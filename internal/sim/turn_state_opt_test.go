@@ -3,6 +3,8 @@ package sim
 import (
 	"strings"
 	"testing"
+
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
 )
 
 // withOptHero swaps CurrentHero to the supplied FakeHero for the test's lifetime and
@@ -23,7 +25,7 @@ func TestTurnStateOpt_PassthroughKeepsDeckOrder(t *testing.T) {
 	c := NewFakeCard("c")
 	d := NewFakeCard("d")
 	withOptHero(t, FakeHero{Intel: 4}, func() {
-		s := NewTurnState([]Card{a, b, c, d}, nil)
+		s := NewTurnStateFromCards([]Card{a, b, c, d}, nil)
 		s.Opt(2)
 		got := s.Deck()
 		want := []Card{a, b, c, d}
@@ -46,7 +48,7 @@ func TestTurnStateOpt_BottomsHandlerSpecifiedCards(t *testing.T) {
 			return []Card{cards[1]}, []Card{cards[0]}
 		},
 	}, func() {
-		s := NewTurnState([]Card{a, b, c}, nil)
+		s := NewTurnStateFromCards([]Card{a, b, c}, nil)
 		s.Opt(2)
 		got := s.Deck()
 		// Handler saw [a, b]; returned top=[b], bottom=[a]. Deck becomes [b] + [c] + [a].
@@ -67,7 +69,7 @@ func TestTurnStateOpt_HandlerReorderCanReverseTop(t *testing.T) {
 			return []Card{cards[1], cards[0]}, nil
 		},
 	}, func() {
-		s := NewTurnState([]Card{a, b, c}, nil)
+		s := NewTurnStateFromCards([]Card{a, b, c}, nil)
 		s.Opt(2)
 		got := s.Deck()
 		want := []Card{b, a, c}
@@ -91,7 +93,7 @@ func TestTurnStateOpt_ClampsNToDeckLength(t *testing.T) {
 			return cards, nil
 		},
 	}, func() {
-		s := NewTurnState([]Card{a, b}, nil)
+		s := NewTurnStateFromCards([]Card{a, b}, nil)
 		s.Opt(5)
 		got := s.Deck()
 		want := []Card{a, b}
@@ -129,7 +131,7 @@ func TestTurnStateOpt_NonPositiveNSkipsHandler(t *testing.T) {
 				return cards, nil
 			},
 		}, func() {
-			s := NewTurnState([]Card{NewFakeCard("x")}, nil)
+			s := NewTurnStateFromCards([]Card{NewFakeCard("x")}, nil)
 			s.Opt(n)
 			if called {
 				t.Errorf("Opt(%d) called the handler, want skip", n)
@@ -149,7 +151,7 @@ func TestTurnStateOpt_LogsOutcome(t *testing.T) {
 			return []Card{cards[1]}, []Card{cards[0]}
 		},
 	}, func() {
-		s := NewTurnState([]Card{a, b, c}, nil)
+		s := NewTurnStateFromCards([]Card{a, b, c}, nil)
 		s.Opt(2)
 		if len(s.LogEntries()) != 1 {
 			t.Fatalf("Log len = %d, want 1", len(s.LogEntries()))
@@ -173,7 +175,7 @@ func TestTurnStateOpt_LogShowsEmptyListsAsBrackets(t *testing.T) {
 			return cards, nil // bottom empty
 		},
 	}, func() {
-		s := NewTurnState([]Card{a, b}, nil)
+		s := NewTurnStateFromCards([]Card{a, b}, nil)
 		s.Opt(2)
 		want := "Opted [a, b], put [a, b] on top, put [] on bottom"
 		if got := s.LogEntries()[0].Text; got != want {
@@ -195,7 +197,7 @@ func TestTurnStateOpt_NoOpPathsSkipLog(t *testing.T) {
 	}
 	withOptHero(t, FakeHero{}, func() {
 		for _, tc := range cases {
-			s := NewTurnState(tc.deck, nil)
+			s := NewTurnStateFromCards(tc.deck, nil)
 			s.Opt(tc.n)
 			if len(s.LogEntries()) != 0 {
 				t.Errorf("%s: Log = %v, want empty", tc.name, s.LogEntries())
@@ -219,7 +221,7 @@ func TestTurnStateOpt_AlwaysFlipsCacheable(t *testing.T) {
 	}
 	withOptHero(t, FakeHero{}, func() {
 		for _, tc := range cases {
-			s := NewTurnState(tc.deck, nil)
+			s := NewTurnStateFromCards(tc.deck, nil)
 			if !s.IsCacheable() {
 				t.Fatalf("%s: pre IsCacheable should be true", tc.name)
 			}
@@ -238,7 +240,7 @@ func TestTurnStateOpt_PanicsOnDroppedCard(t *testing.T) {
 			return []Card{cards[0]}, nil // drops cards[1]
 		},
 	}, func() {
-		s := NewTurnState([]Card{NewFakeCard("a"), NewFakeCard("b")}, nil)
+		s := NewTurnStateFromCards([]Card{NewFakeCard("a"), NewFakeCard("b")}, nil)
 		assertPanics(t, "dropped card", "Opt:", func() { s.Opt(2) })
 	})
 }
@@ -253,7 +255,7 @@ func TestTurnStateOpt_PanicsOnExtraCard(t *testing.T) {
 			return []Card{a, b, foreign}, nil
 		},
 	}, func() {
-		s := NewTurnState([]Card{a, b}, nil)
+		s := NewTurnStateFromCards([]Card{a, b}, nil)
 		assertPanics(t, "extra card", "Opt:", func() { s.Opt(2) })
 	})
 }
@@ -269,7 +271,7 @@ func TestTurnStateOpt_PanicsOnSubstitutedCard(t *testing.T) {
 			return []Card{a, foreign}, nil
 		},
 	}, func() {
-		s := NewTurnState([]Card{a, b}, nil)
+		s := NewTurnStateFromCards([]Card{a, b}, nil)
 		assertPanics(t, "substituted card", "Opt:", func() { s.Opt(2) })
 	})
 }
@@ -285,18 +287,22 @@ func TestTurnStateOpt_PanicsOnDuplicatedCard(t *testing.T) {
 			return []Card{a, a}, nil // duplicates a, drops b
 		},
 	}, func() {
-		s := NewTurnState([]Card{a, b}, nil)
+		s := NewTurnStateFromCards([]Card{a, b}, nil)
 		assertPanics(t, "duplicated card", "Opt:", func() { s.Opt(2) })
 	})
 }
 
-// sameDeck reports whether two card slices contain the same cards in the same order.
-func sameDeck(got, want []Card) bool {
-	if len(got) != len(want) {
+// sameDeck reports whether got contains the same cards in the same order as want by
+// destructively draining the deck — Opt's effect is observable through subsequent draws,
+// so the natural verification is to walk the deck via Draw. Mutates got; callers must
+// discard it after the check.
+func sameDeck(got *deck.Deck, want []Card) bool {
+	if got.Size() != len(want) {
 		return false
 	}
-	for i := range got {
-		if got[i] != want[i] {
+	drawn := got.Draw(got.Size())
+	for i, c := range drawn {
+		if c.(Card) != want[i] {
 			return false
 		}
 	}

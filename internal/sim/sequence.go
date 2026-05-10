@@ -7,6 +7,8 @@ package sim
 
 import (
 	"fmt"
+
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
 )
 
 // perItemAbilityCap caps how many instances of one item's activated ability the chain
@@ -39,12 +41,12 @@ func FormatLogEntry(e LogEntry) string {
 // arsenalAtChainStart is the card sitting in the arsenal slot at the start of the chain — set
 // when the partition assigned arsenalCardIn the Arsenal role (it's staying), nil otherwise
 // (no arsenal-in, or arsenal-in is playing as Attack/Defend).
-func bestAttackWithWeapons(hero Hero, weapons []Weapon, attackers, defenders, pitched, held, deck []Card, bufs *attackBufs, mp Matchup, blockTotal, arsenalInIdx, arsenalDefenderIdx int, arsenalAtChainStart Card, prior TurnState, skipLog bool) (int, int, chainBudget, []string, CarryState, bool, bool) {
+func bestAttackWithWeapons(hero Hero, weapons []Weapon, attackers, defenders, pitched, held []Card, d *deck.Deck, bufs *attackBufs, mp Matchup, blockTotal, arsenalInIdx, arsenalDefenderIdx int, arsenalAtChainStart Card, prior TurnState, skipLog bool) (int, int, chainBudget, []string, CarryState, bool, bool) {
 	runechantCarryover := tokenCountIn(prior.Auras, TokenTypeRunechant)
 	ctx := &sequenceContext{
 		hero:                hero,
 		pitched:             pitched,
-		deck:                deck,
+		deck:                d,
 		handStart:           held,
 		arsenalAtChainStart: arsenalAtChainStart,
 		bufs:                bufs,
@@ -108,7 +110,7 @@ func bestAttackWithWeapons(hero Hero, weapons []Weapon, attackers, defenders, pi
 	// so nothing in the defense phase reads hidden state.
 	defenseCacheableConst := true
 	if !hasModalBlocker && len(defenders) > 0 {
-		defenseDealtConst, defenseCacheableConst = ctx.runDefense(defenders, pitched, deck, prior.Auras, mp.IncomingDamage, noBlockBudgetCap, arsenalDefenderIdx)
+		defenseDealtConst, defenseCacheableConst = ctx.runDefense(defenders, pitched, d, prior.Auras, mp.IncomingDamage, noBlockBudgetCap, arsenalDefenderIdx)
 	}
 	defenseDealt := defenseDealtConst
 	defenseCacheable := defenseCacheableConst
@@ -227,7 +229,7 @@ func bestAttackWithWeapons(hero Hero, weapons []Weapon, attackers, defenders, pi
 			// candidate sees the right spare budget. Non-modal-blocker partitions stick with
 			// the once-per-leaf defenseDealtConst computed above.
 			if hasModalBlocker {
-				defenseDealt, defenseCacheable = ctx.runDefense(defenders, pitched, deck, prior.Auras, mp.IncomingDamage, phase.defendBudget-drCost, arsenalDefenderIdx)
+				defenseDealt, defenseCacheable = ctx.runDefense(defenders, pitched, d, prior.Auras, mp.IncomingDamage, phase.defendBudget-drCost, arsenalDefenderIdx)
 			}
 			if phase.hasDefendPitches && phase.defendBudget-drCost >= phase.maxDefendPitch {
 				continue
@@ -284,8 +286,11 @@ func bestAttackWithWeapons(hero Hero, weapons []Weapon, attackers, defenders, pi
 // fund every chain step) but set by tests that drive playSequence with a budget number
 // instead of a real pitched bag.
 type sequenceContext struct {
-	hero          Hero
-	pitched, deck []Card
+	hero    Hero
+	pitched []Card
+	// deck is the per-leaf starting deck. resetStateForPermutation copies it via
+	// d.Copy() so each permutation runs against a fresh, isolated *deck.Deck.
+	deck *deck.Deck
 	// handStart is the partition's Held-role hand cards — what state.Hand starts as before
 	// the chain runs. Cards mutating state.Hand mid-chain (DrawOne, Moon Wish tutor) work
 	// against a per-permutation copy so the next permutation gets handStart back.
@@ -378,14 +383,14 @@ type sequenceContext struct {
 // consolidate against existing tokens), runs defendersDamage, and captures the post-
 // defense aura set into ctx.defenderAuras (and bufs.defenderAurasBacking) for later
 // chain seeding. Re-bind both headers after the call to track any growth-driven realloc.
-func (ctx *sequenceContext) runDefense(defenders, pitched, deck []Card, priorAuras []Aura, incomingDamage, blockBudget, arsenalDefenderIdx int) (int, bool) {
+func (ctx *sequenceContext) runDefense(defenders, pitched []Card, deckPile *deck.Deck, priorAuras []Aura, incomingDamage, blockBudget, arsenalDefenderIdx int) (int, bool) {
 	bufs := ctx.bufs
 	bufs.state.Auras = append(ctx.defenderAuras[:0], priorAuras...)
 	// Seed skipLog so the first DR's per-defender reset (and the plain-block phase that
 	// reuses bufs.state afterwards) sees the chain-level gate; defendersDamage preserves
 	// it through its struct-literal reset.
 	bufs.state.skipLog = ctx.skipLog
-	dealt, gravScratch, cacheable := defendersDamage(defenders, pitched, deck, bufs.state, bufs.defenseGravScratch, &bufs.drCardStateScratch, incomingDamage, blockBudget, arsenalDefenderIdx)
+	dealt, gravScratch, cacheable := defendersDamage(defenders, pitched, deckPile, bufs.state, bufs.defenseGravScratch, &bufs.drCardStateScratch, incomingDamage, blockBudget, arsenalDefenderIdx)
 	bufs.defenseGravScratch = gravScratch
 	ctx.defenderAuras = bufs.state.Auras
 	bufs.defenderAurasBacking = bufs.state.Auras
@@ -520,11 +525,8 @@ func fireAttackAuras(state *TurnState, triggeringCard Card) {
 // slices before the next permutation overwrites these buffers; mid-chain growth past the
 // pre-sized cap is the only path that allocates a new backing array.
 //
-// deck aliases ctx.deck directly without copying. Every public mutation accessor on the
-// deck (PrependToDeck, TutorFromDeck, Opt) allocates a fresh backing slice, and PopDeckTop
-// only slides the slice header — none of them write through to the shared underlying array.
-// So the per-permutation deck reset is just a slice-header rebind, saving ~640 bytes of
-// memmove per permutation across N! orderings × leaves × shuffles.
+// deck is a fresh Copy of ctx.deck per permutation so card-driven mutations
+// (PrependToDeck, TutorFromDeck, Opt, PopDeckTop) stay scoped to this permutation.
 func (ctx *sequenceContext) resetStateForPermutation() {
 	s := ctx.bufs.state
 	bufs := ctx.bufs
@@ -534,7 +536,7 @@ func (ctx *sequenceContext) resetStateForPermutation() {
 	// NonAttackActionPlayed, ArcaneDamageDealt, Revealed, TriggeringCard) are assigned
 	// explicitly so any leftover state from a previous permutation gets cleared.
 	s.hand = append(bufs.handBacking[:0], ctx.handStart...)
-	s.deck = ctx.deck
+	s.deck = ctx.deck.Copy()
 	s.Arsenal = ctx.arsenalAtChainStart
 	s.graveyard = append(bufs.graveBacking[:0], ctx.priorGraveyard...)
 	s.graveyard = append(s.graveyard, ctx.defenders...)

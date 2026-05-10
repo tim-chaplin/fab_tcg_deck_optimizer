@@ -4,55 +4,6 @@ import (
 	"testing"
 )
 
-// Tests the NotImplemented type-assertion contract: opt-in via a NotImplemented() method;
-// plain Cards don't satisfy the interface.
-func TestNotImplementedMarker(t *testing.T) {
-	var plain Card = NewFakeCard("plain")
-	if _, ok := plain.(NotImplemented); ok {
-		t.Error("plain stub satisfied NotImplemented — the marker must be opt-in, not implicit")
-	}
-	var tagged Card = NotImplementedFakeCard{FakeCard: NewFakeCard("tagged")}
-	if _, ok := tagged.(NotImplemented); !ok {
-		t.Error("tagged stub failed NotImplemented assertion — defining NotImplemented() must opt in")
-	}
-}
-
-// TestUnplayableMarker mirrors TestNotImplementedMarker for the Unplayable interface — opt-in,
-// not implicit, and orthogonal to NotImplemented (a plain stub satisfies neither, an
-// Unplayable stub satisfies Unplayable but not NotImplemented).
-func TestUnplayableMarker(t *testing.T) {
-	var plain Card = NewFakeCard("plain")
-	if _, ok := plain.(Unplayable); ok {
-		t.Error("plain stub satisfied Unplayable — the marker must be opt-in, not implicit")
-	}
-	var tagged Card = UnplayableFakeCard{FakeCard: NewFakeCard("tagged")}
-	if _, ok := tagged.(Unplayable); !ok {
-		t.Error("tagged stub failed Unplayable assertion — defining Unplayable() must opt in")
-	}
-	if _, ok := tagged.(NotImplemented); ok {
-		t.Error("Unplayable stub also satisfied NotImplemented — the markers must be orthogonal")
-	}
-}
-
-// TestIsExcludedFromPool_BothMarkers pins the centralised pool-exclusion check: NotImplemented
-// OR Unplayable trips the filter, plain stubs don't.
-func TestIsExcludedFromPool_BothMarkers(t *testing.T) {
-	cases := []struct {
-		name string
-		card Card
-		want bool
-	}{
-		{"plain", NewFakeCard("plain"), false},
-		{"NotImplemented", NotImplementedFakeCard{FakeCard: NewFakeCard("ni")}, true},
-		{"Unplayable", UnplayableFakeCard{FakeCard: NewFakeCard("up")}, true},
-	}
-	for _, tc := range cases {
-		if got := IsExcludedFromPool(tc.card); got != tc.want {
-			t.Errorf("%s: IsExcludedFromPool = %v, want %v", tc.name, got, tc.want)
-		}
-	}
-}
-
 // TestCardState_EffectiveGoAgain: printed GoAgain OR a mid-chain grant qualifies the card
 // for Go again. Neither printed nor granted → false.
 func TestCardState_EffectiveGoAgain(t *testing.T) {

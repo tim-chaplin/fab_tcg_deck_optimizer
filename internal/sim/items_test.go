@@ -7,7 +7,7 @@ import (
 // Tests that GoldTokenAbility.Play decrements Count and removes the entry at zero. Drives
 // Play directly because the optimizer credits no Value for spending Gold.
 func TestGoldAbility_PlaysDecrementsAndDestroys(t *testing.T) {
-	s := NewTurnState([]Card{FakeRedAttack{}}, nil)
+	s := NewTurnStateFromCards([]Card{FakeRedAttack{}}, nil)
 	s.Items = []Item{NewGoldItem(1)}
 	(GoldTokenAbility{}).Play(s, &CardState{Card: GoldTokenAbility{}})
 	if s.Gold() != 0 {
@@ -23,7 +23,7 @@ func TestGoldAbility_PlaysDecrementsAndDestroys(t *testing.T) {
 
 // Tests that spending one of multiple Gold tokens leaves the entry at decremented Count.
 func TestGoldAbility_PlayDecrementsCountWhenMultiple(t *testing.T) {
-	s := NewTurnState([]Card{FakeRedAttack{}}, nil)
+	s := NewTurnStateFromCards([]Card{FakeRedAttack{}}, nil)
 	s.Items = []Item{NewGoldItem(3)}
 	(GoldTokenAbility{}).Play(s, &CardState{Card: GoldTokenAbility{}})
 	if s.Gold() != 2 {
@@ -33,7 +33,7 @@ func TestGoldAbility_PlayDecrementsCountWhenMultiple(t *testing.T) {
 
 // Tests SilverTokenAbility.Play decrement + draw behaviour, mirroring the Gold case.
 func TestSilverAbility_PlaysDecrementsAndDestroys(t *testing.T) {
-	s := NewTurnState([]Card{FakeRedAttack{}}, nil)
+	s := NewTurnStateFromCards([]Card{FakeRedAttack{}}, nil)
 	s.Items = []Item{NewSilverItem(1)}
 	(SilverTokenAbility{}).Play(s, &CardState{Card: SilverTokenAbility{}})
 	if s.Silver() != 0 {
@@ -49,7 +49,7 @@ func TestSilverAbility_PlaysDecrementsAndDestroys(t *testing.T) {
 
 // Tests CopperTokenAbility.Play decrement + draw behaviour, mirroring the Gold case.
 func TestCopperAbility_PlaysDecrementsAndDestroys(t *testing.T) {
-	s := NewTurnState([]Card{FakeRedAttack{}}, nil)
+	s := NewTurnStateFromCards([]Card{FakeRedAttack{}}, nil)
 	s.Items = []Item{NewCopperItem(1)}
 	(CopperTokenAbility{}).Play(s, &CardState{Card: CopperTokenAbility{}})
 	if s.Copper() != 0 {

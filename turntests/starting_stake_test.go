@@ -26,7 +26,7 @@ func TestStartingStake_CreatesGoldViaChain(t *testing.T) {
 // Tests Starting Stake's "if you control no Gold tokens" gate: with prior Gold in play, Play
 // is a no-op and doesn't stack a second token. Drives Play directly to isolate the gate.
 func TestStartingStake_NoOpWhenGoldInPlay(t *testing.T) {
-	s := sim.NewTurnState(nil, nil)
+	s := sim.NewTurnStateFromCards(nil, nil)
 	s.CreateGold(2)
 	(cards.StartingStakeYellow{}).Play(s, &sim.CardState{Card: cards.StartingStakeYellow{}})
 	if s.Gold() != 2 {

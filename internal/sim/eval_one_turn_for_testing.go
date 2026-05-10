@@ -21,8 +21,9 @@ type TurnStartState struct {
 	StartOfNextTurnHand []deck.Card
 	// StartOfNextTurnArsenal is the card in the arsenal slot at the start of the next turn.
 	StartOfNextTurnArsenal deck.Card
-	// StartOfNextTurnDeck is the remaining deck at the start of the next turn, top-to-bottom.
-	StartOfNextTurnDeck []deck.Card
+	// StartOfNextTurnDeck is the remaining deck at the start of the next turn — a
+	// fresh *deck.Deck the caller can drive through Draw / PeekTop / Size.
+	StartOfNextTurnDeck *deck.Deck
 	// StartOfNextTurnAuras is the live aura set at the start of the next turn: survivors
 	// of this turn's chain plus any token bumps made by next-turn start-of-turn handlers.
 	// Tests query specific token counts via Runechants and friends.
@@ -71,7 +72,7 @@ func (t TurnStartState) Copper() int {
 	return itemCountIn(t.StartOfNextTurnItems, TokenTypeCopper)
 }
 
-// EvalOneTurnForTesting runs one turn against d.Cards in source order (no shuffle) and returns
+// EvalOneTurnForTesting runs one turn against the deck in source order (no shuffle) and returns
 // the tested turn's outcome plus the start-of-next-turn state. initial seeds the start-of-turn
 // state — Arsenal, Auras, Items — modelling carryover from a hypothetical previous turn; the
 // other TurnState fields are ignored (transient mid-chain state, hand / deck / graveyard which
@@ -116,20 +117,9 @@ func EvalOneTurnForTesting(master *deck.Deck, mp Matchup, initial TurnState, ini
 	for i, w := range d.Weapons {
 		weapons[i] = w.(Weapon)
 	}
-	// Snapshot the post-deal pile in sim's typed view for the chain runner. This is the
-	// same TODO as runOneShuffle: the chain runner needs the whole remaining deck so it can
-	// seed TurnState.deck and run mid-chain mutations against it.
-	remaining := make([]Card, len(d.Cards))
-	for i, c := range d.Cards {
-		remaining[i] = c.(Card)
-	}
-	play := best(hero, weapons, h, mp, remaining, initial)
-	// Install the chain's post-mutation deck and recycle pitched cards onto the bottom.
-	newDeck := make([]deck.Card, len(play.State.Deck))
-	for i, c := range play.State.Deck {
-		newDeck[i] = c
-	}
-	d.Reset(newDeck)
+	play := best(hero, weapons, h, mp, d, initial)
+	// Adopt the chain's post-mutation deck and recycle pitched cards onto the bottom.
+	d = play.State.Deck
 	pitched := pitchedFromBestLine(play.BestLine)
 	recycled := make([]deck.Card, len(pitched))
 	for i, c := range pitched {
@@ -148,16 +138,12 @@ func EvalOneTurnForTesting(master *deck.Deck, mp Matchup, initial TurnState, ini
 		graveyardOut[i] = c
 	}
 	if len(held) >= handSize || d.Size() < handSize-len(held) {
-		nextDeck := make([]deck.Card, len(play.State.Deck))
-		for i, c := range play.State.Deck {
-			nextDeck[i] = c
-		}
 		return TurnStartState{
 			Value:                  play.Value,
 			BestLine:               append([]CardAssignment(nil), play.BestLine...),
 			Graveyard:              graveyardOut,
 			StartOfNextTurnArsenal: play.State.Arsenal,
-			StartOfNextTurnDeck:    nextDeck,
+			StartOfNextTurnDeck:    d.Copy(),
 			StartOfNextTurnAuras:   append([]Aura(nil), play.State.Auras...),
 			StartOfNextTurnItems:   append([]Item(nil), play.State.Items...),
 			CardsDrawn:             play.State.CardsDrawn,
@@ -172,17 +158,9 @@ func EvalOneTurnForTesting(master *deck.Deck, mp Matchup, initial TurnState, ini
 	// fire start-of-turn handlers, re-arm OncePerTurn gates, drop exhausted entries.
 	// Reveals into the hand are consumed here so the returned turn-2 Hand matches what
 	// Best would see.
-	turn2Remaining := make([]Card, len(d.Cards))
-	for i, c := range d.Cards {
-		turn2Remaining[i] = c.(Card)
-	}
-	survivors, _, trigDamage, trigRevealed, trigGraveyarded := processAurasAtStartOfTurn(auraQueue, turn2Remaining)
-	for range trigRevealed {
-		turn2Hand = append(turn2Hand, d.Draw(1)[0].(Card))
-	}
-	deckOut := make([]deck.Card, len(d.Cards))
-	for i, c := range d.Cards {
-		deckOut[i] = c
+	survivors, _, trigDamage, trigRevealed, trigGraveyarded := processAurasAtStartOfTurn(auraQueue, d)
+	for _, c := range trigRevealed {
+		turn2Hand = append(turn2Hand, c)
 	}
 	handOut := make([]deck.Card, len(turn2Hand))
 	for i, c := range turn2Hand {
@@ -199,7 +177,7 @@ func EvalOneTurnForTesting(master *deck.Deck, mp Matchup, initial TurnState, ini
 		Graveyard:                    graveyardOut,
 		StartOfNextTurnHand:          handOut,
 		StartOfNextTurnArsenal:       play.State.Arsenal,
-		StartOfNextTurnDeck:          deckOut,
+		StartOfNextTurnDeck:          d.Copy(),
 		StartOfNextTurnAuras:         append([]Aura(nil), survivors...),
 		StartOfNextTurnItems:         append([]Item(nil), itemQueue...),
 		CardsDrawn:                   play.State.CardsDrawn,

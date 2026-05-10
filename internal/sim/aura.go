@@ -27,7 +27,7 @@ const (
 	TriggerAttack
 	// TriggerEndOfTurn fires after the chain finishes, before the carry-state snapshot
 	// and the post-hoc arsenal-promotion step. Ponder uses this to draw a card into the
-	// held pile so the existing arsenal-promotion logic fills an otherwise-empty slot.
+	// held cards so the existing arsenal-promotion logic fills an otherwise-empty slot.
 	TriggerEndOfTurn
 	// TriggerHit fires when an attack hits (LikelyToHit on the post-AR-buff EffectiveAttack).
 	// Used by "the next time an X you control hits this turn, do Y" printed text (Plunder

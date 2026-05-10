@@ -8,7 +8,7 @@ import (
 
 // Tests that Performance Bonus registers an OnHit handler.
 func TestPerformanceBonus_RegistersOnHit(t *testing.T) {
-	s := sim.NewTurnState(nil, nil)
+	s := sim.NewTurnStateFromCards(nil, nil)
 	self := &sim.CardState{Card: PerformanceBonusBlue{}}
 	(PerformanceBonusBlue{}).Play(s, self)
 	if len(self.OnHit) != 1 {
@@ -18,7 +18,7 @@ func TestPerformanceBonus_RegistersOnHit(t *testing.T) {
 
 // Tests that the from-arsenal play grants Go again on top of the on-hit rider.
 func TestPerformanceBonus_ArsenalGrantsGoAgain(t *testing.T) {
-	s := sim.NewTurnState(nil, nil)
+	s := sim.NewTurnStateFromCards(nil, nil)
 	self := &sim.CardState{Card: PerformanceBonusRed{}, FromArsenal: true}
 	(PerformanceBonusRed{}).Play(s, self)
 	if !self.GrantedGoAgain {
@@ -28,7 +28,7 @@ func TestPerformanceBonus_ArsenalGrantsGoAgain(t *testing.T) {
 
 // Tests that hand-played (non-arsenal) Performance Bonus does NOT grant Go again.
 func TestPerformanceBonus_NonArsenalNoGoAgain(t *testing.T) {
-	s := sim.NewTurnState(nil, nil)
+	s := sim.NewTurnStateFromCards(nil, nil)
 	self := &sim.CardState{Card: PerformanceBonusRed{}, FromArsenal: false}
 	(PerformanceBonusRed{}).Play(s, self)
 	if self.GrantedGoAgain {

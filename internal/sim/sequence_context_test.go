@@ -1,5 +1,7 @@
 package sim
 
+import "github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
+
 // newSequenceContextForTest builds a sequenceContext wired to a fresh attackBufs sized for
 // the given chain length. Tests use this instead of hand-rolling the context fields so the
 // common shape is centralised. Lives in a sim test file (rather than sim_test) so
@@ -13,10 +15,14 @@ func newSequenceContextForTest(h Hero, pitched, deckCards []Card, resourceBudget
 	if runechantCarryover > 0 {
 		priorAuras = []Aura{NewRunechantAura(runechantCarryover)}
 	}
+	dc := make([]deck.Card, len(deckCards))
+	for i, c := range deckCards {
+		dc[i] = c
+	}
 	return &sequenceContext{
 		hero:               h,
 		pitched:            pitched,
-		deck:               deckCards,
+		deck:               deck.New(nil, nil, dc),
 		bufs:               bufs,
 		resourceBudget:     resourceBudget,
 		runechantCarryover: runechantCarryover,

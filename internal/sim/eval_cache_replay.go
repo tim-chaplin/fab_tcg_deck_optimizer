@@ -7,7 +7,11 @@ package sim
 // does after the search loop, so the resulting summary is byte-identical to a full
 // from-scratch Best call.
 
-import "fmt"
+import (
+	"fmt"
+
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
+)
 
 // replayBest is the cache-hit body. Thin wrapper around evaluatePartition: project the
 // cached BestLine onto the new call's hand to fill rolesBuf, hand off to evaluatePartition
@@ -23,7 +27,7 @@ import "fmt"
 func (e *Evaluator) replayBest(
 	entry evalCacheEntry,
 	hero Hero, weapons []Weapon, hand []Card,
-	mp Matchup, deck []Card,
+	mp Matchup, d *deck.Deck,
 	prior TurnState, skipLog bool,
 ) TurnSummary {
 	arsenalCardIn := prior.Arsenal
@@ -62,7 +66,7 @@ func (e *Evaluator) replayBest(
 	defenseSum := defenseSumFromRoles(hand, arsenalCardIn, rolesBuf, n)
 
 	attackDealt, defenseDealt, swung, carry, ok, _, arsenalAtChainStart := e.evaluatePartition(
-		hero, weapons, hand, deck,
+		hero, weapons, hand, d,
 		rolesBuf, n, bufs,
 		mp, defenseSum,
 		prior, skipLog,

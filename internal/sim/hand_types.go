@@ -5,7 +5,7 @@ package sim
 // deck loop adopts CarryState wholesale into the next turn's seed — no per-field
 // reconstruction.
 
-import ()
+import "github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
 
 // Role is what a card did on a given turn cycle.
 type Role uint8
@@ -37,9 +37,11 @@ type CarryState struct {
 	// Hand is the cards in hand at end of chain — partition Held cards plus anything
 	// tutored or drawn that didn't get played. Becomes next turn's Held prefix.
 	Hand []Card
-	// Deck is the deck at end of chain (top-to-bottom). Reflects every mid-chain mutation
-	// (DrawOne pops, tutor removals, alt-cost prepends). Becomes next turn's draw pile.
-	Deck []Card
+	// Deck is the deck at end of chain. Reflects every mid-chain mutation (DrawOne pops,
+	// tutor removals, alt-cost prepends). The eval loop adopts this directly as next
+	// turn's deck (`d = play.State.Deck`); each chain-runner call returns a fresh
+	// *deck.Deck so the caller can mutate it freely.
+	Deck *deck.Deck
 	// Arsenal is the arsenal slot at end of chain. Set by the partition (arsenal-in stayed),
 	// or filled post-hoc by promoting a Hand card when the slot is empty.
 	Arsenal Card

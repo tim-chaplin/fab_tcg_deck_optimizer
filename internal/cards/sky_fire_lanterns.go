@@ -13,13 +13,14 @@ import (
 )
 
 // skyFireLanternsPlay emits the chain step then writes a runechant rider sub-line under
-// self when the deck-top card matches this variant's pitch (color). Reads the deck top via
-// s.Deck() so the cacheable bit flips — whether the rider fires depends on shuffle order.
+// self when the deck-top card matches this variant's pitch (color). Reads the deck top
+// via PeekDeck so the cacheable bit flips — whether the rider fires depends on shuffle
+// order.
 func skyFireLanternsPlay(s *sim.TurnState, self *sim.CardState, selfPitch int) {
 	n := self.DealEffectiveAttack(s)
 	s.Log(self, n)
-	deck := s.Deck()
-	if len(deck) == 0 || deck[0].Pitch() != selfPitch {
+	top, ok := s.PeekDeck()
+	if !ok || top.Pitch() != selfPitch {
 		return
 	}
 	s.CreateRunechants(1)

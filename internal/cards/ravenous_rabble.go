@@ -16,13 +16,13 @@ import (
 // ravenousRabbleApplyDebuff routes the -X{p} self-debuff (X = revealed deck-top pitch)
 // through self.BonusAttack so EffectiveAttack and LikelyToHit see the debuffed power; the
 // chain step's (+N) reflects the post-clamp result. No deck top means no penalty. Reads
-// s.Deck() so the cacheable bit flips — the debuff size depends on hidden shuffle order.
+// the deck top so the cacheable bit flips — the debuff size depends on hidden shuffle order.
 func ravenousRabbleApplyDebuff(s *sim.TurnState, self *sim.CardState) {
-	deck := s.Deck()
-	if len(deck) == 0 {
+	top, ok := s.PeekDeck()
+	if !ok {
 		return
 	}
-	self.BonusAttack -= deck[0].Pitch()
+	self.BonusAttack -= top.Pitch()
 }
 
 func (RavenousRabbleRed) Play(s *sim.TurnState, self *sim.CardState) {

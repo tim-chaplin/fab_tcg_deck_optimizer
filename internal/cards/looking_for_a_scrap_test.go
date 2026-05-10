@@ -11,7 +11,7 @@ import (
 func TestLookingForAScrap_NoBanishableRiderOff(t *testing.T) {
 	for _, c := range []sim.Card{LookingForAScrapRed{}, LookingForAScrapYellow{}, LookingForAScrapBlue{}} {
 		self := &sim.CardState{Card: c}
-		c.Play(sim.NewTurnState(nil, nil), self)
+		c.Play(sim.NewTurnStateFromCards(nil, nil), self)
 		if self.GrantedGoAgain {
 			t.Errorf("%s [%d{p}]: GrantedGoAgain = true with empty graveyard, want false", c.Name(), c.Pitch())
 		}
@@ -25,7 +25,7 @@ func TestLookingForAScrap_NoBanishableRiderOff(t *testing.T) {
 // go-again rider.
 func TestLookingForAScrap_BanishesOnePowerForBonus(t *testing.T) {
 	for _, c := range []sim.Card{LookingForAScrapRed{}, LookingForAScrapYellow{}, LookingForAScrapBlue{}} {
-		s := sim.NewTurnState(nil, []sim.Card{testutils.GenericAttack(0, 1)})
+		s := sim.NewTurnStateFromCards(nil, []sim.Card{testutils.GenericAttack(0, 1)})
 		self := &sim.CardState{Card: c}
 		c.Play(s, self)
 		if !self.GrantedGoAgain {

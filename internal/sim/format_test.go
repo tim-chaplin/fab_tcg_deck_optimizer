@@ -140,7 +140,7 @@ func TestFormatBestTurn_LogSuppressesZeroTriggers(t *testing.T) {
 // its own PLAY chain entry, heal renders as a "Gained 3 health" child under Sun Kiss.
 func TestFormatBestTurn_MoonWishTutorAndPlayLogsAsPostTrigger(t *testing.T) {
 	h := []Card{cards.FlyingHighRed{}, cards.MoonWishYellow{}, testutils.BlueAttack{}}
-	deck := []Card{cards.SunKissRed{}}
+	deck := DeckOf(cards.SunKissRed{})
 	got := Best(testutils.Hero{Intel: 4}, nil, h, Matchup{IncomingDamage: 0}, deck, TurnState{})
 	out := FormatBestTurn(got, nil, nil)
 	wants := []string{
@@ -168,7 +168,7 @@ func TestFormatBestTurn_MoonWishTutorAndPlayLogsAsPostTrigger(t *testing.T) {
 // is credited.
 func TestFormatBestTurn_MoonWishTutorOnlyLogsAsPostTrigger(t *testing.T) {
 	h := []Card{cards.MoonWishYellow{}, testutils.BlueAttack{}}
-	deck := []Card{cards.SunKissRed{}}
+	deck := DeckOf(cards.SunKissRed{})
 	got := Best(testutils.Hero{Intel: 4}, nil, h, Matchup{IncomingDamage: 0}, deck, TurnState{})
 	out := FormatBestTurn(got, nil, nil)
 	wants := []string{

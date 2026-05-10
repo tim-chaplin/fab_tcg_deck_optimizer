@@ -1,8 +1,8 @@
 // Package deck represents a candidate FaB deck — hero, weapons, cards, plus the user's
 // sideboard / equipment lists. Search code creates many Decks via Random and edits them via
-// ApplyDefaults / SanitizeNotImplemented. Simulation lives elsewhere; deck depends only on
-// the narrow Hero / Weapon / Card / Registry contracts declared in this package, so a
-// caller can swap in any concrete card / weapon / hero / registry implementation.
+// ApplyDefaults. Simulation lives elsewhere; deck depends only on the narrow Hero / Weapon
+// / Card / Registry contracts declared in this package, so a caller can swap in any concrete
+// card / weapon / hero / registry implementation.
 package deck
 
 import (
@@ -23,15 +23,38 @@ import (
 // the user wants on their sideboard list (e.g. Nullrune cycle) aren't in the card registry,
 // so a registry-backed field would force the user's data through a lossy lookup.
 //
-// Cards doubles as the runtime draw pile: Shuffle / Draw / Peek / Reset / PutBottom mutate
-// it directly. Callers running an evaluation trial should Copy() the master deck first so
-// their pile mutations don't disturb the master — see deck.Copy.
+// cards doubles as the runtime deck: Shuffle / Draw / PeekTop / PutBottom / PutTop / Tutor
+// mutate it directly. Callers running an evaluation trial should Copy() the master deck first
+// so their deck mutations don't disturb the master — see deck.Copy. The field is unexported
+// so external callers can't peek the runtime order; composition-level inspection goes through
+// UniqueIDs / NameCounts / DisplayNames / PitchCounts.
 type Deck struct {
 	Hero      Hero
 	Weapons   []Weapon
-	Cards     []Card
+	cards     []Card
 	Sideboard []string
 	Equipment []string
+}
+
+// UniqueIDs returns the distinct card IDs in deck order of first appearance plus a
+// position-lookup map keyed by ID. The simulator pre-builds this once per Evaluate run to
+// drive its per-shuffle hand-presence accounting (the parallel marginal-stats buffers are
+// indexed by position so shuffles can tally without growing maps in the inner loop).
+func (d *Deck) UniqueIDs() ([]ids.CardID, map[ids.CardID]int) {
+	if d == nil {
+		return nil, nil
+	}
+	out := make([]ids.CardID, 0, len(d.cards))
+	idx := make(map[ids.CardID]int, len(d.cards))
+	for _, c := range d.cards {
+		id := c.ID()
+		if _, ok := idx[id]; ok {
+			continue
+		}
+		idx[id] = len(out)
+		out = append(out, id)
+	}
+	return out, idx
 }
 
 // New constructs a Deck. Panics if the weapon loadout violates the "0–2 weapons; if 2, both
@@ -39,12 +62,18 @@ type Deck struct {
 // carrying them over.
 func New(h Hero, weapons []Weapon, cards []Card) *Deck {
 	validateWeapons(weapons)
-	return &Deck{Hero: h, Weapons: weapons, Cards: cards}
+	return &Deck{Hero: h, Weapons: weapons, cards: cards}
 }
 
 // Size reports the number of cards in the deck. Excludes Sideboard and Equipment, which are
-// reserve / arena lists the simulator never reads.
-func (d *Deck) Size() int { return len(d.Cards) }
+// reserve / arena lists the simulator never reads. Nil-safe: a nil Deck reports 0 so
+// callers holding a zero-value TurnState (no deck attached) read empty without a guard.
+func (d *Deck) Size() int {
+	if d == nil {
+		return 0
+	}
+	return len(d.cards)
+}
 
 // Fingerprint returns a comparable summary of the deck for equality checks: the weapon
 // loadout (names sorted) and a sorted card-count histogram. Two decks with the same cards
@@ -62,7 +91,7 @@ func (d *Deck) Fingerprint() string {
 	}
 	b.WriteByte('|')
 	counts := map[ids.CardID]int{}
-	for _, c := range d.Cards {
+	for _, c := range d.cards {
 		counts[c.ID()]++
 	}
 	cardIDs := make([]int, 0, len(counts))
@@ -81,12 +110,15 @@ func (d *Deck) Fingerprint() string {
 // evaluator: each worker calls master.Copy() before its trial so Shuffle / Draw / Reset /
 // PutBottom mutations land on the worker's local copy and the master deck stays sharable.
 func (d *Deck) Copy() *Deck {
+	if d == nil {
+		return &Deck{}
+	}
 	out := &Deck{Hero: d.Hero}
 	if len(d.Weapons) > 0 {
 		out.Weapons = append(make([]Weapon, 0, len(d.Weapons)), d.Weapons...)
 	}
-	if len(d.Cards) > 0 {
-		out.Cards = append(make([]Card, 0, len(d.Cards)), d.Cards...)
+	if len(d.cards) > 0 {
+		out.cards = append(make([]Card, 0, len(d.cards)), d.cards...)
 	}
 	if len(d.Sideboard) > 0 {
 		out.Sideboard = append(make([]string, 0, len(d.Sideboard)), d.Sideboard...)
@@ -97,56 +129,96 @@ func (d *Deck) Copy() *Deck {
 	return out
 }
 
-// Shuffle randomises Cards in place via Fisher-Yates. Mutates the receiver — callers
+// Shuffle randomises the deck in place via Fisher-Yates. Mutates the receiver — callers
 // running independent trials should Copy() the master deck first.
 func (d *Deck) Shuffle(rng *rand.Rand) {
-	for i := len(d.Cards) - 1; i > 0; i-- {
+	for i := len(d.cards) - 1; i > 0; i-- {
 		j := rng.Intn(i + 1)
-		d.Cards[i], d.Cards[j] = d.Cards[j], d.Cards[i]
+		d.cards[i], d.cards[j] = d.cards[j], d.cards[i]
 	}
 }
 
-// PeekTop returns the top card of the draw pile without removing it, or nil when the
-// pile is empty. Used by cards that get a buff based on the top card's type / cost / etc.
+// PeekTop returns the top card of the deck without removing it, or nil when the deck is
+// empty. Used by cards that get a buff based on the top card's type / cost / etc.
 // (e.g. "if the top card of your deck is an attack action, this gets +1{p}"). Tests
-// reading the whole pile should drive Draw / PutBottom instead of reaching for a Peek-all
+// reading the whole deck should drive Draw / PutBottom instead of reaching for a Peek-all
 // API — the deck is meant to be a black box past its top.
 func (d *Deck) PeekTop() Card {
-	if len(d.Cards) == 0 {
+	if d == nil || len(d.cards) == 0 {
 		return nil
 	}
-	return d.Cards[0]
+	return d.cards[0]
 }
 
-// Draw removes the top n cards from the draw pile and returns them (top to bottom).
+// PeekTopN returns the top n cards of the deck (top first) without removing them, or
+// fewer when the deck has < n cards. Reserved for cards whose printed effect literally
+// reads "reveal the top N cards" (Sutcliffe's Research Notes and similar) — not for tests
+// that want a back-door view of the deck's full contents. The returned slice aliases the
+// deck's backing storage; mutating it would corrupt the deck.
+func (d *Deck) PeekTopN(n int) []Card {
+	if d == nil {
+		return nil
+	}
+	if n > len(d.cards) {
+		n = len(d.cards)
+	}
+	return d.cards[:n]
+}
+
+// Draw removes the top n cards from the deck and returns them (top to bottom).
 // The returned slice aliases the deck's backing storage; same retention caveat as Peek.
 // Panics when n exceeds Size.
 func (d *Deck) Draw(n int) []Card {
-	if n > len(d.Cards) {
-		panic(fmt.Sprintf("deck: Draw(%d) exceeds remaining size %d", n, len(d.Cards)))
+	if n > len(d.cards) {
+		panic(fmt.Sprintf("deck: Draw(%d) exceeds remaining size %d", n, len(d.cards)))
 	}
-	out := d.Cards[:n]
-	d.Cards = d.Cards[n:]
+	out := d.cards[:n]
+	d.cards = d.cards[n:]
 	return out
 }
 
-// Reset replaces the draw pile with cards (top to bottom), discarding the prior pile
-// state. Used by the per-turn loop to install a new pile arrangement (e.g. the chain's
-// post-mutation deck) before recycling pitched cards onto the bottom via PutBottom.
-func (d *Deck) Reset(cards []Card) {
-	if cap(d.Cards) < len(cards) {
-		d.Cards = make([]Card, len(cards))
-	} else {
-		d.Cards = d.Cards[:len(cards)]
-	}
-	copy(d.Cards, cards)
-}
-
-// PutBottom appends cards to the bottom of the draw pile, preserving the relative order
+// PutBottom appends cards to the bottom of the deck, preserving the relative order
 // passed in. Used by the per-turn loop to recycle pitched cards onto the deck bottom per
 // FaB's end-of-turn pitch-zone-to-deck rule.
 func (d *Deck) PutBottom(cards []Card) {
-	d.Cards = append(d.Cards, cards...)
+	d.cards = append(d.cards, cards...)
+}
+
+// PutTop prepends cards to the top of the deck, preserving the relative order passed
+// in (cards[0] becomes the new top). Used by mid-chain effects that put a card back on
+// top (PrependToDeck) or that re-order the top N (Opt).
+func (d *Deck) PutTop(cards []Card) {
+	if len(cards) == 0 {
+		return
+	}
+	combined := make([]Card, 0, len(cards)+len(d.cards))
+	combined = append(combined, cards...)
+	combined = append(combined, d.cards...)
+	d.cards = combined
+}
+
+// Tutor scans the entire deck, removes the highest-scoring card per score, and returns it.
+// Returns (nil, false) when no card scores > 0 or the deck is empty. Used by mid-chain
+// tutor effects ("search your deck for a … with X").
+func (d *Deck) Tutor(score func(Card) int) (Card, bool) {
+	bestIdx := -1
+	bestScore := 0
+	for i, c := range d.cards {
+		sc := score(c)
+		if sc > bestScore {
+			bestScore = sc
+			bestIdx = i
+		}
+	}
+	if bestIdx < 0 {
+		return nil, false
+	}
+	found := d.cards[bestIdx]
+	out := make([]Card, 0, len(d.cards)-1)
+	out = append(out, d.cards[:bestIdx]...)
+	out = append(out, d.cards[bestIdx+1:]...)
+	d.cards = out
+	return found, true
 }
 
 // SideboardDefault is one "always include in the sideboard" entry the caller passes to
@@ -191,7 +263,7 @@ func (d *Deck) ApplyDefaults(defaults Defaults) {
 	}
 
 	mainCounts := map[string]int{}
-	for _, c := range d.Cards {
+	for _, c := range d.cards {
 		mainCounts[c.DisplayName()]++
 	}
 	sideCounts := map[string]int{}
@@ -252,76 +324,8 @@ func Random(h Hero, size, maxCopies int, rng *rand.Rand, legal func(Card) bool, 
 	return New(h, weapons, picks)
 }
 
-// NotImplementedReplacement records one swap made by Deck.SanitizeNotImplemented: the
-// pool-excluded card that was removed and the pool-eligible card that took its slot.
-type NotImplementedReplacement struct {
-	From Card
-	To   Card
-}
-
-// SanitizeNotImplemented replaces every card no longer present in reg.LegalCards with a
-// random legal replacement, respecting maxCopies. Returns the ordered list of swaps (empty
-// when nothing needed replacement). Panics when maxCopies < 1, when the legal pool is
-// empty, or when every pool entry is already at maxCopies in the surviving slots (no
-// legal replacement can be picked).
-func (d *Deck) SanitizeNotImplemented(maxCopies int, rng *rand.Rand, legal func(Card) bool, reg Registry) []NotImplementedReplacement {
-	if maxCopies < 1 {
-		panic(fmt.Sprintf("deck: SanitizeNotImplemented requires maxCopies >= 1 (got %d)", maxCopies))
-	}
-	pool := legalPool(reg, legal)
-	if len(pool) == 0 {
-		panic("deck: SanitizeNotImplemented's legal filter rejected every pool-eligible card — cannot build a replacement")
-	}
-	// Build the legal-id set from the pool so the per-slot check is a map lookup.
-	legalSet := make(map[ids.CardID]bool, len(pool))
-	for _, c := range pool {
-		legalSet[c.ID()] = true
-	}
-	// Seed counts with the keeper cards already in the deck so replacements respect
-	// maxCopies against the surviving slots. The excluded slots we're about to overwrite
-	// don't count.
-	counts := map[ids.CardID]int{}
-	var slots []int
-	for i, c := range d.Cards {
-		if !legalSet[c.ID()] {
-			slots = append(slots, i)
-			continue
-		}
-		counts[c.ID()]++
-	}
-	if len(slots) == 0 {
-		return nil
-	}
-	replacements := make([]NotImplementedReplacement, 0, len(slots))
-	for _, idx := range slots {
-		// Reject-resample the pool until a non-saturated card lands. The bounded loop
-		// guards against the pathological "every pool entry is already at maxCopies"
-		// case the pre-rewrite version would loop forever on; once attempts exceeds the
-		// pool-size × maxCopies upper bound on legal picks, panic with a clear error.
-		var pick Card
-		maxAttempts := len(pool) * (maxCopies + 1)
-		picked := false
-		for attempt := 0; attempt < maxAttempts; attempt++ {
-			pick = pool[rng.Intn(len(pool))]
-			if counts[pick.ID()]+1 <= maxCopies {
-				picked = true
-				break
-			}
-		}
-		if !picked {
-			panic("deck: SanitizeNotImplemented's pool can't satisfy the per-printing budget the surviving slots already use up")
-		}
-		counts[pick.ID()]++
-		from := d.Cards[idx]
-		d.Cards[idx] = pick
-		replacements = append(replacements, NotImplementedReplacement{From: from, To: pick})
-	}
-	return replacements
-}
-
 // legalPool returns reg.LegalCards filtered by legal. legal == nil disables the extra
-// filter (still excludes pool-marked cards via reg's own definition). Shared by Random
-// and SanitizeNotImplemented.
+// filter (still excludes pool-marked cards via reg's own definition).
 func legalPool(reg Registry, legal func(Card) bool) []Card {
 	pool := reg.LegalCards()
 	if legal == nil {

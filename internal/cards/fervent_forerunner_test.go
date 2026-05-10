@@ -37,7 +37,7 @@ func TestFerventForerunner_OnHitOptFiresOnlyWhenInHitWindow(t *testing.T) {
 		{FerventForerunnerBlue{}, true, 1},
 	}
 	for _, tc := range cases {
-		s := sim.NewTurnState([]sim.Card{a, b}, nil)
+		s := sim.NewTurnStateFromCards([]sim.Card{a, b}, nil)
 		cs := &sim.CardState{Card: tc.c}
 		tc.c.Play(s, cs)
 		testutils.FireOnHitIfLikely(s, cs)
@@ -69,7 +69,7 @@ func TestFerventForerunner_OnHitOptFiresWithBonusAttackInWindow(t *testing.T) {
 
 	a, b := testutils.NewStubCard("a"), testutils.NewStubCard("b")
 	c := FerventForerunnerRed{}
-	s := sim.NewTurnState([]sim.Card{a, b}, nil)
+	s := sim.NewTurnStateFromCards([]sim.Card{a, b}, nil)
 	cs := &sim.CardState{Card: c, BonusAttack: 1}
 	c.Play(s, cs)
 	testutils.FireOnHitIfLikely(s, cs)

@@ -9,7 +9,7 @@ import (
 // Tests that Regurgitating Slog with no Sloggism in the graveyard does not gain Dominate.
 func TestRegurgitatingSlog_NoSloggismNoDominate(t *testing.T) {
 	for _, c := range []sim.Card{RegurgitatingSlogRed{}, RegurgitatingSlogYellow{}, RegurgitatingSlogBlue{}} {
-		s := sim.NewTurnState(nil, nil)
+		s := sim.NewTurnStateFromCards(nil, nil)
 		self := &sim.CardState{Card: c}
 		c.Play(s, self)
 		if self.GrantedDominate {
@@ -22,7 +22,7 @@ func TestRegurgitatingSlog_NoSloggismNoDominate(t *testing.T) {
 // Dominate.
 func TestRegurgitatingSlog_BanishesSloggismForDominate(t *testing.T) {
 	for _, c := range []sim.Card{RegurgitatingSlogRed{}, RegurgitatingSlogYellow{}, RegurgitatingSlogBlue{}} {
-		s := sim.NewTurnState(nil, []sim.Card{SloggismRed{}})
+		s := sim.NewTurnStateFromCards(nil, []sim.Card{SloggismRed{}})
 		self := &sim.CardState{Card: c}
 		c.Play(s, self)
 		if !self.GrantedDominate {

@@ -70,12 +70,13 @@ type TurnState struct {
 	// Card subpackages reach hand only through Hand() / AppendHand / PopHandAt — see the
 	// package-level docstring for the framework-vs-card boundary rationale.
 	hand []Card
-	// deck is the deck top-to-bottom. Unexported so card subpackages can only reach it via
-	// the public Deck() / PopDeckTop / PrependToDeck / TutorFromDeck accessors, each of
-	// which clears cacheable. Framework code in this package reads / writes deck directly
-	// (resetStateForPermutation seed, snapshotCarry copy, applyTurnResult adoption) so the
-	// non-card-driven path doesn't poison the cacheable bit.
-	deck []Card
+	// deck is the chain's working deck. Unexported so card subpackages can only reach
+	// it via the public Deck() / PopDeckTop / PrependToDeck / TutorFromDeck accessors, each
+	// of which clears cacheable. Framework code in this package reads / writes deck directly
+	// (resetStateForPermutation seed, snapshotCarry copy) so the non-card-driven path
+	// doesn't poison the cacheable bit. Always non-nil during a chain — pointed at a
+	// per-permutation Copy of the leaf's starting deck.
+	deck *deck.Deck
 	// Arsenal is the arsenal slot's contents at this point in the chain — the arsenal-in
 	// card at start of turn, nil after it plays / defends, refilled post-chain by the
 	// arsenal-promotion step. Cards that read "from arsenal" use CardState.FromArsenal,
@@ -258,13 +259,29 @@ func (s *TurnState) AmendLastChainStepN(n int) {
 	}
 }
 
-// Deck returns the live deck top-to-bottom and flips IsCacheable to false. Cards must not
-// mutate the returned slice; use PopDeckTop / PrependToDeck / TutorFromDeck for mutations.
-// Read-only callers that only inspect the slice still flip — the cache key can't depend on
-// what the deck-order read produced.
-func (s *TurnState) Deck() []Card {
+// Deck returns the chain-runner deck for read-only inspection and flips IsCacheable to
+// false. Card handlers should not mutate the returned *deck.Deck directly; route mutations
+// through PopDeckTop / PrependToDeck / Opt / TutorFromDeck / RecycleToDeckBottom so the
+// cacheable bookkeeping stays consistent.
+func (s *TurnState) Deck() *deck.Deck {
 	s.cacheable = false
 	return s.deck
+}
+
+// PeekTopN returns the top n cards of the deck (top first) without removing them and
+// flips IsCacheable to false. Returns fewer cards when the deck has < n. Used by cards
+// that scan or count the top N for a rider.
+func (s *TurnState) PeekTopN(n int) []Card {
+	s.cacheable = false
+	top := s.deck.PeekTopN(n)
+	if len(top) == 0 {
+		return nil
+	}
+	out := make([]Card, len(top))
+	for i, c := range top {
+		out[i] = c.(Card)
+	}
+	return out
 }
 
 // Hand returns the live hand slice and flips IsCacheable to false. Cards must not mutate
@@ -370,12 +387,10 @@ func (s *TurnState) Graveyard() []Card {
 // the deck is empty. Flips IsCacheable to false.
 func (s *TurnState) PopDeckTop() (Card, bool) {
 	s.cacheable = false
-	if len(s.deck) == 0 {
+	if s.deck.Size() == 0 {
 		return nil, false
 	}
-	top := s.deck[0]
-	s.deck = s.deck[1:]
-	return top, true
+	return s.deck.Draw(1)[0].(Card), true
 }
 
 // PeekDeck returns the top card of the deck without removing it. Returns (nil, false) on
@@ -383,34 +398,26 @@ func (s *TurnState) PopDeckTop() (Card, bool) {
 // output depend on hidden shuffle order, same as PopDeckTop.
 func (s *TurnState) PeekDeck() (Card, bool) {
 	s.cacheable = false
-	if len(s.deck) == 0 {
+	top := s.deck.PeekTop()
+	if top == nil {
 		return nil, false
 	}
-	return s.deck[0], true
+	return top.(Card), true
 }
 
-// PrependToDeck inserts c at the top of the deck. Flips IsCacheable to false. Allocates a
-// fresh backing slice so subsequent mid-chain mutations don't poison sibling permutations
-// that share the per-leaf deck reference.
+// PrependToDeck inserts c at the top of the deck. Flips IsCacheable to false.
 func (s *TurnState) PrependToDeck(c Card) {
 	s.cacheable = false
-	newDeck := make([]Card, 0, len(s.deck)+1)
-	newDeck = append(newDeck, c)
-	newDeck = append(newDeck, s.deck...)
-	s.deck = newDeck
+	s.deck.PutTop([]deck.Card{c})
 }
 
 // RecycleToDeckBottom appends self.Card to the bottom of the deck and flips
 // self.SkipGraveyard so the chain dispatcher skips the usual non-persistent → graveyard
 // append. Models the FaB clause "put this on the bottom of its owner's deck"
-// (Relentless Pursuit). Flips IsCacheable to false. Allocates a fresh deck backing slice
-// so the per-leaf deck reference shared across permutations stays untouched.
+// (Relentless Pursuit). Flips IsCacheable to false.
 func (s *TurnState) RecycleToDeckBottom(self *CardState) {
 	s.cacheable = false
-	newDeck := make([]Card, 0, len(s.deck)+1)
-	newDeck = append(newDeck, s.deck...)
-	newDeck = append(newDeck, self.Card)
-	s.deck = newDeck
+	s.deck.PutBottom([]deck.Card{self.Card})
 	self.SkipGraveyard = true
 }
 
@@ -429,29 +436,34 @@ func (s *TurnState) RecycleToDeckBottom(self *CardState) {
 //
 // Panics if the handler's combined output isn't exactly the input multiset. The contract
 // is that Opt only re-orders cards; adding, dropping, or substituting any card is a bug.
-//
-// Allocates a fresh deck backing slice so the per-leaf deck reference shared across
-// permutations stays untouched (same convention as PrependToDeck / TutorFromDeck).
 func (s *TurnState) Opt(n int) {
 	s.cacheable = false
-	if n <= 0 || len(s.deck) == 0 {
+	if n <= 0 || s.deck.Size() == 0 {
 		return
 	}
-	if n > len(s.deck) {
-		n = len(s.deck)
+	if n > s.deck.Size() {
+		n = s.deck.Size()
 	}
 	// Copy off the popped slice so the handler can't mutate s.deck through aliasing.
-	cards := append([]Card(nil), s.deck[:n]...)
-	rest := s.deck[n:]
+	drawn := s.deck.Draw(n)
+	cards := make([]Card, len(drawn))
+	for i, c := range drawn {
+		cards[i] = c.(Card)
+	}
 
 	top, bottom := CurrentHero.Opt(cards)
 	panicIfOptViolatesMultiset(cards, top, bottom)
 
-	newDeck := make([]Card, 0, len(top)+len(rest)+len(bottom))
-	newDeck = append(newDeck, top...)
-	newDeck = append(newDeck, rest...)
-	newDeck = append(newDeck, bottom...)
-	s.deck = newDeck
+	deckTop := make([]deck.Card, len(top))
+	for i, c := range top {
+		deckTop[i] = c
+	}
+	s.deck.PutTop(deckTop)
+	deckBottom := make([]deck.Card, len(bottom))
+	for i, c := range bottom {
+		deckBottom[i] = c
+	}
+	s.deck.PutBottom(deckBottom)
 
 	if OptDebug {
 		fmt.Printf("Opt(%d): cards=%s -> top=%s bottom=%s\n",
@@ -513,28 +525,13 @@ func panicIfOptViolatesMultiset(in, top, bottom []Card) {
 
 // TutorFromDeck removes and returns the highest-scoring card per score. Returns (nil,
 // false) when no card scores > 0 (or the deck is empty). Flips IsCacheable to false.
-// Allocates a fresh backing slice so the per-leaf deck reference shared across
-// permutations stays untouched.
 func (s *TurnState) TutorFromDeck(score func(Card) int) (Card, bool) {
 	s.cacheable = false
-	bestIdx := -1
-	bestScore := 0
-	for i, c := range s.deck {
-		sc := score(c)
-		if sc > bestScore {
-			bestScore = sc
-			bestIdx = i
-		}
-	}
-	if bestIdx < 0 {
+	got, ok := s.deck.Tutor(func(c deck.Card) int { return score(c.(Card)) })
+	if !ok {
 		return nil, false
 	}
-	found := s.deck[bestIdx]
-	out := make([]Card, 0, len(s.deck)-1)
-	out = append(out, s.deck[:bestIdx]...)
-	out = append(out, s.deck[bestIdx+1:]...)
-	s.deck = out
-	return found, true
+	return got.(Card), true
 }
 
 // BanishFromGraveyard removes the first graveyard card matching pred, appends it to
@@ -588,28 +585,37 @@ func (s *TurnState) recycleFromGraveyard(pred func(Card) bool, toTop bool) (Card
 			continue
 		}
 		s.graveyard = append(s.graveyard[:i], s.graveyard[i+1:]...)
-		newDeck := make([]Card, 0, len(s.deck)+1)
 		if toTop {
-			newDeck = append(newDeck, c)
-			newDeck = append(newDeck, s.deck...)
+			s.deck.PutTop([]deck.Card{c})
 		} else {
-			newDeck = append(newDeck, s.deck...)
-			newDeck = append(newDeck, c)
+			s.deck.PutBottom([]deck.Card{c})
 		}
-		s.deck = newDeck
 		return c, true
 	}
 	return nil, false
 }
 
-// NewTurnState constructs a *TurnState with the given deck and graveyard seed. Test /
-// utility constructor: the unexported deck / graveyard fields aren't reachable via a
-// composite literal from outside this package, so callers in card subpackages and other
-// non-sim packages route through this constructor (or set the slices via the accessor
-// methods after construction). The returned state has IsCacheable()==true; cacheable
-// has to be set explicitly because the field's zero value is false (see the field doc).
-func NewTurnState(deck, graveyard []Card) *TurnState {
-	return &TurnState{deck: deck, graveyard: graveyard, cacheable: true, currentAuraIdx: -1}
+// NewTurnState constructs a *TurnState with the given deck and graveyard seed. The
+// unexported deck / graveyard fields aren't reachable via a composite literal from outside
+// this package, so callers route through this constructor. The returned state has
+// IsCacheable()==true; cacheable has to be set explicitly because the field's zero value
+// is false (see the field doc).
+func NewTurnState(d *deck.Deck, graveyard []Card) *TurnState {
+	if d == nil {
+		d = &deck.Deck{}
+	}
+	return &TurnState{deck: d, graveyard: graveyard, cacheable: true, currentAuraIdx: -1}
+}
+
+// NewTurnStateFromCards is a test-only constructor that wraps a Card slice in a fresh
+// *deck.Deck and forwards to NewTurnState. Lets card tests build a TurnState seeded with
+// a hand-rolled deck order without each test plumbing the deck construction inline.
+func NewTurnStateFromCards(deckCards, graveyard []Card) *TurnState {
+	dc := make([]deck.Card, len(deckCards))
+	for i, c := range deckCards {
+		dc[i] = c
+	}
+	return NewTurnState(deck.New(nil, nil, dc), graveyard)
 }
 
 // AddValue credits n to s.Value, clamped at 0. Pair with a Log helper when you also want a
@@ -766,22 +772,22 @@ func (s *TurnState) HasPlayedOrCreatedAura() bool {
 
 // Clash models a clash (rule 8.5.45): we and the opponent reveal the top card of our decks
 // and the higher {p} wins. We model from our side only — our deck's top is read via
-// s.Deck(); the opponent's top is approximated as 5-power. On a win (our top ≥ 6), win
+// PeekDeck; the opponent's top is approximated as 5-power. On a win (our top ≥ 6), win
 // fires; on a loss (our top ≤ 4), lose fires; ties (top == 5) and an empty deck fire
-// neither. Either callback may be nil. Reading the deck top through Deck() flips
-// IsCacheable to false — a clash result depends on hidden shuffle order.
+// neither. Either callback may be nil. PeekDeck flips IsCacheable to false — a clash
+// result depends on hidden shuffle order.
 func (s *TurnState) Clash(win, lose func()) {
-	deck := s.Deck()
-	if len(deck) == 0 {
+	top, ok := s.PeekDeck()
+	if !ok {
 		return
 	}
-	top := deck[0].Attack()
+	power := top.Attack()
 	switch {
-	case top >= 6:
+	case power >= 6:
 		if win != nil {
 			win()
 		}
-	case top <= 4:
+	case power <= 4:
 		if lose != nil {
 			lose()
 		}

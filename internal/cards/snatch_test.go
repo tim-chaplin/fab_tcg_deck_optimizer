@@ -11,7 +11,7 @@ import (
 // hand.
 func TestSnatch_LikelyHitFiresDrawOne(t *testing.T) {
 	top := testutils.GenericAttack(0, 3)
-	s := sim.NewTurnState([]sim.Card{top}, nil)
+	s := sim.NewTurnStateFromCards([]sim.Card{top}, nil)
 	c := SnatchRed{}
 	cs := &sim.CardState{Card: c}
 	c.Play(s, cs)
@@ -22,8 +22,8 @@ func TestSnatch_LikelyHitFiresDrawOne(t *testing.T) {
 	if h := s.Hand(); len(h) != 1 || h[0] != top {
 		t.Errorf("Hand = %v, want [top-of-deck]", h)
 	}
-	if d := s.Deck(); len(d) != 0 {
-		t.Errorf("Deck len = %d, want 0 (top consumed)", len(d))
+	if d := s.Deck(); d.Size() != 0 {
+		t.Errorf("Deck size = %d, want 0 (top consumed)", d.Size())
 	}
 }
 
@@ -38,7 +38,7 @@ func TestSnatch_BlockableSuppressesDraw(t *testing.T) {
 	}
 	for _, tc := range cases {
 		top := testutils.GenericAttack(0, 3)
-		s := sim.NewTurnState([]sim.Card{top}, nil)
+		s := sim.NewTurnStateFromCards([]sim.Card{top}, nil)
 		tc.c.Play(s, &sim.CardState{Card: tc.c})
 		if got := s.Value; got != tc.want {
 			t.Errorf("%s: Play() = %d, want %d (blockable, no draw)", tc.c.Name(), got, tc.want)
@@ -46,8 +46,8 @@ func TestSnatch_BlockableSuppressesDraw(t *testing.T) {
 		if h := s.Hand(); len(h) != 0 {
 			t.Errorf("%s: Hand = %v, want empty (no draw fired)", tc.c.Name(), h)
 		}
-		if d := s.Deck(); len(d) != 1 {
-			t.Errorf("%s: Deck len = %d, want 1 (top preserved)", tc.c.Name(), len(d))
+		if d := s.Deck(); d.Size() != 1 {
+			t.Errorf("%s: Deck size = %d, want 1 (top preserved)", tc.c.Name(), d.Size())
 		}
 	}
 }

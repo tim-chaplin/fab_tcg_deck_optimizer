@@ -20,7 +20,7 @@ func TestWhisperOfTheOracle_PlayCallsOpt4(t *testing.T) {
 	defer testutils.SwapCurrentHero(testutils.Hero{})()
 
 	for _, card := range whisperOfTheOracleVariants {
-		s := sim.NewTurnState([]sim.Card{a, b, c, d}, nil)
+		s := sim.NewTurnStateFromCards([]sim.Card{a, b, c, d}, nil)
 		card.Play(s, &sim.CardState{Card: card})
 		if s.Value != 0 {
 			t.Errorf("%s: Play() Value = %d, want 0", card.Name(), s.Value)

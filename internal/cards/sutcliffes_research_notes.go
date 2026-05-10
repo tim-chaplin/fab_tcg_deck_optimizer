@@ -17,19 +17,14 @@ import (
 
 // sutcliffesResearchNotesPlay scans the top revealCount cards of the deck and creates one
 // runechant per Runeblade attack action card found, emitting the rider sub-line under self
-// when any are created. Reads the deck via s.Deck() so the cacheable bit flips — the
+// when any are created. Reads the top via PeekTopN so the cacheable bit flips — the
 // runechant count produced depends on shuffle order.
 func sutcliffesResearchNotesPlay(s *sim.TurnState, self *sim.CardState, revealCount int) {
 	dmg := self.DealEffectiveAttack(s)
 	s.Log(self, dmg)
-	deck := s.Deck()
-	n := revealCount
-	if n > len(deck) {
-		n = len(deck)
-	}
 	count := 0
-	for i := 0; i < n; i++ {
-		t := deck[i].Types()
+	for _, c := range s.PeekTopN(revealCount) {
+		t := c.Types()
 		if t.Has(card.TypeRuneblade) && t.IsAttackAction() {
 			count++
 		}

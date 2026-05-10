@@ -21,7 +21,7 @@ func TestFateForeseen_BlocksAndCallsOpt1(t *testing.T) {
 
 	for _, tc := range cases {
 		top := testutils.NewStubCard("top")
-		s := sim.NewTurnState([]sim.Card{top}, nil)
+		s := sim.NewTurnStateFromCards([]sim.Card{top}, nil)
 		s.IncomingDamage = 10
 		tc.c.Play(s, &sim.CardState{Card: tc.c})
 		if s.Value != tc.block {

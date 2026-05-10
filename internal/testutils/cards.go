@@ -402,14 +402,14 @@ type DominatingStubCard struct{ StubCard }
 
 func (DominatingStubCard) Dominate() {}
 
-// NotImplementedStubCard embeds StubCard and adds the sim.NotImplemented marker —
-// exercises the type assertion the deck legal-pool filter keys on.
+// NotImplementedStubCard embeds StubCard and adds the registry.NotImplemented marker —
+// exercises the type assertion the registry's legal-pool filter keys on.
 type NotImplementedStubCard struct{ StubCard }
 
 func (NotImplementedStubCard) NotImplemented() {}
 
-// UnplayableStubCard embeds StubCard and adds the sim.Unplayable marker — exercises the
-// second pool-exclusion path the deck legal-pool filter keys on.
+// UnplayableStubCard embeds StubCard and adds the registry.Unplayable marker — exercises
+// the second pool-exclusion path the registry's legal-pool filter keys on.
 type UnplayableStubCard struct{ StubCard }
 
 func (UnplayableStubCard) Unplayable() {}

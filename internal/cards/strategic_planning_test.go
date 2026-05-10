@@ -10,7 +10,7 @@ import (
 // Tests that Strategic Planning queues a TriggerEndOfTurn keyed to itself, not a Ponder.
 func TestStrategicPlanning_QueuesEndOfTurnTrigger(t *testing.T) {
 	for _, c := range []sim.Card{StrategicPlanningRed{}, StrategicPlanningYellow{}, StrategicPlanningBlue{}} {
-		s := sim.NewTurnState(nil, nil)
+		s := sim.NewTurnStateFromCards(nil, nil)
 		c.Play(s, &sim.CardState{Card: c})
 		matching := 0
 		for _, tr := range s.Triggers {
@@ -31,10 +31,12 @@ func TestStrategicPlanning_QueuesEndOfTurnTrigger(t *testing.T) {
 func TestStrategicPlanning_RecyclesEligibleActionToBottom(t *testing.T) {
 	target := testutils.GenericAction()
 	deck := []sim.Card{testutils.BlueAttack{}}
-	s := sim.NewTurnState(deck, []sim.Card{target})
+	s := sim.NewTurnStateFromCards(deck, []sim.Card{target})
 	(StrategicPlanningRed{}).Play(s, &sim.CardState{Card: StrategicPlanningRed{}})
-	gotDeck := s.Deck()
-	if len(gotDeck) != 2 || gotDeck[1] != sim.Card(target) {
-		t.Errorf("deck after recycle = %v, want target at bottom under BlueAttack", gotDeck)
+	if got := s.Deck().Size(); got != 2 {
+		t.Errorf("deck size after recycle = %d, want 2 (target appended to bottom)", got)
+	}
+	if top := s.Deck().PeekTop(); top != (testutils.BlueAttack{}) {
+		t.Errorf("deck top after recycle = %v, want BlueAttack still on top (target went to bottom)", top)
 	}
 }

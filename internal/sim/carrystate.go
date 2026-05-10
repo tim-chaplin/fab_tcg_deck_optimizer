@@ -16,14 +16,15 @@ package sim
 // The aliasing rule for reuse helpers: the receiver's slices are SHARED across calls,
 // so any value that needs to outlive the next call must Clone first.
 
-// SnapshotFromTurn copies every persistent TurnState field into c, reusing c's slice
-// backings via append([:0], src...). The slice copies are intentional: mid-chain
-// state.* slices alias attackBufs scratch storage and the next permutation will
-// overwrite them. Reads s.deck / s.graveyard directly so the snapshot itself doesn't
-// poison cacheable.
+// SnapshotFromTurn copies every persistent TurnState field into c. Slice fields reuse c's
+// backings via append([:0], src...) — mid-chain state.* slices alias attackBufs scratch
+// storage that the next permutation overwrites, so the copy is necessary. Deck gets a
+// fresh Copy() so subsequent permutations' deck mutations don't reach back into the
+// snapshot. Reads s.deck / s.graveyard directly so the snapshot itself doesn't poison
+// cacheable.
 func (c *CarryState) SnapshotFromTurn(s *TurnState) {
 	c.Hand = append(c.Hand[:0], s.hand...)
-	c.Deck = append(c.Deck[:0], s.deck...)
+	c.Deck = s.deck.Copy()
 	c.Arsenal = s.Arsenal
 	c.Graveyard = append(c.Graveyard[:0], s.graveyard...)
 	c.Banish = append(c.Banish[:0], s.banished...)
@@ -34,13 +35,17 @@ func (c *CarryState) SnapshotFromTurn(s *TurnState) {
 	c.Log = append(c.Log[:0], s.turnLog...)
 }
 
-// CopyFrom copies every field of src into c, reusing c's slice backings via
-// append([:0], ...). Allocation-free after the first sizing — callers that promote
-// one already-built CarryState into a different destination avoid the per-promotion
-// allocation a fresh value-assign would pay.
+// CopyFrom copies every field of src into c. Slice fields reuse c's backings via
+// append([:0], ...); Deck gets a fresh Copy(). Callers that promote one already-built
+// CarryState into a different destination avoid the per-promotion allocation a fresh
+// value-assign would pay (except for the deck Copy, which always allocates).
 func (c *CarryState) CopyFrom(src *CarryState) {
 	c.Hand = append(c.Hand[:0], src.Hand...)
-	c.Deck = append(c.Deck[:0], src.Deck...)
+	if src.Deck != nil {
+		c.Deck = src.Deck.Copy()
+	} else {
+		c.Deck = nil
+	}
 	c.Arsenal = src.Arsenal
 	c.Graveyard = append(c.Graveyard[:0], src.Graveyard...)
 	c.Banish = append(c.Banish[:0], src.Banish...)
@@ -57,7 +62,7 @@ func (c *CarryState) CopyFrom(src *CarryState) {
 // previous run can't leak through when no candidate is promoted.
 func (c *CarryState) Reset() {
 	c.Hand = c.Hand[:0]
-	c.Deck = c.Deck[:0]
+	c.Deck = nil
 	c.Arsenal = nil
 	c.Graveyard = c.Graveyard[:0]
 	c.Banish = c.Banish[:0]
@@ -68,7 +73,7 @@ func (c *CarryState) Reset() {
 	c.Log = c.Log[:0]
 }
 
-// Clone returns a fresh CarryState whose slice fields own independent backing arrays.
+// Clone returns a fresh CarryState whose slice / deck fields own independent backing.
 // Used at ownership-transfer points (e.g. the final TurnSummary returned by findBest)
 // so the result survives subsequent reuse-helper calls. Empty slices stay nil to keep
 // trivial CarryStates allocation-free.
@@ -81,8 +86,8 @@ func (c CarryState) Clone() CarryState {
 	if len(c.Hand) > 0 {
 		out.Hand = append([]Card(nil), c.Hand...)
 	}
-	if len(c.Deck) > 0 {
-		out.Deck = append([]Card(nil), c.Deck...)
+	if c.Deck != nil {
+		out.Deck = c.Deck.Copy()
 	}
 	if len(c.Graveyard) > 0 {
 		out.Graveyard = append([]Card(nil), c.Graveyard...)

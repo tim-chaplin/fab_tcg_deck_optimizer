@@ -79,7 +79,7 @@ func NewRunechantAura(n int) Aura {
 }
 
 // ponderAuraHandler is the TriggerEndOfTurn handler shared by every Ponder aura. For
-// each token in play it pops the deck top into the held pile (s.Hand), letting the
+// each token in play it pops the deck top into the held cards (s.Hand), letting the
 // post-hoc arsenal-promotion step fill an otherwise-empty arsenal slot. Pops past
 // deck-end are silently skipped — empty deck just means no draw. Reading the deck top
 // flips s.cacheable (PopDeckTop's contract).
