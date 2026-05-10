@@ -23,7 +23,7 @@ import (
 // stay untouched.
 func printCardList(d *deck.Deck) {
 	fmt.Println("Card list:")
-	printGroupedCards(d.Cards)
+	printGroupedCards(d.AllCards())
 	if len(d.Equipment) > 0 {
 		fmt.Println("Equipment:")
 		printGroupedStrings(d.Equipment)
@@ -71,7 +71,7 @@ func printGroupedStrings(ss []string) {
 func printDeckSummary(d *deck.Deck, s sim.DeckStats) {
 	fmt.Printf("Hero:    %s\n", d.Hero.(sim.Hero).Name())
 	fmt.Printf("Weapons: %s\n", weaponNames(d.Weapons))
-	fmt.Printf("Pitch:   %s\n", pitchCountsLine(d.Cards))
+	fmt.Printf("Pitch:   %s\n", pitchCountsLine(d.AllCards()))
 	fmt.Println()
 	fmt.Printf("Mean value: %s\n", meanValueLine(s))
 	fmt.Printf("  Cycle 1 mean: %s\n", formatMean(s.FirstCycle.Mean()))
@@ -216,7 +216,7 @@ func printCardValues(d *deck.Deck, s sim.DeckStats) {
 	// Column widths take the larger of header label and longest data string so the dividers
 	// line up regardless of deck. Card column also widens for the "Card" header on absurdly
 	// short-named decks.
-	nameW := maxNameLen(d.Cards)
+	nameW := maxNameLen(d.AllCards())
 	if nameW < len("Card") {
 		nameW = len("Card")
 	}

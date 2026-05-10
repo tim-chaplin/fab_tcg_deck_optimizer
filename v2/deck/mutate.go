@@ -117,7 +117,7 @@ func weaponLoadoutMutations(d *Deck, reg Registry) []Mutation {
 		if l.key == currentKey {
 			continue
 		}
-		newCards := append([]Card(nil), d.Cards...)
+		newCards := append([]Card(nil), d.cards...)
 		nd := New(d.Hero, l.weapons, newCards)
 		nd.Sideboard = d.Sideboard
 		nd.Equipment = d.Equipment
@@ -145,7 +145,7 @@ func singleSwapMutations(d *Deck, pool legalCardPool) []Mutation {
 			replacement := pool.byID[addID]
 			newCards := make([]Card, 0, d.Size())
 			removed1 := false
-			for _, c := range d.Cards {
+			for _, c := range d.cards {
 				if !removed1 && c.ID() == removeID {
 					removed1 = true
 					continue
@@ -171,7 +171,7 @@ func singleSwapMutations(d *Deck, pool legalCardPool) []Mutation {
 func uniqueDeckCards(d *Deck) []Card {
 	seen := map[ids.CardID]bool{}
 	out := make([]Card, 0, d.Size())
-	for _, c := range d.Cards {
+	for _, c := range d.cards {
 		if seen[c.ID()] {
 			continue
 		}
@@ -243,7 +243,7 @@ type pairDedupeKey struct {
 // pairSwapMutations emits paired add mutations for every entry in CardPairs by taking the
 // cross-product of every (i, j) deck-index pair (i < j) with every (firstVariant,
 // secondVariant) combo from the pair's two groups. Each emitted mutation removes the cards
-// at positions i and j from a fresh copy of d.Cards and appends the chosen pair variants.
+// at positions i and j from a fresh copy of d.cards and appends the chosen pair variants.
 //
 // Index-based iteration is what makes "remove both copies of a card that appears twice"
 // reachable: with a [HocusPocusBlue, HocusPocusBlue] deck, the (0, 1) index pair removes
@@ -287,9 +287,9 @@ func pairSwapMutations(d *Deck, pairs []CardPair, pool legalCardPool) []Mutation
 					continue
 				}
 				addA, addB := sortedIDPair(firstID, secondID)
-				for i := 0; i < len(d.Cards); i++ {
-					for j := i + 1; j < len(d.Cards); j++ {
-						idI, idJ := d.Cards[i].ID(), d.Cards[j].ID()
+				for i := 0; i < len(d.cards); i++ {
+					for j := i + 1; j < len(d.cards); j++ {
+						idI, idJ := d.cards[i].ID(), d.cards[j].ID()
 						if idI == firstID || idI == secondID ||
 							idJ == firstID || idJ == secondID {
 							continue
@@ -300,14 +300,14 @@ func pairSwapMutations(d *Deck, pairs []CardPair, pool legalCardPool) []Mutation
 							continue
 						}
 						seen[key] = true
-						newCards := pairSwapByIndex(d.Cards, i, j, first, second)
+						newCards := pairSwapByIndex(d.cards, i, j, first, second)
 						nd := New(d.Hero, d.Weapons, newCards)
 						nd.Sideboard = d.Sideboard
 						nd.Equipment = d.Equipment
 						out = append(out, Mutation{
 							Deck: nd,
 							Description: fmt.Sprintf("-1 %s, -1 %s, +1 %s, +1 %s",
-								d.Cards[i].DisplayName(), d.Cards[j].DisplayName(),
+								d.cards[i].DisplayName(), d.cards[j].DisplayName(),
 								first.DisplayName(), second.DisplayName()),
 						})
 					}
@@ -380,7 +380,7 @@ func cardMultisetKey(cs []Card) string {
 func filterMaxCopiesViolations(muts []Mutation, maxCopies int) []Mutation {
 	out := make([]Mutation, 0, len(muts))
 	for _, m := range muts {
-		if respectsMaxCopies(m.Deck.Cards, maxCopies) {
+		if respectsMaxCopies(m.Deck.cards, maxCopies) {
 			out = append(out, m)
 		}
 	}

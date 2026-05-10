@@ -72,7 +72,7 @@ func (t TurnStartState) Copper() int {
 	return itemCountIn(t.StartOfNextTurnItems, TokenTypeCopper)
 }
 
-// EvalOneTurnForTesting runs one turn against d.Cards in source order (no shuffle) and returns
+// EvalOneTurnForTesting runs one turn against the deck in source order (no shuffle) and returns
 // the tested turn's outcome plus the start-of-next-turn state. initial seeds the start-of-turn
 // state — Arsenal, Auras, Items — modelling carryover from a hypothetical previous turn; the
 // other TurnState fields are ignored (transient mid-chain state, hand / deck / graveyard which

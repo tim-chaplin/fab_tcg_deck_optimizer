@@ -153,11 +153,11 @@ func TestRandom_BuildsLegalDeckWithinCopyBudget(t *testing.T) {
 	rng := rand.New(rand.NewSource(42))
 
 	d := Random(nil, 8, 2, rng, nil, reg)
-	if len(d.Cards) != 8 {
-		t.Errorf("len(Cards) = %d, want 8", len(d.Cards))
+	if len(d.cards) != 8 {
+		t.Errorf("len(Cards) = %d, want 8", len(d.cards))
 	}
 	counts := map[ids.CardID]int{}
-	for _, c := range d.Cards {
+	for _, c := range d.cards {
 		counts[c.ID()]++
 	}
 	for id, n := range counts {
@@ -198,7 +198,7 @@ func TestSanitizeNotImplemented_ReplacesIllegalSlots(t *testing.T) {
 	for _, c := range reg.LegalCards() {
 		legal[c.ID()] = true
 	}
-	for i, c := range d.Cards {
+	for i, c := range d.cards {
 		if !legal[c.ID()] {
 			t.Errorf("Cards[%d] = %v is still illegal after sanitize", i, c)
 		}
@@ -249,13 +249,13 @@ func TestShuffle_RandomisesCardsInPlace(t *testing.T) {
 		fakeCard{id: 5}, fakeCard{id: 6}, fakeCard{id: 7}, fakeCard{id: 8},
 	})
 	beforeCounts := map[ids.CardID]int{}
-	for _, c := range master.Cards {
+	for _, c := range master.cards {
 		beforeCounts[c.ID()]++
 	}
 	d := master.Copy()
 	d.Shuffle(rand.New(rand.NewSource(1)))
 	afterCounts := map[ids.CardID]int{}
-	for _, c := range d.Cards {
+	for _, c := range d.cards {
 		afterCounts[c.ID()]++
 	}
 	if !reflect.DeepEqual(beforeCounts, afterCounts) {
@@ -264,8 +264,8 @@ func TestShuffle_RandomisesCardsInPlace(t *testing.T) {
 
 	d2 := master.Copy()
 	d2.Shuffle(rand.New(rand.NewSource(2)))
-	if reflect.DeepEqual(d.Cards, d2.Cards) {
-		t.Errorf("two seeds produced identical orderings: %v", d.Cards)
+	if reflect.DeepEqual(d.cards, d2.cards) {
+		t.Errorf("two seeds produced identical orderings: %v", d.cards)
 	}
 }
 
@@ -277,11 +277,11 @@ func TestCopy_IsolatesShuffleFromMaster(t *testing.T) {
 	master := New(nil, nil, []Card{
 		fakeCard{id: 1}, fakeCard{id: 2}, fakeCard{id: 3}, fakeCard{id: 4},
 	})
-	before := append([]Card(nil), master.Cards...)
+	before := append([]Card(nil), master.cards...)
 	worker := master.Copy()
 	worker.Shuffle(rand.New(rand.NewSource(99)))
-	if !reflect.DeepEqual(master.Cards, before) {
-		t.Errorf("master mutated by worker.Shuffle: got %v, want %v", master.Cards, before)
+	if !reflect.DeepEqual(master.cards, before) {
+		t.Errorf("master mutated by worker.Shuffle: got %v, want %v", master.cards, before)
 	}
 }
 
@@ -402,9 +402,9 @@ func TestTutor_RemovesHighestScoring(t *testing.T) {
 	if d.Size() != 3 {
 		t.Errorf("Size after Tutor = %d, want 3", d.Size())
 	}
-	for _, c := range d.Cards {
+	for _, c := range d.cards {
 		if c.ID() == 7 {
-			t.Errorf("Tutor left id 7 in the deck: %v", d.Cards)
+			t.Errorf("Tutor left id 7 in the deck: %v", d.cards)
 		}
 	}
 }

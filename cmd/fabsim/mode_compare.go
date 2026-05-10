@@ -59,7 +59,7 @@ func runCompare(name1, name2 string, shuffles int, mp sim.Matchup, maxCopies int
 	fmt.Println()
 
 	printSideBySideStats(name1, name2, []statSection{
-		{"Pitch values", pitchCountsLine(d1.Cards), pitchCountsLine(d2.Cards)},
+		{"Pitch values", pitchCountsLine(d1.AllCards()), pitchCountsLine(d2.AllCards())},
 		{"Mean hand value", formatMean(s1.Mean()), formatMean(s2.Mean())},
 		{"Cycle 1 mean", formatMean(s1.FirstCycle.Mean()), formatMean(s2.FirstCycle.Mean())},
 		{"Cycle 2 mean", formatMean(s1.SecondCycle.Mean()), formatMean(s2.SecondCycle.Mean())},
@@ -151,8 +151,9 @@ func printCardDelta(name1, name2 string, d1, d2 *deck.Deck) {
 // printings as distinct entries so a "-1 Aether Slash [R], +1 Aether Slash [Y]" diff is
 // legible.
 func loadoutCounts(d *deck.Deck) map[string]int {
-	out := make(map[string]int, len(d.Cards)+len(d.Weapons))
-	for _, c := range d.Cards {
+	allCards := d.AllCards()
+	out := make(map[string]int, len(allCards)+len(d.Weapons))
+	for _, c := range allCards {
 		out[c.DisplayName()]++
 	}
 	for _, w := range d.Weapons {

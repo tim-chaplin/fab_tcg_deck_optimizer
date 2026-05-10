@@ -68,7 +68,7 @@ func TestPitchAttribution_OneNonAttackPitchFundsMultipleAetherSlashes(t *testing
 
 // fillerDeck is a no-op deck body for EvalOneTurnForTesting calls that supply their own
 // initialHand. The cards never enter play this turn (the caller's hand is the only thing
-// the chain runner sees) but EvalOneTurnForTesting still wants a non-empty Deck.Cards so
+// the chain runner sees) but EvalOneTurnForTesting still wants a non-empty deck body so
 // the post-turn deal can pull a turn-2 hand without short-circuiting to a zero state.
 func fillerDeck() []deck.Card {
 	return []deck.Card{

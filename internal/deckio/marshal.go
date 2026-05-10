@@ -25,9 +25,10 @@ func toJSON(d *deck.Deck, stats sim.DeckStats) *DeckJSON {
 	for i, w := range d.Weapons {
 		weapons[i] = w.Name()
 	}
-	cardNames := make([]string, len(d.Cards))
+	allCards := d.AllCards()
+	cardNames := make([]string, len(allCards))
 	var pitchCounts PitchCountsJSON
-	for i, c := range d.Cards {
+	for i, c := range allCards {
 		cardNames[i] = c.DisplayName()
 		switch c.(sim.Card).Pitch() {
 		case 1:

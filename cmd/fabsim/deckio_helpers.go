@@ -109,7 +109,7 @@ func fabraryPathFor(jsonPath string) string {
 // the replacement pool (typically the run's format predicate). Returns nil when the deck
 // was already clean — callers can use that to skip the forced-reevaluation branch.
 //
-// The sanitizer mutates d.Cards in place. Callers that care about the pre-sanitize score
+// The sanitizer mutates the deck in place. Callers that care about the pre-sanitize score
 // for a delta warning should capture it before calling this.
 func sanitizeLoadedDeck(d *deck.Deck, maxCopies int, rng *rand.Rand, legal func(deck.Card) bool) []deck.NotImplementedReplacement {
 	replaced := d.SanitizeNotImplemented(maxCopies, rng, legal, registry.Registry{})

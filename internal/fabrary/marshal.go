@@ -42,7 +42,7 @@ func Marshal(d *deck.Deck) string {
 	b.WriteString("\n")
 
 	b.WriteString("Deck cards\n")
-	writeCounts(&b, cardCountsForExport(d.Cards))
+	writeCounts(&b, cardCountsForExport(d.AllCards()))
 
 	sideboardCounts := sideboardCountsForExport(d.Sideboard)
 	if len(sideboardCounts) > 0 {

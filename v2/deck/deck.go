@@ -23,15 +23,28 @@ import (
 // the user wants on their sideboard list (e.g. Nullrune cycle) aren't in the card registry,
 // so a registry-backed field would force the user's data through a lossy lookup.
 //
-// Cards doubles as the runtime deck: Shuffle / Draw / PeekTop / PutBottom / PutTop / Tutor
+// cards doubles as the runtime deck: Shuffle / Draw / PeekTop / PutBottom / PutTop / Tutor
 // mutate it directly. Callers running an evaluation trial should Copy() the master deck first
-// so their deck mutations don't disturb the master — see deck.Copy.
+// so their deck mutations don't disturb the master — see deck.Copy. The field is unexported
+// so external callers can't peek the runtime order; AllCards returns a read-only view of the
+// composition for marshalling, printing, and other composition-level inspections.
 type Deck struct {
 	Hero      Hero
 	Weapons   []Weapon
-	Cards     []Card
+	cards     []Card
 	Sideboard []string
 	Equipment []string
+}
+
+// AllCards returns the deck's cards as a read-only view of the composition. Callers should
+// treat the slice as immutable — mutating it (or the cards under it) corrupts the deck.
+// Used by printing, marshalling, and composition diff code that doesn't need to drive the
+// deck via Shuffle / Draw / etc.
+func (d *Deck) AllCards() []Card {
+	if d == nil {
+		return nil
+	}
+	return d.cards
 }
 
 // New constructs a Deck. Panics if the weapon loadout violates the "0–2 weapons; if 2, both
@@ -39,7 +52,7 @@ type Deck struct {
 // carrying them over.
 func New(h Hero, weapons []Weapon, cards []Card) *Deck {
 	validateWeapons(weapons)
-	return &Deck{Hero: h, Weapons: weapons, Cards: cards}
+	return &Deck{Hero: h, Weapons: weapons, cards: cards}
 }
 
 // Size reports the number of cards in the deck. Excludes Sideboard and Equipment, which are
@@ -49,7 +62,7 @@ func (d *Deck) Size() int {
 	if d == nil {
 		return 0
 	}
-	return len(d.Cards)
+	return len(d.cards)
 }
 
 // Fingerprint returns a comparable summary of the deck for equality checks: the weapon
@@ -68,7 +81,7 @@ func (d *Deck) Fingerprint() string {
 	}
 	b.WriteByte('|')
 	counts := map[ids.CardID]int{}
-	for _, c := range d.Cards {
+	for _, c := range d.cards {
 		counts[c.ID()]++
 	}
 	cardIDs := make([]int, 0, len(counts))
@@ -94,8 +107,8 @@ func (d *Deck) Copy() *Deck {
 	if len(d.Weapons) > 0 {
 		out.Weapons = append(make([]Weapon, 0, len(d.Weapons)), d.Weapons...)
 	}
-	if len(d.Cards) > 0 {
-		out.Cards = append(make([]Card, 0, len(d.Cards)), d.Cards...)
+	if len(d.cards) > 0 {
+		out.cards = append(make([]Card, 0, len(d.cards)), d.cards...)
 	}
 	if len(d.Sideboard) > 0 {
 		out.Sideboard = append(make([]string, 0, len(d.Sideboard)), d.Sideboard...)
@@ -109,9 +122,9 @@ func (d *Deck) Copy() *Deck {
 // Shuffle randomises Cards in place via Fisher-Yates. Mutates the receiver — callers
 // running independent trials should Copy() the master deck first.
 func (d *Deck) Shuffle(rng *rand.Rand) {
-	for i := len(d.Cards) - 1; i > 0; i-- {
+	for i := len(d.cards) - 1; i > 0; i-- {
 		j := rng.Intn(i + 1)
-		d.Cards[i], d.Cards[j] = d.Cards[j], d.Cards[i]
+		d.cards[i], d.cards[j] = d.cards[j], d.cards[i]
 	}
 }
 
@@ -121,10 +134,10 @@ func (d *Deck) Shuffle(rng *rand.Rand) {
 // reading the whole deck should drive Draw / PutBottom instead of reaching for a Peek-all
 // API — the deck is meant to be a black box past its top.
 func (d *Deck) PeekTop() Card {
-	if d == nil || len(d.Cards) == 0 {
+	if d == nil || len(d.cards) == 0 {
 		return nil
 	}
-	return d.Cards[0]
+	return d.cards[0]
 }
 
 // PeekTopN returns the top n cards of the deck (top first) without removing them, or
@@ -136,21 +149,21 @@ func (d *Deck) PeekTopN(n int) []Card {
 	if d == nil {
 		return nil
 	}
-	if n > len(d.Cards) {
-		n = len(d.Cards)
+	if n > len(d.cards) {
+		n = len(d.cards)
 	}
-	return d.Cards[:n]
+	return d.cards[:n]
 }
 
 // Draw removes the top n cards from the deck and returns them (top to bottom).
 // The returned slice aliases the deck's backing storage; same retention caveat as Peek.
 // Panics when n exceeds Size.
 func (d *Deck) Draw(n int) []Card {
-	if n > len(d.Cards) {
-		panic(fmt.Sprintf("deck: Draw(%d) exceeds remaining size %d", n, len(d.Cards)))
+	if n > len(d.cards) {
+		panic(fmt.Sprintf("deck: Draw(%d) exceeds remaining size %d", n, len(d.cards)))
 	}
-	out := d.Cards[:n]
-	d.Cards = d.Cards[n:]
+	out := d.cards[:n]
+	d.cards = d.cards[n:]
 	return out
 }
 
@@ -158,19 +171,19 @@ func (d *Deck) Draw(n int) []Card {
 // Reuses the existing backing slice when its capacity fits, keeping the call allocation-free
 // when the same Deck is rewound across many trials.
 func (d *Deck) Reset(cards []Card) {
-	if cap(d.Cards) < len(cards) {
-		d.Cards = make([]Card, len(cards))
+	if cap(d.cards) < len(cards) {
+		d.cards = make([]Card, len(cards))
 	} else {
-		d.Cards = d.Cards[:len(cards)]
+		d.cards = d.cards[:len(cards)]
 	}
-	copy(d.Cards, cards)
+	copy(d.cards, cards)
 }
 
 // PutBottom appends cards to the bottom of the deck, preserving the relative order
 // passed in. Used by the per-turn loop to recycle pitched cards onto the deck bottom per
 // FaB's end-of-turn pitch-zone-to-deck rule.
 func (d *Deck) PutBottom(cards []Card) {
-	d.Cards = append(d.Cards, cards...)
+	d.cards = append(d.cards, cards...)
 }
 
 // PutTop prepends cards to the top of the deck, preserving the relative order passed
@@ -180,10 +193,10 @@ func (d *Deck) PutTop(cards []Card) {
 	if len(cards) == 0 {
 		return
 	}
-	combined := make([]Card, 0, len(cards)+len(d.Cards))
+	combined := make([]Card, 0, len(cards)+len(d.cards))
 	combined = append(combined, cards...)
-	combined = append(combined, d.Cards...)
-	d.Cards = combined
+	combined = append(combined, d.cards...)
+	d.cards = combined
 }
 
 // Tutor scans the entire deck, removes the highest-scoring card per score, and returns it.
@@ -192,7 +205,7 @@ func (d *Deck) PutTop(cards []Card) {
 func (d *Deck) Tutor(score func(Card) int) (Card, bool) {
 	bestIdx := -1
 	bestScore := 0
-	for i, c := range d.Cards {
+	for i, c := range d.cards {
 		sc := score(c)
 		if sc > bestScore {
 			bestScore = sc
@@ -202,11 +215,11 @@ func (d *Deck) Tutor(score func(Card) int) (Card, bool) {
 	if bestIdx < 0 {
 		return nil, false
 	}
-	found := d.Cards[bestIdx]
-	out := make([]Card, 0, len(d.Cards)-1)
-	out = append(out, d.Cards[:bestIdx]...)
-	out = append(out, d.Cards[bestIdx+1:]...)
-	d.Cards = out
+	found := d.cards[bestIdx]
+	out := make([]Card, 0, len(d.cards)-1)
+	out = append(out, d.cards[:bestIdx]...)
+	out = append(out, d.cards[bestIdx+1:]...)
+	d.cards = out
 	return found, true
 }
 
@@ -252,7 +265,7 @@ func (d *Deck) ApplyDefaults(defaults Defaults) {
 	}
 
 	mainCounts := map[string]int{}
-	for _, c := range d.Cards {
+	for _, c := range d.cards {
 		mainCounts[c.DisplayName()]++
 	}
 	sideCounts := map[string]int{}
@@ -343,7 +356,7 @@ func (d *Deck) SanitizeNotImplemented(maxCopies int, rng *rand.Rand, legal func(
 	// don't count.
 	counts := map[ids.CardID]int{}
 	var slots []int
-	for i, c := range d.Cards {
+	for i, c := range d.cards {
 		if !legalSet[c.ID()] {
 			slots = append(slots, i)
 			continue
@@ -373,8 +386,8 @@ func (d *Deck) SanitizeNotImplemented(maxCopies int, rng *rand.Rand, legal func(
 			panic("deck: SanitizeNotImplemented's pool can't satisfy the per-printing budget the surviving slots already use up")
 		}
 		counts[pick.ID()]++
-		from := d.Cards[idx]
-		d.Cards[idx] = pick
+		from := d.cards[idx]
+		d.cards[idx] = pick
 		replacements = append(replacements, NotImplementedReplacement{From: from, To: pick})
 	}
 	return replacements

@@ -106,7 +106,7 @@ func (ev *Evaluator) evaluateImpl(d *deck.Deck, maxRuns int, mp Matchup, rng *ra
 // cachedBufs scratch directly. This is the deterministic-RNG path tests rely on.
 func (ev *Evaluator) evaluateSequentialImpl(d *deck.Deck, maxRuns int, mp Matchup, rng *rand.Rand, stop shuffleStopper, handSize, deckSize int) DeckStats {
 	handsPerCycle := deckSize / handSize
-	uniqueIDs, idIndex := uniqueDeckIDs(d.Cards)
+	uniqueIDs, idIndex := uniqueDeckIDs(d.AllCards())
 	scratch := newShuffleScratch(len(d.Weapons), deckSize, handSize, len(uniqueIDs))
 
 	var stats DeckStats
@@ -133,7 +133,7 @@ func (ev *Evaluator) evaluateSequentialImpl(d *deck.Deck, maxRuns int, mp Matchu
 func (ev *Evaluator) evaluateParallelImpl(d *deck.Deck, maxRuns int, mp Matchup, rng *rand.Rand, stop shuffleStopper, handSize, deckSize int) DeckStats {
 	numWorkers := ev.numWorkers
 	handsPerCycle := deckSize / handSize
-	uniqueIDs, idIndex := uniqueDeckIDs(d.Cards)
+	uniqueIDs, idIndex := uniqueDeckIDs(d.AllCards())
 	aggregateMarginal := make([]CardMarginalStats, len(uniqueIDs))
 
 	chunkPerWorker := adaptiveCheckInterval
@@ -636,7 +636,7 @@ func recordBestTurn(stats *DeckStats, play TurnSummary, startingAuras []Aura, st
 // a position-lookup map keyed by ID. The caller uses uniqueIDs to iterate every card the deck
 // could ever score against and idIndex to flip per-turn presence flags from the dealt hand.
 // Takes deck.Card (not sim.Card) because the only method it needs is ID(), which both
-// surfaces; that lets evaluate callers pass d.Cards directly without converting up front.
+// surfaces; that lets evaluate callers pass d.AllCards() directly without converting up front.
 func uniqueDeckIDs(cs []deck.Card) ([]ids.CardID, map[ids.CardID]int) {
 	out := make([]ids.CardID, 0, len(cs))
 	idx := make(map[ids.CardID]int, len(cs))

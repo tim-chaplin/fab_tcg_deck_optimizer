@@ -22,7 +22,7 @@ type DeckStats struct {
 	// have been evaluated.
 	Best BestTurn
 	// PerCardMarginal carries a coarse correlational view of each card's hand-value impact:
-	// for every unique card ID in d.Cards, the mean turn Value across turns where that card
+	// for every unique card ID in the deck, the mean turn Value across turns where that card
 	// was in the dealt hand (or arsenal-in slot) vs turns where it wasn't. The gap between
 	// the two means is a smell test — cards whose presence shifts hand value far more than
 	// their printed face value would suggest are candidates for buggy or oversimplified
