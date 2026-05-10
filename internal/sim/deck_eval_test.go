@@ -1,8 +1,6 @@
 package sim_test
 
 import (
-	. "github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
-	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
 	"math/rand"
 	"testing"
 	"time"
@@ -10,14 +8,17 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/heroes"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+	. "github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapons"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/registry"
 )
 
 // Tests that BestTurn.StartingAuras reflects pre-hand carryover (empty on the first hand).
 func TestEvaluate_BestTurnStartingAurasIsPreHandCarryover(t *testing.T) {
 	// 4-card deck + Viserai Intel=4 gives exactly one hand per run.
-	read := GetCard(ids.ReadTheRunesRed)
+	read := registry.GetCard(ids.ReadTheRunesRed)
 	d := deck.New(heroes.Viserai{}, nil, []deck.Card{read, read, read, read})
 
 	stats := NewEvaluator().Evaluate(d, 1, Matchup{}, rand.New(rand.NewSource(1)))
@@ -39,7 +40,7 @@ func TestEvaluate_BestTurnStartingAurasIsPreHandCarryover(t *testing.T) {
 // Tests that BestTurn deep-copies the winning turn's full CarryState (Hand, Deck, Graveyard,
 // Arsenal, Log, etc.) — including mid-chain draws.
 func TestEvaluate_BestTurnSnapshotsState(t *testing.T) {
-	snatch := GetCard(ids.SnatchRed)
+	snatch := registry.GetCard(ids.SnatchRed)
 	d := deck.New(heroes.Viserai{}, nil, []deck.Card{snatch, snatch, snatch, snatch, snatch, snatch, snatch, snatch})
 	stats := NewEvaluator().Evaluate(d, 1, Matchup{}, rand.New(rand.NewSource(1)))
 
@@ -70,8 +71,8 @@ func TestEvaluate_BestTurnSnapshotsState(t *testing.T) {
 
 // Tests the marginal-stats invariant: PresentHands + AbsentHands == Stats.Hands per card.
 func TestEvaluate_PerCardMarginalCoversEveryHand(t *testing.T) {
-	read := GetCard(ids.ReadTheRunesRed)
-	snatch := GetCard(ids.SnatchRed)
+	read := registry.GetCard(ids.ReadTheRunesRed)
+	snatch := registry.GetCard(ids.SnatchRed)
 	// 4 of each so Snatch isn't pinned to a single hand and the absent bucket gets exercised.
 	deckCards := []deck.Card{read, read, read, read, snatch, snatch, snatch, snatch}
 	d := deck.New(heroes.Viserai{}, nil, deckCards)
@@ -83,23 +84,23 @@ func TestEvaluate_PerCardMarginalCoversEveryHand(t *testing.T) {
 	for _, id := range []ids.CardID{ids.ReadTheRunesRed, ids.SnatchRed} {
 		m, ok := stats.PerCardMarginal[id]
 		if !ok {
-			t.Errorf("PerCardMarginal missing entry for %s", GetCard(id).Name())
+			t.Errorf("PerCardMarginal missing entry for %s", registry.GetCard(id).Name())
 			continue
 		}
 		if got := m.PresentHands + m.AbsentHands; got != stats.Hands {
 			t.Errorf("%s: PresentHands+AbsentHands = %d, want Stats.Hands = %d (every hand must end up in exactly one bucket)",
-				GetCard(id).Name(), got, stats.Hands)
+				registry.GetCard(id).Name(), got, stats.Hands)
 		}
 		if m.PresentHands == 0 {
 			t.Errorf("%s: PresentHands = 0 — this card should have been in at least one dealt hand across 20 shuffles",
-				GetCard(id).Name())
+				registry.GetCard(id).Name())
 		}
 	}
 }
 
 // Tests the singleton-deck case: AbsentHands == 0, Marginal() == 0 (no comparison possible).
 func TestEvaluate_PerCardMarginalAlwaysPresent(t *testing.T) {
-	read := GetCard(ids.ReadTheRunesRed)
+	read := registry.GetCard(ids.ReadTheRunesRed)
 	d := deck.New(heroes.Viserai{}, nil, []deck.Card{read, read, read, read, read, read, read, read})
 	stats := NewEvaluator().Evaluate(d, 5, Matchup{}, rand.New(rand.NewSource(1)))
 
@@ -188,11 +189,11 @@ func TestEvaluate_TerminatesAfterTwoCycles(t *testing.T) {
 // when the SE target is met.
 func TestEvaluateAdaptive_StopsBeforeMaxRunsWhenSEMet(t *testing.T) {
 	deckCards := append([]deck.Card{},
-		GetCard(ids.ReadTheRunesRed), GetCard(ids.ReadTheRunesRed),
-		GetCard(ids.ReadTheRunesYellow), GetCard(ids.ReadTheRunesYellow),
+		registry.GetCard(ids.ReadTheRunesRed), registry.GetCard(ids.ReadTheRunesRed),
+		registry.GetCard(ids.ReadTheRunesYellow), registry.GetCard(ids.ReadTheRunesYellow),
 	)
 	for len(deckCards) < 40 {
-		deckCards = append(deckCards, GetCard(ids.ReadTheRunesBlue))
+		deckCards = append(deckCards, registry.GetCard(ids.ReadTheRunesBlue))
 	}
 	d := deck.New(heroes.Viserai{}, []deck.Weapon{weapons.ReapingBlade{}}, deckCards)
 	stats := NewEvaluator().EvaluateAdaptive(d, 0.1, Matchup{}, rand.New(rand.NewSource(42)))
@@ -208,11 +209,11 @@ func TestEvaluateAdaptive_StopsBeforeMaxRunsWhenSEMet(t *testing.T) {
 // Drives evaluateImpl directly so the cap can be small.
 func TestEvaluateAdaptive_RespectsMaxRunsCapWhenSEUnreachable(t *testing.T) {
 	deckCards := append([]deck.Card{},
-		GetCard(ids.ReadTheRunesRed), GetCard(ids.ReadTheRunesRed),
-		GetCard(ids.ReadTheRunesYellow), GetCard(ids.ReadTheRunesYellow),
+		registry.GetCard(ids.ReadTheRunesRed), registry.GetCard(ids.ReadTheRunesRed),
+		registry.GetCard(ids.ReadTheRunesYellow), registry.GetCard(ids.ReadTheRunesYellow),
 	)
 	for len(deckCards) < 40 {
-		deckCards = append(deckCards, GetCard(ids.ReadTheRunesBlue))
+		deckCards = append(deckCards, registry.GetCard(ids.ReadTheRunesBlue))
 	}
 	d := deck.New(heroes.Viserai{}, []deck.Weapon{weapons.ReapingBlade{}}, deckCards)
 	// Negative targetSE is structurally unreachable — MeanStandardError is always >= 0, so

@@ -144,7 +144,7 @@ The chain runner builds `ctx.itemAbilities` by replicating each Item's `Ability`
 
 `v2/registry` is the master roster of every implemented card, weapon, and hero. It declares minimal `Card` / `Hero` / `Weapon` interfaces (identity + display name) so its surface stays decoupled from sim's richer contracts; concrete card / weapon / hero types satisfy both, and callers needing behaviour assert to `sim.Card` / `sim.Weapon` / `sim.Hero` at the read site. Marker interfaces (`NotImplemented`, `Unplayable`, `NotSilverAgeLegal`) are declared locally in both packages and matched structurally — neither package imports the other.
 
-`internal/simreg` is the only package that imports both `internal/sim` and `v2/registry`. Its `init` populates sim's forward-declared hooks (`sim.GetCard`, `sim.DeckableCards`, `sim.AllWeapons`) and primes `optimizations.WarmChainStepCache`. Production binaries pull simreg in transitively via the binary's main; test files that exercise sim without going through a binary blank-import simreg directly. The forward-declared hooks panic with a "blank-import internal/simreg" message when called before init runs.
+Callers that need cards / weapons / heroes import `v2/registry` directly and assert to `sim.Card` / `sim.Weapon` / `sim.Hero` at the read site. `cmd/fabsim` warms `optimizations.WarmChainStepCache` from registry data in a small `init` so the runtime hot path is pure cache reads; other callers rely on the lazy backfill in `optimizations.cachedChainStepText`.
 
 ## Cross-file references
 
