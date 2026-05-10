@@ -140,6 +140,12 @@ Token items consolidate by `TokenType`: at most one `Item` per `TokenType` per `
 
 The chain runner builds `ctx.itemAbilities` by replicating each Item's `Ability` up to `perItemAbilityCap` times so the wmask can pick "play it 0..N times this turn"; the cap (`internal/sim/sequence.go`) bounds the 2^k mask explosion.
 
+## Registry / sim split
+
+`v2/registry` is the master roster of every implemented card, weapon, and hero. It declares minimal `Card` / `Hero` / `Weapon` interfaces (identity + display name) so its surface stays decoupled from sim's richer contracts; concrete card / weapon / hero types satisfy both, and callers needing behaviour assert to `sim.Card` / `sim.Weapon` / `sim.Hero` at the read site. Marker interfaces (`NotImplemented`, `Unplayable`, `NotSilverAgeLegal`) are declared locally in both packages and matched structurally — neither package imports the other.
+
+`internal/simreg` is the only package that imports both `internal/sim` and `v2/registry`. Its `init` populates sim's forward-declared hooks (`sim.GetCard`, `sim.DeckableCards`, `sim.AllWeapons`) and primes `optimizations.WarmChainStepCache`. Production binaries pull simreg in transitively via the binary's main; test files that exercise sim without going through a binary blank-import simreg directly. The forward-declared hooks panic with a "blank-import internal/simreg" message when called before init runs.
+
 ## Cross-file references
 
 If a comment's rationale would otherwise cite "matches the pattern in foo.go, bar.go, baz.go", factor the shared rule into this file and cite only the local behaviour at the call site.

@@ -12,8 +12,8 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/registry"
 )
 
 // Unmarshal parses fabrary-style deck text and returns a *deck.Deck plus a count-keyed map of

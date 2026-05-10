@@ -12,6 +12,10 @@ import (
 	"strings"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/mydecks"
+
+	// Populates sim's forward-declared hooks and warms the chain-step text cache at
+	// process start. See docs/dev-standards.md "Registry / sim split".
+	_ "github.com/tim-chaplin/fab-deck-optimizer/internal/simreg"
 )
 
 // defaultMaxCopies is the shared fallback for every subcommand's -max-copies flag so the

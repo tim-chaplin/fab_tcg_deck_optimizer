@@ -1,9 +1,9 @@
 package sim_test
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry"
 	. "github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/registry"
 	"math/rand"
 	"testing"
 

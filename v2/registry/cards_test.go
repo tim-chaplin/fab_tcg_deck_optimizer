@@ -1,12 +1,9 @@
 package registry
 
-import (
-	"testing"
-)
+import "testing"
 
 func TestAllIDsResolve(t *testing.T) {
-	// Every CardID returned by AllCards() must map to a non-nil card. Catches gaps in the byID
-	// slice (an undeclared const would leave a nil hole).
+	// Every CardID from AllCards() must map to a non-nil card; catches nil holes in cardsByID.
 	for _, id := range AllCards() {
 		if GetCard(id) == nil {
 			t.Errorf("CardID %d resolves to nil", id)
@@ -15,9 +12,8 @@ func TestAllIDsResolve(t *testing.T) {
 }
 
 func TestDisplayNamesAreUnique(t *testing.T) {
-	// c.DisplayName() is used as the reverse-lookup key, so every registered card must
-	// have a distinct display name. A collision would silently overwrite the earlier entry
-	// in byName. (Bare Name() collides intentionally — pitch variants share it.)
+	// DisplayName is the reverse-lookup key; collisions would silently overwrite the earlier
+	// entry in cardsByName. (Bare Name collides intentionally — pitch variants share it.)
 	seen := map[string]CardID{}
 	for _, id := range AllCards() {
 		name := GetCard(id).DisplayName()
@@ -40,6 +36,6 @@ func TestByNameRoundTrip(t *testing.T) {
 
 func TestByNameUnknown(t *testing.T) {
 	if _, ok := CardByName("Not A Real Card"); ok {
-		t.Error("ByName of unknown card should return ok=false")
+		t.Error("CardByName of unknown card should return ok=false")
 	}
 }
