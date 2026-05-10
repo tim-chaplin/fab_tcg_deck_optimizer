@@ -12,14 +12,14 @@ import (
 func TestPursueToTheEdgeOfOblivion_OnHitMarksOpponent(t *testing.T) {
 	self := &sim.CardState{Card: PursueToTheEdgeOfOblivionRed{}}
 	s := sim.TurnState{}
-	(PursueToTheEdgeOfOblivionRed{}).Play(&s, self)
+	(PursueToTheEdgeOfOblivionRed{}).Play(&s, s.Logger(), self)
 	if len(self.OnHit) != 1 {
 		t.Fatalf("OnHit handlers = %d, want 1", len(self.OnHit))
 	}
 	if s.OpponentMarked {
 		t.Errorf("OpponentMarked = true before OnHit fires, want false")
 	}
-	testutils.FireOnHitIfLikely(&s, self)
+	testutils.FireOnHitIfLikely(&s, s.Logger(), self)
 	if !s.OpponentMarked {
 		t.Errorf("OpponentMarked = false after OnHit fires, want true")
 	}

@@ -9,26 +9,26 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
 
-func (OathOfTheArknightRed) Play(s *sim.TurnState, self *sim.CardState) {
-	oathPlay(s, self, 3)
+func (OathOfTheArknightRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+	oathPlay(s, l, self, 3)
 }
 
-func (OathOfTheArknightYellow) Play(s *sim.TurnState, self *sim.CardState) {
-	oathPlay(s, self, 2)
+func (OathOfTheArknightYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+	oathPlay(s, l, self, 2)
 }
 
-func (OathOfTheArknightBlue) Play(s *sim.TurnState, self *sim.CardState) {
-	oathPlay(s, self, 1)
+func (OathOfTheArknightBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+	oathPlay(s, l, self, 1)
 }
 
 // oathPlay grants +n to the first scheduled Runeblade attack via pc.BonusAttack so the
 // buffed attack's EffectiveAttack folds the bonus into LikelyToHit and the chain credit
 // lands on the target's slot, not Oath's. Always creates a Runechant token, which IS
 // Oath's own contribution and lands as a sub-line under self's chain entry.
-func oathPlay(s *sim.TurnState, self *sim.CardState, bonus int) {
+func oathPlay(s *sim.TurnState, l sim.Logger, self *sim.CardState, bonus int) {
 	GrantNextCardBonusAttack(s, bonus, IsRunebladeAttack)
 	dmg := self.DealEffectiveAttack(s)
-	s.Log(self, dmg)
+	l.Log(self, dmg)
 	s.CreateRunechants(1)
-	s.LogRider(self, 1, "Created a runechant")
+	l.LogRider(self, 1, "Created a runechant")
 }

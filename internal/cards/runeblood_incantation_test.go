@@ -20,7 +20,7 @@ func TestRunebloodIncantation_PlayRegistersStartOfTurnTriggerWithCountN(t *testi
 	}
 	for _, tc := range cases {
 		var s sim.TurnState
-		tc.c.Play(&s, &sim.CardState{Card: tc.c})
+		tc.c.Play(&s, s.Logger(), &sim.CardState{Card: tc.c})
 		if got := s.Value; got != 0 {
 			t.Errorf("%s: Play() = %d, want 0 (every rune fires on a future turn)", tc.c.Name(), got)
 		}
@@ -49,11 +49,11 @@ func TestRunebloodIncantation_PlayRegistersStartOfTurnTriggerWithCountN(t *testi
 func TestRunebloodIncantation_HandlerCreatesOneRunechantPerFire(t *testing.T) {
 	for _, c := range []sim.Card{RunebloodIncantationRed{}, RunebloodIncantationYellow{}, RunebloodIncantationBlue{}} {
 		var play sim.TurnState
-		c.Play(&play, &sim.CardState{Card: c})
+		c.Play(&play, play.Logger(), &sim.CardState{Card: c})
 		fire := sim.NewTurnStateFromCards(nil, nil)
 		fire.Auras = append(fire.Auras, play.Auras[0])
 		fire.SetCurrentAuraIdxForTesting(0)
-		fire.Auras[0].Handler(fire, &fire.Auras[0].Trigger, &fire.Auras[0])
+		fire.Auras[0].Handler(fire, fire.Logger(), &fire.Auras[0].Trigger, &fire.Auras[0])
 		if fire.Value != 1 {
 			t.Errorf("%s: handler Value = %d, want 1", c.Name(), fire.Value)
 		}

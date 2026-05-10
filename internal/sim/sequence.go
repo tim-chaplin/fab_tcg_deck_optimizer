@@ -9,7 +9,6 @@ import (
 	"fmt"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
-	"github.com/tim-chaplin/fab-deck-optimizer/v2/turnlogger"
 )
 
 // perItemAbilityCap caps how many instances of one item's activated ability the chain
@@ -382,11 +381,13 @@ type sequenceContext struct {
 	cacheable bool
 }
 
-// activeLogger returns nil during the find-best (skip) pass so every Log helper
-// short-circuits, or bufs.logger during replay so chain Plays append into the
-// bufs-owned scratch. Centralised here so resetStateForPermutation and runDefense pick
-// the same value off ctx.skipLog without each spelling the conditional inline.
-func (ctx *sequenceContext) activeLogger() *turnlogger.TurnLogger {
+// activeLogger returns the *simLogger the chain runner threads through Card.Play /
+// Block / OnHitHandler.Fire / TriggerHandler / Hero.OnCardPlayed for this pass —
+// bufs.logger when recording, a typed-nil during the find-best pass so every Log
+// helper short-circuits via *simLogger's nil-receiver guards. Centralised here so
+// resetStateForPermutation and runDefense pick the same value off ctx.skipLog without
+// each spelling the conditional inline.
+func (ctx *sequenceContext) activeLogger() *simLogger {
 	if ctx.skipLog {
 		return nil
 	}
@@ -433,7 +434,7 @@ func fireAttackActionAuras(state *TurnState, triggeringCard Card) {
 		state.TriggeringCard = triggeringCard
 		state.currentAuraIdx = i
 		state.currentAuraDestroyed = false
-		t.Handler(state, &t.Trigger, t)
+		t.Handler(state, state.logger, &t.Trigger, t)
 		state.currentAuraIdx = -1
 		state.TriggeringCard = nil
 		if !state.currentAuraDestroyed {
@@ -478,7 +479,7 @@ func fireEndOfTurn(state *TurnState) {
 		}
 		state.currentAuraIdx = i
 		state.currentAuraDestroyed = false
-		a.Handler(state, &a.Trigger, a)
+		a.Handler(state, state.logger, &a.Trigger, a)
 		state.currentAuraIdx = -1
 		if !state.currentAuraDestroyed {
 			state.Auras[i].FiredThisTurn = true
@@ -491,7 +492,7 @@ func fireEndOfTurn(state *TurnState) {
 		if tr.TriggerType != TriggerEndOfTurn {
 			continue
 		}
-		tr.Handler(state, &tr, nil)
+		tr.Handler(state, state.logger, &tr, nil)
 	}
 	kept := state.Triggers[:0]
 	for i, tr := range state.Triggers {
@@ -517,7 +518,7 @@ func fireAttackAuras(state *TurnState, triggeringCard Card) {
 		state.TriggeringCard = triggeringCard
 		state.currentAuraIdx = i
 		state.currentAuraDestroyed = false
-		t.Handler(state, &t.Trigger, t)
+		t.Handler(state, state.logger, &t.Trigger, t)
 		state.currentAuraIdx = -1
 		state.TriggeringCard = nil
 		if !state.currentAuraDestroyed {
@@ -579,7 +580,7 @@ func (ctx *sequenceContext) resetStateForPermutation() {
 	// s.logger nil during the find-best pass so every Log helper short-circuits at
 	// the call site. ctx.activeLogger encapsulates the skip / record decision.
 	if l := ctx.activeLogger(); l != nil {
-		l.SetBuffer(bufs.logBacking)
+		l.tl.SetBuffer(bufs.logBacking)
 		s.logger = l
 	} else {
 		s.logger = nil
@@ -884,7 +885,7 @@ func (ctx *sequenceContext) playSequenceWithMeta(n int) (damage int, futureValue
 		if LikelyToHit(activeAttack) {
 			for i := range activeAttack.OnHit {
 				h := &activeAttack.OnHit[i]
-				h.Fire(state, activeAttack, h)
+				h.Fire(state, state.logger, activeAttack, h)
 			}
 			// Drain matching TriggerHit Triggers — each rider's TypeFilter narrows the
 			// qualifying hits (e.g. "attack action card" vs broader "attack" wording).
@@ -902,7 +903,7 @@ func (ctx *sequenceContext) playSequenceWithMeta(n int) (damage int, futureValue
 						kept = append(kept, t)
 						continue
 					}
-					t.Handler(state, &t, nil)
+					t.Handler(state, state.logger, &t, nil)
 				}
 				state.Triggers = kept
 				state.TriggeringCard = prevTriggering
@@ -965,9 +966,9 @@ func (ctx *sequenceContext) playSequenceWithMeta(n int) (damage int, futureValue
 			if !ok || activeAttack == nil || !ar.ARTargetAllowed(activeAttack.Card, pc.Mode) {
 				return 0, 0, 0, false
 			}
-			ctx.hero.OnCardPlayed(pc.Card, state)
+			ctx.hero.OnCardPlayed(pc.Card, state, state.logger)
 			state.attackReactionTarget = activeAttack
-			pc.Card.Play(state, pc)
+			pc.Card.Play(state, state.logger, pc)
 			state.attackReactionTarget = nil
 			state.CardsPlayed = append(state.CardsPlayed, pc.Card)
 			state.graveyard = append(state.graveyard, pc.Card)
@@ -997,13 +998,13 @@ func (ctx *sequenceContext) playSequenceWithMeta(n int) (damage int, futureValue
 		// NonAttackActionPlayed isn't flipped until the end of the iteration. The hero
 		// handler logs its own contribution via state.AddPreTriggerLogEntry; its int return
 		// is unused.
-		ctx.hero.OnCardPlayed(pc.Card, state)
+		ctx.hero.OnCardPlayed(pc.Card, state, state.logger)
 		// Card.Play owns its chain-step log line and pre-buff damage contribution. ARs top
 		// up the parent chain step's delta; OnHit funcs fire later via finalizeActiveAttack.
 		// fireAttackAuras runs after Play so continuous "while you control an aura"
 		// modifiers (Yinti Yanti +1{p}) see live token auras before TriggerAttack
 		// handlers consume them.
-		pc.Card.Play(state, pc)
+		pc.Card.Play(state, state.logger, pc)
 		if m.isAttack {
 			fireAttackAuras(state, pc.Card)
 			// Clear after Play so any "if defending hero is marked" rider on this card

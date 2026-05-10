@@ -12,13 +12,13 @@ import (
 func TestPursueToThePitsOfDespair_OnHitMarksOpponent(t *testing.T) {
 	self := &sim.CardState{Card: PursueToThePitsOfDespairRed{}}
 	s := sim.TurnState{}
-	(PursueToThePitsOfDespairRed{}).Play(&s, self)
+	(PursueToThePitsOfDespairRed{}).Play(&s, s.Logger(), self)
 	if len(self.OnHit) != 1 {
 		t.Fatalf("OnHit handlers = %d, want 1", len(self.OnHit))
 	}
 	// Printed 5{p} doesn't fit the 1/4/7 LikelyDamageHits window; bump to 7 to drain.
 	self.BonusAttack = 2
-	testutils.FireOnHitIfLikely(&s, self)
+	testutils.FireOnHitIfLikely(&s, s.Logger(), self)
 	if !s.OpponentMarked {
 		t.Errorf("OpponentMarked = false after OnHit fires, want true")
 	}

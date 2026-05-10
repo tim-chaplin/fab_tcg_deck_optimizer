@@ -13,7 +13,7 @@ import (
 
 // not implemented: opponent hand reveal, defense-reaction deck search
 
-func (c SoundTheAlarmRed) Play(s *sim.TurnState, self *sim.CardState) {
+func (c SoundTheAlarmRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	n := self.DealEffectiveAttack(s)
-	s.Log(self, n)
+	l.Log(self, n)
 }

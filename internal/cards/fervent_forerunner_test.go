@@ -39,8 +39,8 @@ func TestFerventForerunner_OnHitOptFiresOnlyWhenInHitWindow(t *testing.T) {
 	for _, tc := range cases {
 		s := sim.NewTurnStateFromCards([]sim.Card{a, b}, nil)
 		cs := &sim.CardState{Card: tc.c}
-		tc.c.Play(s, cs)
-		testutils.FireOnHitIfLikely(s, cs)
+		tc.c.Play(s, s.Logger(), cs)
+		testutils.FireOnHitIfLikely(s, s.Logger(), cs)
 		if s.Value != tc.printed {
 			t.Errorf("%s: Play() Value = %d, want %d (printed power)",
 				tc.c.Name(), s.Value, tc.printed)
@@ -71,8 +71,8 @@ func TestFerventForerunner_OnHitOptFiresWithBonusAttackInWindow(t *testing.T) {
 	c := FerventForerunnerRed{}
 	s := sim.NewTurnStateFromCards([]sim.Card{a, b}, nil)
 	cs := &sim.CardState{Card: c, BonusAttack: 1}
-	c.Play(s, cs)
-	testutils.FireOnHitIfLikely(s, cs)
+	c.Play(s, s.Logger(), cs)
+	testutils.FireOnHitIfLikely(s, s.Logger(), cs)
 	want := 3 + 1
 	if s.Value != want {
 		t.Errorf("Play() Value = %d, want %d (3 printed + 1 BonusAttack)", s.Value, want)

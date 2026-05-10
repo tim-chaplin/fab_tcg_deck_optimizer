@@ -12,15 +12,15 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
 
-func battlefrontBastionPlay(s *sim.TurnState, self *sim.CardState) {
+func battlefrontBastionPlay(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	n := self.DealEffectiveAttack(s)
-	s.Log(self, n)
+	l.Log(self, n)
 }
 
 // battlefrontBastionBlock fires the +1 alone-bonus when this is the only plain blocker.
 // Iterates Defenders and short-circuits on the second non-DR sighting so the typical
 // partition pays at most a few comparisons.
-func battlefrontBastionBlock(s *sim.TurnState, self *sim.CardState) {
+func battlefrontBastionBlock(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	plainCount := 0
 	for _, d := range s.Defenders {
 		if d.Types().IsDefenseReaction() {
@@ -34,23 +34,23 @@ func battlefrontBastionBlock(s *sim.TurnState, self *sim.CardState) {
 	self.BonusDefense += 1
 }
 
-func (BattlefrontBastionRed) Block(s *sim.TurnState, self *sim.CardState) {
-	battlefrontBastionBlock(s, self)
+func (BattlefrontBastionRed) Block(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+	battlefrontBastionBlock(s, l, self)
 }
-func (BattlefrontBastionRed) Play(s *sim.TurnState, self *sim.CardState) {
-	battlefrontBastionPlay(s, self)
-}
-
-func (BattlefrontBastionYellow) Block(s *sim.TurnState, self *sim.CardState) {
-	battlefrontBastionBlock(s, self)
-}
-func (BattlefrontBastionYellow) Play(s *sim.TurnState, self *sim.CardState) {
-	battlefrontBastionPlay(s, self)
+func (BattlefrontBastionRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+	battlefrontBastionPlay(s, l, self)
 }
 
-func (BattlefrontBastionBlue) Block(s *sim.TurnState, self *sim.CardState) {
-	battlefrontBastionBlock(s, self)
+func (BattlefrontBastionYellow) Block(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+	battlefrontBastionBlock(s, l, self)
 }
-func (BattlefrontBastionBlue) Play(s *sim.TurnState, self *sim.CardState) {
-	battlefrontBastionPlay(s, self)
+func (BattlefrontBastionYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+	battlefrontBastionPlay(s, l, self)
+}
+
+func (BattlefrontBastionBlue) Block(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+	battlefrontBastionBlock(s, l, self)
+}
+func (BattlefrontBastionBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+	battlefrontBastionPlay(s, l, self)
 }

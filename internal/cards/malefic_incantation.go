@@ -14,16 +14,16 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
 
-func (c MaleficIncantationRed) Play(s *sim.TurnState, self *sim.CardState) {
-	maleficPlay(s, self, c, 3)
+func (c MaleficIncantationRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+	maleficPlay(s, l, self, c, 3)
 }
 
-func (c MaleficIncantationYellow) Play(s *sim.TurnState, self *sim.CardState) {
-	maleficPlay(s, self, c, 2)
+func (c MaleficIncantationYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+	maleficPlay(s, l, self, c, 2)
 }
 
-func (c MaleficIncantationBlue) Play(s *sim.TurnState, self *sim.CardState) {
-	maleficPlay(s, self, c, 1)
+func (c MaleficIncantationBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+	maleficPlay(s, l, self, c, 1)
 }
 
 // maleficCreatedRunechantText is the precomputed rider line for each Malefic Incantation
@@ -46,26 +46,26 @@ var maleficCreatedRunechantText = func() map[ids.CardID]string {
 // post-trigger log line so it groups beneath the triggering attack-action chain step. n
 // is the printed counter count carried on the trigger so the handler can stay a top-level
 // function.
-func maleficPlay(s *sim.TurnState, selfState *sim.CardState, selfCard sim.Card, n int) {
+func maleficPlay(s *sim.TurnState, l sim.Logger, selfState *sim.CardState, selfCard sim.Card, n int) {
 	s.AddAura(sim.Aura{
 		Trigger:     sim.Trigger{TriggerType: sim.TriggerAttackAction, Handler: maleficAuraHandler},
 		Self:        sim.CardOrTokenType{Card: selfCard},
 		Count:       n,
 		OncePerTurn: true,
 	})
-	s.Log(selfState, 0)
+	l.Log(selfState, 0)
 }
 
 // maleficAuraHandler is the once-per-turn attack-action trigger handler shared across
 // Malefic Incantation variants. Per-variant rider text is read off the table by
 // aura.Self.CardID() so the hot fire path runs zero string allocations. Decrements
 // aura.Count (the verse counter) and destroys the aura when the last verse fires.
-func maleficAuraHandler(s *sim.TurnState, _ *sim.Trigger, a *sim.Aura) {
+func maleficAuraHandler(s *sim.TurnState, l sim.Logger, _ *sim.Trigger, a *sim.Aura) {
 	cardID := a.Self.CardID()
 	a.Count--
 	lastVerse := a.Count <= 0
 	s.CreateRunechants(1)
-	s.LogPostTrigger(s.TriggeringCard.DisplayName(), maleficCreatedRunechantText[cardID], 1)
+	l.LogPostTrigger(s.TriggeringCard.DisplayName(), maleficCreatedRunechantText[cardID], 1)
 	if lastVerse {
 		s.DestroyAura(a, true)
 	}

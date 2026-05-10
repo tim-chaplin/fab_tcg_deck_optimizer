@@ -11,7 +11,7 @@ import (
 // it requires the chain runner to actually fire.
 func TestHighStriker_QueuesTriggerHit(t *testing.T) {
 	s := sim.NewTurnStateFromCards(nil, nil)
-	(HighStrikerRed{}).Play(s, &sim.CardState{Card: HighStrikerRed{}})
+	(HighStrikerRed{}).Play(s, s.Logger(), &sim.CardState{Card: HighStrikerRed{}})
 	if got := triggerHitCount(s); got != 1 {
 		t.Fatalf("TriggerHit triggers = %d, want 1 (registered the rider)", got)
 	}

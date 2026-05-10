@@ -12,22 +12,22 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
 
-func vigorRushPlay(s *sim.TurnState, self *sim.CardState) {
+func vigorRushPlay(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	if s.NonAttackActionPlayed {
 		self.GrantedGoAgain = true
 	}
 	n := self.DealEffectiveAttack(s)
-	s.Log(self, n)
+	l.Log(self, n)
 }
 
-func (VigorRushRed) Play(s *sim.TurnState, self *sim.CardState) {
-	vigorRushPlay(s, self)
+func (VigorRushRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+	vigorRushPlay(s, l, self)
 }
 
-func (VigorRushYellow) Play(s *sim.TurnState, self *sim.CardState) {
-	vigorRushPlay(s, self)
+func (VigorRushYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+	vigorRushPlay(s, l, self)
 }
 
-func (VigorRushBlue) Play(s *sim.TurnState, self *sim.CardState) {
-	vigorRushPlay(s, self)
+func (VigorRushBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+	vigorRushPlay(s, l, self)
 }

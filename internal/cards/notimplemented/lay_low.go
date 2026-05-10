@@ -11,7 +11,7 @@ import (
 // not implemented: marked-defender state not tracked; treated as always legal and the -1{p}
 // attacker debuff is dropped
 
-func (LayLowYellow) Play(s *sim.TurnState, self *sim.CardState) {
+func (LayLowYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	n := self.DealEffectiveDefense(s)
-	s.Log(self, n)
+	l.Log(self, n)
 }

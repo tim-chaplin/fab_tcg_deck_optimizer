@@ -7,10 +7,10 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
 
-func (StartingStakeYellow) Play(s *sim.TurnState, self *sim.CardState) {
+func (StartingStakeYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	if s.Gold() == 0 {
 		s.CreateGold(1)
-		s.LogRider(self, 0, "Created a gold token")
+		l.LogRider(self, 0, "Created a gold token")
 	}
-	s.Log(self, 0)
+	l.Log(self, 0)
 }

@@ -14,34 +14,34 @@ import (
 
 // consumingVolitionApplyRider registers the on-hit discard rider; the ArcaneDamageDealt
 // gate runs at hit time so a Runechant firing on this same attack can satisfy it.
-func consumingVolitionApplyRider(_ *sim.TurnState, self *sim.CardState) {
+func consumingVolitionApplyRider(_ *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	self.RegisterOnHit(consumingVolitionOnHit)
 }
 
 // consumingVolitionOnHit fires the "When this hits a hero, they discard a card" rider
 // when ArcaneDamageDealt is set. Top-level so registration stays alloc-free.
-func consumingVolitionOnHit(s *sim.TurnState, self *sim.CardState, _ *sim.OnHitHandler) {
+func consumingVolitionOnHit(s *sim.TurnState, l sim.Logger, self *sim.CardState, _ *sim.OnHitHandler) {
 	if !s.ArcaneDamageDealt {
 		return
 	}
 	s.AddValue(sim.DiscardValue)
-	s.LogRider(self, sim.DiscardValue, "On-hit discarded a card")
+	l.LogRider(self, sim.DiscardValue, "On-hit discarded a card")
 }
 
-func (ConsumingVolitionRed) Play(s *sim.TurnState, self *sim.CardState) {
+func (ConsumingVolitionRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	n := self.DealEffectiveAttack(s)
-	s.Log(self, n)
-	consumingVolitionApplyRider(s, self)
+	l.Log(self, n)
+	consumingVolitionApplyRider(s, l, self)
 }
 
-func (ConsumingVolitionYellow) Play(s *sim.TurnState, self *sim.CardState) {
+func (ConsumingVolitionYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	n := self.DealEffectiveAttack(s)
-	s.Log(self, n)
-	consumingVolitionApplyRider(s, self)
+	l.Log(self, n)
+	consumingVolitionApplyRider(s, l, self)
 }
 
-func (ConsumingVolitionBlue) Play(s *sim.TurnState, self *sim.CardState) {
+func (ConsumingVolitionBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	n := self.DealEffectiveAttack(s)
-	s.Log(self, n)
-	consumingVolitionApplyRider(s, self)
+	l.Log(self, n)
+	consumingVolitionApplyRider(s, l, self)
 }

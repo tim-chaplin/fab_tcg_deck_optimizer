@@ -45,7 +45,7 @@ func (RosettaThornAbility) Attack() int             { return 2 }
 func (RosettaThornAbility) Defense() int            { return 0 }
 func (RosettaThornAbility) Types() card.TypeSet     { return rosettaThornAbilityTypes }
 func (RosettaThornAbility) GoAgain() bool           { return false }
-func (RosettaThornAbility) Play(s *sim.TurnState, self *sim.CardState) {
+func (RosettaThornAbility) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	n := self.DealEffectiveAttack(s)
-	s.Log(self, n)
+	l.Log(self, n)
 }

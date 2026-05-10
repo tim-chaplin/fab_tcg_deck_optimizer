@@ -11,7 +11,7 @@ import (
 func TestStrategicPlanning_QueuesEndOfTurnTrigger(t *testing.T) {
 	for _, c := range []sim.Card{StrategicPlanningRed{}, StrategicPlanningYellow{}, StrategicPlanningBlue{}} {
 		s := sim.NewTurnStateFromCards(nil, nil)
-		c.Play(s, &sim.CardState{Card: c})
+		c.Play(s, s.Logger(), &sim.CardState{Card: c})
 		matching := 0
 		for _, tr := range s.Triggers {
 			if tr.TriggerType == sim.TriggerEndOfTurn && tr.Source == c {
@@ -32,7 +32,7 @@ func TestStrategicPlanning_RecyclesEligibleActionToBottom(t *testing.T) {
 	target := testutils.GenericAction()
 	deck := []sim.Card{testutils.BlueAttack{}}
 	s := sim.NewTurnStateFromCards(deck, []sim.Card{target})
-	(StrategicPlanningRed{}).Play(s, &sim.CardState{Card: StrategicPlanningRed{}})
+	(StrategicPlanningRed{}).Play(s, s.Logger(), &sim.CardState{Card: StrategicPlanningRed{}})
 	if got := s.Deck().Size(); got != 2 {
 		t.Errorf("deck size after recycle = %d, want 2 (target appended to bottom)", got)
 	}

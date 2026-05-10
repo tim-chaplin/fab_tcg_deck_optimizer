@@ -12,7 +12,8 @@ import (
 func TestDrowningDire_NoAuraNoDominate(t *testing.T) {
 	for _, c := range []sim.Card{DrowningDireRed{}, DrowningDireYellow{}, DrowningDireBlue{}} {
 		self := &sim.CardState{Card: c}
-		c.Play(sim.NewTurnStateFromCards(nil, nil), self)
+		s := sim.NewTurnStateFromCards(nil, nil)
+		c.Play(s, s.Logger(), self)
 		if self.GrantedDominate {
 			t.Errorf("%s [%d{p}]: GrantedDominate = true without prior aura, want false", c.Name(), c.Pitch())
 		}
@@ -25,7 +26,7 @@ func TestDrowningDire_AuraGrantsDominate(t *testing.T) {
 		s := sim.NewTurnStateFromCards(nil, nil)
 		s.CardsPlayed = []sim.Card{testutils.Aura{}}
 		self := &sim.CardState{Card: c}
-		c.Play(s, self)
+		c.Play(s, s.Logger(), self)
 		if !self.GrantedDominate {
 			t.Errorf("%s [%d{p}]: GrantedDominate = false after aura, want true", c.Name(), c.Pitch())
 		}
@@ -38,9 +39,9 @@ func TestDrowningDire_OnHitRecyclesNonAttackToBottom(t *testing.T) {
 	deck := []sim.Card{testutils.RedAttack{}}
 	s := sim.NewTurnStateFromCards(deck, []sim.Card{non})
 	self := &sim.CardState{Card: DrowningDireRed{}}
-	(DrowningDireRed{}).Play(s, self)
+	(DrowningDireRed{}).Play(s, s.Logger(), self)
 	self.BonusAttack = 2
-	testutils.FireOnHitIfLikely(s, self)
+	testutils.FireOnHitIfLikely(s, s.Logger(), self)
 	if got := s.Deck().Size(); got != 2 {
 		t.Errorf("deck size after recycle = %d, want 2 (target appended to bottom)", got)
 	}

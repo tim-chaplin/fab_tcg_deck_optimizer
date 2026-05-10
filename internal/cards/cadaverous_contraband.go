@@ -10,28 +10,28 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
 
-func cadaverousContrabandOnHitRecycle(s *sim.TurnState, self *sim.CardState, _ *sim.OnHitHandler) {
+func cadaverousContrabandOnHitRecycle(s *sim.TurnState, l sim.Logger, self *sim.CardState, _ *sim.OnHitHandler) {
 	if _, ok := s.RecycleFromGraveyardToTop(isNonAttackAction); ok {
-		s.LogRider(self, 0, "Recycled a non-attack action card to top of deck")
+		l.LogRider(self, 0, "Recycled a non-attack action card to top of deck")
 	}
 }
 
 func isNonAttackAction(c sim.Card) bool { return c.Types().IsNonAttackAction() }
 
-func cadaverousContrabandPlay(s *sim.TurnState, self *sim.CardState) {
+func cadaverousContrabandPlay(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	n := self.DealEffectiveAttack(s)
-	s.Log(self, n)
+	l.Log(self, n)
 	self.RegisterOnHit(cadaverousContrabandOnHitRecycle)
 }
 
-func (CadaverousContrabandRed) Play(s *sim.TurnState, self *sim.CardState) {
-	cadaverousContrabandPlay(s, self)
+func (CadaverousContrabandRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+	cadaverousContrabandPlay(s, l, self)
 }
 
-func (CadaverousContrabandYellow) Play(s *sim.TurnState, self *sim.CardState) {
-	cadaverousContrabandPlay(s, self)
+func (CadaverousContrabandYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+	cadaverousContrabandPlay(s, l, self)
 }
 
-func (CadaverousContrabandBlue) Play(s *sim.TurnState, self *sim.CardState) {
-	cadaverousContrabandPlay(s, self)
+func (CadaverousContrabandBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+	cadaverousContrabandPlay(s, l, self)
 }

@@ -15,16 +15,16 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
 
-func (DeathlyDuetRed) Play(s *sim.TurnState, self *sim.CardState) {
-	deathlyDuetApplyRiders(s, self)
+func (DeathlyDuetRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+	deathlyDuetApplyRiders(s, l, self)
 }
 
-func (DeathlyDuetYellow) Play(s *sim.TurnState, self *sim.CardState) {
-	deathlyDuetApplyRiders(s, self)
+func (DeathlyDuetYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+	deathlyDuetApplyRiders(s, l, self)
 }
 
-func (DeathlyDuetBlue) Play(s *sim.TurnState, self *sim.CardState) {
-	deathlyDuetApplyRiders(s, self)
+func (DeathlyDuetBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+	deathlyDuetApplyRiders(s, l, self)
 }
 
 // deathlyDuetApplyRiders folds Deathly Duet's two pitch-conditional riders into self and
@@ -35,7 +35,7 @@ func (DeathlyDuetBlue) Play(s *sim.TurnState, self *sim.CardState) {
 //     resolution; the rider lands as a "Created 2 runechants" sub-line under self.
 //
 // Both riders can stack when self.PitchedToPlay contains both roles.
-func deathlyDuetApplyRiders(s *sim.TurnState, self *sim.CardState) {
+func deathlyDuetApplyRiders(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	var attackPitched, nonAttackActionPitched bool
 	for _, p := range self.PitchedToPlay {
 		t := p.Types()
@@ -50,9 +50,9 @@ func deathlyDuetApplyRiders(s *sim.TurnState, self *sim.CardState) {
 		self.BonusAttack += 2
 	}
 	n := self.DealEffectiveAttack(s)
-	s.Log(self, n)
+	l.Log(self, n)
 	if nonAttackActionPitched {
 		s.CreateRunechants(2)
-		s.LogRider(self, 2, "Created 2 runechants")
+		l.LogRider(self, 2, "Created 2 runechants")
 	}
 }

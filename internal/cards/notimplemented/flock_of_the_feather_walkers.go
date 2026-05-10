@@ -12,21 +12,21 @@ import (
 
 // not implemented: additional reveal cost, quicken tokens
 
-func (c FlockOfTheFeatherWalkersRed) Play(s *sim.TurnState, self *sim.CardState) {
+func (c FlockOfTheFeatherWalkersRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	n := self.DealEffectiveAttack(s)
-	s.Log(self, n)
+	l.Log(self, n)
 }
 
 // not implemented: additional reveal cost, quicken tokens
 
-func (c FlockOfTheFeatherWalkersYellow) Play(s *sim.TurnState, self *sim.CardState) {
+func (c FlockOfTheFeatherWalkersYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	n := self.DealEffectiveAttack(s)
-	s.Log(self, n)
+	l.Log(self, n)
 }
 
 // not implemented: additional reveal cost, quicken tokens
 
-func (c FlockOfTheFeatherWalkersBlue) Play(s *sim.TurnState, self *sim.CardState) {
+func (c FlockOfTheFeatherWalkersBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	n := self.DealEffectiveAttack(s)
-	s.Log(self, n)
+	l.Log(self, n)
 }

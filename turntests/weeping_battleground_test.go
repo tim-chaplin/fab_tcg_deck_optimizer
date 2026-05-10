@@ -16,16 +16,16 @@ import (
 // tests can isolate Weeping Battleground's +1 arcane banish rider.
 type zeroDefenseAura struct{}
 
-func (zeroDefenseAura) ID() ids.CardID                      { return ids.InvalidCard }
-func (zeroDefenseAura) Name() string                        { return "zeroDefenseAura" }
-func (zeroDefenseAura) DisplayName() string                 { return "zeroDefenseAura" }
-func (zeroDefenseAura) Cost(*sim.TurnState) int             { return 0 }
-func (zeroDefenseAura) Pitch() int                          { return 0 }
-func (zeroDefenseAura) Attack() int                         { return 0 }
-func (zeroDefenseAura) Defense() int                        { return 0 }
-func (zeroDefenseAura) Types() card.TypeSet                 { return card.NewTypeSet(card.TypeAura) }
-func (zeroDefenseAura) GoAgain() bool                       { return false }
-func (zeroDefenseAura) Play(*sim.TurnState, *sim.CardState) {}
+func (zeroDefenseAura) ID() ids.CardID                                  { return ids.InvalidCard }
+func (zeroDefenseAura) Name() string                                    { return "zeroDefenseAura" }
+func (zeroDefenseAura) DisplayName() string                             { return "zeroDefenseAura" }
+func (zeroDefenseAura) Cost(*sim.TurnState) int                         { return 0 }
+func (zeroDefenseAura) Pitch() int                                      { return 0 }
+func (zeroDefenseAura) Attack() int                                     { return 0 }
+func (zeroDefenseAura) Defense() int                                    { return 0 }
+func (zeroDefenseAura) Types() card.TypeSet                             { return card.NewTypeSet(card.TypeAura) }
+func (zeroDefenseAura) GoAgain() bool                                   { return false }
+func (zeroDefenseAura) Play(*sim.TurnState, sim.Logger, *sim.CardState) {}
 
 // Tests that Weeping Battleground banishes a same-turn-blocked aura from the graveyard
 // for 1 arcane while also defending.

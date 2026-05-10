@@ -7,17 +7,17 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
 
-func (c WoundingBlowRed) Play(s *sim.TurnState, self *sim.CardState) {
+func (c WoundingBlowRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	n := self.DealEffectiveAttack(s)
-	s.Log(self, n)
+	l.Log(self, n)
 }
 
-func (c WoundingBlowYellow) Play(s *sim.TurnState, self *sim.CardState) {
+func (c WoundingBlowYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	n := self.DealEffectiveAttack(s)
-	s.Log(self, n)
+	l.Log(self, n)
 }
 
-func (c WoundingBlowBlue) Play(s *sim.TurnState, self *sim.CardState) {
+func (c WoundingBlowBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	n := self.DealEffectiveAttack(s)
-	s.Log(self, n)
+	l.Log(self, n)
 }

@@ -22,7 +22,7 @@ func TestBattlefrontBastion_BlockAloneFiresPrevention(t *testing.T) {
 		}
 		s := sim.TurnState{Defenders: []sim.Card{c}}
 		self := &sim.CardState{Card: c}
-		blocker.Block(&s, self)
+		blocker.Block(&s, s.Logger(), self)
 		if self.BonusDefense != 1 {
 			t.Errorf("%s: BonusDefense = %d, want 1 (alone)", c.Name(), self.BonusDefense)
 		}
@@ -35,7 +35,7 @@ func TestBattlefrontBastion_BlockWithOtherPlainBlockerNoBonus(t *testing.T) {
 	c := BattlefrontBastionRed{}
 	s := sim.TurnState{Defenders: []sim.Card{c, testutils.GenericAttack(0, 1)}}
 	self := &sim.CardState{Card: c}
-	c.Block(&s, self)
+	c.Block(&s, s.Logger(), self)
 	if self.BonusDefense != 0 {
 		t.Errorf("BonusDefense = %d, want 0 (another plain blocker)", self.BonusDefense)
 	}

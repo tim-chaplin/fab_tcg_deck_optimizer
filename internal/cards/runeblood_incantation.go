@@ -12,26 +12,26 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
 
-func (c RunebloodIncantationRed) Play(s *sim.TurnState, self *sim.CardState) {
-	runebloodPlay(s, self, c, 3)
+func (c RunebloodIncantationRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+	runebloodPlay(s, l, self, c, 3)
 }
 
-func (c RunebloodIncantationYellow) Play(s *sim.TurnState, self *sim.CardState) {
-	runebloodPlay(s, self, c, 2)
+func (c RunebloodIncantationYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+	runebloodPlay(s, l, self, c, 2)
 }
 
-func (c RunebloodIncantationBlue) Play(s *sim.TurnState, self *sim.CardState) {
-	runebloodPlay(s, self, c, 1)
+func (c RunebloodIncantationBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+	runebloodPlay(s, l, self, c, 1)
 }
 
 // runebloodAuraHandler creates 1 runechant per fire and decrements the verse counter.
 // When the last verse fires, destroys the aura and graveyards the card.
-func runebloodAuraHandler(s *sim.TurnState, _ *sim.Trigger, a *sim.Aura) {
+func runebloodAuraHandler(s *sim.TurnState, l sim.Logger, _ *sim.Trigger, a *sim.Aura) {
 	name := a.Self.DisplayName()
 	a.Count--
 	lastVerse := a.Count <= 0
 	s.CreateRunechants(1)
-	s.LogPostTrigger(name, "Created a runechant (verse counter)", 1)
+	l.LogPostTrigger(name, "Created a runechant (verse counter)", 1)
 	if lastVerse {
 		s.DestroyAura(a, true)
 	}
@@ -39,11 +39,11 @@ func runebloodAuraHandler(s *sim.TurnState, _ *sim.Trigger, a *sim.Aura) {
 
 // runebloodPlay registers a start-of-turn trigger with Count=n and emits the same-turn
 // chain step (no value contribution; every rune is credited at its future-turn fire).
-func runebloodPlay(s *sim.TurnState, selfState *sim.CardState, selfCard sim.Card, n int) {
+func runebloodPlay(s *sim.TurnState, l sim.Logger, selfState *sim.CardState, selfCard sim.Card, n int) {
 	s.AddAura(sim.Aura{
 		Trigger: sim.Trigger{TriggerType: sim.TriggerStartOfTurn, Handler: runebloodAuraHandler},
 		Self:    sim.CardOrTokenType{Card: selfCard},
 		Count:   n,
 	})
-	s.Log(selfState, 0)
+	l.Log(selfState, 0)
 }

@@ -19,7 +19,7 @@ func TestTremorOfIArathael_NoBanishReturnsBaseAttack(t *testing.T) {
 	}
 	for _, tc := range cases {
 		s := sim.TurnState{}
-		tc.c.Play(&s, &sim.CardState{Card: tc.c})
+		tc.c.Play(&s, s.Logger(), &sim.CardState{Card: tc.c})
 		if s.Value != tc.base {
 			t.Errorf("%s: Value = %d, want %d (no banish, base attack only)", tc.c.Name(), s.Value, tc.base)
 		}
@@ -38,7 +38,7 @@ func TestTremorOfIArathael_BanishGrantsPlusTwo(t *testing.T) {
 	}
 	for _, tc := range cases {
 		s := sim.TurnState{CardBanished: true}
-		tc.c.Play(&s, &sim.CardState{Card: tc.c})
+		tc.c.Play(&s, s.Logger(), &sim.CardState{Card: tc.c})
 		if want := tc.base + 2; s.Value != want {
 			t.Errorf("%s: Value = %d, want %d (CardBanished set, +2{p} rider on)", tc.c.Name(), s.Value, want)
 		}

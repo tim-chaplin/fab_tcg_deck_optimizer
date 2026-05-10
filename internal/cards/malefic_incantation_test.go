@@ -19,7 +19,7 @@ func TestMaleficIncantation_PlayRegistersAttackActionTrigger(t *testing.T) {
 	}
 	for _, tc := range cases {
 		var s sim.TurnState
-		tc.c.Play(&s, &sim.CardState{Card: tc.c})
+		tc.c.Play(&s, s.Logger(), &sim.CardState{Card: tc.c})
 		if got := s.Value; got != 0 {
 			t.Errorf("%s: Play() = %d, want 0 (rune comes from trigger, not Play)", tc.c.Name(), got)
 		}
@@ -49,12 +49,12 @@ func TestMaleficIncantation_PlayRegistersAttackActionTrigger(t *testing.T) {
 func TestMaleficIncantation_HandlerCreatesOneRunechantPerFire(t *testing.T) {
 	for _, c := range []sim.Card{MaleficIncantationRed{}, MaleficIncantationYellow{}, MaleficIncantationBlue{}} {
 		var s sim.TurnState
-		c.Play(&s, &sim.CardState{Card: c})
+		c.Play(&s, s.Logger(), &sim.CardState{Card: c})
 		chain := sim.NewTurnStateFromCards(nil, nil)
 		chain.TriggeringCard = c
 		chain.Auras = append(chain.Auras, s.Auras[0])
 		chain.SetCurrentAuraIdxForTesting(0)
-		chain.Auras[0].Handler(chain, &chain.Auras[0].Trigger, &chain.Auras[0])
+		chain.Auras[0].Handler(chain, chain.Logger(), &chain.Auras[0].Trigger, &chain.Auras[0])
 		if chain.Value != 1 {
 			t.Errorf("%s: handler Value = %d, want 1", c.Name(), chain.Value)
 		}

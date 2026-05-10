@@ -14,20 +14,20 @@ func minnowismIsTarget(_ *sim.TurnState, pc *sim.CardState) bool {
 	return pc.Card.Types().IsAttackAction() && pc.Card.Attack() <= 3
 }
 
-func (MinnowismRed) Play(s *sim.TurnState, self *sim.CardState) {
+func (MinnowismRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	GrantNextCardBonusAttack(s, 3, minnowismIsTarget)
 	n := self.DealEffectiveAttack(s)
-	s.Log(self, n)
+	l.Log(self, n)
 }
 
-func (MinnowismYellow) Play(s *sim.TurnState, self *sim.CardState) {
+func (MinnowismYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	GrantNextCardBonusAttack(s, 2, minnowismIsTarget)
 	n := self.DealEffectiveAttack(s)
-	s.Log(self, n)
+	l.Log(self, n)
 }
 
-func (MinnowismBlue) Play(s *sim.TurnState, self *sim.CardState) {
+func (MinnowismBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	GrantNextCardBonusAttack(s, 1, minnowismIsTarget)
 	n := self.DealEffectiveAttack(s)
-	s.Log(self, n)
+	l.Log(self, n)
 }

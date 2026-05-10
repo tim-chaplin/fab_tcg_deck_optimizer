@@ -8,23 +8,23 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
 
-func (SpellbladeAssaultRed) Play(s *sim.TurnState, self *sim.CardState) {
+func (SpellbladeAssaultRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	n := self.DealEffectiveAttack(s)
-	s.Log(self, n)
+	l.Log(self, n)
 	s.CreateRunechants(2)
-	s.LogRider(self, 2, "Created 2 runechants")
+	l.LogRider(self, 2, "Created 2 runechants")
 }
 
-func (SpellbladeAssaultYellow) Play(s *sim.TurnState, self *sim.CardState) {
+func (SpellbladeAssaultYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	n := self.DealEffectiveAttack(s)
-	s.Log(self, n)
+	l.Log(self, n)
 	s.CreateRunechants(2)
-	s.LogRider(self, 2, "Created 2 runechants")
+	l.LogRider(self, 2, "Created 2 runechants")
 }
 
-func (SpellbladeAssaultBlue) Play(s *sim.TurnState, self *sim.CardState) {
+func (SpellbladeAssaultBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	n := self.DealEffectiveAttack(s)
-	s.Log(self, n)
+	l.Log(self, n)
 	s.CreateRunechants(2)
-	s.LogRider(self, 2, "Created 2 runechants")
+	l.LogRider(self, 2, "Created 2 runechants")
 }

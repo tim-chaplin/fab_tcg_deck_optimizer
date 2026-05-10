@@ -11,21 +11,21 @@ import (
 
 // not implemented: next-weapon-attack +1{p} grant (weapon chain not scanned)
 
-func (c BrandishRed) Play(s *sim.TurnState, self *sim.CardState) {
+func (c BrandishRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	n := self.DealEffectiveAttack(s)
-	s.Log(self, n)
+	l.Log(self, n)
 }
 
 // not implemented: next-weapon-attack +1{p} grant (weapon chain not scanned)
 
-func (c BrandishYellow) Play(s *sim.TurnState, self *sim.CardState) {
+func (c BrandishYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	n := self.DealEffectiveAttack(s)
-	s.Log(self, n)
+	l.Log(self, n)
 }
 
 // not implemented: next-weapon-attack +1{p} grant (weapon chain not scanned)
 
-func (c BrandishBlue) Play(s *sim.TurnState, self *sim.CardState) {
+func (c BrandishBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	n := self.DealEffectiveAttack(s)
-	s.Log(self, n)
+	l.Log(self, n)
 }

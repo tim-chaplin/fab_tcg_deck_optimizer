@@ -28,8 +28,8 @@ func (pitchOnlyRed) Defense() int        { return 0 }
 func (pitchOnlyRed) Types() card.TypeSet {
 	return card.NewTypeSet(card.TypeGeneric, card.TypeAction)
 }
-func (pitchOnlyRed) GoAgain() bool               { return false }
-func (pitchOnlyRed) Play(*TurnState, *CardState) {}
+func (pitchOnlyRed) GoAgain() bool                       { return false }
+func (pitchOnlyRed) Play(*TurnState, Logger, *CardState) {}
 
 // grantBonusAttack is a test-only non-attack action card that scans CardsRemaining and adds n
 // to BonusAttack on the first attack action card it finds. Mirrors production "next attack
@@ -48,14 +48,14 @@ func (grantBonusAttack) Types() card.TypeSet {
 	return card.NewTypeSet(card.TypeGeneric, card.TypeAction)
 }
 func (grantBonusAttack) GoAgain() bool { return true }
-func (g grantBonusAttack) Play(s *TurnState, self *CardState) {
+func (g grantBonusAttack) Play(s *TurnState, l Logger, self *CardState) {
 	for _, pc := range s.CardsRemaining {
 		if pc.Card.Types().IsAttackAction() {
 			pc.BonusAttack += g.n
 			break
 		}
 	}
-	s.Log(self, 0)
+	l.Log(self, 0)
 }
 
 // grantBonusAttackWeapon scans CardsRemaining for the first weapon swing (a weapon
@@ -75,14 +75,14 @@ func (grantBonusAttackWeapon) Types() card.TypeSet {
 	return card.NewTypeSet(card.TypeGeneric, card.TypeAction)
 }
 func (grantBonusAttackWeapon) GoAgain() bool { return true }
-func (g grantBonusAttackWeapon) Play(s *TurnState, self *CardState) {
+func (g grantBonusAttackWeapon) Play(s *TurnState, l Logger, self *CardState) {
 	for _, pc := range s.CardsRemaining {
 		if pc.Card.Types().IsWeaponAttack() {
 			pc.BonusAttack += g.n
 			break
 		}
 	}
-	s.Log(self, 0)
+	l.Log(self, 0)
 }
 
 // Tests that a granter writes BonusAttack on the target's CardState and the chain total

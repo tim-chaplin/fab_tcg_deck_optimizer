@@ -11,17 +11,17 @@ import (
 )
 
 // warmongersRecitalRecycleOnHit pulls the buffed attack out of graveyard onto the deck bottom.
-func warmongersRecitalRecycleOnHit(s *sim.TurnState, self *sim.CardState, _ *sim.OnHitHandler) {
+func warmongersRecitalRecycleOnHit(s *sim.TurnState, l sim.Logger, self *sim.CardState, _ *sim.OnHitHandler) {
 	target := self.Card
 	if _, ok := s.RecycleFromGraveyardToBottom(func(c sim.Card) bool { return c == target }); !ok {
 		return
 	}
-	s.LogPostTrigger(self.Card.DisplayName(), "Recycled to bottom of deck on hit", 0)
+	l.LogPostTrigger(self.Card.DisplayName(), "Recycled to bottom of deck on hit", 0)
 }
 
 // warmongersRecitalPlay grants the next attack action +n{p} and the on-hit recycle rider.
 // Fizzles silently if no attack action follows in CardsRemaining.
-func warmongersRecitalPlay(s *sim.TurnState, self *sim.CardState, source sim.Card, n int) {
+func warmongersRecitalPlay(s *sim.TurnState, l sim.Logger, self *sim.CardState, source sim.Card, n int) {
 	for _, pc := range s.CardsRemaining {
 		if pc.Card.Types().IsAttackAction() {
 			pc.BonusAttack += n
@@ -33,17 +33,17 @@ func warmongersRecitalPlay(s *sim.TurnState, self *sim.CardState, source sim.Car
 		}
 	}
 	n2 := self.DealEffectiveAttack(s)
-	s.Log(self, n2)
+	l.Log(self, n2)
 }
 
-func (c WarmongersRecitalRed) Play(s *sim.TurnState, self *sim.CardState) {
-	warmongersRecitalPlay(s, self, c, 3)
+func (c WarmongersRecitalRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+	warmongersRecitalPlay(s, l, self, c, 3)
 }
 
-func (c WarmongersRecitalYellow) Play(s *sim.TurnState, self *sim.CardState) {
-	warmongersRecitalPlay(s, self, c, 2)
+func (c WarmongersRecitalYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+	warmongersRecitalPlay(s, l, self, c, 2)
 }
 
-func (c WarmongersRecitalBlue) Play(s *sim.TurnState, self *sim.CardState) {
-	warmongersRecitalPlay(s, self, c, 1)
+func (c WarmongersRecitalBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+	warmongersRecitalPlay(s, l, self, c, 1)
 }

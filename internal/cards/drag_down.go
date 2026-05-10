@@ -14,19 +14,19 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
 
-func dragDownPlay(s *sim.TurnState, self *sim.CardState) {
+func dragDownPlay(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	n := self.DealEffectiveDefense(s)
-	s.Log(self, n)
+	l.Log(self, n)
 }
 
-func (DragDownRed) Play(s *sim.TurnState, self *sim.CardState) {
-	dragDownPlay(s, self)
+func (DragDownRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+	dragDownPlay(s, l, self)
 }
 
-func (DragDownYellow) Play(s *sim.TurnState, self *sim.CardState) {
-	dragDownPlay(s, self)
+func (DragDownYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+	dragDownPlay(s, l, self)
 }
 
-func (DragDownBlue) Play(s *sim.TurnState, self *sim.CardState) {
-	dragDownPlay(s, self)
+func (DragDownBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+	dragDownPlay(s, l, self)
 }

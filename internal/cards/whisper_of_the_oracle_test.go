@@ -21,7 +21,7 @@ func TestWhisperOfTheOracle_PlayCallsOpt4(t *testing.T) {
 
 	for _, card := range whisperOfTheOracleVariants {
 		s := sim.NewTurnStateFromCards([]sim.Card{a, b, c, d}, nil)
-		card.Play(s, &sim.CardState{Card: card})
+		card.Play(s, s.Logger(), &sim.CardState{Card: card})
 		if s.Value != 0 {
 			t.Errorf("%s: Play() Value = %d, want 0", card.Name(), s.Value)
 		}

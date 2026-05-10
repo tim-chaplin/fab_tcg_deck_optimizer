@@ -387,7 +387,7 @@ func defendersDamage(defenders, pitched []Card, deckPile *deck.Deck, state *Turn
 		// DR sees the original pre-DR deck order.
 		*state = TurnState{Pitched: pitched, deck: deckPile.Copy(), graveyard: gravBuf, IncomingDamage: remaining, cacheable: true, Defenders: defenders, Auras: preservedAuras, logger: preservedLogger}
 		*cs = CardState{Card: def, FromArsenal: i == arsenalDefenderIdx}
-		def.Play(state, cs)
+		def.Play(state, state.logger, cs)
 		total += state.Value
 		remaining = state.IncomingDamage
 		if !state.IsCacheable() {
@@ -408,7 +408,7 @@ func defendersDamage(defenders, pitched []Card, deckPile *deck.Deck, state *Turn
 		blockBudget -= bestCost
 		*cs = CardState{Card: def, Mode: bestMode}
 		if b, ok := def.(Blocker); ok {
-			b.Block(state, cs)
+			b.Block(state, state.logger, cs)
 		}
 		block := cs.EffectiveDefense()
 		if block > remaining {
@@ -449,7 +449,7 @@ func pickBlockerMode(d Card, state *TurnState, cs *CardState, blockBudget int) (
 			continue
 		}
 		*cs = CardState{Card: d, Mode: mode}
-		b.Block(state, cs)
+		b.Block(state, state.logger, cs)
 		if cs.BonusDefense > bestBonus {
 			bestBonus = cs.BonusDefense
 			bestMode = mode

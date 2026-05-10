@@ -11,20 +11,20 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
 
-func (UnmovableRed) Play(s *sim.TurnState, self *sim.CardState) {
+func (UnmovableRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	n := self.DealEffectiveDefense(s)
-	s.Log(self, n)
+	l.Log(self, n)
 }
 func (UnmovableRed) ArsenalDefenseBonus() int { return 1 }
 
-func (UnmovableYellow) Play(s *sim.TurnState, self *sim.CardState) {
+func (UnmovableYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	n := self.DealEffectiveDefense(s)
-	s.Log(self, n)
+	l.Log(self, n)
 }
 func (UnmovableYellow) ArsenalDefenseBonus() int { return 1 }
 
-func (UnmovableBlue) Play(s *sim.TurnState, self *sim.CardState) {
+func (UnmovableBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	n := self.DealEffectiveDefense(s)
-	s.Log(self, n)
+	l.Log(self, n)
 }
 func (UnmovableBlue) ArsenalDefenseBonus() int { return 1 }

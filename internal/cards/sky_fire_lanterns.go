@@ -16,25 +16,25 @@ import (
 // self when the deck-top card matches this variant's pitch (color). Reads the deck top
 // via PeekDeck so the cacheable bit flips — whether the rider fires depends on shuffle
 // order.
-func skyFireLanternsPlay(s *sim.TurnState, self *sim.CardState, selfPitch int) {
+func skyFireLanternsPlay(s *sim.TurnState, l sim.Logger, self *sim.CardState, selfPitch int) {
 	n := self.DealEffectiveAttack(s)
-	s.Log(self, n)
+	l.Log(self, n)
 	top, ok := s.PeekDeck()
 	if !ok || top.Pitch() != selfPitch {
 		return
 	}
 	s.CreateRunechants(1)
-	s.LogRider(self, 1, "Created a runechant")
+	l.LogRider(self, 1, "Created a runechant")
 }
 
-func (c SkyFireLanternsRed) Play(s *sim.TurnState, self *sim.CardState) {
-	skyFireLanternsPlay(s, self, c.Pitch())
+func (c SkyFireLanternsRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+	skyFireLanternsPlay(s, l, self, c.Pitch())
 }
 
-func (c SkyFireLanternsYellow) Play(s *sim.TurnState, self *sim.CardState) {
-	skyFireLanternsPlay(s, self, c.Pitch())
+func (c SkyFireLanternsYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+	skyFireLanternsPlay(s, l, self, c.Pitch())
 }
 
-func (c SkyFireLanternsBlue) Play(s *sim.TurnState, self *sim.CardState) {
-	skyFireLanternsPlay(s, self, c.Pitch())
+func (c SkyFireLanternsBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+	skyFireLanternsPlay(s, l, self, c.Pitch())
 }

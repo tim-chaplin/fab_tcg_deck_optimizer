@@ -10,14 +10,14 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
 
-func lookingForAScrapPlay(s *sim.TurnState, self *sim.CardState) {
+func lookingForAScrapPlay(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	if _, ok := s.BanishFromGraveyard(isOnePowerCard); ok {
 		self.BonusAttack++
 		self.GrantedGoAgain = true
-		s.LogRider(self, 1, "Banished a 1{p} card, +1{p} and go again")
+		l.LogRider(self, 1, "Banished a 1{p} card, +1{p} and go again")
 	}
 	n := self.DealEffectiveAttack(s)
-	s.Log(self, n)
+	l.Log(self, n)
 }
 
 // isOnePowerCard matches the printed "card with 1{p}" target — any card whose printed
@@ -25,14 +25,14 @@ func lookingForAScrapPlay(s *sim.TurnState, self *sim.CardState) {
 // redundant.
 func isOnePowerCard(c sim.Card) bool { return c.Attack() == 1 }
 
-func (LookingForAScrapRed) Play(s *sim.TurnState, self *sim.CardState) {
-	lookingForAScrapPlay(s, self)
+func (LookingForAScrapRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+	lookingForAScrapPlay(s, l, self)
 }
 
-func (LookingForAScrapYellow) Play(s *sim.TurnState, self *sim.CardState) {
-	lookingForAScrapPlay(s, self)
+func (LookingForAScrapYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+	lookingForAScrapPlay(s, l, self)
 }
 
-func (LookingForAScrapBlue) Play(s *sim.TurnState, self *sim.CardState) {
-	lookingForAScrapPlay(s, self)
+func (LookingForAScrapBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+	lookingForAScrapPlay(s, l, self)
 }

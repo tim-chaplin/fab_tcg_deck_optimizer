@@ -16,14 +16,14 @@ import (
 // sunKissPlay emits the chain step ("Sun Kiss [R]: PLAY"), writes the heal as a sub-line
 // "Gained N health" under it, and — when Moon Wish has already played this turn — fires
 // an extra mid-turn draw and a go-again grant on self.
-func sunKissPlay(heal int, s *sim.TurnState, self *sim.CardState) {
+func sunKissPlay(heal int, s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	if playedMoonWishThisTurn(s) {
 		s.DrawOne()
 		self.GrantedGoAgain = true
 	}
-	s.Log(self, 0)
+	l.Log(self, 0)
 	s.AddValue(heal)
-	s.LogRiderf(self, heal, "Gained %d health", heal)
+	l.LogRiderf(self, heal, "Gained %d health", heal)
 }
 
 // playedMoonWishThisTurn reports whether any prior card resolved this turn is a Moon Wish
@@ -38,14 +38,14 @@ func playedMoonWishThisTurn(s *sim.TurnState) bool {
 	return false
 }
 
-func (SunKissRed) Play(s *sim.TurnState, self *sim.CardState) {
-	sunKissPlay(3, s, self)
+func (SunKissRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+	sunKissPlay(3, s, l, self)
 }
 
-func (SunKissYellow) Play(s *sim.TurnState, self *sim.CardState) {
-	sunKissPlay(2, s, self)
+func (SunKissYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+	sunKissPlay(2, s, l, self)
 }
 
-func (SunKissBlue) Play(s *sim.TurnState, self *sim.CardState) {
-	sunKissPlay(1, s, self)
+func (SunKissBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+	sunKissPlay(1, s, l, self)
 }

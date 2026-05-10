@@ -14,25 +14,29 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
 
-func moneyOrYourLifeOnHit(s *sim.TurnState, self *sim.CardState, _ *sim.OnHitHandler) {
+func moneyOrYourLifeOnHit(s *sim.TurnState, l sim.Logger, self *sim.CardState, _ *sim.OnHitHandler) {
 	n := 2
 	if sim.CurrentHero != nil && sim.CurrentHero.Types().Has(card.TypeThief) {
 		n = 4
 	}
 	s.AddValue(n)
-	s.LogRiderf(self, n, "On-hit dealt %d (opponent surrendered no Gold)", n)
+	l.LogRiderf(self, n, "On-hit dealt %d (opponent surrendered no Gold)", n)
 }
 
-func moneyOrYourLifePlay(s *sim.TurnState, self *sim.CardState) {
+func moneyOrYourLifePlay(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	n := self.DealEffectiveAttack(s)
-	s.Log(self, n)
+	l.Log(self, n)
 	self.RegisterOnHit(moneyOrYourLifeOnHit)
 }
 
-func (MoneyOrYourLifeRed) Play(s *sim.TurnState, self *sim.CardState) { moneyOrYourLifePlay(s, self) }
-
-func (MoneyOrYourLifeYellow) Play(s *sim.TurnState, self *sim.CardState) {
-	moneyOrYourLifePlay(s, self)
+func (MoneyOrYourLifeRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+	moneyOrYourLifePlay(s, l, self)
 }
 
-func (MoneyOrYourLifeBlue) Play(s *sim.TurnState, self *sim.CardState) { moneyOrYourLifePlay(s, self) }
+func (MoneyOrYourLifeYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+	moneyOrYourLifePlay(s, l, self)
+}
+
+func (MoneyOrYourLifeBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+	moneyOrYourLifePlay(s, l, self)
+}

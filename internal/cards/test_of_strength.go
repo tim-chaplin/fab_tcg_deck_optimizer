@@ -11,19 +11,19 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
 
-func (TestOfStrengthRed) Play(s *sim.TurnState, self *sim.CardState) {
+func (TestOfStrengthRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	n := self.DealEffectiveDefense(s)
-	s.Log(self, n)
+	l.Log(self, n)
 	s.Clash(
 		func() {
 			s.CreateGold(1)
-			s.LogRider(self, 0, "Clash win created a gold token")
+			l.LogRider(self, 0, "Clash win created a gold token")
 		},
 		func() {
 			// AddValue clamps negatives, so write directly: opponent gains the Gold token,
 			// netting us roughly one resource of opposing tempo.
 			s.Value--
-			s.LogRider(self, -1, "Clash loss conceded gold to opponent")
+			l.LogRider(self, -1, "Clash loss conceded gold to opponent")
 		},
 	)
 }

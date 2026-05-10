@@ -20,20 +20,20 @@ func scoutThePeripheryIsTarget(_ *sim.TurnState, pc *sim.CardState) bool {
 	return pc.FromArsenal && pc.Card.Types().IsAttackAction()
 }
 
-func (ScoutThePeripheryRed) Play(s *sim.TurnState, self *sim.CardState) {
+func (ScoutThePeripheryRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	GrantNextCardBonusAttack(s, 3, scoutThePeripheryIsTarget)
 	n := self.DealEffectiveAttack(s)
-	s.Log(self, n)
+	l.Log(self, n)
 }
 
-func (ScoutThePeripheryYellow) Play(s *sim.TurnState, self *sim.CardState) {
+func (ScoutThePeripheryYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	GrantNextCardBonusAttack(s, 2, scoutThePeripheryIsTarget)
 	n := self.DealEffectiveAttack(s)
-	s.Log(self, n)
+	l.Log(self, n)
 }
 
-func (ScoutThePeripheryBlue) Play(s *sim.TurnState, self *sim.CardState) {
+func (ScoutThePeripheryBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	GrantNextCardBonusAttack(s, 1, scoutThePeripheryIsTarget)
 	n := self.DealEffectiveAttack(s)
-	s.Log(self, n)
+	l.Log(self, n)
 }

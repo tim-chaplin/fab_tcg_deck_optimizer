@@ -10,22 +10,22 @@ import (
 )
 
 // springLoadPlay applies the +3{p} 'no cards in hand' rider, then emits the chain step.
-func springLoadPlay(s *sim.TurnState, self *sim.CardState) {
+func springLoadPlay(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	if len(s.Hand()) == 0 {
 		self.BonusAttack += 3
 	}
 	n := self.DealEffectiveAttack(s)
-	s.Log(self, n)
+	l.Log(self, n)
 }
 
-func (SpringLoadRed) Play(s *sim.TurnState, self *sim.CardState) {
-	springLoadPlay(s, self)
+func (SpringLoadRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+	springLoadPlay(s, l, self)
 }
 
-func (SpringLoadYellow) Play(s *sim.TurnState, self *sim.CardState) {
-	springLoadPlay(s, self)
+func (SpringLoadYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+	springLoadPlay(s, l, self)
 }
 
-func (SpringLoadBlue) Play(s *sim.TurnState, self *sim.CardState) {
-	springLoadPlay(s, self)
+func (SpringLoadBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+	springLoadPlay(s, l, self)
 }

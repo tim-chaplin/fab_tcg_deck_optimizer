@@ -12,7 +12,7 @@ import (
 func TestTestOfStrength_WinCreatesGold(t *testing.T) {
 	for _, power := range []int{6, 7} {
 		s := sim.NewTurnStateFromCards([]sim.Card{testutils.GenericAttack(0, power)}, nil)
-		(TestOfStrengthRed{}).Play(s, &sim.CardState{Card: TestOfStrengthRed{}})
+		(TestOfStrengthRed{}).Play(s, s.Logger(), &sim.CardState{Card: TestOfStrengthRed{}})
 		if s.Gold() != 1 {
 			t.Errorf("top power %d: Gold = %d, want 1 (clash win)", power, s.Gold())
 		}
@@ -22,7 +22,7 @@ func TestTestOfStrength_WinCreatesGold(t *testing.T) {
 // Tests that a tied clash (top power == 5) creates no Gold token.
 func TestTestOfStrength_TieNoGold(t *testing.T) {
 	s := sim.NewTurnStateFromCards([]sim.Card{testutils.GenericAttack(0, 5)}, nil)
-	(TestOfStrengthRed{}).Play(s, &sim.CardState{Card: TestOfStrengthRed{}})
+	(TestOfStrengthRed{}).Play(s, s.Logger(), &sim.CardState{Card: TestOfStrengthRed{}})
 	if s.Gold() != 0 {
 		t.Errorf("top power 5: Gold = %d, want 0 (tie)", s.Gold())
 	}
@@ -34,7 +34,7 @@ func TestTestOfStrength_LossNoGoldAndDocksValue(t *testing.T) {
 	for _, power := range []int{0, 1, 2, 3, 4} {
 		s := sim.NewTurnStateFromCards([]sim.Card{testutils.GenericAttack(0, power)}, nil)
 		valueBefore := s.Value
-		(TestOfStrengthRed{}).Play(s, &sim.CardState{Card: TestOfStrengthRed{}})
+		(TestOfStrengthRed{}).Play(s, s.Logger(), &sim.CardState{Card: TestOfStrengthRed{}})
 		if s.Gold() != 0 {
 			t.Errorf("top power %d: Gold = %d, want 0 (clash loss)", power, s.Gold())
 		}
@@ -48,7 +48,7 @@ func TestTestOfStrength_LossNoGoldAndDocksValue(t *testing.T) {
 // Tests that an empty deck makes the clash a no-op (no Gold created).
 func TestTestOfStrength_EmptyDeckNoGold(t *testing.T) {
 	s := sim.NewTurnStateFromCards(nil, nil)
-	(TestOfStrengthRed{}).Play(s, &sim.CardState{Card: TestOfStrengthRed{}})
+	(TestOfStrengthRed{}).Play(s, s.Logger(), &sim.CardState{Card: TestOfStrengthRed{}})
 	if s.Gold() != 0 {
 		t.Errorf("empty deck: Gold = %d, want 0 (clash fails)", s.Gold())
 	}

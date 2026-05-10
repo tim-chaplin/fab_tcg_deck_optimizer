@@ -37,7 +37,7 @@ func moonWishCost(s *sim.TurnState) int {
 // moonWishPlay pays the alt cost (when a hand card is available), emits the chain step,
 // and registers an OnHit that tutors Sun Kiss. Tutored Sun Kiss plays immediately when
 // self has go-again granted; otherwise it lands in hand for next turn.
-func moonWishPlay(c sim.Card, s *sim.TurnState, self *sim.CardState) {
+func moonWishPlay(c sim.Card, s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	name := c.DisplayName()
 	// Alt cost: pop a hand card and prepend it to the deck (PrependToDeck flips cacheable).
 	var returned sim.Card
@@ -48,10 +48,10 @@ func moonWishPlay(c sim.Card, s *sim.TurnState, self *sim.CardState) {
 
 	// Emit Moon Wish's chain step first so the alt-cost / tutor lines follow it in order.
 	n := self.DealEffectiveAttack(s)
-	s.Log(self, n)
+	l.Log(self, n)
 
 	if returned != nil {
-		s.LogPostTriggerf(name, 0, "%s returned %s to top of deck", name, returned.DisplayName())
+		l.LogPostTriggerf(name, 0, "%s returned %s to top of deck", name, returned.DisplayName())
 	}
 
 	self.RegisterOnHit(moonWishOnHit)
@@ -61,28 +61,28 @@ func moonWishPlay(c sim.Card, s *sim.TurnState, self *sim.CardState) {
 // registration stays alloc-free; reads the Moon Wish printing off self.Card so we don't
 // need a captured copy or a Source-field detour (self IS the Moon Wish that registered
 // the handler).
-func moonWishOnHit(s *sim.TurnState, self *sim.CardState, _ *sim.OnHitHandler) {
+func moonWishOnHit(s *sim.TurnState, l sim.Logger, self *sim.CardState, _ *sim.OnHitHandler) {
 	c := self.Card
 	name := c.DisplayName()
 	sk, ok := s.TutorFromDeck(sunKissTutorPriority)
 	if !ok {
-		s.LogPostTriggerf(name, 0, "%s found no Sun Kiss to tutor", name)
+		l.LogPostTriggerf(name, 0, "%s found no Sun Kiss to tutor", name)
 		return
 	}
 
 	if !self.EffectiveGoAgain() {
 		// Tutor lands the card in hand for next turn.
 		s.AppendHand(sk)
-		s.LogPostTriggerf(name, 0, "%s tutored %s", name, sk.DisplayName())
+		l.LogPostTriggerf(name, 0, "%s tutored %s", name, sk.DisplayName())
 		return
 	}
 	// Go-again: Sun Kiss plays immediately. Pre-append Moon Wish to CardsPlayed so Sun
 	// Kiss's "if you've played Moon Wish" synergy fires; pop after so the sim's normal
 	// post-Play append doesn't double-add.
-	s.LogPostTriggerf(name, 0, "%s tutored %s and played it", name, sk.DisplayName())
+	l.LogPostTriggerf(name, 0, "%s tutored %s and played it", name, sk.DisplayName())
 	s.CardsPlayed = append(s.CardsPlayed, c)
 	skSelf := &sim.CardState{Card: sk}
-	sk.Play(s, skSelf)
+	sk.Play(s, l, skSelf)
 	s.CardsPlayed = s.CardsPlayed[:len(s.CardsPlayed)-1]
 	s.AddToGraveyard(sk)
 }
@@ -106,22 +106,22 @@ func (MoonWishRed) Cost(s *sim.TurnState) int { return moonWishCost(s) }
 func (MoonWishRed) MinCost() int              { return 0 }
 func (MoonWishRed) MaxCost() int              { return moonWishPrintedCost }
 
-func (c MoonWishRed) Play(s *sim.TurnState, self *sim.CardState) {
-	moonWishPlay(c, s, self)
+func (c MoonWishRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+	moonWishPlay(c, s, l, self)
 }
 
 func (MoonWishYellow) Cost(s *sim.TurnState) int { return moonWishCost(s) }
 func (MoonWishYellow) MinCost() int              { return 0 }
 func (MoonWishYellow) MaxCost() int              { return moonWishPrintedCost }
 
-func (c MoonWishYellow) Play(s *sim.TurnState, self *sim.CardState) {
-	moonWishPlay(c, s, self)
+func (c MoonWishYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+	moonWishPlay(c, s, l, self)
 }
 
 func (MoonWishBlue) Cost(s *sim.TurnState) int { return moonWishCost(s) }
 func (MoonWishBlue) MinCost() int              { return 0 }
 func (MoonWishBlue) MaxCost() int              { return moonWishPrintedCost }
 
-func (c MoonWishBlue) Play(s *sim.TurnState, self *sim.CardState) {
-	moonWishPlay(c, s, self)
+func (c MoonWishBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+	moonWishPlay(c, s, l, self)
 }

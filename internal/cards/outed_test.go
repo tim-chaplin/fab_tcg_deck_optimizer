@@ -10,7 +10,7 @@ import (
 func TestOuted_NoMarkUnbuffed(t *testing.T) {
 	self := &sim.CardState{Card: OutedRed{}}
 	s := sim.TurnState{}
-	(OutedRed{}).Play(&s, self)
+	(OutedRed{}).Play(&s, s.Logger(), self)
 	if self.BonusAttack != 0 {
 		t.Errorf("BonusAttack = %d, want 0 (mark off)", self.BonusAttack)
 	}
@@ -20,7 +20,7 @@ func TestOuted_NoMarkUnbuffed(t *testing.T) {
 func TestOuted_MarkedDefenderAddsOne(t *testing.T) {
 	self := &sim.CardState{Card: OutedRed{}}
 	s := sim.TurnState{OpponentMarked: true}
-	(OutedRed{}).Play(&s, self)
+	(OutedRed{}).Play(&s, s.Logger(), self)
 	if s.Value != 4 {
 		t.Errorf("Play() Value = %d, want 4 (3 printed + 1 marked-defender)", s.Value)
 	}

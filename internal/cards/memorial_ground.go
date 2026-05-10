@@ -10,23 +10,23 @@ import (
 )
 
 // Cost predicate reads s so variable-cost targets are gated on their current cost.
-func memorialGroundPlay(s *sim.TurnState, self *sim.CardState) {
+func memorialGroundPlay(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	if _, ok := s.RecycleFromGraveyardToTop(func(c sim.Card) bool {
 		return c.Types().IsAttackAction() && c.Cost(s) <= 2
 	}); ok {
-		s.LogRider(self, 0, "Recycled an attack action card to top of deck")
+		l.LogRider(self, 0, "Recycled an attack action card to top of deck")
 	}
-	s.Log(self, 0)
+	l.Log(self, 0)
 }
 
-func (MemorialGroundRed) Play(s *sim.TurnState, self *sim.CardState) {
-	memorialGroundPlay(s, self)
+func (MemorialGroundRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+	memorialGroundPlay(s, l, self)
 }
 
-func (MemorialGroundYellow) Play(s *sim.TurnState, self *sim.CardState) {
-	memorialGroundPlay(s, self)
+func (MemorialGroundYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+	memorialGroundPlay(s, l, self)
 }
 
-func (MemorialGroundBlue) Play(s *sim.TurnState, self *sim.CardState) {
-	memorialGroundPlay(s, self)
+func (MemorialGroundBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+	memorialGroundPlay(s, l, self)
 }

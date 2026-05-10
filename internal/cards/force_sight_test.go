@@ -11,7 +11,7 @@ import (
 func TestForceSight_NoAttackReturnsZero(t *testing.T) {
 	s := sim.TurnState{}
 	for _, c := range []sim.Card{ForceSightRed{}, ForceSightYellow{}, ForceSightBlue{}} {
-		c.Play(&s, &sim.CardState{Card: c})
+		c.Play(&s, s.Logger(), &sim.CardState{Card: c})
 		if got := s.Value; got != 0 {
 			t.Errorf("%s: Play() = %d, want 0", c.Name(), got)
 		}
@@ -21,7 +21,7 @@ func TestForceSight_NoAttackReturnsZero(t *testing.T) {
 // TestForceSight_NonAttackInRemainingFizzles: non-attack action fails the predicate.
 func TestForceSight_NonAttackInRemainingFizzles(t *testing.T) {
 	s := sim.TurnState{CardsRemaining: []*sim.CardState{{Card: testutils.GenericAction()}}}
-	(ForceSightRed{}).Play(&s, &sim.CardState{Card: ForceSightRed{}})
+	(ForceSightRed{}).Play(&s, s.Logger(), &sim.CardState{Card: ForceSightRed{}})
 	if got := s.Value; got != 0 {
 		t.Errorf("Play() = %d, want 0 (non-attack skipped)", got)
 	}
@@ -41,7 +41,7 @@ func TestForceSight_NextAttackReturnsBonus(t *testing.T) {
 	for _, tc := range cases {
 		target := &sim.CardState{Card: testutils.GenericAttack(0, 0)}
 		s := sim.TurnState{CardsRemaining: []*sim.CardState{target}}
-		tc.c.Play(&s, &sim.CardState{Card: tc.c})
+		tc.c.Play(&s, s.Logger(), &sim.CardState{Card: tc.c})
 		if got := s.Value; got != 0 {
 			t.Errorf("%s: Play() = %d, want 0 (granter returns 0; +N rides on target's BonusAttack)", tc.c.Name(), got)
 		}
@@ -58,7 +58,7 @@ func TestForceSight_HandPlaySkipsOpt(t *testing.T) {
 	a, b := testutils.NewStubCard("a"), testutils.NewStubCard("b")
 	for _, c := range []sim.Card{ForceSightRed{}, ForceSightYellow{}, ForceSightBlue{}} {
 		s := sim.NewTurnStateFromCards([]sim.Card{a, b}, nil)
-		c.Play(s, &sim.CardState{Card: c})
+		c.Play(s, s.Logger(), &sim.CardState{Card: c})
 		if s.Value != 0 {
 			t.Errorf("%s: Play() from hand Value = %d, want 0", c.Name(), s.Value)
 		}
@@ -77,7 +77,7 @@ func TestForceSight_ArsenalPlayCallsOpt2(t *testing.T) {
 	a, b := testutils.NewStubCard("a"), testutils.NewStubCard("b")
 	for _, c := range []sim.Card{ForceSightRed{}, ForceSightYellow{}, ForceSightBlue{}} {
 		s := sim.NewTurnStateFromCards([]sim.Card{a, b}, nil)
-		c.Play(s, &sim.CardState{Card: c, FromArsenal: true})
+		c.Play(s, s.Logger(), &sim.CardState{Card: c, FromArsenal: true})
 		if s.Value != 0 {
 			t.Errorf("%s: Play() from arsenal Value = %d, want 0", c.Name(), s.Value)
 		}

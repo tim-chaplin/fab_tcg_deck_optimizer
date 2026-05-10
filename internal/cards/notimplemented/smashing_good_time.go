@@ -18,27 +18,27 @@ import (
 
 // not implemented: on-hit item-destruction rider
 
-func (SmashingGoodTimeRed) Play(s *sim.TurnState, self *sim.CardState) {
+func (SmashingGoodTimeRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	if self.FromArsenal {
 		cards.GrantNextCardBonusAttack(s, 3, cards.IsAttackAction)
 	}
-	s.Log(self, 0)
+	l.Log(self, 0)
 }
 
 // not implemented: on-hit item-destruction rider
 
-func (SmashingGoodTimeYellow) Play(s *sim.TurnState, self *sim.CardState) {
+func (SmashingGoodTimeYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	if self.FromArsenal {
 		cards.GrantNextCardBonusAttack(s, 2, cards.IsAttackAction)
 	}
-	s.Log(self, 0)
+	l.Log(self, 0)
 }
 
 // not implemented: on-hit item-destruction rider
 
-func (SmashingGoodTimeBlue) Play(s *sim.TurnState, self *sim.CardState) {
+func (SmashingGoodTimeBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	if self.FromArsenal {
 		cards.GrantNextCardBonusAttack(s, 1, cards.IsAttackAction)
 	}
-	s.Log(self, 0)
+	l.Log(self, 0)
 }

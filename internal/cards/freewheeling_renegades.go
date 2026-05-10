@@ -12,20 +12,20 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
 
-func freewheelingRenegadesPlay(s *sim.TurnState, self *sim.CardState) {
+func freewheelingRenegadesPlay(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	self.BonusAttack -= 2
 	n := self.DealEffectiveAttack(s)
-	s.Log(self, n)
+	l.Log(self, n)
 }
 
-func (FreewheelingRenegadesRed) Play(s *sim.TurnState, self *sim.CardState) {
-	freewheelingRenegadesPlay(s, self)
+func (FreewheelingRenegadesRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+	freewheelingRenegadesPlay(s, l, self)
 }
 
-func (FreewheelingRenegadesYellow) Play(s *sim.TurnState, self *sim.CardState) {
-	freewheelingRenegadesPlay(s, self)
+func (FreewheelingRenegadesYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+	freewheelingRenegadesPlay(s, l, self)
 }
 
-func (FreewheelingRenegadesBlue) Play(s *sim.TurnState, self *sim.CardState) {
-	freewheelingRenegadesPlay(s, self)
+func (FreewheelingRenegadesBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+	freewheelingRenegadesPlay(s, l, self)
 }

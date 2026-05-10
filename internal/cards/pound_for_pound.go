@@ -17,22 +17,22 @@ import (
 
 // poundForPoundPlay grants self Dominate when the current hero opts into LowerHealthWanter,
 // then emits the chain step.
-func poundForPoundPlay(s *sim.TurnState, self *sim.CardState) {
+func poundForPoundPlay(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	if sim.HeroWantsLowerHealth() {
 		self.GrantedDominate = true
 	}
 	n := self.DealEffectiveAttack(s)
-	s.Log(self, n)
+	l.Log(self, n)
 }
 
-func (PoundForPoundRed) Play(s *sim.TurnState, self *sim.CardState) {
-	poundForPoundPlay(s, self)
+func (PoundForPoundRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+	poundForPoundPlay(s, l, self)
 }
 
-func (PoundForPoundYellow) Play(s *sim.TurnState, self *sim.CardState) {
-	poundForPoundPlay(s, self)
+func (PoundForPoundYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+	poundForPoundPlay(s, l, self)
 }
 
-func (PoundForPoundBlue) Play(s *sim.TurnState, self *sim.CardState) {
-	poundForPoundPlay(s, self)
+func (PoundForPoundBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+	poundForPoundPlay(s, l, self)
 }

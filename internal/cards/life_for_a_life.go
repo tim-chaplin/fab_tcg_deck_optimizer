@@ -18,28 +18,28 @@ const lifeForALifeHealValue = 1
 
 // lifeForALifeOnHit fires the printed "When this hits, gain 1{h}" rider. Top-level so
 // registration stays alloc-free.
-func lifeForALifeOnHit(s *sim.TurnState, self *sim.CardState, _ *sim.OnHitHandler) {
+func lifeForALifeOnHit(s *sim.TurnState, l sim.Logger, self *sim.CardState, _ *sim.OnHitHandler) {
 	s.AddValue(lifeForALifeHealValue)
-	s.LogRider(self, lifeForALifeHealValue, "On-hit gained 1 health")
+	l.LogRider(self, lifeForALifeHealValue, "On-hit gained 1 health")
 }
 
 func (LifeForALifeRed) GoAgain() bool { return sim.HeroWantsLowerHealth() }
-func (LifeForALifeRed) Play(s *sim.TurnState, self *sim.CardState) {
+func (LifeForALifeRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	n := self.DealEffectiveAttack(s)
-	s.Log(self, n)
+	l.Log(self, n)
 	self.RegisterOnHit(lifeForALifeOnHit)
 }
 
 func (LifeForALifeYellow) GoAgain() bool { return sim.HeroWantsLowerHealth() }
-func (LifeForALifeYellow) Play(s *sim.TurnState, self *sim.CardState) {
+func (LifeForALifeYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	n := self.DealEffectiveAttack(s)
-	s.Log(self, n)
+	l.Log(self, n)
 	self.RegisterOnHit(lifeForALifeOnHit)
 }
 
 func (LifeForALifeBlue) GoAgain() bool { return sim.HeroWantsLowerHealth() }
-func (LifeForALifeBlue) Play(s *sim.TurnState, self *sim.CardState) {
+func (LifeForALifeBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	n := self.DealEffectiveAttack(s)
-	s.Log(self, n)
+	l.Log(self, n)
 	self.RegisterOnHit(lifeForALifeOnHit)
 }

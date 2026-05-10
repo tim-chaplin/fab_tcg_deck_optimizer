@@ -21,9 +21,9 @@ func (soloBlocker) Defense() int        { return 2 }
 func (soloBlocker) Types() card.TypeSet {
 	return card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 }
-func (soloBlocker) GoAgain() bool               { return false }
-func (soloBlocker) Play(*TurnState, *CardState) {}
-func (soloBlocker) Block(s *TurnState, self *CardState) {
+func (soloBlocker) GoAgain() bool                       { return false }
+func (soloBlocker) Play(*TurnState, Logger, *CardState) {}
+func (soloBlocker) Block(s *TurnState, l Logger, self *CardState) {
 	plainCount := 0
 	for _, d := range s.Defenders {
 		if d.Types().IsDefenseReaction() {
@@ -51,9 +51,9 @@ func (togetherBlocker) Defense() int        { return 2 }
 func (togetherBlocker) Types() card.TypeSet {
 	return card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 }
-func (togetherBlocker) GoAgain() bool               { return false }
-func (togetherBlocker) Play(*TurnState, *CardState) {}
-func (togetherBlocker) Block(s *TurnState, self *CardState) {
+func (togetherBlocker) GoAgain() bool                       { return false }
+func (togetherBlocker) Play(*TurnState, Logger, *CardState) {}
+func (togetherBlocker) Block(s *TurnState, l Logger, self *CardState) {
 	plainCount := 0
 	for _, d := range s.Defenders {
 		if d.Types().IsDefenseReaction() {
@@ -80,8 +80,8 @@ func (plainBlocker) Defense() int        { return 2 }
 func (plainBlocker) Types() card.TypeSet {
 	return card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 }
-func (plainBlocker) GoAgain() bool               { return false }
-func (plainBlocker) Play(*TurnState, *CardState) {}
+func (plainBlocker) GoAgain() bool                       { return false }
+func (plainBlocker) Play(*TurnState, Logger, *CardState) {}
 
 // blockOneDR is a 1-defense Defense Reaction. Used to verify DRs alongside a plain blocker
 // don't satisfy "another plain block" for either Block-time pattern.
@@ -98,9 +98,9 @@ func (blockOneDR) Types() card.TypeSet {
 	return card.NewTypeSet(card.TypeGeneric, card.TypeDefenseReaction)
 }
 func (blockOneDR) GoAgain() bool { return false }
-func (blockOneDR) Play(s *TurnState, self *CardState) {
+func (blockOneDR) Play(s *TurnState, l Logger, self *CardState) {
 	n := self.DealEffectiveDefense(s)
-	s.Log(self, n)
+	l.Log(self, n)
 }
 
 // Tests that defendersDamage folds the alone-style Block hook's BonusDefense into the

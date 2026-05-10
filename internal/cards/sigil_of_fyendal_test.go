@@ -11,7 +11,7 @@ import (
 // when the sim fires the trigger next turn.
 func TestSigilOfFyendal_PlayRegistersStartOfTurnTrigger(t *testing.T) {
 	var s sim.TurnState
-	(SigilOfFyendalBlue{}).Play(&s, &sim.CardState{Card: SigilOfFyendalBlue{}})
+	(SigilOfFyendalBlue{}).Play(&s, s.Logger(), &sim.CardState{Card: SigilOfFyendalBlue{}})
 	if got := s.Value; got != 0 {
 		t.Errorf("Play() = %d, want 0 (1{h} gain deferred to trigger)", got)
 	}
@@ -30,11 +30,11 @@ func TestSigilOfFyendal_PlayRegistersStartOfTurnTrigger(t *testing.T) {
 // (the 1{h} gain, valued 1-to-1 with damage).
 func TestSigilOfFyendal_TriggerHandlerCredits1Damage(t *testing.T) {
 	var s sim.TurnState
-	(SigilOfFyendalBlue{}).Play(&s, &sim.CardState{Card: SigilOfFyendalBlue{}})
+	(SigilOfFyendalBlue{}).Play(&s, s.Logger(), &sim.CardState{Card: SigilOfFyendalBlue{}})
 	fire := sim.NewTurnStateFromCards(nil, nil)
 	fire.Auras = append(fire.Auras, s.Auras[0])
 	fire.SetCurrentAuraIdxForTesting(0)
-	fire.Auras[0].Handler(fire, &fire.Auras[0].Trigger, &fire.Auras[0])
+	fire.Auras[0].Handler(fire, fire.Logger(), &fire.Auras[0].Trigger, &fire.Auras[0])
 	if fire.Value != 1 {
 		t.Errorf("Handler Value = %d, want 1", fire.Value)
 	}

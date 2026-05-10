@@ -12,21 +12,21 @@ import (
 
 // not implemented: defense-time instant activated ability
 
-func (c RallyTheCoastGuardRed) Play(s *sim.TurnState, self *sim.CardState) {
+func (c RallyTheCoastGuardRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	n := self.DealEffectiveAttack(s)
-	s.Log(self, n)
+	l.Log(self, n)
 }
 
 // not implemented: defense-time instant activated ability
 
-func (c RallyTheCoastGuardYellow) Play(s *sim.TurnState, self *sim.CardState) {
+func (c RallyTheCoastGuardYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	n := self.DealEffectiveAttack(s)
-	s.Log(self, n)
+	l.Log(self, n)
 }
 
 // not implemented: defense-time instant activated ability
 
-func (c RallyTheCoastGuardBlue) Play(s *sim.TurnState, self *sim.CardState) {
+func (c RallyTheCoastGuardBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	n := self.DealEffectiveAttack(s)
-	s.Log(self, n)
+	l.Log(self, n)
 }

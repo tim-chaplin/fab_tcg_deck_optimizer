@@ -14,7 +14,7 @@ import (
 
 // reekOfCorruptionApplyRider registers the on-hit discard rider when the aura
 // precondition is satisfied.
-func reekOfCorruptionApplyRider(s *sim.TurnState, self *sim.CardState) {
+func reekOfCorruptionApplyRider(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	if !s.HasPlayedOrCreatedAura() {
 		return
 	}
@@ -23,25 +23,25 @@ func reekOfCorruptionApplyRider(s *sim.TurnState, self *sim.CardState) {
 
 // reekOfCorruptionOnHit fires the conditional "When this hits a hero, they discard a card"
 // rider. Top-level so registration stays alloc-free.
-func reekOfCorruptionOnHit(s *sim.TurnState, self *sim.CardState, _ *sim.OnHitHandler) {
+func reekOfCorruptionOnHit(s *sim.TurnState, l sim.Logger, self *sim.CardState, _ *sim.OnHitHandler) {
 	s.AddValue(sim.DiscardValue)
-	s.LogRider(self, sim.DiscardValue, "On-hit discarded a card")
+	l.LogRider(self, sim.DiscardValue, "On-hit discarded a card")
 }
 
-func (ReekOfCorruptionRed) Play(s *sim.TurnState, self *sim.CardState) {
+func (ReekOfCorruptionRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	n := self.DealEffectiveAttack(s)
-	s.Log(self, n)
-	reekOfCorruptionApplyRider(s, self)
+	l.Log(self, n)
+	reekOfCorruptionApplyRider(s, l, self)
 }
 
-func (ReekOfCorruptionYellow) Play(s *sim.TurnState, self *sim.CardState) {
+func (ReekOfCorruptionYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	n := self.DealEffectiveAttack(s)
-	s.Log(self, n)
-	reekOfCorruptionApplyRider(s, self)
+	l.Log(self, n)
+	reekOfCorruptionApplyRider(s, l, self)
 }
 
-func (ReekOfCorruptionBlue) Play(s *sim.TurnState, self *sim.CardState) {
+func (ReekOfCorruptionBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	n := self.DealEffectiveAttack(s)
-	s.Log(self, n)
-	reekOfCorruptionApplyRider(s, self)
+	l.Log(self, n)
+	reekOfCorruptionApplyRider(s, l, self)
 }

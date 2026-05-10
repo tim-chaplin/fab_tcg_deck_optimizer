@@ -13,19 +13,19 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
 
-func cutDownToSizePlay(s *sim.TurnState, self *sim.CardState) {
+func cutDownToSizePlay(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	n := self.DealEffectiveAttack(s)
-	s.Log(self, n)
+	l.Log(self, n)
 }
 
-func (CutDownToSizeRed) Play(s *sim.TurnState, self *sim.CardState) {
-	cutDownToSizePlay(s, self)
+func (CutDownToSizeRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+	cutDownToSizePlay(s, l, self)
 }
 
-func (CutDownToSizeYellow) Play(s *sim.TurnState, self *sim.CardState) {
-	cutDownToSizePlay(s, self)
+func (CutDownToSizeYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+	cutDownToSizePlay(s, l, self)
 }
 
-func (CutDownToSizeBlue) Play(s *sim.TurnState, self *sim.CardState) {
-	cutDownToSizePlay(s, self)
+func (CutDownToSizeBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+	cutDownToSizePlay(s, l, self)
 }

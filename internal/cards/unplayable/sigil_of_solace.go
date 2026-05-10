@@ -8,8 +8,8 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
 
-func (SigilOfSolaceRed) Play(s *sim.TurnState, self *sim.CardState) { s.Log(self, 0) }
+func (SigilOfSolaceRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) { l.Log(self, 0) }
 
-func (SigilOfSolaceYellow) Play(s *sim.TurnState, self *sim.CardState) { s.Log(self, 0) }
+func (SigilOfSolaceYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) { l.Log(self, 0) }
 
-func (SigilOfSolaceBlue) Play(s *sim.TurnState, self *sim.CardState) { s.Log(self, 0) }
+func (SigilOfSolaceBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) { l.Log(self, 0) }

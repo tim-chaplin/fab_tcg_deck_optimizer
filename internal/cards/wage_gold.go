@@ -10,19 +10,25 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
 
-func wageGoldOnHit(s *sim.TurnState, self *sim.CardState, _ *sim.OnHitHandler) {
+func wageGoldOnHit(s *sim.TurnState, l sim.Logger, self *sim.CardState, _ *sim.OnHitHandler) {
 	s.CreateGold(1)
-	s.LogRider(self, 0, "On-hit won wager")
+	l.LogRider(self, 0, "On-hit won wager")
 }
 
-func wageGoldPlay(s *sim.TurnState, self *sim.CardState) {
+func wageGoldPlay(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	n := self.DealEffectiveAttack(s)
-	s.Log(self, n)
+	l.Log(self, n)
 	self.RegisterOnHit(wageGoldOnHit)
 }
 
-func (WageGoldRed) Play(s *sim.TurnState, self *sim.CardState) { wageGoldPlay(s, self) }
+func (WageGoldRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+	wageGoldPlay(s, l, self)
+}
 
-func (WageGoldYellow) Play(s *sim.TurnState, self *sim.CardState) { wageGoldPlay(s, self) }
+func (WageGoldYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+	wageGoldPlay(s, l, self)
+}
 
-func (WageGoldBlue) Play(s *sim.TurnState, self *sim.CardState) { wageGoldPlay(s, self) }
+func (WageGoldBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+	wageGoldPlay(s, l, self)
+}

@@ -13,19 +13,19 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
 
-func gravekeepingPlay(s *sim.TurnState, self *sim.CardState) {
+func gravekeepingPlay(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	n := self.DealEffectiveAttack(s)
-	s.Log(self, n)
+	l.Log(self, n)
 }
 
-func (GravekeepingRed) Play(s *sim.TurnState, self *sim.CardState) {
-	gravekeepingPlay(s, self)
+func (GravekeepingRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+	gravekeepingPlay(s, l, self)
 }
 
-func (GravekeepingYellow) Play(s *sim.TurnState, self *sim.CardState) {
-	gravekeepingPlay(s, self)
+func (GravekeepingYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+	gravekeepingPlay(s, l, self)
 }
 
-func (GravekeepingBlue) Play(s *sim.TurnState, self *sim.CardState) {
-	gravekeepingPlay(s, self)
+func (GravekeepingBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+	gravekeepingPlay(s, l, self)
 }

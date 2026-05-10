@@ -10,7 +10,7 @@ import (
 func TestPerformanceBonus_RegistersOnHit(t *testing.T) {
 	s := sim.NewTurnStateFromCards(nil, nil)
 	self := &sim.CardState{Card: PerformanceBonusBlue{}}
-	(PerformanceBonusBlue{}).Play(s, self)
+	(PerformanceBonusBlue{}).Play(s, s.Logger(), self)
 	if len(self.OnHit) != 1 {
 		t.Fatalf("OnHit handlers = %d, want 1 (gold-create rider registered)", len(self.OnHit))
 	}
@@ -20,7 +20,7 @@ func TestPerformanceBonus_RegistersOnHit(t *testing.T) {
 func TestPerformanceBonus_ArsenalGrantsGoAgain(t *testing.T) {
 	s := sim.NewTurnStateFromCards(nil, nil)
 	self := &sim.CardState{Card: PerformanceBonusRed{}, FromArsenal: true}
-	(PerformanceBonusRed{}).Play(s, self)
+	(PerformanceBonusRed{}).Play(s, s.Logger(), self)
 	if !self.GrantedGoAgain {
 		t.Fatalf("GrantedGoAgain = false, want true (played from arsenal)")
 	}
@@ -30,7 +30,7 @@ func TestPerformanceBonus_ArsenalGrantsGoAgain(t *testing.T) {
 func TestPerformanceBonus_NonArsenalNoGoAgain(t *testing.T) {
 	s := sim.NewTurnStateFromCards(nil, nil)
 	self := &sim.CardState{Card: PerformanceBonusRed{}, FromArsenal: false}
-	(PerformanceBonusRed{}).Play(s, self)
+	(PerformanceBonusRed{}).Play(s, s.Logger(), self)
 	if self.GrantedGoAgain {
 		t.Fatalf("GrantedGoAgain = true with FromArsenal=false, want false")
 	}

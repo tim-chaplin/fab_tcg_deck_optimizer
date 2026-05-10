@@ -11,28 +11,28 @@ import (
 
 // fyendalsFightingSpiritApplyRider emits the 1{h} gain as a sub-line under self when the
 // current hero opts into LowerHealthWanter.
-func fyendalsFightingSpiritApplyRider(s *sim.TurnState, self *sim.CardState) {
+func fyendalsFightingSpiritApplyRider(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	if !sim.HeroWantsLowerHealth() {
 		return
 	}
 	s.AddValue(1)
-	s.LogRider(self, 1, "Gained 1 health (lower health than opposing hero)")
+	l.LogRider(self, 1, "Gained 1 health (lower health than opposing hero)")
 }
 
-func (FyendalsFightingSpiritRed) Play(s *sim.TurnState, self *sim.CardState) {
+func (FyendalsFightingSpiritRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	n := self.DealEffectiveAttack(s)
-	s.Log(self, n)
-	fyendalsFightingSpiritApplyRider(s, self)
+	l.Log(self, n)
+	fyendalsFightingSpiritApplyRider(s, l, self)
 }
 
-func (FyendalsFightingSpiritYellow) Play(s *sim.TurnState, self *sim.CardState) {
+func (FyendalsFightingSpiritYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	n := self.DealEffectiveAttack(s)
-	s.Log(self, n)
-	fyendalsFightingSpiritApplyRider(s, self)
+	l.Log(self, n)
+	fyendalsFightingSpiritApplyRider(s, l, self)
 }
 
-func (FyendalsFightingSpiritBlue) Play(s *sim.TurnState, self *sim.CardState) {
+func (FyendalsFightingSpiritBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	n := self.DealEffectiveAttack(s)
-	s.Log(self, n)
-	fyendalsFightingSpiritApplyRider(s, self)
+	l.Log(self, n)
+	fyendalsFightingSpiritApplyRider(s, l, self)
 }

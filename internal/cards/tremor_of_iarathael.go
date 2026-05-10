@@ -15,22 +15,22 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
 
-func tremorOfIArathaelPlay(s *sim.TurnState, self *sim.CardState) {
+func tremorOfIArathaelPlay(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	if s.CardBanished {
 		self.BonusAttack += 2
 	}
 	n := self.DealEffectiveAttack(s)
-	s.Log(self, n)
+	l.Log(self, n)
 }
 
-func (TremorOfIArathaelRed) Play(s *sim.TurnState, self *sim.CardState) {
-	tremorOfIArathaelPlay(s, self)
+func (TremorOfIArathaelRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+	tremorOfIArathaelPlay(s, l, self)
 }
 
-func (TremorOfIArathaelYellow) Play(s *sim.TurnState, self *sim.CardState) {
-	tremorOfIArathaelPlay(s, self)
+func (TremorOfIArathaelYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+	tremorOfIArathaelPlay(s, l, self)
 }
 
-func (TremorOfIArathaelBlue) Play(s *sim.TurnState, self *sim.CardState) {
-	tremorOfIArathaelPlay(s, self)
+func (TremorOfIArathaelBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+	tremorOfIArathaelPlay(s, l, self)
 }

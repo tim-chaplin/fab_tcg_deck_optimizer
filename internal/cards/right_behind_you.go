@@ -15,14 +15,14 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
 
-func rightBehindYouPlay(s *sim.TurnState, self *sim.CardState) {
+func rightBehindYouPlay(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	n := self.DealEffectiveAttack(s)
-	s.Log(self, n)
+	l.Log(self, n)
 }
 
 // rightBehindYouBlock fires the +1{d} together-bonus when at least two plain blockers
 // share the defenders slot. Short-circuits on the second non-DR sighting.
-func rightBehindYouBlock(s *sim.TurnState, self *sim.CardState) {
+func rightBehindYouBlock(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	plainCount := 0
 	for _, d := range s.Defenders {
 		if d.Types().IsDefenseReaction() {
@@ -36,23 +36,23 @@ func rightBehindYouBlock(s *sim.TurnState, self *sim.CardState) {
 	}
 }
 
-func (RightBehindYouRed) Block(s *sim.TurnState, self *sim.CardState) {
-	rightBehindYouBlock(s, self)
+func (RightBehindYouRed) Block(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+	rightBehindYouBlock(s, l, self)
 }
-func (RightBehindYouRed) Play(s *sim.TurnState, self *sim.CardState) {
-	rightBehindYouPlay(s, self)
-}
-
-func (RightBehindYouYellow) Block(s *sim.TurnState, self *sim.CardState) {
-	rightBehindYouBlock(s, self)
-}
-func (RightBehindYouYellow) Play(s *sim.TurnState, self *sim.CardState) {
-	rightBehindYouPlay(s, self)
+func (RightBehindYouRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+	rightBehindYouPlay(s, l, self)
 }
 
-func (RightBehindYouBlue) Block(s *sim.TurnState, self *sim.CardState) {
-	rightBehindYouBlock(s, self)
+func (RightBehindYouYellow) Block(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+	rightBehindYouBlock(s, l, self)
 }
-func (RightBehindYouBlue) Play(s *sim.TurnState, self *sim.CardState) {
-	rightBehindYouPlay(s, self)
+func (RightBehindYouYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+	rightBehindYouPlay(s, l, self)
+}
+
+func (RightBehindYouBlue) Block(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+	rightBehindYouBlock(s, l, self)
+}
+func (RightBehindYouBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+	rightBehindYouPlay(s, l, self)
 }

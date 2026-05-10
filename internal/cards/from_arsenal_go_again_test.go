@@ -20,12 +20,14 @@ func TestFromArsenalGoAgain_GrantsOnArsenalCopyOnly(t *testing.T) {
 	}
 	for _, c := range cards {
 		hand := &sim.CardState{Card: c}
-		c.Play(&sim.TurnState{}, hand)
+		s := sim.NewTurnState(nil, nil)
+		c.Play(s, s.Logger(), hand)
 		if hand.GrantedGoAgain {
 			t.Errorf("%s: GrantedGoAgain = true with FromArsenal=false, want false", c.Name())
 		}
 		arsenal := &sim.CardState{Card: c, FromArsenal: true}
-		c.Play(&sim.TurnState{}, arsenal)
+		s2 := sim.NewTurnState(nil, nil)
+		c.Play(s2, s2.Logger(), arsenal)
 		if !arsenal.GrantedGoAgain {
 			t.Errorf("%s: GrantedGoAgain = false with FromArsenal=true, want true", c.Name())
 		}

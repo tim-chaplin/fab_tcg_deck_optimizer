@@ -22,13 +22,11 @@ type Hero interface {
 	Class() card.CardType
 	// OnCardPlayed is called by the hand evaluator before each card's Play() resolves so the
 	// hero's printed ability fires ahead of the card itself (matching FaB stack order). Heroes
-	// that contribute damage-equivalent (e.g. a Runechant token) credit it through
-	// s.AddPreTriggerLogEntry — hero abilities are pre-triggers — which both writes the
-	// trigger's log line and bumps s.Value. The int return is informational and discarded by
-	// the dispatcher — it's the value AddPreTriggerLogEntry already credited, surfaced so
-	// callers can fold the call into a single return statement. Heroes without a triggered
-	// ability return 0.
-	OnCardPlayed(played Card, s *TurnState) int
+	// that contribute damage-equivalent (e.g. a Runechant token) credit it through l (the
+	// recording Logger the chain runner threads through) — hero abilities are pre-triggers
+	// — and bump s.Value alongside. The int return is informational and discarded by the
+	// dispatcher; heroes without a triggered ability return 0.
+	OnCardPlayed(played Card, s *TurnState, l Logger) int
 	// Opt is the hero's heuristic for the FaB Opt N keyword. TurnState.Opt(N) pops up to N
 	// cards from the top of the deck and hands them here; the handler returns a (top,
 	// bottom) split. The top list is placed back on top of the deck (in returned order)

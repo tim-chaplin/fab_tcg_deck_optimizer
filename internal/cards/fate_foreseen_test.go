@@ -23,7 +23,7 @@ func TestFateForeseen_BlocksAndCallsOpt1(t *testing.T) {
 		top := testutils.NewStubCard("top")
 		s := sim.NewTurnStateFromCards([]sim.Card{top}, nil)
 		s.IncomingDamage = 10
-		tc.c.Play(s, &sim.CardState{Card: tc.c})
+		tc.c.Play(s, s.Logger(), &sim.CardState{Card: tc.c})
 		if s.Value != tc.block {
 			t.Errorf("%s: Play(IncomingDamage=10) Value = %d, want %d (block only)",
 				tc.c.Name(), s.Value, tc.block)

@@ -16,6 +16,6 @@ func (ThrustRed) ARTargetAllowed(c sim.Card, _ int8) bool {
 	t := c.Types()
 	return t.Has(card.TypeSword) && t.IsAttack()
 }
-func (ThrustRed) Play(s *sim.TurnState, self *sim.CardState) {
-	sim.GrantAttackReactionBuff(s, self, 3)
+func (ThrustRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+	sim.GrantAttackReactionBuff(s, l, self, 3)
 }

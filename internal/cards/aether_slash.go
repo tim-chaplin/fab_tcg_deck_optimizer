@@ -12,30 +12,30 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
 
-func (AetherSlashRed) Play(s *sim.TurnState, self *sim.CardState) {
+func (AetherSlashRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	n := self.DealEffectiveAttack(s)
-	s.Log(self, n)
-	aetherSlashApplyRider(s, self)
+	l.Log(self, n)
+	aetherSlashApplyRider(s, l, self)
 }
 
-func (AetherSlashYellow) Play(s *sim.TurnState, self *sim.CardState) {
+func (AetherSlashYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	n := self.DealEffectiveAttack(s)
-	s.Log(self, n)
-	aetherSlashApplyRider(s, self)
+	l.Log(self, n)
+	aetherSlashApplyRider(s, l, self)
 }
 
-func (AetherSlashBlue) Play(s *sim.TurnState, self *sim.CardState) {
+func (AetherSlashBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	n := self.DealEffectiveAttack(s)
-	s.Log(self, n)
-	aetherSlashApplyRider(s, self)
+	l.Log(self, n)
+	aetherSlashApplyRider(s, l, self)
 }
 
 // aetherSlashApplyRider deals 1 arcane and emits the rider sub-line when a non-attack action
 // is among the pitched cards the runner attributed to paying for this Aether Slash.
-func aetherSlashApplyRider(s *sim.TurnState, self *sim.CardState) {
+func aetherSlashApplyRider(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	for _, p := range self.PitchedToPlay {
 		if p.Types().IsNonAttackAction() {
-			s.DealArcaneDamage(self, 1)
+			s.DealArcaneDamage(l, self, 1)
 			return
 		}
 	}

@@ -10,7 +10,7 @@ import (
 )
 
 func (CalmingBreezeRed) DefensiveInstant() {}
-func (CalmingBreezeRed) Play(s *sim.TurnState, self *sim.CardState) {
+func (CalmingBreezeRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	n := self.DealEffectiveDefense(s)
-	s.Log(self, n)
+	l.Log(self, n)
 }

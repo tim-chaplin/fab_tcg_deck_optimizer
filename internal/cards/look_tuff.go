@@ -11,16 +11,16 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
 
-func lookTuffPlay(s *sim.TurnState, self *sim.CardState) {
+func lookTuffPlay(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	if self.Mode == 0 {
 		self.BonusAttack -= 1
 	}
 	n := self.DealEffectiveAttack(s)
-	s.Log(self, n)
+	l.Log(self, n)
 }
 
 func (LookTuffRed) Modes() int              { return 2 }
 func (LookTuffRed) ModalCost(mode int8) int { return 3 + int(mode) }
-func (LookTuffRed) Play(s *sim.TurnState, self *sim.CardState) {
-	lookTuffPlay(s, self)
+func (LookTuffRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+	lookTuffPlay(s, l, self)
 }

@@ -12,4 +12,6 @@ import (
 // not implemented: self-destroys on play-from-banished → banish a named card from opposing
 // graveyards
 
-func (TalismanOfCremationBlue) Play(s *sim.TurnState, self *sim.CardState) { s.Log(self, 0) }
+func (TalismanOfCremationBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+	l.Log(self, 0)
+}

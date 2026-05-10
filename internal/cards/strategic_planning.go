@@ -14,33 +14,33 @@ import (
 
 // drawOneAtEndOfTurn is the end-of-turn TriggerHandler that fires Strategic Planning's
 // deferred draw. Top-level so the registration stays alloc-free.
-func drawOneAtEndOfTurn(s *sim.TurnState, _ *sim.Trigger, _ *sim.Aura) {
+func drawOneAtEndOfTurn(s *sim.TurnState, l sim.Logger, _ *sim.Trigger, _ *sim.Aura) {
 	s.DrawOne()
 }
 
-func strategicPlanningPlay(s *sim.TurnState, self *sim.CardState) {
+func strategicPlanningPlay(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	if _, ok := s.RecycleFromGraveyardToBottom(func(c sim.Card) bool {
 		return c.Types().Has(card.TypeAction) && c.Cost(s) <= 2
 	}); ok {
-		s.LogRider(self, 0, "Recycled an action card to bottom of deck")
+		l.LogRider(self, 0, "Recycled an action card to bottom of deck")
 	}
 	s.AddTrigger(sim.Trigger{
 		Source:      self.Card,
 		TriggerType: sim.TriggerEndOfTurn,
 		Handler:     drawOneAtEndOfTurn,
 	})
-	s.LogRider(self, 0, "End-phase draw queued")
-	s.Log(self, 0)
+	l.LogRider(self, 0, "End-phase draw queued")
+	l.Log(self, 0)
 }
 
-func (StrategicPlanningRed) Play(s *sim.TurnState, self *sim.CardState) {
-	strategicPlanningPlay(s, self)
+func (StrategicPlanningRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+	strategicPlanningPlay(s, l, self)
 }
 
-func (StrategicPlanningYellow) Play(s *sim.TurnState, self *sim.CardState) {
-	strategicPlanningPlay(s, self)
+func (StrategicPlanningYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+	strategicPlanningPlay(s, l, self)
 }
 
-func (StrategicPlanningBlue) Play(s *sim.TurnState, self *sim.CardState) {
-	strategicPlanningPlay(s, self)
+func (StrategicPlanningBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+	strategicPlanningPlay(s, l, self)
 }

@@ -11,20 +11,20 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
 
-func (c SigilOfDeadwoodBlue) Play(s *sim.TurnState, self *sim.CardState) {
+func (c SigilOfDeadwoodBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	s.AddAura(sim.Aura{
 		Trigger: sim.Trigger{TriggerType: sim.TriggerStartOfTurn, Handler: sigilOfDeadwoodAuraHandler},
 		Self:    sim.CardOrTokenType{Card: c},
 		Count:   1,
 	})
-	s.Log(self, 0)
+	l.Log(self, 0)
 }
 
 // sigilOfDeadwoodAuraHandler creates 1 runechant on the next-turn fire and destroys the
 // aura. Top-level so the Aura.Handler assignment doesn't allocate a closure.
-func sigilOfDeadwoodAuraHandler(s *sim.TurnState, _ *sim.Trigger, a *sim.Aura) {
+func sigilOfDeadwoodAuraHandler(s *sim.TurnState, l sim.Logger, _ *sim.Trigger, a *sim.Aura) {
 	name := a.Self.DisplayName()
 	s.CreateRunechants(1)
-	s.LogPostTrigger(name, "Created a runechant", 1)
+	l.LogPostTrigger(name, "Created a runechant", 1)
 	s.DestroyAura(a, true)
 }

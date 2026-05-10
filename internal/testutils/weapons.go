@@ -39,9 +39,9 @@ func (ClubWeaponAbility) Attack() int             { return 1 }
 func (ClubWeaponAbility) Defense() int            { return 0 }
 func (ClubWeaponAbility) Types() card.TypeSet     { return clubWeaponAbilityTypes }
 func (ClubWeaponAbility) GoAgain() bool           { return false }
-func (ClubWeaponAbility) Play(s *sim.TurnState, self *sim.CardState) {
+func (ClubWeaponAbility) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	n := self.DealEffectiveAttack(s)
-	s.Log(self, n)
+	l.Log(self, n)
 }
 
 var hammerWeaponAbilityTypes = card.NewTypeSet(card.TypeGeneric, card.TypeWeapon, card.TypeHammer, card.TypeOneHand, card.TypeAttack)
@@ -60,7 +60,7 @@ func (HammerWeaponAbility) Attack() int             { return 1 }
 func (HammerWeaponAbility) Defense() int            { return 0 }
 func (HammerWeaponAbility) Types() card.TypeSet     { return hammerWeaponAbilityTypes }
 func (HammerWeaponAbility) GoAgain() bool           { return false }
-func (HammerWeaponAbility) Play(s *sim.TurnState, self *sim.CardState) {
+func (HammerWeaponAbility) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	n := self.DealEffectiveAttack(s)
-	s.Log(self, n)
+	l.Log(self, n)
 }

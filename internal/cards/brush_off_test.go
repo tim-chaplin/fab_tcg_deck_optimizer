@@ -20,7 +20,7 @@ func TestBrushOff_PreventsCap(t *testing.T) {
 	for _, tc := range cases {
 		s := sim.TurnState{IncomingDamage: 5}
 		self := &sim.CardState{Card: tc.card}
-		tc.card.Play(&s, self)
+		tc.card.Play(&s, s.Logger(), self)
 		if s.Value != tc.want {
 			t.Errorf("%s: Value = %d, want %d", tc.card.Name(), s.Value, tc.want)
 		}
@@ -34,7 +34,7 @@ func TestBrushOff_PreventsCap(t *testing.T) {
 func TestBrushOff_CapsAtIncoming(t *testing.T) {
 	s := sim.TurnState{IncomingDamage: 1}
 	self := &sim.CardState{Card: BrushOffRed{}}
-	BrushOffRed{}.Play(&s, self)
+	BrushOffRed{}.Play(&s, s.Logger(), self)
 	if s.Value != 1 {
 		t.Errorf("Value = %d, want 1 (capped at IncomingDamage)", s.Value)
 	}

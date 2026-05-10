@@ -10,7 +10,7 @@ import (
 // Tests that Relentless Pursuit always marks the opposing hero on Play.
 func TestRelentlessPursuit_MarksOpponent(t *testing.T) {
 	s := sim.NewTurnStateFromCards(nil, nil)
-	(RelentlessPursuitBlue{}).Play(s, &sim.CardState{Card: RelentlessPursuitBlue{}})
+	(RelentlessPursuitBlue{}).Play(s, s.Logger(), &sim.CardState{Card: RelentlessPursuitBlue{}})
 	if !s.OpponentMarked {
 		t.Errorf("OpponentMarked = false after Play, want true")
 	}
@@ -21,7 +21,7 @@ func TestRelentlessPursuit_MarksOpponent(t *testing.T) {
 func TestRelentlessPursuit_NoRecycleWithoutPriorAttack(t *testing.T) {
 	self := &sim.CardState{Card: RelentlessPursuitBlue{}}
 	s := sim.NewTurnStateFromCards(nil, nil)
-	(RelentlessPursuitBlue{}).Play(s, self)
+	(RelentlessPursuitBlue{}).Play(s, s.Logger(), self)
 	if self.SkipGraveyard {
 		t.Error("SkipGraveyard = true without a prior attack, want false")
 	}
@@ -33,7 +33,7 @@ func TestRelentlessPursuit_RecyclesAfterPriorAttack(t *testing.T) {
 	self := &sim.CardState{Card: RelentlessPursuitBlue{}}
 	s := sim.NewTurnStateFromCards(nil, nil)
 	s.CardsPlayed = []sim.Card{testutils.GenericAttack(0, 3)}
-	(RelentlessPursuitBlue{}).Play(s, self)
+	(RelentlessPursuitBlue{}).Play(s, s.Logger(), self)
 	if !self.SkipGraveyard {
 		t.Fatal("SkipGraveyard = false after prior attack, want true")
 	}

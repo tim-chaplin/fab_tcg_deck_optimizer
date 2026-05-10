@@ -12,4 +12,6 @@ import (
 // not implemented: self-destroys when an attack gains exactly +1{p} in the reaction step →
 // grants go again
 
-func (TalismanOfFeatherfootYellow) Play(s *sim.TurnState, self *sim.CardState) { s.Log(self, 0) }
+func (TalismanOfFeatherfootYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+	l.Log(self, 0)
+}

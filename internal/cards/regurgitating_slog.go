@@ -10,25 +10,25 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
 
-func regurgitatingSlogPlay(s *sim.TurnState, self *sim.CardState) {
+func regurgitatingSlogPlay(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	if _, ok := s.BanishFromGraveyard(isSloggism); ok {
 		self.GrantedDominate = true
-		s.LogRider(self, 0, "Banished a Sloggism, gained dominate")
+		l.LogRider(self, 0, "Banished a Sloggism, gained dominate")
 	}
 	n := self.DealEffectiveAttack(s)
-	s.Log(self, n)
+	l.Log(self, n)
 }
 
 func isSloggism(c sim.Card) bool { return c.Name() == "Sloggism" }
 
-func (RegurgitatingSlogRed) Play(s *sim.TurnState, self *sim.CardState) {
-	regurgitatingSlogPlay(s, self)
+func (RegurgitatingSlogRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+	regurgitatingSlogPlay(s, l, self)
 }
 
-func (RegurgitatingSlogYellow) Play(s *sim.TurnState, self *sim.CardState) {
-	regurgitatingSlogPlay(s, self)
+func (RegurgitatingSlogYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+	regurgitatingSlogPlay(s, l, self)
 }
 
-func (RegurgitatingSlogBlue) Play(s *sim.TurnState, self *sim.CardState) {
-	regurgitatingSlogPlay(s, self)
+func (RegurgitatingSlogBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+	regurgitatingSlogPlay(s, l, self)
 }

@@ -140,10 +140,11 @@ type TurnState struct {
 	// logger is the per-turn log sink. Nil during the eval-loop's "find best" pass so
 	// every Log* helper short-circuits at the call site (no fmt.Sprintf, no DisplayName,
 	// no append); points at bufs.logger during the rare "replay best turn" pass that
-	// materialises the printout. Cards reach it through the Log / LogRider /
-	// LogPostTrigger family below; external readers (tests, format layer entry points)
-	// use the LogEntries accessor.
-	logger *turnlogger.TurnLogger
+	// materialises the printout. The chain runner threads this same value into
+	// Card.Play / Block / OnHitHandler.Fire / TriggerHandler / Hero.OnCardPlayed as
+	// the explicit Logger arg cards write through; framework methods that need direct
+	// access (defendersDamage's per-DR seed, the LogEntries accessor) read it here.
+	logger *simLogger
 	// CardsPlayed is the sequence of cards played (as attacks) this turn, in order.
 	// Populated by the sim after each Play returns so later cards this turn see what was
 	// played before them.
@@ -319,7 +320,7 @@ func NewTurnStateFromSpec(spec TurnStateSpec) TurnState {
 		OpponentMarked: spec.OpponentMarked,
 		cacheable:      true,
 		currentAuraIdx: -1,
-		logger:         turnlogger.New(),
+		logger:         newSimLogger(turnlogger.New()),
 	}
 }
 
@@ -400,7 +401,7 @@ func (s *TurnState) RecycleToDeckBottom(self *CardState) {
 //
 // Panics if the handler's combined output isn't exactly the input multiset. The contract
 // is that Opt only re-orders cards; adding, dropping, or substituting any card is a bug.
-func (s *TurnState) Opt(n int) {
+func (s *TurnState) Opt(l Logger, n int) {
 	s.cacheable = false
 	if n <= 0 || s.deck.Size() == 0 {
 		return
@@ -433,10 +434,10 @@ func (s *TurnState) Opt(n int) {
 		fmt.Printf("Opt(%d): cards=%s -> top=%s bottom=%s\n",
 			n, formatCardList(cards), formatCardList(top), formatCardList(bottom))
 	}
-	if s.logger == nil {
+	if l == nil {
 		return
 	}
-	s.Logf(0, "Opted %s, put %s on top, put %s on bottom",
+	l.Logf(0, "Opted %s, put %s on top, put %s on bottom",
 		formatCardList(cards), formatCardList(top), formatCardList(bottom))
 }
 
@@ -570,7 +571,7 @@ func NewTurnState(d *deck.Deck, graveyard []Card) *TurnState {
 	if d == nil {
 		d = &deck.Deck{}
 	}
-	return &TurnState{deck: d, graveyard: graveyard, cacheable: true, currentAuraIdx: -1, logger: turnlogger.New()}
+	return &TurnState{deck: d, graveyard: graveyard, cacheable: true, currentAuraIdx: -1, logger: newSimLogger(turnlogger.New())}
 }
 
 // NewTurnStateFromCards is a test-only constructor that wraps a Card slice in a fresh
@@ -600,67 +601,11 @@ func (s *TurnState) AddValue(n int) {
 // logger field directly.
 func (s *TurnState) LogEntries() []LogEntry { return s.logger.Entries() }
 
-// Log appends the canonical "<DisplayName>: <VERB>[ from arsenal]" main-line chain-step
-// entry for self, with display suffix "(+n)". Use for both attacks (n = effective attack)
-// and non-attack chain steps (n = 0). Pair with AddValue or self.DealEffectiveAttack /
-// self.DealEffectiveDefense on a separate line so the Log call itself has no side effects.
-// ChainStepText is deferred into the recording branch — a nil logger short-circuits the
-// computation.
-func (s *TurnState) Log(self *CardState, n int) {
-	if s.logger == nil {
-		return
-	}
-	s.logger.AppendChainStep(ChainStepText(self), n)
-}
-
-// Logf appends a free-form main-line chain-step entry with formatted text. Use when no
-// CardState applies (Opt's "Opted X, put Y on top, put Z on bottom").
-func (s *TurnState) Logf(n int, format string, args ...any) {
-	s.logger.AppendChainStepf(n, format, args...)
-}
-
-// LogRider appends an indented post-trigger sub-line under self's chain entry. Use for
-// "Created a runechant", "Gained 3 health (graveyard trigger)", "On-hit discarded a card",
-// etc. Pair with AddValue on a separate preceding line when n > 0.
-func (s *TurnState) LogRider(self *CardState, n int, text string) {
-	if s.logger == nil {
-		return
-	}
-	s.logger.AppendPostTrigger(self.Card.DisplayName(), text, n)
-}
-
-// LogRiderf is the format variant of LogRider — defers fmt.Sprintf and DisplayName into
-// the recording branch.
-func (s *TurnState) LogRiderf(self *CardState, n int, format string, args ...any) {
-	if s.logger == nil {
-		return
-	}
-	s.logger.AppendPostTriggerf(self.Card.DisplayName(), n, format, args...)
-}
-
-// LogPreTrigger appends an indented pre-trigger sub-line attributed to source — a hero or
-// aura-attack-action trigger that fires before its parent chain entry. The format layer
-// attaches this entry to the next chain entry whose name matches source.
-func (s *TurnState) LogPreTrigger(source, text string, n int) {
-	s.logger.AppendPreTrigger(source, text, n)
-}
-
-// LogPreTriggerf is the format variant of LogPreTrigger.
-func (s *TurnState) LogPreTriggerf(source string, n int, format string, args ...any) {
-	s.logger.AppendPreTriggerf(source, n, format, args...)
-}
-
-// LogPostTrigger appends an indented post-trigger sub-line attributed to source — for
-// rider lines whose host differs from self (e.g. an OnHit attached to a target card). Use
-// LogRider when self's CardState is the host.
-func (s *TurnState) LogPostTrigger(source, text string, n int) {
-	s.logger.AppendPostTrigger(source, text, n)
-}
-
-// LogPostTriggerf is the format variant of LogPostTrigger.
-func (s *TurnState) LogPostTriggerf(source string, n int, format string, args ...any) {
-	s.logger.AppendPostTriggerf(source, n, format, args...)
-}
+// Logger returns the chain runner's currently-active log sink as a Logger interface
+// value. Returns the same value the framework threads into Card.Play so test harnesses
+// (and any other framework caller that needs to invoke Card-shaped hooks directly) can
+// pass it through. Nil during the find-best pass.
+func (s *TurnState) Logger() Logger { return s.logger }
 
 // DrawOne models a mid-turn draw: pop the top of the deck and append it to Hand. No-op on
 // an empty deck. Every draw-rider card routes through this helper. Inherits the flip via
@@ -832,16 +777,16 @@ func (s *TurnState) ConsumeItem(t TokenType, n int) {
 // approves so same-turn triggers reading "if you've dealt arcane damage this turn" fire.
 // Routes through dealtArcaneText[n] so the hot path avoids per-call fmt.Sprintf and
 // variadic-int boxing.
-func (s *TurnState) DealArcaneDamage(self *CardState, n int) {
+func (s *TurnState) DealArcaneDamage(l Logger, self *CardState, n int) {
 	s.AddValue(n)
 	if LikelyDamageHits(n, false) {
 		s.ArcaneDamageDealt = true
 	}
 	if n >= 0 && n < len(dealtArcaneText) {
-		s.LogRider(self, n, dealtArcaneText[n])
+		l.LogRider(self, n, dealtArcaneText[n])
 		return
 	}
-	s.LogRiderf(self, n, "Dealt %d arcane damage", n)
+	l.LogRiderf(self, n, "Dealt %d arcane damage", n)
 }
 
 // dealtArcaneText is the pre-built rider-line cache indexed by arcane-damage count, keeping

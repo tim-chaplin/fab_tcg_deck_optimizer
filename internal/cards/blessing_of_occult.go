@@ -20,16 +20,16 @@ var blessingOfOccultTriggerText = [...]string{
 	3: "Created 3 runechants",
 }
 
-func (c BlessingOfOccultRed) Play(s *sim.TurnState, self *sim.CardState) {
-	blessingOfOccultPlay(s, self, c, 3)
+func (c BlessingOfOccultRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+	blessingOfOccultPlay(s, l, self, c, 3)
 }
 
-func (c BlessingOfOccultYellow) Play(s *sim.TurnState, self *sim.CardState) {
-	blessingOfOccultPlay(s, self, c, 2)
+func (c BlessingOfOccultYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+	blessingOfOccultPlay(s, l, self, c, 2)
 }
 
-func (c BlessingOfOccultBlue) Play(s *sim.TurnState, self *sim.CardState) {
-	blessingOfOccultPlay(s, self, c, 1)
+func (c BlessingOfOccultBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+	blessingOfOccultPlay(s, l, self, c, 1)
 }
 
 // blessingOfOccultPlay registers the shared next-turn trigger that creates n Runechants
@@ -40,19 +40,19 @@ func (c BlessingOfOccultBlue) Play(s *sim.TurnState, self *sim.CardState) {
 // carries the per-variant rune count (R=3 / Y=2 / B=1) — the handler is one-shot, so
 // Count's "fires remaining" interpretation collapses to "runechants to create on the
 // only fire".
-func blessingOfOccultHandler(s *sim.TurnState, _ *sim.Trigger, a *sim.Aura) {
+func blessingOfOccultHandler(s *sim.TurnState, l sim.Logger, _ *sim.Trigger, a *sim.Aura) {
 	n := a.Count
 	name := a.Self.DisplayName()
 	s.CreateRunechants(n)
-	s.LogPostTrigger(name, blessingOfOccultTriggerText[n], n)
+	l.LogPostTrigger(name, blessingOfOccultTriggerText[n], n)
 	s.DestroyAura(a, true)
 }
 
-func blessingOfOccultPlay(s *sim.TurnState, selfState *sim.CardState, selfCard sim.Card, n int) {
+func blessingOfOccultPlay(s *sim.TurnState, l sim.Logger, selfState *sim.CardState, selfCard sim.Card, n int) {
 	s.AddAura(sim.Aura{
 		Trigger: sim.Trigger{TriggerType: sim.TriggerStartOfTurn, Handler: blessingOfOccultHandler},
 		Self:    sim.CardOrTokenType{Card: selfCard},
 		Count:   n,
 	})
-	s.Log(selfState, 0)
+	l.Log(selfState, 0)
 }

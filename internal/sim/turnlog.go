@@ -179,7 +179,7 @@ func appendDefenseReactionLines(out []string, a CardAssignment, defenders []Card
 	state := NewTurnState(nil, append([]Card(nil), defenders...))
 	state.IncomingDamage = remaining
 	cs := CardState{Card: a.Card, FromArsenal: a.FromArsenal}
-	a.Card.Play(state, &cs)
+	a.Card.Play(state, state.logger, &cs)
 	return appendGroupedChainEntries(out, state.LogEntries()), state.IncomingDamage
 }
 
