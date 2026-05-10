@@ -6,6 +6,21 @@ import (
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/turnlogger"
+)
+
+// LogEntry, LogEntryKind, and the LogEntry* constants live in v2/turnlogger; the
+// aliases below let sibling files in this package keep referencing sim.LogEntry /
+// sim.LogEntryChainStep without churn while the refactor is in flight.
+type (
+	LogEntry     = turnlogger.LogEntry
+	LogEntryKind = turnlogger.LogEntryKind
+)
+
+const (
+	LogEntryChainStep   = turnlogger.LogEntryChainStep
+	LogEntryPreTrigger  = turnlogger.LogEntryPreTrigger
+	LogEntryPostTrigger = turnlogger.LogEntryPostTrigger
 )
 
 // Per-turn shared context threaded through Card.Play. Cards mutate state directly — moving
@@ -25,41 +40,6 @@ import (
 // framework (this package) accesses the slices directly to seed and snapshot state
 // without poisoning the bit; card code in a different package can't see the unexported
 // field name, which is the language-level enforcement that the cacheable signal is sound.
-
-// LogEntryKind classifies a LogEntry. Triggers come in two flavours because they fire on
-// opposite sides of their parent in the FaB stack — the format layer needs to know which
-// side a given entry sits on so two cards with the same display name in the same chain
-// don't steal each other's triggers during grouping.
-type LogEntryKind int8
-
-const (
-	// LogEntryChainStep is the sim's "<Card>: <VERB>" line. Stands alone in the printout
-	// and acts as the parent that triggers attach to.
-	LogEntryChainStep LogEntryKind = iota
-	// LogEntryPreTrigger is a trigger that fires before its parent chain entry resolves
-	// (hero / aura attack-action triggers). The format layer attaches it to the next
-	// chain entry whose name matches Source.
-	LogEntryPreTrigger
-	// LogEntryPostTrigger is a trigger that fires after its parent chain entry resolves
-	// (OnHit riders, AR buffs). The format layer attaches it to the previous chain entry
-	// whose name matches Source.
-	LogEntryPostTrigger
-)
-
-// LogEntry is one chain-event entry in TurnState.Log. Text is the freeform display string
-// the producer authored ("Viserai created a runechant", "Consuming Volition [R]: ATTACK")
-// — the format layer renders it verbatim, no further opinions on phrasing. Kind tags the
-// entry as a chain step or as a pre/post trigger so the grouping algorithm can attribute
-// triggers correctly even when sibling chain entries share a name. Source names the card
-// whose play caused the trigger and is matched against chain-entry names to pick the
-// parent; only meaningful for triggers. N is the damage-equivalent credited to s.Value
-// when the entry was added.
-type LogEntry struct {
-	Text   string
-	Source string
-	Kind   LogEntryKind
-	N      int
-}
 
 // TurnState is the shared turn-level context passed to Card.Play alongside the per-card
 // CardState wrapper.
@@ -157,13 +137,13 @@ type TurnState struct {
 	// OnHit) credit themselves the same way. The solver compares permutations on this
 	// field. Reset by the sim per permutation.
 	Value int
-	// turnLog is the per-event chain trace — one entry per chain step / hero / aura /
-	// OnHit / weapon swing. Cards reach it through the Log / LogRider / LogPreTrigger /
+	// logger is the per-turn log sink. Nil during the eval-loop's "find best" pass so
+	// every Log* helper short-circuits at the call site (no fmt.Sprintf, no DisplayName,
+	// no append); points at bufs.logger during the rare "replay best turn" pass that
+	// materialises the printout. Cards reach it through the Log / LogRider /
 	// LogPostTrigger family below; external readers (tests, format layer entry points)
-	// use the LogEntries accessor. The format layer uses each entry's Kind plus Source to
-	// cluster triggers under the right parent. Reset per permutation. Lowercase so callers
-	// can't bypass the skipLog gate by appending directly.
-	turnLog []LogEntry
+	// use the LogEntries accessor.
+	logger *turnlogger.TurnLogger
 	// CardsPlayed is the sequence of cards played (as attacks) this turn, in order.
 	// Populated by the sim after each Play returns so later cards this turn see what was
 	// played before them.
@@ -215,15 +195,6 @@ type TurnState struct {
 	// and OnHit handlers receive the triggering card as a direct arg already and don't
 	// need this field. Nil during direct chain-step resolution and start-of-turn fires.
 	TriggeringCard Card
-	// skipLog short-circuits Log appends and the per-entry text formatting for chains the
-	// caller doesn't intend to display. The Log* helpers below own the gate end-to-end —
-	// Value is still credited (so the sim's running damage tally stays correct) but the
-	// helpers skip every fmt.Sprintf, DisplayName lookup, and slice append underneath. The
-	// eval loop runs every turn silent; only the rare new-deck-best turn replays with
-	// skipLog=false to materialise its Log for the printout. Cards must never read this
-	// field — the helpers handle it. The lowercase name is the language-level enforcement.
-	skipLog bool
-
 	// cacheable is true while the chain hasn't read or mutated deck / graveyard through any
 	// public accessor (Deck / Graveyard / PopDeckTop / PrependToDeck / TutorFromDeck /
 	// BanishFromGraveyard / AddToGraveyard) or framework helper built on them (DrawOne,
@@ -245,18 +216,10 @@ func (s *TurnState) IsCacheable() bool { return s.cacheable }
 func (s *TurnState) AttackReactionTarget() *CardState { return s.attackReactionTarget }
 
 // AmendLastChainStepN adds n to the most recent ChainStep entry's N field. ARs use this to
-// fold their +{p} buff into the buffed attack's display delta. No-op when skipLog elided
-// log entries.
+// fold their +{p} buff into the buffed attack's display delta. No-op when the logger is
+// nil (find-best pass) or when no chain-step entry exists yet.
 func (s *TurnState) AmendLastChainStepN(n int) {
-	if s.skipLog || n == 0 {
-		return
-	}
-	for i := len(s.turnLog) - 1; i >= 0; i-- {
-		if s.turnLog[i].Kind == LogEntryChainStep {
-			s.turnLog[i].N += n
-			return
-		}
-	}
+	s.logger.AmendLastChainStepN(n)
 }
 
 // Deck returns the chain-runner deck for read-only inspection and flips IsCacheable to
@@ -356,6 +319,7 @@ func NewTurnStateFromSpec(spec TurnStateSpec) TurnState {
 		OpponentMarked: spec.OpponentMarked,
 		cacheable:      true,
 		currentAuraIdx: -1,
+		logger:         turnlogger.New(),
 	}
 }
 
@@ -469,7 +433,7 @@ func (s *TurnState) Opt(n int) {
 		fmt.Printf("Opt(%d): cards=%s -> top=%s bottom=%s\n",
 			n, formatCardList(cards), formatCardList(top), formatCardList(bottom))
 	}
-	if s.skipLog {
+	if s.logger == nil {
 		return
 	}
 	s.Logf(0, "Opted %s, put %s on top, put %s on bottom",
@@ -477,8 +441,8 @@ func (s *TurnState) Opt(n int) {
 }
 
 // formatCardList renders cs as "[name1, name2, ...]" using DisplayName for each entry, or
-// "[]" when cs is empty. Used by the Opt log entry; the caller gates the call on s.skipLog
-// so this only runs when the chain materialises its log.
+// "[]" when cs is empty. Used by the Opt log entry; the caller gates the call on whether
+// the logger is recording so this only runs when the chain materialises its log.
 func formatCardList(cs []Card) string {
 	if len(cs) == 0 {
 		return "[]"
@@ -598,13 +562,15 @@ func (s *TurnState) recycleFromGraveyard(pred func(Card) bool, toTop bool) (Card
 // NewTurnState constructs a *TurnState with the given deck and graveyard seed. The
 // unexported deck / graveyard fields aren't reachable via a composite literal from outside
 // this package, so callers route through this constructor. The returned state has
-// IsCacheable()==true; cacheable has to be set explicitly because the field's zero value
-// is false (see the field doc).
+// IsCacheable()==true (cacheable has to be set explicitly because the field's zero value
+// is false — see the field doc) and a fresh recording *TurnLogger; the framework's
+// resetStateForPermutation overrides the logger to nil for the eval-loop's silent
+// find-best pass.
 func NewTurnState(d *deck.Deck, graveyard []Card) *TurnState {
 	if d == nil {
 		d = &deck.Deck{}
 	}
-	return &TurnState{deck: d, graveyard: graveyard, cacheable: true, currentAuraIdx: -1}
+	return &TurnState{deck: d, graveyard: graveyard, cacheable: true, currentAuraIdx: -1, logger: turnlogger.New()}
 }
 
 // NewTurnStateFromCards is a test-only constructor that wraps a Card slice in a fresh
@@ -630,113 +596,70 @@ func (s *TurnState) AddValue(n int) {
 }
 
 // LogEntries returns the per-event chain trace accumulated by the Log family. External
-// readers (tests, format layer) use this; package-internal code reads the underlying field.
-func (s *TurnState) LogEntries() []LogEntry { return s.turnLog }
-
-// log is the single skipLog gate. When not running silent, appends a LogEntry of the given
-// kind, source, and pre-built text. Every public Log helper funnels through here or its
-// variadic sibling logf, so the gate lives in exactly one place and cards never check
-// skipLog themselves. log does NOT credit s.Value — pair the Log helper with AddValue when
-// you also want to record damage.
-func (s *TurnState) log(kind LogEntryKind, source, text string, n int) {
-	if s.skipLog {
-		return
-	}
-	if n < 0 {
-		n = 0
-	}
-	s.turnLog = append(s.turnLog, LogEntry{
-		Kind:   kind,
-		Text:   text,
-		Source: source,
-		N:      n,
-	})
-}
-
-// logf is the format variant: same gate as log, but fmt.Sprintf only runs on the !skipLog
-// branch. Callers pay variadic-arg boxing at the call site regardless, so prefer the
-// non-format Log helpers when text is constant or pre-built.
-func (s *TurnState) logf(kind LogEntryKind, source string, n int, format string, args ...any) {
-	if s.skipLog {
-		return
-	}
-	if n < 0 {
-		n = 0
-	}
-	s.turnLog = append(s.turnLog, LogEntry{
-		Kind:   kind,
-		Text:   fmt.Sprintf(format, args...),
-		Source: source,
-		N:      n,
-	})
-}
+// readers (tests, format layer) use this; package-internal code reads the underlying
+// logger field directly.
+func (s *TurnState) LogEntries() []LogEntry { return s.logger.Entries() }
 
 // Log appends the canonical "<DisplayName>: <VERB>[ from arsenal]" main-line chain-step
 // entry for self, with display suffix "(+n)". Use for both attacks (n = effective attack)
 // and non-attack chain steps (n = 0). Pair with AddValue or self.DealEffectiveAttack /
 // self.DealEffectiveDefense on a separate line so the Log call itself has no side effects.
-// ChainStepText is deferred into the !skipLog branch.
+// ChainStepText is deferred into the recording branch — a nil logger short-circuits the
+// computation.
 func (s *TurnState) Log(self *CardState, n int) {
-	if s.skipLog {
+	if s.logger == nil {
 		return
 	}
-	if n < 0 {
-		n = 0
-	}
-	s.turnLog = append(s.turnLog, LogEntry{
-		Kind: LogEntryChainStep,
-		Text: ChainStepText(self),
-		N:    n,
-	})
+	s.logger.AppendChainStep(ChainStepText(self), n)
 }
 
 // Logf appends a free-form main-line chain-step entry with formatted text. Use when no
 // CardState applies (Opt's "Opted X, put Y on top, put Z on bottom").
 func (s *TurnState) Logf(n int, format string, args ...any) {
-	s.logf(LogEntryChainStep, "", n, format, args...)
+	s.logger.AppendChainStepf(n, format, args...)
 }
 
 // LogRider appends an indented post-trigger sub-line under self's chain entry. Use for
 // "Created a runechant", "Gained 3 health (graveyard trigger)", "On-hit discarded a card",
 // etc. Pair with AddValue on a separate preceding line when n > 0.
 func (s *TurnState) LogRider(self *CardState, n int, text string) {
-	if s.skipLog {
+	if s.logger == nil {
 		return
 	}
-	s.log(LogEntryPostTrigger, self.Card.DisplayName(), text, n)
+	s.logger.AppendPostTrigger(self.Card.DisplayName(), text, n)
 }
 
-// LogRiderf is the format variant of LogRider — defers fmt.Sprintf and DisplayName into the
-// !skipLog branch.
+// LogRiderf is the format variant of LogRider — defers fmt.Sprintf and DisplayName into
+// the recording branch.
 func (s *TurnState) LogRiderf(self *CardState, n int, format string, args ...any) {
-	if s.skipLog {
+	if s.logger == nil {
 		return
 	}
-	s.logf(LogEntryPostTrigger, self.Card.DisplayName(), n, format, args...)
+	s.logger.AppendPostTriggerf(self.Card.DisplayName(), n, format, args...)
 }
 
 // LogPreTrigger appends an indented pre-trigger sub-line attributed to source — a hero or
 // aura-attack-action trigger that fires before its parent chain entry. The format layer
 // attaches this entry to the next chain entry whose name matches source.
 func (s *TurnState) LogPreTrigger(source, text string, n int) {
-	s.log(LogEntryPreTrigger, source, text, n)
+	s.logger.AppendPreTrigger(source, text, n)
 }
 
 // LogPreTriggerf is the format variant of LogPreTrigger.
 func (s *TurnState) LogPreTriggerf(source string, n int, format string, args ...any) {
-	s.logf(LogEntryPreTrigger, source, n, format, args...)
+	s.logger.AppendPreTriggerf(source, n, format, args...)
 }
 
 // LogPostTrigger appends an indented post-trigger sub-line attributed to source — for
 // rider lines whose host differs from self (e.g. an OnHit attached to a target card). Use
 // LogRider when self's CardState is the host.
 func (s *TurnState) LogPostTrigger(source, text string, n int) {
-	s.log(LogEntryPostTrigger, source, text, n)
+	s.logger.AppendPostTrigger(source, text, n)
 }
 
 // LogPostTriggerf is the format variant of LogPostTrigger.
 func (s *TurnState) LogPostTriggerf(source string, n int, format string, args ...any) {
-	s.logf(LogEntryPostTrigger, source, n, format, args...)
+	s.logger.AppendPostTriggerf(source, n, format, args...)
 }
 
 // DrawOne models a mid-turn draw: pop the top of the deck and append it to Hand. No-op on

@@ -32,7 +32,7 @@ func (c *CarryState) SnapshotFromTurn(s *TurnState) {
 	c.Items = append(c.Items[:0], s.Items...)
 	c.CardsDrawn = s.CardsDrawn
 	c.OpponentMarked = s.OpponentMarked
-	c.Log = append(c.Log[:0], s.turnLog...)
+	c.Log = append(c.Log[:0], s.logger.Entries()...)
 }
 
 // CopyFrom copies every field of src into c. Slice fields reuse c's backings via

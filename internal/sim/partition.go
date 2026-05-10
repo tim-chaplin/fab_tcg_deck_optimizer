@@ -377,13 +377,15 @@ func defendersDamage(defenders, pitched []Card, deckPile *deck.Deck, state *Turn
 		// deck or graveyard. Set explicitly because TurnState's zero-value is uncacheable.
 		// Auras carry across the per-DR reset so created auras persist for the caller.
 		preservedAuras := state.Auras
-		// Carry skipLog through the per-DR seed: every Log helper's gate keys off this
-		// field, and the BestSkipLog hot path expects DR Plays to skip log work. Resetting
-		// without it forces every DR sub-line through fmt.Sprintf / DisplayName / append.
-		preservedSkipLog := state.skipLog
+		// Carry the logger through the per-DR seed: a nil logger is the find-best
+		// silent mode and a non-nil logger is the replay mode; either way every Log
+		// helper's behaviour follows the field, and resetting without it would either
+		// drop replay entries or force find-best DR sub-lines through fmt.Sprintf /
+		// DisplayName / append.
+		preservedLogger := state.logger
 		// Copy the deck per DR so a DR's mid-Play deck mutations stay scoped — the next
 		// DR sees the original pre-DR deck order.
-		*state = TurnState{Pitched: pitched, deck: deckPile.Copy(), graveyard: gravBuf, IncomingDamage: remaining, cacheable: true, Defenders: defenders, Auras: preservedAuras, skipLog: preservedSkipLog}
+		*state = TurnState{Pitched: pitched, deck: deckPile.Copy(), graveyard: gravBuf, IncomingDamage: remaining, cacheable: true, Defenders: defenders, Auras: preservedAuras, logger: preservedLogger}
 		*cs = CardState{Card: def, FromArsenal: i == arsenalDefenderIdx}
 		def.Play(state, cs)
 		total += state.Value

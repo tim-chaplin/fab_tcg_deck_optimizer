@@ -9,6 +9,7 @@ import (
 	"fmt"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/turnlogger"
 )
 
 // perItemAbilityCap caps how many instances of one item's activated ability the chain
@@ -366,9 +367,11 @@ type sequenceContext struct {
 	// found; reusing the bufs-owned backing arrays makes that snapshot allocation-free
 	// after the first sizing.
 	carryWinner *CarryState
-	// skipLog propagates into TurnState.skipLog on every permutation reset. When true,
-	// chains run with Log appends elided (Value still credited); the caller is replaying
-	// later with skipLog=false to materialise the printout.
+	// skipLog drives the per-permutation logger choice. When true, every permutation
+	// reset leaves TurnState.logger nil so chains run with Log appends elided (Value
+	// still credited); when false, TurnState.logger points at bufs.logger so the
+	// per-permutation chain materialises into the bufs-owned scratch. The caller is
+	// replaying later with skipLog=false to materialise the printout.
 	skipLog bool
 	// cacheable is a sticky bit ANDed in after every permutation in bestSequence. Starts
 	// true on context construction; flips to false the first time a permutation's chain
@@ -379,6 +382,17 @@ type sequenceContext struct {
 	cacheable bool
 }
 
+// activeLogger returns nil during the find-best (skip) pass so every Log helper
+// short-circuits, or bufs.logger during replay so chain Plays append into the
+// bufs-owned scratch. Centralised here so resetStateForPermutation and runDefense pick
+// the same value off ctx.skipLog without each spelling the conditional inline.
+func (ctx *sequenceContext) activeLogger() *turnlogger.TurnLogger {
+	if ctx.skipLog {
+		return nil
+	}
+	return ctx.bufs.logger
+}
+
 // runDefense seeds bufs.state.Auras with priorAuras (so DR Plays' aura-create helpers
 // consolidate against existing tokens), runs defendersDamage, and captures the post-
 // defense aura set into ctx.defenderAuras (and bufs.defenderAurasBacking) for later
@@ -386,10 +400,11 @@ type sequenceContext struct {
 func (ctx *sequenceContext) runDefense(defenders, pitched []Card, deckPile *deck.Deck, priorAuras []Aura, incomingDamage, blockBudget, arsenalDefenderIdx int) (int, bool) {
 	bufs := ctx.bufs
 	bufs.state.Auras = append(ctx.defenderAuras[:0], priorAuras...)
-	// Seed skipLog so the first DR's per-defender reset (and the plain-block phase that
-	// reuses bufs.state afterwards) sees the chain-level gate; defendersDamage preserves
-	// it through its struct-literal reset.
-	bufs.state.skipLog = ctx.skipLog
+	// Seed the logger so the first DR's per-defender reset (and the plain-block phase
+	// that reuses bufs.state afterwards) sees the chain-level skip / record decision;
+	// defendersDamage preserves it through its struct-literal reset. Nil during the
+	// find-best pass; bufs.logger during replay.
+	bufs.state.logger = ctx.activeLogger()
 	dealt, gravScratch, cacheable := defendersDamage(defenders, pitched, deckPile, bufs.state, bufs.defenseGravScratch, &bufs.drCardStateScratch, incomingDamage, blockBudget, arsenalDefenderIdx)
 	bufs.defenseGravScratch = gravScratch
 	ctx.defenderAuras = bufs.state.Auras
@@ -560,7 +575,15 @@ func (ctx *sequenceContext) resetStateForPermutation() {
 	s.CardsDrawn = 0
 	s.currentAuraIdx = -1
 	s.Value = 0
-	s.turnLog = bufs.logBacking[:0]
+	// Bind the logger to the per-permutation backing buffer when recording, leaving
+	// s.logger nil during the find-best pass so every Log helper short-circuits at
+	// the call site. ctx.activeLogger encapsulates the skip / record decision.
+	if l := ctx.activeLogger(); l != nil {
+		l.SetBuffer(bufs.logBacking)
+		s.logger = l
+	} else {
+		s.logger = nil
+	}
 	s.CardsPlayed = bufs.cardsPlayedBacking[:0]
 	s.AuraCreated = false
 	s.CardsRemaining = nil
@@ -572,7 +595,6 @@ func (ctx *sequenceContext) resetStateForPermutation() {
 	s.BlockTotal = ctx.blockTotal
 	s.attackReactionTarget = nil
 	s.TriggeringCard = nil
-	s.skipLog = ctx.skipLog
 	// Permutation seed starts cacheable; the first card-driven deck / graveyard read
 	// in this permutation flips it to false. Set explicitly because zero-value is false.
 	s.cacheable = true
