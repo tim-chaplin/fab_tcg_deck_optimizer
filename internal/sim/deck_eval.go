@@ -513,7 +513,7 @@ func processAurasAtStartOfTurn(queued []Aura, d *deck.Deck) (
 		}
 		self := t.Self.Card
 		preHand := len(ts.hand)
-		preLog := len(ts.turnLog)
+		preLog := len(ts.logger.Entries())
 		preValue := ts.Value
 		ts.currentAuraIdx = i
 		ts.currentAuraDestroyed = false
@@ -533,8 +533,8 @@ func processAurasAtStartOfTurn(queued []Aura, d *deck.Deck) (
 		// over the inferred "drew X into hand" / "START OF ACTION PHASE" suffix at format
 		// time so cards can fully own their printout wording.
 		var text string
-		if len(ts.turnLog) > preLog {
-			text = ts.turnLog[preLog].Text
+		if entries := ts.logger.Entries(); len(entries) > preLog {
+			text = entries[preLog].Text
 		}
 		contribs = append(contribs, TriggerContribution{Card: self, Damage: d, Revealed: rev, Text: text})
 		// Advance the cursor unless the handler destroyed its own aura. When it did, the

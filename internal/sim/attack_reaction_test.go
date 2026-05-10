@@ -5,6 +5,7 @@ import (
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/turnlogger"
 )
 
 // stubAR is a minimal Card + AttackReaction stub. The unit tests exercise
@@ -54,8 +55,8 @@ func TestGrantAttackReactionBuff_NoTargetIsNoOp(t *testing.T) {
 // target's chain-step log delta.
 func TestGrantAttackReactionBuff_AppliesBuffAndCreditsValue(t *testing.T) {
 	target := &CardState{Card: stubAttack{}}
-	s := TurnState{attackReactionTarget: target}
-	s.turnLog = append(s.turnLog, LogEntry{Kind: LogEntryChainStep, Text: "stubAttack: ATTACK", N: 1})
+	s := TurnState{attackReactionTarget: target, logger: turnlogger.New()}
+	s.logger.AppendChainStep("stubAttack: ATTACK", 1)
 	GrantAttackReactionBuff(&s, &CardState{Card: stubAR{}}, 3)
 	if target.BonusAttack != 3 {
 		t.Errorf("target BonusAttack = %d, want 3", target.BonusAttack)
@@ -63,7 +64,7 @@ func TestGrantAttackReactionBuff_AppliesBuffAndCreditsValue(t *testing.T) {
 	if s.Value != 3 {
 		t.Errorf("Value = %d, want 3", s.Value)
 	}
-	if got := s.turnLog[0].N; got != 4 {
+	if got := s.LogEntries()[0].N; got != 4 {
 		t.Errorf("amended chain-step N = %d, want 4", got)
 	}
 }
@@ -71,16 +72,15 @@ func TestGrantAttackReactionBuff_AppliesBuffAndCreditsValue(t *testing.T) {
 // Tests that AmendLastChainStepN skips non-chain-step entries to find the most recent
 // chain-step.
 func TestAmendLastChainStepN_SkipsNonChainEntries(t *testing.T) {
-	s := TurnState{}
-	s.turnLog = append(s.turnLog,
-		LogEntry{Kind: LogEntryChainStep, Text: "first", N: 2},
-		LogEntry{Kind: LogEntryPostTrigger, Source: "first", Text: "rider", N: 0},
-	)
+	s := TurnState{logger: turnlogger.New()}
+	s.logger.AppendChainStep("first", 2)
+	s.logger.AppendPostTrigger("first", "rider", 0)
 	s.AmendLastChainStepN(5)
-	if got := s.turnLog[0].N; got != 7 {
+	entries := s.LogEntries()
+	if got := entries[0].N; got != 7 {
 		t.Errorf("first chain-step N = %d, want 7", got)
 	}
-	if got := s.turnLog[1].N; got != 0 {
+	if got := entries[1].N; got != 0 {
 		t.Errorf("post-trigger N = %d, want 0 (untouched)", got)
 	}
 }

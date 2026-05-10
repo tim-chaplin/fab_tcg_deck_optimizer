@@ -1,6 +1,9 @@
 package sim
 
-import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+import (
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/turnlogger"
+)
 
 // Pre-allocated scratch buffers threaded through the attack-evaluation pipeline (findBest
 // partition loop, bestAttackWithWeapons phase/weapon masks, bestSequence permutation search).
@@ -95,11 +98,16 @@ type shapeBufs struct {
 // never reallocates: only mid-chain growth past the pre-sized cap forces a new backing
 // array.
 type permBufs struct {
-	handBacking         []Card
-	graveBacking        []Card
-	banishBacking       []Card
-	cardsPlayedBacking  []Card
-	logBacking          []LogEntry
+	handBacking        []Card
+	graveBacking       []Card
+	banishBacking      []Card
+	cardsPlayedBacking []Card
+	logBacking         []LogEntry
+	// logger is the recording-mode *TurnLogger reused across permutations. Allocated
+	// once in newAttackBufs and rebound each permutation via SetBuffer(logBacking).
+	// resetStateForPermutation points TurnState.logger at this when ctx is recording
+	// or leaves TurnState.logger nil when ctx is skipping.
+	logger              *turnlogger.TurnLogger
 	auraTriggersBacking []Aura
 	// itemsBacking backs TurnState.Items per permutation — seeded from priorItems and
 	// freely mutated by item-ability Plays.
@@ -230,6 +238,7 @@ func newAttackBufs(handSize, weaponCount int, weapons []Weapon) *attackBufs {
 			banishBacking:        make([]Card, 0, handSize+1),
 			cardsPlayedBacking:   make([]Card, 0, maxAttackers),
 			logBacking:           make([]LogEntry, 0, logBackingCap),
+			logger:               turnlogger.New(),
 			auraTriggersBacking:  make([]Aura, 0, handSize+1),
 			itemsBacking:         make([]Item, 0, 4),
 			defenderAurasBacking: make([]Aura, 0, handSize+1),
