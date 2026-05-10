@@ -151,10 +151,10 @@ func (d *Deck) PeekTop() Card {
 }
 
 // PeekTopN returns the top n cards of the deck (top first) without removing them, or
-// fewer when the deck has < n cards. Used by cards that scan / count the top N for a
-// rider (e.g. "reveal the top N cards; create a runechant for each runeblade attack
-// action revealed"). The returned slice aliases the deck's backing storage; mutating it
-// would corrupt the deck.
+// fewer when the deck has < n cards. Reserved for cards whose printed effect literally
+// reads "reveal the top N cards" (Sutcliffe's Research Notes and similar) — not for tests
+// that want a back-door view of the deck's full contents. The returned slice aliases the
+// deck's backing storage; mutating it would corrupt the deck.
 func (d *Deck) PeekTopN(n int) []Card {
 	if d == nil {
 		return nil

@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
@@ -115,21 +116,18 @@ func TestEvalOneTurn_MoonWishWithFlyingHighPlaysTutoredSunKiss(t *testing.T) {
 	}
 }
 
-// countAcrossSurfaces totals occurrences of id across the start-of-next-turn Hand, Deck, and
-// Arsenal. Asserts "exists / doesn't exist" without pinning a specific position.
+// countAcrossSurfaces totals occurrences of the printing across the start-of-next-turn
+// Hand, Deck, and Arsenal — keyed by DisplayName since that's what NameCounts surfaces.
+// Asserts "exists / doesn't exist" without pinning a specific position.
 func countAcrossSurfaces(state sim.TurnStartState, id ids.CardID) int {
-	n := 0
+	name := registry.GetCard(id).DisplayName()
+	n := state.StartOfNextTurnDeck.NameCounts()[name]
 	for _, c := range state.StartOfNextTurnHand {
-		if c.ID() == id {
+		if c.DisplayName() == name {
 			n++
 		}
 	}
-	for _, c := range state.StartOfNextTurnDeck.PeekTopN(state.StartOfNextTurnDeck.Size()) {
-		if c.ID() == id {
-			n++
-		}
-	}
-	if state.StartOfNextTurnArsenal != nil && state.StartOfNextTurnArsenal.ID() == id {
+	if state.StartOfNextTurnArsenal != nil && state.StartOfNextTurnArsenal.DisplayName() == name {
 		n++
 	}
 	return n

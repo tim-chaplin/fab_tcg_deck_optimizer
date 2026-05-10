@@ -41,8 +41,10 @@ func TestDrowningDire_OnHitRecyclesNonAttackToBottom(t *testing.T) {
 	(DrowningDireRed{}).Play(s, self)
 	self.BonusAttack = 2
 	testutils.FireOnHitIfLikely(s, self)
-	gotDeck := s.Deck().PeekTopN(s.Deck().Size())
-	if len(gotDeck) != 2 || gotDeck[1].(sim.Card) != sim.Card(non) {
-		t.Errorf("deck after recycle = %v, want non-attack at bottom under RedAttack", gotDeck)
+	if got := s.Deck().Size(); got != 2 {
+		t.Errorf("deck size after recycle = %d, want 2 (target appended to bottom)", got)
+	}
+	if top := s.Deck().PeekTop(); top != (testutils.RedAttack{}) {
+		t.Errorf("deck top after recycle = %v, want RedAttack still on top (target went to bottom)", top)
 	}
 }

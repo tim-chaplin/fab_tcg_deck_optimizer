@@ -27,9 +27,11 @@ func TestCadaverousContraband_OnHitRecyclesNonAttackToTop(t *testing.T) {
 	(CadaverousContrabandRed{}).Play(s, self)
 	self.BonusAttack = 1
 	testutils.FireOnHitIfLikely(s, self)
-	gotDeck := s.Deck().PeekTopN(s.Deck().Size())
-	if len(gotDeck) != 2 || gotDeck[0].(sim.Card) != sim.Card(non) {
-		t.Errorf("deck after recycle = %v, want non-attack on top of RedAttack", gotDeck)
+	if got := s.Deck().Size(); got != 2 {
+		t.Errorf("deck size after recycle = %d, want 2 (graveyard card moved onto the existing top)", got)
+	}
+	if top := s.Deck().PeekTop(); top != sim.Card(non) {
+		t.Errorf("deck top after recycle = %v, want %v", top, non)
 	}
 	if len(s.Graveyard()) != 0 {
 		t.Errorf("graveyard after recycle = %v, want empty", s.Graveyard())

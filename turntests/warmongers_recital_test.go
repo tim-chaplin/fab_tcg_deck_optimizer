@@ -22,14 +22,8 @@ func TestWarmongersRecital_OnHitRecyclesToDeck(t *testing.T) {
 		cards.CriticalStrikeYellow{},
 	}
 	got := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, sim.TurnState{}, hand)
-	found := false
-	for _, c := range got.StartOfNextTurnDeck.PeekTopN(got.StartOfNextTurnDeck.Size()) {
-		if c.ID() == (cards.CriticalStrikeYellow{}).ID() {
-			found = true
-			break
-		}
-	}
-	if !found {
-		t.Fatalf("Critical Strike missing from end-of-turn deck; deck=%v graveyard=%v", got.StartOfNextTurnDeck, got.Graveyard)
+	csName := cards.CriticalStrikeYellow{}.DisplayName()
+	if got.StartOfNextTurnDeck.NameCounts()[csName] == 0 {
+		t.Fatalf("Critical Strike missing from end-of-turn deck; graveyard=%v", got.Graveyard)
 	}
 }

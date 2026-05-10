@@ -37,8 +37,10 @@ func TestRelentlessPursuit_RecyclesAfterPriorAttack(t *testing.T) {
 	if !self.SkipGraveyard {
 		t.Fatal("SkipGraveyard = false after prior attack, want true")
 	}
-	deck := s.Deck().PeekTopN(s.Deck().Size())
-	if len(deck) != 1 || deck[0].(sim.Card) != (RelentlessPursuitBlue{}) {
-		t.Errorf("deck after recycle = %v, want [RelentlessPursuitBlue{}]", deck)
+	if got := s.Deck().Size(); got != 1 {
+		t.Errorf("deck size after recycle = %d, want 1 (Relentless Pursuit went onto an empty deck)", got)
+	}
+	if top := s.Deck().PeekTop(); top != (RelentlessPursuitBlue{}) {
+		t.Errorf("deck top after recycle = %v, want RelentlessPursuitBlue{}", top)
 	}
 }
