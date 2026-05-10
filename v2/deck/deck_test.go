@@ -154,7 +154,7 @@ func TestRandom_BuildsLegalDeckWithinCopyBudget(t *testing.T) {
 
 	d := Random(nil, 8, 2, rng, nil, reg)
 	if len(d.cards) != 8 {
-		t.Errorf("len(Cards) = %d, want 8", len(d.cards))
+		t.Errorf("deck size = %d, want 8", len(d.cards))
 	}
 	counts := map[ids.CardID]int{}
 	for _, c := range d.cards {

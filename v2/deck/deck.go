@@ -119,7 +119,7 @@ func (d *Deck) Copy() *Deck {
 	return out
 }
 
-// Shuffle randomises Cards in place via Fisher-Yates. Mutates the receiver — callers
+// Shuffle randomises the deck in place via Fisher-Yates. Mutates the receiver — callers
 // running independent trials should Copy() the master deck first.
 func (d *Deck) Shuffle(rng *rand.Rand) {
 	for i := len(d.cards) - 1; i > 0; i-- {

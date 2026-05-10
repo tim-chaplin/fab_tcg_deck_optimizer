@@ -20,7 +20,7 @@ const defaultFormat = "Silver Age"
 // "Import deck" tab. The output sections are:
 //
 //   - Arena cards: weapons + d.Equipment.
-//   - Deck cards: d.Cards, pitch color suffix lowercased to match fabrary.
+//   - Deck cards: d.AllCards(), pitch color suffix lowercased to match fabrary.
 //   - Sideboard: d.Sideboard, lowercased pitch suffix. Empty when d.Sideboard is empty.
 //
 // Callers that want the hardcoded default equipment / sideboard loadout baked in should run

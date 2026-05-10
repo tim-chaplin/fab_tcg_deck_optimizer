@@ -243,7 +243,7 @@ type pairDedupeKey struct {
 // pairSwapMutations emits paired add mutations for every entry in CardPairs by taking the
 // cross-product of every (i, j) deck-index pair (i < j) with every (firstVariant,
 // secondVariant) combo from the pair's two groups. Each emitted mutation removes the cards
-// at positions i and j from a fresh copy of d.cards and appends the chosen pair variants.
+// at positions i and j from a fresh copy of d's cards and appends the chosen pair variants.
 //
 // Index-based iteration is what makes "remove both copies of a card that appears twice"
 // reachable: with a [HocusPocusBlue, HocusPocusBlue] deck, the (0, 1) index pair removes
