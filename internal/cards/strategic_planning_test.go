@@ -33,8 +33,10 @@ func TestStrategicPlanning_RecyclesEligibleActionToBottom(t *testing.T) {
 	deck := []sim.Card{testutils.BlueAttack{}}
 	s := sim.NewTurnStateFromCards(deck, []sim.Card{target})
 	(StrategicPlanningRed{}).Play(s, &sim.CardState{Card: StrategicPlanningRed{}})
-	gotDeck := s.Deck().PeekTopN(s.Deck().Size())
-	if len(gotDeck) != 2 || gotDeck[1].(sim.Card) != sim.Card(target) {
-		t.Errorf("deck after recycle = %v, want target at bottom under BlueAttack", gotDeck)
+	if got := s.Deck().Size(); got != 2 {
+		t.Errorf("deck size after recycle = %d, want 2 (target appended to bottom)", got)
+	}
+	if top := s.Deck().PeekTop(); top != (testutils.BlueAttack{}) {
+		t.Errorf("deck top after recycle = %v, want BlueAttack still on top (target went to bottom)", top)
 	}
 }

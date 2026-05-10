@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
@@ -118,13 +119,9 @@ func TestEvalOneTurn_MoonWishWithFlyingHighPlaysTutoredSunKiss(t *testing.T) {
 // countAcrossSurfaces totals occurrences of id across the start-of-next-turn Hand, Deck, and
 // Arsenal. Asserts "exists / doesn't exist" without pinning a specific position.
 func countAcrossSurfaces(state sim.TurnStartState, id ids.CardID) int {
-	n := 0
+	displayName := registry.GetCard(id).DisplayName()
+	n := state.StartOfNextTurnDeck.NameCounts()[displayName]
 	for _, c := range state.StartOfNextTurnHand {
-		if c.ID() == id {
-			n++
-		}
-	}
-	for _, c := range state.StartOfNextTurnDeck.PeekTopN(state.StartOfNextTurnDeck.Size()) {
 		if c.ID() == id {
 			n++
 		}

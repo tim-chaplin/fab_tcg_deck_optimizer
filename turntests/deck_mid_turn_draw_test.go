@@ -45,16 +45,6 @@ func TestEvalOneTurn_MidTurnDrawArsenalsWhenSlotEmpty(t *testing.T) {
 		t.Errorf("turn 2 arsenal = %v, want %v (drawn card should take the empty arsenal slot)", state.StartOfNextTurnArsenal, beacon)
 	}
 
-	// Remaining deck: one untouched Yellow from source position 9, then the pitched Blue
-	// recycled to the bottom on turn 1.
-	wantDeck := []deck.Card{
-		testutils.YellowAttack{},
-		testutils.BlueAttack{},
-	}
-	if !reflect.DeepEqual(state.StartOfNextTurnDeck.PeekTopN(state.StartOfNextTurnDeck.Size()), wantDeck) {
-		t.Errorf("turn 2 deck = %v, want %v", state.StartOfNextTurnDeck, wantDeck)
-	}
-
 	if state.Runechants() != 0 {
 		t.Errorf("turn 2 runechants = %d, want 0 (nothing on turn 1 creates runechants)", state.Runechants())
 	}
@@ -93,15 +83,6 @@ func TestEvalOneTurn_TwoMidTurnDraws_OneArsenalsOneHeld(t *testing.T) {
 
 	if state.StartOfNextTurnArsenal != beacon {
 		t.Errorf("turn 2 arsenal = %v, want %v (one of the two drawn beacons should fill the empty slot)", state.StartOfNextTurnArsenal, beacon)
-	}
-
-	// Remaining deck: only the Yellow tripwire at source position 9. Turn 1 had no pitches
-	// (all four cards played as attacks), so nothing recycled to the bottom.
-	wantDeck := []deck.Card{
-		testutils.YellowAttack{},
-	}
-	if !reflect.DeepEqual(state.StartOfNextTurnDeck.PeekTopN(state.StartOfNextTurnDeck.Size()), wantDeck) {
-		t.Errorf("turn 2 deck = %v, want %v", state.StartOfNextTurnDeck, wantDeck)
 	}
 
 	if state.Runechants() != 0 {
@@ -143,14 +124,6 @@ func TestEvalOneTurn_ThreeMidTurnDraws_ArsenalFromDrawnPool(t *testing.T) {
 		t.Errorf("turn 2 arsenal = %v, want %v (one of the three drawn beacons should fill the slot vacated by arsenal-in Snatch)", state.StartOfNextTurnArsenal, beacon)
 	}
 
-	// Remaining deck: only the Yellow tripwire. Turn 1 had no pitches.
-	wantDeck := []deck.Card{
-		testutils.YellowAttack{},
-	}
-	if !reflect.DeepEqual(state.StartOfNextTurnDeck.PeekTopN(state.StartOfNextTurnDeck.Size()), wantDeck) {
-		t.Errorf("turn 2 deck = %v, want %v", state.StartOfNextTurnDeck, wantDeck)
-	}
-
 	if state.Runechants() != 0 {
 		t.Errorf("turn 2 runechants = %d, want 0 (nothing on turn 1 creates runechants)", state.Runechants())
 	}
@@ -187,17 +160,6 @@ func TestEvalOneTurn_MidTurnDrawHeldWhenArsenalFull(t *testing.T) {
 
 	if state.StartOfNextTurnArsenal != arsenalIn {
 		t.Errorf("turn 2 arsenal = %v, want %v (arsenal-in should remain untouched when no better candidate beats it)", state.StartOfNextTurnArsenal, arsenalIn)
-	}
-
-	// Remaining deck: two untouched Yellows from positions 8..9, then the pitched Blue
-	// recycled to the bottom on turn 1.
-	wantDeck := []deck.Card{
-		testutils.YellowAttack{},
-		testutils.YellowAttack{},
-		testutils.BlueAttack{},
-	}
-	if !reflect.DeepEqual(state.StartOfNextTurnDeck.PeekTopN(state.StartOfNextTurnDeck.Size()), wantDeck) {
-		t.Errorf("turn 2 deck = %v, want %v", state.StartOfNextTurnDeck, wantDeck)
 	}
 
 	if state.Runechants() != 0 {

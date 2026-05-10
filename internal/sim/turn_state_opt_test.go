@@ -292,14 +292,17 @@ func TestTurnStateOpt_PanicsOnDuplicatedCard(t *testing.T) {
 	})
 }
 
-// sameDeck reports whether got contains the same cards in the same order as want.
+// sameDeck reports whether got contains the same cards in the same order as want by
+// destructively draining the deck — Opt's effect is observable through subsequent draws,
+// so the natural verification is to walk the deck via Draw. Mutates got; callers must
+// discard it after the check.
 func sameDeck(got *deck.Deck, want []Card) bool {
-	gotCards := got.PeekTopN(got.Size())
-	if len(gotCards) != len(want) {
+	if got.Size() != len(want) {
 		return false
 	}
-	for i, c := range gotCards {
-		if c != want[i] {
+	drawn := got.Draw(got.Size())
+	for i, c := range drawn {
+		if c.(Card) != want[i] {
 			return false
 		}
 	}

@@ -20,18 +20,16 @@ func TestRelentlessPursuit_RecyclesToDeckBottomAfterAttack(t *testing.T) {
 		testutils.RedPitch{},          // funds RedAttack's cost-1
 	}
 	state := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, sim.TurnState{}, hand)
-	rpID := cards.RelentlessPursuitBlue{}.ID()
+	rp := cards.RelentlessPursuitBlue{}
+	rpName := rp.DisplayName()
 	for _, c := range state.Graveyard {
-		if c.ID() == rpID {
+		if c.ID() == rp.ID() {
 			t.Fatalf("Relentless Pursuit unexpectedly in graveyard after recycle; got %v", state.Graveyard)
 		}
 	}
-	for _, c := range state.StartOfNextTurnDeck.PeekTopN(state.StartOfNextTurnDeck.Size()) {
-		if c.ID() == rpID {
-			return
-		}
+	if state.StartOfNextTurnDeck.NameCounts()[rpName] == 0 {
+		t.Fatalf("Relentless Pursuit missing from next turn's deck; graveyard=%v", state.Graveyard)
 	}
-	t.Fatalf("Relentless Pursuit missing from next turn's deck; deck=%v graveyard=%v", state.StartOfNextTurnDeck, state.Graveyard)
 }
 
 // Tests that Relentless Pursuit goes to the graveyard normally when it resolves before any

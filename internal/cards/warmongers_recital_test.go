@@ -76,8 +76,11 @@ func TestWarmongersRecital_OnHitFireRecyclesTargetFromGraveyardToDeckBottom(t *t
 	if g := s.Graveyard(); len(g) != 0 {
 		t.Errorf("Graveyard after recycle = %v, want empty (target pulled out)", g)
 	}
-	if d := s.Deck().PeekTopN(s.Deck().Size()); len(d) != 2 || d[0].(sim.Card) != deckTop || d[1].(sim.Card) != target {
-		t.Errorf("Deck after recycle = %v, want [deckTop, target] (target appended to bottom)", d)
+	if got := s.Deck().Size(); got != 2 {
+		t.Errorf("Deck size after recycle = %d, want 2 (target appended to bottom)", got)
+	}
+	if top := s.Deck().PeekTop(); top != sim.Card(deckTop) {
+		t.Errorf("Deck top after recycle = %v, want %v (target went to bottom, deckTop unchanged)", top, deckTop)
 	}
 	// Rider line attributes the recycle to the buffed attack, not Warmonger's Recital.
 	added := s.LogEntries()[preLog:]

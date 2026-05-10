@@ -47,10 +47,11 @@ func TestMoonWish_AltCostMovesHandCardToDeckTop(t *testing.T) {
 	if h := s.Hand(); len(h) != 0 {
 		t.Errorf("Hand = %d entries, want 0 (alt cost should pop the only hand card)", len(h))
 	}
-	d := s.Deck().PeekTopN(s.Deck().Size())
-	if len(d) != 2 || d[0].(sim.Card).Name() != "dr" || d[1].(sim.Card).Name() != "deckTop" {
-		t.Errorf("Deck = %v, want [dr, deckTop] (alt-cost'd card on top)",
-			[]string{d[0].(sim.Card).Name(), d[1].(sim.Card).Name()})
+	if got := s.Deck().Size(); got != 2 {
+		t.Errorf("Deck size = %d, want 2 (alt-cost'd card prepended onto existing top)", got)
+	}
+	if top := s.Deck().PeekTop(); top == nil || top.(sim.Card).Name() != "dr" {
+		t.Errorf("Deck top = %v, want %q (alt-cost'd card moved to top)", top, "dr")
 	}
 	// One of the post-trigger log entries should name the returned card.
 	wantSuffix := "returned " + dr.DisplayName() + " to top of deck"

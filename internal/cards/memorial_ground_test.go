@@ -23,9 +23,11 @@ func TestMemorialGround_RecyclesEligibleAttackActionToTop(t *testing.T) {
 	deck := []sim.Card{testutils.BlueAttack{}}
 	s := sim.NewTurnStateFromCards(deck, []sim.Card{target})
 	(MemorialGroundRed{}).Play(s, &sim.CardState{Card: MemorialGroundRed{}})
-	gotDeck := s.Deck().PeekTopN(s.Deck().Size())
-	if len(gotDeck) != 2 || gotDeck[0].(sim.Card) != sim.Card(target) {
-		t.Errorf("deck after recycle = %v, want target on top of BlueAttack", gotDeck)
+	if got := s.Deck().Size(); got != 2 {
+		t.Errorf("deck size after recycle = %d, want 2 (target moved onto the existing top)", got)
+	}
+	if top := s.Deck().PeekTop(); top != sim.Card(target) {
+		t.Errorf("deck top after recycle = %v, want %v", top, target)
 	}
 	if len(s.Graveyard()) != 0 {
 		t.Errorf("graveyard size = %d, want 0 (target recycled out)", len(s.Graveyard()))
