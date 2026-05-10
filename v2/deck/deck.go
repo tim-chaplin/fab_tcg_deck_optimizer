@@ -154,9 +154,9 @@ func (d *Deck) Draw(n int) []Card {
 	return out
 }
 
-// Reset replaces the deck with cards (top to bottom), discarding the prior deck
-// state. Used by the per-turn loop to install a new deck arrangement (e.g. the chain's
-// post-mutation deck) before recycling pitched cards onto the bottom via PutBottom.
+// Reset replaces the deck with cards (top to bottom), discarding the prior deck state.
+// Reuses the existing backing slice when its capacity fits, keeping the call allocation-free
+// when the same Deck is rewound across many trials.
 func (d *Deck) Reset(cards []Card) {
 	if cap(d.Cards) < len(cards) {
 		d.Cards = make([]Card, len(cards))

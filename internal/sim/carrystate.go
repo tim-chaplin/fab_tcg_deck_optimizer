@@ -18,9 +18,10 @@ package sim
 
 // SnapshotFromTurn copies every persistent TurnState field into c. Slice fields reuse c's
 // backings via append([:0], src...) — mid-chain state.* slices alias attackBufs scratch
-// storage that the next permutation overwrites, so the copy is necessary. Deck is a
-// *deck.Deck so it gets a fresh Copy(). Reads s.deck / s.graveyard directly so the
-// snapshot itself doesn't poison cacheable.
+// storage that the next permutation overwrites, so the copy is necessary. Deck gets a
+// fresh Copy() so subsequent permutations' deck mutations don't reach back into the
+// snapshot. Reads s.deck / s.graveyard directly so the snapshot itself doesn't poison
+// cacheable.
 func (c *CarryState) SnapshotFromTurn(s *TurnState) {
 	c.Hand = append(c.Hand[:0], s.hand...)
 	c.Deck = s.deck.Copy()

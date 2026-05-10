@@ -259,10 +259,10 @@ func (s *TurnState) AmendLastChainStepN(n int) {
 	}
 }
 
-// Deck returns the live chain-runner deck and flips IsCacheable to false. Read-only
-// callers still flip — the cache key can't depend on what the deck-order read produced.
-// Mutating the returned *deck.Deck inside a card handler is fine; the per-permutation
-// Copy isolates that mutation from sibling permutations.
+// Deck returns the chain-runner deck for read-only inspection and flips IsCacheable to
+// false. Card handlers should not mutate the returned *deck.Deck directly; route mutations
+// through PopDeckTop / PrependToDeck / Opt / TutorFromDeck / RecycleToDeckBottom so the
+// cacheable bookkeeping stays consistent.
 func (s *TurnState) Deck() *deck.Deck {
 	s.cacheable = false
 	return s.deck
@@ -436,9 +436,6 @@ func (s *TurnState) RecycleToDeckBottom(self *CardState) {
 //
 // Panics if the handler's combined output isn't exactly the input multiset. The contract
 // is that Opt only re-orders cards; adding, dropping, or substituting any card is a bug.
-//
-// Allocates a fresh deck backing slice so the per-leaf deck reference shared across
-// permutations stays untouched (same convention as PrependToDeck / TutorFromDeck).
 func (s *TurnState) Opt(n int) {
 	s.cacheable = false
 	if n <= 0 || s.deck.Size() == 0 {

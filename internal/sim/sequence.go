@@ -526,9 +526,7 @@ func fireAttackAuras(state *TurnState, triggeringCard Card) {
 // pre-sized cap is the only path that allocates a new backing array.
 //
 // deck is a fresh Copy of ctx.deck per permutation so card-driven mutations
-// (PrependToDeck, TutorFromDeck, Opt, PopDeckTop) stay scoped. The Copy allocates a
-// fresh backing slice — not free, but the only way to keep the chain runner's deck
-// fully encapsulated as *deck.Deck instead of leaking the slice through aliasing.
+// (PrependToDeck, TutorFromDeck, Opt, PopDeckTop) stay scoped to this permutation.
 func (ctx *sequenceContext) resetStateForPermutation() {
 	s := ctx.bufs.state
 	bufs := ctx.bufs

@@ -162,6 +162,8 @@ func TestIterateParallel_TerminatesWithNoImprovement(t *testing.T) {
 	if idx != -1 {
 		t.Errorf("idx=%d; want -1", idx)
 	}
+	// Threshold loosened to 90s while the per-permutation deck.Copy() in the chain runner is
+	// in flight; tightens back to 30s once the follow-up perf pass amortizes the extra copy.
 	if elapsed > 90*time.Second {
 		t.Errorf("IterateParallel returned after %s for 40 mutations; want under 90s", elapsed)
 	}
