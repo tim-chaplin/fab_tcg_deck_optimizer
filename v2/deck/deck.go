@@ -27,7 +27,7 @@ import (
 // mutate it directly. Callers running an evaluation trial should Copy() the master deck first
 // so their deck mutations don't disturb the master — see deck.Copy. The field is unexported
 // so external callers can't peek the runtime order; composition-level inspection goes through
-// UniqueIDs / NameCounts / DisplayNames / PitchCounts / Each.
+// UniqueIDs / NameCounts / DisplayNames / PitchCounts.
 type Deck struct {
 	Hero      Hero
 	Weapons   []Weapon
@@ -55,18 +55,6 @@ func (d *Deck) UniqueIDs() ([]ids.CardID, map[ids.CardID]int) {
 		out = append(out, id)
 	}
 	return out, idx
-}
-
-// Each invokes fn for every card in deck order. Used by tests that need to iterate without
-// the slice itself escaping the deck — fn must not mutate the card or stash a reference past
-// the call.
-func (d *Deck) Each(fn func(Card)) {
-	if d == nil {
-		return
-	}
-	for _, c := range d.cards {
-		fn(c)
-	}
 }
 
 // New constructs a Deck. Panics if the weapon loadout violates the "0–2 weapons; if 2, both
