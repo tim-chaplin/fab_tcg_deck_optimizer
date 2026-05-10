@@ -41,17 +41,17 @@ func (Registry) LegalWeapons() []deck.Weapon {
 }
 
 // isExcludedFromPool / isExcludedWeaponFromPool gate cards and weapons out of the deck-
-// construction pool. Three reasons exclude a printing today, all expressed as optional
-// marker interfaces sim defines:
-//   - NotImplemented      — the simulator can't model the printed effect yet.
-//   - Unplayable          — the effect is so weak the optimizer wouldn't pick it.
+// construction pool. Three reasons exclude a printing today, expressed as optional marker
+// interfaces:
+//   - NotImplemented      — the simulator can't model the printed effect yet (registry-side).
+//   - Unplayable          — the effect is so weak the optimizer wouldn't pick it (registry-side).
 //   - NotSilverAgeLegal   — the printing is banned in Silver Age, the only constructed
-//     format the deck builder targets today.
+//     format the deck builder targets today (sim-side, since it's a format rule).
 func isExcludedFromPool(c sim.Card) bool {
-	if _, ok := c.(sim.NotImplemented); ok {
+	if _, ok := c.(NotImplemented); ok {
 		return true
 	}
-	if _, ok := c.(sim.Unplayable); ok {
+	if _, ok := c.(Unplayable); ok {
 		return true
 	}
 	if _, ok := c.(sim.NotSilverAgeLegal); ok {
@@ -61,10 +61,10 @@ func isExcludedFromPool(c sim.Card) bool {
 }
 
 func isExcludedWeaponFromPool(w sim.Weapon) bool {
-	if _, ok := w.(sim.NotImplemented); ok {
+	if _, ok := w.(NotImplemented); ok {
 		return true
 	}
-	if _, ok := w.(sim.Unplayable); ok {
+	if _, ok := w.(Unplayable); ok {
 		return true
 	}
 	if _, ok := w.(sim.NotSilverAgeLegal); ok {

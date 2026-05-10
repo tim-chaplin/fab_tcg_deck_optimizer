@@ -68,18 +68,6 @@ type DominatingFakeCard struct{ FakeCard }
 
 func (DominatingFakeCard) Dominate() {}
 
-// NotImplementedFakeCard embeds FakeCard and adds the NotImplemented marker —
-// exercises the type assertion the deck legal-pool filter keys on.
-type NotImplementedFakeCard struct{ FakeCard }
-
-func (NotImplementedFakeCard) NotImplemented() {}
-
-// UnplayableFakeCard embeds FakeCard and adds the Unplayable marker — exercises the
-// second pool-exclusion path the deck legal-pool filter keys on.
-type UnplayableFakeCard struct{ FakeCard }
-
-func (UnplayableFakeCard) Unplayable() {}
-
 // FakeHero is a minimal Hero with configurable Intelligence and an optional Opt
 // strategy. Every other method returns a fixed zero value so tests measure hand /
 // deck behaviour in isolation from hero ability contributions.

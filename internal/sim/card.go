@@ -239,28 +239,6 @@ type NotSilverAgeLegal interface {
 	NotSilverAgeLegal()
 }
 
-// NotImplemented is an optional marker. Cards whose printed effect references mechanics the
-// simulator doesn't model (e.g. Gold / Silver / Copper token economies, Landmarks) opt in so
-// random deck generation and mutation pools skip them. A NotImplemented card is still a valid
-// Card — hands that already contain one still evaluate using its static Attack / Pitch /
-// Defense — but the optimizer won't introduce it into a new deck or swap one in via mutation.
-// Orthogonal to NotSilverAgeLegal: a card can be format-legal yet unimplemented, or banned yet
-// fully implemented, or both.
-type NotImplemented interface {
-	NotImplemented()
-}
-
-// Unplayable is an optional marker with identical pool-exclusion semantics to NotImplemented:
-// random deck generation, mutation pools, and SanitizeNotImplemented all treat it as a
-// reject-from-pool tag. The distinction is intent — NotImplemented means "we haven't gotten
-// around to modelling this card's effect"; Unplayable means "this card's effect is so weak
-// the optimizer would never pick it even if fully modelled, so don't bother". Both still
-// satisfy Card and remain valid in pre-built hands; only the deck-construction pipeline
-// filters them out.
-type Unplayable interface {
-	Unplayable()
-}
-
 // ModalCard is an optional marker for "Choose 1" cards. Modes returns the number of
 // exclusive modes (typically 2); the chain runner enumerates 0..Modes()-1 per ordering and
 // cards dispatch on self.Mode inside Play. Modes that are no-ops for the current state
@@ -278,31 +256,6 @@ type ModalCard interface {
 // costs into the partition pre-screen via VariableCost.
 type ModalCost interface {
 	ModalCost(mode int8) int
-}
-
-// isExcludedFromPool reports whether c carries either pool-exclusion marker (NotImplemented
-// or Unplayable). The two have identical effect on pool membership; this helper centralises
-// the OR so the deck-construction pipeline reads cleanly and future markers can join the set
-// in one place.
-func isExcludedFromPool(c Card) bool {
-	if _, ok := c.(NotImplemented); ok {
-		return true
-	}
-	if _, ok := c.(Unplayable); ok {
-		return true
-	}
-	return false
-}
-
-// isExcludedWeaponFromPool is the weapon-side analogue of isExcludedFromPool.
-func isExcludedWeaponFromPool(w Weapon) bool {
-	if _, ok := w.(NotImplemented); ok {
-		return true
-	}
-	if _, ok := w.(Unplayable); ok {
-		return true
-	}
-	return false
 }
 
 // Dominator is an optional marker. Attack action cards printed with the Dominate keyword

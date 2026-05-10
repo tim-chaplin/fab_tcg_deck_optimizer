@@ -390,7 +390,7 @@ func baselineEvaluate(d *deck.Deck, cfg annealConfig, rng *rand.Rand) sim.DeckSt
 // budget (use as-is). File exists but doesn't parse → die loudly rather than silently
 // overwrite a corrupt checkpoint.
 //
-// A loaded deck that contains sim.NotImplemented copies (e.g. a pre-tag deck recovered
+// A loaded deck that contains registry.NotImplemented copies (e.g. a pre-tag deck recovered
 // from disk) is sanitized before any of the above branches: the tagged slots are replaced
 // with random legal picks and the run always takes the re-evaluate path so the baseline
 // reflects the new card list.

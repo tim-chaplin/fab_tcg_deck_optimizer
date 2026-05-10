@@ -103,7 +103,7 @@ func fabraryPathFor(jsonPath string) string {
 	return jsonPath + ".txt"
 }
 
-// sanitizeLoadedDeck swaps every sim.NotImplemented copy in d for a random legal
+// sanitizeLoadedDeck swaps every registry.NotImplemented copy in d for a random legal
 // replacement, prints a warning summary on stderr when any swap was made, and returns the
 // ordered list of swaps. maxCopies caps post-sanitize copies per printing; legal restricts
 // the replacement pool (typically the run's format predicate). Returns nil when the deck

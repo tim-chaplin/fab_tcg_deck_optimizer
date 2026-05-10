@@ -75,7 +75,7 @@ func runEval(outPath string, shuffles int, precision float64, mp sim.Matchup, ma
 // evaluateAndPersist runs the deck eval — adaptive when shuffles is negative (capped at
 // adaptiveShufflesCap), fixed otherwise — then writes the fresh stats back to disk
 // (.json + sibling fabrary .txt). Returns the simulated deck so callers can print its
-// stats. The sanitize pass (replacing any sim.NotImplemented copies with legal substitutes
+// stats. The sanitize pass (replacing any registry.NotImplemented copies with legal substitutes
 // drawn at maxCopies under fmtValue) runs before the eval so the on-disk avg always
 // reflects the cards the binary can actually simulate. The stderr summary lets the operator
 // see the re-score happening before the printed output appears.
