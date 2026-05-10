@@ -12,11 +12,21 @@ import (
 	"strings"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/mydecks"
-
-	// Populates sim's forward-declared hooks and warms the chain-step text cache at
-	// process start. See docs/dev-standards.md "Registry / sim split".
-	_ "github.com/tim-chaplin/fab-deck-optimizer/internal/simreg"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/optimizations"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/registry"
 )
+
+// Warms the chain-step text cache from the registry so the runtime hot path is pure
+// cache reads. See docs/dev-standards.md "Registry / sim split".
+func init() {
+	ids := registry.AllCards()
+	cards := make([]sim.Card, 0, len(ids))
+	for _, id := range ids {
+		cards = append(cards, registry.GetCard(id).(sim.Card))
+	}
+	optimizations.WarmChainStepCache(cards)
+}
 
 // defaultMaxCopies is the shared fallback for every subcommand's -max-copies flag so the
 // anneal hill-climb and any future caller agree on "how many copies of one printing is a
