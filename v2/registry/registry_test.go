@@ -1,4 +1,4 @@
-package registry_test
+package registry
 
 import (
 	"math/rand"
@@ -6,14 +6,13 @@ import (
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/heroes"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
-	"github.com/tim-chaplin/fab-deck-optimizer/v2/registry"
 )
 
 // Tests that v2/deck.Random builds a legal deck against the production card pool through
-// registry.Registry.
+// Registry.
 func TestRegistry_DrivesDeckRandom(t *testing.T) {
 	rng := rand.New(rand.NewSource(7))
-	d := deck.Random(heroes.Viserai{}, 40, 2, rng, nil, registry.Registry{})
+	d := deck.Random(heroes.Viserai{}, 40, 2, rng, nil, Registry{})
 	if d.Size() != 40 {
 		t.Errorf("len(Cards) = %d, want 40", d.Size())
 	}
