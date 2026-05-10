@@ -55,7 +55,7 @@ func TestBlessingOfOccult_TriggerHandlerCreatesNRunes(t *testing.T) {
 	for _, tc := range cases {
 		var play sim.TurnState
 		tc.c.Play(&play, &sim.CardState{Card: tc.c})
-		next := sim.NewTurnState(nil, nil)
+		next := sim.NewTurnStateFromCards(nil, nil)
 		next.Auras = append(next.Auras, play.Auras[0])
 		next.SetCurrentAuraIdxForTesting(0)
 		next.Auras[0].Handler(next, &next.Auras[0].Trigger, &next.Auras[0])

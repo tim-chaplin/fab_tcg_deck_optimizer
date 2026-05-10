@@ -60,7 +60,7 @@ func TestWarmongersRecital_OnHitFireRecyclesTargetFromGraveyardToDeckBottom(t *t
 	target := testutils.GenericAttack(0, 5)
 	targetState := &sim.CardState{Card: target}
 	deckTop := testutils.GenericAttack(1, 7)
-	s := sim.NewTurnState([]sim.Card{deckTop}, nil)
+	s := sim.NewTurnStateFromCards([]sim.Card{deckTop}, nil)
 	s.CardsRemaining = []*sim.CardState{targetState}
 	(cards.WarmongersRecitalRed{}).Play(s, &sim.CardState{Card: cards.WarmongersRecitalRed{}})
 	if len(targetState.OnHit) != 1 {
@@ -76,7 +76,7 @@ func TestWarmongersRecital_OnHitFireRecyclesTargetFromGraveyardToDeckBottom(t *t
 	if g := s.Graveyard(); len(g) != 0 {
 		t.Errorf("Graveyard after recycle = %v, want empty (target pulled out)", g)
 	}
-	if d := s.Deck(); len(d) != 2 || d[0] != deckTop || d[1] != target {
+	if d := s.Deck().PeekTopN(s.Deck().Size()); len(d) != 2 || d[0].(sim.Card) != deckTop || d[1].(sim.Card) != target {
 		t.Errorf("Deck after recycle = %v, want [deckTop, target] (target appended to bottom)", d)
 	}
 	// Rider line attributes the recycle to the buffed attack, not Warmonger's Recital.

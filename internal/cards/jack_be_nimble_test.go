@@ -9,7 +9,7 @@ import (
 // Tests that with no Nimblism in the graveyard the rider stays off.
 func TestJackBeNimble_NoNimblismRiderOff(t *testing.T) {
 	self := &sim.CardState{Card: JackBeNimbleRed{}}
-	(JackBeNimbleRed{}).Play(sim.NewTurnState(nil, nil), self)
+	(JackBeNimbleRed{}).Play(sim.NewTurnStateFromCards(nil, nil), self)
 	if self.GrantedGoAgain {
 		t.Errorf("GrantedGoAgain = true with empty graveyard, want false")
 	}
@@ -21,7 +21,7 @@ func TestJackBeNimble_NoNimblismRiderOff(t *testing.T) {
 // Tests that a Nimblism in the graveyard lets Jack Be Nimble banish for the +1{p} /
 // go-again rider.
 func TestJackBeNimble_BanishesNimblismForBonus(t *testing.T) {
-	s := sim.NewTurnState(nil, []sim.Card{NimblismRed{}})
+	s := sim.NewTurnStateFromCards(nil, []sim.Card{NimblismRed{}})
 	self := &sim.CardState{Card: JackBeNimbleRed{}}
 	(JackBeNimbleRed{}).Play(s, self)
 	if !self.GrantedGoAgain {

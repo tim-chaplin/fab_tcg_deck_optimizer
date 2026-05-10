@@ -1,5 +1,7 @@
 package sim
 
+import "github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
+
 // evaluatePartition is the shared "given a fixed role assignment, score it" body used by
 // both findBest's recurse leaf (one of many partitions explored during the search) and
 // replayBest (the cached partition replayed without searching). It groups hand cards into
@@ -18,7 +20,7 @@ package sim
 // place; both callers feed pooled scratch through bufs and tolerate the rewrite.
 func (e *Evaluator) evaluatePartition(
 	hero Hero, weapons []Weapon, hand []Card,
-	deck []Card,
+	d *deck.Deck,
 	rolesBuf []Role, n int, bufs *attackBufs,
 	mp Matchup, defenseSum int,
 	prior TurnState, skipLog bool,
@@ -31,7 +33,7 @@ func (e *Evaluator) evaluatePartition(
 	arsenalCardIn := prior.Arsenal
 	// Group hand cards into played / pitched / defending buckets, then fold in the
 	// arsenal-in card based on its slot's role.
-	p, a, d := groupByRoleInto(
+	p, a, defs := groupByRoleInto(
 		hand, rolesBuf[:n],
 		bufs.pitchedBuf[:0], bufs.attackersBuf[:0], bufs.defendersBuf[:0],
 	)
@@ -40,7 +42,7 @@ func (e *Evaluator) evaluatePartition(
 		case Attack:
 			a = append(a, arsenalCardIn)
 		case Defend:
-			d = append(d, arsenalCardIn)
+			defs = append(defs, arsenalCardIn)
 		}
 	}
 	// Arsenal-in is appended last to a / d above, so its index is len(slice)-1 when
@@ -52,7 +54,7 @@ func (e *Evaluator) evaluatePartition(
 	}
 	arsenalDefenderIdx := -1
 	if arsenalCardIn != nil && rolesBuf[n] == Defend {
-		arsenalDefenderIdx = len(d) - 1
+		arsenalDefenderIdx = len(defs) - 1
 	}
 	// Held cards (hand cards left without a Pitch / Attack / Defend role) thread through
 	// to TurnState.Hand so alt-cost effects (e.g. Moon Wish's "use a hand card") can read
@@ -63,7 +65,7 @@ func (e *Evaluator) evaluatePartition(
 	// Hand off to the chain dispatcher — same call shape both callers used inline before
 	// the extraction.
 	attackDealt, defenseDealt, _, swung, carry, ok, cacheable = bestAttackWithWeapons(
-		hero, weapons, a, d, p, h, deck, bufs,
+		hero, weapons, a, defs, p, h, d, bufs,
 		mp, defenseSum,
 		arsenalInIdx, arsenalDefenderIdx, arsenalAtChainStart,
 		prior, skipLog,

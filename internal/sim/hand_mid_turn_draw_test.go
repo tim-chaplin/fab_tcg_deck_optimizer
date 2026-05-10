@@ -22,9 +22,9 @@ func TestPlaySequence_DrawDoesNotPoisonSubsequentPermutations(t *testing.T) {
 	if h := ctx.Bufs().State().Hand(); len(h) != 1 || h[0] != top {
 		t.Fatalf("after first permutation: Hand = %v, want [top]", h)
 	}
-	if len(ctx.Bufs().State().Deck()) != len(deck)-1 {
-		t.Fatalf("after first permutation: Deck len = %d, want %d (top consumed)",
-			len(ctx.Bufs().State().Deck()), len(deck)-1)
+	if got := ctx.Bufs().State().Deck().Size(); got != len(deck)-1 {
+		t.Fatalf("after first permutation: Deck size = %d, want %d (top consumed)",
+			got, len(deck)-1)
 	}
 
 	// Second permutation: plain attack, no draw. The reset at the top of playSequenceWithMeta
@@ -33,9 +33,9 @@ func TestPlaySequence_DrawDoesNotPoisonSubsequentPermutations(t *testing.T) {
 	if h := ctx.Bufs().State().Hand(); len(h) != 0 {
 		t.Errorf("after second permutation: Hand = %v, want empty (reset lost)", h)
 	}
-	if len(ctx.Bufs().State().Deck()) != len(deck) {
-		t.Errorf("after second permutation: Deck len = %d, want %d (reset lost)",
-			len(ctx.Bufs().State().Deck()), len(deck))
+	if got := ctx.Bufs().State().Deck().Size(); got != len(deck) {
+		t.Errorf("after second permutation: Deck size = %d, want %d (reset lost)",
+			got, len(deck))
 	}
 }
 
@@ -44,8 +44,8 @@ func TestPlaySequence_DrawDoesNotPoisonSubsequentPermutations(t *testing.T) {
 // decks must report distinct end-of-turn State.Hand contents (the cards drawn off the top).
 func TestBest_DrawRiderSeesActualDeck(t *testing.T) {
 	h := []Card{cards.SnatchRed{}}
-	deckA := []Card{testutils.RedAttack{}}
-	deckB := []Card{testutils.BlueAttack{}}
+	deckA := DeckOf(testutils.RedAttack{})
+	deckB := DeckOf(testutils.BlueAttack{})
 
 	resA := Best(heroes.Viserai{}, nil, h, Matchup{IncomingDamage: 0}, deckA, TurnState{})
 	resB := Best(heroes.Viserai{}, nil, h, Matchup{IncomingDamage: 0}, deckB, TurnState{})
@@ -72,8 +72,8 @@ func TestBest_DrawRiderSeesActualDeck(t *testing.T) {
 // chosen hand roles must not depend on Deck[0] — the player commits before seeing the draw.
 func TestBest_DeckOrderDoesNotAffectHandRoles(t *testing.T) {
 	h := []Card{testutils.CostlyDraw{}, testutils.CostlyAttack{}, testutils.PitchOneDR{}}
-	deckA := []Card{testutils.HugeAttack{}, testutils.PitchOneDR{}}
-	deckB := []Card{testutils.PitchOneDR{}, testutils.HugeAttack{}}
+	deckA := DeckOf(testutils.HugeAttack{}, testutils.PitchOneDR{})
+	deckB := DeckOf(testutils.PitchOneDR{}, testutils.HugeAttack{})
 
 	rolesFor := func(summary TurnSummary) map[ids.CardID]Role {
 		m := make(map[ids.CardID]Role, len(summary.BestLine))

@@ -20,7 +20,7 @@ func TestSunKiss_SoloIsHealOnly(t *testing.T) {
 		{SunKissBlue{}, 1},
 	}
 	for _, tc := range cases {
-		s := sim.NewTurnState([]sim.Card{testutils.GenericAttack(0, 0)}, nil)
+		s := sim.NewTurnStateFromCards([]sim.Card{testutils.GenericAttack(0, 0)}, nil)
 		self := &sim.CardState{Card: tc.c}
 		tc.c.Play(s, self)
 		got := s.Value
@@ -49,7 +49,7 @@ func TestSunKiss_SynergyFiresOnPriorMoonWish(t *testing.T) {
 			{SunKissYellow{}, 2},
 			{SunKissBlue{}, 1},
 		} {
-			s := sim.NewTurnState([]sim.Card{testutils.GenericAttack(0, 0)}, nil)
+			s := sim.NewTurnStateFromCards([]sim.Card{testutils.GenericAttack(0, 0)}, nil)
 			s.CardsPlayed = []sim.Card{mw}
 			self := &sim.CardState{Card: sk.c}
 			sk.c.Play(s, self)
@@ -72,7 +72,7 @@ func TestSunKiss_SynergyFiresOnPriorMoonWish(t *testing.T) {
 // Tests that the Sun Kiss synergy only fires on a Moon Wish printing, not any prior attack.
 func TestSunKiss_SynergyDoesNotFireOnUnrelatedAttacks(t *testing.T) {
 	notMoonWish := testutils.GenericAttackPitch(0, 0, 1)
-	s := sim.NewTurnState([]sim.Card{testutils.GenericAttack(0, 0)}, nil)
+	s := sim.NewTurnStateFromCards([]sim.Card{testutils.GenericAttack(0, 0)}, nil)
 	s.CardsPlayed = []sim.Card{notMoonWish}
 	self := &sim.CardState{Card: SunKissRed{}}
 	SunKissRed{}.Play(s, self)

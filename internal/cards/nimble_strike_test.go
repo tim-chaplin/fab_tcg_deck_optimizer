@@ -10,7 +10,7 @@ import (
 func TestNimbleStrike_NoNimblismRiderOff(t *testing.T) {
 	for _, c := range []sim.Card{NimbleStrikeRed{}, NimbleStrikeYellow{}, NimbleStrikeBlue{}} {
 		self := &sim.CardState{Card: c}
-		c.Play(sim.NewTurnState(nil, nil), self)
+		c.Play(sim.NewTurnStateFromCards(nil, nil), self)
 		if self.GrantedGoAgain {
 			t.Errorf("%s [%d{p}]: GrantedGoAgain = true with empty graveyard, want false", c.Name(), c.Pitch())
 		}
@@ -24,7 +24,7 @@ func TestNimbleStrike_NoNimblismRiderOff(t *testing.T) {
 // go-again rider.
 func TestNimbleStrike_BanishesNimblismForBonus(t *testing.T) {
 	for _, c := range []sim.Card{NimbleStrikeRed{}, NimbleStrikeYellow{}, NimbleStrikeBlue{}} {
-		s := sim.NewTurnState(nil, []sim.Card{NimblismRed{}})
+		s := sim.NewTurnStateFromCards(nil, []sim.Card{NimblismRed{}})
 		self := &sim.CardState{Card: c}
 		c.Play(s, self)
 		if !self.GrantedGoAgain {

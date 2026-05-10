@@ -40,17 +40,17 @@ func TestRavenousRabble_TopPitchSubtracted(t *testing.T) {
 		{"pitch 3", 3, 2, 1, 0},
 	}
 	for _, tc := range cases {
-		sRed := sim.NewTurnState([]sim.Card{testutils.GenericAttackPitch(0, 0, tc.topPitch)}, nil)
+		sRed := sim.NewTurnStateFromCards([]sim.Card{testutils.GenericAttackPitch(0, 0, tc.topPitch)}, nil)
 		(RavenousRabbleRed{}).Play(sRed, &sim.CardState{Card: RavenousRabbleRed{}})
 		if got := sRed.Value; got != tc.red {
 			t.Errorf("%s Red: Play() = %d, want %d", tc.name, got, tc.red)
 		}
-		sYellow := sim.NewTurnState([]sim.Card{testutils.GenericAttackPitch(0, 0, tc.topPitch)}, nil)
+		sYellow := sim.NewTurnStateFromCards([]sim.Card{testutils.GenericAttackPitch(0, 0, tc.topPitch)}, nil)
 		(RavenousRabbleYellow{}).Play(sYellow, &sim.CardState{Card: RavenousRabbleYellow{}})
 		if got := sYellow.Value; got != tc.yellow {
 			t.Errorf("%s Yellow: Play() = %d, want %d", tc.name, got, tc.yellow)
 		}
-		sBlue := sim.NewTurnState([]sim.Card{testutils.GenericAttackPitch(0, 0, tc.topPitch)}, nil)
+		sBlue := sim.NewTurnStateFromCards([]sim.Card{testutils.GenericAttackPitch(0, 0, tc.topPitch)}, nil)
 		(RavenousRabbleBlue{}).Play(sBlue, &sim.CardState{Card: RavenousRabbleBlue{}})
 		if got := sBlue.Value; got != tc.blue {
 			t.Errorf("%s Blue: Play() = %d, want %d", tc.name, got, tc.blue)
@@ -62,7 +62,7 @@ func TestRavenousRabble_TopPitchSubtracted(t *testing.T) {
 // Verify the floor explicitly by reducing well past zero: Blue vs a (hypothetical) pitch-5 card
 // should still return 0, not a negative number that'd turn into negative damage downstream.
 func TestRavenousRabble_FloorsAtZero(t *testing.T) {
-	s := sim.NewTurnState([]sim.Card{testutils.GenericAttackPitch(0, 0, 5)}, nil)
+	s := sim.NewTurnStateFromCards([]sim.Card{testutils.GenericAttackPitch(0, 0, 5)}, nil)
 	(RavenousRabbleBlue{}).Play(s, &sim.CardState{Card: RavenousRabbleBlue{}})
 	if got := s.Value; got != 0 {
 		t.Errorf("Blue vs pitch-5 top: Play() = %d, want 0 (floor)", got)
@@ -72,7 +72,7 @@ func TestRavenousRabble_FloorsAtZero(t *testing.T) {
 // TestRavenousRabble_OnlyFirstDeckCardMatters: the reveal is the top card; cards below it don't
 // affect the result.
 func TestRavenousRabble_OnlyFirstDeckCardMatters(t *testing.T) {
-	s := sim.NewTurnState([]sim.Card{
+	s := sim.NewTurnStateFromCards([]sim.Card{
 		testutils.GenericAttackPitch(0, 0, 1),
 		testutils.GenericAttackPitch(0, 0, 3),
 		testutils.GenericAttackPitch(0, 0, 3),

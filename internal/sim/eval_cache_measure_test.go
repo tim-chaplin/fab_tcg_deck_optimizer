@@ -173,7 +173,7 @@ func TestEvalCache_PerHandEquivalence(t *testing.T) {
 		{cards.MoonWishYellow{}, cards.FlyingHighRed{}},
 		{cards.RavenousRabbleRed{}, cards.RavenousRabbleRed{}},
 	}
-	deck := []Card{cards.MaleficIncantationBlue{}, cards.SunKissRed{}}
+	deck := DeckOf(cards.MaleficIncantationBlue{}, cards.SunKissRed{})
 	cachedEv := NewEvaluator()
 	freshEv := NewEvaluatorWithoutCache()
 	for _, h := range hands {

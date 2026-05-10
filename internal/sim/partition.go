@@ -12,9 +12,10 @@ package sim
 
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
 )
 
-func (e *Evaluator) findBest(hero Hero, weapons []Weapon, hand []Card, mp Matchup, deck []Card, prior TurnState, skipLog bool) TurnSummary {
+func (e *Evaluator) findBest(hero Hero, weapons []Weapon, hand []Card, mp Matchup, d *deck.Deck, prior TurnState, skipLog bool) TurnSummary {
 	// Cache fast-path. Bypassed when disabled (e.cache nil) or when any input overflows
 	// a fixed-size cache-key slot (hand size, weapons, auras, items).
 	var cacheKey evalCacheKey
@@ -29,7 +30,7 @@ func (e *Evaluator) findBest(hero Hero, weapons []Weapon, hand []Card, mp Matchu
 	if cacheUsable {
 		if entry, ok := e.cache.lookup(cacheKey); ok {
 			e.cache.hits.Add(1)
-			return e.replayBest(entry, hero, weapons, hand, mp, deck, prior, skipLog)
+			return e.replayBest(entry, hero, weapons, hand, mp, d, prior, skipLog)
 		}
 		e.cache.misses.Add(1)
 	}
@@ -57,7 +58,7 @@ func (e *Evaluator) findBest(hero Hero, weapons []Weapon, hand []Card, mp Matchu
 		Cacheable:      true,
 		State: CarryState{
 			Hand:    append([]Card(nil), hand...),
-			Deck:    append([]Card(nil), deck...),
+			Deck:    d.Copy(),
 			Arsenal: arsenalCardIn,
 			Auras:   append([]Aura(nil), prior.Auras...),
 			Items:   append([]Item(nil), prior.Items...),
@@ -94,7 +95,7 @@ func (e *Evaluator) findBest(hero Hero, weapons []Weapon, hand []Card, mp Matchu
 	recurse = func(i, pitchSum, defenseSum int) {
 		if i == totalN {
 			attackDealt, defenseDealt, swung, carry, ok, leafCacheable, arsenalAtChainStart := e.evaluatePartition(
-				hero, weapons, hand, deck,
+				hero, weapons, hand, d,
 				rolesBuf, n, bufs,
 				mp, defenseSum,
 				prior, skipLog,
@@ -360,15 +361,15 @@ func roleAllowed(r Role, isArsenalSlot, isDefenseReaction, canAttack bool) bool 
 // Returns the per-DR cacheable status as a sticky bit — once a DR reads deck or graveyard
 // via the accessors, the partition's defense-phase output isn't safe to cache; aggregated up
 // through bestAttackWithWeapons.
-func defendersDamage(defenders, pitched, deck []Card, state *TurnState, gravBuf []Card, cs *CardState, incomingDamage, blockBudget, arsenalDefenderIdx int) (int, []Card, bool) {
+func defendersDamage(defenders, pitched []Card, deckPile *deck.Deck, state *TurnState, gravBuf []Card, cs *CardState, incomingDamage, blockBudget, arsenalDefenderIdx int) (int, []Card, bool) {
 	total := 0
 	remaining := incomingDamage
 	cacheable := true
 	// state.Auras is caller-seeded with priorAuras so DR Plays consolidate created
 	// auras against the carryover entries. The per-DR reset below preserves the
 	// running list across iterations.
-	for i, d := range defenders {
-		if !attackerMetaPtrFor(d).actsAsDR {
+	for i, def := range defenders {
+		if !attackerMetaPtrFor(def).actsAsDR {
 			continue
 		}
 		gravBuf = append(gravBuf[:0], defenders...)
@@ -380,9 +381,11 @@ func defendersDamage(defenders, pitched, deck []Card, state *TurnState, gravBuf 
 		// field, and the BestSkipLog hot path expects DR Plays to skip log work. Resetting
 		// without it forces every DR sub-line through fmt.Sprintf / DisplayName / append.
 		preservedSkipLog := state.skipLog
-		*state = TurnState{Pitched: pitched, deck: deck, graveyard: gravBuf, IncomingDamage: remaining, cacheable: true, Defenders: defenders, Auras: preservedAuras, skipLog: preservedSkipLog}
-		*cs = CardState{Card: d, FromArsenal: i == arsenalDefenderIdx}
-		d.Play(state, cs)
+		// Copy the deck per DR so a DR's mid-Play deck mutations stay scoped — the next
+		// DR sees the original pre-DR deck order.
+		*state = TurnState{Pitched: pitched, deck: deckPile.Copy(), graveyard: gravBuf, IncomingDamage: remaining, cacheable: true, Defenders: defenders, Auras: preservedAuras, skipLog: preservedSkipLog}
+		*cs = CardState{Card: def, FromArsenal: i == arsenalDefenderIdx}
+		def.Play(state, cs)
 		total += state.Value
 		remaining = state.IncomingDamage
 		if !state.IsCacheable() {
@@ -395,14 +398,14 @@ func defendersDamage(defenders, pitched, deck []Card, state *TurnState, gravBuf 
 	// their hook unchanged. Reuse the caller-provided cs scratch so the interface call
 	// doesn't escape a fresh CardState per plain blocker.
 	state.Defenders = defenders
-	for _, d := range defenders {
-		if attackerMetaPtrFor(d).actsAsDR {
+	for _, def := range defenders {
+		if attackerMetaPtrFor(def).actsAsDR {
 			continue
 		}
-		bestMode, bestCost := pickBlockerMode(d, state, cs, blockBudget)
+		bestMode, bestCost := pickBlockerMode(def, state, cs, blockBudget)
 		blockBudget -= bestCost
-		*cs = CardState{Card: d, Mode: bestMode}
-		if b, ok := d.(Blocker); ok {
+		*cs = CardState{Card: def, Mode: bestMode}
+		if b, ok := def.(Blocker); ok {
 			b.Block(state, cs)
 		}
 		block := cs.EffectiveDefense()

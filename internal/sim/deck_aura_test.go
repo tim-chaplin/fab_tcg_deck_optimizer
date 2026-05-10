@@ -37,7 +37,7 @@ func TestProcessAurasAtStartOfTurn_FiresEachQueuedTriggerOnce(t *testing.T) {
 	aura := testutils.RedAttack{}
 	var callsA, callsB int
 	queue := []Aura{damageTrigger(aura, 2, &callsA), damageTrigger(aura, 3, &callsB)}
-	survivors, contribs, total, _, _ := ProcessAurasAtStartOfTurn(queue, nil)
+	survivors, contribs, total, _, _ := ProcessAurasAtStartOfTurn(queue, DeckOf())
 	if total != 5 {
 		t.Errorf("total = %d, want 5 (2+3)", total)
 	}
@@ -54,7 +54,7 @@ func TestProcessAurasAtStartOfTurn_FiresEachQueuedTriggerOnce(t *testing.T) {
 
 // TestProcessAurasAtStartOfTurn_EmptyQueue short-circuits: no contribs, no alloc, zero total.
 func TestProcessAurasAtStartOfTurn_EmptyQueue(t *testing.T) {
-	survivors, contribs, total, _, _ := ProcessAurasAtStartOfTurn(nil, nil)
+	survivors, contribs, total, _, _ := ProcessAurasAtStartOfTurn(nil, DeckOf())
 	if total != 0 {
 		t.Errorf("total = %d, want 0", total)
 	}
@@ -91,7 +91,7 @@ func TestProcessAurasAtStartOfTurn_GraveyardsExhaustedAura(t *testing.T) {
 			Count: 1,
 		},
 		watcher,
-	}, nil)
+	}, DeckOf())
 	if len(seen) != 1 || seen[0] != aura {
 		t.Errorf("second handler saw Graveyard = %v, want [%v] (first trigger's Self graveyarded first)",
 			seen, aura)
@@ -102,7 +102,7 @@ func TestProcessAurasAtStartOfTurn_GraveyardsExhaustedAura(t *testing.T) {
 // start), so a carried-in Ponder is left untouched by the start-of-turn pass — no
 // other framework piece should accidentally drain it.
 func TestProcessAurasAtStartOfTurn_IgnoresPonder(t *testing.T) {
-	survivors, _, _, _, _ := ProcessAurasAtStartOfTurn([]Aura{NewPonderAura(1)}, nil)
+	survivors, _, _, _, _ := ProcessAurasAtStartOfTurn([]Aura{NewPonderAura(1)}, DeckOf())
 	if len(survivors) != 1 || survivors[0].Self.TokenType != TokenTypePonder {
 		t.Errorf("survivors = %+v, want one Ponder aura intact", survivors)
 	}
@@ -113,7 +113,7 @@ func TestProcessAurasAtStartOfTurn_IgnoresPonder(t *testing.T) {
 // the post-hoc arsenal-promotion step fill an empty arsenal.
 func TestFireEndOfTurn_PonderPopsDeckTopIntoHand(t *testing.T) {
 	a, b, c := testutils.NewStubCard("a"), testutils.NewStubCard("b"), testutils.NewStubCard("c")
-	s := NewTurnState([]Card{a, b, c}, nil)
+	s := NewTurnStateFromCards([]Card{a, b, c}, nil)
 	s.Auras = append(s.Auras, NewPonderAura(2))
 
 	FireEndOfTurn(s)
@@ -122,8 +122,8 @@ func TestFireEndOfTurn_PonderPopsDeckTopIntoHand(t *testing.T) {
 	if len(h) != 2 || h[0] != a || h[1] != b {
 		t.Errorf("Hand = %v, want [a, b]", h)
 	}
-	if got := len(s.Deck()); got != 1 {
-		t.Errorf("len(Deck) = %d, want 1 (two cards popped)", got)
+	if got := s.Deck().Size(); got != 1 {
+		t.Errorf("Deck size = %d, want 1 (two cards popped)", got)
 	}
 	if len(s.Auras) != 0 {
 		t.Errorf("Auras = %+v, want empty (Ponder destroyed itself)", s.Auras)
@@ -151,7 +151,7 @@ func TestProcessAurasAtStartOfTurn_RevealsAttackActionIntoHand(t *testing.T) {
 	var play TurnState
 	(cards.SigilOfTheArknightBlue{}).Play(&play, &CardState{Card: cards.SigilOfTheArknightBlue{}})
 	slash := cards.AetherSlashRed{}
-	_, contribs, total, revealed, _ := ProcessAurasAtStartOfTurn(play.Auras, []Card{slash})
+	_, contribs, total, revealed, _ := ProcessAurasAtStartOfTurn(play.Auras, DeckOf(slash))
 	if total != 0 {
 		t.Errorf("total = %d, want 0 (reveal contributes via hand, not damage)", total)
 	}
@@ -169,7 +169,7 @@ func TestProcessAurasAtStartOfTurn_AttributesRevealedToContribution(t *testing.T
 	var play TurnState
 	(cards.SigilOfTheArknightBlue{}).Play(&play, &CardState{Card: cards.SigilOfTheArknightBlue{}})
 	slash := cards.AetherSlashRed{}
-	_, contribs, _, _, _ := ProcessAurasAtStartOfTurn(play.Auras, []Card{slash})
+	_, contribs, _, _, _ := ProcessAurasAtStartOfTurn(play.Auras, DeckOf(slash))
 	if len(contribs) != 1 {
 		t.Fatalf("contribs = %+v, want one entry", contribs)
 	}
@@ -186,7 +186,7 @@ func TestProcessAurasAtStartOfTurn_CascadingReveals(t *testing.T) {
 	(cards.SigilOfTheArknightBlue{}).Play(&play, &CardState{Card: cards.SigilOfTheArknightBlue{}})
 	first := cards.AetherSlashRed{}
 	second := cards.ConsumingVolitionRed{}
-	_, _, _, revealed, _ := ProcessAurasAtStartOfTurn(play.Auras, []Card{first, second})
+	_, _, _, revealed, _ := ProcessAurasAtStartOfTurn(play.Auras, DeckOf(first, second))
 	if len(revealed) != 2 {
 		t.Fatalf("len(revealed) = %d, want 2 (two cascading reveals)", len(revealed))
 	}
@@ -202,7 +202,7 @@ func TestProcessAurasAtStartOfTurn_NonAttackActionTopSkipsReveal(t *testing.T) {
 	sigil := cards.SigilOfTheArknightBlue{}
 	sigil.Play(&play, &CardState{Card: sigil})
 	// Sigil itself is an Aura (non-attack action) — use it as a convenient non-attack top.
-	_, _, total, revealed, _ := ProcessAurasAtStartOfTurn(play.Auras, []Card{sigil})
+	_, _, total, revealed, _ := ProcessAurasAtStartOfTurn(play.Auras, DeckOf(sigil))
 	if total != 0 {
 		t.Errorf("total = %d, want 0 (non-attack top, no credit)", total)
 	}
@@ -218,7 +218,7 @@ func TestProcessAurasAtStartOfTurn_SigilHitAuthorsLogText(t *testing.T) {
 	var play TurnState
 	sigil := cards.SigilOfTheArknightBlue{}
 	sigil.Play(&play, &CardState{Card: sigil})
-	_, contribs, _, _, _ := ProcessAurasAtStartOfTurn(play.Auras, []Card{cards.AetherSlashRed{}})
+	_, contribs, _, _, _ := ProcessAurasAtStartOfTurn(play.Auras, DeckOf(cards.AetherSlashRed{}))
 	if len(contribs) != 1 {
 		t.Fatalf("contribs = %+v, want one entry", contribs)
 	}
@@ -236,7 +236,7 @@ func TestProcessAurasAtStartOfTurn_SigilWhiffStillLogs(t *testing.T) {
 	sigil := cards.SigilOfTheArknightBlue{}
 	sigil.Play(&play, &CardState{Card: sigil})
 	// Sigil itself is a non-attack action — convenient whiff top.
-	_, contribs, _, _, _ := ProcessAurasAtStartOfTurn(play.Auras, []Card{sigil})
+	_, contribs, _, _, _ := ProcessAurasAtStartOfTurn(play.Auras, DeckOf(sigil))
 	if len(contribs) != 1 {
 		t.Fatalf("contribs = %+v, want one entry", contribs)
 	}
@@ -299,7 +299,7 @@ func TestProcessAurasAtStartOfTurn_ReArmsOncePerTurnGate(t *testing.T) {
 		OncePerTurn:   true,
 		FiredThisTurn: true,
 	}
-	survivors, _, _, _, _ := ProcessAurasAtStartOfTurn([]Aura{exhausted}, nil)
+	survivors, _, _, _, _ := ProcessAurasAtStartOfTurn([]Aura{exhausted}, DeckOf())
 	if len(survivors) != 1 {
 		t.Fatalf("survivors len = %d, want 1 (AttackAction trigger passes through)", len(survivors))
 	}

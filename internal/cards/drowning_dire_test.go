@@ -12,7 +12,7 @@ import (
 func TestDrowningDire_NoAuraNoDominate(t *testing.T) {
 	for _, c := range []sim.Card{DrowningDireRed{}, DrowningDireYellow{}, DrowningDireBlue{}} {
 		self := &sim.CardState{Card: c}
-		c.Play(sim.NewTurnState(nil, nil), self)
+		c.Play(sim.NewTurnStateFromCards(nil, nil), self)
 		if self.GrantedDominate {
 			t.Errorf("%s [%d{p}]: GrantedDominate = true without prior aura, want false", c.Name(), c.Pitch())
 		}
@@ -22,7 +22,7 @@ func TestDrowningDire_NoAuraNoDominate(t *testing.T) {
 // Tests that an aura played earlier this turn flips GrantedDominate via HasPlayedOrCreatedAura.
 func TestDrowningDire_AuraGrantsDominate(t *testing.T) {
 	for _, c := range []sim.Card{DrowningDireRed{}, DrowningDireYellow{}, DrowningDireBlue{}} {
-		s := sim.NewTurnState(nil, nil)
+		s := sim.NewTurnStateFromCards(nil, nil)
 		s.CardsPlayed = []sim.Card{testutils.Aura{}}
 		self := &sim.CardState{Card: c}
 		c.Play(s, self)
@@ -36,13 +36,13 @@ func TestDrowningDire_AuraGrantsDominate(t *testing.T) {
 func TestDrowningDire_OnHitRecyclesNonAttackToBottom(t *testing.T) {
 	non := testutils.GenericAction()
 	deck := []sim.Card{testutils.RedAttack{}}
-	s := sim.NewTurnState(deck, []sim.Card{non})
+	s := sim.NewTurnStateFromCards(deck, []sim.Card{non})
 	self := &sim.CardState{Card: DrowningDireRed{}}
 	(DrowningDireRed{}).Play(s, self)
 	self.BonusAttack = 2
 	testutils.FireOnHitIfLikely(s, self)
-	gotDeck := s.Deck()
-	if len(gotDeck) != 2 || gotDeck[1] != sim.Card(non) {
+	gotDeck := s.Deck().PeekTopN(s.Deck().Size())
+	if len(gotDeck) != 2 || gotDeck[1].(sim.Card) != sim.Card(non) {
 		t.Errorf("deck after recycle = %v, want non-attack at bottom under RedAttack", gotDeck)
 	}
 }

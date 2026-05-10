@@ -19,8 +19,19 @@ func IsExcludedFromPool(c Card) bool { return isExcludedFromPool(c) }
 
 // Best re-exports the package-private best for sim_test consumers. External-package
 // (turntests) callers don't see this — only sim_test files in the same directory do.
-func Best(hero Hero, weapons []Weapon, hand []Card, mp Matchup, deck []Card, prior TurnState) TurnSummary {
-	return best(hero, weapons, hand, mp, deck, prior)
+func Best(hero Hero, weapons []Weapon, hand []Card, mp Matchup, d *deck.Deck, prior TurnState) TurnSummary {
+	return best(hero, weapons, hand, mp, d, prior)
+}
+
+// DeckOf builds a *deck.Deck from a list of sim.Cards. Test-only convenience for tests
+// that want to seed a TurnState or chain runner without writing the type-conversion loop
+// inline.
+func DeckOf(cards ...Card) *deck.Deck {
+	dc := make([]deck.Card, len(cards))
+	for i, c := range cards {
+		dc[i] = c
+	}
+	return deck.New(nil, nil, dc)
 }
 
 // SequenceContextForTest wraps *sequenceContext so sim_test files can drive
@@ -74,15 +85,15 @@ func AppendGroupedChainEntries(out []string, log []LogEntry) []string {
 // DefendersDamage re-exports defendersDamage for sim_test consumers with an unbounded
 // block budget (no modal-blocker pressure). Drops the trailing cacheable bool so call
 // sites that don't care about cacheable propagation stay terse.
-func DefendersDamage(defenders, pitched, deck []Card, state *TurnState, gravBuf []Card, cs *CardState, incomingDamage, arsenalDefenderIdx int) (int, []Card) {
-	total, gravBuf, _ := defendersDamage(defenders, pitched, deck, state, gravBuf, cs, incomingDamage, noBlockBudgetCap, arsenalDefenderIdx)
+func DefendersDamage(defenders, pitched []Card, d *deck.Deck, state *TurnState, gravBuf []Card, cs *CardState, incomingDamage, arsenalDefenderIdx int) (int, []Card) {
+	total, gravBuf, _ := defendersDamage(defenders, pitched, d, state, gravBuf, cs, incomingDamage, noBlockBudgetCap, arsenalDefenderIdx)
 	return total, gravBuf
 }
 
 // DefendersDamageWithBudget is the budget-aware export — sim_test consumers exercising
 // modal blockers (Brothers in Arms, …) pass blockBudget directly to gate the mode pick.
-func DefendersDamageWithBudget(defenders, pitched, deck []Card, state *TurnState, gravBuf []Card, cs *CardState, incomingDamage, blockBudget, arsenalDefenderIdx int) (int, []Card) {
-	total, gravBuf, _ := defendersDamage(defenders, pitched, deck, state, gravBuf, cs, incomingDamage, blockBudget, arsenalDefenderIdx)
+func DefendersDamageWithBudget(defenders, pitched []Card, d *deck.Deck, state *TurnState, gravBuf []Card, cs *CardState, incomingDamage, blockBudget, arsenalDefenderIdx int) (int, []Card) {
+	total, gravBuf, _ := defendersDamage(defenders, pitched, d, state, gravBuf, cs, incomingDamage, blockBudget, arsenalDefenderIdx)
 	return total, gravBuf
 }
 
@@ -131,12 +142,12 @@ func MeanStandardError(stats *DeckStats) float64 { return meanStandardError(stat
 
 // ProcessAurasAtStartOfTurn re-exports processAurasAtStartOfTurn for sim_test
 // consumers exercising the start-of-turn aura-trigger pipeline in isolation.
-func ProcessAurasAtStartOfTurn(queued []Aura, postDrawDeck []Card) (
+func ProcessAurasAtStartOfTurn(queued []Aura, d *deck.Deck) (
 	survivors []Aura,
 	contribs []TriggerContribution,
 	damage int,
 	revealed []Card,
 	graveyarded []Card,
 ) {
-	return processAurasAtStartOfTurn(queued, postDrawDeck)
+	return processAurasAtStartOfTurn(queued, d)
 }

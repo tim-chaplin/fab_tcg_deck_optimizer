@@ -286,7 +286,7 @@ func TestCopy_IsolatesShuffleFromMaster(t *testing.T) {
 }
 
 // TestDraw_ConsumesFromTop pins the contract: Draw(n) returns the top n cards in deck
-// order and advances the pile so Size = original − n. Asserts against the first card via
+// order and advances the deck so Size = original − n. Asserts against the first card via
 // PeekTop so the test doesn't reach for the (test-only) Cards backing slice.
 func TestDraw_ConsumesFromTop(t *testing.T) {
 	d := New(nil, nil, []Card{
@@ -303,7 +303,7 @@ func TestDraw_ConsumesFromTop(t *testing.T) {
 }
 
 // PeekTop returns nil when the deck is empty, and the top card otherwise. Drawing the
-// whole pile and Peeking should give nil; PutBottom-ing one and re-Peeking gives that
+// whole deck and Peeking should give nil; PutBottom-ing one and re-Peeking gives that
 // card back.
 func TestPeekTop_ReturnsTopOrNil(t *testing.T) {
 	d := New(nil, nil, []Card{fakeCard{id: 1}, fakeCard{id: 2}})
@@ -332,7 +332,7 @@ func TestDraw_PanicsOnOverdraw(t *testing.T) {
 	d.Draw(3)
 }
 
-// TestReset_ReplacesPile pins that Reset installs a brand new draw pile, discarding the
+// TestReset_ReplacesPile pins that Reset installs a brand new deck, discarding the
 // prior order. Asserts via Size + PeekTop + Draw rather than reaching into the backing
 // slice.
 func TestReset_ReplacesPile(t *testing.T) {
@@ -353,7 +353,7 @@ func TestReset_ReplacesPile(t *testing.T) {
 	}
 }
 
-// TestPutBottom_AppendsToBottom confirms PutBottom puts cards at the bottom of the pile
+// TestPutBottom_AppendsToBottom confirms PutBottom puts cards at the bottom of the deck
 // in the order passed, preserving the existing top.
 func TestPutBottom_AppendsToBottom(t *testing.T) {
 	d := New(nil, nil, []Card{fakeCard{id: 1}, fakeCard{id: 2}, fakeCard{id: 3}})
@@ -367,5 +367,58 @@ func TestPutBottom_AppendsToBottom(t *testing.T) {
 		if got.ID() != want {
 			t.Errorf("PutBottom card[%d] = %d, want %d", i, got.ID(), want)
 		}
+	}
+}
+
+// TestPutTop_PrependsToTop confirms PutTop puts cards at the top of the deck in the order
+// passed (first card of the slice is the new top), preserving the existing bottom.
+func TestPutTop_PrependsToTop(t *testing.T) {
+	d := New(nil, nil, []Card{fakeCard{id: 1}, fakeCard{id: 2}, fakeCard{id: 3}})
+	d.PutTop([]Card{fakeCard{id: 99}, fakeCard{id: 98}})
+	if d.Size() != 5 {
+		t.Fatalf("Size after PutTop = %d, want 5", d.Size())
+	}
+	wantOrder := []ids.CardID{99, 98, 1, 2, 3}
+	for i, want := range wantOrder {
+		got := d.Draw(1)[0]
+		if got.ID() != want {
+			t.Errorf("PutTop card[%d] = %d, want %d", i, got.ID(), want)
+		}
+	}
+}
+
+// TestTutor_RemovesHighestScoring confirms Tutor scans the whole deck, removes the card
+// with the highest positive score, and returns it. Cards scoring zero or negative are
+// ignored; a deck where every card scores zero returns (nil, false) without removing.
+func TestTutor_RemovesHighestScoring(t *testing.T) {
+	d := New(nil, nil, []Card{
+		fakeCard{id: 1}, fakeCard{id: 5}, fakeCard{id: 3}, fakeCard{id: 7},
+	})
+	score := func(c Card) int { return int(c.ID()) }
+	got, ok := d.Tutor(score)
+	if !ok || got.ID() != 7 {
+		t.Errorf("Tutor returned %v ok=%v, want id 7 ok=true", got, ok)
+	}
+	if d.Size() != 3 {
+		t.Errorf("Size after Tutor = %d, want 3", d.Size())
+	}
+	for _, c := range d.Cards {
+		if c.ID() == 7 {
+			t.Errorf("Tutor left id 7 in the deck: %v", d.Cards)
+		}
+	}
+}
+
+// TestTutor_NoMatchReturnsFalse confirms Tutor leaves the deck untouched when no card
+// scores > 0.
+func TestTutor_NoMatchReturnsFalse(t *testing.T) {
+	d := New(nil, nil, []Card{fakeCard{id: 1}, fakeCard{id: 2}})
+	beforeSize := d.Size()
+	got, ok := d.Tutor(func(Card) int { return 0 })
+	if ok || got != nil {
+		t.Errorf("Tutor on no-match returned %v ok=%v, want nil false", got, ok)
+	}
+	if d.Size() != beforeSize {
+		t.Errorf("Size mutated by failed Tutor: %d, want %d", d.Size(), beforeSize)
 	}
 }

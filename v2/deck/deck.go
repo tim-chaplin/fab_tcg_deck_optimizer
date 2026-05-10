@@ -23,9 +23,9 @@ import (
 // the user wants on their sideboard list (e.g. Nullrune cycle) aren't in the card registry,
 // so a registry-backed field would force the user's data through a lossy lookup.
 //
-// Cards doubles as the runtime draw pile: Shuffle / Draw / Peek / Reset / PutBottom mutate
-// it directly. Callers running an evaluation trial should Copy() the master deck first so
-// their pile mutations don't disturb the master — see deck.Copy.
+// Cards doubles as the runtime deck: Shuffle / Draw / PeekTop / PutBottom / PutTop / Tutor
+// mutate it directly. Callers running an evaluation trial should Copy() the master deck first
+// so their deck mutations don't disturb the master — see deck.Copy.
 type Deck struct {
 	Hero      Hero
 	Weapons   []Weapon
@@ -43,8 +43,14 @@ func New(h Hero, weapons []Weapon, cards []Card) *Deck {
 }
 
 // Size reports the number of cards in the deck. Excludes Sideboard and Equipment, which are
-// reserve / arena lists the simulator never reads.
-func (d *Deck) Size() int { return len(d.Cards) }
+// reserve / arena lists the simulator never reads. Nil-safe: a nil Deck reports 0 so
+// callers holding a zero-value TurnState (no deck attached) read empty without a guard.
+func (d *Deck) Size() int {
+	if d == nil {
+		return 0
+	}
+	return len(d.Cards)
+}
 
 // Fingerprint returns a comparable summary of the deck for equality checks: the weapon
 // loadout (names sorted) and a sorted card-count histogram. Two decks with the same cards
@@ -81,6 +87,9 @@ func (d *Deck) Fingerprint() string {
 // evaluator: each worker calls master.Copy() before its trial so Shuffle / Draw / Reset /
 // PutBottom mutations land on the worker's local copy and the master deck stays sharable.
 func (d *Deck) Copy() *Deck {
+	if d == nil {
+		return &Deck{}
+	}
 	out := &Deck{Hero: d.Hero}
 	if len(d.Weapons) > 0 {
 		out.Weapons = append(make([]Weapon, 0, len(d.Weapons)), d.Weapons...)
@@ -106,19 +115,34 @@ func (d *Deck) Shuffle(rng *rand.Rand) {
 	}
 }
 
-// PeekTop returns the top card of the draw pile without removing it, or nil when the
-// pile is empty. Used by cards that get a buff based on the top card's type / cost / etc.
+// PeekTop returns the top card of the deck without removing it, or nil when the deck is
+// empty. Used by cards that get a buff based on the top card's type / cost / etc.
 // (e.g. "if the top card of your deck is an attack action, this gets +1{p}"). Tests
-// reading the whole pile should drive Draw / PutBottom instead of reaching for a Peek-all
+// reading the whole deck should drive Draw / PutBottom instead of reaching for a Peek-all
 // API — the deck is meant to be a black box past its top.
 func (d *Deck) PeekTop() Card {
-	if len(d.Cards) == 0 {
+	if d == nil || len(d.Cards) == 0 {
 		return nil
 	}
 	return d.Cards[0]
 }
 
-// Draw removes the top n cards from the draw pile and returns them (top to bottom).
+// PeekTopN returns the top n cards of the deck (top first) without removing them, or
+// fewer when the deck has < n cards. Used by cards that scan / count the top N for a
+// rider (e.g. "reveal the top N cards; create a runechant for each runeblade attack
+// action revealed"). The returned slice aliases the deck's backing storage; mutating it
+// would corrupt the deck.
+func (d *Deck) PeekTopN(n int) []Card {
+	if d == nil {
+		return nil
+	}
+	if n > len(d.Cards) {
+		n = len(d.Cards)
+	}
+	return d.Cards[:n]
+}
+
+// Draw removes the top n cards from the deck and returns them (top to bottom).
 // The returned slice aliases the deck's backing storage; same retention caveat as Peek.
 // Panics when n exceeds Size.
 func (d *Deck) Draw(n int) []Card {
@@ -130,8 +154,8 @@ func (d *Deck) Draw(n int) []Card {
 	return out
 }
 
-// Reset replaces the draw pile with cards (top to bottom), discarding the prior pile
-// state. Used by the per-turn loop to install a new pile arrangement (e.g. the chain's
+// Reset replaces the deck with cards (top to bottom), discarding the prior deck
+// state. Used by the per-turn loop to install a new deck arrangement (e.g. the chain's
 // post-mutation deck) before recycling pitched cards onto the bottom via PutBottom.
 func (d *Deck) Reset(cards []Card) {
 	if cap(d.Cards) < len(cards) {
@@ -142,11 +166,48 @@ func (d *Deck) Reset(cards []Card) {
 	copy(d.Cards, cards)
 }
 
-// PutBottom appends cards to the bottom of the draw pile, preserving the relative order
+// PutBottom appends cards to the bottom of the deck, preserving the relative order
 // passed in. Used by the per-turn loop to recycle pitched cards onto the deck bottom per
 // FaB's end-of-turn pitch-zone-to-deck rule.
 func (d *Deck) PutBottom(cards []Card) {
 	d.Cards = append(d.Cards, cards...)
+}
+
+// PutTop prepends cards to the top of the deck, preserving the relative order passed
+// in (cards[0] becomes the new top). Used by mid-chain effects that put a card back on
+// top (PrependToDeck) or that re-order the top N (Opt).
+func (d *Deck) PutTop(cards []Card) {
+	if len(cards) == 0 {
+		return
+	}
+	combined := make([]Card, 0, len(cards)+len(d.Cards))
+	combined = append(combined, cards...)
+	combined = append(combined, d.Cards...)
+	d.Cards = combined
+}
+
+// Tutor scans the entire deck, removes the highest-scoring card per score, and returns it.
+// Returns (nil, false) when no card scores > 0 or the deck is empty. Used by mid-chain
+// tutor effects ("search your deck for a … with X").
+func (d *Deck) Tutor(score func(Card) int) (Card, bool) {
+	bestIdx := -1
+	bestScore := 0
+	for i, c := range d.Cards {
+		sc := score(c)
+		if sc > bestScore {
+			bestScore = sc
+			bestIdx = i
+		}
+	}
+	if bestIdx < 0 {
+		return nil, false
+	}
+	found := d.Cards[bestIdx]
+	out := make([]Card, 0, len(d.Cards)-1)
+	out = append(out, d.Cards[:bestIdx]...)
+	out = append(out, d.Cards[bestIdx+1:]...)
+	d.Cards = out
+	return found, true
 }
 
 // SideboardDefault is one "always include in the sideboard" entry the caller passes to

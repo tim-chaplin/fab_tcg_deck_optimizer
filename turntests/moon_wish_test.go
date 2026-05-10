@@ -124,7 +124,7 @@ func countAcrossSurfaces(state sim.TurnStartState, id ids.CardID) int {
 			n++
 		}
 	}
-	for _, c := range state.StartOfNextTurnDeck {
+	for _, c := range state.StartOfNextTurnDeck.PeekTopN(state.StartOfNextTurnDeck.Size()) {
 		if c.ID() == id {
 			n++
 		}

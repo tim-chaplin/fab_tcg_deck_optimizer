@@ -247,7 +247,7 @@ func newShuffleScratch(weaponCount, deckSize, handSize, numUniqueIDs int) *shuff
 // per-worker totals at chunk boundaries via mergeStatsInto.
 //
 // master is the per-evaluation deck shared with mutation enumeration; runOneShuffle copies
-// it before shuffling so each shuffle trial gets an independent draw pile and the master's
+// it before shuffling so each shuffle trial gets an independent deck and the master's
 // Cards order stays stable across goroutines.
 func runOneShuffle(master *deck.Deck, scratch *shuffleScratch, stats *DeckStats, idIndex map[ids.CardID]int, ev *Evaluator, rng *rand.Rand, mp Matchup, handsPerCycle, handSize int) {
 	d := master.Copy()
@@ -290,28 +290,19 @@ func runOneShuffle(master *deck.Deck, scratch *shuffleScratch, stats *DeckStats,
 		startingItems := append([]Item(nil), itemBuf...)
 		startOfTurnAuras := snapshotStartOfTurnAuras(auraTriggerBuf)
 		dealtHand := append([]Card(nil), h...)
-		// processAurasAtStartOfTurn and runBestForTurn / replayBestForTurnWithLog still
-		// take the full remaining-deck snapshot in []sim.Card form: aura processing scans
-		// it for reveal-eligible cards, and the chain runner seeds TurnState.deck from it
-		// so mid-chain mutations (DrawOne / TutorFromDeck / PrependToDeck) have a deck to
-		// mutate. Reading d.Cards directly is the placeholder until the chain runner can
-		// drive the deck through black-box ops itself.
-		// TODO: replace with a black-box deck-snapshot path before lowercasing Cards.
-		remaining := make([]Card, len(d.Cards))
-		for i, c := range d.Cards {
-			remaining[i] = c.(Card)
-		}
+		// processAurasAtStartOfTurn drives the deck through PopDeckTop on reveal-handling
+		// auras (Sigil of the Arknight). Pass d directly so reveals mutate the eval-loop
+		// deck in place — trigRevealed lists what got drawn.
 		var trigContribs []TriggerContribution
 		var trigDamage int
 		var trigRevealed []Card
-		auraTriggerBuf, trigContribs, trigDamage, trigRevealed, _ = processAurasAtStartOfTurn(auraTriggerBuf, remaining)
-		for range trigRevealed {
-			h = append(h, d.Draw(1)[0].(Card))
-			remaining = remaining[1:]
+		auraTriggerBuf, trigContribs, trigDamage, trigRevealed, _ = processAurasAtStartOfTurn(auraTriggerBuf, d)
+		for _, c := range trigRevealed {
+			h = append(h, c)
 		}
 		arsenalIn := arsenalCard
 		sortHandByID(h)
-		play := runBestForTurn(hero, weapons, h, mp, remaining, TurnState{Arsenal: arsenalCard, Auras: auraTriggerBuf, Items: itemBuf, banished: banishBuf, graveyard: graveyardBuf, OpponentMarked: opponentMarked}, ev)
+		play := runBestForTurn(hero, weapons, h, mp, d, TurnState{Arsenal: arsenalCard, Auras: auraTriggerBuf, Items: itemBuf, banished: banishBuf, graveyard: graveyardBuf, OpponentMarked: opponentMarked}, ev)
 		arsenalCard = play.State.Arsenal
 		play.Value += trigDamage
 		play.TriggersFromLastTurn = trigContribs
@@ -319,7 +310,7 @@ func runOneShuffle(master *deck.Deck, scratch *shuffleScratch, stats *DeckStats,
 		play.DealtHand = dealtHand
 
 		if recordTurnStats(stats, play, handIdx, handsPerCycle) {
-			replay := replayBestForTurnWithLog(hero, weapons, h, mp, remaining, TurnState{Arsenal: arsenalIn, Auras: auraTriggerBuf, Items: itemBuf, banished: banishBuf, graveyard: graveyardBuf, OpponentMarked: opponentMarked}, ev)
+			replay := replayBestForTurnWithLog(hero, weapons, h, mp, d, TurnState{Arsenal: arsenalIn, Auras: auraTriggerBuf, Items: itemBuf, banished: banishBuf, graveyard: graveyardBuf, OpponentMarked: opponentMarked}, ev)
 			replay.Value = play.Value
 			replay.TriggersFromLastTurn = trigContribs
 			replay.StartOfTurnAuras = startOfTurnAuras
@@ -327,15 +318,9 @@ func runOneShuffle(master *deck.Deck, scratch *shuffleScratch, stats *DeckStats,
 			recordBestTurn(stats, replay, startingAuras, startingItems)
 		}
 		tallyMarginalPresence(scratch.marginalBuf, idIndex, scratch.presentBuf, h, arsenalIn, float64(play.Value))
-		// Install the chain's post-mutation deck and recycle pitched cards onto the
-		// bottom — FaB's end-of-turn pitch-zone-to-deck rule. The slice conversions
-		// here narrow each sim.Card down to deck.Card inline; they're temporary until
-		// piece 4 lets sim hand the deck back what it gave.
-		newDeck := make([]deck.Card, len(play.State.Deck))
-		for i, c := range play.State.Deck {
-			newDeck[i] = c
-		}
-		d.Reset(newDeck)
+		// Adopt the chain's post-mutation deck and recycle pitched cards onto the
+		// bottom — FaB's end-of-turn pitch-zone-to-deck rule.
+		d = play.State.Deck
 		pitched := pitchedFromBestLine(play.BestLine)
 		recycled := make([]deck.Card, len(pitched))
 		for i, c := range pitched {
@@ -424,11 +409,11 @@ func runBestForTurn(
 	weapons []Weapon,
 	h []Card,
 	mp Matchup,
-	deck []Card,
+	d *deck.Deck,
 	prior TurnState,
 	ev *Evaluator,
 ) TurnSummary {
-	return ev.BestSkipLog(hero, weapons, h, mp, deck, prior)
+	return ev.BestSkipLog(hero, weapons, h, mp, d, prior)
 }
 
 // replayBestForTurnWithLog re-runs the Best search with full Log materialisation. Same
@@ -441,11 +426,11 @@ func replayBestForTurnWithLog(
 	weapons []Weapon,
 	h []Card,
 	mp Matchup,
-	deck []Card,
+	d *deck.Deck,
 	prior TurnState,
 	ev *Evaluator,
 ) TurnSummary {
-	return ev.Best(hero, weapons, h, mp, deck, prior)
+	return ev.Best(hero, weapons, h, mp, d, prior)
 }
 
 // recordTurnStats folds one resolved turn's accumulators into stats: bumps Hands /
@@ -499,7 +484,7 @@ const startOfTurnRevealRoom = 8
 //
 // Cascading reveals: a handler that pops s.Deck shrinks the view for the next handler, so
 // two reveal-capable auras see distinct tops.
-func processAurasAtStartOfTurn(queued []Aura, postDrawDeck []Card) (
+func processAurasAtStartOfTurn(queued []Aura, d *deck.Deck) (
 	survivors []Aura,
 	contribs []TriggerContribution,
 	damage int,
@@ -510,11 +495,12 @@ func processAurasAtStartOfTurn(queued []Aura, postDrawDeck []Card) (
 		return queued[:0], nil, 0, nil, nil
 	}
 	// Start-of-turn trigger seed starts cacheable; reveal handlers like Sigil of the
-	// Arknight will flip it via PopDeckTop. The result isn't currently consumed (callers
-	// don't read ts.IsCacheable) but routing through NewTurnState keeps the per-state
-	// semantics consistent with the rest of the framework. Adopting queued onto ts.Auras
-	// lets handlers' s.DestroyAura splice the live list directly.
-	ts := NewTurnState(postDrawDeck, nil)
+	// Arknight will flip it via PopDeckTop, which mutates the eval-loop deck d directly.
+	// The cacheable result isn't currently consumed (callers don't read ts.IsCacheable)
+	// but routing through NewTurnState keeps the per-state semantics consistent with
+	// the rest of the framework. Adopting queued onto ts.Auras lets handlers'
+	// s.DestroyAura splice the live list directly.
+	ts := NewTurnState(d, nil)
 	ts.Auras = queued
 	for i := 0; i < len(ts.Auras); {
 		t := &ts.Auras[i]

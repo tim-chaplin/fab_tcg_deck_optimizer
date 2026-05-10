@@ -23,7 +23,7 @@ func TestWarmongersRecital_OnHitRecyclesToDeck(t *testing.T) {
 	}
 	got := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, sim.TurnState{}, hand)
 	found := false
-	for _, c := range got.StartOfNextTurnDeck {
+	for _, c := range got.StartOfNextTurnDeck.PeekTopN(got.StartOfNextTurnDeck.Size()) {
 		if c.ID() == (cards.CriticalStrikeYellow{}).ID() {
 			found = true
 			break

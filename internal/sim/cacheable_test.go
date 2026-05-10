@@ -41,7 +41,7 @@ func TestBest_CacheablePlainAttackers(t *testing.T) {
 // must report false.
 func TestBest_UncacheableSkyFireLanterns(t *testing.T) {
 	h := []Card{cards.SkyFireLanternsRed{}}
-	deck := []Card{testutils.RedAttack{}}
+	deck := DeckOf(testutils.RedAttack{})
 	got := Best(testutils.Hero{Intel: 4}, nil, h, Matchup{IncomingDamage: 0}, deck, TurnState{})
 	if got.Cacheable {
 		t.Errorf("Sky Fire Lanterns hand: Cacheable = true, want false (Play reads s.Deck())")
@@ -52,7 +52,7 @@ func TestBest_UncacheableSkyFireLanterns(t *testing.T) {
 // reads s.Deck().
 func TestBest_UncacheableSutcliffesResearchNotes(t *testing.T) {
 	h := []Card{cards.SutcliffesResearchNotesRed{}, testutils.BlueAttack{}}
-	deck := []Card{testutils.RunebladeAttack{}}
+	deck := DeckOf(testutils.RunebladeAttack{})
 	got := Best(testutils.Hero{Intel: 4}, nil, h, Matchup{IncomingDamage: 0}, deck, TurnState{})
 	if got.Cacheable {
 		t.Errorf("Sutcliffe's hand: Cacheable = true, want false (Play scans s.Deck())")
@@ -64,7 +64,7 @@ func TestBest_UncacheableSutcliffesResearchNotes(t *testing.T) {
 // flips via PrependToDeck) and a deck card to tutor.
 func TestBest_UncacheableMoonWishTutor(t *testing.T) {
 	h := []Card{cards.MoonWishRed{}, testutils.RedAttack{}}
-	deck := []Card{cards.SunKissRed{}}
+	deck := DeckOf(cards.SunKissRed{})
 	got := Best(testutils.Hero{Intel: 4}, nil, h, Matchup{IncomingDamage: 0}, deck, TurnState{})
 	if got.Cacheable {
 		t.Errorf("Moon Wish hand: Cacheable = true, want false (TutorFromDeck flips)")
@@ -75,8 +75,7 @@ func TestBest_UncacheableMoonWishTutor(t *testing.T) {
 // s.Deck() — Cacheable=false even though the card "only" peeks.
 func TestBest_UncacheableRavenousRabble(t *testing.T) {
 	h := []Card{cards.RavenousRabbleRed{}}
-	deck := []Card{testutils.GenericAttackPitch(0, 0, 1)}
-	got := Best(testutils.Hero{Intel: 4}, nil, h, Matchup{IncomingDamage: 0}, deck, TurnState{})
+	got := Best(testutils.Hero{Intel: 4}, nil, h, Matchup{IncomingDamage: 0}, DeckOf(testutils.GenericAttackPitch(0, 0, 1)), TurnState{})
 	if got.Cacheable {
 		t.Errorf("Ravenous Rabble hand: Cacheable = true, want false (Play reads s.Deck())")
 	}
@@ -85,7 +84,7 @@ func TestBest_UncacheableRavenousRabble(t *testing.T) {
 // Tests that DrawOne's PopDeckTop flips Cacheable when an on-hit DrawOne fires (Snatch hits).
 func TestBest_UncacheableSnatchHitDrawsViaDrawOne(t *testing.T) {
 	h := []Card{cards.SnatchRed{}}
-	deck := []Card{testutils.RedAttack{}}
+	deck := DeckOf(testutils.RedAttack{})
 	got := Best(testutils.Hero{Intel: 4}, nil, h, Matchup{IncomingDamage: 0}, deck, TurnState{})
 	if got.Cacheable {
 		t.Errorf("Snatch [R] hand: Cacheable = true, want false (DrawOne flips via PopDeckTop)")
@@ -95,8 +94,7 @@ func TestBest_UncacheableSnatchHitDrawsViaDrawOne(t *testing.T) {
 // Tests that Test of Strength's Clash flips Cacheable via s.Deck().
 func TestBest_UncacheableTestOfStrengthClash(t *testing.T) {
 	h := []Card{cards.TestOfStrengthRed{}}
-	deck := []Card{testutils.GenericAttack(0, 7)}
-	got := Best(testutils.Hero{Intel: 4}, nil, h, Matchup{IncomingDamage: 1}, deck, TurnState{})
+	got := Best(testutils.Hero{Intel: 4}, nil, h, Matchup{IncomingDamage: 1}, DeckOf(testutils.GenericAttack(0, 7)), TurnState{})
 	if got.Cacheable {
 		t.Errorf("Test of Strength hand: Cacheable = true, want false (Clash flips via Deck())")
 	}
@@ -116,7 +114,7 @@ func TestBest_UncacheableWeepingBattlegroundDR(t *testing.T) {
 // deck-reading card is only pitched in the winning line.
 func TestBest_AggregationDeckReaderInHandPoisonsResultEvenWhenPitched(t *testing.T) {
 	h := []Card{cards.SkyFireLanternsBlue{}, testutils.RedAttack{}, testutils.RedAttack{}, testutils.RedAttack{}}
-	deck := []Card{testutils.RedAttack{}}
+	deck := DeckOf(testutils.RedAttack{})
 	got := Best(testutils.Hero{Intel: 4}, nil, h, Matchup{IncomingDamage: 0}, deck, TurnState{})
 	if got.Cacheable {
 		t.Errorf("hand with pitched deck-reader: Cacheable = true, want false (sibling-leaf reads poison)")
@@ -127,7 +125,7 @@ func TestBest_AggregationDeckReaderInHandPoisonsResultEvenWhenPitched(t *testing
 // hand can't poison a later cacheable one.
 func TestBest_ResetBetweenCallsClearsCacheableState(t *testing.T) {
 	ev := NewEvaluator()
-	deck := []Card{testutils.RedAttack{}}
+	deck := DeckOf(testutils.RedAttack{})
 
 	// First call: Sky Fire Lanterns reads the deck top → expected Cacheable=false.
 	first := ev.Best(testutils.Hero{Intel: 4}, nil, []Card{cards.SkyFireLanternsRed{}}, Matchup{IncomingDamage: 0}, deck, TurnState{})
@@ -147,7 +145,7 @@ func TestBest_ResetBetweenCallsClearsCacheableState(t *testing.T) {
 // LikelyToHit so DrawOne never fires and the result stays cacheable.
 func TestBest_RuntimeGatedNonFlipSnatchYellowMisses(t *testing.T) {
 	h := []Card{cards.SnatchYellow{}}
-	deck := []Card{testutils.RedAttack{}}
+	deck := DeckOf(testutils.RedAttack{})
 	got := Best(testutils.Hero{Intel: 4}, nil, h, Matchup{IncomingDamage: 0}, deck, TurnState{})
 	if !got.Cacheable {
 		t.Errorf("Snatch [Y] alone: Cacheable = false, want true (LikelyToHit miss skips DrawOne)")
@@ -157,7 +155,7 @@ func TestBest_RuntimeGatedNonFlipSnatchYellowMisses(t *testing.T) {
 // Tests that pre-Play cost rejection stops a would-be-uncacheable card from running Play.
 func TestBest_RuntimeGatedNonFlipMoonWishBlockedAtCostCheck(t *testing.T) {
 	h := []Card{cards.MoonWishRed{}}
-	deck := []Card{cards.SunKissRed{}}
+	deck := DeckOf(cards.SunKissRed{})
 	got := Best(testutils.Hero{Intel: 4}, nil, h, Matchup{IncomingDamage: 0}, deck, TurnState{})
 	if !got.Cacheable {
 		t.Errorf("solo Moon Wish [R]: Cacheable = false, want true (cost check rejects before Play)")

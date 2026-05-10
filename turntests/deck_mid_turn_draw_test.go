@@ -51,7 +51,7 @@ func TestEvalOneTurn_MidTurnDrawArsenalsWhenSlotEmpty(t *testing.T) {
 		testutils.YellowAttack{},
 		testutils.BlueAttack{},
 	}
-	if !reflect.DeepEqual(state.StartOfNextTurnDeck, wantDeck) {
+	if !reflect.DeepEqual(state.StartOfNextTurnDeck.PeekTopN(state.StartOfNextTurnDeck.Size()), wantDeck) {
 		t.Errorf("turn 2 deck = %v, want %v", state.StartOfNextTurnDeck, wantDeck)
 	}
 
@@ -100,7 +100,7 @@ func TestEvalOneTurn_TwoMidTurnDraws_OneArsenalsOneHeld(t *testing.T) {
 	wantDeck := []deck.Card{
 		testutils.YellowAttack{},
 	}
-	if !reflect.DeepEqual(state.StartOfNextTurnDeck, wantDeck) {
+	if !reflect.DeepEqual(state.StartOfNextTurnDeck.PeekTopN(state.StartOfNextTurnDeck.Size()), wantDeck) {
 		t.Errorf("turn 2 deck = %v, want %v", state.StartOfNextTurnDeck, wantDeck)
 	}
 
@@ -147,7 +147,7 @@ func TestEvalOneTurn_ThreeMidTurnDraws_ArsenalFromDrawnPool(t *testing.T) {
 	wantDeck := []deck.Card{
 		testutils.YellowAttack{},
 	}
-	if !reflect.DeepEqual(state.StartOfNextTurnDeck, wantDeck) {
+	if !reflect.DeepEqual(state.StartOfNextTurnDeck.PeekTopN(state.StartOfNextTurnDeck.Size()), wantDeck) {
 		t.Errorf("turn 2 deck = %v, want %v", state.StartOfNextTurnDeck, wantDeck)
 	}
 
@@ -196,7 +196,7 @@ func TestEvalOneTurn_MidTurnDrawHeldWhenArsenalFull(t *testing.T) {
 		testutils.YellowAttack{},
 		testutils.BlueAttack{},
 	}
-	if !reflect.DeepEqual(state.StartOfNextTurnDeck, wantDeck) {
+	if !reflect.DeepEqual(state.StartOfNextTurnDeck.PeekTopN(state.StartOfNextTurnDeck.Size()), wantDeck) {
 		t.Errorf("turn 2 deck = %v, want %v", state.StartOfNextTurnDeck, wantDeck)
 	}
 
@@ -255,7 +255,7 @@ func TestEvalOneTurn_MidTurnDrawSansGoAgainStaysHeld(t *testing.T) {
 
 	// Deck is fully consumed: 4 deck cards minus 1 Slash drawn mid-turn = 3 Blues, all in the
 	// turn 2 refill alongside the held anchor.
-	if len(state.StartOfNextTurnDeck) != 0 {
+	if state.StartOfNextTurnDeck.Size() != 0 {
 		t.Errorf("turn 2 deck = %v, want empty", state.StartOfNextTurnDeck)
 	}
 
@@ -276,7 +276,7 @@ func TestEvalOneTurn_DrawOneOnEmptyDeckIsNoop(t *testing.T) {
 	if len(state.StartOfNextTurnHand) != 0 {
 		t.Errorf("turn 2 hand = %v, want empty (deck was empty, can't refill)", state.StartOfNextTurnHand)
 	}
-	if len(state.StartOfNextTurnDeck) != 0 {
+	if state.StartOfNextTurnDeck.Size() != 0 {
 		t.Errorf("turn 2 deck = %v, want empty", state.StartOfNextTurnDeck)
 	}
 	if state.StartOfNextTurnArsenal != nil {

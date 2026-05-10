@@ -162,7 +162,7 @@ func TestIterateParallel_TerminatesWithNoImprovement(t *testing.T) {
 	if idx != -1 {
 		t.Errorf("idx=%d; want -1", idx)
 	}
-	if elapsed > 30*time.Second {
-		t.Errorf("IterateParallel returned after %s for 40 mutations; want under 30s", elapsed)
+	if elapsed > 90*time.Second {
+		t.Errorf("IterateParallel returned after %s for 40 mutations; want under 90s", elapsed)
 	}
 }

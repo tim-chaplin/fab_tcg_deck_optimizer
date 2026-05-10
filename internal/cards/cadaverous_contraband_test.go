@@ -11,7 +11,7 @@ import (
 func TestCadaverousContraband_RegistersOnHit(t *testing.T) {
 	for _, c := range []sim.Card{CadaverousContrabandRed{}, CadaverousContrabandYellow{}, CadaverousContrabandBlue{}} {
 		self := &sim.CardState{Card: c}
-		c.Play(sim.NewTurnState(nil, nil), self)
+		c.Play(sim.NewTurnStateFromCards(nil, nil), self)
 		if len(self.OnHit) != 1 {
 			t.Errorf("%s [%d{p}]: OnHit handlers = %d, want 1", c.Name(), c.Pitch(), len(self.OnHit))
 		}
@@ -22,13 +22,13 @@ func TestCadaverousContraband_RegistersOnHit(t *testing.T) {
 func TestCadaverousContraband_OnHitRecyclesNonAttackToTop(t *testing.T) {
 	non := testutils.GenericAction()
 	deck := []sim.Card{testutils.RedAttack{}}
-	s := sim.NewTurnState(deck, []sim.Card{non})
+	s := sim.NewTurnStateFromCards(deck, []sim.Card{non})
 	self := &sim.CardState{Card: CadaverousContrabandRed{}}
 	(CadaverousContrabandRed{}).Play(s, self)
 	self.BonusAttack = 1
 	testutils.FireOnHitIfLikely(s, self)
-	gotDeck := s.Deck()
-	if len(gotDeck) != 2 || gotDeck[0] != sim.Card(non) {
+	gotDeck := s.Deck().PeekTopN(s.Deck().Size())
+	if len(gotDeck) != 2 || gotDeck[0].(sim.Card) != sim.Card(non) {
 		t.Errorf("deck after recycle = %v, want non-attack on top of RedAttack", gotDeck)
 	}
 	if len(s.Graveyard()) != 0 {
@@ -39,7 +39,7 @@ func TestCadaverousContraband_OnHitRecyclesNonAttackToTop(t *testing.T) {
 // Tests that with no non-attack action card in the graveyard, the on-hit recycle leaves the
 // graveyard and deck untouched.
 func TestCadaverousContraband_OnHitNoEligibleCardNoOp(t *testing.T) {
-	s := sim.NewTurnState(nil, []sim.Card{testutils.RedAttack{}})
+	s := sim.NewTurnStateFromCards(nil, []sim.Card{testutils.RedAttack{}})
 	self := &sim.CardState{Card: CadaverousContrabandRed{}}
 	(CadaverousContrabandRed{}).Play(s, self)
 	testutils.FireOnHitIfLikely(s, self)

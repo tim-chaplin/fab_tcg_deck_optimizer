@@ -26,7 +26,7 @@ func TestRelentlessPursuit_RecyclesToDeckBottomAfterAttack(t *testing.T) {
 			t.Fatalf("Relentless Pursuit unexpectedly in graveyard after recycle; got %v", state.Graveyard)
 		}
 	}
-	for _, c := range state.StartOfNextTurnDeck {
+	for _, c := range state.StartOfNextTurnDeck.PeekTopN(state.StartOfNextTurnDeck.Size()) {
 		if c.ID() == rpID {
 			return
 		}
