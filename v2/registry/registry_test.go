@@ -5,13 +5,12 @@ import (
 	"testing"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/heroes"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/registry"
 )
 
 // Tests that v2/deck.Random builds a legal deck against the production card pool through
-// registry.Registry. Confirms the package's LegalCards + LegalWeapons methods satisfy
-// deck.Registry directly — no separate adapter type required.
+// registry.Registry.
 func TestRegistry_DrivesDeckRandom(t *testing.T) {
 	rng := rand.New(rand.NewSource(7))
 	d := deck.Random(heroes.Viserai{}, 40, 2, rng, nil, registry.Registry{})

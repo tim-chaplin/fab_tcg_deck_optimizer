@@ -12,7 +12,7 @@ import (
 	"time"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/heroes"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/registry"
 )
 
 // Tests that concurrent Evaluate from many goroutines (each with its own Evaluator)

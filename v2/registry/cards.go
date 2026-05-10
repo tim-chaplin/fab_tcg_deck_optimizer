@@ -1,24 +1,15 @@
-// Package cards is the master registry of every implemented card. The canonical ID type and
-// constants live in package card; this package maps IDs to concrete Card values and provides
-// lookup / iteration helpers useful for random deck generation, serialization, and compact
-// equality checks.
-//
-// Weapons aren't ID-indexed — they're equipment, not deck cards. The weapon roster lives in
-// package weapon alongside the Weapon implementations (weapon.All, weapon.ByName).
 package registry
 
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/optimizations"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
 
-// CardID aliases ids.CardID so callers of this package don't need two imports just to hold IDs.
+// CardID aliases ids.CardID so callers don't need two imports to hold IDs.
 type CardID = ids.CardID
 
 // cardsByID is indexed directly by CardID. Index 0 (Invalid) is nil.
-var cardsByID = []sim.Card{
+var cardsByID = []Card{
 	ids.InvalidCard: nil,
 
 	ids.AetherSlashRed:    cards.AetherSlashRed{},
@@ -474,22 +465,9 @@ var cardsByID = []sim.Card{
 	ids.ZealousBeltingBlue:   cards.ZealousBeltingBlue{},
 }
 
-// init eagerly populates package sim's chain-step text and DisplayName caches so the
-// per-Play hot path is pure cache reads, and wires the sim → registry forward-declared
-// hooks (sim.GetCard / sim.DeckableCards / sim.AllWeapons) so sim's chain runner can
-// reach the registry without importing it (would cycle through cards → sim → registry).
-// Done at registration time because the registry is the only place that knows the full
-// card set, and the caches are sized for the full ID space.
-func init() {
-	optimizations.WarmChainStepCache(cardsByID)
-	sim.GetCard = GetCard
-	sim.DeckableCards = func() []ids.CardID { return DeckableCards() }
-	sim.AllWeapons = AllWeapons
-}
-
-// cardsByName maps c.DisplayName() → CardID for reverse lookup. Built once at init. Keyed
-// on DisplayName (not bare Name) so each pitch variant gets a distinct entry — Card.Name()
-// collapses all three printings to the same base string, so it's not a unique key.
+// cardsByName maps DisplayName → CardID for reverse lookup. Keyed on DisplayName (not bare
+// Name) so each pitch variant gets a distinct entry — the three printings of one card share
+// Name but have distinct DisplayNames.
 var cardsByName = func() map[string]CardID {
 	m := make(map[string]CardID, len(cardsByID)-1)
 	for id, c := range cardsByID {
@@ -501,14 +479,12 @@ var cardsByName = func() map[string]CardID {
 	return m
 }()
 
-// GetCard returns the card for the given ID, or nil when the ID has no registered card —
-// the case for NotImplemented and Unplayable IDs whose subpackages aren't imported by the
-// registry. Panics if id is the Invalid sentinel or out of the registered ID range, since
-// those indicate a programming error (an out-of-range or sentinel ID). Callers iterating
-// IDs should null-check the result.
-func GetCard(id CardID) sim.Card {
+// GetCard returns the card for the given ID, or nil when the ID has no registered card.
+// Panics on the Invalid sentinel or an out-of-range ID. Callers iterating IDs should
+// null-check the result.
+func GetCard(id CardID) Card {
 	if id == ids.InvalidCard || int(id) >= len(cardsByID) {
-		panic("cardindex: invalid card ID")
+		panic("registry: invalid card ID")
 	}
 	return cardsByID[id]
 }
@@ -520,8 +496,8 @@ func CardByName(name string) (CardID, bool) {
 	return id, ok
 }
 
-// AllCards returns every valid card ID in registration order. The returned slice is freshly
-// allocated and safe for the caller to mutate (e.g. shuffle for random deck generation).
+// AllCards returns every valid card ID in registration order. Freshly allocated; safe to
+// mutate (e.g. shuffle for random deck generation).
 func AllCards() []CardID {
 	out := make([]CardID, 0, len(cardsByID)-1)
 	for id := 1; id < len(cardsByID); id++ {
@@ -534,10 +510,9 @@ func AllCards() []CardID {
 }
 
 // DeckableCards returns every registered card ID that's legal to put in a real deck.
-// Freshly allocated; safe to mutate. Test-only synthetic IDs (testutils.FakeRedAttack, …)
-// live in the testutils package and aren't registered here, so this is just AllCards()
-// under a different name — kept distinct so callers who want "deck-legal cards" stay
-// readable even if the registry ever holds non-deckable entries again.
+// Freshly allocated; safe to mutate. Test-only synthetic IDs live in the testutils package
+// and aren't registered here, so the result currently matches AllCards(); the distinct name
+// keeps caller intent ("deck-legal cards") readable.
 func DeckableCards() []CardID {
 	return AllCards()
 }

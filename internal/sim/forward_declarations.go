@@ -1,17 +1,9 @@
 package sim
 
-// Forward declarations for the simulator. Each entry below is a package-level function or
-// variable whose body / value is supplied by another package at init time so we can break
-// would-be import cycles between sim and packages that depend on sim's types.
-//
-// The pattern is uniform: declare the var here with a sensible default; the providing
-// package's init() reassigns it to its real implementation before any caller invokes it.
-// Production code always pulls the providing package in transitively (the registry is
-// imported by every entry point), so the defaults are only seen in narrowly-scoped tests.
-//
-// Keeping these in one file makes the cycle-breaking surface easy to audit:
-// `grep -r '\bsim\.\(GetCard\|DeckableCards\|AllWeapons\|ChainStepText\)\b'` lights up
-// every consumer.
+// Forward declarations for the simulator: package-level vars whose real values are supplied
+// by another package's init(), letting sim break would-be import cycles with packages that
+// depend on sim's types. Defaults panic so a test that forgot the wiring fails loudly. See
+// docs/dev-standards.md "Registry / sim split".
 
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
@@ -21,10 +13,8 @@ import (
 // log line is built from. VERB picks WEAPON ATTACK for weapon activated-ability cards
 // (Weapon + Attack), ATTACK for attack-action cards, DEFENSE REACTION for Defense
 // Reactions, and PLAY for everything else; the "from arsenal" suffix tags entries played
-// out of the arsenal slot.
-//
-// optimizations.init swaps in a memoised version that hits a per-(CardID, FromArsenal)
-// cache.
+// out of the arsenal slot. optimizations.init swaps in a memoised version backed by a
+// per-(CardID, FromArsenal) cache.
 var ChainStepText = func(self *CardState) string {
 	types := self.Card.Types()
 	var verb string
@@ -44,18 +34,15 @@ var ChainStepText = func(self *CardState) string {
 	return self.Card.DisplayName() + ": " + verb
 }
 
-// GetCard returns the registered card.Card for id. Populated by registry.init; default
-// panics so an early caller (test that forgot to import the registry) gets a clear error
-// instead of a silent zero-value Card.
+// GetCard returns the registered Card for id. Populated by simreg.init.
 var GetCard = func(id ids.CardID) Card {
-	panic("sim.GetCard: registry not loaded — import internal/registry blank to populate the hook")
+	panic("sim.GetCard: registry not loaded — blank-import internal/simreg to populate the hook")
 }
 
-// DeckableCards returns every CardID legal to put in a real deck. Populated by
-// registry.init.
+// DeckableCards returns every CardID legal to put in a real deck. Populated by simreg.init.
 var DeckableCards = func() []ids.CardID {
-	panic("sim.DeckableCards: registry not loaded — import internal/registry blank to populate the hook")
+	panic("sim.DeckableCards: registry not loaded — blank-import internal/simreg to populate the hook")
 }
 
-// AllWeapons is the registered weapon roster. Populated by registry.init.
+// AllWeapons is the registered weapon roster. Populated by simreg.init.
 var AllWeapons []Weapon

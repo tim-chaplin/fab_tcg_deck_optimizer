@@ -9,10 +9,10 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/registry"
 )
 
 // Unmarshal decodes JSON produced by Marshal into a *deck.Deck and the associated DeckStats.
