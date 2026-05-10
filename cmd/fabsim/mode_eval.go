@@ -7,7 +7,6 @@ import (
 	"os"
 	"time"
 
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/deckformat"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
 )
@@ -27,8 +26,6 @@ func runEvalCmd(args []string) {
 	incoming := fs.Int("incoming", 0, "opponent damage per turn (required unless -print-only is set — must match the value the deck was annealed at for comparable numbers)")
 	arcaneIncoming := fs.Int("arcane-incoming", 0, "opponent arcane damage per turn (defaults to 0 — the non-arcane matchup; raise it to score cards that gate on incoming arcane)")
 	seed := fs.Int64("seed", time.Now().UnixNano(), "RNG seed")
-	formatFlag := fs.String("format", string(deckformat.SilverAge), "constructed format predicate applied to replacement picks when the loaded deck contains NotImplemented cards")
-	maxCopies := fs.Int("max-copies", defaultMaxCopies, "maximum copies of any single card printing per deck, applied when replacing NotImplemented cards in the loaded deck")
 	printOnly := fs.Bool("print-only", false, "load the deck and print the stats from the last run without simulating or rewriting the on-disk .json / .txt")
 	brief := fs.Bool("brief", false, "print only the score summary (no card list, per-card stats, or best turn)")
 	debug := fs.Bool("debug", false, "print additional debug info to stdout / stderr")
@@ -39,12 +36,8 @@ func runEvalCmd(args []string) {
 	if !*printOnly {
 		requireFlag(fs, "eval", "incoming")
 	}
-	fmtValue, err := deckformat.Parse(*formatFlag)
-	if err != nil {
-		die("%v", err)
-	}
 	sim.OptDebug = *debug
-	runEval(resolveDeckPath(fs.Arg(0)), *shuffles, *precision, sim.Matchup{IncomingDamage: *incoming, ArcaneIncomingDamage: *arcaneIncoming}, *maxCopies, *seed, fmtValue, *printOnly, *brief, *debug)
+	runEval(resolveDeckPath(fs.Arg(0)), *shuffles, *precision, sim.Matchup{IncomingDamage: *incoming, ArcaneIncomingDamage: *arcaneIncoming}, *seed, *printOnly, *brief, *debug)
 }
 
 // runEval loads the deck at outPath and prints its stats. Default behaviour (printOnly=false)
@@ -64,9 +57,9 @@ func runEvalCmd(args []string) {
 // debug=true prints extra telemetry to stderr after the run — currently the hand-eval
 // cache hit rate. Only meaningful when a fresh simulation actually ran (printOnly=false);
 // otherwise the Evaluator never spun up.
-func runEval(outPath string, shuffles int, precision float64, mp sim.Matchup, maxCopies int, seed int64, fmtValue deckformat.Format, printOnly, brief, debug bool) {
+func runEval(outPath string, shuffles int, precision float64, mp sim.Matchup, seed int64, printOnly, brief, debug bool) {
 	if !printOnly {
-		evaluateAndPersist(outPath, shuffles, precision, mp, maxCopies, seed, fmtValue, debug)
+		evaluateAndPersist(outPath, shuffles, precision, mp, seed, debug)
 	}
 	d, stats := mustLoadDeck(outPath)
 	printLoadedDeck(d, stats, brief)
@@ -75,16 +68,14 @@ func runEval(outPath string, shuffles int, precision float64, mp sim.Matchup, ma
 // evaluateAndPersist runs the deck eval — adaptive when shuffles is negative (capped at
 // adaptiveShufflesCap), fixed otherwise — then writes the fresh stats back to disk
 // (.json + sibling fabrary .txt). Returns the simulated deck so callers can print its
-// stats. The sanitize pass (replacing any registry.NotImplemented copies with legal substitutes
-// drawn at maxCopies under fmtValue) runs before the eval so the on-disk avg always
-// reflects the cards the binary can actually simulate. The stderr summary lets the operator
-// see the re-score happening before the printed output appears.
+// stats. The stderr summary lets the operator see the re-score happening before the
+// printed output appears.
 //
 // Always uses a dedicated Evaluator (rather than the package-level shared one) so the
 // per-Evaluator cache stats are always available. debug=true prints them after the run;
 // otherwise they're computed-but-discarded — the cache itself runs unconditionally because
 // it speeds up the eval regardless of whether the operator wants the telemetry.
-func evaluateAndPersist(outPath string, shuffles int, precision float64, mp sim.Matchup, maxCopies int, seed int64, fmtValue deckformat.Format, debug bool) (*deck.Deck, sim.DeckStats) {
+func evaluateAndPersist(outPath string, shuffles int, precision float64, mp sim.Matchup, seed int64, debug bool) (*deck.Deck, sim.DeckStats) {
 	loaded, loadedStats := mustLoadDeck(outPath)
 	// Wrap the loaded hero/weapons/cards in a fresh Deck so the eval's stats start from zero
 	// instead of accumulating on top of the persisted ones. Sideboard and Equipment carry
@@ -95,7 +86,6 @@ func evaluateAndPersist(outPath string, shuffles int, precision float64, mp sim.
 	d.Equipment = loaded.Equipment
 	rng := rand.New(rand.NewSource(seed))
 	savedAvg := loadedStats.Mean()
-	sanitizeLoadedDeck(d, maxCopies, rng, fmtValue.IsLegal)
 	// Parallel-shuffle eval: workers fan the shuffle loop across all available cores,
 	// sharing the cache via the RWMutex-protected lookup path. fabsim eval is the
 	// flagship single-deck workload — getting from 1.8s to ~0.5s on 8 workers cuts

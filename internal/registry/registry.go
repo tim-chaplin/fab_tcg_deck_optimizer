@@ -9,14 +9,13 @@ import (
 // pools the deck builder picks from, with cards and weapons flagged NotImplemented or
 // Unplayable already filtered out. Satisfies v2/deck.Registry directly. Zero-sized and
 // stateless because the underlying slices are package-level vars; multiple instances are
-// interchangeable. Callers pass Registry{} to deck.Random / deck.SanitizeNotImplemented.
+// interchangeable. Callers pass Registry{} to deck.Random.
 type Registry struct{}
 
 // LegalCards returns every registered card eligible for deck construction — every printing
 // in the registry minus those flagged NotImplemented or Unplayable. Already typed as
 // deck.Card so deck.Random picks from the slice without a per-call conversion. Allocation
-// is O(legal card count) per call; the deck builders that hit this method call it once at
-// the start of a Random / SanitizeNotImplemented invocation.
+// is O(legal card count) per call; deck.Random calls it once at the start of a sample run.
 func (Registry) LegalCards() []deck.Card {
 	out := make([]deck.Card, 0, len(cardsByID))
 	for _, c := range cardsByID {

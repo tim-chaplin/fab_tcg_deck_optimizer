@@ -10,7 +10,6 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/deckformat"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/heroes"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
@@ -78,7 +77,7 @@ func TestRunEval_DefaultRewritesFile(t *testing.T) {
 	// where the seed had Hands=0. captureEvalOutput drains stdout/stderr so the test isn't
 	// cluttered with eval's prints and runEval doesn't block on a full pipe buffer.
 	_, _ = captureEvalOutput(t, func() {
-		runEval(path, 50, 0.1, sim.Matchup{}, 2, 1, deckformat.SilverAge, false, true, false)
+		runEval(path, 50, 0.1, sim.Matchup{}, 1, false, true, false)
 	})
 	afterDefault, err := os.ReadFile(path)
 	if err != nil {
@@ -118,7 +117,7 @@ func TestRunEval_PrintOnlyLeavesFileUnchanged(t *testing.T) {
 	}
 
 	stdout, stderr := captureEvalOutput(t, func() {
-		runEval(path, 50, 0.1, sim.Matchup{}, 2, 1, deckformat.SilverAge, true, false, false)
+		runEval(path, 50, 0.1, sim.Matchup{}, 1, true, false, false)
 	})
 	afterRead, err := os.ReadFile(path)
 	if err != nil {
@@ -128,9 +127,8 @@ func TestRunEval_PrintOnlyLeavesFileUnchanged(t *testing.T) {
 		t.Errorf("-print-only should leave the file unchanged; len before=%d after=%d",
 			len(beforeJSON), len(afterRead))
 	}
-	// -print-only must not emit the delta-and-rewrite banner the simulate path uses. Unrelated
-	// stderr is still allowed (e.g. a sanitize warning) so the test only pins the absence of
-	// the rewrite-line marker.
+	// -print-only must not emit the delta-and-rewrite banner the simulate path uses. The
+	// test only pins the absence of the rewrite-line marker; unrelated stderr is allowed.
 	if strings.Contains(stderr, "rewriting") {
 		t.Errorf("-print-only should not log a rewrite; got stderr:\n%s", stderr)
 	}
@@ -160,7 +158,7 @@ func TestRunEval_DefaultPrintsFullDump(t *testing.T) {
 	}
 
 	stdout, stderr := captureEvalOutput(t, func() {
-		runEval(path, 100, 0.1, sim.Matchup{}, 2, 1, deckformat.SilverAge, false, false, false)
+		runEval(path, 100, 0.1, sim.Matchup{}, 1, false, false, false)
 	})
 	if !strings.Contains(stdout, "Best turn played") {
 		t.Errorf("eval output missing 'Best turn played' header:\n%s", stdout)
@@ -193,7 +191,7 @@ func TestRunEval_BriefSkipsBestTurnAndCardList(t *testing.T) {
 	}
 
 	stdout, _ := captureEvalOutput(t, func() {
-		runEval(path, 100, 0.1, sim.Matchup{}, 2, 1, deckformat.SilverAge, false, true, false)
+		runEval(path, 100, 0.1, sim.Matchup{}, 1, false, true, false)
 	})
 	if !strings.Contains(stdout, "Mean value:") {
 		t.Errorf("brief eval output missing the 'Mean value:' stats line:\n%s", stdout)
