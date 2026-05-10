@@ -29,8 +29,7 @@ type fakeCard struct {
 func (c fakeCard) ID() ids.CardID      { return c.id }
 func (c fakeCard) DisplayName() string { return c.display }
 
-// fakeRegistry is the in-memory registry the tests build against. illegal IDs surface
-// the SanitizeNotImplemented branch without needing a real exclusion-marker mechanism.
+// fakeRegistry is the in-memory registry the tests build against.
 type fakeRegistry struct {
 	cards   []Card
 	weapons []Weapon
@@ -49,17 +48,6 @@ func newFakeRegistry() *fakeRegistry {
 		},
 		weapons: []Weapon{fakeWeapon{name: "Reaping Blade", hands: 2}, fakeWeapon{name: "Scepter of Pain", hands: 1}},
 	}
-}
-
-// cardByID is a test helper for the SanitizeNotImplemented tests that need to retrieve a
-// known legal card by its ID; production code doesn't need GetCard on the Registry.
-func (r *fakeRegistry) cardByID(id ids.CardID) Card {
-	for _, c := range r.cards {
-		if c.ID() == id {
-			return c
-		}
-	}
-	return nil
 }
 
 // Tests that New panics on a 3-weapon loadout (max 2) and on a 2H + 1H loadout (both must
@@ -180,63 +168,6 @@ func TestRandom_PanicsWhenLegalFilterRejectsEveryCard(t *testing.T) {
 		}
 	}()
 	Random(nil, 4, 2, rand.New(rand.NewSource(1)), func(Card) bool { return false }, reg)
-}
-
-// Tests that SanitizeNotImplemented swaps every card not in reg.LegalCards for a
-// legal replacement, returning a non-empty replacement list.
-func TestSanitizeNotImplemented_ReplacesIllegalSlots(t *testing.T) {
-	reg := newFakeRegistry()
-	bad := fakeCard{id: 99, display: "Mystery Card"}
-	good := reg.cardByID(1)
-	d := New(nil, nil, []Card{good, bad, good, bad})
-	swaps := d.SanitizeNotImplemented(2, rand.New(rand.NewSource(7)), nil, reg)
-
-	if len(swaps) != 2 {
-		t.Errorf("swaps count = %d, want 2 (one per illegal slot)", len(swaps))
-	}
-	legal := map[ids.CardID]bool{}
-	for _, c := range reg.LegalCards() {
-		legal[c.ID()] = true
-	}
-	for i, c := range d.cards {
-		if !legal[c.ID()] {
-			t.Errorf("Cards[%d] = %v is still illegal after sanitize", i, c)
-		}
-	}
-}
-
-// Tests that SanitizeNotImplemented is a no-op (empty return slice) when every slot is
-// already legal.
-func TestSanitizeNotImplemented_NoOpOnCleanDeck(t *testing.T) {
-	reg := newFakeRegistry()
-	d := New(nil, nil, []Card{reg.cardByID(1), reg.cardByID(2)})
-	swaps := d.SanitizeNotImplemented(2, rand.New(rand.NewSource(1)), nil, reg)
-	if swaps != nil {
-		t.Errorf("swaps = %v, want nil for an already-clean deck", swaps)
-	}
-}
-
-// Tests that SanitizeNotImplemented panics when every pool entry is already saturated in
-// the surviving slots — guarding against the previous infinite-loop failure mode.
-func TestSanitizeNotImplemented_PanicsWhenPoolSaturated(t *testing.T) {
-	// Two-card pool, both at maxCopies=1 in surviving slots; the illegal slot can't
-	// be filled without exceeding the cap.
-	reg := &fakeRegistry{
-		cards: []Card{
-			fakeCard{id: 1, display: "A"},
-			fakeCard{id: 2, display: "B"},
-		},
-		weapons: []Weapon{fakeWeapon{name: "w", hands: 2}},
-	}
-	bad := fakeCard{id: 99, display: "Bad"}
-	d := New(nil, nil, []Card{reg.cardByID(1), reg.cardByID(2), bad})
-
-	defer func() {
-		if recover() == nil {
-			t.Errorf("SanitizeNotImplemented didn't panic when pool was saturated")
-		}
-	}()
-	d.SanitizeNotImplemented(1, rand.New(rand.NewSource(1)), nil, reg)
 }
 
 // TestShuffle_RandomisesCardsInPlace pins Shuffle's two-part contract: the post-shuffle

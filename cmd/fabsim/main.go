@@ -15,8 +15,8 @@ import (
 )
 
 // defaultMaxCopies is the shared fallback for every subcommand's -max-copies flag so the
-// anneal hill-climb, eval's sanitize pass, and any future caller all agree on "how many
-// copies of one printing is a normal deck allowed to hold" without forking the default.
+// anneal hill-climb and any future caller agree on "how many copies of one printing is a
+// normal deck allowed to hold" without forking the default.
 const defaultMaxCopies = 2
 
 func main() {

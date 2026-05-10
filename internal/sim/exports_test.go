@@ -13,10 +13,6 @@ import (
 // in package sim. The fix is to keep those tests in package sim_test (a separate test
 // package); this file re-exports the unexported helpers they rely on.
 
-// IsExcludedFromPool re-exports isExcludedFromPool for sim_test consumers exercising the
-// pool-exclusion marker contract directly.
-func IsExcludedFromPool(c Card) bool { return isExcludedFromPool(c) }
-
 // Best re-exports the package-private best for sim_test consumers. External-package
 // (turntests) callers don't see this — only sim_test files in the same directory do.
 func Best(hero Hero, weapons []Weapon, hand []Card, mp Matchup, d *deck.Deck, prior TurnState) TurnSummary {

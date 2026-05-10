@@ -11,8 +11,8 @@ import (
 
 // DeckJSON is the on-disk shape of a Deck with its Stats. Sideboard and Equipment are
 // user-managed parallel card lists that the simulator never reads — both round-trip through
-// Marshal / Unmarshal but don't participate in scoring, mutations, or NotImplemented
-// sanitization. Each is omitted from the JSON when empty so existing files stay untouched.
+// Marshal / Unmarshal but don't participate in scoring or mutations. Each is omitted from
+// the JSON when empty so existing files stay untouched.
 type DeckJSON struct {
 	Hero      string          `json:"hero"`
 	Weapons   []string        `json:"weapons"`

@@ -1,9 +1,8 @@
 package main
 
 // Deck load / save plumbing: atomic JSON + fabrary .txt writes, must-load variants that die
-// on failure, path resolution, and the NotImplemented-sanitization wrapper that prints the
-// per-swap warning lines. Every subcommand routes deck persistence through these helpers so
-// the on-disk format and error messages stay uniform.
+// on failure, and path resolution. Every subcommand routes deck persistence through these
+// helpers so the on-disk format and error messages stay uniform.
 
 import (
 	"errors"
@@ -16,7 +15,6 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/deckio"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/fabrary"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/mydecks"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
 )
@@ -101,26 +99,6 @@ func fabraryPathFor(jsonPath string) string {
 		return strings.TrimSuffix(jsonPath, ext) + ".txt"
 	}
 	return jsonPath + ".txt"
-}
-
-// sanitizeLoadedDeck swaps every sim.NotImplemented copy in d for a random legal
-// replacement, prints a warning summary on stderr when any swap was made, and returns the
-// ordered list of swaps. maxCopies caps post-sanitize copies per printing; legal restricts
-// the replacement pool (typically the run's format predicate). Returns nil when the deck
-// was already clean — callers can use that to skip the forced-reevaluation branch.
-//
-// The sanitizer mutates the deck in place. Callers that care about the pre-sanitize score
-// for a delta warning should capture it before calling this.
-func sanitizeLoadedDeck(d *deck.Deck, maxCopies int, rng *rand.Rand, legal func(deck.Card) bool) []deck.NotImplementedReplacement {
-	replaced := d.SanitizeNotImplemented(maxCopies, rng, legal, registry.Registry{})
-	if len(replaced) == 0 {
-		return nil
-	}
-	fmt.Fprintf(os.Stderr, "warning: loaded deck contained %d NotImplemented card(s); replacing with legal substitutes:\n", len(replaced))
-	for _, r := range replaced {
-		fmt.Fprintf(os.Stderr, "  -1 %s, +1 %s\n", r.From.DisplayName(), r.To.DisplayName())
-	}
-	return replaced
 }
 
 // mustLoadDeck loads the deck (and its persisted stats) at path or dies. For subcommands
