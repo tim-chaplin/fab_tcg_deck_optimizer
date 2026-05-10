@@ -23,7 +23,7 @@ import (
 // stay untouched.
 func printCardList(d *deck.Deck) {
 	fmt.Println("Card list:")
-	printGroupedCards(d.AllCards())
+	printGroupedStrings(d.DisplayNames())
 	if len(d.Equipment) > 0 {
 		fmt.Println("Equipment:")
 		printGroupedStrings(d.Equipment)
@@ -32,18 +32,6 @@ func printCardList(d *deck.Deck) {
 		fmt.Println("Sideboard:")
 		printGroupedStrings(d.Sideboard)
 	}
-}
-
-// printGroupedCards writes one count-and-name line per unique card in cs, sorted by name.
-// Shared between the main card list and the sideboard block so formatting stays consistent.
-// Card.DisplayName keeps pitch printings as distinct entries so the card list shows e.g.
-// "2x Aether Slash [R]" alongside "1x Aether Slash [Y]".
-func printGroupedCards(cs []deck.Card) {
-	names := make([]string, len(cs))
-	for i, c := range cs {
-		names[i] = c.DisplayName()
-	}
-	printGroupedStrings(names)
 }
 
 // printGroupedStrings is the string-slice counterpart of printGroupedCards — used by the
@@ -71,18 +59,11 @@ func printGroupedStrings(ss []string) {
 func printDeckSummary(d *deck.Deck, s sim.DeckStats) {
 	fmt.Printf("Hero:    %s\n", d.Hero.(sim.Hero).Name())
 	fmt.Printf("Weapons: %s\n", weaponNames(d.Weapons))
-	fmt.Printf("Pitch:   %s\n", pitchCountsLine(d.AllCards()))
+	fmt.Printf("Pitch:   %s\n", d.PitchCountsLine())
 	fmt.Println()
 	fmt.Printf("Mean value: %s\n", meanValueLine(s))
 	fmt.Printf("  Cycle 1 mean: %s\n", formatMean(s.FirstCycle.Mean()))
 	fmt.Printf("  Cycle 2 mean: %s\n", formatMean(s.SecondCycle.Mean()))
-}
-
-// pitchCountsLine returns the "20 red / 8 yellow / 12 blue" rendering of the deck's pitch
-// distribution.
-func pitchCountsLine(cs []deck.Card) string {
-	red, yellow, blue := pitchCounts(cs)
-	return fmt.Sprintf("%d red / %d yellow / %d blue", red, yellow, blue)
 }
 
 // meanValueLine returns "14.041 (10,000 shuffles)" — the deck's overall mean plus the run
@@ -123,23 +104,6 @@ func printSideBySideStats(name1, name2 string, sections []statSection) {
 		fmt.Printf("  %-*s  %s\n", nameW+1, name1+":", sec.val1)
 		fmt.Printf("  %-*s  %s\n", nameW+1, name2+":", sec.val2)
 	}
-}
-
-// pitchCounts tallies red/yellow/blue copies by Pitch() value. Cards with pitch outside 1-3
-// contribute to no bucket. Asserts to sim.Card per element since Pitch lives on the rich
-// interface, not on deck.Card.
-func pitchCounts(cs []deck.Card) (red, yellow, blue int) {
-	for _, c := range cs {
-		switch c.(sim.Card).Pitch() {
-		case 1:
-			red++
-		case 2:
-			yellow++
-		case 3:
-			blue++
-		}
-	}
-	return red, yellow, blue
 }
 
 // printBestDeck dumps the full deck report: summary, card list, best turn played, the
@@ -216,7 +180,7 @@ func printCardValues(d *deck.Deck, s sim.DeckStats) {
 	// Column widths take the larger of header label and longest data string so the dividers
 	// line up regardless of deck. Card column also widens for the "Card" header on absurdly
 	// short-named decks.
-	nameW := maxNameLen(d.AllCards())
+	nameW := d.MaxNameLen()
 	if nameW < len("Card") {
 		nameW = len("Card")
 	}
@@ -573,19 +537,6 @@ func centerLabel(s string, width int) string {
 	}
 	left := (width - len(s)) / 2
 	return strings.Repeat(" ", left) + s
-}
-
-// maxNameLen returns the length of the longest DisplayName across cs, or 0 when empty.
-// Used to size fixed-width card-name columns in printed tables — DisplayName so the column
-// reserves room for the pitch tag.
-func maxNameLen(cs []deck.Card) int {
-	m := 0
-	for _, c := range cs {
-		if n := len(c.DisplayName()); n > m {
-			m = n
-		}
-	}
-	return m
 }
 
 // weaponNames joins the deck's weapon names with ", " for the summary's "Weapons:" line.

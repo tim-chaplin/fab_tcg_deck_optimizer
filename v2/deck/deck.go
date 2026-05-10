@@ -26,8 +26,8 @@ import (
 // cards doubles as the runtime deck: Shuffle / Draw / PeekTop / PutBottom / PutTop / Tutor
 // mutate it directly. Callers running an evaluation trial should Copy() the master deck first
 // so their deck mutations don't disturb the master — see deck.Copy. The field is unexported
-// so external callers can't peek the runtime order; AllCards returns a read-only view of the
-// composition for marshalling, printing, and other composition-level inspections.
+// so external callers can't peek the runtime order; composition-level inspection goes through
+// UniqueIDs / NameCounts / DisplayNames / PitchCounts / Each.
 type Deck struct {
 	Hero      Hero
 	Weapons   []Weapon
@@ -36,15 +36,37 @@ type Deck struct {
 	Equipment []string
 }
 
-// AllCards returns the deck's cards as a read-only view of the composition. Callers should
-// treat the slice as immutable — mutating it (or the cards under it) corrupts the deck.
-// Used by printing, marshalling, and composition diff code that doesn't need to drive the
-// deck via Shuffle / Draw / etc.
-func (d *Deck) AllCards() []Card {
+// UniqueIDs returns the distinct card IDs in deck order of first appearance plus a
+// position-lookup map keyed by ID. The simulator pre-builds this once per Evaluate run to
+// drive its per-shuffle hand-presence accounting (the parallel marginal-stats buffers are
+// indexed by position so shuffles can tally without growing maps in the inner loop).
+func (d *Deck) UniqueIDs() ([]ids.CardID, map[ids.CardID]int) {
 	if d == nil {
-		return nil
+		return nil, nil
 	}
-	return d.cards
+	out := make([]ids.CardID, 0, len(d.cards))
+	idx := make(map[ids.CardID]int, len(d.cards))
+	for _, c := range d.cards {
+		id := c.ID()
+		if _, ok := idx[id]; ok {
+			continue
+		}
+		idx[id] = len(out)
+		out = append(out, id)
+	}
+	return out, idx
+}
+
+// Each invokes fn for every card in deck order. Used by tests that need to iterate without
+// the slice itself escaping the deck — fn must not mutate the card or stash a reference past
+// the call.
+func (d *Deck) Each(fn func(Card)) {
+	if d == nil {
+		return
+	}
+	for _, c := range d.cards {
+		fn(c)
+	}
 }
 
 // New constructs a Deck. Panics if the weapon loadout violates the "0–2 weapons; if 2, both
@@ -165,18 +187,6 @@ func (d *Deck) Draw(n int) []Card {
 	out := d.cards[:n]
 	d.cards = d.cards[n:]
 	return out
-}
-
-// Reset replaces the deck with cards (top to bottom), discarding the prior deck state.
-// Reuses the existing backing slice when its capacity fits, keeping the call allocation-free
-// when the same Deck is rewound across many trials.
-func (d *Deck) Reset(cards []Card) {
-	if cap(d.cards) < len(cards) {
-		d.cards = make([]Card, len(cards))
-	} else {
-		d.cards = d.cards[:len(cards)]
-	}
-	copy(d.cards, cards)
 }
 
 // PutBottom appends cards to the bottom of the deck, preserving the relative order

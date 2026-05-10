@@ -332,27 +332,6 @@ func TestDraw_PanicsOnOverdraw(t *testing.T) {
 	d.Draw(3)
 }
 
-// TestReset_ReplacesPile pins that Reset installs a brand new deck, discarding the
-// prior order. Asserts via Size + PeekTop + Draw rather than reaching into the backing
-// slice.
-func TestReset_ReplacesPile(t *testing.T) {
-	d := New(nil, nil, []Card{
-		fakeCard{id: 1}, fakeCard{id: 2}, fakeCard{id: 3},
-	})
-	d.Draw(2)
-	newPile := []Card{fakeCard{id: 9}, fakeCard{id: 8}}
-	d.Reset(newPile)
-	if d.Size() != len(newPile) {
-		t.Errorf("Size after Reset = %d, want %d", d.Size(), len(newPile))
-	}
-	for i, want := range newPile {
-		got := d.Draw(1)[0]
-		if got != want {
-			t.Errorf("Reset card[%d] = %v, want %v", i, got, want)
-		}
-	}
-}
-
 // TestPutBottom_AppendsToBottom confirms PutBottom puts cards at the bottom of the deck
 // in the order passed, preserving the existing top.
 func TestPutBottom_AppendsToBottom(t *testing.T) {

@@ -289,11 +289,7 @@ Deck cards
 }
 
 func cardNameCounts(d *deck.Deck) map[string]int {
-	m := map[string]int{}
-	for _, c := range d.AllCards() {
-		m[c.DisplayName()]++
-	}
-	return m
+	return d.NameCounts()
 }
 
 func weaponNameCounts(d *deck.Deck) map[string]int {
