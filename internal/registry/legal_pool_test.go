@@ -10,7 +10,7 @@ import (
 
 // TestLegalCards_SkipsNotImplemented pins that the registry's deck-construction pool excludes
 // every card carrying the NotImplemented marker — the deck builder relies on this filter
-// rather than re-checking each printing per call to Random / SanitizeNotImplemented.
+// rather than re-checking each printing per call to Random.
 func TestLegalCards_SkipsNotImplemented(t *testing.T) {
 	for _, c := range (registry.Registry{}).LegalCards() {
 		if _, ok := c.(registry.NotImplemented); ok {

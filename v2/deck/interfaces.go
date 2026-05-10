@@ -28,9 +28,8 @@ type Card interface {
 
 // Registry is the legal card / weapon roster Deck constructs against. The two methods
 // hand back the full pre-filtered pools (the production registry's NotImplemented /
-// Unplayable markers are already excluded), so deck.Random picks from them directly and
-// deck.SanitizeNotImplemented derives its "still in the pool?" predicate from LegalCards.
-// No GetCard or membership predicate on the interface — the production registry isn't
+// Unplayable markers are already excluded), so deck.Random picks from them directly. No
+// GetCard or membership predicate on the interface — the production registry isn't
 // restructured just to satisfy a lookup deck doesn't need.
 type Registry interface {
 	LegalCards() []Card
