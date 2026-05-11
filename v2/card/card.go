@@ -25,11 +25,11 @@ type Card interface {
 	// debug).
 	DisplayName() string
 	// Cost returns the card's current resource cost given the turn state. Cards with
-	// a static printed cost ignore s and return a constant; cards that read s (e.g.
+	// a static printed cost ignore g and return a constant; cards that read g (e.g.
 	// discount-per-token effects) additionally implement VariableCost so the solver
 	// can pre-screen with cheap MinCost / MaxCost bounds before enumerating chain
 	// permutations.
-	Cost(s GameEngine) int
+	Cost(g GameEngine) int
 	Pitch() int
 	// Attack is the printed attack value. Conditional bonuses belong in Play, not
 	// here.
@@ -45,8 +45,8 @@ type Card interface {
 	// Cards own card-specific behaviour only: conditional self-buffs (flip
 	// self.BonusAttack / self.BonusDefense), riders (l.AppendPostTrigger sub-lines),
 	// OnHit registration, mid-chain effects. The standard "credit EffectiveAttack /
-	// capped EffectiveDefense to s and emit the <Card>: <VERB> (+N) chain step"
+	// capped EffectiveDefense to g and emit the <Card>: <VERB> (+N) chain step"
 	// mechanic happens in sim.ResolveChainStep after Play returns — vanilla attack /
 	// DR cards have an empty Play body.
-	Play(s GameEngine, l Logger, self *CardState)
+	Play(g GameEngine, l Logger, self *CardState)
 }

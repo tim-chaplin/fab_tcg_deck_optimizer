@@ -75,7 +75,7 @@ type CardState struct {
 // OnHit (Mauvrion Skies, Runic Reaping). N and LogText are optional small payloads
 // cards use to avoid closures.
 type OnHitHandler struct {
-	Fire    func(s GameEngine, l Logger, self *CardState, h *OnHitHandler)
+	Fire    func(g GameEngine, l Logger, self *CardState, h *OnHitHandler)
 	Source  Card
 	LogText string
 	N       int
@@ -84,7 +84,7 @@ type OnHitHandler struct {
 // RegisterOnHit appends a fire-only on-hit handler — the common case for "if this
 // hits, do X" riders. Cards needing Source / N / LogText payloads on the handler
 // append an OnHitHandler literal directly.
-func (p *CardState) RegisterOnHit(fire func(s GameEngine, l Logger, self *CardState, h *OnHitHandler)) {
+func (p *CardState) RegisterOnHit(fire func(g GameEngine, l Logger, self *CardState, h *OnHitHandler)) {
 	p.OnHit = append(p.OnHit, OnHitHandler{Fire: fire})
 }
 
