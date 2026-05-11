@@ -16,7 +16,7 @@ import (
 func scourTheBattlescapePlay(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	self.GrantGoAgainIfFromArsenal()
 	n := self.DealEffectiveAttack(s)
-	l.Log(self, n)
+	self.Log(l, n)
 }
 
 // not implemented: hand-cycle rider (put a card on bottom of deck, draw)

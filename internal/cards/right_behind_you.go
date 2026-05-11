@@ -17,7 +17,7 @@ import (
 
 func rightBehindYouPlay(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	n := self.DealEffectiveAttack(s)
-	l.Log(self, n)
+	self.Log(l, n)
 }
 
 // rightBehindYouBlock fires the +1{d} together-bonus when at least two plain blockers

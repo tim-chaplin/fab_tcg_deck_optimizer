@@ -21,7 +21,7 @@ func sigilOfSufferingPlay(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 		self.BonusDefense++
 	}
 	n := self.DealEffectiveDefense(s)
-	l.Log(self, n)
+	self.Log(l, n)
 	s.DealArcaneDamage(l, self, 1)
 }
 

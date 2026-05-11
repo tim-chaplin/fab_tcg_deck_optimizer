@@ -33,7 +33,7 @@ func (Viserai) OnCardPlayed(played sim.Card, s *sim.TurnState, l sim.Logger) int
 	}
 	if s.NonAttackActionPlayed {
 		s.CreateRunechants(1)
-		l.LogPreTrigger(played.DisplayName(), "Viserai created a runechant", 1)
+		l.AppendPreTrigger(played.DisplayName(), "Viserai created a runechant", 1)
 		return 1
 	}
 	return 0

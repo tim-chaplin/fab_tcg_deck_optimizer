@@ -13,7 +13,7 @@ import (
 func publicBountyPlay(s *sim.TurnState, l sim.Logger, self *sim.CardState, n int) {
 	s.OpponentMarked = true
 	GrantNextCardBonusAttack(s, n, IsAttack)
-	l.Log(self, 0)
+	self.Log(l, 0)
 }
 
 func (PublicBountyRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {

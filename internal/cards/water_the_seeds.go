@@ -22,17 +22,17 @@ func waterTheSeedsIsTarget(_ *sim.TurnState, pc *sim.CardState) bool {
 func (WaterTheSeedsRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	GrantNextCardBonusAttack(s, 1, waterTheSeedsIsTarget)
 	n := self.DealEffectiveAttack(s)
-	l.Log(self, n)
+	self.Log(l, n)
 }
 
 func (WaterTheSeedsYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	GrantNextCardBonusAttack(s, 1, waterTheSeedsIsTarget)
 	n := self.DealEffectiveAttack(s)
-	l.Log(self, n)
+	self.Log(l, n)
 }
 
 func (WaterTheSeedsBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	GrantNextCardBonusAttack(s, 1, waterTheSeedsIsTarget)
 	n := self.DealEffectiveAttack(s)
-	l.Log(self, n)
+	self.Log(l, n)
 }

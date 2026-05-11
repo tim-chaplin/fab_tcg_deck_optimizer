@@ -15,7 +15,7 @@ func TestFireAttackActionAuras_FiresOnceWhenGated(t *testing.T) {
 			Handler: func(s *TurnState, l Logger, _ *Trigger, _ *Aura) {
 				calls++
 				s.AddValue(1)
-				l.LogPreTriggerf("TestCard", 1, "test trigger fired")
+				l.AppendPreTriggerf("TestCard", 1, "test trigger fired")
 			},
 		},
 		Self:        CardOrTokenType{Card: aura},

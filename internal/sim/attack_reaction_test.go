@@ -55,8 +55,8 @@ func TestGrantAttackReactionBuff_NoTargetIsNoOp(t *testing.T) {
 // target's chain-step log delta.
 func TestGrantAttackReactionBuff_AppliesBuffAndCreditsValue(t *testing.T) {
 	target := &CardState{Card: stubAttack{}}
-	s := TurnState{attackReactionTarget: target, logger: newSimLogger(turnlogger.New())}
-	s.logger.tl.AppendChainStep("stubAttack: ATTACK", 1)
+	s := TurnState{attackReactionTarget: target, logger: turnlogger.New()}
+	s.logger.AppendChainStep("stubAttack: ATTACK", 1)
 	GrantAttackReactionBuff(&s, s.Logger(), &CardState{Card: stubAR{}}, 3)
 	if target.BonusAttack != 3 {
 		t.Errorf("target BonusAttack = %d, want 3", target.BonusAttack)
@@ -72,9 +72,9 @@ func TestGrantAttackReactionBuff_AppliesBuffAndCreditsValue(t *testing.T) {
 // Tests that AmendLastChainStepN skips non-chain-step entries to find the most recent
 // chain-step.
 func TestAmendLastChainStepN_SkipsNonChainEntries(t *testing.T) {
-	s := TurnState{logger: newSimLogger(turnlogger.New())}
-	s.logger.tl.AppendChainStep("first", 2)
-	s.logger.tl.AppendPostTrigger("first", "rider", 0)
+	s := TurnState{logger: turnlogger.New()}
+	s.logger.AppendChainStep("first", 2)
+	s.logger.AppendPostTrigger("first", "rider", 0)
 	s.Logger().AmendLastChainStepN(5)
 	entries := s.LogEntries()
 	if got := entries[0].N; got != 7 {

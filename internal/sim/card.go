@@ -183,39 +183,73 @@ func (p *CardState) DealEffectiveDefense(s *TurnState) int {
 }
 
 // Logger is the cards-facing log sink the chain runner threads through Play, Block,
-// OnHitHandler.Fire, TriggerHandler, and Hero.OnCardPlayed. Cards write to it via the
-// CardState-aware Log / LogRider / LogPostTrigger family; the framework supplies either
-// a real recording adapter (replay pass) or nil (find-best pass — every method is a
-// no-op for nil receivers when the implementation honours the contract). The interface
-// lives in card.go so it travels with Card when the package later moves to v2/card; the
-// concrete implementation (simLogger) and the underlying buffer (turnlogger.TurnLogger)
-// stay framework-side.
+// OnHitHandler.Fire, TriggerHandler, and Hero.OnCardPlayed. The method set matches
+// *turnlogger.TurnLogger exactly so sim hands one of those directly to cards — no
+// adapter sits in the middle. The interface lives in card.go so it travels with Card
+// when the package later moves to v2/card; the concrete implementation
+// (turnlogger.TurnLogger) stays in v2/turnlogger and the move requires no import
+// rewiring on the card side. Cards reach the CardState-aware ergonomics via the
+// CardState.Log / LogRider / LogRiderf helpers below — they own the
+// CardState->display-text conversion (ChainStepText, Card.DisplayName) and gate it on
+// l.Recording() so skipped passes don't pay arg-formatting cost.
 type Logger interface {
-	// Log appends the canonical "<DisplayName>: <VERB>[ from arsenal]" main-line chain-step
-	// entry for self with display delta n. n=0 is conventional for non-attack chain
-	// steps; n>0 covers attacks. Pair with self.DealEffectiveAttack on a separate line.
-	Log(self *CardState, n int)
-	// Logf appends a free-form chain-step entry with formatted text. Use when no
-	// CardState owns the line (Opt's "Opted X, put Y on top, put Z on bottom").
-	Logf(n int, format string, args ...any)
-	// LogRider appends an indented post-trigger sub-line under self's chain entry — the
-	// common case for self-riders ("Created a runechant", "Gained 3 health").
-	LogRider(self *CardState, n int, text string)
-	// LogRiderf is the format variant of LogRider.
-	LogRiderf(self *CardState, n int, format string, args ...any)
-	// LogPreTrigger appends an indented pre-trigger sub-line attributed to source — a
-	// hero or aura-attack-action trigger that fires before its parent chain entry.
-	LogPreTrigger(source, text string, n int)
-	// LogPreTriggerf is the format variant of LogPreTrigger.
-	LogPreTriggerf(source string, n int, format string, args ...any)
-	// LogPostTrigger appends an indented post-trigger sub-line attributed to source —
-	// for rider lines whose host differs from self (OnHit attached to a target card).
-	LogPostTrigger(source, text string, n int)
-	// LogPostTriggerf is the format variant of LogPostTrigger.
-	LogPostTriggerf(source string, n int, format string, args ...any)
+	// AppendChainStep appends a main-line chain-step entry with pre-built text and the
+	// damage-equivalent display delta n. CardState callers prefer CardState.Log which
+	// computes ChainStepText for them; this raw-text form is for Opt-style free-form
+	// chain lines and external test seeding.
+	AppendChainStep(text string, n int)
+	// AppendChainStepf is the format variant of AppendChainStep — fmt.Sprintf runs only
+	// on the recording branch.
+	AppendChainStepf(n int, format string, args ...any)
+	// AppendPostTrigger appends an indented post-trigger sub-line attributed to source.
+	// CardState callers whose source IS self.Card prefer CardState.LogRider; cross-card
+	// post-triggers (OnHit handlers attached to a target card) use this raw form.
+	AppendPostTrigger(source, text string, n int)
+	// AppendPostTriggerf is the format variant of AppendPostTrigger.
+	AppendPostTriggerf(source string, n int, format string, args ...any)
+	// AppendPreTrigger appends an indented pre-trigger sub-line attributed to source —
+	// a hero or aura-attack-action trigger that fires before its parent chain entry.
+	AppendPreTrigger(source, text string, n int)
+	// AppendPreTriggerf is the format variant of AppendPreTrigger.
+	AppendPreTriggerf(source string, n int, format string, args ...any)
 	// AmendLastChainStepN adds n to the most recent ChainStep entry's N field. ARs use
 	// this to fold their +{p} buff into the buffed attack's display delta.
 	AmendLastChainStepN(n int)
+	// Recording reports whether the logger is materialising entries this pass. False
+	// during the eval-loop's find-best pass; callers gate expensive arg construction
+	// (ChainStepText, Card.DisplayName, fmt.Sprintf upstream of the Append* methods)
+	// on this so a skipped pass costs only the Recording call itself.
+	Recording() bool
+}
+
+// Log appends the canonical "<DisplayName>: <VERB>[ from arsenal]" main-line chain-step
+// entry for this card with display delta n. No-op when the logger isn't recording —
+// callers can pair this with self.DealEffectiveAttack on the preceding line, and the
+// Log line itself stays side-effect-free.
+func (cs *CardState) Log(l Logger, n int) {
+	if !l.Recording() {
+		return
+	}
+	l.AppendChainStep(ChainStepText(cs), n)
+}
+
+// LogRider appends an indented post-trigger sub-line under this card's chain entry —
+// the common shape for self-riders ("Created a runechant", "Gained 3 health"). Pair
+// with AddValue on a preceding line when n > 0.
+func (cs *CardState) LogRider(l Logger, n int, text string) {
+	if !l.Recording() {
+		return
+	}
+	l.AppendPostTrigger(cs.Card.DisplayName(), text, n)
+}
+
+// LogRiderf is the format variant of LogRider. Defers fmt.Sprintf and the DisplayName
+// lookup into the recording branch.
+func (cs *CardState) LogRiderf(l Logger, n int, format string, args ...any) {
+	if !l.Recording() {
+		return
+	}
+	l.AppendPostTriggerf(cs.Card.DisplayName(), n, format, args...)
 }
 
 // Card is any Flesh and Blood card that can be in a deck. Methods return the card's static
@@ -252,7 +286,7 @@ type Card interface {
 	// own state mutation: they read self.FromArsenal for arsenal-gated riders, write
 	// self.GrantedGoAgain to grant themselves Go again, and emit chain / rider log lines
 	// via l (the Logger param the framework threads through). Damage credit pairs with
-	// l.Log: self.DealEffectiveAttack(s) on one line, l.Log(self, n) on the next.
+	// l.Log: self.DealEffectiveAttack(s) on one line, self.Log(l, n) on the next.
 	Play(s *TurnState, l Logger, self *CardState)
 }
 

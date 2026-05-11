@@ -14,19 +14,19 @@ import (
 
 func (c FlockOfTheFeatherWalkersRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	n := self.DealEffectiveAttack(s)
-	l.Log(self, n)
+	self.Log(l, n)
 }
 
 // not implemented: additional reveal cost, quicken tokens
 
 func (c FlockOfTheFeatherWalkersYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	n := self.DealEffectiveAttack(s)
-	l.Log(self, n)
+	self.Log(l, n)
 }
 
 // not implemented: additional reveal cost, quicken tokens
 
 func (c FlockOfTheFeatherWalkersBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	n := self.DealEffectiveAttack(s)
-	l.Log(self, n)
+	self.Log(l, n)
 }

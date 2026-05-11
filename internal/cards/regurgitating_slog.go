@@ -13,10 +13,10 @@ import (
 func regurgitatingSlogPlay(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	if _, ok := s.BanishFromGraveyard(isSloggism); ok {
 		self.GrantedDominate = true
-		l.LogRider(self, 0, "Banished a Sloggism, gained dominate")
+		self.LogRider(l, 0, "Banished a Sloggism, gained dominate")
 	}
 	n := self.DealEffectiveAttack(s)
-	l.Log(self, n)
+	self.Log(l, n)
 }
 
 func isSloggism(c sim.Card) bool { return c.Name() == "Sloggism" }

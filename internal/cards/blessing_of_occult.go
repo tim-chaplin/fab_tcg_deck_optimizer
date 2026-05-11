@@ -44,7 +44,7 @@ func blessingOfOccultHandler(s *sim.TurnState, l sim.Logger, _ *sim.Trigger, a *
 	n := a.Count
 	name := a.Self.DisplayName()
 	s.CreateRunechants(n)
-	l.LogPostTrigger(name, blessingOfOccultTriggerText[n], n)
+	l.AppendPostTrigger(name, blessingOfOccultTriggerText[n], n)
 	s.DestroyAura(a, true)
 }
 
@@ -54,5 +54,5 @@ func blessingOfOccultPlay(s *sim.TurnState, l sim.Logger, selfState *sim.CardSta
 		Self:    sim.CardOrTokenType{Card: selfCard},
 		Count:   n,
 	})
-	l.Log(selfState, 0)
+	selfState.Log(l, 0)
 }

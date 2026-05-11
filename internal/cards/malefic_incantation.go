@@ -53,7 +53,7 @@ func maleficPlay(s *sim.TurnState, l sim.Logger, selfState *sim.CardState, selfC
 		Count:       n,
 		OncePerTurn: true,
 	})
-	l.Log(selfState, 0)
+	selfState.Log(l, 0)
 }
 
 // maleficAuraHandler is the once-per-turn attack-action trigger handler shared across
@@ -65,7 +65,7 @@ func maleficAuraHandler(s *sim.TurnState, l sim.Logger, _ *sim.Trigger, a *sim.A
 	a.Count--
 	lastVerse := a.Count <= 0
 	s.CreateRunechants(1)
-	l.LogPostTrigger(s.TriggeringCard.DisplayName(), maleficCreatedRunechantText[cardID], 1)
+	l.AppendPostTrigger(s.TriggeringCard.DisplayName(), maleficCreatedRunechantText[cardID], 1)
 	if lastVerse {
 		s.DestroyAura(a, true)
 	}

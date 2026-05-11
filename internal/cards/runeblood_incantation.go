@@ -31,7 +31,7 @@ func runebloodAuraHandler(s *sim.TurnState, l sim.Logger, _ *sim.Trigger, a *sim
 	a.Count--
 	lastVerse := a.Count <= 0
 	s.CreateRunechants(1)
-	l.LogPostTrigger(name, "Created a runechant (verse counter)", 1)
+	l.AppendPostTrigger(name, "Created a runechant (verse counter)", 1)
 	if lastVerse {
 		s.DestroyAura(a, true)
 	}
@@ -45,5 +45,5 @@ func runebloodPlay(s *sim.TurnState, l sim.Logger, selfState *sim.CardState, sel
 		Self:    sim.CardOrTokenType{Card: selfCard},
 		Count:   n,
 	})
-	l.Log(selfState, 0)
+	selfState.Log(l, 0)
 }

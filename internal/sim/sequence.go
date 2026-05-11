@@ -9,6 +9,7 @@ import (
 	"fmt"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/turnlogger"
 )
 
 // perItemAbilityCap caps how many instances of one item's activated ability the chain
@@ -381,13 +382,14 @@ type sequenceContext struct {
 	cacheable bool
 }
 
-// activeLogger returns the *simLogger the chain runner threads through Card.Play /
-// Block / OnHitHandler.Fire / TriggerHandler / Hero.OnCardPlayed for this pass —
-// bufs.logger when recording, a typed-nil during the find-best pass so every Log
-// helper short-circuits via *simLogger's nil-receiver guards. Centralised here so
+// activeLogger returns the *turnlogger.TurnLogger the chain runner threads through
+// Card.Play / Block / OnHitHandler.Fire / TriggerHandler / Hero.OnCardPlayed for this
+// pass — bufs.logger when recording, a typed-nil during the find-best pass so every
+// Append* helper short-circuits via TurnLogger's nil-receiver guards (and cards skip
+// expensive arg construction via l.Recording()). Centralised here so
 // resetStateForPermutation and runDefense pick the same value off ctx.skipLog without
 // each spelling the conditional inline.
-func (ctx *sequenceContext) activeLogger() *simLogger {
+func (ctx *sequenceContext) activeLogger() *turnlogger.TurnLogger {
 	if ctx.skipLog {
 		return nil
 	}
@@ -580,7 +582,7 @@ func (ctx *sequenceContext) resetStateForPermutation() {
 	// s.logger nil during the find-best pass so every Log helper short-circuits at
 	// the call site. ctx.activeLogger encapsulates the skip / record decision.
 	if l := ctx.activeLogger(); l != nil {
-		l.tl.SetBuffer(bufs.logBacking)
+		l.SetBuffer(bufs.logBacking)
 		s.logger = l
 	} else {
 		s.logger = nil

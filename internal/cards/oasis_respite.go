@@ -18,7 +18,7 @@ func oasisRespitePlay(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 		s.AddValue(1)
 		n++
 	}
-	l.Log(self, n)
+	self.Log(l, n)
 }
 
 func (OasisRespiteRed) DefensiveInstant() {}

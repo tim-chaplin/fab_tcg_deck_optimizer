@@ -20,7 +20,7 @@ func tremorOfIArathaelPlay(s *sim.TurnState, l sim.Logger, self *sim.CardState) 
 		self.BonusAttack += 2
 	}
 	n := self.DealEffectiveAttack(s)
-	l.Log(self, n)
+	self.Log(l, n)
 }
 
 func (TremorOfIArathaelRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {

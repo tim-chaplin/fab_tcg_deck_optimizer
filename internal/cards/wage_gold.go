@@ -12,12 +12,12 @@ import (
 
 func wageGoldOnHit(s *sim.TurnState, l sim.Logger, self *sim.CardState, _ *sim.OnHitHandler) {
 	s.CreateGold(1)
-	l.LogRider(self, 0, "On-hit won wager")
+	self.LogRider(l, 0, "On-hit won wager")
 }
 
 func wageGoldPlay(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	n := self.DealEffectiveAttack(s)
-	l.Log(self, n)
+	self.Log(l, n)
 	self.RegisterOnHit(wageGoldOnHit)
 }
 

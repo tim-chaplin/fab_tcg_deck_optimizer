@@ -31,7 +31,7 @@ func captainsCallPlay(s *sim.TurnState, l sim.Logger, self *sim.CardState, maxCo
 		}
 		break
 	}
-	l.Log(self, 0)
+	self.Log(l, 0)
 }
 
 func (CaptainsCallRed) Modes() int { return 2 }

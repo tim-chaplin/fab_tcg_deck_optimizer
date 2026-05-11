@@ -22,7 +22,7 @@ func (SmashingGoodTimeRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardSt
 	if self.FromArsenal {
 		cards.GrantNextCardBonusAttack(s, 3, cards.IsAttackAction)
 	}
-	l.Log(self, 0)
+	self.Log(l, 0)
 }
 
 // not implemented: on-hit item-destruction rider
@@ -31,7 +31,7 @@ func (SmashingGoodTimeYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.Car
 	if self.FromArsenal {
 		cards.GrantNextCardBonusAttack(s, 2, cards.IsAttackAction)
 	}
-	l.Log(self, 0)
+	self.Log(l, 0)
 }
 
 // not implemented: on-hit item-destruction rider
@@ -40,5 +40,5 @@ func (SmashingGoodTimeBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardS
 	if self.FromArsenal {
 		cards.GrantNextCardBonusAttack(s, 1, cards.IsAttackAction)
 	}
-	l.Log(self, 0)
+	self.Log(l, 0)
 }

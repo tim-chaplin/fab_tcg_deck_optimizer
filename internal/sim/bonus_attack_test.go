@@ -55,7 +55,7 @@ func (g grantBonusAttack) Play(s *TurnState, l Logger, self *CardState) {
 			break
 		}
 	}
-	l.Log(self, 0)
+	self.Log(l, 0)
 }
 
 // grantBonusAttackWeapon scans CardsRemaining for the first weapon swing (a weapon
@@ -82,7 +82,7 @@ func (g grantBonusAttackWeapon) Play(s *TurnState, l Logger, self *CardState) {
 			break
 		}
 	}
-	l.Log(self, 0)
+	self.Log(l, 0)
 }
 
 // Tests that a granter writes BonusAttack on the target's CardState and the chain total

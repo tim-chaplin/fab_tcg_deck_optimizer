@@ -16,5 +16,5 @@ import (
 func (SapwoodElixirRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	cards.GrantNextCardBonusAttack(s, 3, cards.IsAttack)
 	n := self.DealEffectiveAttack(s)
-	l.Log(self, n)
+	self.Log(l, n)
 }

@@ -44,7 +44,7 @@ func runicReapingPlay(s *sim.TurnState, l sim.Logger, selfState *sim.CardState, 
 		}
 	}
 	if target == nil {
-		l.Log(selfState, 0)
+		selfState.Log(l, 0)
 		return
 	}
 	for _, p := range selfState.PitchedToPlay {
@@ -60,5 +60,5 @@ func runicReapingPlay(s *sim.TurnState, l sim.Logger, selfState *sim.CardState, 
 		LogText: text,
 		N:       n,
 	})
-	l.Log(selfState, 0)
+	selfState.Log(l, 0)
 }

@@ -8,5 +8,5 @@ import (
 
 func (DodgeBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	n := self.DealEffectiveDefense(s)
-	l.Log(self, n)
+	self.Log(l, n)
 }

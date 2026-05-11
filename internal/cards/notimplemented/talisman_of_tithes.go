@@ -12,4 +12,4 @@ import (
 // not implemented: self-destroys on an opposing draw during your action phase → opponent draws
 // minus 1
 
-func (TalismanOfTithesBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) { l.Log(self, 0) }
+func (TalismanOfTithesBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) { self.Log(l, 0) }

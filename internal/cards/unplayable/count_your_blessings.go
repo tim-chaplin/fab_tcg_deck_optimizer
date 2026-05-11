@@ -9,13 +9,13 @@ import (
 )
 
 func (CountYourBlessingsRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
-	l.Log(self, 0)
+	self.Log(l, 0)
 }
 
 func (CountYourBlessingsYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
-	l.Log(self, 0)
+	self.Log(l, 0)
 }
 
 func (CountYourBlessingsBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
-	l.Log(self, 0)
+	self.Log(l, 0)
 }

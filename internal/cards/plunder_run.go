@@ -18,7 +18,7 @@ import (
 
 func plunderRunOnHitDraw(s *sim.TurnState, l sim.Logger, t *sim.Trigger, _ *sim.Aura) {
 	s.DrawOne()
-	l.LogPostTriggerf(s.TriggeringCard.DisplayName(), 0,
+	l.AppendPostTriggerf(s.TriggeringCard.DisplayName(), 0,
 		"%s drew a card on attack-action hit", t.Source.DisplayName())
 }
 
@@ -32,7 +32,7 @@ func plunderRunPlay(s *sim.TurnState, l sim.Logger, self *sim.CardState, source 
 	if self.FromArsenal {
 		GrantNextCardBonusAttack(s, n, IsAttackAction)
 	}
-	l.Log(self, 0)
+	self.Log(l, 0)
 }
 
 func (c PlunderRunRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {

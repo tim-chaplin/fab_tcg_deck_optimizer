@@ -17,10 +17,10 @@ import (
 // a sub-line under self when an aura was successfully banished from the graveyard.
 func weepingBattlegroundPlay(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	n := self.DealEffectiveDefense(s)
-	l.Log(self, n)
+	self.Log(l, n)
 	if n := banishAuraFromGraveyard(s); n > 0 {
 		s.AddValue(n)
-		l.LogRider(self, n, "Banished an aura, dealt 1 arcane damage")
+		self.LogRider(l, n, "Banished an aura, dealt 1 arcane damage")
 	}
 }
 

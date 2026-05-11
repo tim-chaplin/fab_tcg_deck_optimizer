@@ -14,10 +14,10 @@ func nimbleStrikePlay(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	if _, ok := s.BanishFromGraveyard(isNimblism); ok {
 		self.BonusAttack++
 		self.GrantedGoAgain = true
-		l.LogRider(self, 1, "Banished a Nimblism, +1{p} and go again")
+		self.LogRider(l, 1, "Banished a Nimblism, +1{p} and go again")
 	}
 	n := self.DealEffectiveAttack(s)
-	l.Log(self, n)
+	self.Log(l, n)
 }
 
 func isNimblism(c sim.Card) bool { return c.Name() == "Nimblism" }

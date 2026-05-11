@@ -28,7 +28,7 @@ func (OathOfTheArknightBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.Card
 func oathPlay(s *sim.TurnState, l sim.Logger, self *sim.CardState, bonus int) {
 	GrantNextCardBonusAttack(s, bonus, IsRunebladeAttack)
 	dmg := self.DealEffectiveAttack(s)
-	l.Log(self, dmg)
+	self.Log(l, dmg)
 	s.CreateRunechants(1)
-	l.LogRider(self, 1, "Created a runechant")
+	self.LogRider(l, 1, "Created a runechant")
 }

@@ -16,7 +16,7 @@ import (
 
 func dragDownPlay(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	n := self.DealEffectiveDefense(s)
-	l.Log(self, n)
+	self.Log(l, n)
 }
 
 func (DragDownRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {

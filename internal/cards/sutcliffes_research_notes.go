@@ -21,7 +21,7 @@ import (
 // runechant count produced depends on shuffle order.
 func sutcliffesResearchNotesPlay(s *sim.TurnState, l sim.Logger, self *sim.CardState, revealCount int) {
 	dmg := self.DealEffectiveAttack(s)
-	l.Log(self, dmg)
+	self.Log(l, dmg)
 	count := 0
 	for _, c := range s.PeekTopN(revealCount) {
 		t := c.Types()
@@ -30,7 +30,7 @@ func sutcliffesResearchNotesPlay(s *sim.TurnState, l sim.Logger, self *sim.CardS
 		}
 	}
 	s.CreateRunechants(count)
-	l.LogRiderf(self, count, "Created %d runechants", count)
+	self.LogRiderf(l, count, "Created %d runechants", count)
 }
 
 func (SutcliffesResearchNotesRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {

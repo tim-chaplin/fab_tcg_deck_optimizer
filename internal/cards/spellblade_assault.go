@@ -10,21 +10,21 @@ import (
 
 func (SpellbladeAssaultRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	n := self.DealEffectiveAttack(s)
-	l.Log(self, n)
+	self.Log(l, n)
 	s.CreateRunechants(2)
-	l.LogRider(self, 2, "Created 2 runechants")
+	self.LogRider(l, 2, "Created 2 runechants")
 }
 
 func (SpellbladeAssaultYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	n := self.DealEffectiveAttack(s)
-	l.Log(self, n)
+	self.Log(l, n)
 	s.CreateRunechants(2)
-	l.LogRider(self, 2, "Created 2 runechants")
+	self.LogRider(l, 2, "Created 2 runechants")
 }
 
 func (SpellbladeAssaultBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	n := self.DealEffectiveAttack(s)
-	l.Log(self, n)
+	self.Log(l, n)
 	s.CreateRunechants(2)
-	l.LogRider(self, 2, "Created 2 runechants")
+	self.LogRider(l, 2, "Created 2 runechants")
 }

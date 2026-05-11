@@ -18,9 +18,9 @@ import (
 // health (graveyard trigger)" sub-line under self. Health is valued 1-to-1 with damage.
 func fiddlersGreenPlay(s *sim.TurnState, l sim.Logger, self *sim.CardState, heal int) {
 	n := self.DealEffectiveDefense(s)
-	l.Log(self, n)
+	self.Log(l, n)
 	s.AddValue(heal)
-	l.LogRiderf(self, heal, "Gained %d health (graveyard trigger)", heal)
+	self.LogRiderf(l, heal, "Gained %d health (graveyard trigger)", heal)
 }
 
 func (FiddlersGreenRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {

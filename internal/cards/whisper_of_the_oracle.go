@@ -10,7 +10,7 @@ import (
 )
 
 func whisperOfTheOraclePlay(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
-	l.Log(self, 0)
+	self.Log(l, 0)
 	s.Opt(l, 4)
 }
 

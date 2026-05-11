@@ -10,7 +10,7 @@ import (
 func (StartingStakeYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	if s.Gold() == 0 {
 		s.CreateGold(1)
-		l.LogRider(self, 0, "Created a gold token")
+		self.LogRider(l, 0, "Created a gold token")
 	}
-	l.Log(self, 0)
+	self.Log(l, 0)
 }

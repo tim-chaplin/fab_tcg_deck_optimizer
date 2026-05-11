@@ -103,12 +103,12 @@ type permBufs struct {
 	banishBacking      []Card
 	cardsPlayedBacking []Card
 	logBacking         []LogEntry
-	// logger is the recording-mode Logger adapter reused across permutations.
-	// Allocated once in newAttackBufs wrapping a single *turnlogger.TurnLogger; the
-	// per-permutation buffer rebind goes through bufs.logger.tl.SetBuffer(logBacking).
-	// resetStateForPermutation points TurnState.logger at this when ctx is recording
-	// or leaves TurnState.logger nil when ctx is skipping.
-	logger              *simLogger
+	// logger is the recording-mode *TurnLogger reused across permutations. Allocated
+	// once in newAttackBufs; the per-permutation buffer rebind goes through
+	// bufs.logger.SetBuffer(logBacking). resetStateForPermutation points
+	// TurnState.logger at this when ctx is recording or leaves TurnState.logger nil
+	// when ctx is skipping.
+	logger              *turnlogger.TurnLogger
 	auraTriggersBacking []Aura
 	// itemsBacking backs TurnState.Items per permutation — seeded from priorItems and
 	// freely mutated by item-ability Plays.
@@ -239,7 +239,7 @@ func newAttackBufs(handSize, weaponCount int, weapons []Weapon) *attackBufs {
 			banishBacking:        make([]Card, 0, handSize+1),
 			cardsPlayedBacking:   make([]Card, 0, maxAttackers),
 			logBacking:           make([]LogEntry, 0, logBackingCap),
-			logger:               newSimLogger(turnlogger.New()),
+			logger:               turnlogger.New(),
 			auraTriggersBacking:  make([]Aura, 0, handSize+1),
 			itemsBacking:         make([]Item, 0, 4),
 			defenderAurasBacking: make([]Aura, 0, handSize+1),

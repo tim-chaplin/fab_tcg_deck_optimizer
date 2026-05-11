@@ -20,26 +20,26 @@ const lifeForALifeHealValue = 1
 // registration stays alloc-free.
 func lifeForALifeOnHit(s *sim.TurnState, l sim.Logger, self *sim.CardState, _ *sim.OnHitHandler) {
 	s.AddValue(lifeForALifeHealValue)
-	l.LogRider(self, lifeForALifeHealValue, "On-hit gained 1 health")
+	self.LogRider(l, lifeForALifeHealValue, "On-hit gained 1 health")
 }
 
 func (LifeForALifeRed) GoAgain() bool { return sim.HeroWantsLowerHealth() }
 func (LifeForALifeRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	n := self.DealEffectiveAttack(s)
-	l.Log(self, n)
+	self.Log(l, n)
 	self.RegisterOnHit(lifeForALifeOnHit)
 }
 
 func (LifeForALifeYellow) GoAgain() bool { return sim.HeroWantsLowerHealth() }
 func (LifeForALifeYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	n := self.DealEffectiveAttack(s)
-	l.Log(self, n)
+	self.Log(l, n)
 	self.RegisterOnHit(lifeForALifeOnHit)
 }
 
 func (LifeForALifeBlue) GoAgain() bool { return sim.HeroWantsLowerHealth() }
 func (LifeForALifeBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	n := self.DealEffectiveAttack(s)
-	l.Log(self, n)
+	self.Log(l, n)
 	self.RegisterOnHit(lifeForALifeOnHit)
 }

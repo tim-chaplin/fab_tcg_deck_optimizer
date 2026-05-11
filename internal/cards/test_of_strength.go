@@ -13,17 +13,17 @@ import (
 
 func (TestOfStrengthRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	n := self.DealEffectiveDefense(s)
-	l.Log(self, n)
+	self.Log(l, n)
 	s.Clash(
 		func() {
 			s.CreateGold(1)
-			l.LogRider(self, 0, "Clash win created a gold token")
+			self.LogRider(l, 0, "Clash win created a gold token")
 		},
 		func() {
 			// AddValue clamps negatives, so write directly: opponent gains the Gold token,
 			// netting us roughly one resource of opposing tempo.
 			s.Value--
-			l.LogRider(self, -1, "Clash loss conceded gold to opponent")
+			self.LogRider(l, -1, "Clash loss conceded gold to opponent")
 		},
 	)
 }

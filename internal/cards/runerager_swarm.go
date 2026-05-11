@@ -27,5 +27,5 @@ func runeragerSwarmPlay(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 		self.GrantedGoAgain = true
 	}
 	n := self.DealEffectiveAttack(s)
-	l.Log(self, n)
+	self.Log(l, n)
 }

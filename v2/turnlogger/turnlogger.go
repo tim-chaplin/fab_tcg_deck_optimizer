@@ -85,6 +85,13 @@ func (l *TurnLogger) Entries() []LogEntry {
 	return l.entries
 }
 
+// Recording reports whether this logger will retain appended entries — true for a
+// non-nil receiver, false for the nil sentinel the eval-loop's find-best pass threads
+// through. Callers gate expensive log-argument construction (ChainStepText,
+// DisplayName, fmt.Sprintf) on this so skipped passes don't pay arg-formatting cost
+// only to have the Append* method drop the entry.
+func (l *TurnLogger) Recording() bool { return l != nil }
+
 // AppendChainStep appends a chain-step entry with text and damage-equivalent n. n is
 // clamped at zero. No-op on a nil receiver.
 func (l *TurnLogger) AppendChainStep(text string, n int) {

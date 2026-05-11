@@ -19,7 +19,7 @@ func arcanePolarityPlay(s *sim.TurnState, l sim.Logger, self *sim.CardState, arc
 		gain = arcaneGain
 	}
 	s.AddValue(gain)
-	l.Log(self, gain)
+	self.Log(l, gain)
 }
 
 func (ArcanePolarityRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {

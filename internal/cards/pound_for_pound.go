@@ -22,7 +22,7 @@ func poundForPoundPlay(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 		self.GrantedDominate = true
 	}
 	n := self.DealEffectiveAttack(s)
-	l.Log(self, n)
+	self.Log(l, n)
 }
 
 func (PoundForPoundRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {

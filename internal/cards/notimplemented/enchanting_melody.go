@@ -20,7 +20,7 @@ import (
 func (EnchantingMelodyRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	cards.SetAuraCreated(s)
 	n := self.DealEffectiveAttack(s)
-	l.Log(self, n)
+	self.Log(l, n)
 }
 
 // not implemented: damage-prevention trigger, end-phase destruction clause
@@ -28,7 +28,7 @@ func (EnchantingMelodyRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardSt
 func (EnchantingMelodyYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	cards.SetAuraCreated(s)
 	n := self.DealEffectiveAttack(s)
-	l.Log(self, n)
+	self.Log(l, n)
 }
 
 // not implemented: damage-prevention trigger, end-phase destruction clause
@@ -36,5 +36,5 @@ func (EnchantingMelodyYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.Car
 func (EnchantingMelodyBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	cards.SetAuraCreated(s)
 	n := self.DealEffectiveAttack(s)
-	l.Log(self, n)
+	self.Log(l, n)
 }

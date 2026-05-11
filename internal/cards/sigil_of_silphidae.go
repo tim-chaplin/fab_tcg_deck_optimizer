@@ -21,10 +21,10 @@ func (c SigilOfSilphidaeBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.Car
 		Count:   1,
 	})
 	n := self.DealEffectiveAttack(s)
-	l.Log(self, n)
+	self.Log(l, n)
 	if enterDamage > 0 {
 		s.AddValue(enterDamage)
-		l.LogRider(self, enterDamage, "Banished an aura, dealt 1 arcane damage")
+		self.LogRider(l, enterDamage, "Banished an aura, dealt 1 arcane damage")
 	}
 }
 
@@ -34,7 +34,7 @@ func sigilOfSilphidaeAuraHandler(s *sim.TurnState, l sim.Logger, _ *sim.Trigger,
 	n := banishAuraFromGraveyard(s)
 	if n > 0 {
 		s.AddValue(n)
-		l.LogPostTrigger(a.Self.DisplayName(), "Banished an aura, dealt 1 arcane damage", n)
+		l.AppendPostTrigger(a.Self.DisplayName(), "Banished an aura, dealt 1 arcane damage", n)
 	}
 	s.DestroyAura(a, true)
 }

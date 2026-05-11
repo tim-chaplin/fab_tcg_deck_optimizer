@@ -14,7 +14,7 @@ import (
 
 func moneyWhereYaMouthIsWagerOnHit(s *sim.TurnState, l sim.Logger, target *sim.CardState, h *sim.OnHitHandler) {
 	s.CreateGold(1)
-	l.LogPostTriggerf(target.Card.DisplayName(), 0, "%s won wager", h.Source.DisplayName())
+	l.AppendPostTriggerf(target.Card.DisplayName(), 0, "%s won wager", h.Source.DisplayName())
 }
 
 func moneyWhereYaMouthIsPlay(s *sim.TurnState, l sim.Logger, self *sim.CardState, source sim.Card, n int) {
@@ -28,7 +28,7 @@ func moneyWhereYaMouthIsPlay(s *sim.TurnState, l sim.Logger, self *sim.CardState
 			break
 		}
 	}
-	l.Log(self, 0)
+	self.Log(l, 0)
 }
 
 func (c MoneyWhereYaMouthIsRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {

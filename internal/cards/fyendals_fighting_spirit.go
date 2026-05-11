@@ -16,23 +16,23 @@ func fyendalsFightingSpiritApplyRider(s *sim.TurnState, l sim.Logger, self *sim.
 		return
 	}
 	s.AddValue(1)
-	l.LogRider(self, 1, "Gained 1 health (lower health than opposing hero)")
+	self.LogRider(l, 1, "Gained 1 health (lower health than opposing hero)")
 }
 
 func (FyendalsFightingSpiritRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	n := self.DealEffectiveAttack(s)
-	l.Log(self, n)
+	self.Log(l, n)
 	fyendalsFightingSpiritApplyRider(s, l, self)
 }
 
 func (FyendalsFightingSpiritYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	n := self.DealEffectiveAttack(s)
-	l.Log(self, n)
+	self.Log(l, n)
 	fyendalsFightingSpiritApplyRider(s, l, self)
 }
 
 func (FyendalsFightingSpiritBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	n := self.DealEffectiveAttack(s)
-	l.Log(self, n)
+	self.Log(l, n)
 	fyendalsFightingSpiritApplyRider(s, l, self)
 }

@@ -18,13 +18,13 @@ import (
 // order.
 func skyFireLanternsPlay(s *sim.TurnState, l sim.Logger, self *sim.CardState, selfPitch int) {
 	n := self.DealEffectiveAttack(s)
-	l.Log(self, n)
+	self.Log(l, n)
 	top, ok := s.PeekDeck()
 	if !ok || top.Pitch() != selfPitch {
 		return
 	}
 	s.CreateRunechants(1)
-	l.LogRider(self, 1, "Created a runechant")
+	self.LogRider(l, 1, "Created a runechant")
 }
 
 func (c SkyFireLanternsRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {

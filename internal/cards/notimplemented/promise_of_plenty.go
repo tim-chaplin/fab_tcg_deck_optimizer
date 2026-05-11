@@ -17,7 +17,7 @@ import (
 func promiseOfPlentyPlay(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	self.GrantGoAgainIfFromArsenal()
 	n := self.DealEffectiveAttack(s)
-	l.Log(self, n)
+	self.Log(l, n)
 }
 
 // not implemented: on-hit arsenal-placement rider (arsenal/deck content tracking would be required)

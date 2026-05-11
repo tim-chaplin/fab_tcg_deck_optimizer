@@ -15,21 +15,21 @@ import (
 
 func (SirensOfSafeHarborRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	n := self.DealEffectiveAttack(s)
-	l.Log(self, n)
+	self.Log(l, n)
 	s.AddValue(1)
-	l.LogRider(self, 1, "Gained 1 health (graveyard trigger)")
+	self.LogRider(l, 1, "Gained 1 health (graveyard trigger)")
 }
 
 func (SirensOfSafeHarborYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	n := self.DealEffectiveAttack(s)
-	l.Log(self, n)
+	self.Log(l, n)
 	s.AddValue(1)
-	l.LogRider(self, 1, "Gained 1 health (graveyard trigger)")
+	self.LogRider(l, 1, "Gained 1 health (graveyard trigger)")
 }
 
 func (SirensOfSafeHarborBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	n := self.DealEffectiveAttack(s)
-	l.Log(self, n)
+	self.Log(l, n)
 	s.AddValue(1)
-	l.LogRider(self, 1, "Gained 1 health (graveyard trigger)")
+	self.LogRider(l, 1, "Gained 1 health (graveyard trigger)")
 }

@@ -14,7 +14,7 @@ import (
 
 func (SplinteringDeadwoodRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	n := self.DealEffectiveAttack(s)
-	l.Log(self, n)
+	self.Log(l, n)
 }
 
 // not implemented: aura-swap rider modelled net-zero; no tempo credit for trading a weak aura
@@ -22,7 +22,7 @@ func (SplinteringDeadwoodRed) Play(s *sim.TurnState, l sim.Logger, self *sim.Car
 
 func (SplinteringDeadwoodYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	n := self.DealEffectiveAttack(s)
-	l.Log(self, n)
+	self.Log(l, n)
 }
 
 // not implemented: aura-swap rider modelled net-zero; no tempo credit for trading a weak aura
@@ -30,5 +30,5 @@ func (SplinteringDeadwoodYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.
 
 func (SplinteringDeadwoodBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	n := self.DealEffectiveAttack(s)
-	l.Log(self, n)
+	self.Log(l, n)
 }

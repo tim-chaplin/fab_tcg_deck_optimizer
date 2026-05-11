@@ -14,7 +14,7 @@ import (
 
 func battlefrontBastionPlay(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	n := self.DealEffectiveAttack(s)
-	l.Log(self, n)
+	self.Log(l, n)
 }
 
 // battlefrontBastionBlock fires the +1 alone-bonus when this is the only plain blocker.

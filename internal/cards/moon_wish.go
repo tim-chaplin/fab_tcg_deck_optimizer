@@ -48,10 +48,10 @@ func moonWishPlay(c sim.Card, s *sim.TurnState, l sim.Logger, self *sim.CardStat
 
 	// Emit Moon Wish's chain step first so the alt-cost / tutor lines follow it in order.
 	n := self.DealEffectiveAttack(s)
-	l.Log(self, n)
+	self.Log(l, n)
 
 	if returned != nil {
-		l.LogPostTriggerf(name, 0, "%s returned %s to top of deck", name, returned.DisplayName())
+		l.AppendPostTriggerf(name, 0, "%s returned %s to top of deck", name, returned.DisplayName())
 	}
 
 	self.RegisterOnHit(moonWishOnHit)
@@ -66,20 +66,20 @@ func moonWishOnHit(s *sim.TurnState, l sim.Logger, self *sim.CardState, _ *sim.O
 	name := c.DisplayName()
 	sk, ok := s.TutorFromDeck(sunKissTutorPriority)
 	if !ok {
-		l.LogPostTriggerf(name, 0, "%s found no Sun Kiss to tutor", name)
+		l.AppendPostTriggerf(name, 0, "%s found no Sun Kiss to tutor", name)
 		return
 	}
 
 	if !self.EffectiveGoAgain() {
 		// Tutor lands the card in hand for next turn.
 		s.AppendHand(sk)
-		l.LogPostTriggerf(name, 0, "%s tutored %s", name, sk.DisplayName())
+		l.AppendPostTriggerf(name, 0, "%s tutored %s", name, sk.DisplayName())
 		return
 	}
 	// Go-again: Sun Kiss plays immediately. Pre-append Moon Wish to CardsPlayed so Sun
 	// Kiss's "if you've played Moon Wish" synergy fires; pop after so the sim's normal
 	// post-Play append doesn't double-add.
-	l.LogPostTriggerf(name, 0, "%s tutored %s and played it", name, sk.DisplayName())
+	l.AppendPostTriggerf(name, 0, "%s tutored %s and played it", name, sk.DisplayName())
 	s.CardsPlayed = append(s.CardsPlayed, c)
 	skSelf := &sim.CardState{Card: sk}
 	sk.Play(s, l, skSelf)

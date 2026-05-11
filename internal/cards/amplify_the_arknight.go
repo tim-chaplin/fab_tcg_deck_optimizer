@@ -28,7 +28,7 @@ func (AmplifyTheArknightRed) MaxCost() int              { return amplifyTheArkni
 
 func (AmplifyTheArknightRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	n := self.DealEffectiveAttack(s)
-	l.Log(self, n)
+	self.Log(l, n)
 }
 
 func (AmplifyTheArknightYellow) Cost(s *sim.TurnState) int { return amplifyTheArknightCost(s) }
@@ -37,7 +37,7 @@ func (AmplifyTheArknightYellow) MaxCost() int              { return amplifyTheAr
 
 func (AmplifyTheArknightYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	n := self.DealEffectiveAttack(s)
-	l.Log(self, n)
+	self.Log(l, n)
 }
 
 func (AmplifyTheArknightBlue) Cost(s *sim.TurnState) int { return amplifyTheArknightCost(s) }
@@ -46,5 +46,5 @@ func (AmplifyTheArknightBlue) MaxCost() int              { return amplifyTheArkn
 
 func (AmplifyTheArknightBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	n := self.DealEffectiveAttack(s)
-	l.Log(self, n)
+	self.Log(l, n)
 }

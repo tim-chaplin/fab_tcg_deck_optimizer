@@ -16,7 +16,7 @@ import (
 func (CondemnToSlaughterRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	condemnToSlaughterApplySideEffect(s, 3)
 	n := self.DealEffectiveAttack(s)
-	l.Log(self, n)
+	self.Log(l, n)
 }
 
 // not implemented: aura-trade rider and opponent-aura destruction clause; only same-turn
@@ -25,7 +25,7 @@ func (CondemnToSlaughterRed) Play(s *sim.TurnState, l sim.Logger, self *sim.Card
 func (CondemnToSlaughterYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	condemnToSlaughterApplySideEffect(s, 2)
 	n := self.DealEffectiveAttack(s)
-	l.Log(self, n)
+	self.Log(l, n)
 }
 
 // not implemented: aura-trade rider and opponent-aura destruction clause; only same-turn
@@ -34,7 +34,7 @@ func (CondemnToSlaughterYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.C
 func (CondemnToSlaughterBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	condemnToSlaughterApplySideEffect(s, 1)
 	n := self.DealEffectiveAttack(s)
-	l.Log(self, n)
+	self.Log(l, n)
 }
 
 // condemnToSlaughterApplySideEffect grants +n to the first scheduled Runeblade attack (attack

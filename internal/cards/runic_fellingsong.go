@@ -20,10 +20,10 @@ import (
 // arcane-damage payload.
 func runicFellingsongPlay(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	n := self.DealEffectiveAttack(s)
-	l.Log(self, n)
+	self.Log(l, n)
 	if n := banishAuraFromGraveyard(s); n > 0 {
 		s.AddValue(n)
-		l.LogRider(self, n, "Banished an aura, dealt 1 arcane damage")
+		self.LogRider(l, n, "Banished an aura, dealt 1 arcane damage")
 	}
 }
 

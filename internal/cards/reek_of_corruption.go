@@ -25,23 +25,23 @@ func reekOfCorruptionApplyRider(s *sim.TurnState, l sim.Logger, self *sim.CardSt
 // rider. Top-level so registration stays alloc-free.
 func reekOfCorruptionOnHit(s *sim.TurnState, l sim.Logger, self *sim.CardState, _ *sim.OnHitHandler) {
 	s.AddValue(sim.DiscardValue)
-	l.LogRider(self, sim.DiscardValue, "On-hit discarded a card")
+	self.LogRider(l, sim.DiscardValue, "On-hit discarded a card")
 }
 
 func (ReekOfCorruptionRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	n := self.DealEffectiveAttack(s)
-	l.Log(self, n)
+	self.Log(l, n)
 	reekOfCorruptionApplyRider(s, l, self)
 }
 
 func (ReekOfCorruptionYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	n := self.DealEffectiveAttack(s)
-	l.Log(self, n)
+	self.Log(l, n)
 	reekOfCorruptionApplyRider(s, l, self)
 }
 
 func (ReekOfCorruptionBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	n := self.DealEffectiveAttack(s)
-	l.Log(self, n)
+	self.Log(l, n)
 	reekOfCorruptionApplyRider(s, l, self)
 }

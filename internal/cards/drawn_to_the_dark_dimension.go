@@ -32,7 +32,7 @@ func (DrawnToTheDarkDimensionRed) MaxCost() int              { return drawnToThe
 func (c DrawnToTheDarkDimensionRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	s.DrawOne()
 	n := self.DealEffectiveAttack(s)
-	l.Log(self, n)
+	self.Log(l, n)
 }
 
 func (DrawnToTheDarkDimensionYellow) Cost(s *sim.TurnState) int {
@@ -44,7 +44,7 @@ func (DrawnToTheDarkDimensionYellow) MaxCost() int { return drawnToTheDarkDimens
 func (c DrawnToTheDarkDimensionYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	s.DrawOne()
 	n := self.DealEffectiveAttack(s)
-	l.Log(self, n)
+	self.Log(l, n)
 }
 
 func (DrawnToTheDarkDimensionBlue) Cost(s *sim.TurnState) int { return drawnToTheDarkDimensionCost(s) }
@@ -54,5 +54,5 @@ func (DrawnToTheDarkDimensionBlue) MaxCost() int              { return drawnToTh
 func (c DrawnToTheDarkDimensionBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	s.DrawOne()
 	n := self.DealEffectiveAttack(s)
-	l.Log(self, n)
+	self.Log(l, n)
 }

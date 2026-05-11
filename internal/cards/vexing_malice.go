@@ -13,18 +13,18 @@ import (
 
 func (VexingMaliceRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	n := self.DealEffectiveAttack(s)
-	l.Log(self, n)
+	self.Log(l, n)
 	s.DealArcaneDamage(l, self, 2)
 }
 
 func (VexingMaliceYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	n := self.DealEffectiveAttack(s)
-	l.Log(self, n)
+	self.Log(l, n)
 	s.DealArcaneDamage(l, self, 2)
 }
 
 func (VexingMaliceBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	n := self.DealEffectiveAttack(s)
-	l.Log(self, n)
+	self.Log(l, n)
 	s.DealArcaneDamage(l, self, 2)
 }

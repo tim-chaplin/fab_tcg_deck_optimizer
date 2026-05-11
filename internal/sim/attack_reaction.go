@@ -23,5 +23,5 @@ func GrantAttackReactionBuff(s *TurnState, l Logger, self *CardState, n int) {
 	s.AddValue(n)
 	l.AmendLastChainStepN(n)
 	// N=0: the +n delta is folded into the parent chain step via AmendLastChainStepN.
-	l.LogPostTriggerf(target.Card.DisplayName(), 0, "%s buffed +%d{p}", self.Card.DisplayName(), n)
+	l.AppendPostTriggerf(target.Card.DisplayName(), 0, "%s buffed +%d{p}", self.Card.DisplayName(), n)
 }

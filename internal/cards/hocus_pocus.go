@@ -10,21 +10,21 @@ import (
 
 func (HocusPocusRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	n := self.DealEffectiveAttack(s)
-	l.Log(self, n)
+	self.Log(l, n)
 	s.CreateRunechants(1)
-	l.LogRider(self, 1, "Created a runechant")
+	self.LogRider(l, 1, "Created a runechant")
 }
 
 func (HocusPocusYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	n := self.DealEffectiveAttack(s)
-	l.Log(self, n)
+	self.Log(l, n)
 	s.CreateRunechants(1)
-	l.LogRider(self, 1, "Created a runechant")
+	self.LogRider(l, 1, "Created a runechant")
 }
 
 func (HocusPocusBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	n := self.DealEffectiveAttack(s)
-	l.Log(self, n)
+	self.Log(l, n)
 	s.CreateRunechants(1)
-	l.LogRider(self, 1, "Created a runechant")
+	self.LogRider(l, 1, "Created a runechant")
 }

@@ -11,5 +11,5 @@ import (
 )
 
 func (AmuletOfInterventionBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
-	l.Log(self, 0)
+	self.Log(l, 0)
 }

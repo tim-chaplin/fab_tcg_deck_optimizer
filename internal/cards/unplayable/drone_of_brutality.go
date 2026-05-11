@@ -10,10 +10,10 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
 
-func (DroneOfBrutalityRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) { l.Log(self, 0) }
+func (DroneOfBrutalityRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) { self.Log(l, 0) }
 
 func (DroneOfBrutalityYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
-	l.Log(self, 0)
+	self.Log(l, 0)
 }
 
-func (DroneOfBrutalityBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) { l.Log(self, 0) }
+func (DroneOfBrutalityBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) { self.Log(l, 0) }

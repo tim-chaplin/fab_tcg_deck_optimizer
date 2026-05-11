@@ -12,21 +12,21 @@ import (
 
 func (ReadTheRunesRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	n := self.DealEffectiveAttack(s)
-	l.Log(self, n)
+	self.Log(l, n)
 	s.CreateRunechants(3)
-	l.LogRider(self, 3, "Created 3 runechants")
+	self.LogRider(l, 3, "Created 3 runechants")
 }
 
 func (ReadTheRunesYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	n := self.DealEffectiveAttack(s)
-	l.Log(self, n)
+	self.Log(l, n)
 	s.CreateRunechants(2)
-	l.LogRider(self, 2, "Created 2 runechants")
+	self.LogRider(l, 2, "Created 2 runechants")
 }
 
 func (ReadTheRunesBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	n := self.DealEffectiveAttack(s)
-	l.Log(self, n)
+	self.Log(l, n)
 	s.CreateRunechants(1)
-	l.LogRider(self, 1, "Created a runechant")
+	self.LogRider(l, 1, "Created a runechant")
 }

@@ -38,7 +38,7 @@ func mauvrionSkiesPlay(s *sim.TurnState, l sim.Logger, selfState *sim.CardState,
 			break
 		}
 	}
-	l.Log(selfState, 0)
+	selfState.Log(l, 0)
 }
 
 // onHitCreateRunechants fires the on-hit "create N runechants" rider attached to the
@@ -47,7 +47,7 @@ func mauvrionSkiesPlay(s *sim.TurnState, l sim.Logger, selfState *sim.CardState,
 // (whose name credits the trigger line).
 func onHitCreateRunechants(s *sim.TurnState, l sim.Logger, self *sim.CardState, h *sim.OnHitHandler) {
 	s.CreateRunechants(h.N)
-	l.LogPostTrigger(self.Card.DisplayName(), h.LogText, h.N)
+	l.AppendPostTrigger(self.Card.DisplayName(), h.LogText, h.N)
 }
 
 // onHitRunechantText is the precomputed rider line for each Mauvrion Skies / Runic Reaping

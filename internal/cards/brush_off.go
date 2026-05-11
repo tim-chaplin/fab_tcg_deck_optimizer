@@ -12,7 +12,7 @@ import (
 
 func brushOffPlay(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	n := self.DealEffectiveDefense(s)
-	l.Log(self, n)
+	self.Log(l, n)
 }
 
 func (BrushOffRed) DefensiveInstant() {}

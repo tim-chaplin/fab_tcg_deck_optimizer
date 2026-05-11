@@ -12,7 +12,7 @@ import (
 
 func cadaverousContrabandOnHitRecycle(s *sim.TurnState, l sim.Logger, self *sim.CardState, _ *sim.OnHitHandler) {
 	if _, ok := s.RecycleFromGraveyardToTop(isNonAttackAction); ok {
-		l.LogRider(self, 0, "Recycled a non-attack action card to top of deck")
+		self.LogRider(l, 0, "Recycled a non-attack action card to top of deck")
 	}
 }
 
@@ -20,7 +20,7 @@ func isNonAttackAction(c sim.Card) bool { return c.Types().IsNonAttackAction() }
 
 func cadaverousContrabandPlay(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	n := self.DealEffectiveAttack(s)
-	l.Log(self, n)
+	self.Log(l, n)
 	self.RegisterOnHit(cadaverousContrabandOnHitRecycle)
 }
 

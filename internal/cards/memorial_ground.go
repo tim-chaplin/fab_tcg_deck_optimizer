@@ -14,9 +14,9 @@ func memorialGroundPlay(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	if _, ok := s.RecycleFromGraveyardToTop(func(c sim.Card) bool {
 		return c.Types().IsAttackAction() && c.Cost(s) <= 2
 	}); ok {
-		l.LogRider(self, 0, "Recycled an attack action card to top of deck")
+		self.LogRider(l, 0, "Recycled an attack action card to top of deck")
 	}
-	l.Log(self, 0)
+	self.Log(l, 0)
 }
 
 func (MemorialGroundRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {

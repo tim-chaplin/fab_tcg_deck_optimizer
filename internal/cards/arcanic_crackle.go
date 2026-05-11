@@ -14,18 +14,18 @@ import (
 
 func (ArcanicCrackleRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	n := self.DealEffectiveAttack(s)
-	l.Log(self, n)
+	self.Log(l, n)
 	s.DealArcaneDamage(l, self, 1)
 }
 
 func (ArcanicCrackleYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	n := self.DealEffectiveAttack(s)
-	l.Log(self, n)
+	self.Log(l, n)
 	s.DealArcaneDamage(l, self, 1)
 }
 
 func (ArcanicCrackleBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	n := self.DealEffectiveAttack(s)
-	l.Log(self, n)
+	self.Log(l, n)
 	s.DealArcaneDamage(l, self, 1)
 }

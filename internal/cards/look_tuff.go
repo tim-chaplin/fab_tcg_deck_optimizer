@@ -16,7 +16,7 @@ func lookTuffPlay(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 		self.BonusAttack -= 1
 	}
 	n := self.DealEffectiveAttack(s)
-	l.Log(self, n)
+	self.Log(l, n)
 }
 
 func (LookTuffRed) Modes() int              { return 2 }

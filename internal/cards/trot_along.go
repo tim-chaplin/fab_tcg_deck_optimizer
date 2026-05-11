@@ -26,5 +26,5 @@ func trotAlongApplySideEffect(s *sim.TurnState) {
 func (TrotAlongBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	trotAlongApplySideEffect(s)
 	n := self.DealEffectiveAttack(s)
-	l.Log(self, n)
+	self.Log(l, n)
 }

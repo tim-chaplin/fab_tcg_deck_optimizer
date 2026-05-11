@@ -43,5 +43,5 @@ func (AnnalsOfSutcliffeAbility) Types() card.TypeSet     { return annalsOfSutcli
 func (AnnalsOfSutcliffeAbility) GoAgain() bool           { return false }
 func (AnnalsOfSutcliffeAbility) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	n := self.DealEffectiveAttack(s)
-	l.Log(self, n)
+	self.Log(l, n)
 }

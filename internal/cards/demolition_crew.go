@@ -34,7 +34,7 @@ func (DemolitionCrewRed) PlayPrecondition(s *sim.TurnState, _ *sim.CardState) bo
 }
 func (c DemolitionCrewRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	n := self.DealEffectiveAttack(s)
-	l.Log(self, n)
+	self.Log(l, n)
 }
 
 func (DemolitionCrewYellow) Dominate() {}
@@ -43,7 +43,7 @@ func (DemolitionCrewYellow) PlayPrecondition(s *sim.TurnState, _ *sim.CardState)
 }
 func (c DemolitionCrewYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	n := self.DealEffectiveAttack(s)
-	l.Log(self, n)
+	self.Log(l, n)
 }
 
 func (DemolitionCrewBlue) Dominate() {}
@@ -52,5 +52,5 @@ func (DemolitionCrewBlue) PlayPrecondition(s *sim.TurnState, _ *sim.CardState) b
 }
 func (c DemolitionCrewBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	n := self.DealEffectiveAttack(s)
-	l.Log(self, n)
+	self.Log(l, n)
 }

@@ -43,5 +43,5 @@ func (TalisharAbility) Types() card.TypeSet     { return talisharAbilityTypes }
 func (TalisharAbility) GoAgain() bool           { return false }
 func (TalisharAbility) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	n := self.DealEffectiveAttack(s)
-	l.Log(self, n)
+	self.Log(l, n)
 }

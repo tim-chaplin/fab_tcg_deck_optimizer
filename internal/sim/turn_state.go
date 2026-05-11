@@ -138,13 +138,13 @@ type TurnState struct {
 	// field. Reset by the sim per permutation.
 	Value int
 	// logger is the per-turn log sink. Nil during the eval-loop's "find best" pass so
-	// every Log* helper short-circuits at the call site (no fmt.Sprintf, no DisplayName,
-	// no append); points at bufs.logger during the rare "replay best turn" pass that
-	// materialises the printout. The chain runner threads this same value into
-	// Card.Play / Block / OnHitHandler.Fire / TriggerHandler / Hero.OnCardPlayed as
-	// the explicit Logger arg cards write through; framework methods that need direct
-	// access (defendersDamage's per-DR seed, the LogEntries accessor) read it here.
-	logger *simLogger
+	// every Append* helper short-circuits via the nil-receiver guard on TurnLogger;
+	// points at bufs.logger during the rare "replay best turn" pass that materialises
+	// the printout. The chain runner threads this same value into Card.Play / Block /
+	// OnHitHandler.Fire / TriggerHandler / Hero.OnCardPlayed as the explicit Logger
+	// arg cards write through; framework methods that need direct access
+	// (defendersDamage's per-DR seed, the LogEntries accessor) read it here.
+	logger *turnlogger.TurnLogger
 	// CardsPlayed is the sequence of cards played (as attacks) this turn, in order.
 	// Populated by the sim after each Play returns so later cards this turn see what was
 	// played before them.
@@ -320,7 +320,7 @@ func NewTurnStateFromSpec(spec TurnStateSpec) TurnState {
 		OpponentMarked: spec.OpponentMarked,
 		cacheable:      true,
 		currentAuraIdx: -1,
-		logger:         newSimLogger(turnlogger.New()),
+		logger:         turnlogger.New(),
 	}
 }
 
@@ -437,7 +437,7 @@ func (s *TurnState) Opt(l Logger, n int) {
 	if l == nil {
 		return
 	}
-	l.Logf(0, "Opted %s, put %s on top, put %s on bottom",
+	l.AppendChainStepf(0, "Opted %s, put %s on top, put %s on bottom",
 		formatCardList(cards), formatCardList(top), formatCardList(bottom))
 }
 
@@ -571,7 +571,7 @@ func NewTurnState(d *deck.Deck, graveyard []Card) *TurnState {
 	if d == nil {
 		d = &deck.Deck{}
 	}
-	return &TurnState{deck: d, graveyard: graveyard, cacheable: true, currentAuraIdx: -1, logger: newSimLogger(turnlogger.New())}
+	return &TurnState{deck: d, graveyard: graveyard, cacheable: true, currentAuraIdx: -1, logger: turnlogger.New()}
 }
 
 // NewTurnStateFromCards is a test-only constructor that wraps a Card slice in a fresh
@@ -783,10 +783,10 @@ func (s *TurnState) DealArcaneDamage(l Logger, self *CardState, n int) {
 		s.ArcaneDamageDealt = true
 	}
 	if n >= 0 && n < len(dealtArcaneText) {
-		l.LogRider(self, n, dealtArcaneText[n])
+		self.LogRider(l, n, dealtArcaneText[n])
 		return
 	}
-	l.LogRiderf(self, n, "Dealt %d arcane damage", n)
+	self.LogRiderf(l, n, "Dealt %d arcane damage", n)
 }
 
 // dealtArcaneText is the pre-built rider-line cache indexed by arcane-damage count, keeping

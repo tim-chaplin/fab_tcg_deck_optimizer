@@ -10,13 +10,13 @@ import (
 
 func performanceBonusOnHit(s *sim.TurnState, l sim.Logger, self *sim.CardState, _ *sim.OnHitHandler) {
 	s.CreateGold(1)
-	l.LogRider(self, 0, "On-hit created a gold token")
+	self.LogRider(l, 0, "On-hit created a gold token")
 }
 
 func performanceBonusPlay(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	self.GrantGoAgainIfFromArsenal()
 	n := self.DealEffectiveAttack(s)
-	l.Log(self, n)
+	self.Log(l, n)
 	self.RegisterOnHit(performanceBonusOnHit)
 }
 

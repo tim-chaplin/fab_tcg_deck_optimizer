@@ -21,7 +21,7 @@ func (c SigilOfTheArknightBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.C
 		Self:    sim.CardOrTokenType{Card: c},
 		Count:   1,
 	})
-	l.Log(self, 0)
+	self.Log(l, 0)
 }
 
 // sigilOfTheArknightReveal implements the handler described in the file docstring. Logs
@@ -38,8 +38,8 @@ func sigilOfTheArknightReveal(s *sim.TurnState, l sim.Logger, _ *sim.Trigger, a 
 	self := SigilOfTheArknightBlue{}.DisplayName()
 	if top.Types().IsAttackAction() {
 		s.DrawOne()
-		l.LogPostTriggerf(self, 0, "%s drew %s into hand", self, top.DisplayName())
+		l.AppendPostTriggerf(self, 0, "%s drew %s into hand", self, top.DisplayName())
 		return
 	}
-	l.LogPostTriggerf(self, 0, "%s revealed %s but didn't draw it", self, top.DisplayName())
+	l.AppendPostTriggerf(self, 0, "%s revealed %s but didn't draw it", self, top.DisplayName())
 }
