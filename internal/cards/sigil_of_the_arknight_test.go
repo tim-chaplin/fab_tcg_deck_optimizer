@@ -33,7 +33,8 @@ func TestSigilOfTheArknight_TriggerRevealsAttackActionIntoHand(t *testing.T) {
 	sim.ResolveChainStep(&play, play.Logger(), &card.CardState{Card: SigilOfTheArknightBlue{}})
 	top := testutils.RunebladeAttack{}
 	next := sim.NewTurnStateFromCards([]card.Card{top, testutils.NonAttack{}}, nil)
-	play.Auras()[0].Handler(next, next.Logger(), &play.Auras()[0].Trigger, &play.Auras()[0])
+	next.SetAuras(append(next.Auras(), play.Auras()[0]))
+	next.FireAuraForTesting(0)
 	if next.Value() != 0 {
 		t.Errorf("handler Value = %d, want 0 (tempo credited via the draw, not damage)", next.Value())
 	}
@@ -51,7 +52,8 @@ func TestSigilOfTheArknight_TriggerRevealsNonAttack(t *testing.T) {
 	var play sim.TurnState
 	sim.ResolveChainStep(&play, play.Logger(), &card.CardState{Card: SigilOfTheArknightBlue{}})
 	next := sim.NewTurnStateFromCards([]card.Card{testutils.Aura{}, testutils.RunebladeAttack{}}, nil)
-	play.Auras()[0].Handler(next, next.Logger(), &play.Auras()[0].Trigger, &play.Auras()[0])
+	next.SetAuras(append(next.Auras(), play.Auras()[0]))
+	next.FireAuraForTesting(0)
 	if next.Value() != 0 {
 		t.Errorf("handler Value = %d, want 0", next.Value())
 	}
@@ -67,8 +69,9 @@ func TestSigilOfTheArknight_TriggerRevealsNonAttack(t *testing.T) {
 func TestSigilOfTheArknight_TriggerEmptyDeck(t *testing.T) {
 	var play sim.TurnState
 	sim.ResolveChainStep(&play, play.Logger(), &card.CardState{Card: SigilOfTheArknightBlue{}})
-	var next sim.TurnState
-	play.Auras()[0].Handler(&next, next.Logger(), &play.Auras()[0].Trigger, &play.Auras()[0])
+	next := sim.NewTurnStateFromCards(nil, nil)
+	next.SetAuras(append(next.Auras(), play.Auras()[0]))
+	next.FireAuraForTesting(0)
 	if next.Value() != 0 {
 		t.Errorf("handler Value = %d, want 0", next.Value())
 	}

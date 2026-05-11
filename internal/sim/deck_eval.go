@@ -504,21 +504,22 @@ func processAurasAtStartOfTurn(queued []Aura, d *deck.Deck) (
 	ts := NewTurnState(d, nil)
 	ts.auras = queued
 	for i := 0; i < len(ts.auras); {
-		t := &ts.auras[i]
+		a := &ts.auras[i]
 		// Re-arm the OncePerTurn gate before the start-of-turn fire so handlers that read
 		// FiredThisTurn see the cleared state.
-		t.FiredThisTurn = false
-		if t.TriggerType != TriggerStartOfTurn {
+		a.FiredThisTurn = false
+		if a.TriggerType != TriggerStartOfTurn {
 			i++
 			continue
 		}
-		self := t.Self.Card
+		self := a.Self.Card
 		preHand := len(ts.hand)
 		preLog := len(ts.logger.Entries())
 		preValue := ts.value
 		ts.currentAuraIdx = i
 		ts.currentAuraDestroyed = false
-		t.Handler(ts, ts.logger, &t.Trigger, t)
+		ctx := auraCtx{a: a, s: ts}
+		a.Handler(ts, ts.logger, &ctx)
 		ts.currentAuraIdx = -1
 		d := ts.value - preValue
 		damage += d

@@ -12,13 +12,11 @@ func TestFireAttackActionAuras_FiresOnceWhenGated(t *testing.T) {
 	aura := FakeRedAttack{}
 	calls := 0
 	state := NewTurnStatePtr(TurnStateSpec{Auras: []Aura{{
-		Trigger: Trigger{
-			TriggerType: TriggerAttackAction,
-			Handler: func(s card.GameEngine, l card.Logger, _ *Trigger, _ *Aura) {
-				calls++
-				s.AddValue(1)
-				l.AppendPreTriggerf("TestCard", 1, "test trigger fired")
-			},
+		TriggerType: TriggerAttackAction,
+		Handler: func(s card.GameEngine, l card.Logger, _ card.Aura) {
+			calls++
+			s.AddValue(1)
+			l.AppendPreTriggerf("TestCard", 1, "test trigger fired")
 		},
 		Self:        CardOrTokenType{Card: aura},
 		Count:       3,
@@ -44,24 +42,22 @@ func TestFireAttackActionAuras_FiresOnceWhenGated(t *testing.T) {
 	}
 }
 
-// TestFireAttackActionAuras_GraveyardsExhaustedAura: a handler that calls DestroyAura
+// TestFireAttackActionAuras_GraveyardsExhaustedAura: a handler that calls Destroy
 // drops the entry from Auras and lands Self in the graveyard.
 func TestFireAttackActionAuras_GraveyardsExhaustedAura(t *testing.T) {
 	aura := FakeRedAttack{}
 	state := NewTurnStatePtr(TurnStateSpec{Auras: []Aura{{
-		Trigger: Trigger{
-			TriggerType: TriggerAttackAction,
-			Handler: func(s card.GameEngine, _ card.Logger, _ *Trigger, a *Aura) {
-				s.AddValue(1)
-				s.DestroyAura(a, true)
-			},
+		TriggerType: TriggerAttackAction,
+		Handler: func(s card.GameEngine, _ card.Logger, a card.Aura) {
+			s.AddValue(1)
+			a.Destroy(true)
 		},
 		Self:  CardOrTokenType{Card: aura},
 		Count: 1,
 	}}})
 	fireAttackActionAuras(state, FakeRedAttack{})
 	if len(state.Auras()) != 0 {
-		t.Errorf("Auras = %+v, want empty (handler called DestroyAura)", state.Auras())
+		t.Errorf("Auras = %+v, want empty (handler called Destroy)", state.Auras())
 	}
 	g := state.Graveyard()
 	if len(g) != 1 || g[0] != aura {
@@ -76,12 +72,10 @@ func TestFireAttackActionAuras_PassesThroughNonAttackActionTriggers(t *testing.T
 	aura := FakeRedAttack{}
 	calls := 0
 	state := NewTurnStatePtr(TurnStateSpec{Auras: []Aura{{
-		Trigger: Trigger{
-			TriggerType: TriggerStartOfTurn,
-			Handler:     func(card.GameEngine, card.Logger, *Trigger, *Aura) { calls++ },
-		},
-		Self:  CardOrTokenType{Card: aura},
-		Count: 1,
+		TriggerType: TriggerStartOfTurn,
+		Handler:     func(card.GameEngine, card.Logger, card.Aura) { calls++ },
+		Self:        CardOrTokenType{Card: aura},
+		Count:       1,
 	}}})
 	fireAttackActionAuras(state, FakeRedAttack{})
 	if state.Value() != 0 {

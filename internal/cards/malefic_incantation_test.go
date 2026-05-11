@@ -55,7 +55,7 @@ func TestMaleficIncantation_HandlerCreatesOneRunechantPerFire(t *testing.T) {
 		chain.SetTriggeringCard(c)
 		chain.SetAuras(append(chain.Auras(), s.Auras()[0]))
 		chain.SetCurrentAuraIdxForTesting(0)
-		chain.Auras()[0].Handler(chain, chain.Logger(), &chain.Auras()[0].Trigger, &chain.Auras()[0])
+		chain.FireAuraForTesting(0)
 		if chain.Value() != 1 {
 			t.Errorf("%s: handler Value = %d, want 1", c.Name(), chain.Value())
 		}

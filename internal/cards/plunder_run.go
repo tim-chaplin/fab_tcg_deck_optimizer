@@ -12,36 +12,29 @@ package cards
 
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
-
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
 
-func plunderRunOnHitDraw(s card.GameEngine, l card.Logger, t *sim.Trigger, _ *sim.Aura) {
+func plunderRunOnHitDraw(s card.GameEngine, l card.Logger, t card.Trigger) {
 	s.DrawOne()
 	l.AppendPostTriggerf(s.TriggeringCard().DisplayName(), 0,
-		"%s drew a card on attack-action hit", t.Source.DisplayName())
+		"%s drew a card on attack-action hit", t.SourceName())
 }
 
-func plunderRunPlay(s card.GameEngine, l card.Logger, self *card.CardState, source card.Card, n int) {
-	s.AddTrigger(sim.Trigger{
-		Source:      source,
-		TriggerType: sim.TriggerHit,
-		TypeFilter:  card.TypeSet.IsAttackAction,
-		Handler:     plunderRunOnHitDraw,
-	})
+func plunderRunPlay(s card.GameEngine, l card.Logger, self *card.CardState, n int) {
+	s.AddHitTrigger(self, plunderRunOnHitDraw, card.TypeSet.IsAttackAction)
 	if self.FromArsenal {
 		GrantNextCardBonusAttack(s, n, IsAttackAction)
 	}
 }
 
-func (c PlunderRunRed) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
-	plunderRunPlay(s, l, self, c, 3)
+func (PlunderRunRed) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
+	plunderRunPlay(s, l, self, 3)
 }
 
-func (c PlunderRunYellow) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
-	plunderRunPlay(s, l, self, c, 2)
+func (PlunderRunYellow) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
+	plunderRunPlay(s, l, self, 2)
 }
 
-func (c PlunderRunBlue) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
-	plunderRunPlay(s, l, self, c, 1)
+func (PlunderRunBlue) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
+	plunderRunPlay(s, l, self, 1)
 }

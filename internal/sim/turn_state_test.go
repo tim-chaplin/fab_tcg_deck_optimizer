@@ -42,16 +42,18 @@ func TestDrawOne_EmptyDeckIsNoOp(t *testing.T) {
 	}
 }
 
-// Tests that AddAura flips AuraCreated and appends to s.Auras() in call order — bundling
-// the flip with the append prevents a trigger registered without advertising the aura.
+// Tests that the AddXxxAura family flips AuraCreated and appends to s.Auras() in call
+// order — bundling the flip with the append prevents a trigger registered without
+// advertising the aura.
 func TestAddAura_FlipsAuraCreatedAndAppends(t *testing.T) {
 	self := NewFakeCard("self")
+	cs := &card.CardState{Card: self}
 	s := &TurnState{}
 	if s.AuraCreated() {
 		t.Fatal("pre: AuraCreated should be false")
 	}
-	s.AddAura(Aura{Trigger: Trigger{TriggerType: TriggerStartOfTurn}, Self: CardOrTokenType{Card: self}, Count: 2})
-	s.AddAura(Aura{Trigger: Trigger{TriggerType: TriggerStartOfTurn}, Self: CardOrTokenType{Card: self}, Count: 1})
+	s.AddStartOfTurnAura(cs, nil, 2)
+	s.AddStartOfTurnAura(cs, nil, 1)
 	if !s.AuraCreated() {
 		t.Error("AuraCreated = false, want true")
 	}

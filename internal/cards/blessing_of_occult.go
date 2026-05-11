@@ -8,7 +8,6 @@
 package cards
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
@@ -21,38 +20,25 @@ var blessingOfOccultTriggerText = [...]string{
 	3: "Created 3 runechants",
 }
 
-func (c BlessingOfOccultRed) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
-	blessingOfOccultPlay(s, l, self, c, 3)
+func (BlessingOfOccultRed) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
+	s.AddStartOfTurnAura(self, blessingOfOccultHandler, 3)
 }
 
-func (c BlessingOfOccultYellow) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
-	blessingOfOccultPlay(s, l, self, c, 2)
+func (BlessingOfOccultYellow) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
+	s.AddStartOfTurnAura(self, blessingOfOccultHandler, 2)
 }
 
-func (c BlessingOfOccultBlue) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
-	blessingOfOccultPlay(s, l, self, c, 1)
+func (BlessingOfOccultBlue) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
+	s.AddStartOfTurnAura(self, blessingOfOccultHandler, 1)
 }
 
-// blessingOfOccultPlay registers the shared next-turn trigger that creates n Runechants
-// and emits the same-turn chain step (no value contribution; all credit is deferred to
-// the trigger).
-//
-// blessingOfOccultHandler creates aura.Count runechants and destroys the aura. Count
+// blessingOfOccultHandler creates a.Count() Runechants and destroys the aura. Count
 // carries the per-variant rune count (R=3 / Y=2 / B=1) — the handler is one-shot, so
 // Count's "fires remaining" interpretation collapses to "runechants to create on the
 // only fire".
-func blessingOfOccultHandler(s card.GameEngine, l card.Logger, _ *sim.Trigger, a *sim.Aura) {
-	n := a.Count
-	name := a.Self.DisplayName()
+func blessingOfOccultHandler(s card.GameEngine, l card.Logger, a card.Aura) {
+	n := a.Count()
 	s.CreateRunechants(n)
-	l.AppendPostTrigger(name, blessingOfOccultTriggerText[n], n)
-	s.DestroyAura(a, true)
-}
-
-func blessingOfOccultPlay(s card.GameEngine, l card.Logger, selfState *card.CardState, selfCard card.Card, n int) {
-	s.AddAura(sim.Aura{
-		Trigger: sim.Trigger{TriggerType: sim.TriggerStartOfTurn, Handler: blessingOfOccultHandler},
-		Self:    sim.CardOrTokenType{Card: selfCard},
-		Count:   n,
-	})
+	l.AppendPostTrigger(a.SelfName(), blessingOfOccultTriggerText[n], n)
+	a.Destroy(true)
 }

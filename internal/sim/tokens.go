@@ -60,12 +60,12 @@ func tokenDisplayName(t TokenType) string {
 // Fires before each attack / weapon swing resolves: flips ArcaneDamageDealt when
 // aura.Count clears the LikelyDamageHits window and destroys the aura. Damage was
 // credited at creation time in CreateRunechants — this handler is pure state cleanup.
-func runechantAuraHandler(g card.GameEngine, _ card.Logger, _ *Trigger, a *Aura) {
+func runechantAuraHandler(g card.GameEngine, _ card.Logger, a card.Aura) {
 	s := g.(*TurnState)
-	if LikelyDamageHits(a.Count, false) {
+	if LikelyDamageHits(a.Count(), false) {
 		s.arcaneDamageDealt = true
 	}
-	s.DestroyAura(a, false)
+	a.Destroy(false)
 }
 
 // NewRunechantAura returns a runechant token aura at count n. Production code calls
@@ -73,9 +73,10 @@ func runechantAuraHandler(g card.GameEngine, _ card.Logger, _ *Trigger, a *Aura)
 // factory is for tests that need to seed a runechant aura without the damage credit.
 func NewRunechantAura(n int) Aura {
 	return Aura{
-		Trigger: Trigger{TriggerType: TriggerAttack, Handler: runechantAuraHandler},
-		Self:    CardOrTokenType{TokenType: TokenTypeRunechant},
-		Count:   n,
+		TriggerType: TriggerAttack,
+		Handler:     runechantAuraHandler,
+		Self:        CardOrTokenType{TokenType: TokenTypeRunechant},
+		Count:       n,
 	}
 }
 
@@ -84,25 +85,26 @@ func NewRunechantAura(n int) Aura {
 // post-hoc arsenal-promotion step fill an otherwise-empty arsenal slot. Pops past
 // deck-end are silently skipped — empty deck just means no draw. Reading the deck top
 // flips s.cacheable (PopDeckTop's contract).
-func ponderAuraHandler(g card.GameEngine, _ card.Logger, _ *Trigger, a *Aura) {
+func ponderAuraHandler(g card.GameEngine, _ card.Logger, a card.Aura) {
 	s := g.(*TurnState)
-	for i := 0; i < a.Count; i++ {
+	for i := 0; i < a.Count(); i++ {
 		c, ok := s.PopDeckTop()
 		if !ok {
 			break
 		}
 		s.hand = append(s.hand, c)
 	}
-	s.DestroyAura(a, false)
+	a.Destroy(false)
 }
 
 // NewPonderAura returns a ponder token aura at count n. Production code calls
 // s.CreatePonder instead; this factory is for tests that need to seed the aura directly.
 func NewPonderAura(n int) Aura {
 	return Aura{
-		Trigger: Trigger{TriggerType: TriggerEndOfTurn, Handler: ponderAuraHandler},
-		Self:    CardOrTokenType{TokenType: TokenTypePonder},
-		Count:   n,
+		TriggerType: TriggerEndOfTurn,
+		Handler:     ponderAuraHandler,
+		Self:        CardOrTokenType{TokenType: TokenTypePonder},
+		Count:       n,
 	}
 }
 
