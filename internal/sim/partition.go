@@ -60,7 +60,7 @@ func (e *Evaluator) findBest(hero Hero, weapons []Weapon, hand []Card, mp Matchu
 			Hand:    append([]Card(nil), hand...),
 			Deck:    d.Copy(),
 			Arsenal: arsenalCardIn,
-			Auras:   append([]Aura(nil), prior.Auras...),
+			Auras:   append([]Aura(nil), prior.auras...),
 			Items:   append([]Item(nil), prior.Items...),
 		},
 	}
@@ -336,7 +336,7 @@ func roleAllowed(r Role, isArsenalSlot, isDefenseReaction, canAttack bool) bool 
 }
 
 // defendersDamage tallies the total Value contribution of the partition's defense phase. DRs
-// resolve first via Play (their ApplyAndLogEffectiveDefense decrements state.IncomingDamage
+// resolve first via Play (their ApplyAndLogEffectiveDefense decrements state.incomingDamage
 // and credits the block, with arcane / runechant riders adding their own Value); plain blocks
 // then consume whatever incoming damage is left, capped per card. Played in isolation — no
 // attack ordering; per-DR TurnState carries Pitched / deck plus a fresh copy of the defenders
@@ -365,7 +365,7 @@ func defendersDamage(defenders, pitched []Card, deckPile *deck.Deck, state *Turn
 	total := 0
 	remaining := incomingDamage
 	cacheable := true
-	// state.Auras is caller-seeded with priorAuras so DR Plays consolidate created
+	// state.auras is caller-seeded with priorAuras so DR Plays consolidate created
 	// auras against the carryover entries. The per-DR reset below preserves the
 	// running list across iterations.
 	for i, def := range defenders {
@@ -376,7 +376,7 @@ func defendersDamage(defenders, pitched []Card, deckPile *deck.Deck, state *Turn
 		// Per-DR seed starts cacheable; the DR's Play flips it via accessors if it reads
 		// deck or graveyard. Set explicitly because TurnState's zero-value is uncacheable.
 		// Auras carry across the per-DR reset so created auras persist for the caller.
-		preservedAuras := state.Auras
+		preservedAuras := state.auras
 		// Carry the logger through the per-DR seed: a nil logger is the find-best
 		// silent mode and a non-nil logger is the replay mode; either way every Log
 		// helper's behaviour follows the field, and resetting without it would either
@@ -385,21 +385,21 @@ func defendersDamage(defenders, pitched []Card, deckPile *deck.Deck, state *Turn
 		preservedLogger := state.logger
 		// Copy the deck per DR so a DR's mid-Play deck mutations stay scoped — the next
 		// DR sees the original pre-DR deck order.
-		*state = TurnState{Pitched: pitched, deck: deckPile.Copy(), graveyard: gravBuf, IncomingDamage: remaining, cacheable: true, Defenders: defenders, Auras: preservedAuras, logger: preservedLogger}
+		*state = TurnState{pitched: pitched, deck: deckPile.Copy(), graveyard: gravBuf, incomingDamage: remaining, cacheable: true, defenders: defenders, auras: preservedAuras, logger: preservedLogger}
 		*cs = CardState{Card: def, FromArsenal: i == arsenalDefenderIdx}
 		ResolveChainStep(state, state.logger, cs)
-		total += state.Value
-		remaining = state.IncomingDamage
+		total += state.value
+		remaining = state.incomingDamage
 		if !state.IsCacheable() {
 			cacheable = false
 		}
 	}
 	// Plain blocks contribute their printed Defense plus any BonusDefense the optional
-	// Blocker hook flipped after scanning state.Defenders. Modal blockers with BlockCost
+	// Blocker hook flipped after scanning state.defenders. Modal blockers with BlockCost
 	// pick the highest-bonus mode that fits the remaining budget; non-modal Blockers run
 	// their hook unchanged. Reuse the caller-provided cs scratch so the interface call
 	// doesn't escape a fresh CardState per plain blocker.
-	state.Defenders = defenders
+	state.defenders = defenders
 	for _, def := range defenders {
 		if attackerMetaPtrFor(def).actsAsDR {
 			continue

@@ -9,12 +9,10 @@ package notimplemented
 
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
-
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
 )
 
 // not implemented: start-of-action-phase self-destroy, leaves-arena discard/draw
 
 func (SigilOfCyclesBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
-	cards.SetAuraCreated(s)
+	s.SetAuraCreated(true)
 }

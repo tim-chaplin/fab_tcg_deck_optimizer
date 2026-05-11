@@ -12,10 +12,10 @@ import (
 // Red's base power is 5 — a pitched power-5 card fails the strict ">" check.
 func TestZealousBelting_NoQualifyingPitchNoGoAgain(t *testing.T) {
 	c := ZealousBeltingRed{}
-	s := sim.TurnState{Pitched: []sim.Card{testutils.GenericAttack(0, 5)}}
+	s := sim.NewTurnStateFromSpec(sim.TurnStateSpec{Pitched: []sim.Card{testutils.GenericAttack(0, 5)}})
 	self := &sim.CardState{Card: c}
 	sim.ResolveChainStep(&s, s.Logger(), self)
-	if got := s.Value; got != c.Attack() {
+	if got := s.Value(); got != c.Attack() {
 		t.Errorf("Play() = %d, want %d (no qualifying pitch)", got, c.Attack())
 	}
 	if self.GrantedGoAgain {
@@ -36,7 +36,7 @@ func TestZealousBelting_HigherPowerPitchGrantsGoAgain(t *testing.T) {
 		{ZealousBeltingBlue{}, 4},   // base 3, pitched power 4
 	}
 	for _, tc := range cases {
-		s := sim.TurnState{Pitched: []sim.Card{testutils.GenericAttack(0, tc.pitchPow)}}
+		s := sim.NewTurnStateFromSpec(sim.TurnStateSpec{Pitched: []sim.Card{testutils.GenericAttack(0, tc.pitchPow)}})
 		self := &sim.CardState{Card: tc.c}
 		sim.ResolveChainStep(&s, s.Logger(), self)
 		if !self.GrantedGoAgain {

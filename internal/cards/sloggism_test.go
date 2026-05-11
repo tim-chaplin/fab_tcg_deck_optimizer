@@ -12,7 +12,7 @@ func TestSloggism_NoAttackReturnsZero(t *testing.T) {
 	s := sim.TurnState{}
 	for _, c := range []sim.Card{SloggismRed{}, SloggismYellow{}, SloggismBlue{}} {
 		sim.ResolveChainStep(&s, s.Logger(), &sim.CardState{Card: c})
-		if got := s.Value; got != 0 {
+		if got := s.Value(); got != 0 {
 			t.Errorf("%s: Play() = %d, want 0", c.Name(), got)
 		}
 	}
@@ -20,9 +20,9 @@ func TestSloggism_NoAttackReturnsZero(t *testing.T) {
 
 // TestSloggism_LowCostFilteredOut: a cost-1 attack is seen but the cost>=2 filter rejects it.
 func TestSloggism_LowCostFilteredOut(t *testing.T) {
-	s := sim.TurnState{CardsRemaining: []*sim.CardState{{Card: testutils.GenericAttack(1, 0)}}}
+	s := sim.NewTurnStateFromSpec(sim.TurnStateSpec{CardsRemaining: []*sim.CardState{{Card: testutils.GenericAttack(1, 0)}}})
 	sim.ResolveChainStep(&s, s.Logger(), &sim.CardState{Card: SloggismRed{}})
-	if got := s.Value; got != 0 {
+	if got := s.Value(); got != 0 {
 		t.Errorf("Play() = %d, want 0 (cost 1 < 2)", got)
 	}
 }
@@ -40,9 +40,9 @@ func TestSloggism_HighCostReturnsBonus(t *testing.T) {
 	}
 	for _, tc := range cases {
 		target := &sim.CardState{Card: testutils.GenericAttack(2, 0)}
-		s := sim.TurnState{CardsRemaining: []*sim.CardState{target}}
+		s := sim.NewTurnStateFromSpec(sim.TurnStateSpec{CardsRemaining: []*sim.CardState{target}})
 		sim.ResolveChainStep(&s, s.Logger(), &sim.CardState{Card: tc.c})
-		if got := s.Value; got != 0 {
+		if got := s.Value(); got != 0 {
 			t.Errorf("%s: Play() = %d, want 0 (granter returns 0; +N rides on target's BonusAttack)", tc.c.Name(), got)
 		}
 		if target.BonusAttack != tc.want {

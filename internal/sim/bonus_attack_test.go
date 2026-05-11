@@ -49,7 +49,7 @@ func (grantBonusAttack) Types() card.TypeSet {
 }
 func (grantBonusAttack) GoAgain() bool { return true }
 func (g grantBonusAttack) Play(s *TurnState, l Logger, self *CardState) {
-	for _, pc := range s.CardsRemaining {
+	for _, pc := range s.CardsRemaining() {
 		if pc.Card.Types().IsAttackAction() {
 			pc.BonusAttack += g.n
 			break
@@ -75,7 +75,7 @@ func (grantBonusAttackWeapon) Types() card.TypeSet {
 }
 func (grantBonusAttackWeapon) GoAgain() bool { return true }
 func (g grantBonusAttackWeapon) Play(s *TurnState, l Logger, self *CardState) {
-	for _, pc := range s.CardsRemaining {
+	for _, pc := range s.CardsRemaining() {
 		if pc.Card.Types().IsWeaponAttack() {
 			pc.BonusAttack += g.n
 			break
@@ -211,7 +211,7 @@ func TestBest_NimblismGrantsConsumingVolitionDiscardRider(t *testing.T) {
 		cards.NimblismBlue{},
 		pitchOnlyRed{},
 	}
-	got := Best(testutils.Hero{Intel: 4}, nil, h, Matchup{IncomingDamage: 0}, nil, TurnState{Auras: []Aura{NewRunechantAura(1)}})
+	got := Best(testutils.Hero{Intel: 4}, nil, h, Matchup{IncomingDamage: 0}, nil, NewTurnStateFromSpec(TurnStateSpec{Auras: []Aura{NewRunechantAura(1)}}))
 	if got.Value != 7 {
 		t.Fatalf("Value = %d, want 7 (Volition 3 base + Nimblism +1 BonusAttack + discard rider 3 from runechant-driven ArcaneDamageDealt × LikelyToHit on buffed 4-power attack); line=[%s]",
 			got.Value, FormatBestLine(got.BestLine))

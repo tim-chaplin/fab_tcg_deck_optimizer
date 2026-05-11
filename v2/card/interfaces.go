@@ -64,12 +64,46 @@ type GameEngine interface {
 	Copper() int
 
 	// Value crediting and arcane damage
+	Value() int
 	AddValue(int)
+	SetValue(int)
 	DealArcaneDamage(Logger, *CardState, int)
+
+	// AP / Overpower (chain-step controls cards read or grant).
+	ActionPoints() int
+	AddActionPoints(int)
+	Overpower() bool
+	SetOverpower(bool)
+
+	// Sticky flags cards read to gate their effects (and flip when their effects fire).
+	ArcaneDamageDealt() bool
+	SetArcaneDamageDealt(bool)
+	AuraCreated() bool
+	SetAuraCreated(bool)
+	CardBanished() bool
+	NonAttackActionPlayed() bool
+	OpponentMarked() bool
+	SetOpponentMarked(bool)
+
+	// Partition / matchup state.
+	IncomingDamage() int
+	ArcaneIncomingDamage() int
+	BlockTotal() int
+	Defenders() []Card
+	Pitched() []Card
 
 	// Chain queries
 	HasPlayedOrCreatedAura() bool
 	HasPlayedType(card.CardType) bool
+	CardsPlayed() []Card
+	SetCardsPlayed([]Card)
+	CardsRemaining() []*CardState
+	TriggeringCard() Card
+	// Auras / Triggers slice access is omitted — Aura and Trigger are sim-owned shapes
+	// (mirrored as `any` in AddAura / AddTrigger / DestroyAura). The handful of cards
+	// that scan the live aura set (e.g. Yinti Yanti's len(Auras) gate) type-assert back
+	// to *sim.TurnState; a future cleanup could expose typed slice accessors once Aura
+	// / Trigger move to a shared package.
 
 	// Mid-chain draw / tutoring / recycling
 	DrawOne()

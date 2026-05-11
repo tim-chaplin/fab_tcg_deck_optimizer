@@ -59,7 +59,7 @@ type CardState struct {
 	// Card.Play: as costs come up, pitched cards are popped from the active pitch ordering
 	// (carrying over any excess to fund subsequent cards) and the popped slice is exposed
 	// here. Cards whose printed text gates on "if X was pitched to play this" iterate this
-	// slice instead of the unordered s.Pitched bag — the same pitched bag still lives on
+	// slice instead of the unordered s.pitched bag — the same pitched bag still lives on
 	// TurnState for cards that read it as a multiset. Empty for cards whose cost was fully
 	// paid by carry from a prior pitch.
 	PitchedToPlay []Card
@@ -215,7 +215,7 @@ type Card interface {
 	// Cards own card-specific behaviour only: conditional self-buffs (flip
 	// self.BonusAttack / self.BonusDefense), riders (l.AppendPostTrigger sub-lines),
 	// OnHit registration, mid-chain effects. The standard "credit EffectiveAttack /
-	// capped EffectiveDefense to s.Value and emit the <Card>: <VERB> (+N) chain step"
+	// capped EffectiveDefense to s.value and emit the <Card>: <VERB> (+N) chain step"
 	// mechanic happens in sim.ResolveChainStep after Play returns — vanilla attack /
 	// DR cards have an empty Play body.
 	Play(s *TurnState, l Logger, self *CardState)

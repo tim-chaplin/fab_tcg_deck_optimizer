@@ -10,7 +10,7 @@ import (
 )
 
 func (OutedRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
-	if s.OpponentMarked {
+	if s.OpponentMarked() {
 		self.BonusAttack++
 	}
 }

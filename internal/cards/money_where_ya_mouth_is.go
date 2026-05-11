@@ -19,7 +19,7 @@ func moneyWhereYaMouthIsWagerOnHit(s *sim.TurnState, l sim.Logger, target *sim.C
 
 func moneyWhereYaMouthIsPlay(s *sim.TurnState, l sim.Logger, self *sim.CardState, source sim.Card, n int) {
 	GrantNextCardBonusAttack(s, n, IsAttack)
-	for _, pc := range s.CardsRemaining {
+	for _, pc := range s.CardsRemaining() {
 		if pc.Card.Types().IsAttack() {
 			pc.OnHit = append(pc.OnHit, sim.OnHitHandler{
 				Fire:   moneyWhereYaMouthIsWagerOnHit,

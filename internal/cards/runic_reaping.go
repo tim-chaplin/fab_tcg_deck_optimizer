@@ -37,7 +37,7 @@ func (c RunicReapingBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardSta
 // and appends an on-hit n-runechant rider.
 func runicReapingPlay(s *sim.TurnState, l sim.Logger, selfState *sim.CardState, source sim.Card, n int) {
 	var target *sim.CardState
-	for _, pc := range s.CardsRemaining {
+	for _, pc := range s.CardsRemaining() {
 		if runicReapingTargetMatches(pc) {
 			target = pc
 			break

@@ -23,7 +23,7 @@ func TestHighStriker_QueuesTriggerHit(t *testing.T) {
 // triggerHitCount returns the number of queued TriggerHit triggers on s.
 func triggerHitCount(s *sim.TurnState) int {
 	n := 0
-	for _, t := range s.Triggers {
+	for _, t := range s.Triggers() {
 		if t.TriggerType == sim.TriggerHit {
 			n++
 		}

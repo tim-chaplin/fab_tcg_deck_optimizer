@@ -454,7 +454,7 @@ func (GrantAll) Types() card.TypeSet {
 }
 func (GrantAll) GoAgain() bool { return true }
 func (GrantAll) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
-	for _, pc := range s.CardsRemaining {
+	for _, pc := range s.CardsRemaining() {
 		pc.GrantedGoAgain = true
 	}
 }
@@ -478,10 +478,10 @@ func (GrantSpy) Types() card.TypeSet {
 }
 func (GrantSpy) GoAgain() bool { return true }
 func (g GrantSpy) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
-	if len(s.CardsPlayed) != 0 {
+	if len(s.CardsPlayed()) != 0 {
 		return
 	}
-	for _, pc := range s.CardsRemaining {
+	for _, pc := range s.CardsRemaining() {
 		if pc.GrantedGoAgain {
 			*g.Saw = true
 		}

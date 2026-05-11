@@ -17,7 +17,7 @@ const arcaneDamageBonus = 2
 
 // arcanicSpikeBonus returns the +2{p} power buff when ArcaneDamageDealt is set, else 0.
 func arcanicSpikeBonus(s *sim.TurnState) int {
-	if s != nil && s.ArcaneDamageDealt {
+	if s != nil && s.ArcaneDamageDealt() {
 		return arcaneDamageBonus
 	}
 	return 0

@@ -20,35 +20,35 @@ func TestVantagePoint_BaseDamageNoAura(t *testing.T) {
 	for _, tc := range cases {
 		var s sim.TurnState
 		sim.ResolveChainStep(&s, s.Logger(), &sim.CardState{Card: tc.c})
-		if got := s.Value; got != tc.base {
+		if got := s.Value(); got != tc.base {
 			t.Errorf("%s: Play() = %d, want %d", tc.c.Name(), got, tc.base)
 		}
-		if s.Overpower {
+		if s.Overpower() {
 			t.Errorf("%s: Overpower should stay false when no aura", tc.c.Name())
 		}
 	}
 }
 
-// Tests that an aura already played this turn flips s.Overpower.
+// Tests that an aura already played this turn flips s.Overpower().
 func TestVantagePoint_AuraPlayedSetsOverpower(t *testing.T) {
-	s := sim.TurnState{CardsPlayed: []sim.Card{testutils.Aura{}}}
+	s := sim.NewTurnStateFromSpec(sim.TurnStateSpec{CardsPlayed: []sim.Card{testutils.Aura{}}})
 	sim.ResolveChainStep(&s, s.Logger(), &sim.CardState{Card: VantagePointRed{}})
-	if got := s.Value; got != 7 {
+	if got := s.Value(); got != 7 {
 		t.Errorf("Play() = %d, want 7", got)
 	}
-	if !s.Overpower {
+	if !s.Overpower() {
 		t.Errorf("Overpower should be set when an aura was played")
 	}
 }
 
-// Tests that the AuraCreated flag also flips s.Overpower.
+// Tests that the AuraCreated flag also flips s.Overpower().
 func TestVantagePoint_AuraCreatedSetsOverpower(t *testing.T) {
-	s := sim.TurnState{AuraCreated: true}
+	s := sim.NewTurnStateFromSpec(sim.TurnStateSpec{AuraCreated: true})
 	sim.ResolveChainStep(&s, s.Logger(), &sim.CardState{Card: VantagePointRed{}})
-	if got := s.Value; got != 7 {
+	if got := s.Value(); got != 7 {
 		t.Errorf("Play() = %d, want 7", got)
 	}
-	if !s.Overpower {
+	if !s.Overpower() {
 		t.Errorf("Overpower should be set when AuraCreated is true")
 	}
 }

@@ -20,7 +20,7 @@ func TestRightBehindYou_BlockTogetherFiresBonus(t *testing.T) {
 			t.Errorf("%s: missing sim.Blocker hook", c.Name())
 			continue
 		}
-		s := sim.TurnState{Defenders: []sim.Card{c, testutils.GenericAttack(0, 1)}}
+		s := sim.NewTurnStateFromSpec(sim.TurnStateSpec{Defenders: []sim.Card{c, testutils.GenericAttack(0, 1)}})
 		self := &sim.CardState{Card: c}
 		blocker.Block(&s, s.Logger(), self)
 		if self.BonusDefense != 1 {
@@ -32,7 +32,7 @@ func TestRightBehindYou_BlockTogetherFiresBonus(t *testing.T) {
 // Tests that Block leaves BonusDefense untouched when this is the only plain blocker.
 func TestRightBehindYou_BlockAloneNoBonus(t *testing.T) {
 	c := RightBehindYouRed{}
-	s := sim.TurnState{Defenders: []sim.Card{c}}
+	s := sim.NewTurnStateFromSpec(sim.TurnStateSpec{Defenders: []sim.Card{c}})
 	self := &sim.CardState{Card: c}
 	c.Block(&s, s.Logger(), self)
 	if self.BonusDefense != 0 {

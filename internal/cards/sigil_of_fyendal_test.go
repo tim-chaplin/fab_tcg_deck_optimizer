@@ -12,17 +12,17 @@ import (
 func TestSigilOfFyendal_PlayRegistersStartOfTurnTrigger(t *testing.T) {
 	var s sim.TurnState
 	sim.ResolveChainStep(&s, s.Logger(), &sim.CardState{Card: SigilOfFyendalBlue{}})
-	if got := s.Value; got != 0 {
+	if got := s.Value(); got != 0 {
 		t.Errorf("Play() = %d, want 0 (1{h} gain deferred to trigger)", got)
 	}
-	if !s.AuraCreated {
+	if !s.AuraCreated() {
 		t.Error("AuraCreated = false, want true")
 	}
-	if len(s.Auras) != 1 || s.Auras[0].TriggerType != sim.TriggerStartOfTurn {
-		t.Errorf("Auras = %+v, want one TriggerStartOfTurn entry", s.Auras)
+	if len(s.Auras()) != 1 || s.Auras()[0].TriggerType != sim.TriggerStartOfTurn {
+		t.Errorf("Auras = %+v, want one TriggerStartOfTurn entry", s.Auras())
 	}
-	if s.Auras[0].Count != 1 {
-		t.Errorf("Count = %d, want 1", s.Auras[0].Count)
+	if s.Auras()[0].Count != 1 {
+		t.Errorf("Count = %d, want 1", s.Auras()[0].Count)
 	}
 }
 
@@ -32,10 +32,10 @@ func TestSigilOfFyendal_TriggerHandlerCredits1Damage(t *testing.T) {
 	var s sim.TurnState
 	sim.ResolveChainStep(&s, s.Logger(), &sim.CardState{Card: SigilOfFyendalBlue{}})
 	fire := sim.NewTurnStateFromCards(nil, nil)
-	fire.Auras = append(fire.Auras, s.Auras[0])
+	fire.SetAuras(append(fire.Auras(), s.Auras()[0]))
 	fire.SetCurrentAuraIdxForTesting(0)
-	fire.Auras[0].Handler(fire, fire.Logger(), &fire.Auras[0].Trigger, &fire.Auras[0])
-	if fire.Value != 1 {
-		t.Errorf("Handler Value = %d, want 1", fire.Value)
+	fire.Auras()[0].Handler(fire, fire.Logger(), &fire.Auras()[0].Trigger, &fire.Auras()[0])
+	if fire.Value() != 1 {
+		t.Errorf("Handler Value = %d, want 1", fire.Value())
 	}
 }

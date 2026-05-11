@@ -16,11 +16,11 @@ func TestPursueToTheEdgeOfOblivion_OnHitMarksOpponent(t *testing.T) {
 	if len(self.OnHit) != 1 {
 		t.Fatalf("OnHit handlers = %d, want 1", len(self.OnHit))
 	}
-	if s.OpponentMarked {
+	if s.OpponentMarked() {
 		t.Errorf("OpponentMarked = true before OnHit fires, want false")
 	}
 	testutils.FireOnHitIfLikely(&s, s.Logger(), self)
-	if !s.OpponentMarked {
+	if !s.OpponentMarked() {
 		t.Errorf("OpponentMarked = false after OnHit fires, want true")
 	}
 }

@@ -12,7 +12,7 @@ func TestForceSight_NoAttackReturnsZero(t *testing.T) {
 	s := sim.TurnState{}
 	for _, c := range []sim.Card{ForceSightRed{}, ForceSightYellow{}, ForceSightBlue{}} {
 		sim.ResolveChainStep(&s, s.Logger(), &sim.CardState{Card: c})
-		if got := s.Value; got != 0 {
+		if got := s.Value(); got != 0 {
 			t.Errorf("%s: Play() = %d, want 0", c.Name(), got)
 		}
 	}
@@ -20,9 +20,9 @@ func TestForceSight_NoAttackReturnsZero(t *testing.T) {
 
 // TestForceSight_NonAttackInRemainingFizzles: non-attack action fails the predicate.
 func TestForceSight_NonAttackInRemainingFizzles(t *testing.T) {
-	s := sim.TurnState{CardsRemaining: []*sim.CardState{{Card: testutils.GenericAction()}}}
+	s := sim.NewTurnStateFromSpec(sim.TurnStateSpec{CardsRemaining: []*sim.CardState{{Card: testutils.GenericAction()}}})
 	sim.ResolveChainStep(&s, s.Logger(), &sim.CardState{Card: ForceSightRed{}})
-	if got := s.Value; got != 0 {
+	if got := s.Value(); got != 0 {
 		t.Errorf("Play() = %d, want 0 (non-attack skipped)", got)
 	}
 }
@@ -40,9 +40,9 @@ func TestForceSight_NextAttackReturnsBonus(t *testing.T) {
 	}
 	for _, tc := range cases {
 		target := &sim.CardState{Card: testutils.GenericAttack(0, 0)}
-		s := sim.TurnState{CardsRemaining: []*sim.CardState{target}}
+		s := sim.NewTurnStateFromSpec(sim.TurnStateSpec{CardsRemaining: []*sim.CardState{target}})
 		sim.ResolveChainStep(&s, s.Logger(), &sim.CardState{Card: tc.c})
-		if got := s.Value; got != 0 {
+		if got := s.Value(); got != 0 {
 			t.Errorf("%s: Play() = %d, want 0 (granter returns 0; +N rides on target's BonusAttack)", tc.c.Name(), got)
 		}
 		if target.BonusAttack != tc.want {
@@ -59,8 +59,8 @@ func TestForceSight_HandPlaySkipsOpt(t *testing.T) {
 	for _, c := range []sim.Card{ForceSightRed{}, ForceSightYellow{}, ForceSightBlue{}} {
 		s := sim.NewTurnStateFromCards([]sim.Card{a, b}, nil)
 		sim.ResolveChainStep(s, s.Logger(), &sim.CardState{Card: c})
-		if s.Value != 0 {
-			t.Errorf("%s: Play() from hand Value = %d, want 0", c.Name(), s.Value)
+		if s.Value() != 0 {
+			t.Errorf("%s: Play() from hand Value = %d, want 0", c.Name(), s.Value())
 		}
 		// Just the LogPlay chain step, no Opt sub-entry.
 		if len(s.LogEntries()) != 1 {
@@ -78,8 +78,8 @@ func TestForceSight_ArsenalPlayCallsOpt2(t *testing.T) {
 	for _, c := range []sim.Card{ForceSightRed{}, ForceSightYellow{}, ForceSightBlue{}} {
 		s := sim.NewTurnStateFromCards([]sim.Card{a, b}, nil)
 		sim.ResolveChainStep(s, s.Logger(), &sim.CardState{Card: c, FromArsenal: true})
-		if s.Value != 0 {
-			t.Errorf("%s: Play() from arsenal Value = %d, want 0", c.Name(), s.Value)
+		if s.Value() != 0 {
+			t.Errorf("%s: Play() from arsenal Value = %d, want 0", c.Name(), s.Value())
 		}
 		if len(s.LogEntries()) != 2 {
 			t.Errorf("%s: Log len = %d, want 2 (Opted... + chain step)", c.Name(), len(s.LogEntries()))

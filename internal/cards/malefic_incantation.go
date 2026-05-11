@@ -64,7 +64,7 @@ func maleficAuraHandler(s *sim.TurnState, l sim.Logger, _ *sim.Trigger, a *sim.A
 	a.Count--
 	lastVerse := a.Count <= 0
 	s.CreateRunechants(1)
-	l.AppendPostTrigger(s.TriggeringCard.DisplayName(), maleficCreatedRunechantText[cardID], 1)
+	l.AppendPostTrigger(s.TriggeringCard().DisplayName(), maleficCreatedRunechantText[cardID], 1)
 	if lastVerse {
 		s.DestroyAura(a, true)
 	}

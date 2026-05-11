@@ -21,7 +21,7 @@ func TestRuneragerSwarm_NoAuraNoGoAgain(t *testing.T) {
 		s := sim.TurnState{}
 		self := &sim.CardState{Card: tc.c}
 		sim.ResolveChainStep(&s, s.Logger(), self)
-		if got := s.Value; got != tc.want {
+		if got := s.Value(); got != tc.want {
 			t.Errorf("%s: Play() = %d, want %d", tc.c.Name(), got, tc.want)
 		}
 		if self.GrantedGoAgain {
@@ -33,7 +33,7 @@ func TestRuneragerSwarm_NoAuraNoGoAgain(t *testing.T) {
 func TestRuneragerSwarm_AuraPlayedGrantsGoAgain(t *testing.T) {
 	// An aura in CardsPlayed satisfies the "played an aura this turn" condition.
 	for _, c := range []sim.Card{RuneragerSwarmRed{}, RuneragerSwarmYellow{}, RuneragerSwarmBlue{}} {
-		s := sim.TurnState{CardsPlayed: []sim.Card{testutils.Aura{}}}
+		s := sim.NewTurnStateFromSpec(sim.TurnStateSpec{CardsPlayed: []sim.Card{testutils.Aura{}}})
 		self := &sim.CardState{Card: c}
 		sim.ResolveChainStep(&s, s.Logger(), self)
 		if !self.GrantedGoAgain {
@@ -46,7 +46,7 @@ func TestRuneragerSwarm_AuraCreatedGrantsGoAgain(t *testing.T) {
 	// TurnState.AuraCreated (e.g. from a runechant-creating effect earlier in the chain) also
 	// satisfies the condition.
 	for _, c := range []sim.Card{RuneragerSwarmRed{}, RuneragerSwarmYellow{}, RuneragerSwarmBlue{}} {
-		s := sim.TurnState{AuraCreated: true}
+		s := sim.NewTurnStateFromSpec(sim.TurnStateSpec{AuraCreated: true})
 		self := &sim.CardState{Card: c}
 		sim.ResolveChainStep(&s, s.Logger(), self)
 		if !self.GrantedGoAgain {

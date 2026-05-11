@@ -12,17 +12,17 @@ import (
 func TestSigilOfSilphidae_PlayFizzlesWithoutAura(t *testing.T) {
 	var s sim.TurnState
 	sim.ResolveChainStep(&s, s.Logger(), &sim.CardState{Card: SigilOfSilphidaeBlue{}})
-	if got := s.Value; got != 0 {
+	if got := s.Value(); got != 0 {
 		t.Errorf("Play() = %d, want 0 (empty graveyard)", got)
 	}
-	if !s.AuraCreated {
+	if !s.AuraCreated() {
 		t.Errorf("AuraCreated should be set even when banish fizzles")
 	}
-	if s.ArcaneDamageDealt {
+	if s.ArcaneDamageDealt() {
 		t.Errorf("ArcaneDamageDealt should stay false when banish fizzles")
 	}
-	if len(s.Auras) != 1 || s.Auras[0].TriggerType != sim.TriggerStartOfTurn {
-		t.Errorf("Auras = %+v, want one TriggerStartOfTurn entry", s.Auras)
+	if len(s.Auras()) != 1 || s.Auras()[0].TriggerType != sim.TriggerStartOfTurn {
+		t.Errorf("Auras = %+v, want one TriggerStartOfTurn entry", s.Auras())
 	}
 }
 
@@ -32,10 +32,10 @@ func TestSigilOfSilphidae_PlayBanishesAuraForOneArcane(t *testing.T) {
 	aura := BlessingOfOccultRed{}
 	s := sim.NewTurnStateFromCards(nil, []sim.Card{aura})
 	sim.ResolveChainStep(s, s.Logger(), &sim.CardState{Card: SigilOfSilphidaeBlue{}})
-	if got := s.Value; got != 1 {
+	if got := s.Value(); got != 1 {
 		t.Errorf("Play() = %d, want 1", got)
 	}
-	if !s.ArcaneDamageDealt {
+	if !s.ArcaneDamageDealt() {
 		t.Errorf("ArcaneDamageDealt should be set")
 	}
 	if len(s.Banished()) != 1 || s.Banished()[0].ID() != aura.ID() {
@@ -50,11 +50,11 @@ func TestSigilOfSilphidae_StartOfTurnHandlerFizzlesWithoutAnotherAura(t *testing
 	var play sim.TurnState
 	sim.ResolveChainStep(&play, play.Logger(), &sim.CardState{Card: SigilOfSilphidaeBlue{}})
 	next := sim.NewTurnStateFromCards(nil, nil)
-	next.Auras = append(next.Auras, play.Auras[0])
+	next.SetAuras(append(next.Auras(), play.Auras()[0]))
 	next.SetCurrentAuraIdxForTesting(0)
-	next.Auras[0].Handler(next, next.Logger(), &next.Auras[0].Trigger, &next.Auras[0])
-	if next.Value != 0 {
-		t.Errorf("handler Value = %d, want 0 (no other aura to banish)", next.Value)
+	next.Auras()[0].Handler(next, next.Logger(), &next.Auras()[0].Trigger, &next.Auras()[0])
+	if next.Value() != 0 {
+		t.Errorf("handler Value = %d, want 0 (no other aura to banish)", next.Value())
 	}
 }
 
@@ -65,11 +65,11 @@ func TestSigilOfSilphidae_StartOfTurnHandlerBanishesAnotherAura(t *testing.T) {
 	sim.ResolveChainStep(&play, play.Logger(), &sim.CardState{Card: SigilOfSilphidaeBlue{}})
 	other := BlessingOfOccultRed{}
 	next := sim.NewTurnStateFromCards(nil, []sim.Card{other})
-	next.Auras = append(next.Auras, play.Auras[0])
+	next.SetAuras(append(next.Auras(), play.Auras()[0]))
 	next.SetCurrentAuraIdxForTesting(0)
-	next.Auras[0].Handler(next, next.Logger(), &next.Auras[0].Trigger, &next.Auras[0])
-	if next.Value != 1 {
-		t.Errorf("handler Value = %d, want 1 (banished another aura)", next.Value)
+	next.Auras()[0].Handler(next, next.Logger(), &next.Auras()[0].Trigger, &next.Auras()[0])
+	if next.Value() != 1 {
+		t.Errorf("handler Value = %d, want 1 (banished another aura)", next.Value())
 	}
 	if len(next.Banished()) != 1 || next.Banished()[0].ID() != other.ID() {
 		t.Errorf("Banish = %v, want [Blessing]", next.Banished())

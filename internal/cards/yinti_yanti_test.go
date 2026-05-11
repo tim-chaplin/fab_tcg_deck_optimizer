@@ -20,8 +20,8 @@ func TestYintiYanti_PlayNoAuraNoBonus(t *testing.T) {
 		s := sim.TurnState{}
 		self := &sim.CardState{Card: tc.c}
 		sim.ResolveChainStep(&s, s.Logger(), self)
-		if s.Value != tc.want {
-			t.Errorf("%s: Value = %d, want %d (printed attack, no aura bonus)", tc.c.Name(), s.Value, tc.want)
+		if s.Value() != tc.want {
+			t.Errorf("%s: Value = %d, want %d (printed attack, no aura bonus)", tc.c.Name(), s.Value(), tc.want)
 		}
 	}
 }
@@ -37,11 +37,11 @@ func TestYintiYanti_PlayWithAuraGetsBonus(t *testing.T) {
 		{YintiYantiBlue{}, 2},
 	}
 	for _, tc := range cases {
-		s := sim.TurnState{Auras: []sim.Aura{sim.NewRunechantAura(1)}}
+		s := sim.NewTurnStateFromSpec(sim.TurnStateSpec{Auras: []sim.Aura{sim.NewRunechantAura(1)}})
 		self := &sim.CardState{Card: tc.c}
 		sim.ResolveChainStep(&s, s.Logger(), self)
-		if s.Value != tc.want {
-			t.Errorf("%s with aura: Value = %d, want %d (printed +1 aura bonus)", tc.c.Name(), s.Value, tc.want)
+		if s.Value() != tc.want {
+			t.Errorf("%s with aura: Value = %d, want %d (printed +1 aura bonus)", tc.c.Name(), s.Value(), tc.want)
 		}
 	}
 }
@@ -61,7 +61,7 @@ func TestYintiYanti_BlockNoAuraNoBonus(t *testing.T) {
 // Tests that Block bumps BonusDefense by 1 when an aura is in play.
 func TestYintiYanti_BlockWithAuraGetsBonus(t *testing.T) {
 	for _, c := range []sim.Card{YintiYantiRed{}, YintiYantiYellow{}, YintiYantiBlue{}} {
-		s := sim.TurnState{Auras: []sim.Aura{sim.NewRunechantAura(1)}}
+		s := sim.NewTurnStateFromSpec(sim.TurnStateSpec{Auras: []sim.Aura{sim.NewRunechantAura(1)}})
 		self := &sim.CardState{Card: c}
 		c.(sim.Blocker).Block(&s, s.Logger(), self)
 		if self.BonusDefense != 1 {

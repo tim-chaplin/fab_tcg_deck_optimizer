@@ -152,7 +152,7 @@ func makeCacheKey(
 ) (evalCacheKey, bool) {
 	if len(hand) > maxCachedHandSize ||
 		len(weapons) > maxCachedWeapons ||
-		len(prior.Auras) > maxCachedAuras ||
+		len(prior.auras) > maxCachedAuras ||
 		len(prior.Items) > maxCachedItems {
 		return evalCacheKey{}, false
 	}
@@ -169,8 +169,8 @@ func makeCacheKey(
 	// into the fixed-size key arrays so the cache key stays multiset-invariant across
 	// registration order. Both aura and item sets are small in practice (typically 0-3
 	// each) so the O(n²) cost is negligible.
-	key.auraLen = len(prior.Auras)
-	for i, t := range prior.Auras {
+	key.auraLen = len(prior.auras)
+	for i, t := range prior.auras {
 		insertPersistentEntry(key.auras[:i+1], persistentCacheKey{
 			SelfID: t.Self.CardID(), TokenType: t.Self.TokenType, Count: t.Count,
 		})
@@ -187,7 +187,7 @@ func makeCacheKey(
 	if prior.Arsenal != nil {
 		key.arsenalID = prior.Arsenal.ID()
 	}
-	key.opponentMarked = prior.OpponentMarked
+	key.opponentMarked = prior.opponentMarked
 	return key, true
 }
 

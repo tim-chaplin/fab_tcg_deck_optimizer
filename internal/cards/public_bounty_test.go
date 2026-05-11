@@ -12,7 +12,7 @@ func TestPublicBounty_MarksOpponent(t *testing.T) {
 	for _, c := range []sim.Card{PublicBountyRed{}, PublicBountyYellow{}, PublicBountyBlue{}} {
 		s := sim.TurnState{}
 		sim.ResolveChainStep(&s, s.Logger(), &sim.CardState{Card: c})
-		if !s.OpponentMarked {
+		if !s.OpponentMarked() {
 			t.Errorf("%s: OpponentMarked = false after Play, want true", c.Name())
 		}
 	}
@@ -30,7 +30,7 @@ func TestPublicBounty_GrantsBonusToNextAttack(t *testing.T) {
 	}
 	for _, tc := range cases {
 		target := &sim.CardState{Card: testutils.GenericAttack(0, 0)}
-		s := sim.TurnState{CardsRemaining: []*sim.CardState{target}}
+		s := sim.NewTurnStateFromSpec(sim.TurnStateSpec{CardsRemaining: []*sim.CardState{target}})
 		sim.ResolveChainStep(&s, s.Logger(), &sim.CardState{Card: tc.c})
 		if target.BonusAttack != tc.want {
 			t.Errorf("%s: target BonusAttack = %d, want %d", tc.c.Name(), target.BonusAttack, tc.want)

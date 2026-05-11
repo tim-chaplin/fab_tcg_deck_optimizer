@@ -11,7 +11,7 @@ import (
 func TestRelentlessPursuit_MarksOpponent(t *testing.T) {
 	s := sim.NewTurnStateFromCards(nil, nil)
 	sim.ResolveChainStep(s, s.Logger(), &sim.CardState{Card: RelentlessPursuitBlue{}})
-	if !s.OpponentMarked {
+	if !s.OpponentMarked() {
 		t.Errorf("OpponentMarked = false after Play, want true")
 	}
 }
@@ -32,7 +32,7 @@ func TestRelentlessPursuit_NoRecycleWithoutPriorAttack(t *testing.T) {
 func TestRelentlessPursuit_RecyclesAfterPriorAttack(t *testing.T) {
 	self := &sim.CardState{Card: RelentlessPursuitBlue{}}
 	s := sim.NewTurnStateFromCards(nil, nil)
-	s.CardsPlayed = []sim.Card{testutils.GenericAttack(0, 3)}
+	s.SetCardsPlayed([]sim.Card{testutils.GenericAttack(0, 3)})
 	sim.ResolveChainStep(s, s.Logger(), self)
 	if !self.SkipGraveyard {
 		t.Fatal("SkipGraveyard = false after prior attack, want true")

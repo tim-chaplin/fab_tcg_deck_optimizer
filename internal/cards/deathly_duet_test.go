@@ -20,7 +20,7 @@ func TestDeathlyDuet_BaseDamage(t *testing.T) {
 	for _, tc := range cases {
 		var s sim.TurnState
 		sim.ResolveChainStep(&s, s.Logger(), &sim.CardState{Card: tc.c})
-		if got := s.Value; got != tc.want {
+		if got := s.Value(); got != tc.want {
 			t.Errorf("%s: Play() = %d, want %d", tc.c.Name(), got, tc.want)
 		}
 	}
@@ -34,7 +34,7 @@ func TestDeathlyDuet_AttackAttributedAddsPower(t *testing.T) {
 		PitchedToPlay: []sim.Card{testutils.RunebladeAttack{}},
 	}
 	sim.ResolveChainStep(&s, s.Logger(), self)
-	if got := s.Value; got != 6 {
+	if got := s.Value(); got != 6 {
 		t.Errorf("Deathly Duet Red with attack attributed: Play() = %d, want 6", got)
 	}
 }
@@ -49,13 +49,13 @@ func TestDeathlyDuet_NonAttackActionAttributedCreatesRunechants(t *testing.T) {
 		PitchedToPlay: []sim.Card{testutils.NonAttack{}},
 	}
 	sim.ResolveChainStep(&s, s.Logger(), self)
-	if got := s.Value; got != 6 {
+	if got := s.Value(); got != 6 {
 		t.Errorf("Deathly Duet Red with non-attack attributed: Play() = %d, want 6 (base 4 + 2 token credits)", got)
 	}
 	if s.Runechants() != 2 {
 		t.Errorf("Runechants = %d, want 2", s.Runechants())
 	}
-	if !s.AuraCreated {
+	if !s.AuraCreated() {
 		t.Errorf("AuraCreated should be set when Runechants are created")
 	}
 }
@@ -69,7 +69,7 @@ func TestDeathlyDuet_BothBranchesFire(t *testing.T) {
 		PitchedToPlay: []sim.Card{testutils.RunebladeAttack{}, testutils.NonAttack{}},
 	}
 	sim.ResolveChainStep(&s, s.Logger(), self)
-	if got := s.Value; got != 8 {
+	if got := s.Value(); got != 8 {
 		t.Errorf("Deathly Duet Red with both attributed: Play() = %d, want 8 (base 4 + 2 power + 2 token credits)", got)
 	}
 	if s.Runechants() != 2 {

@@ -11,10 +11,10 @@ func TestWeepingBattleground_AuraInGraveyard(t *testing.T) {
 	aura := SigilOfSilphidaeBlue{}
 	s := sim.NewTurnStateFromCards(nil, []sim.Card{aura})
 	sim.ResolveChainStep(s, s.Logger(), &sim.CardState{Card: WeepingBattlegroundRed{}})
-	if got := s.Value; got != 1 {
+	if got := s.Value(); got != 1 {
 		t.Fatalf("Play() = %d, want 1", got)
 	}
-	if !s.ArcaneDamageDealt {
+	if !s.ArcaneDamageDealt() {
 		t.Errorf("want ArcaneDamageDealt set")
 	}
 }
@@ -26,10 +26,10 @@ func TestWeepingBattleground_NoAuraInGraveyard(t *testing.T) {
 	nonAura := ShrillOfSkullformRed{}
 	s := sim.NewTurnStateFromCards(nil, []sim.Card{nonAura})
 	sim.ResolveChainStep(s, s.Logger(), &sim.CardState{Card: WeepingBattlegroundRed{}})
-	if got := s.Value; got != 0 {
+	if got := s.Value(); got != 0 {
 		t.Fatalf("Play() = %d, want 0 (no aura to banish)", got)
 	}
-	if s.ArcaneDamageDealt {
+	if s.ArcaneDamageDealt() {
 		t.Errorf("ArcaneDamageDealt should stay false when the banish clause fizzles")
 	}
 }
@@ -38,7 +38,7 @@ func TestWeepingBattleground_NoAuraInGraveyard(t *testing.T) {
 func TestWeepingBattleground_EmptyGraveyard(t *testing.T) {
 	var s sim.TurnState
 	sim.ResolveChainStep(&s, s.Logger(), &sim.CardState{Card: WeepingBattlegroundRed{}})
-	if got := s.Value; got != 0 {
+	if got := s.Value(); got != 0 {
 		t.Fatalf("Play() = %d, want 0", got)
 	}
 }
@@ -77,17 +77,17 @@ func TestWeepingBattleground_OnlyOneAuraBanished(t *testing.T) {
 
 // TestWeepingBattleground_SecondCopyAlsoFires: two Weeping Battlegrounds against a graveyard
 // with two auras each banish one. The second one must still fire because Play mutates state.
-// Each fire credits +1, so cumulative s.Value = 2.
+// Each fire credits +1, so cumulative s.Value() = 2.
 func TestWeepingBattleground_SecondCopyAlsoFires(t *testing.T) {
 	aura1 := SigilOfSilphidaeBlue{}
 	aura2 := SigilOfSilphidaeBlue{}
 	s := sim.NewTurnStateFromCards(nil, []sim.Card{aura1, aura2})
 	sim.ResolveChainStep(s, s.Logger(), &sim.CardState{Card: WeepingBattlegroundRed{}})
-	if got := s.Value; got != 1 {
+	if got := s.Value(); got != 1 {
 		t.Fatalf("first Play() Value = %d, want 1", got)
 	}
 	sim.ResolveChainStep(s, s.Logger(), &sim.CardState{Card: WeepingBattlegroundBlue{}})
-	if got := s.Value; got != 2 {
+	if got := s.Value(); got != 2 {
 		t.Fatalf("second Play() cumulative Value = %d, want 2", got)
 	}
 	if g := s.Graveyard(); len(g) != 0 {
@@ -104,11 +104,11 @@ func TestWeepingBattleground_SecondCopyFizzlesWhenOutOfAuras(t *testing.T) {
 	aura := SigilOfSilphidaeBlue{}
 	s := sim.NewTurnStateFromCards(nil, []sim.Card{aura})
 	sim.ResolveChainStep(s, s.Logger(), &sim.CardState{Card: WeepingBattlegroundRed{}})
-	if got := s.Value; got != 1 {
+	if got := s.Value(); got != 1 {
 		t.Fatalf("first Play() Value = %d, want 1", got)
 	}
 	sim.ResolveChainStep(s, s.Logger(), &sim.CardState{Card: WeepingBattlegroundBlue{}})
-	if got := s.Value; got != 1 {
+	if got := s.Value(); got != 1 {
 		t.Fatalf("second Play() cumulative Value = %d, want 1 (no aura left, fizzle adds 0)", got)
 	}
 }

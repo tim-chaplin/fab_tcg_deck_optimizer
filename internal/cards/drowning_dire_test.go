@@ -24,7 +24,7 @@ func TestDrowningDire_NoAuraNoDominate(t *testing.T) {
 func TestDrowningDire_AuraGrantsDominate(t *testing.T) {
 	for _, c := range []sim.Card{DrowningDireRed{}, DrowningDireYellow{}, DrowningDireBlue{}} {
 		s := sim.NewTurnStateFromCards(nil, nil)
-		s.CardsPlayed = []sim.Card{testutils.Aura{}}
+		s.SetCardsPlayed([]sim.Card{testutils.Aura{}})
 		self := &sim.CardState{Card: c}
 		sim.ResolveChainStep(s, s.Logger(), self)
 		if !self.GrantedDominate {

@@ -16,7 +16,7 @@ import (
 // EffectiveAttack picks the buff up in any LikelyToHit check on the buffed attack. The
 // +1 attributes to the target's slot, not Flying High's.
 func flyingHighApplySideEffect(s *sim.TurnState, matchPitch int) {
-	for _, pc := range s.CardsRemaining {
+	for _, pc := range s.CardsRemaining() {
 		if !pc.Card.Types().IsAttack() {
 			continue
 		}

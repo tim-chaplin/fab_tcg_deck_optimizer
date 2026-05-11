@@ -28,10 +28,10 @@ func (c *CarryState) SnapshotFromTurn(s *TurnState) {
 	c.Arsenal = s.Arsenal
 	c.Graveyard = append(c.Graveyard[:0], s.graveyard...)
 	c.Banish = append(c.Banish[:0], s.banished...)
-	c.Auras = append(c.Auras[:0], s.Auras...)
+	c.Auras = append(c.Auras[:0], s.auras...)
 	c.Items = append(c.Items[:0], s.Items...)
 	c.CardsDrawn = s.CardsDrawn
-	c.OpponentMarked = s.OpponentMarked
+	c.OpponentMarked = s.opponentMarked
 	c.Log = append(c.Log[:0], s.logger.Entries()...)
 }
 

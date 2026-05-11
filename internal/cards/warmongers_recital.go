@@ -22,7 +22,7 @@ func warmongersRecitalRecycleOnHit(s *sim.TurnState, l sim.Logger, self *sim.Car
 // warmongersRecitalPlay grants the next attack action +n{p} and the on-hit recycle rider.
 // Fizzles silently if no attack action follows in CardsRemaining.
 func warmongersRecitalPlay(s *sim.TurnState, l sim.Logger, self *sim.CardState, source sim.Card, n int) {
-	for _, pc := range s.CardsRemaining {
+	for _, pc := range s.CardsRemaining() {
 		if pc.Card.Types().IsAttackAction() {
 			pc.BonusAttack += n
 			pc.OnHit = append(pc.OnHit, sim.OnHitHandler{

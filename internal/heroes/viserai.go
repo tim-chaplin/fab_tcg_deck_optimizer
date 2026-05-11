@@ -31,7 +31,7 @@ func (Viserai) OnCardPlayed(played sim.Card, s *sim.TurnState, l sim.Logger) int
 	if !t.Has(card.TypeRuneblade) || t.Has(card.TypeWeapon) {
 		return 0
 	}
-	if s.NonAttackActionPlayed {
+	if s.NonAttackActionPlayed() {
 		s.CreateRunechants(1)
 		l.AppendPreTrigger(played.DisplayName(), "Viserai created a runechant", 1)
 		return 1

@@ -32,7 +32,7 @@ func TestExposed_RejectsNonAttack(t *testing.T) {
 func TestExposed_PlayMarksOpponent(t *testing.T) {
 	s := sim.TurnState{}
 	sim.ResolveChainStep(&s, s.Logger(), &sim.CardState{Card: ExposedBlue{}})
-	if !s.OpponentMarked {
+	if !s.OpponentMarked() {
 		t.Error("OpponentMarked = false after Play, want true")
 	}
 }

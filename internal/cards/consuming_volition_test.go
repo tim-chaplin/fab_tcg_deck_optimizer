@@ -22,7 +22,7 @@ func TestConsumingVolition_ArcaneDamageNotDealtReturnsBaseAttack(t *testing.T) {
 		cs := &sim.CardState{Card: tc.c}
 		sim.ResolveChainStep(&s, s.Logger(), cs)
 		testutils.FireOnHitIfLikely(&s, s.Logger(), cs)
-		if got := s.Value; got != tc.want {
+		if got := s.Value(); got != tc.want {
 			t.Errorf("%s: Play() = %d, want %d (base attack, ArcaneDamageDealt=false)", tc.c.Name(), got, tc.want)
 		}
 	}
@@ -31,12 +31,12 @@ func TestConsumingVolition_ArcaneDamageNotDealtReturnsBaseAttack(t *testing.T) {
 // Tests that the discard rider fires when ArcaneDamageDealt is set and the attack is likely
 // to hit.
 func TestConsumingVolition_LikelyToHitAndArcaneTriggersDiscard(t *testing.T) {
-	s := sim.TurnState{ArcaneDamageDealt: true}
+	s := sim.NewTurnStateFromSpec(sim.TurnStateSpec{ArcaneDamageDealt: true})
 	c := ConsumingVolitionRed{}
 	cs := &sim.CardState{Card: c}
 	sim.ResolveChainStep(&s, s.Logger(), cs)
 	testutils.FireOnHitIfLikely(&s, s.Logger(), cs)
-	if got := s.Value; got != 4+3 {
+	if got := s.Value(); got != 4+3 {
 		t.Errorf("Red with ArcaneDamageDealt: Play() = %d, want 7 (base 4 likely to hit + 3 discard)", got)
 	}
 }
@@ -52,9 +52,9 @@ func TestConsumingVolition_BlockableBaseSuppressesDiscard(t *testing.T) {
 		{ConsumingVolitionBlue{}, 2},
 	}
 	for _, tc := range cases {
-		s := sim.TurnState{ArcaneDamageDealt: true}
+		s := sim.NewTurnStateFromSpec(sim.TurnStateSpec{ArcaneDamageDealt: true})
 		sim.ResolveChainStep(&s, s.Logger(), &sim.CardState{Card: tc.c})
-		if got := s.Value; got != tc.want {
+		if got := s.Value(); got != tc.want {
 			t.Errorf("%s with ArcaneDamageDealt: Play() = %d, want %d (blockable, no rider)", tc.c.Name(), got, tc.want)
 		}
 	}
@@ -63,10 +63,10 @@ func TestConsumingVolition_BlockableBaseSuppressesDiscard(t *testing.T) {
 // Tests that co-firing runechants don't rescue a blockable variant — "this hits" reads only
 // this card's own damage.
 func TestConsumingVolition_RunechantsDontRescue(t *testing.T) {
-	s := sim.TurnState{ArcaneDamageDealt: true, Auras: []sim.Aura{sim.NewRunechantAura(1)}}
+	s := sim.NewTurnStateFromSpec(sim.TurnStateSpec{ArcaneDamageDealt: true, Auras: []sim.Aura{sim.NewRunechantAura(1)}})
 	c := ConsumingVolitionYellow{}
 	sim.ResolveChainStep(&s, s.Logger(), &sim.CardState{Card: c})
-	if got := s.Value; got != 3 {
+	if got := s.Value(); got != 3 {
 		t.Errorf("Yellow with 1 Runechant: Play() = %d, want 3 (runechant isn't 'this' damage)", got)
 	}
 }

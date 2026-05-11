@@ -3,7 +3,7 @@
 //
 // Text: "When this defends alone, prevent the next 1 damage that would be dealt to you this turn."
 //
-// Block scans s.Defenders for a second plain blocker; if none is present (DRs alongside
+// Block scans s.Defenders() for a second plain blocker; if none is present (DRs alongside
 // don't count), the +1 prevention fires by bumping self.BonusDefense.
 
 package cards
@@ -17,7 +17,7 @@ import (
 // partition pays at most a few comparisons.
 func battlefrontBastionBlock(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	plainCount := 0
-	for _, d := range s.Defenders {
+	for _, d := range s.Defenders() {
 		if d.Types().IsDefenseReaction() {
 			continue
 		}

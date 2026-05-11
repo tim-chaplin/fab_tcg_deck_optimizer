@@ -21,19 +21,19 @@ func TestRunebloodIncantation_PlayRegistersStartOfTurnTriggerWithCountN(t *testi
 	for _, tc := range cases {
 		var s sim.TurnState
 		sim.ResolveChainStep(&s, s.Logger(), &sim.CardState{Card: tc.c})
-		if got := s.Value; got != 0 {
+		if got := s.Value(); got != 0 {
 			t.Errorf("%s: Play() = %d, want 0 (every rune fires on a future turn)", tc.c.Name(), got)
 		}
-		if !s.AuraCreated {
+		if !s.AuraCreated() {
 			t.Errorf("%s: AuraCreated should be set", tc.c.Name())
 		}
 		if s.Runechants() != 0 {
 			t.Errorf("%s: Runechants = %d, want 0 (no same-turn rune)", tc.c.Name(), s.Runechants())
 		}
-		if len(s.Auras) != 1 {
-			t.Fatalf("%s: Auras len = %d, want 1", tc.c.Name(), len(s.Auras))
+		if len(s.Auras()) != 1 {
+			t.Fatalf("%s: Auras len = %d, want 1", tc.c.Name(), len(s.Auras()))
 		}
-		tr := s.Auras[0]
+		tr := s.Auras()[0]
 		if tr.TriggerType != sim.TriggerStartOfTurn {
 			t.Errorf("%s: trigger Type = %d, want TriggerStartOfTurn", tc.c.Name(), tr.TriggerType)
 		}
@@ -51,11 +51,11 @@ func TestRunebloodIncantation_HandlerCreatesOneRunechantPerFire(t *testing.T) {
 		var play sim.TurnState
 		sim.ResolveChainStep(&play, play.Logger(), &sim.CardState{Card: c})
 		fire := sim.NewTurnStateFromCards(nil, nil)
-		fire.Auras = append(fire.Auras, play.Auras[0])
+		fire.SetAuras(append(fire.Auras(), play.Auras()[0]))
 		fire.SetCurrentAuraIdxForTesting(0)
-		fire.Auras[0].Handler(fire, fire.Logger(), &fire.Auras[0].Trigger, &fire.Auras[0])
-		if fire.Value != 1 {
-			t.Errorf("%s: handler Value = %d, want 1", c.Name(), fire.Value)
+		fire.Auras()[0].Handler(fire, fire.Logger(), &fire.Auras()[0].Trigger, &fire.Auras()[0])
+		if fire.Value() != 1 {
+			t.Errorf("%s: handler Value = %d, want 1", c.Name(), fire.Value())
 		}
 		if fire.Runechants() != 1 {
 			t.Errorf("%s: Runechants = %d, want 1 (one rune per fire)", c.Name(), fire.Runechants())

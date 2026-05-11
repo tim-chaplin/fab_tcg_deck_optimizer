@@ -1,9 +1,9 @@
 package sim
 
 // ResolveChainStep runs card.Play and then applies the standard chain-step resolution:
-// for an attack-action or weapon-attack, credit self.EffectiveAttack() to s.Value; for
+// for an attack-action or weapon-attack, credit self.EffectiveAttack() to s.value; for
 // a defense-reaction (or DefensiveInstant), credit the EffectiveDefense capped at
-// s.IncomingDamage and decrement IncomingDamage; for everything else, log (+0).
+// s.incomingDamage and decrement IncomingDamage; for everything else, log (+0).
 // The "<DisplayName>: <VERB> (+N)" chain-step entry is appended after Play returns so
 // any self-buffs Play applied (e.g. modal +2{p} riders flipping self.BonusAttack) are
 // reflected in the displayed delta.
@@ -33,18 +33,18 @@ func chainStepDelta(s *TurnState, self *CardState) int {
 	switch {
 	case types.IsAttackAction() || types.IsWeaponAttack():
 		n := self.EffectiveAttack()
-		s.Value += n
+		s.value += n
 		return n
 	case types.IsDefenseReaction() || isDefensiveInstant(self.Card):
 		n := self.EffectiveDefense()
-		if n > s.IncomingDamage {
-			n = s.IncomingDamage
+		if n > s.incomingDamage {
+			n = s.incomingDamage
 		}
 		if n < 0 {
 			n = 0
 		}
-		s.IncomingDamage -= n
-		s.Value += n
+		s.incomingDamage -= n
+		s.value += n
 		return n
 	}
 	return 0

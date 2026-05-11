@@ -163,7 +163,7 @@ func TestBest_AllAttackHandPlusArsenalNoWeapons(t *testing.T) {
 		cards.WoundingBlowRed{}, cards.WoundingBlowRed{},
 	}
 	d := deck.New(testutils.Hero{Intel: 4}, nil, nil)
-	got := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, sim.TurnState{Arsenal: cards.WoundingBlowRed{}}, h)
+	got := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, sim.NewTurnStateFromSpec(sim.TurnStateSpec{Arsenal: cards.WoundingBlowRed{}}), h)
 	if got.Value != 4 {
 		t.Fatalf("Value = %d, want 4 (one Wounding Blow Red lands; rest can't chain without GoAgain). Roles=[%s]",
 			got.Value, sim.FormatBestLine(got.BestLine))

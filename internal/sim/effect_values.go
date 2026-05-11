@@ -21,7 +21,7 @@ const GoldTokenValue = 0
 // OverpowerValue is the damage-equivalent credited when an attack has the Overpower keyword.
 // Overpower lets damage through equal to the un-blocked attack power, a niche bump against
 // partially-blocked hits — the model treats it as zero rather than enumerate the defender's
-// block configuration. Cards setting Overpower still flip s.Overpower for any future consumer.
+// block configuration. Cards setting Overpower still flip s.overpower for any future consumer.
 const OverpowerValue = 0
 
 // LikelyToHit reports whether self's attack is likely to land past the opponent's blocks.

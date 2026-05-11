@@ -43,7 +43,7 @@ func FormatLogEntry(e LogEntry) string {
 // when the partition assigned arsenalCardIn the Arsenal role (it's staying), nil otherwise
 // (no arsenal-in, or arsenal-in is playing as Attack/Defend).
 func bestAttackWithWeapons(hero Hero, weapons []Weapon, attackers, defenders, pitched, held []Card, d *deck.Deck, bufs *attackBufs, mp Matchup, blockTotal, arsenalInIdx, arsenalDefenderIdx int, arsenalAtChainStart Card, prior TurnState, skipLog bool) (int, int, chainBudget, []string, CarryState, bool, bool) {
-	runechantCarryover := tokenCountIn(prior.Auras, TokenTypeRunechant)
+	runechantCarryover := tokenCountIn(prior.auras, TokenTypeRunechant)
 	ctx := &sequenceContext{
 		hero:                hero,
 		pitched:             pitched,
@@ -55,9 +55,9 @@ func bestAttackWithWeapons(hero Hero, weapons []Weapon, attackers, defenders, pi
 		matchup:             mp,
 		blockTotal:          blockTotal,
 		arsenalInIdx:        arsenalInIdx,
-		priorAuras:          prior.Auras,
+		priorAuras:          prior.auras,
 		priorItems:          prior.Items,
-		priorOpponentMarked: prior.OpponentMarked,
+		priorOpponentMarked: prior.opponentMarked,
 		priorBanish:         prior.banished,
 		priorGraveyard:      prior.graveyard,
 		// defenderAuras shares backing with bufs.defenderAurasBacking so the per-partition
@@ -111,7 +111,7 @@ func bestAttackWithWeapons(hero Hero, weapons []Weapon, attackers, defenders, pi
 	// so nothing in the defense phase reads hidden state.
 	defenseCacheableConst := true
 	if !hasModalBlocker && len(defenders) > 0 {
-		defenseDealtConst, defenseCacheableConst = ctx.runDefense(defenders, pitched, d, prior.Auras, mp.IncomingDamage, noBlockBudgetCap, arsenalDefenderIdx)
+		defenseDealtConst, defenseCacheableConst = ctx.runDefense(defenders, pitched, d, prior.auras, mp.IncomingDamage, noBlockBudgetCap, arsenalDefenderIdx)
 	}
 	defenseDealt := defenseDealtConst
 	defenseCacheable := defenseCacheableConst
@@ -213,7 +213,7 @@ func bestAttackWithWeapons(hero Hero, weapons []Weapon, attackers, defenders, pi
 			bufs.drScratch = TurnState{}
 			if ctx.runechantCarryover > 0 {
 				bufs.drScratchAuras = append(bufs.drScratchAuras[:0], NewRunechantAura(ctx.runechantCarryover))
-				bufs.drScratch.Auras = bufs.drScratchAuras
+				bufs.drScratch.auras = bufs.drScratchAuras
 			}
 			drCost := 0
 			for _, d := range defenders {
@@ -230,7 +230,7 @@ func bestAttackWithWeapons(hero Hero, weapons []Weapon, attackers, defenders, pi
 			// candidate sees the right spare budget. Non-modal-blocker partitions stick with
 			// the once-per-leaf defenseDealtConst computed above.
 			if hasModalBlocker {
-				defenseDealt, defenseCacheable = ctx.runDefense(defenders, pitched, d, prior.Auras, mp.IncomingDamage, phase.defendBudget-drCost, arsenalDefenderIdx)
+				defenseDealt, defenseCacheable = ctx.runDefense(defenders, pitched, d, prior.auras, mp.IncomingDamage, phase.defendBudget-drCost, arsenalDefenderIdx)
 			}
 			if phase.hasDefendPitches && phase.defendBudget-drCost >= phase.maxDefendPitch {
 				continue
@@ -322,7 +322,7 @@ type sequenceContext struct {
 	arsenalInIdx int
 	// priorAuras are the Auras carried in from the previous turn (e.g. an
 	// AttackAction trigger from a Malefic Incantation played a turn ago). Each permutation
-	// seeds state.Auras with a fresh copy of this slice so mid-chain firing can
+	// seeds state.auras with a fresh copy of this slice so mid-chain firing can
 	// decrement Count / set FiredThisTurn without leaking those mutations across permutations.
 	priorAuras []Aura
 	// priorItems are the Items carried in from the previous turn. Each permutation seeds
@@ -353,7 +353,7 @@ type sequenceContext struct {
 	activatedAbilityCosts []int
 	// defenderAuras is the post-defense aura set: priorAuras consolidated with the
 	// auras DR / plain-block Plays create during defendersDamage. resetStateForPermutation
-	// seeds state.Auras from this so chain cards see auras created during defense.
+	// seeds state.auras from this so chain cards see auras created during defense.
 	defenderAuras []Aura
 	// defenders is the partition's defender slice (DRs + plain blocks together). After
 	// the defense phase resolves, every defender lands in the graveyard;
@@ -396,13 +396,13 @@ func (ctx *sequenceContext) activeLogger() *turnlogger.TurnLogger {
 	return ctx.bufs.logger
 }
 
-// runDefense seeds bufs.state.Auras with priorAuras (so DR Plays' aura-create helpers
+// runDefense seeds bufs.state.auras with priorAuras (so DR Plays' aura-create helpers
 // consolidate against existing tokens), runs defendersDamage, and captures the post-
 // defense aura set into ctx.defenderAuras (and bufs.defenderAurasBacking) for later
 // chain seeding. Re-bind both headers after the call to track any growth-driven realloc.
 func (ctx *sequenceContext) runDefense(defenders, pitched []Card, deckPile *deck.Deck, priorAuras []Aura, incomingDamage, blockBudget, arsenalDefenderIdx int) (int, bool) {
 	bufs := ctx.bufs
-	bufs.state.Auras = append(ctx.defenderAuras[:0], priorAuras...)
+	bufs.state.auras = append(ctx.defenderAuras[:0], priorAuras...)
 	// Seed the logger so the first DR's per-defender reset (and the plain-block phase
 	// that reuses bufs.state afterwards) sees the chain-level skip / record decision;
 	// defendersDamage preserves it through its struct-literal reset. Nil during the
@@ -410,37 +410,37 @@ func (ctx *sequenceContext) runDefense(defenders, pitched []Card, deckPile *deck
 	bufs.state.logger = ctx.activeLogger()
 	dealt, gravScratch, cacheable := defendersDamage(defenders, pitched, deckPile, bufs.state, bufs.defenseGravScratch, &bufs.drCardStateScratch, incomingDamage, blockBudget, arsenalDefenderIdx)
 	bufs.defenseGravScratch = gravScratch
-	ctx.defenderAuras = bufs.state.Auras
-	bufs.defenderAurasBacking = bufs.state.Auras
+	ctx.defenderAuras = bufs.state.auras
+	bufs.defenderAurasBacking = bufs.state.auras
 	return dealt, cacheable
 }
 
-// fireAttackActionAuras walks state.Auras after an attack action card resolves
+// fireAttackActionAuras walks state.auras after an attack action card resolves
 // and invokes every TriggerAttackAction entry whose OncePerTurn gate is open. Each fire
 // decrements the trigger's Count; when Count hits zero the aura drops out of the list and
 // Self lands in the graveyard so downstream same-turn effects see the destroy. The sim
-// publishes the triggering card via state.TriggeringCard before each handler runs and
+// publishes the triggering card via state.triggeringCard before each handler runs and
 // clears it after; handlers read it through s.AddPreTriggerLogEntry to attribute their
 // log line back to the triggering card.
 //
-// Iterates state.Auras with a cursor that handles handler-side splicing: a handler
-// calling s.DestroyAura mutates state.Auras in place (shifting the next entry down to
+// Iterates state.auras with a cursor that handles handler-side splicing: a handler
+// calling s.DestroyAura mutates state.auras in place (shifting the next entry down to
 // the cursor's index), so the loop only advances when the slice length didn't change.
 func fireAttackActionAuras(state *TurnState, triggeringCard Card) {
-	for i := 0; i < len(state.Auras); {
-		t := &state.Auras[i]
+	for i := 0; i < len(state.auras); {
+		t := &state.auras[i]
 		if t.TriggerType != TriggerAttackAction || (t.OncePerTurn && t.FiredThisTurn) {
 			i++
 			continue
 		}
-		state.TriggeringCard = triggeringCard
+		state.triggeringCard = triggeringCard
 		state.currentAuraIdx = i
 		state.currentAuraDestroyed = false
 		t.Handler(state, state.logger, &t.Trigger, t)
 		state.currentAuraIdx = -1
-		state.TriggeringCard = nil
+		state.triggeringCard = nil
 		if !state.currentAuraDestroyed {
-			state.Auras[i].FiredThisTurn = true
+			state.auras[i].FiredThisTurn = true
 			i++
 		}
 	}
@@ -449,12 +449,12 @@ func fireAttackActionAuras(state *TurnState, triggeringCard Card) {
 // hasEndOfTurnFire reports whether either Auras or Triggers carries a TriggerEndOfTurn
 // entry. Lets the chain runner skip the end-of-turn walk when nothing would fire.
 func hasEndOfTurnFire(state *TurnState) bool {
-	for _, a := range state.Auras {
+	for _, a := range state.auras {
 		if a.TriggerType == TriggerEndOfTurn {
 			return true
 		}
 	}
-	for _, t := range state.Triggers {
+	for _, t := range state.triggers {
 		if t.TriggerType == TriggerEndOfTurn {
 			return true
 		}
@@ -469,12 +469,12 @@ func hasEndOfTurnFire(state *TurnState) bool {
 //   - Aura entries respect OncePerTurn / FiredThisTurn semantics; the handler owns
 //     destruction via s.DestroyAura.
 //   - Trigger entries are one-shot; the sim removes each fired entry afterward.
-//     Snapshotting len(state.Triggers) before iterating keeps a handler that calls
+//     Snapshotting len(state.triggers) before iterating keeps a handler that calls
 //     AddTrigger from firing its newcomer on the same pass — newcomers stay queued for
 //     the next matching event.
 func fireEndOfTurn(state *TurnState) {
-	for i := 0; i < len(state.Auras); {
-		a := &state.Auras[i]
+	for i := 0; i < len(state.auras); {
+		a := &state.auras[i]
 		if a.TriggerType != TriggerEndOfTurn || (a.OncePerTurn && a.FiredThisTurn) {
 			i++
 			continue
@@ -484,47 +484,47 @@ func fireEndOfTurn(state *TurnState) {
 		a.Handler(state, state.logger, &a.Trigger, a)
 		state.currentAuraIdx = -1
 		if !state.currentAuraDestroyed {
-			state.Auras[i].FiredThisTurn = true
+			state.auras[i].FiredThisTurn = true
 			i++
 		}
 	}
-	n := len(state.Triggers)
+	n := len(state.triggers)
 	for i := 0; i < n; i++ {
-		tr := state.Triggers[i]
+		tr := state.triggers[i]
 		if tr.TriggerType != TriggerEndOfTurn {
 			continue
 		}
 		tr.Handler(state, state.logger, &tr, nil)
 	}
-	kept := state.Triggers[:0]
-	for i, tr := range state.Triggers {
+	kept := state.triggers[:0]
+	for i, tr := range state.triggers {
 		if i < n && tr.TriggerType == TriggerEndOfTurn {
 			continue
 		}
 		kept = append(kept, tr)
 	}
-	state.Triggers = kept
+	state.triggers = kept
 }
 
 // fireAttackAuras is the TriggerAttack counterpart to fireAttackActionAuras: walks
-// state.Auras when ANY attack resolves (attack action OR weapon swing) and invokes every
+// state.auras when ANY attack resolves (attack action OR weapon swing) and invokes every
 // TriggerAttack entry. The runechant token aura uses this trigger. Same cursor / splice
 // semantics as fireAttackActionAuras.
 func fireAttackAuras(state *TurnState, triggeringCard Card) {
-	for i := 0; i < len(state.Auras); {
-		t := &state.Auras[i]
+	for i := 0; i < len(state.auras); {
+		t := &state.auras[i]
 		if t.TriggerType != TriggerAttack || (t.OncePerTurn && t.FiredThisTurn) {
 			i++
 			continue
 		}
-		state.TriggeringCard = triggeringCard
+		state.triggeringCard = triggeringCard
 		state.currentAuraIdx = i
 		state.currentAuraDestroyed = false
 		t.Handler(state, state.logger, &t.Trigger, t)
 		state.currentAuraIdx = -1
-		state.TriggeringCard = nil
+		state.triggeringCard = nil
 		if !state.currentAuraDestroyed {
-			state.Auras[i].FiredThisTurn = true
+			state.auras[i].FiredThisTurn = true
 			i++
 		}
 	}
@@ -559,10 +559,10 @@ func (ctx *sequenceContext) resetStateForPermutation() {
 	s.graveyard = append(bufs.graveBacking[:0], ctx.priorGraveyard...)
 	s.graveyard = append(s.graveyard, ctx.defenders...)
 	s.banished = append(bufs.banishBacking[:0], ctx.priorBanish...)
-	s.CardBanished = false
-	s.ActionPoints = 1
-	s.ArcaneDamageDealt = false
-	s.OpponentMarked = ctx.priorOpponentMarked
+	s.cardBanished = false
+	s.actionPoints = 1
+	s.arcaneDamageDealt = false
+	s.opponentMarked = ctx.priorOpponentMarked
 	// Seed from defenderAuras when defendersDamage ran for this leaf (it already
 	// includes priorAuras consolidated with DR-created auras); fall back to priorAuras
 	// otherwise.
@@ -570,14 +570,14 @@ func (ctx *sequenceContext) resetStateForPermutation() {
 	if len(ctx.defenderAuras) > 0 {
 		auraSeed = ctx.defenderAuras
 	}
-	s.Auras = append(bufs.auraTriggersBacking[:0], auraSeed...)
+	s.auras = append(bufs.auraTriggersBacking[:0], auraSeed...)
 	// Triggers are one-shot and don't carry across permutations — reset to empty so a
 	// prior permutation's Triggers don't leak.
-	s.Triggers = bufs.triggersBacking[:0]
+	s.triggers = bufs.triggersBacking[:0]
 	s.Items = append(bufs.itemsBacking[:0], ctx.priorItems...)
 	s.CardsDrawn = 0
 	s.currentAuraIdx = -1
-	s.Value = 0
+	s.value = 0
 	// Bind the logger to the per-permutation backing buffer when recording, leaving
 	// s.logger nil during the find-best pass so every Log helper short-circuits at
 	// the call site. ctx.activeLogger encapsulates the skip / record decision.
@@ -587,17 +587,17 @@ func (ctx *sequenceContext) resetStateForPermutation() {
 	} else {
 		s.logger = nil
 	}
-	s.CardsPlayed = bufs.cardsPlayedBacking[:0]
-	s.AuraCreated = false
-	s.CardsRemaining = nil
-	s.Pitched = ctx.pitched
-	s.Overpower = false
-	s.NonAttackActionPlayed = false
-	s.IncomingDamage = ctx.matchup.IncomingDamage
-	s.ArcaneIncomingDamage = ctx.matchup.ArcaneIncomingDamage
-	s.BlockTotal = ctx.blockTotal
+	s.cardsPlayed = bufs.cardsPlayedBacking[:0]
+	s.auraCreated = false
+	s.cardsRemaining = nil
+	s.pitched = ctx.pitched
+	s.overpower = false
+	s.nonAttackActionPlayed = false
+	s.incomingDamage = ctx.matchup.IncomingDamage
+	s.arcaneIncomingDamage = ctx.matchup.ArcaneIncomingDamage
+	s.blockTotal = ctx.blockTotal
 	s.attackReactionTarget = nil
-	s.TriggeringCard = nil
+	s.triggeringCard = nil
 	// Permutation seed starts cacheable; the first card-driven deck / graveyard read
 	// in this permutation flips it to false. Set explicitly because zero-value is false.
 	s.cacheable = true
@@ -631,7 +631,7 @@ func (ctx *sequenceContext) bestSequence(attackers []Card) (int, int, bool) {
 			fireEndOfTurn(st)
 		}
 		ctx.carryWinner.SnapshotFromTurn(st)
-		return 0, pendingFutureValue(st.Auras, st.Items), true
+		return 0, pendingFutureValue(st.auras, st.Items), true
 	}
 	pcBuf := ctx.bufs.pcBuf[:n]
 	permMeta := ctx.bufs.permMeta[:n]
@@ -832,10 +832,10 @@ func (ctx *sequenceContext) playSequence(order []Card) (damage int, futureValue 
 // which land directly on pc.PitchedToPlay. End-of-chain validity: pool.idx must equal
 // pool.n — a pitched card held back without funding any cost rejects the permutation.
 //
-// Damage flows through state.Value: the dispatcher records the chain step's
+// Damage flows through state.value: the dispatcher records the chain step's
 // Play+BonusAttack contribution via state.AddLogEntry; pre-trigger handlers (hero, aura)
 // credit themselves through AddPreTriggerLogEntry, post-trigger handlers (OnHit, AR
-// buffs) through AddPostTriggerLogEntry. The returned damage is just state.Value at end
+// buffs) through AddPostTriggerLogEntry. The returned damage is just state.value at end
 // of chain.
 func (ctx *sequenceContext) playSequenceWithMeta(n int) (damage int, futureValue int, residualBudget int, legal bool) {
 	pcBuf := ctx.bufs.pcBuf
@@ -850,7 +850,7 @@ func (ctx *sequenceContext) playSequenceWithMeta(n int) (damage int, futureValue
 	}
 	played := ptrBuf[:n]
 	// Per-permutation reset: full-state rewrite. Hand and Deck are deep-copied so cards can
-	// mutate them freely without leaking to the next permutation. state.Value resets to 0.
+	// mutate them freely without leaking to the next permutation. state.value resets to 0.
 	ctx.resetStateForPermutation()
 	state := ctx.bufs.state
 	// Seed state.hand with the upcoming chain attackers so each chain step's Play sees an
@@ -892,14 +892,14 @@ func (ctx *sequenceContext) playSequenceWithMeta(n int) (damage int, futureValue
 			// Drain matching TriggerHit Triggers — each rider's TypeFilter narrows the
 			// qualifying hits (e.g. "attack action card" vs broader "attack" wording).
 			// Triggers that don't match stay queued for a later qualifying hit. The
-			// firing handler reads state.TriggeringCard for attack identity.
-			if len(state.Triggers) > 0 {
+			// firing handler reads state.triggeringCard for attack identity.
+			if len(state.triggers) > 0 {
 				types := activeAttack.Card.Types()
-				prevTriggering := state.TriggeringCard
-				state.TriggeringCard = activeAttack.Card
-				kept := state.Triggers[:0]
-				for i := range state.Triggers {
-					t := state.Triggers[i]
+				prevTriggering := state.triggeringCard
+				state.triggeringCard = activeAttack.Card
+				kept := state.triggers[:0]
+				for i := range state.triggers {
+					t := state.triggers[i]
 					if t.TriggerType != TriggerHit ||
 						(t.TypeFilter != nil && !t.TypeFilter(types)) {
 						kept = append(kept, t)
@@ -907,8 +907,8 @@ func (ctx *sequenceContext) playSequenceWithMeta(n int) (damage int, futureValue
 					}
 					t.Handler(state, state.logger, &t, nil)
 				}
-				state.Triggers = kept
-				state.TriggeringCard = prevTriggering
+				state.triggers = kept
+				state.triggeringCard = prevTriggering
 			}
 		}
 		activeAttack = nil
@@ -919,10 +919,10 @@ func (ctx *sequenceContext) playSequenceWithMeta(n int) (damage int, futureValue
 		// Reactions) cost 0. A paying card resolving with no AP available rejects the
 		// permutation. Go again and AP-grant effects restock the pool for later steps.
 		if !m.isFreeChainStep {
-			if state.ActionPoints <= 0 {
+			if state.actionPoints <= 0 {
 				return 0, 0, 0, false
 			}
-			state.ActionPoints--
+			state.actionPoints--
 		}
 		// Remove the playing card from state.hand before resolving — it's leaving the hand
 		// to enter the chain. Linear search by interface equality works because every card
@@ -972,11 +972,11 @@ func (ctx *sequenceContext) playSequenceWithMeta(n int) (damage int, futureValue
 			state.attackReactionTarget = activeAttack
 			ResolveChainStep(state, state.logger, pc)
 			state.attackReactionTarget = nil
-			state.CardsPlayed = append(state.CardsPlayed, pc.Card)
+			state.cardsPlayed = append(state.cardsPlayed, pc.Card)
 			state.graveyard = append(state.graveyard, pc.Card)
 			// Go again is not printed on ARs but honour the flag if granted.
 			if pc.EffectiveGoAgain() {
-				state.ActionPoints++
+				state.actionPoints++
 			}
 			continue
 		}
@@ -992,7 +992,7 @@ func (ctx *sequenceContext) playSequenceWithMeta(n int) (damage int, futureValue
 			}
 		}
 
-		state.CardsRemaining = played[i+1:]
+		state.cardsRemaining = played[i+1:]
 
 		// Hero ability fires BEFORE the card's own Play so "aura created this turn" checks
 		// inside the card's Play see the runechant (or other aura) the hero just made.
@@ -1012,7 +1012,7 @@ func (ctx *sequenceContext) playSequenceWithMeta(n int) (damage int, futureValue
 			// Clear after Play so any "if defending hero is marked" rider on this card
 			// already read the pre-clear flag. OnHit handlers fire later via
 			// finalizeActiveAttack, after this clear, so on-hit Mark riders survive.
-			state.OpponentMarked = false
+			state.opponentMarked = false
 		}
 		if m.isAttackAction {
 			fireAttackActionAuras(state, pc.Card)
@@ -1020,9 +1020,9 @@ func (ctx *sequenceContext) playSequenceWithMeta(n int) (damage int, futureValue
 		if m.isAttack {
 			activeAttack = pc
 		}
-		state.CardsPlayed = append(state.CardsPlayed, pc.Card)
+		state.cardsPlayed = append(state.cardsPlayed, pc.Card)
 		if m.types.IsNonAttackAction() {
-			state.NonAttackActionPlayed = true
+			state.nonAttackActionPlayed = true
 		}
 		// Weapons and persistent card types (Auras, Items) stay in their zone when they
 		// resolve; any destroy event that should send them to the graveyard is a separate
@@ -1039,7 +1039,7 @@ func (ctx *sequenceContext) playSequenceWithMeta(n int) (damage int, futureValue
 		// printed Go again and mid-chain conditional grants — by the time we get here the
 		// card's Play has had a chance to flip GrantedGoAgain on itself.
 		if pc.EffectiveGoAgain() {
-			state.ActionPoints++
+			state.actionPoints++
 		}
 	}
 	// Flush any attack still pending OnHit at end of chain.
@@ -1057,5 +1057,5 @@ func (ctx *sequenceContext) playSequenceWithMeta(n int) (damage int, futureValue
 	if hasEndOfTurnFire(state) {
 		fireEndOfTurn(state)
 	}
-	return state.Value, pendingFutureValue(state.Auras, state.Items), pool.remaining, true
+	return state.value, pendingFutureValue(state.auras, state.Items), pool.remaining, true
 }

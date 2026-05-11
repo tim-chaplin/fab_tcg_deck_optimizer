@@ -10,7 +10,7 @@ import (
 func TestSutcliffesResearchNotes_EmptyDeck(t *testing.T) {
 	s := &sim.TurnState{}
 	sim.ResolveChainStep(s, s.Logger(), &sim.CardState{Card: SutcliffesResearchNotesRed{}})
-	if got := s.Value; got != 0 {
+	if got := s.Value(); got != 0 {
 		t.Errorf("Play() = %d, want 0 (empty deck reveals nothing)", got)
 	}
 }
@@ -23,7 +23,7 @@ func TestSutcliffesResearchNotes_CountsRunebladeAttackActions(t *testing.T) {
 	}
 	s := sim.NewTurnStateFromCards(deck, nil)
 	sim.ResolveChainStep(s, s.Logger(), &sim.CardState{Card: SutcliffesResearchNotesRed{}})
-	if got := s.Value; got != 2 {
+	if got := s.Value(); got != 2 {
 		t.Errorf("Red (reveal 3): Play() = %d, want 2 (2 of 3 are Runeblade attack actions)", got)
 	}
 	if s.Runechants() != 2 {
@@ -35,7 +35,7 @@ func TestSutcliffesResearchNotes_DeckShorterThanRevealCount(t *testing.T) {
 	deck := []sim.Card{testutils.RunebladeAttack{}}
 	s := sim.NewTurnStateFromCards(deck, nil)
 	sim.ResolveChainStep(s, s.Logger(), &sim.CardState{Card: SutcliffesResearchNotesRed{}})
-	if got := s.Value; got != 1 {
+	if got := s.Value(); got != 1 {
 		t.Errorf("Red (reveal 3, deck 1): Play() = %d, want 1 (only 1 card to reveal)", got)
 	}
 }
@@ -46,7 +46,7 @@ func TestSutcliffesResearchNotes_RunebladeNonAttackIgnored(t *testing.T) {
 	deck := []sim.Card{ReadTheRunesRed{}}
 	s := sim.NewTurnStateFromCards(deck, nil)
 	sim.ResolveChainStep(s, s.Logger(), &sim.CardState{Card: SutcliffesResearchNotesRed{}})
-	if got := s.Value; got != 0 {
+	if got := s.Value(); got != 0 {
 		t.Errorf("Play() = %d, want 0 (Runeblade non-attack card shouldn't count)", got)
 	}
 }
@@ -56,7 +56,7 @@ func TestSutcliffesResearchNotes_NonRunebladeAttackIgnored(t *testing.T) {
 	deck := []sim.Card{testutils.NonRunebladeAttack{}}
 	s := sim.NewTurnStateFromCards(deck, nil)
 	sim.ResolveChainStep(s, s.Logger(), &sim.CardState{Card: SutcliffesResearchNotesRed{}})
-	if got := s.Value; got != 0 {
+	if got := s.Value(); got != 0 {
 		t.Errorf("Play() = %d, want 0 (non-Runeblade attack shouldn't count)", got)
 	}
 }
@@ -78,7 +78,7 @@ func TestSutcliffesResearchNotes_VariantRevealCounts(t *testing.T) {
 	for _, tc := range cases {
 		s := sim.NewTurnStateFromCards(deck, nil)
 		sim.ResolveChainStep(s, s.Logger(), &sim.CardState{Card: tc.c})
-		if got := s.Value; got != tc.want {
+		if got := s.Value(); got != tc.want {
 			t.Errorf("%s: Play() = %d, want %d", tc.c.Name(), got, tc.want)
 		}
 	}

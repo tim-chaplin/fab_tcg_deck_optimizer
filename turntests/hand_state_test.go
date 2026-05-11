@@ -111,7 +111,7 @@ func TestHandState_DemolitionCrewSeesUncommittedPitchInHand(t *testing.T) {
 		cards.DragDownYellow{},
 		notimpl.BrandishRed{},
 	}
-	if got := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, sim.TurnState{Arsenal: cards.FlyingHighRed{}}, hand).Value; got != 10 {
+	if got := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, sim.NewTurnStateFromSpec(sim.TurnStateSpec{Arsenal: cards.FlyingHighRed{}}), hand).Value; got != 10 {
 		t.Fatalf("Value = %d, want 10 (FH 0 + DC 7 + Brandish 3 — DC reveal sees pitched Toughen Up)", got)
 	}
 }

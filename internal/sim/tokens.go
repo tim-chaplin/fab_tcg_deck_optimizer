@@ -62,7 +62,7 @@ func tokenDisplayName(t TokenType) string {
 // credited at creation time in CreateRunechants — this handler is pure state cleanup.
 func runechantAuraHandler(s *TurnState, _ Logger, _ *Trigger, a *Aura) {
 	if LikelyDamageHits(a.Count, false) {
-		s.ArcaneDamageDealt = true
+		s.arcaneDamageDealt = true
 	}
 	s.DestroyAura(a, false)
 }

@@ -13,7 +13,7 @@ import (
 )
 
 func meatAndGreetPlay(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
-	if s.ArcaneDamageDealt {
+	if s.ArcaneDamageDealt() {
 		self.GrantedGoAgain = true
 	}
 	self.RegisterOnHit(meatAndGreetOnHit)

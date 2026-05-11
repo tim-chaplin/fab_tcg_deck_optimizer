@@ -14,10 +14,10 @@ func TestEnchantingMelody_SetsAuraCreated(t *testing.T) {
 	for _, c := range cases {
 		s := sim.TurnState{}
 		sim.ResolveChainStep(&s, s.Logger(), &sim.CardState{Card: c})
-		if got := s.Value; got != 0 {
+		if got := s.Value(); got != 0 {
 			t.Errorf("%s: Play() = %d, want 0", c.Name(), got)
 		}
-		if !s.AuraCreated {
+		if !s.AuraCreated() {
 			t.Errorf("%s: AuraCreated = false, want true", c.Name())
 		}
 	}

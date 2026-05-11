@@ -46,7 +46,7 @@ func razorReflexPlay(s *sim.TurnState, l sim.Logger, self *sim.CardState, n int)
 	}
 	sim.GrantAttackReactionBuff(s, l, self, n)
 	if self.Mode == 1 && sim.LikelyToHit(target) {
-		s.ActionPoints++
+		s.AddActionPoints(1)
 	}
 }
 

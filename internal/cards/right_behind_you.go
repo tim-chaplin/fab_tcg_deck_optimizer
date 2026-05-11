@@ -4,7 +4,7 @@
 // Text: "When this defends together with another card from hand, this gets +1{d} and you may look
 // at the top card of your deck. You may put it on the bottom."
 //
-// Block scans s.Defenders for a second plain blocker; if at least one is present (DRs
+// Block scans s.Defenders() for a second plain blocker; if at least one is present (DRs
 // alongside don't count), the +1{d} fires by bumping self.BonusDefense. The deck-top
 // peek/bottom rider is dropped — the optimizer would never bottom a card it'd rather
 // draw next.
@@ -19,7 +19,7 @@ import (
 // share the defenders slot. Short-circuits on the second non-DR sighting.
 func rightBehindYouBlock(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	plainCount := 0
-	for _, d := range s.Defenders {
+	for _, d := range s.Defenders() {
 		if d.Types().IsDefenseReaction() {
 			continue
 		}

@@ -23,7 +23,7 @@ func TestSunKiss_SoloIsHealOnly(t *testing.T) {
 		s := sim.NewTurnStateFromCards([]sim.Card{testutils.GenericAttack(0, 0)}, nil)
 		self := &sim.CardState{Card: tc.c}
 		sim.ResolveChainStep(s, s.Logger(), self)
-		got := s.Value
+		got := s.Value()
 		if got != tc.heal {
 			t.Errorf("%s: solo Play() = %d, want %d", tc.c.Name(), got, tc.heal)
 		}
@@ -50,10 +50,10 @@ func TestSunKiss_SynergyFiresOnPriorMoonWish(t *testing.T) {
 			{SunKissBlue{}, 1},
 		} {
 			s := sim.NewTurnStateFromCards([]sim.Card{testutils.GenericAttack(0, 0)}, nil)
-			s.CardsPlayed = []sim.Card{mw}
+			s.SetCardsPlayed([]sim.Card{mw})
 			self := &sim.CardState{Card: sk.c}
 			sim.ResolveChainStep(s, s.Logger(), self)
-			got := s.Value
+			got := s.Value()
 			if got != sk.heal {
 				t.Errorf("%s after %s: Play() = %d, want %d (synergy still credits printed heal)",
 					sk.c.Name(), mw.Name(), got, sk.heal)
@@ -73,10 +73,10 @@ func TestSunKiss_SynergyFiresOnPriorMoonWish(t *testing.T) {
 func TestSunKiss_SynergyDoesNotFireOnUnrelatedAttacks(t *testing.T) {
 	notMoonWish := testutils.GenericAttackPitch(0, 0, 1)
 	s := sim.NewTurnStateFromCards([]sim.Card{testutils.GenericAttack(0, 0)}, nil)
-	s.CardsPlayed = []sim.Card{notMoonWish}
+	s.SetCardsPlayed([]sim.Card{notMoonWish})
 	self := &sim.CardState{Card: SunKissRed{}}
 	sim.ResolveChainStep(s, s.Logger(), self)
-	got := s.Value
+	got := s.Value()
 	if got != 3 {
 		t.Errorf("Play() = %d, want 3 (printed heal only)", got)
 	}
@@ -92,13 +92,13 @@ func TestSunKiss_SynergyDoesNotFireOnUnrelatedAttacks(t *testing.T) {
 // resolves, the synergy still grants go-again but the draw silently no-ops (DrawOne contract).
 // Guards against a future regression that panics on Deck[0] read with no top.
 func TestSunKiss_SynergyHandlesEmptyDeck(t *testing.T) {
-	s := &sim.TurnState{
+	s := sim.NewTurnStatePtr(sim.TurnStateSpec{
 		CardsPlayed: []sim.Card{MoonWishRed{}},
 		// Deck intentionally nil.
-	}
+	})
 	self := &sim.CardState{Card: SunKissRed{}}
 	sim.ResolveChainStep(s, s.Logger(), self)
-	got := s.Value
+	got := s.Value()
 	if got != 3 {
 		t.Errorf("Play() = %d, want 3", got)
 	}

@@ -11,11 +11,6 @@ import (
 
 // --- Aura helpers ---
 
-// SetAuraCreated flips s.AuraCreated so cards that read it see the aura entering play.
-func SetAuraCreated(s *sim.TurnState) {
-	s.AuraCreated = true
-}
-
 // banishAuraFromGraveyard banishes the first aura-typed card in the graveyard, flips
 // ArcaneDamageDealt, and returns 1. Returns 0 when no aura is found. Callers that also
 // destroy the source card (e.g. Sigil of Silphidae's leave trigger) should run this scan
@@ -31,7 +26,7 @@ func banishAuraFromGraveyard(s *sim.TurnState) int {
 		return 0
 	}
 	if sim.LikelyDamageHits(1, false) {
-		s.ArcaneDamageDealt = true
+		s.SetArcaneDamageDealt(true)
 	}
 	return 1
 }
@@ -64,7 +59,7 @@ func fragileAuraValue(s *sim.TurnState, n int, attackActionOnly bool) int {
 	if popsThisTurn(s, attackActionOnly) {
 		return n
 	}
-	if s.BlockTotal >= s.IncomingDamage {
+	if s.BlockTotal() >= s.IncomingDamage() {
 		return n
 	}
 	return 0
@@ -82,7 +77,7 @@ func fragileAuraValue(s *sim.TurnState, n int, attackActionOnly bool) int {
 // (or granted) Dominate clears the 5+ bar.
 func popsThisTurn(s *sim.TurnState, attackActionOnly bool) bool {
 	firstAttacker := true
-	for _, pc := range s.CardsRemaining {
+	for _, pc := range s.CardsRemaining() {
 		if !qualifiesAsAttacker(pc.Card, attackActionOnly) {
 			continue
 		}
@@ -110,7 +105,7 @@ func qualifiesAsAttacker(c sim.Card, attackActionOnly bool) bool {
 
 // markOpponentOnHit fires the printed "When this hits a hero, mark them" rider.
 func markOpponentOnHit(s *sim.TurnState, l sim.Logger, self *sim.CardState, _ *sim.OnHitHandler) {
-	s.OpponentMarked = true
+	s.SetOpponentMarked(true)
 	l.AppendPostTrigger(self.Card.DisplayName(), "Marked the opposing hero", 0)
 }
 
@@ -125,7 +120,7 @@ func markOpponentOnHit(s *sim.TurnState, l sim.Logger, self *sim.CardState, _ *s
 func GrantNextCardBonusAttack(
 	s *sim.TurnState, n int, match func(*sim.TurnState, *sim.CardState) bool,
 ) {
-	for _, pc := range s.CardsRemaining {
+	for _, pc := range s.CardsRemaining() {
 		if match(s, pc) {
 			pc.BonusAttack += n
 			return

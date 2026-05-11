@@ -12,12 +12,12 @@ import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 // after firing — are stored on TurnState.Triggers and added via AddTrigger.
 //
 // Handlers receive (s, t, a): for aura fires a is the firing aura, for standalone
-// trigger fires a is nil. Handlers that mutate s.Auras (e.g. via CreateRunechants, which
+// trigger fires a is nil. Handlers that mutate s.auras (e.g. via CreateRunechants, which
 // appends a Runechant aura) MUST read state through a BEFORE the mutating call — a slice
 // realloc invalidates the parameter.
 //
 // Handlers MUST NOT call AddTrigger from within a fire walk: the firing helper
-// snapshots len(s.Triggers) before iterating, so a trigger added during fire stays
+// snapshots len(s.triggers) before iterating, so a trigger added during fire stays
 // queued for the next matching event but isn't seen on the current pass.
 type Trigger struct {
 	// Source is the originating card, surfaced in the trace via Source.DisplayName().

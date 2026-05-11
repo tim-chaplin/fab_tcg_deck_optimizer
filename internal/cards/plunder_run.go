@@ -18,7 +18,7 @@ import (
 
 func plunderRunOnHitDraw(s *sim.TurnState, l sim.Logger, t *sim.Trigger, _ *sim.Aura) {
 	s.DrawOne()
-	l.AppendPostTriggerf(s.TriggeringCard.DisplayName(), 0,
+	l.AppendPostTriggerf(s.TriggeringCard().DisplayName(), 0,
 		"%s drew a card on attack-action hit", t.Source.DisplayName())
 }
 
