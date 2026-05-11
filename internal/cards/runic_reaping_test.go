@@ -10,7 +10,7 @@ import (
 // Tests that Runic Reaping with no following attack-action target lands no riders.
 func TestRunicReaping_NoNextAttackReturnsZero(t *testing.T) {
 	var s sim.TurnState
-	(RunicReapingRed{}).Play(&s, &sim.CardState{
+	(RunicReapingRed{}).Play(&s, s.Logger(), &sim.CardState{
 		Card:          RunicReapingRed{},
 		PitchedToPlay: []sim.Card{testutils.AttackWithPower{Power: 4}},
 	})
@@ -26,7 +26,7 @@ func TestRunicReaping_NoNextAttackReturnsZero(t *testing.T) {
 func TestRunicReaping_WeaponNextDoesNotQualify(t *testing.T) {
 	target := &sim.CardState{Card: testutils.RunebladeWeapon{}}
 	s := sim.TurnState{CardsRemaining: []*sim.CardState{target}}
-	(RunicReapingRed{}).Play(&s, &sim.CardState{Card: RunicReapingRed{}})
+	sim.ResolveChainStep(&s, s.Logger(), &sim.CardState{Card: RunicReapingRed{}})
 	if got := s.Value; got != 0 {
 		t.Fatalf("Play() = %d, want 0", got)
 	}
@@ -43,7 +43,7 @@ func TestRunicReaping_WeaponNextDoesNotQualify(t *testing.T) {
 func TestRunicReaping_RegistersTriggerAndGrantsPitchedAttackBonus(t *testing.T) {
 	target := &sim.CardState{Card: testutils.AttackWithPower{Power: 3}}
 	s := sim.TurnState{CardsRemaining: []*sim.CardState{target}}
-	(RunicReapingRed{}).Play(&s, &sim.CardState{
+	(RunicReapingRed{}).Play(&s, s.Logger(), &sim.CardState{
 		Card:          RunicReapingRed{},
 		PitchedToPlay: []sim.Card{testutils.RunebladeAttack{}},
 	})
@@ -63,7 +63,7 @@ func TestRunicReaping_RegistersTriggerAndGrantsPitchedAttackBonus(t *testing.T) 
 func TestRunicReaping_NoPitchedAttackSkipsBonusButRegistersTrigger(t *testing.T) {
 	target := &sim.CardState{Card: testutils.AttackWithPower{Power: 4}}
 	s := sim.TurnState{CardsRemaining: []*sim.CardState{target}}
-	(RunicReapingRed{}).Play(&s, &sim.CardState{
+	(RunicReapingRed{}).Play(&s, s.Logger(), &sim.CardState{
 		Card:          RunicReapingRed{},
 		PitchedToPlay: []sim.Card{testutils.NonAttack{}},
 	})

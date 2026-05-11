@@ -11,4 +11,5 @@ import (
 
 // not implemented: self-destroys + wipes all arsenals on a 2-damage hit
 
-func (TalismanOfWarfareYellow) Play(s *sim.TurnState, self *sim.CardState) { s.Log(self, 0) }
+func (TalismanOfWarfareYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+}

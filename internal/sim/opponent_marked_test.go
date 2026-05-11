@@ -9,7 +9,7 @@ func TestRunechantAuraHandler_LeavesOpponentMarked(t *testing.T) {
 	aura := NewRunechantAura(1)
 	s.Auras = append(s.Auras, aura)
 	s.SetCurrentAuraIdxForTesting(0)
-	runechantAuraHandler(s, &s.Auras[0].Trigger, &s.Auras[0])
+	runechantAuraHandler(s, s.logger, &s.Auras[0].Trigger, &s.Auras[0])
 	if !s.OpponentMarked {
 		t.Error("OpponentMarked = false after runechant pop, want true (arcane doesn't clear mark)")
 	}

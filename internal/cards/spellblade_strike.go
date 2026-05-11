@@ -8,23 +8,17 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
 
-func (SpellbladeStrikeRed) Play(s *sim.TurnState, self *sim.CardState) {
-	n := self.DealEffectiveAttack(s)
-	s.Log(self, n)
+func (SpellbladeStrikeRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	s.CreateRunechants(1)
-	s.LogRider(self, 1, "Created a runechant")
+	l.AppendPostTrigger(self.Card.DisplayName(), "Created a runechant", 1)
 }
 
-func (SpellbladeStrikeYellow) Play(s *sim.TurnState, self *sim.CardState) {
-	n := self.DealEffectiveAttack(s)
-	s.Log(self, n)
+func (SpellbladeStrikeYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	s.CreateRunechants(1)
-	s.LogRider(self, 1, "Created a runechant")
+	l.AppendPostTrigger(self.Card.DisplayName(), "Created a runechant", 1)
 }
 
-func (SpellbladeStrikeBlue) Play(s *sim.TurnState, self *sim.CardState) {
-	n := self.DealEffectiveAttack(s)
-	s.Log(self, n)
+func (SpellbladeStrikeBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	s.CreateRunechants(1)
-	s.LogRider(self, 1, "Created a runechant")
+	l.AppendPostTrigger(self.Card.DisplayName(), "Created a runechant", 1)
 }

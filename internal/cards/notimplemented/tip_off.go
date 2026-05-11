@@ -11,21 +11,15 @@ import (
 
 // not implemented: instant discard-to-mark activation
 
-func (c TipOffRed) Play(s *sim.TurnState, self *sim.CardState) {
-	n := self.DealEffectiveAttack(s)
-	s.Log(self, n)
+func (c TipOffRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 }
 
 // not implemented: instant discard-to-mark activation
 
-func (c TipOffYellow) Play(s *sim.TurnState, self *sim.CardState) {
-	n := self.DealEffectiveAttack(s)
-	s.Log(self, n)
+func (c TipOffYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 }
 
 // not implemented: instant discard-to-mark activation
 
-func (c TipOffBlue) Play(s *sim.TurnState, self *sim.CardState) {
-	n := self.DealEffectiveAttack(s)
-	s.Log(self, n)
+func (c TipOffBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 }

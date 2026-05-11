@@ -13,17 +13,11 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
 
-func (LifeOfThePartyRed) Play(s *sim.TurnState, self *sim.CardState) {
-	n := self.DealEffectiveAttack(s)
-	s.Log(self, n)
+func (LifeOfThePartyRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 }
 
-func (LifeOfThePartyYellow) Play(s *sim.TurnState, self *sim.CardState) {
-	n := self.DealEffectiveAttack(s)
-	s.Log(self, n)
+func (LifeOfThePartyYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 }
 
-func (LifeOfThePartyBlue) Play(s *sim.TurnState, self *sim.CardState) {
-	n := self.DealEffectiveAttack(s)
-	s.Log(self, n)
+func (LifeOfThePartyBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 }

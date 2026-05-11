@@ -24,7 +24,7 @@ func mauvrionTargetMatches(target *sim.CardState) bool {
 
 // mauvrionSkiesPlay grants the next matching attack go-again and an on-hit n-runechant
 // rider.
-func mauvrionSkiesPlay(s *sim.TurnState, selfState *sim.CardState, source sim.Card, n int) {
+func mauvrionSkiesPlay(s *sim.TurnState, l sim.Logger, selfState *sim.CardState, source sim.Card, n int) {
 	for _, pc := range s.CardsRemaining {
 		if mauvrionTargetMatches(pc) {
 			pc.GrantedGoAgain = true
@@ -38,16 +38,15 @@ func mauvrionSkiesPlay(s *sim.TurnState, selfState *sim.CardState, source sim.Ca
 			break
 		}
 	}
-	s.Log(selfState, 0)
 }
 
 // onHitCreateRunechants fires the on-hit "create N runechants" rider attached to the
 // targeted attack by Mauvrion Skies / Runic Reaping. Reads N and the precomputed log
 // line off the handler so registration stays alloc-free; self is the targeted attack
 // (whose name credits the trigger line).
-func onHitCreateRunechants(s *sim.TurnState, self *sim.CardState, h *sim.OnHitHandler) {
+func onHitCreateRunechants(s *sim.TurnState, l sim.Logger, self *sim.CardState, h *sim.OnHitHandler) {
 	s.CreateRunechants(h.N)
-	s.LogPostTrigger(self.Card.DisplayName(), h.LogText, h.N)
+	l.AppendPostTrigger(self.Card.DisplayName(), h.LogText, h.N)
 }
 
 // onHitRunechantText is the precomputed rider line for each Mauvrion Skies / Runic Reaping
@@ -70,14 +69,14 @@ var onHitRunechantText = func() map[ids.CardID]string {
 	return out
 }()
 
-func (c MauvrionSkiesRed) Play(s *sim.TurnState, self *sim.CardState) {
-	mauvrionSkiesPlay(s, self, c, 3)
+func (c MauvrionSkiesRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+	mauvrionSkiesPlay(s, l, self, c, 3)
 }
 
-func (c MauvrionSkiesYellow) Play(s *sim.TurnState, self *sim.CardState) {
-	mauvrionSkiesPlay(s, self, c, 2)
+func (c MauvrionSkiesYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+	mauvrionSkiesPlay(s, l, self, c, 2)
 }
 
-func (c MauvrionSkiesBlue) Play(s *sim.TurnState, self *sim.CardState) {
-	mauvrionSkiesPlay(s, self, c, 1)
+func (c MauvrionSkiesBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+	mauvrionSkiesPlay(s, l, self, c, 1)
 }

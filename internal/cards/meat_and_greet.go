@@ -12,30 +12,28 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
 
-func meatAndGreetPlay(s *sim.TurnState, self *sim.CardState) {
+func meatAndGreetPlay(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	if s.ArcaneDamageDealt {
 		self.GrantedGoAgain = true
 	}
-	n := self.DealEffectiveAttack(s)
-	s.Log(self, n)
 	self.RegisterOnHit(meatAndGreetOnHit)
 }
 
 // meatAndGreetOnHit fires the printed "When this hits, create a Runechant token" rider.
 // Top-level so registration stays alloc-free.
-func meatAndGreetOnHit(s *sim.TurnState, self *sim.CardState, _ *sim.OnHitHandler) {
+func meatAndGreetOnHit(s *sim.TurnState, l sim.Logger, self *sim.CardState, _ *sim.OnHitHandler) {
 	s.CreateRunechants(1)
-	s.LogRider(self, 1, "On-hit created a runechant")
+	l.AppendPostTrigger(self.Card.DisplayName(), "On-hit created a runechant", 1)
 }
 
-func (MeatAndGreetRed) Play(s *sim.TurnState, self *sim.CardState) {
-	meatAndGreetPlay(s, self)
+func (MeatAndGreetRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+	meatAndGreetPlay(s, l, self)
 }
 
-func (MeatAndGreetYellow) Play(s *sim.TurnState, self *sim.CardState) {
-	meatAndGreetPlay(s, self)
+func (MeatAndGreetYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+	meatAndGreetPlay(s, l, self)
 }
 
-func (MeatAndGreetBlue) Play(s *sim.TurnState, self *sim.CardState) {
-	meatAndGreetPlay(s, self)
+func (MeatAndGreetBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+	meatAndGreetPlay(s, l, self)
 }

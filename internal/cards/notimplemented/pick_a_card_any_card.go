@@ -13,12 +13,13 @@ import (
 
 // not implemented: silver tokens, opponent hand inspection
 
-func (PickACardAnyCardRed) Play(s *sim.TurnState, self *sim.CardState) { s.Log(self, 0) }
+func (PickACardAnyCardRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {}
 
 // not implemented: silver tokens, opponent hand inspection
 
-func (PickACardAnyCardYellow) Play(s *sim.TurnState, self *sim.CardState) { s.Log(self, 0) }
+func (PickACardAnyCardYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+}
 
 // not implemented: silver tokens, opponent hand inspection
 
-func (PickACardAnyCardBlue) Play(s *sim.TurnState, self *sim.CardState) { s.Log(self, 0) }
+func (PickACardAnyCardBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {}

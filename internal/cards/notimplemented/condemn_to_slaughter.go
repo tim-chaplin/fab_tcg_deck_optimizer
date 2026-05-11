@@ -13,28 +13,22 @@ import (
 // not implemented: aura-trade rider and opponent-aura destruction clause; only same-turn
 // Runeblade-attack +N{p} is modelled
 
-func (CondemnToSlaughterRed) Play(s *sim.TurnState, self *sim.CardState) {
+func (CondemnToSlaughterRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	condemnToSlaughterApplySideEffect(s, 3)
-	n := self.DealEffectiveAttack(s)
-	s.Log(self, n)
 }
 
 // not implemented: aura-trade rider and opponent-aura destruction clause; only same-turn
 // Runeblade-attack +N{p} is modelled
 
-func (CondemnToSlaughterYellow) Play(s *sim.TurnState, self *sim.CardState) {
+func (CondemnToSlaughterYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	condemnToSlaughterApplySideEffect(s, 2)
-	n := self.DealEffectiveAttack(s)
-	s.Log(self, n)
 }
 
 // not implemented: aura-trade rider and opponent-aura destruction clause; only same-turn
 // Runeblade-attack +N{p} is modelled
 
-func (CondemnToSlaughterBlue) Play(s *sim.TurnState, self *sim.CardState) {
+func (CondemnToSlaughterBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	condemnToSlaughterApplySideEffect(s, 1)
-	n := self.DealEffectiveAttack(s)
-	s.Log(self, n)
 }
 
 // condemnToSlaughterApplySideEffect grants +n to the first scheduled Runeblade attack (attack

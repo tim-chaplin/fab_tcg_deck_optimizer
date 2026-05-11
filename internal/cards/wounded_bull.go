@@ -18,20 +18,14 @@ func woundedBullBonus() int {
 	return 0
 }
 
-func (WoundedBullRed) Play(s *sim.TurnState, self *sim.CardState) {
+func (WoundedBullRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	self.BonusAttack += woundedBullBonus()
-	n := self.DealEffectiveAttack(s)
-	s.Log(self, n)
 }
 
-func (WoundedBullYellow) Play(s *sim.TurnState, self *sim.CardState) {
+func (WoundedBullYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	self.BonusAttack += woundedBullBonus()
-	n := self.DealEffectiveAttack(s)
-	s.Log(self, n)
 }
 
-func (WoundedBullBlue) Play(s *sim.TurnState, self *sim.CardState) {
+func (WoundedBullBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	self.BonusAttack += woundedBullBonus()
-	n := self.DealEffectiveAttack(s)
-	s.Log(self, n)
 }

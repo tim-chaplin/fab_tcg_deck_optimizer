@@ -14,8 +14,8 @@ func TestSnatch_LikelyHitFiresDrawOne(t *testing.T) {
 	s := sim.NewTurnStateFromCards([]sim.Card{top}, nil)
 	c := SnatchRed{}
 	cs := &sim.CardState{Card: c}
-	c.Play(s, cs)
-	testutils.FireOnHitIfLikely(s, cs)
+	sim.ResolveChainStep(s, s.Logger(), cs)
+	testutils.FireOnHitIfLikely(s, s.Logger(), cs)
 	if got := s.Value; got != 4 {
 		t.Errorf("Red: Play() = %d, want 4", got)
 	}
@@ -39,7 +39,7 @@ func TestSnatch_BlockableSuppressesDraw(t *testing.T) {
 	for _, tc := range cases {
 		top := testutils.GenericAttack(0, 3)
 		s := sim.NewTurnStateFromCards([]sim.Card{top}, nil)
-		tc.c.Play(s, &sim.CardState{Card: tc.c})
+		sim.ResolveChainStep(s, s.Logger(), &sim.CardState{Card: tc.c})
 		if got := s.Value; got != tc.want {
 			t.Errorf("%s: Play() = %d, want %d (blockable, no draw)", tc.c.Name(), got, tc.want)
 		}

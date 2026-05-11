@@ -12,19 +12,8 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
 
-func surgingMilitiaPlay(s *sim.TurnState, self *sim.CardState) {
-	n := self.DealEffectiveAttack(s)
-	s.Log(self, n)
-}
+func (SurgingMilitiaRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {}
 
-func (SurgingMilitiaRed) Play(s *sim.TurnState, self *sim.CardState) {
-	surgingMilitiaPlay(s, self)
-}
+func (SurgingMilitiaYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {}
 
-func (SurgingMilitiaYellow) Play(s *sim.TurnState, self *sim.CardState) {
-	surgingMilitiaPlay(s, self)
-}
-
-func (SurgingMilitiaBlue) Play(s *sim.TurnState, self *sim.CardState) {
-	surgingMilitiaPlay(s, self)
-}
+func (SurgingMilitiaBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {}

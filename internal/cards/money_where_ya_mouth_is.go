@@ -12,12 +12,12 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
 
-func moneyWhereYaMouthIsWagerOnHit(s *sim.TurnState, target *sim.CardState, h *sim.OnHitHandler) {
+func moneyWhereYaMouthIsWagerOnHit(s *sim.TurnState, l sim.Logger, target *sim.CardState, h *sim.OnHitHandler) {
 	s.CreateGold(1)
-	s.LogPostTriggerf(target.Card.DisplayName(), 0, "%s won wager", h.Source.DisplayName())
+	l.AppendPostTriggerf(target.Card.DisplayName(), 0, "%s won wager", h.Source.DisplayName())
 }
 
-func moneyWhereYaMouthIsPlay(s *sim.TurnState, self *sim.CardState, source sim.Card, n int) {
+func moneyWhereYaMouthIsPlay(s *sim.TurnState, l sim.Logger, self *sim.CardState, source sim.Card, n int) {
 	GrantNextCardBonusAttack(s, n, IsAttack)
 	for _, pc := range s.CardsRemaining {
 		if pc.Card.Types().IsAttack() {
@@ -28,17 +28,16 @@ func moneyWhereYaMouthIsPlay(s *sim.TurnState, self *sim.CardState, source sim.C
 			break
 		}
 	}
-	s.Log(self, 0)
 }
 
-func (c MoneyWhereYaMouthIsRed) Play(s *sim.TurnState, self *sim.CardState) {
-	moneyWhereYaMouthIsPlay(s, self, c, 3)
+func (c MoneyWhereYaMouthIsRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+	moneyWhereYaMouthIsPlay(s, l, self, c, 3)
 }
 
-func (c MoneyWhereYaMouthIsYellow) Play(s *sim.TurnState, self *sim.CardState) {
-	moneyWhereYaMouthIsPlay(s, self, c, 2)
+func (c MoneyWhereYaMouthIsYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+	moneyWhereYaMouthIsPlay(s, l, self, c, 2)
 }
 
-func (c MoneyWhereYaMouthIsBlue) Play(s *sim.TurnState, self *sim.CardState) {
-	moneyWhereYaMouthIsPlay(s, self, c, 1)
+func (c MoneyWhereYaMouthIsBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+	moneyWhereYaMouthIsPlay(s, l, self, c, 1)
 }

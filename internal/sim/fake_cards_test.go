@@ -33,16 +33,16 @@ func (c FakeCard) WithPitch(p int) FakeCard          { c.pitch = p; return c }
 func (c FakeCard) WithDefense(d int) FakeCard        { c.defense = d; return c }
 func (c FakeCard) WithGoAgain() FakeCard             { c.goAgain = true; return c }
 
-func (c FakeCard) ID() ids.CardID            { return c.id }
-func (c FakeCard) Name() string              { return c.name }
-func (c FakeCard) DisplayName() string       { return c.name }
-func (FakeCard) Cost(*TurnState) int         { return 0 }
-func (c FakeCard) Pitch() int                { return c.pitch }
-func (c FakeCard) Attack() int               { return c.attack }
-func (c FakeCard) Defense() int              { return c.defense }
-func (c FakeCard) Types() card.TypeSet       { return c.types }
-func (c FakeCard) GoAgain() bool             { return c.goAgain }
-func (FakeCard) Play(*TurnState, *CardState) {}
+func (c FakeCard) ID() ids.CardID                    { return c.id }
+func (c FakeCard) Name() string                      { return c.name }
+func (c FakeCard) DisplayName() string               { return c.name }
+func (FakeCard) Cost(*TurnState) int                 { return 0 }
+func (c FakeCard) Pitch() int                        { return c.pitch }
+func (c FakeCard) Attack() int                       { return c.attack }
+func (c FakeCard) Defense() int                      { return c.defense }
+func (c FakeCard) Types() card.TypeSet               { return c.types }
+func (c FakeCard) GoAgain() bool                     { return c.goAgain }
+func (FakeCard) Play(*TurnState, Logger, *CardState) {}
 
 // FakeRedAttack is a fixed-stat-line attack: 1-cost, 1-pitch, 3-power, 1-defense, no
 // Go again. Mirrors testutils.RedAttack so tests that just need a "vanilla red attack"
@@ -59,8 +59,8 @@ func (FakeRedAttack) Defense() int        { return 1 }
 func (FakeRedAttack) Types() card.TypeSet {
 	return card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 }
-func (FakeRedAttack) GoAgain() bool               { return false }
-func (FakeRedAttack) Play(*TurnState, *CardState) {}
+func (FakeRedAttack) GoAgain() bool                       { return false }
+func (FakeRedAttack) Play(*TurnState, Logger, *CardState) {}
 
 // DominatingFakeCard embeds FakeCard and adds the Dominator marker — exercises the
 // printed-Dominate branch of EffectiveDominate / HasDominate.
@@ -76,14 +76,14 @@ type FakeHero struct {
 	OptStrategy func(cs []Card) (top, bottom []Card)
 }
 
-func (FakeHero) ID() ids.HeroID                    { return ids.InvalidHero }
-func (FakeHero) Name() string                      { return "FakeHero" }
-func (FakeHero) DisplayName() string               { return "FakeHero" }
-func (FakeHero) Health() int                       { return 20 }
-func (h FakeHero) Intelligence() int               { return h.Intel }
-func (FakeHero) Types() card.TypeSet               { return 0 }
-func (FakeHero) Class() card.CardType              { return 0 }
-func (FakeHero) OnCardPlayed(Card, *TurnState) int { return 0 }
+func (FakeHero) ID() ids.HeroID                            { return ids.InvalidHero }
+func (FakeHero) Name() string                              { return "FakeHero" }
+func (FakeHero) DisplayName() string                       { return "FakeHero" }
+func (FakeHero) Health() int                               { return 20 }
+func (h FakeHero) Intelligence() int                       { return h.Intel }
+func (FakeHero) Types() card.TypeSet                       { return 0 }
+func (FakeHero) Class() card.CardType                      { return 0 }
+func (FakeHero) OnCardPlayed(Card, *TurnState, Logger) int { return 0 }
 
 // Opt dispatches to OptStrategy when set; otherwise keeps every revealed card on top
 // of the deck in input order (no reshape).

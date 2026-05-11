@@ -16,33 +16,31 @@ func yintiYantiBonus(s *sim.TurnState) int {
 	return 0
 }
 
-func yintiYantiPlay(s *sim.TurnState, self *sim.CardState) {
+func yintiYantiPlay(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	self.BonusAttack += yintiYantiBonus(s)
-	n := self.DealEffectiveAttack(s)
-	s.Log(self, n)
 }
 
-func yintiYantiBlock(s *sim.TurnState, self *sim.CardState) {
+func yintiYantiBlock(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	self.BonusDefense += yintiYantiBonus(s)
 }
 
-func (YintiYantiRed) Play(s *sim.TurnState, self *sim.CardState) {
-	yintiYantiPlay(s, self)
+func (YintiYantiRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+	yintiYantiPlay(s, l, self)
 }
-func (YintiYantiRed) Block(s *sim.TurnState, self *sim.CardState) {
-	yintiYantiBlock(s, self)
-}
-
-func (YintiYantiYellow) Play(s *sim.TurnState, self *sim.CardState) {
-	yintiYantiPlay(s, self)
-}
-func (YintiYantiYellow) Block(s *sim.TurnState, self *sim.CardState) {
-	yintiYantiBlock(s, self)
+func (YintiYantiRed) Block(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+	yintiYantiBlock(s, l, self)
 }
 
-func (YintiYantiBlue) Play(s *sim.TurnState, self *sim.CardState) {
-	yintiYantiPlay(s, self)
+func (YintiYantiYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+	yintiYantiPlay(s, l, self)
 }
-func (YintiYantiBlue) Block(s *sim.TurnState, self *sim.CardState) {
-	yintiYantiBlock(s, self)
+func (YintiYantiYellow) Block(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+	yintiYantiBlock(s, l, self)
+}
+
+func (YintiYantiBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+	yintiYantiPlay(s, l, self)
+}
+func (YintiYantiBlue) Block(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+	yintiYantiBlock(s, l, self)
 }

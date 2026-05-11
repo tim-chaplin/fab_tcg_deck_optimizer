@@ -41,7 +41,5 @@ func (TalisharAbility) Attack() int             { return 4 }
 func (TalisharAbility) Defense() int            { return 0 }
 func (TalisharAbility) Types() card.TypeSet     { return talisharAbilityTypes }
 func (TalisharAbility) GoAgain() bool           { return false }
-func (TalisharAbility) Play(s *sim.TurnState, self *sim.CardState) {
-	n := self.DealEffectiveAttack(s)
-	s.Log(self, n)
+func (TalisharAbility) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 }

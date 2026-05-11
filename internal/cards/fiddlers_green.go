@@ -16,21 +16,19 @@ import (
 
 // fiddlersGreenPlay emits the chain step then writes the printed N{h} as a "Gained N
 // health (graveyard trigger)" sub-line under self. Health is valued 1-to-1 with damage.
-func fiddlersGreenPlay(s *sim.TurnState, self *sim.CardState, heal int) {
-	n := self.DealEffectiveDefense(s)
-	s.Log(self, n)
+func fiddlersGreenPlay(s *sim.TurnState, l sim.Logger, self *sim.CardState, heal int) {
 	s.AddValue(heal)
-	s.LogRiderf(self, heal, "Gained %d health (graveyard trigger)", heal)
+	l.AppendPostTriggerf(self.Card.DisplayName(), heal, "Gained %d health (graveyard trigger)", heal)
 }
 
-func (FiddlersGreenRed) Play(s *sim.TurnState, self *sim.CardState) {
-	fiddlersGreenPlay(s, self, 3)
+func (FiddlersGreenRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+	fiddlersGreenPlay(s, l, self, 3)
 }
 
-func (FiddlersGreenYellow) Play(s *sim.TurnState, self *sim.CardState) {
-	fiddlersGreenPlay(s, self, 2)
+func (FiddlersGreenYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+	fiddlersGreenPlay(s, l, self, 2)
 }
 
-func (FiddlersGreenBlue) Play(s *sim.TurnState, self *sim.CardState) {
-	fiddlersGreenPlay(s, self, 1)
+func (FiddlersGreenBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+	fiddlersGreenPlay(s, l, self, 1)
 }

@@ -17,7 +17,7 @@ func (BladeFlashBlue) ARTargetAllowed(c sim.Card, _ int8) bool {
 	t := c.Types()
 	return t.Has(card.TypeSword) && t.IsAttack()
 }
-func (BladeFlashBlue) Play(s *sim.TurnState, _ *sim.CardState) {
+func (BladeFlashBlue) Play(s *sim.TurnState, l sim.Logger, _ *sim.CardState) {
 	if s.AttackReactionTarget() == nil {
 		return
 	}

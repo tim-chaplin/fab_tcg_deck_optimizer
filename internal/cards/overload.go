@@ -9,25 +9,23 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
 
-func overloadPlay(s *sim.TurnState, self *sim.CardState) {
-	n := self.DealEffectiveAttack(s)
-	s.Log(self, n)
+func overloadPlay(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	if sim.LikelyToHit(self) {
 		self.GrantedGoAgain = true
 	}
 }
 
 func (OverloadRed) Dominate() {}
-func (OverloadRed) Play(s *sim.TurnState, self *sim.CardState) {
-	overloadPlay(s, self)
+func (OverloadRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+	overloadPlay(s, l, self)
 }
 
 func (OverloadYellow) Dominate() {}
-func (OverloadYellow) Play(s *sim.TurnState, self *sim.CardState) {
-	overloadPlay(s, self)
+func (OverloadYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+	overloadPlay(s, l, self)
 }
 
 func (OverloadBlue) Dominate() {}
-func (OverloadBlue) Play(s *sim.TurnState, self *sim.CardState) {
-	overloadPlay(s, self)
+func (OverloadBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+	overloadPlay(s, l, self)
 }

@@ -10,20 +10,19 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
 
-func publicBountyPlay(s *sim.TurnState, self *sim.CardState, n int) {
+func publicBountyPlay(s *sim.TurnState, l sim.Logger, self *sim.CardState, n int) {
 	s.OpponentMarked = true
 	GrantNextCardBonusAttack(s, n, IsAttack)
-	s.Log(self, 0)
 }
 
-func (PublicBountyRed) Play(s *sim.TurnState, self *sim.CardState) {
-	publicBountyPlay(s, self, 3)
+func (PublicBountyRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+	publicBountyPlay(s, l, self, 3)
 }
 
-func (PublicBountyYellow) Play(s *sim.TurnState, self *sim.CardState) {
-	publicBountyPlay(s, self, 2)
+func (PublicBountyYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+	publicBountyPlay(s, l, self, 2)
 }
 
-func (PublicBountyBlue) Play(s *sim.TurnState, self *sim.CardState) {
-	publicBountyPlay(s, self, 1)
+func (PublicBountyBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+	publicBountyPlay(s, l, self, 1)
 }

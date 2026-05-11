@@ -21,7 +21,7 @@ func TestOverload_OnHitGoAgainEagerByLikelyToHit(t *testing.T) {
 	for _, tc := range cases {
 		s := sim.TurnState{}
 		self := &sim.CardState{Card: tc.c}
-		tc.c.Play(&s, self)
+		sim.ResolveChainStep(&s, s.Logger(), self)
 		if got := s.Value; got != tc.wantDmg {
 			t.Errorf("%s: Play() Value = %d, want %d", tc.c.Name(), got, tc.wantDmg)
 		}
@@ -46,7 +46,7 @@ func TestOverload_BonusAttackPushesIntoHitWindow(t *testing.T) {
 	for _, tc := range cases {
 		s := sim.TurnState{}
 		self := &sim.CardState{Card: OverloadRed{}, BonusAttack: tc.bonus}
-		OverloadRed{}.Play(&s, self)
+		sim.ResolveChainStep(&s, s.Logger(), self)
 		if !self.GrantedGoAgain {
 			t.Errorf("Red + BonusAttack %d: GrantedGoAgain = false, want true", tc.bonus)
 		}

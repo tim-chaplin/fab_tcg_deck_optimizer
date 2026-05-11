@@ -10,27 +10,25 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
 
-func ferventForerunnerPlay(s *sim.TurnState, self *sim.CardState) {
+func ferventForerunnerPlay(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	self.GrantGoAgainIfFromArsenal()
-	n := self.DealEffectiveAttack(s)
-	s.Log(self, n)
 	self.RegisterOnHit(ferventForerunnerOnHit)
 }
 
 // ferventForerunnerOnHit fires the printed "If this hits, opt 2" rider. Top-level so
 // registration stays alloc-free.
-func ferventForerunnerOnHit(s *sim.TurnState, _ *sim.CardState, _ *sim.OnHitHandler) {
-	s.Opt(2)
+func ferventForerunnerOnHit(s *sim.TurnState, l sim.Logger, _ *sim.CardState, _ *sim.OnHitHandler) {
+	s.Opt(l, 2)
 }
 
-func (FerventForerunnerRed) Play(s *sim.TurnState, self *sim.CardState) {
-	ferventForerunnerPlay(s, self)
+func (FerventForerunnerRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+	ferventForerunnerPlay(s, l, self)
 }
 
-func (FerventForerunnerYellow) Play(s *sim.TurnState, self *sim.CardState) {
-	ferventForerunnerPlay(s, self)
+func (FerventForerunnerYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+	ferventForerunnerPlay(s, l, self)
 }
 
-func (FerventForerunnerBlue) Play(s *sim.TurnState, self *sim.CardState) {
-	ferventForerunnerPlay(s, self)
+func (FerventForerunnerBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+	ferventForerunnerPlay(s, l, self)
 }

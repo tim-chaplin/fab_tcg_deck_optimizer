@@ -12,21 +12,15 @@ import (
 
 // not implemented: hand-on-top alt cost and conditional go-again rider
 
-func (c SeekHorizonRed) Play(s *sim.TurnState, self *sim.CardState) {
-	n := self.DealEffectiveAttack(s)
-	s.Log(self, n)
+func (c SeekHorizonRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 }
 
 // not implemented: hand-on-top alt cost and conditional go-again rider
 
-func (c SeekHorizonYellow) Play(s *sim.TurnState, self *sim.CardState) {
-	n := self.DealEffectiveAttack(s)
-	s.Log(self, n)
+func (c SeekHorizonYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 }
 
 // not implemented: hand-on-top alt cost and conditional go-again rider
 
-func (c SeekHorizonBlue) Play(s *sim.TurnState, self *sim.CardState) {
-	n := self.DealEffectiveAttack(s)
-	s.Log(self, n)
+func (c SeekHorizonBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 }

@@ -10,19 +10,13 @@ import (
 )
 
 func (ScarForAScarRed) GoAgain() bool { return sim.HeroWantsLowerHealth() }
-func (c ScarForAScarRed) Play(s *sim.TurnState, self *sim.CardState) {
-	n := self.DealEffectiveAttack(s)
-	s.Log(self, n)
+func (c ScarForAScarRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 }
 
 func (ScarForAScarYellow) GoAgain() bool { return sim.HeroWantsLowerHealth() }
-func (c ScarForAScarYellow) Play(s *sim.TurnState, self *sim.CardState) {
-	n := self.DealEffectiveAttack(s)
-	s.Log(self, n)
+func (c ScarForAScarYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 }
 
 func (ScarForAScarBlue) GoAgain() bool { return sim.HeroWantsLowerHealth() }
-func (c ScarForAScarBlue) Play(s *sim.TurnState, self *sim.CardState) {
-	n := self.DealEffectiveAttack(s)
-	s.Log(self, n)
+func (c ScarForAScarBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 }

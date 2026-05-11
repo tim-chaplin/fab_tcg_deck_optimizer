@@ -41,7 +41,5 @@ func (AnnalsOfSutcliffeAbility) Attack() int             { return 0 }
 func (AnnalsOfSutcliffeAbility) Defense() int            { return 0 }
 func (AnnalsOfSutcliffeAbility) Types() card.TypeSet     { return annalsOfSutcliffeAbilityTypes }
 func (AnnalsOfSutcliffeAbility) GoAgain() bool           { return false }
-func (AnnalsOfSutcliffeAbility) Play(s *sim.TurnState, self *sim.CardState) {
-	n := self.DealEffectiveAttack(s)
-	s.Log(self, n)
+func (AnnalsOfSutcliffeAbility) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 }

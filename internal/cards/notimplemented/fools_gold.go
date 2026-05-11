@@ -10,4 +10,4 @@ import (
 
 // not implemented: discard trigger creates a Gold token
 
-func (FoolsGoldYellow) Play(s *sim.TurnState, self *sim.CardState) { s.Log(self, 0) }
+func (FoolsGoldYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {}

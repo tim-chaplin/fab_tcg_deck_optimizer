@@ -18,7 +18,7 @@ func TestDestructiveDeliberation_PlayCreditsAttack(t *testing.T) {
 	for _, tc := range cases {
 		s := sim.TurnState{}
 		self := &sim.CardState{Card: tc.c}
-		tc.c.Play(&s, self)
+		sim.ResolveChainStep(&s, s.Logger(), self)
 		if s.Value != tc.want {
 			t.Errorf("%s: Value = %d, want %d", tc.c.Name(), s.Value, tc.want)
 		}
@@ -36,8 +36,8 @@ func TestDestructiveDeliberation_OnHitCreatesPonder(t *testing.T) {
 	} {
 		s := sim.TurnState{}
 		self := &sim.CardState{Card: c}
-		c.Play(&s, self)
-		self.OnHit[0].Fire(&s, self, &self.OnHit[0])
+		sim.ResolveChainStep(&s, s.Logger(), self)
+		self.OnHit[0].Fire(&s, s.Logger(), self, &self.OnHit[0])
 		if got := s.Ponders(); got != 1 {
 			t.Errorf("%s: Ponders = %d, want 1", c.Name(), got)
 		}

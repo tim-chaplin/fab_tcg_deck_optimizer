@@ -10,7 +10,5 @@ import (
 // not implemented: base-power cap on what this can defend is ignored; treated as legal vs every
 // attack
 
-func (PutInContextBlue) Play(s *sim.TurnState, self *sim.CardState) {
-	n := self.DealEffectiveDefense(s)
-	s.Log(self, n)
+func (PutInContextBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 }

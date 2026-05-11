@@ -82,7 +82,7 @@ type CardState struct {
 // stays correct when the handler was added to a different card's OnHit (Mauvrion Skies,
 // Runic Reaping). N and LogText are optional small payloads cards use to avoid closures.
 type OnHitHandler struct {
-	Fire    func(s *TurnState, self *CardState, h *OnHitHandler)
+	Fire    func(s *TurnState, l Logger, self *CardState, h *OnHitHandler)
 	Source  Card
 	LogText string
 	N       int
@@ -91,7 +91,7 @@ type OnHitHandler struct {
 // RegisterOnHit appends a fire-only on-hit handler — the common case for "if this hits, do
 // X" riders. Cards needing Source / N / LogText payloads on the handler append an
 // OnHitHandler literal directly.
-func (p *CardState) RegisterOnHit(fire func(s *TurnState, self *CardState, h *OnHitHandler)) {
+func (p *CardState) RegisterOnHit(fire func(s *TurnState, l Logger, self *CardState, h *OnHitHandler)) {
 	p.OnHit = append(p.OnHit, OnHitHandler{Fire: fire})
 }
 
@@ -182,6 +182,38 @@ func (p *CardState) DealEffectiveDefense(s *TurnState) int {
 	return n
 }
 
+// Logger is the cards-facing log sink the chain runner threads through Play, Block,
+// OnHitHandler.Fire, TriggerHandler, and Hero.OnCardPlayed. The method set matches
+// *turnlogger.TurnLogger exactly so sim hands one of those directly to cards — no
+// adapter sits in the middle. The interface lives in card.go so it travels with Card
+// when the package later moves to v2/card; the concrete implementation
+// (turnlogger.TurnLogger) stays in v2/turnlogger and the move requires no import
+// rewiring on the card side. Cards convert CardState into log-line text at the call
+// site via ChainStepText / Card.DisplayName.
+type Logger interface {
+	// AppendChainStep appends a main-line chain-step entry with the given text and
+	// damage-equivalent display delta n. Cards typically wrap the call as
+	// l.AppendChainStep(ChainStepText(self), n).
+	AppendChainStep(text string, n int)
+	// AppendChainStepf is the format variant of AppendChainStep — fmt.Sprintf runs only
+	// on the recording branch.
+	AppendChainStepf(n int, format string, args ...any)
+	// AppendPostTrigger appends an indented post-trigger sub-line attributed to source.
+	// Self-riders pass self.Card.DisplayName() as source; cross-card riders (OnHit
+	// handlers attached to a target card) pass the target's name.
+	AppendPostTrigger(source, text string, n int)
+	// AppendPostTriggerf is the format variant of AppendPostTrigger.
+	AppendPostTriggerf(source string, n int, format string, args ...any)
+	// AppendPreTrigger appends an indented pre-trigger sub-line attributed to source —
+	// a hero or aura-attack-action trigger that fires before its parent chain entry.
+	AppendPreTrigger(source, text string, n int)
+	// AppendPreTriggerf is the format variant of AppendPreTrigger.
+	AppendPreTriggerf(source string, n int, format string, args ...any)
+	// AmendLastChainStepN adds n to the most recent ChainStep entry's N field. ARs use
+	// this to fold their +{p} buff into the buffed attack's display delta.
+	AmendLastChainStepN(n int)
+}
+
 // Card is any Flesh and Blood card that can be in a deck. Methods return the card's static
 // profile plus a Play hook for on-play logic.
 type Card interface {
@@ -214,13 +246,10 @@ type Card interface {
 	GoAgain() bool
 	// Play is called when the card resolves — as an attack or as a defense reaction. Cards
 	// own state mutation: they read self.FromArsenal for arsenal-gated riders, write
-	// self.GrantedGoAgain to grant themselves Go again, and call s.ApplyAndLogEffectiveAttack
-	// (or s.LogPlay for non-attack cards) to append the chain-step log entry and credit
-	// damage to s.Value. Separable rider effects (runechant creation, conditional arcane,
-	// on-hit credits, tutored sub-card plays) emit their own post-trigger child lines via
-	// the ApplyAndLogRiderOnPlay / CreateAndLogRunechantsOnPlay / DealAndLogArcaneDamage /
-	// AddPostTriggerLogEntry helpers so the printout reads as a structured tree.
-	Play(s *TurnState, self *CardState)
+	// self.GrantedGoAgain to grant themselves Go again, and emit chain / rider log lines
+	// via l (the Logger param the framework threads through). Damage credit pairs with
+	// l.Log: self.DealEffectiveAttack(s) on one line, self.Log(l, n) on the next.
+	Play(s *TurnState, l Logger, self *CardState)
 }
 
 // VariableCost is optionally implemented by cards whose Cost(s) varies with TurnState (e.g.
@@ -322,7 +351,7 @@ func arsenalDefenseBonusOf(c Card) int {
 // another card" / similar conditional buffs. Cards without block-time logic don't need
 // to implement Blocker; their plain-block contribution stays at the printed Defense().
 type Blocker interface {
-	Block(s *TurnState, self *CardState)
+	Block(s *TurnState, l Logger, self *CardState)
 }
 
 // BlockCost is an optional add-on for ModalCard Blockers whose block-time bonus comes

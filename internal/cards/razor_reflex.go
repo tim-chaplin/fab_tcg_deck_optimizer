@@ -39,12 +39,12 @@ func razorReflexAccepts(c sim.Card, mode int8) bool {
 // razorReflexPlay applies the chosen mode's effect. The chain runner already validated
 // the target via razorReflexAccepts, so the buff lands directly. Mode 1 additionally
 // fires the on-hit go-again rider eagerly when the post-buff target is likely to hit.
-func razorReflexPlay(s *sim.TurnState, self *sim.CardState, n int) {
+func razorReflexPlay(s *sim.TurnState, l sim.Logger, self *sim.CardState, n int) {
 	target := s.AttackReactionTarget()
 	if target == nil {
 		return
 	}
-	sim.GrantAttackReactionBuff(s, self, n)
+	sim.GrantAttackReactionBuff(s, l, self, n)
 	if self.Mode == 1 && sim.LikelyToHit(target) {
 		s.ActionPoints++
 	}
@@ -54,22 +54,22 @@ func (RazorReflexRed) Modes() int { return 2 }
 func (RazorReflexRed) ARTargetAllowed(c sim.Card, mode int8) bool {
 	return razorReflexAccepts(c, mode)
 }
-func (RazorReflexRed) Play(s *sim.TurnState, self *sim.CardState) {
-	razorReflexPlay(s, self, 3)
+func (RazorReflexRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+	razorReflexPlay(s, l, self, 3)
 }
 
 func (RazorReflexYellow) Modes() int { return 2 }
 func (RazorReflexYellow) ARTargetAllowed(c sim.Card, mode int8) bool {
 	return razorReflexAccepts(c, mode)
 }
-func (RazorReflexYellow) Play(s *sim.TurnState, self *sim.CardState) {
-	razorReflexPlay(s, self, 2)
+func (RazorReflexYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+	razorReflexPlay(s, l, self, 2)
 }
 
 func (RazorReflexBlue) Modes() int { return 2 }
 func (RazorReflexBlue) ARTargetAllowed(c sim.Card, mode int8) bool {
 	return razorReflexAccepts(c, mode)
 }
-func (RazorReflexBlue) Play(s *sim.TurnState, self *sim.CardState) {
-	razorReflexPlay(s, self, 1)
+func (RazorReflexBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+	razorReflexPlay(s, l, self, 1)
 }

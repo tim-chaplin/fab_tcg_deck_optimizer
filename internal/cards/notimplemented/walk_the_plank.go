@@ -11,21 +11,15 @@ import (
 
 // not implemented: pirate-target freeze rider
 
-func (WalkThePlankRed) Play(s *sim.TurnState, self *sim.CardState) {
-	n := self.DealEffectiveAttack(s)
-	s.Log(self, n)
+func (WalkThePlankRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 }
 
 // not implemented: pirate-target freeze rider
 
-func (WalkThePlankYellow) Play(s *sim.TurnState, self *sim.CardState) {
-	n := self.DealEffectiveAttack(s)
-	s.Log(self, n)
+func (WalkThePlankYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 }
 
 // not implemented: pirate-target freeze rider
 
-func (WalkThePlankBlue) Play(s *sim.TurnState, self *sim.CardState) {
-	n := self.DealEffectiveAttack(s)
-	s.Log(self, n)
+func (WalkThePlankBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 }

@@ -9,26 +9,24 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
 
-func snatchPlay(s *sim.TurnState, self *sim.CardState) {
-	n := self.DealEffectiveAttack(s)
-	s.Log(self, n)
+func snatchPlay(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	self.RegisterOnHit(snatchOnHit)
 }
 
 // snatchOnHit fires the printed "When this hits, draw a card" rider. Top-level so
 // registration stays alloc-free.
-func snatchOnHit(s *sim.TurnState, _ *sim.CardState, _ *sim.OnHitHandler) {
+func snatchOnHit(s *sim.TurnState, l sim.Logger, _ *sim.CardState, _ *sim.OnHitHandler) {
 	s.DrawOne()
 }
 
-func (SnatchRed) Play(s *sim.TurnState, self *sim.CardState) {
-	snatchPlay(s, self)
+func (SnatchRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+	snatchPlay(s, l, self)
 }
 
-func (SnatchYellow) Play(s *sim.TurnState, self *sim.CardState) {
-	snatchPlay(s, self)
+func (SnatchYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+	snatchPlay(s, l, self)
 }
 
-func (SnatchBlue) Play(s *sim.TurnState, self *sim.CardState) {
-	snatchPlay(s, self)
+func (SnatchBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+	snatchPlay(s, l, self)
 }

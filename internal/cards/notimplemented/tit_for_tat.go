@@ -10,4 +10,4 @@ import (
 
 // not implemented: freeze/unfreeze
 
-func (TitForTatBlue) Play(s *sim.TurnState, self *sim.CardState) { s.Log(self, 0) }
+func (TitForTatBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {}

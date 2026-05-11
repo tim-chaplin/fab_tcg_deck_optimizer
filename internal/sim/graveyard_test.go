@@ -64,9 +64,8 @@ func (gravSpyDR) Types() card.TypeSet {
 	return card.NewTypeSet(card.TypeGeneric, card.TypeDefenseReaction)
 }
 func (gravSpyDR) GoAgain() bool { return false }
-func (g gravSpyDR) Play(s *TurnState, self *CardState) {
+func (g gravSpyDR) Play(s *TurnState, l Logger, self *CardState) {
 	*g.saw = append((*g.saw)[:0], s.Graveyard()...)
-	s.Log(self, 0)
 }
 
 // auraDefender is a test-only card whose type line is Aura — a persistent type that normally
@@ -75,16 +74,16 @@ func (g gravSpyDR) Play(s *TurnState, self *CardState) {
 // seeding regardless of their type mask.
 type auraDefender struct{}
 
-func (auraDefender) ID() ids.CardID              { return ids.InvalidCard }
-func (auraDefender) Name() string                { return "auraDefender" }
-func (auraDefender) DisplayName() string         { return "auraDefender" }
-func (auraDefender) Cost(*TurnState) int         { return 0 }
-func (auraDefender) Pitch() int                  { return 0 }
-func (auraDefender) Attack() int                 { return 0 }
-func (auraDefender) Defense() int                { return 3 }
-func (auraDefender) Types() card.TypeSet         { return card.NewTypeSet(card.TypeAura) }
-func (auraDefender) GoAgain() bool               { return false }
-func (auraDefender) Play(*TurnState, *CardState) {}
+func (auraDefender) ID() ids.CardID                      { return ids.InvalidCard }
+func (auraDefender) Name() string                        { return "auraDefender" }
+func (auraDefender) DisplayName() string                 { return "auraDefender" }
+func (auraDefender) Cost(*TurnState) int                 { return 0 }
+func (auraDefender) Pitch() int                          { return 0 }
+func (auraDefender) Attack() int                         { return 0 }
+func (auraDefender) Defense() int                        { return 3 }
+func (auraDefender) Types() card.TypeSet                 { return card.NewTypeSet(card.TypeAura) }
+func (auraDefender) GoAgain() bool                       { return false }
+func (auraDefender) Play(*TurnState, Logger, *CardState) {}
 
 // Tests that a plain blocker enters the graveyard regardless of PersistsInPlay — a paired
 // DR snapshotting state.Graveyard sees the blocker.

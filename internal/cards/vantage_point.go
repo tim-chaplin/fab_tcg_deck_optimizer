@@ -13,23 +13,21 @@ import (
 
 // vantagePointPlay flips s.Overpower when an aura has been played or created this turn, then
 // emits the chain step.
-func vantagePointPlay(s *sim.TurnState, self *sim.CardState) {
+func vantagePointPlay(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	if s.HasPlayedOrCreatedAura() {
 		s.Overpower = true
 		s.AddValue(sim.OverpowerValue)
 	}
-	n := self.DealEffectiveAttack(s)
-	s.Log(self, n)
 }
 
-func (VantagePointRed) Play(s *sim.TurnState, self *sim.CardState) {
-	vantagePointPlay(s, self)
+func (VantagePointRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+	vantagePointPlay(s, l, self)
 }
 
-func (VantagePointYellow) Play(s *sim.TurnState, self *sim.CardState) {
-	vantagePointPlay(s, self)
+func (VantagePointYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+	vantagePointPlay(s, l, self)
 }
 
-func (VantagePointBlue) Play(s *sim.TurnState, self *sim.CardState) {
-	vantagePointPlay(s, self)
+func (VantagePointBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+	vantagePointPlay(s, l, self)
 }

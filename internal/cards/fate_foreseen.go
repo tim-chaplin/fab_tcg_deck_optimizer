@@ -9,20 +9,18 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
 
-func fateForeseenPlay(s *sim.TurnState, self *sim.CardState) {
-	n := self.DealEffectiveDefense(s)
-	s.Log(self, n)
-	s.Opt(1)
+func fateForeseenPlay(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+	s.Opt(l, 1)
 }
 
-func (FateForeseenRed) Play(s *sim.TurnState, self *sim.CardState) {
-	fateForeseenPlay(s, self)
+func (FateForeseenRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+	fateForeseenPlay(s, l, self)
 }
 
-func (FateForeseenYellow) Play(s *sim.TurnState, self *sim.CardState) {
-	fateForeseenPlay(s, self)
+func (FateForeseenYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+	fateForeseenPlay(s, l, self)
 }
 
-func (FateForeseenBlue) Play(s *sim.TurnState, self *sim.CardState) {
-	fateForeseenPlay(s, self)
+func (FateForeseenBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+	fateForeseenPlay(s, l, self)
 }

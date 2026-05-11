@@ -92,8 +92,8 @@ func TestFormatBestTurn_LogAttributesEachTriggerSeparately(t *testing.T) {
 	// Use the real Malefic Incantation card's Play to register the prior trigger so the
 	// handler matches production exactly (logs via AddPreTriggerLogEntry, sources from
 	// state.TriggeringCard).
-	var bootstrap TurnState
-	cards.MaleficIncantationRed{}.Play(&bootstrap, &CardState{Card: cards.MaleficIncantationRed{}})
+	bootstrap := NewTurnState(nil, nil)
+	ResolveChainStep(bootstrap, bootstrap.Logger(), &CardState{Card: cards.MaleficIncantationRed{}})
 	prior := bootstrap.Auras
 	got := Best(heroes.Viserai{}, nil, h, Matchup{}, nil, TurnState{Auras: prior})
 	out := FormatBestTurn(got, nil, nil)

@@ -13,29 +13,27 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
 
-func drowningDireOnHitRecycle(s *sim.TurnState, self *sim.CardState, _ *sim.OnHitHandler) {
+func drowningDireOnHitRecycle(s *sim.TurnState, l sim.Logger, self *sim.CardState, _ *sim.OnHitHandler) {
 	if _, ok := s.RecycleFromGraveyardToBottom(isNonAttackAction); ok {
-		s.LogRider(self, 0, "Recycled a non-attack action card to bottom of deck")
+		l.AppendPostTrigger(self.Card.DisplayName(), "Recycled a non-attack action card to bottom of deck", 0)
 	}
 }
 
-func drowningDirePlay(s *sim.TurnState, self *sim.CardState) {
+func drowningDirePlay(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	if s.HasPlayedOrCreatedAura() {
 		self.GrantedDominate = true
 	}
-	n := self.DealEffectiveAttack(s)
-	s.Log(self, n)
 	self.RegisterOnHit(drowningDireOnHitRecycle)
 }
 
-func (DrowningDireRed) Play(s *sim.TurnState, self *sim.CardState) {
-	drowningDirePlay(s, self)
+func (DrowningDireRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+	drowningDirePlay(s, l, self)
 }
 
-func (DrowningDireYellow) Play(s *sim.TurnState, self *sim.CardState) {
-	drowningDirePlay(s, self)
+func (DrowningDireYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+	drowningDirePlay(s, l, self)
 }
 
-func (DrowningDireBlue) Play(s *sim.TurnState, self *sim.CardState) {
-	drowningDirePlay(s, self)
+func (DrowningDireBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+	drowningDirePlay(s, l, self)
 }

@@ -104,9 +104,10 @@ type permBufs struct {
 	cardsPlayedBacking []Card
 	logBacking         []LogEntry
 	// logger is the recording-mode *TurnLogger reused across permutations. Allocated
-	// once in newAttackBufs and rebound each permutation via SetBuffer(logBacking).
-	// resetStateForPermutation points TurnState.logger at this when ctx is recording
-	// or leaves TurnState.logger nil when ctx is skipping.
+	// once in newAttackBufs; the per-permutation buffer rebind goes through
+	// bufs.logger.SetBuffer(logBacking). resetStateForPermutation points
+	// TurnState.logger at this when ctx is recording or leaves TurnState.logger nil
+	// when ctx is skipping.
 	logger              *turnlogger.TurnLogger
 	auraTriggersBacking []Aura
 	// itemsBacking backs TurnState.Items per permutation — seeded from priorItems and

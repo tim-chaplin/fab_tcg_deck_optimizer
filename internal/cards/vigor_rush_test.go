@@ -27,7 +27,7 @@ func TestVigorRush_NoNonAttackActionNoGoAgain(t *testing.T) {
 			NonAttackActionPlayed: false,
 		}
 		self := &sim.CardState{Card: c}
-		c.Play(&s, self)
+		sim.ResolveChainStep(&s, s.Logger(), self)
 		if got := s.Value; got != c.Attack() {
 			t.Errorf("%s: Play() = %d, want %d (base power)", c.Name(), got, c.Attack())
 		}
@@ -47,7 +47,7 @@ func TestVigorRush_NonAttackActionGrantsGoAgain(t *testing.T) {
 			NonAttackActionPlayed: true,
 		}
 		self := &sim.CardState{Card: c}
-		c.Play(&s, self)
+		sim.ResolveChainStep(&s, s.Logger(), self)
 		if !self.GrantedGoAgain {
 			t.Errorf("%s: GrantedGoAgain = false, want true (non-attack action → go again)", c.Name())
 		}

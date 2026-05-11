@@ -15,7 +15,7 @@ import (
 
 // captainsCallPlay applies the modal grant to the next cost-≤maxCost attack action card in
 // CardsRemaining. Fizzles silently if no follow-up attack action matches.
-func captainsCallPlay(s *sim.TurnState, self *sim.CardState, maxCost int) {
+func captainsCallPlay(s *sim.TurnState, l sim.Logger, self *sim.CardState, maxCost int) {
 	for _, pc := range s.CardsRemaining {
 		if !pc.Card.Types().IsAttackAction() {
 			continue
@@ -31,20 +31,19 @@ func captainsCallPlay(s *sim.TurnState, self *sim.CardState, maxCost int) {
 		}
 		break
 	}
-	s.Log(self, 0)
 }
 
 func (CaptainsCallRed) Modes() int { return 2 }
-func (CaptainsCallRed) Play(s *sim.TurnState, self *sim.CardState) {
-	captainsCallPlay(s, self, 2)
+func (CaptainsCallRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+	captainsCallPlay(s, l, self, 2)
 }
 
 func (CaptainsCallYellow) Modes() int { return 2 }
-func (CaptainsCallYellow) Play(s *sim.TurnState, self *sim.CardState) {
-	captainsCallPlay(s, self, 1)
+func (CaptainsCallYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+	captainsCallPlay(s, l, self, 1)
 }
 
 func (CaptainsCallBlue) Modes() int { return 2 }
-func (CaptainsCallBlue) Play(s *sim.TurnState, self *sim.CardState) {
-	captainsCallPlay(s, self, 0)
+func (CaptainsCallBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+	captainsCallPlay(s, l, self, 0)
 }

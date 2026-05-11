@@ -15,8 +15,6 @@ import (
 
 // not implemented: start-of-action-phase self-destroy, leaves-arena discard/draw
 
-func (SigilOfCyclesBlue) Play(s *sim.TurnState, self *sim.CardState) {
+func (SigilOfCyclesBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	cards.SetAuraCreated(s)
-	n := self.DealEffectiveAttack(s)
-	s.Log(self, n)
 }

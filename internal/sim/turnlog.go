@@ -179,7 +179,7 @@ func appendDefenseReactionLines(out []string, a CardAssignment, defenders []Card
 	state := NewTurnState(nil, append([]Card(nil), defenders...))
 	state.IncomingDamage = remaining
 	cs := CardState{Card: a.Card, FromArsenal: a.FromArsenal}
-	a.Card.Play(state, &cs)
+	ResolveChainStep(state, state.logger, &cs)
 	return appendGroupedChainEntries(out, state.LogEntries()), state.IncomingDamage
 }
 
@@ -315,56 +315,70 @@ func itemsLine(gold, silver, copper int) string {
 // stays a flat []string for JSON round-tripping.
 const childEntryPrefix = "  "
 
-// appendGroupedChainEntries walks t.State.Log and emits each chain entry as a parent line
-// followed by its triggers as childEntryPrefix-tagged children. LogEntry.Kind tells
-// pre-triggers from post-triggers — the lookforward step only consumes post-triggers, so
-// a pre-trigger whose Source happens to match the previous chain entry's name (two cards
-// with the same display name in one chain) gets buffered and attaches to its real parent
-// instead. An orphan trigger whose Source matches no chain line falls through as a plain
-// top-level entry via FormatLogEntry — keeps "(from <source>)" attribution visible so
-// the data isn't silently dropped if the parent-emit invariant ever loosens.
+// appendGroupedChainEntries walks t.State.Log and emits each chain entry as a parent
+// line followed by its triggers as childEntryPrefix-tagged children. Both pre-triggers
+// and post-triggers are buffered until a chain step with a matching Source arrives —
+// the sim emits cards' rider lines during Card.Play, but the chain step itself gets
+// auto-logged by ResolveChainStep after Play returns, so a card's post-triggers come
+// before its chain step in the stream. Buffering both sides keeps the attribution
+// correct regardless of stream order. An orphan trigger whose Source matches no chain
+// line falls through as a plain top-level entry via FormatLogEntry, keeping the
+// "(from <source>)" tail visible so the data isn't silently dropped if a producer
+// ever emits a trigger with no parent.
 func appendGroupedChainEntries(out []string, log []LogEntry) []string {
-	var pending []LogEntry
+	var pendingPre, pendingPost []LogEntry
 	i := 0
 	for i < len(log) {
 		e := log[i]
 		switch e.Kind {
 		case LogEntryPreTrigger:
-			pending = append(pending, e)
+			pendingPre = append(pendingPre, e)
 			i++
 		case LogEntryPostTrigger:
-			// Orphan post-trigger — no preceding chain step consumed it via the
-			// lookforward below. Surface as a top-level line.
-			out = append(out, FormatLogEntry(e))
+			pendingPost = append(pendingPost, e)
 			i++
 		default:
-			// Chain step: emit parent, attach matching buffered pre-triggers, then look
-			// forward for matching post-triggers (only post — pre-triggers belong to a
-			// later chain entry).
 			parentName := chainEntryCardName(e.Text)
 			out = append(out, formatTextWithDelta(e))
-			for _, pre := range pending {
-				if pre.Source == parentName {
-					out = append(out, childEntryPrefix+formatTextWithDelta(pre))
-				} else {
-					out = append(out, FormatLogEntry(pre))
-				}
-			}
-			pending = pending[:0]
+			// Drain pre/post-triggers that arrived BEFORE this chain step (the
+			// ResolveChainStep path: Card.Play emits riders, then sim appends the
+			// chain step). Pre-triggers always come from BEFORE; we drain them too.
+			pendingPre, out = drainMatchingTriggers(pendingPre, parentName, out)
+			pendingPost, out = drainMatchingTriggers(pendingPost, parentName, out)
+			// Look forward for adjacent post-triggers that arrived AFTER this chain
+			// step. Covers manually-built test streams and any producer that appends
+			// rider lines after emitting its own chain step.
 			j := i + 1
-			for j < len(log) &&
-				log[j].Kind == LogEntryPostTrigger &&
-				log[j].Source == parentName {
+			for j < len(log) && log[j].Kind == LogEntryPostTrigger && log[j].Source == parentName {
 				out = append(out, childEntryPrefix+formatTextWithDelta(log[j]))
 				j++
 			}
 			i = j
 		}
 	}
-	for _, p := range pending {
+	for _, p := range pendingPre {
+		out = append(out, FormatLogEntry(p))
+	}
+	for _, p := range pendingPost {
 		out = append(out, FormatLogEntry(p))
 	}
 	return out
+}
+
+// drainMatchingTriggers splits pending into entries whose Source matches name (emitted
+// as indented children of the chain step) and entries that don't (returned for a later
+// chain step to consume). The split preserves arrival order within each bucket so
+// pre/post-triggers render in the order their producers fired.
+func drainMatchingTriggers(pending []LogEntry, name string, out []string) ([]LogEntry, []string) {
+	var remaining []LogEntry
+	for _, t := range pending {
+		if t.Source == name {
+			out = append(out, childEntryPrefix+formatTextWithDelta(t))
+		} else {
+			remaining = append(remaining, t)
+		}
+	}
+	return remaining, out
 }
 
 // formatTextWithDelta renders a LogEntry as just "<Text> (+N)" — the bare-Text form

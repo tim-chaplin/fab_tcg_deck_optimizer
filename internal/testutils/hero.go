@@ -20,14 +20,14 @@ type Hero struct {
 	OptStrategy func(cards []sim.Card) (top, bottom []sim.Card)
 }
 
-func (Hero) ID() ids.HeroID                            { return ids.InvalidHero }
-func (Hero) Name() string                              { return "testutils.Hero" }
-func (Hero) DisplayName() string                       { return "testutils.Hero" }
-func (Hero) Health() int                               { return 20 }
-func (h Hero) Intelligence() int                       { return h.Intel }
-func (Hero) Types() card.TypeSet                       { return 0 }
-func (Hero) Class() card.CardType                      { return 0 }
-func (Hero) OnCardPlayed(sim.Card, *sim.TurnState) int { return 0 }
+func (Hero) ID() ids.HeroID                                        { return ids.InvalidHero }
+func (Hero) Name() string                                          { return "testutils.Hero" }
+func (Hero) DisplayName() string                                   { return "testutils.Hero" }
+func (Hero) Health() int                                           { return 20 }
+func (h Hero) Intelligence() int                                   { return h.Intel }
+func (Hero) Types() card.TypeSet                                   { return 0 }
+func (Hero) Class() card.CardType                                  { return 0 }
+func (Hero) OnCardPlayed(sim.Card, *sim.TurnState, sim.Logger) int { return 0 }
 
 // Opt dispatches to OptStrategy when set; otherwise keeps every revealed card on top of
 // the deck in input order (no reshape).

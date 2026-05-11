@@ -19,7 +19,7 @@ func TestDeathlyDuet_BaseDamage(t *testing.T) {
 	}
 	for _, tc := range cases {
 		var s sim.TurnState
-		tc.c.Play(&s, &sim.CardState{Card: tc.c})
+		sim.ResolveChainStep(&s, s.Logger(), &sim.CardState{Card: tc.c})
 		if got := s.Value; got != tc.want {
 			t.Errorf("%s: Play() = %d, want %d", tc.c.Name(), got, tc.want)
 		}
@@ -33,7 +33,7 @@ func TestDeathlyDuet_AttackAttributedAddsPower(t *testing.T) {
 		Card:          DeathlyDuetRed{},
 		PitchedToPlay: []sim.Card{testutils.RunebladeAttack{}},
 	}
-	(DeathlyDuetRed{}).Play(&s, self)
+	sim.ResolveChainStep(&s, s.Logger(), self)
 	if got := s.Value; got != 6 {
 		t.Errorf("Deathly Duet Red with attack attributed: Play() = %d, want 6", got)
 	}
@@ -48,7 +48,7 @@ func TestDeathlyDuet_NonAttackActionAttributedCreatesRunechants(t *testing.T) {
 		Card:          DeathlyDuetRed{},
 		PitchedToPlay: []sim.Card{testutils.NonAttack{}},
 	}
-	(DeathlyDuetRed{}).Play(&s, self)
+	sim.ResolveChainStep(&s, s.Logger(), self)
 	if got := s.Value; got != 6 {
 		t.Errorf("Deathly Duet Red with non-attack attributed: Play() = %d, want 6 (base 4 + 2 token credits)", got)
 	}
@@ -68,7 +68,7 @@ func TestDeathlyDuet_BothBranchesFire(t *testing.T) {
 		Card:          DeathlyDuetRed{},
 		PitchedToPlay: []sim.Card{testutils.RunebladeAttack{}, testutils.NonAttack{}},
 	}
-	(DeathlyDuetRed{}).Play(&s, self)
+	sim.ResolveChainStep(&s, s.Logger(), self)
 	if got := s.Value; got != 8 {
 		t.Errorf("Deathly Duet Red with both attributed: Play() = %d, want 8 (base 4 + 2 power + 2 token credits)", got)
 	}

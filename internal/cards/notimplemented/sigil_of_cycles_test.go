@@ -9,7 +9,7 @@ import (
 // TestSigilOfCycles_SetsAuraCreated verifies the Blue-only variant flips AuraCreated and returns 0.
 func TestSigilOfCycles_SetsAuraCreated(t *testing.T) {
 	s := sim.TurnState{}
-	(SigilOfCyclesBlue{}).Play(&s, &sim.CardState{Card: SigilOfCyclesBlue{}})
+	sim.ResolveChainStep(&s, s.Logger(), &sim.CardState{Card: SigilOfCyclesBlue{}})
 	if got := s.Value; got != 0 {
 		t.Errorf("Play() = %d, want 0", got)
 	}

@@ -13,8 +13,6 @@ import (
 
 // not implemented: Frailty health-gain rider dropped (status tokens not tracked)
 
-func (SapwoodElixirRed) Play(s *sim.TurnState, self *sim.CardState) {
+func (SapwoodElixirRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	cards.GrantNextCardBonusAttack(s, 3, cards.IsAttack)
-	n := self.DealEffectiveAttack(s)
-	s.Log(self, n)
 }

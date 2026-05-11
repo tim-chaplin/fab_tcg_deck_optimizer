@@ -16,13 +16,13 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
 
-func plunderRunOnHitDraw(s *sim.TurnState, t *sim.Trigger, _ *sim.Aura) {
+func plunderRunOnHitDraw(s *sim.TurnState, l sim.Logger, t *sim.Trigger, _ *sim.Aura) {
 	s.DrawOne()
-	s.LogPostTriggerf(s.TriggeringCard.DisplayName(), 0,
+	l.AppendPostTriggerf(s.TriggeringCard.DisplayName(), 0,
 		"%s drew a card on attack-action hit", t.Source.DisplayName())
 }
 
-func plunderRunPlay(s *sim.TurnState, self *sim.CardState, source sim.Card, n int) {
+func plunderRunPlay(s *sim.TurnState, l sim.Logger, self *sim.CardState, source sim.Card, n int) {
 	s.AddTrigger(sim.Trigger{
 		Source:      source,
 		TriggerType: sim.TriggerHit,
@@ -32,17 +32,16 @@ func plunderRunPlay(s *sim.TurnState, self *sim.CardState, source sim.Card, n in
 	if self.FromArsenal {
 		GrantNextCardBonusAttack(s, n, IsAttackAction)
 	}
-	s.Log(self, 0)
 }
 
-func (c PlunderRunRed) Play(s *sim.TurnState, self *sim.CardState) {
-	plunderRunPlay(s, self, c, 3)
+func (c PlunderRunRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+	plunderRunPlay(s, l, self, c, 3)
 }
 
-func (c PlunderRunYellow) Play(s *sim.TurnState, self *sim.CardState) {
-	plunderRunPlay(s, self, c, 2)
+func (c PlunderRunYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+	plunderRunPlay(s, l, self, c, 2)
 }
 
-func (c PlunderRunBlue) Play(s *sim.TurnState, self *sim.CardState) {
-	plunderRunPlay(s, self, c, 1)
+func (c PlunderRunBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+	plunderRunPlay(s, l, self, c, 1)
 }

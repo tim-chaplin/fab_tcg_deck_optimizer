@@ -15,7 +15,7 @@ func TestArcanePolarity_NoArcaneIncomingCreditsOne(t *testing.T) {
 	}
 	for _, c := range cases {
 		var s sim.TurnState
-		c.Play(&s, &sim.CardState{Card: c})
+		sim.ResolveChainStep(&s, s.Logger(), &sim.CardState{Card: c})
 		if s.Value != 1 {
 			t.Errorf("%s: Value = %d, want 1", c.Name(), s.Value)
 		}
@@ -34,7 +34,7 @@ func TestArcanePolarity_ArcaneIncomingCreditsLargeGain(t *testing.T) {
 	}
 	for _, tc := range cases {
 		s := sim.TurnState{ArcaneIncomingDamage: 1}
-		tc.c.Play(&s, &sim.CardState{Card: tc.c})
+		sim.ResolveChainStep(&s, s.Logger(), &sim.CardState{Card: tc.c})
 		if s.Value != tc.gain {
 			t.Errorf("%s: Value = %d, want %d", tc.c.Name(), s.Value, tc.gain)
 		}

@@ -10,26 +10,24 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
 
-func nimbleStrikePlay(s *sim.TurnState, self *sim.CardState) {
+func nimbleStrikePlay(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	if _, ok := s.BanishFromGraveyard(isNimblism); ok {
 		self.BonusAttack++
 		self.GrantedGoAgain = true
-		s.LogRider(self, 1, "Banished a Nimblism, +1{p} and go again")
+		l.AppendPostTrigger(self.Card.DisplayName(), "Banished a Nimblism, +1{p} and go again", 1)
 	}
-	n := self.DealEffectiveAttack(s)
-	s.Log(self, n)
 }
 
 func isNimblism(c sim.Card) bool { return c.Name() == "Nimblism" }
 
-func (NimbleStrikeRed) Play(s *sim.TurnState, self *sim.CardState) {
-	nimbleStrikePlay(s, self)
+func (NimbleStrikeRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+	nimbleStrikePlay(s, l, self)
 }
 
-func (NimbleStrikeYellow) Play(s *sim.TurnState, self *sim.CardState) {
-	nimbleStrikePlay(s, self)
+func (NimbleStrikeYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+	nimbleStrikePlay(s, l, self)
 }
 
-func (NimbleStrikeBlue) Play(s *sim.TurnState, self *sim.CardState) {
-	nimbleStrikePlay(s, self)
+func (NimbleStrikeBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+	nimbleStrikePlay(s, l, self)
 }

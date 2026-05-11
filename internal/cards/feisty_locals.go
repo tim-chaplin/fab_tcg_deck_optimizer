@@ -12,19 +12,8 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
 
-func feistyLocalsPlay(s *sim.TurnState, self *sim.CardState) {
-	n := self.DealEffectiveAttack(s)
-	s.Log(self, n)
-}
+func (FeistyLocalsRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {}
 
-func (FeistyLocalsRed) Play(s *sim.TurnState, self *sim.CardState) {
-	feistyLocalsPlay(s, self)
-}
+func (FeistyLocalsYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {}
 
-func (FeistyLocalsYellow) Play(s *sim.TurnState, self *sim.CardState) {
-	feistyLocalsPlay(s, self)
-}
-
-func (FeistyLocalsBlue) Play(s *sim.TurnState, self *sim.CardState) {
-	feistyLocalsPlay(s, self)
-}
+func (FeistyLocalsBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {}

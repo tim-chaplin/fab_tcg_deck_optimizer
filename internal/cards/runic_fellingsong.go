@@ -18,23 +18,21 @@ import (
 // arcane rider as a sub-line under self when an aura was successfully banished from the
 // graveyard. banishAuraFromGraveyard flips ArcaneDamageDealt internally as part of its
 // arcane-damage payload.
-func runicFellingsongPlay(s *sim.TurnState, self *sim.CardState) {
-	n := self.DealEffectiveAttack(s)
-	s.Log(self, n)
+func runicFellingsongPlay(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	if n := banishAuraFromGraveyard(s); n > 0 {
 		s.AddValue(n)
-		s.LogRider(self, n, "Banished an aura, dealt 1 arcane damage")
+		l.AppendPostTrigger(self.Card.DisplayName(), "Banished an aura, dealt 1 arcane damage", n)
 	}
 }
 
-func (RunicFellingsongRed) Play(s *sim.TurnState, self *sim.CardState) {
-	runicFellingsongPlay(s, self)
+func (RunicFellingsongRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+	runicFellingsongPlay(s, l, self)
 }
 
-func (RunicFellingsongYellow) Play(s *sim.TurnState, self *sim.CardState) {
-	runicFellingsongPlay(s, self)
+func (RunicFellingsongYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+	runicFellingsongPlay(s, l, self)
 }
 
-func (RunicFellingsongBlue) Play(s *sim.TurnState, self *sim.CardState) {
-	runicFellingsongPlay(s, self)
+func (RunicFellingsongBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+	runicFellingsongPlay(s, l, self)
 }

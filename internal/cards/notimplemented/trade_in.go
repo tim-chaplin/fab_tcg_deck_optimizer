@@ -12,21 +12,15 @@ import (
 
 // not implemented: discard-to-draw rider, arsenal-conditional go again
 
-func (c TradeInRed) Play(s *sim.TurnState, self *sim.CardState) {
-	n := self.DealEffectiveAttack(s)
-	s.Log(self, n)
+func (c TradeInRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 }
 
 // not implemented: discard-to-draw rider, arsenal-conditional go again
 
-func (c TradeInYellow) Play(s *sim.TurnState, self *sim.CardState) {
-	n := self.DealEffectiveAttack(s)
-	s.Log(self, n)
+func (c TradeInYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 }
 
 // not implemented: discard-to-draw rider, arsenal-conditional go again
 
-func (c TradeInBlue) Play(s *sim.TurnState, self *sim.CardState) {
-	n := self.DealEffectiveAttack(s)
-	s.Log(self, n)
+func (c TradeInBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 }

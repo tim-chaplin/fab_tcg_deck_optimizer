@@ -12,19 +12,8 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
 
-func barragingBrawnhidePlay(s *sim.TurnState, self *sim.CardState) {
-	n := self.DealEffectiveAttack(s)
-	s.Log(self, n)
-}
+func (BarragingBrawnhideRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {}
 
-func (BarragingBrawnhideRed) Play(s *sim.TurnState, self *sim.CardState) {
-	barragingBrawnhidePlay(s, self)
-}
+func (BarragingBrawnhideYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {}
 
-func (BarragingBrawnhideYellow) Play(s *sim.TurnState, self *sim.CardState) {
-	barragingBrawnhidePlay(s, self)
-}
-
-func (BarragingBrawnhideBlue) Play(s *sim.TurnState, self *sim.CardState) {
-	barragingBrawnhidePlay(s, self)
-}
+func (BarragingBrawnhideBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {}

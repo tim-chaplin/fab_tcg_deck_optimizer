@@ -12,21 +12,15 @@ import (
 
 // not implemented: frailty/inertia/bloodrot pox tokens
 
-func (c InfectiousHostRed) Play(s *sim.TurnState, self *sim.CardState) {
-	n := self.DealEffectiveAttack(s)
-	s.Log(self, n)
+func (c InfectiousHostRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 }
 
 // not implemented: frailty/inertia/bloodrot pox tokens
 
-func (c InfectiousHostYellow) Play(s *sim.TurnState, self *sim.CardState) {
-	n := self.DealEffectiveAttack(s)
-	s.Log(self, n)
+func (c InfectiousHostYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 }
 
 // not implemented: frailty/inertia/bloodrot pox tokens
 
-func (c InfectiousHostBlue) Play(s *sim.TurnState, self *sim.CardState) {
-	n := self.DealEffectiveAttack(s)
-	s.Log(self, n)
+func (c InfectiousHostBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 }

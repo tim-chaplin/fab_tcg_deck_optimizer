@@ -6,25 +6,23 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
 
-func destructiveDeliberationPlay(s *sim.TurnState, self *sim.CardState) {
-	n := self.DealEffectiveAttack(s)
-	s.Log(self, n)
+func destructiveDeliberationPlay(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	self.RegisterOnHit(destructiveDeliberationOnHit)
 }
 
-func destructiveDeliberationOnHit(s *sim.TurnState, self *sim.CardState, _ *sim.OnHitHandler) {
+func destructiveDeliberationOnHit(s *sim.TurnState, l sim.Logger, self *sim.CardState, _ *sim.OnHitHandler) {
 	s.CreatePonder(1)
-	s.LogRider(self, 0, "On-hit created a ponder")
+	l.AppendPostTrigger(self.Card.DisplayName(), "On-hit created a ponder", 0)
 }
 
-func (DestructiveDeliberationRed) Play(s *sim.TurnState, self *sim.CardState) {
-	destructiveDeliberationPlay(s, self)
+func (DestructiveDeliberationRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+	destructiveDeliberationPlay(s, l, self)
 }
 
-func (DestructiveDeliberationYellow) Play(s *sim.TurnState, self *sim.CardState) {
-	destructiveDeliberationPlay(s, self)
+func (DestructiveDeliberationYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+	destructiveDeliberationPlay(s, l, self)
 }
 
-func (DestructiveDeliberationBlue) Play(s *sim.TurnState, self *sim.CardState) {
-	destructiveDeliberationPlay(s, self)
+func (DestructiveDeliberationBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+	destructiveDeliberationPlay(s, l, self)
 }

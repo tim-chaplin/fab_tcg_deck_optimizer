@@ -19,9 +19,7 @@ import (
 // runechant per Runeblade attack action card found, emitting the rider sub-line under self
 // when any are created. Reads the top via PeekTopN so the cacheable bit flips — the
 // runechant count produced depends on shuffle order.
-func sutcliffesResearchNotesPlay(s *sim.TurnState, self *sim.CardState, revealCount int) {
-	dmg := self.DealEffectiveAttack(s)
-	s.Log(self, dmg)
+func sutcliffesResearchNotesPlay(s *sim.TurnState, l sim.Logger, self *sim.CardState, revealCount int) {
 	count := 0
 	for _, c := range s.PeekTopN(revealCount) {
 		t := c.Types()
@@ -30,17 +28,17 @@ func sutcliffesResearchNotesPlay(s *sim.TurnState, self *sim.CardState, revealCo
 		}
 	}
 	s.CreateRunechants(count)
-	s.LogRiderf(self, count, "Created %d runechants", count)
+	l.AppendPostTriggerf(self.Card.DisplayName(), count, "Created %d runechants", count)
 }
 
-func (SutcliffesResearchNotesRed) Play(s *sim.TurnState, self *sim.CardState) {
-	sutcliffesResearchNotesPlay(s, self, 3)
+func (SutcliffesResearchNotesRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+	sutcliffesResearchNotesPlay(s, l, self, 3)
 }
 
-func (SutcliffesResearchNotesYellow) Play(s *sim.TurnState, self *sim.CardState) {
-	sutcliffesResearchNotesPlay(s, self, 2)
+func (SutcliffesResearchNotesYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+	sutcliffesResearchNotesPlay(s, l, self, 2)
 }
 
-func (SutcliffesResearchNotesBlue) Play(s *sim.TurnState, self *sim.CardState) {
-	sutcliffesResearchNotesPlay(s, self, 1)
+func (SutcliffesResearchNotesBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+	sutcliffesResearchNotesPlay(s, l, self, 1)
 }

@@ -60,7 +60,7 @@ func tokenDisplayName(t TokenType) string {
 // Fires before each attack / weapon swing resolves: flips ArcaneDamageDealt when
 // aura.Count clears the LikelyDamageHits window and destroys the aura. Damage was
 // credited at creation time in CreateRunechants — this handler is pure state cleanup.
-func runechantAuraHandler(s *TurnState, _ *Trigger, a *Aura) {
+func runechantAuraHandler(s *TurnState, _ Logger, _ *Trigger, a *Aura) {
 	if LikelyDamageHits(a.Count, false) {
 		s.ArcaneDamageDealt = true
 	}
@@ -83,7 +83,7 @@ func NewRunechantAura(n int) Aura {
 // post-hoc arsenal-promotion step fill an otherwise-empty arsenal slot. Pops past
 // deck-end are silently skipped — empty deck just means no draw. Reading the deck top
 // flips s.cacheable (PopDeckTop's contract).
-func ponderAuraHandler(s *TurnState, _ *Trigger, a *Aura) {
+func ponderAuraHandler(s *TurnState, _ Logger, _ *Trigger, a *Aura) {
 	for i := 0; i < a.Count; i++ {
 		c, ok := s.PopDeckTop()
 		if !ok {
@@ -139,11 +139,10 @@ func (GoldTokenAbility) PlayPrecondition(s *TurnState, self *CardState) bool {
 	return s.Gold() > 0
 }
 
-func (GoldTokenAbility) Play(s *TurnState, self *CardState) {
+func (GoldTokenAbility) Play(s *TurnState, l Logger, self *CardState) {
 	s.ConsumeItem(TokenTypeGold, 1)
 	s.DrawOne()
-	s.Log(self, 0)
-	s.LogRider(self, 0, "Spent 1 gold to draw a card")
+	l.AppendPostTrigger(self.Card.DisplayName(), "Spent 1 gold to draw a card", 0)
 }
 
 // NewGoldItem returns a fresh Gold token Item with the given count. Production code calls
@@ -178,11 +177,10 @@ func (SilverTokenAbility) PlayPrecondition(s *TurnState, self *CardState) bool {
 	return s.Silver() > 0
 }
 
-func (SilverTokenAbility) Play(s *TurnState, self *CardState) {
+func (SilverTokenAbility) Play(s *TurnState, l Logger, self *CardState) {
 	s.ConsumeItem(TokenTypeSilver, 1)
 	s.DrawOne()
-	s.Log(self, 0)
-	s.LogRider(self, 0, "Spent 1 silver to draw a card")
+	l.AppendPostTrigger(self.Card.DisplayName(), "Spent 1 silver to draw a card", 0)
 }
 
 // NewSilverItem returns a fresh Silver token Item with the given count. Production code
@@ -217,11 +215,10 @@ func (CopperTokenAbility) PlayPrecondition(s *TurnState, self *CardState) bool {
 	return s.Copper() > 0
 }
 
-func (CopperTokenAbility) Play(s *TurnState, self *CardState) {
+func (CopperTokenAbility) Play(s *TurnState, l Logger, self *CardState) {
 	s.ConsumeItem(TokenTypeCopper, 1)
 	s.DrawOne()
-	s.Log(self, 0)
-	s.LogRider(self, 0, "Spent 1 copper to draw a card")
+	l.AppendPostTrigger(self.Card.DisplayName(), "Spent 1 copper to draw a card", 0)
 }
 
 // NewCopperItem returns a fresh Copper token Item with the given count. Production code

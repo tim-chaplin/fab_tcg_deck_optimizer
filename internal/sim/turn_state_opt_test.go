@@ -26,7 +26,7 @@ func TestTurnStateOpt_PassthroughKeepsDeckOrder(t *testing.T) {
 	d := NewFakeCard("d")
 	withOptHero(t, FakeHero{Intel: 4}, func() {
 		s := NewTurnStateFromCards([]Card{a, b, c, d}, nil)
-		s.Opt(2)
+		s.Opt(s.Logger(), 2)
 		got := s.Deck()
 		want := []Card{a, b, c, d}
 		if !sameDeck(got, want) {
@@ -49,7 +49,7 @@ func TestTurnStateOpt_BottomsHandlerSpecifiedCards(t *testing.T) {
 		},
 	}, func() {
 		s := NewTurnStateFromCards([]Card{a, b, c}, nil)
-		s.Opt(2)
+		s.Opt(s.Logger(), 2)
 		got := s.Deck()
 		// Handler saw [a, b]; returned top=[b], bottom=[a]. Deck becomes [b] + [c] + [a].
 		want := []Card{b, c, a}
@@ -70,7 +70,7 @@ func TestTurnStateOpt_HandlerReorderCanReverseTop(t *testing.T) {
 		},
 	}, func() {
 		s := NewTurnStateFromCards([]Card{a, b, c}, nil)
-		s.Opt(2)
+		s.Opt(s.Logger(), 2)
 		got := s.Deck()
 		want := []Card{b, a, c}
 		if !sameDeck(got, want) {
@@ -94,7 +94,7 @@ func TestTurnStateOpt_ClampsNToDeckLength(t *testing.T) {
 		},
 	}, func() {
 		s := NewTurnStateFromCards([]Card{a, b}, nil)
-		s.Opt(5)
+		s.Opt(s.Logger(), 5)
 		got := s.Deck()
 		want := []Card{a, b}
 		if !sameDeck(got, want) {
@@ -113,7 +113,7 @@ func TestTurnStateOpt_EmptyDeckSkipsHandler(t *testing.T) {
 		},
 	}, func() {
 		s := NewTurnState(nil, nil)
-		s.Opt(3)
+		s.Opt(s.Logger(), 3)
 		if called {
 			t.Error("handler should not be called on empty deck")
 		}
@@ -132,7 +132,7 @@ func TestTurnStateOpt_NonPositiveNSkipsHandler(t *testing.T) {
 			},
 		}, func() {
 			s := NewTurnStateFromCards([]Card{NewFakeCard("x")}, nil)
-			s.Opt(n)
+			s.Opt(s.Logger(), n)
 			if called {
 				t.Errorf("Opt(%d) called the handler, want skip", n)
 			}
@@ -152,7 +152,7 @@ func TestTurnStateOpt_LogsOutcome(t *testing.T) {
 		},
 	}, func() {
 		s := NewTurnStateFromCards([]Card{a, b, c}, nil)
-		s.Opt(2)
+		s.Opt(s.Logger(), 2)
 		if len(s.LogEntries()) != 1 {
 			t.Fatalf("Log len = %d, want 1", len(s.LogEntries()))
 		}
@@ -176,7 +176,7 @@ func TestTurnStateOpt_LogShowsEmptyListsAsBrackets(t *testing.T) {
 		},
 	}, func() {
 		s := NewTurnStateFromCards([]Card{a, b}, nil)
-		s.Opt(2)
+		s.Opt(s.Logger(), 2)
 		want := "Opted [a, b], put [a, b] on top, put [] on bottom"
 		if got := s.LogEntries()[0].Text; got != want {
 			t.Errorf("log entry = %q, want %q", got, want)
@@ -198,7 +198,7 @@ func TestTurnStateOpt_NoOpPathsSkipLog(t *testing.T) {
 	withOptHero(t, FakeHero{}, func() {
 		for _, tc := range cases {
 			s := NewTurnStateFromCards(tc.deck, nil)
-			s.Opt(tc.n)
+			s.Opt(s.Logger(), tc.n)
 			if len(s.LogEntries()) != 0 {
 				t.Errorf("%s: Log = %v, want empty", tc.name, s.LogEntries())
 			}
@@ -225,7 +225,7 @@ func TestTurnStateOpt_AlwaysFlipsCacheable(t *testing.T) {
 			if !s.IsCacheable() {
 				t.Fatalf("%s: pre IsCacheable should be true", tc.name)
 			}
-			s.Opt(tc.n)
+			s.Opt(s.Logger(), tc.n)
 			if s.IsCacheable() {
 				t.Errorf("%s: Opt(%d) should flip IsCacheable to false", tc.name, tc.n)
 			}
@@ -241,7 +241,7 @@ func TestTurnStateOpt_PanicsOnDroppedCard(t *testing.T) {
 		},
 	}, func() {
 		s := NewTurnStateFromCards([]Card{NewFakeCard("a"), NewFakeCard("b")}, nil)
-		assertPanics(t, "dropped card", "Opt:", func() { s.Opt(2) })
+		assertPanics(t, "dropped card", "Opt:", func() { s.Opt(s.Logger(), 2) })
 	})
 }
 
@@ -256,7 +256,7 @@ func TestTurnStateOpt_PanicsOnExtraCard(t *testing.T) {
 		},
 	}, func() {
 		s := NewTurnStateFromCards([]Card{a, b}, nil)
-		assertPanics(t, "extra card", "Opt:", func() { s.Opt(2) })
+		assertPanics(t, "extra card", "Opt:", func() { s.Opt(s.Logger(), 2) })
 	})
 }
 
@@ -272,7 +272,7 @@ func TestTurnStateOpt_PanicsOnSubstitutedCard(t *testing.T) {
 		},
 	}, func() {
 		s := NewTurnStateFromCards([]Card{a, b}, nil)
-		assertPanics(t, "substituted card", "Opt:", func() { s.Opt(2) })
+		assertPanics(t, "substituted card", "Opt:", func() { s.Opt(s.Logger(), 2) })
 	})
 }
 
@@ -288,7 +288,7 @@ func TestTurnStateOpt_PanicsOnDuplicatedCard(t *testing.T) {
 		},
 	}, func() {
 		s := NewTurnStateFromCards([]Card{a, b}, nil)
-		assertPanics(t, "duplicated card", "Opt:", func() { s.Opt(2) })
+		assertPanics(t, "duplicated card", "Opt:", func() { s.Opt(s.Logger(), 2) })
 	})
 }
 

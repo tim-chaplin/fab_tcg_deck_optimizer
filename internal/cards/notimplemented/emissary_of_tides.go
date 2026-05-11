@@ -12,7 +12,5 @@ import (
 
 // not implemented: hand-cycle-for-+2{p} rider
 
-func (c EmissaryOfTidesRed) Play(s *sim.TurnState, self *sim.CardState) {
-	n := self.DealEffectiveAttack(s)
-	s.Log(self, n)
+func (c EmissaryOfTidesRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 }

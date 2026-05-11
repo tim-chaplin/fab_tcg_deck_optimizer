@@ -12,7 +12,5 @@ import (
 
 // not implemented: on-hit opponent-arsenal manipulation rider
 
-func (HandBehindThePenRed) Play(s *sim.TurnState, self *sim.CardState) {
-	n := self.DealEffectiveAttack(s)
-	s.Log(self, n)
+func (HandBehindThePenRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 }

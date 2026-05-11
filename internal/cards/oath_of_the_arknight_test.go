@@ -9,7 +9,7 @@ import (
 
 func TestOathOfTheArknight_NoRemainingCards(t *testing.T) {
 	s := &sim.TurnState{}
-	(OathOfTheArknightRed{}).Play(s, &sim.CardState{Card: OathOfTheArknightRed{}})
+	sim.ResolveChainStep(s, s.Logger(), &sim.CardState{Card: OathOfTheArknightRed{}})
 	if got := s.Value; got != 1 {
 		t.Errorf("Play() = %d, want 1 (Runechant only, no attack to buff)", got)
 	}
@@ -30,7 +30,7 @@ func TestOathOfTheArknight_RunebladeAttackInRemaining(t *testing.T) {
 	for _, tc := range cases {
 		target := &sim.CardState{Card: testutils.RunebladeAttack{}}
 		s := &sim.TurnState{CardsRemaining: []*sim.CardState{target}}
-		tc.c.Play(s, &sim.CardState{Card: tc.c})
+		sim.ResolveChainStep(s, s.Logger(), &sim.CardState{Card: tc.c})
 		if got := s.Value; got != 1 {
 			t.Errorf("%s: Play() = %d, want 1 (Runechant only; +N rides on target's BonusAttack)", tc.c.Name(), got)
 		}
@@ -43,7 +43,7 @@ func TestOathOfTheArknight_RunebladeAttackInRemaining(t *testing.T) {
 func TestOathOfTheArknight_WeaponCountsAsAttack(t *testing.T) {
 	target := &sim.CardState{Card: testutils.RunebladeWeapon{}}
 	s := &sim.TurnState{CardsRemaining: []*sim.CardState{target}}
-	(OathOfTheArknightRed{}).Play(s, &sim.CardState{Card: OathOfTheArknightRed{}})
+	sim.ResolveChainStep(s, s.Logger(), &sim.CardState{Card: OathOfTheArknightRed{}})
 	if got := s.Value; got != 1 {
 		t.Errorf("Play() = %d, want 1 (Runechant only; +3 rides on weapon's BonusAttack)", got)
 	}
@@ -54,7 +54,7 @@ func TestOathOfTheArknight_WeaponCountsAsAttack(t *testing.T) {
 
 func TestOathOfTheArknight_NonRunebladeAttackDoesNotQualify(t *testing.T) {
 	s := &sim.TurnState{CardsRemaining: []*sim.CardState{{Card: testutils.NonRunebladeAttack{}}}}
-	(OathOfTheArknightRed{}).Play(s, &sim.CardState{Card: OathOfTheArknightRed{}})
+	sim.ResolveChainStep(s, s.Logger(), &sim.CardState{Card: OathOfTheArknightRed{}})
 	if got := s.Value; got != 1 {
 		t.Errorf("Play() = %d, want 1 (non-Runeblade attack shouldn't trigger bonus)", got)
 	}
@@ -63,7 +63,7 @@ func TestOathOfTheArknight_NonRunebladeAttackDoesNotQualify(t *testing.T) {
 func TestOathOfTheArknight_RunebladeNonAttackDoesNotQualify(t *testing.T) {
 	// Read the Runes is Runeblade + Action but NOT Attack or Weapon.
 	s := &sim.TurnState{CardsRemaining: []*sim.CardState{{Card: testutils.NonAttack{}}}}
-	(OathOfTheArknightRed{}).Play(s, &sim.CardState{Card: OathOfTheArknightRed{}})
+	sim.ResolveChainStep(s, s.Logger(), &sim.CardState{Card: OathOfTheArknightRed{}})
 	if got := s.Value; got != 1 {
 		t.Errorf("Play() = %d, want 1 (non-attack Runeblade card shouldn't trigger bonus)", got)
 	}

@@ -14,20 +14,14 @@ func sloggismIsTarget(s *sim.TurnState, pc *sim.CardState) bool {
 	return pc.Card.Types().IsAttackAction() && pc.Card.Cost(s) >= 2
 }
 
-func (SloggismRed) Play(s *sim.TurnState, self *sim.CardState) {
+func (SloggismRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	GrantNextCardBonusAttack(s, 6, sloggismIsTarget)
-	n := self.DealEffectiveAttack(s)
-	s.Log(self, n)
 }
 
-func (SloggismYellow) Play(s *sim.TurnState, self *sim.CardState) {
+func (SloggismYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	GrantNextCardBonusAttack(s, 5, sloggismIsTarget)
-	n := self.DealEffectiveAttack(s)
-	s.Log(self, n)
 }
 
-func (SloggismBlue) Play(s *sim.TurnState, self *sim.CardState) {
+func (SloggismBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	GrantNextCardBonusAttack(s, 4, sloggismIsTarget)
-	n := self.DealEffectiveAttack(s)
-	s.Log(self, n)
 }

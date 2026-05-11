@@ -517,7 +517,7 @@ func processAurasAtStartOfTurn(queued []Aura, d *deck.Deck) (
 		preValue := ts.Value
 		ts.currentAuraIdx = i
 		ts.currentAuraDestroyed = false
-		t.Handler(ts, &t.Trigger, t)
+		t.Handler(ts, ts.logger, &t.Trigger, t)
 		ts.currentAuraIdx = -1
 		d := ts.Value - preValue
 		damage += d

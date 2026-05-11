@@ -21,7 +21,7 @@ func TestAetherSlash_BaseDamage(t *testing.T) {
 	}
 	for _, tc := range cases {
 		var s sim.TurnState
-		tc.c.Play(&s, &sim.CardState{Card: tc.c})
+		sim.ResolveChainStep(&s, s.Logger(), &sim.CardState{Card: tc.c})
 		if got := s.Value; got != tc.want {
 			t.Errorf("%s: Play() = %d, want %d", tc.c.Name(), got, tc.want)
 		}
@@ -41,7 +41,7 @@ func TestAetherSlash_NonAttackActionAttributedFiresRider(t *testing.T) {
 	for _, tc := range cases {
 		var s sim.TurnState
 		self := &sim.CardState{Card: tc.c, PitchedToPlay: []sim.Card{testutils.NonAttack{}}}
-		tc.c.Play(&s, self)
+		sim.ResolveChainStep(&s, s.Logger(), self)
 		if got := s.Value; got != tc.want {
 			t.Errorf("%s: Play() = %d, want %d", tc.c.Name(), got, tc.want)
 		}
@@ -57,7 +57,7 @@ func TestAetherSlash_AttackAttributedDoesNotFireRider(t *testing.T) {
 		PitchedToPlay: []sim.Card{testutils.RunebladeAttack{}},
 	}
 	s := sim.TurnState{Pitched: []sim.Card{testutils.RunebladeAttack{}, testutils.NonAttack{}}}
-	(AetherSlashRed{}).Play(&s, self)
+	sim.ResolveChainStep(&s, s.Logger(), self)
 	if got := s.Value; got != 4 {
 		t.Errorf("Aether Slash Red: Play() = %d, want 4 (attack attributed; rider gated to PitchedToPlay)", got)
 	}
@@ -67,13 +67,13 @@ func TestAetherSlash_FlagsArcaneDamageDealtOnlyWhenTriggered(t *testing.T) {
 	// The ArcaneDamageDealt flag should only be set when the rider actually fires — otherwise
 	// same-turn triggers like Meat and Greet's go-again would spuriously enable themselves.
 	var s sim.TurnState
-	(AetherSlashRed{}).Play(&s, &sim.CardState{Card: AetherSlashRed{}})
+	sim.ResolveChainStep(&s, s.Logger(), &sim.CardState{Card: AetherSlashRed{}})
 	if s.ArcaneDamageDealt {
 		t.Error("ArcaneDamageDealt = true with no qualifying pitch attribution; want false")
 	}
 	s = sim.TurnState{}
 	self := &sim.CardState{Card: AetherSlashRed{}, PitchedToPlay: []sim.Card{testutils.NonAttack{}}}
-	(AetherSlashRed{}).Play(&s, self)
+	sim.ResolveChainStep(&s, s.Logger(), self)
 	if !s.ArcaneDamageDealt {
 		t.Error("ArcaneDamageDealt = false with non-attack action attributed; want true")
 	}

@@ -11,4 +11,5 @@ import (
 
 // not implemented: self-destroys on pitching a 1-resource card → gain {r}{r}{r} instead
 
-func (TalismanOfRecompenseYellow) Play(s *sim.TurnState, self *sim.CardState) { s.Log(self, 0) }
+func (TalismanOfRecompenseYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+}

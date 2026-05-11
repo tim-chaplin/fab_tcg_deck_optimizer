@@ -12,20 +12,14 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
 
-func (ArcanicCrackleRed) Play(s *sim.TurnState, self *sim.CardState) {
-	n := self.DealEffectiveAttack(s)
-	s.Log(self, n)
-	s.DealArcaneDamage(self, 1)
+func (ArcanicCrackleRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+	s.DealArcaneDamage(l, self, 1)
 }
 
-func (ArcanicCrackleYellow) Play(s *sim.TurnState, self *sim.CardState) {
-	n := self.DealEffectiveAttack(s)
-	s.Log(self, n)
-	s.DealArcaneDamage(self, 1)
+func (ArcanicCrackleYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+	s.DealArcaneDamage(l, self, 1)
 }
 
-func (ArcanicCrackleBlue) Play(s *sim.TurnState, self *sim.CardState) {
-	n := self.DealEffectiveAttack(s)
-	s.Log(self, n)
-	s.DealArcaneDamage(self, 1)
+func (ArcanicCrackleBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+	s.DealArcaneDamage(l, self, 1)
 }

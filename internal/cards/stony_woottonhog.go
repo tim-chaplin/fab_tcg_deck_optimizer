@@ -12,19 +12,8 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
 
-func stonyWoottonhogPlay(s *sim.TurnState, self *sim.CardState) {
-	n := self.DealEffectiveAttack(s)
-	s.Log(self, n)
-}
+func (StonyWoottonhogRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {}
 
-func (StonyWoottonhogRed) Play(s *sim.TurnState, self *sim.CardState) {
-	stonyWoottonhogPlay(s, self)
-}
+func (StonyWoottonhogYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {}
 
-func (StonyWoottonhogYellow) Play(s *sim.TurnState, self *sim.CardState) {
-	stonyWoottonhogPlay(s, self)
-}
-
-func (StonyWoottonhogBlue) Play(s *sim.TurnState, self *sim.CardState) {
-	stonyWoottonhogPlay(s, self)
-}
+func (StonyWoottonhogBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {}

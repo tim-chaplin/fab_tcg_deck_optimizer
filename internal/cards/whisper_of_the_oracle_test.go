@@ -21,16 +21,18 @@ func TestWhisperOfTheOracle_PlayCallsOpt4(t *testing.T) {
 
 	for _, card := range whisperOfTheOracleVariants {
 		s := sim.NewTurnStateFromCards([]sim.Card{a, b, c, d}, nil)
-		card.Play(s, &sim.CardState{Card: card})
+		sim.ResolveChainStep(s, s.Logger(), &sim.CardState{Card: card})
 		if s.Value != 0 {
 			t.Errorf("%s: Play() Value = %d, want 0", card.Name(), s.Value)
 		}
 		if len(s.LogEntries()) != 2 {
-			t.Errorf("%s: Log len = %d, want 2 (LogPlay + Opted ...)", card.Name(), len(s.LogEntries()))
+			t.Errorf("%s: Log len = %d, want 2 (Opted... + chain step)", card.Name(), len(s.LogEntries()))
 			continue
 		}
+		// Play emits the Opted line; the chain step is auto-appended after Play
+		// returns, so the Opted entry lands first.
 		want := "Opted [a, b, c, d], put [a, b, c, d] on top, put [] on bottom"
-		if got := s.LogEntries()[1].Text; got != want {
+		if got := s.LogEntries()[0].Text; got != want {
 			t.Errorf("%s: Opt log entry = %q, want %q", card.Name(), got, want)
 		}
 	}

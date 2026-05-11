@@ -13,23 +13,17 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
 
-func (SirensOfSafeHarborRed) Play(s *sim.TurnState, self *sim.CardState) {
-	n := self.DealEffectiveAttack(s)
-	s.Log(self, n)
+func (SirensOfSafeHarborRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	s.AddValue(1)
-	s.LogRider(self, 1, "Gained 1 health (graveyard trigger)")
+	l.AppendPostTrigger(self.Card.DisplayName(), "Gained 1 health (graveyard trigger)", 1)
 }
 
-func (SirensOfSafeHarborYellow) Play(s *sim.TurnState, self *sim.CardState) {
-	n := self.DealEffectiveAttack(s)
-	s.Log(self, n)
+func (SirensOfSafeHarborYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	s.AddValue(1)
-	s.LogRider(self, 1, "Gained 1 health (graveyard trigger)")
+	l.AppendPostTrigger(self.Card.DisplayName(), "Gained 1 health (graveyard trigger)", 1)
 }
 
-func (SirensOfSafeHarborBlue) Play(s *sim.TurnState, self *sim.CardState) {
-	n := self.DealEffectiveAttack(s)
-	s.Log(self, n)
+func (SirensOfSafeHarborBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	s.AddValue(1)
-	s.LogRider(self, 1, "Gained 1 health (graveyard trigger)")
+	l.AppendPostTrigger(self.Card.DisplayName(), "Gained 1 health (graveyard trigger)", 1)
 }

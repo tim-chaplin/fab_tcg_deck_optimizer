@@ -11,12 +11,12 @@ import (
 
 // not implemented: Instant prevent X arcane to your hero; X scaled by revealed top-card pitch
 
-func (EirinasPrayerRed) Play(s *sim.TurnState, self *sim.CardState) { s.Log(self, 0) }
+func (EirinasPrayerRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {}
 
 // not implemented: Instant prevent X arcane to your hero; X scaled by revealed top-card pitch
 
-func (EirinasPrayerYellow) Play(s *sim.TurnState, self *sim.CardState) { s.Log(self, 0) }
+func (EirinasPrayerYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {}
 
 // not implemented: Instant prevent X arcane to your hero; X scaled by revealed top-card pitch
 
-func (EirinasPrayerBlue) Play(s *sim.TurnState, self *sim.CardState) { s.Log(self, 0) }
+func (EirinasPrayerBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {}

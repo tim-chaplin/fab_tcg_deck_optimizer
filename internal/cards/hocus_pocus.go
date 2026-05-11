@@ -8,23 +8,17 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
 
-func (HocusPocusRed) Play(s *sim.TurnState, self *sim.CardState) {
-	n := self.DealEffectiveAttack(s)
-	s.Log(self, n)
+func (HocusPocusRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	s.CreateRunechants(1)
-	s.LogRider(self, 1, "Created a runechant")
+	l.AppendPostTrigger(self.Card.DisplayName(), "Created a runechant", 1)
 }
 
-func (HocusPocusYellow) Play(s *sim.TurnState, self *sim.CardState) {
-	n := self.DealEffectiveAttack(s)
-	s.Log(self, n)
+func (HocusPocusYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	s.CreateRunechants(1)
-	s.LogRider(self, 1, "Created a runechant")
+	l.AppendPostTrigger(self.Card.DisplayName(), "Created a runechant", 1)
 }
 
-func (HocusPocusBlue) Play(s *sim.TurnState, self *sim.CardState) {
-	n := self.DealEffectiveAttack(s)
-	s.Log(self, n)
+func (HocusPocusBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	s.CreateRunechants(1)
-	s.LogRider(self, 1, "Created a runechant")
+	l.AppendPostTrigger(self.Card.DisplayName(), "Created a runechant", 1)
 }

@@ -13,6 +13,6 @@ import (
 func (LungingPressBlue) ARTargetAllowed(c sim.Card, _ int8) bool {
 	return c.Types().IsAttackAction()
 }
-func (LungingPressBlue) Play(s *sim.TurnState, self *sim.CardState) {
-	sim.GrantAttackReactionBuff(s, self, 1)
+func (LungingPressBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+	sim.GrantAttackReactionBuff(s, l, self, 1)
 }

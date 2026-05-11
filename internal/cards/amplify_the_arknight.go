@@ -26,25 +26,19 @@ func (AmplifyTheArknightRed) Cost(s *sim.TurnState) int { return amplifyTheArkni
 func (AmplifyTheArknightRed) MinCost() int              { return 0 }
 func (AmplifyTheArknightRed) MaxCost() int              { return amplifyTheArknightPrintedCost }
 
-func (AmplifyTheArknightRed) Play(s *sim.TurnState, self *sim.CardState) {
-	n := self.DealEffectiveAttack(s)
-	s.Log(self, n)
+func (AmplifyTheArknightRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 }
 
 func (AmplifyTheArknightYellow) Cost(s *sim.TurnState) int { return amplifyTheArknightCost(s) }
 func (AmplifyTheArknightYellow) MinCost() int              { return 0 }
 func (AmplifyTheArknightYellow) MaxCost() int              { return amplifyTheArknightPrintedCost }
 
-func (AmplifyTheArknightYellow) Play(s *sim.TurnState, self *sim.CardState) {
-	n := self.DealEffectiveAttack(s)
-	s.Log(self, n)
+func (AmplifyTheArknightYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 }
 
 func (AmplifyTheArknightBlue) Cost(s *sim.TurnState) int { return amplifyTheArknightCost(s) }
 func (AmplifyTheArknightBlue) MinCost() int              { return 0 }
 func (AmplifyTheArknightBlue) MaxCost() int              { return amplifyTheArknightPrintedCost }
 
-func (AmplifyTheArknightBlue) Play(s *sim.TurnState, self *sim.CardState) {
-	n := self.DealEffectiveAttack(s)
-	s.Log(self, n)
+func (AmplifyTheArknightBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 }

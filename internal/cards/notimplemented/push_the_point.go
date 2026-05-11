@@ -11,21 +11,15 @@ import (
 
 // not implemented: chain-history +2{p} rider (in-chain history not readable from Play)
 
-func (c PushThePointRed) Play(s *sim.TurnState, self *sim.CardState) {
-	n := self.DealEffectiveAttack(s)
-	s.Log(self, n)
+func (c PushThePointRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 }
 
 // not implemented: chain-history +2{p} rider (in-chain history not readable from Play)
 
-func (c PushThePointYellow) Play(s *sim.TurnState, self *sim.CardState) {
-	n := self.DealEffectiveAttack(s)
-	s.Log(self, n)
+func (c PushThePointYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 }
 
 // not implemented: chain-history +2{p} rider (in-chain history not readable from Play)
 
-func (c PushThePointBlue) Play(s *sim.TurnState, self *sim.CardState) {
-	n := self.DealEffectiveAttack(s)
-	s.Log(self, n)
+func (c PushThePointBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 }

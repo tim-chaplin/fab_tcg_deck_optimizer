@@ -11,7 +11,7 @@ func TestRegurgitatingSlog_NoSloggismNoDominate(t *testing.T) {
 	for _, c := range []sim.Card{RegurgitatingSlogRed{}, RegurgitatingSlogYellow{}, RegurgitatingSlogBlue{}} {
 		s := sim.NewTurnStateFromCards(nil, nil)
 		self := &sim.CardState{Card: c}
-		c.Play(s, self)
+		sim.ResolveChainStep(s, s.Logger(), self)
 		if self.GrantedDominate {
 			t.Errorf("%s [%d{p}]: GrantedDominate = true with no Sloggism, want false", c.Name(), c.Pitch())
 		}
@@ -24,7 +24,7 @@ func TestRegurgitatingSlog_BanishesSloggismForDominate(t *testing.T) {
 	for _, c := range []sim.Card{RegurgitatingSlogRed{}, RegurgitatingSlogYellow{}, RegurgitatingSlogBlue{}} {
 		s := sim.NewTurnStateFromCards(nil, []sim.Card{SloggismRed{}})
 		self := &sim.CardState{Card: c}
-		c.Play(s, self)
+		sim.ResolveChainStep(s, s.Logger(), self)
 		if !self.GrantedDominate {
 			t.Errorf("%s [%d{p}]: GrantedDominate = false after banish, want true", c.Name(), c.Pitch())
 		}

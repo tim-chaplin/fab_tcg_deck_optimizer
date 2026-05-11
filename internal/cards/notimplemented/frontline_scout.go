@@ -13,26 +13,24 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
 
-func frontlineScoutPlay(s *sim.TurnState, self *sim.CardState) {
+func frontlineScoutPlay(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	self.GrantGoAgainIfFromArsenal()
-	n := self.DealEffectiveAttack(s)
-	s.Log(self, n)
 }
 
 // not implemented: opposing-hand-peek rider
 
-func (FrontlineScoutRed) Play(s *sim.TurnState, self *sim.CardState) {
-	frontlineScoutPlay(s, self)
+func (FrontlineScoutRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+	frontlineScoutPlay(s, l, self)
 }
 
 // not implemented: opposing-hand-peek rider
 
-func (FrontlineScoutYellow) Play(s *sim.TurnState, self *sim.CardState) {
-	frontlineScoutPlay(s, self)
+func (FrontlineScoutYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+	frontlineScoutPlay(s, l, self)
 }
 
 // not implemented: opposing-hand-peek rider
 
-func (FrontlineScoutBlue) Play(s *sim.TurnState, self *sim.CardState) {
-	frontlineScoutPlay(s, self)
+func (FrontlineScoutBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+	frontlineScoutPlay(s, l, self)
 }

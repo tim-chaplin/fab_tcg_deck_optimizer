@@ -15,23 +15,21 @@ import (
 
 // weepingBattlegroundPlay emits the chain step then writes the banish-for-arcane rider as
 // a sub-line under self when an aura was successfully banished from the graveyard.
-func weepingBattlegroundPlay(s *sim.TurnState, self *sim.CardState) {
-	n := self.DealEffectiveDefense(s)
-	s.Log(self, n)
+func weepingBattlegroundPlay(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	if n := banishAuraFromGraveyard(s); n > 0 {
 		s.AddValue(n)
-		s.LogRider(self, n, "Banished an aura, dealt 1 arcane damage")
+		l.AppendPostTrigger(self.Card.DisplayName(), "Banished an aura, dealt 1 arcane damage", n)
 	}
 }
 
-func (WeepingBattlegroundRed) Play(s *sim.TurnState, self *sim.CardState) {
-	weepingBattlegroundPlay(s, self)
+func (WeepingBattlegroundRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+	weepingBattlegroundPlay(s, l, self)
 }
 
-func (WeepingBattlegroundYellow) Play(s *sim.TurnState, self *sim.CardState) {
-	weepingBattlegroundPlay(s, self)
+func (WeepingBattlegroundYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+	weepingBattlegroundPlay(s, l, self)
 }
 
-func (WeepingBattlegroundBlue) Play(s *sim.TurnState, self *sim.CardState) {
-	weepingBattlegroundPlay(s, self)
+func (WeepingBattlegroundBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+	weepingBattlegroundPlay(s, l, self)
 }

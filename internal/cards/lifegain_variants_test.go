@@ -27,7 +27,7 @@ func TestLifegainPerVariant(t *testing.T) {
 	}
 	for _, tc := range cases {
 		var s sim.TurnState
-		tc.card.Play(&s, &sim.CardState{Card: tc.card})
+		sim.ResolveChainStep(&s, s.Logger(), &sim.CardState{Card: tc.card})
 		if got := s.Value; got != tc.want {
 			t.Errorf("%s: Play() = %d, want %d", tc.name, got, tc.want)
 		}

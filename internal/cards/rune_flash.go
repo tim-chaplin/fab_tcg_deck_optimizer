@@ -26,25 +26,19 @@ func (RuneFlashRed) Cost(s *sim.TurnState) int { return runeFlashCost(s) }
 func (RuneFlashRed) MinCost() int              { return 0 }
 func (RuneFlashRed) MaxCost() int              { return runeFlashPrintedCost }
 
-func (RuneFlashRed) Play(s *sim.TurnState, self *sim.CardState) {
-	n := self.DealEffectiveAttack(s)
-	s.Log(self, n)
+func (RuneFlashRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 }
 
 func (RuneFlashYellow) Cost(s *sim.TurnState) int { return runeFlashCost(s) }
 func (RuneFlashYellow) MinCost() int              { return 0 }
 func (RuneFlashYellow) MaxCost() int              { return runeFlashPrintedCost }
 
-func (RuneFlashYellow) Play(s *sim.TurnState, self *sim.CardState) {
-	n := self.DealEffectiveAttack(s)
-	s.Log(self, n)
+func (RuneFlashYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 }
 
 func (RuneFlashBlue) Cost(s *sim.TurnState) int { return runeFlashCost(s) }
 func (RuneFlashBlue) MinCost() int              { return 0 }
 func (RuneFlashBlue) MaxCost() int              { return runeFlashPrintedCost }
 
-func (RuneFlashBlue) Play(s *sim.TurnState, self *sim.CardState) {
-	n := self.DealEffectiveAttack(s)
-	s.Log(self, n)
+func (RuneFlashBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 }

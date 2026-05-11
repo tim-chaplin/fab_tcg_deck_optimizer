@@ -25,7 +25,7 @@ func (Viserai) Class() card.CardType { return card.TypeRuneblade }
 // OnCardPlayed implements Viserai's hero ability: whenever a Runeblade card is played, if a
 // non-attack action (Action without Attack) has been played this turn, create a Runechant
 // token.
-func (Viserai) OnCardPlayed(played sim.Card, s *sim.TurnState) int {
+func (Viserai) OnCardPlayed(played sim.Card, s *sim.TurnState, l sim.Logger) int {
 	t := played.Types()
 	// Weapon swings aren't "playing a card" and don't trigger Viserai.
 	if !t.Has(card.TypeRuneblade) || t.Has(card.TypeWeapon) {
@@ -33,7 +33,7 @@ func (Viserai) OnCardPlayed(played sim.Card, s *sim.TurnState) int {
 	}
 	if s.NonAttackActionPlayed {
 		s.CreateRunechants(1)
-		s.LogPreTrigger(played.DisplayName(), "Viserai created a runechant", 1)
+		l.AppendPreTrigger(played.DisplayName(), "Viserai created a runechant", 1)
 		return 1
 	}
 	return 0

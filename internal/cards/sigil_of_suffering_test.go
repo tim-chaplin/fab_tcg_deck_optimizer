@@ -18,7 +18,7 @@ func TestSigilOfSuffering_FullCreditWhenIncomingAbsorbsBoost(t *testing.T) {
 	}
 	for _, tc := range cases {
 		s := sim.TurnState{IncomingDamage: 10}
-		tc.c.Play(&s, &sim.CardState{Card: tc.c})
+		sim.ResolveChainStep(&s, s.Logger(), &sim.CardState{Card: tc.c})
 		if got := s.Value; got != tc.want {
 			t.Errorf("%s: Play(IncomingDamage=10) Value = %d, want %d (block + boost + arcane)",
 				tc.c.DisplayName(), got, tc.want)
@@ -40,7 +40,7 @@ func TestSigilOfSuffering_BoostWastedWhenIncomingMatchesDefense(t *testing.T) {
 	}
 	for _, tc := range cases {
 		s := sim.TurnState{IncomingDamage: tc.incoming}
-		tc.c.Play(&s, &sim.CardState{Card: tc.c})
+		sim.ResolveChainStep(&s, s.Logger(), &sim.CardState{Card: tc.c})
 		if got := s.Value; got != tc.want {
 			t.Errorf("%s: Play(IncomingDamage=%d) Value = %d, want %d (block at cap + arcane only)",
 				tc.c.DisplayName(), tc.incoming, got, tc.want)

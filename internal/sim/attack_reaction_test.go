@@ -24,7 +24,7 @@ func (stubAR) Types() card.TypeSet {
 }
 func (stubAR) GoAgain() bool                       { return false }
 func (stubAR) ARTargetAllowed(c Card, _ int8) bool { return true }
-func (stubAR) Play(*TurnState, *CardState)         {}
+func (stubAR) Play(*TurnState, Logger, *CardState) {}
 
 // stubAttack is a Generic Action - Attack target candidate.
 type stubAttack struct{}
@@ -39,13 +39,13 @@ func (stubAttack) Defense() int        { return 0 }
 func (stubAttack) Types() card.TypeSet {
 	return card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 }
-func (stubAttack) GoAgain() bool               { return true }
-func (stubAttack) Play(*TurnState, *CardState) {}
+func (stubAttack) GoAgain() bool                       { return true }
+func (stubAttack) Play(*TurnState, Logger, *CardState) {}
 
 // Tests that GrantAttackReactionBuff is a no-op when no target is set.
 func TestGrantAttackReactionBuff_NoTargetIsNoOp(t *testing.T) {
 	s := TurnState{}
-	GrantAttackReactionBuff(&s, &CardState{Card: stubAR{}}, 5)
+	GrantAttackReactionBuff(&s, s.Logger(), &CardState{Card: stubAR{}}, 5)
 	if s.Value != 0 {
 		t.Errorf("Value = %d, want 0", s.Value)
 	}
@@ -57,7 +57,7 @@ func TestGrantAttackReactionBuff_AppliesBuffAndCreditsValue(t *testing.T) {
 	target := &CardState{Card: stubAttack{}}
 	s := TurnState{attackReactionTarget: target, logger: turnlogger.New()}
 	s.logger.AppendChainStep("stubAttack: ATTACK", 1)
-	GrantAttackReactionBuff(&s, &CardState{Card: stubAR{}}, 3)
+	GrantAttackReactionBuff(&s, s.Logger(), &CardState{Card: stubAR{}}, 3)
 	if target.BonusAttack != 3 {
 		t.Errorf("target BonusAttack = %d, want 3", target.BonusAttack)
 	}
@@ -75,7 +75,7 @@ func TestAmendLastChainStepN_SkipsNonChainEntries(t *testing.T) {
 	s := TurnState{logger: turnlogger.New()}
 	s.logger.AppendChainStep("first", 2)
 	s.logger.AppendPostTrigger("first", "rider", 0)
-	s.AmendLastChainStepN(5)
+	s.Logger().AmendLastChainStepN(5)
 	entries := s.LogEntries()
 	if got := entries[0].N; got != 7 {
 		t.Errorf("first chain-step N = %d, want 7", got)

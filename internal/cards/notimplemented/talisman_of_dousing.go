@@ -10,4 +10,5 @@ import (
 
 // not implemented: passive Spellvoid 1
 
-func (TalismanOfDousingYellow) Play(s *sim.TurnState, self *sim.CardState) { s.Log(self, 0) }
+func (TalismanOfDousingYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+}

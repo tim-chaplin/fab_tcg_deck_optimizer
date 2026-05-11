@@ -45,14 +45,13 @@ func banishAuraFromGraveyard(s *sim.TurnState) int {
 // fragileAuraPlay emits the chain step for a fragile-aura card and writes the expected
 // payoff as a sub-line under self when fragileAuraValue is non-zero. Auras have Attack=0,
 // so LogPlay carries the chain entry; the rider line carries the predicted value.
-func fragileAuraPlay(s *sim.TurnState, self *sim.CardState, n int, attackActionOnly bool) {
-	s.Log(self, 0)
+func fragileAuraPlay(s *sim.TurnState, l sim.Logger, self *sim.CardState, n int, attackActionOnly bool) {
 	v := fragileAuraValue(s, n, attackActionOnly)
 	if v <= 0 {
 		return
 	}
 	s.AddValue(v)
-	s.LogRiderf(self, v, "Aura expected to pay %d runechants", v)
+	l.AppendPostTriggerf(self.Card.DisplayName(), v, "Aura expected to pay %d runechants", v)
 }
 
 // fragileAuraValue returns n when the aura is expected to pay out, 0 otherwise. Two paths
@@ -110,9 +109,9 @@ func qualifiesAsAttacker(c sim.Card, attackActionOnly bool) bool {
 // --- Mark helpers ---
 
 // markOpponentOnHit fires the printed "When this hits a hero, mark them" rider.
-func markOpponentOnHit(s *sim.TurnState, self *sim.CardState, _ *sim.OnHitHandler) {
+func markOpponentOnHit(s *sim.TurnState, l sim.Logger, self *sim.CardState, _ *sim.OnHitHandler) {
 	s.OpponentMarked = true
-	s.LogRider(self, 0, "Marked the opposing hero")
+	l.AppendPostTrigger(self.Card.DisplayName(), "Marked the opposing hero", 0)
 }
 
 // --- "Next attack" rider helpers ---

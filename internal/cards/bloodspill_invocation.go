@@ -13,14 +13,14 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
 
-func (BloodspillInvocationRed) Play(s *sim.TurnState, self *sim.CardState) {
-	fragileAuraPlay(s, self, 3, true)
+func (BloodspillInvocationRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+	fragileAuraPlay(s, l, self, 3, true)
 }
 
-func (BloodspillInvocationYellow) Play(s *sim.TurnState, self *sim.CardState) {
-	fragileAuraPlay(s, self, 2, true)
+func (BloodspillInvocationYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+	fragileAuraPlay(s, l, self, 2, true)
 }
 
-func (BloodspillInvocationBlue) Play(s *sim.TurnState, self *sim.CardState) {
-	fragileAuraPlay(s, self, 1, true)
+func (BloodspillInvocationBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+	fragileAuraPlay(s, l, self, 1, true)
 }

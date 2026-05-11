@@ -12,21 +12,15 @@ import (
 
 // not implemented: hand-as-cost alt cost not modelled; card fails when printed cost can't be paid
 
-func (RiseAboveRed) Play(s *sim.TurnState, self *sim.CardState) {
-	n := self.DealEffectiveDefense(s)
-	s.Log(self, n)
+func (RiseAboveRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 }
 
 // not implemented: hand-as-cost alt cost not modelled; card fails when printed cost can't be paid
 
-func (RiseAboveYellow) Play(s *sim.TurnState, self *sim.CardState) {
-	n := self.DealEffectiveDefense(s)
-	s.Log(self, n)
+func (RiseAboveYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 }
 
 // not implemented: hand-as-cost alt cost not modelled; card fails when printed cost can't be paid
 
-func (RiseAboveBlue) Play(s *sim.TurnState, self *sim.CardState) {
-	n := self.DealEffectiveDefense(s)
-	s.Log(self, n)
+func (RiseAboveBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 }

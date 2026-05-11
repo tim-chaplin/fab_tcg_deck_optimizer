@@ -17,24 +17,18 @@ import (
 
 // not implemented: damage-prevention trigger, end-phase destruction clause
 
-func (EnchantingMelodyRed) Play(s *sim.TurnState, self *sim.CardState) {
+func (EnchantingMelodyRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	cards.SetAuraCreated(s)
-	n := self.DealEffectiveAttack(s)
-	s.Log(self, n)
 }
 
 // not implemented: damage-prevention trigger, end-phase destruction clause
 
-func (EnchantingMelodyYellow) Play(s *sim.TurnState, self *sim.CardState) {
+func (EnchantingMelodyYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	cards.SetAuraCreated(s)
-	n := self.DealEffectiveAttack(s)
-	s.Log(self, n)
 }
 
 // not implemented: damage-prevention trigger, end-phase destruction clause
 
-func (EnchantingMelodyBlue) Play(s *sim.TurnState, self *sim.CardState) {
+func (EnchantingMelodyBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	cards.SetAuraCreated(s)
-	n := self.DealEffectiveAttack(s)
-	s.Log(self, n)
 }

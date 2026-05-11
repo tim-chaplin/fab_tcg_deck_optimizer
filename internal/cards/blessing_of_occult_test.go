@@ -19,7 +19,7 @@ func TestBlessingOfOccult_PlayCreatesAuraNoThisTurnRunes(t *testing.T) {
 	}
 	for _, tc := range cases {
 		var s sim.TurnState
-		tc.c.Play(&s, &sim.CardState{Card: tc.c})
+		sim.ResolveChainStep(&s, s.Logger(), &sim.CardState{Card: tc.c})
 		if got := s.Value; got != 0 {
 			t.Errorf("%s: Play() = %d, want 0 (rune creation deferred to trigger)", tc.c.Name(), got)
 		}
@@ -54,11 +54,11 @@ func TestBlessingOfOccult_TriggerHandlerCreatesNRunes(t *testing.T) {
 	}
 	for _, tc := range cases {
 		var play sim.TurnState
-		tc.c.Play(&play, &sim.CardState{Card: tc.c})
+		sim.ResolveChainStep(&play, play.Logger(), &sim.CardState{Card: tc.c})
 		next := sim.NewTurnStateFromCards(nil, nil)
 		next.Auras = append(next.Auras, play.Auras[0])
 		next.SetCurrentAuraIdxForTesting(0)
-		next.Auras[0].Handler(next, &next.Auras[0].Trigger, &next.Auras[0])
+		next.Auras[0].Handler(next, next.Logger(), &next.Auras[0].Trigger, &next.Auras[0])
 		if next.Value != tc.n {
 			t.Errorf("%s: handler Value = %d, want %d", tc.c.Name(), next.Value, tc.n)
 		}

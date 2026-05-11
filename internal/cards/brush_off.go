@@ -10,22 +10,11 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
 
-func brushOffPlay(s *sim.TurnState, self *sim.CardState) {
-	n := self.DealEffectiveDefense(s)
-	s.Log(self, n)
-}
-
 func (BrushOffRed) DefensiveInstant() {}
-func (BrushOffRed) Play(s *sim.TurnState, self *sim.CardState) {
-	brushOffPlay(s, self)
-}
+func (BrushOffRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {}
 
 func (BrushOffYellow) DefensiveInstant() {}
-func (BrushOffYellow) Play(s *sim.TurnState, self *sim.CardState) {
-	brushOffPlay(s, self)
-}
+func (BrushOffYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {}
 
 func (BrushOffBlue) DefensiveInstant() {}
-func (BrushOffBlue) Play(s *sim.TurnState, self *sim.CardState) {
-	brushOffPlay(s, self)
-}
+func (BrushOffBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {}

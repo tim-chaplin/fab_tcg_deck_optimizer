@@ -9,7 +9,7 @@ import (
 // Tests that Starting Stake creates a Gold token when none are in play.
 func TestStartingStake_CreatesGoldWhenNone(t *testing.T) {
 	s := sim.NewTurnStateFromCards(nil, nil)
-	(StartingStakeYellow{}).Play(s, &sim.CardState{Card: StartingStakeYellow{}})
+	sim.ResolveChainStep(s, s.Logger(), &sim.CardState{Card: StartingStakeYellow{}})
 	if s.Gold() != 1 {
 		t.Fatalf("Gold = %d, want 1 (no prior tokens, creates one)", s.Gold())
 	}
@@ -19,7 +19,7 @@ func TestStartingStake_CreatesGoldWhenNone(t *testing.T) {
 func TestStartingStake_NoOpWhenGoldExists(t *testing.T) {
 	s := sim.NewTurnStateFromCards(nil, nil)
 	s.CreateGold(2)
-	(StartingStakeYellow{}).Play(s, &sim.CardState{Card: StartingStakeYellow{}})
+	sim.ResolveChainStep(s, s.Logger(), &sim.CardState{Card: StartingStakeYellow{}})
 	if s.Gold() != 2 {
 		t.Fatalf("Gold = %d, want 2 (already had Gold, no create)", s.Gold())
 	}

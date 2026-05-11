@@ -11,21 +11,15 @@ import (
 
 // not implemented: pay-{r}{r}{r}-for-+5{p} mode
 
-func (c PunchAboveYourWeightRed) Play(s *sim.TurnState, self *sim.CardState) {
-	n := self.DealEffectiveAttack(s)
-	s.Log(self, n)
+func (c PunchAboveYourWeightRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 }
 
 // not implemented: pay-{r}{r}{r}-for-+5{p} mode
 
-func (c PunchAboveYourWeightYellow) Play(s *sim.TurnState, self *sim.CardState) {
-	n := self.DealEffectiveAttack(s)
-	s.Log(self, n)
+func (c PunchAboveYourWeightYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 }
 
 // not implemented: pay-{r}{r}{r}-for-+5{p} mode
 
-func (c PunchAboveYourWeightBlue) Play(s *sim.TurnState, self *sim.CardState) {
-	n := self.DealEffectiveAttack(s)
-	s.Log(self, n)
+func (c PunchAboveYourWeightBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 }

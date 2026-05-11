@@ -10,7 +10,5 @@ import (
 )
 
 func (CalmingBreezeRed) DefensiveInstant() {}
-func (CalmingBreezeRed) Play(s *sim.TurnState, self *sim.CardState) {
-	n := self.DealEffectiveDefense(s)
-	s.Log(self, n)
+func (CalmingBreezeRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 }

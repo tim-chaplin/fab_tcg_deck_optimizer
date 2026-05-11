@@ -11,21 +11,15 @@ import (
 
 // not implemented: opponent 'lose all colors' debuff
 
-func (BlanchRed) Play(s *sim.TurnState, self *sim.CardState) {
-	n := self.DealEffectiveAttack(s)
-	s.Log(self, n)
+func (BlanchRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 }
 
 // not implemented: opponent 'lose all colors' debuff
 
-func (BlanchYellow) Play(s *sim.TurnState, self *sim.CardState) {
-	n := self.DealEffectiveAttack(s)
-	s.Log(self, n)
+func (BlanchYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 }
 
 // not implemented: opponent 'lose all colors' debuff
 
-func (BlanchBlue) Play(s *sim.TurnState, self *sim.CardState) {
-	n := self.DealEffectiveAttack(s)
-	s.Log(self, n)
+func (BlanchBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 }

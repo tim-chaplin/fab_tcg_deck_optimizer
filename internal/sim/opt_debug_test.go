@@ -47,7 +47,7 @@ func TestOptDebug_PrintsOnlyWhenSet(t *testing.T) {
 		OptDebug = false
 		out := captureStdout(t, func() {
 			s := NewTurnStateFromCards([]Card{a, b}, nil)
-			s.Opt(2)
+			s.Opt(s.Logger(), 2)
 		})
 		if out != "" {
 			t.Errorf("OptDebug=false produced stdout: %q", out)
@@ -57,7 +57,7 @@ func TestOptDebug_PrintsOnlyWhenSet(t *testing.T) {
 		OptDebug = true
 		out = captureStdout(t, func() {
 			s := NewTurnStateFromCards([]Card{a, b}, nil)
-			s.Opt(2)
+			s.Opt(s.Logger(), 2)
 		})
 		if !strings.Contains(out, "Opt(2)") || !strings.Contains(out, "top=") || !strings.Contains(out, "bottom=") {
 			t.Errorf("OptDebug=true output missing expected fragments: %q", out)

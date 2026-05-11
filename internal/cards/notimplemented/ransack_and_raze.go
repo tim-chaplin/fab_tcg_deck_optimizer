@@ -12,4 +12,4 @@ import (
 
 // not implemented: gold tokens, landmarks
 
-func (RansackAndRazeBlue) Play(s *sim.TurnState, self *sim.CardState) { s.Log(self, 0) }
+func (RansackAndRazeBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {}
