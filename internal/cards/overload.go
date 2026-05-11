@@ -10,8 +10,6 @@ import (
 )
 
 func overloadPlay(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
-	n := self.DealEffectiveAttack(s)
-	self.Log(l, n)
 	if sim.LikelyToHit(self) {
 		self.GrantedGoAgain = true
 	}

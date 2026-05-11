@@ -12,18 +12,12 @@ import (
 
 func (ComeToFightRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	GrantNextCardBonusAttack(s, 3, IsAttackAction)
-	n := self.DealEffectiveAttack(s)
-	self.Log(l, n)
 }
 
 func (ComeToFightYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	GrantNextCardBonusAttack(s, 2, IsAttackAction)
-	n := self.DealEffectiveAttack(s)
-	self.Log(l, n)
 }
 
 func (ComeToFightBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	GrantNextCardBonusAttack(s, 1, IsAttackAction)
-	n := self.DealEffectiveAttack(s)
-	self.Log(l, n)
 }

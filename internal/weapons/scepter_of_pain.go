@@ -37,8 +37,6 @@ func (ScepterOfPainAbility) Defense() int            { return 0 }
 func (ScepterOfPainAbility) Types() card.TypeSet     { return scepterOfPainAbilityTypes }
 func (ScepterOfPainAbility) GoAgain() bool           { return false }
 func (ScepterOfPainAbility) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
-	n := self.DealEffectiveAttack(s)
-	self.Log(l, n)
 	s.CreateRunechants(1)
-	self.LogRider(l, 1, "Created a runechant")
+	l.AppendPostTrigger(self.Card.DisplayName(), "Created a runechant", 1)
 }

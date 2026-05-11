@@ -12,6 +12,4 @@ import (
 // not implemented: on-hit opponent-arsenal manipulation rider
 
 func (SmashUpRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
-	n := self.DealEffectiveAttack(s)
-	self.Log(l, n)
 }

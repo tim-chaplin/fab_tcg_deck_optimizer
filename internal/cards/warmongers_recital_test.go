@@ -14,7 +14,7 @@ func TestWarmongersRecital_NoAttackReturnsZero(t *testing.T) {
 	for _, c := range []sim.Card{
 		cards.WarmongersRecitalRed{}, cards.WarmongersRecitalYellow{}, cards.WarmongersRecitalBlue{},
 	} {
-		c.Play(&s, s.Logger(), &sim.CardState{Card: c})
+		sim.ResolveChainStep(&s, s.Logger(), &sim.CardState{Card: c})
 		if s.Value != 0 {
 			t.Errorf("%s: Play() = %d, want 0", c.Name(), s.Value)
 		}
@@ -24,7 +24,7 @@ func TestWarmongersRecital_NoAttackReturnsZero(t *testing.T) {
 // TestWarmongersRecital_NonAttackInRemainingFizzles: non-attack action fails the predicate.
 func TestWarmongersRecital_NonAttackInRemainingFizzles(t *testing.T) {
 	s := sim.TurnState{CardsRemaining: []*sim.CardState{{Card: testutils.GenericAction()}}}
-	(cards.WarmongersRecitalRed{}).Play(&s, s.Logger(), &sim.CardState{Card: cards.WarmongersRecitalRed{}})
+	sim.ResolveChainStep(&s, s.Logger(), &sim.CardState{Card: cards.WarmongersRecitalRed{}})
 	if s.Value != 0 {
 		t.Errorf("Play() = %d, want 0 (non-attack skipped)", s.Value)
 	}
@@ -44,7 +44,7 @@ func TestWarmongersRecital_NextAttackReceivesBonusAndOnHit(t *testing.T) {
 	for _, tc := range cases {
 		target := &sim.CardState{Card: testutils.GenericAttack(0, 0)}
 		s := sim.TurnState{CardsRemaining: []*sim.CardState{target}}
-		tc.c.Play(&s, s.Logger(), &sim.CardState{Card: tc.c})
+		sim.ResolveChainStep(&s, s.Logger(), &sim.CardState{Card: tc.c})
 		if target.BonusAttack != tc.want {
 			t.Errorf("%s: target BonusAttack = %d, want %d", tc.c.Name(), target.BonusAttack, tc.want)
 		}
@@ -62,7 +62,7 @@ func TestWarmongersRecital_OnHitFireRecyclesTargetFromGraveyardToDeckBottom(t *t
 	deckTop := testutils.GenericAttack(1, 7)
 	s := sim.NewTurnStateFromCards([]sim.Card{deckTop}, nil)
 	s.CardsRemaining = []*sim.CardState{targetState}
-	(cards.WarmongersRecitalRed{}).Play(s, s.Logger(), &sim.CardState{Card: cards.WarmongersRecitalRed{}})
+	sim.ResolveChainStep(s, s.Logger(), &sim.CardState{Card: cards.WarmongersRecitalRed{}})
 	if len(targetState.OnHit) != 1 {
 		t.Fatalf("OnHit not registered: len=%d", len(targetState.OnHit))
 	}

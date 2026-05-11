@@ -16,8 +16,6 @@ func meatAndGreetPlay(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	if s.ArcaneDamageDealt {
 		self.GrantedGoAgain = true
 	}
-	n := self.DealEffectiveAttack(s)
-	self.Log(l, n)
 	self.RegisterOnHit(meatAndGreetOnHit)
 }
 
@@ -25,7 +23,7 @@ func meatAndGreetPlay(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 // Top-level so registration stays alloc-free.
 func meatAndGreetOnHit(s *sim.TurnState, l sim.Logger, self *sim.CardState, _ *sim.OnHitHandler) {
 	s.CreateRunechants(1)
-	self.LogRider(l, 1, "On-hit created a runechant")
+	l.AppendPostTrigger(self.Card.DisplayName(), "On-hit created a runechant", 1)
 }
 
 func (MeatAndGreetRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {

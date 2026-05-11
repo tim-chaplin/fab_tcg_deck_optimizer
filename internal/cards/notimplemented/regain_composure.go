@@ -14,6 +14,4 @@ import (
 
 func (RegainComposureBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	cards.GrantNextCardBonusAttack(s, 1, cards.IsAttack)
-	n := self.DealEffectiveAttack(s)
-	self.Log(l, n)
 }

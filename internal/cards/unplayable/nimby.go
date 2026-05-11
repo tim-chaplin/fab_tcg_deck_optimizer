@@ -10,8 +10,8 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
 
-func (NimbyRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) { self.Log(l, 0) }
+func (NimbyRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {}
 
-func (NimbyYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) { self.Log(l, 0) }
+func (NimbyYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {}
 
-func (NimbyBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) { self.Log(l, 0) }
+func (NimbyBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {}

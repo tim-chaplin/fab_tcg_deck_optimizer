@@ -9,16 +9,10 @@ import (
 )
 
 func (EvasiveLeapRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
-	n := self.DealEffectiveDefense(s)
-	self.Log(l, n)
 }
 
 func (EvasiveLeapYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
-	n := self.DealEffectiveDefense(s)
-	self.Log(l, n)
 }
 
 func (EvasiveLeapBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
-	n := self.DealEffectiveDefense(s)
-	self.Log(l, n)
 }

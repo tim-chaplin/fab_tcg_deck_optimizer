@@ -387,7 +387,7 @@ func defendersDamage(defenders, pitched []Card, deckPile *deck.Deck, state *Turn
 		// DR sees the original pre-DR deck order.
 		*state = TurnState{Pitched: pitched, deck: deckPile.Copy(), graveyard: gravBuf, IncomingDamage: remaining, cacheable: true, Defenders: defenders, Auras: preservedAuras, logger: preservedLogger}
 		*cs = CardState{Card: def, FromArsenal: i == arsenalDefenderIdx}
-		def.Play(state, state.logger, cs)
+		ResolveChainStep(state, state.logger, cs)
 		total += state.Value
 		remaining = state.IncomingDamage
 		if !state.IsCacheable() {

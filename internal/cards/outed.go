@@ -13,6 +13,4 @@ func (OutedRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	if s.OpponentMarked {
 		self.BonusAttack++
 	}
-	n := self.DealEffectiveAttack(s)
-	self.Log(l, n)
 }

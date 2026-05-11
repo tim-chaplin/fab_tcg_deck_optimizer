@@ -9,4 +9,4 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
 
-func (PotionOfIronhideBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) { self.Log(l, 0) }
+func (PotionOfIronhideBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {}

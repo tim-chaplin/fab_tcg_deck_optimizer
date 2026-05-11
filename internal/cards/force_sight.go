@@ -16,7 +16,6 @@ import (
 // Opt 2.
 func forceSightPlay(s *sim.TurnState, l sim.Logger, self *sim.CardState, bonus int) {
 	GrantNextCardBonusAttack(s, bonus, IsAttackAction)
-	self.Log(l, 0)
 	if self.FromArsenal {
 		s.Opt(l, 2)
 	}

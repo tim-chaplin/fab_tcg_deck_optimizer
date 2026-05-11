@@ -13,22 +13,16 @@ import (
 // for a Runechant
 
 func (SplinteringDeadwoodRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
-	n := self.DealEffectiveAttack(s)
-	self.Log(l, n)
 }
 
 // not implemented: aura-swap rider modelled net-zero; no tempo credit for trading a weak aura
 // for a Runechant
 
 func (SplinteringDeadwoodYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
-	n := self.DealEffectiveAttack(s)
-	self.Log(l, n)
 }
 
 // not implemented: aura-swap rider modelled net-zero; no tempo credit for trading a weak aura
 // for a Runechant
 
 func (SplinteringDeadwoodBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
-	n := self.DealEffectiveAttack(s)
-	self.Log(l, n)
 }

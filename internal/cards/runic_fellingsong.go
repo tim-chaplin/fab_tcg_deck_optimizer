@@ -19,11 +19,9 @@ import (
 // graveyard. banishAuraFromGraveyard flips ArcaneDamageDealt internally as part of its
 // arcane-damage payload.
 func runicFellingsongPlay(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
-	n := self.DealEffectiveAttack(s)
-	self.Log(l, n)
 	if n := banishAuraFromGraveyard(s); n > 0 {
 		s.AddValue(n)
-		self.LogRider(l, n, "Banished an aura, dealt 1 arcane damage")
+		l.AppendPostTrigger(self.Card.DisplayName(), "Banished an aura, dealt 1 arcane damage", n)
 	}
 }
 

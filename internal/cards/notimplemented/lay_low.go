@@ -12,6 +12,4 @@ import (
 // attacker debuff is dropped
 
 func (LayLowYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
-	n := self.DealEffectiveDefense(s)
-	self.Log(l, n)
 }

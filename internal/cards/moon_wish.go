@@ -47,8 +47,6 @@ func moonWishPlay(c sim.Card, s *sim.TurnState, l sim.Logger, self *sim.CardStat
 	}
 
 	// Emit Moon Wish's chain step first so the alt-cost / tutor lines follow it in order.
-	n := self.DealEffectiveAttack(s)
-	self.Log(l, n)
 
 	if returned != nil {
 		l.AppendPostTriggerf(name, 0, "%s returned %s to top of deck", name, returned.DisplayName())
@@ -82,7 +80,7 @@ func moonWishOnHit(s *sim.TurnState, l sim.Logger, self *sim.CardState, _ *sim.O
 	l.AppendPostTriggerf(name, 0, "%s tutored %s and played it", name, sk.DisplayName())
 	s.CardsPlayed = append(s.CardsPlayed, c)
 	skSelf := &sim.CardState{Card: sk}
-	sk.Play(s, l, skSelf)
+	sim.ResolveChainStep(s, l, skSelf)
 	s.CardsPlayed = s.CardsPlayed[:len(s.CardsPlayed)-1]
 	s.AddToGraveyard(sk)
 }

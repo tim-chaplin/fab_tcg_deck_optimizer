@@ -10,7 +10,5 @@ import (
 )
 
 func (PursueToTheEdgeOfOblivionRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
-	n := self.DealEffectiveAttack(s)
-	self.Log(l, n)
 	self.RegisterOnHit(markOpponentOnHit)
 }

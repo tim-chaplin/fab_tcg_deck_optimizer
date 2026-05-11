@@ -142,8 +142,7 @@ func (GoldTokenAbility) PlayPrecondition(s *TurnState, self *CardState) bool {
 func (GoldTokenAbility) Play(s *TurnState, l Logger, self *CardState) {
 	s.ConsumeItem(TokenTypeGold, 1)
 	s.DrawOne()
-	self.Log(l, 0)
-	self.LogRider(l, 0, "Spent 1 gold to draw a card")
+	l.AppendPostTrigger(self.Card.DisplayName(), "Spent 1 gold to draw a card", 0)
 }
 
 // NewGoldItem returns a fresh Gold token Item with the given count. Production code calls
@@ -181,8 +180,7 @@ func (SilverTokenAbility) PlayPrecondition(s *TurnState, self *CardState) bool {
 func (SilverTokenAbility) Play(s *TurnState, l Logger, self *CardState) {
 	s.ConsumeItem(TokenTypeSilver, 1)
 	s.DrawOne()
-	self.Log(l, 0)
-	self.LogRider(l, 0, "Spent 1 silver to draw a card")
+	l.AppendPostTrigger(self.Card.DisplayName(), "Spent 1 silver to draw a card", 0)
 }
 
 // NewSilverItem returns a fresh Silver token Item with the given count. Production code
@@ -220,8 +218,7 @@ func (CopperTokenAbility) PlayPrecondition(s *TurnState, self *CardState) bool {
 func (CopperTokenAbility) Play(s *TurnState, l Logger, self *CardState) {
 	s.ConsumeItem(TokenTypeCopper, 1)
 	s.DrawOne()
-	self.Log(l, 0)
-	self.LogRider(l, 0, "Spent 1 copper to draw a card")
+	l.AppendPostTrigger(self.Card.DisplayName(), "Spent 1 copper to draw a card", 0)
 }
 
 // NewCopperItem returns a fresh Copper token Item with the given count. Production code

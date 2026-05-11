@@ -13,6 +13,4 @@ import (
 // not implemented: hand-cycle draw rider
 
 func (c EmissaryOfMoonRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
-	n := self.DealEffectiveAttack(s)
-	self.Log(l, n)
 }

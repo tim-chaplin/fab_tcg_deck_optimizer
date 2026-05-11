@@ -10,7 +10,7 @@ import (
 func TestJackBeQuick_NoNimblismRiderOff(t *testing.T) {
 	self := &sim.CardState{Card: JackBeQuickRed{}}
 	s := sim.NewTurnStateFromCards(nil, nil)
-	(JackBeQuickRed{}).Play(s, s.Logger(), self)
+	sim.ResolveChainStep(s, s.Logger(), self)
 	if self.GrantedGoAgain {
 		t.Errorf("GrantedGoAgain = true with empty graveyard, want false")
 	}
@@ -24,7 +24,7 @@ func TestJackBeQuick_NoNimblismRiderOff(t *testing.T) {
 func TestJackBeQuick_BanishesNimblismForBonus(t *testing.T) {
 	s := sim.NewTurnStateFromCards(nil, []sim.Card{NimblismRed{}})
 	self := &sim.CardState{Card: JackBeQuickRed{}}
-	(JackBeQuickRed{}).Play(s, s.Logger(), self)
+	sim.ResolveChainStep(s, s.Logger(), self)
 	if !self.GrantedGoAgain {
 		t.Errorf("GrantedGoAgain = false after banish, want true")
 	}

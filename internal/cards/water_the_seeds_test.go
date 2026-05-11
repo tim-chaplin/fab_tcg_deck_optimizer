@@ -20,7 +20,7 @@ func TestWaterTheSeeds_NoAttackReturnsBase(t *testing.T) {
 	}
 	for _, tc := range cases {
 		s := &sim.TurnState{}
-		tc.c.Play(s, s.Logger(), &sim.CardState{Card: tc.c})
+		sim.ResolveChainStep(s, s.Logger(), &sim.CardState{Card: tc.c})
 		if got := s.Value; got != tc.want {
 			t.Errorf("%s: Play() = %d, want %d (no lookahead target)", tc.c.Name(), got, tc.want)
 		}
@@ -31,7 +31,7 @@ func TestWaterTheSeeds_NoAttackReturnsBase(t *testing.T) {
 // rider keeps searching. With no matching attack below it, the bonus fizzles.
 func TestWaterTheSeeds_HighPowerFizzles(t *testing.T) {
 	s := &sim.TurnState{CardsRemaining: []*sim.CardState{{Card: testutils.GenericAttack(0, 2)}}}
-	(WaterTheSeedsRed{}).Play(s, s.Logger(), &sim.CardState{Card: WaterTheSeedsRed{}})
+	sim.ResolveChainStep(s, s.Logger(), &sim.CardState{Card: WaterTheSeedsRed{}})
 	if got := s.Value; got != 3 {
 		t.Errorf("Play() = %d, want 3 (power 2 > 1 → no bonus)", got)
 	}
@@ -44,7 +44,7 @@ func TestWaterTheSeeds_LowPowerTriggersBonus(t *testing.T) {
 	for _, c := range []sim.Card{WaterTheSeedsRed{}, WaterTheSeedsYellow{}, WaterTheSeedsBlue{}} {
 		target := &sim.CardState{Card: testutils.GenericAttack(0, 1)}
 		s := &sim.TurnState{CardsRemaining: []*sim.CardState{target}}
-		c.Play(s, s.Logger(), &sim.CardState{Card: c})
+		sim.ResolveChainStep(s, s.Logger(), &sim.CardState{Card: c})
 		if got := target.BonusAttack; got != 1 {
 			t.Errorf("%s: target.BonusAttack = %d, want 1 (power-1 target triggers +1)", c.Name(), got)
 		}
@@ -58,7 +58,7 @@ func TestWaterTheSeeds_SkipsPastNonMatchingAttacks(t *testing.T) {
 	skipped := &sim.CardState{Card: testutils.GenericAttack(0, 3)}
 	target := &sim.CardState{Card: testutils.GenericAttack(0, 0)}
 	s := &sim.TurnState{CardsRemaining: []*sim.CardState{skipped, target}}
-	(WaterTheSeedsRed{}).Play(s, s.Logger(), &sim.CardState{Card: WaterTheSeedsRed{}})
+	sim.ResolveChainStep(s, s.Logger(), &sim.CardState{Card: WaterTheSeedsRed{}})
 	if got := skipped.BonusAttack; got != 0 {
 		t.Errorf("skipped.BonusAttack = %d, want 0 (power-3 target shouldn't consume rider)", got)
 	}
@@ -71,7 +71,7 @@ func TestWaterTheSeeds_SkipsPastNonMatchingAttacks(t *testing.T) {
 // doesn't qualify as "your next attack" — the rider walks past it without firing.
 func TestWaterTheSeeds_NonAttackInRemainingIgnored(t *testing.T) {
 	s := &sim.TurnState{CardsRemaining: []*sim.CardState{{Card: testutils.GenericAction()}}}
-	(WaterTheSeedsRed{}).Play(s, s.Logger(), &sim.CardState{Card: WaterTheSeedsRed{}})
+	sim.ResolveChainStep(s, s.Logger(), &sim.CardState{Card: WaterTheSeedsRed{}})
 	if got := s.Value; got != 3 {
 		t.Errorf("Play() = %d, want 3 (non-attack ignored)", got)
 	}
@@ -82,7 +82,7 @@ func TestWaterTheSeeds_NonAttackInRemainingIgnored(t *testing.T) {
 func TestWaterTheSeeds_BonusLandsOnWeaponSwing(t *testing.T) {
 	target := &sim.CardState{Card: testutils.RunebladeWeapon{}}
 	s := &sim.TurnState{CardsRemaining: []*sim.CardState{target}}
-	(WaterTheSeedsRed{}).Play(s, s.Logger(), &sim.CardState{Card: WaterTheSeedsRed{}})
+	sim.ResolveChainStep(s, s.Logger(), &sim.CardState{Card: WaterTheSeedsRed{}})
 	if got := target.BonusAttack; got != 1 {
 		t.Errorf("weapon BonusAttack = %d, want 1 (no 'action card' qualifier on 'next attack')", got)
 	}

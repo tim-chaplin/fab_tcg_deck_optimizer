@@ -8,6 +8,4 @@ import (
 )
 
 func (c MuscleMuttYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
-	n := self.DealEffectiveAttack(s)
-	self.Log(l, n)
 }

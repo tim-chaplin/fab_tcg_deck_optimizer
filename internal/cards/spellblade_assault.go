@@ -9,22 +9,16 @@ import (
 )
 
 func (SpellbladeAssaultRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
-	n := self.DealEffectiveAttack(s)
-	self.Log(l, n)
 	s.CreateRunechants(2)
-	self.LogRider(l, 2, "Created 2 runechants")
+	l.AppendPostTrigger(self.Card.DisplayName(), "Created 2 runechants", 2)
 }
 
 func (SpellbladeAssaultYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
-	n := self.DealEffectiveAttack(s)
-	self.Log(l, n)
 	s.CreateRunechants(2)
-	self.LogRider(l, 2, "Created 2 runechants")
+	l.AppendPostTrigger(self.Card.DisplayName(), "Created 2 runechants", 2)
 }
 
 func (SpellbladeAssaultBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
-	n := self.DealEffectiveAttack(s)
-	self.Log(l, n)
 	s.CreateRunechants(2)
-	self.LogRider(l, 2, "Created 2 runechants")
+	l.AppendPostTrigger(self.Card.DisplayName(), "Created 2 runechants", 2)
 }

@@ -12,7 +12,7 @@ import (
 func TestPursueToTheEdgeOfOblivion_OnHitMarksOpponent(t *testing.T) {
 	self := &sim.CardState{Card: PursueToTheEdgeOfOblivionRed{}}
 	s := sim.TurnState{}
-	(PursueToTheEdgeOfOblivionRed{}).Play(&s, s.Logger(), self)
+	sim.ResolveChainStep(&s, s.Logger(), self)
 	if len(self.OnHit) != 1 {
 		t.Fatalf("OnHit handlers = %d, want 1", len(self.OnHit))
 	}

@@ -12,7 +12,7 @@ func TestPlunderRun_FromHandQueuesTriggerNoBonus(t *testing.T) {
 	target := &sim.CardState{Card: testutils.GenericAttack(0, 4)}
 	s := sim.TurnState{CardsRemaining: []*sim.CardState{target}}
 	self := &sim.CardState{Card: PlunderRunRed{}}
-	(PlunderRunRed{}).Play(&s, s.Logger(), self)
+	sim.ResolveChainStep(&s, s.Logger(), self)
 	if got := triggerHitCount(&s); got != 1 {
 		t.Errorf("queued triggers = %d, want 1", got)
 	}
@@ -36,7 +36,7 @@ func TestPlunderRun_FromArsenalAddsBonusAttack(t *testing.T) {
 		target := &sim.CardState{Card: testutils.GenericAttack(0, 4)}
 		s := sim.TurnState{CardsRemaining: []*sim.CardState{target}}
 		self := &sim.CardState{Card: tc.c, FromArsenal: true}
-		tc.c.Play(&s, s.Logger(), self)
+		sim.ResolveChainStep(&s, s.Logger(), self)
 		if got := triggerHitCount(&s); got != 1 {
 			t.Errorf("%s: queued triggers = %d, want 1", tc.c.Name(), got)
 		}
@@ -49,8 +49,8 @@ func TestPlunderRun_FromArsenalAddsBonusAttack(t *testing.T) {
 // Multiple Plunder Runs queue independent triggers — they all fire on the same hit.
 func TestPlunderRun_TriggersStack(t *testing.T) {
 	s := sim.TurnState{}
-	(PlunderRunRed{}).Play(&s, s.Logger(), &sim.CardState{Card: PlunderRunRed{}})
-	(PlunderRunBlue{}).Play(&s, s.Logger(), &sim.CardState{Card: PlunderRunBlue{}})
+	sim.ResolveChainStep(&s, s.Logger(), &sim.CardState{Card: PlunderRunRed{}})
+	sim.ResolveChainStep(&s, s.Logger(), &sim.CardState{Card: PlunderRunBlue{}})
 	if got := triggerHitCount(&s); got != 2 {
 		t.Errorf("queued triggers = %d, want 2 (two independent listeners)", got)
 	}

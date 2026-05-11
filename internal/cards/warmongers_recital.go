@@ -32,8 +32,6 @@ func warmongersRecitalPlay(s *sim.TurnState, l sim.Logger, self *sim.CardState, 
 			break
 		}
 	}
-	n2 := self.DealEffectiveAttack(s)
-	self.Log(l, n2)
 }
 
 func (c WarmongersRecitalRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {

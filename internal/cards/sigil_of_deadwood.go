@@ -17,7 +17,6 @@ func (c SigilOfDeadwoodBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.Card
 		Self:    sim.CardOrTokenType{Card: c},
 		Count:   1,
 	})
-	self.Log(l, 0)
 }
 
 // sigilOfDeadwoodAuraHandler creates 1 runechant on the next-turn fire and destroys the

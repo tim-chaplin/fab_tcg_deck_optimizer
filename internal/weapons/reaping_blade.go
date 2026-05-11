@@ -41,6 +41,4 @@ func (ReapingBladeAbility) Defense() int            { return 0 }
 func (ReapingBladeAbility) Types() card.TypeSet     { return reapingBladeAbilityTypes }
 func (ReapingBladeAbility) GoAgain() bool           { return false }
 func (ReapingBladeAbility) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
-	n := self.DealEffectiveAttack(s)
-	self.Log(l, n)
 }

@@ -42,7 +42,7 @@ func TestMoonWish_AltCostMovesHandCardToDeckTop(t *testing.T) {
 	s := sim.NewTurnStateFromCards([]sim.Card{other}, nil)
 	s.SetHandForTesting([]sim.Card{dr})
 	self := &sim.CardState{Card: MoonWishYellow{}}
-	MoonWishYellow{}.Play(s, s.Logger(), self)
+	sim.ResolveChainStep(s, s.Logger(), self)
 	testutils.FireOnHitIfLikely(s, s.Logger(), self)
 	if h := s.Hand(); len(h) != 0 {
 		t.Errorf("Hand = %d entries, want 0 (alt cost should pop the only hand card)", len(h))
@@ -82,7 +82,7 @@ func TestMoonWish_TutorPrefersRedSunKissThenYellowThenBlue(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			s := sim.NewTurnStateFromCards(append([]sim.Card(nil), tc.deck...), nil)
 			self := &sim.CardState{Card: MoonWishYellow{}}
-			MoonWishYellow{}.Play(s, s.Logger(), self)
+			sim.ResolveChainStep(s, s.Logger(), self)
 			testutils.FireOnHitIfLikely(s, s.Logger(), self)
 			h := s.Hand()
 			if len(h) != 1 || h[0].ID() != tc.want {
@@ -98,7 +98,7 @@ func TestMoonWish_TutorRequiresHit(t *testing.T) {
 	{
 		s := sim.NewTurnStateFromCards([]sim.Card{SunKissRed{}}, nil)
 		self := &sim.CardState{Card: MoonWishYellow{}}
-		MoonWishYellow{}.Play(s, s.Logger(), self)
+		sim.ResolveChainStep(s, s.Logger(), self)
 		testutils.FireOnHitIfLikely(s, s.Logger(), self)
 		h := s.Hand()
 		if len(h) != 1 || h[0].ID() != ids.SunKissRed {
@@ -112,7 +112,7 @@ func TestMoonWish_TutorRequiresHit(t *testing.T) {
 		s := sim.NewTurnStateFromCards([]sim.Card{SunKissRed{}}, nil)
 		// Drive EffectiveAttack down so LikelyToHit fails (4 - 4 = 0, clamped, not in window).
 		self := &sim.CardState{Card: MoonWishYellow{}, BonusAttack: -4}
-		MoonWishYellow{}.Play(s, s.Logger(), self)
+		sim.ResolveChainStep(s, s.Logger(), self)
 		if h := s.Hand(); len(h) != 0 {
 			t.Errorf("dampened: Hand = %v, want [] (no hit, no tutor)", h)
 		}
@@ -127,7 +127,7 @@ func TestMoonWish_GoAgainPlaysSunKissImmediately(t *testing.T) {
 	{
 		s := sim.NewTurnStateFromCards([]sim.Card{SunKissRed{}}, nil)
 		self := &sim.CardState{Card: MoonWishYellow{}, GrantedGoAgain: true}
-		MoonWishYellow{}.Play(s, s.Logger(), self)
+		sim.ResolveChainStep(s, s.Logger(), self)
 		testutils.FireOnHitIfLikely(s, s.Logger(), self)
 		dmg := s.Value
 		if dmg != 4+3 {
@@ -144,7 +144,7 @@ func TestMoonWish_GoAgainPlaysSunKissImmediately(t *testing.T) {
 	{
 		s := sim.NewTurnStateFromCards([]sim.Card{SunKissRed{}}, nil)
 		self := &sim.CardState{Card: MoonWishYellow{}}
-		MoonWishYellow{}.Play(s, s.Logger(), self)
+		sim.ResolveChainStep(s, s.Logger(), self)
 		testutils.FireOnHitIfLikely(s, s.Logger(), self)
 		dmg := s.Value
 		if dmg != 4 {

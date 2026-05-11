@@ -783,10 +783,10 @@ func (s *TurnState) DealArcaneDamage(l Logger, self *CardState, n int) {
 		s.ArcaneDamageDealt = true
 	}
 	if n >= 0 && n < len(dealtArcaneText) {
-		self.LogRider(l, n, dealtArcaneText[n])
+		l.AppendPostTrigger(self.Card.DisplayName(), dealtArcaneText[n], n)
 		return
 	}
-	self.LogRiderf(l, n, "Dealt %d arcane damage", n)
+	l.AppendPostTriggerf(self.Card.DisplayName(), n, "Dealt %d arcane damage", n)
 }
 
 // dealtArcaneText is the pre-built rider-line cache indexed by arcane-damage count, keeping

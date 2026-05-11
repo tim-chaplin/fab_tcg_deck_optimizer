@@ -26,6 +26,4 @@ func runeragerSwarmPlay(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	if s.HasPlayedOrCreatedAura() {
 		self.GrantedGoAgain = true
 	}
-	n := self.DealEffectiveAttack(s)
-	self.Log(l, n)
 }

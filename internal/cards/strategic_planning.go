@@ -22,15 +22,14 @@ func strategicPlanningPlay(s *sim.TurnState, l sim.Logger, self *sim.CardState) 
 	if _, ok := s.RecycleFromGraveyardToBottom(func(c sim.Card) bool {
 		return c.Types().Has(card.TypeAction) && c.Cost(s) <= 2
 	}); ok {
-		self.LogRider(l, 0, "Recycled an action card to bottom of deck")
+		l.AppendPostTrigger(self.Card.DisplayName(), "Recycled an action card to bottom of deck", 0)
 	}
 	s.AddTrigger(sim.Trigger{
 		Source:      self.Card,
 		TriggerType: sim.TriggerEndOfTurn,
 		Handler:     drawOneAtEndOfTurn,
 	})
-	self.LogRider(l, 0, "End-phase draw queued")
-	self.Log(l, 0)
+	l.AppendPostTrigger(self.Card.DisplayName(), "End-phase draw queued", 0)
 }
 
 func (StrategicPlanningRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {

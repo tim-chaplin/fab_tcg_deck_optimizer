@@ -11,22 +11,16 @@ import (
 )
 
 func (ReadTheRunesRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
-	n := self.DealEffectiveAttack(s)
-	self.Log(l, n)
 	s.CreateRunechants(3)
-	self.LogRider(l, 3, "Created 3 runechants")
+	l.AppendPostTrigger(self.Card.DisplayName(), "Created 3 runechants", 3)
 }
 
 func (ReadTheRunesYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
-	n := self.DealEffectiveAttack(s)
-	self.Log(l, n)
 	s.CreateRunechants(2)
-	self.LogRider(l, 2, "Created 2 runechants")
+	l.AppendPostTrigger(self.Card.DisplayName(), "Created 2 runechants", 2)
 }
 
 func (ReadTheRunesBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
-	n := self.DealEffectiveAttack(s)
-	self.Log(l, n)
 	s.CreateRunechants(1)
-	self.LogRider(l, 1, "Created a runechant")
+	l.AppendPostTrigger(self.Card.DisplayName(), "Created a runechant", 1)
 }

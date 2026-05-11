@@ -15,8 +15,6 @@ import (
 
 func frontlineScoutPlay(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	self.GrantGoAgainIfFromArsenal()
-	n := self.DealEffectiveAttack(s)
-	self.Log(l, n)
 }
 
 // not implemented: opposing-hand-peek rider

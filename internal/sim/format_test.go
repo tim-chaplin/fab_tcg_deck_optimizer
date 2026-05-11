@@ -93,7 +93,7 @@ func TestFormatBestTurn_LogAttributesEachTriggerSeparately(t *testing.T) {
 	// handler matches production exactly (logs via AddPreTriggerLogEntry, sources from
 	// state.TriggeringCard).
 	bootstrap := NewTurnState(nil, nil)
-	cards.MaleficIncantationRed{}.Play(bootstrap, bootstrap.Logger(), &CardState{Card: cards.MaleficIncantationRed{}})
+	ResolveChainStep(bootstrap, bootstrap.Logger(), &CardState{Card: cards.MaleficIncantationRed{}})
 	prior := bootstrap.Auras
 	got := Best(heroes.Viserai{}, nil, h, Matchup{}, nil, TurnState{Auras: prior})
 	out := FormatBestTurn(got, nil, nil)

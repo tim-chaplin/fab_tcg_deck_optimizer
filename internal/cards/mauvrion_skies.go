@@ -38,7 +38,6 @@ func mauvrionSkiesPlay(s *sim.TurnState, l sim.Logger, selfState *sim.CardState,
 			break
 		}
 	}
-	selfState.Log(l, 0)
 }
 
 // onHitCreateRunechants fires the on-hit "create N runechants" rider attached to the

@@ -17,8 +17,7 @@ func (RelentlessPursuitBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.Card
 	if recycled {
 		s.RecycleToDeckBottom(self)
 	}
-	self.Log(l, 0)
 	if recycled {
-		self.LogRider(l, 0, "Recycled to bottom of deck")
+		l.AppendPostTrigger(self.Card.DisplayName(), "Recycled to bottom of deck", 0)
 	}
 }

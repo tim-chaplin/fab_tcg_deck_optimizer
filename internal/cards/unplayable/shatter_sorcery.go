@@ -10,5 +10,4 @@ import (
 )
 
 func (ShatterSorceryBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
-	self.Log(l, 0)
 }

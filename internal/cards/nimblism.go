@@ -16,18 +16,12 @@ func nimblismIsTarget(s *sim.TurnState, pc *sim.CardState) bool {
 
 func (NimblismRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	GrantNextCardBonusAttack(s, 3, nimblismIsTarget)
-	n := self.DealEffectiveAttack(s)
-	self.Log(l, n)
 }
 
 func (NimblismYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	GrantNextCardBonusAttack(s, 2, nimblismIsTarget)
-	n := self.DealEffectiveAttack(s)
-	self.Log(l, n)
 }
 
 func (NimblismBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	GrantNextCardBonusAttack(s, 1, nimblismIsTarget)
-	n := self.DealEffectiveAttack(s)
-	self.Log(l, n)
 }

@@ -21,7 +21,6 @@ func (c SigilOfTheArknightBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.C
 		Self:    sim.CardOrTokenType{Card: c},
 		Count:   1,
 	})
-	self.Log(l, 0)
 }
 
 // sigilOfTheArknightReveal implements the handler described in the file docstring. Logs

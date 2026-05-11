@@ -30,10 +30,8 @@ func (ReduceToRunechantRed) MinCost() int              { return 0 }
 func (ReduceToRunechantRed) MaxCost() int              { return reduceToRunechantPrintedCost }
 
 func (ReduceToRunechantRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
-	n := self.DealEffectiveDefense(s)
-	self.Log(l, n)
 	s.CreateRunechants(1)
-	self.LogRider(l, 1, "Created a runechant")
+	l.AppendPostTrigger(self.Card.DisplayName(), "Created a runechant", 1)
 }
 
 func (ReduceToRunechantYellow) Cost(s *sim.TurnState) int { return reduceToRunechantCost(s) }
@@ -41,10 +39,8 @@ func (ReduceToRunechantYellow) MinCost() int              { return 0 }
 func (ReduceToRunechantYellow) MaxCost() int              { return reduceToRunechantPrintedCost }
 
 func (ReduceToRunechantYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
-	n := self.DealEffectiveDefense(s)
-	self.Log(l, n)
 	s.CreateRunechants(1)
-	self.LogRider(l, 1, "Created a runechant")
+	l.AppendPostTrigger(self.Card.DisplayName(), "Created a runechant", 1)
 }
 
 func (ReduceToRunechantBlue) Cost(s *sim.TurnState) int { return reduceToRunechantCost(s) }
@@ -52,8 +48,6 @@ func (ReduceToRunechantBlue) MinCost() int              { return 0 }
 func (ReduceToRunechantBlue) MaxCost() int              { return reduceToRunechantPrintedCost }
 
 func (ReduceToRunechantBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
-	n := self.DealEffectiveDefense(s)
-	self.Log(l, n)
 	s.CreateRunechants(1)
-	self.LogRider(l, 1, "Created a runechant")
+	l.AppendPostTrigger(self.Card.DisplayName(), "Created a runechant", 1)
 }

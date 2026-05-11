@@ -20,8 +20,6 @@ func zealousBeltingPlay(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 			break
 		}
 	}
-	n := self.DealEffectiveAttack(s)
-	self.Log(l, n)
 }
 
 func (ZealousBeltingRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {

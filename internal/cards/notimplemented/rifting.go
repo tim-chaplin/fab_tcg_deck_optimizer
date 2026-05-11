@@ -13,20 +13,14 @@ import (
 // not implemented: on-hit instant-casting grant
 
 func (c RiftingRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
-	n := self.DealEffectiveAttack(s)
-	self.Log(l, n)
 }
 
 // not implemented: on-hit instant-casting grant
 
 func (c RiftingYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
-	n := self.DealEffectiveAttack(s)
-	self.Log(l, n)
 }
 
 // not implemented: on-hit instant-casting grant
 
 func (c RiftingBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
-	n := self.DealEffectiveAttack(s)
-	self.Log(l, n)
 }

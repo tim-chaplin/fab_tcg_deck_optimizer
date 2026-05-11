@@ -6,4 +6,4 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
 
-func (TitaniumBaubleBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) { self.Log(l, 0) }
+func (TitaniumBaubleBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {}

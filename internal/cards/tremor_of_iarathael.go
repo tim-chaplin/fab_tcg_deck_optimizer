@@ -19,8 +19,6 @@ func tremorOfIArathaelPlay(s *sim.TurnState, l sim.Logger, self *sim.CardState) 
 	if s.CardBanished {
 		self.BonusAttack += 2
 	}
-	n := self.DealEffectiveAttack(s)
-	self.Log(l, n)
 }
 
 func (TremorOfIArathaelRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {

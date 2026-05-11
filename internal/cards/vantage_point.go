@@ -18,8 +18,6 @@ func vantagePointPlay(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 		s.Overpower = true
 		s.AddValue(sim.OverpowerValue)
 	}
-	n := self.DealEffectiveAttack(s)
-	self.Log(l, n)
 }
 
 func (VantagePointRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {

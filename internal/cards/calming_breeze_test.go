@@ -10,7 +10,7 @@ import (
 func TestCalmingBreeze_PreventsFlat3(t *testing.T) {
 	s := sim.TurnState{IncomingDamage: 5}
 	self := &sim.CardState{Card: CalmingBreezeRed{}}
-	CalmingBreezeRed{}.Play(&s, s.Logger(), self)
+	sim.ResolveChainStep(&s, s.Logger(), self)
 	if s.Value != 3 {
 		t.Errorf("Value = %d, want 3", s.Value)
 	}

@@ -28,7 +28,6 @@ func moneyWhereYaMouthIsPlay(s *sim.TurnState, l sim.Logger, self *sim.CardState
 			break
 		}
 	}
-	self.Log(l, 0)
 }
 
 func (c MoneyWhereYaMouthIsRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {

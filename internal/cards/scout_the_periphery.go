@@ -22,18 +22,12 @@ func scoutThePeripheryIsTarget(_ *sim.TurnState, pc *sim.CardState) bool {
 
 func (ScoutThePeripheryRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	GrantNextCardBonusAttack(s, 3, scoutThePeripheryIsTarget)
-	n := self.DealEffectiveAttack(s)
-	self.Log(l, n)
 }
 
 func (ScoutThePeripheryYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	GrantNextCardBonusAttack(s, 2, scoutThePeripheryIsTarget)
-	n := self.DealEffectiveAttack(s)
-	self.Log(l, n)
 }
 
 func (ScoutThePeripheryBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	GrantNextCardBonusAttack(s, 1, scoutThePeripheryIsTarget)
-	n := self.DealEffectiveAttack(s)
-	self.Log(l, n)
 }

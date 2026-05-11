@@ -17,22 +17,16 @@ import (
 
 func (SigilOfProtectionRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	cards.SetAuraCreated(s)
-	n := self.DealEffectiveAttack(s)
-	self.Log(l, n)
 }
 
 // not implemented: ward (opponent damage prevention)
 
 func (SigilOfProtectionYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	cards.SetAuraCreated(s)
-	n := self.DealEffectiveAttack(s)
-	self.Log(l, n)
 }
 
 // not implemented: ward (opponent damage prevention)
 
 func (SigilOfProtectionBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	cards.SetAuraCreated(s)
-	n := self.DealEffectiveAttack(s)
-	self.Log(l, n)
 }

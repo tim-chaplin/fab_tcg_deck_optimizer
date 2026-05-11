@@ -20,18 +20,12 @@ func adrenalineRushBonus() int {
 
 func (AdrenalineRushRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	self.BonusAttack += adrenalineRushBonus()
-	n := self.DealEffectiveAttack(s)
-	self.Log(l, n)
 }
 
 func (AdrenalineRushYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	self.BonusAttack += adrenalineRushBonus()
-	n := self.DealEffectiveAttack(s)
-	self.Log(l, n)
 }
 
 func (AdrenalineRushBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	self.BonusAttack += adrenalineRushBonus()
-	n := self.DealEffectiveAttack(s)
-	self.Log(l, n)
 }

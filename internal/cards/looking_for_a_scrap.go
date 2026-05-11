@@ -14,10 +14,8 @@ func lookingForAScrapPlay(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	if _, ok := s.BanishFromGraveyard(isOnePowerCard); ok {
 		self.BonusAttack++
 		self.GrantedGoAgain = true
-		self.LogRider(l, 1, "Banished a 1{p} card, +1{p} and go again")
+		l.AppendPostTrigger(self.Card.DisplayName(), "Banished a 1{p} card, +1{p} and go again", 1)
 	}
-	n := self.DealEffectiveAttack(s)
-	self.Log(l, n)
 }
 
 // isOnePowerCard matches the printed "card with 1{p}" target — any card whose printed

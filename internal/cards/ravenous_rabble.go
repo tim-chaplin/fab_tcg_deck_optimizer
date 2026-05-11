@@ -27,18 +27,12 @@ func ravenousRabbleApplyDebuff(s *sim.TurnState, l sim.Logger, self *sim.CardSta
 
 func (RavenousRabbleRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	ravenousRabbleApplyDebuff(s, l, self)
-	n := self.DealEffectiveAttack(s)
-	self.Log(l, n)
 }
 
 func (RavenousRabbleYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	ravenousRabbleApplyDebuff(s, l, self)
-	n := self.DealEffectiveAttack(s)
-	self.Log(l, n)
 }
 
 func (RavenousRabbleBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	ravenousRabbleApplyDebuff(s, l, self)
-	n := self.DealEffectiveAttack(s)
-	self.Log(l, n)
 }

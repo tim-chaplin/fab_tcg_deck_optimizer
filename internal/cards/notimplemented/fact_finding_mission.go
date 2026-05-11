@@ -13,20 +13,14 @@ import (
 // not implemented: on-hit opponent-arsenal/equipment peek
 
 func (FactFindingMissionRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
-	n := self.DealEffectiveAttack(s)
-	self.Log(l, n)
 }
 
 // not implemented: on-hit opponent-arsenal/equipment peek
 
 func (FactFindingMissionYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
-	n := self.DealEffectiveAttack(s)
-	self.Log(l, n)
 }
 
 // not implemented: on-hit opponent-arsenal/equipment peek
 
 func (FactFindingMissionBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
-	n := self.DealEffectiveAttack(s)
-	self.Log(l, n)
 }

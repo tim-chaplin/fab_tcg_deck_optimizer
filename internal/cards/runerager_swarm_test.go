@@ -20,7 +20,7 @@ func TestRuneragerSwarm_NoAuraNoGoAgain(t *testing.T) {
 	for _, tc := range cases {
 		s := sim.TurnState{}
 		self := &sim.CardState{Card: tc.c}
-		tc.c.Play(&s, s.Logger(), self)
+		sim.ResolveChainStep(&s, s.Logger(), self)
 		if got := s.Value; got != tc.want {
 			t.Errorf("%s: Play() = %d, want %d", tc.c.Name(), got, tc.want)
 		}
@@ -35,7 +35,7 @@ func TestRuneragerSwarm_AuraPlayedGrantsGoAgain(t *testing.T) {
 	for _, c := range []sim.Card{RuneragerSwarmRed{}, RuneragerSwarmYellow{}, RuneragerSwarmBlue{}} {
 		s := sim.TurnState{CardsPlayed: []sim.Card{testutils.Aura{}}}
 		self := &sim.CardState{Card: c}
-		c.Play(&s, s.Logger(), self)
+		sim.ResolveChainStep(&s, s.Logger(), self)
 		if !self.GrantedGoAgain {
 			t.Errorf("%s: GrantedGoAgain should be set when an aura has been played", c.Name())
 		}
@@ -48,7 +48,7 @@ func TestRuneragerSwarm_AuraCreatedGrantsGoAgain(t *testing.T) {
 	for _, c := range []sim.Card{RuneragerSwarmRed{}, RuneragerSwarmYellow{}, RuneragerSwarmBlue{}} {
 		s := sim.TurnState{AuraCreated: true}
 		self := &sim.CardState{Card: c}
-		c.Play(&s, s.Logger(), self)
+		sim.ResolveChainStep(&s, s.Logger(), self)
 		if !self.GrantedGoAgain {
 			t.Errorf("%s: GrantedGoAgain should be set when AuraCreated is true", c.Name())
 		}

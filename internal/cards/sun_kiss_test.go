@@ -22,7 +22,7 @@ func TestSunKiss_SoloIsHealOnly(t *testing.T) {
 	for _, tc := range cases {
 		s := sim.NewTurnStateFromCards([]sim.Card{testutils.GenericAttack(0, 0)}, nil)
 		self := &sim.CardState{Card: tc.c}
-		tc.c.Play(s, s.Logger(), self)
+		sim.ResolveChainStep(s, s.Logger(), self)
 		got := s.Value
 		if got != tc.heal {
 			t.Errorf("%s: solo Play() = %d, want %d", tc.c.Name(), got, tc.heal)
@@ -52,7 +52,7 @@ func TestSunKiss_SynergyFiresOnPriorMoonWish(t *testing.T) {
 			s := sim.NewTurnStateFromCards([]sim.Card{testutils.GenericAttack(0, 0)}, nil)
 			s.CardsPlayed = []sim.Card{mw}
 			self := &sim.CardState{Card: sk.c}
-			sk.c.Play(s, s.Logger(), self)
+			sim.ResolveChainStep(s, s.Logger(), self)
 			got := s.Value
 			if got != sk.heal {
 				t.Errorf("%s after %s: Play() = %d, want %d (synergy still credits printed heal)",
@@ -75,7 +75,7 @@ func TestSunKiss_SynergyDoesNotFireOnUnrelatedAttacks(t *testing.T) {
 	s := sim.NewTurnStateFromCards([]sim.Card{testutils.GenericAttack(0, 0)}, nil)
 	s.CardsPlayed = []sim.Card{notMoonWish}
 	self := &sim.CardState{Card: SunKissRed{}}
-	SunKissRed{}.Play(s, s.Logger(), self)
+	sim.ResolveChainStep(s, s.Logger(), self)
 	got := s.Value
 	if got != 3 {
 		t.Errorf("Play() = %d, want 3 (printed heal only)", got)
@@ -97,7 +97,7 @@ func TestSunKiss_SynergyHandlesEmptyDeck(t *testing.T) {
 		// Deck intentionally nil.
 	}
 	self := &sim.CardState{Card: SunKissRed{}}
-	SunKissRed{}.Play(s, s.Logger(), self)
+	sim.ResolveChainStep(s, s.Logger(), self)
 	got := s.Value
 	if got != 3 {
 		t.Errorf("Play() = %d, want 3", got)

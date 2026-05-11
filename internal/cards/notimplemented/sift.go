@@ -11,12 +11,12 @@ import (
 
 // not implemented: hand cycling
 
-func (SiftRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) { self.Log(l, 0) }
+func (SiftRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {}
 
 // not implemented: hand cycling
 
-func (SiftYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) { self.Log(l, 0) }
+func (SiftYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {}
 
 // not implemented: hand cycling
 
-func (SiftBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) { self.Log(l, 0) }
+func (SiftBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {}

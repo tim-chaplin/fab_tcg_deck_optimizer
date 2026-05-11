@@ -99,8 +99,6 @@ func (blockOneDR) Types() card.TypeSet {
 }
 func (blockOneDR) GoAgain() bool { return false }
 func (blockOneDR) Play(s *TurnState, l Logger, self *CardState) {
-	n := self.DealEffectiveDefense(s)
-	self.Log(l, n)
 }
 
 // Tests that defendersDamage folds the alone-style Block hook's BonusDefense into the

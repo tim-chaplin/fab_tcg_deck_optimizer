@@ -7,14 +7,12 @@ import (
 )
 
 func destructiveDeliberationPlay(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
-	n := self.DealEffectiveAttack(s)
-	self.Log(l, n)
 	self.RegisterOnHit(destructiveDeliberationOnHit)
 }
 
 func destructiveDeliberationOnHit(s *sim.TurnState, l sim.Logger, self *sim.CardState, _ *sim.OnHitHandler) {
 	s.CreatePonder(1)
-	self.LogRider(l, 0, "On-hit created a ponder")
+	l.AppendPostTrigger(self.Card.DisplayName(), "On-hit created a ponder", 0)
 }
 
 func (DestructiveDeliberationRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {

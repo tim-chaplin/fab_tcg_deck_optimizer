@@ -18,10 +18,8 @@ func jackBeQuickPlay(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	if _, ok := s.BanishFromGraveyard(isNimblism); ok {
 		self.BonusAttack++
 		self.GrantedGoAgain = true
-		self.LogRider(l, 1, "Banished a Nimblism, +1{p} and go again")
+		l.AppendPostTrigger(self.Card.DisplayName(), "Banished a Nimblism, +1{p} and go again", 1)
 	}
-	n := self.DealEffectiveAttack(s)
-	self.Log(l, n)
 }
 
 func (JackBeQuickRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {

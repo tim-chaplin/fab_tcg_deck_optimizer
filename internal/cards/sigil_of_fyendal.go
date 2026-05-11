@@ -17,7 +17,6 @@ func (c SigilOfFyendalBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardS
 		Self:    sim.CardOrTokenType{Card: c},
 		Count:   1,
 	})
-	self.Log(l, 0)
 }
 
 // sigilOfFyendalAuraHandler credits the +1 health (valued 1-to-1 with damage) next turn

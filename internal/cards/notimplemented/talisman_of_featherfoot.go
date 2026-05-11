@@ -13,5 +13,4 @@ import (
 // grants go again
 
 func (TalismanOfFeatherfootYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
-	self.Log(l, 0)
 }

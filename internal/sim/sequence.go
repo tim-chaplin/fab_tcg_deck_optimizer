@@ -970,7 +970,7 @@ func (ctx *sequenceContext) playSequenceWithMeta(n int) (damage int, futureValue
 			}
 			ctx.hero.OnCardPlayed(pc.Card, state, state.logger)
 			state.attackReactionTarget = activeAttack
-			pc.Card.Play(state, state.logger, pc)
+			ResolveChainStep(state, state.logger, pc)
 			state.attackReactionTarget = nil
 			state.CardsPlayed = append(state.CardsPlayed, pc.Card)
 			state.graveyard = append(state.graveyard, pc.Card)
@@ -1006,7 +1006,7 @@ func (ctx *sequenceContext) playSequenceWithMeta(n int) (damage int, futureValue
 		// fireAttackAuras runs after Play so continuous "while you control an aura"
 		// modifiers (Yinti Yanti +1{p}) see live token auras before TriggerAttack
 		// handlers consume them.
-		pc.Card.Play(state, state.logger, pc)
+		ResolveChainStep(state, state.logger, pc)
 		if m.isAttack {
 			fireAttackAuras(state, pc.Card)
 			// Clear after Play so any "if defending hero is marked" rider on this card

@@ -14,20 +14,14 @@ import (
 // not implemented: deck-reveal comparison + on-hit deck-top destruction
 
 func (CrashDownTheGatesRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
-	n := self.DealEffectiveAttack(s)
-	self.Log(l, n)
 }
 
 // not implemented: deck-reveal comparison + on-hit deck-top destruction
 
 func (CrashDownTheGatesYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
-	n := self.DealEffectiveAttack(s)
-	self.Log(l, n)
 }
 
 // not implemented: deck-reveal comparison + on-hit deck-top destruction
 
 func (CrashDownTheGatesBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
-	n := self.DealEffectiveAttack(s)
-	self.Log(l, n)
 }

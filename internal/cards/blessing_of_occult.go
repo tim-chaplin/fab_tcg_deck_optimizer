@@ -54,5 +54,4 @@ func blessingOfOccultPlay(s *sim.TurnState, l sim.Logger, selfState *sim.CardSta
 		Self:    sim.CardOrTokenType{Card: selfCard},
 		Count:   n,
 	})
-	selfState.Log(l, 0)
 }

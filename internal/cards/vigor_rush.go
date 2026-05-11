@@ -16,8 +16,6 @@ func vigorRushPlay(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	if s.NonAttackActionPlayed {
 		self.GrantedGoAgain = true
 	}
-	n := self.DealEffectiveAttack(s)
-	self.Log(l, n)
 }
 
 func (VigorRushRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {

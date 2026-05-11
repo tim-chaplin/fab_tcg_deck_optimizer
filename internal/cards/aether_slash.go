@@ -13,20 +13,14 @@ import (
 )
 
 func (AetherSlashRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
-	n := self.DealEffectiveAttack(s)
-	self.Log(l, n)
 	aetherSlashApplyRider(s, l, self)
 }
 
 func (AetherSlashYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
-	n := self.DealEffectiveAttack(s)
-	self.Log(l, n)
 	aetherSlashApplyRider(s, l, self)
 }
 
 func (AetherSlashBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
-	n := self.DealEffectiveAttack(s)
-	self.Log(l, n)
 	aetherSlashApplyRider(s, l, self)
 }
 

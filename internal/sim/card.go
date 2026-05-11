@@ -188,22 +188,19 @@ func (p *CardState) DealEffectiveDefense(s *TurnState) int {
 // adapter sits in the middle. The interface lives in card.go so it travels with Card
 // when the package later moves to v2/card; the concrete implementation
 // (turnlogger.TurnLogger) stays in v2/turnlogger and the move requires no import
-// rewiring on the card side. Cards reach the CardState-aware ergonomics via the
-// CardState.Log / LogRider / LogRiderf helpers below — they own the
-// CardState->display-text conversion (ChainStepText, Card.DisplayName) and gate it on
-// l.Recording() so skipped passes don't pay arg-formatting cost.
+// rewiring on the card side. Cards convert CardState into log-line text at the call
+// site via ChainStepText / Card.DisplayName.
 type Logger interface {
-	// AppendChainStep appends a main-line chain-step entry with pre-built text and the
-	// damage-equivalent display delta n. CardState callers prefer CardState.Log which
-	// computes ChainStepText for them; this raw-text form is for Opt-style free-form
-	// chain lines and external test seeding.
+	// AppendChainStep appends a main-line chain-step entry with the given text and
+	// damage-equivalent display delta n. Cards typically wrap the call as
+	// l.AppendChainStep(ChainStepText(self), n).
 	AppendChainStep(text string, n int)
 	// AppendChainStepf is the format variant of AppendChainStep — fmt.Sprintf runs only
 	// on the recording branch.
 	AppendChainStepf(n int, format string, args ...any)
 	// AppendPostTrigger appends an indented post-trigger sub-line attributed to source.
-	// CardState callers whose source IS self.Card prefer CardState.LogRider; cross-card
-	// post-triggers (OnHit handlers attached to a target card) use this raw form.
+	// Self-riders pass self.Card.DisplayName() as source; cross-card riders (OnHit
+	// handlers attached to a target card) pass the target's name.
 	AppendPostTrigger(source, text string, n int)
 	// AppendPostTriggerf is the format variant of AppendPostTrigger.
 	AppendPostTriggerf(source string, n int, format string, args ...any)
@@ -215,41 +212,6 @@ type Logger interface {
 	// AmendLastChainStepN adds n to the most recent ChainStep entry's N field. ARs use
 	// this to fold their +{p} buff into the buffed attack's display delta.
 	AmendLastChainStepN(n int)
-	// Recording reports whether the logger is materialising entries this pass. False
-	// during the eval-loop's find-best pass; callers gate expensive arg construction
-	// (ChainStepText, Card.DisplayName, fmt.Sprintf upstream of the Append* methods)
-	// on this so a skipped pass costs only the Recording call itself.
-	Recording() bool
-}
-
-// Log appends the canonical "<DisplayName>: <VERB>[ from arsenal]" main-line chain-step
-// entry for this card with display delta n. No-op when the logger isn't recording —
-// callers can pair this with self.DealEffectiveAttack on the preceding line, and the
-// Log line itself stays side-effect-free.
-func (cs *CardState) Log(l Logger, n int) {
-	if !l.Recording() {
-		return
-	}
-	l.AppendChainStep(ChainStepText(cs), n)
-}
-
-// LogRider appends an indented post-trigger sub-line under this card's chain entry —
-// the common shape for self-riders ("Created a runechant", "Gained 3 health"). Pair
-// with AddValue on a preceding line when n > 0.
-func (cs *CardState) LogRider(l Logger, n int, text string) {
-	if !l.Recording() {
-		return
-	}
-	l.AppendPostTrigger(cs.Card.DisplayName(), text, n)
-}
-
-// LogRiderf is the format variant of LogRider. Defers fmt.Sprintf and the DisplayName
-// lookup into the recording branch.
-func (cs *CardState) LogRiderf(l Logger, n int, format string, args ...any) {
-	if !l.Recording() {
-		return
-	}
-	l.AppendPostTriggerf(cs.Card.DisplayName(), n, format, args...)
 }
 
 // Card is any Flesh and Blood card that can be in a deck. Methods return the card's static

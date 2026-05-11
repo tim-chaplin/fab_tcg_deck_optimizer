@@ -9,7 +9,7 @@ import (
 func TestGoldAbility_PlaysDecrementsAndDestroys(t *testing.T) {
 	s := NewTurnStateFromCards([]Card{FakeRedAttack{}}, nil)
 	s.Items = []Item{NewGoldItem(1)}
-	(GoldTokenAbility{}).Play(s, s.Logger(), &CardState{Card: GoldTokenAbility{}})
+	ResolveChainStep(s, s.Logger(), &CardState{Card: GoldTokenAbility{}})
 	if s.Gold() != 0 {
 		t.Fatalf("Gold = %d after spending the only token, want 0", s.Gold())
 	}
@@ -25,7 +25,7 @@ func TestGoldAbility_PlaysDecrementsAndDestroys(t *testing.T) {
 func TestGoldAbility_PlayDecrementsCountWhenMultiple(t *testing.T) {
 	s := NewTurnStateFromCards([]Card{FakeRedAttack{}}, nil)
 	s.Items = []Item{NewGoldItem(3)}
-	(GoldTokenAbility{}).Play(s, s.Logger(), &CardState{Card: GoldTokenAbility{}})
+	ResolveChainStep(s, s.Logger(), &CardState{Card: GoldTokenAbility{}})
 	if s.Gold() != 2 {
 		t.Fatalf("Gold = %d after spending 1 of 3, want 2", s.Gold())
 	}
@@ -35,7 +35,7 @@ func TestGoldAbility_PlayDecrementsCountWhenMultiple(t *testing.T) {
 func TestSilverAbility_PlaysDecrementsAndDestroys(t *testing.T) {
 	s := NewTurnStateFromCards([]Card{FakeRedAttack{}}, nil)
 	s.Items = []Item{NewSilverItem(1)}
-	(SilverTokenAbility{}).Play(s, s.Logger(), &CardState{Card: SilverTokenAbility{}})
+	ResolveChainStep(s, s.Logger(), &CardState{Card: SilverTokenAbility{}})
 	if s.Silver() != 0 {
 		t.Fatalf("Silver = %d after spending the only token, want 0", s.Silver())
 	}
@@ -51,7 +51,7 @@ func TestSilverAbility_PlaysDecrementsAndDestroys(t *testing.T) {
 func TestCopperAbility_PlaysDecrementsAndDestroys(t *testing.T) {
 	s := NewTurnStateFromCards([]Card{FakeRedAttack{}}, nil)
 	s.Items = []Item{NewCopperItem(1)}
-	(CopperTokenAbility{}).Play(s, s.Logger(), &CardState{Card: CopperTokenAbility{}})
+	ResolveChainStep(s, s.Logger(), &CardState{Card: CopperTokenAbility{}})
 	if s.Copper() != 0 {
 		t.Fatalf("Copper = %d after spending the only token, want 0", s.Copper())
 	}

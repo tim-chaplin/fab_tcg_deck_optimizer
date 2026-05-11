@@ -25,18 +25,12 @@ func arcanicSpikeBonus(s *sim.TurnState) int {
 
 func (ArcanicSpikeRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	self.BonusAttack += arcanicSpikeBonus(s)
-	n := self.DealEffectiveAttack(s)
-	self.Log(l, n)
 }
 
 func (ArcanicSpikeYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	self.BonusAttack += arcanicSpikeBonus(s)
-	n := self.DealEffectiveAttack(s)
-	self.Log(l, n)
 }
 
 func (ArcanicSpikeBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	self.BonusAttack += arcanicSpikeBonus(s)
-	n := self.DealEffectiveAttack(s)
-	self.Log(l, n)
 }

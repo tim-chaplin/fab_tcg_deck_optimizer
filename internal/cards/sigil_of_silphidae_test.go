@@ -11,7 +11,7 @@ import (
 // and a start-of-turn Aura is registered for the "destroy this" clause.
 func TestSigilOfSilphidae_PlayFizzlesWithoutAura(t *testing.T) {
 	var s sim.TurnState
-	(SigilOfSilphidaeBlue{}).Play(&s, s.Logger(), &sim.CardState{Card: SigilOfSilphidaeBlue{}})
+	sim.ResolveChainStep(&s, s.Logger(), &sim.CardState{Card: SigilOfSilphidaeBlue{}})
 	if got := s.Value; got != 0 {
 		t.Errorf("Play() = %d, want 0 (empty graveyard)", got)
 	}
@@ -31,7 +31,7 @@ func TestSigilOfSilphidae_PlayFizzlesWithoutAura(t *testing.T) {
 func TestSigilOfSilphidae_PlayBanishesAuraForOneArcane(t *testing.T) {
 	aura := BlessingOfOccultRed{}
 	s := sim.NewTurnStateFromCards(nil, []sim.Card{aura})
-	(SigilOfSilphidaeBlue{}).Play(s, s.Logger(), &sim.CardState{Card: SigilOfSilphidaeBlue{}})
+	sim.ResolveChainStep(s, s.Logger(), &sim.CardState{Card: SigilOfSilphidaeBlue{}})
 	if got := s.Value; got != 1 {
 		t.Errorf("Play() = %d, want 1", got)
 	}
@@ -48,7 +48,7 @@ func TestSigilOfSilphidae_PlayBanishesAuraForOneArcane(t *testing.T) {
 // 0 damage.
 func TestSigilOfSilphidae_StartOfTurnHandlerFizzlesWithoutAnotherAura(t *testing.T) {
 	var play sim.TurnState
-	(SigilOfSilphidaeBlue{}).Play(&play, play.Logger(), &sim.CardState{Card: SigilOfSilphidaeBlue{}})
+	sim.ResolveChainStep(&play, play.Logger(), &sim.CardState{Card: SigilOfSilphidaeBlue{}})
 	next := sim.NewTurnStateFromCards(nil, nil)
 	next.Auras = append(next.Auras, play.Auras[0])
 	next.SetCurrentAuraIdxForTesting(0)
@@ -62,7 +62,7 @@ func TestSigilOfSilphidae_StartOfTurnHandlerFizzlesWithoutAnotherAura(t *testing
 // the start-of-turn graveyard, the leave trigger banishes it for 1 arcane.
 func TestSigilOfSilphidae_StartOfTurnHandlerBanishesAnotherAura(t *testing.T) {
 	var play sim.TurnState
-	(SigilOfSilphidaeBlue{}).Play(&play, play.Logger(), &sim.CardState{Card: SigilOfSilphidaeBlue{}})
+	sim.ResolveChainStep(&play, play.Logger(), &sim.CardState{Card: SigilOfSilphidaeBlue{}})
 	other := BlessingOfOccultRed{}
 	next := sim.NewTurnStateFromCards(nil, []sim.Card{other})
 	next.Auras = append(next.Auras, play.Auras[0])

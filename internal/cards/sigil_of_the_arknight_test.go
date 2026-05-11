@@ -12,7 +12,7 @@ import (
 // happens when the sim fires the trigger next turn.
 func TestSigilOfTheArknight_PlayOnlySetsAuraCreated(t *testing.T) {
 	s := sim.NewTurnStateFromCards([]sim.Card{testutils.RunebladeAttack{}}, nil)
-	(SigilOfTheArknightBlue{}).Play(s, s.Logger(), &sim.CardState{Card: SigilOfTheArknightBlue{}})
+	sim.ResolveChainStep(s, s.Logger(), &sim.CardState{Card: SigilOfTheArknightBlue{}})
 	if got := s.Value; got != 0 {
 		t.Errorf("Play() = %d, want 0 (reveal deferred to trigger)", got)
 	}
@@ -29,7 +29,7 @@ func TestSigilOfTheArknight_PlayOnlySetsAuraCreated(t *testing.T) {
 // stays 0 (tempo is captured by the extra card, not a flat credit).
 func TestSigilOfTheArknight_TriggerRevealsAttackActionIntoHand(t *testing.T) {
 	var play sim.TurnState
-	(SigilOfTheArknightBlue{}).Play(&play, play.Logger(), &sim.CardState{Card: SigilOfTheArknightBlue{}})
+	sim.ResolveChainStep(&play, play.Logger(), &sim.CardState{Card: SigilOfTheArknightBlue{}})
 	top := testutils.RunebladeAttack{}
 	next := sim.NewTurnStateFromCards([]sim.Card{top, testutils.NonAttack{}}, nil)
 	play.Auras[0].Handler(next, next.Logger(), &play.Auras[0].Trigger, &play.Auras[0])
@@ -48,7 +48,7 @@ func TestSigilOfTheArknight_TriggerRevealsAttackActionIntoHand(t *testing.T) {
 // empty and Deck is untouched (the card stays on top of the deck in the real game).
 func TestSigilOfTheArknight_TriggerRevealsNonAttack(t *testing.T) {
 	var play sim.TurnState
-	(SigilOfTheArknightBlue{}).Play(&play, play.Logger(), &sim.CardState{Card: SigilOfTheArknightBlue{}})
+	sim.ResolveChainStep(&play, play.Logger(), &sim.CardState{Card: SigilOfTheArknightBlue{}})
 	next := sim.NewTurnStateFromCards([]sim.Card{testutils.Aura{}, testutils.RunebladeAttack{}}, nil)
 	play.Auras[0].Handler(next, next.Logger(), &play.Auras[0].Trigger, &play.Auras[0])
 	if next.Value != 0 {
@@ -65,7 +65,7 @@ func TestSigilOfTheArknight_TriggerRevealsNonAttack(t *testing.T) {
 // TestSigilOfTheArknight_TriggerEmptyDeck: nothing to reveal → zero result, Hand stays empty.
 func TestSigilOfTheArknight_TriggerEmptyDeck(t *testing.T) {
 	var play sim.TurnState
-	(SigilOfTheArknightBlue{}).Play(&play, play.Logger(), &sim.CardState{Card: SigilOfTheArknightBlue{}})
+	sim.ResolveChainStep(&play, play.Logger(), &sim.CardState{Card: SigilOfTheArknightBlue{}})
 	var next sim.TurnState
 	play.Auras[0].Handler(&next, next.Logger(), &play.Auras[0].Trigger, &play.Auras[0])
 	if next.Value != 0 {

@@ -10,8 +10,6 @@ import (
 )
 
 func peaceOfMindPlay(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
-	n := self.DealEffectiveDefense(s)
-	self.Log(l, n)
 	s.CreatePonder(1)
 }
 

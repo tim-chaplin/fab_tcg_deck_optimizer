@@ -12,7 +12,7 @@ import (
 func TestPursueToThePitsOfDespair_OnHitMarksOpponent(t *testing.T) {
 	self := &sim.CardState{Card: PursueToThePitsOfDespairRed{}}
 	s := sim.TurnState{}
-	(PursueToThePitsOfDespairRed{}).Play(&s, s.Logger(), self)
+	sim.ResolveChainStep(&s, s.Logger(), self)
 	if len(self.OnHit) != 1 {
 		t.Fatalf("OnHit handlers = %d, want 1", len(self.OnHit))
 	}

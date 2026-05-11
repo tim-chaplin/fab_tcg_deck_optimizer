@@ -12,19 +12,13 @@ import (
 )
 
 func (SingeingSteelbladeRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
-	n := self.DealEffectiveAttack(s)
-	self.Log(l, n)
 	s.DealArcaneDamage(l, self, 1)
 }
 
 func (SingeingSteelbladeYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
-	n := self.DealEffectiveAttack(s)
-	self.Log(l, n)
 	s.DealArcaneDamage(l, self, 1)
 }
 
 func (SingeingSteelbladeBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
-	n := self.DealEffectiveAttack(s)
-	self.Log(l, n)
 	s.DealArcaneDamage(l, self, 1)
 }

@@ -20,11 +20,9 @@ func (c SigilOfSilphidaeBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.Car
 		Self:    sim.CardOrTokenType{Card: c},
 		Count:   1,
 	})
-	n := self.DealEffectiveAttack(s)
-	self.Log(l, n)
 	if enterDamage > 0 {
 		s.AddValue(enterDamage)
-		self.LogRider(l, enterDamage, "Banished an aura, dealt 1 arcane damage")
+		l.AppendPostTrigger(self.Card.DisplayName(), "Banished an aura, dealt 1 arcane damage", enterDamage)
 	}
 }
 

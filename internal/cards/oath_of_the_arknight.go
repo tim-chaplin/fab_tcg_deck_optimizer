@@ -27,8 +27,6 @@ func (OathOfTheArknightBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.Card
 // Oath's own contribution and lands as a sub-line under self's chain entry.
 func oathPlay(s *sim.TurnState, l sim.Logger, self *sim.CardState, bonus int) {
 	GrantNextCardBonusAttack(s, bonus, IsRunebladeAttack)
-	dmg := self.DealEffectiveAttack(s)
-	self.Log(l, dmg)
 	s.CreateRunechants(1)
-	self.LogRider(l, 1, "Created a runechant")
+	l.AppendPostTrigger(self.Card.DisplayName(), "Created a runechant", 1)
 }

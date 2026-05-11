@@ -20,12 +20,10 @@ func moneyOrYourLifeOnHit(s *sim.TurnState, l sim.Logger, self *sim.CardState, _
 		n = 4
 	}
 	s.AddValue(n)
-	self.LogRiderf(l, n, "On-hit dealt %d (opponent surrendered no Gold)", n)
+	l.AppendPostTriggerf(self.Card.DisplayName(), n, "On-hit dealt %d (opponent surrendered no Gold)", n)
 }
 
 func moneyOrYourLifePlay(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
-	n := self.DealEffectiveAttack(s)
-	self.Log(l, n)
 	self.RegisterOnHit(moneyOrYourLifeOnHit)
 }
 

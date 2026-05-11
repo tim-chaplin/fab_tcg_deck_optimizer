@@ -18,7 +18,7 @@ func TestFreewheelingRenegades_AlwaysDebuffedByTwo(t *testing.T) {
 	}
 	for _, tc := range cases {
 		s := sim.TurnState{}
-		tc.c.Play(&s, s.Logger(), &sim.CardState{Card: tc.c})
+		sim.ResolveChainStep(&s, s.Logger(), &sim.CardState{Card: tc.c})
 		if got := s.Value; got != tc.want {
 			t.Errorf("%s: Play() = %d, want %d (printed - 2)", tc.c.Name(), got, tc.want)
 		}

@@ -18,8 +18,6 @@ func yintiYantiBonus(s *sim.TurnState) int {
 
 func yintiYantiPlay(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	self.BonusAttack += yintiYantiBonus(s)
-	n := self.DealEffectiveAttack(s)
-	self.Log(l, n)
 }
 
 func yintiYantiBlock(s *sim.TurnState, l sim.Logger, self *sim.CardState) {

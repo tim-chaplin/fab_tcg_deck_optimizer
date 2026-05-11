@@ -14,8 +14,6 @@ import (
 )
 
 func brothersInArmsPlay(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
-	n := self.DealEffectiveAttack(s)
-	self.Log(l, n)
 }
 
 // brothersInArmsBlock fires +2{d} on mode 1 (caller already deducted 1{r} from the spare

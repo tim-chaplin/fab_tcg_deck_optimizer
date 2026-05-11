@@ -28,7 +28,7 @@ func TestRunechantOnPlay_CreatesNTokens(t *testing.T) {
 	}
 	for _, tc := range cases {
 		var s sim.TurnState
-		tc.c.Play(&s, s.Logger(), &sim.CardState{Card: tc.c})
+		sim.ResolveChainStep(&s, s.Logger(), &sim.CardState{Card: tc.c})
 		if s.Runechants() != tc.n {
 			t.Errorf("%s: Runechants = %d, want %d", tc.c.Name(), s.Runechants(), tc.n)
 		}

@@ -12,8 +12,6 @@ import (
 
 func ferventForerunnerPlay(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	self.GrantGoAgainIfFromArsenal()
-	n := self.DealEffectiveAttack(s)
-	self.Log(l, n)
 	self.RegisterOnHit(ferventForerunnerOnHit)
 }
 

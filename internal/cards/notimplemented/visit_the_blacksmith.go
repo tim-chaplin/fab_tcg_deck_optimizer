@@ -11,5 +11,4 @@ import (
 // not implemented: next-sword-attack +1{p} grant (weapon chain not peeked)
 
 func (VisitTheBlacksmithBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
-	self.Log(l, 0)
 }

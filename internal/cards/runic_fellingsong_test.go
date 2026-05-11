@@ -11,7 +11,7 @@ import (
 func TestRunicFellingsong_NoAuraCreditsPrintedPowerOnly(t *testing.T) {
 	var s sim.TurnState
 	c := RunicFellingsongRed{}
-	c.Play(&s, s.Logger(), &sim.CardState{Card: c})
+	sim.ResolveChainStep(&s, s.Logger(), &sim.CardState{Card: c})
 	if got := s.Value; got != c.Attack() {
 		t.Errorf("Play() = %d, want %d (Attack only; banish fizzles)", got, c.Attack())
 	}
@@ -24,7 +24,7 @@ func TestRunicFellingsong_AuraInGraveyardFiresBanishRider(t *testing.T) {
 	s := sim.NewTurnStateFromCards(nil, []sim.Card{aura})
 	c := RunicFellingsongRed{}
 	want := c.Attack() + 1
-	c.Play(s, s.Logger(), &sim.CardState{Card: c})
+	sim.ResolveChainStep(s, s.Logger(), &sim.CardState{Card: c})
 	if got := s.Value; got != want {
 		t.Errorf("Play() = %d, want %d (Attack + banish rider)", got, want)
 	}

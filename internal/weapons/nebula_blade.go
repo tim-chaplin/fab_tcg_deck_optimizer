@@ -43,8 +43,6 @@ func (NebulaBladeAbility) Play(s *sim.TurnState, l sim.Logger, self *sim.CardSta
 	if s.NonAttackActionPlayed {
 		self.BonusAttack += 3
 	}
-	n := self.DealEffectiveAttack(s)
-	self.Log(l, n)
 	self.RegisterOnHit(nebulaBladeOnHit)
 }
 
@@ -52,5 +50,5 @@ func (NebulaBladeAbility) Play(s *sim.TurnState, l sim.Logger, self *sim.CardSta
 // rider. Top-level so registration stays alloc-free.
 func nebulaBladeOnHit(s *sim.TurnState, l sim.Logger, self *sim.CardState, _ *sim.OnHitHandler) {
 	s.CreateRunechants(1)
-	self.LogRider(l, 1, "On-hit created a runechant")
+	l.AppendPostTrigger(self.Card.DisplayName(), "On-hit created a runechant", 1)
 }

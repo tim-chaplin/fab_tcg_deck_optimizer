@@ -14,8 +14,6 @@ import (
 )
 
 func gravekeepingPlay(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
-	n := self.DealEffectiveAttack(s)
-	self.Log(l, n)
 }
 
 func (GravekeepingRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {

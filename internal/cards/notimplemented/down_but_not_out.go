@@ -14,20 +14,14 @@ import (
 // not implemented: health/equipment/token comparison, agility/might/vigor tokens, overpower
 
 func (DownButNotOutRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
-	n := self.DealEffectiveAttack(s)
-	self.Log(l, n)
 }
 
 // not implemented: health/equipment/token comparison, agility/might/vigor tokens, overpower
 
 func (DownButNotOutYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
-	n := self.DealEffectiveAttack(s)
-	self.Log(l, n)
 }
 
 // not implemented: health/equipment/token comparison, agility/might/vigor tokens, overpower
 
 func (DownButNotOutBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
-	n := self.DealEffectiveAttack(s)
-	self.Log(l, n)
 }

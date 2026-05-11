@@ -27,8 +27,6 @@ func (RuneFlashRed) MinCost() int              { return 0 }
 func (RuneFlashRed) MaxCost() int              { return runeFlashPrintedCost }
 
 func (RuneFlashRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
-	n := self.DealEffectiveAttack(s)
-	self.Log(l, n)
 }
 
 func (RuneFlashYellow) Cost(s *sim.TurnState) int { return runeFlashCost(s) }
@@ -36,8 +34,6 @@ func (RuneFlashYellow) MinCost() int              { return 0 }
 func (RuneFlashYellow) MaxCost() int              { return runeFlashPrintedCost }
 
 func (RuneFlashYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
-	n := self.DealEffectiveAttack(s)
-	self.Log(l, n)
 }
 
 func (RuneFlashBlue) Cost(s *sim.TurnState) int { return runeFlashCost(s) }
@@ -45,6 +41,4 @@ func (RuneFlashBlue) MinCost() int              { return 0 }
 func (RuneFlashBlue) MaxCost() int              { return runeFlashPrintedCost }
 
 func (RuneFlashBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
-	n := self.DealEffectiveAttack(s)
-	self.Log(l, n)
 }

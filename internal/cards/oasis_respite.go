@@ -13,12 +13,11 @@ import (
 )
 
 func oasisRespitePlay(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
-	n := self.DealEffectiveDefense(s)
 	if sim.HeroWantsLowerHealth() {
-		s.AddValue(1)
-		n++
+		// Flip BonusDefense so the sim's chain-step resolver folds the +1{h} into the
+		// "(+N)" delta when it credits EffectiveDefense after Play returns.
+		self.BonusDefense += 1
 	}
-	self.Log(l, n)
 }
 
 func (OasisRespiteRed) DefensiveInstant() {}

@@ -11,7 +11,7 @@ import (
 func TestPrimeTheCrowd_NoAttackReturnsZero(t *testing.T) {
 	s := sim.TurnState{}
 	for _, c := range []sim.Card{PrimeTheCrowdRed{}, PrimeTheCrowdYellow{}, PrimeTheCrowdBlue{}} {
-		c.Play(&s, s.Logger(), &sim.CardState{Card: c})
+		sim.ResolveChainStep(&s, s.Logger(), &sim.CardState{Card: c})
 		if got := s.Value; got != 0 {
 			t.Errorf("%s: Play() = %d, want 0", c.Name(), got)
 		}
@@ -21,7 +21,7 @@ func TestPrimeTheCrowd_NoAttackReturnsZero(t *testing.T) {
 // TestPrimeTheCrowd_NonAttackInRemainingFizzles: non-attack action fails the predicate.
 func TestPrimeTheCrowd_NonAttackInRemainingFizzles(t *testing.T) {
 	s := sim.TurnState{CardsRemaining: []*sim.CardState{{Card: testutils.GenericAction()}}}
-	(PrimeTheCrowdRed{}).Play(&s, s.Logger(), &sim.CardState{Card: PrimeTheCrowdRed{}})
+	sim.ResolveChainStep(&s, s.Logger(), &sim.CardState{Card: PrimeTheCrowdRed{}})
 	if got := s.Value; got != 0 {
 		t.Errorf("Play() = %d, want 0 (non-attack skipped)", got)
 	}
@@ -41,7 +41,7 @@ func TestPrimeTheCrowd_NextAttackReturnsBonus(t *testing.T) {
 	for _, tc := range cases {
 		target := &sim.CardState{Card: testutils.GenericAttack(0, 0)}
 		s := sim.TurnState{CardsRemaining: []*sim.CardState{target}}
-		tc.c.Play(&s, s.Logger(), &sim.CardState{Card: tc.c})
+		sim.ResolveChainStep(&s, s.Logger(), &sim.CardState{Card: tc.c})
 		if got := s.Value; got != 0 {
 			t.Errorf("%s: Play() = %d, want 0 (granter returns 0; +N rides on target's BonusAttack)", tc.c.Name(), got)
 		}

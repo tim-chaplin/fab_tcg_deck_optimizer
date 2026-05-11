@@ -17,14 +17,12 @@ import (
 // via PeekDeck so the cacheable bit flips — whether the rider fires depends on shuffle
 // order.
 func skyFireLanternsPlay(s *sim.TurnState, l sim.Logger, self *sim.CardState, selfPitch int) {
-	n := self.DealEffectiveAttack(s)
-	self.Log(l, n)
 	top, ok := s.PeekDeck()
 	if !ok || top.Pitch() != selfPitch {
 		return
 	}
 	s.CreateRunechants(1)
-	self.LogRider(l, 1, "Created a runechant")
+	l.AppendPostTrigger(self.Card.DisplayName(), "Created a runechant", 1)
 }
 
 func (c SkyFireLanternsRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {

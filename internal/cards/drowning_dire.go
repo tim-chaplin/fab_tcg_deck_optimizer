@@ -15,7 +15,7 @@ import (
 
 func drowningDireOnHitRecycle(s *sim.TurnState, l sim.Logger, self *sim.CardState, _ *sim.OnHitHandler) {
 	if _, ok := s.RecycleFromGraveyardToBottom(isNonAttackAction); ok {
-		self.LogRider(l, 0, "Recycled a non-attack action card to bottom of deck")
+		l.AppendPostTrigger(self.Card.DisplayName(), "Recycled a non-attack action card to bottom of deck", 0)
 	}
 }
 
@@ -23,8 +23,6 @@ func drowningDirePlay(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	if s.HasPlayedOrCreatedAura() {
 		self.GrantedDominate = true
 	}
-	n := self.DealEffectiveAttack(s)
-	self.Log(l, n)
 	self.RegisterOnHit(drowningDireOnHitRecycle)
 }
 

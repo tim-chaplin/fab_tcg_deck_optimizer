@@ -19,7 +19,7 @@ func TestHitTheHighNotes_NoAuraReturnsBase(t *testing.T) {
 	}
 	for _, tc := range cases {
 		var s sim.TurnState
-		tc.c.Play(&s, s.Logger(), &sim.CardState{Card: tc.c})
+		sim.ResolveChainStep(&s, s.Logger(), &sim.CardState{Card: tc.c})
 		if got := s.Value; got != tc.base {
 			t.Errorf("%s: Play() = %d, want %d", tc.c.Name(), got, tc.base)
 		}
@@ -29,7 +29,7 @@ func TestHitTheHighNotes_NoAuraReturnsBase(t *testing.T) {
 func TestHitTheHighNotes_AuraPlayedTriggersBonus(t *testing.T) {
 	// An Aura-typed card earlier in the turn's CardsPlayed → +2 power.
 	s := sim.TurnState{CardsPlayed: []sim.Card{testutils.Aura{}}}
-	(HitTheHighNotesRed{}).Play(&s, s.Logger(), &sim.CardState{Card: HitTheHighNotesRed{}})
+	sim.ResolveChainStep(&s, s.Logger(), &sim.CardState{Card: HitTheHighNotesRed{}})
 	if got := s.Value; got != 6 {
 		t.Errorf("Play() = %d, want 6 (base 4 + 2 aura bonus)", got)
 	}
@@ -39,7 +39,7 @@ func TestHitTheHighNotes_AuraCreatedTriggersBonus(t *testing.T) {
 	// AuraCreated flag set earlier in the chain (e.g. Runechant creation) → +2 power, even
 	// without an Aura-typed card in CardsPlayed.
 	s := sim.TurnState{AuraCreated: true}
-	(HitTheHighNotesRed{}).Play(&s, s.Logger(), &sim.CardState{Card: HitTheHighNotesRed{}})
+	sim.ResolveChainStep(&s, s.Logger(), &sim.CardState{Card: HitTheHighNotesRed{}})
 	if got := s.Value; got != 6 {
 		t.Errorf("Play() = %d, want 6 (base 4 + 2 AuraCreated bonus)", got)
 	}
@@ -50,7 +50,7 @@ func TestHitTheHighNotes_AuraCreatedTriggersBonus(t *testing.T) {
 func TestHitTheHighNotes_BonusFlowsThroughBonusAttack(t *testing.T) {
 	s := sim.TurnState{AuraCreated: true}
 	self := &sim.CardState{Card: HitTheHighNotesRed{}}
-	(HitTheHighNotesRed{}).Play(&s, s.Logger(), self)
+	sim.ResolveChainStep(&s, s.Logger(), self)
 	if got := self.EffectiveAttack(); got != 6 {
 		t.Errorf("EffectiveAttack() = %d, want 6 (base 4 + 2 power buff)", got)
 	}

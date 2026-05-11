@@ -25,23 +25,17 @@ func consumingVolitionOnHit(s *sim.TurnState, l sim.Logger, self *sim.CardState,
 		return
 	}
 	s.AddValue(sim.DiscardValue)
-	self.LogRider(l, sim.DiscardValue, "On-hit discarded a card")
+	l.AppendPostTrigger(self.Card.DisplayName(), "On-hit discarded a card", sim.DiscardValue)
 }
 
 func (ConsumingVolitionRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
-	n := self.DealEffectiveAttack(s)
-	self.Log(l, n)
 	consumingVolitionApplyRider(s, l, self)
 }
 
 func (ConsumingVolitionYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
-	n := self.DealEffectiveAttack(s)
-	self.Log(l, n)
 	consumingVolitionApplyRider(s, l, self)
 }
 
 func (ConsumingVolitionBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
-	n := self.DealEffectiveAttack(s)
-	self.Log(l, n)
 	consumingVolitionApplyRider(s, l, self)
 }

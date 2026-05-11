@@ -10,20 +10,14 @@ import (
 
 func (HitTheHighNotesRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	self.BonusAttack += hitTheHighNotesBonus(s)
-	n := self.DealEffectiveAttack(s)
-	self.Log(l, n)
 }
 
 func (HitTheHighNotesYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	self.BonusAttack += hitTheHighNotesBonus(s)
-	n := self.DealEffectiveAttack(s)
-	self.Log(l, n)
 }
 
 func (HitTheHighNotesBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	self.BonusAttack += hitTheHighNotesBonus(s)
-	n := self.DealEffectiveAttack(s)
-	self.Log(l, n)
 }
 func hitTheHighNotesBonus(s *sim.TurnState) int {
 	if s.HasPlayedOrCreatedAura() {

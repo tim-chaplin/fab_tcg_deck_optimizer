@@ -17,6 +17,4 @@ import (
 
 func (SigilOfCyclesBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	cards.SetAuraCreated(s)
-	n := self.DealEffectiveAttack(s)
-	self.Log(l, n)
 }

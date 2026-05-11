@@ -36,7 +36,6 @@ func highStrikerPlay(s *sim.TurnState, l sim.Logger, self *sim.CardState, source
 		TypeFilter:  card.TypeSet.IsAttack,
 		Handler:     handler,
 	})
-	self.Log(l, 0)
 }
 
 func (c HighStrikerRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {

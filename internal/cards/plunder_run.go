@@ -32,7 +32,6 @@ func plunderRunPlay(s *sim.TurnState, l sim.Logger, self *sim.CardState, source 
 	if self.FromArsenal {
 		GrantNextCardBonusAttack(s, n, IsAttackAction)
 	}
-	self.Log(l, 0)
 }
 
 func (c PlunderRunRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {

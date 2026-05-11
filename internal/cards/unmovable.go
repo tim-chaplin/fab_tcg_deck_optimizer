@@ -12,19 +12,13 @@ import (
 )
 
 func (UnmovableRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
-	n := self.DealEffectiveDefense(s)
-	self.Log(l, n)
 }
 func (UnmovableRed) ArsenalDefenseBonus() int { return 1 }
 
 func (UnmovableYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
-	n := self.DealEffectiveDefense(s)
-	self.Log(l, n)
 }
 func (UnmovableYellow) ArsenalDefenseBonus() int { return 1 }
 
 func (UnmovableBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
-	n := self.DealEffectiveDefense(s)
-	self.Log(l, n)
 }
 func (UnmovableBlue) ArsenalDefenseBonus() int { return 1 }

@@ -13,8 +13,6 @@ import (
 )
 
 func outMusclePlay(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
-	n := self.DealEffectiveAttack(s)
-	self.Log(l, n)
 }
 
 func (OutMuscleRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {

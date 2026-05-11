@@ -26,7 +26,7 @@ func TestRunicReaping_NoNextAttackReturnsZero(t *testing.T) {
 func TestRunicReaping_WeaponNextDoesNotQualify(t *testing.T) {
 	target := &sim.CardState{Card: testutils.RunebladeWeapon{}}
 	s := sim.TurnState{CardsRemaining: []*sim.CardState{target}}
-	(RunicReapingRed{}).Play(&s, s.Logger(), &sim.CardState{Card: RunicReapingRed{}})
+	sim.ResolveChainStep(&s, s.Logger(), &sim.CardState{Card: RunicReapingRed{}})
 	if got := s.Value; got != 0 {
 		t.Fatalf("Play() = %d, want 0", got)
 	}
