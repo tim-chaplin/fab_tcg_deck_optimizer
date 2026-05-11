@@ -12,5 +12,5 @@ import (
 
 // not implemented: end-phase arsenal-fill from top of deck if behind on arsenal count
 
-func (TalismanOfBalanceBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (TalismanOfBalanceBlue) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 }

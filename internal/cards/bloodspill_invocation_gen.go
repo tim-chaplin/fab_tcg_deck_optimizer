@@ -15,7 +15,7 @@ type BloodspillInvocationRed struct{}
 func (BloodspillInvocationRed) ID() ids.CardID          { return ids.BloodspillInvocationRed }
 func (BloodspillInvocationRed) Name() string            { return "Bloodspill Invocation" }
 func (BloodspillInvocationRed) DisplayName() string     { return "Bloodspill Invocation [R]" }
-func (BloodspillInvocationRed) Cost(*sim.TurnState) int { return 1 }
+func (BloodspillInvocationRed) Cost(sim.GameEngine) int { return 1 }
 func (BloodspillInvocationRed) Pitch() int              { return 1 }
 func (BloodspillInvocationRed) Attack() int             { return 0 }
 func (BloodspillInvocationRed) Defense() int            { return 2 }
@@ -27,7 +27,7 @@ type BloodspillInvocationYellow struct{}
 func (BloodspillInvocationYellow) ID() ids.CardID          { return ids.BloodspillInvocationYellow }
 func (BloodspillInvocationYellow) Name() string            { return "Bloodspill Invocation" }
 func (BloodspillInvocationYellow) DisplayName() string     { return "Bloodspill Invocation [Y]" }
-func (BloodspillInvocationYellow) Cost(*sim.TurnState) int { return 1 }
+func (BloodspillInvocationYellow) Cost(sim.GameEngine) int { return 1 }
 func (BloodspillInvocationYellow) Pitch() int              { return 2 }
 func (BloodspillInvocationYellow) Attack() int             { return 0 }
 func (BloodspillInvocationYellow) Defense() int            { return 2 }
@@ -39,7 +39,7 @@ type BloodspillInvocationBlue struct{}
 func (BloodspillInvocationBlue) ID() ids.CardID          { return ids.BloodspillInvocationBlue }
 func (BloodspillInvocationBlue) Name() string            { return "Bloodspill Invocation" }
 func (BloodspillInvocationBlue) DisplayName() string     { return "Bloodspill Invocation [B]" }
-func (BloodspillInvocationBlue) Cost(*sim.TurnState) int { return 1 }
+func (BloodspillInvocationBlue) Cost(sim.GameEngine) int { return 1 }
 func (BloodspillInvocationBlue) Pitch() int              { return 3 }
 func (BloodspillInvocationBlue) Attack() int             { return 0 }
 func (BloodspillInvocationBlue) Defense() int            { return 2 }

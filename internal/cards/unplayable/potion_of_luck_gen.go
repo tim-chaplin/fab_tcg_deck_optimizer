@@ -15,7 +15,7 @@ type PotionOfLuckBlue struct{}
 func (PotionOfLuckBlue) ID() ids.CardID          { return ids.PotionOfLuckBlue }
 func (PotionOfLuckBlue) Name() string            { return "Potion of Luck" }
 func (PotionOfLuckBlue) DisplayName() string     { return "Potion of Luck [B]" }
-func (PotionOfLuckBlue) Cost(*sim.TurnState) int { return 0 }
+func (PotionOfLuckBlue) Cost(sim.GameEngine) int { return 0 }
 func (PotionOfLuckBlue) Pitch() int              { return 3 }
 func (PotionOfLuckBlue) Attack() int             { return 0 }
 func (PotionOfLuckBlue) Defense() int            { return 0 }

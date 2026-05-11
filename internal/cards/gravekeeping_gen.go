@@ -15,7 +15,7 @@ type GravekeepingRed struct{}
 func (GravekeepingRed) ID() ids.CardID          { return ids.GravekeepingRed }
 func (GravekeepingRed) Name() string            { return "Gravekeeping" }
 func (GravekeepingRed) DisplayName() string     { return "Gravekeeping [R]" }
-func (GravekeepingRed) Cost(*sim.TurnState) int { return 1 }
+func (GravekeepingRed) Cost(sim.GameEngine) int { return 1 }
 func (GravekeepingRed) Pitch() int              { return 1 }
 func (GravekeepingRed) Attack() int             { return 5 }
 func (GravekeepingRed) Defense() int            { return 2 }
@@ -27,7 +27,7 @@ type GravekeepingYellow struct{}
 func (GravekeepingYellow) ID() ids.CardID          { return ids.GravekeepingYellow }
 func (GravekeepingYellow) Name() string            { return "Gravekeeping" }
 func (GravekeepingYellow) DisplayName() string     { return "Gravekeeping [Y]" }
-func (GravekeepingYellow) Cost(*sim.TurnState) int { return 1 }
+func (GravekeepingYellow) Cost(sim.GameEngine) int { return 1 }
 func (GravekeepingYellow) Pitch() int              { return 2 }
 func (GravekeepingYellow) Attack() int             { return 4 }
 func (GravekeepingYellow) Defense() int            { return 2 }
@@ -39,7 +39,7 @@ type GravekeepingBlue struct{}
 func (GravekeepingBlue) ID() ids.CardID          { return ids.GravekeepingBlue }
 func (GravekeepingBlue) Name() string            { return "Gravekeeping" }
 func (GravekeepingBlue) DisplayName() string     { return "Gravekeeping [B]" }
-func (GravekeepingBlue) Cost(*sim.TurnState) int { return 1 }
+func (GravekeepingBlue) Cost(sim.GameEngine) int { return 1 }
 func (GravekeepingBlue) Pitch() int              { return 3 }
 func (GravekeepingBlue) Attack() int             { return 3 }
 func (GravekeepingBlue) Defense() int            { return 2 }

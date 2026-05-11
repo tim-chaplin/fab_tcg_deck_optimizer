@@ -11,4 +11,4 @@ import (
 
 // not implemented: passive tap-target Pirate; can't unfreeze; self-destroys at start of turn
 
-func (ClapEmInIronsBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {}
+func (ClapEmInIronsBlue) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {}

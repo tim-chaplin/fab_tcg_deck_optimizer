@@ -15,7 +15,7 @@ type SkyFireLanternsRed struct{}
 func (SkyFireLanternsRed) ID() ids.CardID          { return ids.SkyFireLanternsRed }
 func (SkyFireLanternsRed) Name() string            { return "Sky Fire Lanterns" }
 func (SkyFireLanternsRed) DisplayName() string     { return "Sky Fire Lanterns [R]" }
-func (SkyFireLanternsRed) Cost(*sim.TurnState) int { return 0 }
+func (SkyFireLanternsRed) Cost(sim.GameEngine) int { return 0 }
 func (SkyFireLanternsRed) Pitch() int              { return 1 }
 func (SkyFireLanternsRed) Attack() int             { return 0 }
 func (SkyFireLanternsRed) Defense() int            { return 2 }
@@ -27,7 +27,7 @@ type SkyFireLanternsYellow struct{}
 func (SkyFireLanternsYellow) ID() ids.CardID          { return ids.SkyFireLanternsYellow }
 func (SkyFireLanternsYellow) Name() string            { return "Sky Fire Lanterns" }
 func (SkyFireLanternsYellow) DisplayName() string     { return "Sky Fire Lanterns [Y]" }
-func (SkyFireLanternsYellow) Cost(*sim.TurnState) int { return 0 }
+func (SkyFireLanternsYellow) Cost(sim.GameEngine) int { return 0 }
 func (SkyFireLanternsYellow) Pitch() int              { return 2 }
 func (SkyFireLanternsYellow) Attack() int             { return 0 }
 func (SkyFireLanternsYellow) Defense() int            { return 2 }
@@ -39,7 +39,7 @@ type SkyFireLanternsBlue struct{}
 func (SkyFireLanternsBlue) ID() ids.CardID          { return ids.SkyFireLanternsBlue }
 func (SkyFireLanternsBlue) Name() string            { return "Sky Fire Lanterns" }
 func (SkyFireLanternsBlue) DisplayName() string     { return "Sky Fire Lanterns [B]" }
-func (SkyFireLanternsBlue) Cost(*sim.TurnState) int { return 0 }
+func (SkyFireLanternsBlue) Cost(sim.GameEngine) int { return 0 }
 func (SkyFireLanternsBlue) Pitch() int              { return 3 }
 func (SkyFireLanternsBlue) Attack() int             { return 0 }
 func (SkyFireLanternsBlue) Defense() int            { return 2 }

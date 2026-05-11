@@ -11,5 +11,5 @@ import (
 
 // not implemented: on-hit opponent-arsenal manipulation rider
 
-func (SmashUpRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (SmashUpRed) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 }

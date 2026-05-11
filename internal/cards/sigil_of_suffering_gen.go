@@ -15,7 +15,7 @@ type SigilOfSufferingRed struct{}
 func (SigilOfSufferingRed) ID() ids.CardID          { return ids.SigilOfSufferingRed }
 func (SigilOfSufferingRed) Name() string            { return "Sigil of Suffering" }
 func (SigilOfSufferingRed) DisplayName() string     { return "Sigil of Suffering [R]" }
-func (SigilOfSufferingRed) Cost(*sim.TurnState) int { return 0 }
+func (SigilOfSufferingRed) Cost(sim.GameEngine) int { return 0 }
 func (SigilOfSufferingRed) Pitch() int              { return 1 }
 func (SigilOfSufferingRed) Attack() int             { return 0 }
 func (SigilOfSufferingRed) Defense() int            { return 3 }
@@ -27,7 +27,7 @@ type SigilOfSufferingYellow struct{}
 func (SigilOfSufferingYellow) ID() ids.CardID          { return ids.SigilOfSufferingYellow }
 func (SigilOfSufferingYellow) Name() string            { return "Sigil of Suffering" }
 func (SigilOfSufferingYellow) DisplayName() string     { return "Sigil of Suffering [Y]" }
-func (SigilOfSufferingYellow) Cost(*sim.TurnState) int { return 0 }
+func (SigilOfSufferingYellow) Cost(sim.GameEngine) int { return 0 }
 func (SigilOfSufferingYellow) Pitch() int              { return 2 }
 func (SigilOfSufferingYellow) Attack() int             { return 0 }
 func (SigilOfSufferingYellow) Defense() int            { return 2 }
@@ -39,7 +39,7 @@ type SigilOfSufferingBlue struct{}
 func (SigilOfSufferingBlue) ID() ids.CardID          { return ids.SigilOfSufferingBlue }
 func (SigilOfSufferingBlue) Name() string            { return "Sigil of Suffering" }
 func (SigilOfSufferingBlue) DisplayName() string     { return "Sigil of Suffering [B]" }
-func (SigilOfSufferingBlue) Cost(*sim.TurnState) int { return 0 }
+func (SigilOfSufferingBlue) Cost(sim.GameEngine) int { return 0 }
 func (SigilOfSufferingBlue) Pitch() int              { return 3 }
 func (SigilOfSufferingBlue) Attack() int             { return 0 }
 func (SigilOfSufferingBlue) Defense() int            { return 1 }

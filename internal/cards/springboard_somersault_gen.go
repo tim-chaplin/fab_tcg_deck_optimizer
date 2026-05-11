@@ -15,7 +15,7 @@ type SpringboardSomersaultYellow struct{}
 func (SpringboardSomersaultYellow) ID() ids.CardID          { return ids.SpringboardSomersaultYellow }
 func (SpringboardSomersaultYellow) Name() string            { return "Springboard Somersault" }
 func (SpringboardSomersaultYellow) DisplayName() string     { return "Springboard Somersault [Y]" }
-func (SpringboardSomersaultYellow) Cost(*sim.TurnState) int { return 0 }
+func (SpringboardSomersaultYellow) Cost(sim.GameEngine) int { return 0 }
 func (SpringboardSomersaultYellow) Pitch() int              { return 2 }
 func (SpringboardSomersaultYellow) Attack() int             { return 0 }
 func (SpringboardSomersaultYellow) Defense() int            { return 2 }

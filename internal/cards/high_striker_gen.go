@@ -15,7 +15,7 @@ type HighStrikerRed struct{}
 func (HighStrikerRed) ID() ids.CardID          { return ids.HighStrikerRed }
 func (HighStrikerRed) Name() string            { return "High Striker" }
 func (HighStrikerRed) DisplayName() string     { return "High Striker [R]" }
-func (HighStrikerRed) Cost(*sim.TurnState) int { return 0 }
+func (HighStrikerRed) Cost(sim.GameEngine) int { return 0 }
 func (HighStrikerRed) Pitch() int              { return 1 }
 func (HighStrikerRed) Attack() int             { return 0 }
 func (HighStrikerRed) Defense() int            { return 2 }
@@ -27,7 +27,7 @@ type HighStrikerYellow struct{}
 func (HighStrikerYellow) ID() ids.CardID          { return ids.HighStrikerYellow }
 func (HighStrikerYellow) Name() string            { return "High Striker" }
 func (HighStrikerYellow) DisplayName() string     { return "High Striker [Y]" }
-func (HighStrikerYellow) Cost(*sim.TurnState) int { return 0 }
+func (HighStrikerYellow) Cost(sim.GameEngine) int { return 0 }
 func (HighStrikerYellow) Pitch() int              { return 2 }
 func (HighStrikerYellow) Attack() int             { return 0 }
 func (HighStrikerYellow) Defense() int            { return 2 }
@@ -39,7 +39,7 @@ type HighStrikerBlue struct{}
 func (HighStrikerBlue) ID() ids.CardID          { return ids.HighStrikerBlue }
 func (HighStrikerBlue) Name() string            { return "High Striker" }
 func (HighStrikerBlue) DisplayName() string     { return "High Striker [B]" }
-func (HighStrikerBlue) Cost(*sim.TurnState) int { return 0 }
+func (HighStrikerBlue) Cost(sim.GameEngine) int { return 0 }
 func (HighStrikerBlue) Pitch() int              { return 3 }
 func (HighStrikerBlue) Attack() int             { return 0 }
 func (HighStrikerBlue) Defense() int            { return 2 }

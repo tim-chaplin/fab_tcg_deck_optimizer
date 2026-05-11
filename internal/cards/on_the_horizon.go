@@ -14,8 +14,8 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
 
-func (OnTheHorizonRed) Play(*sim.TurnState, sim.Logger, *sim.CardState) {}
+func (OnTheHorizonRed) Play(sim.GameEngine, sim.Logger, *sim.CardState) {}
 
-func (OnTheHorizonYellow) Play(*sim.TurnState, sim.Logger, *sim.CardState) {}
+func (OnTheHorizonYellow) Play(sim.GameEngine, sim.Logger, *sim.CardState) {}
 
-func (OnTheHorizonBlue) Play(*sim.TurnState, sim.Logger, *sim.CardState) {}
+func (OnTheHorizonBlue) Play(sim.GameEngine, sim.Logger, *sim.CardState) {}

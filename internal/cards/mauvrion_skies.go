@@ -24,7 +24,7 @@ func mauvrionTargetMatches(target *sim.CardState) bool {
 
 // mauvrionSkiesPlay grants the next matching attack go-again and an on-hit n-runechant
 // rider.
-func mauvrionSkiesPlay(s *sim.TurnState, l sim.Logger, selfState *sim.CardState, source sim.Card, n int) {
+func mauvrionSkiesPlay(s sim.GameEngine, l sim.Logger, selfState *sim.CardState, source sim.Card, n int) {
 	for _, pc := range s.CardsRemaining() {
 		if mauvrionTargetMatches(pc) {
 			pc.GrantedGoAgain = true
@@ -44,7 +44,7 @@ func mauvrionSkiesPlay(s *sim.TurnState, l sim.Logger, selfState *sim.CardState,
 // targeted attack by Mauvrion Skies / Runic Reaping. Reads N and the precomputed log
 // line off the handler so registration stays alloc-free; self is the targeted attack
 // (whose name credits the trigger line).
-func onHitCreateRunechants(s *sim.TurnState, l sim.Logger, self *sim.CardState, h *sim.OnHitHandler) {
+func onHitCreateRunechants(s sim.GameEngine, l sim.Logger, self *sim.CardState, h *sim.OnHitHandler) {
 	s.CreateRunechants(h.N)
 	l.AppendPostTrigger(self.Card.DisplayName(), h.LogText, h.N)
 }
@@ -69,14 +69,14 @@ var onHitRunechantText = func() map[ids.CardID]string {
 	return out
 }()
 
-func (c MauvrionSkiesRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (c MauvrionSkiesRed) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 	mauvrionSkiesPlay(s, l, self, c, 3)
 }
 
-func (c MauvrionSkiesYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (c MauvrionSkiesYellow) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 	mauvrionSkiesPlay(s, l, self, c, 2)
 }
 
-func (c MauvrionSkiesBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (c MauvrionSkiesBlue) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 	mauvrionSkiesPlay(s, l, self, c, 1)
 }

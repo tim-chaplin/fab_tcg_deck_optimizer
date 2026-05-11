@@ -15,7 +15,7 @@ type LifeForALifeRed struct{}
 func (LifeForALifeRed) ID() ids.CardID          { return ids.LifeForALifeRed }
 func (LifeForALifeRed) Name() string            { return "Life for a Life" }
 func (LifeForALifeRed) DisplayName() string     { return "Life for a Life [R]" }
-func (LifeForALifeRed) Cost(*sim.TurnState) int { return 1 }
+func (LifeForALifeRed) Cost(sim.GameEngine) int { return 1 }
 func (LifeForALifeRed) Pitch() int              { return 1 }
 func (LifeForALifeRed) Attack() int             { return 4 }
 func (LifeForALifeRed) Defense() int            { return 2 }
@@ -26,7 +26,7 @@ type LifeForALifeYellow struct{}
 func (LifeForALifeYellow) ID() ids.CardID          { return ids.LifeForALifeYellow }
 func (LifeForALifeYellow) Name() string            { return "Life for a Life" }
 func (LifeForALifeYellow) DisplayName() string     { return "Life for a Life [Y]" }
-func (LifeForALifeYellow) Cost(*sim.TurnState) int { return 1 }
+func (LifeForALifeYellow) Cost(sim.GameEngine) int { return 1 }
 func (LifeForALifeYellow) Pitch() int              { return 2 }
 func (LifeForALifeYellow) Attack() int             { return 3 }
 func (LifeForALifeYellow) Defense() int            { return 2 }
@@ -37,7 +37,7 @@ type LifeForALifeBlue struct{}
 func (LifeForALifeBlue) ID() ids.CardID          { return ids.LifeForALifeBlue }
 func (LifeForALifeBlue) Name() string            { return "Life for a Life" }
 func (LifeForALifeBlue) DisplayName() string     { return "Life for a Life [B]" }
-func (LifeForALifeBlue) Cost(*sim.TurnState) int { return 1 }
+func (LifeForALifeBlue) Cost(sim.GameEngine) int { return 1 }
 func (LifeForALifeBlue) Pitch() int              { return 3 }
 func (LifeForALifeBlue) Attack() int             { return 2 }
 func (LifeForALifeBlue) Defense() int            { return 2 }

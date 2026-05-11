@@ -12,15 +12,15 @@ import (
 
 // not implemented: hero-ability suppression rider
 
-func (HumbleRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (HumbleRed) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 }
 
 // not implemented: hero-ability suppression rider
 
-func (HumbleYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (HumbleYellow) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 }
 
 // not implemented: hero-ability suppression rider
 
-func (HumbleBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (HumbleBlue) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 }

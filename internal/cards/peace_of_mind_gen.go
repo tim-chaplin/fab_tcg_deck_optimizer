@@ -15,7 +15,7 @@ type PeaceOfMindRed struct{}
 func (PeaceOfMindRed) ID() ids.CardID          { return ids.PeaceOfMindRed }
 func (PeaceOfMindRed) Name() string            { return "Peace of Mind" }
 func (PeaceOfMindRed) DisplayName() string     { return "Peace of Mind [R]" }
-func (PeaceOfMindRed) Cost(*sim.TurnState) int { return 2 }
+func (PeaceOfMindRed) Cost(sim.GameEngine) int { return 2 }
 func (PeaceOfMindRed) Pitch() int              { return 1 }
 func (PeaceOfMindRed) Attack() int             { return 0 }
 func (PeaceOfMindRed) Defense() int            { return 4 }
@@ -27,7 +27,7 @@ type PeaceOfMindYellow struct{}
 func (PeaceOfMindYellow) ID() ids.CardID          { return ids.PeaceOfMindYellow }
 func (PeaceOfMindYellow) Name() string            { return "Peace of Mind" }
 func (PeaceOfMindYellow) DisplayName() string     { return "Peace of Mind [Y]" }
-func (PeaceOfMindYellow) Cost(*sim.TurnState) int { return 2 }
+func (PeaceOfMindYellow) Cost(sim.GameEngine) int { return 2 }
 func (PeaceOfMindYellow) Pitch() int              { return 2 }
 func (PeaceOfMindYellow) Attack() int             { return 0 }
 func (PeaceOfMindYellow) Defense() int            { return 3 }
@@ -39,7 +39,7 @@ type PeaceOfMindBlue struct{}
 func (PeaceOfMindBlue) ID() ids.CardID          { return ids.PeaceOfMindBlue }
 func (PeaceOfMindBlue) Name() string            { return "Peace of Mind" }
 func (PeaceOfMindBlue) DisplayName() string     { return "Peace of Mind [B]" }
-func (PeaceOfMindBlue) Cost(*sim.TurnState) int { return 2 }
+func (PeaceOfMindBlue) Cost(sim.GameEngine) int { return 2 }
 func (PeaceOfMindBlue) Pitch() int              { return 3 }
 func (PeaceOfMindBlue) Attack() int             { return 0 }
 func (PeaceOfMindBlue) Defense() int            { return 2 }

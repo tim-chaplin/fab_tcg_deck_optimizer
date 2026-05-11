@@ -15,7 +15,7 @@ type ShrillOfSkullformRed struct{}
 func (ShrillOfSkullformRed) ID() ids.CardID          { return ids.ShrillOfSkullformRed }
 func (ShrillOfSkullformRed) Name() string            { return "Shrill of Skullform" }
 func (ShrillOfSkullformRed) DisplayName() string     { return "Shrill of Skullform [R]" }
-func (ShrillOfSkullformRed) Cost(*sim.TurnState) int { return 2 }
+func (ShrillOfSkullformRed) Cost(sim.GameEngine) int { return 2 }
 func (ShrillOfSkullformRed) Pitch() int              { return 1 }
 func (ShrillOfSkullformRed) Attack() int             { return 4 }
 func (ShrillOfSkullformRed) Defense() int            { return 3 }
@@ -27,7 +27,7 @@ type ShrillOfSkullformYellow struct{}
 func (ShrillOfSkullformYellow) ID() ids.CardID          { return ids.ShrillOfSkullformYellow }
 func (ShrillOfSkullformYellow) Name() string            { return "Shrill of Skullform" }
 func (ShrillOfSkullformYellow) DisplayName() string     { return "Shrill of Skullform [Y]" }
-func (ShrillOfSkullformYellow) Cost(*sim.TurnState) int { return 2 }
+func (ShrillOfSkullformYellow) Cost(sim.GameEngine) int { return 2 }
 func (ShrillOfSkullformYellow) Pitch() int              { return 2 }
 func (ShrillOfSkullformYellow) Attack() int             { return 3 }
 func (ShrillOfSkullformYellow) Defense() int            { return 3 }
@@ -39,7 +39,7 @@ type ShrillOfSkullformBlue struct{}
 func (ShrillOfSkullformBlue) ID() ids.CardID          { return ids.ShrillOfSkullformBlue }
 func (ShrillOfSkullformBlue) Name() string            { return "Shrill of Skullform" }
 func (ShrillOfSkullformBlue) DisplayName() string     { return "Shrill of Skullform [B]" }
-func (ShrillOfSkullformBlue) Cost(*sim.TurnState) int { return 2 }
+func (ShrillOfSkullformBlue) Cost(sim.GameEngine) int { return 2 }
 func (ShrillOfSkullformBlue) Pitch() int              { return 3 }
 func (ShrillOfSkullformBlue) Attack() int             { return 2 }
 func (ShrillOfSkullformBlue) Defense() int            { return 3 }

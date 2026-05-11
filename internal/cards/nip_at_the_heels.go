@@ -15,6 +15,6 @@ import (
 func (NipAtTheHeelsBlue) ARTargetAllowed(c sim.Card, _ int8) bool {
 	return c.Types().IsAttack() && c.Attack() <= 3
 }
-func (NipAtTheHeelsBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (NipAtTheHeelsBlue) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 	sim.GrantAttackReactionBuff(s, l, self, 1)
 }

@@ -15,7 +15,7 @@ type NipAtTheHeelsBlue struct{}
 func (NipAtTheHeelsBlue) ID() ids.CardID          { return ids.NipAtTheHeelsBlue }
 func (NipAtTheHeelsBlue) Name() string            { return "Nip at the Heels" }
 func (NipAtTheHeelsBlue) DisplayName() string     { return "Nip at the Heels [B]" }
-func (NipAtTheHeelsBlue) Cost(*sim.TurnState) int { return 0 }
+func (NipAtTheHeelsBlue) Cost(sim.GameEngine) int { return 0 }
 func (NipAtTheHeelsBlue) Pitch() int              { return 3 }
 func (NipAtTheHeelsBlue) Attack() int             { return 0 }
 func (NipAtTheHeelsBlue) Defense() int            { return 3 }

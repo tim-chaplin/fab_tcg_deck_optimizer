@@ -13,18 +13,18 @@ import (
 
 // not implemented: ward (opponent damage prevention)
 
-func (SigilOfProtectionRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (SigilOfProtectionRed) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 	s.SetAuraCreated(true)
 }
 
 // not implemented: ward (opponent damage prevention)
 
-func (SigilOfProtectionYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (SigilOfProtectionYellow) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 	s.SetAuraCreated(true)
 }
 
 // not implemented: ward (opponent damage prevention)
 
-func (SigilOfProtectionBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (SigilOfProtectionBlue) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 	s.SetAuraCreated(true)
 }

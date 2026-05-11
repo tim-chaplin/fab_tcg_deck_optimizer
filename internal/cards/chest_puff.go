@@ -11,7 +11,7 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
 
-func chestPuffPlay(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func chestPuffPlay(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 	if self.Mode == 0 {
 		self.BonusAttack -= 1
 	}
@@ -19,6 +19,6 @@ func chestPuffPlay(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 
 func (ChestPuffRed) Modes() int              { return 2 }
 func (ChestPuffRed) ModalCost(mode int8) int { return 2 + int(mode) }
-func (ChestPuffRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (ChestPuffRed) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 	chestPuffPlay(s, l, self)
 }

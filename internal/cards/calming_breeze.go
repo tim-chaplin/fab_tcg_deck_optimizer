@@ -10,5 +10,5 @@ import (
 )
 
 func (CalmingBreezeRed) DefensiveInstant() {}
-func (CalmingBreezeRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (CalmingBreezeRed) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 }

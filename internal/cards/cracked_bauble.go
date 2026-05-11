@@ -9,4 +9,4 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
 
-func (CrackedBaubleYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {}
+func (CrackedBaubleYellow) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {}

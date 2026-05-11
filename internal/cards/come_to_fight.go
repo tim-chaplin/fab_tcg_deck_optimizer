@@ -10,14 +10,14 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
 
-func (ComeToFightRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (ComeToFightRed) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 	GrantNextCardBonusAttack(s, 3, IsAttackAction)
 }
 
-func (ComeToFightYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (ComeToFightYellow) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 	GrantNextCardBonusAttack(s, 2, IsAttackAction)
 }
 
-func (ComeToFightBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (ComeToFightBlue) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 	GrantNextCardBonusAttack(s, 1, IsAttackAction)
 }

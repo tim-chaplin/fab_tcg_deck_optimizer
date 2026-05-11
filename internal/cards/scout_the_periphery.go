@@ -16,18 +16,18 @@ import (
 )
 
 // scoutThePeripheryIsTarget gates the rider on attack action cards played from arsenal.
-func scoutThePeripheryIsTarget(_ *sim.TurnState, pc *sim.CardState) bool {
+func scoutThePeripheryIsTarget(_ sim.GameEngine, pc *sim.CardState) bool {
 	return pc.FromArsenal && pc.Card.Types().IsAttackAction()
 }
 
-func (ScoutThePeripheryRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (ScoutThePeripheryRed) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 	GrantNextCardBonusAttack(s, 3, scoutThePeripheryIsTarget)
 }
 
-func (ScoutThePeripheryYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (ScoutThePeripheryYellow) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 	GrantNextCardBonusAttack(s, 2, scoutThePeripheryIsTarget)
 }
 
-func (ScoutThePeripheryBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (ScoutThePeripheryBlue) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 	GrantNextCardBonusAttack(s, 1, scoutThePeripheryIsTarget)
 }

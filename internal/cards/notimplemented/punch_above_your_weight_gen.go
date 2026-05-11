@@ -15,7 +15,7 @@ type PunchAboveYourWeightRed struct{}
 func (PunchAboveYourWeightRed) ID() ids.CardID          { return ids.PunchAboveYourWeightRed }
 func (PunchAboveYourWeightRed) Name() string            { return "Punch Above Your Weight" }
 func (PunchAboveYourWeightRed) DisplayName() string     { return "Punch Above Your Weight [R]" }
-func (PunchAboveYourWeightRed) Cost(*sim.TurnState) int { return 0 }
+func (PunchAboveYourWeightRed) Cost(sim.GameEngine) int { return 0 }
 func (PunchAboveYourWeightRed) Pitch() int              { return 1 }
 func (PunchAboveYourWeightRed) Attack() int             { return 2 }
 func (PunchAboveYourWeightRed) Defense() int            { return 2 }
@@ -28,7 +28,7 @@ type PunchAboveYourWeightYellow struct{}
 func (PunchAboveYourWeightYellow) ID() ids.CardID          { return ids.PunchAboveYourWeightYellow }
 func (PunchAboveYourWeightYellow) Name() string            { return "Punch Above Your Weight" }
 func (PunchAboveYourWeightYellow) DisplayName() string     { return "Punch Above Your Weight [Y]" }
-func (PunchAboveYourWeightYellow) Cost(*sim.TurnState) int { return 0 }
+func (PunchAboveYourWeightYellow) Cost(sim.GameEngine) int { return 0 }
 func (PunchAboveYourWeightYellow) Pitch() int              { return 2 }
 func (PunchAboveYourWeightYellow) Attack() int             { return 2 }
 func (PunchAboveYourWeightYellow) Defense() int            { return 2 }
@@ -41,7 +41,7 @@ type PunchAboveYourWeightBlue struct{}
 func (PunchAboveYourWeightBlue) ID() ids.CardID          { return ids.PunchAboveYourWeightBlue }
 func (PunchAboveYourWeightBlue) Name() string            { return "Punch Above Your Weight" }
 func (PunchAboveYourWeightBlue) DisplayName() string     { return "Punch Above Your Weight [B]" }
-func (PunchAboveYourWeightBlue) Cost(*sim.TurnState) int { return 0 }
+func (PunchAboveYourWeightBlue) Cost(sim.GameEngine) int { return 0 }
 func (PunchAboveYourWeightBlue) Pitch() int              { return 3 }
 func (PunchAboveYourWeightBlue) Attack() int             { return 2 }
 func (PunchAboveYourWeightBlue) Defense() int            { return 2 }

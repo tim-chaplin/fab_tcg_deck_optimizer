@@ -15,18 +15,18 @@ import (
 
 // not implemented: damage-prevention trigger, end-phase destruction clause
 
-func (EnchantingMelodyRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (EnchantingMelodyRed) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 	s.SetAuraCreated(true)
 }
 
 // not implemented: damage-prevention trigger, end-phase destruction clause
 
-func (EnchantingMelodyYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (EnchantingMelodyYellow) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 	s.SetAuraCreated(true)
 }
 
 // not implemented: damage-prevention trigger, end-phase destruction clause
 
-func (EnchantingMelodyBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (EnchantingMelodyBlue) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 	s.SetAuraCreated(true)
 }

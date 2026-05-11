@@ -15,7 +15,7 @@ type CutDownToSizeRed struct{}
 func (CutDownToSizeRed) ID() ids.CardID          { return ids.CutDownToSizeRed }
 func (CutDownToSizeRed) Name() string            { return "Cut Down to Size" }
 func (CutDownToSizeRed) DisplayName() string     { return "Cut Down to Size [R]" }
-func (CutDownToSizeRed) Cost(*sim.TurnState) int { return 2 }
+func (CutDownToSizeRed) Cost(sim.GameEngine) int { return 2 }
 func (CutDownToSizeRed) Pitch() int              { return 1 }
 func (CutDownToSizeRed) Attack() int             { return 6 }
 func (CutDownToSizeRed) Defense() int            { return 2 }
@@ -27,7 +27,7 @@ type CutDownToSizeYellow struct{}
 func (CutDownToSizeYellow) ID() ids.CardID          { return ids.CutDownToSizeYellow }
 func (CutDownToSizeYellow) Name() string            { return "Cut Down to Size" }
 func (CutDownToSizeYellow) DisplayName() string     { return "Cut Down to Size [Y]" }
-func (CutDownToSizeYellow) Cost(*sim.TurnState) int { return 2 }
+func (CutDownToSizeYellow) Cost(sim.GameEngine) int { return 2 }
 func (CutDownToSizeYellow) Pitch() int              { return 2 }
 func (CutDownToSizeYellow) Attack() int             { return 5 }
 func (CutDownToSizeYellow) Defense() int            { return 2 }
@@ -39,7 +39,7 @@ type CutDownToSizeBlue struct{}
 func (CutDownToSizeBlue) ID() ids.CardID          { return ids.CutDownToSizeBlue }
 func (CutDownToSizeBlue) Name() string            { return "Cut Down to Size" }
 func (CutDownToSizeBlue) DisplayName() string     { return "Cut Down to Size [B]" }
-func (CutDownToSizeBlue) Cost(*sim.TurnState) int { return 2 }
+func (CutDownToSizeBlue) Cost(sim.GameEngine) int { return 2 }
 func (CutDownToSizeBlue) Pitch() int              { return 3 }
 func (CutDownToSizeBlue) Attack() int             { return 4 }
 func (CutDownToSizeBlue) Defense() int            { return 2 }

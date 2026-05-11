@@ -11,15 +11,15 @@ import (
 
 // not implemented: pay-{r}{r}{r}-for-+5{p} mode
 
-func (c PunchAboveYourWeightRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (c PunchAboveYourWeightRed) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 }
 
 // not implemented: pay-{r}{r}{r}-for-+5{p} mode
 
-func (c PunchAboveYourWeightYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (c PunchAboveYourWeightYellow) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 }
 
 // not implemented: pay-{r}{r}{r}-for-+5{p} mode
 
-func (c PunchAboveYourWeightBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (c PunchAboveYourWeightBlue) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 }

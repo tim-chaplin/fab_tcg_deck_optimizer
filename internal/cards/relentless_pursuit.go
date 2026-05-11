@@ -11,7 +11,7 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
 
-func (RelentlessPursuitBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (RelentlessPursuitBlue) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 	s.SetOpponentMarked(true)
 	recycled := s.HasPlayedType(card.TypeAttack)
 	if recycled {

@@ -30,13 +30,13 @@ type ScepterOfPainAbility struct{}
 func (ScepterOfPainAbility) ID() ids.CardID          { return ids.ScepterOfPainAbilityID }
 func (ScepterOfPainAbility) Name() string            { return "Scepter of Pain" }
 func (ScepterOfPainAbility) DisplayName() string     { return "Scepter of Pain" }
-func (ScepterOfPainAbility) Cost(*sim.TurnState) int { return 2 }
+func (ScepterOfPainAbility) Cost(sim.GameEngine) int { return 2 }
 func (ScepterOfPainAbility) Pitch() int              { return 0 }
 func (ScepterOfPainAbility) Attack() int             { return 1 }
 func (ScepterOfPainAbility) Defense() int            { return 0 }
 func (ScepterOfPainAbility) Types() card.TypeSet     { return scepterOfPainAbilityTypes }
 func (ScepterOfPainAbility) GoAgain() bool           { return false }
-func (ScepterOfPainAbility) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (ScepterOfPainAbility) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 	s.CreateRunechants(1)
 	l.AppendPostTrigger(self.Card.DisplayName(), "Created a runechant", 1)
 }

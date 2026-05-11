@@ -21,7 +21,7 @@ type pitchOnlyRed struct{}
 func (pitchOnlyRed) ID() ids.CardID      { return ids.InvalidCard }
 func (pitchOnlyRed) Name() string        { return "pitchOnlyRed" }
 func (pitchOnlyRed) DisplayName() string { return "pitchOnlyRed [R]" }
-func (pitchOnlyRed) Cost(*TurnState) int { return 0 }
+func (pitchOnlyRed) Cost(GameEngine) int { return 0 }
 func (pitchOnlyRed) Pitch() int          { return 1 }
 func (pitchOnlyRed) Attack() int         { return 0 }
 func (pitchOnlyRed) Defense() int        { return 0 }
@@ -29,7 +29,7 @@ func (pitchOnlyRed) Types() card.TypeSet {
 	return card.NewTypeSet(card.TypeGeneric, card.TypeAction)
 }
 func (pitchOnlyRed) GoAgain() bool                       { return false }
-func (pitchOnlyRed) Play(*TurnState, Logger, *CardState) {}
+func (pitchOnlyRed) Play(GameEngine, Logger, *CardState) {}
 
 // grantBonusAttack is a test-only non-attack action card that scans CardsRemaining and adds n
 // to BonusAttack on the first attack action card it finds. Mirrors production "next attack
@@ -40,7 +40,7 @@ type grantBonusAttack struct{ n int }
 func (grantBonusAttack) ID() ids.CardID      { return ids.InvalidCard }
 func (grantBonusAttack) Name() string        { return "grantBonusAttack" }
 func (grantBonusAttack) DisplayName() string { return "grantBonusAttack" }
-func (grantBonusAttack) Cost(*TurnState) int { return 0 }
+func (grantBonusAttack) Cost(GameEngine) int { return 0 }
 func (grantBonusAttack) Pitch() int          { return 0 }
 func (grantBonusAttack) Attack() int         { return 0 }
 func (grantBonusAttack) Defense() int        { return 0 }
@@ -48,7 +48,7 @@ func (grantBonusAttack) Types() card.TypeSet {
 	return card.NewTypeSet(card.TypeGeneric, card.TypeAction)
 }
 func (grantBonusAttack) GoAgain() bool { return true }
-func (g grantBonusAttack) Play(s *TurnState, l Logger, self *CardState) {
+func (g grantBonusAttack) Play(s GameEngine, l Logger, self *CardState) {
 	for _, pc := range s.CardsRemaining() {
 		if pc.Card.Types().IsAttackAction() {
 			pc.BonusAttack += g.n
@@ -66,7 +66,7 @@ type grantBonusAttackWeapon struct{ n int }
 func (grantBonusAttackWeapon) ID() ids.CardID      { return ids.InvalidCard }
 func (grantBonusAttackWeapon) Name() string        { return "grantBonusAttackWeapon" }
 func (grantBonusAttackWeapon) DisplayName() string { return "grantBonusAttackWeapon" }
-func (grantBonusAttackWeapon) Cost(*TurnState) int { return 0 }
+func (grantBonusAttackWeapon) Cost(GameEngine) int { return 0 }
 func (grantBonusAttackWeapon) Pitch() int          { return 0 }
 func (grantBonusAttackWeapon) Attack() int         { return 0 }
 func (grantBonusAttackWeapon) Defense() int        { return 0 }
@@ -74,7 +74,7 @@ func (grantBonusAttackWeapon) Types() card.TypeSet {
 	return card.NewTypeSet(card.TypeGeneric, card.TypeAction)
 }
 func (grantBonusAttackWeapon) GoAgain() bool { return true }
-func (g grantBonusAttackWeapon) Play(s *TurnState, l Logger, self *CardState) {
+func (g grantBonusAttackWeapon) Play(s GameEngine, l Logger, self *CardState) {
 	for _, pc := range s.CardsRemaining() {
 		if pc.Card.Types().IsWeaponAttack() {
 			pc.BonusAttack += g.n

@@ -15,7 +15,7 @@ type PrimeTheCrowdRed struct{}
 func (PrimeTheCrowdRed) ID() ids.CardID          { return ids.PrimeTheCrowdRed }
 func (PrimeTheCrowdRed) Name() string            { return "Prime the Crowd" }
 func (PrimeTheCrowdRed) DisplayName() string     { return "Prime the Crowd [R]" }
-func (PrimeTheCrowdRed) Cost(*sim.TurnState) int { return 2 }
+func (PrimeTheCrowdRed) Cost(sim.GameEngine) int { return 2 }
 func (PrimeTheCrowdRed) Pitch() int              { return 1 }
 func (PrimeTheCrowdRed) Attack() int             { return 0 }
 func (PrimeTheCrowdRed) Defense() int            { return 2 }
@@ -28,7 +28,7 @@ type PrimeTheCrowdYellow struct{}
 func (PrimeTheCrowdYellow) ID() ids.CardID          { return ids.PrimeTheCrowdYellow }
 func (PrimeTheCrowdYellow) Name() string            { return "Prime the Crowd" }
 func (PrimeTheCrowdYellow) DisplayName() string     { return "Prime the Crowd [Y]" }
-func (PrimeTheCrowdYellow) Cost(*sim.TurnState) int { return 2 }
+func (PrimeTheCrowdYellow) Cost(sim.GameEngine) int { return 2 }
 func (PrimeTheCrowdYellow) Pitch() int              { return 2 }
 func (PrimeTheCrowdYellow) Attack() int             { return 0 }
 func (PrimeTheCrowdYellow) Defense() int            { return 2 }
@@ -41,7 +41,7 @@ type PrimeTheCrowdBlue struct{}
 func (PrimeTheCrowdBlue) ID() ids.CardID          { return ids.PrimeTheCrowdBlue }
 func (PrimeTheCrowdBlue) Name() string            { return "Prime the Crowd" }
 func (PrimeTheCrowdBlue) DisplayName() string     { return "Prime the Crowd [B]" }
-func (PrimeTheCrowdBlue) Cost(*sim.TurnState) int { return 2 }
+func (PrimeTheCrowdBlue) Cost(sim.GameEngine) int { return 2 }
 func (PrimeTheCrowdBlue) Pitch() int              { return 3 }
 func (PrimeTheCrowdBlue) Attack() int             { return 0 }
 func (PrimeTheCrowdBlue) Defense() int            { return 2 }

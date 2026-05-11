@@ -15,7 +15,7 @@ type CrashDownTheGatesRed struct{}
 func (CrashDownTheGatesRed) ID() ids.CardID          { return ids.CrashDownTheGatesRed }
 func (CrashDownTheGatesRed) Name() string            { return "Crash Down the Gates" }
 func (CrashDownTheGatesRed) DisplayName() string     { return "Crash Down the Gates [R]" }
-func (CrashDownTheGatesRed) Cost(*sim.TurnState) int { return 3 }
+func (CrashDownTheGatesRed) Cost(sim.GameEngine) int { return 3 }
 func (CrashDownTheGatesRed) Pitch() int              { return 1 }
 func (CrashDownTheGatesRed) Attack() int             { return 6 }
 func (CrashDownTheGatesRed) Defense() int            { return 2 }
@@ -28,7 +28,7 @@ type CrashDownTheGatesYellow struct{}
 func (CrashDownTheGatesYellow) ID() ids.CardID          { return ids.CrashDownTheGatesYellow }
 func (CrashDownTheGatesYellow) Name() string            { return "Crash Down the Gates" }
 func (CrashDownTheGatesYellow) DisplayName() string     { return "Crash Down the Gates [Y]" }
-func (CrashDownTheGatesYellow) Cost(*sim.TurnState) int { return 3 }
+func (CrashDownTheGatesYellow) Cost(sim.GameEngine) int { return 3 }
 func (CrashDownTheGatesYellow) Pitch() int              { return 2 }
 func (CrashDownTheGatesYellow) Attack() int             { return 5 }
 func (CrashDownTheGatesYellow) Defense() int            { return 2 }
@@ -41,7 +41,7 @@ type CrashDownTheGatesBlue struct{}
 func (CrashDownTheGatesBlue) ID() ids.CardID          { return ids.CrashDownTheGatesBlue }
 func (CrashDownTheGatesBlue) Name() string            { return "Crash Down the Gates" }
 func (CrashDownTheGatesBlue) DisplayName() string     { return "Crash Down the Gates [B]" }
-func (CrashDownTheGatesBlue) Cost(*sim.TurnState) int { return 3 }
+func (CrashDownTheGatesBlue) Cost(sim.GameEngine) int { return 3 }
 func (CrashDownTheGatesBlue) Pitch() int              { return 3 }
 func (CrashDownTheGatesBlue) Attack() int             { return 4 }
 func (CrashDownTheGatesBlue) Defense() int            { return 2 }

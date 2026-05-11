@@ -15,7 +15,7 @@ type WeepingBattlegroundRed struct{}
 func (WeepingBattlegroundRed) ID() ids.CardID          { return ids.WeepingBattlegroundRed }
 func (WeepingBattlegroundRed) Name() string            { return "Weeping Battleground" }
 func (WeepingBattlegroundRed) DisplayName() string     { return "Weeping Battleground [R]" }
-func (WeepingBattlegroundRed) Cost(*sim.TurnState) int { return 0 }
+func (WeepingBattlegroundRed) Cost(sim.GameEngine) int { return 0 }
 func (WeepingBattlegroundRed) Pitch() int              { return 1 }
 func (WeepingBattlegroundRed) Attack() int             { return 0 }
 func (WeepingBattlegroundRed) Defense() int            { return 3 }
@@ -27,7 +27,7 @@ type WeepingBattlegroundYellow struct{}
 func (WeepingBattlegroundYellow) ID() ids.CardID          { return ids.WeepingBattlegroundYellow }
 func (WeepingBattlegroundYellow) Name() string            { return "Weeping Battleground" }
 func (WeepingBattlegroundYellow) DisplayName() string     { return "Weeping Battleground [Y]" }
-func (WeepingBattlegroundYellow) Cost(*sim.TurnState) int { return 0 }
+func (WeepingBattlegroundYellow) Cost(sim.GameEngine) int { return 0 }
 func (WeepingBattlegroundYellow) Pitch() int              { return 2 }
 func (WeepingBattlegroundYellow) Attack() int             { return 0 }
 func (WeepingBattlegroundYellow) Defense() int            { return 3 }
@@ -39,7 +39,7 @@ type WeepingBattlegroundBlue struct{}
 func (WeepingBattlegroundBlue) ID() ids.CardID          { return ids.WeepingBattlegroundBlue }
 func (WeepingBattlegroundBlue) Name() string            { return "Weeping Battleground" }
 func (WeepingBattlegroundBlue) DisplayName() string     { return "Weeping Battleground [B]" }
-func (WeepingBattlegroundBlue) Cost(*sim.TurnState) int { return 0 }
+func (WeepingBattlegroundBlue) Cost(sim.GameEngine) int { return 0 }
 func (WeepingBattlegroundBlue) Pitch() int              { return 3 }
 func (WeepingBattlegroundBlue) Attack() int             { return 0 }
 func (WeepingBattlegroundBlue) Defense() int            { return 3 }

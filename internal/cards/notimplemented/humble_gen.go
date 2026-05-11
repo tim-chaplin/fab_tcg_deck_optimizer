@@ -15,7 +15,7 @@ type HumbleRed struct{}
 func (HumbleRed) ID() ids.CardID          { return ids.HumbleRed }
 func (HumbleRed) Name() string            { return "Humble" }
 func (HumbleRed) DisplayName() string     { return "Humble [R]" }
-func (HumbleRed) Cost(*sim.TurnState) int { return 2 }
+func (HumbleRed) Cost(sim.GameEngine) int { return 2 }
 func (HumbleRed) Pitch() int              { return 1 }
 func (HumbleRed) Attack() int             { return 6 }
 func (HumbleRed) Defense() int            { return 2 }
@@ -28,7 +28,7 @@ type HumbleYellow struct{}
 func (HumbleYellow) ID() ids.CardID          { return ids.HumbleYellow }
 func (HumbleYellow) Name() string            { return "Humble" }
 func (HumbleYellow) DisplayName() string     { return "Humble [Y]" }
-func (HumbleYellow) Cost(*sim.TurnState) int { return 2 }
+func (HumbleYellow) Cost(sim.GameEngine) int { return 2 }
 func (HumbleYellow) Pitch() int              { return 2 }
 func (HumbleYellow) Attack() int             { return 5 }
 func (HumbleYellow) Defense() int            { return 2 }
@@ -41,7 +41,7 @@ type HumbleBlue struct{}
 func (HumbleBlue) ID() ids.CardID          { return ids.HumbleBlue }
 func (HumbleBlue) Name() string            { return "Humble" }
 func (HumbleBlue) DisplayName() string     { return "Humble [B]" }
-func (HumbleBlue) Cost(*sim.TurnState) int { return 2 }
+func (HumbleBlue) Cost(sim.GameEngine) int { return 2 }
 func (HumbleBlue) Pitch() int              { return 3 }
 func (HumbleBlue) Attack() int             { return 4 }
 func (HumbleBlue) Defense() int            { return 2 }

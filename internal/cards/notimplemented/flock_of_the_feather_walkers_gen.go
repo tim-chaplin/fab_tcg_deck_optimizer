@@ -15,7 +15,7 @@ type FlockOfTheFeatherWalkersRed struct{}
 func (FlockOfTheFeatherWalkersRed) ID() ids.CardID          { return ids.FlockOfTheFeatherWalkersRed }
 func (FlockOfTheFeatherWalkersRed) Name() string            { return "Flock of the Feather Walkers" }
 func (FlockOfTheFeatherWalkersRed) DisplayName() string     { return "Flock of the Feather Walkers [R]" }
-func (FlockOfTheFeatherWalkersRed) Cost(*sim.TurnState) int { return 1 }
+func (FlockOfTheFeatherWalkersRed) Cost(sim.GameEngine) int { return 1 }
 func (FlockOfTheFeatherWalkersRed) Pitch() int              { return 1 }
 func (FlockOfTheFeatherWalkersRed) Attack() int             { return 5 }
 func (FlockOfTheFeatherWalkersRed) Defense() int            { return 2 }
@@ -28,7 +28,7 @@ type FlockOfTheFeatherWalkersYellow struct{}
 func (FlockOfTheFeatherWalkersYellow) ID() ids.CardID          { return ids.FlockOfTheFeatherWalkersYellow }
 func (FlockOfTheFeatherWalkersYellow) Name() string            { return "Flock of the Feather Walkers" }
 func (FlockOfTheFeatherWalkersYellow) DisplayName() string     { return "Flock of the Feather Walkers [Y]" }
-func (FlockOfTheFeatherWalkersYellow) Cost(*sim.TurnState) int { return 1 }
+func (FlockOfTheFeatherWalkersYellow) Cost(sim.GameEngine) int { return 1 }
 func (FlockOfTheFeatherWalkersYellow) Pitch() int              { return 2 }
 func (FlockOfTheFeatherWalkersYellow) Attack() int             { return 4 }
 func (FlockOfTheFeatherWalkersYellow) Defense() int            { return 2 }
@@ -41,7 +41,7 @@ type FlockOfTheFeatherWalkersBlue struct{}
 func (FlockOfTheFeatherWalkersBlue) ID() ids.CardID          { return ids.FlockOfTheFeatherWalkersBlue }
 func (FlockOfTheFeatherWalkersBlue) Name() string            { return "Flock of the Feather Walkers" }
 func (FlockOfTheFeatherWalkersBlue) DisplayName() string     { return "Flock of the Feather Walkers [B]" }
-func (FlockOfTheFeatherWalkersBlue) Cost(*sim.TurnState) int { return 1 }
+func (FlockOfTheFeatherWalkersBlue) Cost(sim.GameEngine) int { return 1 }
 func (FlockOfTheFeatherWalkersBlue) Pitch() int              { return 3 }
 func (FlockOfTheFeatherWalkersBlue) Attack() int             { return 3 }
 func (FlockOfTheFeatherWalkersBlue) Defense() int            { return 2 }

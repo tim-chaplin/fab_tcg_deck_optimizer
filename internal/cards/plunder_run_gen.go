@@ -15,7 +15,7 @@ type PlunderRunRed struct{}
 func (PlunderRunRed) ID() ids.CardID          { return ids.PlunderRunRed }
 func (PlunderRunRed) Name() string            { return "Plunder Run" }
 func (PlunderRunRed) DisplayName() string     { return "Plunder Run [R]" }
-func (PlunderRunRed) Cost(*sim.TurnState) int { return 0 }
+func (PlunderRunRed) Cost(sim.GameEngine) int { return 0 }
 func (PlunderRunRed) Pitch() int              { return 1 }
 func (PlunderRunRed) Attack() int             { return 0 }
 func (PlunderRunRed) Defense() int            { return 2 }
@@ -28,7 +28,7 @@ type PlunderRunYellow struct{}
 func (PlunderRunYellow) ID() ids.CardID          { return ids.PlunderRunYellow }
 func (PlunderRunYellow) Name() string            { return "Plunder Run" }
 func (PlunderRunYellow) DisplayName() string     { return "Plunder Run [Y]" }
-func (PlunderRunYellow) Cost(*sim.TurnState) int { return 0 }
+func (PlunderRunYellow) Cost(sim.GameEngine) int { return 0 }
 func (PlunderRunYellow) Pitch() int              { return 2 }
 func (PlunderRunYellow) Attack() int             { return 0 }
 func (PlunderRunYellow) Defense() int            { return 2 }
@@ -41,7 +41,7 @@ type PlunderRunBlue struct{}
 func (PlunderRunBlue) ID() ids.CardID          { return ids.PlunderRunBlue }
 func (PlunderRunBlue) Name() string            { return "Plunder Run" }
 func (PlunderRunBlue) DisplayName() string     { return "Plunder Run [B]" }
-func (PlunderRunBlue) Cost(*sim.TurnState) int { return 0 }
+func (PlunderRunBlue) Cost(sim.GameEngine) int { return 0 }
 func (PlunderRunBlue) Pitch() int              { return 3 }
 func (PlunderRunBlue) Attack() int             { return 0 }
 func (PlunderRunBlue) Defense() int            { return 2 }

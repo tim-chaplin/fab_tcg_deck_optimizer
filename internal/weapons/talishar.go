@@ -35,11 +35,11 @@ type TalisharAbility struct{}
 func (TalisharAbility) ID() ids.CardID          { return ids.TalisharAbilityID }
 func (TalisharAbility) Name() string            { return "Talishar, the Lost Prince" }
 func (TalisharAbility) DisplayName() string     { return "Talishar, the Lost Prince" }
-func (TalisharAbility) Cost(*sim.TurnState) int { return 0 }
+func (TalisharAbility) Cost(sim.GameEngine) int { return 0 }
 func (TalisharAbility) Pitch() int              { return 0 }
 func (TalisharAbility) Attack() int             { return 4 }
 func (TalisharAbility) Defense() int            { return 0 }
 func (TalisharAbility) Types() card.TypeSet     { return talisharAbilityTypes }
 func (TalisharAbility) GoAgain() bool           { return false }
-func (TalisharAbility) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (TalisharAbility) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 }

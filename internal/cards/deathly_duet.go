@@ -15,15 +15,15 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
 
-func (DeathlyDuetRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (DeathlyDuetRed) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 	deathlyDuetApplyRiders(s, l, self)
 }
 
-func (DeathlyDuetYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (DeathlyDuetYellow) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 	deathlyDuetApplyRiders(s, l, self)
 }
 
-func (DeathlyDuetBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (DeathlyDuetBlue) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 	deathlyDuetApplyRiders(s, l, self)
 }
 
@@ -35,7 +35,7 @@ func (DeathlyDuetBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState)
 //     resolution; the rider lands as a "Created 2 runechants" sub-line under self.
 //
 // Both riders can stack when self.PitchedToPlay contains both roles.
-func deathlyDuetApplyRiders(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func deathlyDuetApplyRiders(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 	var attackPitched, nonAttackActionPitched bool
 	for _, p := range self.PitchedToPlay {
 		t := p.Types()

@@ -15,7 +15,7 @@ type ShatterSorceryBlue struct{}
 func (ShatterSorceryBlue) ID() ids.CardID          { return ids.ShatterSorceryBlue }
 func (ShatterSorceryBlue) Name() string            { return "Shatter Sorcery" }
 func (ShatterSorceryBlue) DisplayName() string     { return "Shatter Sorcery [B]" }
-func (ShatterSorceryBlue) Cost(*sim.TurnState) int { return 0 }
+func (ShatterSorceryBlue) Cost(sim.GameEngine) int { return 0 }
 func (ShatterSorceryBlue) Pitch() int              { return 3 }
 func (ShatterSorceryBlue) Attack() int             { return 0 }
 func (ShatterSorceryBlue) Defense() int            { return 0 }

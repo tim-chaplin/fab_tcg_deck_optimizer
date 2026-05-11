@@ -12,15 +12,15 @@ import (
 
 // not implemented: hand-as-cost alt cost not modelled; card fails when printed cost can't be paid
 
-func (RiseAboveRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (RiseAboveRed) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 }
 
 // not implemented: hand-as-cost alt cost not modelled; card fails when printed cost can't be paid
 
-func (RiseAboveYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (RiseAboveYellow) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 }
 
 // not implemented: hand-as-cost alt cost not modelled; card fails when printed cost can't be paid
 
-func (RiseAboveBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (RiseAboveBlue) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 }

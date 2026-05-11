@@ -33,13 +33,13 @@ type ClubWeaponAbility struct{}
 func (ClubWeaponAbility) ID() ids.CardID          { return FakeClubWeaponAbility }
 func (ClubWeaponAbility) Name() string            { return "test.ClubWeapon" }
 func (ClubWeaponAbility) DisplayName() string     { return "test.ClubWeapon" }
-func (ClubWeaponAbility) Cost(*sim.TurnState) int { return 0 }
+func (ClubWeaponAbility) Cost(sim.GameEngine) int { return 0 }
 func (ClubWeaponAbility) Pitch() int              { return 0 }
 func (ClubWeaponAbility) Attack() int             { return 1 }
 func (ClubWeaponAbility) Defense() int            { return 0 }
 func (ClubWeaponAbility) Types() card.TypeSet     { return clubWeaponAbilityTypes }
 func (ClubWeaponAbility) GoAgain() bool           { return false }
-func (ClubWeaponAbility) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (ClubWeaponAbility) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 }
 
 var hammerWeaponAbilityTypes = card.NewTypeSet(card.TypeGeneric, card.TypeWeapon, card.TypeHammer, card.TypeOneHand, card.TypeAttack)
@@ -52,11 +52,11 @@ type HammerWeaponAbility struct{}
 func (HammerWeaponAbility) ID() ids.CardID          { return FakeHammerWeaponAbility }
 func (HammerWeaponAbility) Name() string            { return "test.HammerWeapon" }
 func (HammerWeaponAbility) DisplayName() string     { return "test.HammerWeapon" }
-func (HammerWeaponAbility) Cost(*sim.TurnState) int { return 0 }
+func (HammerWeaponAbility) Cost(sim.GameEngine) int { return 0 }
 func (HammerWeaponAbility) Pitch() int              { return 0 }
 func (HammerWeaponAbility) Attack() int             { return 1 }
 func (HammerWeaponAbility) Defense() int            { return 0 }
 func (HammerWeaponAbility) Types() card.TypeSet     { return hammerWeaponAbilityTypes }
 func (HammerWeaponAbility) GoAgain() bool           { return false }
-func (HammerWeaponAbility) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (HammerWeaponAbility) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 }

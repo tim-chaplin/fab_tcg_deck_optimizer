@@ -15,7 +15,7 @@ type ThrustRed struct{}
 func (ThrustRed) ID() ids.CardID          { return ids.ThrustRed }
 func (ThrustRed) Name() string            { return "Thrust" }
 func (ThrustRed) DisplayName() string     { return "Thrust [R]" }
-func (ThrustRed) Cost(*sim.TurnState) int { return 1 }
+func (ThrustRed) Cost(sim.GameEngine) int { return 1 }
 func (ThrustRed) Pitch() int              { return 1 }
 func (ThrustRed) Attack() int             { return 0 }
 func (ThrustRed) Defense() int            { return 2 }

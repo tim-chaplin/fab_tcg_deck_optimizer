@@ -13,24 +13,24 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
 
-func scourTheBattlescapePlay(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func scourTheBattlescapePlay(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 	self.GrantGoAgainIfFromArsenal()
 }
 
 // not implemented: hand-cycle rider (put a card on bottom of deck, draw)
 
-func (ScourTheBattlescapeRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (ScourTheBattlescapeRed) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 	scourTheBattlescapePlay(s, l, self)
 }
 
 // not implemented: hand-cycle rider (put a card on bottom of deck, draw)
 
-func (ScourTheBattlescapeYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (ScourTheBattlescapeYellow) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 	scourTheBattlescapePlay(s, l, self)
 }
 
 // not implemented: hand-cycle rider (put a card on bottom of deck, draw)
 
-func (ScourTheBattlescapeBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (ScourTheBattlescapeBlue) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 	scourTheBattlescapePlay(s, l, self)
 }

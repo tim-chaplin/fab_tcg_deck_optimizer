@@ -11,15 +11,15 @@ import (
 
 // not implemented: chain-history +2{p} rider (in-chain history not readable from Play)
 
-func (c PushThePointRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (c PushThePointRed) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 }
 
 // not implemented: chain-history +2{p} rider (in-chain history not readable from Play)
 
-func (c PushThePointYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (c PushThePointYellow) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 }
 
 // not implemented: chain-history +2{p} rider (in-chain history not readable from Play)
 
-func (c PushThePointBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (c PushThePointBlue) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 }

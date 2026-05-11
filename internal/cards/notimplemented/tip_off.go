@@ -11,15 +11,15 @@ import (
 
 // not implemented: instant discard-to-mark activation
 
-func (c TipOffRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (c TipOffRed) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 }
 
 // not implemented: instant discard-to-mark activation
 
-func (c TipOffYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (c TipOffYellow) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 }
 
 // not implemented: instant discard-to-mark activation
 
-func (c TipOffBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (c TipOffBlue) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 }

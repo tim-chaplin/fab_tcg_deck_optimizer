@@ -29,7 +29,7 @@ func highStrikerCreate(s *sim.TurnState, l sim.Logger, t *sim.Trigger, n int) {
 		"%s created %d copper tokens on attack hit", t.Source.DisplayName(), n)
 }
 
-func highStrikerPlay(s *sim.TurnState, l sim.Logger, self *sim.CardState, source sim.Card, handler sim.TriggerHandler) {
+func highStrikerPlay(s sim.GameEngine, l sim.Logger, self *sim.CardState, source sim.Card, handler sim.TriggerHandler) {
 	s.AddTrigger(sim.Trigger{
 		Source:      source,
 		TriggerType: sim.TriggerHit,
@@ -38,14 +38,14 @@ func highStrikerPlay(s *sim.TurnState, l sim.Logger, self *sim.CardState, source
 	})
 }
 
-func (c HighStrikerRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (c HighStrikerRed) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 	highStrikerPlay(s, l, self, c, highStrikerOnHit6)
 }
 
-func (c HighStrikerYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (c HighStrikerYellow) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 	highStrikerPlay(s, l, self, c, highStrikerOnHit4)
 }
 
-func (c HighStrikerBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (c HighStrikerBlue) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 	highStrikerPlay(s, l, self, c, highStrikerOnHit2)
 }

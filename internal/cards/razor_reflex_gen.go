@@ -15,7 +15,7 @@ type RazorReflexRed struct{}
 func (RazorReflexRed) ID() ids.CardID          { return ids.RazorReflexRed }
 func (RazorReflexRed) Name() string            { return "Razor Reflex" }
 func (RazorReflexRed) DisplayName() string     { return "Razor Reflex [R]" }
-func (RazorReflexRed) Cost(*sim.TurnState) int { return 1 }
+func (RazorReflexRed) Cost(sim.GameEngine) int { return 1 }
 func (RazorReflexRed) Pitch() int              { return 1 }
 func (RazorReflexRed) Attack() int             { return 0 }
 func (RazorReflexRed) Defense() int            { return 2 }
@@ -27,7 +27,7 @@ type RazorReflexYellow struct{}
 func (RazorReflexYellow) ID() ids.CardID          { return ids.RazorReflexYellow }
 func (RazorReflexYellow) Name() string            { return "Razor Reflex" }
 func (RazorReflexYellow) DisplayName() string     { return "Razor Reflex [Y]" }
-func (RazorReflexYellow) Cost(*sim.TurnState) int { return 1 }
+func (RazorReflexYellow) Cost(sim.GameEngine) int { return 1 }
 func (RazorReflexYellow) Pitch() int              { return 2 }
 func (RazorReflexYellow) Attack() int             { return 0 }
 func (RazorReflexYellow) Defense() int            { return 2 }
@@ -39,7 +39,7 @@ type RazorReflexBlue struct{}
 func (RazorReflexBlue) ID() ids.CardID          { return ids.RazorReflexBlue }
 func (RazorReflexBlue) Name() string            { return "Razor Reflex" }
 func (RazorReflexBlue) DisplayName() string     { return "Razor Reflex [B]" }
-func (RazorReflexBlue) Cost(*sim.TurnState) int { return 1 }
+func (RazorReflexBlue) Cost(sim.GameEngine) int { return 1 }
 func (RazorReflexBlue) Pitch() int              { return 3 }
 func (RazorReflexBlue) Attack() int             { return 0 }
 func (RazorReflexBlue) Defense() int            { return 2 }

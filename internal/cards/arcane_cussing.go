@@ -12,14 +12,14 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
 
-func (ArcaneCussingRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (ArcaneCussingRed) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 	fragileAuraPlay(s, l, self, 3, false)
 }
 
-func (ArcaneCussingYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (ArcaneCussingYellow) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 	fragileAuraPlay(s, l, self, 2, false)
 }
 
-func (ArcaneCussingBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (ArcaneCussingBlue) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 	fragileAuraPlay(s, l, self, 1, false)
 }

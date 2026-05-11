@@ -12,15 +12,15 @@ import (
 
 // not implemented: discard-to-draw rider, arsenal-conditional go again
 
-func (c TradeInRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (c TradeInRed) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 }
 
 // not implemented: discard-to-draw rider, arsenal-conditional go again
 
-func (c TradeInYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (c TradeInYellow) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 }
 
 // not implemented: discard-to-draw rider, arsenal-conditional go again
 
-func (c TradeInBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (c TradeInBlue) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 }

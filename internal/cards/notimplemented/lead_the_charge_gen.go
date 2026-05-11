@@ -15,7 +15,7 @@ type LeadTheChargeRed struct{}
 func (LeadTheChargeRed) ID() ids.CardID          { return ids.LeadTheChargeRed }
 func (LeadTheChargeRed) Name() string            { return "Lead the Charge" }
 func (LeadTheChargeRed) DisplayName() string     { return "Lead the Charge [R]" }
-func (LeadTheChargeRed) Cost(*sim.TurnState) int { return 0 }
+func (LeadTheChargeRed) Cost(sim.GameEngine) int { return 0 }
 func (LeadTheChargeRed) Pitch() int              { return 1 }
 func (LeadTheChargeRed) Attack() int             { return 0 }
 func (LeadTheChargeRed) Defense() int            { return 2 }
@@ -28,7 +28,7 @@ type LeadTheChargeYellow struct{}
 func (LeadTheChargeYellow) ID() ids.CardID          { return ids.LeadTheChargeYellow }
 func (LeadTheChargeYellow) Name() string            { return "Lead the Charge" }
 func (LeadTheChargeYellow) DisplayName() string     { return "Lead the Charge [Y]" }
-func (LeadTheChargeYellow) Cost(*sim.TurnState) int { return 0 }
+func (LeadTheChargeYellow) Cost(sim.GameEngine) int { return 0 }
 func (LeadTheChargeYellow) Pitch() int              { return 2 }
 func (LeadTheChargeYellow) Attack() int             { return 0 }
 func (LeadTheChargeYellow) Defense() int            { return 2 }
@@ -41,7 +41,7 @@ type LeadTheChargeBlue struct{}
 func (LeadTheChargeBlue) ID() ids.CardID          { return ids.LeadTheChargeBlue }
 func (LeadTheChargeBlue) Name() string            { return "Lead the Charge" }
 func (LeadTheChargeBlue) DisplayName() string     { return "Lead the Charge [B]" }
-func (LeadTheChargeBlue) Cost(*sim.TurnState) int { return 0 }
+func (LeadTheChargeBlue) Cost(sim.GameEngine) int { return 0 }
 func (LeadTheChargeBlue) Pitch() int              { return 3 }
 func (LeadTheChargeBlue) Attack() int             { return 0 }
 func (LeadTheChargeBlue) Defense() int            { return 2 }

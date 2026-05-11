@@ -15,7 +15,7 @@ type BattlefrontBastionRed struct{}
 func (BattlefrontBastionRed) ID() ids.CardID          { return ids.BattlefrontBastionRed }
 func (BattlefrontBastionRed) Name() string            { return "Battlefront Bastion" }
 func (BattlefrontBastionRed) DisplayName() string     { return "Battlefront Bastion [R]" }
-func (BattlefrontBastionRed) Cost(*sim.TurnState) int { return 3 }
+func (BattlefrontBastionRed) Cost(sim.GameEngine) int { return 3 }
 func (BattlefrontBastionRed) Pitch() int              { return 1 }
 func (BattlefrontBastionRed) Attack() int             { return 7 }
 func (BattlefrontBastionRed) Defense() int            { return 2 }
@@ -27,7 +27,7 @@ type BattlefrontBastionYellow struct{}
 func (BattlefrontBastionYellow) ID() ids.CardID          { return ids.BattlefrontBastionYellow }
 func (BattlefrontBastionYellow) Name() string            { return "Battlefront Bastion" }
 func (BattlefrontBastionYellow) DisplayName() string     { return "Battlefront Bastion [Y]" }
-func (BattlefrontBastionYellow) Cost(*sim.TurnState) int { return 3 }
+func (BattlefrontBastionYellow) Cost(sim.GameEngine) int { return 3 }
 func (BattlefrontBastionYellow) Pitch() int              { return 2 }
 func (BattlefrontBastionYellow) Attack() int             { return 6 }
 func (BattlefrontBastionYellow) Defense() int            { return 2 }
@@ -39,7 +39,7 @@ type BattlefrontBastionBlue struct{}
 func (BattlefrontBastionBlue) ID() ids.CardID          { return ids.BattlefrontBastionBlue }
 func (BattlefrontBastionBlue) Name() string            { return "Battlefront Bastion" }
 func (BattlefrontBastionBlue) DisplayName() string     { return "Battlefront Bastion [B]" }
-func (BattlefrontBastionBlue) Cost(*sim.TurnState) int { return 3 }
+func (BattlefrontBastionBlue) Cost(sim.GameEngine) int { return 3 }
 func (BattlefrontBastionBlue) Pitch() int              { return 3 }
 func (BattlefrontBastionBlue) Attack() int             { return 5 }
 func (BattlefrontBastionBlue) Defense() int            { return 2 }

@@ -11,12 +11,12 @@ import (
 
 // not implemented: hand cycling
 
-func (SiftRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {}
+func (SiftRed) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {}
 
 // not implemented: hand cycling
 
-func (SiftYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {}
+func (SiftYellow) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {}
 
 // not implemented: hand cycling
 
-func (SiftBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {}
+func (SiftBlue) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {}

@@ -11,15 +11,15 @@ import (
 
 // not implemented: next-weapon-attack +1{p} grant (weapon chain not scanned)
 
-func (c BrandishRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (c BrandishRed) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 }
 
 // not implemented: next-weapon-attack +1{p} grant (weapon chain not scanned)
 
-func (c BrandishYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (c BrandishYellow) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 }
 
 // not implemented: next-weapon-attack +1{p} grant (weapon chain not scanned)
 
-func (c BrandishBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (c BrandishBlue) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 }

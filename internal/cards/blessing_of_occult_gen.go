@@ -15,7 +15,7 @@ type BlessingOfOccultRed struct{}
 func (BlessingOfOccultRed) ID() ids.CardID          { return ids.BlessingOfOccultRed }
 func (BlessingOfOccultRed) Name() string            { return "Blessing of Occult" }
 func (BlessingOfOccultRed) DisplayName() string     { return "Blessing of Occult [R]" }
-func (BlessingOfOccultRed) Cost(*sim.TurnState) int { return 1 }
+func (BlessingOfOccultRed) Cost(sim.GameEngine) int { return 1 }
 func (BlessingOfOccultRed) Pitch() int              { return 1 }
 func (BlessingOfOccultRed) Attack() int             { return 0 }
 func (BlessingOfOccultRed) Defense() int            { return 2 }
@@ -27,7 +27,7 @@ type BlessingOfOccultYellow struct{}
 func (BlessingOfOccultYellow) ID() ids.CardID          { return ids.BlessingOfOccultYellow }
 func (BlessingOfOccultYellow) Name() string            { return "Blessing of Occult" }
 func (BlessingOfOccultYellow) DisplayName() string     { return "Blessing of Occult [Y]" }
-func (BlessingOfOccultYellow) Cost(*sim.TurnState) int { return 1 }
+func (BlessingOfOccultYellow) Cost(sim.GameEngine) int { return 1 }
 func (BlessingOfOccultYellow) Pitch() int              { return 2 }
 func (BlessingOfOccultYellow) Attack() int             { return 0 }
 func (BlessingOfOccultYellow) Defense() int            { return 2 }
@@ -39,7 +39,7 @@ type BlessingOfOccultBlue struct{}
 func (BlessingOfOccultBlue) ID() ids.CardID          { return ids.BlessingOfOccultBlue }
 func (BlessingOfOccultBlue) Name() string            { return "Blessing of Occult" }
 func (BlessingOfOccultBlue) DisplayName() string     { return "Blessing of Occult [B]" }
-func (BlessingOfOccultBlue) Cost(*sim.TurnState) int { return 1 }
+func (BlessingOfOccultBlue) Cost(sim.GameEngine) int { return 1 }
 func (BlessingOfOccultBlue) Pitch() int              { return 3 }
 func (BlessingOfOccultBlue) Attack() int             { return 0 }
 func (BlessingOfOccultBlue) Defense() int            { return 2 }

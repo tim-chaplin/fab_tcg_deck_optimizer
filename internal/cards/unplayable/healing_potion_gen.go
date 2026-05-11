@@ -15,7 +15,7 @@ type HealingPotionBlue struct{}
 func (HealingPotionBlue) ID() ids.CardID          { return ids.HealingPotionBlue }
 func (HealingPotionBlue) Name() string            { return "Healing Potion" }
 func (HealingPotionBlue) DisplayName() string     { return "Healing Potion [B]" }
-func (HealingPotionBlue) Cost(*sim.TurnState) int { return 0 }
+func (HealingPotionBlue) Cost(sim.GameEngine) int { return 0 }
 func (HealingPotionBlue) Pitch() int              { return 3 }
 func (HealingPotionBlue) Attack() int             { return 0 }
 func (HealingPotionBlue) Defense() int            { return 0 }

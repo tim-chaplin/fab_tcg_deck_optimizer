@@ -12,15 +12,15 @@ import (
 
 // not implemented: on-hit instant-casting grant
 
-func (c RiftingRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (c RiftingRed) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 }
 
 // not implemented: on-hit instant-casting grant
 
-func (c RiftingYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (c RiftingYellow) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 }
 
 // not implemented: on-hit instant-casting grant
 
-func (c RiftingBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (c RiftingBlue) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 }

@@ -12,15 +12,15 @@ import (
 
 // not implemented: on-hit opponent-arsenal/equipment peek
 
-func (FactFindingMissionRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (FactFindingMissionRed) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 }
 
 // not implemented: on-hit opponent-arsenal/equipment peek
 
-func (FactFindingMissionYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (FactFindingMissionYellow) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 }
 
 // not implemented: on-hit opponent-arsenal/equipment peek
 
-func (FactFindingMissionBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (FactFindingMissionBlue) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 }

@@ -15,7 +15,7 @@ type SplinteringDeadwoodRed struct{}
 func (SplinteringDeadwoodRed) ID() ids.CardID          { return ids.SplinteringDeadwoodRed }
 func (SplinteringDeadwoodRed) Name() string            { return "Splintering Deadwood" }
 func (SplinteringDeadwoodRed) DisplayName() string     { return "Splintering Deadwood [R]" }
-func (SplinteringDeadwoodRed) Cost(*sim.TurnState) int { return 3 }
+func (SplinteringDeadwoodRed) Cost(sim.GameEngine) int { return 3 }
 func (SplinteringDeadwoodRed) Pitch() int              { return 1 }
 func (SplinteringDeadwoodRed) Attack() int             { return 7 }
 func (SplinteringDeadwoodRed) Defense() int            { return 3 }
@@ -28,7 +28,7 @@ type SplinteringDeadwoodYellow struct{}
 func (SplinteringDeadwoodYellow) ID() ids.CardID          { return ids.SplinteringDeadwoodYellow }
 func (SplinteringDeadwoodYellow) Name() string            { return "Splintering Deadwood" }
 func (SplinteringDeadwoodYellow) DisplayName() string     { return "Splintering Deadwood [Y]" }
-func (SplinteringDeadwoodYellow) Cost(*sim.TurnState) int { return 3 }
+func (SplinteringDeadwoodYellow) Cost(sim.GameEngine) int { return 3 }
 func (SplinteringDeadwoodYellow) Pitch() int              { return 2 }
 func (SplinteringDeadwoodYellow) Attack() int             { return 6 }
 func (SplinteringDeadwoodYellow) Defense() int            { return 3 }
@@ -41,7 +41,7 @@ type SplinteringDeadwoodBlue struct{}
 func (SplinteringDeadwoodBlue) ID() ids.CardID          { return ids.SplinteringDeadwoodBlue }
 func (SplinteringDeadwoodBlue) Name() string            { return "Splintering Deadwood" }
 func (SplinteringDeadwoodBlue) DisplayName() string     { return "Splintering Deadwood [B]" }
-func (SplinteringDeadwoodBlue) Cost(*sim.TurnState) int { return 3 }
+func (SplinteringDeadwoodBlue) Cost(sim.GameEngine) int { return 3 }
 func (SplinteringDeadwoodBlue) Pitch() int              { return 3 }
 func (SplinteringDeadwoodBlue) Attack() int             { return 5 }
 func (SplinteringDeadwoodBlue) Defense() int            { return 3 }

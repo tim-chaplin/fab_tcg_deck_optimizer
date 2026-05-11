@@ -15,7 +15,7 @@ type WageGoldRed struct{}
 func (WageGoldRed) ID() ids.CardID          { return ids.WageGoldRed }
 func (WageGoldRed) Name() string            { return "Wage Gold" }
 func (WageGoldRed) DisplayName() string     { return "Wage Gold [R]" }
-func (WageGoldRed) Cost(*sim.TurnState) int { return 3 }
+func (WageGoldRed) Cost(sim.GameEngine) int { return 3 }
 func (WageGoldRed) Pitch() int              { return 1 }
 func (WageGoldRed) Attack() int             { return 7 }
 func (WageGoldRed) Defense() int            { return 2 }
@@ -27,7 +27,7 @@ type WageGoldYellow struct{}
 func (WageGoldYellow) ID() ids.CardID          { return ids.WageGoldYellow }
 func (WageGoldYellow) Name() string            { return "Wage Gold" }
 func (WageGoldYellow) DisplayName() string     { return "Wage Gold [Y]" }
-func (WageGoldYellow) Cost(*sim.TurnState) int { return 3 }
+func (WageGoldYellow) Cost(sim.GameEngine) int { return 3 }
 func (WageGoldYellow) Pitch() int              { return 2 }
 func (WageGoldYellow) Attack() int             { return 6 }
 func (WageGoldYellow) Defense() int            { return 2 }
@@ -39,7 +39,7 @@ type WageGoldBlue struct{}
 func (WageGoldBlue) ID() ids.CardID          { return ids.WageGoldBlue }
 func (WageGoldBlue) Name() string            { return "Wage Gold" }
 func (WageGoldBlue) DisplayName() string     { return "Wage Gold [B]" }
-func (WageGoldBlue) Cost(*sim.TurnState) int { return 3 }
+func (WageGoldBlue) Cost(sim.GameEngine) int { return 3 }
 func (WageGoldBlue) Pitch() int              { return 3 }
 func (WageGoldBlue) Attack() int             { return 5 }
 func (WageGoldBlue) Defense() int            { return 2 }

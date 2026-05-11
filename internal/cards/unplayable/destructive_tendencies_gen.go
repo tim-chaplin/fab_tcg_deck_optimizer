@@ -15,7 +15,7 @@ type DestructiveTendenciesBlue struct{}
 func (DestructiveTendenciesBlue) ID() ids.CardID          { return ids.DestructiveTendenciesBlue }
 func (DestructiveTendenciesBlue) Name() string            { return "Destructive Tendencies" }
 func (DestructiveTendenciesBlue) DisplayName() string     { return "Destructive Tendencies [B]" }
-func (DestructiveTendenciesBlue) Cost(*sim.TurnState) int { return 0 }
+func (DestructiveTendenciesBlue) Cost(sim.GameEngine) int { return 0 }
 func (DestructiveTendenciesBlue) Pitch() int              { return 3 }
 func (DestructiveTendenciesBlue) Attack() int             { return 0 }
 func (DestructiveTendenciesBlue) Defense() int            { return 0 }

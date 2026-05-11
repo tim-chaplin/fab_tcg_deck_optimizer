@@ -20,15 +20,15 @@ var blessingOfOccultTriggerText = [...]string{
 	3: "Created 3 runechants",
 }
 
-func (c BlessingOfOccultRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (c BlessingOfOccultRed) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 	blessingOfOccultPlay(s, l, self, c, 3)
 }
 
-func (c BlessingOfOccultYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (c BlessingOfOccultYellow) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 	blessingOfOccultPlay(s, l, self, c, 2)
 }
 
-func (c BlessingOfOccultBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (c BlessingOfOccultBlue) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 	blessingOfOccultPlay(s, l, self, c, 1)
 }
 
@@ -48,7 +48,7 @@ func blessingOfOccultHandler(s *sim.TurnState, l sim.Logger, _ *sim.Trigger, a *
 	s.DestroyAura(a, true)
 }
 
-func blessingOfOccultPlay(s *sim.TurnState, l sim.Logger, selfState *sim.CardState, selfCard sim.Card, n int) {
+func blessingOfOccultPlay(s sim.GameEngine, l sim.Logger, selfState *sim.CardState, selfCard sim.Card, n int) {
 	s.AddAura(sim.Aura{
 		Trigger: sim.Trigger{TriggerType: sim.TriggerStartOfTurn, Handler: blessingOfOccultHandler},
 		Self:    sim.CardOrTokenType{Card: selfCard},

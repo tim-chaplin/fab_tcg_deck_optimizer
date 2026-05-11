@@ -15,7 +15,7 @@ type SmashingGoodTimeRed struct{}
 func (SmashingGoodTimeRed) ID() ids.CardID          { return ids.SmashingGoodTimeRed }
 func (SmashingGoodTimeRed) Name() string            { return "Smashing Good Time" }
 func (SmashingGoodTimeRed) DisplayName() string     { return "Smashing Good Time [R]" }
-func (SmashingGoodTimeRed) Cost(*sim.TurnState) int { return 0 }
+func (SmashingGoodTimeRed) Cost(sim.GameEngine) int { return 0 }
 func (SmashingGoodTimeRed) Pitch() int              { return 1 }
 func (SmashingGoodTimeRed) Attack() int             { return 0 }
 func (SmashingGoodTimeRed) Defense() int            { return 2 }
@@ -28,7 +28,7 @@ type SmashingGoodTimeYellow struct{}
 func (SmashingGoodTimeYellow) ID() ids.CardID          { return ids.SmashingGoodTimeYellow }
 func (SmashingGoodTimeYellow) Name() string            { return "Smashing Good Time" }
 func (SmashingGoodTimeYellow) DisplayName() string     { return "Smashing Good Time [Y]" }
-func (SmashingGoodTimeYellow) Cost(*sim.TurnState) int { return 0 }
+func (SmashingGoodTimeYellow) Cost(sim.GameEngine) int { return 0 }
 func (SmashingGoodTimeYellow) Pitch() int              { return 2 }
 func (SmashingGoodTimeYellow) Attack() int             { return 0 }
 func (SmashingGoodTimeYellow) Defense() int            { return 2 }
@@ -41,7 +41,7 @@ type SmashingGoodTimeBlue struct{}
 func (SmashingGoodTimeBlue) ID() ids.CardID          { return ids.SmashingGoodTimeBlue }
 func (SmashingGoodTimeBlue) Name() string            { return "Smashing Good Time" }
 func (SmashingGoodTimeBlue) DisplayName() string     { return "Smashing Good Time [B]" }
-func (SmashingGoodTimeBlue) Cost(*sim.TurnState) int { return 0 }
+func (SmashingGoodTimeBlue) Cost(sim.GameEngine) int { return 0 }
 func (SmashingGoodTimeBlue) Pitch() int              { return 3 }
 func (SmashingGoodTimeBlue) Attack() int             { return 0 }
 func (SmashingGoodTimeBlue) Defense() int            { return 2 }

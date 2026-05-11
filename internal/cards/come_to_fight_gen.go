@@ -15,7 +15,7 @@ type ComeToFightRed struct{}
 func (ComeToFightRed) ID() ids.CardID          { return ids.ComeToFightRed }
 func (ComeToFightRed) Name() string            { return "Come to Fight" }
 func (ComeToFightRed) DisplayName() string     { return "Come to Fight [R]" }
-func (ComeToFightRed) Cost(*sim.TurnState) int { return 1 }
+func (ComeToFightRed) Cost(sim.GameEngine) int { return 1 }
 func (ComeToFightRed) Pitch() int              { return 1 }
 func (ComeToFightRed) Attack() int             { return 0 }
 func (ComeToFightRed) Defense() int            { return 3 }
@@ -27,7 +27,7 @@ type ComeToFightYellow struct{}
 func (ComeToFightYellow) ID() ids.CardID          { return ids.ComeToFightYellow }
 func (ComeToFightYellow) Name() string            { return "Come to Fight" }
 func (ComeToFightYellow) DisplayName() string     { return "Come to Fight [Y]" }
-func (ComeToFightYellow) Cost(*sim.TurnState) int { return 1 }
+func (ComeToFightYellow) Cost(sim.GameEngine) int { return 1 }
 func (ComeToFightYellow) Pitch() int              { return 2 }
 func (ComeToFightYellow) Attack() int             { return 0 }
 func (ComeToFightYellow) Defense() int            { return 3 }
@@ -39,7 +39,7 @@ type ComeToFightBlue struct{}
 func (ComeToFightBlue) ID() ids.CardID          { return ids.ComeToFightBlue }
 func (ComeToFightBlue) Name() string            { return "Come to Fight" }
 func (ComeToFightBlue) DisplayName() string     { return "Come to Fight [B]" }
-func (ComeToFightBlue) Cost(*sim.TurnState) int { return 1 }
+func (ComeToFightBlue) Cost(sim.GameEngine) int { return 1 }
 func (ComeToFightBlue) Pitch() int              { return 3 }
 func (ComeToFightBlue) Attack() int             { return 0 }
 func (ComeToFightBlue) Defense() int            { return 3 }

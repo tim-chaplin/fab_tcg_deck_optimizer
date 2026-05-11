@@ -15,7 +15,7 @@ type ReadTheRunesRed struct{}
 func (ReadTheRunesRed) ID() ids.CardID          { return ids.ReadTheRunesRed }
 func (ReadTheRunesRed) Name() string            { return "Read the Runes" }
 func (ReadTheRunesRed) DisplayName() string     { return "Read the Runes [R]" }
-func (ReadTheRunesRed) Cost(*sim.TurnState) int { return 0 }
+func (ReadTheRunesRed) Cost(sim.GameEngine) int { return 0 }
 func (ReadTheRunesRed) Pitch() int              { return 1 }
 func (ReadTheRunesRed) Attack() int             { return 0 }
 func (ReadTheRunesRed) Defense() int            { return 2 }
@@ -27,7 +27,7 @@ type ReadTheRunesYellow struct{}
 func (ReadTheRunesYellow) ID() ids.CardID          { return ids.ReadTheRunesYellow }
 func (ReadTheRunesYellow) Name() string            { return "Read the Runes" }
 func (ReadTheRunesYellow) DisplayName() string     { return "Read the Runes [Y]" }
-func (ReadTheRunesYellow) Cost(*sim.TurnState) int { return 0 }
+func (ReadTheRunesYellow) Cost(sim.GameEngine) int { return 0 }
 func (ReadTheRunesYellow) Pitch() int              { return 2 }
 func (ReadTheRunesYellow) Attack() int             { return 0 }
 func (ReadTheRunesYellow) Defense() int            { return 2 }
@@ -39,7 +39,7 @@ type ReadTheRunesBlue struct{}
 func (ReadTheRunesBlue) ID() ids.CardID          { return ids.ReadTheRunesBlue }
 func (ReadTheRunesBlue) Name() string            { return "Read the Runes" }
 func (ReadTheRunesBlue) DisplayName() string     { return "Read the Runes [B]" }
-func (ReadTheRunesBlue) Cost(*sim.TurnState) int { return 0 }
+func (ReadTheRunesBlue) Cost(sim.GameEngine) int { return 0 }
 func (ReadTheRunesBlue) Pitch() int              { return 3 }
 func (ReadTheRunesBlue) Attack() int             { return 0 }
 func (ReadTheRunesBlue) Defense() int            { return 2 }

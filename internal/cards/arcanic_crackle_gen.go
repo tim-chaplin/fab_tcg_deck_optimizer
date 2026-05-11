@@ -15,7 +15,7 @@ type ArcanicCrackleRed struct{}
 func (ArcanicCrackleRed) ID() ids.CardID          { return ids.ArcanicCrackleRed }
 func (ArcanicCrackleRed) Name() string            { return "Arcanic Crackle" }
 func (ArcanicCrackleRed) DisplayName() string     { return "Arcanic Crackle [R]" }
-func (ArcanicCrackleRed) Cost(*sim.TurnState) int { return 0 }
+func (ArcanicCrackleRed) Cost(sim.GameEngine) int { return 0 }
 func (ArcanicCrackleRed) Pitch() int              { return 1 }
 func (ArcanicCrackleRed) Attack() int             { return 3 }
 func (ArcanicCrackleRed) Defense() int            { return 3 }
@@ -27,7 +27,7 @@ type ArcanicCrackleYellow struct{}
 func (ArcanicCrackleYellow) ID() ids.CardID          { return ids.ArcanicCrackleYellow }
 func (ArcanicCrackleYellow) Name() string            { return "Arcanic Crackle" }
 func (ArcanicCrackleYellow) DisplayName() string     { return "Arcanic Crackle [Y]" }
-func (ArcanicCrackleYellow) Cost(*sim.TurnState) int { return 0 }
+func (ArcanicCrackleYellow) Cost(sim.GameEngine) int { return 0 }
 func (ArcanicCrackleYellow) Pitch() int              { return 2 }
 func (ArcanicCrackleYellow) Attack() int             { return 2 }
 func (ArcanicCrackleYellow) Defense() int            { return 3 }
@@ -39,7 +39,7 @@ type ArcanicCrackleBlue struct{}
 func (ArcanicCrackleBlue) ID() ids.CardID          { return ids.ArcanicCrackleBlue }
 func (ArcanicCrackleBlue) Name() string            { return "Arcanic Crackle" }
 func (ArcanicCrackleBlue) DisplayName() string     { return "Arcanic Crackle [B]" }
-func (ArcanicCrackleBlue) Cost(*sim.TurnState) int { return 0 }
+func (ArcanicCrackleBlue) Cost(sim.GameEngine) int { return 0 }
 func (ArcanicCrackleBlue) Pitch() int              { return 3 }
 func (ArcanicCrackleBlue) Attack() int             { return 1 }
 func (ArcanicCrackleBlue) Defense() int            { return 3 }

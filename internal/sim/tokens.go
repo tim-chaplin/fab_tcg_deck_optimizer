@@ -125,7 +125,7 @@ type GoldTokenAbility struct{}
 func (GoldTokenAbility) ID() ids.CardID      { return ids.GoldTokenAbilityID }
 func (GoldTokenAbility) Name() string        { return "Gold" }
 func (GoldTokenAbility) DisplayName() string { return "Gold" }
-func (GoldTokenAbility) Cost(*TurnState) int { return 2 }
+func (GoldTokenAbility) Cost(GameEngine) int { return 2 }
 func (GoldTokenAbility) Pitch() int          { return 0 }
 func (GoldTokenAbility) Attack() int         { return 0 }
 func (GoldTokenAbility) Defense() int        { return 0 }
@@ -139,7 +139,8 @@ func (GoldTokenAbility) PlayPrecondition(s *TurnState, self *CardState) bool {
 	return s.Gold() > 0
 }
 
-func (GoldTokenAbility) Play(s *TurnState, l Logger, self *CardState) {
+func (GoldTokenAbility) Play(g GameEngine, l Logger, self *CardState) {
+	s := g.(*TurnState)
 	s.ConsumeItem(TokenTypeGold, 1)
 	s.DrawOne()
 	l.AppendPostTrigger(self.Card.DisplayName(), "Spent 1 gold to draw a card", 0)
@@ -165,7 +166,7 @@ type SilverTokenAbility struct{}
 func (SilverTokenAbility) ID() ids.CardID      { return ids.SilverTokenAbilityID }
 func (SilverTokenAbility) Name() string        { return "Silver" }
 func (SilverTokenAbility) DisplayName() string { return "Silver" }
-func (SilverTokenAbility) Cost(*TurnState) int { return 3 }
+func (SilverTokenAbility) Cost(GameEngine) int { return 3 }
 func (SilverTokenAbility) Pitch() int          { return 0 }
 func (SilverTokenAbility) Attack() int         { return 0 }
 func (SilverTokenAbility) Defense() int        { return 0 }
@@ -177,7 +178,8 @@ func (SilverTokenAbility) PlayPrecondition(s *TurnState, self *CardState) bool {
 	return s.Silver() > 0
 }
 
-func (SilverTokenAbility) Play(s *TurnState, l Logger, self *CardState) {
+func (SilverTokenAbility) Play(g GameEngine, l Logger, self *CardState) {
+	s := g.(*TurnState)
 	s.ConsumeItem(TokenTypeSilver, 1)
 	s.DrawOne()
 	l.AppendPostTrigger(self.Card.DisplayName(), "Spent 1 silver to draw a card", 0)
@@ -203,7 +205,7 @@ type CopperTokenAbility struct{}
 func (CopperTokenAbility) ID() ids.CardID      { return ids.CopperTokenAbilityID }
 func (CopperTokenAbility) Name() string        { return "Copper" }
 func (CopperTokenAbility) DisplayName() string { return "Copper" }
-func (CopperTokenAbility) Cost(*TurnState) int { return 4 }
+func (CopperTokenAbility) Cost(GameEngine) int { return 4 }
 func (CopperTokenAbility) Pitch() int          { return 0 }
 func (CopperTokenAbility) Attack() int         { return 0 }
 func (CopperTokenAbility) Defense() int        { return 0 }
@@ -215,7 +217,8 @@ func (CopperTokenAbility) PlayPrecondition(s *TurnState, self *CardState) bool {
 	return s.Copper() > 0
 }
 
-func (CopperTokenAbility) Play(s *TurnState, l Logger, self *CardState) {
+func (CopperTokenAbility) Play(g GameEngine, l Logger, self *CardState) {
+	s := g.(*TurnState)
 	s.ConsumeItem(TokenTypeCopper, 1)
 	s.DrawOne()
 	l.AppendPostTrigger(self.Card.DisplayName(), "Spent 1 copper to draw a card", 0)

@@ -8,18 +8,18 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
 
-func (HitTheHighNotesRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (HitTheHighNotesRed) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 	self.BonusAttack += hitTheHighNotesBonus(s)
 }
 
-func (HitTheHighNotesYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (HitTheHighNotesYellow) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 	self.BonusAttack += hitTheHighNotesBonus(s)
 }
 
-func (HitTheHighNotesBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (HitTheHighNotesBlue) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 	self.BonusAttack += hitTheHighNotesBonus(s)
 }
-func hitTheHighNotesBonus(s *sim.TurnState) int {
+func hitTheHighNotesBonus(s sim.GameEngine) int {
 	if s.HasPlayedOrCreatedAura() {
 		return 2
 	}

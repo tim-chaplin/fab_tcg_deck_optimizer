@@ -15,7 +15,7 @@ type CadaverousContrabandRed struct{}
 func (CadaverousContrabandRed) ID() ids.CardID          { return ids.CadaverousContrabandRed }
 func (CadaverousContrabandRed) Name() string            { return "Cadaverous Contraband" }
 func (CadaverousContrabandRed) DisplayName() string     { return "Cadaverous Contraband [R]" }
-func (CadaverousContrabandRed) Cost(*sim.TurnState) int { return 2 }
+func (CadaverousContrabandRed) Cost(sim.GameEngine) int { return 2 }
 func (CadaverousContrabandRed) Pitch() int              { return 1 }
 func (CadaverousContrabandRed) Attack() int             { return 6 }
 func (CadaverousContrabandRed) Defense() int            { return 2 }
@@ -27,7 +27,7 @@ type CadaverousContrabandYellow struct{}
 func (CadaverousContrabandYellow) ID() ids.CardID          { return ids.CadaverousContrabandYellow }
 func (CadaverousContrabandYellow) Name() string            { return "Cadaverous Contraband" }
 func (CadaverousContrabandYellow) DisplayName() string     { return "Cadaverous Contraband [Y]" }
-func (CadaverousContrabandYellow) Cost(*sim.TurnState) int { return 2 }
+func (CadaverousContrabandYellow) Cost(sim.GameEngine) int { return 2 }
 func (CadaverousContrabandYellow) Pitch() int              { return 2 }
 func (CadaverousContrabandYellow) Attack() int             { return 5 }
 func (CadaverousContrabandYellow) Defense() int            { return 2 }
@@ -39,7 +39,7 @@ type CadaverousContrabandBlue struct{}
 func (CadaverousContrabandBlue) ID() ids.CardID          { return ids.CadaverousContrabandBlue }
 func (CadaverousContrabandBlue) Name() string            { return "Cadaverous Contraband" }
 func (CadaverousContrabandBlue) DisplayName() string     { return "Cadaverous Contraband [B]" }
-func (CadaverousContrabandBlue) Cost(*sim.TurnState) int { return 2 }
+func (CadaverousContrabandBlue) Cost(sim.GameEngine) int { return 2 }
 func (CadaverousContrabandBlue) Pitch() int              { return 3 }
 func (CadaverousContrabandBlue) Attack() int             { return 4 }
 func (CadaverousContrabandBlue) Defense() int            { return 2 }

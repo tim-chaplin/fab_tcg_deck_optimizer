@@ -15,7 +15,7 @@ type FreewheelingRenegadesRed struct{}
 func (FreewheelingRenegadesRed) ID() ids.CardID          { return ids.FreewheelingRenegadesRed }
 func (FreewheelingRenegadesRed) Name() string            { return "Freewheeling Renegades" }
 func (FreewheelingRenegadesRed) DisplayName() string     { return "Freewheeling Renegades [R]" }
-func (FreewheelingRenegadesRed) Cost(*sim.TurnState) int { return 1 }
+func (FreewheelingRenegadesRed) Cost(sim.GameEngine) int { return 1 }
 func (FreewheelingRenegadesRed) Pitch() int              { return 1 }
 func (FreewheelingRenegadesRed) Attack() int             { return 6 }
 func (FreewheelingRenegadesRed) Defense() int            { return 2 }
@@ -27,7 +27,7 @@ type FreewheelingRenegadesYellow struct{}
 func (FreewheelingRenegadesYellow) ID() ids.CardID          { return ids.FreewheelingRenegadesYellow }
 func (FreewheelingRenegadesYellow) Name() string            { return "Freewheeling Renegades" }
 func (FreewheelingRenegadesYellow) DisplayName() string     { return "Freewheeling Renegades [Y]" }
-func (FreewheelingRenegadesYellow) Cost(*sim.TurnState) int { return 1 }
+func (FreewheelingRenegadesYellow) Cost(sim.GameEngine) int { return 1 }
 func (FreewheelingRenegadesYellow) Pitch() int              { return 2 }
 func (FreewheelingRenegadesYellow) Attack() int             { return 5 }
 func (FreewheelingRenegadesYellow) Defense() int            { return 2 }
@@ -39,7 +39,7 @@ type FreewheelingRenegadesBlue struct{}
 func (FreewheelingRenegadesBlue) ID() ids.CardID          { return ids.FreewheelingRenegadesBlue }
 func (FreewheelingRenegadesBlue) Name() string            { return "Freewheeling Renegades" }
 func (FreewheelingRenegadesBlue) DisplayName() string     { return "Freewheeling Renegades [B]" }
-func (FreewheelingRenegadesBlue) Cost(*sim.TurnState) int { return 1 }
+func (FreewheelingRenegadesBlue) Cost(sim.GameEngine) int { return 1 }
 func (FreewheelingRenegadesBlue) Pitch() int              { return 3 }
 func (FreewheelingRenegadesBlue) Attack() int             { return 4 }
 func (FreewheelingRenegadesBlue) Defense() int            { return 2 }

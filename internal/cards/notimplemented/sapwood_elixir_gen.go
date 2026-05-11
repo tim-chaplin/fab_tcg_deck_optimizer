@@ -15,7 +15,7 @@ type SapwoodElixirRed struct{}
 func (SapwoodElixirRed) ID() ids.CardID          { return ids.SapwoodElixirRed }
 func (SapwoodElixirRed) Name() string            { return "Sapwood Elixir" }
 func (SapwoodElixirRed) DisplayName() string     { return "Sapwood Elixir [R]" }
-func (SapwoodElixirRed) Cost(*sim.TurnState) int { return 1 }
+func (SapwoodElixirRed) Cost(sim.GameEngine) int { return 1 }
 func (SapwoodElixirRed) Pitch() int              { return 1 }
 func (SapwoodElixirRed) Attack() int             { return 0 }
 func (SapwoodElixirRed) Defense() int            { return 3 }

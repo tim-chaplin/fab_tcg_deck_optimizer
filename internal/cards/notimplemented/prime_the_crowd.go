@@ -15,18 +15,18 @@ import (
 
 // not implemented: Crowd cheers / Crowd boos keywords dropped
 
-func (PrimeTheCrowdRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (PrimeTheCrowdRed) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 	cards.GrantNextCardBonusAttack(s, 4, cards.IsAttackAction)
 }
 
 // not implemented: Crowd cheers / Crowd boos keywords dropped
 
-func (PrimeTheCrowdYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (PrimeTheCrowdYellow) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 	cards.GrantNextCardBonusAttack(s, 3, cards.IsAttackAction)
 }
 
 // not implemented: Crowd cheers / Crowd boos keywords dropped
 
-func (PrimeTheCrowdBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (PrimeTheCrowdBlue) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 	cards.GrantNextCardBonusAttack(s, 2, cards.IsAttackAction)
 }

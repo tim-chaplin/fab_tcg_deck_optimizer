@@ -10,6 +10,6 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
 
-func (SpringboardSomersaultYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (SpringboardSomersaultYellow) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 }
 func (SpringboardSomersaultYellow) ArsenalDefenseBonus() int { return 2 }

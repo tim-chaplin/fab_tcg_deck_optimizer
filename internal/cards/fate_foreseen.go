@@ -9,18 +9,18 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
 
-func fateForeseenPlay(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func fateForeseenPlay(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 	s.Opt(l, 1)
 }
 
-func (FateForeseenRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (FateForeseenRed) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 	fateForeseenPlay(s, l, self)
 }
 
-func (FateForeseenYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (FateForeseenYellow) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 	fateForeseenPlay(s, l, self)
 }
 
-func (FateForeseenBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (FateForeseenBlue) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 	fateForeseenPlay(s, l, self)
 }

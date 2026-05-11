@@ -15,7 +15,7 @@ type OutedRed struct{}
 func (OutedRed) ID() ids.CardID          { return ids.OutedRed }
 func (OutedRed) Name() string            { return "Outed" }
 func (OutedRed) DisplayName() string     { return "Outed [R]" }
-func (OutedRed) Cost(*sim.TurnState) int { return 0 }
+func (OutedRed) Cost(sim.GameEngine) int { return 0 }
 func (OutedRed) Pitch() int              { return 1 }
 func (OutedRed) Attack() int             { return 3 }
 func (OutedRed) Defense() int            { return 0 }

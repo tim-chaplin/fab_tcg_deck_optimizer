@@ -144,5 +144,6 @@ type Logger interface {
 	AppendPostTrigger(source, text string, n int)
 	AppendPostTriggerf(source string, n int, format string, args ...any)
 	AppendPreTrigger(source, text string, n int)
+	AppendPreTriggerf(source string, n int, format string, args ...any)
 	AmendLastChainStepN(n int)
 }

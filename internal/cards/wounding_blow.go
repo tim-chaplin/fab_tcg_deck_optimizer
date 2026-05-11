@@ -7,11 +7,11 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
 
-func (c WoundingBlowRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (c WoundingBlowRed) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 }
 
-func (c WoundingBlowYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (c WoundingBlowYellow) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 }
 
-func (c WoundingBlowBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (c WoundingBlowBlue) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 }

@@ -13,21 +13,21 @@ import (
 // not implemented: aura-trade rider and opponent-aura destruction clause; only same-turn
 // Runeblade-attack +N{p} is modelled
 
-func (CondemnToSlaughterRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (CondemnToSlaughterRed) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 	condemnToSlaughterApplySideEffect(s, 3)
 }
 
 // not implemented: aura-trade rider and opponent-aura destruction clause; only same-turn
 // Runeblade-attack +N{p} is modelled
 
-func (CondemnToSlaughterYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (CondemnToSlaughterYellow) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 	condemnToSlaughterApplySideEffect(s, 2)
 }
 
 // not implemented: aura-trade rider and opponent-aura destruction clause; only same-turn
 // Runeblade-attack +N{p} is modelled
 
-func (CondemnToSlaughterBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (CondemnToSlaughterBlue) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 	condemnToSlaughterApplySideEffect(s, 1)
 }
 
@@ -35,7 +35,7 @@ func (CondemnToSlaughterBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.Car
 // action card or weapon swing) via pc.BonusAttack so the buffed attack's EffectiveAttack folds
 // the bonus into LikelyToHit and the chain credit lands on the target's slot. Condemn's own
 // contribution is zero.
-func condemnToSlaughterApplySideEffect(s *sim.TurnState, n int) {
+func condemnToSlaughterApplySideEffect(s sim.GameEngine, n int) {
 	for _, pc := range s.CardsRemaining() {
 		if pc.Card.Types().IsRunebladeAttack() {
 			pc.BonusAttack += n

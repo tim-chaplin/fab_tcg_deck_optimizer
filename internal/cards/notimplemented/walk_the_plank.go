@@ -11,15 +11,15 @@ import (
 
 // not implemented: pirate-target freeze rider
 
-func (WalkThePlankRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (WalkThePlankRed) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 }
 
 // not implemented: pirate-target freeze rider
 
-func (WalkThePlankYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (WalkThePlankYellow) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 }
 
 // not implemented: pirate-target freeze rider
 
-func (WalkThePlankBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (WalkThePlankBlue) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 }

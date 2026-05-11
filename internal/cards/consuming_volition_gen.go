@@ -15,7 +15,7 @@ type ConsumingVolitionRed struct{}
 func (ConsumingVolitionRed) ID() ids.CardID          { return ids.ConsumingVolitionRed }
 func (ConsumingVolitionRed) Name() string            { return "Consuming Volition" }
 func (ConsumingVolitionRed) DisplayName() string     { return "Consuming Volition [R]" }
-func (ConsumingVolitionRed) Cost(*sim.TurnState) int { return 1 }
+func (ConsumingVolitionRed) Cost(sim.GameEngine) int { return 1 }
 func (ConsumingVolitionRed) Pitch() int              { return 1 }
 func (ConsumingVolitionRed) Attack() int             { return 4 }
 func (ConsumingVolitionRed) Defense() int            { return 3 }
@@ -27,7 +27,7 @@ type ConsumingVolitionYellow struct{}
 func (ConsumingVolitionYellow) ID() ids.CardID          { return ids.ConsumingVolitionYellow }
 func (ConsumingVolitionYellow) Name() string            { return "Consuming Volition" }
 func (ConsumingVolitionYellow) DisplayName() string     { return "Consuming Volition [Y]" }
-func (ConsumingVolitionYellow) Cost(*sim.TurnState) int { return 1 }
+func (ConsumingVolitionYellow) Cost(sim.GameEngine) int { return 1 }
 func (ConsumingVolitionYellow) Pitch() int              { return 2 }
 func (ConsumingVolitionYellow) Attack() int             { return 3 }
 func (ConsumingVolitionYellow) Defense() int            { return 3 }
@@ -39,7 +39,7 @@ type ConsumingVolitionBlue struct{}
 func (ConsumingVolitionBlue) ID() ids.CardID          { return ids.ConsumingVolitionBlue }
 func (ConsumingVolitionBlue) Name() string            { return "Consuming Volition" }
 func (ConsumingVolitionBlue) DisplayName() string     { return "Consuming Volition [B]" }
-func (ConsumingVolitionBlue) Cost(*sim.TurnState) int { return 1 }
+func (ConsumingVolitionBlue) Cost(sim.GameEngine) int { return 1 }
 func (ConsumingVolitionBlue) Pitch() int              { return 3 }
 func (ConsumingVolitionBlue) Attack() int             { return 2 }
 func (ConsumingVolitionBlue) Defense() int            { return 3 }

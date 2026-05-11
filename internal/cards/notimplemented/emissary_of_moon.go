@@ -12,5 +12,5 @@ import (
 
 // not implemented: hand-cycle draw rider
 
-func (c EmissaryOfMoonRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (c EmissaryOfMoonRed) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 }

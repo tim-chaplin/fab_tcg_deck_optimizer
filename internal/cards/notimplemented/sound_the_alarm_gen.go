@@ -15,7 +15,7 @@ type SoundTheAlarmRed struct{}
 func (SoundTheAlarmRed) ID() ids.CardID          { return ids.SoundTheAlarmRed }
 func (SoundTheAlarmRed) Name() string            { return "Sound the Alarm" }
 func (SoundTheAlarmRed) DisplayName() string     { return "Sound the Alarm [R]" }
-func (SoundTheAlarmRed) Cost(*sim.TurnState) int { return 1 }
+func (SoundTheAlarmRed) Cost(sim.GameEngine) int { return 1 }
 func (SoundTheAlarmRed) Pitch() int              { return 1 }
 func (SoundTheAlarmRed) Attack() int             { return 5 }
 func (SoundTheAlarmRed) Defense() int            { return 3 }

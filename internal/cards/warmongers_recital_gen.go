@@ -15,7 +15,7 @@ type WarmongersRecitalRed struct{}
 func (WarmongersRecitalRed) ID() ids.CardID          { return ids.WarmongersRecitalRed }
 func (WarmongersRecitalRed) Name() string            { return "Warmonger's Recital" }
 func (WarmongersRecitalRed) DisplayName() string     { return "Warmonger's Recital [R]" }
-func (WarmongersRecitalRed) Cost(*sim.TurnState) int { return 1 }
+func (WarmongersRecitalRed) Cost(sim.GameEngine) int { return 1 }
 func (WarmongersRecitalRed) Pitch() int              { return 1 }
 func (WarmongersRecitalRed) Attack() int             { return 0 }
 func (WarmongersRecitalRed) Defense() int            { return 2 }
@@ -27,7 +27,7 @@ type WarmongersRecitalYellow struct{}
 func (WarmongersRecitalYellow) ID() ids.CardID          { return ids.WarmongersRecitalYellow }
 func (WarmongersRecitalYellow) Name() string            { return "Warmonger's Recital" }
 func (WarmongersRecitalYellow) DisplayName() string     { return "Warmonger's Recital [Y]" }
-func (WarmongersRecitalYellow) Cost(*sim.TurnState) int { return 1 }
+func (WarmongersRecitalYellow) Cost(sim.GameEngine) int { return 1 }
 func (WarmongersRecitalYellow) Pitch() int              { return 2 }
 func (WarmongersRecitalYellow) Attack() int             { return 0 }
 func (WarmongersRecitalYellow) Defense() int            { return 2 }
@@ -39,7 +39,7 @@ type WarmongersRecitalBlue struct{}
 func (WarmongersRecitalBlue) ID() ids.CardID          { return ids.WarmongersRecitalBlue }
 func (WarmongersRecitalBlue) Name() string            { return "Warmonger's Recital" }
 func (WarmongersRecitalBlue) DisplayName() string     { return "Warmonger's Recital [B]" }
-func (WarmongersRecitalBlue) Cost(*sim.TurnState) int { return 1 }
+func (WarmongersRecitalBlue) Cost(sim.GameEngine) int { return 1 }
 func (WarmongersRecitalBlue) Pitch() int              { return 3 }
 func (WarmongersRecitalBlue) Attack() int             { return 0 }
 func (WarmongersRecitalBlue) Defense() int            { return 2 }

@@ -15,7 +15,7 @@ type RegurgitatingSlogRed struct{}
 func (RegurgitatingSlogRed) ID() ids.CardID          { return ids.RegurgitatingSlogRed }
 func (RegurgitatingSlogRed) Name() string            { return "Regurgitating Slog" }
 func (RegurgitatingSlogRed) DisplayName() string     { return "Regurgitating Slog [R]" }
-func (RegurgitatingSlogRed) Cost(*sim.TurnState) int { return 2 }
+func (RegurgitatingSlogRed) Cost(sim.GameEngine) int { return 2 }
 func (RegurgitatingSlogRed) Pitch() int              { return 1 }
 func (RegurgitatingSlogRed) Attack() int             { return 6 }
 func (RegurgitatingSlogRed) Defense() int            { return 2 }
@@ -27,7 +27,7 @@ type RegurgitatingSlogYellow struct{}
 func (RegurgitatingSlogYellow) ID() ids.CardID          { return ids.RegurgitatingSlogYellow }
 func (RegurgitatingSlogYellow) Name() string            { return "Regurgitating Slog" }
 func (RegurgitatingSlogYellow) DisplayName() string     { return "Regurgitating Slog [Y]" }
-func (RegurgitatingSlogYellow) Cost(*sim.TurnState) int { return 2 }
+func (RegurgitatingSlogYellow) Cost(sim.GameEngine) int { return 2 }
 func (RegurgitatingSlogYellow) Pitch() int              { return 2 }
 func (RegurgitatingSlogYellow) Attack() int             { return 5 }
 func (RegurgitatingSlogYellow) Defense() int            { return 2 }
@@ -39,7 +39,7 @@ type RegurgitatingSlogBlue struct{}
 func (RegurgitatingSlogBlue) ID() ids.CardID          { return ids.RegurgitatingSlogBlue }
 func (RegurgitatingSlogBlue) Name() string            { return "Regurgitating Slog" }
 func (RegurgitatingSlogBlue) DisplayName() string     { return "Regurgitating Slog [B]" }
-func (RegurgitatingSlogBlue) Cost(*sim.TurnState) int { return 2 }
+func (RegurgitatingSlogBlue) Cost(sim.GameEngine) int { return 2 }
 func (RegurgitatingSlogBlue) Pitch() int              { return 3 }
 func (RegurgitatingSlogBlue) Attack() int             { return 4 }
 func (RegurgitatingSlogBlue) Defense() int            { return 2 }

@@ -15,7 +15,7 @@ type BelittleRed struct{}
 func (BelittleRed) ID() ids.CardID          { return ids.BelittleRed }
 func (BelittleRed) Name() string            { return "Belittle" }
 func (BelittleRed) DisplayName() string     { return "Belittle [R]" }
-func (BelittleRed) Cost(*sim.TurnState) int { return 1 }
+func (BelittleRed) Cost(sim.GameEngine) int { return 1 }
 func (BelittleRed) Pitch() int              { return 1 }
 func (BelittleRed) Attack() int             { return 3 }
 func (BelittleRed) Defense() int            { return 2 }
@@ -29,7 +29,7 @@ type BelittleYellow struct{}
 func (BelittleYellow) ID() ids.CardID          { return ids.BelittleYellow }
 func (BelittleYellow) Name() string            { return "Belittle" }
 func (BelittleYellow) DisplayName() string     { return "Belittle [Y]" }
-func (BelittleYellow) Cost(*sim.TurnState) int { return 1 }
+func (BelittleYellow) Cost(sim.GameEngine) int { return 1 }
 func (BelittleYellow) Pitch() int              { return 2 }
 func (BelittleYellow) Attack() int             { return 2 }
 func (BelittleYellow) Defense() int            { return 2 }
@@ -43,7 +43,7 @@ type BelittleBlue struct{}
 func (BelittleBlue) ID() ids.CardID          { return ids.BelittleBlue }
 func (BelittleBlue) Name() string            { return "Belittle" }
 func (BelittleBlue) DisplayName() string     { return "Belittle [B]" }
-func (BelittleBlue) Cost(*sim.TurnState) int { return 1 }
+func (BelittleBlue) Cost(sim.GameEngine) int { return 1 }
 func (BelittleBlue) Pitch() int              { return 3 }
 func (BelittleBlue) Attack() int             { return 1 }
 func (BelittleBlue) Defense() int            { return 2 }

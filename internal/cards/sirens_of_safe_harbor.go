@@ -13,17 +13,17 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
 
-func (SirensOfSafeHarborRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (SirensOfSafeHarborRed) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 	s.AddValue(1)
 	l.AppendPostTrigger(self.Card.DisplayName(), "Gained 1 health (graveyard trigger)", 1)
 }
 
-func (SirensOfSafeHarborYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (SirensOfSafeHarborYellow) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 	s.AddValue(1)
 	l.AppendPostTrigger(self.Card.DisplayName(), "Gained 1 health (graveyard trigger)", 1)
 }
 
-func (SirensOfSafeHarborBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (SirensOfSafeHarborBlue) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 	s.AddValue(1)
 	l.AppendPostTrigger(self.Card.DisplayName(), "Gained 1 health (graveyard trigger)", 1)
 }

@@ -160,7 +160,7 @@ func emitGroup(dir, pkg, basename string, g CardGroup) error {
 		fmt.Fprintf(&buf, "func (%s) Name() string        { return %q }\n", v.ID, g.Name)
 		fmt.Fprintf(&buf, "func (%s) DisplayName() string { return %q }\n", v.ID, display)
 		if c, ok := g.constCost(); ok {
-			fmt.Fprintf(&buf, "func (%s) Cost(*sim.TurnState) int { return %d }\n", v.ID, c)
+			fmt.Fprintf(&buf, "func (%s) Cost(sim.GameEngine) int { return %d }\n", v.ID, c)
 		}
 		fmt.Fprintf(&buf, "func (%s) Pitch() int          { return %d }\n", v.ID, v.Pitch)
 		fmt.Fprintf(&buf, "func (%s) Attack() int         { return %d }\n", v.ID, v.Attack)

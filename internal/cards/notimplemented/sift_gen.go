@@ -15,7 +15,7 @@ type SiftRed struct{}
 func (SiftRed) ID() ids.CardID          { return ids.SiftRed }
 func (SiftRed) Name() string            { return "Sift" }
 func (SiftRed) DisplayName() string     { return "Sift [R]" }
-func (SiftRed) Cost(*sim.TurnState) int { return 0 }
+func (SiftRed) Cost(sim.GameEngine) int { return 0 }
 func (SiftRed) Pitch() int              { return 1 }
 func (SiftRed) Attack() int             { return 0 }
 func (SiftRed) Defense() int            { return 3 }
@@ -28,7 +28,7 @@ type SiftYellow struct{}
 func (SiftYellow) ID() ids.CardID          { return ids.SiftYellow }
 func (SiftYellow) Name() string            { return "Sift" }
 func (SiftYellow) DisplayName() string     { return "Sift [Y]" }
-func (SiftYellow) Cost(*sim.TurnState) int { return 0 }
+func (SiftYellow) Cost(sim.GameEngine) int { return 0 }
 func (SiftYellow) Pitch() int              { return 2 }
 func (SiftYellow) Attack() int             { return 0 }
 func (SiftYellow) Defense() int            { return 3 }
@@ -41,7 +41,7 @@ type SiftBlue struct{}
 func (SiftBlue) ID() ids.CardID          { return ids.SiftBlue }
 func (SiftBlue) Name() string            { return "Sift" }
 func (SiftBlue) DisplayName() string     { return "Sift [B]" }
-func (SiftBlue) Cost(*sim.TurnState) int { return 0 }
+func (SiftBlue) Cost(sim.GameEngine) int { return 0 }
 func (SiftBlue) Pitch() int              { return 3 }
 func (SiftBlue) Attack() int             { return 0 }
 func (SiftBlue) Defense() int            { return 3 }

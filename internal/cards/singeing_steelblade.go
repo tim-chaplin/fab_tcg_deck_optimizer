@@ -11,14 +11,14 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
 
-func (SingeingSteelbladeRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (SingeingSteelbladeRed) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 	s.DealArcaneDamage(l, self, 1)
 }
 
-func (SingeingSteelbladeYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (SingeingSteelbladeYellow) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 	s.DealArcaneDamage(l, self, 1)
 }
 
-func (SingeingSteelbladeBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (SingeingSteelbladeBlue) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 	s.DealArcaneDamage(l, self, 1)
 }

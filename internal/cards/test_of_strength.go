@@ -11,7 +11,7 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
 
-func (TestOfStrengthRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (TestOfStrengthRed) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 	s.Clash(
 		func() {
 			s.CreateGold(1)

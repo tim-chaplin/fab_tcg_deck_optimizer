@@ -10,18 +10,18 @@ import (
 )
 
 // sloggismIsTarget gates the rider on attack action cards whose cost is 2 or more.
-func sloggismIsTarget(s *sim.TurnState, pc *sim.CardState) bool {
+func sloggismIsTarget(s sim.GameEngine, pc *sim.CardState) bool {
 	return pc.Card.Types().IsAttackAction() && pc.Card.Cost(s) >= 2
 }
 
-func (SloggismRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (SloggismRed) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 	GrantNextCardBonusAttack(s, 6, sloggismIsTarget)
 }
 
-func (SloggismYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (SloggismYellow) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 	GrantNextCardBonusAttack(s, 5, sloggismIsTarget)
 }
 
-func (SloggismBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (SloggismBlue) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 	GrantNextCardBonusAttack(s, 4, sloggismIsTarget)
 }

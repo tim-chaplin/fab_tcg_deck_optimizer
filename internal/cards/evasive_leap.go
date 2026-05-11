@@ -8,11 +8,11 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
 
-func (EvasiveLeapRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (EvasiveLeapRed) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 }
 
-func (EvasiveLeapYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (EvasiveLeapYellow) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 }
 
-func (EvasiveLeapBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (EvasiveLeapBlue) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 }

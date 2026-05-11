@@ -13,7 +13,7 @@ import (
 )
 
 // arcanePolarityPlay credits the conditional life gain as the chain step.
-func arcanePolarityPlay(s *sim.TurnState, l sim.Logger, self *sim.CardState, arcaneGain int) {
+func arcanePolarityPlay(s sim.GameEngine, l sim.Logger, self *sim.CardState, arcaneGain int) {
 	gain := 1
 	if s.ArcaneIncomingDamage() > 0 {
 		gain = arcaneGain
@@ -21,14 +21,14 @@ func arcanePolarityPlay(s *sim.TurnState, l sim.Logger, self *sim.CardState, arc
 	s.AddValue(gain)
 }
 
-func (ArcanePolarityRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (ArcanePolarityRed) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 	arcanePolarityPlay(s, l, self, 4)
 }
 
-func (ArcanePolarityYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (ArcanePolarityYellow) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 	arcanePolarityPlay(s, l, self, 3)
 }
 
-func (ArcanePolarityBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (ArcanePolarityBlue) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 	arcanePolarityPlay(s, l, self, 2)
 }

@@ -15,7 +15,7 @@ type FyendalsFightingSpiritRed struct{}
 func (FyendalsFightingSpiritRed) ID() ids.CardID          { return ids.FyendalsFightingSpiritRed }
 func (FyendalsFightingSpiritRed) Name() string            { return "Fyendal's Fighting Spirit" }
 func (FyendalsFightingSpiritRed) DisplayName() string     { return "Fyendal's Fighting Spirit [R]" }
-func (FyendalsFightingSpiritRed) Cost(*sim.TurnState) int { return 3 }
+func (FyendalsFightingSpiritRed) Cost(sim.GameEngine) int { return 3 }
 func (FyendalsFightingSpiritRed) Pitch() int              { return 1 }
 func (FyendalsFightingSpiritRed) Attack() int             { return 7 }
 func (FyendalsFightingSpiritRed) Defense() int            { return 2 }
@@ -27,7 +27,7 @@ type FyendalsFightingSpiritYellow struct{}
 func (FyendalsFightingSpiritYellow) ID() ids.CardID          { return ids.FyendalsFightingSpiritYellow }
 func (FyendalsFightingSpiritYellow) Name() string            { return "Fyendal's Fighting Spirit" }
 func (FyendalsFightingSpiritYellow) DisplayName() string     { return "Fyendal's Fighting Spirit [Y]" }
-func (FyendalsFightingSpiritYellow) Cost(*sim.TurnState) int { return 3 }
+func (FyendalsFightingSpiritYellow) Cost(sim.GameEngine) int { return 3 }
 func (FyendalsFightingSpiritYellow) Pitch() int              { return 2 }
 func (FyendalsFightingSpiritYellow) Attack() int             { return 6 }
 func (FyendalsFightingSpiritYellow) Defense() int            { return 2 }
@@ -39,7 +39,7 @@ type FyendalsFightingSpiritBlue struct{}
 func (FyendalsFightingSpiritBlue) ID() ids.CardID          { return ids.FyendalsFightingSpiritBlue }
 func (FyendalsFightingSpiritBlue) Name() string            { return "Fyendal's Fighting Spirit" }
 func (FyendalsFightingSpiritBlue) DisplayName() string     { return "Fyendal's Fighting Spirit [B]" }
-func (FyendalsFightingSpiritBlue) Cost(*sim.TurnState) int { return 3 }
+func (FyendalsFightingSpiritBlue) Cost(sim.GameEngine) int { return 3 }
 func (FyendalsFightingSpiritBlue) Pitch() int              { return 3 }
 func (FyendalsFightingSpiritBlue) Attack() int             { return 5 }
 func (FyendalsFightingSpiritBlue) Defense() int            { return 2 }

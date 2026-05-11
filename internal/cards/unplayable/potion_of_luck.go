@@ -9,4 +9,4 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
 
-func (PotionOfLuckBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {}
+func (PotionOfLuckBlue) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {}

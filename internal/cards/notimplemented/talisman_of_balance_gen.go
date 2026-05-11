@@ -15,7 +15,7 @@ type TalismanOfBalanceBlue struct{}
 func (TalismanOfBalanceBlue) ID() ids.CardID          { return ids.TalismanOfBalanceBlue }
 func (TalismanOfBalanceBlue) Name() string            { return "Talisman of Balance" }
 func (TalismanOfBalanceBlue) DisplayName() string     { return "Talisman of Balance [B]" }
-func (TalismanOfBalanceBlue) Cost(*sim.TurnState) int { return 0 }
+func (TalismanOfBalanceBlue) Cost(sim.GameEngine) int { return 0 }
 func (TalismanOfBalanceBlue) Pitch() int              { return 3 }
 func (TalismanOfBalanceBlue) Attack() int             { return 0 }
 func (TalismanOfBalanceBlue) Defense() int            { return 0 }

@@ -15,7 +15,7 @@ type CondemnToSlaughterRed struct{}
 func (CondemnToSlaughterRed) ID() ids.CardID          { return ids.CondemnToSlaughterRed }
 func (CondemnToSlaughterRed) Name() string            { return "Condemn to Slaughter" }
 func (CondemnToSlaughterRed) DisplayName() string     { return "Condemn to Slaughter [R]" }
-func (CondemnToSlaughterRed) Cost(*sim.TurnState) int { return 1 }
+func (CondemnToSlaughterRed) Cost(sim.GameEngine) int { return 1 }
 func (CondemnToSlaughterRed) Pitch() int              { return 1 }
 func (CondemnToSlaughterRed) Attack() int             { return 0 }
 func (CondemnToSlaughterRed) Defense() int            { return 3 }
@@ -28,7 +28,7 @@ type CondemnToSlaughterYellow struct{}
 func (CondemnToSlaughterYellow) ID() ids.CardID          { return ids.CondemnToSlaughterYellow }
 func (CondemnToSlaughterYellow) Name() string            { return "Condemn to Slaughter" }
 func (CondemnToSlaughterYellow) DisplayName() string     { return "Condemn to Slaughter [Y]" }
-func (CondemnToSlaughterYellow) Cost(*sim.TurnState) int { return 1 }
+func (CondemnToSlaughterYellow) Cost(sim.GameEngine) int { return 1 }
 func (CondemnToSlaughterYellow) Pitch() int              { return 2 }
 func (CondemnToSlaughterYellow) Attack() int             { return 0 }
 func (CondemnToSlaughterYellow) Defense() int            { return 3 }
@@ -41,7 +41,7 @@ type CondemnToSlaughterBlue struct{}
 func (CondemnToSlaughterBlue) ID() ids.CardID          { return ids.CondemnToSlaughterBlue }
 func (CondemnToSlaughterBlue) Name() string            { return "Condemn to Slaughter" }
 func (CondemnToSlaughterBlue) DisplayName() string     { return "Condemn to Slaughter [B]" }
-func (CondemnToSlaughterBlue) Cost(*sim.TurnState) int { return 1 }
+func (CondemnToSlaughterBlue) Cost(sim.GameEngine) int { return 1 }
 func (CondemnToSlaughterBlue) Pitch() int              { return 3 }
 func (CondemnToSlaughterBlue) Attack() int             { return 0 }
 func (CondemnToSlaughterBlue) Defense() int            { return 3 }

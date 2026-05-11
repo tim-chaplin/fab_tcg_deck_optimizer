@@ -35,11 +35,11 @@ type AnnalsOfSutcliffeAbility struct{}
 func (AnnalsOfSutcliffeAbility) ID() ids.CardID          { return ids.AnnalsOfSutcliffeAbilityID }
 func (AnnalsOfSutcliffeAbility) Name() string            { return "Annals of Sutcliffe" }
 func (AnnalsOfSutcliffeAbility) DisplayName() string     { return "Annals of Sutcliffe" }
-func (AnnalsOfSutcliffeAbility) Cost(*sim.TurnState) int { return 3 }
+func (AnnalsOfSutcliffeAbility) Cost(sim.GameEngine) int { return 3 }
 func (AnnalsOfSutcliffeAbility) Pitch() int              { return 0 }
 func (AnnalsOfSutcliffeAbility) Attack() int             { return 0 }
 func (AnnalsOfSutcliffeAbility) Defense() int            { return 0 }
 func (AnnalsOfSutcliffeAbility) Types() card.TypeSet     { return annalsOfSutcliffeAbilityTypes }
 func (AnnalsOfSutcliffeAbility) GoAgain() bool           { return false }
-func (AnnalsOfSutcliffeAbility) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (AnnalsOfSutcliffeAbility) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 }

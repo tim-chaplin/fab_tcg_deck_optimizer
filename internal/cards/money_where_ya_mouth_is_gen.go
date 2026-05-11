@@ -15,7 +15,7 @@ type MoneyWhereYaMouthIsRed struct{}
 func (MoneyWhereYaMouthIsRed) ID() ids.CardID          { return ids.MoneyWhereYaMouthIsRed }
 func (MoneyWhereYaMouthIsRed) Name() string            { return "Money Where Ya Mouth Is" }
 func (MoneyWhereYaMouthIsRed) DisplayName() string     { return "Money Where Ya Mouth Is [R]" }
-func (MoneyWhereYaMouthIsRed) Cost(*sim.TurnState) int { return 1 }
+func (MoneyWhereYaMouthIsRed) Cost(sim.GameEngine) int { return 1 }
 func (MoneyWhereYaMouthIsRed) Pitch() int              { return 1 }
 func (MoneyWhereYaMouthIsRed) Attack() int             { return 0 }
 func (MoneyWhereYaMouthIsRed) Defense() int            { return 2 }
@@ -27,7 +27,7 @@ type MoneyWhereYaMouthIsYellow struct{}
 func (MoneyWhereYaMouthIsYellow) ID() ids.CardID          { return ids.MoneyWhereYaMouthIsYellow }
 func (MoneyWhereYaMouthIsYellow) Name() string            { return "Money Where Ya Mouth Is" }
 func (MoneyWhereYaMouthIsYellow) DisplayName() string     { return "Money Where Ya Mouth Is [Y]" }
-func (MoneyWhereYaMouthIsYellow) Cost(*sim.TurnState) int { return 1 }
+func (MoneyWhereYaMouthIsYellow) Cost(sim.GameEngine) int { return 1 }
 func (MoneyWhereYaMouthIsYellow) Pitch() int              { return 2 }
 func (MoneyWhereYaMouthIsYellow) Attack() int             { return 0 }
 func (MoneyWhereYaMouthIsYellow) Defense() int            { return 2 }
@@ -39,7 +39,7 @@ type MoneyWhereYaMouthIsBlue struct{}
 func (MoneyWhereYaMouthIsBlue) ID() ids.CardID          { return ids.MoneyWhereYaMouthIsBlue }
 func (MoneyWhereYaMouthIsBlue) Name() string            { return "Money Where Ya Mouth Is" }
 func (MoneyWhereYaMouthIsBlue) DisplayName() string     { return "Money Where Ya Mouth Is [B]" }
-func (MoneyWhereYaMouthIsBlue) Cost(*sim.TurnState) int { return 1 }
+func (MoneyWhereYaMouthIsBlue) Cost(sim.GameEngine) int { return 1 }
 func (MoneyWhereYaMouthIsBlue) Pitch() int              { return 3 }
 func (MoneyWhereYaMouthIsBlue) Attack() int             { return 0 }
 func (MoneyWhereYaMouthIsBlue) Defense() int            { return 2 }

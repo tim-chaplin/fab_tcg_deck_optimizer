@@ -15,7 +15,7 @@ type FoolsGoldYellow struct{}
 func (FoolsGoldYellow) ID() ids.CardID          { return ids.FoolsGoldYellow }
 func (FoolsGoldYellow) Name() string            { return "Fool's Gold" }
 func (FoolsGoldYellow) DisplayName() string     { return "Fool's Gold [Y]" }
-func (FoolsGoldYellow) Cost(*sim.TurnState) int { return 0 }
+func (FoolsGoldYellow) Cost(sim.GameEngine) int { return 0 }
 func (FoolsGoldYellow) Pitch() int              { return 2 }
 func (FoolsGoldYellow) Attack() int             { return 0 }
 func (FoolsGoldYellow) Defense() int            { return 0 }

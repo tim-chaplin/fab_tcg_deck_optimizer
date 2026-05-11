@@ -15,7 +15,7 @@ type ImperialSealOfCommandRed struct{}
 func (ImperialSealOfCommandRed) ID() ids.CardID          { return ids.ImperialSealOfCommandRed }
 func (ImperialSealOfCommandRed) Name() string            { return "Imperial Seal of Command" }
 func (ImperialSealOfCommandRed) DisplayName() string     { return "Imperial Seal of Command [R]" }
-func (ImperialSealOfCommandRed) Cost(*sim.TurnState) int { return 0 }
+func (ImperialSealOfCommandRed) Cost(sim.GameEngine) int { return 0 }
 func (ImperialSealOfCommandRed) Pitch() int              { return 1 }
 func (ImperialSealOfCommandRed) Attack() int             { return 0 }
 func (ImperialSealOfCommandRed) Defense() int            { return 0 }

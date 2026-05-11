@@ -15,7 +15,7 @@ type WoundedBullRed struct{}
 func (WoundedBullRed) ID() ids.CardID          { return ids.WoundedBullRed }
 func (WoundedBullRed) Name() string            { return "Wounded Bull" }
 func (WoundedBullRed) DisplayName() string     { return "Wounded Bull [R]" }
-func (WoundedBullRed) Cost(*sim.TurnState) int { return 3 }
+func (WoundedBullRed) Cost(sim.GameEngine) int { return 3 }
 func (WoundedBullRed) Pitch() int              { return 1 }
 func (WoundedBullRed) Attack() int             { return 7 }
 func (WoundedBullRed) Defense() int            { return 2 }
@@ -27,7 +27,7 @@ type WoundedBullYellow struct{}
 func (WoundedBullYellow) ID() ids.CardID          { return ids.WoundedBullYellow }
 func (WoundedBullYellow) Name() string            { return "Wounded Bull" }
 func (WoundedBullYellow) DisplayName() string     { return "Wounded Bull [Y]" }
-func (WoundedBullYellow) Cost(*sim.TurnState) int { return 3 }
+func (WoundedBullYellow) Cost(sim.GameEngine) int { return 3 }
 func (WoundedBullYellow) Pitch() int              { return 2 }
 func (WoundedBullYellow) Attack() int             { return 6 }
 func (WoundedBullYellow) Defense() int            { return 2 }
@@ -39,7 +39,7 @@ type WoundedBullBlue struct{}
 func (WoundedBullBlue) ID() ids.CardID          { return ids.WoundedBullBlue }
 func (WoundedBullBlue) Name() string            { return "Wounded Bull" }
 func (WoundedBullBlue) DisplayName() string     { return "Wounded Bull [B]" }
-func (WoundedBullBlue) Cost(*sim.TurnState) int { return 3 }
+func (WoundedBullBlue) Cost(sim.GameEngine) int { return 3 }
 func (WoundedBullBlue) Pitch() int              { return 3 }
 func (WoundedBullBlue) Attack() int             { return 5 }
 func (WoundedBullBlue) Defense() int            { return 2 }

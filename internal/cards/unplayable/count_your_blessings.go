@@ -8,11 +8,11 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
 
-func (CountYourBlessingsRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (CountYourBlessingsRed) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 }
 
-func (CountYourBlessingsYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (CountYourBlessingsYellow) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 }
 
-func (CountYourBlessingsBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (CountYourBlessingsBlue) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 }

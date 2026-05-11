@@ -7,5 +7,5 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
 
-func (c MuscleMuttYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (c MuscleMuttYellow) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 }

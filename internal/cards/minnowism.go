@@ -10,18 +10,18 @@ import (
 )
 
 // minnowismIsTarget gates the rider on attack action cards with printed power 3 or less.
-func minnowismIsTarget(_ *sim.TurnState, pc *sim.CardState) bool {
+func minnowismIsTarget(_ sim.GameEngine, pc *sim.CardState) bool {
 	return pc.Card.Types().IsAttackAction() && pc.Card.Attack() <= 3
 }
 
-func (MinnowismRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (MinnowismRed) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 	GrantNextCardBonusAttack(s, 3, minnowismIsTarget)
 }
 
-func (MinnowismYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (MinnowismYellow) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 	GrantNextCardBonusAttack(s, 2, minnowismIsTarget)
 }
 
-func (MinnowismBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (MinnowismBlue) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 	GrantNextCardBonusAttack(s, 1, minnowismIsTarget)
 }

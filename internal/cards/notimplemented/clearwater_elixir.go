@@ -13,6 +13,6 @@ import (
 
 // not implemented: Bloodrot Pox health-gain rider dropped (status tokens not tracked)
 
-func (ClearwaterElixirRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (ClearwaterElixirRed) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 	cards.GrantNextCardBonusAttack(s, 3, cards.IsAttack)
 }

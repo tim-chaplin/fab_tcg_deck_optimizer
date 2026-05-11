@@ -13,15 +13,15 @@ import (
 
 // not implemented: Opt + reveal-and-Quicken trigger; gated on damage dealt this turn
 
-func (EvenBiggerThanThatRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (EvenBiggerThanThatRed) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 }
 
 // not implemented: Opt + reveal-and-Quicken trigger; gated on damage dealt this turn
 
-func (EvenBiggerThanThatYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (EvenBiggerThanThatYellow) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 }
 
 // not implemented: Opt + reveal-and-Quicken trigger; gated on damage dealt this turn
 
-func (EvenBiggerThanThatBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (EvenBiggerThanThatBlue) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 }

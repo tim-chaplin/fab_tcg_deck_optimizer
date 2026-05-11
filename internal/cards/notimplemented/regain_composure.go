@@ -12,6 +12,6 @@ import (
 
 // not implemented: on-hit unfreeze rider (freeze/unfreeze state not tracked)
 
-func (RegainComposureBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (RegainComposureBlue) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 	cards.GrantNextCardBonusAttack(s, 1, cards.IsAttack)
 }

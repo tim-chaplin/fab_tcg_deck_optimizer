@@ -15,7 +15,7 @@ type DownButNotOutRed struct{}
 func (DownButNotOutRed) ID() ids.CardID          { return ids.DownButNotOutRed }
 func (DownButNotOutRed) Name() string            { return "Down But Not Out" }
 func (DownButNotOutRed) DisplayName() string     { return "Down But Not Out [R]" }
-func (DownButNotOutRed) Cost(*sim.TurnState) int { return 3 }
+func (DownButNotOutRed) Cost(sim.GameEngine) int { return 3 }
 func (DownButNotOutRed) Pitch() int              { return 1 }
 func (DownButNotOutRed) Attack() int             { return 5 }
 func (DownButNotOutRed) Defense() int            { return 3 }
@@ -28,7 +28,7 @@ type DownButNotOutYellow struct{}
 func (DownButNotOutYellow) ID() ids.CardID          { return ids.DownButNotOutYellow }
 func (DownButNotOutYellow) Name() string            { return "Down But Not Out" }
 func (DownButNotOutYellow) DisplayName() string     { return "Down But Not Out [Y]" }
-func (DownButNotOutYellow) Cost(*sim.TurnState) int { return 3 }
+func (DownButNotOutYellow) Cost(sim.GameEngine) int { return 3 }
 func (DownButNotOutYellow) Pitch() int              { return 2 }
 func (DownButNotOutYellow) Attack() int             { return 4 }
 func (DownButNotOutYellow) Defense() int            { return 3 }
@@ -41,7 +41,7 @@ type DownButNotOutBlue struct{}
 func (DownButNotOutBlue) ID() ids.CardID          { return ids.DownButNotOutBlue }
 func (DownButNotOutBlue) Name() string            { return "Down But Not Out" }
 func (DownButNotOutBlue) DisplayName() string     { return "Down But Not Out [B]" }
-func (DownButNotOutBlue) Cost(*sim.TurnState) int { return 3 }
+func (DownButNotOutBlue) Cost(sim.GameEngine) int { return 3 }
 func (DownButNotOutBlue) Pitch() int              { return 3 }
 func (DownButNotOutBlue) Attack() int             { return 3 }
 func (DownButNotOutBlue) Defense() int            { return 3 }

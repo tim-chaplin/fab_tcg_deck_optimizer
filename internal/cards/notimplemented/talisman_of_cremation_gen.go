@@ -15,7 +15,7 @@ type TalismanOfCremationBlue struct{}
 func (TalismanOfCremationBlue) ID() ids.CardID          { return ids.TalismanOfCremationBlue }
 func (TalismanOfCremationBlue) Name() string            { return "Talisman of Cremation" }
 func (TalismanOfCremationBlue) DisplayName() string     { return "Talisman of Cremation [B]" }
-func (TalismanOfCremationBlue) Cost(*sim.TurnState) int { return 0 }
+func (TalismanOfCremationBlue) Cost(sim.GameEngine) int { return 0 }
 func (TalismanOfCremationBlue) Pitch() int              { return 3 }
 func (TalismanOfCremationBlue) Attack() int             { return 0 }
 func (TalismanOfCremationBlue) Defense() int            { return 0 }

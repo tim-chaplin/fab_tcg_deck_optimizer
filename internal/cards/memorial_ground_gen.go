@@ -15,7 +15,7 @@ type MemorialGroundRed struct{}
 func (MemorialGroundRed) ID() ids.CardID          { return ids.MemorialGroundRed }
 func (MemorialGroundRed) Name() string            { return "Memorial Ground" }
 func (MemorialGroundRed) DisplayName() string     { return "Memorial Ground [R]" }
-func (MemorialGroundRed) Cost(*sim.TurnState) int { return 0 }
+func (MemorialGroundRed) Cost(sim.GameEngine) int { return 0 }
 func (MemorialGroundRed) Pitch() int              { return 1 }
 func (MemorialGroundRed) Attack() int             { return 0 }
 func (MemorialGroundRed) Defense() int            { return 0 }
@@ -27,7 +27,7 @@ type MemorialGroundYellow struct{}
 func (MemorialGroundYellow) ID() ids.CardID          { return ids.MemorialGroundYellow }
 func (MemorialGroundYellow) Name() string            { return "Memorial Ground" }
 func (MemorialGroundYellow) DisplayName() string     { return "Memorial Ground [Y]" }
-func (MemorialGroundYellow) Cost(*sim.TurnState) int { return 0 }
+func (MemorialGroundYellow) Cost(sim.GameEngine) int { return 0 }
 func (MemorialGroundYellow) Pitch() int              { return 2 }
 func (MemorialGroundYellow) Attack() int             { return 0 }
 func (MemorialGroundYellow) Defense() int            { return 0 }
@@ -39,7 +39,7 @@ type MemorialGroundBlue struct{}
 func (MemorialGroundBlue) ID() ids.CardID          { return ids.MemorialGroundBlue }
 func (MemorialGroundBlue) Name() string            { return "Memorial Ground" }
 func (MemorialGroundBlue) DisplayName() string     { return "Memorial Ground [B]" }
-func (MemorialGroundBlue) Cost(*sim.TurnState) int { return 0 }
+func (MemorialGroundBlue) Cost(sim.GameEngine) int { return 0 }
 func (MemorialGroundBlue) Pitch() int              { return 3 }
 func (MemorialGroundBlue) Attack() int             { return 0 }
 func (MemorialGroundBlue) Defense() int            { return 0 }

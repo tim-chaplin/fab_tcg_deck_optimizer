@@ -6,5 +6,5 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
 
-func (ToughenUpBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (ToughenUpBlue) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 }

@@ -15,7 +15,7 @@ type PublicBountyRed struct{}
 func (PublicBountyRed) ID() ids.CardID          { return ids.PublicBountyRed }
 func (PublicBountyRed) Name() string            { return "Public Bounty" }
 func (PublicBountyRed) DisplayName() string     { return "Public Bounty [R]" }
-func (PublicBountyRed) Cost(*sim.TurnState) int { return 1 }
+func (PublicBountyRed) Cost(sim.GameEngine) int { return 1 }
 func (PublicBountyRed) Pitch() int              { return 1 }
 func (PublicBountyRed) Attack() int             { return 0 }
 func (PublicBountyRed) Defense() int            { return 2 }
@@ -27,7 +27,7 @@ type PublicBountyYellow struct{}
 func (PublicBountyYellow) ID() ids.CardID          { return ids.PublicBountyYellow }
 func (PublicBountyYellow) Name() string            { return "Public Bounty" }
 func (PublicBountyYellow) DisplayName() string     { return "Public Bounty [Y]" }
-func (PublicBountyYellow) Cost(*sim.TurnState) int { return 1 }
+func (PublicBountyYellow) Cost(sim.GameEngine) int { return 1 }
 func (PublicBountyYellow) Pitch() int              { return 2 }
 func (PublicBountyYellow) Attack() int             { return 0 }
 func (PublicBountyYellow) Defense() int            { return 2 }
@@ -39,7 +39,7 @@ type PublicBountyBlue struct{}
 func (PublicBountyBlue) ID() ids.CardID          { return ids.PublicBountyBlue }
 func (PublicBountyBlue) Name() string            { return "Public Bounty" }
 func (PublicBountyBlue) DisplayName() string     { return "Public Bounty [B]" }
-func (PublicBountyBlue) Cost(*sim.TurnState) int { return 1 }
+func (PublicBountyBlue) Cost(sim.GameEngine) int { return 1 }
 func (PublicBountyBlue) Pitch() int              { return 3 }
 func (PublicBountyBlue) Attack() int             { return 0 }
 func (PublicBountyBlue) Defense() int            { return 2 }

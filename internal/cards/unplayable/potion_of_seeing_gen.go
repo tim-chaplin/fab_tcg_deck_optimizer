@@ -15,7 +15,7 @@ type PotionOfSeeingBlue struct{}
 func (PotionOfSeeingBlue) ID() ids.CardID          { return ids.PotionOfSeeingBlue }
 func (PotionOfSeeingBlue) Name() string            { return "Potion of Seeing" }
 func (PotionOfSeeingBlue) DisplayName() string     { return "Potion of Seeing [B]" }
-func (PotionOfSeeingBlue) Cost(*sim.TurnState) int { return 0 }
+func (PotionOfSeeingBlue) Cost(sim.GameEngine) int { return 0 }
 func (PotionOfSeeingBlue) Pitch() int              { return 3 }
 func (PotionOfSeeingBlue) Attack() int             { return 0 }
 func (PotionOfSeeingBlue) Defense() int            { return 0 }

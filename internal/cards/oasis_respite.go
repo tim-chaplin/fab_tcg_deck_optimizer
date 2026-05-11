@@ -13,7 +13,7 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
 
-func oasisRespitePlay(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func oasisRespitePlay(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 	if sim.HeroWantsLowerHealth() {
 		// Flip BonusDefense so the sim's chain-step resolver folds the +1{h} into the
 		// "(+N)" delta when it credits EffectiveDefense after Play returns.
@@ -22,16 +22,16 @@ func oasisRespitePlay(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 }
 
 func (OasisRespiteRed) DefensiveInstant() {}
-func (OasisRespiteRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (OasisRespiteRed) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 	oasisRespitePlay(s, l, self)
 }
 
 func (OasisRespiteYellow) DefensiveInstant() {}
-func (OasisRespiteYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (OasisRespiteYellow) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 	oasisRespitePlay(s, l, self)
 }
 
 func (OasisRespiteBlue) DefensiveInstant() {}
-func (OasisRespiteBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (OasisRespiteBlue) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 	oasisRespitePlay(s, l, self)
 }

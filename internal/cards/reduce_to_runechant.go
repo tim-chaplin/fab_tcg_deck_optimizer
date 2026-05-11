@@ -17,7 +17,7 @@ import (
 
 const reduceToRunechantPrintedCost = 1
 
-func reduceToRunechantCost(s *sim.TurnState) int {
+func reduceToRunechantCost(s sim.GameEngine) int {
 	eff := reduceToRunechantPrintedCost - s.Runechants()
 	if eff < 0 {
 		return 0
@@ -25,29 +25,29 @@ func reduceToRunechantCost(s *sim.TurnState) int {
 	return eff
 }
 
-func (ReduceToRunechantRed) Cost(s *sim.TurnState) int { return reduceToRunechantCost(s) }
+func (ReduceToRunechantRed) Cost(s sim.GameEngine) int { return reduceToRunechantCost(s) }
 func (ReduceToRunechantRed) MinCost() int              { return 0 }
 func (ReduceToRunechantRed) MaxCost() int              { return reduceToRunechantPrintedCost }
 
-func (ReduceToRunechantRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (ReduceToRunechantRed) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 	s.CreateRunechants(1)
 	l.AppendPostTrigger(self.Card.DisplayName(), "Created a runechant", 1)
 }
 
-func (ReduceToRunechantYellow) Cost(s *sim.TurnState) int { return reduceToRunechantCost(s) }
+func (ReduceToRunechantYellow) Cost(s sim.GameEngine) int { return reduceToRunechantCost(s) }
 func (ReduceToRunechantYellow) MinCost() int              { return 0 }
 func (ReduceToRunechantYellow) MaxCost() int              { return reduceToRunechantPrintedCost }
 
-func (ReduceToRunechantYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (ReduceToRunechantYellow) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 	s.CreateRunechants(1)
 	l.AppendPostTrigger(self.Card.DisplayName(), "Created a runechant", 1)
 }
 
-func (ReduceToRunechantBlue) Cost(s *sim.TurnState) int { return reduceToRunechantCost(s) }
+func (ReduceToRunechantBlue) Cost(s sim.GameEngine) int { return reduceToRunechantCost(s) }
 func (ReduceToRunechantBlue) MinCost() int              { return 0 }
 func (ReduceToRunechantBlue) MaxCost() int              { return reduceToRunechantPrintedCost }
 
-func (ReduceToRunechantBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (ReduceToRunechantBlue) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 	s.CreateRunechants(1)
 	l.AppendPostTrigger(self.Card.DisplayName(), "Created a runechant", 1)
 }

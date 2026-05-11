@@ -15,7 +15,7 @@ type AmuletOfIgnitionYellow struct{}
 func (AmuletOfIgnitionYellow) ID() ids.CardID          { return ids.AmuletOfIgnitionYellow }
 func (AmuletOfIgnitionYellow) Name() string            { return "Amulet of Ignition" }
 func (AmuletOfIgnitionYellow) DisplayName() string     { return "Amulet of Ignition [Y]" }
-func (AmuletOfIgnitionYellow) Cost(*sim.TurnState) int { return 0 }
+func (AmuletOfIgnitionYellow) Cost(sim.GameEngine) int { return 0 }
 func (AmuletOfIgnitionYellow) Pitch() int              { return 2 }
 func (AmuletOfIgnitionYellow) Attack() int             { return 0 }
 func (AmuletOfIgnitionYellow) Defense() int            { return 0 }

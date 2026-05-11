@@ -22,7 +22,7 @@ func plunderRunOnHitDraw(s *sim.TurnState, l sim.Logger, t *sim.Trigger, _ *sim.
 		"%s drew a card on attack-action hit", t.Source.DisplayName())
 }
 
-func plunderRunPlay(s *sim.TurnState, l sim.Logger, self *sim.CardState, source sim.Card, n int) {
+func plunderRunPlay(s sim.GameEngine, l sim.Logger, self *sim.CardState, source sim.Card, n int) {
 	s.AddTrigger(sim.Trigger{
 		Source:      source,
 		TriggerType: sim.TriggerHit,
@@ -34,14 +34,14 @@ func plunderRunPlay(s *sim.TurnState, l sim.Logger, self *sim.CardState, source 
 	}
 }
 
-func (c PlunderRunRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (c PlunderRunRed) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 	plunderRunPlay(s, l, self, c, 3)
 }
 
-func (c PlunderRunYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (c PlunderRunYellow) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 	plunderRunPlay(s, l, self, c, 2)
 }
 
-func (c PlunderRunBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (c PlunderRunBlue) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 	plunderRunPlay(s, l, self, c, 1)
 }

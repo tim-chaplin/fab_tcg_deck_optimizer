@@ -11,15 +11,15 @@ import (
 
 // not implemented: pay-{r}{r}-for-+2{p} attack/defence mode
 
-func (c FlexRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (c FlexRed) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 }
 
 // not implemented: pay-{r}{r}-for-+2{p} attack/defence mode
 
-func (c FlexYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (c FlexYellow) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 }
 
 // not implemented: pay-{r}{r}-for-+2{p} attack/defence mode
 
-func (c FlexBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (c FlexBlue) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 }

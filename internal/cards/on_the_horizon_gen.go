@@ -15,7 +15,7 @@ type OnTheHorizonRed struct{}
 func (OnTheHorizonRed) ID() ids.CardID          { return ids.OnTheHorizonRed }
 func (OnTheHorizonRed) Name() string            { return "On the Horizon" }
 func (OnTheHorizonRed) DisplayName() string     { return "On the Horizon [R]" }
-func (OnTheHorizonRed) Cost(*sim.TurnState) int { return 0 }
+func (OnTheHorizonRed) Cost(sim.GameEngine) int { return 0 }
 func (OnTheHorizonRed) Pitch() int              { return 1 }
 func (OnTheHorizonRed) Attack() int             { return 0 }
 func (OnTheHorizonRed) Defense() int            { return 4 }
@@ -27,7 +27,7 @@ type OnTheHorizonYellow struct{}
 func (OnTheHorizonYellow) ID() ids.CardID          { return ids.OnTheHorizonYellow }
 func (OnTheHorizonYellow) Name() string            { return "On the Horizon" }
 func (OnTheHorizonYellow) DisplayName() string     { return "On the Horizon [Y]" }
-func (OnTheHorizonYellow) Cost(*sim.TurnState) int { return 0 }
+func (OnTheHorizonYellow) Cost(sim.GameEngine) int { return 0 }
 func (OnTheHorizonYellow) Pitch() int              { return 2 }
 func (OnTheHorizonYellow) Attack() int             { return 0 }
 func (OnTheHorizonYellow) Defense() int            { return 3 }
@@ -39,7 +39,7 @@ type OnTheHorizonBlue struct{}
 func (OnTheHorizonBlue) ID() ids.CardID          { return ids.OnTheHorizonBlue }
 func (OnTheHorizonBlue) Name() string            { return "On the Horizon" }
 func (OnTheHorizonBlue) DisplayName() string     { return "On the Horizon [B]" }
-func (OnTheHorizonBlue) Cost(*sim.TurnState) int { return 0 }
+func (OnTheHorizonBlue) Cost(sim.GameEngine) int { return 0 }
 func (OnTheHorizonBlue) Pitch() int              { return 3 }
 func (OnTheHorizonBlue) Attack() int             { return 0 }
 func (OnTheHorizonBlue) Defense() int            { return 2 }

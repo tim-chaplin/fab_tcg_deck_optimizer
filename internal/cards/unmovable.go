@@ -11,14 +11,14 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
 
-func (UnmovableRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (UnmovableRed) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 }
 func (UnmovableRed) ArsenalDefenseBonus() int { return 1 }
 
-func (UnmovableYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (UnmovableYellow) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 }
 func (UnmovableYellow) ArsenalDefenseBonus() int { return 1 }
 
-func (UnmovableBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (UnmovableBlue) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 }
 func (UnmovableBlue) ArsenalDefenseBonus() int { return 1 }

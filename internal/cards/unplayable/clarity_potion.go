@@ -8,4 +8,4 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
 
-func (ClarityPotionBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {}
+func (ClarityPotionBlue) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {}

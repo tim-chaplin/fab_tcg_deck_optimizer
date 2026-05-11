@@ -9,6 +9,6 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
 
-func (PursueToThePitsOfDespairRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (PursueToThePitsOfDespairRed) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 	self.RegisterOnHit(markOpponentOnHit)
 }

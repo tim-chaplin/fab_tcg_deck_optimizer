@@ -10,5 +10,5 @@ import (
 // not implemented: base-power cap on what this can defend is ignored; treated as legal vs every
 // attack
 
-func (PutInContextBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (PutInContextBlue) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 }

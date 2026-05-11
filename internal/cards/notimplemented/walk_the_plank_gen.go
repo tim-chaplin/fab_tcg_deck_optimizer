@@ -15,7 +15,7 @@ type WalkThePlankRed struct{}
 func (WalkThePlankRed) ID() ids.CardID          { return ids.WalkThePlankRed }
 func (WalkThePlankRed) Name() string            { return "Walk the Plank" }
 func (WalkThePlankRed) DisplayName() string     { return "Walk the Plank [R]" }
-func (WalkThePlankRed) Cost(*sim.TurnState) int { return 3 }
+func (WalkThePlankRed) Cost(sim.GameEngine) int { return 3 }
 func (WalkThePlankRed) Pitch() int              { return 1 }
 func (WalkThePlankRed) Attack() int             { return 7 }
 func (WalkThePlankRed) Defense() int            { return 2 }
@@ -28,7 +28,7 @@ type WalkThePlankYellow struct{}
 func (WalkThePlankYellow) ID() ids.CardID          { return ids.WalkThePlankYellow }
 func (WalkThePlankYellow) Name() string            { return "Walk the Plank" }
 func (WalkThePlankYellow) DisplayName() string     { return "Walk the Plank [Y]" }
-func (WalkThePlankYellow) Cost(*sim.TurnState) int { return 3 }
+func (WalkThePlankYellow) Cost(sim.GameEngine) int { return 3 }
 func (WalkThePlankYellow) Pitch() int              { return 2 }
 func (WalkThePlankYellow) Attack() int             { return 6 }
 func (WalkThePlankYellow) Defense() int            { return 2 }
@@ -41,7 +41,7 @@ type WalkThePlankBlue struct{}
 func (WalkThePlankBlue) ID() ids.CardID          { return ids.WalkThePlankBlue }
 func (WalkThePlankBlue) Name() string            { return "Walk the Plank" }
 func (WalkThePlankBlue) DisplayName() string     { return "Walk the Plank [B]" }
-func (WalkThePlankBlue) Cost(*sim.TurnState) int { return 3 }
+func (WalkThePlankBlue) Cost(sim.GameEngine) int { return 3 }
 func (WalkThePlankBlue) Pitch() int              { return 3 }
 func (WalkThePlankBlue) Attack() int             { return 5 }
 func (WalkThePlankBlue) Defense() int            { return 2 }

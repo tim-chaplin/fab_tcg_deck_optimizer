@@ -15,7 +15,7 @@ type PoundForPoundRed struct{}
 func (PoundForPoundRed) ID() ids.CardID          { return ids.PoundForPoundRed }
 func (PoundForPoundRed) Name() string            { return "Pound for Pound" }
 func (PoundForPoundRed) DisplayName() string     { return "Pound for Pound [R]" }
-func (PoundForPoundRed) Cost(*sim.TurnState) int { return 3 }
+func (PoundForPoundRed) Cost(sim.GameEngine) int { return 3 }
 func (PoundForPoundRed) Pitch() int              { return 1 }
 func (PoundForPoundRed) Attack() int             { return 6 }
 func (PoundForPoundRed) Defense() int            { return 2 }
@@ -27,7 +27,7 @@ type PoundForPoundYellow struct{}
 func (PoundForPoundYellow) ID() ids.CardID          { return ids.PoundForPoundYellow }
 func (PoundForPoundYellow) Name() string            { return "Pound for Pound" }
 func (PoundForPoundYellow) DisplayName() string     { return "Pound for Pound [Y]" }
-func (PoundForPoundYellow) Cost(*sim.TurnState) int { return 3 }
+func (PoundForPoundYellow) Cost(sim.GameEngine) int { return 3 }
 func (PoundForPoundYellow) Pitch() int              { return 2 }
 func (PoundForPoundYellow) Attack() int             { return 5 }
 func (PoundForPoundYellow) Defense() int            { return 2 }
@@ -39,7 +39,7 @@ type PoundForPoundBlue struct{}
 func (PoundForPoundBlue) ID() ids.CardID          { return ids.PoundForPoundBlue }
 func (PoundForPoundBlue) Name() string            { return "Pound for Pound" }
 func (PoundForPoundBlue) DisplayName() string     { return "Pound for Pound [B]" }
-func (PoundForPoundBlue) Cost(*sim.TurnState) int { return 3 }
+func (PoundForPoundBlue) Cost(sim.GameEngine) int { return 3 }
 func (PoundForPoundBlue) Pitch() int              { return 3 }
 func (PoundForPoundBlue) Attack() int             { return 4 }
 func (PoundForPoundBlue) Defense() int            { return 2 }

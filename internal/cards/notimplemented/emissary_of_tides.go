@@ -12,5 +12,5 @@ import (
 
 // not implemented: hand-cycle-for-+2{p} rider
 
-func (c EmissaryOfTidesRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (c EmissaryOfTidesRed) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 }

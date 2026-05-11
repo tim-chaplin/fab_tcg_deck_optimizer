@@ -11,15 +11,15 @@ import (
 
 // not implemented: opponent 'lose all colors' debuff
 
-func (BlanchRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (BlanchRed) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 }
 
 // not implemented: opponent 'lose all colors' debuff
 
-func (BlanchYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (BlanchYellow) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 }
 
 // not implemented: opponent 'lose all colors' debuff
 
-func (BlanchBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (BlanchBlue) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 }

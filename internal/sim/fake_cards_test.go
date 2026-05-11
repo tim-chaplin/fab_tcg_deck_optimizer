@@ -36,13 +36,13 @@ func (c FakeCard) WithGoAgain() FakeCard             { c.goAgain = true; return 
 func (c FakeCard) ID() ids.CardID                    { return c.id }
 func (c FakeCard) Name() string                      { return c.name }
 func (c FakeCard) DisplayName() string               { return c.name }
-func (FakeCard) Cost(*TurnState) int                 { return 0 }
+func (FakeCard) Cost(GameEngine) int                 { return 0 }
 func (c FakeCard) Pitch() int                        { return c.pitch }
 func (c FakeCard) Attack() int                       { return c.attack }
 func (c FakeCard) Defense() int                      { return c.defense }
 func (c FakeCard) Types() card.TypeSet               { return c.types }
 func (c FakeCard) GoAgain() bool                     { return c.goAgain }
-func (FakeCard) Play(*TurnState, Logger, *CardState) {}
+func (FakeCard) Play(GameEngine, Logger, *CardState) {}
 
 // FakeRedAttack is a fixed-stat-line attack: 1-cost, 1-pitch, 3-power, 1-defense, no
 // Go again. Mirrors testutils.RedAttack so tests that just need a "vanilla red attack"
@@ -52,7 +52,7 @@ type FakeRedAttack struct{}
 func (FakeRedAttack) ID() ids.CardID      { return ids.InvalidCard }
 func (FakeRedAttack) Name() string        { return "FakeRedAttack" }
 func (FakeRedAttack) DisplayName() string { return "FakeRedAttack [R]" }
-func (FakeRedAttack) Cost(*TurnState) int { return 1 }
+func (FakeRedAttack) Cost(GameEngine) int { return 1 }
 func (FakeRedAttack) Pitch() int          { return 1 }
 func (FakeRedAttack) Attack() int         { return 3 }
 func (FakeRedAttack) Defense() int        { return 1 }
@@ -60,7 +60,7 @@ func (FakeRedAttack) Types() card.TypeSet {
 	return card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 }
 func (FakeRedAttack) GoAgain() bool                       { return false }
-func (FakeRedAttack) Play(*TurnState, Logger, *CardState) {}
+func (FakeRedAttack) Play(GameEngine, Logger, *CardState) {}
 
 // DominatingFakeCard embeds FakeCard and adds the Dominator marker — exercises the
 // printed-Dominate branch of EffectiveDominate / HasDominate.

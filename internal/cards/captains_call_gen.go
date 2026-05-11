@@ -15,7 +15,7 @@ type CaptainsCallRed struct{}
 func (CaptainsCallRed) ID() ids.CardID          { return ids.CaptainsCallRed }
 func (CaptainsCallRed) Name() string            { return "Captain's Call" }
 func (CaptainsCallRed) DisplayName() string     { return "Captain's Call [R]" }
-func (CaptainsCallRed) Cost(*sim.TurnState) int { return 0 }
+func (CaptainsCallRed) Cost(sim.GameEngine) int { return 0 }
 func (CaptainsCallRed) Pitch() int              { return 1 }
 func (CaptainsCallRed) Attack() int             { return 0 }
 func (CaptainsCallRed) Defense() int            { return 2 }
@@ -27,7 +27,7 @@ type CaptainsCallYellow struct{}
 func (CaptainsCallYellow) ID() ids.CardID          { return ids.CaptainsCallYellow }
 func (CaptainsCallYellow) Name() string            { return "Captain's Call" }
 func (CaptainsCallYellow) DisplayName() string     { return "Captain's Call [Y]" }
-func (CaptainsCallYellow) Cost(*sim.TurnState) int { return 0 }
+func (CaptainsCallYellow) Cost(sim.GameEngine) int { return 0 }
 func (CaptainsCallYellow) Pitch() int              { return 2 }
 func (CaptainsCallYellow) Attack() int             { return 0 }
 func (CaptainsCallYellow) Defense() int            { return 2 }
@@ -39,7 +39,7 @@ type CaptainsCallBlue struct{}
 func (CaptainsCallBlue) ID() ids.CardID          { return ids.CaptainsCallBlue }
 func (CaptainsCallBlue) Name() string            { return "Captain's Call" }
 func (CaptainsCallBlue) DisplayName() string     { return "Captain's Call [B]" }
-func (CaptainsCallBlue) Cost(*sim.TurnState) int { return 0 }
+func (CaptainsCallBlue) Cost(sim.GameEngine) int { return 0 }
 func (CaptainsCallBlue) Pitch() int              { return 3 }
 func (CaptainsCallBlue) Attack() int             { return 0 }
 func (CaptainsCallBlue) Defense() int            { return 2 }

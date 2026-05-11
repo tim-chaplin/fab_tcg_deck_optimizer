@@ -16,19 +16,19 @@ import (
 
 // fiddlersGreenPlay emits the chain step then writes the printed N{h} as a "Gained N
 // health (graveyard trigger)" sub-line under self. Health is valued 1-to-1 with damage.
-func fiddlersGreenPlay(s *sim.TurnState, l sim.Logger, self *sim.CardState, heal int) {
+func fiddlersGreenPlay(s sim.GameEngine, l sim.Logger, self *sim.CardState, heal int) {
 	s.AddValue(heal)
 	l.AppendPostTriggerf(self.Card.DisplayName(), heal, "Gained %d health (graveyard trigger)", heal)
 }
 
-func (FiddlersGreenRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (FiddlersGreenRed) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 	fiddlersGreenPlay(s, l, self, 3)
 }
 
-func (FiddlersGreenYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (FiddlersGreenYellow) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 	fiddlersGreenPlay(s, l, self, 2)
 }
 
-func (FiddlersGreenBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (FiddlersGreenBlue) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 	fiddlersGreenPlay(s, l, self, 1)
 }

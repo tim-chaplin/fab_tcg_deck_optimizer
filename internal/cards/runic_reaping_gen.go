@@ -15,7 +15,7 @@ type RunicReapingRed struct{}
 func (RunicReapingRed) ID() ids.CardID          { return ids.RunicReapingRed }
 func (RunicReapingRed) Name() string            { return "Runic Reaping" }
 func (RunicReapingRed) DisplayName() string     { return "Runic Reaping [R]" }
-func (RunicReapingRed) Cost(*sim.TurnState) int { return 1 }
+func (RunicReapingRed) Cost(sim.GameEngine) int { return 1 }
 func (RunicReapingRed) Pitch() int              { return 1 }
 func (RunicReapingRed) Attack() int             { return 0 }
 func (RunicReapingRed) Defense() int            { return 2 }
@@ -27,7 +27,7 @@ type RunicReapingYellow struct{}
 func (RunicReapingYellow) ID() ids.CardID          { return ids.RunicReapingYellow }
 func (RunicReapingYellow) Name() string            { return "Runic Reaping" }
 func (RunicReapingYellow) DisplayName() string     { return "Runic Reaping [Y]" }
-func (RunicReapingYellow) Cost(*sim.TurnState) int { return 1 }
+func (RunicReapingYellow) Cost(sim.GameEngine) int { return 1 }
 func (RunicReapingYellow) Pitch() int              { return 2 }
 func (RunicReapingYellow) Attack() int             { return 0 }
 func (RunicReapingYellow) Defense() int            { return 2 }
@@ -39,7 +39,7 @@ type RunicReapingBlue struct{}
 func (RunicReapingBlue) ID() ids.CardID          { return ids.RunicReapingBlue }
 func (RunicReapingBlue) Name() string            { return "Runic Reaping" }
 func (RunicReapingBlue) DisplayName() string     { return "Runic Reaping [B]" }
-func (RunicReapingBlue) Cost(*sim.TurnState) int { return 1 }
+func (RunicReapingBlue) Cost(sim.GameEngine) int { return 1 }
 func (RunicReapingBlue) Pitch() int              { return 3 }
 func (RunicReapingBlue) Attack() int             { return 0 }
 func (RunicReapingBlue) Defense() int            { return 2 }

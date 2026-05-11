@@ -15,7 +15,7 @@ type EnergyPotionBlue struct{}
 func (EnergyPotionBlue) ID() ids.CardID          { return ids.EnergyPotionBlue }
 func (EnergyPotionBlue) Name() string            { return "Energy Potion" }
 func (EnergyPotionBlue) DisplayName() string     { return "Energy Potion [B]" }
-func (EnergyPotionBlue) Cost(*sim.TurnState) int { return 0 }
+func (EnergyPotionBlue) Cost(sim.GameEngine) int { return 0 }
 func (EnergyPotionBlue) Pitch() int              { return 3 }
 func (EnergyPotionBlue) Attack() int             { return 0 }
 func (EnergyPotionBlue) Defense() int            { return 0 }

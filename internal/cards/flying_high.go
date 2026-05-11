@@ -15,7 +15,7 @@ import (
 // also add +1 to its BonusAttack — the "+1{p} if it's <matching color>" rider — so
 // EffectiveAttack picks the buff up in any LikelyToHit check on the buffed attack. The
 // +1 attributes to the target's slot, not Flying High's.
-func flyingHighApplySideEffect(s *sim.TurnState, matchPitch int) {
+func flyingHighApplySideEffect(s sim.GameEngine, matchPitch int) {
 	for _, pc := range s.CardsRemaining() {
 		if !pc.Card.Types().IsAttack() {
 			continue
@@ -28,14 +28,14 @@ func flyingHighApplySideEffect(s *sim.TurnState, matchPitch int) {
 	}
 }
 
-func (FlyingHighRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (FlyingHighRed) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 	flyingHighApplySideEffect(s, 1)
 }
 
-func (FlyingHighYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (FlyingHighYellow) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 	flyingHighApplySideEffect(s, 2)
 }
 
-func (FlyingHighBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (FlyingHighBlue) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 	flyingHighApplySideEffect(s, 3)
 }

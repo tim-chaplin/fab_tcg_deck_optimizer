@@ -9,7 +9,7 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
 
-func (OutedRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (OutedRed) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 	if s.OpponentMarked() {
 		self.BonusAttack++
 	}

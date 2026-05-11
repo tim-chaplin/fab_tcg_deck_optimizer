@@ -20,10 +20,12 @@ func TestHighStriker_QueuesTriggerHit(t *testing.T) {
 	}
 }
 
-// triggerHitCount returns the number of queued TriggerHit triggers on s.
-func triggerHitCount(s *sim.TurnState) int {
+// triggerHitCount returns the number of queued TriggerHit triggers on s. Reaches
+// past GameEngine to the concrete *sim.TurnState — Triggers is sim-owned and the
+// engine interface stays sim-free.
+func triggerHitCount(s sim.GameEngine) int {
 	n := 0
-	for _, t := range s.Triggers() {
+	for _, t := range s.(*sim.TurnState).Triggers() {
 		if t.TriggerType == sim.TriggerHit {
 			n++
 		}

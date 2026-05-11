@@ -13,5 +13,5 @@ import (
 
 // not implemented: opponent hand reveal, defense-reaction deck search
 
-func (c SoundTheAlarmRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (c SoundTheAlarmRed) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 }

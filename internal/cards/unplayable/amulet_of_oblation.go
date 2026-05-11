@@ -10,4 +10,4 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
 
-func (AmuletOfOblationBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {}
+func (AmuletOfOblationBlue) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {}

@@ -15,18 +15,18 @@ import (
 
 // waterTheSeedsIsTarget gates the rider on attacks (action cards or weapon swings — "your
 // next attack") with base power 1 or less.
-func waterTheSeedsIsTarget(_ *sim.TurnState, pc *sim.CardState) bool {
+func waterTheSeedsIsTarget(_ sim.GameEngine, pc *sim.CardState) bool {
 	return pc.Card.Types().IsAttack() && pc.Card.Attack() <= 1
 }
 
-func (WaterTheSeedsRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (WaterTheSeedsRed) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 	GrantNextCardBonusAttack(s, 1, waterTheSeedsIsTarget)
 }
 
-func (WaterTheSeedsYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (WaterTheSeedsYellow) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 	GrantNextCardBonusAttack(s, 1, waterTheSeedsIsTarget)
 }
 
-func (WaterTheSeedsBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (WaterTheSeedsBlue) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 	GrantNextCardBonusAttack(s, 1, waterTheSeedsIsTarget)
 }

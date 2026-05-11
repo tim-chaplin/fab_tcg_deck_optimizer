@@ -12,15 +12,15 @@ import (
 
 // not implemented: face-up-from-deck action point grant
 
-func (c BackAlleyBreaklineRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (c BackAlleyBreaklineRed) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 }
 
 // not implemented: face-up-from-deck action point grant
 
-func (c BackAlleyBreaklineYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (c BackAlleyBreaklineYellow) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 }
 
 // not implemented: face-up-from-deck action point grant
 
-func (c BackAlleyBreaklineBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (c BackAlleyBreaklineBlue) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 }

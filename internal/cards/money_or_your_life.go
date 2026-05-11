@@ -14,7 +14,7 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
 
-func moneyOrYourLifeOnHit(s *sim.TurnState, l sim.Logger, self *sim.CardState, _ *sim.OnHitHandler) {
+func moneyOrYourLifeOnHit(s sim.GameEngine, l sim.Logger, self *sim.CardState, _ *sim.OnHitHandler) {
 	n := 2
 	if sim.CurrentHero != nil && sim.CurrentHero.Types().Has(card.TypeThief) {
 		n = 4
@@ -23,18 +23,18 @@ func moneyOrYourLifeOnHit(s *sim.TurnState, l sim.Logger, self *sim.CardState, _
 	l.AppendPostTriggerf(self.Card.DisplayName(), n, "On-hit dealt %d (opponent surrendered no Gold)", n)
 }
 
-func moneyOrYourLifePlay(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func moneyOrYourLifePlay(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 	self.RegisterOnHit(moneyOrYourLifeOnHit)
 }
 
-func (MoneyOrYourLifeRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (MoneyOrYourLifeRed) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 	moneyOrYourLifePlay(s, l, self)
 }
 
-func (MoneyOrYourLifeYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (MoneyOrYourLifeYellow) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 	moneyOrYourLifePlay(s, l, self)
 }
 
-func (MoneyOrYourLifeBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (MoneyOrYourLifeBlue) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 	moneyOrYourLifePlay(s, l, self)
 }

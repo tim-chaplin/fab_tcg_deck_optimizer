@@ -12,8 +12,8 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
 
-func (BarragingBrawnhideRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {}
+func (BarragingBrawnhideRed) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {}
 
-func (BarragingBrawnhideYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {}
+func (BarragingBrawnhideYellow) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {}
 
-func (BarragingBrawnhideBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {}
+func (BarragingBrawnhideBlue) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {}

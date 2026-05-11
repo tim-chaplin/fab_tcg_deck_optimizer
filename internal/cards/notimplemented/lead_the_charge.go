@@ -12,12 +12,12 @@ import (
 
 // not implemented: action point grant
 
-func (LeadTheChargeRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {}
+func (LeadTheChargeRed) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {}
 
 // not implemented: action point grant
 
-func (LeadTheChargeYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {}
+func (LeadTheChargeYellow) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {}
 
 // not implemented: action point grant
 
-func (LeadTheChargeBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {}
+func (LeadTheChargeBlue) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {}

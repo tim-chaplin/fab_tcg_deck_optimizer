@@ -10,13 +10,13 @@ import (
 
 // not implemented: Instant +N{d} grant to a defending attack action card
 
-func (ReinforceTheLineRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {}
+func (ReinforceTheLineRed) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {}
 
 // not implemented: Instant +N{d} grant to a defending attack action card
 
-func (ReinforceTheLineYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (ReinforceTheLineYellow) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 }
 
 // not implemented: Instant +N{d} grant to a defending attack action card
 
-func (ReinforceTheLineBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {}
+func (ReinforceTheLineBlue) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {}

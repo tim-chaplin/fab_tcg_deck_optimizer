@@ -12,15 +12,15 @@ import (
 
 // not implemented: defense-reaction lockout, on-hit arsenal banish
 
-func (WreckHavocRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (WreckHavocRed) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 }
 
 // not implemented: defense-reaction lockout, on-hit arsenal banish
 
-func (WreckHavocYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (WreckHavocYellow) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 }
 
 // not implemented: defense-reaction lockout, on-hit arsenal banish
 
-func (WreckHavocBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (WreckHavocBlue) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 }

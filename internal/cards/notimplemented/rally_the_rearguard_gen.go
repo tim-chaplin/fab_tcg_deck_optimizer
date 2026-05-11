@@ -15,7 +15,7 @@ type RallyTheRearguardRed struct{}
 func (RallyTheRearguardRed) ID() ids.CardID          { return ids.RallyTheRearguardRed }
 func (RallyTheRearguardRed) Name() string            { return "Rally the Rearguard" }
 func (RallyTheRearguardRed) DisplayName() string     { return "Rally the Rearguard [R]" }
-func (RallyTheRearguardRed) Cost(*sim.TurnState) int { return 2 }
+func (RallyTheRearguardRed) Cost(sim.GameEngine) int { return 2 }
 func (RallyTheRearguardRed) Pitch() int              { return 1 }
 func (RallyTheRearguardRed) Attack() int             { return 6 }
 func (RallyTheRearguardRed) Defense() int            { return 2 }
@@ -28,7 +28,7 @@ type RallyTheRearguardYellow struct{}
 func (RallyTheRearguardYellow) ID() ids.CardID          { return ids.RallyTheRearguardYellow }
 func (RallyTheRearguardYellow) Name() string            { return "Rally the Rearguard" }
 func (RallyTheRearguardYellow) DisplayName() string     { return "Rally the Rearguard [Y]" }
-func (RallyTheRearguardYellow) Cost(*sim.TurnState) int { return 2 }
+func (RallyTheRearguardYellow) Cost(sim.GameEngine) int { return 2 }
 func (RallyTheRearguardYellow) Pitch() int              { return 2 }
 func (RallyTheRearguardYellow) Attack() int             { return 5 }
 func (RallyTheRearguardYellow) Defense() int            { return 2 }
@@ -41,7 +41,7 @@ type RallyTheRearguardBlue struct{}
 func (RallyTheRearguardBlue) ID() ids.CardID          { return ids.RallyTheRearguardBlue }
 func (RallyTheRearguardBlue) Name() string            { return "Rally the Rearguard" }
 func (RallyTheRearguardBlue) DisplayName() string     { return "Rally the Rearguard [B]" }
-func (RallyTheRearguardBlue) Cost(*sim.TurnState) int { return 2 }
+func (RallyTheRearguardBlue) Cost(sim.GameEngine) int { return 2 }
 func (RallyTheRearguardBlue) Pitch() int              { return 3 }
 func (RallyTheRearguardBlue) Attack() int             { return 4 }
 func (RallyTheRearguardBlue) Defense() int            { return 2 }

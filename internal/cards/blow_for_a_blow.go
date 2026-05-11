@@ -17,13 +17,13 @@ import (
 const blowForABlowPingValue = 1
 
 func (BlowForABlowRed) GoAgain() bool { return sim.HeroWantsLowerHealth() }
-func (BlowForABlowRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (BlowForABlowRed) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 	self.RegisterOnHit(blowForABlowOnHit)
 }
 
 // blowForABlowOnHit fires the printed "When this hits, deal 1 damage" rider. Top-level so
 // registration doesn't allocate a closure on the hot anneal path.
-func blowForABlowOnHit(s *sim.TurnState, l sim.Logger, self *sim.CardState, _ *sim.OnHitHandler) {
+func blowForABlowOnHit(s sim.GameEngine, l sim.Logger, self *sim.CardState, _ *sim.OnHitHandler) {
 	s.AddValue(blowForABlowPingValue)
 	l.AppendPostTrigger(self.Card.DisplayName(), "On-hit dealt 1 damage", blowForABlowPingValue)
 }

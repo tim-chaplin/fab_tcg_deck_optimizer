@@ -15,7 +15,7 @@ type TalismanOfWarfareYellow struct{}
 func (TalismanOfWarfareYellow) ID() ids.CardID          { return ids.TalismanOfWarfareYellow }
 func (TalismanOfWarfareYellow) Name() string            { return "Talisman of Warfare" }
 func (TalismanOfWarfareYellow) DisplayName() string     { return "Talisman of Warfare [Y]" }
-func (TalismanOfWarfareYellow) Cost(*sim.TurnState) int { return 0 }
+func (TalismanOfWarfareYellow) Cost(sim.GameEngine) int { return 0 }
 func (TalismanOfWarfareYellow) Pitch() int              { return 2 }
 func (TalismanOfWarfareYellow) Attack() int             { return 0 }
 func (TalismanOfWarfareYellow) Defense() int            { return 0 }

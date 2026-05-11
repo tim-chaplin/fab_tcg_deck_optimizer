@@ -15,7 +15,7 @@ type SinkBelowRed struct{}
 func (SinkBelowRed) ID() ids.CardID          { return ids.SinkBelowRed }
 func (SinkBelowRed) Name() string            { return "Sink Below" }
 func (SinkBelowRed) DisplayName() string     { return "Sink Below [R]" }
-func (SinkBelowRed) Cost(*sim.TurnState) int { return 0 }
+func (SinkBelowRed) Cost(sim.GameEngine) int { return 0 }
 func (SinkBelowRed) Pitch() int              { return 1 }
 func (SinkBelowRed) Attack() int             { return 0 }
 func (SinkBelowRed) Defense() int            { return 4 }
@@ -29,7 +29,7 @@ type SinkBelowYellow struct{}
 func (SinkBelowYellow) ID() ids.CardID          { return ids.SinkBelowYellow }
 func (SinkBelowYellow) Name() string            { return "Sink Below" }
 func (SinkBelowYellow) DisplayName() string     { return "Sink Below [Y]" }
-func (SinkBelowYellow) Cost(*sim.TurnState) int { return 0 }
+func (SinkBelowYellow) Cost(sim.GameEngine) int { return 0 }
 func (SinkBelowYellow) Pitch() int              { return 2 }
 func (SinkBelowYellow) Attack() int             { return 0 }
 func (SinkBelowYellow) Defense() int            { return 3 }
@@ -43,7 +43,7 @@ type SinkBelowBlue struct{}
 func (SinkBelowBlue) ID() ids.CardID          { return ids.SinkBelowBlue }
 func (SinkBelowBlue) Name() string            { return "Sink Below" }
 func (SinkBelowBlue) DisplayName() string     { return "Sink Below [B]" }
-func (SinkBelowBlue) Cost(*sim.TurnState) int { return 0 }
+func (SinkBelowBlue) Cost(sim.GameEngine) int { return 0 }
 func (SinkBelowBlue) Pitch() int              { return 3 }
 func (SinkBelowBlue) Attack() int             { return 0 }
 func (SinkBelowBlue) Defense() int            { return 2 }

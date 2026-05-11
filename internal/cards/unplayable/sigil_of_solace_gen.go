@@ -15,7 +15,7 @@ type SigilOfSolaceRed struct{}
 func (SigilOfSolaceRed) ID() ids.CardID          { return ids.SigilOfSolaceRed }
 func (SigilOfSolaceRed) Name() string            { return "Sigil of Solace" }
 func (SigilOfSolaceRed) DisplayName() string     { return "Sigil of Solace [R]" }
-func (SigilOfSolaceRed) Cost(*sim.TurnState) int { return 0 }
+func (SigilOfSolaceRed) Cost(sim.GameEngine) int { return 0 }
 func (SigilOfSolaceRed) Pitch() int              { return 1 }
 func (SigilOfSolaceRed) Attack() int             { return 0 }
 func (SigilOfSolaceRed) Defense() int            { return 0 }
@@ -29,7 +29,7 @@ type SigilOfSolaceYellow struct{}
 func (SigilOfSolaceYellow) ID() ids.CardID          { return ids.SigilOfSolaceYellow }
 func (SigilOfSolaceYellow) Name() string            { return "Sigil of Solace" }
 func (SigilOfSolaceYellow) DisplayName() string     { return "Sigil of Solace [Y]" }
-func (SigilOfSolaceYellow) Cost(*sim.TurnState) int { return 0 }
+func (SigilOfSolaceYellow) Cost(sim.GameEngine) int { return 0 }
 func (SigilOfSolaceYellow) Pitch() int              { return 2 }
 func (SigilOfSolaceYellow) Attack() int             { return 0 }
 func (SigilOfSolaceYellow) Defense() int            { return 0 }
@@ -43,7 +43,7 @@ type SigilOfSolaceBlue struct{}
 func (SigilOfSolaceBlue) ID() ids.CardID          { return ids.SigilOfSolaceBlue }
 func (SigilOfSolaceBlue) Name() string            { return "Sigil of Solace" }
 func (SigilOfSolaceBlue) DisplayName() string     { return "Sigil of Solace [B]" }
-func (SigilOfSolaceBlue) Cost(*sim.TurnState) int { return 0 }
+func (SigilOfSolaceBlue) Cost(sim.GameEngine) int { return 0 }
 func (SigilOfSolaceBlue) Pitch() int              { return 3 }
 func (SigilOfSolaceBlue) Attack() int             { return 0 }
 func (SigilOfSolaceBlue) Defense() int            { return 0 }

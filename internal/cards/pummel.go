@@ -35,7 +35,7 @@ func pummelAccepts(c sim.Card, mode int8) bool {
 }
 
 // pummelOnHitDiscard fires the printed "when this hits a hero, they discard a card" rider.
-func pummelOnHitDiscard(s *sim.TurnState, l sim.Logger, self *sim.CardState, h *sim.OnHitHandler) {
+func pummelOnHitDiscard(s sim.GameEngine, l sim.Logger, self *sim.CardState, h *sim.OnHitHandler) {
 	s.AddValue(sim.DiscardValue)
 	l.AppendPostTriggerf(self.Card.DisplayName(), sim.DiscardValue,
 		"%s forced opponent to discard 1", h.Source.DisplayName())
@@ -44,7 +44,7 @@ func pummelOnHitDiscard(s *sim.TurnState, l sim.Logger, self *sim.CardState, h *
 // pummelPlay applies the chosen mode's effect. The chain runner already validated the
 // target via pummelAccepts, so the buff lands directly. Mode 1 additionally registers the
 // on-hit hero-discard rider on the target.
-func pummelPlay(s *sim.TurnState, l sim.Logger, self *sim.CardState, n int) {
+func pummelPlay(s sim.GameEngine, l sim.Logger, self *sim.CardState, n int) {
 	target := s.AttackReactionTarget()
 	if target == nil {
 		return
@@ -62,7 +62,7 @@ func (PummelRed) Modes() int { return 2 }
 func (PummelRed) ARTargetAllowed(c sim.Card, mode int8) bool {
 	return pummelAccepts(c, mode)
 }
-func (PummelRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (PummelRed) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 	pummelPlay(s, l, self, 4)
 }
 
@@ -70,7 +70,7 @@ func (PummelYellow) Modes() int { return 2 }
 func (PummelYellow) ARTargetAllowed(c sim.Card, mode int8) bool {
 	return pummelAccepts(c, mode)
 }
-func (PummelYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (PummelYellow) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 	pummelPlay(s, l, self, 3)
 }
 
@@ -78,6 +78,6 @@ func (PummelBlue) Modes() int { return 2 }
 func (PummelBlue) ARTargetAllowed(c sim.Card, mode int8) bool {
 	return pummelAccepts(c, mode)
 }
-func (PummelBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (PummelBlue) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 	pummelPlay(s, l, self, 2)
 }

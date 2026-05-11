@@ -14,24 +14,24 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
 
-func promiseOfPlentyPlay(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func promiseOfPlentyPlay(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 	self.GrantGoAgainIfFromArsenal()
 }
 
 // not implemented: on-hit arsenal-placement rider (arsenal/deck content tracking would be required)
 
-func (PromiseOfPlentyRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (PromiseOfPlentyRed) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 	promiseOfPlentyPlay(s, l, self)
 }
 
 // not implemented: on-hit arsenal-placement rider (arsenal/deck content tracking would be required)
 
-func (PromiseOfPlentyYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (PromiseOfPlentyYellow) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 	promiseOfPlentyPlay(s, l, self)
 }
 
 // not implemented: on-hit arsenal-placement rider (arsenal/deck content tracking would be required)
 
-func (PromiseOfPlentyBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (PromiseOfPlentyBlue) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 	promiseOfPlentyPlay(s, l, self)
 }

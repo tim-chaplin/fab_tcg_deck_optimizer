@@ -15,7 +15,7 @@ type VantagePointRed struct{}
 func (VantagePointRed) ID() ids.CardID          { return ids.VantagePointRed }
 func (VantagePointRed) Name() string            { return "Vantage Point" }
 func (VantagePointRed) DisplayName() string     { return "Vantage Point [R]" }
-func (VantagePointRed) Cost(*sim.TurnState) int { return 3 }
+func (VantagePointRed) Cost(sim.GameEngine) int { return 3 }
 func (VantagePointRed) Pitch() int              { return 1 }
 func (VantagePointRed) Attack() int             { return 7 }
 func (VantagePointRed) Defense() int            { return 3 }
@@ -27,7 +27,7 @@ type VantagePointYellow struct{}
 func (VantagePointYellow) ID() ids.CardID          { return ids.VantagePointYellow }
 func (VantagePointYellow) Name() string            { return "Vantage Point" }
 func (VantagePointYellow) DisplayName() string     { return "Vantage Point [Y]" }
-func (VantagePointYellow) Cost(*sim.TurnState) int { return 3 }
+func (VantagePointYellow) Cost(sim.GameEngine) int { return 3 }
 func (VantagePointYellow) Pitch() int              { return 2 }
 func (VantagePointYellow) Attack() int             { return 6 }
 func (VantagePointYellow) Defense() int            { return 3 }
@@ -39,7 +39,7 @@ type VantagePointBlue struct{}
 func (VantagePointBlue) ID() ids.CardID          { return ids.VantagePointBlue }
 func (VantagePointBlue) Name() string            { return "Vantage Point" }
 func (VantagePointBlue) DisplayName() string     { return "Vantage Point [B]" }
-func (VantagePointBlue) Cost(*sim.TurnState) int { return 3 }
+func (VantagePointBlue) Cost(sim.GameEngine) int { return 3 }
 func (VantagePointBlue) Pitch() int              { return 3 }
 func (VantagePointBlue) Attack() int             { return 5 }
 func (VantagePointBlue) Defense() int            { return 3 }

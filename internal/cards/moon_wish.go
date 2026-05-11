@@ -27,7 +27,7 @@ const moonWishPrintedCost = 2
 // moonWishCost returns 0 when there's any card left in hand to spend on the alt cost,
 // else the printed cost. Shared across all three pitch variants since the alt cost is
 // identical.
-func moonWishCost(s *sim.TurnState) int {
+func moonWishCost(s sim.GameEngine) int {
 	if s != nil && len(s.Hand()) > 0 {
 		return 0
 	}
@@ -37,7 +37,7 @@ func moonWishCost(s *sim.TurnState) int {
 // moonWishPlay pays the alt cost (when a hand card is available), emits the chain step,
 // and registers an OnHit that tutors Sun Kiss. Tutored Sun Kiss plays immediately when
 // self has go-again granted; otherwise it lands in hand for next turn.
-func moonWishPlay(c sim.Card, s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func moonWishPlay(c sim.Card, s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 	name := c.DisplayName()
 	// Alt cost: pop a hand card and prepend it to the deck (PrependToDeck flips cacheable).
 	var returned sim.Card
@@ -59,7 +59,7 @@ func moonWishPlay(c sim.Card, s *sim.TurnState, l sim.Logger, self *sim.CardStat
 // registration stays alloc-free; reads the Moon Wish printing off self.Card so we don't
 // need a captured copy or a Source-field detour (self IS the Moon Wish that registered
 // the handler).
-func moonWishOnHit(s *sim.TurnState, l sim.Logger, self *sim.CardState, _ *sim.OnHitHandler) {
+func moonWishOnHit(s sim.GameEngine, l sim.Logger, self *sim.CardState, _ *sim.OnHitHandler) {
 	c := self.Card
 	name := c.DisplayName()
 	sk, ok := s.TutorFromDeck(sunKissTutorPriority)
@@ -100,26 +100,26 @@ func sunKissTutorPriority(c sim.Card) int {
 	}
 }
 
-func (MoonWishRed) Cost(s *sim.TurnState) int { return moonWishCost(s) }
+func (MoonWishRed) Cost(s sim.GameEngine) int { return moonWishCost(s) }
 func (MoonWishRed) MinCost() int              { return 0 }
 func (MoonWishRed) MaxCost() int              { return moonWishPrintedCost }
 
-func (c MoonWishRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (c MoonWishRed) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 	moonWishPlay(c, s, l, self)
 }
 
-func (MoonWishYellow) Cost(s *sim.TurnState) int { return moonWishCost(s) }
+func (MoonWishYellow) Cost(s sim.GameEngine) int { return moonWishCost(s) }
 func (MoonWishYellow) MinCost() int              { return 0 }
 func (MoonWishYellow) MaxCost() int              { return moonWishPrintedCost }
 
-func (c MoonWishYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (c MoonWishYellow) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 	moonWishPlay(c, s, l, self)
 }
 
-func (MoonWishBlue) Cost(s *sim.TurnState) int { return moonWishCost(s) }
+func (MoonWishBlue) Cost(s sim.GameEngine) int { return moonWishCost(s) }
 func (MoonWishBlue) MinCost() int              { return 0 }
 func (MoonWishBlue) MaxCost() int              { return moonWishPrintedCost }
 
-func (c MoonWishBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (c MoonWishBlue) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 	moonWishPlay(c, s, l, self)
 }

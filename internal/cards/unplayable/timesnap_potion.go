@@ -8,4 +8,4 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
 
-func (TimesnapPotionBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {}
+func (TimesnapPotionBlue) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {}

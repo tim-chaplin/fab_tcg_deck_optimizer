@@ -11,7 +11,7 @@ import (
 )
 
 // warmongersRecitalRecycleOnHit pulls the buffed attack out of graveyard onto the deck bottom.
-func warmongersRecitalRecycleOnHit(s *sim.TurnState, l sim.Logger, self *sim.CardState, _ *sim.OnHitHandler) {
+func warmongersRecitalRecycleOnHit(s sim.GameEngine, l sim.Logger, self *sim.CardState, _ *sim.OnHitHandler) {
 	target := self.Card
 	if _, ok := s.RecycleFromGraveyardToBottom(func(c sim.Card) bool { return c == target }); !ok {
 		return
@@ -21,7 +21,7 @@ func warmongersRecitalRecycleOnHit(s *sim.TurnState, l sim.Logger, self *sim.Car
 
 // warmongersRecitalPlay grants the next attack action +n{p} and the on-hit recycle rider.
 // Fizzles silently if no attack action follows in CardsRemaining.
-func warmongersRecitalPlay(s *sim.TurnState, l sim.Logger, self *sim.CardState, source sim.Card, n int) {
+func warmongersRecitalPlay(s sim.GameEngine, l sim.Logger, self *sim.CardState, source sim.Card, n int) {
 	for _, pc := range s.CardsRemaining() {
 		if pc.Card.Types().IsAttackAction() {
 			pc.BonusAttack += n
@@ -34,14 +34,14 @@ func warmongersRecitalPlay(s *sim.TurnState, l sim.Logger, self *sim.CardState, 
 	}
 }
 
-func (c WarmongersRecitalRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (c WarmongersRecitalRed) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 	warmongersRecitalPlay(s, l, self, c, 3)
 }
 
-func (c WarmongersRecitalYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (c WarmongersRecitalYellow) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 	warmongersRecitalPlay(s, l, self, c, 2)
 }
 
-func (c WarmongersRecitalBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (c WarmongersRecitalBlue) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 	warmongersRecitalPlay(s, l, self, c, 1)
 }

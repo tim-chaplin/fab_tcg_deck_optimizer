@@ -14,7 +14,7 @@ type modalBlocker struct{}
 func (modalBlocker) ID() ids.CardID      { return ids.InvalidCard }
 func (modalBlocker) Name() string        { return "modalBlocker" }
 func (modalBlocker) DisplayName() string { return "modalBlocker" }
-func (modalBlocker) Cost(*TurnState) int { return 0 }
+func (modalBlocker) Cost(GameEngine) int { return 0 }
 func (modalBlocker) Pitch() int          { return 0 }
 func (modalBlocker) Attack() int         { return 0 }
 func (modalBlocker) Defense() int        { return 2 }
@@ -24,7 +24,7 @@ func (modalBlocker) Types() card.TypeSet {
 func (modalBlocker) GoAgain() bool                       { return false }
 func (modalBlocker) Modes() int                          { return 2 }
 func (modalBlocker) BlockCost(mode int8) int             { return int(mode) }
-func (modalBlocker) Play(*TurnState, Logger, *CardState) {}
+func (modalBlocker) Play(GameEngine, Logger, *CardState) {}
 func (modalBlocker) Block(_ *TurnState, _ Logger, self *CardState) {
 	if self.Mode == 1 {
 		self.BonusDefense += 2

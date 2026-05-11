@@ -10,4 +10,4 @@ import (
 
 // not implemented: next-sword-attack go-again grant (weapon chain not scanned)
 
-func (OnAKnifeEdgeYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {}
+func (OnAKnifeEdgeYellow) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {}

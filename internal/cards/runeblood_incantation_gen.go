@@ -15,7 +15,7 @@ type RunebloodIncantationRed struct{}
 func (RunebloodIncantationRed) ID() ids.CardID          { return ids.RunebloodIncantationRed }
 func (RunebloodIncantationRed) Name() string            { return "Runeblood Incantation" }
 func (RunebloodIncantationRed) DisplayName() string     { return "Runeblood Incantation [R]" }
-func (RunebloodIncantationRed) Cost(*sim.TurnState) int { return 1 }
+func (RunebloodIncantationRed) Cost(sim.GameEngine) int { return 1 }
 func (RunebloodIncantationRed) Pitch() int              { return 1 }
 func (RunebloodIncantationRed) Attack() int             { return 0 }
 func (RunebloodIncantationRed) Defense() int            { return 2 }
@@ -27,7 +27,7 @@ type RunebloodIncantationYellow struct{}
 func (RunebloodIncantationYellow) ID() ids.CardID          { return ids.RunebloodIncantationYellow }
 func (RunebloodIncantationYellow) Name() string            { return "Runeblood Incantation" }
 func (RunebloodIncantationYellow) DisplayName() string     { return "Runeblood Incantation [Y]" }
-func (RunebloodIncantationYellow) Cost(*sim.TurnState) int { return 1 }
+func (RunebloodIncantationYellow) Cost(sim.GameEngine) int { return 1 }
 func (RunebloodIncantationYellow) Pitch() int              { return 2 }
 func (RunebloodIncantationYellow) Attack() int             { return 0 }
 func (RunebloodIncantationYellow) Defense() int            { return 2 }
@@ -39,7 +39,7 @@ type RunebloodIncantationBlue struct{}
 func (RunebloodIncantationBlue) ID() ids.CardID          { return ids.RunebloodIncantationBlue }
 func (RunebloodIncantationBlue) Name() string            { return "Runeblood Incantation" }
 func (RunebloodIncantationBlue) DisplayName() string     { return "Runeblood Incantation [B]" }
-func (RunebloodIncantationBlue) Cost(*sim.TurnState) int { return 1 }
+func (RunebloodIncantationBlue) Cost(sim.GameEngine) int { return 1 }
 func (RunebloodIncantationBlue) Pitch() int              { return 3 }
 func (RunebloodIncantationBlue) Attack() int             { return 0 }
 func (RunebloodIncantationBlue) Defense() int            { return 2 }

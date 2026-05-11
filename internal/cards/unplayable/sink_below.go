@@ -9,8 +9,8 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
 
-func (SinkBelowRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {}
+func (SinkBelowRed) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {}
 
-func (SinkBelowYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {}
+func (SinkBelowYellow) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {}
 
-func (SinkBelowBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {}
+func (SinkBelowBlue) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {}

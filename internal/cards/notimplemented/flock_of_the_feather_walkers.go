@@ -12,15 +12,15 @@ import (
 
 // not implemented: additional reveal cost, quicken tokens
 
-func (c FlockOfTheFeatherWalkersRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (c FlockOfTheFeatherWalkersRed) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 }
 
 // not implemented: additional reveal cost, quicken tokens
 
-func (c FlockOfTheFeatherWalkersYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (c FlockOfTheFeatherWalkersYellow) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 }
 
 // not implemented: additional reveal cost, quicken tokens
 
-func (c FlockOfTheFeatherWalkersBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (c FlockOfTheFeatherWalkersBlue) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 }

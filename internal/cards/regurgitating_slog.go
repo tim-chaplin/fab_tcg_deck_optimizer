@@ -10,7 +10,7 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
 
-func regurgitatingSlogPlay(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func regurgitatingSlogPlay(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 	if _, ok := s.BanishFromGraveyard(isSloggism); ok {
 		self.GrantedDominate = true
 		l.AppendPostTrigger(self.Card.DisplayName(), "Banished a Sloggism, gained dominate", 0)
@@ -19,14 +19,14 @@ func regurgitatingSlogPlay(s *sim.TurnState, l sim.Logger, self *sim.CardState) 
 
 func isSloggism(c sim.Card) bool { return c.Name() == "Sloggism" }
 
-func (RegurgitatingSlogRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (RegurgitatingSlogRed) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 	regurgitatingSlogPlay(s, l, self)
 }
 
-func (RegurgitatingSlogYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (RegurgitatingSlogYellow) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 	regurgitatingSlogPlay(s, l, self)
 }
 
-func (RegurgitatingSlogBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (RegurgitatingSlogBlue) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 	regurgitatingSlogPlay(s, l, self)
 }

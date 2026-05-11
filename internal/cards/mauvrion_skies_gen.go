@@ -15,7 +15,7 @@ type MauvrionSkiesRed struct{}
 func (MauvrionSkiesRed) ID() ids.CardID          { return ids.MauvrionSkiesRed }
 func (MauvrionSkiesRed) Name() string            { return "Mauvrion Skies" }
 func (MauvrionSkiesRed) DisplayName() string     { return "Mauvrion Skies [R]" }
-func (MauvrionSkiesRed) Cost(*sim.TurnState) int { return 0 }
+func (MauvrionSkiesRed) Cost(sim.GameEngine) int { return 0 }
 func (MauvrionSkiesRed) Pitch() int              { return 1 }
 func (MauvrionSkiesRed) Attack() int             { return 0 }
 func (MauvrionSkiesRed) Defense() int            { return 2 }
@@ -27,7 +27,7 @@ type MauvrionSkiesYellow struct{}
 func (MauvrionSkiesYellow) ID() ids.CardID          { return ids.MauvrionSkiesYellow }
 func (MauvrionSkiesYellow) Name() string            { return "Mauvrion Skies" }
 func (MauvrionSkiesYellow) DisplayName() string     { return "Mauvrion Skies [Y]" }
-func (MauvrionSkiesYellow) Cost(*sim.TurnState) int { return 0 }
+func (MauvrionSkiesYellow) Cost(sim.GameEngine) int { return 0 }
 func (MauvrionSkiesYellow) Pitch() int              { return 2 }
 func (MauvrionSkiesYellow) Attack() int             { return 0 }
 func (MauvrionSkiesYellow) Defense() int            { return 2 }
@@ -39,7 +39,7 @@ type MauvrionSkiesBlue struct{}
 func (MauvrionSkiesBlue) ID() ids.CardID          { return ids.MauvrionSkiesBlue }
 func (MauvrionSkiesBlue) Name() string            { return "Mauvrion Skies" }
 func (MauvrionSkiesBlue) DisplayName() string     { return "Mauvrion Skies [B]" }
-func (MauvrionSkiesBlue) Cost(*sim.TurnState) int { return 0 }
+func (MauvrionSkiesBlue) Cost(sim.GameEngine) int { return 0 }
 func (MauvrionSkiesBlue) Pitch() int              { return 3 }
 func (MauvrionSkiesBlue) Attack() int             { return 0 }
 func (MauvrionSkiesBlue) Defense() int            { return 2 }

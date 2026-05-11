@@ -9,21 +9,21 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
 
-func peaceOfMindPlay(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func peaceOfMindPlay(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 	s.CreatePonder(1)
 }
 
 func (PeaceOfMindRed) DefensiveInstant() {}
-func (PeaceOfMindRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (PeaceOfMindRed) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 	peaceOfMindPlay(s, l, self)
 }
 
 func (PeaceOfMindYellow) DefensiveInstant() {}
-func (PeaceOfMindYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (PeaceOfMindYellow) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 	peaceOfMindPlay(s, l, self)
 }
 
 func (PeaceOfMindBlue) DefensiveInstant() {}
-func (PeaceOfMindBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (PeaceOfMindBlue) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 	peaceOfMindPlay(s, l, self)
 }

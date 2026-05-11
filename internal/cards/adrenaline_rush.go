@@ -18,14 +18,14 @@ func adrenalineRushBonus() int {
 	return 0
 }
 
-func (AdrenalineRushRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (AdrenalineRushRed) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 	self.BonusAttack += adrenalineRushBonus()
 }
 
-func (AdrenalineRushYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (AdrenalineRushYellow) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 	self.BonusAttack += adrenalineRushBonus()
 }
 
-func (AdrenalineRushBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (AdrenalineRushBlue) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 	self.BonusAttack += adrenalineRushBonus()
 }

@@ -15,7 +15,7 @@ type CrackedBaubleYellow struct{}
 func (CrackedBaubleYellow) ID() ids.CardID          { return ids.CrackedBaubleYellow }
 func (CrackedBaubleYellow) Name() string            { return "Cracked Bauble" }
 func (CrackedBaubleYellow) DisplayName() string     { return "Cracked Bauble [Y]" }
-func (CrackedBaubleYellow) Cost(*sim.TurnState) int { return 0 }
+func (CrackedBaubleYellow) Cost(sim.GameEngine) int { return 0 }
 func (CrackedBaubleYellow) Pitch() int              { return 2 }
 func (CrackedBaubleYellow) Attack() int             { return 0 }
 func (CrackedBaubleYellow) Defense() int            { return 0 }

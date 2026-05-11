@@ -12,8 +12,8 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
 
-func (FeistyLocalsRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {}
+func (FeistyLocalsRed) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {}
 
-func (FeistyLocalsYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {}
+func (FeistyLocalsYellow) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {}
 
-func (FeistyLocalsBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {}
+func (FeistyLocalsBlue) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {}

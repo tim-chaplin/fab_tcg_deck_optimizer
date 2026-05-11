@@ -13,7 +13,7 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
 
-func (c SigilOfSilphidaeBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (c SigilOfSilphidaeBlue) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 	enterDamage := banishAuraFromGraveyard(s)
 	s.AddAura(sim.Aura{
 		Trigger: sim.Trigger{TriggerType: sim.TriggerStartOfTurn, Handler: sigilOfSilphidaeAuraHandler},

@@ -15,7 +15,7 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
 
-func (c SigilOfTheArknightBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (c SigilOfTheArknightBlue) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 	s.AddAura(sim.Aura{
 		Trigger: sim.Trigger{TriggerType: sim.TriggerStartOfTurn, Handler: sigilOfTheArknightReveal},
 		Self:    sim.CardOrTokenType{Card: c},

@@ -8,22 +8,22 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
 
-func (ShrillOfSkullformRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (ShrillOfSkullformRed) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 	shrillPlay(s, l, self)
 }
 
-func (ShrillOfSkullformYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (ShrillOfSkullformYellow) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 	shrillPlay(s, l, self)
 }
 
-func (ShrillOfSkullformBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (ShrillOfSkullformBlue) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 	shrillPlay(s, l, self)
 }
 
 // shrillPlay routes the +3{p} aura-in-play buff through self.BonusAttack so EffectiveAttack
 // and LikelyToHit see the buffed power, then emits the chain step at the buffed value. No
 // rider sub-line — this is a power buff, not a separable effect.
-func shrillPlay(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func shrillPlay(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 	if s.HasPlayedOrCreatedAura() {
 		self.BonusAttack += 3
 	}

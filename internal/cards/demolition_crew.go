@@ -19,7 +19,7 @@ import (
 // variants. The chain runner's hand snapshot has already removed the playing card and
 // popped this card's pitches by the time PlayPrecondition runs, so the scan only sees
 // cards that genuinely remain in hand.
-func demolitionCrewPrecondition(s *sim.TurnState) bool {
+func demolitionCrewPrecondition(s sim.GameEngine) bool {
 	for _, c := range s.Hand() {
 		if c.Cost(s) >= 2 {
 			return true
@@ -32,19 +32,19 @@ func (DemolitionCrewRed) Dominate() {}
 func (DemolitionCrewRed) PlayPrecondition(s *sim.TurnState, _ *sim.CardState) bool {
 	return demolitionCrewPrecondition(s)
 }
-func (c DemolitionCrewRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (c DemolitionCrewRed) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 }
 
 func (DemolitionCrewYellow) Dominate() {}
 func (DemolitionCrewYellow) PlayPrecondition(s *sim.TurnState, _ *sim.CardState) bool {
 	return demolitionCrewPrecondition(s)
 }
-func (c DemolitionCrewYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (c DemolitionCrewYellow) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 }
 
 func (DemolitionCrewBlue) Dominate() {}
 func (DemolitionCrewBlue) PlayPrecondition(s *sim.TurnState, _ *sim.CardState) bool {
 	return demolitionCrewPrecondition(s)
 }
-func (c DemolitionCrewBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (c DemolitionCrewBlue) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 }

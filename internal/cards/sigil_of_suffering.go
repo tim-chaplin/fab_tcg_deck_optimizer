@@ -16,21 +16,21 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
 
-func sigilOfSufferingPlay(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func sigilOfSufferingPlay(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 	if s.ArcaneDamageDealt() || sim.LikelyDamageHits(1, false) {
 		self.BonusDefense++
 	}
 	s.DealArcaneDamage(l, self, 1)
 }
 
-func (SigilOfSufferingRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (SigilOfSufferingRed) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 	sigilOfSufferingPlay(s, l, self)
 }
 
-func (SigilOfSufferingYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (SigilOfSufferingYellow) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 	sigilOfSufferingPlay(s, l, self)
 }
 
-func (SigilOfSufferingBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (SigilOfSufferingBlue) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 	sigilOfSufferingPlay(s, l, self)
 }

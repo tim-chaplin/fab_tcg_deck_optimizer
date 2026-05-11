@@ -14,7 +14,7 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
 
-func jackBeQuickPlay(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func jackBeQuickPlay(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 	if _, ok := s.BanishFromGraveyard(isNimblism); ok {
 		self.BonusAttack++
 		self.GrantedGoAgain = true
@@ -22,6 +22,6 @@ func jackBeQuickPlay(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	}
 }
 
-func (JackBeQuickRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (JackBeQuickRed) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 	jackBeQuickPlay(s, l, self)
 }

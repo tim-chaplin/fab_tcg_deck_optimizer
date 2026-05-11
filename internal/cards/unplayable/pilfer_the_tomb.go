@@ -9,5 +9,5 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
 
-func (PilferTheTombBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (PilferTheTombBlue) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 }

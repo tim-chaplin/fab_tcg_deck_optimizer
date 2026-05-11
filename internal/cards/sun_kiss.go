@@ -16,7 +16,7 @@ import (
 // sunKissPlay emits the chain step ("Sun Kiss [R]: PLAY"), writes the heal as a sub-line
 // "Gained N health" under it, and — when Moon Wish has already played this turn — fires
 // an extra mid-turn draw and a go-again grant on self.
-func sunKissPlay(heal int, s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func sunKissPlay(heal int, s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 	if playedMoonWishThisTurn(s) {
 		s.DrawOne()
 		self.GrantedGoAgain = true
@@ -28,7 +28,7 @@ func sunKissPlay(heal int, s *sim.TurnState, l sim.Logger, self *sim.CardState) 
 // playedMoonWishThisTurn reports whether any prior card resolved this turn is a Moon Wish
 // printing. Exact-match on Name() works because all three Moon Wish printings share the
 // base name "Moon Wish" — the pitch suffix lives in DisplayName, not Name.
-func playedMoonWishThisTurn(s *sim.TurnState) bool {
+func playedMoonWishThisTurn(s sim.GameEngine) bool {
 	for _, c := range s.CardsPlayed() {
 		if c.Name() == "Moon Wish" {
 			return true
@@ -37,14 +37,14 @@ func playedMoonWishThisTurn(s *sim.TurnState) bool {
 	return false
 }
 
-func (SunKissRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (SunKissRed) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 	sunKissPlay(3, s, l, self)
 }
 
-func (SunKissYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (SunKissYellow) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 	sunKissPlay(2, s, l, self)
 }
 
-func (SunKissBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (SunKissBlue) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 	sunKissPlay(1, s, l, self)
 }

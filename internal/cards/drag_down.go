@@ -14,8 +14,8 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
 
-func (DragDownRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {}
+func (DragDownRed) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {}
 
-func (DragDownYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {}
+func (DragDownYellow) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {}
 
-func (DragDownBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {}
+func (DragDownBlue) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {}

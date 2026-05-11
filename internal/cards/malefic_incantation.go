@@ -14,15 +14,15 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
 
-func (c MaleficIncantationRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (c MaleficIncantationRed) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 	maleficPlay(s, l, self, c, 3)
 }
 
-func (c MaleficIncantationYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (c MaleficIncantationYellow) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 	maleficPlay(s, l, self, c, 2)
 }
 
-func (c MaleficIncantationBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (c MaleficIncantationBlue) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 	maleficPlay(s, l, self, c, 1)
 }
 
@@ -46,7 +46,7 @@ var maleficCreatedRunechantText = func() map[ids.CardID]string {
 // post-trigger log line so it groups beneath the triggering attack-action chain step. n
 // is the printed counter count carried on the trigger so the handler can stay a top-level
 // function.
-func maleficPlay(s *sim.TurnState, l sim.Logger, selfState *sim.CardState, selfCard sim.Card, n int) {
+func maleficPlay(s sim.GameEngine, l sim.Logger, selfState *sim.CardState, selfCard sim.Card, n int) {
 	s.AddAura(sim.Aura{
 		Trigger:     sim.Trigger{TriggerType: sim.TriggerAttackAction, Handler: maleficAuraHandler},
 		Self:        sim.CardOrTokenType{Card: selfCard},

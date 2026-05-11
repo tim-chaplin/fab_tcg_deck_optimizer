@@ -15,7 +15,7 @@ type DroneOfBrutalityRed struct{}
 func (DroneOfBrutalityRed) ID() ids.CardID          { return ids.DroneOfBrutalityRed }
 func (DroneOfBrutalityRed) Name() string            { return "Drone of Brutality" }
 func (DroneOfBrutalityRed) DisplayName() string     { return "Drone of Brutality [R]" }
-func (DroneOfBrutalityRed) Cost(*sim.TurnState) int { return 2 }
+func (DroneOfBrutalityRed) Cost(sim.GameEngine) int { return 2 }
 func (DroneOfBrutalityRed) Pitch() int              { return 1 }
 func (DroneOfBrutalityRed) Attack() int             { return 6 }
 func (DroneOfBrutalityRed) Defense() int            { return 2 }
@@ -29,7 +29,7 @@ type DroneOfBrutalityYellow struct{}
 func (DroneOfBrutalityYellow) ID() ids.CardID          { return ids.DroneOfBrutalityYellow }
 func (DroneOfBrutalityYellow) Name() string            { return "Drone of Brutality" }
 func (DroneOfBrutalityYellow) DisplayName() string     { return "Drone of Brutality [Y]" }
-func (DroneOfBrutalityYellow) Cost(*sim.TurnState) int { return 2 }
+func (DroneOfBrutalityYellow) Cost(sim.GameEngine) int { return 2 }
 func (DroneOfBrutalityYellow) Pitch() int              { return 2 }
 func (DroneOfBrutalityYellow) Attack() int             { return 5 }
 func (DroneOfBrutalityYellow) Defense() int            { return 2 }
@@ -43,7 +43,7 @@ type DroneOfBrutalityBlue struct{}
 func (DroneOfBrutalityBlue) ID() ids.CardID          { return ids.DroneOfBrutalityBlue }
 func (DroneOfBrutalityBlue) Name() string            { return "Drone of Brutality" }
 func (DroneOfBrutalityBlue) DisplayName() string     { return "Drone of Brutality [B]" }
-func (DroneOfBrutalityBlue) Cost(*sim.TurnState) int { return 2 }
+func (DroneOfBrutalityBlue) Cost(sim.GameEngine) int { return 2 }
 func (DroneOfBrutalityBlue) Pitch() int              { return 3 }
 func (DroneOfBrutalityBlue) Attack() int             { return 4 }
 func (DroneOfBrutalityBlue) Defense() int            { return 2 }

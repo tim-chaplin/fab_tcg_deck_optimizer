@@ -14,7 +14,7 @@ import (
 
 const runeFlashPrintedCost = 3
 
-func runeFlashCost(s *sim.TurnState) int {
+func runeFlashCost(s sim.GameEngine) int {
 	eff := runeFlashPrintedCost - s.Runechants()
 	if eff < 0 {
 		return 0
@@ -22,23 +22,23 @@ func runeFlashCost(s *sim.TurnState) int {
 	return eff
 }
 
-func (RuneFlashRed) Cost(s *sim.TurnState) int { return runeFlashCost(s) }
+func (RuneFlashRed) Cost(s sim.GameEngine) int { return runeFlashCost(s) }
 func (RuneFlashRed) MinCost() int              { return 0 }
 func (RuneFlashRed) MaxCost() int              { return runeFlashPrintedCost }
 
-func (RuneFlashRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (RuneFlashRed) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 }
 
-func (RuneFlashYellow) Cost(s *sim.TurnState) int { return runeFlashCost(s) }
+func (RuneFlashYellow) Cost(s sim.GameEngine) int { return runeFlashCost(s) }
 func (RuneFlashYellow) MinCost() int              { return 0 }
 func (RuneFlashYellow) MaxCost() int              { return runeFlashPrintedCost }
 
-func (RuneFlashYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (RuneFlashYellow) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 }
 
-func (RuneFlashBlue) Cost(s *sim.TurnState) int { return runeFlashCost(s) }
+func (RuneFlashBlue) Cost(s sim.GameEngine) int { return runeFlashCost(s) }
 func (RuneFlashBlue) MinCost() int              { return 0 }
 func (RuneFlashBlue) MaxCost() int              { return runeFlashPrintedCost }
 
-func (RuneFlashBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (RuneFlashBlue) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 }

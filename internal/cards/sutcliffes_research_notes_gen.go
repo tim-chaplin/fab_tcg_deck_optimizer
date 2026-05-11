@@ -15,7 +15,7 @@ type SutcliffesResearchNotesRed struct{}
 func (SutcliffesResearchNotesRed) ID() ids.CardID          { return ids.SutcliffesResearchNotesRed }
 func (SutcliffesResearchNotesRed) Name() string            { return "Sutcliffe's Research Notes" }
 func (SutcliffesResearchNotesRed) DisplayName() string     { return "Sutcliffe's Research Notes [R]" }
-func (SutcliffesResearchNotesRed) Cost(*sim.TurnState) int { return 1 }
+func (SutcliffesResearchNotesRed) Cost(sim.GameEngine) int { return 1 }
 func (SutcliffesResearchNotesRed) Pitch() int              { return 1 }
 func (SutcliffesResearchNotesRed) Attack() int             { return 0 }
 func (SutcliffesResearchNotesRed) Defense() int            { return 2 }
@@ -27,7 +27,7 @@ type SutcliffesResearchNotesYellow struct{}
 func (SutcliffesResearchNotesYellow) ID() ids.CardID          { return ids.SutcliffesResearchNotesYellow }
 func (SutcliffesResearchNotesYellow) Name() string            { return "Sutcliffe's Research Notes" }
 func (SutcliffesResearchNotesYellow) DisplayName() string     { return "Sutcliffe's Research Notes [Y]" }
-func (SutcliffesResearchNotesYellow) Cost(*sim.TurnState) int { return 1 }
+func (SutcliffesResearchNotesYellow) Cost(sim.GameEngine) int { return 1 }
 func (SutcliffesResearchNotesYellow) Pitch() int              { return 2 }
 func (SutcliffesResearchNotesYellow) Attack() int             { return 0 }
 func (SutcliffesResearchNotesYellow) Defense() int            { return 2 }
@@ -39,7 +39,7 @@ type SutcliffesResearchNotesBlue struct{}
 func (SutcliffesResearchNotesBlue) ID() ids.CardID          { return ids.SutcliffesResearchNotesBlue }
 func (SutcliffesResearchNotesBlue) Name() string            { return "Sutcliffe's Research Notes" }
 func (SutcliffesResearchNotesBlue) DisplayName() string     { return "Sutcliffe's Research Notes [B]" }
-func (SutcliffesResearchNotesBlue) Cost(*sim.TurnState) int { return 1 }
+func (SutcliffesResearchNotesBlue) Cost(sim.GameEngine) int { return 1 }
 func (SutcliffesResearchNotesBlue) Pitch() int              { return 3 }
 func (SutcliffesResearchNotesBlue) Attack() int             { return 0 }
 func (SutcliffesResearchNotesBlue) Defense() int            { return 2 }

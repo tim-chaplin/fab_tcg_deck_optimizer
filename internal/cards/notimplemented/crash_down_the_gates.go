@@ -13,15 +13,15 @@ import (
 
 // not implemented: deck-reveal comparison + on-hit deck-top destruction
 
-func (CrashDownTheGatesRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (CrashDownTheGatesRed) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 }
 
 // not implemented: deck-reveal comparison + on-hit deck-top destruction
 
-func (CrashDownTheGatesYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (CrashDownTheGatesYellow) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 }
 
 // not implemented: deck-reveal comparison + on-hit deck-top destruction
 
-func (CrashDownTheGatesBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (CrashDownTheGatesBlue) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 }
