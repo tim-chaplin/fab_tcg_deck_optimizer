@@ -52,7 +52,7 @@ func mySigilAuraHandler(s *sim.TurnState, _ *sim.Trigger, a *sim.Aura) {
     s.DestroyAura(a, true)
 }
 
-func (c MySigil) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
+func (c MySigil) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
     s.AddAura(sim.Aura{Self: c, TriggerType: sim.TriggerStartOfTurn, Count: 1, Handler: mySigilAuraHandler})
     s.Log(self, 0)
 }
@@ -79,7 +79,7 @@ The plumbing below is uniform; card docstrings call out the printed rider and an
 - **Conditional go-again / dominate grants**: flip `self.GrantedGoAgain` / `self.GrantedDominate`; `EffectiveGoAgain` / `EffectiveDominate` honour them. Card docstrings call out the *condition*, not the flag.
 - **`card.VariableCost`** (Amplify the Arknight, Rune Flash, …): `Cost(s)` reads TurnState; the marker exposes `MinCost` / `MaxCost` for the solver pre-screen. Note the printed cost formula.
 - **Attack Reactions**: implement `sim.AttackReaction.ARTargetAllowed(c, mode) bool` matching the printed target wording. Chain runner validates the chosen `Mode`; failures abort the permutation. The AR's `Play` calls `sim.GrantAttackReactionBuff(s, self, n)` — reads `s.AttackReactionTarget()` (set by the runner before `Play`), adds `n` to target's `BonusAttack`, credits `n` to `s.Value`, amends the buffed attack's chain-step delta, emits the rider line. ARs cost 0 AP (handled by the free-step gate). Modal ARs combine with `sim.ModalCard.Modes()` — predicate dispatches per mode; `Play` applies the buff unconditionally because the runner already validated. Non-modal ARs ignore `mode` (always 0). Card docstrings call out the printed predicate (esp. when wording distinguishes "attack" / "attack action card" / "weapon attack" — TypeSet helpers are `IsAttack` / `IsAttackAction` / `IsWeaponAttack`) and any modelling fudge.
-- **`OnHit` registrations**: attack cards with "if this hits, do X" append a handler to `self.OnHit` inside `Play` (the handler takes `sim.GameEngine`, `sim.Logger`, `*sim.CardState`, `*sim.OnHitHandler`). Chain runner finalizes each attack post-AR-buff: when `LikelyToHit(self)` is true on post-buff `EffectiveAttack`, every closure in `self.OnHit` runs. Cards adding an on-hit rider to a DIFFERENT card (Mauvrion Skies, Runic Reaping) append to the target's `OnHit`. **Do NOT call `LikelyToHit` directly from `Play`** — chain runner owns the gate so AR buffs propagate. Use a top-level handler (not an inline closure) so registration stays allocation-free — closures assigned to `OnHit.Fire` escape to the heap.
+- **`OnHit` registrations**: attack cards with "if this hits, do X" append a handler to `self.OnHit` inside `Play` (the handler takes `card.GameEngine`, `card.Logger`, `*card.CardState`, `*card.OnHitHandler`). Chain runner finalizes each attack post-AR-buff: when `LikelyToHit(self)` is true on post-buff `EffectiveAttack`, every closure in `self.OnHit` runs. Cards adding an on-hit rider to a DIFFERENT card (Mauvrion Skies, Runic Reaping) append to the target's `OnHit`. **Do NOT call `LikelyToHit` directly from `Play`** — chain runner owns the gate so AR buffs propagate. Use a top-level handler (not an inline closure) so registration stays allocation-free — closures assigned to `OnHit.Fire` escape to the heap.
 - **`NextHit` triggers** (Plunder Run, High Striker, …): cards whose printed text reads "the next time an X you control hits this turn, do Y" register via `s.RegisterNextHit(...)`. Each trigger carries a `TypeFilter func(card.TypeSet) bool` narrowing the qualifying hits — `card.TypeSet.IsAttackAction` for "attack action card" wording (Plunder Run), `card.TypeSet.IsAttack` for the broader "attack" wording that includes weapon swings (High Striker). Chain runner drains matching triggers inside `finalizeActiveAttack` on each `LikelyToHit` attack; non-matching triggers stay queued. Use this — not `OnHit` on a specific `CardState` — when the rider must wait across misses for the FIRST qualifying hit.
 - **Self-granting on-hit go-again** (Overload, Razor Reflex mode 1): "if this hits, it gains go again" → flip `self.GrantedGoAgain = true` inside `Play` when `sim.LikelyToHit(self)` returns true.
 - **Modal "Choose 1" cards** (Captain's Call, …): implement `sim.ModalCard.Modes() int` and dispatch on `self.Mode` inside `Play`. Chain runner enumerates the cartesian product of modes across modal cards and picks the highest-Value tuple. Modes that are no-ops should resolve as zero-Value no-ops. Card docstrings call out each mode's effect.
@@ -91,7 +91,7 @@ The plumbing below is uniform; card docstrings call out the printed rider and an
 
 Cards' `Play` body does **not** emit the chain step itself. `sim.ResolveChainStep` runs the card's `Play`, then credits `s.Value` and appends the canonical `<Card>: <VERB> (+N)` chain-step entry — `EffectiveAttack` for attacks and weapon-swings, capped `EffectiveDefense` (with `IncomingDamage` decrement) for defense-reactions and `DefensiveInstant` cards, 0 otherwise. Vanilla attack / DR / non-attack cards have an empty `Play` body.
 
-Cards' `Play` body emits **rider sub-lines only** — post-triggers attributed to `self.Card.DisplayName()` for self-riders, or to a different source for cross-card riders (e.g. an `OnHit` attached to a target card). The framework threads a `sim.Logger` into every Card-shaped hook (`Play`, `Block`, `OnHitHandler.Fire`, `TriggerHandler`, `Hero.OnCardPlayed`). Logger's method set matches `*turnlogger.TurnLogger`: `AppendChainStep` / `AppendChainStepf` / `AppendPostTrigger` / `AppendPostTriggerf` / `AppendPreTrigger` / `AppendPreTriggerf` / `AmendLastChainStepN`. A nil-pointer Logger (the find-best skip pass) silently elides every call — cards never gate manually.
+Cards' `Play` body emits **rider sub-lines only** — post-triggers attributed to `self.Card.DisplayName()` for self-riders, or to a different source for cross-card riders (e.g. an `OnHit` attached to a target card). The framework threads a `card.Logger` into every Card-shaped hook (`Play`, `Block`, `OnHitHandler.Fire`, `TriggerHandler`, `Hero.OnCardPlayed`). Logger's method set matches `*turnlogger.TurnLogger`: `AppendChainStep` / `AppendChainStepf` / `AppendPostTrigger` / `AppendPostTriggerf` / `AppendPreTrigger` / `AppendPreTriggerf` / `AmendLastChainStepN`. A nil-pointer Logger (the find-best skip pass) silently elides every call — cards never gate manually.
 
 **A line starting with `l.AppendXxx(...)` must have no side effects.** Put the value change on its own preceding line:
 
@@ -110,14 +110,14 @@ Conditional self-buffs go before the chain step gets logged — they live in the
 
 ```go
 // Bluster Buff (mode 1): +2{p} for paying {r}.
-func blusterBuffPlay(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
+func blusterBuffPlay(s card.GameEngine, l card.Logger, self *card.CardState) {
     if self.Mode == 1 {
         self.BonusAttack += 2
     }
 }
 
 // Aether Slash: deal 1 arcane if a non-attack action was pitched to play it.
-func aetherSlashApplyRider(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
+func aetherSlashApplyRider(s card.GameEngine, l card.Logger, self *card.CardState) {
     for _, p := range self.PitchedToPlay {
         if p.Types().IsNonAttackAction() {
             s.DealArcaneDamage(l, self, 1)
