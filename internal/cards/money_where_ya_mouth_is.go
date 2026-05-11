@@ -9,7 +9,6 @@
 package cards
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
@@ -18,7 +17,7 @@ func moneyWhereYaMouthIsWagerOnHit(s card.GameEngine, l card.Logger, target *car
 	l.AppendPostTriggerf(target.Card.DisplayName(), 0, "%s won wager", h.Source.DisplayName())
 }
 
-func moneyWhereYaMouthIsPlay(s card.GameEngine, l card.Logger, self *card.CardState, source sim.Card, n int) {
+func moneyWhereYaMouthIsPlay(s card.GameEngine, l card.Logger, self *card.CardState, source card.Card, n int) {
 	GrantNextCardBonusAttack(s, n, IsAttack)
 	for _, pc := range s.CardsRemaining() {
 		if pc.Card.Types().IsAttack() {

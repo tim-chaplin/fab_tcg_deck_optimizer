@@ -8,7 +8,6 @@ package weapons
 
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
@@ -20,10 +19,10 @@ func (Talishar) ID() ids.WeaponID    { return ids.TalisharID }
 func (Talishar) Name() string        { return "Talishar, the Lost Prince" }
 func (Talishar) Types() card.TypeSet { return talisharTypes }
 func (Talishar) Hands() int          { return 2 }
-func (Talishar) Ability() sim.Card   { return talisharAbility }
+func (Talishar) Ability() card.Card  { return talisharAbility }
 
 // Cached at package init — see nebula_blade.go for the alloc-free rationale.
-var talisharAbility sim.Card = TalisharAbility{}
+var talisharAbility card.Card = TalisharAbility{}
 
 // not implemented: rust-counter activation cost and end-phase self-destruct at 3+ counters
 func (Talishar) NotImplemented() {}

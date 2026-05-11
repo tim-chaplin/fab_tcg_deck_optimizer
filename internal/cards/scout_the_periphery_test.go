@@ -11,7 +11,7 @@ import (
 // TestScoutThePeriphery_NoAttackReturnsZero: no qualifying next attack card → +3 rider fizzles.
 func TestScoutThePeriphery_NoAttackReturnsZero(t *testing.T) {
 	s := sim.TurnState{}
-	for _, c := range []sim.Card{ScoutThePeripheryRed{}, ScoutThePeripheryYellow{}, ScoutThePeripheryBlue{}} {
+	for _, c := range []card.Card{ScoutThePeripheryRed{}, ScoutThePeripheryYellow{}, ScoutThePeripheryBlue{}} {
 		sim.ResolveChainStep(&s, s.Logger(), &card.CardState{Card: c})
 		if got := s.Value(); got != 0 {
 			t.Errorf("%s: Play() = %d, want 0", c.Name(), got)
@@ -43,7 +43,7 @@ func TestScoutThePeriphery_HandPlayedAttackFizzles(t *testing.T) {
 // (granter credits 0; bonus rides on the target).
 func TestScoutThePeriphery_NextArsenalAttackReturnsBonus(t *testing.T) {
 	cases := []struct {
-		c    sim.Card
+		c    card.Card
 		want int
 	}{
 		{ScoutThePeripheryRed{}, 3},

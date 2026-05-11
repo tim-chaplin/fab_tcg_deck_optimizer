@@ -7,7 +7,6 @@
 package cards
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
@@ -18,7 +17,7 @@ func regurgitatingSlogPlay(s card.GameEngine, l card.Logger, self *card.CardStat
 	}
 }
 
-func isSloggism(c sim.Card) bool { return c.Name() == "Sloggism" }
+func isSloggism(c card.Card) bool { return c.Name() == "Sloggism" }
 
 func (RegurgitatingSlogRed) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 	regurgitatingSlogPlay(s, l, self)

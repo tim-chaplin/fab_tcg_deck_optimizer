@@ -36,7 +36,7 @@ func TestFlyingHigh_NonAttackInRemainingFizzles(t *testing.T) {
 func TestFlyingHigh_ColorMatchGrantsBonus(t *testing.T) {
 	cases := []struct {
 		name       string
-		c          sim.Card
+		c          card.Card
 		wantRed    int
 		wantYellow int
 		wantBlue   int

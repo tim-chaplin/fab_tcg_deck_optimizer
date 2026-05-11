@@ -12,7 +12,7 @@ func TestFireAttackActionAuras_FiresOnceWhenGated(t *testing.T) {
 	state := NewTurnStatePtr(TurnStateSpec{Auras: []Aura{{
 		Trigger: Trigger{
 			TriggerType: TriggerAttackAction,
-			Handler: func(s *TurnState, l Logger, _ *Trigger, _ *Aura) {
+			Handler: func(s GameEngine, l Logger, _ *Trigger, _ *Aura) {
 				calls++
 				s.AddValue(1)
 				l.AppendPreTriggerf("TestCard", 1, "test trigger fired")
@@ -49,7 +49,7 @@ func TestFireAttackActionAuras_GraveyardsExhaustedAura(t *testing.T) {
 	state := NewTurnStatePtr(TurnStateSpec{Auras: []Aura{{
 		Trigger: Trigger{
 			TriggerType: TriggerAttackAction,
-			Handler: func(s *TurnState, _ Logger, _ *Trigger, a *Aura) {
+			Handler: func(s GameEngine, _ Logger, _ *Trigger, a *Aura) {
 				s.AddValue(1)
 				s.DestroyAura(a, true)
 			},
@@ -76,7 +76,7 @@ func TestFireAttackActionAuras_PassesThroughNonAttackActionTriggers(t *testing.T
 	state := NewTurnStatePtr(TurnStateSpec{Auras: []Aura{{
 		Trigger: Trigger{
 			TriggerType: TriggerStartOfTurn,
-			Handler:     func(*TurnState, Logger, *Trigger, *Aura) { calls++ },
+			Handler:     func(GameEngine, Logger, *Trigger, *Aura) { calls++ },
 		},
 		Self:  CardOrTokenType{Card: aura},
 		Count: 1,

@@ -12,7 +12,7 @@ import (
 // when we block all incoming damage, and pays N on a future-turn pop.
 func TestBloodspillInvocation_BlockCoversIncomingReturnsN(t *testing.T) {
 	cases := []struct {
-		c sim.Card
+		c card.Card
 		n int
 	}{
 		{BloodspillInvocationRed{}, 3},
@@ -31,7 +31,7 @@ func TestBloodspillInvocation_BlockCoversIncomingReturnsN(t *testing.T) {
 // TestBloodspillInvocation_BlockShortReturnsZero: if we take damage and have no same-turn
 // attack action likely to hit, Bloodspill dies without creating Runechants.
 func TestBloodspillInvocation_BlockShortReturnsZero(t *testing.T) {
-	cases := []sim.Card{
+	cases := []card.Card{
 		BloodspillInvocationRed{},
 		BloodspillInvocationYellow{},
 		BloodspillInvocationBlue{},

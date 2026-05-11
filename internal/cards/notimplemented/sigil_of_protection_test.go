@@ -9,7 +9,7 @@ import (
 
 // TestSigilOfProtection_SetsAuraCreated verifies every variant flips AuraCreated and returns 0.
 func TestSigilOfProtection_SetsAuraCreated(t *testing.T) {
-	cases := []sim.Card{SigilOfProtectionRed{}, SigilOfProtectionYellow{}, SigilOfProtectionBlue{}}
+	cases := []card.Card{SigilOfProtectionRed{}, SigilOfProtectionYellow{}, SigilOfProtectionBlue{}}
 	for _, c := range cases {
 		s := sim.TurnState{}
 		sim.ResolveChainStep(&s, s.Logger(), &card.CardState{Card: c})

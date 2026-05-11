@@ -11,7 +11,7 @@ import (
 // TestTremorOfIArathael_NoBanishReturnsBaseAttack: empty Banish → printed power, no rider.
 func TestTremorOfIArathael_NoBanishReturnsBaseAttack(t *testing.T) {
 	cases := []struct {
-		c    sim.Card
+		c    card.Card
 		base int
 	}{
 		{cards.TremorOfIArathaelRed{}, 4},
@@ -30,7 +30,7 @@ func TestTremorOfIArathael_NoBanishReturnsBaseAttack(t *testing.T) {
 // TestTremorOfIArathael_BanishGrantsPlusTwo: CardBanished set flips +2{p}.
 func TestTremorOfIArathael_BanishGrantsPlusTwo(t *testing.T) {
 	cases := []struct {
-		c    sim.Card
+		c    card.Card
 		base int
 	}{
 		{cards.TremorOfIArathaelRed{}, 4},

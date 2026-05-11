@@ -11,7 +11,7 @@ import (
 // TestSmashingGoodTime_NoAttackReturnsZero: no qualifying next attack card → +3 rider fizzles.
 func TestSmashingGoodTime_NoAttackReturnsZero(t *testing.T) {
 	s := sim.TurnState{}
-	for _, c := range []sim.Card{SmashingGoodTimeRed{}, SmashingGoodTimeYellow{}, SmashingGoodTimeBlue{}} {
+	for _, c := range []card.Card{SmashingGoodTimeRed{}, SmashingGoodTimeYellow{}, SmashingGoodTimeBlue{}} {
 		sim.ResolveChainStep(&s, s.Logger(), &card.CardState{Card: c})
 		if got := s.Value(); got != 0 {
 			t.Errorf("%s: Play() = %d, want 0", c.Name(), got)
@@ -33,7 +33,7 @@ func TestSmashingGoodTime_NonAttackInRemainingFizzles(t *testing.T) {
 // BonusAttack. Granter returns 0; the +N attributes to the buffed attack.
 func TestSmashingGoodTime_NextAttackGrantsBonusAttack(t *testing.T) {
 	cases := []struct {
-		c    sim.Card
+		c    card.Card
 		want int
 	}{
 		{SmashingGoodTimeRed{}, 3},
@@ -56,7 +56,7 @@ func TestSmashingGoodTime_NextAttackGrantsBonusAttack(t *testing.T) {
 
 // TestSmashingGoodTime_HandPlayedFizzles: hand-played copy fails the from-arsenal gate.
 func TestSmashingGoodTime_HandPlayedFizzles(t *testing.T) {
-	for _, c := range []sim.Card{SmashingGoodTimeRed{}, SmashingGoodTimeYellow{}, SmashingGoodTimeBlue{}} {
+	for _, c := range []card.Card{SmashingGoodTimeRed{}, SmashingGoodTimeYellow{}, SmashingGoodTimeBlue{}} {
 		s := sim.NewTurnStateFromSpec(sim.TurnStateSpec{CardsRemaining: []*card.CardState{{Card: testutils.GenericAttack(0, 0)}}})
 		self := &card.CardState{Card: c}
 		sim.ResolveChainStep(&s, s.Logger(), self)

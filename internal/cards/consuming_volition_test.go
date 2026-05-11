@@ -11,7 +11,7 @@ import (
 // Tests that the discard rider stays dormant when ArcaneDamageDealt is false.
 func TestConsumingVolition_ArcaneDamageNotDealtReturnsBaseAttack(t *testing.T) {
 	cases := []struct {
-		c    sim.Card
+		c    card.Card
 		want int
 	}{
 		{ConsumingVolitionRed{}, 4},
@@ -46,7 +46,7 @@ func TestConsumingVolition_LikelyToHitAndArcaneTriggersDiscard(t *testing.T) {
 // ArcaneDamageDealt set.
 func TestConsumingVolition_BlockableBaseSuppressesDiscard(t *testing.T) {
 	cases := []struct {
-		c    sim.Card
+		c    card.Card
 		want int
 	}{
 		{ConsumingVolitionYellow{}, 3},

@@ -9,7 +9,6 @@ package weapons
 
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
@@ -21,11 +20,11 @@ func (ReapingBlade) ID() ids.WeaponID    { return ids.ReapingBladeID }
 func (ReapingBlade) Name() string        { return "Reaping Blade" }
 func (ReapingBlade) Types() card.TypeSet { return reapingBladeTypes }
 func (ReapingBlade) Hands() int          { return 2 }
-func (ReapingBlade) Ability() sim.Card   { return reapingBladeAbility }
+func (ReapingBlade) Ability() card.Card  { return reapingBladeAbility }
 
 // Cached at package init so Weapon.Ability() returns a stable interface value (no
 // per-call re-box of the zero-size struct on the chain runner's hot path).
-var reapingBladeAbility sim.Card = ReapingBladeAbility{}
+var reapingBladeAbility card.Card = ReapingBladeAbility{}
 
 var reapingBladeAbilityTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeWeapon, card.TypeSword, card.TypeTwoHand, card.TypeAttack)
 

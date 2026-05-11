@@ -26,7 +26,7 @@ func TestPlunderRun_FromHandQueuesTriggerNoBonus(t *testing.T) {
 // CardsRemaining. Each printing carries its own N.
 func TestPlunderRun_FromArsenalAddsBonusAttack(t *testing.T) {
 	cases := []struct {
-		c        sim.Card
+		c        card.Card
 		wantBoon int
 	}{
 		{PlunderRunRed{}, 3},

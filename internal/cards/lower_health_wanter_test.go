@@ -11,34 +11,34 @@ import (
 // stubLowHeroOn implements sim.LowerHealthWanter — used to exercise the "hero opts in" branch.
 type stubLowHeroOn struct{}
 
-func (stubLowHeroOn) ID() ids.HeroID                                         { return ids.InvalidHero }
-func (stubLowHeroOn) Name() string                                           { return "stubLowHeroOn" }
-func (stubLowHeroOn) Health() int                                            { return 20 }
-func (stubLowHeroOn) Intelligence() int                                      { return 4 }
-func (stubLowHeroOn) Types() card.TypeSet                                    { return 0 }
-func (stubLowHeroOn) Class() card.CardType                                   { return 0 }
-func (stubLowHeroOn) OnCardPlayed(sim.Card, *sim.TurnState, card.Logger) int { return 0 }
-func (stubLowHeroOn) Opt(cards []sim.Card) (top, bottom []sim.Card)          { return cards, nil }
-func (stubLowHeroOn) WantsLowerHealth()                                      {}
+func (stubLowHeroOn) ID() ids.HeroID                                          { return ids.InvalidHero }
+func (stubLowHeroOn) Name() string                                            { return "stubLowHeroOn" }
+func (stubLowHeroOn) Health() int                                             { return 20 }
+func (stubLowHeroOn) Intelligence() int                                       { return 4 }
+func (stubLowHeroOn) Types() card.TypeSet                                     { return 0 }
+func (stubLowHeroOn) Class() card.CardType                                    { return 0 }
+func (stubLowHeroOn) OnCardPlayed(card.Card, *sim.TurnState, card.Logger) int { return 0 }
+func (stubLowHeroOn) Opt(cards []card.Card) (top, bottom []card.Card)         { return cards, nil }
+func (stubLowHeroOn) WantsLowerHealth()                                       {}
 
 // stubLowHeroOff does NOT implement sim.LowerHealthWanter — the default-hero branch.
 type stubLowHeroOff struct{}
 
-func (stubLowHeroOff) ID() ids.HeroID                                         { return ids.InvalidHero }
-func (stubLowHeroOff) Name() string                                           { return "stubLowHeroOff" }
-func (stubLowHeroOff) Health() int                                            { return 20 }
-func (stubLowHeroOff) Intelligence() int                                      { return 4 }
-func (stubLowHeroOff) Types() card.TypeSet                                    { return 0 }
-func (stubLowHeroOff) Class() card.CardType                                   { return 0 }
-func (stubLowHeroOff) OnCardPlayed(sim.Card, *sim.TurnState, card.Logger) int { return 0 }
-func (stubLowHeroOff) Opt(cards []sim.Card) (top, bottom []sim.Card)          { return cards, nil }
+func (stubLowHeroOff) ID() ids.HeroID                                          { return ids.InvalidHero }
+func (stubLowHeroOff) Name() string                                            { return "stubLowHeroOff" }
+func (stubLowHeroOff) Health() int                                             { return 20 }
+func (stubLowHeroOff) Intelligence() int                                       { return 4 }
+func (stubLowHeroOff) Types() card.TypeSet                                     { return 0 }
+func (stubLowHeroOff) Class() card.CardType                                    { return 0 }
+func (stubLowHeroOff) OnCardPlayed(card.Card, *sim.TurnState, card.Logger) int { return 0 }
+func (stubLowHeroOff) Opt(cards []card.Card) (top, bottom []card.Card)         { return cards, nil }
 
 // TestLowerHealthWanter_DamageRiders checks the +3{p} / +1{p} / +1{h} damage riders fire iff the
 // current hero opts into sim.LowerHealthWanter.
 func TestLowerHealthWanter_DamageRiders(t *testing.T) {
 	cases := []struct {
 		name    string
-		card    sim.Card
+		card    card.Card
 		wantOff int
 		wantOn  int
 	}{
@@ -72,7 +72,7 @@ func TestLowerHealthWanter_DamageRiders(t *testing.T) {
 // TestLowerHealthWanter_GoAgainRiders checks the conditional go-again flips iff the current hero
 // opts into sim.LowerHealthWanter.
 func TestLowerHealthWanter_GoAgainRiders(t *testing.T) {
-	cards := []sim.Card{
+	cards := []card.Card{
 		ScarForAScarRed{}, ScarForAScarYellow{}, ScarForAScarBlue{},
 		BlowForABlowRed{},
 		LifeForALifeRed{}, LifeForALifeYellow{}, LifeForALifeBlue{},
@@ -109,7 +109,7 @@ func TestLowerHealthWanter_NilHeroIsOff(t *testing.T) {
 // Tests that Pound for Pound flips self.GrantedDominate iff the current hero opts into
 // LowerHealthWanter (no damage change).
 func TestLowerHealthWanter_PoundForPoundDominateGrant(t *testing.T) {
-	cards := []sim.Card{PoundForPoundRed{}, PoundForPoundYellow{}, PoundForPoundBlue{}}
+	cards := []card.Card{PoundForPoundRed{}, PoundForPoundYellow{}, PoundForPoundBlue{}}
 
 	sim.CurrentHero = stubLowHeroOff{}
 	for _, c := range cards {

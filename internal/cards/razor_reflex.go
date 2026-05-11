@@ -25,7 +25,7 @@ import (
 //
 // Reads Cost against an empty TurnState; no variable-cost cost-≤1 attack actions exist
 // in the pool.
-func razorReflexAccepts(c sim.Card, mode int8) bool {
+func razorReflexAccepts(c card.Card, mode int8) bool {
 	t := c.Types()
 	switch mode {
 	case 0:
@@ -51,7 +51,7 @@ func razorReflexPlay(s card.GameEngine, l card.Logger, self *card.CardState, n i
 }
 
 func (RazorReflexRed) Modes() int { return 2 }
-func (RazorReflexRed) ARTargetAllowed(c sim.Card, mode int8) bool {
+func (RazorReflexRed) ARTargetAllowed(c card.Card, mode int8) bool {
 	return razorReflexAccepts(c, mode)
 }
 func (RazorReflexRed) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
@@ -59,7 +59,7 @@ func (RazorReflexRed) Play(s card.GameEngine, l card.Logger, self *card.CardStat
 }
 
 func (RazorReflexYellow) Modes() int { return 2 }
-func (RazorReflexYellow) ARTargetAllowed(c sim.Card, mode int8) bool {
+func (RazorReflexYellow) ARTargetAllowed(c card.Card, mode int8) bool {
 	return razorReflexAccepts(c, mode)
 }
 func (RazorReflexYellow) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
@@ -67,7 +67,7 @@ func (RazorReflexYellow) Play(s card.GameEngine, l card.Logger, self *card.CardS
 }
 
 func (RazorReflexBlue) Modes() int { return 2 }
-func (RazorReflexBlue) ARTargetAllowed(c sim.Card, mode int8) bool {
+func (RazorReflexBlue) ARTargetAllowed(c card.Card, mode int8) bool {
 	return razorReflexAccepts(c, mode)
 }
 func (RazorReflexBlue) Play(s card.GameEngine, l card.Logger, self *card.CardState) {

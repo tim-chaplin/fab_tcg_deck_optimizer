@@ -11,7 +11,7 @@ import (
 // sets AuraCreated, and credits N damage to Value.
 func TestRunechantOnPlay_CreatesNTokens(t *testing.T) {
 	cases := []struct {
-		c sim.Card
+		c card.Card
 		n int
 	}{
 		{HocusPocusRed{}, 1},

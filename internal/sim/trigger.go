@@ -36,4 +36,4 @@ type Trigger struct {
 // firing aura as a; standalone trigger fires pass nil. l is the cards-facing log sink
 // the chain runner threaded through Play; handlers emit their pre/post-trigger lines
 // through it so a nil l silently elides logging during the find-best pass.
-type TriggerHandler func(s *TurnState, l Logger, t *Trigger, a *Aura)
+type TriggerHandler func(g GameEngine, l Logger, t *Trigger, a *Aura)

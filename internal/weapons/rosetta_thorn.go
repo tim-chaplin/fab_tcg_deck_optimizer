@@ -9,7 +9,6 @@ package weapons
 
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
@@ -21,10 +20,10 @@ func (RosettaThorn) ID() ids.WeaponID    { return ids.RosettaThornID }
 func (RosettaThorn) Name() string        { return "Rosetta Thorn" }
 func (RosettaThorn) Types() card.TypeSet { return rosettaThornTypes }
 func (RosettaThorn) Hands() int          { return 2 }
-func (RosettaThorn) Ability() sim.Card   { return rosettaThornAbility }
+func (RosettaThorn) Ability() card.Card  { return rosettaThornAbility }
 
 // Cached at package init — see nebula_blade.go for the alloc-free rationale.
-var rosettaThornAbility sim.Card = RosettaThornAbility{}
+var rosettaThornAbility card.Card = RosettaThornAbility{}
 
 func (RosettaThorn) NotSilverAgeLegal() {}
 

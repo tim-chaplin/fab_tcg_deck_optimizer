@@ -10,7 +10,7 @@ import (
 
 // Tests that Cadaverous Contraband's Play registers an OnHit handler.
 func TestCadaverousContraband_RegistersOnHit(t *testing.T) {
-	for _, c := range []sim.Card{CadaverousContrabandRed{}, CadaverousContrabandYellow{}, CadaverousContrabandBlue{}} {
+	for _, c := range []card.Card{CadaverousContrabandRed{}, CadaverousContrabandYellow{}, CadaverousContrabandBlue{}} {
 		self := &card.CardState{Card: c}
 		s := sim.NewTurnStateFromCards(nil, nil)
 		sim.ResolveChainStep(s, s.Logger(), self)
@@ -23,8 +23,8 @@ func TestCadaverousContraband_RegistersOnHit(t *testing.T) {
 // Tests that the on-hit recycle moves a non-attack action card from graveyard to top of deck.
 func TestCadaverousContraband_OnHitRecyclesNonAttackToTop(t *testing.T) {
 	non := testutils.GenericAction()
-	deck := []sim.Card{testutils.RedAttack{}}
-	s := sim.NewTurnStateFromCards(deck, []sim.Card{non})
+	deck := []card.Card{testutils.RedAttack{}}
+	s := sim.NewTurnStateFromCards(deck, []card.Card{non})
 	self := &card.CardState{Card: CadaverousContrabandRed{}}
 	sim.ResolveChainStep(s, s.Logger(), self)
 	self.BonusAttack = 1
@@ -32,7 +32,7 @@ func TestCadaverousContraband_OnHitRecyclesNonAttackToTop(t *testing.T) {
 	if got := s.Deck().Size(); got != 2 {
 		t.Errorf("deck size after recycle = %d, want 2 (graveyard card moved onto the existing top)", got)
 	}
-	if top := s.Deck().PeekTop(); top != sim.Card(non) {
+	if top := s.Deck().PeekTop(); top != card.Card(non) {
 		t.Errorf("deck top after recycle = %v, want %v", top, non)
 	}
 	if len(s.Graveyard()) != 0 {
@@ -43,7 +43,7 @@ func TestCadaverousContraband_OnHitRecyclesNonAttackToTop(t *testing.T) {
 // Tests that with no non-attack action card in the graveyard, the on-hit recycle leaves the
 // graveyard and deck untouched.
 func TestCadaverousContraband_OnHitNoEligibleCardNoOp(t *testing.T) {
-	s := sim.NewTurnStateFromCards(nil, []sim.Card{testutils.RedAttack{}})
+	s := sim.NewTurnStateFromCards(nil, []card.Card{testutils.RedAttack{}})
 	self := &card.CardState{Card: CadaverousContrabandRed{}}
 	sim.ResolveChainStep(s, s.Logger(), self)
 	testutils.FireOnHitIfLikely(s, s.Logger(), self)

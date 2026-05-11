@@ -11,7 +11,7 @@ import (
 // TestPrimeTheCrowd_NoAttackReturnsZero: no qualifying next attack card → +4 rider fizzles.
 func TestPrimeTheCrowd_NoAttackReturnsZero(t *testing.T) {
 	s := sim.TurnState{}
-	for _, c := range []sim.Card{PrimeTheCrowdRed{}, PrimeTheCrowdYellow{}, PrimeTheCrowdBlue{}} {
+	for _, c := range []card.Card{PrimeTheCrowdRed{}, PrimeTheCrowdYellow{}, PrimeTheCrowdBlue{}} {
 		sim.ResolveChainStep(&s, s.Logger(), &card.CardState{Card: c})
 		if got := s.Value(); got != 0 {
 			t.Errorf("%s: Play() = %d, want 0", c.Name(), got)
@@ -32,7 +32,7 @@ func TestPrimeTheCrowd_NonAttackInRemainingFizzles(t *testing.T) {
 // (Red +4, Yellow +3, Blue +2).
 func TestPrimeTheCrowd_NextAttackReturnsBonus(t *testing.T) {
 	cases := []struct {
-		c    sim.Card
+		c    card.Card
 		want int
 	}{
 		{PrimeTheCrowdRed{}, 4},

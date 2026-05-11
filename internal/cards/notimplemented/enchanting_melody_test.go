@@ -11,7 +11,7 @@ import (
 // downstream cards like Yinti Yanti / Runerager Swarm see the aura entering play) and reports 0
 // direct damage — the aura's value is in the flag it leaves behind.
 func TestEnchantingMelody_SetsAuraCreated(t *testing.T) {
-	cases := []sim.Card{EnchantingMelodyRed{}, EnchantingMelodyYellow{}, EnchantingMelodyBlue{}}
+	cases := []card.Card{EnchantingMelodyRed{}, EnchantingMelodyYellow{}, EnchantingMelodyBlue{}}
 	for _, c := range cases {
 		s := sim.TurnState{}
 		sim.ResolveChainStep(&s, s.Logger(), &card.CardState{Card: c})

@@ -15,7 +15,7 @@ var (
 )
 
 func TestReduceToRunechant_PlayCreditsCreatedToken(t *testing.T) {
-	cases := []sim.Card{
+	cases := []card.Card{
 		ReduceToRunechantRed{},
 		ReduceToRunechantYellow{},
 		ReduceToRunechantBlue{},
@@ -34,7 +34,7 @@ func TestReduceToRunechant_PlayCreditsCreatedToken(t *testing.T) {
 }
 
 func TestReduceToRunechant_CostBounds(t *testing.T) {
-	cases := []sim.Card{
+	cases := []card.Card{
 		ReduceToRunechantRed{},
 		ReduceToRunechantYellow{},
 		ReduceToRunechantBlue{},

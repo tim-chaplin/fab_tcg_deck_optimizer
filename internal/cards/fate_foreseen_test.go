@@ -11,7 +11,7 @@ import (
 // Tests that Fate Foreseen blocks for printed defense and emits an Opt 1 log entry.
 func TestFateForeseen_BlocksAndCallsOpt1(t *testing.T) {
 	cases := []struct {
-		c     sim.Card
+		c     card.Card
 		block int
 	}{
 		{FateForeseenRed{}, 4},
@@ -22,7 +22,7 @@ func TestFateForeseen_BlocksAndCallsOpt1(t *testing.T) {
 
 	for _, tc := range cases {
 		top := testutils.NewStubCard("top")
-		s := sim.NewTurnStateFromCards([]sim.Card{top}, nil)
+		s := sim.NewTurnStateFromCards([]card.Card{top}, nil)
 		s.SetIncomingDamage(10)
 		sim.ResolveChainStep(s, s.Logger(), &card.CardState{Card: tc.c})
 		if s.Value() != tc.block {

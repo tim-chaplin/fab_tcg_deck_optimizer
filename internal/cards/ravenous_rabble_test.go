@@ -11,7 +11,7 @@ import (
 // TestRavenousRabble_EmptyDeckReturnsBasePower: with no deck, no card is revealed → no penalty.
 func TestRavenousRabble_EmptyDeckReturnsBasePower(t *testing.T) {
 	cases := []struct {
-		c    sim.Card
+		c    card.Card
 		want int
 	}{
 		{RavenousRabbleRed{}, 5},
@@ -41,17 +41,17 @@ func TestRavenousRabble_TopPitchSubtracted(t *testing.T) {
 		{"pitch 3", 3, 2, 1, 0},
 	}
 	for _, tc := range cases {
-		sRed := sim.NewTurnStateFromCards([]sim.Card{testutils.GenericAttackPitch(0, 0, tc.topPitch)}, nil)
+		sRed := sim.NewTurnStateFromCards([]card.Card{testutils.GenericAttackPitch(0, 0, tc.topPitch)}, nil)
 		sim.ResolveChainStep(sRed, sRed.Logger(), &card.CardState{Card: RavenousRabbleRed{}})
 		if got := sRed.Value(); got != tc.red {
 			t.Errorf("%s Red: Play() = %d, want %d", tc.name, got, tc.red)
 		}
-		sYellow := sim.NewTurnStateFromCards([]sim.Card{testutils.GenericAttackPitch(0, 0, tc.topPitch)}, nil)
+		sYellow := sim.NewTurnStateFromCards([]card.Card{testutils.GenericAttackPitch(0, 0, tc.topPitch)}, nil)
 		sim.ResolveChainStep(sYellow, sYellow.Logger(), &card.CardState{Card: RavenousRabbleYellow{}})
 		if got := sYellow.Value(); got != tc.yellow {
 			t.Errorf("%s Yellow: Play() = %d, want %d", tc.name, got, tc.yellow)
 		}
-		sBlue := sim.NewTurnStateFromCards([]sim.Card{testutils.GenericAttackPitch(0, 0, tc.topPitch)}, nil)
+		sBlue := sim.NewTurnStateFromCards([]card.Card{testutils.GenericAttackPitch(0, 0, tc.topPitch)}, nil)
 		sim.ResolveChainStep(sBlue, sBlue.Logger(), &card.CardState{Card: RavenousRabbleBlue{}})
 		if got := sBlue.Value(); got != tc.blue {
 			t.Errorf("%s Blue: Play() = %d, want %d", tc.name, got, tc.blue)
@@ -63,7 +63,7 @@ func TestRavenousRabble_TopPitchSubtracted(t *testing.T) {
 // Verify the floor explicitly by reducing well past zero: Blue vs a (hypothetical) pitch-5 card
 // should still return 0, not a negative number that'd turn into negative damage downstream.
 func TestRavenousRabble_FloorsAtZero(t *testing.T) {
-	s := sim.NewTurnStateFromCards([]sim.Card{testutils.GenericAttackPitch(0, 0, 5)}, nil)
+	s := sim.NewTurnStateFromCards([]card.Card{testutils.GenericAttackPitch(0, 0, 5)}, nil)
 	sim.ResolveChainStep(s, s.Logger(), &card.CardState{Card: RavenousRabbleBlue{}})
 	if got := s.Value(); got != 0 {
 		t.Errorf("Blue vs pitch-5 top: Play() = %d, want 0 (floor)", got)
@@ -73,7 +73,7 @@ func TestRavenousRabble_FloorsAtZero(t *testing.T) {
 // TestRavenousRabble_OnlyFirstDeckCardMatters: the reveal is the top card; cards below it don't
 // affect the result.
 func TestRavenousRabble_OnlyFirstDeckCardMatters(t *testing.T) {
-	s := sim.NewTurnStateFromCards([]sim.Card{
+	s := sim.NewTurnStateFromCards([]card.Card{
 		testutils.GenericAttackPitch(0, 0, 1),
 		testutils.GenericAttackPitch(0, 0, 3),
 		testutils.GenericAttackPitch(0, 0, 3),

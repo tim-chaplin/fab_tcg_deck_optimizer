@@ -17,21 +17,21 @@ import (
 // Opt heuristic (passthrough by default — every revealed card goes back on top).
 type Hero struct {
 	Intel       int
-	OptStrategy func(cards []sim.Card) (top, bottom []sim.Card)
+	OptStrategy func(cards []card.Card) (top, bottom []card.Card)
 }
 
-func (Hero) ID() ids.HeroID                                         { return ids.InvalidHero }
-func (Hero) Name() string                                           { return "testutils.Hero" }
-func (Hero) DisplayName() string                                    { return "testutils.Hero" }
-func (Hero) Health() int                                            { return 20 }
-func (h Hero) Intelligence() int                                    { return h.Intel }
-func (Hero) Types() card.TypeSet                                    { return 0 }
-func (Hero) Class() card.CardType                                   { return 0 }
-func (Hero) OnCardPlayed(sim.Card, *sim.TurnState, card.Logger) int { return 0 }
+func (Hero) ID() ids.HeroID                                          { return ids.InvalidHero }
+func (Hero) Name() string                                            { return "testutils.Hero" }
+func (Hero) DisplayName() string                                     { return "testutils.Hero" }
+func (Hero) Health() int                                             { return 20 }
+func (h Hero) Intelligence() int                                     { return h.Intel }
+func (Hero) Types() card.TypeSet                                     { return 0 }
+func (Hero) Class() card.CardType                                    { return 0 }
+func (Hero) OnCardPlayed(card.Card, *sim.TurnState, card.Logger) int { return 0 }
 
 // Opt dispatches to OptStrategy when set; otherwise keeps every revealed card on top of
 // the deck in input order (no reshape).
-func (h Hero) Opt(cards []sim.Card) (top, bottom []sim.Card) {
+func (h Hero) Opt(cards []card.Card) (top, bottom []card.Card) {
 	if h.OptStrategy != nil {
 		return h.OptStrategy(cards)
 	}

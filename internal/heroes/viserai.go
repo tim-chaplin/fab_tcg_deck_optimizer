@@ -25,7 +25,7 @@ func (Viserai) Class() card.CardType { return card.TypeRuneblade }
 // OnCardPlayed implements Viserai's hero ability: whenever a Runeblade card is played, if a
 // non-attack action (Action without Attack) has been played this turn, create a Runechant
 // token.
-func (Viserai) OnCardPlayed(played sim.Card, s *sim.TurnState, l card.Logger) int {
+func (Viserai) OnCardPlayed(played card.Card, s *sim.TurnState, l card.Logger) int {
 	t := played.Types()
 	// Weapon swings aren't "playing a card" and don't trigger Viserai.
 	if !t.Has(card.TypeRuneblade) || t.Has(card.TypeWeapon) {
@@ -65,9 +65,9 @@ func (Viserai) OnCardPlayed(played sim.Card, s *sim.TurnState, l card.Logger) in
 //
 // Opt(1) always tops the only revealed card: with one input the slot tracker starts
 // empty, so no slot the card might provide can already be covered.
-func (Viserai) Opt(cards []sim.Card) (top, bottom []sim.Card) {
+func (Viserai) Opt(cards []card.Card) (top, bottom []card.Card) {
 	var covered viseraiOptSlots
-	top = make([]sim.Card, 0, len(cards))
+	top = make([]card.Card, 0, len(cards))
 	for _, c := range cards {
 		slots := viseraiSlotsFor(c)
 		if slots.overlaps(covered) {
@@ -111,7 +111,7 @@ func (s viseraiOptSlots) union(other viseraiOptSlots) viseraiOptSlots {
 }
 
 // viseraiSlotsFor classifies c into Viserai's Opt-heuristic slots.
-func viseraiSlotsFor(c sim.Card) viseraiOptSlots {
+func viseraiSlotsFor(c card.Card) viseraiOptSlots {
 	t := c.Types()
 	return viseraiOptSlots{
 		nonAttackEnabler: t.IsNonAttackAction(),

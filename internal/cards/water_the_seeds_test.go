@@ -12,7 +12,7 @@ import (
 // fizzles and each variant returns its base power.
 func TestWaterTheSeeds_NoAttackReturnsBase(t *testing.T) {
 	cases := []struct {
-		c    sim.Card
+		c    card.Card
 		want int
 	}{
 		{WaterTheSeedsRed{}, 3},
@@ -42,7 +42,7 @@ func TestWaterTheSeeds_HighPowerFizzles(t *testing.T) {
 // +1 rider — the buff lands on the target's BonusAttack so its EffectiveAttack picks up
 // the +1, not the granter's chain step.
 func TestWaterTheSeeds_LowPowerTriggersBonus(t *testing.T) {
-	for _, c := range []sim.Card{WaterTheSeedsRed{}, WaterTheSeedsYellow{}, WaterTheSeedsBlue{}} {
+	for _, c := range []card.Card{WaterTheSeedsRed{}, WaterTheSeedsYellow{}, WaterTheSeedsBlue{}} {
 		target := &card.CardState{Card: testutils.GenericAttack(0, 1)}
 		s := sim.NewTurnStatePtr(sim.TurnStateSpec{CardsRemaining: []*card.CardState{target}})
 		sim.ResolveChainStep(s, s.Logger(), &card.CardState{Card: c})

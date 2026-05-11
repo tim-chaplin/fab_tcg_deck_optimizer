@@ -9,7 +9,7 @@ import (
 
 func TestDestructiveDeliberation_PlayCreditsAttack(t *testing.T) {
 	cases := []struct {
-		c    sim.Card
+		c    card.Card
 		want int
 	}{
 		{DestructiveDeliberationRed{}, 5},
@@ -30,7 +30,7 @@ func TestDestructiveDeliberation_PlayCreditsAttack(t *testing.T) {
 }
 
 func TestDestructiveDeliberation_OnHitCreatesPonder(t *testing.T) {
-	for _, c := range []sim.Card{
+	for _, c := range []card.Card{
 		DestructiveDeliberationRed{},
 		DestructiveDeliberationYellow{},
 		DestructiveDeliberationBlue{},

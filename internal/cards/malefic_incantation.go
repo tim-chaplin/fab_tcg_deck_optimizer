@@ -32,7 +32,7 @@ func (c MaleficIncantationBlue) Play(s card.GameEngine, l card.Logger, self *car
 // formatting on the hot anneal path.
 var maleficCreatedRunechantText = func() map[ids.CardID]string {
 	out := make(map[ids.CardID]string, 3)
-	for _, c := range []sim.Card{
+	for _, c := range []card.Card{
 		MaleficIncantationRed{},
 		MaleficIncantationYellow{},
 		MaleficIncantationBlue{},
@@ -47,7 +47,7 @@ var maleficCreatedRunechantText = func() map[ids.CardID]string {
 // post-trigger log line so it groups beneath the triggering attack-action chain step. n
 // is the printed counter count carried on the trigger so the handler can stay a top-level
 // function.
-func maleficPlay(s card.GameEngine, l card.Logger, selfState *card.CardState, selfCard sim.Card, n int) {
+func maleficPlay(s card.GameEngine, l card.Logger, selfState *card.CardState, selfCard card.Card, n int) {
 	s.AddAura(sim.Aura{
 		Trigger:     sim.Trigger{TriggerType: sim.TriggerAttackAction, Handler: maleficAuraHandler},
 		Self:        sim.CardOrTokenType{Card: selfCard},
@@ -60,7 +60,7 @@ func maleficPlay(s card.GameEngine, l card.Logger, selfState *card.CardState, se
 // Malefic Incantation variants. Per-variant rider text is read off the table by
 // aura.Self.CardID() so the hot fire path runs zero string allocations. Decrements
 // aura.Count (the verse counter) and destroys the aura when the last verse fires.
-func maleficAuraHandler(s *sim.TurnState, l card.Logger, _ *sim.Trigger, a *sim.Aura) {
+func maleficAuraHandler(s card.GameEngine, l card.Logger, _ *sim.Trigger, a *sim.Aura) {
 	cardID := a.Self.CardID()
 	a.Count--
 	lastVerse := a.Count <= 0

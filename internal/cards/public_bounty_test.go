@@ -10,7 +10,7 @@ import (
 
 // Tests that Public Bounty marks the opposing hero on Play.
 func TestPublicBounty_MarksOpponent(t *testing.T) {
-	for _, c := range []sim.Card{PublicBountyRed{}, PublicBountyYellow{}, PublicBountyBlue{}} {
+	for _, c := range []card.Card{PublicBountyRed{}, PublicBountyYellow{}, PublicBountyBlue{}} {
 		s := sim.TurnState{}
 		sim.ResolveChainStep(&s, s.Logger(), &card.CardState{Card: c})
 		if !s.OpponentMarked() {
@@ -22,7 +22,7 @@ func TestPublicBounty_MarksOpponent(t *testing.T) {
 // Tests that Public Bounty grants the per-variant +N{p} bonus to the next IsAttack target.
 func TestPublicBounty_GrantsBonusToNextAttack(t *testing.T) {
 	cases := []struct {
-		c    sim.Card
+		c    card.Card
 		want int
 	}{
 		{PublicBountyRed{}, 3},

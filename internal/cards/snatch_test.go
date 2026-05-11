@@ -12,7 +12,7 @@ import (
 // hand.
 func TestSnatch_LikelyHitFiresDrawOne(t *testing.T) {
 	top := testutils.GenericAttack(0, 3)
-	s := sim.NewTurnStateFromCards([]sim.Card{top}, nil)
+	s := sim.NewTurnStateFromCards([]card.Card{top}, nil)
 	c := SnatchRed{}
 	cs := &card.CardState{Card: c}
 	sim.ResolveChainStep(s, s.Logger(), cs)
@@ -31,7 +31,7 @@ func TestSnatch_LikelyHitFiresDrawOne(t *testing.T) {
 // Tests that the on-hit DrawOne doesn't fire on blockable variants.
 func TestSnatch_BlockableSuppressesDraw(t *testing.T) {
 	cases := []struct {
-		c    sim.Card
+		c    card.Card
 		want int
 	}{
 		{SnatchYellow{}, 3},
@@ -39,7 +39,7 @@ func TestSnatch_BlockableSuppressesDraw(t *testing.T) {
 	}
 	for _, tc := range cases {
 		top := testutils.GenericAttack(0, 3)
-		s := sim.NewTurnStateFromCards([]sim.Card{top}, nil)
+		s := sim.NewTurnStateFromCards([]card.Card{top}, nil)
 		sim.ResolveChainStep(s, s.Logger(), &card.CardState{Card: tc.c})
 		if got := s.Value(); got != tc.want {
 			t.Errorf("%s: Play() = %d, want %d (blockable, no draw)", tc.c.Name(), got, tc.want)

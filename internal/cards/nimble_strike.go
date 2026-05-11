@@ -7,7 +7,6 @@
 package cards
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
@@ -19,7 +18,7 @@ func nimbleStrikePlay(s card.GameEngine, l card.Logger, self *card.CardState) {
 	}
 }
 
-func isNimblism(c sim.Card) bool { return c.Name() == "Nimblism" }
+func isNimblism(c card.Card) bool { return c.Name() == "Nimblism" }
 
 func (NimbleStrikeRed) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 	nimbleStrikePlay(s, l, self)

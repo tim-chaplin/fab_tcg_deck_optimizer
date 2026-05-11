@@ -6,7 +6,6 @@ package testutils
 
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
@@ -20,10 +19,10 @@ func (ClubWeapon) Name() string        { return "test.ClubWeapon" }
 func (ClubWeapon) DisplayName() string { return "test.ClubWeapon" }
 func (ClubWeapon) Types() card.TypeSet { return clubWeaponTypes }
 func (ClubWeapon) Hands() int          { return 1 }
-func (ClubWeapon) Ability() sim.Card   { return clubWeaponAbility }
+func (ClubWeapon) Ability() card.Card  { return clubWeaponAbility }
 
 // Cached at package init so the chain runner's per-Best w.Ability() lookup is alloc-free.
-var clubWeaponAbility sim.Card = ClubWeaponAbility{}
+var clubWeaponAbility card.Card = ClubWeaponAbility{}
 
 var clubWeaponAbilityTypes = card.NewTypeSet(card.TypeGeneric, card.TypeWeapon, card.TypeClub, card.TypeOneHand, card.TypeAttack)
 

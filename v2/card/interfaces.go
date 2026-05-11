@@ -56,10 +56,12 @@ type GameEngine interface {
 	CreateRunechants(int)
 	CreatePonder(int)
 	CreateGold(int)
+	CreateSilver(int)
 	CreateCopper(int)
 	Runechants() int
 	Ponders() int
 	Gold() int
+	Silver() int
 	Copper() int
 
 	// Value crediting and arcane damage

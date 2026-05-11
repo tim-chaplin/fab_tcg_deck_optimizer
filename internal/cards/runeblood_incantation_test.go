@@ -12,7 +12,7 @@ import (
 // same-turn damage credit — every Runechant lands on a real future-turn fire.
 func TestRunebloodIncantation_PlayRegistersStartOfTurnTriggerWithCountN(t *testing.T) {
 	cases := []struct {
-		c sim.Card
+		c card.Card
 		n int
 	}{
 		{RunebloodIncantationRed{}, 3},
@@ -48,7 +48,7 @@ func TestRunebloodIncantation_PlayRegistersStartOfTurnTriggerWithCountN(t *testi
 // creates exactly one live Runechant — the multi-fire behaviour comes from the sim ticking
 // Count, not from the handler doing more work each call.
 func TestRunebloodIncantation_HandlerCreatesOneRunechantPerFire(t *testing.T) {
-	for _, c := range []sim.Card{RunebloodIncantationRed{}, RunebloodIncantationYellow{}, RunebloodIncantationBlue{}} {
+	for _, c := range []card.Card{RunebloodIncantationRed{}, RunebloodIncantationYellow{}, RunebloodIncantationBlue{}} {
 		var play sim.TurnState
 		sim.ResolveChainStep(&play, play.Logger(), &card.CardState{Card: c})
 		fire := sim.NewTurnStateFromCards(nil, nil)

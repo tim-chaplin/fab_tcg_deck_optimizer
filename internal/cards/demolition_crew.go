@@ -12,7 +12,6 @@
 package cards
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
@@ -30,21 +29,21 @@ func demolitionCrewPrecondition(s card.GameEngine) bool {
 }
 
 func (DemolitionCrewRed) Dominate() {}
-func (DemolitionCrewRed) PlayPrecondition(s *sim.TurnState, _ *card.CardState) bool {
+func (DemolitionCrewRed) PlayPrecondition(s card.GameEngine, _ *card.CardState) bool {
 	return demolitionCrewPrecondition(s)
 }
 func (c DemolitionCrewRed) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 }
 
 func (DemolitionCrewYellow) Dominate() {}
-func (DemolitionCrewYellow) PlayPrecondition(s *sim.TurnState, _ *card.CardState) bool {
+func (DemolitionCrewYellow) PlayPrecondition(s card.GameEngine, _ *card.CardState) bool {
 	return demolitionCrewPrecondition(s)
 }
 func (c DemolitionCrewYellow) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 }
 
 func (DemolitionCrewBlue) Dominate() {}
-func (DemolitionCrewBlue) PlayPrecondition(s *sim.TurnState, _ *card.CardState) bool {
+func (DemolitionCrewBlue) PlayPrecondition(s card.GameEngine, _ *card.CardState) bool {
 	return demolitionCrewPrecondition(s)
 }
 func (c DemolitionCrewBlue) Play(s card.GameEngine, l card.Logger, self *card.CardState) {

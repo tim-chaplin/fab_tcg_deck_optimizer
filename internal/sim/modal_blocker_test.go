@@ -25,7 +25,7 @@ func (modalBlocker) GoAgain() bool                       { return false }
 func (modalBlocker) Modes() int                          { return 2 }
 func (modalBlocker) BlockCost(mode int8) int             { return int(mode) }
 func (modalBlocker) Play(GameEngine, Logger, *CardState) {}
-func (modalBlocker) Block(_ *TurnState, _ Logger, self *CardState) {
+func (modalBlocker) Block(_ GameEngine, _ Logger, self *CardState) {
 	if self.Mode == 1 {
 		self.BonusDefense += 2
 	}

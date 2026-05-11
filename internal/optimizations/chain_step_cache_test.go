@@ -5,7 +5,6 @@ import (
 
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 )
 
@@ -18,7 +17,7 @@ func TestWarmChainStepCache_PopulatesBothFromArsenalRows(t *testing.T) {
 	chainStepCache[chainStepCacheIndex(c.ID(), false)].Store(nil)
 	chainStepCache[chainStepCacheIndex(c.ID(), true)].Store(nil)
 
-	WarmChainStepCache([]sim.Card{c})
+	WarmChainStepCache([]card.Card{c})
 
 	gotInHand := chainStepCache[chainStepCacheIndex(c.ID(), false)].Load()
 	if gotInHand == nil {
@@ -40,7 +39,7 @@ func TestWarmChainStepCache_PopulatesBothFromArsenalRows(t *testing.T) {
 // TestWarmChainStepCache_SkipsNil: the registry slice has nil at index 0 (Invalid).
 // Passing it through must not panic and must leave that slot untouched.
 func TestWarmChainStepCache_SkipsNil(t *testing.T) {
-	WarmChainStepCache([]sim.Card{nil})
+	WarmChainStepCache([]card.Card{nil})
 	if got := chainStepCache[0].Load(); got != nil {
 		t.Errorf("nil entry should leave slot 0 empty, got %q", *got)
 	}

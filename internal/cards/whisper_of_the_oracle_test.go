@@ -8,7 +8,7 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
-var whisperOfTheOracleVariants = []sim.Card{
+var whisperOfTheOracleVariants = []card.Card{
 	WhisperOfTheOracleRed{},
 	WhisperOfTheOracleYellow{},
 	WhisperOfTheOracleBlue{},
@@ -21,7 +21,7 @@ func TestWhisperOfTheOracle_PlayCallsOpt4(t *testing.T) {
 	defer testutils.SwapCurrentHero(testutils.Hero{})()
 
 	for _, variant := range whisperOfTheOracleVariants {
-		s := sim.NewTurnStateFromCards([]sim.Card{a, b, c, d}, nil)
+		s := sim.NewTurnStateFromCards([]card.Card{a, b, c, d}, nil)
 		sim.ResolveChainStep(s, s.Logger(), &card.CardState{Card: variant})
 		if s.Value() != 0 {
 			t.Errorf("%s: Play() Value = %d, want 0", variant.Name(), s.Value())

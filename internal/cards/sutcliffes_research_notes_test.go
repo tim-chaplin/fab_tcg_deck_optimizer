@@ -17,7 +17,7 @@ func TestSutcliffesResearchNotes_EmptyDeck(t *testing.T) {
 }
 
 func TestSutcliffesResearchNotes_CountsRunebladeAttackActions(t *testing.T) {
-	deck := []sim.Card{
+	deck := []card.Card{
 		testutils.RunebladeAttack{},
 		testutils.NonAttack{},
 		testutils.RunebladeAttack{},
@@ -33,7 +33,7 @@ func TestSutcliffesResearchNotes_CountsRunebladeAttackActions(t *testing.T) {
 }
 
 func TestSutcliffesResearchNotes_DeckShorterThanRevealCount(t *testing.T) {
-	deck := []sim.Card{testutils.RunebladeAttack{}}
+	deck := []card.Card{testutils.RunebladeAttack{}}
 	s := sim.NewTurnStateFromCards(deck, nil)
 	sim.ResolveChainStep(s, s.Logger(), &card.CardState{Card: SutcliffesResearchNotesRed{}})
 	if got := s.Value(); got != 1 {
@@ -44,7 +44,7 @@ func TestSutcliffesResearchNotes_DeckShorterThanRevealCount(t *testing.T) {
 func TestSutcliffesResearchNotes_RunebladeNonAttackIgnored(t *testing.T) {
 	// A Runeblade card that isn't an attack action (e.g. Read the Runes: Runeblade + Action, no
 	// Attack type) shouldn't count toward the Runechant creation.
-	deck := []sim.Card{ReadTheRunesRed{}}
+	deck := []card.Card{ReadTheRunesRed{}}
 	s := sim.NewTurnStateFromCards(deck, nil)
 	sim.ResolveChainStep(s, s.Logger(), &card.CardState{Card: SutcliffesResearchNotesRed{}})
 	if got := s.Value(); got != 0 {
@@ -54,7 +54,7 @@ func TestSutcliffesResearchNotes_RunebladeNonAttackIgnored(t *testing.T) {
 
 func TestSutcliffesResearchNotes_NonRunebladeAttackIgnored(t *testing.T) {
 	// An attack action that isn't Runeblade-classed shouldn't count.
-	deck := []sim.Card{testutils.NonRunebladeAttack{}}
+	deck := []card.Card{testutils.NonRunebladeAttack{}}
 	s := sim.NewTurnStateFromCards(deck, nil)
 	sim.ResolveChainStep(s, s.Logger(), &card.CardState{Card: SutcliffesResearchNotesRed{}})
 	if got := s.Value(); got != 0 {
@@ -63,13 +63,13 @@ func TestSutcliffesResearchNotes_NonRunebladeAttackIgnored(t *testing.T) {
 }
 
 func TestSutcliffesResearchNotes_VariantRevealCounts(t *testing.T) {
-	deck := []sim.Card{
+	deck := []card.Card{
 		testutils.RunebladeAttack{},
 		testutils.RunebladeAttack{},
 		testutils.RunebladeAttack{},
 	}
 	cases := []struct {
-		c    sim.Card
+		c    card.Card
 		want int
 	}{
 		{SutcliffesResearchNotesRed{}, 3},

@@ -14,7 +14,7 @@ import (
 // action's BonusAttack iff self.FromArsenal is true.
 func TestFromArsenalNextAttackBonus_GrantsOnArsenalCopyOnly(t *testing.T) {
 	cases := []struct {
-		c sim.Card
+		c card.Card
 		n int
 	}{
 		{cards.PlunderRunRed{}, 3},

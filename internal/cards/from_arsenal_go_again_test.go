@@ -12,7 +12,7 @@ import (
 // Tests that the played-from-arsenal go-again rider flips self.GrantedGoAgain iff
 // self.FromArsenal is true.
 func TestFromArsenalGoAgain_GrantsOnArsenalCopyOnly(t *testing.T) {
-	cards := []sim.Card{
+	cards := []card.Card{
 		cards.FerventForerunnerRed{}, cards.FerventForerunnerYellow{}, cards.FerventForerunnerBlue{},
 		notimpl.FrontlineScoutRed{}, notimpl.FrontlineScoutYellow{}, notimpl.FrontlineScoutBlue{},
 		cards.PerformanceBonusRed{}, cards.PerformanceBonusYellow{}, cards.PerformanceBonusBlue{},

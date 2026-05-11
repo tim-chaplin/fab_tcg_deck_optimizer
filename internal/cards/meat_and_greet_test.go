@@ -11,7 +11,7 @@ import (
 // Tests that the on-hit Runechant rider fires only on likely-hit variants.
 func TestMeatAndGreet_OnHitRunechantGatedByLikelyToHit(t *testing.T) {
 	cases := []struct {
-		c       sim.Card
+		c       card.Card
 		wantDmg int
 	}{
 		{MeatAndGreetRed{}, 4 + 1},
@@ -38,7 +38,7 @@ func TestMeatAndGreet_OnHitRunechantGatedByLikelyToHit(t *testing.T) {
 
 // Tests that ArcaneDamageDealt at Play time grants conditional go again.
 func TestMeatAndGreet_ArcaneDamageDealtGrantsGoAgain(t *testing.T) {
-	cases := []sim.Card{
+	cases := []card.Card{
 		MeatAndGreetRed{},
 		MeatAndGreetYellow{},
 		MeatAndGreetBlue{},

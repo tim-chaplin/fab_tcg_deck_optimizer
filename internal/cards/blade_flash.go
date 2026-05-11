@@ -9,11 +9,9 @@ package cards
 
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
-
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
 
-func (BladeFlashBlue) ARTargetAllowed(c sim.Card, _ int8) bool {
+func (BladeFlashBlue) ARTargetAllowed(c card.Card, _ int8) bool {
 	t := c.Types()
 	return t.Has(card.TypeSword) && t.IsAttack()
 }

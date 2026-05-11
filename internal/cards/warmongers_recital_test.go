@@ -12,7 +12,7 @@ import (
 // TestWarmongersRecital_NoAttackReturnsZero: no qualifying next attack card → +N rider fizzles.
 func TestWarmongersRecital_NoAttackReturnsZero(t *testing.T) {
 	s := sim.TurnState{}
-	for _, c := range []sim.Card{
+	for _, c := range []card.Card{
 		cards.WarmongersRecitalRed{}, cards.WarmongersRecitalYellow{}, cards.WarmongersRecitalBlue{},
 	} {
 		sim.ResolveChainStep(&s, s.Logger(), &card.CardState{Card: c})
@@ -35,7 +35,7 @@ func TestWarmongersRecital_NonAttackInRemainingFizzles(t *testing.T) {
 // per-variant +N{p} bonus AND an OnHit handler appended for the recycle rider.
 func TestWarmongersRecital_NextAttackReceivesBonusAndOnHit(t *testing.T) {
 	cases := []struct {
-		c    sim.Card
+		c    card.Card
 		want int
 	}{
 		{cards.WarmongersRecitalRed{}, 3},
@@ -61,7 +61,7 @@ func TestWarmongersRecital_OnHitFireRecyclesTargetFromGraveyardToDeckBottom(t *t
 	target := testutils.GenericAttack(0, 5)
 	targetState := &card.CardState{Card: target}
 	deckTop := testutils.GenericAttack(1, 7)
-	s := sim.NewTurnStateFromCards([]sim.Card{deckTop}, nil)
+	s := sim.NewTurnStateFromCards([]card.Card{deckTop}, nil)
 	s.SetCardsRemaining([]*card.CardState{targetState})
 	sim.ResolveChainStep(s, s.Logger(), &card.CardState{Card: cards.WarmongersRecitalRed{}})
 	if len(targetState.OnHit) != 1 {
@@ -80,7 +80,7 @@ func TestWarmongersRecital_OnHitFireRecyclesTargetFromGraveyardToDeckBottom(t *t
 	if got := s.Deck().Size(); got != 2 {
 		t.Errorf("Deck size after recycle = %d, want 2 (target appended to bottom)", got)
 	}
-	if top := s.Deck().PeekTop(); top != sim.Card(deckTop) {
+	if top := s.Deck().PeekTop(); top != card.Card(deckTop) {
 		t.Errorf("Deck top after recycle = %v, want %v (target went to bottom, deckTop unchanged)", top, deckTop)
 	}
 	// Rider line attributes the recycle to the buffed attack, not Warmonger's Recital.

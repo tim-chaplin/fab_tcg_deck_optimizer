@@ -10,7 +10,7 @@ import (
 // Tests that each variant credits printed_power - 2 to s.Value().
 func TestFreewheelingRenegades_AlwaysDebuffedByTwo(t *testing.T) {
 	cases := []struct {
-		c    sim.Card
+		c    card.Card
 		want int
 	}{
 		{FreewheelingRenegadesRed{}, 4},

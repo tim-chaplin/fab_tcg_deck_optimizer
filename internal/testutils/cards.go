@@ -335,7 +335,7 @@ func (HugeAttack) GoAgain() bool            { return false }
 func (HugeAttack) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 }
 
-// StubCard is a minimal sim.Card. Tests construct it via NewStubCard plus the With…
+// StubCard is a minimal card.Card. Tests construct it via NewStubCard plus the With…
 // builder methods so call sites only set the fields they care about — every other field
 // returns a zero value through the Card interface methods. ID defaults to InvalidCard;
 // tests that reach into ID-keyed caches (cardMetaCache, chainStepCache) should attach a
@@ -492,14 +492,14 @@ func (g GrantSpy) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 func CardNames(cs []deck.Card) []string {
 	out := make([]string, len(cs))
 	for i, c := range cs {
-		out[i] = c.(sim.Card).Name()
+		out[i] = c.(card.Card).Name()
 	}
 	return out
 }
 
-// CardNamesSim is the []sim.Card overload of CardNames so tests holding sim slices
+// CardNamesSim is the []card.Card overload of CardNames so tests holding sim slices
 // don't have to widen at the call site.
-func CardNamesSim(cs []sim.Card) []string {
+func CardNamesSim(cs []card.Card) []string {
 	out := make([]string, len(cs))
 	for i, c := range cs {
 		out[i] = c.Name()

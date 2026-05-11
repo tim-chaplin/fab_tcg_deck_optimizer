@@ -13,7 +13,7 @@ import (
 // survives to pay out later.
 func TestArcaneCussing_BlockCoversIncomingReturnsN(t *testing.T) {
 	cases := []struct {
-		c sim.Card
+		c card.Card
 		n int
 	}{
 		{ArcaneCussingRed{}, 3},
@@ -42,7 +42,7 @@ func TestArcaneCussing_OverBlockReturnsN(t *testing.T) {
 // TestArcaneCussing_BlockShortReturnsZero confirms the aura collapses to 0 when incoming damage
 // gets through — we take damage, aura dies without pay-out, no same-turn attack to save it.
 func TestArcaneCussing_BlockShortReturnsZero(t *testing.T) {
-	cases := []sim.Card{
+	cases := []card.Card{
 		ArcaneCussingRed{},
 		ArcaneCussingYellow{},
 		ArcaneCussingBlue{},

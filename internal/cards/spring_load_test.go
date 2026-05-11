@@ -10,9 +10,9 @@ import (
 
 // Tests that Spring Load with a non-empty hand attacks for printed power only.
 func TestSpringLoad_BasePower(t *testing.T) {
-	for _, c := range []sim.Card{SpringLoadRed{}, SpringLoadYellow{}, SpringLoadBlue{}} {
+	for _, c := range []card.Card{SpringLoadRed{}, SpringLoadYellow{}, SpringLoadBlue{}} {
 		var s sim.TurnState
-		s.SetHandForTesting([]sim.Card{testutils.GenericAttack(0, 0)})
+		s.SetHandForTesting([]card.Card{testutils.GenericAttack(0, 0)})
 		sim.ResolveChainStep(&s, s.Logger(), &card.CardState{Card: c})
 		if got := s.Value(); got != 2 {
 			t.Errorf("%s: Play() with non-empty hand = %d, want 2", c.Name(), got)
@@ -22,7 +22,7 @@ func TestSpringLoad_BasePower(t *testing.T) {
 
 // Tests that Spring Load with an empty hand fires the +3{p} rider on every variant.
 func TestSpringLoad_EmptyHandFiresRider(t *testing.T) {
-	for _, c := range []sim.Card{SpringLoadRed{}, SpringLoadYellow{}, SpringLoadBlue{}} {
+	for _, c := range []card.Card{SpringLoadRed{}, SpringLoadYellow{}, SpringLoadBlue{}} {
 		var s sim.TurnState
 		sim.ResolveChainStep(&s, s.Logger(), &card.CardState{Card: c})
 		if got := s.Value(); got != 5 {

@@ -7,7 +7,6 @@
 package cards
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
@@ -22,7 +21,7 @@ func lookingForAScrapPlay(s card.GameEngine, l card.Logger, self *card.CardState
 // isOnePowerCard matches the printed "card with 1{p}" target — any card whose printed
 // Attack value is 1. Non-attack cards have Attack() = 0, so the type predicate would be
 // redundant.
-func isOnePowerCard(c sim.Card) bool { return c.Attack() == 1 }
+func isOnePowerCard(c card.Card) bool { return c.Attack() == 1 }
 
 func (LookingForAScrapRed) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 	lookingForAScrapPlay(s, l, self)

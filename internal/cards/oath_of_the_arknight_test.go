@@ -21,7 +21,7 @@ func TestOathOfTheArknight_RunebladeAttackInRemaining(t *testing.T) {
 	// rides on the target's BonusAttack — so Play returns just the Runechant value, and the
 	// target's BonusAttack picks up +N.
 	cases := []struct {
-		c     sim.Card
+		c     card.Card
 		bonus int
 	}{
 		{OathOfTheArknightRed{}, 3},

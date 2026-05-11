@@ -7,6 +7,7 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
 )
 
@@ -100,9 +101,9 @@ func TestBest_RespectsResourceConstraint(t *testing.T) {
 	for i, c := range h {
 		switch got.BestLine[i].Role {
 		case sim.Pitch:
-			res += c.(sim.Card).Pitch()
+			res += c.(card.Card).Pitch()
 		case sim.Attack:
-			cost += c.(sim.Card).Cost(&sim.TurnState{})
+			cost += c.(card.Card).Cost(&sim.TurnState{})
 		}
 	}
 	if res < cost {

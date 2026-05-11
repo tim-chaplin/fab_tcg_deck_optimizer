@@ -9,7 +9,6 @@
 package cards
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
@@ -30,17 +29,17 @@ func battlefrontBastionBlock(s card.GameEngine, l card.Logger, self *card.CardSt
 	self.BonusDefense += 1
 }
 
-func (BattlefrontBastionRed) Block(s *sim.TurnState, l card.Logger, self *card.CardState) {
+func (BattlefrontBastionRed) Block(s card.GameEngine, l card.Logger, self *card.CardState) {
 	battlefrontBastionBlock(s, l, self)
 }
 func (BattlefrontBastionRed) Play(s card.GameEngine, l card.Logger, self *card.CardState) {}
 
-func (BattlefrontBastionYellow) Block(s *sim.TurnState, l card.Logger, self *card.CardState) {
+func (BattlefrontBastionYellow) Block(s card.GameEngine, l card.Logger, self *card.CardState) {
 	battlefrontBastionBlock(s, l, self)
 }
 func (BattlefrontBastionYellow) Play(s card.GameEngine, l card.Logger, self *card.CardState) {}
 
-func (BattlefrontBastionBlue) Block(s *sim.TurnState, l card.Logger, self *card.CardState) {
+func (BattlefrontBastionBlue) Block(s card.GameEngine, l card.Logger, self *card.CardState) {
 	battlefrontBastionBlock(s, l, self)
 }
 func (BattlefrontBastionBlue) Play(s card.GameEngine, l card.Logger, self *card.CardState) {}
