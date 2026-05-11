@@ -1,5 +1,7 @@
 package sim
 
+import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+
 // ResolveChainStep runs card.Play and then applies the standard chain-step resolution:
 // for an attack-action or weapon-attack, credit self.EffectiveAttack() to s.value; for
 // a defense-reaction (or DefensiveInstant), credit the EffectiveDefense capped at
@@ -22,6 +24,9 @@ package sim
 // "chain step, then indented riders" as before.
 func ResolveChainStep(s *TurnState, l Logger, self *CardState) {
 	self.Card.Play(s, l, self)
+	if self.Card.Types().Has(card.TypeAura) {
+		s.auraCreated = true
+	}
 	n := chainStepDelta(s, self)
 	l.AppendChainStep(ChainStepText(self), n)
 }

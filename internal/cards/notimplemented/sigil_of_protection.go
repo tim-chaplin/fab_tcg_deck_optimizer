@@ -2,8 +2,6 @@
 // Blue 3. Defense 2.
 //
 // Text: "**Ward 4** At the beginning of your action phase, destroy Sigil of Protection."
-//
-// The aura-created flag is set so same-turn aura-readers see the entry.
 
 package notimplemented
 
@@ -13,18 +11,12 @@ import (
 
 // not implemented: ward (opponent damage prevention)
 
-func (SigilOfProtectionRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
-	s.SetAuraCreated(true)
-}
+func (SigilOfProtectionRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {}
 
 // not implemented: ward (opponent damage prevention)
 
-func (SigilOfProtectionYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
-	s.SetAuraCreated(true)
-}
+func (SigilOfProtectionYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {}
 
 // not implemented: ward (opponent damage prevention)
 
-func (SigilOfProtectionBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
-	s.SetAuraCreated(true)
-}
+func (SigilOfProtectionBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {}

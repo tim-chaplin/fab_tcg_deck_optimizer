@@ -39,7 +39,7 @@ Card data (name, cost, pitch, attack, defense, type line, printed text) is trans
 
 Defined in `internal/sim/aura.go`. For cards that "create an aura that fires later":
 
-- `Play` calls `s.AddAura(sim.Aura{...})` with `Self`, `TriggerType`, `Count`, `Handler`. `AddAura` sets `s.AuraCreated = true` for same-turn aura-readers.
+- `Play` calls `s.AddAura(sim.Aura{...})` with `Self`, `TriggerType`, `Count`, `Handler`. The sim flips `auraCreated` automatically for any `TypeAura` card resolved via `ResolveChainStep`; `AddAura` flips it too so non-aura cards that mint token auras (e.g. an attack rider creating a Runechant) still signal same-turn aura-readers.
 - Sim walks `s.Auras` per matching `TriggerType` and invokes every matching `Handler`. `OncePerTurn` caps an Aura at one fire per turn.
 - **Lifecycle is the handler's job.** When done, the handler calls `s.DestroyAura(a, addToGraveyard)` to splice itself out of `s.Auras` and (when `addToGraveyard`) land `Self` in the graveyard. Counter-based auras decrement `a.Count` and call `DestroyAura` at zero. The sim never mutates `Count` or graveyards on its own.
 - Handlers parallel `Card.Play` — `func(s *sim.TurnState, t *sim.Trigger, a *sim.Aura)`, no return. Aura fires pass the firing aura as `a`; standalone trigger fires pass `nil`. Credit damage / life via `s.AddValue(n)`; emit log via `s.LogPostTrigger`.

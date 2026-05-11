@@ -4,8 +4,6 @@
 // Text: "**Go again** If your hero would be dealt damage, instead destroy Enchanting Melody and
 // prevent 4 damage that source would deal. At the beginning of your end phase, destroy Enchanting
 // Melody unless you have played a 'non-attack' action card this turn."
-//
-// Sets s.AuraCreated() so same-turn aura-readers see the entry.
 
 package notimplemented
 
@@ -15,18 +13,12 @@ import (
 
 // not implemented: damage-prevention trigger, end-phase destruction clause
 
-func (EnchantingMelodyRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
-	s.SetAuraCreated(true)
-}
+func (EnchantingMelodyRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {}
 
 // not implemented: damage-prevention trigger, end-phase destruction clause
 
-func (EnchantingMelodyYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
-	s.SetAuraCreated(true)
-}
+func (EnchantingMelodyYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {}
 
 // not implemented: damage-prevention trigger, end-phase destruction clause
 
-func (EnchantingMelodyBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
-	s.SetAuraCreated(true)
-}
+func (EnchantingMelodyBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {}

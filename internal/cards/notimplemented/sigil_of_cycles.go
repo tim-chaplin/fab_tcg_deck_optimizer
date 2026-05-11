@@ -2,8 +2,6 @@
 //
 // Text: "**Go again** At the beginning of your action phase, destroy this. When this leaves the
 // arena, discard a card then draw a card."
-//
-// The aura-created flag is set so same-turn aura-readers see the entry.
 
 package notimplemented
 
@@ -13,6 +11,4 @@ import (
 
 // not implemented: start-of-action-phase self-destroy, leaves-arena discard/draw
 
-func (SigilOfCyclesBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
-	s.SetAuraCreated(true)
-}
+func (SigilOfCyclesBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {}
