@@ -13,7 +13,6 @@ package card
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
-	"github.com/tim-chaplin/fab-deck-optimizer/v2/turnlogger"
 )
 
 // GameEngine is the cards-facing rules-engine handle the sim threads through every
@@ -86,10 +85,6 @@ type GameEngine interface {
 
 	// Attack reaction target accessor
 	AttackReactionTarget() *CardState
-
-	// Log access
-	Logger() Logger
-	LogEntries() []turnlogger.LogEntry
 }
 
 // Logger is the cards-facing log sink the chain runner threads through every Card
