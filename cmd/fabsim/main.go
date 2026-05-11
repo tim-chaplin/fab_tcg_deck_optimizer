@@ -13,7 +13,7 @@ import (
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/mydecks"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/optimizations"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/registry"
 )
 
@@ -21,9 +21,9 @@ import (
 // cache reads. See docs/dev-standards.md "Registry / sim split".
 func init() {
 	ids := registry.AllCards()
-	cards := make([]sim.Card, 0, len(ids))
+	cards := make([]card.Card, 0, len(ids))
 	for _, id := range ids {
-		cards = append(cards, registry.GetCard(id).(sim.Card))
+		cards = append(cards, registry.GetCard(id).(card.Card))
 	}
 	optimizations.WarmChainStepCache(cards)
 }

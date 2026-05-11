@@ -16,9 +16,9 @@ func TestRightBehindYou_BlockTogetherFiresBonus(t *testing.T) {
 		RightBehindYouBlue{},
 	}
 	for _, c := range cases {
-		blocker, ok := c.(sim.Blocker)
+		blocker, ok := c.(card.Blocker)
 		if !ok {
-			t.Errorf("%s: missing sim.Blocker hook", c.Name())
+			t.Errorf("%s: missing card.Blocker hook", c.Name())
 			continue
 		}
 		s := sim.NewTurnStateFromSpec(sim.TurnStateSpec{Defenders: []card.Card{c, testutils.GenericAttack(0, 1)}})

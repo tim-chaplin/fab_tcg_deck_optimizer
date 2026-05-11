@@ -8,6 +8,7 @@ package sim
 import (
 	"fmt"
 
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/turnlogger"
 )
@@ -42,7 +43,7 @@ func FormatLogEntry(e LogEntry) string {
 // arsenalAtChainStart is the card sitting in the arsenal slot at the start of the chain — set
 // when the partition assigned arsenalCardIn the Arsenal role (it's staying), nil otherwise
 // (no arsenal-in, or arsenal-in is playing as Attack/Defend).
-func bestAttackWithWeapons(hero Hero, weapons []Weapon, attackers, defenders, pitched, held []Card, d *deck.Deck, bufs *attackBufs, mp Matchup, blockTotal, arsenalInIdx, arsenalDefenderIdx int, arsenalAtChainStart Card, prior TurnState, skipLog bool) (int, int, chainBudget, []string, CarryState, bool, bool) {
+func bestAttackWithWeapons(hero Hero, weapons []Weapon, attackers, defenders, pitched, held []card.Card, d *deck.Deck, bufs *attackBufs, mp Matchup, blockTotal, arsenalInIdx, arsenalDefenderIdx int, arsenalAtChainStart card.Card, prior TurnState, skipLog bool) (int, int, chainBudget, []string, CarryState, bool, bool) {
 	runechantCarryover := tokenCountIn(prior.auras, TokenTypeRunechant)
 	ctx := &sequenceContext{
 		hero:                hero,
@@ -288,25 +289,25 @@ func bestAttackWithWeapons(hero Hero, weapons []Weapon, attackers, defenders, pi
 // instead of a real pitched bag.
 type sequenceContext struct {
 	hero    Hero
-	pitched []Card
+	pitched []card.Card
 	// deck is the per-leaf starting deck. resetStateForPermutation copies it via
 	// d.Copy() so each permutation runs against a fresh, isolated *deck.Deck.
 	deck *deck.Deck
 	// handStart is the partition's Held-role hand cards — what state.Hand starts as before
 	// the chain runs. Cards mutating state.Hand mid-chain (DrawOne, Moon Wish tutor) work
 	// against a per-permutation copy so the next permutation gets handStart back.
-	handStart []Card
+	handStart []card.Card
 	// arsenalAtChainStart is the card sitting in the arsenal slot at the start of the chain
 	// — set when the partition assigned arsenalCardIn the Arsenal role, nil otherwise.
 	// state.Arsenal starts as this value; cards that destroy or replace arsenal contents
 	// during Play would mutate state.Arsenal, but the simulator doesn't model that today.
-	arsenalAtChainStart Card
+	arsenalAtChainStart card.Card
 	bufs                *attackBufs
 	// attackPitchPerm is the active pitch ordering for the attack phase — the pmask-selected
 	// subset of ctx.pitched, populated by bestAttackWithWeapons in original order and
 	// permuted in place by bestSequence's pitch Heap loop. Backing array is bufs.pitchPermBuf
 	// so per-leaf reuse never allocates.
-	attackPitchPerm []Card
+	attackPitchPerm []card.Card
 	// attackPitchVals parallels attackPitchPerm: attackPitchVals[i] is the cached Pitch()
 	// of attackPitchPerm[i]. Permuted in lockstep with attackPitchPerm so the per-pop
 	// resource math reads ints instead of going through the Card.Pitch() interface call.
@@ -336,18 +337,18 @@ type sequenceContext struct {
 	// Each permutation seeds state.banished with a fresh copy so "count cards in your
 	// banished zone" readers see the carried entries; CardBanished stays reset so
 	// "did anything banish THIS turn" stays false until BanishFromGraveyard fires.
-	priorBanish []Card
+	priorBanish []card.Card
 	// priorGraveyard is the cards-already-in-graveyard snapshot from the previous turn.
 	// Each permutation seeds state.graveyard with a fresh copy AHEAD of this turn's
 	// defenders (which the partition's defendersDamage loop has already deposited) so
 	// graveyard-scanning riders (BanishFromGraveyard, Sigil of Silphidae's enter
 	// trigger) see prior-turn entries alongside same-turn blocks.
-	priorGraveyard []Card
+	priorGraveyard []card.Card
 	// activatedAbilities is the unified weapon + item ability list materialised at the
 	// top of bestAttackWithWeapons — weapons' Ability() Cards followed by per-priorItem
 	// ability instances (one per Count, capped at perItemAbilityCap). The wmask iterates
 	// over this slice; index j's bit selects activatedAbilities[j].
-	activatedAbilities []Card
+	activatedAbilities []card.Card
 	// activatedAbilityCosts parallels activatedAbilities — cached cost for each entry
 	// so the per-wmask budget check reads ints rather than re-entering Card.Cost.
 	activatedAbilityCosts []int
@@ -359,7 +360,7 @@ type sequenceContext struct {
 	// the defense phase resolves, every defender lands in the graveyard;
 	// resetStateForPermutation seeds the chain's state.graveyard from this so chain cards
 	// that scan the graveyard (e.g. recycle riders) see defender cards already there.
-	defenders []Card
+	defenders []card.Card
 	// carryWinner is a slice header POINTING into bufs.carryWinnerScratch — the persistent
 	// snapshot buffer that survives across Best calls via the Evaluator's cached attackBufs.
 	// Heap's algorithm keeps iterating past the winner and the shared state.* fields reflect
@@ -400,7 +401,7 @@ func (ctx *sequenceContext) activeLogger() *turnlogger.TurnLogger {
 // consolidate against existing tokens), runs defendersDamage, and captures the post-
 // defense aura set into ctx.defenderAuras (and bufs.defenderAurasBacking) for later
 // chain seeding. Re-bind both headers after the call to track any growth-driven realloc.
-func (ctx *sequenceContext) runDefense(defenders, pitched []Card, deckPile *deck.Deck, priorAuras []Aura, incomingDamage, blockBudget, arsenalDefenderIdx int) (int, bool) {
+func (ctx *sequenceContext) runDefense(defenders, pitched []card.Card, deckPile *deck.Deck, priorAuras []Aura, incomingDamage, blockBudget, arsenalDefenderIdx int) (int, bool) {
 	bufs := ctx.bufs
 	bufs.state.auras = append(ctx.defenderAuras[:0], priorAuras...)
 	// Seed the logger so the first DR's per-defender reset (and the plain-block phase
@@ -426,7 +427,7 @@ func (ctx *sequenceContext) runDefense(defenders, pitched []Card, deckPile *deck
 // Iterates state.auras with a cursor that handles handler-side splicing: a handler
 // calling s.DestroyAura mutates state.auras in place (shifting the next entry down to
 // the cursor's index), so the loop only advances when the slice length didn't change.
-func fireAttackActionAuras(state *TurnState, triggeringCard Card) {
+func fireAttackActionAuras(state *TurnState, triggeringCard card.Card) {
 	for i := 0; i < len(state.auras); {
 		t := &state.auras[i]
 		if t.TriggerType != TriggerAttackAction || (t.OncePerTurn && t.FiredThisTurn) {
@@ -510,7 +511,7 @@ func fireEndOfTurn(state *TurnState) {
 // state.auras when ANY attack resolves (attack action OR weapon swing) and invokes every
 // TriggerAttack entry. The runechant token aura uses this trigger. Same cursor / splice
 // semantics as fireAttackActionAuras.
-func fireAttackAuras(state *TurnState, triggeringCard Card) {
+func fireAttackAuras(state *TurnState, triggeringCard card.Card) {
 	for i := 0; i < len(state.auras); {
 		t := &state.auras[i]
 		if t.TriggerType != TriggerAttack || (t.OncePerTurn && t.FiredThisTurn) {
@@ -612,7 +613,7 @@ func (ctx *sequenceContext) resetStateForPermutation() {
 // Uses Heap's algorithm (iterative) — no closure/callback alloc, no recursive call per perm.
 // The winning permutation's end-of-chain CarryState lands in ctx.carryWinner so callers can
 // adopt the snapshot for next-turn state.
-func (ctx *sequenceContext) bestSequence(attackers []Card) (int, int, bool) {
+func (ctx *sequenceContext) bestSequence(attackers []card.Card) (int, int, bool) {
 	n := len(attackers)
 	if n == 0 {
 		// No chain steps means no costs to pay. Any unspent pitch card in the attack phase
@@ -798,7 +799,7 @@ func (ctx *sequenceContext) bestSequence(attackers []Card) (int, int, bool) {
 // Populates permMeta from order and then calls playSequenceWithMeta. The hot path
 // (bestSequence) builds meta once and calls playSequenceWithMeta directly to amortise
 // interface dispatch across the N! permutations.
-func (ctx *sequenceContext) playSequence(order []Card) (damage int, futureValue int, residualBudget int, legal bool) {
+func (ctx *sequenceContext) playSequence(order []card.Card) (damage int, futureValue int, residualBudget int, legal bool) {
 	n := len(order)
 	pcBuf := ctx.bufs.pcBuf
 	meta := ctx.bufs.permMeta[:n]
@@ -879,7 +880,7 @@ func (ctx *sequenceContext) playSequenceWithMeta(n int) (damage int, futureValue
 	// activeAttack is the most recent attack/weapon CardState awaiting OnHit firing. ARs
 	// played later buff it; finalizeActiveAttack flushes it (fires OnHit when LikelyToHit
 	// is true on the post-buff EffectiveAttack) on the next non-AR card or at end of chain.
-	var activeAttack *CardState
+	var activeAttack *card.CardState
 	finalizeActiveAttack := func() {
 		if activeAttack == nil {
 			return
@@ -959,7 +960,7 @@ func (ctx *sequenceContext) playSequenceWithMeta(n int) (damage int, futureValue
 		// check reads OnHit-mutated state (e.g. an Item created by the previous attack's
 		// hit).
 		if m.types.IsAttackReaction() {
-			if pre, ok := pc.Card.(PlayPrecondition); ok {
+			if pre, ok := pc.Card.(card.PlayPrecondition); ok {
 				if !pre.PlayPrecondition(state, pc) {
 					return 0, 0, 0, false
 				}
@@ -986,7 +987,7 @@ func (ctx *sequenceContext) playSequenceWithMeta(n int) (damage int, futureValue
 		// gating on Items / Auras created by the previous attack's OnHit (Gold ability
 		// after Strike Gold) reads the post-OnHit state.
 		finalizeActiveAttack()
-		if pre, ok := pc.Card.(PlayPrecondition); ok {
+		if pre, ok := pc.Card.(card.PlayPrecondition); ok {
 			if !pre.PlayPrecondition(state, pc) {
 				return 0, 0, 0, false
 			}

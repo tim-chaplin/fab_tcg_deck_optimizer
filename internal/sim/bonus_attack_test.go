@@ -18,18 +18,18 @@ import (
 // don't see it as a candidate target for their "next attack action" grants.
 type pitchOnlyRed struct{}
 
-func (pitchOnlyRed) ID() ids.CardID      { return ids.InvalidCard }
-func (pitchOnlyRed) Name() string        { return "pitchOnlyRed" }
-func (pitchOnlyRed) DisplayName() string { return "pitchOnlyRed [R]" }
-func (pitchOnlyRed) Cost(GameEngine) int { return 0 }
-func (pitchOnlyRed) Pitch() int          { return 1 }
-func (pitchOnlyRed) Attack() int         { return 0 }
-func (pitchOnlyRed) Defense() int        { return 0 }
+func (pitchOnlyRed) ID() ids.CardID           { return ids.InvalidCard }
+func (pitchOnlyRed) Name() string             { return "pitchOnlyRed" }
+func (pitchOnlyRed) DisplayName() string      { return "pitchOnlyRed [R]" }
+func (pitchOnlyRed) Cost(card.GameEngine) int { return 0 }
+func (pitchOnlyRed) Pitch() int               { return 1 }
+func (pitchOnlyRed) Attack() int              { return 0 }
+func (pitchOnlyRed) Defense() int             { return 0 }
 func (pitchOnlyRed) Types() card.TypeSet {
 	return card.NewTypeSet(card.TypeGeneric, card.TypeAction)
 }
-func (pitchOnlyRed) GoAgain() bool                       { return false }
-func (pitchOnlyRed) Play(GameEngine, Logger, *CardState) {}
+func (pitchOnlyRed) GoAgain() bool                                      { return false }
+func (pitchOnlyRed) Play(card.GameEngine, card.Logger, *card.CardState) {}
 
 // grantBonusAttack is a test-only non-attack action card that scans CardsRemaining and adds n
 // to BonusAttack on the first attack action card it finds. Mirrors production "next attack
@@ -37,18 +37,18 @@ func (pitchOnlyRed) Play(GameEngine, Logger, *CardState) {}
 // being buffed and feeds EffectiveAttack for any "if this hits" rider on that target.
 type grantBonusAttack struct{ n int }
 
-func (grantBonusAttack) ID() ids.CardID      { return ids.InvalidCard }
-func (grantBonusAttack) Name() string        { return "grantBonusAttack" }
-func (grantBonusAttack) DisplayName() string { return "grantBonusAttack" }
-func (grantBonusAttack) Cost(GameEngine) int { return 0 }
-func (grantBonusAttack) Pitch() int          { return 0 }
-func (grantBonusAttack) Attack() int         { return 0 }
-func (grantBonusAttack) Defense() int        { return 0 }
+func (grantBonusAttack) ID() ids.CardID           { return ids.InvalidCard }
+func (grantBonusAttack) Name() string             { return "grantBonusAttack" }
+func (grantBonusAttack) DisplayName() string      { return "grantBonusAttack" }
+func (grantBonusAttack) Cost(card.GameEngine) int { return 0 }
+func (grantBonusAttack) Pitch() int               { return 0 }
+func (grantBonusAttack) Attack() int              { return 0 }
+func (grantBonusAttack) Defense() int             { return 0 }
 func (grantBonusAttack) Types() card.TypeSet {
 	return card.NewTypeSet(card.TypeGeneric, card.TypeAction)
 }
 func (grantBonusAttack) GoAgain() bool { return true }
-func (g grantBonusAttack) Play(s GameEngine, l Logger, self *CardState) {
+func (g grantBonusAttack) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 	for _, pc := range s.CardsRemaining() {
 		if pc.Card.Types().IsAttackAction() {
 			pc.BonusAttack += g.n
@@ -63,18 +63,18 @@ func (g grantBonusAttack) Play(s GameEngine, l Logger, self *CardState) {
 // +1{p}" rider — the target is a weapon swing, not an attack action.
 type grantBonusAttackWeapon struct{ n int }
 
-func (grantBonusAttackWeapon) ID() ids.CardID      { return ids.InvalidCard }
-func (grantBonusAttackWeapon) Name() string        { return "grantBonusAttackWeapon" }
-func (grantBonusAttackWeapon) DisplayName() string { return "grantBonusAttackWeapon" }
-func (grantBonusAttackWeapon) Cost(GameEngine) int { return 0 }
-func (grantBonusAttackWeapon) Pitch() int          { return 0 }
-func (grantBonusAttackWeapon) Attack() int         { return 0 }
-func (grantBonusAttackWeapon) Defense() int        { return 0 }
+func (grantBonusAttackWeapon) ID() ids.CardID           { return ids.InvalidCard }
+func (grantBonusAttackWeapon) Name() string             { return "grantBonusAttackWeapon" }
+func (grantBonusAttackWeapon) DisplayName() string      { return "grantBonusAttackWeapon" }
+func (grantBonusAttackWeapon) Cost(card.GameEngine) int { return 0 }
+func (grantBonusAttackWeapon) Pitch() int               { return 0 }
+func (grantBonusAttackWeapon) Attack() int              { return 0 }
+func (grantBonusAttackWeapon) Defense() int             { return 0 }
 func (grantBonusAttackWeapon) Types() card.TypeSet {
 	return card.NewTypeSet(card.TypeGeneric, card.TypeAction)
 }
 func (grantBonusAttackWeapon) GoAgain() bool { return true }
-func (g grantBonusAttackWeapon) Play(s GameEngine, l Logger, self *CardState) {
+func (g grantBonusAttackWeapon) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 	for _, pc := range s.CardsRemaining() {
 		if pc.Card.Types().IsWeaponAttack() {
 			pc.BonusAttack += g.n
@@ -86,7 +86,7 @@ func (g grantBonusAttackWeapon) Play(s GameEngine, l Logger, self *CardState) {
 // Tests that a granter writes BonusAttack on the target's CardState and the chain total
 // reflects printed-attack + bonus.
 func TestPlaySequence_BonusAttackAppliedToTargetDamage(t *testing.T) {
-	order := []Card{grantBonusAttack{n: 3}, testutils.RedAttack{}}
+	order := []card.Card{grantBonusAttack{n: 3}, testutils.RedAttack{}}
 	ctx := NewSequenceContextForTest(testutils.Hero{Intel: 4}, nil, nil, 10, 0, len(order))
 	dmg, _, _, legal := ctx.PlaySequence(order)
 	if !legal {
@@ -103,7 +103,7 @@ func TestPlaySequence_BonusAttackAppliedToTargetDamage(t *testing.T) {
 // scans CardsRemaining, finds no attack action, and contributes nothing — the BonusAttack
 // state simply stays 0.
 func TestPlaySequence_BonusAttackNoTargetFizzles(t *testing.T) {
-	order := []Card{grantBonusAttack{n: 3}}
+	order := []card.Card{grantBonusAttack{n: 3}}
 	ctx := NewSequenceContextForTest(testutils.Hero{Intel: 4}, nil, nil, 10, 0, len(order))
 	dmg, _, _, legal := ctx.PlaySequence(order)
 	if !legal {
@@ -117,7 +117,7 @@ func TestPlaySequence_BonusAttackNoTargetFizzles(t *testing.T) {
 // TestPlaySequence_BonusAttackStacksAcrossGranters pins that two granters in front of the
 // same target both write to BonusAttack; the field accumulates rather than overwriting.
 func TestPlaySequence_BonusAttackStacksAcrossGranters(t *testing.T) {
-	order := []Card{grantBonusAttack{n: 3}, grantBonusAttack{n: 2}, testutils.RedAttack{}}
+	order := []card.Card{grantBonusAttack{n: 3}, grantBonusAttack{n: 2}, testutils.RedAttack{}}
 	ctx := NewSequenceContextForTest(testutils.Hero{Intel: 4}, nil, nil, 10, 0, len(order))
 	dmg, _, _, legal := ctx.PlaySequence(order)
 	if !legal {
@@ -132,7 +132,7 @@ func TestPlaySequence_BonusAttackStacksAcrossGranters(t *testing.T) {
 // Tests that BonusAttack applies to weapon swings (TypeWeapon + TypeAttack), not just
 // attack action cards.
 func TestPlaySequence_BonusAttackAppliesToWeapon(t *testing.T) {
-	order := []Card{grantBonusAttackWeapon{n: 2}, weapons.ReapingBlade{}.Ability()}
+	order := []card.Card{grantBonusAttackWeapon{n: 2}, weapons.ReapingBlade{}.Ability()}
 	ctx := NewSequenceContextForTest(testutils.Hero{Intel: 4}, nil, nil, 10, 0, len(order))
 	dmg, _, _, legal := ctx.PlaySequence(order)
 	if !legal {
@@ -148,7 +148,7 @@ func TestPlaySequence_BonusAttackAppliesToWeapon(t *testing.T) {
 // Tests that a negative BonusAttack clamps the target's contribution at 0 (FaB attack-power
 // floor) — a 1-power attack with a -3 grant deals 0, not -2.
 func TestPlaySequence_BonusAttackNegativeClampsAtZero(t *testing.T) {
-	order := []Card{grantBonusAttack{n: -3}, testutils.BlueAttack{}}
+	order := []card.Card{grantBonusAttack{n: -3}, testutils.BlueAttack{}}
 	ctx := NewSequenceContextForTest(testutils.Hero{Intel: 4}, nil, nil, 10, 0, len(order))
 	dmg, _, _, legal := ctx.PlaySequence(order)
 	if !legal {
@@ -165,7 +165,7 @@ func TestPlaySequence_BonusAttackNegativeClampsAtZero(t *testing.T) {
 // grant that doesn't drive the target below 0 reduces the contribution by the full bonus,
 // no clamp.
 func TestPlaySequence_BonusAttackNegativePartialReduction(t *testing.T) {
-	order := []Card{grantBonusAttack{n: -2}, testutils.RedAttack{}}
+	order := []card.Card{grantBonusAttack{n: -2}, testutils.RedAttack{}}
 	ctx := NewSequenceContextForTest(testutils.Hero{Intel: 4}, nil, nil, 10, 0, len(order))
 	dmg, _, _, legal := ctx.PlaySequence(order)
 	if !legal {
@@ -180,7 +180,7 @@ func TestPlaySequence_BonusAttackNegativePartialReduction(t *testing.T) {
 // TestPlaySequence_BonusAttackNoAttackTargetFizzles pins the granter-side scan: if no attack
 // action follows the granter, the rider has nowhere to land and total damage stays 0.
 func TestPlaySequence_BonusAttackNoAttackTargetFizzles(t *testing.T) {
-	order := []Card{grantBonusAttack{n: 3}, grantBonusAttack{n: 2}}
+	order := []card.Card{grantBonusAttack{n: 3}, grantBonusAttack{n: 2}}
 	ctx := NewSequenceContextForTest(testutils.Hero{Intel: 4}, nil, nil, 10, 0, len(order))
 	dmg, _, _, legal := ctx.PlaySequence(order)
 	if !legal {
@@ -194,7 +194,7 @@ func TestPlaySequence_BonusAttackNoAttackTargetFizzles(t *testing.T) {
 // Tests the per-permutation BonusAttack reset: two back-to-back playSequence calls produce
 // the same total, never a leaked-bonus regression.
 func TestPlaySequence_BonusAttackPerPermutationReset(t *testing.T) {
-	order := []Card{grantBonusAttack{n: 3}, testutils.RedAttack{}}
+	order := []card.Card{grantBonusAttack{n: 3}, testutils.RedAttack{}}
 	ctx := NewSequenceContextForTest(testutils.Hero{Intel: 4}, nil, nil, 10, 0, len(order))
 	first, _, _, _ := ctx.PlaySequence(order)
 	second, _, _, _ := ctx.PlaySequence(order)
@@ -206,7 +206,7 @@ func TestPlaySequence_BonusAttackPerPermutationReset(t *testing.T) {
 // Tests end-to-end that a Nimblism BonusAttack grant pushes Consuming Volition past the
 // likely-to-hit threshold so its arcane-damage discard rider fires.
 func TestBest_NimblismGrantsConsumingVolitionDiscardRider(t *testing.T) {
-	h := []Card{
+	h := []card.Card{
 		cards.ConsumingVolitionYellow{},
 		cards.NimblismBlue{},
 		pitchOnlyRed{},

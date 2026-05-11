@@ -20,6 +20,7 @@ import (
 	"sync/atomic"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 // maxCachedHandSize caps how big a hand the cache will fingerprint. Adult heroes deal up
@@ -147,7 +148,7 @@ func newEvalCache() *evalCache {
 // swung-weapon names would drift, so we just preserve the input order. Matchup is
 // omitted — see evalCacheKey doc.
 func makeCacheKey(
-	hero Hero, weapons []Weapon, hand []Card,
+	hero Hero, weapons []Weapon, hand []card.Card,
 	prior TurnState,
 ) (evalCacheKey, bool) {
 	if len(hand) > maxCachedHandSize ||

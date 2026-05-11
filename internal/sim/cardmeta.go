@@ -23,7 +23,7 @@ import (
 // and the cached value is used directly (no interface call per play).
 type attackerMeta struct {
 	types      card.TypeSet
-	card       Card // held for variable-cost / modal-cost chain-time Cost calls
+	card       card.Card // held for variable-cost / modal-cost chain-time Cost calls
 	minCost    int
 	maxCost    int
 	isVariable bool
@@ -62,7 +62,7 @@ type attackerMeta struct {
 // lives inside the card, not the solver.
 func (m *attackerMeta) costAt(s *TurnState, mode int8) int {
 	if m.isModalCost {
-		return m.card.(ModalCost).ModalCost(mode)
+		return m.card.(card.ModalCost).ModalCost(mode)
 	}
 	if m.isVariable {
 		return m.card.Cost(s)
@@ -89,7 +89,7 @@ var (
 //
 // Test-only cards sharing ids.InvalidCard collide on cache slot 0; the InvalidCard branch
 // builds a fresh meta inline so each gets its own. Production never sees InvalidCard.
-func attackerMetaPtrFor(c Card) *attackerMeta {
+func attackerMetaPtrFor(c card.Card) *attackerMeta {
 	id := c.ID()
 	if id == ids.InvalidCard {
 		m := buildAttackerMeta(c)
@@ -103,7 +103,7 @@ func attackerMetaPtrFor(c Card) *attackerMeta {
 }
 
 // cardMetaSlowPath populates the cache entry under cardMetaMu and returns the computed meta.
-func cardMetaSlowPath(c Card, id ids.CardID) attackerMeta {
+func cardMetaSlowPath(c card.Card, id ids.CardID) attackerMeta {
 	cardMetaMu.Lock()
 	defer cardMetaMu.Unlock()
 	// Re-check under lock: another goroutine may have populated between the atomic load and here.
@@ -118,9 +118,9 @@ func cardMetaSlowPath(c Card, id ids.CardID) attackerMeta {
 
 // buildAttackerMeta computes a fresh attackerMeta from c. Shared by the cache slow path
 // and the InvalidCard bypass in attackerMetaPtrFor.
-func buildAttackerMeta(c Card) attackerMeta {
+func buildAttackerMeta(c card.Card) attackerMeta {
 	t := c.Types()
-	_, isDefensiveInstant := c.(DefensiveInstant)
+	_, isDefensiveInstant := c.(card.DefensiveInstant)
 	m := attackerMeta{
 		types:           t,
 		card:            c,
@@ -130,7 +130,7 @@ func buildAttackerMeta(c Card) attackerMeta {
 		actsAsDR:        t.IsDefenseReaction() || isDefensiveInstant,
 		modes:           1,
 	}
-	if mc, ok := c.(ModalCard); ok {
+	if mc, ok := c.(card.ModalCard); ok {
 		// A ModalCard must expose at least two modes — the marker exists to enumerate
 		// across them. Returning 0 would silently zero the chain (outer loop runs zero
 		// iterations); returning 1 makes the marker pointless. Panic so the bug surfaces
@@ -142,13 +142,13 @@ func buildAttackerMeta(c Card) attackerMeta {
 		m.modes = int8(n)
 		// Modal blockers (also Blocker + BlockCost) get a flag for the defendersDamage
 		// fast path — it scans defenders per leaf and the type assertions add up.
-		if _, ok := c.(Blocker); ok {
-			if _, ok := c.(BlockCost); ok {
+		if _, ok := c.(card.Blocker); ok {
+			if _, ok := c.(card.BlockCost); ok {
 				m.isModalBlocker = true
 			}
 		}
 	}
-	if mc, ok := c.(ModalCost); ok {
+	if mc, ok := c.(card.ModalCost); ok {
 		// ModalCost overrides VariableCost / static Cost in costAt — folds the per-mode
 		// costs into the partition pre-screen so MinCost / MaxCost still bound the search.
 		m.isModalCost = true
@@ -165,7 +165,7 @@ func buildAttackerMeta(c Card) attackerMeta {
 		m.minCost = minC
 		m.maxCost = maxC
 		m.isVariable = minC != maxC
-	} else if vc, ok := c.(VariableCost); ok {
+	} else if vc, ok := c.(card.VariableCost); ok {
 		m.minCost = vc.MinCost()
 		m.maxCost = vc.MaxCost()
 		m.isVariable = m.minCost != m.maxCost

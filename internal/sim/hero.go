@@ -26,12 +26,12 @@ type Hero interface {
 	// recording Logger the chain runner threads through) — hero abilities are pre-triggers
 	// — and bump s.value alongside. The int return is informational and discarded by the
 	// dispatcher; heroes without a triggered ability return 0.
-	OnCardPlayed(played Card, s *TurnState, l Logger) int
+	OnCardPlayed(played card.Card, s *TurnState, l card.Logger) int
 	// Opt is the hero's heuristic for the FaB Opt N keyword. TurnState.Opt(N) pops up to N
 	// cards from the top of the deck and hands them here; the handler returns a (top,
 	// bottom) split. The top list is placed back on top of the deck (in returned order)
 	// and the bottom list appends to the bottom (in returned order). The combined output
 	// must be exactly the input multiset — adding, dropping, or substituting any card
 	// panics. Both lists may be empty (skip bottoming any cards or skip keeping any on top).
-	Opt(cards []Card) (top, bottom []Card)
+	Opt(cards []card.Card) (top, bottom []card.Card)
 }

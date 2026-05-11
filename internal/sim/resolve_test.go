@@ -15,73 +15,75 @@ import (
 // attackStub is a vanilla attack-action card with printed power 3 and an empty Play.
 type attackStub struct{}
 
-func (attackStub) ID() ids.CardID      { return ids.InvalidCard }
-func (attackStub) Name() string        { return "attackStub" }
-func (attackStub) DisplayName() string { return "attackStub" }
-func (attackStub) Cost(GameEngine) int { return 0 }
-func (attackStub) Pitch() int          { return 0 }
-func (attackStub) Attack() int         { return 3 }
-func (attackStub) Defense() int        { return 0 }
+func (attackStub) ID() ids.CardID           { return ids.InvalidCard }
+func (attackStub) Name() string             { return "attackStub" }
+func (attackStub) DisplayName() string      { return "attackStub" }
+func (attackStub) Cost(card.GameEngine) int { return 0 }
+func (attackStub) Pitch() int               { return 0 }
+func (attackStub) Attack() int              { return 3 }
+func (attackStub) Defense() int             { return 0 }
 func (attackStub) Types() card.TypeSet {
 	return card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 }
-func (attackStub) GoAgain() bool                                { return false }
-func (attackStub) Play(s GameEngine, l Logger, self *CardState) {}
+func (attackStub) GoAgain() bool                                               { return false }
+func (attackStub) Play(s card.GameEngine, l card.Logger, self *card.CardState) {}
 
 // drStub is a vanilla defense-reaction card with printed defense 4.
 type drStub struct{}
 
-func (drStub) ID() ids.CardID      { return ids.InvalidCard }
-func (drStub) Name() string        { return "drStub" }
-func (drStub) DisplayName() string { return "drStub" }
-func (drStub) Cost(GameEngine) int { return 0 }
-func (drStub) Pitch() int          { return 0 }
-func (drStub) Attack() int         { return 0 }
-func (drStub) Defense() int        { return 4 }
+func (drStub) ID() ids.CardID           { return ids.InvalidCard }
+func (drStub) Name() string             { return "drStub" }
+func (drStub) DisplayName() string      { return "drStub" }
+func (drStub) Cost(card.GameEngine) int { return 0 }
+func (drStub) Pitch() int               { return 0 }
+func (drStub) Attack() int              { return 0 }
+func (drStub) Defense() int             { return 4 }
 func (drStub) Types() card.TypeSet {
 	return card.NewTypeSet(card.TypeGeneric, card.TypeDefenseReaction)
 }
-func (drStub) GoAgain() bool                                { return false }
-func (drStub) Play(s GameEngine, l Logger, self *CardState) {}
+func (drStub) GoAgain() bool                                               { return false }
+func (drStub) Play(s card.GameEngine, l card.Logger, self *card.CardState) {}
 
 // nonAttackStub is a non-attack action that flips a flag from Play (used to
 // confirm the Play body still runs even though the sim contributes no n).
 type nonAttackStub struct{ played *bool }
 
-func (nonAttackStub) ID() ids.CardID                                 { return ids.InvalidCard }
-func (nonAttackStub) Name() string                                   { return "nonAttackStub" }
-func (nonAttackStub) DisplayName() string                            { return "nonAttackStub" }
-func (nonAttackStub) Cost(GameEngine) int                            { return 0 }
-func (nonAttackStub) Pitch() int                                     { return 0 }
-func (nonAttackStub) Attack() int                                    { return 0 }
-func (nonAttackStub) Defense() int                                   { return 0 }
-func (nonAttackStub) Types() card.TypeSet                            { return card.NewTypeSet(card.TypeGeneric, card.TypeAction) }
-func (nonAttackStub) GoAgain() bool                                  { return false }
-func (n nonAttackStub) Play(s GameEngine, l Logger, self *CardState) { *n.played = true }
+func (nonAttackStub) ID() ids.CardID           { return ids.InvalidCard }
+func (nonAttackStub) Name() string             { return "nonAttackStub" }
+func (nonAttackStub) DisplayName() string      { return "nonAttackStub" }
+func (nonAttackStub) Cost(card.GameEngine) int { return 0 }
+func (nonAttackStub) Pitch() int               { return 0 }
+func (nonAttackStub) Attack() int              { return 0 }
+func (nonAttackStub) Defense() int             { return 0 }
+func (nonAttackStub) Types() card.TypeSet      { return card.NewTypeSet(card.TypeGeneric, card.TypeAction) }
+func (nonAttackStub) GoAgain() bool            { return false }
+func (n nonAttackStub) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
+	*n.played = true
+}
 
 // selfBuffStub is an attack action whose Play body flips BonusAttack so the
 // sim's post-Play EffectiveAttack reads the buffed value. Pins the contract
 // that ResolveChainStep computes n AFTER Play returns.
 type selfBuffStub struct{}
 
-func (selfBuffStub) ID() ids.CardID      { return ids.InvalidCard }
-func (selfBuffStub) Name() string        { return "selfBuffStub" }
-func (selfBuffStub) DisplayName() string { return "selfBuffStub" }
-func (selfBuffStub) Cost(GameEngine) int { return 0 }
-func (selfBuffStub) Pitch() int          { return 0 }
-func (selfBuffStub) Attack() int         { return 2 }
-func (selfBuffStub) Defense() int        { return 0 }
+func (selfBuffStub) ID() ids.CardID           { return ids.InvalidCard }
+func (selfBuffStub) Name() string             { return "selfBuffStub" }
+func (selfBuffStub) DisplayName() string      { return "selfBuffStub" }
+func (selfBuffStub) Cost(card.GameEngine) int { return 0 }
+func (selfBuffStub) Pitch() int               { return 0 }
+func (selfBuffStub) Attack() int              { return 2 }
+func (selfBuffStub) Defense() int             { return 0 }
 func (selfBuffStub) Types() card.TypeSet {
 	return card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 }
 func (selfBuffStub) GoAgain() bool { return false }
-func (selfBuffStub) Play(s GameEngine, l Logger, self *CardState) {
+func (selfBuffStub) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 	self.BonusAttack += 1
 }
 
 func TestResolveChainStep_AttackCreditsEffectiveAttack(t *testing.T) {
 	s := NewTurnStatePtr(TurnStateSpec{})
-	self := &CardState{Card: attackStub{}}
+	self := &card.CardState{Card: attackStub{}}
 	ResolveChainStep(s, s.logger, self)
 	if s.Value() != 3 {
 		t.Errorf("Value = %d, want 3 (printed attack)", s.Value())
@@ -93,7 +95,7 @@ func TestResolveChainStep_AttackCreditsEffectiveAttack(t *testing.T) {
 
 func TestResolveChainStep_DefenseReactionCapsToIncomingDamage(t *testing.T) {
 	s := NewTurnStatePtr(TurnStateSpec{IncomingDamage: 2})
-	self := &CardState{Card: drStub{}}
+	self := &card.CardState{Card: drStub{}}
 	ResolveChainStep(s, s.logger, self)
 	if s.Value() != 2 {
 		t.Errorf("Value = %d, want 2 (capped at IncomingDamage)", s.Value())
@@ -108,7 +110,7 @@ func TestResolveChainStep_DefenseReactionCapsToIncomingDamage(t *testing.T) {
 
 func TestResolveChainStep_DefenseReactionUncappedWhenIncomingExceedsDefense(t *testing.T) {
 	s := NewTurnStatePtr(TurnStateSpec{IncomingDamage: 10})
-	self := &CardState{Card: drStub{}}
+	self := &card.CardState{Card: drStub{}}
 	ResolveChainStep(s, s.logger, self)
 	if s.Value() != 4 {
 		t.Errorf("Value = %d, want 4 (printed defense, uncapped)", s.Value())
@@ -121,7 +123,7 @@ func TestResolveChainStep_DefenseReactionUncappedWhenIncomingExceedsDefense(t *t
 func TestResolveChainStep_NonAttackContributesZero(t *testing.T) {
 	played := false
 	s := NewTurnStatePtr(TurnStateSpec{})
-	self := &CardState{Card: nonAttackStub{played: &played}}
+	self := &card.CardState{Card: nonAttackStub{played: &played}}
 	ResolveChainStep(s, s.logger, self)
 	if !played {
 		t.Error("non-attack Play body did not run")
@@ -136,7 +138,7 @@ func TestResolveChainStep_NonAttackContributesZero(t *testing.T) {
 
 func TestResolveChainStep_SelfBuffInPlayAppliesBeforeCredit(t *testing.T) {
 	s := NewTurnStatePtr(TurnStateSpec{})
-	self := &CardState{Card: selfBuffStub{}}
+	self := &card.CardState{Card: selfBuffStub{}}
 	ResolveChainStep(s, s.logger, self)
 	if s.Value() != 3 {
 		t.Errorf("Value = %d, want 3 (printed 2 + Play's +1 BonusAttack)", s.Value())

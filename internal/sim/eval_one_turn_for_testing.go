@@ -1,6 +1,9 @@
 package sim
 
-import "github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
+import (
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
+)
 
 // Test-only entry point: drives one turn against a fixed deck order so tests can assert
 // chain outcomes plus the start-of-next-turn state without running the full multi-shuffle
@@ -100,17 +103,17 @@ func EvalOneTurnForTesting(master *deck.Deck, mp Matchup, initial TurnState, ini
 	if initialHand != nil && (len(initialHand) == 0 || len(initialHand) > handSize) {
 		return TurnStartState{}
 	}
-	handBuf := make([]Card, handSize, handSize+startOfTurnRevealRoom)
-	var h []Card
+	handBuf := make([]card.Card, handSize, handSize+startOfTurnRevealRoom)
+	var h []card.Card
 	if initialHand != nil {
 		h = handBuf[:len(initialHand)]
 		for i, c := range initialHand {
-			h[i] = c.(Card)
+			h[i] = c.(card.Card)
 		}
 	} else {
 		h = handBuf[:handSize]
 		for i, c := range d.Draw(handSize) {
-			h[i] = c.(Card)
+			h[i] = c.(card.Card)
 		}
 	}
 	sortHandByID(h)
@@ -133,7 +136,7 @@ func EvalOneTurnForTesting(master *deck.Deck, mp Matchup, initial TurnState, ini
 
 	// Deal turn 2's hand off the top, with the chain's leftover hand as the held prefix.
 	// Stop short of running Best — the caller wants the pre-Best state.
-	held := append([]Card(nil), play.State.Hand...)
+	held := append([]card.Card(nil), play.State.Hand...)
 	graveyardOut := make([]deck.Card, len(play.State.Graveyard))
 	for i, c := range play.State.Graveyard {
 		graveyardOut[i] = c
@@ -151,9 +154,9 @@ func EvalOneTurnForTesting(master *deck.Deck, mp Matchup, initial TurnState, ini
 			OpponentMarked:         play.State.OpponentMarked,
 		}
 	}
-	turn2Hand := append([]Card(nil), held...)
+	turn2Hand := append([]card.Card(nil), held...)
 	for _, c := range d.Draw(handSize - len(held)) {
-		turn2Hand = append(turn2Hand, c.(Card))
+		turn2Hand = append(turn2Hand, c.(card.Card))
 	}
 	// Process turn-1 Auras at the turn-2 boundary the same way Evaluate does:
 	// fire start-of-turn handlers, re-arm OncePerTurn gates, drop exhausted entries.

@@ -5,7 +5,7 @@
 // **dominate**."
 //
 // Modelling: the "less {h} than an opposing hero" clause is treated as a hero attribute — the
-// Dominate grant fires for heroes that implement sim.LowerHealthWanter (via
+// Dominate grant fires for heroes that implement card.LowerHealthWanter (via
 // sim.HeroWantsLowerHealth) and never fires otherwise, a coarse proxy that skips per-turn
 // life tracking. Standard self.GrantedDominate wiring (docs/dev-standards.md).
 

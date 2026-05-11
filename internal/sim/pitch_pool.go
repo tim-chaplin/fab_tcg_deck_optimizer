@@ -1,5 +1,9 @@
 package sim
 
+import (
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
+)
+
 // pitchPool tracks the state of the attack-phase pitch pool during a single chain run:
 // the active pitch ordering (perm / vals), how many pitches have popped (idx, n), the
 // partially-consumed front (front + remaining), and the flat backing slice (attr) that
@@ -11,7 +15,7 @@ package sim
 // card was held back without funding any cost — illegal in FaB. Residual `remaining`
 // is fine: it's the over-pitch surplus on the last popped pitch.
 type pitchPool struct {
-	perm []Card
+	perm []card.Card
 	vals []int
 	idx  int
 	n    int
@@ -20,9 +24,9 @@ type pitchPool struct {
 	// remaining==0) or one pitched card sits at the front with leftover resources.
 	// Tests bypass the real pool by seeding remaining with a synthetic budget and no
 	// backing front — pay then drains the budget without contributing attribution.
-	front     Card
+	front     card.Card
 	remaining int
-	attr      []Card
+	attr      []card.Card
 }
 
 // pay consumes `cost` resources from the front of the pool, popping new pitches as the
@@ -30,7 +34,7 @@ type pitchPool struct {
 // payment lands in the returned slice — so pitching one 3-resource non-attack to fund
 // three 1-cost plays attributes the non-attack to all three, not just the one whose
 // payment popped it. Returns ok=false if the pool ran out of pitches mid-payment.
-func (p *pitchPool) pay(cost int) (contrib []Card, ok bool) {
+func (p *pitchPool) pay(cost int) (contrib []card.Card, ok bool) {
 	attrStart := len(p.attr)
 	remaining := cost
 	for remaining > 0 {

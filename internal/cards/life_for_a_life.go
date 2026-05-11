@@ -5,7 +5,7 @@
 // When this hits, gain 1{h}."
 //
 // 1{h} gain is modelled as +1 damage-equivalent. The "less {h}" go-again clause routes
-// through sim.HeroWantsLowerHealth — fires for heroes implementing sim.LowerHealthWanter.
+// through sim.HeroWantsLowerHealth — fires for heroes implementing card.LowerHealthWanter.
 
 package cards
 

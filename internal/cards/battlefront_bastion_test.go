@@ -16,9 +16,9 @@ func TestBattlefrontBastion_BlockAloneFiresPrevention(t *testing.T) {
 		BattlefrontBastionBlue{},
 	}
 	for _, c := range cases {
-		blocker, ok := c.(sim.Blocker)
+		blocker, ok := c.(card.Blocker)
 		if !ok {
-			t.Errorf("%s: missing sim.Blocker hook", c.Name())
+			t.Errorf("%s: missing card.Blocker hook", c.Name())
 			continue
 		}
 		s := sim.NewTurnStateFromSpec(sim.TurnStateSpec{Defenders: []card.Card{c}})

@@ -33,34 +33,34 @@ func (c FakeCard) WithPitch(p int) FakeCard          { c.pitch = p; return c }
 func (c FakeCard) WithDefense(d int) FakeCard        { c.defense = d; return c }
 func (c FakeCard) WithGoAgain() FakeCard             { c.goAgain = true; return c }
 
-func (c FakeCard) ID() ids.CardID                    { return c.id }
-func (c FakeCard) Name() string                      { return c.name }
-func (c FakeCard) DisplayName() string               { return c.name }
-func (FakeCard) Cost(GameEngine) int                 { return 0 }
-func (c FakeCard) Pitch() int                        { return c.pitch }
-func (c FakeCard) Attack() int                       { return c.attack }
-func (c FakeCard) Defense() int                      { return c.defense }
-func (c FakeCard) Types() card.TypeSet               { return c.types }
-func (c FakeCard) GoAgain() bool                     { return c.goAgain }
-func (FakeCard) Play(GameEngine, Logger, *CardState) {}
+func (c FakeCard) ID() ids.CardID                                   { return c.id }
+func (c FakeCard) Name() string                                     { return c.name }
+func (c FakeCard) DisplayName() string                              { return c.name }
+func (FakeCard) Cost(card.GameEngine) int                           { return 0 }
+func (c FakeCard) Pitch() int                                       { return c.pitch }
+func (c FakeCard) Attack() int                                      { return c.attack }
+func (c FakeCard) Defense() int                                     { return c.defense }
+func (c FakeCard) Types() card.TypeSet                              { return c.types }
+func (c FakeCard) GoAgain() bool                                    { return c.goAgain }
+func (FakeCard) Play(card.GameEngine, card.Logger, *card.CardState) {}
 
 // FakeRedAttack is a fixed-stat-line attack: 1-cost, 1-pitch, 3-power, 1-defense, no
 // Go again. Mirrors testutils.RedAttack so tests that just need a "vanilla red attack"
 // in a deck or hand have a direct stand-in.
 type FakeRedAttack struct{}
 
-func (FakeRedAttack) ID() ids.CardID      { return ids.InvalidCard }
-func (FakeRedAttack) Name() string        { return "FakeRedAttack" }
-func (FakeRedAttack) DisplayName() string { return "FakeRedAttack [R]" }
-func (FakeRedAttack) Cost(GameEngine) int { return 1 }
-func (FakeRedAttack) Pitch() int          { return 1 }
-func (FakeRedAttack) Attack() int         { return 3 }
-func (FakeRedAttack) Defense() int        { return 1 }
+func (FakeRedAttack) ID() ids.CardID           { return ids.InvalidCard }
+func (FakeRedAttack) Name() string             { return "FakeRedAttack" }
+func (FakeRedAttack) DisplayName() string      { return "FakeRedAttack [R]" }
+func (FakeRedAttack) Cost(card.GameEngine) int { return 1 }
+func (FakeRedAttack) Pitch() int               { return 1 }
+func (FakeRedAttack) Attack() int              { return 3 }
+func (FakeRedAttack) Defense() int             { return 1 }
 func (FakeRedAttack) Types() card.TypeSet {
 	return card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 }
-func (FakeRedAttack) GoAgain() bool                       { return false }
-func (FakeRedAttack) Play(GameEngine, Logger, *CardState) {}
+func (FakeRedAttack) GoAgain() bool                                      { return false }
+func (FakeRedAttack) Play(card.GameEngine, card.Logger, *card.CardState) {}
 
 // DominatingFakeCard embeds FakeCard and adds the Dominator marker — exercises the
 // printed-Dominate branch of EffectiveDominate / HasDominate.
@@ -73,21 +73,21 @@ func (DominatingFakeCard) Dominate() {}
 // deck behaviour in isolation from hero ability contributions.
 type FakeHero struct {
 	Intel       int
-	OptStrategy func(cs []Card) (top, bottom []Card)
+	OptStrategy func(cs []card.Card) (top, bottom []card.Card)
 }
 
-func (FakeHero) ID() ids.HeroID                            { return ids.InvalidHero }
-func (FakeHero) Name() string                              { return "FakeHero" }
-func (FakeHero) DisplayName() string                       { return "FakeHero" }
-func (FakeHero) Health() int                               { return 20 }
-func (h FakeHero) Intelligence() int                       { return h.Intel }
-func (FakeHero) Types() card.TypeSet                       { return 0 }
-func (FakeHero) Class() card.CardType                      { return 0 }
-func (FakeHero) OnCardPlayed(Card, *TurnState, Logger) int { return 0 }
+func (FakeHero) ID() ids.HeroID                                      { return ids.InvalidHero }
+func (FakeHero) Name() string                                        { return "FakeHero" }
+func (FakeHero) DisplayName() string                                 { return "FakeHero" }
+func (FakeHero) Health() int                                         { return 20 }
+func (h FakeHero) Intelligence() int                                 { return h.Intel }
+func (FakeHero) Types() card.TypeSet                                 { return 0 }
+func (FakeHero) Class() card.CardType                                { return 0 }
+func (FakeHero) OnCardPlayed(card.Card, *TurnState, card.Logger) int { return 0 }
 
 // Opt dispatches to OptStrategy when set; otherwise keeps every revealed card on top
 // of the deck in input order (no reshape).
-func (h FakeHero) Opt(cs []Card) (top, bottom []Card) {
+func (h FakeHero) Opt(cs []card.Card) (top, bottom []card.Card) {
 	if h.OptStrategy != nil {
 		return h.OptStrategy(cs)
 	}

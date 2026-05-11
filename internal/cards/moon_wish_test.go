@@ -24,9 +24,9 @@ func TestMoonWish_VariableCost(t *testing.T) {
 		if got := c.Cost(&empty); got != 2 {
 			t.Errorf("%s: Cost(empty) = %d, want 2", c.Name(), got)
 		}
-		vc, ok := c.(sim.VariableCost)
+		vc, ok := c.(card.VariableCost)
 		if !ok {
-			t.Errorf("%s: missing sim.VariableCost", c.Name())
+			t.Errorf("%s: missing card.VariableCost", c.Name())
 			continue
 		}
 		if vc.MinCost() != 0 || vc.MaxCost() != 2 {

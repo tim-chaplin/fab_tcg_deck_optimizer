@@ -23,7 +23,7 @@ type Trigger struct {
 	// Source is the originating card, surfaced in the trace via Source.DisplayName().
 	// Auras whose Self is a token leave Source nil; Source is the production source for
 	// card-based triggers / auras.
-	Source Card
+	Source card.Card
 	// TriggerType matches the firing site (TriggerEndOfTurn, TriggerAttack, …).
 	TriggerType TriggerType
 	// TypeFilter optionally narrows TriggerHit to a card-type predicate. nil = no filter.
@@ -36,4 +36,4 @@ type Trigger struct {
 // firing aura as a; standalone trigger fires pass nil. l is the cards-facing log sink
 // the chain runner threaded through Play; handlers emit their pre/post-trigger lines
 // through it so a nil l silently elides logging during the find-best pass.
-type TriggerHandler func(g GameEngine, l Logger, t *Trigger, a *Aura)
+type TriggerHandler func(g card.GameEngine, l card.Logger, t *Trigger, a *Aura)

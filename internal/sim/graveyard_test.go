@@ -1,9 +1,10 @@
 package sim_test
 
 import (
+	"testing"
+
 	. "github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
-	"testing"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
@@ -13,7 +14,7 @@ import (
 // TestGraveyard_AttackChainAppends: every attacker in the chain lands in state.Graveyard, in
 // play order. Confirms the solver actually populates the list as cards resolve.
 func TestGraveyard_AttackChainAppends(t *testing.T) {
-	order := []Card{testutils.RedAttack{}, testutils.RedAttack{}, testutils.RedAttack{}}
+	order := []card.Card{testutils.RedAttack{}, testutils.RedAttack{}, testutils.RedAttack{}}
 	ctx := NewSequenceContextForTest(testutils.Hero{Intel: 4}, nil, nil, 1_000_000, 0, len(order))
 	if _, _, _, legal := ctx.PlaySequence(order); !legal {
 		t.Fatalf("playSequence rejected the chain")
@@ -35,7 +36,7 @@ func TestGraveyard_AttackChainAppends(t *testing.T) {
 func TestGraveyard_WeaponSwingDoesNotEnterGraveyard(t *testing.T) {
 	attack := testutils.RedAttack{}
 	swing := weapons.ReapingBlade{}.Ability()
-	order := []Card{attack, swing}
+	order := []card.Card{attack, swing}
 	ctx := NewSequenceContextForTest(testutils.Hero{Intel: 4}, nil, nil, 1_000_000, 0, len(order))
 	if _, _, _, legal := ctx.PlaySequence(order); !legal {
 		t.Fatalf("playSequence rejected attack → weapon")
@@ -51,20 +52,20 @@ func TestGraveyard_WeaponSwingDoesNotEnterGraveyard(t *testing.T) {
 
 // gravSpyDR is a test-only Defense Reaction whose Play captures a snapshot of s.Graveyard so
 // tests can assert the solver seeded it with the expected defenders before the DR resolved.
-type gravSpyDR struct{ saw *[]Card }
+type gravSpyDR struct{ saw *[]card.Card }
 
-func (gravSpyDR) ID() ids.CardID      { return ids.InvalidCard }
-func (gravSpyDR) Name() string        { return "gravSpyDR" }
-func (gravSpyDR) DisplayName() string { return "gravSpyDR" }
-func (gravSpyDR) Cost(GameEngine) int { return 0 }
-func (gravSpyDR) Pitch() int          { return 0 }
-func (gravSpyDR) Attack() int         { return 0 }
-func (gravSpyDR) Defense() int        { return 1 }
+func (gravSpyDR) ID() ids.CardID           { return ids.InvalidCard }
+func (gravSpyDR) Name() string             { return "gravSpyDR" }
+func (gravSpyDR) DisplayName() string      { return "gravSpyDR" }
+func (gravSpyDR) Cost(card.GameEngine) int { return 0 }
+func (gravSpyDR) Pitch() int               { return 0 }
+func (gravSpyDR) Attack() int              { return 0 }
+func (gravSpyDR) Defense() int             { return 1 }
 func (gravSpyDR) Types() card.TypeSet {
 	return card.NewTypeSet(card.TypeGeneric, card.TypeDefenseReaction)
 }
 func (gravSpyDR) GoAgain() bool { return false }
-func (g gravSpyDR) Play(s GameEngine, l Logger, self *CardState) {
+func (g gravSpyDR) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 	*g.saw = append((*g.saw)[:0], s.Graveyard()...)
 }
 
@@ -74,16 +75,16 @@ func (g gravSpyDR) Play(s GameEngine, l Logger, self *CardState) {
 // seeding regardless of their type mask.
 type auraDefender struct{}
 
-func (auraDefender) ID() ids.CardID                      { return ids.InvalidCard }
-func (auraDefender) Name() string                        { return "auraDefender" }
-func (auraDefender) DisplayName() string                 { return "auraDefender" }
-func (auraDefender) Cost(GameEngine) int                 { return 0 }
-func (auraDefender) Pitch() int                          { return 0 }
-func (auraDefender) Attack() int                         { return 0 }
-func (auraDefender) Defense() int                        { return 3 }
-func (auraDefender) Types() card.TypeSet                 { return card.NewTypeSet(card.TypeAura) }
-func (auraDefender) GoAgain() bool                       { return false }
-func (auraDefender) Play(GameEngine, Logger, *CardState) {}
+func (auraDefender) ID() ids.CardID                                     { return ids.InvalidCard }
+func (auraDefender) Name() string                                       { return "auraDefender" }
+func (auraDefender) DisplayName() string                                { return "auraDefender" }
+func (auraDefender) Cost(card.GameEngine) int                           { return 0 }
+func (auraDefender) Pitch() int                                         { return 0 }
+func (auraDefender) Attack() int                                        { return 0 }
+func (auraDefender) Defense() int                                       { return 3 }
+func (auraDefender) Types() card.TypeSet                                { return card.NewTypeSet(card.TypeAura) }
+func (auraDefender) GoAgain() bool                                      { return false }
+func (auraDefender) Play(card.GameEngine, card.Logger, *card.CardState) {}
 
 // Tests that a plain blocker enters the graveyard regardless of PersistsInPlay — a paired
 // DR snapshotting state.Graveyard sees the blocker.
@@ -93,11 +94,11 @@ func TestGraveyard_PlainBlockEntersGraveyardRegardlessOfType(t *testing.T) {
 		t.Fatal("auraDefender's type mask should set PersistsInPlay; otherwise the test " +
 			"isn't isolating the plain-block path")
 	}
-	var saw []Card
+	var saw []card.Card
 	dr := gravSpyDR{saw: &saw}
 	bufs := NewAttackBufs(2, 0, nil)
 	_, _ = DefendersDamage(
-		[]Card{blocker, dr},
+		[]card.Card{blocker, dr},
 		nil, nil,
 		bufs.State(),
 		bufs.DefenseGravScratch(),
@@ -118,8 +119,8 @@ func TestGraveyard_PlainBlockEntersGraveyardRegardlessOfType(t *testing.T) {
 
 // Tests that Graveyard resets between back-to-back playSequence calls (no double-up).
 func TestGraveyard_PermutationReset(t *testing.T) {
-	first := []Card{testutils.RedAttack{}, testutils.RedAttack{}, testutils.RedAttack{}}
-	second := []Card{testutils.RedAttack{}}
+	first := []card.Card{testutils.RedAttack{}, testutils.RedAttack{}, testutils.RedAttack{}}
+	second := []card.Card{testutils.RedAttack{}}
 	ctx := NewSequenceContextForTest(testutils.Hero{Intel: 4}, nil, nil, 1_000_000, 0, len(first))
 
 	if _, _, _, legal := ctx.PlaySequence(first); !legal {

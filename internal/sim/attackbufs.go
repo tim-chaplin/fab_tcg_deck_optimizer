@@ -28,8 +28,8 @@ import (
 // shapeBufs holds the buffers sized once at construction from (handSize, weapons). They
 // stay shape-stable across every call against this attackBufs and never need re-sizing.
 type shapeBufs struct {
-	pcBuf  []CardState
-	ptrBuf []*CardState
+	pcBuf  []card.CardState
+	ptrBuf []*card.CardState
 	state  *TurnState
 	// permMeta parallels pcBuf: each entry points into the global cardMetaCache so playSequence's
 	// inner loop skips interface dispatch on Types / GoAgain and reads cached cost bounds.
@@ -38,7 +38,7 @@ type shapeBufs struct {
 	// attackerBuf is the per-mask-combo working slice that bestAttackWithWeapons fills with
 	// the partition's attackers + the weapon-mask's selected weapons before handing off to
 	// bestSequence. Sized at construction; the slice header re-slices to [:n] per call.
-	attackerBuf []Card
+	attackerBuf []card.Card
 	// weaponNames[mask] is the pre-built []string of weapon names indexed by the
 	// weapon-prefix bits of the wmask, used for SwungWeapons display. Items don't
 	// contribute to swung weapons so this stays weapon-only.
@@ -50,7 +50,7 @@ type shapeBufs struct {
 	// came from a weapon or an item, so they share one list and one path. Per-Best
 	// assembly re-slices back to the weapon prefix length before appending items,
 	// leaving the cached weapon entries reusable across calls.
-	activatedAbilities    []Card
+	activatedAbilities    []card.Card
 	activatedAbilityCosts []int
 	// weaponAbilityCount is len(weapons) at construction — the size of the cached
 	// weapon prefix in activatedAbilities. Per-Best assembly re-slices both
@@ -69,11 +69,11 @@ type shapeBufs struct {
 	// pitchedValsScratch backs the per-leaf "pitched values" slice consumed by phase-mask
 	// enumeration. Re-sliced to [:0] at the start of every leaf to eliminate a per-leaf alloc.
 	pitchedValsScratch []int
-	pitchedBuf         []Card
+	pitchedBuf         []card.Card
 	// pitchPermBuf is the per-leaf pitch-ordering scratch — the chain runner permutes
 	// pitched cards in place via Heap's algorithm, just like the attacker permutation. Sized
 	// to handSize+1 so any pitch-role count the partition produces fits.
-	pitchPermBuf []Card
+	pitchPermBuf []card.Card
 	// pitchPermValsBuf parallels pitchPermBuf: pitchPermValsBuf[i] is the cached Pitch() of
 	// pitchPermBuf[i]. The pitch Heap swaps both slices together so playSequenceWithMeta
 	// can fetch pitch values without re-entering the Card.Pitch() interface call on every
@@ -84,13 +84,13 @@ type shapeBufs struct {
 	// adjacent windows. Total length across cards = pitches consumed (≤ len(pitched)). Sized
 	// at construction to handSize+1 so append never reallocates the backing array — slice
 	// headers stored on CardState stay valid across the active permutation.
-	pitchAttrBuf []Card
-	attackersBuf []Card
-	defendersBuf []Card
-	heldBuf      []Card
+	pitchAttrBuf []card.Card
+	attackersBuf []card.Card
+	defendersBuf []card.Card
+	heldBuf      []card.Card
 	// defenseGravScratch backs state.Graveyard during DR Plays. Reset via [:0]+append per
 	// iteration so card effects can freely mutate their view without leaking into the next one.
-	defenseGravScratch []Card
+	defenseGravScratch []card.Card
 }
 
 // permBufs holds the per-permutation slice backings. resetStateForPermutation seeds the
@@ -98,10 +98,10 @@ type shapeBufs struct {
 // never reallocates: only mid-chain growth past the pre-sized cap forces a new backing
 // array.
 type permBufs struct {
-	handBacking        []Card
-	graveBacking       []Card
-	banishBacking      []Card
-	cardsPlayedBacking []Card
+	handBacking        []card.Card
+	graveBacking       []card.Card
+	banishBacking      []card.Card
+	cardsPlayedBacking []card.Card
 	logBacking         []LogEntry
 	// logger is the recording-mode *TurnLogger reused across permutations. Allocated
 	// once in newAttackBufs; the per-permutation buffer rebind goes through
@@ -163,7 +163,7 @@ type attackBufs struct {
 	// takes a *CardState through an interface boundary so a literal &CardState{} would
 	// escape and heap-alloc once per DR per partition — reusing this slot keeps the
 	// whole defense-phase replay allocation-free. Reset per call by the caller.
-	drCardStateScratch CardState
+	drCardStateScratch card.CardState
 }
 
 func newAttackBufs(handSize, weaponCount int, weapons []Weapon) *attackBufs {
@@ -177,7 +177,7 @@ func newAttackBufs(handSize, weaponCount int, weapons []Weapon) *attackBufs {
 	// stable package-cached interface value (per dev-standards), and its cost flows
 	// through attackerMetaPtrFor's global cache. Per-Best assembly re-slices back to
 	// this prefix length before appending items.
-	activatedAbilities := make([]Card, len(weapons))
+	activatedAbilities := make([]card.Card, len(weapons))
 	activatedAbilityCosts := make([]int, len(weapons))
 	for i, w := range weapons {
 		ab := w.Ability()
@@ -197,8 +197,8 @@ func newAttackBufs(handSize, weaponCount int, weapons []Weapon) *attackBufs {
 		}
 		weaponNames[mask] = names
 	}
-	pcBuf := make([]CardState, maxAttackers)
-	ptrBuf := make([]*CardState, maxAttackers)
+	pcBuf := make([]card.CardState, maxAttackers)
+	ptrBuf := make([]*card.CardState, maxAttackers)
 	// Wire the ptrBuf entries to their pcBuf slots once — the mapping is stable across every
 	// permutation so playSequenceWithMeta doesn't need to rewrite it per call.
 	for i := range pcBuf {
@@ -213,7 +213,7 @@ func newAttackBufs(handSize, weaponCount int, weapons []Weapon) *attackBufs {
 			ptrBuf:                ptrBuf,
 			state:                 &TurnState{},
 			permMeta:              make([]*attackerMeta, maxAttackers),
-			attackerBuf:           make([]Card, maxAttackers),
+			attackerBuf:           make([]card.Card, maxAttackers),
 			weaponNames:           weaponNames,
 			activatedAbilities:    activatedAbilities,
 			activatedAbilityCosts: activatedAbilityCosts,
@@ -224,20 +224,20 @@ func newAttackBufs(handSize, weaponCount int, weapons []Weapon) *attackBufs {
 			isDRBuf:               make([]bool, handSize+1),
 			canAttackBuf:          make([]bool, handSize+1),
 			pitchedValsScratch:    make([]int, 0, handSize+1),
-			pitchedBuf:            make([]Card, 0, handSize+1),
-			pitchPermBuf:          make([]Card, 0, handSize+1),
+			pitchedBuf:            make([]card.Card, 0, handSize+1),
+			pitchPermBuf:          make([]card.Card, 0, handSize+1),
 			pitchPermValsBuf:      make([]int, 0, handSize+1),
-			pitchAttrBuf:          make([]Card, 0, handSize+1),
-			attackersBuf:          make([]Card, 0, handSize+1),
-			defendersBuf:          make([]Card, 0, handSize+1),
-			heldBuf:               make([]Card, 0, handSize+1),
-			defenseGravScratch:    make([]Card, 0, handSize+1),
+			pitchAttrBuf:          make([]card.Card, 0, handSize+1),
+			attackersBuf:          make([]card.Card, 0, handSize+1),
+			defendersBuf:          make([]card.Card, 0, handSize+1),
+			heldBuf:               make([]card.Card, 0, handSize+1),
+			defenseGravScratch:    make([]card.Card, 0, handSize+1),
 		},
 		permBufs: permBufs{
-			handBacking:          make([]Card, 0, maxAttackers),
-			graveBacking:         make([]Card, 0, maxAttackers),
-			banishBacking:        make([]Card, 0, handSize+1),
-			cardsPlayedBacking:   make([]Card, 0, maxAttackers),
+			handBacking:          make([]card.Card, 0, maxAttackers),
+			graveBacking:         make([]card.Card, 0, maxAttackers),
+			banishBacking:        make([]card.Card, 0, handSize+1),
+			cardsPlayedBacking:   make([]card.Card, 0, maxAttackers),
 			logBacking:           make([]LogEntry, 0, logBackingCap),
 			logger:               turnlogger.New(),
 			auraTriggersBacking:  make([]Aura, 0, handSize+1),
@@ -288,9 +288,9 @@ func sameWeapons(a, b []Weapon) bool {
 // calls, which would otherwise repeat on every leaf. totalN covers the optional arsenal-in
 // slot at index n; when present, its Defense picks up ArsenalDefenseBonus so the partition /
 // capping pipeline sees the effective value.
-func fillPartitionPerCardBufs(hand []Card, n, totalN int, arsenalCardIn Card, pvals, dvals []int, isDR, canAttack []bool) {
+func fillPartitionPerCardBufs(hand []card.Card, n, totalN int, arsenalCardIn card.Card, pvals, dvals []int, isDR, canAttack []bool) {
 	for i := 0; i < totalN; i++ {
-		var c Card
+		var c card.Card
 		if i < n {
 			c = hand[i]
 		} else {
@@ -302,7 +302,7 @@ func fillPartitionPerCardBufs(hand []Card, n, totalN int, arsenalCardIn Card, pv
 		// when played from arsenal opt in via ArsenalDefenseBonus; bump the static Defense() up
 		// here so the partition / capping pipeline sees the effective value.
 		if i == n {
-			dvals[i] += arsenalDefenseBonusOf(c)
+			dvals[i] += card.ArsenalDefenseBonusOf(c)
 		}
 		m := attackerMetaPtrFor(c)
 		ts := m.types

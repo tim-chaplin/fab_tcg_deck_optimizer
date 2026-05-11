@@ -49,7 +49,7 @@ type TurnState struct {
 	// chain land here too. Whatever's left at end of chain becomes next turn's Held set.
 	// Card subpackages reach hand only through Hand() / AppendHand / PopHandAt — see the
 	// package-level docstring for the framework-vs-card boundary rationale.
-	hand []Card
+	hand []card.Card
 	// deck is the chain's working deck. Unexported so card subpackages can only reach
 	// it via the public Deck() / PopDeckTop / PrependToDeck / TutorFromDeck accessors, each
 	// of which clears cacheable. Framework code in this package reads / writes deck directly
@@ -61,7 +61,7 @@ type TurnState struct {
 	// card at start of turn, nil after it plays / defends, refilled post-chain by the
 	// arsenal-promotion step. Cards that read "from arsenal" use CardState.FromArsenal,
 	// not this field.
-	Arsenal Card
+	Arsenal card.Card
 	// graveyard is cards that have entered the graveyard this turn — every card played or
 	// blocked lands here after resolving. Pitched cards do not (they recycle to deck
 	// bottom). Unexported for the same reason as deck: cards reach it only via Graveyard()
@@ -69,7 +69,7 @@ type TurnState struct {
 	// code in this package writes graveyard directly (the dispatcher's "card resolved →
 	// non-persistent goes to graveyard" rule, DestroyAura's aura-card append) so the
 	// non-card-driven append doesn't poison cacheable.
-	graveyard []Card
+	graveyard []card.Card
 	// banished holds every card in the banished zone — both prior-turn carryover and
 	// this-turn appends. Per FaB rules cards stay banished forever by default, so the
 	// per-permutation reset re-seeds from the priorBanish snapshot rather than starting
@@ -77,7 +77,7 @@ type TurnState struct {
 	// flips CardBanished alongside the append; cross-turn carry assigns the field
 	// directly via the same-package next-turn construction. External readers consult
 	// Banished() / CardBanished; external constructors go through TurnStateSpec.
-	banished []Card
+	banished []card.Card
 	// CardBanished is the per-turn flag BanishFromGraveyard sets the first time it
 	// appends a card. Reset (alongside banished's per-permutation re-seed) in
 	// resetStateForPermutation so "any card banished this turn" reads true only for
@@ -148,7 +148,7 @@ type TurnState struct {
 	// CardsPlayed is the sequence of cards played (as attacks) this turn, in order.
 	// Populated by the sim after each Play returns so later cards this turn see what was
 	// played before them.
-	cardsPlayed []Card
+	cardsPlayed []card.Card
 	// AuraCreated is set when a card or ability creates an aura this turn (e.g. Runechant
 	// tokens). Effects that check "if you've played or created an aura this turn" should
 	// OR this with CardsPlayed containing an Aura-typed card.
@@ -156,10 +156,10 @@ type TurnState struct {
 	// CardsRemaining is the cards that will be played after the current one in chain order.
 	// Populated by the sim before each Play so an effect can peek forward ("next X attack")
 	// or grant keywords to a later card by flipping flags on its CardState entry.
-	cardsRemaining []*CardState
+	cardsRemaining []*card.CardState
 	// Pitched is the cards pitched this turn for resources. Populated by the sim before any
 	// Play. Effects that check "if an attack card was pitched" scan this list.
-	pitched []Card
+	pitched []card.Card
 	// Overpower is set when an attack with the Overpower keyword is being played. Not yet
 	// consumed by the sim — blocked damage should eventually be forwarded to the hero when
 	// Overpower is true.
@@ -186,16 +186,16 @@ type TurnState struct {
 	// by the chain runner before invoking each defender's Play / Block hook. Cards reading
 	// "how many other plain blockers / DRs are defending alongside" iterate this list — the
 	// defender-side counterpart to CardsRemaining for attackers.
-	defenders []Card
+	defenders []card.Card
 	// attackReactionTarget is the buff target for the currently-resolving Attack Reaction.
 	// Set by the chain runner around AR.Play; ARs read it via AttackReactionTarget().
-	attackReactionTarget *CardState
+	attackReactionTarget *card.CardState
 	// TriggeringCard is the card whose play caused the active aura attack-action trigger
 	// to fire. The sim sets it before each Aura handler runs and clears it after;
 	// the handler reads it to attribute its log line back to the triggering card. Hero
 	// and OnHit handlers receive the triggering card as a direct arg already and don't
 	// need this field. Nil during direct chain-step resolution and start-of-turn fires.
-	triggeringCard Card
+	triggeringCard card.Card
 	// cacheable is true while the chain hasn't read or mutated deck / graveyard through any
 	// public accessor (Deck / Graveyard / PopDeckTop / PrependToDeck / TutorFromDeck /
 	// BanishFromGraveyard / AddToGraveyard) or framework helper built on them (DrawOne,
@@ -214,7 +214,7 @@ func (s *TurnState) IsCacheable() bool { return s.cacheable }
 
 // AttackReactionTarget returns the buff target for the currently-resolving AR, or nil when
 // no AR is resolving.
-func (s *TurnState) AttackReactionTarget() *CardState { return s.attackReactionTarget }
+func (s *TurnState) AttackReactionTarget() *card.CardState { return s.attackReactionTarget }
 
 // Field accessors below: each returns or mutates one privatized struct field. Cards
 // reach them through these methods so the cards-side surface matches v2/card.GameEngine.
@@ -257,21 +257,21 @@ func (s *TurnState) BlockTotal() int { return s.blockTotal }
 func (s *TurnState) CardBanished() bool { return s.cardBanished }
 
 // CardsPlayed returns the sequence of cards played (as attacks) this turn.
-func (s *TurnState) CardsPlayed() []Card { return s.cardsPlayed }
+func (s *TurnState) CardsPlayed() []card.Card { return s.cardsPlayed }
 
 // SetCardsPlayed replaces the cards-played slice — used by Moon Wish's transient
 // pre-append + pop around its go-again Sun Kiss invocation so the synergy fires.
-func (s *TurnState) SetCardsPlayed(cs []Card) { s.cardsPlayed = cs }
+func (s *TurnState) SetCardsPlayed(cs []card.Card) { s.cardsPlayed = cs }
 
 // CardsRemaining returns the cards scheduled after the current chain step.
-func (s *TurnState) CardsRemaining() []*CardState { return s.cardsRemaining }
+func (s *TurnState) CardsRemaining() []*card.CardState { return s.cardsRemaining }
 
 // SetCardsRemaining replaces the look-ahead queue — currently used only by tests that
 // seed a partial chain for predicate evaluation.
-func (s *TurnState) SetCardsRemaining(cs []*CardState) { s.cardsRemaining = cs }
+func (s *TurnState) SetCardsRemaining(cs []*card.CardState) { s.cardsRemaining = cs }
 
 // Defenders returns the partition's defender slice (DRs + plain blocks).
-func (s *TurnState) Defenders() []Card { return s.defenders }
+func (s *TurnState) Defenders() []card.Card { return s.defenders }
 
 // IncomingDamage returns the opponent damage left to allocate this turn.
 func (s *TurnState) IncomingDamage() int { return s.incomingDamage }
@@ -296,15 +296,15 @@ func (s *TurnState) Overpower() bool { return s.overpower }
 func (s *TurnState) SetOverpower(v bool) { s.overpower = v }
 
 // Pitched returns the cards pitched this turn for resources.
-func (s *TurnState) Pitched() []Card { return s.pitched }
+func (s *TurnState) Pitched() []card.Card { return s.pitched }
 
 // TriggeringCard returns the card whose Play caused the currently-firing aura
 // attack-action trigger, or nil outside of a trigger fire.
-func (s *TurnState) TriggeringCard() Card { return s.triggeringCard }
+func (s *TurnState) TriggeringCard() card.Card { return s.triggeringCard }
 
 // SetTriggeringCard replaces the triggering-card slot. Used by tests that drive a
 // trigger handler directly; production code threads it through the trigger fire loop.
-func (s *TurnState) SetTriggeringCard(c Card) { s.triggeringCard = c }
+func (s *TurnState) SetTriggeringCard(c card.Card) { s.triggeringCard = c }
 
 // Triggers returns the one-shot trigger queue.
 func (s *TurnState) Triggers() []Trigger { return s.triggers }
@@ -336,15 +336,15 @@ func (s *TurnState) Deck() *deck.Deck {
 // PeekTopN returns the top n cards of the deck (top first) without removing them and
 // flips IsCacheable to false. Returns fewer cards when the deck has < n. Used by cards
 // that scan or count the top N for a rider.
-func (s *TurnState) PeekTopN(n int) []Card {
+func (s *TurnState) PeekTopN(n int) []card.Card {
 	s.cacheable = false
 	top := s.deck.PeekTopN(n)
 	if len(top) == 0 {
 		return nil
 	}
-	out := make([]Card, len(top))
+	out := make([]card.Card, len(top))
 	for i, c := range top {
-		out[i] = c.(Card)
+		out[i] = c.(card.Card)
 	}
 	return out
 }
@@ -353,7 +353,7 @@ func (s *TurnState) PeekTopN(n int) []Card {
 // the returned slice; use AppendHand / PopHandAt for mutations. Read-only callers that
 // only inspect length / contents still flip — the cache key can't depend on what the
 // hand-content read produced.
-func (s *TurnState) Hand() []Card {
+func (s *TurnState) Hand() []card.Card {
 	s.cacheable = false
 	return s.hand
 }
@@ -363,7 +363,7 @@ func (s *TurnState) Hand() []Card {
 // this package writes s.hand directly (resetStateForPermutation seeds, applyChainStep
 // removes the playing card) and doesn't go through here — those mutations aren't
 // card-driven and shouldn't poison the cacheable bit.
-func (s *TurnState) AppendHand(c Card) {
+func (s *TurnState) AppendHand(c card.Card) {
 	s.cacheable = false
 	s.hand = append(s.hand, c)
 }
@@ -372,7 +372,7 @@ func (s *TurnState) AppendHand(c Card) {
 // that pop hand cards (alt-cost effects, Moon Wish's "return a hand card to top of deck")
 // use this so the cache invalidation is automatic. Panics on out-of-range i — callers
 // should len-check via Hand() first.
-func (s *TurnState) PopHandAt(i int) Card {
+func (s *TurnState) PopHandAt(i int) card.Card {
 	s.cacheable = false
 	c := s.hand[i]
 	s.hand = append(s.hand[:i], s.hand[i+1:]...)
@@ -385,16 +385,16 @@ func (s *TurnState) PopHandAt(i int) Card {
 // in exported form so external code doesn't have to go through one Set* call per
 // field. Construct via NewTurnStateFromSpec.
 type TurnStateSpec struct {
-	Arsenal               Card
+	Arsenal               card.Card
 	Auras                 []Aura
 	Triggers              []Trigger
 	Items                 []Item
 	Banished              []deck.Card
 	Graveyard             []deck.Card
-	Pitched               []Card
-	Defenders             []Card
-	CardsPlayed           []Card
-	CardsRemaining        []*CardState
+	Pitched               []card.Card
+	Defenders             []card.Card
+	CardsPlayed           []card.Card
+	CardsRemaining        []*card.CardState
 	OpponentMarked        bool
 	ArcaneDamageDealt     bool
 	AuraCreated           bool
@@ -406,8 +406,8 @@ type TurnStateSpec struct {
 	ArcaneIncomingDamage  int
 	BlockTotal            int
 	Value                 int
-	TriggeringCard        Card
-	AttackReactionTarget  *CardState
+	TriggeringCard        card.Card
+	AttackReactionTarget  *card.CardState
 }
 
 // NewTurnStatePtr is the pointer variant of NewTurnStateFromSpec — convenience for callers
@@ -423,13 +423,13 @@ func NewTurnStatePtr(spec TurnStateSpec) *TurnState {
 // to construct a prior-turn state for EvalOneTurnForTesting; production code in package
 // sim that already has the cross-turn buffers in hand can construct TurnState directly.
 func NewTurnStateFromSpec(spec TurnStateSpec) TurnState {
-	banished := make([]Card, len(spec.Banished))
+	banished := make([]card.Card, len(spec.Banished))
 	for i, c := range spec.Banished {
-		banished[i] = c.(Card)
+		banished[i] = c.(card.Card)
 	}
-	graveyard := make([]Card, len(spec.Graveyard))
+	graveyard := make([]card.Card, len(spec.Graveyard))
 	for i, c := range spec.Graveyard {
-		graveyard[i] = c.(Card)
+		graveyard[i] = c.(card.Card)
 	}
 	return TurnState{
 		Arsenal:               spec.Arsenal,
@@ -466,7 +466,7 @@ func NewTurnStateFromSpec(spec TurnStateSpec) TurnState {
 // Doesn't flip cacheable: tests that assert on hand state typically don't care about the
 // cache, and a NewTurnState-then-SetHandForTesting flow shouldn't poison the bit before
 // the test has run a single Play.
-func (s *TurnState) SetHandForTesting(cards []Card) {
+func (s *TurnState) SetHandForTesting(cards []card.Card) {
 	s.hand = cards
 }
 
@@ -480,35 +480,35 @@ func (s *TurnState) SetCurrentAuraIdxForTesting(i int) {
 // Graveyard returns the live graveyard slice and flips IsCacheable to false. Cards must
 // not mutate the returned slice; use BanishFromGraveyard for mutations or AddToGraveyard
 // for the deterministic append-only path.
-func (s *TurnState) Graveyard() []Card {
+func (s *TurnState) Graveyard() []card.Card {
 	s.cacheable = false
 	return s.graveyard
 }
 
 // PopDeckTop removes the top card of the deck and returns it. Returns (nil, false) when
 // the deck is empty. Flips IsCacheable to false.
-func (s *TurnState) PopDeckTop() (Card, bool) {
+func (s *TurnState) PopDeckTop() (card.Card, bool) {
 	s.cacheable = false
 	if s.deck.Size() == 0 {
 		return nil, false
 	}
-	return s.deck.Draw(1)[0].(Card), true
+	return s.deck.Draw(1)[0].(card.Card), true
 }
 
 // PeekDeck returns the top card of the deck without removing it. Returns (nil, false) on
 // an empty deck. Flips IsCacheable to false — observing the deck top makes the chain's
 // output depend on hidden shuffle order, same as PopDeckTop.
-func (s *TurnState) PeekDeck() (Card, bool) {
+func (s *TurnState) PeekDeck() (card.Card, bool) {
 	s.cacheable = false
 	top := s.deck.PeekTop()
 	if top == nil {
 		return nil, false
 	}
-	return top.(Card), true
+	return top.(card.Card), true
 }
 
 // PrependToDeck inserts c at the top of the deck. Flips IsCacheable to false.
-func (s *TurnState) PrependToDeck(c Card) {
+func (s *TurnState) PrependToDeck(c card.Card) {
 	s.cacheable = false
 	s.deck.PutTop([]deck.Card{c})
 }
@@ -517,7 +517,7 @@ func (s *TurnState) PrependToDeck(c Card) {
 // self.SkipGraveyard so the chain dispatcher skips the usual non-persistent → graveyard
 // append. Models the FaB clause "put this on the bottom of its owner's deck"
 // (Relentless Pursuit). Flips IsCacheable to false.
-func (s *TurnState) RecycleToDeckBottom(self *CardState) {
+func (s *TurnState) RecycleToDeckBottom(self *card.CardState) {
 	s.cacheable = false
 	s.deck.PutBottom([]deck.Card{self.Card})
 	self.SkipGraveyard = true
@@ -538,7 +538,7 @@ func (s *TurnState) RecycleToDeckBottom(self *CardState) {
 //
 // Panics if the handler's combined output isn't exactly the input multiset. The contract
 // is that Opt only re-orders cards; adding, dropping, or substituting any card is a bug.
-func (s *TurnState) Opt(l Logger, n int) {
+func (s *TurnState) Opt(l card.Logger, n int) {
 	s.cacheable = false
 	if n <= 0 || s.deck.Size() == 0 {
 		return
@@ -548,9 +548,9 @@ func (s *TurnState) Opt(l Logger, n int) {
 	}
 	// Copy off the popped slice so the handler can't mutate s.deck through aliasing.
 	drawn := s.deck.Draw(n)
-	cards := make([]Card, len(drawn))
+	cards := make([]card.Card, len(drawn))
 	for i, c := range drawn {
-		cards[i] = c.(Card)
+		cards[i] = c.(card.Card)
 	}
 
 	top, bottom := CurrentHero.Opt(cards)
@@ -581,7 +581,7 @@ func (s *TurnState) Opt(l Logger, n int) {
 // formatCardList renders cs as "[name1, name2, ...]" using DisplayName for each entry, or
 // "[]" when cs is empty. Used by the Opt log entry; the caller gates the call on whether
 // the logger is recording so this only runs when the chain materialises its log.
-func formatCardList(cs []Card) string {
+func formatCardList(cs []card.Card) string {
 	if len(cs) == 0 {
 		return "[]"
 	}
@@ -598,16 +598,16 @@ func formatCardList(cs []Card) string {
 // failure mode (size mismatch, foreign card, or dropped card). Cards are zero-sized
 // structs in production and small POD structs in tests; both flavours are usable as
 // map keys for the multiset count.
-func panicIfOptViolatesMultiset(in, top, bottom []Card) {
+func panicIfOptViolatesMultiset(in, top, bottom []card.Card) {
 	if len(top)+len(bottom) != len(in) {
 		panic(fmt.Sprintf("Opt: handler returned %d+%d cards, want %d (input multiset)",
 			len(top), len(bottom), len(in)))
 	}
-	counts := make(map[Card]int, len(in))
+	counts := make(map[card.Card]int, len(in))
 	for _, c := range in {
 		counts[c]++
 	}
-	check := func(out []Card, label string) {
+	check := func(out []card.Card, label string) {
 		for _, c := range out {
 			counts[c]--
 			if counts[c] < 0 {
@@ -627,13 +627,13 @@ func panicIfOptViolatesMultiset(in, top, bottom []Card) {
 
 // TutorFromDeck removes and returns the highest-scoring card per score. Returns (nil,
 // false) when no card scores > 0 (or the deck is empty). Flips IsCacheable to false.
-func (s *TurnState) TutorFromDeck(score func(Card) int) (Card, bool) {
+func (s *TurnState) TutorFromDeck(score func(card.Card) int) (card.Card, bool) {
 	s.cacheable = false
-	got, ok := s.deck.Tutor(func(c deck.Card) int { return score(c.(Card)) })
+	got, ok := s.deck.Tutor(func(c deck.Card) int { return score(c.(card.Card)) })
 	if !ok {
 		return nil, false
 	}
-	return got.(Card), true
+	return got.(card.Card), true
 }
 
 // BanishFromGraveyard removes the first graveyard card matching pred, appends it to
@@ -642,7 +642,7 @@ func (s *TurnState) TutorFromDeck(score func(Card) int) (Card, bool) {
 // turn's plain blocks the partition put there) — the chain output depends on hidden
 // prior-turn state. Sets CardBanished so this-turn-banish riders fire correctly without
 // scanning a slice that may contain prior-turn entries.
-func (s *TurnState) BanishFromGraveyard(pred func(Card) bool) (Card, bool) {
+func (s *TurnState) BanishFromGraveyard(pred func(card.Card) bool) (card.Card, bool) {
 	s.cacheable = false
 	for i, c := range s.graveyard {
 		if !pred(c) {
@@ -660,7 +660,7 @@ func (s *TurnState) BanishFromGraveyard(pred func(Card) bool) (Card, bool) {
 // order). Read-only — mutate via BanishFromGraveyard. Includes prior-turn entries since
 // banished cards stay banished by default; "did anything banish THIS turn" readers
 // must use CardBanished instead.
-func (s *TurnState) Banished() []Card {
+func (s *TurnState) Banished() []card.Card {
 	return s.banished
 }
 
@@ -669,18 +669,18 @@ func (s *TurnState) Banished() []Card {
 // false (reading graveyard + mutating deck). The deck mutation IS the model — the recycled
 // card resurfaces in next turn's deal naturally, so callers don't credit Value here. Pair
 // with a rider log line so the trace records the recycle.
-func (s *TurnState) RecycleFromGraveyardToTop(pred func(Card) bool) (Card, bool) {
+func (s *TurnState) RecycleFromGraveyardToTop(pred func(card.Card) bool) (card.Card, bool) {
 	return s.recycleFromGraveyard(pred, true)
 }
 
 // RecycleFromGraveyardToBottom is RecycleFromGraveyardToTop's bottom-of-deck variant: same
 // IsCacheable flip, same no-Value-credit contract; the recycled card lands at the bottom of
 // the deck instead of the top.
-func (s *TurnState) RecycleFromGraveyardToBottom(pred func(Card) bool) (Card, bool) {
+func (s *TurnState) RecycleFromGraveyardToBottom(pred func(card.Card) bool) (card.Card, bool) {
 	return s.recycleFromGraveyard(pred, false)
 }
 
-func (s *TurnState) recycleFromGraveyard(pred func(Card) bool, toTop bool) (Card, bool) {
+func (s *TurnState) recycleFromGraveyard(pred func(card.Card) bool, toTop bool) (card.Card, bool) {
 	s.cacheable = false
 	for i, c := range s.graveyard {
 		if !pred(c) {
@@ -704,7 +704,7 @@ func (s *TurnState) recycleFromGraveyard(pred func(Card) bool, toTop bool) (Card
 // is false — see the field doc) and a fresh recording *TurnLogger; the framework's
 // resetStateForPermutation overrides the logger to nil for the eval-loop's silent
 // find-best pass.
-func NewTurnState(d *deck.Deck, graveyard []Card) *TurnState {
+func NewTurnState(d *deck.Deck, graveyard []card.Card) *TurnState {
 	if d == nil {
 		d = &deck.Deck{}
 	}
@@ -714,7 +714,7 @@ func NewTurnState(d *deck.Deck, graveyard []Card) *TurnState {
 // NewTurnStateFromCards is a test-only constructor that wraps a Card slice in a fresh
 // *deck.Deck and forwards to NewTurnState. Lets card tests build a TurnState seeded with
 // a hand-rolled deck order without each test plumbing the deck construction inline.
-func NewTurnStateFromCards(deckCards, graveyard []Card) *TurnState {
+func NewTurnStateFromCards(deckCards, graveyard []card.Card) *TurnState {
 	dc := make([]deck.Card, len(deckCards))
 	for i, c := range deckCards {
 		dc[i] = c
@@ -742,7 +742,7 @@ func (s *TurnState) LogEntries() []LogEntry { return s.logger.Entries() }
 // value. Returns the same value the framework threads into Card.Play so test harnesses
 // (and any other framework caller that needs to invoke Card-shaped hooks directly) can
 // pass it through. Nil during the find-best pass.
-func (s *TurnState) Logger() Logger { return s.logger }
+func (s *TurnState) Logger() card.Logger { return s.logger }
 
 // DrawOne models a mid-turn draw: pop the top of the deck and append it to Hand. No-op on
 // an empty deck. Every draw-rider card routes through this helper. Inherits the flip via
@@ -914,7 +914,7 @@ func (s *TurnState) ConsumeItem(t TokenType, n int) {
 // approves so same-turn triggers reading "if you've dealt arcane damage this turn" fire.
 // Routes through dealtArcaneText[n] so the hot path avoids per-call fmt.Sprintf and
 // variadic-int boxing.
-func (s *TurnState) DealArcaneDamage(l Logger, self *CardState, n int) {
+func (s *TurnState) DealArcaneDamage(l card.Logger, self *card.CardState, n int) {
 	s.AddValue(n)
 	if LikelyDamageHits(n, false) {
 		s.arcaneDamageDealt = true
@@ -943,7 +943,7 @@ var dealtArcaneText = [...]string{
 // that touches deck / graveyard flips cacheable" stays universal — framework code that
 // graveyards a played card writes s.graveyard directly (same package, no flip) and only
 // card-driven calls reach this method, so the flip is sound and conservative.
-func (s *TurnState) AddToGraveyard(c Card) {
+func (s *TurnState) AddToGraveyard(c card.Card) {
 	s.cacheable = false
 	s.graveyard = append(s.graveyard, c)
 }

@@ -15,7 +15,7 @@ func TestBrothersInArms_Mode0NoBonus(t *testing.T) {
 		BrothersInArmsBlue{},
 	}
 	for _, c := range cases {
-		blocker := c.(sim.Blocker)
+		blocker := c.(card.Blocker)
 		s := sim.TurnState{}
 		self := &card.CardState{Card: c}
 		blocker.Block(&s, s.Logger(), self)
@@ -33,7 +33,7 @@ func TestBrothersInArms_Mode1FiresBonus(t *testing.T) {
 		BrothersInArmsBlue{},
 	}
 	for _, c := range cases {
-		blocker := c.(sim.Blocker)
+		blocker := c.(card.Blocker)
 		s := sim.TurnState{}
 		self := &card.CardState{Card: c, Mode: 1}
 		blocker.Block(&s, s.Logger(), self)

@@ -1,6 +1,9 @@
 package sim
 
-import "github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
+import (
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
+)
 
 // newSequenceContextForTest builds a sequenceContext wired to a fresh attackBufs sized for
 // the given chain length. Tests use this instead of hand-rolling the context fields so the
@@ -9,7 +12,7 @@ import "github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
 //
 // runechantCarryover is wrapped into a priorAuras slice carrying a Runechant token aura,
 // matching what production builds from a real previous-turn carryover.
-func newSequenceContextForTest(h Hero, pitched, deckCards []Card, resourceBudget, runechantCarryover, chainLen int) *sequenceContext {
+func newSequenceContextForTest(h Hero, pitched, deckCards []card.Card, resourceBudget, runechantCarryover, chainLen int) *sequenceContext {
 	bufs := newAttackBufs(chainLen, 0, nil)
 	var priorAuras []Aura
 	if runechantCarryover > 0 {

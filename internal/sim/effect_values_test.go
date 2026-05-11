@@ -2,6 +2,8 @@ package sim
 
 import (
 	"testing"
+
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 // Tests that without Dominate only 1/4/7 damage are treated as likely-to-hit.
@@ -54,11 +56,11 @@ func TestLikelyToHit_FoldsEffectiveAttackAndDominate(t *testing.T) {
 	}
 	for _, tc := range cases {
 		base := NewFakeCard(tc.name).WithAttack(tc.printed)
-		var c Card = base
+		var c card.Card = base
 		if tc.printedDom {
 			c = DominatingFakeCard{FakeCard: base}
 		}
-		p := &CardState{Card: c, BonusAttack: tc.bonusAttack, GrantedDominate: tc.grantedDom}
+		p := &card.CardState{Card: c, BonusAttack: tc.bonusAttack, GrantedDominate: tc.grantedDom}
 		if got := LikelyToHit(p); got != tc.want {
 			t.Errorf("%s: LikelyToHit() = %v, want %v", tc.name, got, tc.want)
 		}

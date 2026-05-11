@@ -4,7 +4,7 @@
 // Text: "Rune Flash costs {r} less to play for each Runechant you control."
 //
 // Variable cost: Cost reads s.Runechants() to return max(0, printed - Runechants).
-// Standard sim.VariableCost wiring (docs/dev-standards.md).
+// Standard card.VariableCost wiring (docs/dev-standards.md).
 
 package cards
 

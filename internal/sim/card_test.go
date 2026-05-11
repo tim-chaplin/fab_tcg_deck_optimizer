@@ -2,6 +2,8 @@ package sim
 
 import (
 	"testing"
+
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 // TestCardState_EffectiveGoAgain: printed GoAgain OR a mid-chain grant qualifies the card
@@ -23,7 +25,7 @@ func TestCardState_EffectiveGoAgain(t *testing.T) {
 		if tc.printed {
 			base = base.WithGoAgain()
 		}
-		p := &CardState{Card: base, GrantedGoAgain: tc.granted}
+		p := &card.CardState{Card: base, GrantedGoAgain: tc.granted}
 		if got := p.EffectiveGoAgain(); got != tc.want {
 			t.Errorf("%s: EffectiveGoAgain() = %v, want %v", tc.name, got, tc.want)
 		}
@@ -38,7 +40,7 @@ func TestCardState_EffectiveDominate(t *testing.T) {
 
 	cases := []struct {
 		name    string
-		card    Card
+		card    card.Card
 		granted bool
 		want    bool
 	}{
@@ -48,7 +50,7 @@ func TestCardState_EffectiveDominate(t *testing.T) {
 		{"both", dominator, true, true},
 	}
 	for _, tc := range cases {
-		p := &CardState{Card: tc.card, GrantedDominate: tc.granted}
+		p := &card.CardState{Card: tc.card, GrantedDominate: tc.granted}
 		if got := p.EffectiveDominate(); got != tc.want {
 			t.Errorf("%s: EffectiveDominate() = %v, want %v", tc.name, got, tc.want)
 		}
@@ -58,10 +60,10 @@ func TestCardState_EffectiveDominate(t *testing.T) {
 // TestHasDominate_MatchesMarker: the free helper is the static printed-keyword check;
 // type assertion to Dominator decides.
 func TestHasDominate_MatchesMarker(t *testing.T) {
-	if HasDominate(NewFakeCard("plain")) {
+	if card.HasDominate(NewFakeCard("plain")) {
 		t.Error("HasDominate(plain) = true, want false")
 	}
-	if !HasDominate(DominatingFakeCard{}) {
+	if !card.HasDominate(DominatingFakeCard{}) {
 		t.Error("HasDominate(dominator) = false, want true")
 	}
 }
@@ -83,7 +85,7 @@ func TestCardState_EffectiveAttack(t *testing.T) {
 		{"large negative on a 4-power attack still clamps at 0", 4, -10, 0},
 	}
 	for _, tc := range cases {
-		p := &CardState{
+		p := &card.CardState{
 			Card:        NewFakeCard(tc.name).WithAttack(tc.printed),
 			BonusAttack: tc.bonusAttack,
 		}

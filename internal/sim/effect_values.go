@@ -9,6 +9,10 @@
 
 package sim
 
+import (
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
+)
+
 // DiscardValue is the damage-equivalent credited when the opponent is forced to discard one
 // card — one card they won't get to play. A typical FaB card is worth ~3 points of tempo.
 const DiscardValue = 3
@@ -29,7 +33,7 @@ const OverpowerValue = 0
 // 0) and self.EffectiveDominate() (printed Dominator marker OR a granted Dominate flag) into
 // the underlying threshold check. Card "if this hits" riders should call this on their own
 // CardState — the bonus / Dominate plumbing is automatic.
-func LikelyToHit(self *CardState) bool {
+func LikelyToHit(self *card.CardState) bool {
 	return LikelyDamageHits(self.EffectiveAttack(), self.EffectiveDominate())
 }
 

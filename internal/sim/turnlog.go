@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"sort"
 	"strings"
+
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 // BuildTurnLog converts a TurnSummary into the four-section TurnLog shape.
@@ -92,7 +94,7 @@ func BuildTurnLog(t TurnSummary, startingAuras []Aura, startingItems []Item) Tur
 // before processAurasAtStartOfTurn modifies the working hand slice, so reveals show up
 // only in MyTurn (where they actually resolve), not in this informational starting-state
 // line. Names render in deal order. Returns "" when the dealt hand was empty.
-func startingHandLine(dealtHand []Card) string {
+func startingHandLine(dealtHand []card.Card) string {
 	if len(dealtHand) == 0 {
 		return ""
 	}
@@ -118,7 +120,7 @@ func startingArsenalLine(line []CardAssignment) string {
 // the top of the turn plus the per-token carryovers. Card-aura names sort alphabetically;
 // token phrases append last in token-declaration order. Returns "" when nothing is in
 // play so the caller skips the line entirely.
-func startingAurasLine(auras []Card, startingRunechants, startingPonders int) string {
+func startingAurasLine(auras []card.Card, startingRunechants, startingPonders int) string {
 	if len(auras) == 0 && startingRunechants == 0 && startingPonders == 0 {
 		return ""
 	}
@@ -163,7 +165,7 @@ func startOfTurnTriggerLine(d TriggerContribution) string {
 func formatBlockLine(a CardAssignment) string {
 	def := a.Card.Defense()
 	if a.FromArsenal {
-		def += arsenalDefenseBonusOf(a.Card)
+		def += card.ArsenalDefenseBonusOf(a.Card)
 	}
 	return fmt.Sprintf("%s: %s (+%d)", a.Card.DisplayName(), roleLabelWithArsenal(a, "BLOCK"), def)
 }
@@ -175,10 +177,10 @@ func formatBlockLine(a CardAssignment) string {
 // any arcane / runechant / +1{d} riders attach as childEntryPrefix-tagged sub-lines via
 // appendGroupedChainEntries. Returns the updated remaining-incoming counter so the caller
 // can thread it into the next DR.
-func appendDefenseReactionLines(out []string, a CardAssignment, defenders []Card, remaining int) ([]string, int) {
-	state := NewTurnState(nil, append([]Card(nil), defenders...))
+func appendDefenseReactionLines(out []string, a CardAssignment, defenders []card.Card, remaining int) ([]string, int) {
+	state := NewTurnState(nil, append([]card.Card(nil), defenders...))
 	state.incomingDamage = remaining
-	cs := CardState{Card: a.Card, FromArsenal: a.FromArsenal}
+	cs := card.CardState{Card: a.Card, FromArsenal: a.FromArsenal}
 	ResolveChainStep(state, state.logger, &cs)
 	return appendGroupedChainEntries(out, state.LogEntries()), state.incomingDamage
 }
@@ -186,8 +188,8 @@ func appendDefenseReactionLines(out []string, a CardAssignment, defenders []Card
 // defendersFromParts collects every card committed to defense — Defense Reactions and plain
 // blocks — into a single slice. Mirrors the defenders argument defendersDamage takes during
 // partition evaluation so the formatter's per-DR Play call sees the same graveyard.
-func defendersFromParts(parts bestLineDisplayParts) []Card {
-	out := make([]Card, 0, len(parts.defenseReactions)+len(parts.plainBlocks))
+func defendersFromParts(parts bestLineDisplayParts) []card.Card {
+	out := make([]card.Card, 0, len(parts.defenseReactions)+len(parts.plainBlocks))
 	for _, a := range parts.defenseReactions {
 		out = append(out, a.Card)
 	}
@@ -200,7 +202,7 @@ func defendersFromParts(parts bestLineDisplayParts) []Card {
 // endingHandLine builds "Hand: A, B" from the cards in hand at end of chain — the partition's
 // Held set plus anything tutored / drawn that didn't get played. Returns "" when the hand
 // ended empty.
-func endingHandLine(handHeld []Card) string {
+func endingHandLine(handHeld []card.Card) string {
 	if len(handHeld) == 0 {
 		return ""
 	}
