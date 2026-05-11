@@ -11,21 +11,9 @@ import (
 // parameter (it's always 0). Modal ARs (sim.ModalCard) dispatch on it: each mode's printed
 // target text becomes its own predicate leg, and the chain runner rejects the permutation
 // when the chosen mode doesn't accept the active attack.
+//
+// card.GrantAttackReactionBuff (the helper most ARs call from Play) lives in v2/card —
+// it's pure GameEngine / Logger / CardState plumbing.
 type AttackReaction interface {
 	ARTargetAllowed(c card.Card, mode int8) bool
-}
-
-// GrantAttackReactionBuff buffs the active attack target by n: adds to BonusAttack, credits
-// g's value, amends the target's chain-step delta, and logs the rider under the target's
-// entry. Cards call this from Play; the chain runner has already validated the target.
-func GrantAttackReactionBuff(g card.GameEngine, l card.Logger, self *card.CardState, n int) {
-	target := g.AttackReactionTarget()
-	if target == nil {
-		return
-	}
-	target.BonusAttack += n
-	g.AddValue(n)
-	l.AmendLastChainStepN(n)
-	// N=0: the +n delta is folded into the parent chain step via AmendLastChainStepN.
-	l.AppendPostTriggerf(target.Card.DisplayName(), 0, "%s buffed +%d{p}", self.Card.DisplayName(), n)
 }

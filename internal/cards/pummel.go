@@ -6,7 +6,7 @@
 // (Red N=4, Yellow N=3, Blue N=2.)
 //
 // Mode 0 grants +N{p} to a club/hammer weapon attack. Mode 1 grants +N{p} to a cost-≥2
-// attack action card and registers an OnHit hero-discard rider crediting sim.DiscardValue.
+// attack action card and registers an OnHit hero-discard rider via g.OpponentDiscard.
 
 package cards
 
@@ -36,8 +36,8 @@ func pummelAccepts(c card.Card, mode int8) bool {
 
 // pummelOnHitDiscard fires the printed "when this hits a hero, they discard a card" rider.
 func pummelOnHitDiscard(s card.GameEngine, l card.Logger, self *card.CardState, h *card.OnHitHandler) {
-	s.AddValue(sim.DiscardValue)
-	l.AppendPostTriggerf(self.Card.DisplayName(), sim.DiscardValue,
+	v := s.OpponentDiscard(1)
+	l.AppendPostTriggerf(self.Card.DisplayName(), v,
 		"%s forced opponent to discard 1", h.Source.DisplayName())
 }
 
@@ -49,7 +49,7 @@ func pummelPlay(s card.GameEngine, l card.Logger, self *card.CardState, n int) {
 	if target == nil {
 		return
 	}
-	sim.GrantAttackReactionBuff(s, l, self, n)
+	card.GrantAttackReactionBuff(s, l, self, n)
 	if self.Mode == 1 {
 		target.OnHit = append(target.OnHit, card.OnHitHandler{
 			Fire:   pummelOnHitDiscard,

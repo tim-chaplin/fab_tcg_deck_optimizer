@@ -5,7 +5,6 @@
 package cards
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
@@ -25,7 +24,7 @@ func banishAuraFromGraveyard(s card.GameEngine) int {
 	}); !ok {
 		return 0
 	}
-	if sim.LikelyDamageHits(1, false) {
+	if s.LikelyDamageHits(1, false) {
 		s.SetArcaneDamageDealt(true)
 	}
 	return 1
@@ -86,7 +85,7 @@ func popsThisTurn(s card.GameEngine, attackActionOnly bool) bool {
 			runechants = s.Runechants()
 			firstAttacker = false
 		}
-		if sim.LikelyToHit(pc) || sim.LikelyDamageHits(runechants, false) {
+		if s.LikelyToHit(pc) || s.LikelyDamageHits(runechants, false) {
 			return true
 		}
 	}

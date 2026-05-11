@@ -144,13 +144,13 @@ func TestBest_ResetBetweenCallsClearsCacheableState(t *testing.T) {
 }
 
 // Tests that cacheability tracks ACTUAL reads, not card identity: Snatch Yellow misses
-// LikelyToHit so DrawOne never fires and the result stays cacheable.
+// s.LikelyToHit so DrawOne never fires and the result stays cacheable.
 func TestBest_RuntimeGatedNonFlipSnatchYellowMisses(t *testing.T) {
 	h := []card.Card{cards.SnatchYellow{}}
 	deck := DeckOf(testutils.RedAttack{})
 	got := Best(testutils.Hero{Intel: 4}, nil, h, Matchup{IncomingDamage: 0}, deck, TurnState{})
 	if !got.Cacheable {
-		t.Errorf("Snatch [Y] alone: Cacheable = false, want true (LikelyToHit miss skips DrawOne)")
+		t.Errorf("Snatch [Y] alone: Cacheable = false, want true (s.LikelyToHit miss skips DrawOne)")
 	}
 }
 

@@ -13,12 +13,11 @@
 package cards
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 func sigilOfSufferingPlay(s card.GameEngine, l card.Logger, self *card.CardState) {
-	if s.ArcaneDamageDealt() || sim.LikelyDamageHits(1, false) {
+	if s.ArcaneDamageDealt() || s.LikelyDamageHits(1, false) {
 		self.BonusDefense++
 	}
 	s.DealArcaneDamage(l, self, 1)

@@ -55,7 +55,7 @@ func TestHitTheHighNotes_BonusFlowsThroughBonusAttack(t *testing.T) {
 	if got := self.EffectiveAttack(); got != 6 {
 		t.Errorf("EffectiveAttack() = %d, want 6 (base 4 + 2 power buff)", got)
 	}
-	if sim.LikelyToHit(self) {
+	if s.LikelyToHit(self) {
 		t.Errorf("LikelyToHit = true at EffectiveAttack 6; want false (6 ∉ {1,4,7})")
 	}
 }

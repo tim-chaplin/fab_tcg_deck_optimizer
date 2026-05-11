@@ -58,11 +58,11 @@ func tokenDisplayName(t TokenType) string {
 
 // runechantAuraHandler is the TriggerAttack handler shared by every Runechant aura.
 // Fires before each attack / weapon swing resolves: flips ArcaneDamageDealt when
-// aura.Count clears the LikelyDamageHits window and destroys the aura. Damage was
+// aura.Count clears the s.LikelyDamageHits window and destroys the aura. Damage was
 // credited at creation time in CreateRunechants — this handler is pure state cleanup.
 func runechantAuraHandler(g card.GameEngine, _ card.Logger, a card.Aura) {
 	s := g.(*TurnState)
-	if LikelyDamageHits(a.Count(), false) {
+	if s.LikelyDamageHits(a.Count(), false) {
 		s.arcaneDamageDealt = true
 	}
 	a.Destroy(false)

@@ -6,7 +6,6 @@
 package cards
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
@@ -14,6 +13,6 @@ func (ExposedBlue) ARTargetAllowed(c card.Card, _ int8) bool {
 	return c.Types().IsAttack()
 }
 func (ExposedBlue) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
-	sim.GrantAttackReactionBuff(s, l, self, 1)
+	card.GrantAttackReactionBuff(s, l, self, 1)
 	s.SetOpponentMarked(true)
 }

@@ -6,12 +6,11 @@
 package cards
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 func overloadPlay(s card.GameEngine, l card.Logger, self *card.CardState) {
-	if sim.LikelyToHit(self) {
+	if s.LikelyToHit(self) {
 		self.GrantedGoAgain = true
 	}
 }
