@@ -13,17 +13,8 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
 
-func gravekeepingPlay(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
-}
+func (GravekeepingRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {}
 
-func (GravekeepingRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
-	gravekeepingPlay(s, l, self)
-}
+func (GravekeepingYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {}
 
-func (GravekeepingYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
-	gravekeepingPlay(s, l, self)
-}
-
-func (GravekeepingBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
-	gravekeepingPlay(s, l, self)
-}
+func (GravekeepingBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {}

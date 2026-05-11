@@ -12,17 +12,8 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
 
-func outMusclePlay(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
-}
+func (OutMuscleRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {}
 
-func (OutMuscleRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
-	outMusclePlay(s, l, self)
-}
+func (OutMuscleYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {}
 
-func (OutMuscleYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
-	outMusclePlay(s, l, self)
-}
-
-func (OutMuscleBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
-	outMusclePlay(s, l, self)
-}
+func (OutMuscleBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {}

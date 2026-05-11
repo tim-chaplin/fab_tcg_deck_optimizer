@@ -13,9 +13,6 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
 
-func brothersInArmsPlay(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
-}
-
 // brothersInArmsBlock fires +2{d} on mode 1 (caller already deducted 1{r} from the spare
 // defense budget). Mode 0 is the printed default with no modification.
 func brothersInArmsBlock(_ *sim.TurnState, l sim.Logger, self *sim.CardState) {
@@ -29,24 +26,18 @@ func (BrothersInArmsRed) BlockCost(mode int8) int { return int(mode) }
 func (BrothersInArmsRed) Block(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	brothersInArmsBlock(s, l, self)
 }
-func (BrothersInArmsRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
-	brothersInArmsPlay(s, l, self)
-}
+func (BrothersInArmsRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {}
 
 func (BrothersInArmsYellow) Modes() int              { return 2 }
 func (BrothersInArmsYellow) BlockCost(mode int8) int { return int(mode) }
 func (BrothersInArmsYellow) Block(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	brothersInArmsBlock(s, l, self)
 }
-func (BrothersInArmsYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
-	brothersInArmsPlay(s, l, self)
-}
+func (BrothersInArmsYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {}
 
 func (BrothersInArmsBlue) Modes() int              { return 2 }
 func (BrothersInArmsBlue) BlockCost(mode int8) int { return int(mode) }
 func (BrothersInArmsBlue) Block(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	brothersInArmsBlock(s, l, self)
 }
-func (BrothersInArmsBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
-	brothersInArmsPlay(s, l, self)
-}
+func (BrothersInArmsBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {}

@@ -15,9 +15,6 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
 
-func rightBehindYouPlay(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
-}
-
 // rightBehindYouBlock fires the +1{d} together-bonus when at least two plain blockers
 // share the defenders slot. Short-circuits on the second non-DR sighting.
 func rightBehindYouBlock(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
@@ -37,20 +34,14 @@ func rightBehindYouBlock(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 func (RightBehindYouRed) Block(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	rightBehindYouBlock(s, l, self)
 }
-func (RightBehindYouRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
-	rightBehindYouPlay(s, l, self)
-}
+func (RightBehindYouRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {}
 
 func (RightBehindYouYellow) Block(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	rightBehindYouBlock(s, l, self)
 }
-func (RightBehindYouYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
-	rightBehindYouPlay(s, l, self)
-}
+func (RightBehindYouYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {}
 
 func (RightBehindYouBlue) Block(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	rightBehindYouBlock(s, l, self)
 }
-func (RightBehindYouBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
-	rightBehindYouPlay(s, l, self)
-}
+func (RightBehindYouBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {}
