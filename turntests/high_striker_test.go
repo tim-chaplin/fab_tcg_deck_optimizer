@@ -7,6 +7,7 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/heroes"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
 )
 
@@ -16,7 +17,7 @@ import (
 func TestHighStriker_TriggersOnNextAttackActionHit(t *testing.T) {
 	cases := []struct {
 		name       string
-		striker    sim.Card
+		striker    card.Card
 		wantCopper int
 	}{
 		{"Red", cards.HighStrikerRed{}, 6},

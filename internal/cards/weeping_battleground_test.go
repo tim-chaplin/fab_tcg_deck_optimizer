@@ -10,7 +10,7 @@ import (
 // TestWeepingBattleground_AuraInGraveyard: an aura in the graveyard gets banished for 1 arcane.
 func TestWeepingBattleground_AuraInGraveyard(t *testing.T) {
 	aura := SigilOfSilphidaeBlue{}
-	s := sim.NewTurnStateFromCards(nil, []sim.Card{aura})
+	s := sim.NewTurnStateFromCards(nil, []card.Card{aura})
 	sim.ResolveChainStep(s, s.Logger(), &card.CardState{Card: WeepingBattlegroundRed{}})
 	if got := s.Value(); got != 1 {
 		t.Fatalf("Play() = %d, want 1", got)
@@ -25,7 +25,7 @@ func TestWeepingBattleground_AuraInGraveyard(t *testing.T) {
 func TestWeepingBattleground_NoAuraInGraveyard(t *testing.T) {
 	// Shrill of Skullform is an Action - Attack (no Aura type), so it fails the aura scan.
 	nonAura := ShrillOfSkullformRed{}
-	s := sim.NewTurnStateFromCards(nil, []sim.Card{nonAura})
+	s := sim.NewTurnStateFromCards(nil, []card.Card{nonAura})
 	sim.ResolveChainStep(s, s.Logger(), &card.CardState{Card: WeepingBattlegroundRed{}})
 	if got := s.Value(); got != 0 {
 		t.Fatalf("Play() = %d, want 0 (no aura to banish)", got)
@@ -49,7 +49,7 @@ func TestWeepingBattleground_EmptyGraveyard(t *testing.T) {
 func TestWeepingBattleground_BanishesAura(t *testing.T) {
 	aura := SigilOfSilphidaeBlue{}
 	nonAura := ShrillOfSkullformRed{}
-	s := sim.NewTurnStateFromCards(nil, []sim.Card{nonAura, aura})
+	s := sim.NewTurnStateFromCards(nil, []card.Card{nonAura, aura})
 	sim.ResolveChainStep(s, s.Logger(), &card.CardState{Card: WeepingBattlegroundRed{}})
 	g := s.Graveyard()
 	if len(g) != 1 || g[0].ID() != nonAura.ID() {
@@ -66,7 +66,7 @@ func TestWeepingBattleground_BanishesAura(t *testing.T) {
 func TestWeepingBattleground_OnlyOneAuraBanished(t *testing.T) {
 	aura1 := SigilOfSilphidaeBlue{}
 	aura2 := SigilOfSilphidaeBlue{}
-	s := sim.NewTurnStateFromCards(nil, []sim.Card{aura1, aura2})
+	s := sim.NewTurnStateFromCards(nil, []card.Card{aura1, aura2})
 	sim.ResolveChainStep(s, s.Logger(), &card.CardState{Card: WeepingBattlegroundRed{}})
 	if g := s.Graveyard(); len(g) != 1 {
 		t.Fatalf("want one aura left in graveyard, got %d", len(g))
@@ -82,7 +82,7 @@ func TestWeepingBattleground_OnlyOneAuraBanished(t *testing.T) {
 func TestWeepingBattleground_SecondCopyAlsoFires(t *testing.T) {
 	aura1 := SigilOfSilphidaeBlue{}
 	aura2 := SigilOfSilphidaeBlue{}
-	s := sim.NewTurnStateFromCards(nil, []sim.Card{aura1, aura2})
+	s := sim.NewTurnStateFromCards(nil, []card.Card{aura1, aura2})
 	sim.ResolveChainStep(s, s.Logger(), &card.CardState{Card: WeepingBattlegroundRed{}})
 	if got := s.Value(); got != 1 {
 		t.Fatalf("first Play() Value = %d, want 1", got)
@@ -103,7 +103,7 @@ func TestWeepingBattleground_SecondCopyAlsoFires(t *testing.T) {
 // the first banishes it, the second contributes 0 (no aura left), so cumulative Value stays 1.
 func TestWeepingBattleground_SecondCopyFizzlesWhenOutOfAuras(t *testing.T) {
 	aura := SigilOfSilphidaeBlue{}
-	s := sim.NewTurnStateFromCards(nil, []sim.Card{aura})
+	s := sim.NewTurnStateFromCards(nil, []card.Card{aura})
 	sim.ResolveChainStep(s, s.Logger(), &card.CardState{Card: WeepingBattlegroundRed{}})
 	if got := s.Value(); got != 1 {
 		t.Fatalf("first Play() Value = %d, want 1", got)

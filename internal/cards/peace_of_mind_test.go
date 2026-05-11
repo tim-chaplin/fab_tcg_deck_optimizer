@@ -10,7 +10,7 @@ import (
 // Tests that each printing prevents its full Defense() amount (4/3/2).
 func TestPeaceOfMind_PreventsByPrinting(t *testing.T) {
 	cases := []struct {
-		card sim.Card
+		card card.Card
 		want int
 	}{
 		{PeaceOfMindRed{}, 4},
@@ -29,7 +29,7 @@ func TestPeaceOfMind_PreventsByPrinting(t *testing.T) {
 
 // Tests that each printing creates one Ponder token on play.
 func TestPeaceOfMind_CreatesPonder(t *testing.T) {
-	for _, c := range []sim.Card{PeaceOfMindRed{}, PeaceOfMindYellow{}, PeaceOfMindBlue{}} {
+	for _, c := range []card.Card{PeaceOfMindRed{}, PeaceOfMindYellow{}, PeaceOfMindBlue{}} {
 		s := sim.NewTurnStateFromSpec(sim.TurnStateSpec{IncomingDamage: 10})
 		self := &card.CardState{Card: c}
 		sim.ResolveChainStep(&s, s.Logger(), self)

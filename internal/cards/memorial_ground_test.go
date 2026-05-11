@@ -21,13 +21,13 @@ func TestMemorialGround_NoEligibleNoOp(t *testing.T) {
 // graveyard to the top of the deck.
 func TestMemorialGround_RecyclesEligibleAttackActionToTop(t *testing.T) {
 	target := testutils.GenericAttack(2, 4)
-	deck := []sim.Card{testutils.BlueAttack{}}
-	s := sim.NewTurnStateFromCards(deck, []sim.Card{target})
+	deck := []card.Card{testutils.BlueAttack{}}
+	s := sim.NewTurnStateFromCards(deck, []card.Card{target})
 	sim.ResolveChainStep(s, s.Logger(), &card.CardState{Card: MemorialGroundRed{}})
 	if got := s.Deck().Size(); got != 2 {
 		t.Errorf("deck size after recycle = %d, want 2 (target moved onto the existing top)", got)
 	}
-	if top := s.Deck().PeekTop(); top != sim.Card(target) {
+	if top := s.Deck().PeekTop(); top != card.Card(target) {
 		t.Errorf("deck top after recycle = %v, want %v", top, target)
 	}
 	if len(s.Graveyard()) != 0 {
@@ -38,7 +38,7 @@ func TestMemorialGround_RecyclesEligibleAttackActionToTop(t *testing.T) {
 // Tests that a graveyard with only an over-cost or non-attack-action card leaves Memorial
 // Ground unable to recycle.
 func TestMemorialGround_IgnoresIneligibleCards(t *testing.T) {
-	s := sim.NewTurnStateFromCards(nil, []sim.Card{testutils.GenericAttack(3, 5), testutils.GenericAction()})
+	s := sim.NewTurnStateFromCards(nil, []card.Card{testutils.GenericAttack(3, 5), testutils.GenericAction()})
 	sim.ResolveChainStep(s, s.Logger(), &card.CardState{Card: MemorialGroundRed{}})
 	if s.Deck().Size() != 0 {
 		t.Errorf("deck size = %d, want 0 (no eligible target)", s.Deck().Size())

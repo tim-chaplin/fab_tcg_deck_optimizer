@@ -11,7 +11,7 @@ import (
 // "may gain 1{h}" rider adds +1 iff the current hero opts into LowerHealthWanter.
 func TestOasisRespite_PreventsAndLifeRider(t *testing.T) {
 	cases := []struct {
-		card            sim.Card
+		card            card.Card
 		wantOff, wantOn int
 	}{
 		{OasisRespiteRed{}, 4, 5},

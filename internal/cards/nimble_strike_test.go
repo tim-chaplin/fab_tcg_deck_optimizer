@@ -9,7 +9,7 @@ import (
 
 // Tests that with no Nimblism in the graveyard the rider stays off.
 func TestNimbleStrike_NoNimblismRiderOff(t *testing.T) {
-	for _, c := range []sim.Card{NimbleStrikeRed{}, NimbleStrikeYellow{}, NimbleStrikeBlue{}} {
+	for _, c := range []card.Card{NimbleStrikeRed{}, NimbleStrikeYellow{}, NimbleStrikeBlue{}} {
 		self := &card.CardState{Card: c}
 		s := sim.NewTurnStateFromCards(nil, nil)
 		sim.ResolveChainStep(s, s.Logger(), self)
@@ -25,8 +25,8 @@ func TestNimbleStrike_NoNimblismRiderOff(t *testing.T) {
 // Tests that a Nimblism in the graveyard lets Nimble Strike banish for the +1{p} /
 // go-again rider.
 func TestNimbleStrike_BanishesNimblismForBonus(t *testing.T) {
-	for _, c := range []sim.Card{NimbleStrikeRed{}, NimbleStrikeYellow{}, NimbleStrikeBlue{}} {
-		s := sim.NewTurnStateFromCards(nil, []sim.Card{NimblismRed{}})
+	for _, c := range []card.Card{NimbleStrikeRed{}, NimbleStrikeYellow{}, NimbleStrikeBlue{}} {
+		s := sim.NewTurnStateFromCards(nil, []card.Card{NimblismRed{}})
 		self := &card.CardState{Card: c}
 		sim.ResolveChainStep(s, s.Logger(), self)
 		if !self.GrantedGoAgain {

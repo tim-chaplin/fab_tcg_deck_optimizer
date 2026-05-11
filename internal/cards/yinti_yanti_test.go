@@ -10,7 +10,7 @@ import (
 // Tests that Play credits printed Attack with no aura in play (no bonus).
 func TestYintiYanti_PlayNoAuraNoBonus(t *testing.T) {
 	cases := []struct {
-		c    sim.Card
+		c    card.Card
 		want int
 	}{
 		{YintiYantiRed{}, 3},
@@ -30,7 +30,7 @@ func TestYintiYanti_PlayNoAuraNoBonus(t *testing.T) {
 // Tests that Play credits printed Attack + 1 when an aura is in play.
 func TestYintiYanti_PlayWithAuraGetsBonus(t *testing.T) {
 	cases := []struct {
-		c    sim.Card
+		c    card.Card
 		want int
 	}{
 		{YintiYantiRed{}, 4},
@@ -49,7 +49,7 @@ func TestYintiYanti_PlayWithAuraGetsBonus(t *testing.T) {
 
 // Tests that Block leaves BonusDefense untouched when no aura is in play.
 func TestYintiYanti_BlockNoAuraNoBonus(t *testing.T) {
-	for _, c := range []sim.Card{YintiYantiRed{}, YintiYantiYellow{}, YintiYantiBlue{}} {
+	for _, c := range []card.Card{YintiYantiRed{}, YintiYantiYellow{}, YintiYantiBlue{}} {
 		s := sim.TurnState{}
 		self := &card.CardState{Card: c}
 		c.(sim.Blocker).Block(&s, s.Logger(), self)
@@ -61,7 +61,7 @@ func TestYintiYanti_BlockNoAuraNoBonus(t *testing.T) {
 
 // Tests that Block bumps BonusDefense by 1 when an aura is in play.
 func TestYintiYanti_BlockWithAuraGetsBonus(t *testing.T) {
-	for _, c := range []sim.Card{YintiYantiRed{}, YintiYantiYellow{}, YintiYantiBlue{}} {
+	for _, c := range []card.Card{YintiYantiRed{}, YintiYantiYellow{}, YintiYantiBlue{}} {
 		s := sim.NewTurnStateFromSpec(sim.TurnStateSpec{Auras: []sim.Aura{sim.NewRunechantAura(1)}})
 		self := &card.CardState{Card: c}
 		c.(sim.Blocker).Block(&s, s.Logger(), self)

@@ -20,7 +20,7 @@ import (
 // chain output depend on hidden state. Each caller owns its own AddValue + LogRider
 // because the printed wording differs ("Banished an aura, dealt 1 arcane damage").
 func banishAuraFromGraveyard(s card.GameEngine) int {
-	if _, ok := s.BanishFromGraveyard(func(c sim.Card) bool {
+	if _, ok := s.BanishFromGraveyard(func(c card.Card) bool {
 		return c.Types().Has(card.TypeAura)
 	}); !ok {
 		return 0
@@ -93,7 +93,7 @@ func popsThisTurn(s card.GameEngine, attackActionOnly bool) bool {
 	return false
 }
 
-func qualifiesAsAttacker(c sim.Card, attackActionOnly bool) bool {
+func qualifiesAsAttacker(c card.Card, attackActionOnly bool) bool {
 	ts := c.Types()
 	if attackActionOnly {
 		return ts.IsAttackAction()

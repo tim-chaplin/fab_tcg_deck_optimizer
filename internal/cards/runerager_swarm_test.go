@@ -11,7 +11,7 @@ import (
 func TestRuneragerSwarm_NoAuraNoGoAgain(t *testing.T) {
 	// No aura played/created this turn → returns base power and does NOT grant self go-again.
 	cases := []struct {
-		c    sim.Card
+		c    card.Card
 		want int
 	}{
 		{RuneragerSwarmRed{}, 3},
@@ -33,8 +33,8 @@ func TestRuneragerSwarm_NoAuraNoGoAgain(t *testing.T) {
 
 func TestRuneragerSwarm_AuraPlayedGrantsGoAgain(t *testing.T) {
 	// An aura in CardsPlayed satisfies the "played an aura this turn" condition.
-	for _, c := range []sim.Card{RuneragerSwarmRed{}, RuneragerSwarmYellow{}, RuneragerSwarmBlue{}} {
-		s := sim.NewTurnStateFromSpec(sim.TurnStateSpec{CardsPlayed: []sim.Card{testutils.Aura{}}})
+	for _, c := range []card.Card{RuneragerSwarmRed{}, RuneragerSwarmYellow{}, RuneragerSwarmBlue{}} {
+		s := sim.NewTurnStateFromSpec(sim.TurnStateSpec{CardsPlayed: []card.Card{testutils.Aura{}}})
 		self := &card.CardState{Card: c}
 		sim.ResolveChainStep(&s, s.Logger(), self)
 		if !self.GrantedGoAgain {
@@ -46,7 +46,7 @@ func TestRuneragerSwarm_AuraPlayedGrantsGoAgain(t *testing.T) {
 func TestRuneragerSwarm_AuraCreatedGrantsGoAgain(t *testing.T) {
 	// TurnState.AuraCreated (e.g. from a runechant-creating effect earlier in the chain) also
 	// satisfies the condition.
-	for _, c := range []sim.Card{RuneragerSwarmRed{}, RuneragerSwarmYellow{}, RuneragerSwarmBlue{}} {
+	for _, c := range []card.Card{RuneragerSwarmRed{}, RuneragerSwarmYellow{}, RuneragerSwarmBlue{}} {
 		s := sim.NewTurnStateFromSpec(sim.TurnStateSpec{AuraCreated: true})
 		self := &card.CardState{Card: c}
 		sim.ResolveChainStep(&s, s.Logger(), self)

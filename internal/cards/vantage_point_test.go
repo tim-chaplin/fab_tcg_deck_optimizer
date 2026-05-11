@@ -11,7 +11,7 @@ import (
 // Tests that with no aura played or created the printed power is credited and Overpower stays false.
 func TestVantagePoint_BaseDamageNoAura(t *testing.T) {
 	cases := []struct {
-		c    sim.Card
+		c    card.Card
 		base int
 	}{
 		{VantagePointRed{}, 7},
@@ -32,7 +32,7 @@ func TestVantagePoint_BaseDamageNoAura(t *testing.T) {
 
 // Tests that an aura already played this turn flips s.Overpower().
 func TestVantagePoint_AuraPlayedSetsOverpower(t *testing.T) {
-	s := sim.NewTurnStateFromSpec(sim.TurnStateSpec{CardsPlayed: []sim.Card{testutils.Aura{}}})
+	s := sim.NewTurnStateFromSpec(sim.TurnStateSpec{CardsPlayed: []card.Card{testutils.Aura{}}})
 	sim.ResolveChainStep(&s, s.Logger(), &card.CardState{Card: VantagePointRed{}})
 	if got := s.Value(); got != 7 {
 		t.Errorf("Play() = %d, want 7", got)

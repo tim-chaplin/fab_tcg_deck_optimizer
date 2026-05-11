@@ -10,7 +10,7 @@ import (
 
 // Tests that Block flips +1{d} when this is the only plain blocker.
 func TestBattlefrontBastion_BlockAloneFiresPrevention(t *testing.T) {
-	cases := []sim.Card{
+	cases := []card.Card{
 		BattlefrontBastionRed{},
 		BattlefrontBastionYellow{},
 		BattlefrontBastionBlue{},
@@ -21,7 +21,7 @@ func TestBattlefrontBastion_BlockAloneFiresPrevention(t *testing.T) {
 			t.Errorf("%s: missing sim.Blocker hook", c.Name())
 			continue
 		}
-		s := sim.NewTurnStateFromSpec(sim.TurnStateSpec{Defenders: []sim.Card{c}})
+		s := sim.NewTurnStateFromSpec(sim.TurnStateSpec{Defenders: []card.Card{c}})
 		self := &card.CardState{Card: c}
 		blocker.Block(&s, s.Logger(), self)
 		if self.BonusDefense != 1 {
@@ -34,7 +34,7 @@ func TestBattlefrontBastion_BlockAloneFiresPrevention(t *testing.T) {
 // the defenders slot.
 func TestBattlefrontBastion_BlockWithOtherPlainBlockerNoBonus(t *testing.T) {
 	c := BattlefrontBastionRed{}
-	s := sim.NewTurnStateFromSpec(sim.TurnStateSpec{Defenders: []sim.Card{c, testutils.GenericAttack(0, 1)}})
+	s := sim.NewTurnStateFromSpec(sim.TurnStateSpec{Defenders: []card.Card{c, testutils.GenericAttack(0, 1)}})
 	self := &card.CardState{Card: c}
 	c.Block(&s, s.Logger(), self)
 	if self.BonusDefense != 0 {

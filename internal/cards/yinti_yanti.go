@@ -23,27 +23,27 @@ func yintiYantiPlay(s card.GameEngine, l card.Logger, self *card.CardState) {
 	self.BonusAttack += yintiYantiBonus(s)
 }
 
-func yintiYantiBlock(s *sim.TurnState, l card.Logger, self *card.CardState) {
+func yintiYantiBlock(s card.GameEngine, l card.Logger, self *card.CardState) {
 	self.BonusDefense += yintiYantiBonus(s)
 }
 
 func (YintiYantiRed) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 	yintiYantiPlay(s, l, self)
 }
-func (YintiYantiRed) Block(s *sim.TurnState, l card.Logger, self *card.CardState) {
+func (YintiYantiRed) Block(s card.GameEngine, l card.Logger, self *card.CardState) {
 	yintiYantiBlock(s, l, self)
 }
 
 func (YintiYantiYellow) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 	yintiYantiPlay(s, l, self)
 }
-func (YintiYantiYellow) Block(s *sim.TurnState, l card.Logger, self *card.CardState) {
+func (YintiYantiYellow) Block(s card.GameEngine, l card.Logger, self *card.CardState) {
 	yintiYantiBlock(s, l, self)
 }
 
 func (YintiYantiBlue) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 	yintiYantiPlay(s, l, self)
 }
-func (YintiYantiBlue) Block(s *sim.TurnState, l card.Logger, self *card.CardState) {
+func (YintiYantiBlue) Block(s card.GameEngine, l card.Logger, self *card.CardState) {
 	yintiYantiBlock(s, l, self)
 }

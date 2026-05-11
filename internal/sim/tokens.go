@@ -60,7 +60,8 @@ func tokenDisplayName(t TokenType) string {
 // Fires before each attack / weapon swing resolves: flips ArcaneDamageDealt when
 // aura.Count clears the LikelyDamageHits window and destroys the aura. Damage was
 // credited at creation time in CreateRunechants — this handler is pure state cleanup.
-func runechantAuraHandler(s *TurnState, _ Logger, _ *Trigger, a *Aura) {
+func runechantAuraHandler(g GameEngine, _ Logger, _ *Trigger, a *Aura) {
+	s := g.(*TurnState)
 	if LikelyDamageHits(a.Count, false) {
 		s.arcaneDamageDealt = true
 	}
@@ -83,7 +84,8 @@ func NewRunechantAura(n int) Aura {
 // post-hoc arsenal-promotion step fill an otherwise-empty arsenal slot. Pops past
 // deck-end are silently skipped — empty deck just means no draw. Reading the deck top
 // flips s.cacheable (PopDeckTop's contract).
-func ponderAuraHandler(s *TurnState, _ Logger, _ *Trigger, a *Aura) {
+func ponderAuraHandler(g GameEngine, _ Logger, _ *Trigger, a *Aura) {
+	s := g.(*TurnState)
 	for i := 0; i < a.Count; i++ {
 		c, ok := s.PopDeckTop()
 		if !ok {
@@ -135,7 +137,7 @@ func (GoldTokenAbility) GoAgain() bool       { return true }
 // PlayPrecondition gates the activated ability on having a Gold token to spend. Rejects
 // permutations that order the ability before the card / OnHit that creates the token —
 // the chain runner finds the legal ordering (token created first) via Heap's algorithm.
-func (GoldTokenAbility) PlayPrecondition(s *TurnState, self *CardState) bool {
+func (GoldTokenAbility) PlayPrecondition(s GameEngine, self *CardState) bool {
 	return s.Gold() > 0
 }
 
@@ -174,7 +176,7 @@ func (SilverTokenAbility) Types() card.TypeSet { return silverTokenAbilityTypes 
 func (SilverTokenAbility) GoAgain() bool       { return true }
 
 // PlayPrecondition gates the activated ability on having a Silver token to spend.
-func (SilverTokenAbility) PlayPrecondition(s *TurnState, self *CardState) bool {
+func (SilverTokenAbility) PlayPrecondition(s GameEngine, self *CardState) bool {
 	return s.Silver() > 0
 }
 
@@ -213,7 +215,7 @@ func (CopperTokenAbility) Types() card.TypeSet { return copperTokenAbilityTypes 
 func (CopperTokenAbility) GoAgain() bool       { return true }
 
 // PlayPrecondition gates the activated ability on having a Copper token to spend.
-func (CopperTokenAbility) PlayPrecondition(s *TurnState, self *CardState) bool {
+func (CopperTokenAbility) PlayPrecondition(s GameEngine, self *CardState) bool {
 	return s.Copper() > 0
 }
 

@@ -10,7 +10,7 @@ import (
 // Tests that with enough IncomingDamage Value sums printed Defense + +1{d} boost + 1 arcane.
 func TestSigilOfSuffering_FullCreditWhenIncomingAbsorbsBoost(t *testing.T) {
 	cases := []struct {
-		c    sim.Card
+		c    card.Card
 		want int
 	}{
 		{SigilOfSufferingRed{}, 5},    // 3 block + 1 boost + 1 arcane
@@ -31,7 +31,7 @@ func TestSigilOfSuffering_FullCreditWhenIncomingAbsorbsBoost(t *testing.T) {
 // Value collapses to printed Defense + 1 arcane.
 func TestSigilOfSuffering_BoostWastedWhenIncomingMatchesDefense(t *testing.T) {
 	cases := []struct {
-		c        sim.Card
+		c        card.Card
 		incoming int
 		want     int
 	}{
@@ -53,7 +53,7 @@ func TestSigilOfSuffering_BoostWastedWhenIncomingMatchesDefense(t *testing.T) {
 // — the +1{d} bonus is credited via BonusDefense at Play time, not baked into Defense.
 func TestSigilOfSuffering_DefenseIsPrinted(t *testing.T) {
 	cases := []struct {
-		c    sim.Card
+		c    card.Card
 		want int
 	}{
 		{SigilOfSufferingRed{}, 3},

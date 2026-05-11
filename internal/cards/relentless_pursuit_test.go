@@ -33,7 +33,7 @@ func TestRelentlessPursuit_NoRecycleWithoutPriorAttack(t *testing.T) {
 func TestRelentlessPursuit_RecyclesAfterPriorAttack(t *testing.T) {
 	self := &card.CardState{Card: RelentlessPursuitBlue{}}
 	s := sim.NewTurnStateFromCards(nil, nil)
-	s.SetCardsPlayed([]sim.Card{testutils.GenericAttack(0, 3)})
+	s.SetCardsPlayed([]card.Card{testutils.GenericAttack(0, 3)})
 	sim.ResolveChainStep(s, s.Logger(), self)
 	if !self.SkipGraveyard {
 		t.Fatal("SkipGraveyard = false after prior attack, want true")

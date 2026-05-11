@@ -13,7 +13,7 @@ func TestAetherSlash_BaseDamage(t *testing.T) {
 	// rider's damage (not a separate baseline), so with the non-attack-action condition unmet
 	// the card deals no arcane.
 	cases := []struct {
-		c    sim.Card
+		c    card.Card
 		want int
 	}{
 		{AetherSlashRed{}, 4},
@@ -32,7 +32,7 @@ func TestAetherSlash_BaseDamage(t *testing.T) {
 func TestAetherSlash_NonAttackActionAttributedFiresRider(t *testing.T) {
 	// A non-attack action attributed to this card via PitchedToPlay fires the +1 arcane rider.
 	cases := []struct {
-		c    sim.Card
+		c    card.Card
 		want int
 	}{
 		{AetherSlashRed{}, 5},
@@ -41,7 +41,7 @@ func TestAetherSlash_NonAttackActionAttributedFiresRider(t *testing.T) {
 	}
 	for _, tc := range cases {
 		var s sim.TurnState
-		self := &card.CardState{Card: tc.c, PitchedToPlay: []sim.Card{testutils.NonAttack{}}}
+		self := &card.CardState{Card: tc.c, PitchedToPlay: []card.Card{testutils.NonAttack{}}}
 		sim.ResolveChainStep(&s, s.Logger(), self)
 		if got := s.Value(); got != tc.want {
 			t.Errorf("%s: Play() = %d, want %d", tc.c.Name(), got, tc.want)
@@ -55,9 +55,9 @@ func TestAetherSlash_AttackAttributedDoesNotFireRider(t *testing.T) {
 	// cards funded specifically to play this Aether Slash (PitchedToPlay) count.
 	self := &card.CardState{
 		Card:          AetherSlashRed{},
-		PitchedToPlay: []sim.Card{testutils.RunebladeAttack{}},
+		PitchedToPlay: []card.Card{testutils.RunebladeAttack{}},
 	}
-	s := sim.NewTurnStateFromSpec(sim.TurnStateSpec{Pitched: []sim.Card{testutils.RunebladeAttack{}, testutils.NonAttack{}}})
+	s := sim.NewTurnStateFromSpec(sim.TurnStateSpec{Pitched: []card.Card{testutils.RunebladeAttack{}, testutils.NonAttack{}}})
 	sim.ResolveChainStep(&s, s.Logger(), self)
 	if got := s.Value(); got != 4 {
 		t.Errorf("Aether Slash Red: Play() = %d, want 4 (attack attributed; rider gated to PitchedToPlay)", got)
@@ -73,7 +73,7 @@ func TestAetherSlash_FlagsArcaneDamageDealtOnlyWhenTriggered(t *testing.T) {
 		t.Error("ArcaneDamageDealt = true with no qualifying pitch attribution; want false")
 	}
 	s = sim.TurnState{}
-	self := &card.CardState{Card: AetherSlashRed{}, PitchedToPlay: []sim.Card{testutils.NonAttack{}}}
+	self := &card.CardState{Card: AetherSlashRed{}, PitchedToPlay: []card.Card{testutils.NonAttack{}}}
 	sim.ResolveChainStep(&s, s.Logger(), self)
 	if !s.ArcaneDamageDealt() {
 		t.Error("ArcaneDamageDealt = false with non-attack action attributed; want true")

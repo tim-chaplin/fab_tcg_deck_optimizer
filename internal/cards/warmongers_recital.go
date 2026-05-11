@@ -7,14 +7,13 @@
 package cards
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 // warmongersRecitalRecycleOnHit pulls the buffed attack out of graveyard onto the deck bottom.
 func warmongersRecitalRecycleOnHit(s card.GameEngine, l card.Logger, self *card.CardState, _ *card.OnHitHandler) {
 	target := self.Card
-	if _, ok := s.RecycleFromGraveyardToBottom(func(c sim.Card) bool { return c == target }); !ok {
+	if _, ok := s.RecycleFromGraveyardToBottom(func(c card.Card) bool { return c == target }); !ok {
 		return
 	}
 	l.AppendPostTrigger(self.Card.DisplayName(), "Recycled to bottom of deck on hit", 0)
@@ -22,7 +21,7 @@ func warmongersRecitalRecycleOnHit(s card.GameEngine, l card.Logger, self *card.
 
 // warmongersRecitalPlay grants the next attack action +n{p} and the on-hit recycle rider.
 // Fizzles silently if no attack action follows in CardsRemaining.
-func warmongersRecitalPlay(s card.GameEngine, l card.Logger, self *card.CardState, source sim.Card, n int) {
+func warmongersRecitalPlay(s card.GameEngine, l card.Logger, self *card.CardState, source card.Card, n int) {
 	for _, pc := range s.CardsRemaining() {
 		if pc.Card.Types().IsAttackAction() {
 			pc.BonusAttack += n

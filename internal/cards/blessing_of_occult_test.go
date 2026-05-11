@@ -11,7 +11,7 @@ import (
 // the per-variant Count for the deferred trigger.
 func TestBlessingOfOccult_PlayCreatesAuraNoThisTurnRunes(t *testing.T) {
 	cases := []struct {
-		c         sim.Card
+		c         card.Card
 		wantCount int
 	}{
 		{BlessingOfOccultRed{}, 3},
@@ -46,7 +46,7 @@ func TestBlessingOfOccult_PlayCreatesAuraNoThisTurnRunes(t *testing.T) {
 // fresh TurnState creates N live Runechants and credits matching damage.
 func TestBlessingOfOccult_TriggerHandlerCreatesNRunes(t *testing.T) {
 	cases := []struct {
-		c sim.Card
+		c card.Card
 		n int
 	}{
 		{BlessingOfOccultRed{}, 3},

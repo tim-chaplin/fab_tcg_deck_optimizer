@@ -23,7 +23,7 @@ func TestLifeForALife_LikelyHitCreditsHeal(t *testing.T) {
 // Tests that the heal rider doesn't fire on blockable variants.
 func TestLifeForALife_BlockableSuppressesHeal(t *testing.T) {
 	cases := []struct {
-		c    sim.Card
+		c    card.Card
 		want int
 	}{
 		{LifeForALifeYellow{}, 3},

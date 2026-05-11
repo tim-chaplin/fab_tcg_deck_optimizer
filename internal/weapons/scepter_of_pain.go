@@ -6,7 +6,6 @@ package weapons
 
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
@@ -18,10 +17,10 @@ func (ScepterOfPain) ID() ids.WeaponID    { return ids.ScepterOfPainID }
 func (ScepterOfPain) Name() string        { return "Scepter of Pain" }
 func (ScepterOfPain) Types() card.TypeSet { return scepterOfPainTypes }
 func (ScepterOfPain) Hands() int          { return 1 }
-func (ScepterOfPain) Ability() sim.Card   { return scepterOfPainAbility }
+func (ScepterOfPain) Ability() card.Card  { return scepterOfPainAbility }
 
 // Cached at package init — see nebula_blade.go for the alloc-free rationale.
-var scepterOfPainAbility sim.Card = ScepterOfPainAbility{}
+var scepterOfPainAbility card.Card = ScepterOfPainAbility{}
 
 var scepterOfPainAbilityTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeWeapon, card.TypeScepter, card.TypeOneHand, card.TypeAttack)
 

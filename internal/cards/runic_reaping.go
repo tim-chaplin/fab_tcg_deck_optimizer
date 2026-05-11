@@ -11,8 +11,6 @@ package cards
 
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
-
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
 
 // runicReapingTargetMatches accepts Runeblade attack action cards (weapons don't qualify).
@@ -35,7 +33,7 @@ func (c RunicReapingBlue) Play(s card.GameEngine, l card.Logger, self *card.Card
 
 // runicReapingPlay buffs the next matching attack +1{p} when an attack card was pitched
 // and appends an on-hit n-runechant rider.
-func runicReapingPlay(s card.GameEngine, l card.Logger, selfState *card.CardState, source sim.Card, n int) {
+func runicReapingPlay(s card.GameEngine, l card.Logger, selfState *card.CardState, source card.Card, n int) {
 	var target *card.CardState
 	for _, pc := range s.CardsRemaining() {
 		if runicReapingTargetMatches(pc) {

@@ -16,13 +16,13 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
 
-func plunderRunOnHitDraw(s *sim.TurnState, l card.Logger, t *sim.Trigger, _ *sim.Aura) {
+func plunderRunOnHitDraw(s card.GameEngine, l card.Logger, t *sim.Trigger, _ *sim.Aura) {
 	s.DrawOne()
 	l.AppendPostTriggerf(s.TriggeringCard().DisplayName(), 0,
 		"%s drew a card on attack-action hit", t.Source.DisplayName())
 }
 
-func plunderRunPlay(s card.GameEngine, l card.Logger, self *card.CardState, source sim.Card, n int) {
+func plunderRunPlay(s card.GameEngine, l card.Logger, self *card.CardState, source card.Card, n int) {
 	s.AddTrigger(sim.Trigger{
 		Source:      source,
 		TriggerType: sim.TriggerHit,

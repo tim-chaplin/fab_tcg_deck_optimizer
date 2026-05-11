@@ -12,7 +12,6 @@
 package cards
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
@@ -32,17 +31,17 @@ func rightBehindYouBlock(s card.GameEngine, l card.Logger, self *card.CardState)
 	}
 }
 
-func (RightBehindYouRed) Block(s *sim.TurnState, l card.Logger, self *card.CardState) {
+func (RightBehindYouRed) Block(s card.GameEngine, l card.Logger, self *card.CardState) {
 	rightBehindYouBlock(s, l, self)
 }
 func (RightBehindYouRed) Play(s card.GameEngine, l card.Logger, self *card.CardState) {}
 
-func (RightBehindYouYellow) Block(s *sim.TurnState, l card.Logger, self *card.CardState) {
+func (RightBehindYouYellow) Block(s card.GameEngine, l card.Logger, self *card.CardState) {
 	rightBehindYouBlock(s, l, self)
 }
 func (RightBehindYouYellow) Play(s card.GameEngine, l card.Logger, self *card.CardState) {}
 
-func (RightBehindYouBlue) Block(s *sim.TurnState, l card.Logger, self *card.CardState) {
+func (RightBehindYouBlue) Block(s card.GameEngine, l card.Logger, self *card.CardState) {
 	rightBehindYouBlock(s, l, self)
 }
 func (RightBehindYouBlue) Play(s card.GameEngine, l card.Logger, self *card.CardState) {}

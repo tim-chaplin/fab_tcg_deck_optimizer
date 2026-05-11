@@ -23,7 +23,7 @@ func TestJackBeQuick_NoNimblismRiderOff(t *testing.T) {
 // Tests that a Nimblism in the graveyard lets Jack Be Quick banish for the +1{p} /
 // go-again rider.
 func TestJackBeQuick_BanishesNimblismForBonus(t *testing.T) {
-	s := sim.NewTurnStateFromCards(nil, []sim.Card{NimblismRed{}})
+	s := sim.NewTurnStateFromCards(nil, []card.Card{NimblismRed{}})
 	self := &card.CardState{Card: JackBeQuickRed{}}
 	sim.ResolveChainStep(s, s.Logger(), self)
 	if !self.GrantedGoAgain {

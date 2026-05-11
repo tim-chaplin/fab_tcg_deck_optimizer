@@ -11,7 +11,7 @@ import (
 // TestNimblism_NoAttackReturnsZero: no qualifying next attack card → +3 rider fizzles.
 func TestNimblism_NoAttackReturnsZero(t *testing.T) {
 	s := sim.TurnState{}
-	for _, c := range []sim.Card{NimblismRed{}, NimblismYellow{}, NimblismBlue{}} {
+	for _, c := range []card.Card{NimblismRed{}, NimblismYellow{}, NimblismBlue{}} {
 		sim.ResolveChainStep(&s, s.Logger(), &card.CardState{Card: c})
 		if got := s.Value(); got != 0 {
 			t.Errorf("%s: Play() = %d, want 0", c.Name(), got)
@@ -32,7 +32,7 @@ func TestNimblism_HighCostFilteredOut(t *testing.T) {
 // (Red +3, Yellow +2, Blue +1).
 func TestNimblism_LowCostReturnsBonus(t *testing.T) {
 	cases := []struct {
-		c    sim.Card
+		c    card.Card
 		want int
 	}{
 		{NimblismRed{}, 3},

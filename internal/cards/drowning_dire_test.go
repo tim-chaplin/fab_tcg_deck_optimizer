@@ -11,7 +11,7 @@ import (
 // Tests that Drowning Dire's Play does not flip GrantedDominate when no aura was played or
 // created earlier this turn.
 func TestDrowningDire_NoAuraNoDominate(t *testing.T) {
-	for _, c := range []sim.Card{DrowningDireRed{}, DrowningDireYellow{}, DrowningDireBlue{}} {
+	for _, c := range []card.Card{DrowningDireRed{}, DrowningDireYellow{}, DrowningDireBlue{}} {
 		self := &card.CardState{Card: c}
 		s := sim.NewTurnStateFromCards(nil, nil)
 		sim.ResolveChainStep(s, s.Logger(), self)
@@ -23,9 +23,9 @@ func TestDrowningDire_NoAuraNoDominate(t *testing.T) {
 
 // Tests that an aura played earlier this turn flips GrantedDominate via HasPlayedOrCreatedAura.
 func TestDrowningDire_AuraGrantsDominate(t *testing.T) {
-	for _, c := range []sim.Card{DrowningDireRed{}, DrowningDireYellow{}, DrowningDireBlue{}} {
+	for _, c := range []card.Card{DrowningDireRed{}, DrowningDireYellow{}, DrowningDireBlue{}} {
 		s := sim.NewTurnStateFromCards(nil, nil)
-		s.SetCardsPlayed([]sim.Card{testutils.Aura{}})
+		s.SetCardsPlayed([]card.Card{testutils.Aura{}})
 		self := &card.CardState{Card: c}
 		sim.ResolveChainStep(s, s.Logger(), self)
 		if !self.GrantedDominate {
@@ -37,8 +37,8 @@ func TestDrowningDire_AuraGrantsDominate(t *testing.T) {
 // Tests that the on-hit recycle moves a non-attack action card from graveyard to bottom of deck.
 func TestDrowningDire_OnHitRecyclesNonAttackToBottom(t *testing.T) {
 	non := testutils.GenericAction()
-	deck := []sim.Card{testutils.RedAttack{}}
-	s := sim.NewTurnStateFromCards(deck, []sim.Card{non})
+	deck := []card.Card{testutils.RedAttack{}}
+	s := sim.NewTurnStateFromCards(deck, []card.Card{non})
 	self := &card.CardState{Card: DrowningDireRed{}}
 	sim.ResolveChainStep(s, s.Logger(), self)
 	self.BonusAttack = 2

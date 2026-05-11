@@ -11,7 +11,7 @@ import (
 // aura with the variant's Count.
 func TestMaleficIncantation_PlayRegistersAttackActionTrigger(t *testing.T) {
 	cases := []struct {
-		c sim.Card
+		c card.Card
 		n int
 	}{
 		{MaleficIncantationRed{}, 3},
@@ -48,7 +48,7 @@ func TestMaleficIncantation_PlayRegistersAttackActionTrigger(t *testing.T) {
 
 // Tests that one handler invocation creates one Runechant and credits 1 damage.
 func TestMaleficIncantation_HandlerCreatesOneRunechantPerFire(t *testing.T) {
-	for _, c := range []sim.Card{MaleficIncantationRed{}, MaleficIncantationYellow{}, MaleficIncantationBlue{}} {
+	for _, c := range []card.Card{MaleficIncantationRed{}, MaleficIncantationYellow{}, MaleficIncantationBlue{}} {
 		var s sim.TurnState
 		sim.ResolveChainStep(&s, s.Logger(), &card.CardState{Card: c})
 		chain := sim.NewTurnStateFromCards(nil, nil)

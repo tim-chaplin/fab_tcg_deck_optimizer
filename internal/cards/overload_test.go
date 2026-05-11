@@ -11,7 +11,7 @@ import (
 // Blue 1) only Blue lands in the window unassisted, so only Blue flips GrantedGoAgain.
 func TestOverload_OnHitGoAgainEagerByLikelyToHit(t *testing.T) {
 	cases := []struct {
-		c       sim.Card
+		c       card.Card
 		wantDmg int
 		wantGA  bool
 	}{

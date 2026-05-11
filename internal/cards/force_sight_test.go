@@ -11,7 +11,7 @@ import (
 // TestForceSight_NoAttackReturnsZero: no qualifying next attack card → +3 rider fizzles.
 func TestForceSight_NoAttackReturnsZero(t *testing.T) {
 	s := sim.TurnState{}
-	for _, c := range []sim.Card{ForceSightRed{}, ForceSightYellow{}, ForceSightBlue{}} {
+	for _, c := range []card.Card{ForceSightRed{}, ForceSightYellow{}, ForceSightBlue{}} {
 		sim.ResolveChainStep(&s, s.Logger(), &card.CardState{Card: c})
 		if got := s.Value(); got != 0 {
 			t.Errorf("%s: Play() = %d, want 0", c.Name(), got)
@@ -32,7 +32,7 @@ func TestForceSight_NonAttackInRemainingFizzles(t *testing.T) {
 // (Red +3, Yellow +2, Blue +1).
 func TestForceSight_NextAttackReturnsBonus(t *testing.T) {
 	cases := []struct {
-		c    sim.Card
+		c    card.Card
 		want int
 	}{
 		{ForceSightRed{}, 3},
@@ -57,8 +57,8 @@ func TestForceSight_HandPlaySkipsOpt(t *testing.T) {
 	defer testutils.SwapCurrentHero(testutils.Hero{})()
 
 	a, b := testutils.NewStubCard("a"), testutils.NewStubCard("b")
-	for _, c := range []sim.Card{ForceSightRed{}, ForceSightYellow{}, ForceSightBlue{}} {
-		s := sim.NewTurnStateFromCards([]sim.Card{a, b}, nil)
+	for _, c := range []card.Card{ForceSightRed{}, ForceSightYellow{}, ForceSightBlue{}} {
+		s := sim.NewTurnStateFromCards([]card.Card{a, b}, nil)
 		sim.ResolveChainStep(s, s.Logger(), &card.CardState{Card: c})
 		if s.Value() != 0 {
 			t.Errorf("%s: Play() from hand Value = %d, want 0", c.Name(), s.Value())
@@ -76,8 +76,8 @@ func TestForceSight_ArsenalPlayCallsOpt2(t *testing.T) {
 	defer testutils.SwapCurrentHero(testutils.Hero{})()
 
 	a, b := testutils.NewStubCard("a"), testutils.NewStubCard("b")
-	for _, c := range []sim.Card{ForceSightRed{}, ForceSightYellow{}, ForceSightBlue{}} {
-		s := sim.NewTurnStateFromCards([]sim.Card{a, b}, nil)
+	for _, c := range []card.Card{ForceSightRed{}, ForceSightYellow{}, ForceSightBlue{}} {
+		s := sim.NewTurnStateFromCards([]card.Card{a, b}, nil)
 		sim.ResolveChainStep(s, s.Logger(), &card.CardState{Card: c, FromArsenal: true})
 		if s.Value() != 0 {
 			t.Errorf("%s: Play() from arsenal Value = %d, want 0", c.Name(), s.Value())

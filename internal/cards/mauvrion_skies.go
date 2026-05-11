@@ -12,7 +12,6 @@ import (
 	"fmt"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
@@ -24,7 +23,7 @@ func mauvrionTargetMatches(target *card.CardState) bool {
 
 // mauvrionSkiesPlay grants the next matching attack go-again and an on-hit n-runechant
 // rider.
-func mauvrionSkiesPlay(s card.GameEngine, l card.Logger, selfState *card.CardState, source sim.Card, n int) {
+func mauvrionSkiesPlay(s card.GameEngine, l card.Logger, selfState *card.CardState, source card.Card, n int) {
 	for _, pc := range s.CardsRemaining() {
 		if mauvrionTargetMatches(pc) {
 			pc.GrantedGoAgain = true
@@ -54,7 +53,7 @@ func onHitCreateRunechants(s card.GameEngine, l card.Logger, self *card.CardStat
 var onHitRunechantText = func() map[ids.CardID]string {
 	out := make(map[ids.CardID]string, 6)
 	for _, p := range []struct {
-		c sim.Card
+		c card.Card
 		n int
 	}{
 		{MauvrionSkiesRed{}, 3},

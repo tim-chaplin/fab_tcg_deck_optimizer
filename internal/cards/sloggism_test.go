@@ -11,7 +11,7 @@ import (
 // TestSloggism_NoAttackReturnsZero: no qualifying next attack card → +6 rider fizzles.
 func TestSloggism_NoAttackReturnsZero(t *testing.T) {
 	s := sim.TurnState{}
-	for _, c := range []sim.Card{SloggismRed{}, SloggismYellow{}, SloggismBlue{}} {
+	for _, c := range []card.Card{SloggismRed{}, SloggismYellow{}, SloggismBlue{}} {
 		sim.ResolveChainStep(&s, s.Logger(), &card.CardState{Card: c})
 		if got := s.Value(); got != 0 {
 			t.Errorf("%s: Play() = %d, want 0", c.Name(), got)
@@ -32,7 +32,7 @@ func TestSloggism_LowCostFilteredOut(t *testing.T) {
 // (Red +6, Yellow +5, Blue +4).
 func TestSloggism_HighCostReturnsBonus(t *testing.T) {
 	cases := []struct {
-		c    sim.Card
+		c    card.Card
 		want int
 	}{
 		{SloggismRed{}, 6},

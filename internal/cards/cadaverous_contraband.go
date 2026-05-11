@@ -7,7 +7,6 @@
 package cards
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
@@ -17,7 +16,7 @@ func cadaverousContrabandOnHitRecycle(s card.GameEngine, l card.Logger, self *ca
 	}
 }
 
-func isNonAttackAction(c sim.Card) bool { return c.Types().IsNonAttackAction() }
+func isNonAttackAction(c card.Card) bool { return c.Types().IsNonAttackAction() }
 
 func cadaverousContrabandPlay(s card.GameEngine, l card.Logger, self *card.CardState) {
 	self.RegisterOnHit(cadaverousContrabandOnHitRecycle)

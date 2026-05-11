@@ -14,12 +14,12 @@ import (
 
 // drawOneAtEndOfTurn is the end-of-turn TriggerHandler that fires Strategic Planning's
 // deferred draw. Top-level so the registration stays alloc-free.
-func drawOneAtEndOfTurn(s *sim.TurnState, l card.Logger, _ *sim.Trigger, _ *sim.Aura) {
+func drawOneAtEndOfTurn(s card.GameEngine, l card.Logger, _ *sim.Trigger, _ *sim.Aura) {
 	s.DrawOne()
 }
 
 func strategicPlanningPlay(s card.GameEngine, l card.Logger, self *card.CardState) {
-	if _, ok := s.RecycleFromGraveyardToBottom(func(c sim.Card) bool {
+	if _, ok := s.RecycleFromGraveyardToBottom(func(c card.Card) bool {
 		return c.Types().Has(card.TypeAction) && c.Cost(s) <= 2
 	}); ok {
 		l.AppendPostTrigger(self.Card.DisplayName(), "Recycled an action card to bottom of deck", 0)

@@ -38,10 +38,10 @@ func moonWishCost(s card.GameEngine) int {
 // moonWishPlay pays the alt cost (when a hand card is available), emits the chain step,
 // and registers an OnHit that tutors Sun Kiss. Tutored Sun Kiss plays immediately when
 // self has go-again granted; otherwise it lands in hand for next turn.
-func moonWishPlay(c sim.Card, s card.GameEngine, l card.Logger, self *card.CardState) {
+func moonWishPlay(c card.Card, s card.GameEngine, l card.Logger, self *card.CardState) {
 	name := c.DisplayName()
 	// Alt cost: pop a hand card and prepend it to the deck (PrependToDeck flips cacheable).
-	var returned sim.Card
+	var returned card.Card
 	if len(s.Hand()) > 0 {
 		returned = s.PopHandAt(0)
 		s.PrependToDeck(returned)
@@ -88,7 +88,7 @@ func moonWishOnHit(s card.GameEngine, l card.Logger, self *card.CardState, _ *ca
 
 // sunKissTutorPriority picks the highest-priority Sun Kiss printing in the deck. Red >
 // Yellow > Blue (Red heals the most: {3,2,1}{h} by colour).
-func sunKissTutorPriority(c sim.Card) int {
+func sunKissTutorPriority(c card.Card) int {
 	switch c.ID() {
 	case ids.SunKissRed:
 		return 3

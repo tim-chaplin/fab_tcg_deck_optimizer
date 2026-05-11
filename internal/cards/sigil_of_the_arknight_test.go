@@ -12,7 +12,7 @@ import (
 // flips AuraCreated, registers a TriggerStartOfTurn entry, and returns 0. The deck peek
 // happens when the sim fires the trigger next turn.
 func TestSigilOfTheArknight_PlayOnlySetsAuraCreated(t *testing.T) {
-	s := sim.NewTurnStateFromCards([]sim.Card{testutils.RunebladeAttack{}}, nil)
+	s := sim.NewTurnStateFromCards([]card.Card{testutils.RunebladeAttack{}}, nil)
 	sim.ResolveChainStep(s, s.Logger(), &card.CardState{Card: SigilOfTheArknightBlue{}})
 	if got := s.Value(); got != 0 {
 		t.Errorf("Play() = %d, want 0 (reveal deferred to trigger)", got)
@@ -32,7 +32,7 @@ func TestSigilOfTheArknight_TriggerRevealsAttackActionIntoHand(t *testing.T) {
 	var play sim.TurnState
 	sim.ResolveChainStep(&play, play.Logger(), &card.CardState{Card: SigilOfTheArknightBlue{}})
 	top := testutils.RunebladeAttack{}
-	next := sim.NewTurnStateFromCards([]sim.Card{top, testutils.NonAttack{}}, nil)
+	next := sim.NewTurnStateFromCards([]card.Card{top, testutils.NonAttack{}}, nil)
 	play.Auras()[0].Handler(next, next.Logger(), &play.Auras()[0].Trigger, &play.Auras()[0])
 	if next.Value() != 0 {
 		t.Errorf("handler Value = %d, want 0 (tempo credited via the draw, not damage)", next.Value())
@@ -40,7 +40,7 @@ func TestSigilOfTheArknight_TriggerRevealsAttackActionIntoHand(t *testing.T) {
 	if h := next.Hand(); len(h) != 1 || h[0] != top {
 		t.Errorf("Hand = %v, want [%v] (top of post-draw deck)", h, top)
 	}
-	if d := next.Deck(); d.Size() != 1 || d.PeekTop().(sim.Card) != (testutils.NonAttack{}) {
+	if d := next.Deck(); d.Size() != 1 || d.PeekTop().(card.Card) != (testutils.NonAttack{}) {
 		t.Errorf("Deck = %v, want top popped leaving [testutils.NonAttack]", d)
 	}
 }
@@ -50,7 +50,7 @@ func TestSigilOfTheArknight_TriggerRevealsAttackActionIntoHand(t *testing.T) {
 func TestSigilOfTheArknight_TriggerRevealsNonAttack(t *testing.T) {
 	var play sim.TurnState
 	sim.ResolveChainStep(&play, play.Logger(), &card.CardState{Card: SigilOfTheArknightBlue{}})
-	next := sim.NewTurnStateFromCards([]sim.Card{testutils.Aura{}, testutils.RunebladeAttack{}}, nil)
+	next := sim.NewTurnStateFromCards([]card.Card{testutils.Aura{}, testutils.RunebladeAttack{}}, nil)
 	play.Auras()[0].Handler(next, next.Logger(), &play.Auras()[0].Trigger, &play.Auras()[0])
 	if next.Value() != 0 {
 		t.Errorf("handler Value = %d, want 0", next.Value())

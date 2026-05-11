@@ -9,7 +9,7 @@ import (
 
 // Tests that with no arcane incoming the default branch credits 1{h}.
 func TestArcanePolarity_NoArcaneIncomingCreditsOne(t *testing.T) {
-	cases := []sim.Card{
+	cases := []card.Card{
 		ArcanePolarityRed{},
 		ArcanePolarityYellow{},
 		ArcanePolarityBlue{},
@@ -26,7 +26,7 @@ func TestArcanePolarity_NoArcaneIncomingCreditsOne(t *testing.T) {
 // Tests that ArcaneIncomingDamage > 0 swaps to the per-pitch alternate gain.
 func TestArcanePolarity_ArcaneIncomingCreditsLargeGain(t *testing.T) {
 	cases := []struct {
-		c    sim.Card
+		c    card.Card
 		gain int
 	}{
 		{ArcanePolarityRed{}, 4},

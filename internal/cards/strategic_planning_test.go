@@ -10,7 +10,7 @@ import (
 
 // Tests that Strategic Planning queues a TriggerEndOfTurn keyed to itself, not a Ponder.
 func TestStrategicPlanning_QueuesEndOfTurnTrigger(t *testing.T) {
-	for _, c := range []sim.Card{StrategicPlanningRed{}, StrategicPlanningYellow{}, StrategicPlanningBlue{}} {
+	for _, c := range []card.Card{StrategicPlanningRed{}, StrategicPlanningYellow{}, StrategicPlanningBlue{}} {
 		s := sim.NewTurnStateFromCards(nil, nil)
 		sim.ResolveChainStep(s, s.Logger(), &card.CardState{Card: c})
 		matching := 0
@@ -31,8 +31,8 @@ func TestStrategicPlanning_QueuesEndOfTurnTrigger(t *testing.T) {
 // Tests that an eligible graveyard action is recycled to the bottom of the deck.
 func TestStrategicPlanning_RecyclesEligibleActionToBottom(t *testing.T) {
 	target := testutils.GenericAction()
-	deck := []sim.Card{testutils.BlueAttack{}}
-	s := sim.NewTurnStateFromCards(deck, []sim.Card{target})
+	deck := []card.Card{testutils.BlueAttack{}}
+	s := sim.NewTurnStateFromCards(deck, []card.Card{target})
 	sim.ResolveChainStep(s, s.Logger(), &card.CardState{Card: StrategicPlanningRed{}})
 	if got := s.Deck().Size(); got != 2 {
 		t.Errorf("deck size after recycle = %d, want 2 (target appended to bottom)", got)

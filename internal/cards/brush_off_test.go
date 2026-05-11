@@ -11,7 +11,7 @@ import (
 // has room.
 func TestBrushOff_PreventsCap(t *testing.T) {
 	cases := []struct {
-		card sim.Card
+		card card.Card
 		want int
 	}{
 		{BrushOffRed{}, 3},

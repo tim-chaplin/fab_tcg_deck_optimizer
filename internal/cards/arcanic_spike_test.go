@@ -12,7 +12,7 @@ import (
 // printed attack.
 func TestArcanicSpike_ArcaneDamageNotDealtReturnsBaseAttack(t *testing.T) {
 	cases := []struct {
-		c    sim.Card
+		c    card.Card
 		want int
 	}{
 		{ArcanicSpikeRed{}, 5},
@@ -33,7 +33,7 @@ func TestArcanicSpike_ArcaneDamageNotDealtReturnsBaseAttack(t *testing.T) {
 // the flag) the +2{p} rider activates and Play returns attack + 2.
 func TestArcanicSpike_ArcaneDamageDealtTriggersBonus(t *testing.T) {
 	cases := []struct {
-		c    sim.Card
+		c    card.Card
 		want int
 	}{
 		{ArcanicSpikeRed{}, 5 + 2},

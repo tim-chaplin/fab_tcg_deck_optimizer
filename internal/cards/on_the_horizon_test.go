@@ -3,7 +3,6 @@ package cards
 import (
 	"testing"
 
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
@@ -11,7 +10,7 @@ import (
 // runner routes it through the plain-block path rather than calling its Play during the
 // defender DR loop.
 func TestOnTheHorizon_TypedAsBlock(t *testing.T) {
-	cases := []sim.Card{OnTheHorizonRed{}, OnTheHorizonYellow{}, OnTheHorizonBlue{}}
+	cases := []card.Card{OnTheHorizonRed{}, OnTheHorizonYellow{}, OnTheHorizonBlue{}}
 	for _, c := range cases {
 		ts := c.Types()
 		if !ts.Has(card.TypeBlock) {

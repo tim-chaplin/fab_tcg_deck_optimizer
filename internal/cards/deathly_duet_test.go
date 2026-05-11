@@ -11,7 +11,7 @@ import (
 func TestDeathlyDuet_BaseDamage(t *testing.T) {
 	// Nothing attributed → just printed power.
 	cases := []struct {
-		c    sim.Card
+		c    card.Card
 		want int
 	}{
 		{DeathlyDuetRed{}, 4},
@@ -32,7 +32,7 @@ func TestDeathlyDuet_AttackAttributedAddsPower(t *testing.T) {
 	var s sim.TurnState
 	self := &card.CardState{
 		Card:          DeathlyDuetRed{},
-		PitchedToPlay: []sim.Card{testutils.RunebladeAttack{}},
+		PitchedToPlay: []card.Card{testutils.RunebladeAttack{}},
 	}
 	sim.ResolveChainStep(&s, s.Logger(), self)
 	if got := s.Value(); got != 6 {
@@ -47,7 +47,7 @@ func TestDeathlyDuet_NonAttackActionAttributedCreatesRunechants(t *testing.T) {
 	var s sim.TurnState
 	self := &card.CardState{
 		Card:          DeathlyDuetRed{},
-		PitchedToPlay: []sim.Card{testutils.NonAttack{}},
+		PitchedToPlay: []card.Card{testutils.NonAttack{}},
 	}
 	sim.ResolveChainStep(&s, s.Logger(), self)
 	if got := s.Value(); got != 6 {
@@ -67,7 +67,7 @@ func TestDeathlyDuet_BothBranchesFire(t *testing.T) {
 	var s sim.TurnState
 	self := &card.CardState{
 		Card:          DeathlyDuetRed{},
-		PitchedToPlay: []sim.Card{testutils.RunebladeAttack{}, testutils.NonAttack{}},
+		PitchedToPlay: []card.Card{testutils.RunebladeAttack{}, testutils.NonAttack{}},
 	}
 	sim.ResolveChainStep(&s, s.Logger(), self)
 	if got := s.Value(); got != 8 {

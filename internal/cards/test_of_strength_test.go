@@ -12,7 +12,7 @@ import (
 // (top power ≥ 6 vs opponent's modelled 5).
 func TestTestOfStrength_WinCreatesGold(t *testing.T) {
 	for _, power := range []int{6, 7} {
-		s := sim.NewTurnStateFromCards([]sim.Card{testutils.GenericAttack(0, power)}, nil)
+		s := sim.NewTurnStateFromCards([]card.Card{testutils.GenericAttack(0, power)}, nil)
 		sim.ResolveChainStep(s, s.Logger(), &card.CardState{Card: TestOfStrengthRed{}})
 		if s.Gold() != 1 {
 			t.Errorf("top power %d: Gold = %d, want 1 (clash win)", power, s.Gold())
@@ -22,7 +22,7 @@ func TestTestOfStrength_WinCreatesGold(t *testing.T) {
 
 // Tests that a tied clash (top power == 5) creates no Gold token.
 func TestTestOfStrength_TieNoGold(t *testing.T) {
-	s := sim.NewTurnStateFromCards([]sim.Card{testutils.GenericAttack(0, 5)}, nil)
+	s := sim.NewTurnStateFromCards([]card.Card{testutils.GenericAttack(0, 5)}, nil)
 	sim.ResolveChainStep(s, s.Logger(), &card.CardState{Card: TestOfStrengthRed{}})
 	if s.Gold() != 0 {
 		t.Errorf("top power 5: Gold = %d, want 0 (tie)", s.Gold())
@@ -33,7 +33,7 @@ func TestTestOfStrength_TieNoGold(t *testing.T) {
 // to reflect the opponent's Gold token.
 func TestTestOfStrength_LossNoGoldAndDocksValue(t *testing.T) {
 	for _, power := range []int{0, 1, 2, 3, 4} {
-		s := sim.NewTurnStateFromCards([]sim.Card{testutils.GenericAttack(0, power)}, nil)
+		s := sim.NewTurnStateFromCards([]card.Card{testutils.GenericAttack(0, power)}, nil)
 		valueBefore := s.Value()
 		sim.ResolveChainStep(s, s.Logger(), &card.CardState{Card: TestOfStrengthRed{}})
 		if s.Gold() != 0 {

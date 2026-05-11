@@ -8,7 +8,7 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
-var ferventForerunnerVariants = []sim.Card{
+var ferventForerunnerVariants = []card.Card{
 	FerventForerunnerRed{},
 	FerventForerunnerYellow{},
 	FerventForerunnerBlue{},
@@ -29,7 +29,7 @@ func TestFerventForerunner_OnHitOptFiresOnlyWhenInHitWindow(t *testing.T) {
 
 	a, b := testutils.NewStubCard("a"), testutils.NewStubCard("b")
 	cases := []struct {
-		c       sim.Card
+		c       card.Card
 		hitOpt  bool
 		printed int
 	}{
@@ -38,7 +38,7 @@ func TestFerventForerunner_OnHitOptFiresOnlyWhenInHitWindow(t *testing.T) {
 		{FerventForerunnerBlue{}, true, 1},
 	}
 	for _, tc := range cases {
-		s := sim.NewTurnStateFromCards([]sim.Card{a, b}, nil)
+		s := sim.NewTurnStateFromCards([]card.Card{a, b}, nil)
 		cs := &card.CardState{Card: tc.c}
 		sim.ResolveChainStep(s, s.Logger(), cs)
 		testutils.FireOnHitIfLikely(s, s.Logger(), cs)
@@ -70,7 +70,7 @@ func TestFerventForerunner_OnHitOptFiresWithBonusAttackInWindow(t *testing.T) {
 
 	a, b := testutils.NewStubCard("a"), testutils.NewStubCard("b")
 	c := FerventForerunnerRed{}
-	s := sim.NewTurnStateFromCards([]sim.Card{a, b}, nil)
+	s := sim.NewTurnStateFromCards([]card.Card{a, b}, nil)
 	cs := &card.CardState{Card: c, BonusAttack: 1}
 	sim.ResolveChainStep(s, s.Logger(), cs)
 	testutils.FireOnHitIfLikely(s, s.Logger(), cs)

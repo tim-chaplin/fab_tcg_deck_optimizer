@@ -29,7 +29,7 @@ func (c SigilOfTheArknightBlue) Play(s card.GameEngine, l card.Logger, self *car
 // it" on a whiff — so the printout makes the random reveal visible either way. Empty deck
 // is the silent edge case (no card to name). PeekDeck flips the cacheable bit either way
 // since the reveal outcome depends on shuffle order.
-func sigilOfTheArknightReveal(s *sim.TurnState, l card.Logger, _ *sim.Trigger, a *sim.Aura) {
+func sigilOfTheArknightReveal(s card.GameEngine, l card.Logger, _ *sim.Trigger, a *sim.Aura) {
 	s.DestroyAura(a, true)
 	top, ok := s.PeekDeck()
 	if !ok {

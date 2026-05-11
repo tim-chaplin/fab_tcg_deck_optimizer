@@ -74,7 +74,7 @@ type ModalCost interface {
 // playing card and popped this card's funding pitches from s.hand, so scans see only
 // cards that genuinely remain in hand — a pitch source can't double as a reveal target.
 type PlayPrecondition interface {
-	PlayPrecondition(s *TurnState, self *CardState) bool
+	PlayPrecondition(g GameEngine, self *CardState) bool
 }
 
 // LowerHealthWanter is an optional Hero marker. Heroes whose strategy revolves around staying at
@@ -93,7 +93,7 @@ type LowerHealthWanter interface {
 // another card" / similar conditional buffs. Cards without block-time logic don't need
 // to implement Blocker; their plain-block contribution stays at the printed Defense().
 type Blocker interface {
-	Block(s *TurnState, l Logger, self *CardState)
+	Block(g GameEngine, l Logger, self *CardState)
 }
 
 // BlockCost is an optional add-on for ModalCard Blockers whose block-time bonus comes

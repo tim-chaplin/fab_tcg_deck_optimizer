@@ -65,7 +65,7 @@ func chainStepTextSlow(self *card.CardState, idx uint32) string {
 // Idempotent. The registry package's init calls this once with the registry slice so the
 // runtime hot path is pure cache reads — fakes/test stubs created without registration
 // still work via cachedChainStepText's lazy backfill.
-func WarmChainStepCache(cards []sim.Card) {
+func WarmChainStepCache(cards []card.Card) {
 	var self card.CardState
 	for _, c := range cards {
 		if c == nil {

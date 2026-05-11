@@ -11,7 +11,7 @@ import (
 // Tests that the discard rider stays dormant without an aura played or created.
 func TestReekOfCorruption_NoAuraReturnsBaseAttack(t *testing.T) {
 	cases := []struct {
-		c    sim.Card
+		c    card.Card
 		want int
 	}{
 		{ReekOfCorruptionRed{}, 4},
@@ -43,7 +43,7 @@ func TestReekOfCorruption_LikelyToHitWithAuraCreatedTriggersDiscard(t *testing.T
 
 // Tests that an aura earlier in CardsPlayed satisfies the rider precondition.
 func TestReekOfCorruption_AuraPlayedTriggersDiscard(t *testing.T) {
-	s := sim.NewTurnStateFromSpec(sim.TurnStateSpec{CardsPlayed: []sim.Card{testutils.Aura{}}})
+	s := sim.NewTurnStateFromSpec(sim.TurnStateSpec{CardsPlayed: []card.Card{testutils.Aura{}}})
 	c := ReekOfCorruptionRed{}
 	cs := &card.CardState{Card: c}
 	sim.ResolveChainStep(&s, s.Logger(), cs)
@@ -56,7 +56,7 @@ func TestReekOfCorruption_AuraPlayedTriggersDiscard(t *testing.T) {
 // Tests that the discard rider doesn't fire on blockable variants even with AuraCreated.
 func TestReekOfCorruption_BlockableBaseSuppressesDiscard(t *testing.T) {
 	cases := []struct {
-		c    sim.Card
+		c    card.Card
 		want int
 	}{
 		{ReekOfCorruptionYellow{}, 3},

@@ -13,7 +13,7 @@ import (
 func TestLifegainPerVariant(t *testing.T) {
 	cases := []struct {
 		name string
-		card sim.Card
+		card card.Card
 		want int
 	}{
 		{"HealingBalmRed", HealingBalmRed{}, 3},

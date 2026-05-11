@@ -63,7 +63,7 @@ func TestViserai_RunebladeAfterNonAttackActionTriggers(t *testing.T) {
 	// token on state.Runechants() for downstream consume or carryover. NonAttackActionPlayed is
 	// maintained by the attack-chain driver as non-attack actions resolve; callers must set it
 	// when seeding a TurnState for trigger checks.
-	s := sim.NewTurnStateFromSpec(sim.TurnStateSpec{CardsPlayed: []sim.Card{stubRuneAura{}}, NonAttackActionPlayed: true})
+	s := sim.NewTurnStateFromSpec(sim.TurnStateSpec{CardsPlayed: []card.Card{stubRuneAura{}}, NonAttackActionPlayed: true})
 	if got := (Viserai{}).OnCardPlayed(stubRuneAttack{}, &s, s.Logger()); got != 1 {
 		t.Fatalf("expected +1 damage from OnCardPlayed, got %d", got)
 	}
@@ -74,7 +74,7 @@ func TestViserai_RunebladeAfterNonAttackActionTriggers(t *testing.T) {
 
 func TestViserai_NoPriorNonAttackAction(t *testing.T) {
 	// Runeblade card, but the only prior play was an attack — no trigger.
-	s := sim.NewTurnStateFromSpec(sim.TurnStateSpec{CardsPlayed: []sim.Card{stubRuneAttack{}}})
+	s := sim.NewTurnStateFromSpec(sim.TurnStateSpec{CardsPlayed: []card.Card{stubRuneAttack{}}})
 	if got := (Viserai{}).OnCardPlayed(stubRuneAttack{}, &s, s.Logger()); got != 0 {
 		t.Fatalf("expected 0 (no non-attack action in CardsPlayed), got %d", got)
 	}
@@ -83,7 +83,7 @@ func TestViserai_NoPriorNonAttackAction(t *testing.T) {
 func TestViserai_CardStateNotRuneblade(t *testing.T) {
 	// Played card isn't Runeblade — Viserai's ability doesn't trigger even if a non-attack
 	// action was played earlier.
-	s := sim.NewTurnStateFromSpec(sim.TurnStateSpec{CardsPlayed: []sim.Card{stubRuneAura{}}, NonAttackActionPlayed: true})
+	s := sim.NewTurnStateFromSpec(sim.TurnStateSpec{CardsPlayed: []card.Card{stubRuneAura{}}, NonAttackActionPlayed: true})
 	if got := (Viserai{}).OnCardPlayed(stubNonRuneblade{}, &s, s.Logger()); got != 0 {
 		t.Fatalf("expected 0 (non-Runeblade played), got %d", got)
 	}
@@ -108,7 +108,7 @@ func (stubRuneWeapon) Play(card.GameEngine, card.Logger, *card.CardState) {}
 func TestViserai_WeaponSwingDoesNotTrigger(t *testing.T) {
 	// Even with a prior non-attack action in CardsPlayed, swinging a Runeblade weapon isn't "playing a
 	// card" and must not trigger.
-	s := sim.NewTurnStateFromSpec(sim.TurnStateSpec{CardsPlayed: []sim.Card{stubRuneAura{}}, NonAttackActionPlayed: true})
+	s := sim.NewTurnStateFromSpec(sim.TurnStateSpec{CardsPlayed: []card.Card{stubRuneAura{}}, NonAttackActionPlayed: true})
 	if got := (Viserai{}).OnCardPlayed(stubRuneWeapon{}, &s, s.Logger()); got != 0 {
 		t.Fatalf("expected 0 for weapon swing, got %d", got)
 	}
@@ -131,33 +131,33 @@ var (
 
 // nonAttackEnablerCard returns a non-attack action — fills only the non-attack-enabler
 // slot (red pitch, no defense, has Go again so it doesn't extend into other slots).
-func nonAttackEnablerCard(name string) sim.Card {
+func nonAttackEnablerCard(name string) card.Card {
 	return testutils.NewStubCard(name).WithTypes(genericActionTypes).WithGoAgain()
 }
 
 // defenderCard returns a Defense Reaction with positive defense — fills only the
 // defender slot (red pitch, no Action subtype).
-func defenderCard(name string, defense int) sim.Card {
+func defenderCard(name string, defense int) card.Card {
 	return testutils.NewStubCard(name).WithTypes(defenseReactionTypes).WithDefense(defense).WithPitch(1)
 }
 
 // bluePitchOnlyCard returns a non-action card with blue pitch — fills only the
 // blue-pitch slot.
-func bluePitchOnlyCard(name string) sim.Card {
+func bluePitchOnlyCard(name string) card.Card {
 	return testutils.NewStubCard(name).WithTypes(card.NewTypeSet(card.TypeGeneric)).WithPitch(3)
 }
 
 // noSlotCard returns an attack action with Go again, red pitch, no defense — none of the
 // Viserai slots apply.
-func noSlotCard(name string) sim.Card {
+func noSlotCard(name string) card.Card {
 	return testutils.NewStubCard(name).WithTypes(actionAttackTypes).WithGoAgain().WithPitch(1)
 }
 
 // Tests that Opt(1) always tops the only revealed card.
 func TestViseraiOpt_SingleCardAlwaysTop(t *testing.T) {
 	c := defenderCard("d", 3)
-	top, bottom := (Viserai{}).Opt([]sim.Card{c})
-	if !reflect.DeepEqual(top, []sim.Card{c}) {
+	top, bottom := (Viserai{}).Opt([]card.Card{c})
+	if !reflect.DeepEqual(top, []card.Card{c}) {
 		t.Errorf("top = %v, want [%v]", top, c)
 	}
 	if len(bottom) != 0 {
@@ -169,11 +169,11 @@ func TestViseraiOpt_SingleCardAlwaysTop(t *testing.T) {
 func TestViseraiOpt_TwoSameSlotBottomsSecond(t *testing.T) {
 	a := defenderCard("a", 3)
 	b := defenderCard("b", 2)
-	top, bottom := (Viserai{}).Opt([]sim.Card{a, b})
-	if !reflect.DeepEqual(top, []sim.Card{a}) {
+	top, bottom := (Viserai{}).Opt([]card.Card{a, b})
+	if !reflect.DeepEqual(top, []card.Card{a}) {
 		t.Errorf("top = %v, want [%v]", top, a)
 	}
-	if !reflect.DeepEqual(bottom, []sim.Card{b}) {
+	if !reflect.DeepEqual(bottom, []card.Card{b}) {
 		t.Errorf("bottom = %v, want [%v]", bottom, b)
 	}
 }
@@ -182,8 +182,8 @@ func TestViseraiOpt_TwoSameSlotBottomsSecond(t *testing.T) {
 func TestViseraiOpt_DifferentSlotsBothTop(t *testing.T) {
 	a := nonAttackEnablerCard("a")
 	b := defenderCard("b", 3)
-	top, bottom := (Viserai{}).Opt([]sim.Card{a, b})
-	if !reflect.DeepEqual(top, []sim.Card{a, b}) {
+	top, bottom := (Viserai{}).Opt([]card.Card{a, b})
+	if !reflect.DeepEqual(top, []card.Card{a, b}) {
 		t.Errorf("top = %v, want [%v %v]", top, a, b)
 	}
 	if len(bottom) != 0 {
@@ -197,11 +197,11 @@ func TestViseraiOpt_MultiSlotCardBottomedWhenAllCovered(t *testing.T) {
 	bluePitch := bluePitchOnlyCard("blue")
 	// b spans the non-attack-enabler and blue-pitch slots — both already covered.
 	b := testutils.NewStubCard("b").WithTypes(genericActionTypes).WithGoAgain().WithPitch(3)
-	top, bottom := (Viserai{}).Opt([]sim.Card{a, bluePitch, b})
-	if !reflect.DeepEqual(top, []sim.Card{a, bluePitch}) {
+	top, bottom := (Viserai{}).Opt([]card.Card{a, bluePitch, b})
+	if !reflect.DeepEqual(top, []card.Card{a, bluePitch}) {
 		t.Errorf("top = %v, want [%v %v]", top, a, bluePitch)
 	}
-	if !reflect.DeepEqual(bottom, []sim.Card{b}) {
+	if !reflect.DeepEqual(bottom, []card.Card{b}) {
 		t.Errorf("bottom = %v, want [%v]", bottom, b)
 	}
 }
@@ -214,11 +214,11 @@ func TestViseraiOpt_MultiSlotCardBottomedOnAnyOverlap(t *testing.T) {
 	// b is non-attack-enabler (uncovered) AND blue-pitch (covered). Bottomed because
 	// blue-pitch overlaps even though the enabler slot is fresh.
 	b := testutils.NewStubCard("b").WithTypes(genericActionTypes).WithGoAgain().WithPitch(3)
-	top, bottom := (Viserai{}).Opt([]sim.Card{bluePitch, b})
-	if !reflect.DeepEqual(top, []sim.Card{bluePitch}) {
+	top, bottom := (Viserai{}).Opt([]card.Card{bluePitch, b})
+	if !reflect.DeepEqual(top, []card.Card{bluePitch}) {
 		t.Errorf("top = %v, want [%v]", top, bluePitch)
 	}
-	if !reflect.DeepEqual(bottom, []sim.Card{b}) {
+	if !reflect.DeepEqual(bottom, []card.Card{b}) {
 		t.Errorf("bottom = %v, want [%v]", bottom, b)
 	}
 }
@@ -228,8 +228,8 @@ func TestViseraiOpt_NoSlotCardsStayTop(t *testing.T) {
 	a := noSlotCard("a")
 	b := noSlotCard("b")
 	c := noSlotCard("c")
-	top, bottom := (Viserai{}).Opt([]sim.Card{a, b, c})
-	if !reflect.DeepEqual(top, []sim.Card{a, b, c}) {
+	top, bottom := (Viserai{}).Opt([]card.Card{a, b, c})
+	if !reflect.DeepEqual(top, []card.Card{a, b, c}) {
 		t.Errorf("top = %v, want [%v %v %v]", top, a, b, c)
 	}
 	if len(bottom) != 0 {
@@ -243,7 +243,7 @@ func TestViseraiOpt_OneCardPerSlotAllKept(t *testing.T) {
 	enabler := nonAttackEnablerCard("enabler")
 	defender := defenderCard("defender", 3)
 	bluePitch := bluePitchOnlyCard("blue")
-	cs := []sim.Card{enabler, defender, bluePitch}
+	cs := []card.Card{enabler, defender, bluePitch}
 	top, bottom := (Viserai{}).Opt(cs)
 	if !reflect.DeepEqual(top, cs) {
 		t.Errorf("top = %v, want %v (one per slot, all kept)", top, cs)
@@ -259,11 +259,11 @@ func TestViseraiOpt_DoublesInEachSlotBottomedDownToOne(t *testing.T) {
 	defB := defenderCard("defB", 2)
 	bluePitchA := bluePitchOnlyCard("blueA")
 	bluePitchB := bluePitchOnlyCard("blueB")
-	top, bottom := (Viserai{}).Opt([]sim.Card{defA, defB, bluePitchA, bluePitchB})
-	if !reflect.DeepEqual(top, []sim.Card{defA, bluePitchA}) {
+	top, bottom := (Viserai{}).Opt([]card.Card{defA, defB, bluePitchA, bluePitchB})
+	if !reflect.DeepEqual(top, []card.Card{defA, bluePitchA}) {
 		t.Errorf("top = %v, want [%v %v]", top, defA, bluePitchA)
 	}
-	if !reflect.DeepEqual(bottom, []sim.Card{defB, bluePitchB}) {
+	if !reflect.DeepEqual(bottom, []card.Card{defB, bluePitchB}) {
 		t.Errorf("bottom = %v, want [%v %v]", bottom, defB, bluePitchB)
 	}
 }
@@ -287,8 +287,8 @@ func TestViseraiOpt_DefenseValueAloneDoesNotFillDefenderSlot(t *testing.T) {
 		WithDefense(3).
 		WithPitch(1)
 	defender := defenderCard("dr", 3)
-	top, bottom := (Viserai{}).Opt([]sim.Card{attackWithDefense, defender})
-	if !reflect.DeepEqual(top, []sim.Card{attackWithDefense, defender}) {
+	top, bottom := (Viserai{}).Opt([]card.Card{attackWithDefense, defender})
+	if !reflect.DeepEqual(top, []card.Card{attackWithDefense, defender}) {
 		t.Errorf("top = %v, want [%v %v]", top, attackWithDefense, defender)
 	}
 	if len(bottom) != 0 {
@@ -303,11 +303,11 @@ func TestViseraiOpt_BlockTypeFillsDefenderSlot(t *testing.T) {
 		WithTypes(card.NewTypeSet(card.TypeGeneric, card.TypeBlock)).
 		WithDefense(3).
 		WithPitch(1)
-	top, bottom := (Viserai{}).Opt([]sim.Card{dr, blocker})
-	if !reflect.DeepEqual(top, []sim.Card{dr}) {
+	top, bottom := (Viserai{}).Opt([]card.Card{dr, blocker})
+	if !reflect.DeepEqual(top, []card.Card{dr}) {
 		t.Errorf("top = %v, want [%v]", top, dr)
 	}
-	if !reflect.DeepEqual(bottom, []sim.Card{blocker}) {
+	if !reflect.DeepEqual(bottom, []card.Card{blocker}) {
 		t.Errorf("bottom = %v, want [%v] (Block-typed card competes with DR for defender slot)",
 			bottom, blocker)
 	}

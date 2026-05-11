@@ -9,6 +9,7 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
 )
 
@@ -201,7 +202,7 @@ func TestEvalOneTurn_MidTurnDrawSansGoAgainStaysHeld(t *testing.T) {
 
 	// Turn 2 hand: the non-promoted of the two anchors the held prefix, then three fresh Blues
 	// from the deck (positions 1..3).
-	var wantAnchor sim.Card = cards.ToughenUpBlue{}
+	var wantAnchor card.Card = cards.ToughenUpBlue{}
 	if arsenalIsTU {
 		wantAnchor = cards.AetherSlashRed{}
 	}

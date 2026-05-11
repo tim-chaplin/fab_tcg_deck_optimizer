@@ -13,23 +13,23 @@ import (
 // highStrikerOnHit{6,4,2} fire on the next hit matching the trigger's TypeFilter (any
 // attack per the printed wording). One top-level function per variant keeps the handler
 // a static function value — no closure allocation per Play.
-func highStrikerOnHit6(s *sim.TurnState, l card.Logger, t *sim.Trigger, _ *sim.Aura) {
+func highStrikerOnHit6(s card.GameEngine, l card.Logger, t *sim.Trigger, _ *sim.Aura) {
 	highStrikerCreate(s, l, t, 6)
 }
-func highStrikerOnHit4(s *sim.TurnState, l card.Logger, t *sim.Trigger, _ *sim.Aura) {
+func highStrikerOnHit4(s card.GameEngine, l card.Logger, t *sim.Trigger, _ *sim.Aura) {
 	highStrikerCreate(s, l, t, 4)
 }
-func highStrikerOnHit2(s *sim.TurnState, l card.Logger, t *sim.Trigger, _ *sim.Aura) {
+func highStrikerOnHit2(s card.GameEngine, l card.Logger, t *sim.Trigger, _ *sim.Aura) {
 	highStrikerCreate(s, l, t, 2)
 }
 
-func highStrikerCreate(s *sim.TurnState, l card.Logger, t *sim.Trigger, n int) {
+func highStrikerCreate(s card.GameEngine, l card.Logger, t *sim.Trigger, n int) {
 	s.CreateCopper(n)
 	l.AppendPostTriggerf(s.TriggeringCard().DisplayName(), 0,
 		"%s created %d copper tokens on attack hit", t.Source.DisplayName(), n)
 }
 
-func highStrikerPlay(s card.GameEngine, l card.Logger, self *card.CardState, source sim.Card, handler sim.TriggerHandler) {
+func highStrikerPlay(s card.GameEngine, l card.Logger, self *card.CardState, source card.Card, handler sim.TriggerHandler) {
 	s.AddTrigger(sim.Trigger{
 		Source:      source,
 		TriggerType: sim.TriggerHit,

@@ -9,7 +9,7 @@ import (
 
 // Tests that Block keeps printed Defense on mode 0.
 func TestBrothersInArms_Mode0NoBonus(t *testing.T) {
-	cases := []sim.Card{
+	cases := []card.Card{
 		BrothersInArmsRed{},
 		BrothersInArmsYellow{},
 		BrothersInArmsBlue{},
@@ -27,7 +27,7 @@ func TestBrothersInArms_Mode0NoBonus(t *testing.T) {
 
 // Tests that Block flips +2 BonusDefense on mode 1.
 func TestBrothersInArms_Mode1FiresBonus(t *testing.T) {
-	cases := []sim.Card{
+	cases := []card.Card{
 		BrothersInArmsRed{},
 		BrothersInArmsYellow{},
 		BrothersInArmsBlue{},

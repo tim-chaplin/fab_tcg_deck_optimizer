@@ -13,7 +13,7 @@ import (
 // shape.
 func TestSunKiss_SoloIsHealOnly(t *testing.T) {
 	cases := []struct {
-		c    sim.Card
+		c    card.Card
 		heal int
 	}{
 		{SunKissRed{}, 3},
@@ -21,7 +21,7 @@ func TestSunKiss_SoloIsHealOnly(t *testing.T) {
 		{SunKissBlue{}, 1},
 	}
 	for _, tc := range cases {
-		s := sim.NewTurnStateFromCards([]sim.Card{testutils.GenericAttack(0, 0)}, nil)
+		s := sim.NewTurnStateFromCards([]card.Card{testutils.GenericAttack(0, 0)}, nil)
 		self := &card.CardState{Card: tc.c}
 		sim.ResolveChainStep(s, s.Logger(), self)
 		got := s.Value()
@@ -40,18 +40,18 @@ func TestSunKiss_SoloIsHealOnly(t *testing.T) {
 // Tests that a prior Moon Wish printing makes Sun Kiss credit the heal, draw a card, and
 // grant self go again — across all (Sun Kiss × Moon Wish) variant combinations.
 func TestSunKiss_SynergyFiresOnPriorMoonWish(t *testing.T) {
-	moonWishVariants := []sim.Card{MoonWishRed{}, MoonWishYellow{}, MoonWishBlue{}}
+	moonWishVariants := []card.Card{MoonWishRed{}, MoonWishYellow{}, MoonWishBlue{}}
 	for _, mw := range moonWishVariants {
 		for _, sk := range []struct {
-			c    sim.Card
+			c    card.Card
 			heal int
 		}{
 			{SunKissRed{}, 3},
 			{SunKissYellow{}, 2},
 			{SunKissBlue{}, 1},
 		} {
-			s := sim.NewTurnStateFromCards([]sim.Card{testutils.GenericAttack(0, 0)}, nil)
-			s.SetCardsPlayed([]sim.Card{mw})
+			s := sim.NewTurnStateFromCards([]card.Card{testutils.GenericAttack(0, 0)}, nil)
+			s.SetCardsPlayed([]card.Card{mw})
 			self := &card.CardState{Card: sk.c}
 			sim.ResolveChainStep(s, s.Logger(), self)
 			got := s.Value()
@@ -73,8 +73,8 @@ func TestSunKiss_SynergyFiresOnPriorMoonWish(t *testing.T) {
 // Tests that the Sun Kiss synergy only fires on a Moon Wish printing, not any prior attack.
 func TestSunKiss_SynergyDoesNotFireOnUnrelatedAttacks(t *testing.T) {
 	notMoonWish := testutils.GenericAttackPitch(0, 0, 1)
-	s := sim.NewTurnStateFromCards([]sim.Card{testutils.GenericAttack(0, 0)}, nil)
-	s.SetCardsPlayed([]sim.Card{notMoonWish})
+	s := sim.NewTurnStateFromCards([]card.Card{testutils.GenericAttack(0, 0)}, nil)
+	s.SetCardsPlayed([]card.Card{notMoonWish})
 	self := &card.CardState{Card: SunKissRed{}}
 	sim.ResolveChainStep(s, s.Logger(), self)
 	got := s.Value()
@@ -94,7 +94,7 @@ func TestSunKiss_SynergyDoesNotFireOnUnrelatedAttacks(t *testing.T) {
 // Guards against a future regression that panics on Deck[0] read with no top.
 func TestSunKiss_SynergyHandlesEmptyDeck(t *testing.T) {
 	s := sim.NewTurnStatePtr(sim.TurnStateSpec{
-		CardsPlayed: []sim.Card{MoonWishRed{}},
+		CardsPlayed: []card.Card{MoonWishRed{}},
 		// Deck intentionally nil.
 	})
 	self := &card.CardState{Card: SunKissRed{}}

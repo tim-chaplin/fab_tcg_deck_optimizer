@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 // Compile-time: the Drawn to the Dark Dimension variants must implement sim.VariableCost.
@@ -14,7 +15,7 @@ var (
 )
 
 func TestDrawnToTheDarkDimension_CostBounds(t *testing.T) {
-	cases := []sim.Card{
+	cases := []card.Card{
 		DrawnToTheDarkDimensionRed{},
 		DrawnToTheDarkDimensionYellow{},
 		DrawnToTheDarkDimensionBlue{},

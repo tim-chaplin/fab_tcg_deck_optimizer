@@ -21,7 +21,7 @@ func TestCondemnToSlaughter_NextAttackActionTriggers(t *testing.T) {
 	// A Runeblade attack action card in CardsRemaining picks up +N{p} on its BonusAttack;
 	// Play returns 0 (the +N attributes to the buffed attack, not Condemn).
 	cases := []struct {
-		c sim.Card
+		c card.Card
 		n int
 	}{
 		{CondemnToSlaughterRed{}, 3},

@@ -9,7 +9,7 @@ import (
 
 // Tests that Regurgitating Slog with no Sloggism in the graveyard does not gain Dominate.
 func TestRegurgitatingSlog_NoSloggismNoDominate(t *testing.T) {
-	for _, c := range []sim.Card{RegurgitatingSlogRed{}, RegurgitatingSlogYellow{}, RegurgitatingSlogBlue{}} {
+	for _, c := range []card.Card{RegurgitatingSlogRed{}, RegurgitatingSlogYellow{}, RegurgitatingSlogBlue{}} {
 		s := sim.NewTurnStateFromCards(nil, nil)
 		self := &card.CardState{Card: c}
 		sim.ResolveChainStep(s, s.Logger(), self)
@@ -22,8 +22,8 @@ func TestRegurgitatingSlog_NoSloggismNoDominate(t *testing.T) {
 // Tests that with a Sloggism in the graveyard, Regurgitating Slog banishes it and gains
 // Dominate.
 func TestRegurgitatingSlog_BanishesSloggismForDominate(t *testing.T) {
-	for _, c := range []sim.Card{RegurgitatingSlogRed{}, RegurgitatingSlogYellow{}, RegurgitatingSlogBlue{}} {
-		s := sim.NewTurnStateFromCards(nil, []sim.Card{SloggismRed{}})
+	for _, c := range []card.Card{RegurgitatingSlogRed{}, RegurgitatingSlogYellow{}, RegurgitatingSlogBlue{}} {
+		s := sim.NewTurnStateFromCards(nil, []card.Card{SloggismRed{}})
 		self := &card.CardState{Card: c}
 		sim.ResolveChainStep(s, s.Logger(), self)
 		if !self.GrantedDominate {

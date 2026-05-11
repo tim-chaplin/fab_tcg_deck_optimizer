@@ -23,7 +23,7 @@ func (soloBlocker) Types() card.TypeSet {
 }
 func (soloBlocker) GoAgain() bool                       { return false }
 func (soloBlocker) Play(GameEngine, Logger, *CardState) {}
-func (soloBlocker) Block(s *TurnState, l Logger, self *CardState) {
+func (soloBlocker) Block(s GameEngine, l Logger, self *CardState) {
 	plainCount := 0
 	for _, d := range s.Defenders() {
 		if d.Types().IsDefenseReaction() {
@@ -53,7 +53,7 @@ func (togetherBlocker) Types() card.TypeSet {
 }
 func (togetherBlocker) GoAgain() bool                       { return false }
 func (togetherBlocker) Play(GameEngine, Logger, *CardState) {}
-func (togetherBlocker) Block(s *TurnState, l Logger, self *CardState) {
+func (togetherBlocker) Block(s GameEngine, l Logger, self *CardState) {
 	plainCount := 0
 	for _, d := range s.Defenders() {
 		if d.Types().IsDefenseReaction() {

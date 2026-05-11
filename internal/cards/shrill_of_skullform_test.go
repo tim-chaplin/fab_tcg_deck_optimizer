@@ -11,7 +11,7 @@ import (
 func TestShrillOfSkullform_BaseDamage(t *testing.T) {
 	// Without any auras played this turn, Shrill returns its printed power.
 	cases := []struct {
-		c    sim.Card
+		c    card.Card
 		want int
 	}{
 		{ShrillOfSkullformRed{}, 4},
@@ -31,7 +31,7 @@ func TestShrillOfSkullform_BaseDamage(t *testing.T) {
 func TestShrillOfSkullform_AuraBonus(t *testing.T) {
 	// With an aura in CardsPlayed, Shrill gets +3 power.
 	cases := []struct {
-		c    sim.Card
+		c    card.Card
 		want int
 	}{
 		{ShrillOfSkullformRed{}, 7},
@@ -39,7 +39,7 @@ func TestShrillOfSkullform_AuraBonus(t *testing.T) {
 		{ShrillOfSkullformBlue{}, 5},
 	}
 	for _, tc := range cases {
-		s := sim.NewTurnStateFromSpec(sim.TurnStateSpec{CardsPlayed: []sim.Card{testutils.Aura{}}})
+		s := sim.NewTurnStateFromSpec(sim.TurnStateSpec{CardsPlayed: []card.Card{testutils.Aura{}}})
 		sim.ResolveChainStep(&s, s.Logger(), &card.CardState{Card: tc.c})
 		got := s.Value()
 		if got != tc.want {

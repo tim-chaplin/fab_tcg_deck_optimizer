@@ -11,7 +11,7 @@ import (
 // TestComeToFight_NoAttackReturnsZero: no qualifying next attack card → +3 rider fizzles.
 func TestComeToFight_NoAttackReturnsZero(t *testing.T) {
 	s := sim.TurnState{}
-	for _, c := range []sim.Card{ComeToFightRed{}, ComeToFightYellow{}, ComeToFightBlue{}} {
+	for _, c := range []card.Card{ComeToFightRed{}, ComeToFightYellow{}, ComeToFightBlue{}} {
 		sim.ResolveChainStep(&s, s.Logger(), &card.CardState{Card: c})
 		if got := s.Value(); got != 0 {
 			t.Errorf("%s: Play() = %d, want 0", c.Name(), got)
@@ -33,7 +33,7 @@ func TestComeToFight_NonAttackInRemainingFizzles(t *testing.T) {
 // per-variant bonus (Red +3, Yellow +2, Blue +1).
 func TestComeToFight_NextAttackReturnsBonus(t *testing.T) {
 	cases := []struct {
-		c    sim.Card
+		c    card.Card
 		want int
 	}{
 		{ComeToFightRed{}, 3},

@@ -23,7 +23,7 @@ import (
 //
 // Reads Cost against an empty TurnState; variable-cost cards aren't expected in mode 1's
 // gate range.
-func pummelAccepts(c sim.Card, mode int8) bool {
+func pummelAccepts(c card.Card, mode int8) bool {
 	t := c.Types()
 	switch mode {
 	case 0:
@@ -59,7 +59,7 @@ func pummelPlay(s card.GameEngine, l card.Logger, self *card.CardState, n int) {
 }
 
 func (PummelRed) Modes() int { return 2 }
-func (PummelRed) ARTargetAllowed(c sim.Card, mode int8) bool {
+func (PummelRed) ARTargetAllowed(c card.Card, mode int8) bool {
 	return pummelAccepts(c, mode)
 }
 func (PummelRed) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
@@ -67,7 +67,7 @@ func (PummelRed) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 }
 
 func (PummelYellow) Modes() int { return 2 }
-func (PummelYellow) ARTargetAllowed(c sim.Card, mode int8) bool {
+func (PummelYellow) ARTargetAllowed(c card.Card, mode int8) bool {
 	return pummelAccepts(c, mode)
 }
 func (PummelYellow) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
@@ -75,7 +75,7 @@ func (PummelYellow) Play(s card.GameEngine, l card.Logger, self *card.CardState)
 }
 
 func (PummelBlue) Modes() int { return 2 }
-func (PummelBlue) ARTargetAllowed(c sim.Card, mode int8) bool {
+func (PummelBlue) ARTargetAllowed(c card.Card, mode int8) bool {
 	return pummelAccepts(c, mode)
 }
 func (PummelBlue) Play(s card.GameEngine, l card.Logger, self *card.CardState) {

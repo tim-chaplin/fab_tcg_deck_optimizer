@@ -10,7 +10,7 @@ import (
 
 // Tests that with no banishable graveyard target the rider stays off.
 func TestLookingForAScrap_NoBanishableRiderOff(t *testing.T) {
-	for _, c := range []sim.Card{LookingForAScrapRed{}, LookingForAScrapYellow{}, LookingForAScrapBlue{}} {
+	for _, c := range []card.Card{LookingForAScrapRed{}, LookingForAScrapYellow{}, LookingForAScrapBlue{}} {
 		self := &card.CardState{Card: c}
 		s := sim.NewTurnStateFromCards(nil, nil)
 		sim.ResolveChainStep(s, s.Logger(), self)
@@ -26,8 +26,8 @@ func TestLookingForAScrap_NoBanishableRiderOff(t *testing.T) {
 // Tests that a 1-power graveyard card lets Looking for a Scrap banish for the +1{p} /
 // go-again rider.
 func TestLookingForAScrap_BanishesOnePowerForBonus(t *testing.T) {
-	for _, c := range []sim.Card{LookingForAScrapRed{}, LookingForAScrapYellow{}, LookingForAScrapBlue{}} {
-		s := sim.NewTurnStateFromCards(nil, []sim.Card{testutils.GenericAttack(0, 1)})
+	for _, c := range []card.Card{LookingForAScrapRed{}, LookingForAScrapYellow{}, LookingForAScrapBlue{}} {
+		s := sim.NewTurnStateFromCards(nil, []card.Card{testutils.GenericAttack(0, 1)})
 		self := &card.CardState{Card: c}
 		sim.ResolveChainStep(s, s.Logger(), self)
 		if !self.GrantedGoAgain {

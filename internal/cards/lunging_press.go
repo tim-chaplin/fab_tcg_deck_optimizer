@@ -11,7 +11,7 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
-func (LungingPressBlue) ARTargetAllowed(c sim.Card, _ int8) bool {
+func (LungingPressBlue) ARTargetAllowed(c card.Card, _ int8) bool {
 	return c.Types().IsAttackAction()
 }
 func (LungingPressBlue) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
