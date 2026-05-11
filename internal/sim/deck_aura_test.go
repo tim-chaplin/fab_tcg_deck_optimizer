@@ -19,13 +19,13 @@ import (
 // firing counts.
 func damageTrigger(self card.Card, damage int, calls *int) Aura {
 	return Aura{
-		Trigger: Trigger{
-			TriggerType: TriggerStartOfTurn,
-			Handler: func(s card.GameEngine, _ card.Logger, _ *Trigger, a *Aura) {
-				*calls++
-				s.AddValue(damage)
-				s.DestroyAura(a, true)
-			},
+
+		TriggerType: TriggerStartOfTurn,
+		Handler: func(s card.GameEngine, _ card.Logger, a card.Aura) {
+			*calls++
+			s.AddValue(damage)
+			a.Destroy(true)
+
 		},
 		Self:  CardOrTokenType{Card: self},
 		Count: 1,
@@ -75,20 +75,20 @@ func TestProcessAurasAtStartOfTurn_GraveyardsExhaustedAura(t *testing.T) {
 	// Second trigger's handler records what's currently in the graveyard so we can check the
 	// first trigger's destroy happened BEFORE the second fires.
 	watcher := Aura{
-		Trigger: Trigger{
-			TriggerType: TriggerStartOfTurn,
-			Handler: func(s card.GameEngine, _ card.Logger, _ *Trigger, _ *Aura) {
-				seen = append([]card.Card(nil), s.Graveyard()...)
-			},
+
+		TriggerType: TriggerStartOfTurn,
+		Handler: func(s card.GameEngine, _ card.Logger, _ card.Aura) {
+			seen = append([]card.Card(nil), s.Graveyard()...)
+
 		},
 		Self:  CardOrTokenType{Card: testutils.YellowAttack{}},
 		Count: 1,
 	}
 	_, _, _, _, _ = ProcessAurasAtStartOfTurn([]Aura{
 		{
-			Trigger: Trigger{TriggerType: TriggerStartOfTurn, Handler: func(s card.GameEngine, _ card.Logger, _ *Trigger, a *Aura) {
-				s.DestroyAura(a, true)
-			}},
+			TriggerType: TriggerStartOfTurn, Handler: func(s card.GameEngine, _ card.Logger, a card.Aura) {
+				a.Destroy(true)
+			},
 			Self:  CardOrTokenType{Card: aura},
 			Count: 1,
 		},
@@ -290,9 +290,9 @@ func TestEvaluate_TriggersFromLastTurnSurfacesInBest(t *testing.T) {
 func TestProcessAurasAtStartOfTurn_ReArmsOncePerTurnGate(t *testing.T) {
 	aura := testutils.RedAttack{}
 	exhausted := Aura{
-		Trigger: Trigger{
-			TriggerType: TriggerAttackAction,
-			Handler:     func(card.GameEngine, card.Logger, *Trigger, *Aura) {},
+
+		TriggerType: TriggerAttackAction,
+		Handler: func(card.GameEngine, card.Logger, card.Aura) {
 		},
 		Self:          CardOrTokenType{Card: aura},
 		Count:         2,

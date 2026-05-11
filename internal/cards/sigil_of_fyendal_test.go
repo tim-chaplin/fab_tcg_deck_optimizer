@@ -35,7 +35,7 @@ func TestSigilOfFyendal_TriggerHandlerCredits1Damage(t *testing.T) {
 	fire := sim.NewTurnStateFromCards(nil, nil)
 	fire.SetAuras(append(fire.Auras(), s.Auras()[0]))
 	fire.SetCurrentAuraIdxForTesting(0)
-	fire.Auras()[0].Handler(fire, fire.Logger(), &fire.Auras()[0].Trigger, &fire.Auras()[0])
+	fire.FireAuraForTesting(0)
 	if fire.Value() != 1 {
 		t.Errorf("Handler Value = %d, want 1", fire.Value())
 	}

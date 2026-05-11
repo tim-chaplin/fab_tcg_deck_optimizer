@@ -429,15 +429,16 @@ func (ctx *sequenceContext) runDefense(defenders, pitched []card.Card, deckPile 
 // the cursor's index), so the loop only advances when the slice length didn't change.
 func fireAttackActionAuras(state *TurnState, triggeringCard card.Card) {
 	for i := 0; i < len(state.auras); {
-		t := &state.auras[i]
-		if t.TriggerType != TriggerAttackAction || (t.OncePerTurn && t.FiredThisTurn) {
+		a := &state.auras[i]
+		if a.TriggerType != TriggerAttackAction || (a.OncePerTurn && a.FiredThisTurn) {
 			i++
 			continue
 		}
 		state.triggeringCard = triggeringCard
 		state.currentAuraIdx = i
 		state.currentAuraDestroyed = false
-		t.Handler(state, state.logger, &t.Trigger, t)
+		ctx := auraCtx{a: a, s: state}
+		a.Handler(state, state.logger, &ctx)
 		state.currentAuraIdx = -1
 		state.triggeringCard = nil
 		if !state.currentAuraDestroyed {
@@ -482,7 +483,8 @@ func fireEndOfTurn(state *TurnState) {
 		}
 		state.currentAuraIdx = i
 		state.currentAuraDestroyed = false
-		a.Handler(state, state.logger, &a.Trigger, a)
+		ctx := auraCtx{a: a, s: state}
+		a.Handler(state, state.logger, &ctx)
 		state.currentAuraIdx = -1
 		if !state.currentAuraDestroyed {
 			state.auras[i].FiredThisTurn = true
@@ -495,7 +497,8 @@ func fireEndOfTurn(state *TurnState) {
 		if tr.TriggerType != TriggerEndOfTurn {
 			continue
 		}
-		tr.Handler(state, state.logger, &tr, nil)
+		ctx := triggerCtx{t: &tr}
+		tr.Handler(state, state.logger, &ctx)
 	}
 	kept := state.triggers[:0]
 	for i, tr := range state.triggers {
@@ -513,15 +516,16 @@ func fireEndOfTurn(state *TurnState) {
 // semantics as fireAttackActionAuras.
 func fireAttackAuras(state *TurnState, triggeringCard card.Card) {
 	for i := 0; i < len(state.auras); {
-		t := &state.auras[i]
-		if t.TriggerType != TriggerAttack || (t.OncePerTurn && t.FiredThisTurn) {
+		a := &state.auras[i]
+		if a.TriggerType != TriggerAttack || (a.OncePerTurn && a.FiredThisTurn) {
 			i++
 			continue
 		}
 		state.triggeringCard = triggeringCard
 		state.currentAuraIdx = i
 		state.currentAuraDestroyed = false
-		t.Handler(state, state.logger, &t.Trigger, t)
+		ctx := auraCtx{a: a, s: state}
+		a.Handler(state, state.logger, &ctx)
 		state.currentAuraIdx = -1
 		state.triggeringCard = nil
 		if !state.currentAuraDestroyed {
@@ -906,7 +910,8 @@ func (ctx *sequenceContext) playSequenceWithMeta(n int) (damage int, futureValue
 						kept = append(kept, t)
 						continue
 					}
-					t.Handler(state, state.logger, &t, nil)
+					ctx := triggerCtx{t: &t}
+					t.Handler(state, state.logger, &ctx)
 				}
 				state.triggers = kept
 				state.triggeringCard = prevTriggering

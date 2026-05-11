@@ -1,16 +1,18 @@
 // Package card defines the Card interface every Flesh and Blood card implements, the
 // per-chain-step CardState wrapper that carries mutable flags between resolution
-// phases, and the narrow GameEngine / Logger interfaces cards consume from the sim.
+// phases, and the narrow GameEngine / Logger / Aura / Trigger interfaces cards
+// consume from the sim.
 //
 // The package owns the contract; it does NOT import the sim. *sim.TurnState satisfies
 // GameEngine structurally and *turnlogger.TurnLogger satisfies Logger structurally,
 // so the sim hands either through cards via the explicit Play / Block / OnHit / Cost
-// args without any adapter in the middle. Cards interact with the GameEngine and
-// Logger interfaces only, freeing the sim package to evolve its concrete TurnState
-// representation without breaking the card contract.
+// args without any adapter in the middle. Cards interact with the GameEngine /
+// Logger / Aura / Trigger interfaces only, freeing the sim package to evolve its
+// concrete representations without breaking the card contract.
 package card
 
 import (
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
 )
 
@@ -46,11 +48,20 @@ type GameEngine interface {
 	BanishFromGraveyard(func(Card) bool) (Card, bool)
 	Banished() []Card
 
-	// Auras / Triggers (opaque — cards still import sim to construct the concrete
-	// sim.Aura / sim.Trigger values these methods accept).
-	AddAura(any)
-	AddTrigger(any)
-	DestroyAura(any, bool)
+	// Auras: per-trigger-type registration. The engine builds the underlying aura
+	// internally; cards supply only the handler and an initial count. Source is
+	// derived from self.Card.
+	AddStartOfTurnAura(self *CardState, handler AuraHandler, count int)
+	AddAttackActionAura(self *CardState, handler AuraHandler, count int)
+	AddOncePerTurnAttackActionAura(self *CardState, handler AuraHandler, count int)
+	AddAttackAura(self *CardState, handler AuraHandler, count int)
+	AddEndOfTurnAura(self *CardState, handler AuraHandler, count int)
+
+	// Triggers: one-shot, per-trigger-type. AddHitTrigger's filter narrows the
+	// firing event to a card-type predicate (typically TypeSet.IsAttack or
+	// TypeSet.IsAttackAction); nil = no filter.
+	AddHitTrigger(self *CardState, handler TriggerHandler, filter func(TypeSet) bool)
+	AddEndOfTurnTrigger(self *CardState, handler TriggerHandler)
 
 	// Token economy
 	CreateRunechants(int)
@@ -100,11 +111,10 @@ type GameEngine interface {
 	SetCardsPlayed([]Card)
 	CardsRemaining() []*CardState
 	TriggeringCard() Card
-	// Auras / Triggers slice access is omitted — Aura and Trigger are sim-owned shapes
-	// (mirrored as `any` in AddAura / AddTrigger / DestroyAura). The handful of cards
-	// that scan the live aura set (e.g. Yinti Yanti's len(Auras) gate) type-assert back
-	// to *sim.TurnState; a future cleanup could expose typed slice accessors once Aura
-	// / Trigger move to a shared package.
+	// AuraCount is the count of live auras — used by gates like Yinti Yanti's "while
+	// you control an aura" rider. Cards don't get a typed slice view; the engine
+	// owns the live aura set.
+	AuraCount() int
 
 	// Mid-chain draw / tutoring / recycling
 	DrawOne()
@@ -148,3 +158,43 @@ type Logger interface {
 	AppendPreTriggerf(source string, n int, format string, args ...any)
 	AmendLastChainStepN(n int)
 }
+
+// Aura is the minimal view cards' aura handlers see of the firing aura. The engine
+// constructs and tracks the full concrete representation internally; the handler
+// reads counts / self-identity through this interface and ends the aura's life via
+// Destroy.
+type Aura interface {
+	// Count returns the aura's current count. Handlers that fire-then-destroy read
+	// it as a payload (e.g. Blessing of Occult's runechant count); multi-fire auras
+	// read it as fires-remaining.
+	Count() int
+	// DecrementCount decrements the count by 1 and returns the new value. Multi-fire
+	// aura handlers (Malefic / Runeblood pattern) call this and Destroy when the
+	// result reaches 0.
+	DecrementCount() int
+	// SelfName is the originating card or token's display name — used for log
+	// attribution from inside the handler.
+	SelfName() string
+	// SelfCardID is the originating card's registry ID, or ids.InvalidCard when the
+	// aura belongs to a token. Handlers that match against a specific source card
+	// (e.g. Sigil of Silphidae's "destroy a different aura") gate on this.
+	SelfCardID() ids.CardID
+	// Destroy ends the aura's life. addToGraveyard sends the originating card to
+	// the graveyard (token auras with no originating card skip the append).
+	Destroy(addToGraveyard bool)
+}
+
+// Trigger is the minimal view cards' one-shot trigger handlers see of the firing
+// trigger. Today only SourceName is needed; expand as more triggers appear.
+type Trigger interface {
+	SourceName() string
+}
+
+// AuraHandler is the card-facing aura handler signature. Cards write functions of
+// this type and pass them to GameEngine.AddXxxAura.
+type AuraHandler func(g GameEngine, l Logger, a Aura)
+
+// TriggerHandler is the card-facing one-shot trigger handler signature. Cards write
+// functions of this type and pass them to GameEngine.AddHitTrigger (and any future
+// AddXxxTrigger method).
+type TriggerHandler func(g GameEngine, l Logger, t Trigger)

@@ -10,9 +10,9 @@ import (
 func TestFireEndOfTurn_FiresOnceAndRemoves(t *testing.T) {
 	s := NewTurnState(nil, nil)
 	calls := 0
-	s.AddTrigger(Trigger{
+	s.triggers = append(s.triggers, Trigger{
 		TriggerType: TriggerEndOfTurn,
-		Handler:     func(_ card.GameEngine, _ card.Logger, _ *Trigger, _ *Aura) { calls++ },
+		Handler:     func(_ card.GameEngine, _ card.Logger, _ card.Trigger) { calls++ },
 	})
 	FireEndOfTurn(s)
 	if calls != 1 {
@@ -27,9 +27,9 @@ func TestFireEndOfTurn_FiresOnceAndRemoves(t *testing.T) {
 func TestFireEndOfTurn_LeavesNonMatchingType(t *testing.T) {
 	s := NewTurnState(nil, nil)
 	calls := 0
-	s.AddTrigger(Trigger{
+	s.triggers = append(s.triggers, Trigger{
 		TriggerType: TriggerAttack,
-		Handler:     func(_ card.GameEngine, _ card.Logger, _ *Trigger, _ *Aura) { calls++ },
+		Handler:     func(_ card.GameEngine, _ card.Logger, _ card.Trigger) { calls++ },
 	})
 	FireEndOfTurn(s)
 	if calls != 0 {
@@ -40,18 +40,19 @@ func TestFireEndOfTurn_LeavesNonMatchingType(t *testing.T) {
 	}
 }
 
-// Tests that a handler calling AddTrigger during fire queues the new entry for a future
+// Tests that a handler appending a new trigger during fire queues it for a future
 // fire walk rather than firing it on the current pass.
 func TestFireEndOfTurn_HandlerAddTriggerSafeReentry(t *testing.T) {
 	s := NewTurnState(nil, nil)
 	calls := 0
-	s.AddTrigger(Trigger{
+	s.triggers = append(s.triggers, Trigger{
 		TriggerType: TriggerEndOfTurn,
-		Handler: func(s card.GameEngine, _ card.Logger, _ *Trigger, _ *Aura) {
+		Handler: func(g card.GameEngine, _ card.Logger, _ card.Trigger) {
 			calls++
-			s.AddTrigger(Trigger{
+			ts := g.(*TurnState)
+			ts.triggers = append(ts.triggers, Trigger{
 				TriggerType: TriggerEndOfTurn,
-				Handler:     func(_ card.GameEngine, _ card.Logger, _ *Trigger, _ *Aura) { calls++ },
+				Handler:     func(_ card.GameEngine, _ card.Logger, _ card.Trigger) { calls++ },
 			})
 		},
 	})

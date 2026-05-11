@@ -69,16 +69,17 @@ func (c CardOrTokenType) DisplayName() string {
 	return tokenDisplayName(c.TokenType)
 }
 
-// Aura is one persistent hook attached to a card or a token in play. The embedded
-// Trigger carries the firing-data (Source, TriggerType, TypeFilter, Handler); the
-// fields below add per-instance state that distinguishes a long-lived aura from a
-// one-shot trigger. Each time TriggerType's condition fires — and, when OncePerTurn
-// is set, at most once per turn — the sim invokes Handler. The Aura survives until
-// its handler calls s.DestroyAura.
+// Aura is one persistent hook attached to a card or a token in play. Each time
+// TriggerType's condition fires — and, when OncePerTurn is set, at most once per turn
+// — the sim invokes Handler. The Aura survives until its handler calls Destroy
+// (via the card.Aura context the engine threads in).
 type Aura struct {
-	// Trigger embeds the firing-data (Source, TriggerType, TypeFilter, Handler). Aura
-	// handlers receive (s, t, a); the aura-specific fields below are reached via a.
-	Trigger
+	// Source is the originating card for log attribution. Token auras leave Source nil.
+	Source card.Card
+	// TriggerType matches the firing site (TriggerStartOfTurn, TriggerAttack, …).
+	TriggerType TriggerType
+	// Handler runs when TriggerType matches.
+	Handler card.AuraHandler
 	// Self identifies what this Aura belongs to — a card or a token type. Surfaced in
 	// per-turn summaries via CardOrTokenType.DisplayName.
 	Self CardOrTokenType
@@ -95,4 +96,19 @@ type Aura struct {
 	OncePerTurn bool
 	// FiredThisTurn is sim-managed bookkeeping for OncePerTurn. Cards must not set it.
 	FiredThisTurn bool
+}
+
+// auraCtx adapts *Aura + *TurnState to card.Aura — the engine threads one of these
+// into each handler call so cards never touch the underlying struct.
+type auraCtx struct {
+	a *Aura
+	s *TurnState
+}
+
+func (c *auraCtx) Count() int             { return c.a.Count }
+func (c *auraCtx) DecrementCount() int    { c.a.Count--; return c.a.Count }
+func (c *auraCtx) SelfName() string       { return c.a.Self.DisplayName() }
+func (c *auraCtx) SelfCardID() ids.CardID { return c.a.Self.CardID() }
+func (c *auraCtx) Destroy(addToGraveyard bool) {
+	c.s.destroyAura(c.a, addToGraveyard)
 }

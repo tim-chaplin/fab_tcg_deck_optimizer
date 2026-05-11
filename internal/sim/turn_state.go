@@ -815,7 +815,7 @@ func (s *TurnState) CreateRunechants(n int) {
 			return
 		}
 	}
-	s.AddAura(NewRunechantAura(n))
+	s.auras = append(s.auras, NewRunechantAura(n))
 }
 
 // CreatePonder creates n Ponder tokens, bumping the existing aura entry's Count or
@@ -831,7 +831,7 @@ func (s *TurnState) CreatePonder(n int) {
 			return
 		}
 	}
-	s.AddAura(NewPonderAura(n))
+	s.auras = append(s.auras, NewPonderAura(n))
 }
 
 // Runechants returns the current Runechant token count, or zero when none are in play.
@@ -948,36 +948,109 @@ func (s *TurnState) AddToGraveyard(c card.Card) {
 	s.graveyard = append(s.graveyard, c)
 }
 
-// AddAura is the Play-side combo every Action - Aura card reaches for: flip
-// AuraCreated so same-turn "if you've played or created an aura" riders see the entry, and
-// append t to s.auras so the sim fires it on its matching TriggerType condition. Accepts
-// `any` so the method matches v2/card.GameEngine's sim-free interface; the concrete value
-// must be a sim.Aura.
-func (s *TurnState) AddAura(t any) {
+// AddStartOfTurnAura registers a TriggerStartOfTurn aura: the handler fires at the
+// start of each subsequent turn. Source and Self.Card both come from self.Card.
+func (s *TurnState) AddStartOfTurnAura(self *card.CardState, handler card.AuraHandler, count int) {
+	s.appendCardAura(self, TriggerStartOfTurn, handler, count, false)
+}
+
+// AddAttackActionAura registers a TriggerAttackAction aura: the handler fires once
+// per attack action card that resolves. See AddOncePerTurnAttackActionAura for the
+// OncePerTurn variant.
+func (s *TurnState) AddAttackActionAura(self *card.CardState, handler card.AuraHandler, count int) {
+	s.appendCardAura(self, TriggerAttackAction, handler, count, false)
+}
+
+// AddOncePerTurnAttackActionAura is the OncePerTurn variant of AddAttackActionAura —
+// fires at most once per turn regardless of how many attack actions resolve.
+func (s *TurnState) AddOncePerTurnAttackActionAura(self *card.CardState, handler card.AuraHandler, count int) {
+	s.appendCardAura(self, TriggerAttackAction, handler, count, true)
+}
+
+// AddAttackAura registers a TriggerAttack aura: the handler fires each time any
+// attack (attack action card or weapon swing) resolves.
+func (s *TurnState) AddAttackAura(self *card.CardState, handler card.AuraHandler, count int) {
+	s.appendCardAura(self, TriggerAttack, handler, count, false)
+}
+
+// AddEndOfTurnAura registers a TriggerEndOfTurn aura: the handler fires after the
+// chain finishes resolving, before the carry-state snapshot.
+func (s *TurnState) AddEndOfTurnAura(self *card.CardState, handler card.AuraHandler, count int) {
+	s.appendCardAura(self, TriggerEndOfTurn, handler, count, false)
+}
+
+// appendCardAura is the shared body for the AddXxxAura family. Self / Source both
+// derive from self.Card; AuraCreated flips so same-turn "if you've played or created
+// an aura" riders see the entry.
+func (s *TurnState) appendCardAura(self *card.CardState, tt TriggerType, handler card.AuraHandler, count int, oncePerTurn bool) {
 	s.auraCreated = true
-	s.auras = append(s.auras, t.(Aura))
+	s.auras = append(s.auras, Aura{
+		Source:      self.Card,
+		TriggerType: tt,
+		Handler:     handler,
+		Self:        CardOrTokenType{Card: self.Card},
+		Count:       count,
+		OncePerTurn: oncePerTurn,
+	})
 }
 
-// AddTrigger appends t to s.triggers. The sim fires t once on its matching TriggerType
-// condition then removes it. Accepts `any` for v2/card.GameEngine; concrete value must be
-// a sim.Trigger.
-func (s *TurnState) AddTrigger(t any) {
-	s.triggers = append(s.triggers, t.(Trigger))
+// AddHitTrigger registers a one-shot TriggerHit listener. filter narrows the
+// qualifying hits to a card-type predicate (typically TypeSet.IsAttack or
+// TypeSet.IsAttackAction); nil = any hit qualifies.
+func (s *TurnState) AddHitTrigger(self *card.CardState, handler card.TriggerHandler, filter func(card.TypeSet) bool) {
+	s.triggers = append(s.triggers, Trigger{
+		Source:      self.Card,
+		TriggerType: TriggerHit,
+		TypeFilter:  filter,
+		Handler:     handler,
+	})
 }
 
-// DestroyAura removes a from s.auras and, when addToGraveyard, appends a.Self.Card to
+// AddEndOfTurnTrigger registers a one-shot TriggerEndOfTurn listener — fires after
+// the chain finishes resolving but before the carry-state snapshot.
+func (s *TurnState) AddEndOfTurnTrigger(self *card.CardState, handler card.TriggerHandler) {
+	s.triggers = append(s.triggers, Trigger{
+		Source:      self.Card,
+		TriggerType: TriggerEndOfTurn,
+		Handler:     handler,
+	})
+}
+
+// AuraCount returns the count of live auras. Used by gates like Yinti Yanti's
+// "while you control an aura" rider.
+func (s *TurnState) AuraCount() int { return len(s.auras) }
+
+// FireAuraForTesting invokes the aura at index i's handler, threading the same
+// auraCtx adapter the production fire walks use. Test-only — production firing
+// (fireStartOfTurn, fireAttackActionAuras, …) drives the cursor and the
+// OncePerTurn / FiredThisTurn bookkeeping in addition to invoking the handler.
+func (s *TurnState) FireAuraForTesting(i int) {
+	s.currentAuraIdx = i
+	s.currentAuraDestroyed = false
+	a := &s.auras[i]
+	ctx := auraCtx{a: a, s: s}
+	a.Handler(s, s.logger, &ctx)
+	s.currentAuraIdx = -1
+}
+
+// FireTriggerForTesting invokes the trigger at index i's handler with the trigger
+// adapter the production trigger walks use. Test-only.
+func (s *TurnState) FireTriggerForTesting(i int) {
+	t := &s.triggers[i]
+	ctx := triggerCtx{t: t}
+	t.Handler(s, s.logger, &ctx)
+}
+
+// destroyAura removes a from s.auras and, when addToGraveyard, appends a.Self.Card to
 // s.graveyard. Token-style auras (Self.Card == nil) skip the graveyard append
 // unconditionally. The splice uses currentAuraIdx (the fire loop maintains it through
 // any mid-handler s.auras realloc), so it resolves to the correct live slot even when
 // CreateRunechants has appended a new aura since the handler started; a is read for
 // Self only and may legitimately point at the pre-realloc backing.
 //
-// Accepts `any` (concrete *sim.Aura) so the method matches v2/card.GameEngine.
-//
 // Direct graveyard append (no cacheable flip): destruction is deterministic from the
 // triggering event the sim already accounts for, not from hidden state.
-func (s *TurnState) DestroyAura(aIn any, addToGraveyard bool) {
-	a := aIn.(*Aura)
+func (s *TurnState) destroyAura(a *Aura, addToGraveyard bool) {
 	if addToGraveyard && a.Self.Card != nil {
 		s.graveyard = append(s.graveyard, a.Self.Card)
 	}

@@ -12,16 +12,11 @@
 package cards
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
-func (c SigilOfTheArknightBlue) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
-	s.AddAura(sim.Aura{
-		Trigger: sim.Trigger{TriggerType: sim.TriggerStartOfTurn, Handler: sigilOfTheArknightReveal},
-		Self:    sim.CardOrTokenType{Card: c},
-		Count:   1,
-	})
+func (SigilOfTheArknightBlue) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
+	s.AddStartOfTurnAura(self, sigilOfTheArknightReveal, 1)
 }
 
 // sigilOfTheArknightReveal implements the handler described in the file docstring. Logs
@@ -29,8 +24,8 @@ func (c SigilOfTheArknightBlue) Play(s card.GameEngine, l card.Logger, self *car
 // it" on a whiff — so the printout makes the random reveal visible either way. Empty deck
 // is the silent edge case (no card to name). PeekDeck flips the cacheable bit either way
 // since the reveal outcome depends on shuffle order.
-func sigilOfTheArknightReveal(s card.GameEngine, l card.Logger, _ *sim.Trigger, a *sim.Aura) {
-	s.DestroyAura(a, true)
+func sigilOfTheArknightReveal(s card.GameEngine, l card.Logger, a card.Aura) {
+	a.Destroy(true)
 	top, ok := s.PeekDeck()
 	if !ok {
 		return

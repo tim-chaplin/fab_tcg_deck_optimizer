@@ -8,13 +8,11 @@ package cards
 
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
-
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
 
 // drawOneAtEndOfTurn is the end-of-turn TriggerHandler that fires Strategic Planning's
 // deferred draw. Top-level so the registration stays alloc-free.
-func drawOneAtEndOfTurn(s card.GameEngine, l card.Logger, _ *sim.Trigger, _ *sim.Aura) {
+func drawOneAtEndOfTurn(s card.GameEngine, l card.Logger, _ card.Trigger) {
 	s.DrawOne()
 }
 
@@ -24,11 +22,7 @@ func strategicPlanningPlay(s card.GameEngine, l card.Logger, self *card.CardStat
 	}); ok {
 		l.AppendPostTrigger(self.Card.DisplayName(), "Recycled an action card to bottom of deck", 0)
 	}
-	s.AddTrigger(sim.Trigger{
-		Source:      self.Card,
-		TriggerType: sim.TriggerEndOfTurn,
-		Handler:     drawOneAtEndOfTurn,
-	})
+	s.AddEndOfTurnTrigger(self, drawOneAtEndOfTurn)
 	l.AppendPostTrigger(self.Card.DisplayName(), "End-phase draw queued", 0)
 }
 

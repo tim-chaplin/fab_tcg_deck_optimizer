@@ -2,38 +2,34 @@ package sim
 
 import "github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 
-// Trigger holds the firing-data shared between Auras and standalone one-shot riders.
-// Source identifies the card that registered the trigger; TriggerType matches the firing
-// site; TypeFilter narrows the qualifying events to a card-type predicate (used by
-// TriggerHit hit-riders today, nil = no filter); Handler runs when the trigger fires.
+// Trigger is a one-shot deferred handler keyed to a TriggerType. The sim removes
+// each fired entry from TurnState.Triggers after invoking Handler. Long-lived
+// listeners that survive multiple fires (Sigil-of-X start-of-turn riders, etc.)
+// use Aura instead — the two structs share fields by intent but no longer share
+// a Go type.
 //
-// Aura embeds Trigger by value (see aura.go) and adds persistent-instance state
-// (Self, OncePerTurn, FiredThisTurn, Count). Standalone Triggers — the sim removes them
-// after firing — are stored on TurnState.Triggers and added via AddTrigger.
-//
-// Handlers receive (s, t, a): for aura fires a is the firing aura, for standalone
-// trigger fires a is nil. Handlers that mutate s.auras (e.g. via CreateRunechants, which
-// appends a Runechant aura) MUST read state through a BEFORE the mutating call — a slice
-// realloc invalidates the parameter.
-//
-// Handlers MUST NOT call AddTrigger from within a fire walk: the firing helper
+// Handlers MUST NOT call AddXxxTrigger from within a fire walk: the firing helper
 // snapshots len(s.triggers) before iterating, so a trigger added during fire stays
 // queued for the next matching event but isn't seen on the current pass.
 type Trigger struct {
 	// Source is the originating card, surfaced in the trace via Source.DisplayName().
-	// Auras whose Self is a token leave Source nil; Source is the production source for
-	// card-based triggers / auras.
 	Source card.Card
-	// TriggerType matches the firing site (TriggerEndOfTurn, TriggerAttack, …).
+	// TriggerType matches the firing site (TriggerEndOfTurn, TriggerHit, …).
 	TriggerType TriggerType
 	// TypeFilter optionally narrows TriggerHit to a card-type predicate. nil = no filter.
 	TypeFilter func(card.TypeSet) bool
 	// Handler runs when TriggerType (and TypeFilter, if set) match.
-	Handler TriggerHandler
+	Handler card.TriggerHandler
 }
 
-// TriggerHandler is the business-logic callback for a Trigger. Aura fires pass the
-// firing aura as a; standalone trigger fires pass nil. l is the cards-facing log sink
-// the chain runner threaded through Play; handlers emit their pre/post-trigger lines
-// through it so a nil l silently elides logging during the find-best pass.
-type TriggerHandler func(g card.GameEngine, l card.Logger, t *Trigger, a *Aura)
+// triggerCtx adapts *Trigger to card.Trigger for the firing-pipeline invocation.
+type triggerCtx struct {
+	t *Trigger
+}
+
+func (c *triggerCtx) SourceName() string {
+	if c.t.Source != nil {
+		return c.t.Source.DisplayName()
+	}
+	return ""
+}
