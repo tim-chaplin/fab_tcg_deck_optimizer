@@ -10,14 +10,14 @@
 package unplayable
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
-func (LifeOfThePartyRed) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
+func (LifeOfThePartyRed) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 }
 
-func (LifeOfThePartyYellow) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
+func (LifeOfThePartyYellow) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 }
 
-func (LifeOfThePartyBlue) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
+func (LifeOfThePartyBlue) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 }

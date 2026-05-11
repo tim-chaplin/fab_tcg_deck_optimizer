@@ -3,48 +3,47 @@
 package notimplemented
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 var promiseOfPlentyTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 
 type PromiseOfPlentyRed struct{}
 
-func (PromiseOfPlentyRed) ID() ids.CardID          { return ids.PromiseOfPlentyRed }
-func (PromiseOfPlentyRed) Name() string            { return "Promise of Plenty" }
-func (PromiseOfPlentyRed) DisplayName() string     { return "Promise of Plenty [R]" }
-func (PromiseOfPlentyRed) Cost(sim.GameEngine) int { return 0 }
-func (PromiseOfPlentyRed) Pitch() int              { return 1 }
-func (PromiseOfPlentyRed) Attack() int             { return 3 }
-func (PromiseOfPlentyRed) Defense() int            { return 2 }
-func (PromiseOfPlentyRed) Types() card.TypeSet     { return promiseOfPlentyTypes }
-func (PromiseOfPlentyRed) GoAgain() bool           { return false }
-func (PromiseOfPlentyRed) NotImplemented()         {}
+func (PromiseOfPlentyRed) ID() ids.CardID           { return ids.PromiseOfPlentyRed }
+func (PromiseOfPlentyRed) Name() string             { return "Promise of Plenty" }
+func (PromiseOfPlentyRed) DisplayName() string      { return "Promise of Plenty [R]" }
+func (PromiseOfPlentyRed) Cost(card.GameEngine) int { return 0 }
+func (PromiseOfPlentyRed) Pitch() int               { return 1 }
+func (PromiseOfPlentyRed) Attack() int              { return 3 }
+func (PromiseOfPlentyRed) Defense() int             { return 2 }
+func (PromiseOfPlentyRed) Types() card.TypeSet      { return promiseOfPlentyTypes }
+func (PromiseOfPlentyRed) GoAgain() bool            { return false }
+func (PromiseOfPlentyRed) NotImplemented()          {}
 
 type PromiseOfPlentyYellow struct{}
 
-func (PromiseOfPlentyYellow) ID() ids.CardID          { return ids.PromiseOfPlentyYellow }
-func (PromiseOfPlentyYellow) Name() string            { return "Promise of Plenty" }
-func (PromiseOfPlentyYellow) DisplayName() string     { return "Promise of Plenty [Y]" }
-func (PromiseOfPlentyYellow) Cost(sim.GameEngine) int { return 0 }
-func (PromiseOfPlentyYellow) Pitch() int              { return 2 }
-func (PromiseOfPlentyYellow) Attack() int             { return 2 }
-func (PromiseOfPlentyYellow) Defense() int            { return 2 }
-func (PromiseOfPlentyYellow) Types() card.TypeSet     { return promiseOfPlentyTypes }
-func (PromiseOfPlentyYellow) GoAgain() bool           { return false }
-func (PromiseOfPlentyYellow) NotImplemented()         {}
+func (PromiseOfPlentyYellow) ID() ids.CardID           { return ids.PromiseOfPlentyYellow }
+func (PromiseOfPlentyYellow) Name() string             { return "Promise of Plenty" }
+func (PromiseOfPlentyYellow) DisplayName() string      { return "Promise of Plenty [Y]" }
+func (PromiseOfPlentyYellow) Cost(card.GameEngine) int { return 0 }
+func (PromiseOfPlentyYellow) Pitch() int               { return 2 }
+func (PromiseOfPlentyYellow) Attack() int              { return 2 }
+func (PromiseOfPlentyYellow) Defense() int             { return 2 }
+func (PromiseOfPlentyYellow) Types() card.TypeSet      { return promiseOfPlentyTypes }
+func (PromiseOfPlentyYellow) GoAgain() bool            { return false }
+func (PromiseOfPlentyYellow) NotImplemented()          {}
 
 type PromiseOfPlentyBlue struct{}
 
-func (PromiseOfPlentyBlue) ID() ids.CardID          { return ids.PromiseOfPlentyBlue }
-func (PromiseOfPlentyBlue) Name() string            { return "Promise of Plenty" }
-func (PromiseOfPlentyBlue) DisplayName() string     { return "Promise of Plenty [B]" }
-func (PromiseOfPlentyBlue) Cost(sim.GameEngine) int { return 0 }
-func (PromiseOfPlentyBlue) Pitch() int              { return 3 }
-func (PromiseOfPlentyBlue) Attack() int             { return 1 }
-func (PromiseOfPlentyBlue) Defense() int            { return 2 }
-func (PromiseOfPlentyBlue) Types() card.TypeSet     { return promiseOfPlentyTypes }
-func (PromiseOfPlentyBlue) GoAgain() bool           { return false }
-func (PromiseOfPlentyBlue) NotImplemented()         {}
+func (PromiseOfPlentyBlue) ID() ids.CardID           { return ids.PromiseOfPlentyBlue }
+func (PromiseOfPlentyBlue) Name() string             { return "Promise of Plenty" }
+func (PromiseOfPlentyBlue) DisplayName() string      { return "Promise of Plenty [B]" }
+func (PromiseOfPlentyBlue) Cost(card.GameEngine) int { return 0 }
+func (PromiseOfPlentyBlue) Pitch() int               { return 3 }
+func (PromiseOfPlentyBlue) Attack() int              { return 1 }
+func (PromiseOfPlentyBlue) Defense() int             { return 2 }
+func (PromiseOfPlentyBlue) Types() card.TypeSet      { return promiseOfPlentyTypes }
+func (PromiseOfPlentyBlue) GoAgain() bool            { return false }
+func (PromiseOfPlentyBlue) NotImplemented()          {}

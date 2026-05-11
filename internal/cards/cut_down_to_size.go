@@ -10,11 +10,11 @@
 package cards
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
-func (CutDownToSizeRed) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {}
+func (CutDownToSizeRed) Play(s card.GameEngine, l card.Logger, self *card.CardState) {}
 
-func (CutDownToSizeYellow) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {}
+func (CutDownToSizeYellow) Play(s card.GameEngine, l card.Logger, self *card.CardState) {}
 
-func (CutDownToSizeBlue) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {}
+func (CutDownToSizeBlue) Play(s card.GameEngine, l card.Logger, self *card.CardState) {}

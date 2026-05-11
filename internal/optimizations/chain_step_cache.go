@@ -5,6 +5,7 @@ import (
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 // bareChainStepText is the uncached sim.ChainStepText captured before init swaps in the
@@ -19,7 +20,7 @@ func init() {
 // init. The text depends only on (Card.ID, FromArsenal) — DisplayName, types, and the
 // verb selection are all static — so results live in a pre-warmed table; the per-Play
 // string concat / DisplayName allocation disappears on the hot path.
-func cachedChainStepText(self *sim.CardState) string {
+func cachedChainStepText(self *card.CardState) string {
 	idx := chainStepCacheIndex(self.Card.ID(), self.FromArsenal)
 	if s := chainStepCache[idx].Load(); s != nil {
 		return *s
@@ -53,7 +54,7 @@ func chainStepCacheIndex(id ids.CardID, fromArsenal bool) uint32 {
 //
 // Multiple goroutines computing the same entry race-safely converge on the first writer's
 // string — every writer produces the same value, so reads after a race still match spec.
-func chainStepTextSlow(self *sim.CardState, idx uint32) string {
+func chainStepTextSlow(self *card.CardState, idx uint32) string {
 	out := bareChainStepText(self)
 	chainStepCache[idx].Store(&out)
 	return out
@@ -65,7 +66,7 @@ func chainStepTextSlow(self *sim.CardState, idx uint32) string {
 // runtime hot path is pure cache reads — fakes/test stubs created without registration
 // still work via cachedChainStepText's lazy backfill.
 func WarmChainStepCache(cards []sim.Card) {
-	var self sim.CardState
+	var self card.CardState
 	for _, c := range cards {
 		if c == nil {
 			continue

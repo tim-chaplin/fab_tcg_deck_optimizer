@@ -3,45 +3,44 @@
 package cards
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 var feistyLocalsTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 
 type FeistyLocalsRed struct{}
 
-func (FeistyLocalsRed) ID() ids.CardID          { return ids.FeistyLocalsRed }
-func (FeistyLocalsRed) Name() string            { return "Feisty Locals" }
-func (FeistyLocalsRed) DisplayName() string     { return "Feisty Locals [R]" }
-func (FeistyLocalsRed) Cost(sim.GameEngine) int { return 0 }
-func (FeistyLocalsRed) Pitch() int              { return 1 }
-func (FeistyLocalsRed) Attack() int             { return 3 }
-func (FeistyLocalsRed) Defense() int            { return 2 }
-func (FeistyLocalsRed) Types() card.TypeSet     { return feistyLocalsTypes }
-func (FeistyLocalsRed) GoAgain() bool           { return false }
+func (FeistyLocalsRed) ID() ids.CardID           { return ids.FeistyLocalsRed }
+func (FeistyLocalsRed) Name() string             { return "Feisty Locals" }
+func (FeistyLocalsRed) DisplayName() string      { return "Feisty Locals [R]" }
+func (FeistyLocalsRed) Cost(card.GameEngine) int { return 0 }
+func (FeistyLocalsRed) Pitch() int               { return 1 }
+func (FeistyLocalsRed) Attack() int              { return 3 }
+func (FeistyLocalsRed) Defense() int             { return 2 }
+func (FeistyLocalsRed) Types() card.TypeSet      { return feistyLocalsTypes }
+func (FeistyLocalsRed) GoAgain() bool            { return false }
 
 type FeistyLocalsYellow struct{}
 
-func (FeistyLocalsYellow) ID() ids.CardID          { return ids.FeistyLocalsYellow }
-func (FeistyLocalsYellow) Name() string            { return "Feisty Locals" }
-func (FeistyLocalsYellow) DisplayName() string     { return "Feisty Locals [Y]" }
-func (FeistyLocalsYellow) Cost(sim.GameEngine) int { return 0 }
-func (FeistyLocalsYellow) Pitch() int              { return 2 }
-func (FeistyLocalsYellow) Attack() int             { return 2 }
-func (FeistyLocalsYellow) Defense() int            { return 2 }
-func (FeistyLocalsYellow) Types() card.TypeSet     { return feistyLocalsTypes }
-func (FeistyLocalsYellow) GoAgain() bool           { return false }
+func (FeistyLocalsYellow) ID() ids.CardID           { return ids.FeistyLocalsYellow }
+func (FeistyLocalsYellow) Name() string             { return "Feisty Locals" }
+func (FeistyLocalsYellow) DisplayName() string      { return "Feisty Locals [Y]" }
+func (FeistyLocalsYellow) Cost(card.GameEngine) int { return 0 }
+func (FeistyLocalsYellow) Pitch() int               { return 2 }
+func (FeistyLocalsYellow) Attack() int              { return 2 }
+func (FeistyLocalsYellow) Defense() int             { return 2 }
+func (FeistyLocalsYellow) Types() card.TypeSet      { return feistyLocalsTypes }
+func (FeistyLocalsYellow) GoAgain() bool            { return false }
 
 type FeistyLocalsBlue struct{}
 
-func (FeistyLocalsBlue) ID() ids.CardID          { return ids.FeistyLocalsBlue }
-func (FeistyLocalsBlue) Name() string            { return "Feisty Locals" }
-func (FeistyLocalsBlue) DisplayName() string     { return "Feisty Locals [B]" }
-func (FeistyLocalsBlue) Cost(sim.GameEngine) int { return 0 }
-func (FeistyLocalsBlue) Pitch() int              { return 3 }
-func (FeistyLocalsBlue) Attack() int             { return 1 }
-func (FeistyLocalsBlue) Defense() int            { return 2 }
-func (FeistyLocalsBlue) Types() card.TypeSet     { return feistyLocalsTypes }
-func (FeistyLocalsBlue) GoAgain() bool           { return false }
+func (FeistyLocalsBlue) ID() ids.CardID           { return ids.FeistyLocalsBlue }
+func (FeistyLocalsBlue) Name() string             { return "Feisty Locals" }
+func (FeistyLocalsBlue) DisplayName() string      { return "Feisty Locals [B]" }
+func (FeistyLocalsBlue) Cost(card.GameEngine) int { return 0 }
+func (FeistyLocalsBlue) Pitch() int               { return 3 }
+func (FeistyLocalsBlue) Attack() int              { return 1 }
+func (FeistyLocalsBlue) Defense() int             { return 2 }
+func (FeistyLocalsBlue) Types() card.TypeSet      { return feistyLocalsTypes }
+func (FeistyLocalsBlue) GoAgain() bool            { return false }

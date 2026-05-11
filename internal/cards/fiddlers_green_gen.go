@@ -3,48 +3,47 @@
 package cards
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 var fiddlerSGreenTypes = card.NewTypeSet(card.TypeGeneric, card.TypeDefenseReaction)
 
 type FiddlersGreenRed struct{}
 
-func (FiddlersGreenRed) ID() ids.CardID          { return ids.FiddlersGreenRed }
-func (FiddlersGreenRed) Name() string            { return "Fiddler's Green" }
-func (FiddlersGreenRed) DisplayName() string     { return "Fiddler's Green [R]" }
-func (FiddlersGreenRed) Cost(sim.GameEngine) int { return 0 }
-func (FiddlersGreenRed) Pitch() int              { return 1 }
-func (FiddlersGreenRed) Attack() int             { return 0 }
-func (FiddlersGreenRed) Defense() int            { return 1 }
-func (FiddlersGreenRed) Types() card.TypeSet     { return fiddlerSGreenTypes }
-func (FiddlersGreenRed) GoAgain() bool           { return false }
-func (FiddlersGreenRed) NotSilverAgeLegal()      {}
+func (FiddlersGreenRed) ID() ids.CardID           { return ids.FiddlersGreenRed }
+func (FiddlersGreenRed) Name() string             { return "Fiddler's Green" }
+func (FiddlersGreenRed) DisplayName() string      { return "Fiddler's Green [R]" }
+func (FiddlersGreenRed) Cost(card.GameEngine) int { return 0 }
+func (FiddlersGreenRed) Pitch() int               { return 1 }
+func (FiddlersGreenRed) Attack() int              { return 0 }
+func (FiddlersGreenRed) Defense() int             { return 1 }
+func (FiddlersGreenRed) Types() card.TypeSet      { return fiddlerSGreenTypes }
+func (FiddlersGreenRed) GoAgain() bool            { return false }
+func (FiddlersGreenRed) NotSilverAgeLegal()       {}
 
 type FiddlersGreenYellow struct{}
 
-func (FiddlersGreenYellow) ID() ids.CardID          { return ids.FiddlersGreenYellow }
-func (FiddlersGreenYellow) Name() string            { return "Fiddler's Green" }
-func (FiddlersGreenYellow) DisplayName() string     { return "Fiddler's Green [Y]" }
-func (FiddlersGreenYellow) Cost(sim.GameEngine) int { return 0 }
-func (FiddlersGreenYellow) Pitch() int              { return 2 }
-func (FiddlersGreenYellow) Attack() int             { return 0 }
-func (FiddlersGreenYellow) Defense() int            { return 1 }
-func (FiddlersGreenYellow) Types() card.TypeSet     { return fiddlerSGreenTypes }
-func (FiddlersGreenYellow) GoAgain() bool           { return false }
-func (FiddlersGreenYellow) NotSilverAgeLegal()      {}
+func (FiddlersGreenYellow) ID() ids.CardID           { return ids.FiddlersGreenYellow }
+func (FiddlersGreenYellow) Name() string             { return "Fiddler's Green" }
+func (FiddlersGreenYellow) DisplayName() string      { return "Fiddler's Green [Y]" }
+func (FiddlersGreenYellow) Cost(card.GameEngine) int { return 0 }
+func (FiddlersGreenYellow) Pitch() int               { return 2 }
+func (FiddlersGreenYellow) Attack() int              { return 0 }
+func (FiddlersGreenYellow) Defense() int             { return 1 }
+func (FiddlersGreenYellow) Types() card.TypeSet      { return fiddlerSGreenTypes }
+func (FiddlersGreenYellow) GoAgain() bool            { return false }
+func (FiddlersGreenYellow) NotSilverAgeLegal()       {}
 
 type FiddlersGreenBlue struct{}
 
-func (FiddlersGreenBlue) ID() ids.CardID          { return ids.FiddlersGreenBlue }
-func (FiddlersGreenBlue) Name() string            { return "Fiddler's Green" }
-func (FiddlersGreenBlue) DisplayName() string     { return "Fiddler's Green [B]" }
-func (FiddlersGreenBlue) Cost(sim.GameEngine) int { return 0 }
-func (FiddlersGreenBlue) Pitch() int              { return 3 }
-func (FiddlersGreenBlue) Attack() int             { return 0 }
-func (FiddlersGreenBlue) Defense() int            { return 1 }
-func (FiddlersGreenBlue) Types() card.TypeSet     { return fiddlerSGreenTypes }
-func (FiddlersGreenBlue) GoAgain() bool           { return false }
-func (FiddlersGreenBlue) NotSilverAgeLegal()      {}
+func (FiddlersGreenBlue) ID() ids.CardID           { return ids.FiddlersGreenBlue }
+func (FiddlersGreenBlue) Name() string             { return "Fiddler's Green" }
+func (FiddlersGreenBlue) DisplayName() string      { return "Fiddler's Green [B]" }
+func (FiddlersGreenBlue) Cost(card.GameEngine) int { return 0 }
+func (FiddlersGreenBlue) Pitch() int               { return 3 }
+func (FiddlersGreenBlue) Attack() int              { return 0 }
+func (FiddlersGreenBlue) Defense() int             { return 1 }
+func (FiddlersGreenBlue) Types() card.TypeSet      { return fiddlerSGreenTypes }
+func (FiddlersGreenBlue) GoAgain() bool            { return false }
+func (FiddlersGreenBlue) NotSilverAgeLegal()       {}

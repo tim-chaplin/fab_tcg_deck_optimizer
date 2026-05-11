@@ -7,18 +7,18 @@
 package cards
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
 
 // drawOneAtEndOfTurn is the end-of-turn TriggerHandler that fires Strategic Planning's
 // deferred draw. Top-level so the registration stays alloc-free.
-func drawOneAtEndOfTurn(s *sim.TurnState, l sim.Logger, _ *sim.Trigger, _ *sim.Aura) {
+func drawOneAtEndOfTurn(s *sim.TurnState, l card.Logger, _ *sim.Trigger, _ *sim.Aura) {
 	s.DrawOne()
 }
 
-func strategicPlanningPlay(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
+func strategicPlanningPlay(s card.GameEngine, l card.Logger, self *card.CardState) {
 	if _, ok := s.RecycleFromGraveyardToBottom(func(c sim.Card) bool {
 		return c.Types().Has(card.TypeAction) && c.Cost(s) <= 2
 	}); ok {
@@ -32,14 +32,14 @@ func strategicPlanningPlay(s sim.GameEngine, l sim.Logger, self *sim.CardState) 
 	l.AppendPostTrigger(self.Card.DisplayName(), "End-phase draw queued", 0)
 }
 
-func (StrategicPlanningRed) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
+func (StrategicPlanningRed) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 	strategicPlanningPlay(s, l, self)
 }
 
-func (StrategicPlanningYellow) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
+func (StrategicPlanningYellow) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 	strategicPlanningPlay(s, l, self)
 }
 
-func (StrategicPlanningBlue) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
+func (StrategicPlanningBlue) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 	strategicPlanningPlay(s, l, self)
 }

@@ -3,48 +3,47 @@
 package notimplemented
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 var riseAboveTypes = card.NewTypeSet()
 
 type RiseAboveRed struct{}
 
-func (RiseAboveRed) ID() ids.CardID          { return ids.RiseAboveRed }
-func (RiseAboveRed) Name() string            { return "Rise Above" }
-func (RiseAboveRed) DisplayName() string     { return "Rise Above [R]" }
-func (RiseAboveRed) Cost(sim.GameEngine) int { return 2 }
-func (RiseAboveRed) Pitch() int              { return 1 }
-func (RiseAboveRed) Attack() int             { return 0 }
-func (RiseAboveRed) Defense() int            { return 4 }
-func (RiseAboveRed) Types() card.TypeSet     { return riseAboveTypes }
-func (RiseAboveRed) GoAgain() bool           { return false }
-func (RiseAboveRed) NotImplemented()         {}
+func (RiseAboveRed) ID() ids.CardID           { return ids.RiseAboveRed }
+func (RiseAboveRed) Name() string             { return "Rise Above" }
+func (RiseAboveRed) DisplayName() string      { return "Rise Above [R]" }
+func (RiseAboveRed) Cost(card.GameEngine) int { return 2 }
+func (RiseAboveRed) Pitch() int               { return 1 }
+func (RiseAboveRed) Attack() int              { return 0 }
+func (RiseAboveRed) Defense() int             { return 4 }
+func (RiseAboveRed) Types() card.TypeSet      { return riseAboveTypes }
+func (RiseAboveRed) GoAgain() bool            { return false }
+func (RiseAboveRed) NotImplemented()          {}
 
 type RiseAboveYellow struct{}
 
-func (RiseAboveYellow) ID() ids.CardID          { return ids.RiseAboveYellow }
-func (RiseAboveYellow) Name() string            { return "Rise Above" }
-func (RiseAboveYellow) DisplayName() string     { return "Rise Above [Y]" }
-func (RiseAboveYellow) Cost(sim.GameEngine) int { return 2 }
-func (RiseAboveYellow) Pitch() int              { return 2 }
-func (RiseAboveYellow) Attack() int             { return 0 }
-func (RiseAboveYellow) Defense() int            { return 3 }
-func (RiseAboveYellow) Types() card.TypeSet     { return riseAboveTypes }
-func (RiseAboveYellow) GoAgain() bool           { return false }
-func (RiseAboveYellow) NotImplemented()         {}
+func (RiseAboveYellow) ID() ids.CardID           { return ids.RiseAboveYellow }
+func (RiseAboveYellow) Name() string             { return "Rise Above" }
+func (RiseAboveYellow) DisplayName() string      { return "Rise Above [Y]" }
+func (RiseAboveYellow) Cost(card.GameEngine) int { return 2 }
+func (RiseAboveYellow) Pitch() int               { return 2 }
+func (RiseAboveYellow) Attack() int              { return 0 }
+func (RiseAboveYellow) Defense() int             { return 3 }
+func (RiseAboveYellow) Types() card.TypeSet      { return riseAboveTypes }
+func (RiseAboveYellow) GoAgain() bool            { return false }
+func (RiseAboveYellow) NotImplemented()          {}
 
 type RiseAboveBlue struct{}
 
-func (RiseAboveBlue) ID() ids.CardID          { return ids.RiseAboveBlue }
-func (RiseAboveBlue) Name() string            { return "Rise Above" }
-func (RiseAboveBlue) DisplayName() string     { return "Rise Above [B]" }
-func (RiseAboveBlue) Cost(sim.GameEngine) int { return 2 }
-func (RiseAboveBlue) Pitch() int              { return 3 }
-func (RiseAboveBlue) Attack() int             { return 0 }
-func (RiseAboveBlue) Defense() int            { return 2 }
-func (RiseAboveBlue) Types() card.TypeSet     { return riseAboveTypes }
-func (RiseAboveBlue) GoAgain() bool           { return false }
-func (RiseAboveBlue) NotImplemented()         {}
+func (RiseAboveBlue) ID() ids.CardID           { return ids.RiseAboveBlue }
+func (RiseAboveBlue) Name() string             { return "Rise Above" }
+func (RiseAboveBlue) DisplayName() string      { return "Rise Above [B]" }
+func (RiseAboveBlue) Cost(card.GameEngine) int { return 2 }
+func (RiseAboveBlue) Pitch() int               { return 3 }
+func (RiseAboveBlue) Attack() int              { return 0 }
+func (RiseAboveBlue) Defense() int             { return 2 }
+func (RiseAboveBlue) Types() card.TypeSet      { return riseAboveTypes }
+func (RiseAboveBlue) GoAgain() bool            { return false }
+func (RiseAboveBlue) NotImplemented()          {}

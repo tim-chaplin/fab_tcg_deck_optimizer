@@ -6,9 +6,9 @@
 package weapons
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 var annalsOfSutcliffeTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeWeapon, card.TypeBook, card.TypeTwoHand)
@@ -32,14 +32,14 @@ var annalsOfSutcliffeAbilityTypes = card.NewTypeSet(card.TypeRuneblade, card.Typ
 
 type AnnalsOfSutcliffeAbility struct{}
 
-func (AnnalsOfSutcliffeAbility) ID() ids.CardID          { return ids.AnnalsOfSutcliffeAbilityID }
-func (AnnalsOfSutcliffeAbility) Name() string            { return "Annals of Sutcliffe" }
-func (AnnalsOfSutcliffeAbility) DisplayName() string     { return "Annals of Sutcliffe" }
-func (AnnalsOfSutcliffeAbility) Cost(sim.GameEngine) int { return 3 }
-func (AnnalsOfSutcliffeAbility) Pitch() int              { return 0 }
-func (AnnalsOfSutcliffeAbility) Attack() int             { return 0 }
-func (AnnalsOfSutcliffeAbility) Defense() int            { return 0 }
-func (AnnalsOfSutcliffeAbility) Types() card.TypeSet     { return annalsOfSutcliffeAbilityTypes }
-func (AnnalsOfSutcliffeAbility) GoAgain() bool           { return false }
-func (AnnalsOfSutcliffeAbility) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
+func (AnnalsOfSutcliffeAbility) ID() ids.CardID           { return ids.AnnalsOfSutcliffeAbilityID }
+func (AnnalsOfSutcliffeAbility) Name() string             { return "Annals of Sutcliffe" }
+func (AnnalsOfSutcliffeAbility) DisplayName() string      { return "Annals of Sutcliffe" }
+func (AnnalsOfSutcliffeAbility) Cost(card.GameEngine) int { return 3 }
+func (AnnalsOfSutcliffeAbility) Pitch() int               { return 0 }
+func (AnnalsOfSutcliffeAbility) Attack() int              { return 0 }
+func (AnnalsOfSutcliffeAbility) Defense() int             { return 0 }
+func (AnnalsOfSutcliffeAbility) Types() card.TypeSet      { return annalsOfSutcliffeAbilityTypes }
+func (AnnalsOfSutcliffeAbility) GoAgain() bool            { return false }
+func (AnnalsOfSutcliffeAbility) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 }

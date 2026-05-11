@@ -13,7 +13,7 @@
 package cards
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
@@ -39,7 +39,7 @@ func razorReflexAccepts(c sim.Card, mode int8) bool {
 // razorReflexPlay applies the chosen mode's effect. The chain runner already validated
 // the target via razorReflexAccepts, so the buff lands directly. Mode 1 additionally
 // fires the on-hit go-again rider eagerly when the post-buff target is likely to hit.
-func razorReflexPlay(s sim.GameEngine, l sim.Logger, self *sim.CardState, n int) {
+func razorReflexPlay(s card.GameEngine, l card.Logger, self *card.CardState, n int) {
 	target := s.AttackReactionTarget()
 	if target == nil {
 		return
@@ -54,7 +54,7 @@ func (RazorReflexRed) Modes() int { return 2 }
 func (RazorReflexRed) ARTargetAllowed(c sim.Card, mode int8) bool {
 	return razorReflexAccepts(c, mode)
 }
-func (RazorReflexRed) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
+func (RazorReflexRed) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 	razorReflexPlay(s, l, self, 3)
 }
 
@@ -62,7 +62,7 @@ func (RazorReflexYellow) Modes() int { return 2 }
 func (RazorReflexYellow) ARTargetAllowed(c sim.Card, mode int8) bool {
 	return razorReflexAccepts(c, mode)
 }
-func (RazorReflexYellow) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
+func (RazorReflexYellow) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 	razorReflexPlay(s, l, self, 2)
 }
 
@@ -70,6 +70,6 @@ func (RazorReflexBlue) Modes() int { return 2 }
 func (RazorReflexBlue) ARTargetAllowed(c sim.Card, mode int8) bool {
 	return razorReflexAccepts(c, mode)
 }
-func (RazorReflexBlue) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
+func (RazorReflexBlue) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 	razorReflexPlay(s, l, self, 1)
 }

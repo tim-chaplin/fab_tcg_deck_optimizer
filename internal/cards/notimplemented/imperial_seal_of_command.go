@@ -7,10 +7,10 @@
 package notimplemented
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 // not implemented: activated 'no DR this turn' + Royal-only arsenal-wipe on hit
 
-func (ImperialSealOfCommandRed) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
+func (ImperialSealOfCommandRed) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 }

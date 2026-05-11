@@ -7,9 +7,9 @@
 package weapons
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 var talisharTypes = card.NewTypeSet(card.TypeGeneric, card.TypeWeapon, card.TypeSword, card.TypeTwoHand)
@@ -32,14 +32,14 @@ var talisharAbilityTypes = card.NewTypeSet(card.TypeGeneric, card.TypeWeapon, ca
 
 type TalisharAbility struct{}
 
-func (TalisharAbility) ID() ids.CardID          { return ids.TalisharAbilityID }
-func (TalisharAbility) Name() string            { return "Talishar, the Lost Prince" }
-func (TalisharAbility) DisplayName() string     { return "Talishar, the Lost Prince" }
-func (TalisharAbility) Cost(sim.GameEngine) int { return 0 }
-func (TalisharAbility) Pitch() int              { return 0 }
-func (TalisharAbility) Attack() int             { return 4 }
-func (TalisharAbility) Defense() int            { return 0 }
-func (TalisharAbility) Types() card.TypeSet     { return talisharAbilityTypes }
-func (TalisharAbility) GoAgain() bool           { return false }
-func (TalisharAbility) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
+func (TalisharAbility) ID() ids.CardID           { return ids.TalisharAbilityID }
+func (TalisharAbility) Name() string             { return "Talishar, the Lost Prince" }
+func (TalisharAbility) DisplayName() string      { return "Talishar, the Lost Prince" }
+func (TalisharAbility) Cost(card.GameEngine) int { return 0 }
+func (TalisharAbility) Pitch() int               { return 0 }
+func (TalisharAbility) Attack() int              { return 4 }
+func (TalisharAbility) Defense() int             { return 0 }
+func (TalisharAbility) Types() card.TypeSet      { return talisharAbilityTypes }
+func (TalisharAbility) GoAgain() bool            { return false }
+func (TalisharAbility) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 }

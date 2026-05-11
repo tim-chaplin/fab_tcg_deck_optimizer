@@ -6,10 +6,10 @@
 package notimplemented
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 // not implemented: self-destroys on pitching a 1-resource card → gain {r}{r}{r} instead
 
-func (TalismanOfRecompenseYellow) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
+func (TalismanOfRecompenseYellow) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 }

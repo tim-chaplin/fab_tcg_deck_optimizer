@@ -4,11 +4,12 @@ import (
 	"testing"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 // Tests that Outed doesn't apply the marked-defender bonus when OpponentMarked is false.
 func TestOuted_NoMarkUnbuffed(t *testing.T) {
-	self := &sim.CardState{Card: OutedRed{}}
+	self := &card.CardState{Card: OutedRed{}}
 	s := sim.TurnState{}
 	sim.ResolveChainStep(&s, s.Logger(), self)
 	if self.BonusAttack != 0 {
@@ -18,7 +19,7 @@ func TestOuted_NoMarkUnbuffed(t *testing.T) {
 
 // Tests that Outed self-buffs +1{p} when the opposing hero is marked at Play time.
 func TestOuted_MarkedDefenderAddsOne(t *testing.T) {
-	self := &sim.CardState{Card: OutedRed{}}
+	self := &card.CardState{Card: OutedRed{}}
 	s := sim.NewTurnStateFromSpec(sim.TurnStateSpec{OpponentMarked: true})
 	sim.ResolveChainStep(&s, s.Logger(), self)
 	if s.Value() != 4 {

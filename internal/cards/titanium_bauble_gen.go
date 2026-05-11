@@ -3,21 +3,20 @@
 package cards
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 var titaniumBaubleTypes = card.NewTypeSet(card.TypeGeneric, card.TypeResource)
 
 type TitaniumBaubleBlue struct{}
 
-func (TitaniumBaubleBlue) ID() ids.CardID          { return ids.TitaniumBaubleBlue }
-func (TitaniumBaubleBlue) Name() string            { return "Titanium Bauble" }
-func (TitaniumBaubleBlue) DisplayName() string     { return "Titanium Bauble [B]" }
-func (TitaniumBaubleBlue) Cost(sim.GameEngine) int { return 0 }
-func (TitaniumBaubleBlue) Pitch() int              { return 3 }
-func (TitaniumBaubleBlue) Attack() int             { return 0 }
-func (TitaniumBaubleBlue) Defense() int            { return 3 }
-func (TitaniumBaubleBlue) Types() card.TypeSet     { return titaniumBaubleTypes }
-func (TitaniumBaubleBlue) GoAgain() bool           { return false }
+func (TitaniumBaubleBlue) ID() ids.CardID           { return ids.TitaniumBaubleBlue }
+func (TitaniumBaubleBlue) Name() string             { return "Titanium Bauble" }
+func (TitaniumBaubleBlue) DisplayName() string      { return "Titanium Bauble [B]" }
+func (TitaniumBaubleBlue) Cost(card.GameEngine) int { return 0 }
+func (TitaniumBaubleBlue) Pitch() int               { return 3 }
+func (TitaniumBaubleBlue) Attack() int              { return 0 }
+func (TitaniumBaubleBlue) Defense() int             { return 3 }
+func (TitaniumBaubleBlue) Types() card.TypeSet      { return titaniumBaubleTypes }
+func (TitaniumBaubleBlue) GoAgain() bool            { return false }

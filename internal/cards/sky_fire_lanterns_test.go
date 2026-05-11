@@ -4,11 +4,12 @@ import (
 	"testing"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 func TestSkyFireLanterns_EmptyDeck(t *testing.T) {
 	s := &sim.TurnState{}
-	sim.ResolveChainStep(s, s.Logger(), &sim.CardState{Card: SkyFireLanternsRed{}})
+	sim.ResolveChainStep(s, s.Logger(), &card.CardState{Card: SkyFireLanternsRed{}})
 	if got := s.Value(); got != 0 {
 		t.Errorf("Play() = %d, want 0 (empty deck)", got)
 	}
@@ -17,7 +18,7 @@ func TestSkyFireLanterns_EmptyDeck(t *testing.T) {
 func TestSkyFireLanterns_MatchingTopCard(t *testing.T) {
 	// Red variant (pitch 1) matches a top card with pitch 1.
 	s := sim.NewTurnStateFromCards([]sim.Card{HocusPocusRed{}}, nil)
-	sim.ResolveChainStep(s, s.Logger(), &sim.CardState{Card: SkyFireLanternsRed{}})
+	sim.ResolveChainStep(s, s.Logger(), &card.CardState{Card: SkyFireLanternsRed{}})
 	if got := s.Value(); got != 1 {
 		t.Errorf("Red with Red top: Play() = %d, want 1 (pitch match → create Runechant)", got)
 	}
@@ -29,7 +30,7 @@ func TestSkyFireLanterns_MatchingTopCard(t *testing.T) {
 func TestSkyFireLanterns_MismatchingTopCard(t *testing.T) {
 	// Red variant (pitch 1) doesn't match a Blue top card (pitch 3).
 	s := sim.NewTurnStateFromCards([]sim.Card{HocusPocusBlue{}}, nil)
-	sim.ResolveChainStep(s, s.Logger(), &sim.CardState{Card: SkyFireLanternsRed{}})
+	sim.ResolveChainStep(s, s.Logger(), &card.CardState{Card: SkyFireLanternsRed{}})
 	if got := s.Value(); got != 0 {
 		t.Errorf("Red with Blue top: Play() = %d, want 0 (pitch mismatch)", got)
 	}
@@ -46,7 +47,7 @@ func TestSkyFireLanterns_AllVariantsMatchOwnColor(t *testing.T) {
 	}
 	for _, tc := range cases {
 		s := sim.NewTurnStateFromCards([]sim.Card{tc.top}, nil)
-		sim.ResolveChainStep(s, s.Logger(), &sim.CardState{Card: tc.lantern})
+		sim.ResolveChainStep(s, s.Logger(), &card.CardState{Card: tc.lantern})
 		if got := s.Value(); got != 1 {
 			t.Errorf("%s: Play() = %d, want 1 (same-color top card)", tc.lantern.Name(), got)
 		}

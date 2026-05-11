@@ -3,45 +3,44 @@
 package cards
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 var strategicPlanningTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction)
 
 type StrategicPlanningRed struct{}
 
-func (StrategicPlanningRed) ID() ids.CardID          { return ids.StrategicPlanningRed }
-func (StrategicPlanningRed) Name() string            { return "Strategic Planning" }
-func (StrategicPlanningRed) DisplayName() string     { return "Strategic Planning [R]" }
-func (StrategicPlanningRed) Cost(sim.GameEngine) int { return 1 }
-func (StrategicPlanningRed) Pitch() int              { return 1 }
-func (StrategicPlanningRed) Attack() int             { return 0 }
-func (StrategicPlanningRed) Defense() int            { return 2 }
-func (StrategicPlanningRed) Types() card.TypeSet     { return strategicPlanningTypes }
-func (StrategicPlanningRed) GoAgain() bool           { return true }
+func (StrategicPlanningRed) ID() ids.CardID           { return ids.StrategicPlanningRed }
+func (StrategicPlanningRed) Name() string             { return "Strategic Planning" }
+func (StrategicPlanningRed) DisplayName() string      { return "Strategic Planning [R]" }
+func (StrategicPlanningRed) Cost(card.GameEngine) int { return 1 }
+func (StrategicPlanningRed) Pitch() int               { return 1 }
+func (StrategicPlanningRed) Attack() int              { return 0 }
+func (StrategicPlanningRed) Defense() int             { return 2 }
+func (StrategicPlanningRed) Types() card.TypeSet      { return strategicPlanningTypes }
+func (StrategicPlanningRed) GoAgain() bool            { return true }
 
 type StrategicPlanningYellow struct{}
 
-func (StrategicPlanningYellow) ID() ids.CardID          { return ids.StrategicPlanningYellow }
-func (StrategicPlanningYellow) Name() string            { return "Strategic Planning" }
-func (StrategicPlanningYellow) DisplayName() string     { return "Strategic Planning [Y]" }
-func (StrategicPlanningYellow) Cost(sim.GameEngine) int { return 1 }
-func (StrategicPlanningYellow) Pitch() int              { return 2 }
-func (StrategicPlanningYellow) Attack() int             { return 0 }
-func (StrategicPlanningYellow) Defense() int            { return 2 }
-func (StrategicPlanningYellow) Types() card.TypeSet     { return strategicPlanningTypes }
-func (StrategicPlanningYellow) GoAgain() bool           { return true }
+func (StrategicPlanningYellow) ID() ids.CardID           { return ids.StrategicPlanningYellow }
+func (StrategicPlanningYellow) Name() string             { return "Strategic Planning" }
+func (StrategicPlanningYellow) DisplayName() string      { return "Strategic Planning [Y]" }
+func (StrategicPlanningYellow) Cost(card.GameEngine) int { return 1 }
+func (StrategicPlanningYellow) Pitch() int               { return 2 }
+func (StrategicPlanningYellow) Attack() int              { return 0 }
+func (StrategicPlanningYellow) Defense() int             { return 2 }
+func (StrategicPlanningYellow) Types() card.TypeSet      { return strategicPlanningTypes }
+func (StrategicPlanningYellow) GoAgain() bool            { return true }
 
 type StrategicPlanningBlue struct{}
 
-func (StrategicPlanningBlue) ID() ids.CardID          { return ids.StrategicPlanningBlue }
-func (StrategicPlanningBlue) Name() string            { return "Strategic Planning" }
-func (StrategicPlanningBlue) DisplayName() string     { return "Strategic Planning [B]" }
-func (StrategicPlanningBlue) Cost(sim.GameEngine) int { return 1 }
-func (StrategicPlanningBlue) Pitch() int              { return 3 }
-func (StrategicPlanningBlue) Attack() int             { return 0 }
-func (StrategicPlanningBlue) Defense() int            { return 2 }
-func (StrategicPlanningBlue) Types() card.TypeSet     { return strategicPlanningTypes }
-func (StrategicPlanningBlue) GoAgain() bool           { return true }
+func (StrategicPlanningBlue) ID() ids.CardID           { return ids.StrategicPlanningBlue }
+func (StrategicPlanningBlue) Name() string             { return "Strategic Planning" }
+func (StrategicPlanningBlue) DisplayName() string      { return "Strategic Planning [B]" }
+func (StrategicPlanningBlue) Cost(card.GameEngine) int { return 1 }
+func (StrategicPlanningBlue) Pitch() int               { return 3 }
+func (StrategicPlanningBlue) Attack() int              { return 0 }
+func (StrategicPlanningBlue) Defense() int             { return 2 }
+func (StrategicPlanningBlue) Types() card.TypeSet      { return strategicPlanningTypes }
+func (StrategicPlanningBlue) GoAgain() bool            { return true }

@@ -7,20 +7,20 @@
 package notimplemented
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 // not implemented: frailty/inertia/bloodrot pox tokens
 
-func (c InfectiousHostRed) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
+func (c InfectiousHostRed) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 }
 
 // not implemented: frailty/inertia/bloodrot pox tokens
 
-func (c InfectiousHostYellow) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
+func (c InfectiousHostYellow) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 }
 
 // not implemented: frailty/inertia/bloodrot pox tokens
 
-func (c InfectiousHostBlue) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
+func (c InfectiousHostBlue) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 }

@@ -7,20 +7,20 @@
 package notimplemented
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 // not implemented: hand-on-top alt cost and conditional go-again rider
 
-func (c SeekHorizonRed) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
+func (c SeekHorizonRed) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 }
 
 // not implemented: hand-on-top alt cost and conditional go-again rider
 
-func (c SeekHorizonYellow) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
+func (c SeekHorizonYellow) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 }
 
 // not implemented: hand-on-top alt cost and conditional go-again rider
 
-func (c SeekHorizonBlue) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
+func (c SeekHorizonBlue) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 }

@@ -12,12 +12,12 @@
 package cards
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 const drawnToTheDarkDimensionPrintedCost = 2
 
-func drawnToTheDarkDimensionCost(s sim.GameEngine) int {
+func drawnToTheDarkDimensionCost(s card.GameEngine) int {
 	eff := drawnToTheDarkDimensionPrintedCost - s.Runechants()
 	if eff < 0 {
 		return 0
@@ -25,28 +25,28 @@ func drawnToTheDarkDimensionCost(s sim.GameEngine) int {
 	return eff
 }
 
-func (DrawnToTheDarkDimensionRed) Cost(s sim.GameEngine) int { return drawnToTheDarkDimensionCost(s) }
-func (DrawnToTheDarkDimensionRed) MinCost() int              { return 0 }
-func (DrawnToTheDarkDimensionRed) MaxCost() int              { return drawnToTheDarkDimensionPrintedCost }
+func (DrawnToTheDarkDimensionRed) Cost(s card.GameEngine) int { return drawnToTheDarkDimensionCost(s) }
+func (DrawnToTheDarkDimensionRed) MinCost() int               { return 0 }
+func (DrawnToTheDarkDimensionRed) MaxCost() int               { return drawnToTheDarkDimensionPrintedCost }
 
-func (c DrawnToTheDarkDimensionRed) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
+func (c DrawnToTheDarkDimensionRed) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 	s.DrawOne()
 }
 
-func (DrawnToTheDarkDimensionYellow) Cost(s sim.GameEngine) int {
+func (DrawnToTheDarkDimensionYellow) Cost(s card.GameEngine) int {
 	return drawnToTheDarkDimensionCost(s)
 }
 func (DrawnToTheDarkDimensionYellow) MinCost() int { return 0 }
 func (DrawnToTheDarkDimensionYellow) MaxCost() int { return drawnToTheDarkDimensionPrintedCost }
 
-func (c DrawnToTheDarkDimensionYellow) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
+func (c DrawnToTheDarkDimensionYellow) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 	s.DrawOne()
 }
 
-func (DrawnToTheDarkDimensionBlue) Cost(s sim.GameEngine) int { return drawnToTheDarkDimensionCost(s) }
-func (DrawnToTheDarkDimensionBlue) MinCost() int              { return 0 }
-func (DrawnToTheDarkDimensionBlue) MaxCost() int              { return drawnToTheDarkDimensionPrintedCost }
+func (DrawnToTheDarkDimensionBlue) Cost(s card.GameEngine) int { return drawnToTheDarkDimensionCost(s) }
+func (DrawnToTheDarkDimensionBlue) MinCost() int               { return 0 }
+func (DrawnToTheDarkDimensionBlue) MaxCost() int               { return drawnToTheDarkDimensionPrintedCost }
 
-func (c DrawnToTheDarkDimensionBlue) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
+func (c DrawnToTheDarkDimensionBlue) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 	s.DrawOne()
 }

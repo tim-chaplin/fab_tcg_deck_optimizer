@@ -6,13 +6,13 @@
 package notimplemented
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
 )
 
 // not implemented: Inertia health-gain rider dropped (status tokens not tracked)
 
-func (RestvineElixirRed) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
+func (RestvineElixirRed) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 	cards.GrantNextCardBonusAttack(s, 3, cards.IsAttack)
 }

@@ -8,21 +8,21 @@
 package cards
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
-func (RuneragerSwarmRed) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
+func (RuneragerSwarmRed) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 	runeragerSwarmPlay(s, l, self)
 }
 
-func (RuneragerSwarmYellow) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
+func (RuneragerSwarmYellow) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 	runeragerSwarmPlay(s, l, self)
 }
 
-func (RuneragerSwarmBlue) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
+func (RuneragerSwarmBlue) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 	runeragerSwarmPlay(s, l, self)
 }
-func runeragerSwarmPlay(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
+func runeragerSwarmPlay(s card.GameEngine, l card.Logger, self *card.CardState) {
 	if s.HasPlayedOrCreatedAura() {
 		self.GrantedGoAgain = true
 	}

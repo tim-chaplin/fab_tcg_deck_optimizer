@@ -6,24 +6,24 @@
 package cards
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 // springLoadPlay applies the +3{p} 'no cards in hand' rider, then emits the chain step.
-func springLoadPlay(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
+func springLoadPlay(s card.GameEngine, l card.Logger, self *card.CardState) {
 	if len(s.Hand()) == 0 {
 		self.BonusAttack += 3
 	}
 }
 
-func (SpringLoadRed) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
+func (SpringLoadRed) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 	springLoadPlay(s, l, self)
 }
 
-func (SpringLoadYellow) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
+func (SpringLoadYellow) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 	springLoadPlay(s, l, self)
 }
 
-func (SpringLoadBlue) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
+func (SpringLoadBlue) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 	springLoadPlay(s, l, self)
 }

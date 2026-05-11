@@ -3,22 +3,21 @@
 package notimplemented
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 var tongueTiedTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 
 type TongueTiedRed struct{}
 
-func (TongueTiedRed) ID() ids.CardID          { return ids.TongueTiedRed }
-func (TongueTiedRed) Name() string            { return "Tongue Tied" }
-func (TongueTiedRed) DisplayName() string     { return "Tongue Tied [R]" }
-func (TongueTiedRed) Cost(sim.GameEngine) int { return 3 }
-func (TongueTiedRed) Pitch() int              { return 1 }
-func (TongueTiedRed) Attack() int             { return 7 }
-func (TongueTiedRed) Defense() int            { return 2 }
-func (TongueTiedRed) Types() card.TypeSet     { return tongueTiedTypes }
-func (TongueTiedRed) GoAgain() bool           { return false }
-func (TongueTiedRed) NotImplemented()         {}
+func (TongueTiedRed) ID() ids.CardID           { return ids.TongueTiedRed }
+func (TongueTiedRed) Name() string             { return "Tongue Tied" }
+func (TongueTiedRed) DisplayName() string      { return "Tongue Tied [R]" }
+func (TongueTiedRed) Cost(card.GameEngine) int { return 3 }
+func (TongueTiedRed) Pitch() int               { return 1 }
+func (TongueTiedRed) Attack() int              { return 7 }
+func (TongueTiedRed) Defense() int             { return 2 }
+func (TongueTiedRed) Types() card.TypeSet      { return tongueTiedTypes }
+func (TongueTiedRed) GoAgain() bool            { return false }
+func (TongueTiedRed) NotImplemented()          {}

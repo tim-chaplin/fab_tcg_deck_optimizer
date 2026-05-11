@@ -3,21 +3,20 @@
 package cards
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 var relentlessPursuitTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction)
 
 type RelentlessPursuitBlue struct{}
 
-func (RelentlessPursuitBlue) ID() ids.CardID          { return ids.RelentlessPursuitBlue }
-func (RelentlessPursuitBlue) Name() string            { return "Relentless Pursuit" }
-func (RelentlessPursuitBlue) DisplayName() string     { return "Relentless Pursuit [B]" }
-func (RelentlessPursuitBlue) Cost(sim.GameEngine) int { return 0 }
-func (RelentlessPursuitBlue) Pitch() int              { return 3 }
-func (RelentlessPursuitBlue) Attack() int             { return 0 }
-func (RelentlessPursuitBlue) Defense() int            { return 3 }
-func (RelentlessPursuitBlue) Types() card.TypeSet     { return relentlessPursuitTypes }
-func (RelentlessPursuitBlue) GoAgain() bool           { return true }
+func (RelentlessPursuitBlue) ID() ids.CardID           { return ids.RelentlessPursuitBlue }
+func (RelentlessPursuitBlue) Name() string             { return "Relentless Pursuit" }
+func (RelentlessPursuitBlue) DisplayName() string      { return "Relentless Pursuit [B]" }
+func (RelentlessPursuitBlue) Cost(card.GameEngine) int { return 0 }
+func (RelentlessPursuitBlue) Pitch() int               { return 3 }
+func (RelentlessPursuitBlue) Attack() int              { return 0 }
+func (RelentlessPursuitBlue) Defense() int             { return 3 }
+func (RelentlessPursuitBlue) Types() card.TypeSet      { return relentlessPursuitTypes }
+func (RelentlessPursuitBlue) GoAgain() bool            { return true }

@@ -11,25 +11,25 @@ package cards
 import (
 	"fmt"
 
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 // mauvrionTargetMatches accepts Runeblade attack action cards (weapons don't qualify).
-func mauvrionTargetMatches(target *sim.CardState) bool {
+func mauvrionTargetMatches(target *card.CardState) bool {
 	t := target.Card.Types()
 	return t.Has(card.TypeRuneblade) && t.IsAttackAction()
 }
 
 // mauvrionSkiesPlay grants the next matching attack go-again and an on-hit n-runechant
 // rider.
-func mauvrionSkiesPlay(s sim.GameEngine, l sim.Logger, selfState *sim.CardState, source sim.Card, n int) {
+func mauvrionSkiesPlay(s card.GameEngine, l card.Logger, selfState *card.CardState, source sim.Card, n int) {
 	for _, pc := range s.CardsRemaining() {
 		if mauvrionTargetMatches(pc) {
 			pc.GrantedGoAgain = true
 			text := onHitRunechantText[source.ID()]
-			pc.OnHit = append(pc.OnHit, sim.OnHitHandler{
+			pc.OnHit = append(pc.OnHit, card.OnHitHandler{
 				Fire:    onHitCreateRunechants,
 				Source:  source,
 				LogText: text,
@@ -44,7 +44,7 @@ func mauvrionSkiesPlay(s sim.GameEngine, l sim.Logger, selfState *sim.CardState,
 // targeted attack by Mauvrion Skies / Runic Reaping. Reads N and the precomputed log
 // line off the handler so registration stays alloc-free; self is the targeted attack
 // (whose name credits the trigger line).
-func onHitCreateRunechants(s sim.GameEngine, l sim.Logger, self *sim.CardState, h *sim.OnHitHandler) {
+func onHitCreateRunechants(s card.GameEngine, l card.Logger, self *card.CardState, h *card.OnHitHandler) {
 	s.CreateRunechants(h.N)
 	l.AppendPostTrigger(self.Card.DisplayName(), h.LogText, h.N)
 }
@@ -69,14 +69,14 @@ var onHitRunechantText = func() map[ids.CardID]string {
 	return out
 }()
 
-func (c MauvrionSkiesRed) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
+func (c MauvrionSkiesRed) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 	mauvrionSkiesPlay(s, l, self, c, 3)
 }
 
-func (c MauvrionSkiesYellow) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
+func (c MauvrionSkiesYellow) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 	mauvrionSkiesPlay(s, l, self, c, 2)
 }
 
-func (c MauvrionSkiesBlue) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
+func (c MauvrionSkiesBlue) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 	mauvrionSkiesPlay(s, l, self, c, 1)
 }

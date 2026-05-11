@@ -7,10 +7,10 @@
 package notimplemented
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 // not implemented: on-hit opponent-arsenal manipulation rider
 
-func (HandBehindThePenRed) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
+func (HandBehindThePenRed) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 }

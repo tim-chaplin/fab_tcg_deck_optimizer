@@ -7,10 +7,11 @@ package cards
 
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 // Cost predicate reads s so variable-cost targets are gated on their current cost.
-func memorialGroundPlay(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
+func memorialGroundPlay(s card.GameEngine, l card.Logger, self *card.CardState) {
 	if _, ok := s.RecycleFromGraveyardToTop(func(c sim.Card) bool {
 		return c.Types().IsAttackAction() && c.Cost(s) <= 2
 	}); ok {
@@ -18,14 +19,14 @@ func memorialGroundPlay(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 	}
 }
 
-func (MemorialGroundRed) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
+func (MemorialGroundRed) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 	memorialGroundPlay(s, l, self)
 }
 
-func (MemorialGroundYellow) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
+func (MemorialGroundYellow) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 	memorialGroundPlay(s, l, self)
 }
 
-func (MemorialGroundBlue) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
+func (MemorialGroundBlue) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 	memorialGroundPlay(s, l, self)
 }

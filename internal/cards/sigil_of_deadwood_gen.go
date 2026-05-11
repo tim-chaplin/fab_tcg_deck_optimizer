@@ -3,21 +3,20 @@
 package cards
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 var sigilOfDeadwoodTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeAction, card.TypeAura)
 
 type SigilOfDeadwoodBlue struct{}
 
-func (SigilOfDeadwoodBlue) ID() ids.CardID          { return ids.SigilOfDeadwoodBlue }
-func (SigilOfDeadwoodBlue) Name() string            { return "Sigil of Deadwood" }
-func (SigilOfDeadwoodBlue) DisplayName() string     { return "Sigil of Deadwood [B]" }
-func (SigilOfDeadwoodBlue) Cost(sim.GameEngine) int { return 0 }
-func (SigilOfDeadwoodBlue) Pitch() int              { return 3 }
-func (SigilOfDeadwoodBlue) Attack() int             { return 0 }
-func (SigilOfDeadwoodBlue) Defense() int            { return 2 }
-func (SigilOfDeadwoodBlue) Types() card.TypeSet     { return sigilOfDeadwoodTypes }
-func (SigilOfDeadwoodBlue) GoAgain() bool           { return true }
+func (SigilOfDeadwoodBlue) ID() ids.CardID           { return ids.SigilOfDeadwoodBlue }
+func (SigilOfDeadwoodBlue) Name() string             { return "Sigil of Deadwood" }
+func (SigilOfDeadwoodBlue) DisplayName() string      { return "Sigil of Deadwood [B]" }
+func (SigilOfDeadwoodBlue) Cost(card.GameEngine) int { return 0 }
+func (SigilOfDeadwoodBlue) Pitch() int               { return 3 }
+func (SigilOfDeadwoodBlue) Attack() int              { return 0 }
+func (SigilOfDeadwoodBlue) Defense() int             { return 2 }
+func (SigilOfDeadwoodBlue) Types() card.TypeSet      { return sigilOfDeadwoodTypes }
+func (SigilOfDeadwoodBlue) GoAgain() bool            { return true }

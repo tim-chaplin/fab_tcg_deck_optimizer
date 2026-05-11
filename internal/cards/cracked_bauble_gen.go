@@ -3,21 +3,20 @@
 package cards
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 var crackedBaubleTypes = card.NewTypeSet(card.TypeGeneric, card.TypeResource)
 
 type CrackedBaubleYellow struct{}
 
-func (CrackedBaubleYellow) ID() ids.CardID          { return ids.CrackedBaubleYellow }
-func (CrackedBaubleYellow) Name() string            { return "Cracked Bauble" }
-func (CrackedBaubleYellow) DisplayName() string     { return "Cracked Bauble [Y]" }
-func (CrackedBaubleYellow) Cost(sim.GameEngine) int { return 0 }
-func (CrackedBaubleYellow) Pitch() int              { return 2 }
-func (CrackedBaubleYellow) Attack() int             { return 0 }
-func (CrackedBaubleYellow) Defense() int            { return 0 }
-func (CrackedBaubleYellow) Types() card.TypeSet     { return crackedBaubleTypes }
-func (CrackedBaubleYellow) GoAgain() bool           { return false }
+func (CrackedBaubleYellow) ID() ids.CardID           { return ids.CrackedBaubleYellow }
+func (CrackedBaubleYellow) Name() string             { return "Cracked Bauble" }
+func (CrackedBaubleYellow) DisplayName() string      { return "Cracked Bauble [Y]" }
+func (CrackedBaubleYellow) Cost(card.GameEngine) int { return 0 }
+func (CrackedBaubleYellow) Pitch() int               { return 2 }
+func (CrackedBaubleYellow) Attack() int              { return 0 }
+func (CrackedBaubleYellow) Defense() int             { return 0 }
+func (CrackedBaubleYellow) Types() card.TypeSet      { return crackedBaubleTypes }
+func (CrackedBaubleYellow) GoAgain() bool            { return false }

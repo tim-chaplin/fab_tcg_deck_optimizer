@@ -3,22 +3,21 @@
 package unplayable
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 var amuletOfInterventionTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeItem)
 
 type AmuletOfInterventionBlue struct{}
 
-func (AmuletOfInterventionBlue) ID() ids.CardID          { return ids.AmuletOfInterventionBlue }
-func (AmuletOfInterventionBlue) Name() string            { return "Amulet of Intervention" }
-func (AmuletOfInterventionBlue) DisplayName() string     { return "Amulet of Intervention [B]" }
-func (AmuletOfInterventionBlue) Cost(sim.GameEngine) int { return 0 }
-func (AmuletOfInterventionBlue) Pitch() int              { return 3 }
-func (AmuletOfInterventionBlue) Attack() int             { return 0 }
-func (AmuletOfInterventionBlue) Defense() int            { return 0 }
-func (AmuletOfInterventionBlue) Types() card.TypeSet     { return amuletOfInterventionTypes }
-func (AmuletOfInterventionBlue) GoAgain() bool           { return true }
-func (AmuletOfInterventionBlue) Unplayable()             {}
+func (AmuletOfInterventionBlue) ID() ids.CardID           { return ids.AmuletOfInterventionBlue }
+func (AmuletOfInterventionBlue) Name() string             { return "Amulet of Intervention" }
+func (AmuletOfInterventionBlue) DisplayName() string      { return "Amulet of Intervention [B]" }
+func (AmuletOfInterventionBlue) Cost(card.GameEngine) int { return 0 }
+func (AmuletOfInterventionBlue) Pitch() int               { return 3 }
+func (AmuletOfInterventionBlue) Attack() int              { return 0 }
+func (AmuletOfInterventionBlue) Defense() int             { return 0 }
+func (AmuletOfInterventionBlue) Types() card.TypeSet      { return amuletOfInterventionTypes }
+func (AmuletOfInterventionBlue) GoAgain() bool            { return true }
+func (AmuletOfInterventionBlue) Unplayable()              {}

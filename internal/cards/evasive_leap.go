@@ -5,14 +5,14 @@
 package cards
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
-func (EvasiveLeapRed) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
+func (EvasiveLeapRed) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 }
 
-func (EvasiveLeapYellow) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
+func (EvasiveLeapYellow) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 }
 
-func (EvasiveLeapBlue) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
+func (EvasiveLeapBlue) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 }

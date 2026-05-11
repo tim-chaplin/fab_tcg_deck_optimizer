@@ -8,17 +8,17 @@
 package cards
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
-func (SingeingSteelbladeRed) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
+func (SingeingSteelbladeRed) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 	s.DealArcaneDamage(l, self, 1)
 }
 
-func (SingeingSteelbladeYellow) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
+func (SingeingSteelbladeYellow) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 	s.DealArcaneDamage(l, self, 1)
 }
 
-func (SingeingSteelbladeBlue) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
+func (SingeingSteelbladeBlue) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 	s.DealArcaneDamage(l, self, 1)
 }

@@ -5,12 +5,13 @@ import (
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 // Tests that Runic Reaping with no following attack-action target lands no riders.
 func TestRunicReaping_NoNextAttackReturnsZero(t *testing.T) {
 	var s sim.TurnState
-	(RunicReapingRed{}).Play(&s, s.Logger(), &sim.CardState{
+	(RunicReapingRed{}).Play(&s, s.Logger(), &card.CardState{
 		Card:          RunicReapingRed{},
 		PitchedToPlay: []sim.Card{testutils.AttackWithPower{Power: 4}},
 	})
@@ -24,9 +25,9 @@ func TestRunicReaping_NoNextAttackReturnsZero(t *testing.T) {
 
 // Tests that a Runeblade weapon as the next attack does not satisfy either rider.
 func TestRunicReaping_WeaponNextDoesNotQualify(t *testing.T) {
-	target := &sim.CardState{Card: testutils.RunebladeWeapon{}}
-	s := sim.NewTurnStateFromSpec(sim.TurnStateSpec{CardsRemaining: []*sim.CardState{target}})
-	sim.ResolveChainStep(&s, s.Logger(), &sim.CardState{Card: RunicReapingRed{}})
+	target := &card.CardState{Card: testutils.RunebladeWeapon{}}
+	s := sim.NewTurnStateFromSpec(sim.TurnStateSpec{CardsRemaining: []*card.CardState{target}})
+	sim.ResolveChainStep(&s, s.Logger(), &card.CardState{Card: RunicReapingRed{}})
 	if got := s.Value(); got != 0 {
 		t.Fatalf("Play() = %d, want 0", got)
 	}
@@ -41,9 +42,9 @@ func TestRunicReaping_WeaponNextDoesNotQualify(t *testing.T) {
 // Tests that an attack-action target with attack-attributed funding gets +1{p} and registers the
 // on-hit trigger.
 func TestRunicReaping_RegistersTriggerAndGrantsPitchedAttackBonus(t *testing.T) {
-	target := &sim.CardState{Card: testutils.AttackWithPower{Power: 3}}
-	s := sim.NewTurnStateFromSpec(sim.TurnStateSpec{CardsRemaining: []*sim.CardState{target}})
-	(RunicReapingRed{}).Play(&s, s.Logger(), &sim.CardState{
+	target := &card.CardState{Card: testutils.AttackWithPower{Power: 3}}
+	s := sim.NewTurnStateFromSpec(sim.TurnStateSpec{CardsRemaining: []*card.CardState{target}})
+	(RunicReapingRed{}).Play(&s, s.Logger(), &card.CardState{
 		Card:          RunicReapingRed{},
 		PitchedToPlay: []sim.Card{testutils.RunebladeAttack{}},
 	})
@@ -61,9 +62,9 @@ func TestRunicReaping_RegistersTriggerAndGrantsPitchedAttackBonus(t *testing.T) 
 // Tests that without an attack attributed, the +1{p} rider skips but the on-hit Runechant trigger
 // still registers.
 func TestRunicReaping_NoPitchedAttackSkipsBonusButRegistersTrigger(t *testing.T) {
-	target := &sim.CardState{Card: testutils.AttackWithPower{Power: 4}}
-	s := sim.NewTurnStateFromSpec(sim.TurnStateSpec{CardsRemaining: []*sim.CardState{target}})
-	(RunicReapingRed{}).Play(&s, s.Logger(), &sim.CardState{
+	target := &card.CardState{Card: testutils.AttackWithPower{Power: 4}}
+	s := sim.NewTurnStateFromSpec(sim.TurnStateSpec{CardsRemaining: []*card.CardState{target}})
+	(RunicReapingRed{}).Play(&s, s.Logger(), &card.CardState{
 		Card:          RunicReapingRed{},
 		PitchedToPlay: []sim.Card{testutils.NonAttack{}},
 	})

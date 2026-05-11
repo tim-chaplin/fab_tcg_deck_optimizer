@@ -7,22 +7,22 @@
 package cards
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
-func publicBountyPlay(s sim.GameEngine, l sim.Logger, self *sim.CardState, n int) {
+func publicBountyPlay(s card.GameEngine, l card.Logger, self *card.CardState, n int) {
 	s.SetOpponentMarked(true)
 	GrantNextCardBonusAttack(s, n, IsAttack)
 }
 
-func (PublicBountyRed) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
+func (PublicBountyRed) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 	publicBountyPlay(s, l, self, 3)
 }
 
-func (PublicBountyYellow) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
+func (PublicBountyYellow) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 	publicBountyPlay(s, l, self, 2)
 }
 
-func (PublicBountyBlue) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
+func (PublicBountyBlue) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 	publicBountyPlay(s, l, self, 1)
 }

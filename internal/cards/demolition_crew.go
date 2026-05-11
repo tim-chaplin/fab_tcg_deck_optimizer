@@ -13,13 +13,14 @@ package cards
 
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 // demolitionCrewPrecondition is the shared additional-cost check across all 3 pitch
 // variants. The chain runner's hand snapshot has already removed the playing card and
 // popped this card's pitches by the time PlayPrecondition runs, so the scan only sees
 // cards that genuinely remain in hand.
-func demolitionCrewPrecondition(s sim.GameEngine) bool {
+func demolitionCrewPrecondition(s card.GameEngine) bool {
 	for _, c := range s.Hand() {
 		if c.Cost(s) >= 2 {
 			return true
@@ -29,22 +30,22 @@ func demolitionCrewPrecondition(s sim.GameEngine) bool {
 }
 
 func (DemolitionCrewRed) Dominate() {}
-func (DemolitionCrewRed) PlayPrecondition(s *sim.TurnState, _ *sim.CardState) bool {
+func (DemolitionCrewRed) PlayPrecondition(s *sim.TurnState, _ *card.CardState) bool {
 	return demolitionCrewPrecondition(s)
 }
-func (c DemolitionCrewRed) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
+func (c DemolitionCrewRed) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 }
 
 func (DemolitionCrewYellow) Dominate() {}
-func (DemolitionCrewYellow) PlayPrecondition(s *sim.TurnState, _ *sim.CardState) bool {
+func (DemolitionCrewYellow) PlayPrecondition(s *sim.TurnState, _ *card.CardState) bool {
 	return demolitionCrewPrecondition(s)
 }
-func (c DemolitionCrewYellow) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
+func (c DemolitionCrewYellow) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 }
 
 func (DemolitionCrewBlue) Dominate() {}
-func (DemolitionCrewBlue) PlayPrecondition(s *sim.TurnState, _ *sim.CardState) bool {
+func (DemolitionCrewBlue) PlayPrecondition(s *sim.TurnState, _ *card.CardState) bool {
 	return demolitionCrewPrecondition(s)
 }
-func (c DemolitionCrewBlue) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
+func (c DemolitionCrewBlue) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 }

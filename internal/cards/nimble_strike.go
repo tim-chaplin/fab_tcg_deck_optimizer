@@ -8,9 +8,10 @@ package cards
 
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
-func nimbleStrikePlay(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
+func nimbleStrikePlay(s card.GameEngine, l card.Logger, self *card.CardState) {
 	if _, ok := s.BanishFromGraveyard(isNimblism); ok {
 		self.BonusAttack++
 		self.GrantedGoAgain = true
@@ -20,14 +21,14 @@ func nimbleStrikePlay(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 
 func isNimblism(c sim.Card) bool { return c.Name() == "Nimblism" }
 
-func (NimbleStrikeRed) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
+func (NimbleStrikeRed) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 	nimbleStrikePlay(s, l, self)
 }
 
-func (NimbleStrikeYellow) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
+func (NimbleStrikeYellow) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 	nimbleStrikePlay(s, l, self)
 }
 
-func (NimbleStrikeBlue) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
+func (NimbleStrikeBlue) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 	nimbleStrikePlay(s, l, self)
 }

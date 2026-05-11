@@ -3,7 +3,7 @@ package sim
 import (
 	"testing"
 
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 // TestDrawOne_AppendsTopAndAdvancesDeck: DrawOne pops the top of the deck and appends it to

@@ -6,20 +6,20 @@
 package notimplemented
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 // not implemented: pay-{r}{r}-for-+2{p} attack/defence mode
 
-func (c FlexRed) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
+func (c FlexRed) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 }
 
 // not implemented: pay-{r}{r}-for-+2{p} attack/defence mode
 
-func (c FlexYellow) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
+func (c FlexYellow) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 }
 
 // not implemented: pay-{r}{r}-for-+2{p} attack/defence mode
 
-func (c FlexBlue) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
+func (c FlexBlue) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 }

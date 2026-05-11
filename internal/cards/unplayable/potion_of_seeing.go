@@ -5,7 +5,7 @@
 package unplayable
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
-func (PotionOfSeeingBlue) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {}
+func (PotionOfSeeingBlue) Play(s card.GameEngine, l card.Logger, self *card.CardState) {}

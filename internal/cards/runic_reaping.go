@@ -10,33 +10,33 @@
 package cards
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
 
 // runicReapingTargetMatches accepts Runeblade attack action cards (weapons don't qualify).
-func runicReapingTargetMatches(target *sim.CardState) bool {
+func runicReapingTargetMatches(target *card.CardState) bool {
 	t := target.Card.Types()
 	return t.Has(card.TypeRuneblade) && t.IsAttackAction()
 }
 
-func (c RunicReapingRed) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
+func (c RunicReapingRed) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 	runicReapingPlay(s, l, self, c, 3)
 }
 
-func (c RunicReapingYellow) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
+func (c RunicReapingYellow) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 	runicReapingPlay(s, l, self, c, 2)
 }
 
-func (c RunicReapingBlue) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
+func (c RunicReapingBlue) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 	runicReapingPlay(s, l, self, c, 1)
 }
 
 // runicReapingPlay buffs the next matching attack +1{p} when an attack card was pitched
 // and appends an on-hit n-runechant rider.
-func runicReapingPlay(s sim.GameEngine, l sim.Logger, selfState *sim.CardState, source sim.Card, n int) {
-	var target *sim.CardState
+func runicReapingPlay(s card.GameEngine, l card.Logger, selfState *card.CardState, source sim.Card, n int) {
+	var target *card.CardState
 	for _, pc := range s.CardsRemaining() {
 		if runicReapingTargetMatches(pc) {
 			target = pc
@@ -53,7 +53,7 @@ func runicReapingPlay(s sim.GameEngine, l sim.Logger, selfState *sim.CardState, 
 		}
 	}
 	text := onHitRunechantText[source.ID()]
-	target.OnHit = append(target.OnHit, sim.OnHitHandler{
+	target.OnHit = append(target.OnHit, card.OnHitHandler{
 		Fire:    onHitCreateRunechants,
 		Source:  source,
 		LogText: text,

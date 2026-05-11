@@ -3,45 +3,44 @@
 package cards
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 var ragingOnslaughtTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 
 type RagingOnslaughtRed struct{}
 
-func (RagingOnslaughtRed) ID() ids.CardID          { return ids.RagingOnslaughtRed }
-func (RagingOnslaughtRed) Name() string            { return "Raging Onslaught" }
-func (RagingOnslaughtRed) DisplayName() string     { return "Raging Onslaught [R]" }
-func (RagingOnslaughtRed) Cost(sim.GameEngine) int { return 3 }
-func (RagingOnslaughtRed) Pitch() int              { return 1 }
-func (RagingOnslaughtRed) Attack() int             { return 7 }
-func (RagingOnslaughtRed) Defense() int            { return 3 }
-func (RagingOnslaughtRed) Types() card.TypeSet     { return ragingOnslaughtTypes }
-func (RagingOnslaughtRed) GoAgain() bool           { return false }
+func (RagingOnslaughtRed) ID() ids.CardID           { return ids.RagingOnslaughtRed }
+func (RagingOnslaughtRed) Name() string             { return "Raging Onslaught" }
+func (RagingOnslaughtRed) DisplayName() string      { return "Raging Onslaught [R]" }
+func (RagingOnslaughtRed) Cost(card.GameEngine) int { return 3 }
+func (RagingOnslaughtRed) Pitch() int               { return 1 }
+func (RagingOnslaughtRed) Attack() int              { return 7 }
+func (RagingOnslaughtRed) Defense() int             { return 3 }
+func (RagingOnslaughtRed) Types() card.TypeSet      { return ragingOnslaughtTypes }
+func (RagingOnslaughtRed) GoAgain() bool            { return false }
 
 type RagingOnslaughtYellow struct{}
 
-func (RagingOnslaughtYellow) ID() ids.CardID          { return ids.RagingOnslaughtYellow }
-func (RagingOnslaughtYellow) Name() string            { return "Raging Onslaught" }
-func (RagingOnslaughtYellow) DisplayName() string     { return "Raging Onslaught [Y]" }
-func (RagingOnslaughtYellow) Cost(sim.GameEngine) int { return 3 }
-func (RagingOnslaughtYellow) Pitch() int              { return 2 }
-func (RagingOnslaughtYellow) Attack() int             { return 6 }
-func (RagingOnslaughtYellow) Defense() int            { return 3 }
-func (RagingOnslaughtYellow) Types() card.TypeSet     { return ragingOnslaughtTypes }
-func (RagingOnslaughtYellow) GoAgain() bool           { return false }
+func (RagingOnslaughtYellow) ID() ids.CardID           { return ids.RagingOnslaughtYellow }
+func (RagingOnslaughtYellow) Name() string             { return "Raging Onslaught" }
+func (RagingOnslaughtYellow) DisplayName() string      { return "Raging Onslaught [Y]" }
+func (RagingOnslaughtYellow) Cost(card.GameEngine) int { return 3 }
+func (RagingOnslaughtYellow) Pitch() int               { return 2 }
+func (RagingOnslaughtYellow) Attack() int              { return 6 }
+func (RagingOnslaughtYellow) Defense() int             { return 3 }
+func (RagingOnslaughtYellow) Types() card.TypeSet      { return ragingOnslaughtTypes }
+func (RagingOnslaughtYellow) GoAgain() bool            { return false }
 
 type RagingOnslaughtBlue struct{}
 
-func (RagingOnslaughtBlue) ID() ids.CardID          { return ids.RagingOnslaughtBlue }
-func (RagingOnslaughtBlue) Name() string            { return "Raging Onslaught" }
-func (RagingOnslaughtBlue) DisplayName() string     { return "Raging Onslaught [B]" }
-func (RagingOnslaughtBlue) Cost(sim.GameEngine) int { return 3 }
-func (RagingOnslaughtBlue) Pitch() int              { return 3 }
-func (RagingOnslaughtBlue) Attack() int             { return 5 }
-func (RagingOnslaughtBlue) Defense() int            { return 3 }
-func (RagingOnslaughtBlue) Types() card.TypeSet     { return ragingOnslaughtTypes }
-func (RagingOnslaughtBlue) GoAgain() bool           { return false }
+func (RagingOnslaughtBlue) ID() ids.CardID           { return ids.RagingOnslaughtBlue }
+func (RagingOnslaughtBlue) Name() string             { return "Raging Onslaught" }
+func (RagingOnslaughtBlue) DisplayName() string      { return "Raging Onslaught [B]" }
+func (RagingOnslaughtBlue) Cost(card.GameEngine) int { return 3 }
+func (RagingOnslaughtBlue) Pitch() int               { return 3 }
+func (RagingOnslaughtBlue) Attack() int              { return 5 }
+func (RagingOnslaughtBlue) Defense() int             { return 3 }
+func (RagingOnslaughtBlue) Types() card.TypeSet      { return ragingOnslaughtTypes }
+func (RagingOnslaughtBlue) GoAgain() bool            { return false }

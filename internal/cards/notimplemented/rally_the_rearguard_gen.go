@@ -3,48 +3,47 @@
 package notimplemented
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 var rallyTheRearguardTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 
 type RallyTheRearguardRed struct{}
 
-func (RallyTheRearguardRed) ID() ids.CardID          { return ids.RallyTheRearguardRed }
-func (RallyTheRearguardRed) Name() string            { return "Rally the Rearguard" }
-func (RallyTheRearguardRed) DisplayName() string     { return "Rally the Rearguard [R]" }
-func (RallyTheRearguardRed) Cost(sim.GameEngine) int { return 2 }
-func (RallyTheRearguardRed) Pitch() int              { return 1 }
-func (RallyTheRearguardRed) Attack() int             { return 6 }
-func (RallyTheRearguardRed) Defense() int            { return 2 }
-func (RallyTheRearguardRed) Types() card.TypeSet     { return rallyTheRearguardTypes }
-func (RallyTheRearguardRed) GoAgain() bool           { return false }
-func (RallyTheRearguardRed) NotImplemented()         {}
+func (RallyTheRearguardRed) ID() ids.CardID           { return ids.RallyTheRearguardRed }
+func (RallyTheRearguardRed) Name() string             { return "Rally the Rearguard" }
+func (RallyTheRearguardRed) DisplayName() string      { return "Rally the Rearguard [R]" }
+func (RallyTheRearguardRed) Cost(card.GameEngine) int { return 2 }
+func (RallyTheRearguardRed) Pitch() int               { return 1 }
+func (RallyTheRearguardRed) Attack() int              { return 6 }
+func (RallyTheRearguardRed) Defense() int             { return 2 }
+func (RallyTheRearguardRed) Types() card.TypeSet      { return rallyTheRearguardTypes }
+func (RallyTheRearguardRed) GoAgain() bool            { return false }
+func (RallyTheRearguardRed) NotImplemented()          {}
 
 type RallyTheRearguardYellow struct{}
 
-func (RallyTheRearguardYellow) ID() ids.CardID          { return ids.RallyTheRearguardYellow }
-func (RallyTheRearguardYellow) Name() string            { return "Rally the Rearguard" }
-func (RallyTheRearguardYellow) DisplayName() string     { return "Rally the Rearguard [Y]" }
-func (RallyTheRearguardYellow) Cost(sim.GameEngine) int { return 2 }
-func (RallyTheRearguardYellow) Pitch() int              { return 2 }
-func (RallyTheRearguardYellow) Attack() int             { return 5 }
-func (RallyTheRearguardYellow) Defense() int            { return 2 }
-func (RallyTheRearguardYellow) Types() card.TypeSet     { return rallyTheRearguardTypes }
-func (RallyTheRearguardYellow) GoAgain() bool           { return false }
-func (RallyTheRearguardYellow) NotImplemented()         {}
+func (RallyTheRearguardYellow) ID() ids.CardID           { return ids.RallyTheRearguardYellow }
+func (RallyTheRearguardYellow) Name() string             { return "Rally the Rearguard" }
+func (RallyTheRearguardYellow) DisplayName() string      { return "Rally the Rearguard [Y]" }
+func (RallyTheRearguardYellow) Cost(card.GameEngine) int { return 2 }
+func (RallyTheRearguardYellow) Pitch() int               { return 2 }
+func (RallyTheRearguardYellow) Attack() int              { return 5 }
+func (RallyTheRearguardYellow) Defense() int             { return 2 }
+func (RallyTheRearguardYellow) Types() card.TypeSet      { return rallyTheRearguardTypes }
+func (RallyTheRearguardYellow) GoAgain() bool            { return false }
+func (RallyTheRearguardYellow) NotImplemented()          {}
 
 type RallyTheRearguardBlue struct{}
 
-func (RallyTheRearguardBlue) ID() ids.CardID          { return ids.RallyTheRearguardBlue }
-func (RallyTheRearguardBlue) Name() string            { return "Rally the Rearguard" }
-func (RallyTheRearguardBlue) DisplayName() string     { return "Rally the Rearguard [B]" }
-func (RallyTheRearguardBlue) Cost(sim.GameEngine) int { return 2 }
-func (RallyTheRearguardBlue) Pitch() int              { return 3 }
-func (RallyTheRearguardBlue) Attack() int             { return 4 }
-func (RallyTheRearguardBlue) Defense() int            { return 2 }
-func (RallyTheRearguardBlue) Types() card.TypeSet     { return rallyTheRearguardTypes }
-func (RallyTheRearguardBlue) GoAgain() bool           { return false }
-func (RallyTheRearguardBlue) NotImplemented()         {}
+func (RallyTheRearguardBlue) ID() ids.CardID           { return ids.RallyTheRearguardBlue }
+func (RallyTheRearguardBlue) Name() string             { return "Rally the Rearguard" }
+func (RallyTheRearguardBlue) DisplayName() string      { return "Rally the Rearguard [B]" }
+func (RallyTheRearguardBlue) Cost(card.GameEngine) int { return 2 }
+func (RallyTheRearguardBlue) Pitch() int               { return 3 }
+func (RallyTheRearguardBlue) Attack() int              { return 4 }
+func (RallyTheRearguardBlue) Defense() int             { return 2 }
+func (RallyTheRearguardBlue) Types() card.TypeSet      { return rallyTheRearguardTypes }
+func (RallyTheRearguardBlue) GoAgain() bool            { return false }
+func (RallyTheRearguardBlue) NotImplemented()          {}

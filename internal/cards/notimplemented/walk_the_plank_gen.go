@@ -3,48 +3,47 @@
 package notimplemented
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 var walkThePlankTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 
 type WalkThePlankRed struct{}
 
-func (WalkThePlankRed) ID() ids.CardID          { return ids.WalkThePlankRed }
-func (WalkThePlankRed) Name() string            { return "Walk the Plank" }
-func (WalkThePlankRed) DisplayName() string     { return "Walk the Plank [R]" }
-func (WalkThePlankRed) Cost(sim.GameEngine) int { return 3 }
-func (WalkThePlankRed) Pitch() int              { return 1 }
-func (WalkThePlankRed) Attack() int             { return 7 }
-func (WalkThePlankRed) Defense() int            { return 2 }
-func (WalkThePlankRed) Types() card.TypeSet     { return walkThePlankTypes }
-func (WalkThePlankRed) GoAgain() bool           { return false }
-func (WalkThePlankRed) NotImplemented()         {}
+func (WalkThePlankRed) ID() ids.CardID           { return ids.WalkThePlankRed }
+func (WalkThePlankRed) Name() string             { return "Walk the Plank" }
+func (WalkThePlankRed) DisplayName() string      { return "Walk the Plank [R]" }
+func (WalkThePlankRed) Cost(card.GameEngine) int { return 3 }
+func (WalkThePlankRed) Pitch() int               { return 1 }
+func (WalkThePlankRed) Attack() int              { return 7 }
+func (WalkThePlankRed) Defense() int             { return 2 }
+func (WalkThePlankRed) Types() card.TypeSet      { return walkThePlankTypes }
+func (WalkThePlankRed) GoAgain() bool            { return false }
+func (WalkThePlankRed) NotImplemented()          {}
 
 type WalkThePlankYellow struct{}
 
-func (WalkThePlankYellow) ID() ids.CardID          { return ids.WalkThePlankYellow }
-func (WalkThePlankYellow) Name() string            { return "Walk the Plank" }
-func (WalkThePlankYellow) DisplayName() string     { return "Walk the Plank [Y]" }
-func (WalkThePlankYellow) Cost(sim.GameEngine) int { return 3 }
-func (WalkThePlankYellow) Pitch() int              { return 2 }
-func (WalkThePlankYellow) Attack() int             { return 6 }
-func (WalkThePlankYellow) Defense() int            { return 2 }
-func (WalkThePlankYellow) Types() card.TypeSet     { return walkThePlankTypes }
-func (WalkThePlankYellow) GoAgain() bool           { return false }
-func (WalkThePlankYellow) NotImplemented()         {}
+func (WalkThePlankYellow) ID() ids.CardID           { return ids.WalkThePlankYellow }
+func (WalkThePlankYellow) Name() string             { return "Walk the Plank" }
+func (WalkThePlankYellow) DisplayName() string      { return "Walk the Plank [Y]" }
+func (WalkThePlankYellow) Cost(card.GameEngine) int { return 3 }
+func (WalkThePlankYellow) Pitch() int               { return 2 }
+func (WalkThePlankYellow) Attack() int              { return 6 }
+func (WalkThePlankYellow) Defense() int             { return 2 }
+func (WalkThePlankYellow) Types() card.TypeSet      { return walkThePlankTypes }
+func (WalkThePlankYellow) GoAgain() bool            { return false }
+func (WalkThePlankYellow) NotImplemented()          {}
 
 type WalkThePlankBlue struct{}
 
-func (WalkThePlankBlue) ID() ids.CardID          { return ids.WalkThePlankBlue }
-func (WalkThePlankBlue) Name() string            { return "Walk the Plank" }
-func (WalkThePlankBlue) DisplayName() string     { return "Walk the Plank [B]" }
-func (WalkThePlankBlue) Cost(sim.GameEngine) int { return 3 }
-func (WalkThePlankBlue) Pitch() int              { return 3 }
-func (WalkThePlankBlue) Attack() int             { return 5 }
-func (WalkThePlankBlue) Defense() int            { return 2 }
-func (WalkThePlankBlue) Types() card.TypeSet     { return walkThePlankTypes }
-func (WalkThePlankBlue) GoAgain() bool           { return false }
-func (WalkThePlankBlue) NotImplemented()         {}
+func (WalkThePlankBlue) ID() ids.CardID           { return ids.WalkThePlankBlue }
+func (WalkThePlankBlue) Name() string             { return "Walk the Plank" }
+func (WalkThePlankBlue) DisplayName() string      { return "Walk the Plank [B]" }
+func (WalkThePlankBlue) Cost(card.GameEngine) int { return 3 }
+func (WalkThePlankBlue) Pitch() int               { return 3 }
+func (WalkThePlankBlue) Attack() int              { return 5 }
+func (WalkThePlankBlue) Defense() int             { return 2 }
+func (WalkThePlankBlue) Types() card.TypeSet      { return walkThePlankTypes }
+func (WalkThePlankBlue) GoAgain() bool            { return false }
+func (WalkThePlankBlue) NotImplemented()          {}

@@ -1,8 +1,9 @@
 package optimizations
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"testing"
+
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
@@ -55,7 +56,7 @@ func TestChainStepText_LazyBackfillForUnregisteredCards(t *testing.T) {
 	idx := chainStepCacheIndex(c.ID(), false)
 	chainStepCache[idx].Store(nil)
 
-	self := &sim.CardState{Card: c}
+	self := &card.CardState{Card: c}
 	got := cachedChainStepText(self)
 	if want := "Unregistered: PLAY"; got != want {
 		t.Errorf("first call = %q, want %q", got, want)
@@ -85,7 +86,7 @@ func TestBuildChainStepText_VerbSelection(t *testing.T) {
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
 			c := testutils.NewStubCard("X").WithTypes(tc.types)
-			self := &sim.CardState{Card: c, FromArsenal: tc.fromArsenal}
+			self := &card.CardState{Card: c, FromArsenal: tc.fromArsenal}
 			if got := bareChainStepText(self); got != tc.want {
 				t.Errorf("bareChainStepText = %q, want %q", got, tc.want)
 			}

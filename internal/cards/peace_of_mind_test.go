@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 // Tests that each printing prevents its full Defense() amount (4/3/2).
@@ -18,7 +19,7 @@ func TestPeaceOfMind_PreventsByPrinting(t *testing.T) {
 	}
 	for _, tc := range cases {
 		s := sim.NewTurnStateFromSpec(sim.TurnStateSpec{IncomingDamage: 10})
-		self := &sim.CardState{Card: tc.card}
+		self := &card.CardState{Card: tc.card}
 		sim.ResolveChainStep(&s, s.Logger(), self)
 		if s.Value() != tc.want {
 			t.Errorf("%s: Value = %d, want %d", tc.card.Name(), s.Value(), tc.want)
@@ -30,7 +31,7 @@ func TestPeaceOfMind_PreventsByPrinting(t *testing.T) {
 func TestPeaceOfMind_CreatesPonder(t *testing.T) {
 	for _, c := range []sim.Card{PeaceOfMindRed{}, PeaceOfMindYellow{}, PeaceOfMindBlue{}} {
 		s := sim.NewTurnStateFromSpec(sim.TurnStateSpec{IncomingDamage: 10})
-		self := &sim.CardState{Card: c}
+		self := &card.CardState{Card: c}
 		sim.ResolveChainStep(&s, s.Logger(), self)
 		if got := s.Ponders(); got != 1 {
 			t.Errorf("%s: Ponders = %d, want 1", c.Name(), got)

@@ -3,48 +3,47 @@
 package notimplemented
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 var scourTheBattlescapeTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 
 type ScourTheBattlescapeRed struct{}
 
-func (ScourTheBattlescapeRed) ID() ids.CardID          { return ids.ScourTheBattlescapeRed }
-func (ScourTheBattlescapeRed) Name() string            { return "Scour the Battlescape" }
-func (ScourTheBattlescapeRed) DisplayName() string     { return "Scour the Battlescape [R]" }
-func (ScourTheBattlescapeRed) Cost(sim.GameEngine) int { return 0 }
-func (ScourTheBattlescapeRed) Pitch() int              { return 1 }
-func (ScourTheBattlescapeRed) Attack() int             { return 3 }
-func (ScourTheBattlescapeRed) Defense() int            { return 2 }
-func (ScourTheBattlescapeRed) Types() card.TypeSet     { return scourTheBattlescapeTypes }
-func (ScourTheBattlescapeRed) GoAgain() bool           { return false }
-func (ScourTheBattlescapeRed) NotImplemented()         {}
+func (ScourTheBattlescapeRed) ID() ids.CardID           { return ids.ScourTheBattlescapeRed }
+func (ScourTheBattlescapeRed) Name() string             { return "Scour the Battlescape" }
+func (ScourTheBattlescapeRed) DisplayName() string      { return "Scour the Battlescape [R]" }
+func (ScourTheBattlescapeRed) Cost(card.GameEngine) int { return 0 }
+func (ScourTheBattlescapeRed) Pitch() int               { return 1 }
+func (ScourTheBattlescapeRed) Attack() int              { return 3 }
+func (ScourTheBattlescapeRed) Defense() int             { return 2 }
+func (ScourTheBattlescapeRed) Types() card.TypeSet      { return scourTheBattlescapeTypes }
+func (ScourTheBattlescapeRed) GoAgain() bool            { return false }
+func (ScourTheBattlescapeRed) NotImplemented()          {}
 
 type ScourTheBattlescapeYellow struct{}
 
-func (ScourTheBattlescapeYellow) ID() ids.CardID          { return ids.ScourTheBattlescapeYellow }
-func (ScourTheBattlescapeYellow) Name() string            { return "Scour the Battlescape" }
-func (ScourTheBattlescapeYellow) DisplayName() string     { return "Scour the Battlescape [Y]" }
-func (ScourTheBattlescapeYellow) Cost(sim.GameEngine) int { return 0 }
-func (ScourTheBattlescapeYellow) Pitch() int              { return 2 }
-func (ScourTheBattlescapeYellow) Attack() int             { return 2 }
-func (ScourTheBattlescapeYellow) Defense() int            { return 2 }
-func (ScourTheBattlescapeYellow) Types() card.TypeSet     { return scourTheBattlescapeTypes }
-func (ScourTheBattlescapeYellow) GoAgain() bool           { return false }
-func (ScourTheBattlescapeYellow) NotImplemented()         {}
+func (ScourTheBattlescapeYellow) ID() ids.CardID           { return ids.ScourTheBattlescapeYellow }
+func (ScourTheBattlescapeYellow) Name() string             { return "Scour the Battlescape" }
+func (ScourTheBattlescapeYellow) DisplayName() string      { return "Scour the Battlescape [Y]" }
+func (ScourTheBattlescapeYellow) Cost(card.GameEngine) int { return 0 }
+func (ScourTheBattlescapeYellow) Pitch() int               { return 2 }
+func (ScourTheBattlescapeYellow) Attack() int              { return 2 }
+func (ScourTheBattlescapeYellow) Defense() int             { return 2 }
+func (ScourTheBattlescapeYellow) Types() card.TypeSet      { return scourTheBattlescapeTypes }
+func (ScourTheBattlescapeYellow) GoAgain() bool            { return false }
+func (ScourTheBattlescapeYellow) NotImplemented()          {}
 
 type ScourTheBattlescapeBlue struct{}
 
-func (ScourTheBattlescapeBlue) ID() ids.CardID          { return ids.ScourTheBattlescapeBlue }
-func (ScourTheBattlescapeBlue) Name() string            { return "Scour the Battlescape" }
-func (ScourTheBattlescapeBlue) DisplayName() string     { return "Scour the Battlescape [B]" }
-func (ScourTheBattlescapeBlue) Cost(sim.GameEngine) int { return 0 }
-func (ScourTheBattlescapeBlue) Pitch() int              { return 3 }
-func (ScourTheBattlescapeBlue) Attack() int             { return 1 }
-func (ScourTheBattlescapeBlue) Defense() int            { return 2 }
-func (ScourTheBattlescapeBlue) Types() card.TypeSet     { return scourTheBattlescapeTypes }
-func (ScourTheBattlescapeBlue) GoAgain() bool           { return false }
-func (ScourTheBattlescapeBlue) NotImplemented()         {}
+func (ScourTheBattlescapeBlue) ID() ids.CardID           { return ids.ScourTheBattlescapeBlue }
+func (ScourTheBattlescapeBlue) Name() string             { return "Scour the Battlescape" }
+func (ScourTheBattlescapeBlue) DisplayName() string      { return "Scour the Battlescape [B]" }
+func (ScourTheBattlescapeBlue) Cost(card.GameEngine) int { return 0 }
+func (ScourTheBattlescapeBlue) Pitch() int               { return 3 }
+func (ScourTheBattlescapeBlue) Attack() int              { return 1 }
+func (ScourTheBattlescapeBlue) Defense() int             { return 2 }
+func (ScourTheBattlescapeBlue) Types() card.TypeSet      { return scourTheBattlescapeTypes }
+func (ScourTheBattlescapeBlue) GoAgain() bool            { return false }
+func (ScourTheBattlescapeBlue) NotImplemented()          {}

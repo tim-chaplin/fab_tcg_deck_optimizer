@@ -8,9 +8,10 @@ package cards
 
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
-func lookingForAScrapPlay(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
+func lookingForAScrapPlay(s card.GameEngine, l card.Logger, self *card.CardState) {
 	if _, ok := s.BanishFromGraveyard(isOnePowerCard); ok {
 		self.BonusAttack++
 		self.GrantedGoAgain = true
@@ -23,14 +24,14 @@ func lookingForAScrapPlay(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 // redundant.
 func isOnePowerCard(c sim.Card) bool { return c.Attack() == 1 }
 
-func (LookingForAScrapRed) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
+func (LookingForAScrapRed) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 	lookingForAScrapPlay(s, l, self)
 }
 
-func (LookingForAScrapYellow) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
+func (LookingForAScrapYellow) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 	lookingForAScrapPlay(s, l, self)
 }
 
-func (LookingForAScrapBlue) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
+func (LookingForAScrapBlue) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 	lookingForAScrapPlay(s, l, self)
 }

@@ -5,13 +5,14 @@ import (
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 // Tests that Public Bounty marks the opposing hero on Play.
 func TestPublicBounty_MarksOpponent(t *testing.T) {
 	for _, c := range []sim.Card{PublicBountyRed{}, PublicBountyYellow{}, PublicBountyBlue{}} {
 		s := sim.TurnState{}
-		sim.ResolveChainStep(&s, s.Logger(), &sim.CardState{Card: c})
+		sim.ResolveChainStep(&s, s.Logger(), &card.CardState{Card: c})
 		if !s.OpponentMarked() {
 			t.Errorf("%s: OpponentMarked = false after Play, want true", c.Name())
 		}
@@ -29,9 +30,9 @@ func TestPublicBounty_GrantsBonusToNextAttack(t *testing.T) {
 		{PublicBountyBlue{}, 1},
 	}
 	for _, tc := range cases {
-		target := &sim.CardState{Card: testutils.GenericAttack(0, 0)}
-		s := sim.NewTurnStateFromSpec(sim.TurnStateSpec{CardsRemaining: []*sim.CardState{target}})
-		sim.ResolveChainStep(&s, s.Logger(), &sim.CardState{Card: tc.c})
+		target := &card.CardState{Card: testutils.GenericAttack(0, 0)}
+		s := sim.NewTurnStateFromSpec(sim.TurnStateSpec{CardsRemaining: []*card.CardState{target}})
+		sim.ResolveChainStep(&s, s.Logger(), &card.CardState{Card: tc.c})
 		if target.BonusAttack != tc.want {
 			t.Errorf("%s: target BonusAttack = %d, want %d", tc.c.Name(), target.BonusAttack, tc.want)
 		}

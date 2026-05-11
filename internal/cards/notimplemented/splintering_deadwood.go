@@ -6,23 +6,23 @@
 package notimplemented
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 // not implemented: aura-swap rider modelled net-zero; no tempo credit for trading a weak aura
 // for a Runechant
 
-func (SplinteringDeadwoodRed) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
+func (SplinteringDeadwoodRed) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 }
 
 // not implemented: aura-swap rider modelled net-zero; no tempo credit for trading a weak aura
 // for a Runechant
 
-func (SplinteringDeadwoodYellow) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
+func (SplinteringDeadwoodYellow) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 }
 
 // not implemented: aura-swap rider modelled net-zero; no tempo credit for trading a weak aura
 // for a Runechant
 
-func (SplinteringDeadwoodBlue) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
+func (SplinteringDeadwoodBlue) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 }

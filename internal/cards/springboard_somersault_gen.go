@@ -3,21 +3,20 @@
 package cards
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 var springboardSomersaultTypes = card.NewTypeSet(card.TypeGeneric, card.TypeDefenseReaction)
 
 type SpringboardSomersaultYellow struct{}
 
-func (SpringboardSomersaultYellow) ID() ids.CardID          { return ids.SpringboardSomersaultYellow }
-func (SpringboardSomersaultYellow) Name() string            { return "Springboard Somersault" }
-func (SpringboardSomersaultYellow) DisplayName() string     { return "Springboard Somersault [Y]" }
-func (SpringboardSomersaultYellow) Cost(sim.GameEngine) int { return 0 }
-func (SpringboardSomersaultYellow) Pitch() int              { return 2 }
-func (SpringboardSomersaultYellow) Attack() int             { return 0 }
-func (SpringboardSomersaultYellow) Defense() int            { return 2 }
-func (SpringboardSomersaultYellow) Types() card.TypeSet     { return springboardSomersaultTypes }
-func (SpringboardSomersaultYellow) GoAgain() bool           { return false }
+func (SpringboardSomersaultYellow) ID() ids.CardID           { return ids.SpringboardSomersaultYellow }
+func (SpringboardSomersaultYellow) Name() string             { return "Springboard Somersault" }
+func (SpringboardSomersaultYellow) DisplayName() string      { return "Springboard Somersault [Y]" }
+func (SpringboardSomersaultYellow) Cost(card.GameEngine) int { return 0 }
+func (SpringboardSomersaultYellow) Pitch() int               { return 2 }
+func (SpringboardSomersaultYellow) Attack() int              { return 0 }
+func (SpringboardSomersaultYellow) Defense() int             { return 2 }
+func (SpringboardSomersaultYellow) Types() card.TypeSet      { return springboardSomersaultTypes }
+func (SpringboardSomersaultYellow) GoAgain() bool            { return false }

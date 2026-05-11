@@ -5,12 +5,13 @@ import (
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 // Tests that Memorial Ground with no eligible card in the graveyard leaves the deck empty.
 func TestMemorialGround_NoEligibleNoOp(t *testing.T) {
 	s := sim.NewTurnStateFromCards(nil, nil)
-	sim.ResolveChainStep(s, s.Logger(), &sim.CardState{Card: MemorialGroundRed{}})
+	sim.ResolveChainStep(s, s.Logger(), &card.CardState{Card: MemorialGroundRed{}})
 	if s.Deck().Size() != 0 {
 		t.Errorf("deck size = %d, want 0 (no eligible recycle target)", s.Deck().Size())
 	}
@@ -22,7 +23,7 @@ func TestMemorialGround_RecyclesEligibleAttackActionToTop(t *testing.T) {
 	target := testutils.GenericAttack(2, 4)
 	deck := []sim.Card{testutils.BlueAttack{}}
 	s := sim.NewTurnStateFromCards(deck, []sim.Card{target})
-	sim.ResolveChainStep(s, s.Logger(), &sim.CardState{Card: MemorialGroundRed{}})
+	sim.ResolveChainStep(s, s.Logger(), &card.CardState{Card: MemorialGroundRed{}})
 	if got := s.Deck().Size(); got != 2 {
 		t.Errorf("deck size after recycle = %d, want 2 (target moved onto the existing top)", got)
 	}
@@ -38,7 +39,7 @@ func TestMemorialGround_RecyclesEligibleAttackActionToTop(t *testing.T) {
 // Ground unable to recycle.
 func TestMemorialGround_IgnoresIneligibleCards(t *testing.T) {
 	s := sim.NewTurnStateFromCards(nil, []sim.Card{testutils.GenericAttack(3, 5), testutils.GenericAction()})
-	sim.ResolveChainStep(s, s.Logger(), &sim.CardState{Card: MemorialGroundRed{}})
+	sim.ResolveChainStep(s, s.Logger(), &card.CardState{Card: MemorialGroundRed{}})
 	if s.Deck().Size() != 0 {
 		t.Errorf("deck size = %d, want 0 (no eligible target)", s.Deck().Size())
 	}

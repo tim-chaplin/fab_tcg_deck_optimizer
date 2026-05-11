@@ -7,20 +7,20 @@
 package notimplemented
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 // not implemented: defense-time instant activated ability
 
-func (c RallyTheCoastGuardRed) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
+func (c RallyTheCoastGuardRed) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 }
 
 // not implemented: defense-time instant activated ability
 
-func (c RallyTheCoastGuardYellow) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
+func (c RallyTheCoastGuardYellow) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 }
 
 // not implemented: defense-time instant activated ability
 
-func (c RallyTheCoastGuardBlue) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
+func (c RallyTheCoastGuardBlue) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 }

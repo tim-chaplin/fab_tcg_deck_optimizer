@@ -9,9 +9,10 @@ package cards
 
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
-func (c SigilOfFyendalBlue) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
+func (c SigilOfFyendalBlue) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 	s.AddAura(sim.Aura{
 		Trigger: sim.Trigger{TriggerType: sim.TriggerStartOfTurn, Handler: sigilOfFyendalAuraHandler},
 		Self:    sim.CardOrTokenType{Card: c},
@@ -21,7 +22,7 @@ func (c SigilOfFyendalBlue) Play(s sim.GameEngine, l sim.Logger, self *sim.CardS
 
 // sigilOfFyendalAuraHandler credits the +1 health (valued 1-to-1 with damage) next turn
 // and destroys the aura. Top-level so Aura.Handler doesn't allocate a closure.
-func sigilOfFyendalAuraHandler(s *sim.TurnState, l sim.Logger, _ *sim.Trigger, a *sim.Aura) {
+func sigilOfFyendalAuraHandler(s *sim.TurnState, l card.Logger, _ *sim.Trigger, a *sim.Aura) {
 	s.AddValue(1)
 	l.AppendPostTrigger(a.Self.DisplayName(), "Gained 1 health", 1)
 	s.DestroyAura(a, true)

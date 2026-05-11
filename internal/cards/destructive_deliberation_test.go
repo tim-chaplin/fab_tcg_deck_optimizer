@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 func TestDestructiveDeliberation_PlayCreditsAttack(t *testing.T) {
@@ -17,7 +18,7 @@ func TestDestructiveDeliberation_PlayCreditsAttack(t *testing.T) {
 	}
 	for _, tc := range cases {
 		s := sim.TurnState{}
-		self := &sim.CardState{Card: tc.c}
+		self := &card.CardState{Card: tc.c}
 		sim.ResolveChainStep(&s, s.Logger(), self)
 		if s.Value() != tc.want {
 			t.Errorf("%s: Value = %d, want %d", tc.c.Name(), s.Value(), tc.want)
@@ -35,7 +36,7 @@ func TestDestructiveDeliberation_OnHitCreatesPonder(t *testing.T) {
 		DestructiveDeliberationBlue{},
 	} {
 		s := sim.TurnState{}
-		self := &sim.CardState{Card: c}
+		self := &card.CardState{Card: c}
 		sim.ResolveChainStep(&s, s.Logger(), self)
 		self.OnHit[0].Fire(&s, s.Logger(), self, &self.OnHit[0])
 		if got := s.Ponders(); got != 1 {

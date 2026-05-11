@@ -5,12 +5,13 @@ import (
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 // Tests that Pursue to the Edge of Oblivion's Play registers an OnHit handler that marks
 // the opposing hero when LikelyToHit fires.
 func TestPursueToTheEdgeOfOblivion_OnHitMarksOpponent(t *testing.T) {
-	self := &sim.CardState{Card: PursueToTheEdgeOfOblivionRed{}}
+	self := &card.CardState{Card: PursueToTheEdgeOfOblivionRed{}}
 	s := sim.TurnState{}
 	sim.ResolveChainStep(&s, s.Logger(), self)
 	if len(self.OnHit) != 1 {

@@ -3,21 +3,20 @@
 package cards
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 var calmingBreezeTypes = card.NewTypeSet(card.TypeGeneric, card.TypeInstant)
 
 type CalmingBreezeRed struct{}
 
-func (CalmingBreezeRed) ID() ids.CardID          { return ids.CalmingBreezeRed }
-func (CalmingBreezeRed) Name() string            { return "Calming Breeze" }
-func (CalmingBreezeRed) DisplayName() string     { return "Calming Breeze [R]" }
-func (CalmingBreezeRed) Cost(sim.GameEngine) int { return 0 }
-func (CalmingBreezeRed) Pitch() int              { return 1 }
-func (CalmingBreezeRed) Attack() int             { return 0 }
-func (CalmingBreezeRed) Defense() int            { return 3 }
-func (CalmingBreezeRed) Types() card.TypeSet     { return calmingBreezeTypes }
-func (CalmingBreezeRed) GoAgain() bool           { return false }
+func (CalmingBreezeRed) ID() ids.CardID           { return ids.CalmingBreezeRed }
+func (CalmingBreezeRed) Name() string             { return "Calming Breeze" }
+func (CalmingBreezeRed) DisplayName() string      { return "Calming Breeze [R]" }
+func (CalmingBreezeRed) Cost(card.GameEngine) int { return 0 }
+func (CalmingBreezeRed) Pitch() int               { return 1 }
+func (CalmingBreezeRed) Attack() int              { return 0 }
+func (CalmingBreezeRed) Defense() int             { return 3 }
+func (CalmingBreezeRed) Types() card.TypeSet      { return calmingBreezeTypes }
+func (CalmingBreezeRed) GoAgain() bool            { return false }

@@ -4,11 +4,11 @@
 package notimplemented
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 // not implemented: base-power cap on what this can defend is ignored; treated as legal vs every
 // attack
 
-func (PutInContextBlue) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
+func (PutInContextBlue) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 }

@@ -10,23 +10,23 @@
 package cards
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 // waterTheSeedsIsTarget gates the rider on attacks (action cards or weapon swings — "your
 // next attack") with base power 1 or less.
-func waterTheSeedsIsTarget(_ sim.GameEngine, pc *sim.CardState) bool {
+func waterTheSeedsIsTarget(_ card.GameEngine, pc *card.CardState) bool {
 	return pc.Card.Types().IsAttack() && pc.Card.Attack() <= 1
 }
 
-func (WaterTheSeedsRed) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
+func (WaterTheSeedsRed) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 	GrantNextCardBonusAttack(s, 1, waterTheSeedsIsTarget)
 }
 
-func (WaterTheSeedsYellow) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
+func (WaterTheSeedsYellow) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 	GrantNextCardBonusAttack(s, 1, waterTheSeedsIsTarget)
 }
 
-func (WaterTheSeedsBlue) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
+func (WaterTheSeedsBlue) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 	GrantNextCardBonusAttack(s, 1, waterTheSeedsIsTarget)
 }

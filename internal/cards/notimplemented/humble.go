@@ -7,20 +7,20 @@
 package notimplemented
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 // not implemented: hero-ability suppression rider
 
-func (HumbleRed) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
+func (HumbleRed) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 }
 
 // not implemented: hero-ability suppression rider
 
-func (HumbleYellow) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
+func (HumbleYellow) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 }
 
 // not implemented: hero-ability suppression rider
 
-func (HumbleBlue) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
+func (HumbleBlue) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 }

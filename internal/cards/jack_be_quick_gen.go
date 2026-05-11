@@ -3,21 +3,20 @@
 package cards
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 var jackBeQuickTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 
 type JackBeQuickRed struct{}
 
-func (JackBeQuickRed) ID() ids.CardID          { return ids.JackBeQuickRed }
-func (JackBeQuickRed) Name() string            { return "Jack Be Quick" }
-func (JackBeQuickRed) DisplayName() string     { return "Jack Be Quick [R]" }
-func (JackBeQuickRed) Cost(sim.GameEngine) int { return 0 }
-func (JackBeQuickRed) Pitch() int              { return 1 }
-func (JackBeQuickRed) Attack() int             { return 3 }
-func (JackBeQuickRed) Defense() int            { return 3 }
-func (JackBeQuickRed) Types() card.TypeSet     { return jackBeQuickTypes }
-func (JackBeQuickRed) GoAgain() bool           { return false }
+func (JackBeQuickRed) ID() ids.CardID           { return ids.JackBeQuickRed }
+func (JackBeQuickRed) Name() string             { return "Jack Be Quick" }
+func (JackBeQuickRed) DisplayName() string      { return "Jack Be Quick [R]" }
+func (JackBeQuickRed) Cost(card.GameEngine) int { return 0 }
+func (JackBeQuickRed) Pitch() int               { return 1 }
+func (JackBeQuickRed) Attack() int              { return 3 }
+func (JackBeQuickRed) Defense() int             { return 3 }
+func (JackBeQuickRed) Types() card.TypeSet      { return jackBeQuickTypes }
+func (JackBeQuickRed) GoAgain() bool            { return false }

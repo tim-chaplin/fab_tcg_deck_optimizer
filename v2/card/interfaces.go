@@ -11,7 +11,6 @@
 package card
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
 )
 
@@ -94,7 +93,7 @@ type GameEngine interface {
 
 	// Chain queries
 	HasPlayedOrCreatedAura() bool
-	HasPlayedType(card.CardType) bool
+	HasPlayedType(CardType) bool
 	CardsPlayed() []Card
 	SetCardsPlayed([]Card)
 	CardsRemaining() []*CardState

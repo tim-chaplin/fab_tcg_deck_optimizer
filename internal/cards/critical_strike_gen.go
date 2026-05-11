@@ -3,45 +3,44 @@
 package cards
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 var criticalStrikeTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 
 type CriticalStrikeRed struct{}
 
-func (CriticalStrikeRed) ID() ids.CardID          { return ids.CriticalStrikeRed }
-func (CriticalStrikeRed) Name() string            { return "Critical Strike" }
-func (CriticalStrikeRed) DisplayName() string     { return "Critical Strike [R]" }
-func (CriticalStrikeRed) Cost(sim.GameEngine) int { return 1 }
-func (CriticalStrikeRed) Pitch() int              { return 1 }
-func (CriticalStrikeRed) Attack() int             { return 5 }
-func (CriticalStrikeRed) Defense() int            { return 3 }
-func (CriticalStrikeRed) Types() card.TypeSet     { return criticalStrikeTypes }
-func (CriticalStrikeRed) GoAgain() bool           { return false }
+func (CriticalStrikeRed) ID() ids.CardID           { return ids.CriticalStrikeRed }
+func (CriticalStrikeRed) Name() string             { return "Critical Strike" }
+func (CriticalStrikeRed) DisplayName() string      { return "Critical Strike [R]" }
+func (CriticalStrikeRed) Cost(card.GameEngine) int { return 1 }
+func (CriticalStrikeRed) Pitch() int               { return 1 }
+func (CriticalStrikeRed) Attack() int              { return 5 }
+func (CriticalStrikeRed) Defense() int             { return 3 }
+func (CriticalStrikeRed) Types() card.TypeSet      { return criticalStrikeTypes }
+func (CriticalStrikeRed) GoAgain() bool            { return false }
 
 type CriticalStrikeYellow struct{}
 
-func (CriticalStrikeYellow) ID() ids.CardID          { return ids.CriticalStrikeYellow }
-func (CriticalStrikeYellow) Name() string            { return "Critical Strike" }
-func (CriticalStrikeYellow) DisplayName() string     { return "Critical Strike [Y]" }
-func (CriticalStrikeYellow) Cost(sim.GameEngine) int { return 1 }
-func (CriticalStrikeYellow) Pitch() int              { return 2 }
-func (CriticalStrikeYellow) Attack() int             { return 4 }
-func (CriticalStrikeYellow) Defense() int            { return 3 }
-func (CriticalStrikeYellow) Types() card.TypeSet     { return criticalStrikeTypes }
-func (CriticalStrikeYellow) GoAgain() bool           { return false }
+func (CriticalStrikeYellow) ID() ids.CardID           { return ids.CriticalStrikeYellow }
+func (CriticalStrikeYellow) Name() string             { return "Critical Strike" }
+func (CriticalStrikeYellow) DisplayName() string      { return "Critical Strike [Y]" }
+func (CriticalStrikeYellow) Cost(card.GameEngine) int { return 1 }
+func (CriticalStrikeYellow) Pitch() int               { return 2 }
+func (CriticalStrikeYellow) Attack() int              { return 4 }
+func (CriticalStrikeYellow) Defense() int             { return 3 }
+func (CriticalStrikeYellow) Types() card.TypeSet      { return criticalStrikeTypes }
+func (CriticalStrikeYellow) GoAgain() bool            { return false }
 
 type CriticalStrikeBlue struct{}
 
-func (CriticalStrikeBlue) ID() ids.CardID          { return ids.CriticalStrikeBlue }
-func (CriticalStrikeBlue) Name() string            { return "Critical Strike" }
-func (CriticalStrikeBlue) DisplayName() string     { return "Critical Strike [B]" }
-func (CriticalStrikeBlue) Cost(sim.GameEngine) int { return 1 }
-func (CriticalStrikeBlue) Pitch() int              { return 3 }
-func (CriticalStrikeBlue) Attack() int             { return 3 }
-func (CriticalStrikeBlue) Defense() int            { return 3 }
-func (CriticalStrikeBlue) Types() card.TypeSet     { return criticalStrikeTypes }
-func (CriticalStrikeBlue) GoAgain() bool           { return false }
+func (CriticalStrikeBlue) ID() ids.CardID           { return ids.CriticalStrikeBlue }
+func (CriticalStrikeBlue) Name() string             { return "Critical Strike" }
+func (CriticalStrikeBlue) DisplayName() string      { return "Critical Strike [B]" }
+func (CriticalStrikeBlue) Cost(card.GameEngine) int { return 1 }
+func (CriticalStrikeBlue) Pitch() int               { return 3 }
+func (CriticalStrikeBlue) Attack() int              { return 3 }
+func (CriticalStrikeBlue) Defense() int             { return 3 }
+func (CriticalStrikeBlue) Types() card.TypeSet      { return criticalStrikeTypes }
+func (CriticalStrikeBlue) GoAgain() bool            { return false }

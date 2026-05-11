@@ -3,22 +3,21 @@
 package notimplemented
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 var onAKnifeEdgeTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction)
 
 type OnAKnifeEdgeYellow struct{}
 
-func (OnAKnifeEdgeYellow) ID() ids.CardID          { return ids.OnAKnifeEdgeYellow }
-func (OnAKnifeEdgeYellow) Name() string            { return "On a Knife Edge" }
-func (OnAKnifeEdgeYellow) DisplayName() string     { return "On a Knife Edge [Y]" }
-func (OnAKnifeEdgeYellow) Cost(sim.GameEngine) int { return 0 }
-func (OnAKnifeEdgeYellow) Pitch() int              { return 2 }
-func (OnAKnifeEdgeYellow) Attack() int             { return 0 }
-func (OnAKnifeEdgeYellow) Defense() int            { return 2 }
-func (OnAKnifeEdgeYellow) Types() card.TypeSet     { return onAKnifeEdgeTypes }
-func (OnAKnifeEdgeYellow) GoAgain() bool           { return true }
-func (OnAKnifeEdgeYellow) NotImplemented()         {}
+func (OnAKnifeEdgeYellow) ID() ids.CardID           { return ids.OnAKnifeEdgeYellow }
+func (OnAKnifeEdgeYellow) Name() string             { return "On a Knife Edge" }
+func (OnAKnifeEdgeYellow) DisplayName() string      { return "On a Knife Edge [Y]" }
+func (OnAKnifeEdgeYellow) Cost(card.GameEngine) int { return 0 }
+func (OnAKnifeEdgeYellow) Pitch() int               { return 2 }
+func (OnAKnifeEdgeYellow) Attack() int              { return 0 }
+func (OnAKnifeEdgeYellow) Defense() int             { return 2 }
+func (OnAKnifeEdgeYellow) Types() card.TypeSet      { return onAKnifeEdgeTypes }
+func (OnAKnifeEdgeYellow) GoAgain() bool            { return true }
+func (OnAKnifeEdgeYellow) NotImplemented()          {}

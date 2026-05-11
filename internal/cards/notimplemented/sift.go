@@ -6,17 +6,17 @@
 package notimplemented
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 // not implemented: hand cycling
 
-func (SiftRed) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {}
+func (SiftRed) Play(s card.GameEngine, l card.Logger, self *card.CardState) {}
 
 // not implemented: hand cycling
 
-func (SiftYellow) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {}
+func (SiftYellow) Play(s card.GameEngine, l card.Logger, self *card.CardState) {}
 
 // not implemented: hand cycling
 
-func (SiftBlue) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {}
+func (SiftBlue) Play(s card.GameEngine, l card.Logger, self *card.CardState) {}

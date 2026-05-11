@@ -3,21 +3,20 @@
 package cards
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 var toughenUpTypes = card.NewTypeSet(card.TypeGeneric, card.TypeDefenseReaction)
 
 type ToughenUpBlue struct{}
 
-func (ToughenUpBlue) ID() ids.CardID          { return ids.ToughenUpBlue }
-func (ToughenUpBlue) Name() string            { return "Toughen Up" }
-func (ToughenUpBlue) DisplayName() string     { return "Toughen Up [B]" }
-func (ToughenUpBlue) Cost(sim.GameEngine) int { return 2 }
-func (ToughenUpBlue) Pitch() int              { return 3 }
-func (ToughenUpBlue) Attack() int             { return 0 }
-func (ToughenUpBlue) Defense() int            { return 4 }
-func (ToughenUpBlue) Types() card.TypeSet     { return toughenUpTypes }
-func (ToughenUpBlue) GoAgain() bool           { return false }
+func (ToughenUpBlue) ID() ids.CardID           { return ids.ToughenUpBlue }
+func (ToughenUpBlue) Name() string             { return "Toughen Up" }
+func (ToughenUpBlue) DisplayName() string      { return "Toughen Up [B]" }
+func (ToughenUpBlue) Cost(card.GameEngine) int { return 2 }
+func (ToughenUpBlue) Pitch() int               { return 3 }
+func (ToughenUpBlue) Attack() int              { return 0 }
+func (ToughenUpBlue) Defense() int             { return 4 }
+func (ToughenUpBlue) Types() card.TypeSet      { return toughenUpTypes }
+func (ToughenUpBlue) GoAgain() bool            { return false }

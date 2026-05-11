@@ -10,12 +10,13 @@ package cards
 
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 // battlefrontBastionBlock fires the +1 alone-bonus when this is the only plain blocker.
 // Iterates Defenders and short-circuits on the second non-DR sighting so the typical
 // partition pays at most a few comparisons.
-func battlefrontBastionBlock(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
+func battlefrontBastionBlock(s card.GameEngine, l card.Logger, self *card.CardState) {
 	plainCount := 0
 	for _, d := range s.Defenders() {
 		if d.Types().IsDefenseReaction() {
@@ -29,17 +30,17 @@ func battlefrontBastionBlock(s sim.GameEngine, l sim.Logger, self *sim.CardState
 	self.BonusDefense += 1
 }
 
-func (BattlefrontBastionRed) Block(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (BattlefrontBastionRed) Block(s *sim.TurnState, l card.Logger, self *card.CardState) {
 	battlefrontBastionBlock(s, l, self)
 }
-func (BattlefrontBastionRed) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {}
+func (BattlefrontBastionRed) Play(s card.GameEngine, l card.Logger, self *card.CardState) {}
 
-func (BattlefrontBastionYellow) Block(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (BattlefrontBastionYellow) Block(s *sim.TurnState, l card.Logger, self *card.CardState) {
 	battlefrontBastionBlock(s, l, self)
 }
-func (BattlefrontBastionYellow) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {}
+func (BattlefrontBastionYellow) Play(s card.GameEngine, l card.Logger, self *card.CardState) {}
 
-func (BattlefrontBastionBlue) Block(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (BattlefrontBastionBlue) Block(s *sim.TurnState, l card.Logger, self *card.CardState) {
 	battlefrontBastionBlock(s, l, self)
 }
-func (BattlefrontBastionBlue) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {}
+func (BattlefrontBastionBlue) Play(s card.GameEngine, l card.Logger, self *card.CardState) {}

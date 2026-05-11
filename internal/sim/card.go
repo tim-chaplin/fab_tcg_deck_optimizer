@@ -7,32 +7,29 @@
 // optional shapes (VariableCost, ModalCard, …) live below.
 package sim
 
-import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
-	v2card "github.com/tim-chaplin/fab-deck-optimizer/v2/card"
-)
+import "github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 
 // Aliases for the cards-facing types. The concrete implementations live in v2/card
 // and the chain runner consumes them through these names.
 type (
-	Card                = v2card.Card
-	CardState           = v2card.CardState
-	Logger              = v2card.Logger
-	OnHitHandler        = v2card.OnHitHandler
-	GameEngine          = v2card.GameEngine
-	Dominator           = v2card.Dominator
-	ArsenalDefenseBonus = v2card.ArsenalDefenseBonus
+	Card                = card.Card
+	CardState           = card.CardState
+	Logger              = card.Logger
+	OnHitHandler        = card.OnHitHandler
+	GameEngine          = card.GameEngine
+	Dominator           = card.Dominator
+	ArsenalDefenseBonus = card.ArsenalDefenseBonus
 )
 
 // HasDominate reports whether c is printed with the Dominate keyword — a type assertion to
 // the Dominator marker. Used by CardState.EffectiveDominate and any scanner that needs the
 // static printed-keyword check without going through a CardState.
-func HasDominate(c Card) bool { return v2card.HasDominate(c) }
+func HasDominate(c Card) bool { return card.HasDominate(c) }
 
 // arsenalDefenseBonusOf returns c's ArsenalDefenseBonus contribution, or 0 when c doesn't
 // implement the marker. Used by the partition pre-screen and the log-format pass to fold
 // the bonus into a defender's reported (+N) when the copy came from the arsenal slot.
-func arsenalDefenseBonusOf(c Card) int { return v2card.ArsenalDefenseBonusOf(c) }
+func arsenalDefenseBonusOf(c Card) int { return card.ArsenalDefenseBonusOf(c) }
 
 // VariableCost is optionally implemented by cards whose Cost(g) varies with TurnState (e.g.
 // discount-per-token effects). MinCost and MaxCost are static bounds on the Cost output across
@@ -120,7 +117,3 @@ type BlockCost interface {
 type DefensiveInstant interface {
 	DefensiveInstant()
 }
-
-// _ kept so the card import isn't elided when sim files reference card.TypeSet only via
-// type aliases.
-var _ card.TypeSet

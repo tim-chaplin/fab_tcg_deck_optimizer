@@ -3,45 +3,44 @@
 package cards
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 var spellbladeAssaultTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeAction, card.TypeAttack)
 
 type SpellbladeAssaultRed struct{}
 
-func (SpellbladeAssaultRed) ID() ids.CardID          { return ids.SpellbladeAssaultRed }
-func (SpellbladeAssaultRed) Name() string            { return "Spellblade Assault" }
-func (SpellbladeAssaultRed) DisplayName() string     { return "Spellblade Assault [R]" }
-func (SpellbladeAssaultRed) Cost(sim.GameEngine) int { return 2 }
-func (SpellbladeAssaultRed) Pitch() int              { return 1 }
-func (SpellbladeAssaultRed) Attack() int             { return 4 }
-func (SpellbladeAssaultRed) Defense() int            { return 3 }
-func (SpellbladeAssaultRed) Types() card.TypeSet     { return spellbladeAssaultTypes }
-func (SpellbladeAssaultRed) GoAgain() bool           { return false }
+func (SpellbladeAssaultRed) ID() ids.CardID           { return ids.SpellbladeAssaultRed }
+func (SpellbladeAssaultRed) Name() string             { return "Spellblade Assault" }
+func (SpellbladeAssaultRed) DisplayName() string      { return "Spellblade Assault [R]" }
+func (SpellbladeAssaultRed) Cost(card.GameEngine) int { return 2 }
+func (SpellbladeAssaultRed) Pitch() int               { return 1 }
+func (SpellbladeAssaultRed) Attack() int              { return 4 }
+func (SpellbladeAssaultRed) Defense() int             { return 3 }
+func (SpellbladeAssaultRed) Types() card.TypeSet      { return spellbladeAssaultTypes }
+func (SpellbladeAssaultRed) GoAgain() bool            { return false }
 
 type SpellbladeAssaultYellow struct{}
 
-func (SpellbladeAssaultYellow) ID() ids.CardID          { return ids.SpellbladeAssaultYellow }
-func (SpellbladeAssaultYellow) Name() string            { return "Spellblade Assault" }
-func (SpellbladeAssaultYellow) DisplayName() string     { return "Spellblade Assault [Y]" }
-func (SpellbladeAssaultYellow) Cost(sim.GameEngine) int { return 2 }
-func (SpellbladeAssaultYellow) Pitch() int              { return 2 }
-func (SpellbladeAssaultYellow) Attack() int             { return 3 }
-func (SpellbladeAssaultYellow) Defense() int            { return 3 }
-func (SpellbladeAssaultYellow) Types() card.TypeSet     { return spellbladeAssaultTypes }
-func (SpellbladeAssaultYellow) GoAgain() bool           { return false }
+func (SpellbladeAssaultYellow) ID() ids.CardID           { return ids.SpellbladeAssaultYellow }
+func (SpellbladeAssaultYellow) Name() string             { return "Spellblade Assault" }
+func (SpellbladeAssaultYellow) DisplayName() string      { return "Spellblade Assault [Y]" }
+func (SpellbladeAssaultYellow) Cost(card.GameEngine) int { return 2 }
+func (SpellbladeAssaultYellow) Pitch() int               { return 2 }
+func (SpellbladeAssaultYellow) Attack() int              { return 3 }
+func (SpellbladeAssaultYellow) Defense() int             { return 3 }
+func (SpellbladeAssaultYellow) Types() card.TypeSet      { return spellbladeAssaultTypes }
+func (SpellbladeAssaultYellow) GoAgain() bool            { return false }
 
 type SpellbladeAssaultBlue struct{}
 
-func (SpellbladeAssaultBlue) ID() ids.CardID          { return ids.SpellbladeAssaultBlue }
-func (SpellbladeAssaultBlue) Name() string            { return "Spellblade Assault" }
-func (SpellbladeAssaultBlue) DisplayName() string     { return "Spellblade Assault [B]" }
-func (SpellbladeAssaultBlue) Cost(sim.GameEngine) int { return 2 }
-func (SpellbladeAssaultBlue) Pitch() int              { return 3 }
-func (SpellbladeAssaultBlue) Attack() int             { return 2 }
-func (SpellbladeAssaultBlue) Defense() int            { return 3 }
-func (SpellbladeAssaultBlue) Types() card.TypeSet     { return spellbladeAssaultTypes }
-func (SpellbladeAssaultBlue) GoAgain() bool           { return false }
+func (SpellbladeAssaultBlue) ID() ids.CardID           { return ids.SpellbladeAssaultBlue }
+func (SpellbladeAssaultBlue) Name() string             { return "Spellblade Assault" }
+func (SpellbladeAssaultBlue) DisplayName() string      { return "Spellblade Assault [B]" }
+func (SpellbladeAssaultBlue) Cost(card.GameEngine) int { return 2 }
+func (SpellbladeAssaultBlue) Pitch() int               { return 3 }
+func (SpellbladeAssaultBlue) Attack() int              { return 2 }
+func (SpellbladeAssaultBlue) Defense() int             { return 3 }
+func (SpellbladeAssaultBlue) Types() card.TypeSet      { return spellbladeAssaultTypes }
+func (SpellbladeAssaultBlue) GoAgain() bool            { return false }

@@ -11,7 +11,7 @@ package sim
 // covers both arsenal-in-stayed and Held-for-promotion).
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
 )
 

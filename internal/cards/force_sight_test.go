@@ -5,13 +5,14 @@ import (
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 // TestForceSight_NoAttackReturnsZero: no qualifying next attack card → +3 rider fizzles.
 func TestForceSight_NoAttackReturnsZero(t *testing.T) {
 	s := sim.TurnState{}
 	for _, c := range []sim.Card{ForceSightRed{}, ForceSightYellow{}, ForceSightBlue{}} {
-		sim.ResolveChainStep(&s, s.Logger(), &sim.CardState{Card: c})
+		sim.ResolveChainStep(&s, s.Logger(), &card.CardState{Card: c})
 		if got := s.Value(); got != 0 {
 			t.Errorf("%s: Play() = %d, want 0", c.Name(), got)
 		}
@@ -20,8 +21,8 @@ func TestForceSight_NoAttackReturnsZero(t *testing.T) {
 
 // TestForceSight_NonAttackInRemainingFizzles: non-attack action fails the predicate.
 func TestForceSight_NonAttackInRemainingFizzles(t *testing.T) {
-	s := sim.NewTurnStateFromSpec(sim.TurnStateSpec{CardsRemaining: []*sim.CardState{{Card: testutils.GenericAction()}}})
-	sim.ResolveChainStep(&s, s.Logger(), &sim.CardState{Card: ForceSightRed{}})
+	s := sim.NewTurnStateFromSpec(sim.TurnStateSpec{CardsRemaining: []*card.CardState{{Card: testutils.GenericAction()}}})
+	sim.ResolveChainStep(&s, s.Logger(), &card.CardState{Card: ForceSightRed{}})
 	if got := s.Value(); got != 0 {
 		t.Errorf("Play() = %d, want 0 (non-attack skipped)", got)
 	}
@@ -39,9 +40,9 @@ func TestForceSight_NextAttackReturnsBonus(t *testing.T) {
 		{ForceSightBlue{}, 1},
 	}
 	for _, tc := range cases {
-		target := &sim.CardState{Card: testutils.GenericAttack(0, 0)}
-		s := sim.NewTurnStateFromSpec(sim.TurnStateSpec{CardsRemaining: []*sim.CardState{target}})
-		sim.ResolveChainStep(&s, s.Logger(), &sim.CardState{Card: tc.c})
+		target := &card.CardState{Card: testutils.GenericAttack(0, 0)}
+		s := sim.NewTurnStateFromSpec(sim.TurnStateSpec{CardsRemaining: []*card.CardState{target}})
+		sim.ResolveChainStep(&s, s.Logger(), &card.CardState{Card: tc.c})
 		if got := s.Value(); got != 0 {
 			t.Errorf("%s: Play() = %d, want 0 (granter returns 0; +N rides on target's BonusAttack)", tc.c.Name(), got)
 		}
@@ -58,7 +59,7 @@ func TestForceSight_HandPlaySkipsOpt(t *testing.T) {
 	a, b := testutils.NewStubCard("a"), testutils.NewStubCard("b")
 	for _, c := range []sim.Card{ForceSightRed{}, ForceSightYellow{}, ForceSightBlue{}} {
 		s := sim.NewTurnStateFromCards([]sim.Card{a, b}, nil)
-		sim.ResolveChainStep(s, s.Logger(), &sim.CardState{Card: c})
+		sim.ResolveChainStep(s, s.Logger(), &card.CardState{Card: c})
 		if s.Value() != 0 {
 			t.Errorf("%s: Play() from hand Value = %d, want 0", c.Name(), s.Value())
 		}
@@ -77,7 +78,7 @@ func TestForceSight_ArsenalPlayCallsOpt2(t *testing.T) {
 	a, b := testutils.NewStubCard("a"), testutils.NewStubCard("b")
 	for _, c := range []sim.Card{ForceSightRed{}, ForceSightYellow{}, ForceSightBlue{}} {
 		s := sim.NewTurnStateFromCards([]sim.Card{a, b}, nil)
-		sim.ResolveChainStep(s, s.Logger(), &sim.CardState{Card: c, FromArsenal: true})
+		sim.ResolveChainStep(s, s.Logger(), &card.CardState{Card: c, FromArsenal: true})
 		if s.Value() != 0 {
 			t.Errorf("%s: Play() from arsenal Value = %d, want 0", c.Name(), s.Value())
 		}

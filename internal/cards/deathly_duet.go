@@ -10,20 +10,18 @@
 package cards
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
-
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
-func (DeathlyDuetRed) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
+func (DeathlyDuetRed) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 	deathlyDuetApplyRiders(s, l, self)
 }
 
-func (DeathlyDuetYellow) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
+func (DeathlyDuetYellow) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 	deathlyDuetApplyRiders(s, l, self)
 }
 
-func (DeathlyDuetBlue) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
+func (DeathlyDuetBlue) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 	deathlyDuetApplyRiders(s, l, self)
 }
 
@@ -35,7 +33,7 @@ func (DeathlyDuetBlue) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState)
 //     resolution; the rider lands as a "Created 2 runechants" sub-line under self.
 //
 // Both riders can stack when self.PitchedToPlay contains both roles.
-func deathlyDuetApplyRiders(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
+func deathlyDuetApplyRiders(s card.GameEngine, l card.Logger, self *card.CardState) {
 	var attackPitched, nonAttackActionPitched bool
 	for _, p := range self.PitchedToPlay {
 		t := p.Types()

@@ -10,16 +10,14 @@
 package cards
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
-
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 // sutcliffesResearchNotesPlay scans the top revealCount cards of the deck and creates one
 // runechant per Runeblade attack action card found, emitting the rider sub-line under self
 // when any are created. Reads the top via PeekTopN so the cacheable bit flips — the
 // runechant count produced depends on shuffle order.
-func sutcliffesResearchNotesPlay(s sim.GameEngine, l sim.Logger, self *sim.CardState, revealCount int) {
+func sutcliffesResearchNotesPlay(s card.GameEngine, l card.Logger, self *card.CardState, revealCount int) {
 	count := 0
 	for _, c := range s.PeekTopN(revealCount) {
 		t := c.Types()
@@ -31,14 +29,14 @@ func sutcliffesResearchNotesPlay(s sim.GameEngine, l sim.Logger, self *sim.CardS
 	l.AppendPostTriggerf(self.Card.DisplayName(), count, "Created %d runechants", count)
 }
 
-func (SutcliffesResearchNotesRed) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
+func (SutcliffesResearchNotesRed) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 	sutcliffesResearchNotesPlay(s, l, self, 3)
 }
 
-func (SutcliffesResearchNotesYellow) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
+func (SutcliffesResearchNotesYellow) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 	sutcliffesResearchNotesPlay(s, l, self, 2)
 }
 
-func (SutcliffesResearchNotesBlue) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
+func (SutcliffesResearchNotesBlue) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 	sutcliffesResearchNotesPlay(s, l, self, 1)
 }

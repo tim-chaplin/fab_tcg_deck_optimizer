@@ -7,7 +7,7 @@
 package cards
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
@@ -16,6 +16,6 @@ func (ThrustRed) ARTargetAllowed(c sim.Card, _ int8) bool {
 	t := c.Types()
 	return t.Has(card.TypeSword) && t.IsAttack()
 }
-func (ThrustRed) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
+func (ThrustRed) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 	sim.GrantAttackReactionBuff(s, l, self, 3)
 }

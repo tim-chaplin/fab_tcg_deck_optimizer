@@ -10,11 +10,11 @@
 package cards
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
-func (GravekeepingRed) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {}
+func (GravekeepingRed) Play(s card.GameEngine, l card.Logger, self *card.CardState) {}
 
-func (GravekeepingYellow) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {}
+func (GravekeepingYellow) Play(s card.GameEngine, l card.Logger, self *card.CardState) {}
 
-func (GravekeepingBlue) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {}
+func (GravekeepingBlue) Play(s card.GameEngine, l card.Logger, self *card.CardState) {}

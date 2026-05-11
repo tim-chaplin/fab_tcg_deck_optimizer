@@ -3,22 +3,21 @@
 package unplayable
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 var amuletOfHavencallTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeItem)
 
 type AmuletOfHavencallBlue struct{}
 
-func (AmuletOfHavencallBlue) ID() ids.CardID          { return ids.AmuletOfHavencallBlue }
-func (AmuletOfHavencallBlue) Name() string            { return "Amulet of Havencall" }
-func (AmuletOfHavencallBlue) DisplayName() string     { return "Amulet of Havencall [B]" }
-func (AmuletOfHavencallBlue) Cost(sim.GameEngine) int { return 0 }
-func (AmuletOfHavencallBlue) Pitch() int              { return 3 }
-func (AmuletOfHavencallBlue) Attack() int             { return 0 }
-func (AmuletOfHavencallBlue) Defense() int            { return 0 }
-func (AmuletOfHavencallBlue) Types() card.TypeSet     { return amuletOfHavencallTypes }
-func (AmuletOfHavencallBlue) GoAgain() bool           { return true }
-func (AmuletOfHavencallBlue) Unplayable()             {}
+func (AmuletOfHavencallBlue) ID() ids.CardID           { return ids.AmuletOfHavencallBlue }
+func (AmuletOfHavencallBlue) Name() string             { return "Amulet of Havencall" }
+func (AmuletOfHavencallBlue) DisplayName() string      { return "Amulet of Havencall [B]" }
+func (AmuletOfHavencallBlue) Cost(card.GameEngine) int { return 0 }
+func (AmuletOfHavencallBlue) Pitch() int               { return 3 }
+func (AmuletOfHavencallBlue) Attack() int              { return 0 }
+func (AmuletOfHavencallBlue) Defense() int             { return 0 }
+func (AmuletOfHavencallBlue) Types() card.TypeSet      { return amuletOfHavencallTypes }
+func (AmuletOfHavencallBlue) GoAgain() bool            { return true }
+func (AmuletOfHavencallBlue) Unplayable()              {}

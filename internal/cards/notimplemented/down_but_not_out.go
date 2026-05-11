@@ -8,20 +8,20 @@
 package notimplemented
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 // not implemented: health/equipment/token comparison, agility/might/vigor tokens, overpower
 
-func (DownButNotOutRed) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
+func (DownButNotOutRed) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 }
 
 // not implemented: health/equipment/token comparison, agility/might/vigor tokens, overpower
 
-func (DownButNotOutYellow) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
+func (DownButNotOutYellow) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 }
 
 // not implemented: health/equipment/token comparison, agility/might/vigor tokens, overpower
 
-func (DownButNotOutBlue) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
+func (DownButNotOutBlue) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 }

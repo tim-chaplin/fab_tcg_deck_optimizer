@@ -5,13 +5,13 @@
 package cards
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 // trotAlongApplySideEffect grants go again to the next qualifying attack scheduled later
 // this turn — attack action card OR weapon swing per the "your next attack" wording —
 // gated on base power 3 or less.
-func trotAlongApplySideEffect(s sim.GameEngine) {
+func trotAlongApplySideEffect(s card.GameEngine) {
 	for _, pc := range s.CardsRemaining() {
 		if !pc.Card.Types().IsAttack() {
 			continue
@@ -23,6 +23,6 @@ func trotAlongApplySideEffect(s sim.GameEngine) {
 	}
 }
 
-func (TrotAlongBlue) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
+func (TrotAlongBlue) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 	trotAlongApplySideEffect(s)
 }

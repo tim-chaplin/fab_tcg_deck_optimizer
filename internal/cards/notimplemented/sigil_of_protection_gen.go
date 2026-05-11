@@ -3,48 +3,47 @@
 package notimplemented
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 var sigilOfProtectionTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAura)
 
 type SigilOfProtectionRed struct{}
 
-func (SigilOfProtectionRed) ID() ids.CardID          { return ids.SigilOfProtectionRed }
-func (SigilOfProtectionRed) Name() string            { return "Sigil of Protection" }
-func (SigilOfProtectionRed) DisplayName() string     { return "Sigil of Protection [R]" }
-func (SigilOfProtectionRed) Cost(sim.GameEngine) int { return 1 }
-func (SigilOfProtectionRed) Pitch() int              { return 1 }
-func (SigilOfProtectionRed) Attack() int             { return 0 }
-func (SigilOfProtectionRed) Defense() int            { return 2 }
-func (SigilOfProtectionRed) Types() card.TypeSet     { return sigilOfProtectionTypes }
-func (SigilOfProtectionRed) GoAgain() bool           { return false }
-func (SigilOfProtectionRed) NotImplemented()         {}
+func (SigilOfProtectionRed) ID() ids.CardID           { return ids.SigilOfProtectionRed }
+func (SigilOfProtectionRed) Name() string             { return "Sigil of Protection" }
+func (SigilOfProtectionRed) DisplayName() string      { return "Sigil of Protection [R]" }
+func (SigilOfProtectionRed) Cost(card.GameEngine) int { return 1 }
+func (SigilOfProtectionRed) Pitch() int               { return 1 }
+func (SigilOfProtectionRed) Attack() int              { return 0 }
+func (SigilOfProtectionRed) Defense() int             { return 2 }
+func (SigilOfProtectionRed) Types() card.TypeSet      { return sigilOfProtectionTypes }
+func (SigilOfProtectionRed) GoAgain() bool            { return false }
+func (SigilOfProtectionRed) NotImplemented()          {}
 
 type SigilOfProtectionYellow struct{}
 
-func (SigilOfProtectionYellow) ID() ids.CardID          { return ids.SigilOfProtectionYellow }
-func (SigilOfProtectionYellow) Name() string            { return "Sigil of Protection" }
-func (SigilOfProtectionYellow) DisplayName() string     { return "Sigil of Protection [Y]" }
-func (SigilOfProtectionYellow) Cost(sim.GameEngine) int { return 1 }
-func (SigilOfProtectionYellow) Pitch() int              { return 2 }
-func (SigilOfProtectionYellow) Attack() int             { return 0 }
-func (SigilOfProtectionYellow) Defense() int            { return 2 }
-func (SigilOfProtectionYellow) Types() card.TypeSet     { return sigilOfProtectionTypes }
-func (SigilOfProtectionYellow) GoAgain() bool           { return false }
-func (SigilOfProtectionYellow) NotImplemented()         {}
+func (SigilOfProtectionYellow) ID() ids.CardID           { return ids.SigilOfProtectionYellow }
+func (SigilOfProtectionYellow) Name() string             { return "Sigil of Protection" }
+func (SigilOfProtectionYellow) DisplayName() string      { return "Sigil of Protection [Y]" }
+func (SigilOfProtectionYellow) Cost(card.GameEngine) int { return 1 }
+func (SigilOfProtectionYellow) Pitch() int               { return 2 }
+func (SigilOfProtectionYellow) Attack() int              { return 0 }
+func (SigilOfProtectionYellow) Defense() int             { return 2 }
+func (SigilOfProtectionYellow) Types() card.TypeSet      { return sigilOfProtectionTypes }
+func (SigilOfProtectionYellow) GoAgain() bool            { return false }
+func (SigilOfProtectionYellow) NotImplemented()          {}
 
 type SigilOfProtectionBlue struct{}
 
-func (SigilOfProtectionBlue) ID() ids.CardID          { return ids.SigilOfProtectionBlue }
-func (SigilOfProtectionBlue) Name() string            { return "Sigil of Protection" }
-func (SigilOfProtectionBlue) DisplayName() string     { return "Sigil of Protection [B]" }
-func (SigilOfProtectionBlue) Cost(sim.GameEngine) int { return 1 }
-func (SigilOfProtectionBlue) Pitch() int              { return 3 }
-func (SigilOfProtectionBlue) Attack() int             { return 0 }
-func (SigilOfProtectionBlue) Defense() int            { return 2 }
-func (SigilOfProtectionBlue) Types() card.TypeSet     { return sigilOfProtectionTypes }
-func (SigilOfProtectionBlue) GoAgain() bool           { return false }
-func (SigilOfProtectionBlue) NotImplemented()         {}
+func (SigilOfProtectionBlue) ID() ids.CardID           { return ids.SigilOfProtectionBlue }
+func (SigilOfProtectionBlue) Name() string             { return "Sigil of Protection" }
+func (SigilOfProtectionBlue) DisplayName() string      { return "Sigil of Protection [B]" }
+func (SigilOfProtectionBlue) Cost(card.GameEngine) int { return 1 }
+func (SigilOfProtectionBlue) Pitch() int               { return 3 }
+func (SigilOfProtectionBlue) Attack() int              { return 0 }
+func (SigilOfProtectionBlue) Defense() int             { return 2 }
+func (SigilOfProtectionBlue) Types() card.TypeSet      { return sigilOfProtectionTypes }
+func (SigilOfProtectionBlue) GoAgain() bool            { return false }
+func (SigilOfProtectionBlue) NotImplemented()          {}

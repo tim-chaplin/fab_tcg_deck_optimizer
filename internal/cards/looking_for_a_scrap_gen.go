@@ -3,45 +3,44 @@
 package cards
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 var lookingForAScrapTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 
 type LookingForAScrapRed struct{}
 
-func (LookingForAScrapRed) ID() ids.CardID          { return ids.LookingForAScrapRed }
-func (LookingForAScrapRed) Name() string            { return "Looking for a Scrap" }
-func (LookingForAScrapRed) DisplayName() string     { return "Looking for a Scrap [R]" }
-func (LookingForAScrapRed) Cost(sim.GameEngine) int { return 1 }
-func (LookingForAScrapRed) Pitch() int              { return 1 }
-func (LookingForAScrapRed) Attack() int             { return 4 }
-func (LookingForAScrapRed) Defense() int            { return 2 }
-func (LookingForAScrapRed) Types() card.TypeSet     { return lookingForAScrapTypes }
-func (LookingForAScrapRed) GoAgain() bool           { return false }
+func (LookingForAScrapRed) ID() ids.CardID           { return ids.LookingForAScrapRed }
+func (LookingForAScrapRed) Name() string             { return "Looking for a Scrap" }
+func (LookingForAScrapRed) DisplayName() string      { return "Looking for a Scrap [R]" }
+func (LookingForAScrapRed) Cost(card.GameEngine) int { return 1 }
+func (LookingForAScrapRed) Pitch() int               { return 1 }
+func (LookingForAScrapRed) Attack() int              { return 4 }
+func (LookingForAScrapRed) Defense() int             { return 2 }
+func (LookingForAScrapRed) Types() card.TypeSet      { return lookingForAScrapTypes }
+func (LookingForAScrapRed) GoAgain() bool            { return false }
 
 type LookingForAScrapYellow struct{}
 
-func (LookingForAScrapYellow) ID() ids.CardID          { return ids.LookingForAScrapYellow }
-func (LookingForAScrapYellow) Name() string            { return "Looking for a Scrap" }
-func (LookingForAScrapYellow) DisplayName() string     { return "Looking for a Scrap [Y]" }
-func (LookingForAScrapYellow) Cost(sim.GameEngine) int { return 1 }
-func (LookingForAScrapYellow) Pitch() int              { return 2 }
-func (LookingForAScrapYellow) Attack() int             { return 3 }
-func (LookingForAScrapYellow) Defense() int            { return 2 }
-func (LookingForAScrapYellow) Types() card.TypeSet     { return lookingForAScrapTypes }
-func (LookingForAScrapYellow) GoAgain() bool           { return false }
+func (LookingForAScrapYellow) ID() ids.CardID           { return ids.LookingForAScrapYellow }
+func (LookingForAScrapYellow) Name() string             { return "Looking for a Scrap" }
+func (LookingForAScrapYellow) DisplayName() string      { return "Looking for a Scrap [Y]" }
+func (LookingForAScrapYellow) Cost(card.GameEngine) int { return 1 }
+func (LookingForAScrapYellow) Pitch() int               { return 2 }
+func (LookingForAScrapYellow) Attack() int              { return 3 }
+func (LookingForAScrapYellow) Defense() int             { return 2 }
+func (LookingForAScrapYellow) Types() card.TypeSet      { return lookingForAScrapTypes }
+func (LookingForAScrapYellow) GoAgain() bool            { return false }
 
 type LookingForAScrapBlue struct{}
 
-func (LookingForAScrapBlue) ID() ids.CardID          { return ids.LookingForAScrapBlue }
-func (LookingForAScrapBlue) Name() string            { return "Looking for a Scrap" }
-func (LookingForAScrapBlue) DisplayName() string     { return "Looking for a Scrap [B]" }
-func (LookingForAScrapBlue) Cost(sim.GameEngine) int { return 1 }
-func (LookingForAScrapBlue) Pitch() int              { return 3 }
-func (LookingForAScrapBlue) Attack() int             { return 2 }
-func (LookingForAScrapBlue) Defense() int            { return 2 }
-func (LookingForAScrapBlue) Types() card.TypeSet     { return lookingForAScrapTypes }
-func (LookingForAScrapBlue) GoAgain() bool           { return false }
+func (LookingForAScrapBlue) ID() ids.CardID           { return ids.LookingForAScrapBlue }
+func (LookingForAScrapBlue) Name() string             { return "Looking for a Scrap" }
+func (LookingForAScrapBlue) DisplayName() string      { return "Looking for a Scrap [B]" }
+func (LookingForAScrapBlue) Cost(card.GameEngine) int { return 1 }
+func (LookingForAScrapBlue) Pitch() int               { return 3 }
+func (LookingForAScrapBlue) Attack() int              { return 2 }
+func (LookingForAScrapBlue) Defense() int             { return 2 }
+func (LookingForAScrapBlue) Types() card.TypeSet      { return lookingForAScrapTypes }
+func (LookingForAScrapBlue) GoAgain() bool            { return false }

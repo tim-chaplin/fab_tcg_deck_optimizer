@@ -3,48 +3,47 @@
 package notimplemented
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 var punchAboveYourWeightTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 
 type PunchAboveYourWeightRed struct{}
 
-func (PunchAboveYourWeightRed) ID() ids.CardID          { return ids.PunchAboveYourWeightRed }
-func (PunchAboveYourWeightRed) Name() string            { return "Punch Above Your Weight" }
-func (PunchAboveYourWeightRed) DisplayName() string     { return "Punch Above Your Weight [R]" }
-func (PunchAboveYourWeightRed) Cost(sim.GameEngine) int { return 0 }
-func (PunchAboveYourWeightRed) Pitch() int              { return 1 }
-func (PunchAboveYourWeightRed) Attack() int             { return 2 }
-func (PunchAboveYourWeightRed) Defense() int            { return 2 }
-func (PunchAboveYourWeightRed) Types() card.TypeSet     { return punchAboveYourWeightTypes }
-func (PunchAboveYourWeightRed) GoAgain() bool           { return false }
-func (PunchAboveYourWeightRed) NotImplemented()         {}
+func (PunchAboveYourWeightRed) ID() ids.CardID           { return ids.PunchAboveYourWeightRed }
+func (PunchAboveYourWeightRed) Name() string             { return "Punch Above Your Weight" }
+func (PunchAboveYourWeightRed) DisplayName() string      { return "Punch Above Your Weight [R]" }
+func (PunchAboveYourWeightRed) Cost(card.GameEngine) int { return 0 }
+func (PunchAboveYourWeightRed) Pitch() int               { return 1 }
+func (PunchAboveYourWeightRed) Attack() int              { return 2 }
+func (PunchAboveYourWeightRed) Defense() int             { return 2 }
+func (PunchAboveYourWeightRed) Types() card.TypeSet      { return punchAboveYourWeightTypes }
+func (PunchAboveYourWeightRed) GoAgain() bool            { return false }
+func (PunchAboveYourWeightRed) NotImplemented()          {}
 
 type PunchAboveYourWeightYellow struct{}
 
-func (PunchAboveYourWeightYellow) ID() ids.CardID          { return ids.PunchAboveYourWeightYellow }
-func (PunchAboveYourWeightYellow) Name() string            { return "Punch Above Your Weight" }
-func (PunchAboveYourWeightYellow) DisplayName() string     { return "Punch Above Your Weight [Y]" }
-func (PunchAboveYourWeightYellow) Cost(sim.GameEngine) int { return 0 }
-func (PunchAboveYourWeightYellow) Pitch() int              { return 2 }
-func (PunchAboveYourWeightYellow) Attack() int             { return 2 }
-func (PunchAboveYourWeightYellow) Defense() int            { return 2 }
-func (PunchAboveYourWeightYellow) Types() card.TypeSet     { return punchAboveYourWeightTypes }
-func (PunchAboveYourWeightYellow) GoAgain() bool           { return false }
-func (PunchAboveYourWeightYellow) NotImplemented()         {}
+func (PunchAboveYourWeightYellow) ID() ids.CardID           { return ids.PunchAboveYourWeightYellow }
+func (PunchAboveYourWeightYellow) Name() string             { return "Punch Above Your Weight" }
+func (PunchAboveYourWeightYellow) DisplayName() string      { return "Punch Above Your Weight [Y]" }
+func (PunchAboveYourWeightYellow) Cost(card.GameEngine) int { return 0 }
+func (PunchAboveYourWeightYellow) Pitch() int               { return 2 }
+func (PunchAboveYourWeightYellow) Attack() int              { return 2 }
+func (PunchAboveYourWeightYellow) Defense() int             { return 2 }
+func (PunchAboveYourWeightYellow) Types() card.TypeSet      { return punchAboveYourWeightTypes }
+func (PunchAboveYourWeightYellow) GoAgain() bool            { return false }
+func (PunchAboveYourWeightYellow) NotImplemented()          {}
 
 type PunchAboveYourWeightBlue struct{}
 
-func (PunchAboveYourWeightBlue) ID() ids.CardID          { return ids.PunchAboveYourWeightBlue }
-func (PunchAboveYourWeightBlue) Name() string            { return "Punch Above Your Weight" }
-func (PunchAboveYourWeightBlue) DisplayName() string     { return "Punch Above Your Weight [B]" }
-func (PunchAboveYourWeightBlue) Cost(sim.GameEngine) int { return 0 }
-func (PunchAboveYourWeightBlue) Pitch() int              { return 3 }
-func (PunchAboveYourWeightBlue) Attack() int             { return 2 }
-func (PunchAboveYourWeightBlue) Defense() int            { return 2 }
-func (PunchAboveYourWeightBlue) Types() card.TypeSet     { return punchAboveYourWeightTypes }
-func (PunchAboveYourWeightBlue) GoAgain() bool           { return false }
-func (PunchAboveYourWeightBlue) NotImplemented()         {}
+func (PunchAboveYourWeightBlue) ID() ids.CardID           { return ids.PunchAboveYourWeightBlue }
+func (PunchAboveYourWeightBlue) Name() string             { return "Punch Above Your Weight" }
+func (PunchAboveYourWeightBlue) DisplayName() string      { return "Punch Above Your Weight [B]" }
+func (PunchAboveYourWeightBlue) Cost(card.GameEngine) int { return 0 }
+func (PunchAboveYourWeightBlue) Pitch() int               { return 3 }
+func (PunchAboveYourWeightBlue) Attack() int              { return 2 }
+func (PunchAboveYourWeightBlue) Defense() int             { return 2 }
+func (PunchAboveYourWeightBlue) Types() card.TypeSet      { return punchAboveYourWeightTypes }
+func (PunchAboveYourWeightBlue) GoAgain() bool            { return false }
+func (PunchAboveYourWeightBlue) NotImplemented()          {}

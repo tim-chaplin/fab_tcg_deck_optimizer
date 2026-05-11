@@ -3,22 +3,21 @@
 package notimplemented
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 var foolSGoldTypes = card.NewTypeSet(card.TypeGeneric)
 
 type FoolsGoldYellow struct{}
 
-func (FoolsGoldYellow) ID() ids.CardID          { return ids.FoolsGoldYellow }
-func (FoolsGoldYellow) Name() string            { return "Fool's Gold" }
-func (FoolsGoldYellow) DisplayName() string     { return "Fool's Gold [Y]" }
-func (FoolsGoldYellow) Cost(sim.GameEngine) int { return 0 }
-func (FoolsGoldYellow) Pitch() int              { return 2 }
-func (FoolsGoldYellow) Attack() int             { return 0 }
-func (FoolsGoldYellow) Defense() int            { return 0 }
-func (FoolsGoldYellow) Types() card.TypeSet     { return foolSGoldTypes }
-func (FoolsGoldYellow) GoAgain() bool           { return false }
-func (FoolsGoldYellow) NotImplemented()         {}
+func (FoolsGoldYellow) ID() ids.CardID           { return ids.FoolsGoldYellow }
+func (FoolsGoldYellow) Name() string             { return "Fool's Gold" }
+func (FoolsGoldYellow) DisplayName() string      { return "Fool's Gold [Y]" }
+func (FoolsGoldYellow) Cost(card.GameEngine) int { return 0 }
+func (FoolsGoldYellow) Pitch() int               { return 2 }
+func (FoolsGoldYellow) Attack() int              { return 0 }
+func (FoolsGoldYellow) Defense() int             { return 0 }
+func (FoolsGoldYellow) Types() card.TypeSet      { return foolSGoldTypes }
+func (FoolsGoldYellow) GoAgain() bool            { return false }
+func (FoolsGoldYellow) NotImplemented()          {}

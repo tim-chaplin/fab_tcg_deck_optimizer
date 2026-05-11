@@ -5,6 +5,7 @@ import (
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 // TestVigorRush_BaseGoAgainFalse pins GoAgain() = false so EffectiveGoAgain short-circuits
@@ -26,7 +27,7 @@ func TestVigorRush_NoNonAttackActionNoGoAgain(t *testing.T) {
 			CardsPlayed:           []sim.Card{testutils.GenericAttack(0, 0)}, // attack, not non-attack
 			NonAttackActionPlayed: false,
 		})
-		self := &sim.CardState{Card: c}
+		self := &card.CardState{Card: c}
 		sim.ResolveChainStep(&s, s.Logger(), self)
 		if got := s.Value(); got != c.Attack() {
 			t.Errorf("%s: Play() = %d, want %d (base power)", c.Name(), got, c.Attack())
@@ -46,7 +47,7 @@ func TestVigorRush_NonAttackActionGrantsGoAgain(t *testing.T) {
 			CardsPlayed:           []sim.Card{testutils.GenericAction()},
 			NonAttackActionPlayed: true,
 		})
-		self := &sim.CardState{Card: c}
+		self := &card.CardState{Card: c}
 		sim.ResolveChainStep(&s, s.Logger(), self)
 		if !self.GrantedGoAgain {
 			t.Errorf("%s: GrantedGoAgain = false, want true (non-attack action → go again)", c.Name())

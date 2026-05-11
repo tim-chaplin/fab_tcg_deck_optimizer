@@ -5,27 +5,27 @@
 package cards
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
-func performanceBonusOnHit(s sim.GameEngine, l sim.Logger, self *sim.CardState, _ *sim.OnHitHandler) {
+func performanceBonusOnHit(s card.GameEngine, l card.Logger, self *card.CardState, _ *card.OnHitHandler) {
 	s.CreateGold(1)
 	l.AppendPostTrigger(self.Card.DisplayName(), "On-hit created a gold token", 0)
 }
 
-func performanceBonusPlay(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
+func performanceBonusPlay(s card.GameEngine, l card.Logger, self *card.CardState) {
 	self.GrantGoAgainIfFromArsenal()
 	self.RegisterOnHit(performanceBonusOnHit)
 }
 
-func (PerformanceBonusRed) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
+func (PerformanceBonusRed) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 	performanceBonusPlay(s, l, self)
 }
 
-func (PerformanceBonusYellow) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
+func (PerformanceBonusYellow) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 	performanceBonusPlay(s, l, self)
 }
 
-func (PerformanceBonusBlue) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
+func (PerformanceBonusBlue) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 	performanceBonusPlay(s, l, self)
 }

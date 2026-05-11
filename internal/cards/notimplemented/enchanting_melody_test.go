@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 // TestEnchantingMelody_SetsAuraCreated verifies every variant flips TurnState.AuraCreated (so
@@ -13,7 +14,7 @@ func TestEnchantingMelody_SetsAuraCreated(t *testing.T) {
 	cases := []sim.Card{EnchantingMelodyRed{}, EnchantingMelodyYellow{}, EnchantingMelodyBlue{}}
 	for _, c := range cases {
 		s := sim.TurnState{}
-		sim.ResolveChainStep(&s, s.Logger(), &sim.CardState{Card: c})
+		sim.ResolveChainStep(&s, s.Logger(), &card.CardState{Card: c})
 		if got := s.Value(); got != 0 {
 			t.Errorf("%s: Play() = %d, want 0", c.Name(), got)
 		}

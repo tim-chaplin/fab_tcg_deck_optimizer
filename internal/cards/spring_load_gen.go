@@ -3,45 +3,44 @@
 package cards
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 var springLoadTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 
 type SpringLoadRed struct{}
 
-func (SpringLoadRed) ID() ids.CardID          { return ids.SpringLoadRed }
-func (SpringLoadRed) Name() string            { return "Spring Load" }
-func (SpringLoadRed) DisplayName() string     { return "Spring Load [R]" }
-func (SpringLoadRed) Cost(sim.GameEngine) int { return 1 }
-func (SpringLoadRed) Pitch() int              { return 1 }
-func (SpringLoadRed) Attack() int             { return 2 }
-func (SpringLoadRed) Defense() int            { return 2 }
-func (SpringLoadRed) Types() card.TypeSet     { return springLoadTypes }
-func (SpringLoadRed) GoAgain() bool           { return false }
+func (SpringLoadRed) ID() ids.CardID           { return ids.SpringLoadRed }
+func (SpringLoadRed) Name() string             { return "Spring Load" }
+func (SpringLoadRed) DisplayName() string      { return "Spring Load [R]" }
+func (SpringLoadRed) Cost(card.GameEngine) int { return 1 }
+func (SpringLoadRed) Pitch() int               { return 1 }
+func (SpringLoadRed) Attack() int              { return 2 }
+func (SpringLoadRed) Defense() int             { return 2 }
+func (SpringLoadRed) Types() card.TypeSet      { return springLoadTypes }
+func (SpringLoadRed) GoAgain() bool            { return false }
 
 type SpringLoadYellow struct{}
 
-func (SpringLoadYellow) ID() ids.CardID          { return ids.SpringLoadYellow }
-func (SpringLoadYellow) Name() string            { return "Spring Load" }
-func (SpringLoadYellow) DisplayName() string     { return "Spring Load [Y]" }
-func (SpringLoadYellow) Cost(sim.GameEngine) int { return 1 }
-func (SpringLoadYellow) Pitch() int              { return 2 }
-func (SpringLoadYellow) Attack() int             { return 2 }
-func (SpringLoadYellow) Defense() int            { return 2 }
-func (SpringLoadYellow) Types() card.TypeSet     { return springLoadTypes }
-func (SpringLoadYellow) GoAgain() bool           { return false }
+func (SpringLoadYellow) ID() ids.CardID           { return ids.SpringLoadYellow }
+func (SpringLoadYellow) Name() string             { return "Spring Load" }
+func (SpringLoadYellow) DisplayName() string      { return "Spring Load [Y]" }
+func (SpringLoadYellow) Cost(card.GameEngine) int { return 1 }
+func (SpringLoadYellow) Pitch() int               { return 2 }
+func (SpringLoadYellow) Attack() int              { return 2 }
+func (SpringLoadYellow) Defense() int             { return 2 }
+func (SpringLoadYellow) Types() card.TypeSet      { return springLoadTypes }
+func (SpringLoadYellow) GoAgain() bool            { return false }
 
 type SpringLoadBlue struct{}
 
-func (SpringLoadBlue) ID() ids.CardID          { return ids.SpringLoadBlue }
-func (SpringLoadBlue) Name() string            { return "Spring Load" }
-func (SpringLoadBlue) DisplayName() string     { return "Spring Load [B]" }
-func (SpringLoadBlue) Cost(sim.GameEngine) int { return 1 }
-func (SpringLoadBlue) Pitch() int              { return 3 }
-func (SpringLoadBlue) Attack() int             { return 2 }
-func (SpringLoadBlue) Defense() int            { return 2 }
-func (SpringLoadBlue) Types() card.TypeSet     { return springLoadTypes }
-func (SpringLoadBlue) GoAgain() bool           { return false }
+func (SpringLoadBlue) ID() ids.CardID           { return ids.SpringLoadBlue }
+func (SpringLoadBlue) Name() string             { return "Spring Load" }
+func (SpringLoadBlue) DisplayName() string      { return "Spring Load [B]" }
+func (SpringLoadBlue) Cost(card.GameEngine) int { return 1 }
+func (SpringLoadBlue) Pitch() int               { return 3 }
+func (SpringLoadBlue) Attack() int              { return 2 }
+func (SpringLoadBlue) Defense() int             { return 2 }
+func (SpringLoadBlue) Types() card.TypeSet      { return springLoadTypes }
+func (SpringLoadBlue) GoAgain() bool            { return false }

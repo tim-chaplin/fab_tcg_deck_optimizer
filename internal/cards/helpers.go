@@ -5,8 +5,8 @@
 package cards
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 // --- Aura helpers ---
@@ -19,7 +19,7 @@ import (
 // reading the graveyard contents (which may include cards from prior turns) makes the
 // chain output depend on hidden state. Each caller owns its own AddValue + LogRider
 // because the printed wording differs ("Banished an aura, dealt 1 arcane damage").
-func banishAuraFromGraveyard(s sim.GameEngine) int {
+func banishAuraFromGraveyard(s card.GameEngine) int {
 	if _, ok := s.BanishFromGraveyard(func(c sim.Card) bool {
 		return c.Types().Has(card.TypeAura)
 	}); !ok {
@@ -40,7 +40,7 @@ func banishAuraFromGraveyard(s sim.GameEngine) int {
 // fragileAuraPlay emits the chain step for a fragile-aura card and writes the expected
 // payoff as a sub-line under self when fragileAuraValue is non-zero. Auras have Attack=0,
 // so LogPlay carries the chain entry; the rider line carries the predicted value.
-func fragileAuraPlay(s sim.GameEngine, l sim.Logger, self *sim.CardState, n int, attackActionOnly bool) {
+func fragileAuraPlay(s card.GameEngine, l card.Logger, self *card.CardState, n int, attackActionOnly bool) {
 	v := fragileAuraValue(s, n, attackActionOnly)
 	if v <= 0 {
 		return
@@ -55,7 +55,7 @@ func fragileAuraPlay(s sim.GameEngine, l sim.Logger, self *sim.CardState, n int,
 //
 // attackActionOnly gates the same-turn-pop check. Triggers restricted to "attack action
 // card" pass true (weapon swings don't qualify); triggers off any damage source pass false.
-func fragileAuraValue(s sim.GameEngine, n int, attackActionOnly bool) int {
+func fragileAuraValue(s card.GameEngine, n int, attackActionOnly bool) int {
 	if popsThisTurn(s, attackActionOnly) {
 		return n
 	}
@@ -75,7 +75,7 @@ func fragileAuraValue(s sim.GameEngine, n int, attackActionOnly bool) int {
 // damage from aura tokens, not a card attack — Dominate is an attack-keyword and doesn't
 // apply. The attacker-power check threads pc.EffectiveDominate() so a target with printed
 // (or granted) Dominate clears the 5+ bar.
-func popsThisTurn(s sim.GameEngine, attackActionOnly bool) bool {
+func popsThisTurn(s card.GameEngine, attackActionOnly bool) bool {
 	firstAttacker := true
 	for _, pc := range s.CardsRemaining() {
 		if !qualifiesAsAttacker(pc.Card, attackActionOnly) {
@@ -104,7 +104,7 @@ func qualifiesAsAttacker(c sim.Card, attackActionOnly bool) bool {
 // --- Mark helpers ---
 
 // markOpponentOnHit fires the printed "When this hits a hero, mark them" rider.
-func markOpponentOnHit(s sim.GameEngine, l sim.Logger, self *sim.CardState, _ *sim.OnHitHandler) {
+func markOpponentOnHit(s card.GameEngine, l card.Logger, self *card.CardState, _ *card.OnHitHandler) {
 	s.SetOpponentMarked(true)
 	l.AppendPostTrigger(self.Card.DisplayName(), "Marked the opposing hero", 0)
 }
@@ -117,7 +117,7 @@ func markOpponentOnHit(s sim.GameEngine, l sim.Logger, self *sim.CardState, _ *s
 // EffectiveAttack folds the bonus into LikelyToHit. Fizzles silently when no qualifying
 // target follows. Pass match as a top-level function value to keep the call alloc-free —
 // closures capturing s would escape to the heap.
-func GrantNextCardBonusAttack(s sim.GameEngine, n int, match func(sim.GameEngine, *sim.CardState) bool) {
+func GrantNextCardBonusAttack(s card.GameEngine, n int, match func(card.GameEngine, *card.CardState) bool) {
 	for _, pc := range s.CardsRemaining() {
 		if match(s, pc) {
 			pc.BonusAttack += n
@@ -128,18 +128,18 @@ func GrantNextCardBonusAttack(s sim.GameEngine, n int, match func(sim.GameEngine
 
 // IsAttack matches any scheduled attack — action card OR weapon swing — for
 // "your next attack" wording.
-func IsAttack(_ sim.GameEngine, pc *sim.CardState) bool {
+func IsAttack(_ card.GameEngine, pc *card.CardState) bool {
 	return pc.Card.Types().IsAttack()
 }
 
 // IsAttackAction matches scheduled attack action cards (excludes weapon swings)
 // for "the next attack action card" wording.
-func IsAttackAction(_ sim.GameEngine, pc *sim.CardState) bool {
+func IsAttackAction(_ card.GameEngine, pc *card.CardState) bool {
 	return pc.Card.Types().IsAttackAction()
 }
 
 // IsRunebladeAttack matches scheduled Runeblade attacks (action or weapon) for
 // "your next Runeblade attack" wording.
-func IsRunebladeAttack(_ sim.GameEngine, pc *sim.CardState) bool {
+func IsRunebladeAttack(_ card.GameEngine, pc *card.CardState) bool {
 	return pc.Card.Types().IsRunebladeAttack()
 }

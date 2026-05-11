@@ -3,45 +3,44 @@
 package cards
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 var moneyOrYourLifeTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 
 type MoneyOrYourLifeRed struct{}
 
-func (MoneyOrYourLifeRed) ID() ids.CardID          { return ids.MoneyOrYourLifeRed }
-func (MoneyOrYourLifeRed) Name() string            { return "Money or Your Life?" }
-func (MoneyOrYourLifeRed) DisplayName() string     { return "Money or Your Life? [R]" }
-func (MoneyOrYourLifeRed) Cost(sim.GameEngine) int { return 3 }
-func (MoneyOrYourLifeRed) Pitch() int              { return 1 }
-func (MoneyOrYourLifeRed) Attack() int             { return 6 }
-func (MoneyOrYourLifeRed) Defense() int            { return 2 }
-func (MoneyOrYourLifeRed) Types() card.TypeSet     { return moneyOrYourLifeTypes }
-func (MoneyOrYourLifeRed) GoAgain() bool           { return false }
+func (MoneyOrYourLifeRed) ID() ids.CardID           { return ids.MoneyOrYourLifeRed }
+func (MoneyOrYourLifeRed) Name() string             { return "Money or Your Life?" }
+func (MoneyOrYourLifeRed) DisplayName() string      { return "Money or Your Life? [R]" }
+func (MoneyOrYourLifeRed) Cost(card.GameEngine) int { return 3 }
+func (MoneyOrYourLifeRed) Pitch() int               { return 1 }
+func (MoneyOrYourLifeRed) Attack() int              { return 6 }
+func (MoneyOrYourLifeRed) Defense() int             { return 2 }
+func (MoneyOrYourLifeRed) Types() card.TypeSet      { return moneyOrYourLifeTypes }
+func (MoneyOrYourLifeRed) GoAgain() bool            { return false }
 
 type MoneyOrYourLifeYellow struct{}
 
-func (MoneyOrYourLifeYellow) ID() ids.CardID          { return ids.MoneyOrYourLifeYellow }
-func (MoneyOrYourLifeYellow) Name() string            { return "Money or Your Life?" }
-func (MoneyOrYourLifeYellow) DisplayName() string     { return "Money or Your Life? [Y]" }
-func (MoneyOrYourLifeYellow) Cost(sim.GameEngine) int { return 3 }
-func (MoneyOrYourLifeYellow) Pitch() int              { return 2 }
-func (MoneyOrYourLifeYellow) Attack() int             { return 5 }
-func (MoneyOrYourLifeYellow) Defense() int            { return 2 }
-func (MoneyOrYourLifeYellow) Types() card.TypeSet     { return moneyOrYourLifeTypes }
-func (MoneyOrYourLifeYellow) GoAgain() bool           { return false }
+func (MoneyOrYourLifeYellow) ID() ids.CardID           { return ids.MoneyOrYourLifeYellow }
+func (MoneyOrYourLifeYellow) Name() string             { return "Money or Your Life?" }
+func (MoneyOrYourLifeYellow) DisplayName() string      { return "Money or Your Life? [Y]" }
+func (MoneyOrYourLifeYellow) Cost(card.GameEngine) int { return 3 }
+func (MoneyOrYourLifeYellow) Pitch() int               { return 2 }
+func (MoneyOrYourLifeYellow) Attack() int              { return 5 }
+func (MoneyOrYourLifeYellow) Defense() int             { return 2 }
+func (MoneyOrYourLifeYellow) Types() card.TypeSet      { return moneyOrYourLifeTypes }
+func (MoneyOrYourLifeYellow) GoAgain() bool            { return false }
 
 type MoneyOrYourLifeBlue struct{}
 
-func (MoneyOrYourLifeBlue) ID() ids.CardID          { return ids.MoneyOrYourLifeBlue }
-func (MoneyOrYourLifeBlue) Name() string            { return "Money or Your Life?" }
-func (MoneyOrYourLifeBlue) DisplayName() string     { return "Money or Your Life? [B]" }
-func (MoneyOrYourLifeBlue) Cost(sim.GameEngine) int { return 3 }
-func (MoneyOrYourLifeBlue) Pitch() int              { return 3 }
-func (MoneyOrYourLifeBlue) Attack() int             { return 4 }
-func (MoneyOrYourLifeBlue) Defense() int            { return 2 }
-func (MoneyOrYourLifeBlue) Types() card.TypeSet     { return moneyOrYourLifeTypes }
-func (MoneyOrYourLifeBlue) GoAgain() bool           { return false }
+func (MoneyOrYourLifeBlue) ID() ids.CardID           { return ids.MoneyOrYourLifeBlue }
+func (MoneyOrYourLifeBlue) Name() string             { return "Money or Your Life?" }
+func (MoneyOrYourLifeBlue) DisplayName() string      { return "Money or Your Life? [B]" }
+func (MoneyOrYourLifeBlue) Cost(card.GameEngine) int { return 3 }
+func (MoneyOrYourLifeBlue) Pitch() int               { return 3 }
+func (MoneyOrYourLifeBlue) Attack() int              { return 4 }
+func (MoneyOrYourLifeBlue) Defense() int             { return 2 }
+func (MoneyOrYourLifeBlue) Types() card.TypeSet      { return moneyOrYourLifeTypes }
+func (MoneyOrYourLifeBlue) GoAgain() bool            { return false }

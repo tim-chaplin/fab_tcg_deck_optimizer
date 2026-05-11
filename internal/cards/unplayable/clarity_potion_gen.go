@@ -3,22 +3,21 @@
 package unplayable
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 var clarityPotionTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeItem)
 
 type ClarityPotionBlue struct{}
 
-func (ClarityPotionBlue) ID() ids.CardID          { return ids.ClarityPotionBlue }
-func (ClarityPotionBlue) Name() string            { return "Clarity Potion" }
-func (ClarityPotionBlue) DisplayName() string     { return "Clarity Potion [B]" }
-func (ClarityPotionBlue) Cost(sim.GameEngine) int { return 0 }
-func (ClarityPotionBlue) Pitch() int              { return 3 }
-func (ClarityPotionBlue) Attack() int             { return 0 }
-func (ClarityPotionBlue) Defense() int            { return 0 }
-func (ClarityPotionBlue) Types() card.TypeSet     { return clarityPotionTypes }
-func (ClarityPotionBlue) GoAgain() bool           { return false }
-func (ClarityPotionBlue) Unplayable()             {}
+func (ClarityPotionBlue) ID() ids.CardID           { return ids.ClarityPotionBlue }
+func (ClarityPotionBlue) Name() string             { return "Clarity Potion" }
+func (ClarityPotionBlue) DisplayName() string      { return "Clarity Potion [B]" }
+func (ClarityPotionBlue) Cost(card.GameEngine) int { return 0 }
+func (ClarityPotionBlue) Pitch() int               { return 3 }
+func (ClarityPotionBlue) Attack() int              { return 0 }
+func (ClarityPotionBlue) Defense() int             { return 0 }
+func (ClarityPotionBlue) Types() card.TypeSet      { return clarityPotionTypes }
+func (ClarityPotionBlue) GoAgain() bool            { return false }
+func (ClarityPotionBlue) Unplayable()              {}

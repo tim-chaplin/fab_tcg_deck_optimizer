@@ -3,45 +3,44 @@
 package cards
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 var tremorOfArathaelTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 
 type TremorOfIArathaelRed struct{}
 
-func (TremorOfIArathaelRed) ID() ids.CardID          { return ids.TremorOfIArathaelRed }
-func (TremorOfIArathaelRed) Name() string            { return "Tremor of íArathael" }
-func (TremorOfIArathaelRed) DisplayName() string     { return "Tremor of íArathael [R]" }
-func (TremorOfIArathaelRed) Cost(sim.GameEngine) int { return 1 }
-func (TremorOfIArathaelRed) Pitch() int              { return 1 }
-func (TremorOfIArathaelRed) Attack() int             { return 4 }
-func (TremorOfIArathaelRed) Defense() int            { return 2 }
-func (TremorOfIArathaelRed) Types() card.TypeSet     { return tremorOfArathaelTypes }
-func (TremorOfIArathaelRed) GoAgain() bool           { return false }
+func (TremorOfIArathaelRed) ID() ids.CardID           { return ids.TremorOfIArathaelRed }
+func (TremorOfIArathaelRed) Name() string             { return "Tremor of íArathael" }
+func (TremorOfIArathaelRed) DisplayName() string      { return "Tremor of íArathael [R]" }
+func (TremorOfIArathaelRed) Cost(card.GameEngine) int { return 1 }
+func (TremorOfIArathaelRed) Pitch() int               { return 1 }
+func (TremorOfIArathaelRed) Attack() int              { return 4 }
+func (TremorOfIArathaelRed) Defense() int             { return 2 }
+func (TremorOfIArathaelRed) Types() card.TypeSet      { return tremorOfArathaelTypes }
+func (TremorOfIArathaelRed) GoAgain() bool            { return false }
 
 type TremorOfIArathaelYellow struct{}
 
-func (TremorOfIArathaelYellow) ID() ids.CardID          { return ids.TremorOfIArathaelYellow }
-func (TremorOfIArathaelYellow) Name() string            { return "Tremor of íArathael" }
-func (TremorOfIArathaelYellow) DisplayName() string     { return "Tremor of íArathael [Y]" }
-func (TremorOfIArathaelYellow) Cost(sim.GameEngine) int { return 1 }
-func (TremorOfIArathaelYellow) Pitch() int              { return 2 }
-func (TremorOfIArathaelYellow) Attack() int             { return 3 }
-func (TremorOfIArathaelYellow) Defense() int            { return 2 }
-func (TremorOfIArathaelYellow) Types() card.TypeSet     { return tremorOfArathaelTypes }
-func (TremorOfIArathaelYellow) GoAgain() bool           { return false }
+func (TremorOfIArathaelYellow) ID() ids.CardID           { return ids.TremorOfIArathaelYellow }
+func (TremorOfIArathaelYellow) Name() string             { return "Tremor of íArathael" }
+func (TremorOfIArathaelYellow) DisplayName() string      { return "Tremor of íArathael [Y]" }
+func (TremorOfIArathaelYellow) Cost(card.GameEngine) int { return 1 }
+func (TremorOfIArathaelYellow) Pitch() int               { return 2 }
+func (TremorOfIArathaelYellow) Attack() int              { return 3 }
+func (TremorOfIArathaelYellow) Defense() int             { return 2 }
+func (TremorOfIArathaelYellow) Types() card.TypeSet      { return tremorOfArathaelTypes }
+func (TremorOfIArathaelYellow) GoAgain() bool            { return false }
 
 type TremorOfIArathaelBlue struct{}
 
-func (TremorOfIArathaelBlue) ID() ids.CardID          { return ids.TremorOfIArathaelBlue }
-func (TremorOfIArathaelBlue) Name() string            { return "Tremor of íArathael" }
-func (TremorOfIArathaelBlue) DisplayName() string     { return "Tremor of íArathael [B]" }
-func (TremorOfIArathaelBlue) Cost(sim.GameEngine) int { return 1 }
-func (TremorOfIArathaelBlue) Pitch() int              { return 3 }
-func (TremorOfIArathaelBlue) Attack() int             { return 2 }
-func (TremorOfIArathaelBlue) Defense() int            { return 2 }
-func (TremorOfIArathaelBlue) Types() card.TypeSet     { return tremorOfArathaelTypes }
-func (TremorOfIArathaelBlue) GoAgain() bool           { return false }
+func (TremorOfIArathaelBlue) ID() ids.CardID           { return ids.TremorOfIArathaelBlue }
+func (TremorOfIArathaelBlue) Name() string             { return "Tremor of íArathael" }
+func (TremorOfIArathaelBlue) DisplayName() string      { return "Tremor of íArathael [B]" }
+func (TremorOfIArathaelBlue) Cost(card.GameEngine) int { return 1 }
+func (TremorOfIArathaelBlue) Pitch() int               { return 3 }
+func (TremorOfIArathaelBlue) Attack() int              { return 2 }
+func (TremorOfIArathaelBlue) Defense() int             { return 2 }
+func (TremorOfIArathaelBlue) Types() card.TypeSet      { return tremorOfArathaelTypes }
+func (TremorOfIArathaelBlue) GoAgain() bool            { return false }

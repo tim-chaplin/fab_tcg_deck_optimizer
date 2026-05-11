@@ -3,21 +3,20 @@
 package cards
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 var bladeFlashTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAttackReaction)
 
 type BladeFlashBlue struct{}
 
-func (BladeFlashBlue) ID() ids.CardID          { return ids.BladeFlashBlue }
-func (BladeFlashBlue) Name() string            { return "Blade Flash" }
-func (BladeFlashBlue) DisplayName() string     { return "Blade Flash [B]" }
-func (BladeFlashBlue) Cost(sim.GameEngine) int { return 1 }
-func (BladeFlashBlue) Pitch() int              { return 3 }
-func (BladeFlashBlue) Attack() int             { return 0 }
-func (BladeFlashBlue) Defense() int            { return 2 }
-func (BladeFlashBlue) Types() card.TypeSet     { return bladeFlashTypes }
-func (BladeFlashBlue) GoAgain() bool           { return false }
+func (BladeFlashBlue) ID() ids.CardID           { return ids.BladeFlashBlue }
+func (BladeFlashBlue) Name() string             { return "Blade Flash" }
+func (BladeFlashBlue) DisplayName() string      { return "Blade Flash [B]" }
+func (BladeFlashBlue) Cost(card.GameEngine) int { return 1 }
+func (BladeFlashBlue) Pitch() int               { return 3 }
+func (BladeFlashBlue) Attack() int              { return 0 }
+func (BladeFlashBlue) Defense() int             { return 2 }
+func (BladeFlashBlue) Types() card.TypeSet      { return bladeFlashTypes }
+func (BladeFlashBlue) GoAgain() bool            { return false }

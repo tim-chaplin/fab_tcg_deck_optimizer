@@ -3,22 +3,21 @@
 package unplayable
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 var amuletOfAssertivenessTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeItem)
 
 type AmuletOfAssertivenessYellow struct{}
 
-func (AmuletOfAssertivenessYellow) ID() ids.CardID          { return ids.AmuletOfAssertivenessYellow }
-func (AmuletOfAssertivenessYellow) Name() string            { return "Amulet of Assertiveness" }
-func (AmuletOfAssertivenessYellow) DisplayName() string     { return "Amulet of Assertiveness [Y]" }
-func (AmuletOfAssertivenessYellow) Cost(sim.GameEngine) int { return 0 }
-func (AmuletOfAssertivenessYellow) Pitch() int              { return 2 }
-func (AmuletOfAssertivenessYellow) Attack() int             { return 0 }
-func (AmuletOfAssertivenessYellow) Defense() int            { return 0 }
-func (AmuletOfAssertivenessYellow) Types() card.TypeSet     { return amuletOfAssertivenessTypes }
-func (AmuletOfAssertivenessYellow) GoAgain() bool           { return true }
-func (AmuletOfAssertivenessYellow) Unplayable()             {}
+func (AmuletOfAssertivenessYellow) ID() ids.CardID           { return ids.AmuletOfAssertivenessYellow }
+func (AmuletOfAssertivenessYellow) Name() string             { return "Amulet of Assertiveness" }
+func (AmuletOfAssertivenessYellow) DisplayName() string      { return "Amulet of Assertiveness [Y]" }
+func (AmuletOfAssertivenessYellow) Cost(card.GameEngine) int { return 0 }
+func (AmuletOfAssertivenessYellow) Pitch() int               { return 2 }
+func (AmuletOfAssertivenessYellow) Attack() int              { return 0 }
+func (AmuletOfAssertivenessYellow) Defense() int             { return 0 }
+func (AmuletOfAssertivenessYellow) Types() card.TypeSet      { return amuletOfAssertivenessTypes }
+func (AmuletOfAssertivenessYellow) GoAgain() bool            { return true }
+func (AmuletOfAssertivenessYellow) Unplayable()              {}

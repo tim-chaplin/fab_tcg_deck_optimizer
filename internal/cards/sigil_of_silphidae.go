@@ -11,9 +11,10 @@ package cards
 
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
-func (c SigilOfSilphidaeBlue) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
+func (c SigilOfSilphidaeBlue) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 	enterDamage := banishAuraFromGraveyard(s)
 	s.AddAura(sim.Aura{
 		Trigger: sim.Trigger{TriggerType: sim.TriggerStartOfTurn, Handler: sigilOfSilphidaeAuraHandler},
@@ -28,7 +29,7 @@ func (c SigilOfSilphidaeBlue) Play(s sim.GameEngine, l sim.Logger, self *sim.Car
 
 // sigilOfSilphidaeAuraHandler runs the leave trigger on the next turn: scans the graveyard
 // for an aura to banish, credits 1 arcane damage on a hit, then destroys the aura.
-func sigilOfSilphidaeAuraHandler(s *sim.TurnState, l sim.Logger, _ *sim.Trigger, a *sim.Aura) {
+func sigilOfSilphidaeAuraHandler(s *sim.TurnState, l card.Logger, _ *sim.Trigger, a *sim.Aura) {
 	n := banishAuraFromGraveyard(s)
 	if n > 0 {
 		s.AddValue(n)

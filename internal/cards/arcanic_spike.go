@@ -9,28 +9,28 @@
 package cards
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 // arcaneDamageBonus is the +2{p} gained when the "dealt arcane damage this turn" clause is live.
 const arcaneDamageBonus = 2
 
 // arcanicSpikeBonus returns the +2{p} power buff when ArcaneDamageDealt is set, else 0.
-func arcanicSpikeBonus(s sim.GameEngine) int {
+func arcanicSpikeBonus(s card.GameEngine) int {
 	if s != nil && s.ArcaneDamageDealt() {
 		return arcaneDamageBonus
 	}
 	return 0
 }
 
-func (ArcanicSpikeRed) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
+func (ArcanicSpikeRed) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 	self.BonusAttack += arcanicSpikeBonus(s)
 }
 
-func (ArcanicSpikeYellow) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
+func (ArcanicSpikeYellow) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 	self.BonusAttack += arcanicSpikeBonus(s)
 }
 
-func (ArcanicSpikeBlue) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
+func (ArcanicSpikeBlue) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 	self.BonusAttack += arcanicSpikeBonus(s)
 }

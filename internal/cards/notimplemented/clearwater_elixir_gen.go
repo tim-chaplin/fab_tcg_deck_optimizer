@@ -3,22 +3,21 @@
 package notimplemented
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 var clearwaterElixirTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction)
 
 type ClearwaterElixirRed struct{}
 
-func (ClearwaterElixirRed) ID() ids.CardID          { return ids.ClearwaterElixirRed }
-func (ClearwaterElixirRed) Name() string            { return "Clearwater Elixir" }
-func (ClearwaterElixirRed) DisplayName() string     { return "Clearwater Elixir [R]" }
-func (ClearwaterElixirRed) Cost(sim.GameEngine) int { return 1 }
-func (ClearwaterElixirRed) Pitch() int              { return 1 }
-func (ClearwaterElixirRed) Attack() int             { return 0 }
-func (ClearwaterElixirRed) Defense() int            { return 3 }
-func (ClearwaterElixirRed) Types() card.TypeSet     { return clearwaterElixirTypes }
-func (ClearwaterElixirRed) GoAgain() bool           { return true }
-func (ClearwaterElixirRed) NotImplemented()         {}
+func (ClearwaterElixirRed) ID() ids.CardID           { return ids.ClearwaterElixirRed }
+func (ClearwaterElixirRed) Name() string             { return "Clearwater Elixir" }
+func (ClearwaterElixirRed) DisplayName() string      { return "Clearwater Elixir [R]" }
+func (ClearwaterElixirRed) Cost(card.GameEngine) int { return 1 }
+func (ClearwaterElixirRed) Pitch() int               { return 1 }
+func (ClearwaterElixirRed) Attack() int              { return 0 }
+func (ClearwaterElixirRed) Defense() int             { return 3 }
+func (ClearwaterElixirRed) Types() card.TypeSet      { return clearwaterElixirTypes }
+func (ClearwaterElixirRed) GoAgain() bool            { return true }
+func (ClearwaterElixirRed) NotImplemented()          {}

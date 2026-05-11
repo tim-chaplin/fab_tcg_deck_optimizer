@@ -9,10 +9,10 @@
 package cards
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
-func blusterBuffPlay(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
+func blusterBuffPlay(s card.GameEngine, l card.Logger, self *card.CardState) {
 	if self.Mode == 0 {
 		self.BonusAttack -= 1
 	}
@@ -20,6 +20,6 @@ func blusterBuffPlay(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 
 func (BlusterBuffRed) Modes() int              { return 2 }
 func (BlusterBuffRed) ModalCost(mode int8) int { return 1 + int(mode) }
-func (BlusterBuffRed) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
+func (BlusterBuffRed) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 	blusterBuffPlay(s, l, self)
 }

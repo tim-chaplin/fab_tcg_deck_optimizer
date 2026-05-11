@@ -10,27 +10,27 @@
 package notimplemented
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
-func scourTheBattlescapePlay(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
+func scourTheBattlescapePlay(s card.GameEngine, l card.Logger, self *card.CardState) {
 	self.GrantGoAgainIfFromArsenal()
 }
 
 // not implemented: hand-cycle rider (put a card on bottom of deck, draw)
 
-func (ScourTheBattlescapeRed) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
+func (ScourTheBattlescapeRed) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 	scourTheBattlescapePlay(s, l, self)
 }
 
 // not implemented: hand-cycle rider (put a card on bottom of deck, draw)
 
-func (ScourTheBattlescapeYellow) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
+func (ScourTheBattlescapeYellow) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 	scourTheBattlescapePlay(s, l, self)
 }
 
 // not implemented: hand-cycle rider (put a card on bottom of deck, draw)
 
-func (ScourTheBattlescapeBlue) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
+func (ScourTheBattlescapeBlue) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 	scourTheBattlescapePlay(s, l, self)
 }

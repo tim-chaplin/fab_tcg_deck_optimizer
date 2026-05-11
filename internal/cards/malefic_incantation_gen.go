@@ -3,45 +3,44 @@
 package cards
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 var maleficIncantationTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeAction, card.TypeAura)
 
 type MaleficIncantationRed struct{}
 
-func (MaleficIncantationRed) ID() ids.CardID          { return ids.MaleficIncantationRed }
-func (MaleficIncantationRed) Name() string            { return "Malefic Incantation" }
-func (MaleficIncantationRed) DisplayName() string     { return "Malefic Incantation [R]" }
-func (MaleficIncantationRed) Cost(sim.GameEngine) int { return 0 }
-func (MaleficIncantationRed) Pitch() int              { return 1 }
-func (MaleficIncantationRed) Attack() int             { return 0 }
-func (MaleficIncantationRed) Defense() int            { return 2 }
-func (MaleficIncantationRed) Types() card.TypeSet     { return maleficIncantationTypes }
-func (MaleficIncantationRed) GoAgain() bool           { return true }
+func (MaleficIncantationRed) ID() ids.CardID           { return ids.MaleficIncantationRed }
+func (MaleficIncantationRed) Name() string             { return "Malefic Incantation" }
+func (MaleficIncantationRed) DisplayName() string      { return "Malefic Incantation [R]" }
+func (MaleficIncantationRed) Cost(card.GameEngine) int { return 0 }
+func (MaleficIncantationRed) Pitch() int               { return 1 }
+func (MaleficIncantationRed) Attack() int              { return 0 }
+func (MaleficIncantationRed) Defense() int             { return 2 }
+func (MaleficIncantationRed) Types() card.TypeSet      { return maleficIncantationTypes }
+func (MaleficIncantationRed) GoAgain() bool            { return true }
 
 type MaleficIncantationYellow struct{}
 
-func (MaleficIncantationYellow) ID() ids.CardID          { return ids.MaleficIncantationYellow }
-func (MaleficIncantationYellow) Name() string            { return "Malefic Incantation" }
-func (MaleficIncantationYellow) DisplayName() string     { return "Malefic Incantation [Y]" }
-func (MaleficIncantationYellow) Cost(sim.GameEngine) int { return 0 }
-func (MaleficIncantationYellow) Pitch() int              { return 2 }
-func (MaleficIncantationYellow) Attack() int             { return 0 }
-func (MaleficIncantationYellow) Defense() int            { return 2 }
-func (MaleficIncantationYellow) Types() card.TypeSet     { return maleficIncantationTypes }
-func (MaleficIncantationYellow) GoAgain() bool           { return true }
+func (MaleficIncantationYellow) ID() ids.CardID           { return ids.MaleficIncantationYellow }
+func (MaleficIncantationYellow) Name() string             { return "Malefic Incantation" }
+func (MaleficIncantationYellow) DisplayName() string      { return "Malefic Incantation [Y]" }
+func (MaleficIncantationYellow) Cost(card.GameEngine) int { return 0 }
+func (MaleficIncantationYellow) Pitch() int               { return 2 }
+func (MaleficIncantationYellow) Attack() int              { return 0 }
+func (MaleficIncantationYellow) Defense() int             { return 2 }
+func (MaleficIncantationYellow) Types() card.TypeSet      { return maleficIncantationTypes }
+func (MaleficIncantationYellow) GoAgain() bool            { return true }
 
 type MaleficIncantationBlue struct{}
 
-func (MaleficIncantationBlue) ID() ids.CardID          { return ids.MaleficIncantationBlue }
-func (MaleficIncantationBlue) Name() string            { return "Malefic Incantation" }
-func (MaleficIncantationBlue) DisplayName() string     { return "Malefic Incantation [B]" }
-func (MaleficIncantationBlue) Cost(sim.GameEngine) int { return 0 }
-func (MaleficIncantationBlue) Pitch() int              { return 3 }
-func (MaleficIncantationBlue) Attack() int             { return 0 }
-func (MaleficIncantationBlue) Defense() int            { return 2 }
-func (MaleficIncantationBlue) Types() card.TypeSet     { return maleficIncantationTypes }
-func (MaleficIncantationBlue) GoAgain() bool           { return true }
+func (MaleficIncantationBlue) ID() ids.CardID           { return ids.MaleficIncantationBlue }
+func (MaleficIncantationBlue) Name() string             { return "Malefic Incantation" }
+func (MaleficIncantationBlue) DisplayName() string      { return "Malefic Incantation [B]" }
+func (MaleficIncantationBlue) Cost(card.GameEngine) int { return 0 }
+func (MaleficIncantationBlue) Pitch() int               { return 3 }
+func (MaleficIncantationBlue) Attack() int              { return 0 }
+func (MaleficIncantationBlue) Defense() int             { return 2 }
+func (MaleficIncantationBlue) Types() card.TypeSet      { return maleficIncantationTypes }
+func (MaleficIncantationBlue) GoAgain() bool            { return true }

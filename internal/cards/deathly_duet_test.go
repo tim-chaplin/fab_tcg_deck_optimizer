@@ -5,6 +5,7 @@ import (
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 func TestDeathlyDuet_BaseDamage(t *testing.T) {
@@ -19,7 +20,7 @@ func TestDeathlyDuet_BaseDamage(t *testing.T) {
 	}
 	for _, tc := range cases {
 		var s sim.TurnState
-		sim.ResolveChainStep(&s, s.Logger(), &sim.CardState{Card: tc.c})
+		sim.ResolveChainStep(&s, s.Logger(), &card.CardState{Card: tc.c})
 		if got := s.Value(); got != tc.want {
 			t.Errorf("%s: Play() = %d, want %d", tc.c.Name(), got, tc.want)
 		}
@@ -29,7 +30,7 @@ func TestDeathlyDuet_BaseDamage(t *testing.T) {
 func TestDeathlyDuet_AttackAttributedAddsPower(t *testing.T) {
 	// Attack attributed → +2{p}.
 	var s sim.TurnState
-	self := &sim.CardState{
+	self := &card.CardState{
 		Card:          DeathlyDuetRed{},
 		PitchedToPlay: []sim.Card{testutils.RunebladeAttack{}},
 	}
@@ -44,7 +45,7 @@ func TestDeathlyDuet_NonAttackActionAttributedCreatesRunechants(t *testing.T) {
 	// Play returns base + 2 (Deathly Duet Red base 4 + 2 token credits = 6). state.Runechants=2
 	// for downstream consume bookkeeping.
 	var s sim.TurnState
-	self := &sim.CardState{
+	self := &card.CardState{
 		Card:          DeathlyDuetRed{},
 		PitchedToPlay: []sim.Card{testutils.NonAttack{}},
 	}
@@ -64,7 +65,7 @@ func TestDeathlyDuet_BothBranchesFire(t *testing.T) {
 	// Both an attack AND a non-attack action attributed → both riders fire: +2 power bonus,
 	// plus 2 Runechants credited +1 each at creation. Play returns base 4 + 2 power + 2 = 8.
 	var s sim.TurnState
-	self := &sim.CardState{
+	self := &card.CardState{
 		Card:          DeathlyDuetRed{},
 		PitchedToPlay: []sim.Card{testutils.RunebladeAttack{}, testutils.NonAttack{}},
 	}

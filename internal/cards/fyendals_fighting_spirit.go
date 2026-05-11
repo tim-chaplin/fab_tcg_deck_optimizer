@@ -7,11 +7,12 @@ package cards
 
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 // fyendalsFightingSpiritApplyRider emits the 1{h} gain as a sub-line under self when the
 // current hero opts into LowerHealthWanter.
-func fyendalsFightingSpiritApplyRider(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
+func fyendalsFightingSpiritApplyRider(s card.GameEngine, l card.Logger, self *card.CardState) {
 	if !sim.HeroWantsLowerHealth() {
 		return
 	}
@@ -19,14 +20,14 @@ func fyendalsFightingSpiritApplyRider(s sim.GameEngine, l sim.Logger, self *sim.
 	l.AppendPostTrigger(self.Card.DisplayName(), "Gained 1 health (lower health than opposing hero)", 1)
 }
 
-func (FyendalsFightingSpiritRed) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
+func (FyendalsFightingSpiritRed) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 	fyendalsFightingSpiritApplyRider(s, l, self)
 }
 
-func (FyendalsFightingSpiritYellow) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
+func (FyendalsFightingSpiritYellow) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 	fyendalsFightingSpiritApplyRider(s, l, self)
 }
 
-func (FyendalsFightingSpiritBlue) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
+func (FyendalsFightingSpiritBlue) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 	fyendalsFightingSpiritApplyRider(s, l, self)
 }

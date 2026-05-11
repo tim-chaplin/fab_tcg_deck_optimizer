@@ -9,23 +9,23 @@
 package cards
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
-func vigorRushPlay(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
+func vigorRushPlay(s card.GameEngine, l card.Logger, self *card.CardState) {
 	if s.NonAttackActionPlayed() {
 		self.GrantedGoAgain = true
 	}
 }
 
-func (VigorRushRed) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
+func (VigorRushRed) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 	vigorRushPlay(s, l, self)
 }
 
-func (VigorRushYellow) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
+func (VigorRushYellow) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 	vigorRushPlay(s, l, self)
 }
 
-func (VigorRushBlue) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
+func (VigorRushBlue) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 	vigorRushPlay(s, l, self)
 }

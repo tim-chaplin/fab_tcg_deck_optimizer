@@ -6,20 +6,20 @@
 package notimplemented
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 // not implemented: pay-{r}{r}{r}-for-+5{p} mode
 
-func (c PunchAboveYourWeightRed) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
+func (c PunchAboveYourWeightRed) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 }
 
 // not implemented: pay-{r}{r}{r}-for-+5{p} mode
 
-func (c PunchAboveYourWeightYellow) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
+func (c PunchAboveYourWeightYellow) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 }
 
 // not implemented: pay-{r}{r}{r}-for-+5{p} mode
 
-func (c PunchAboveYourWeightBlue) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
+func (c PunchAboveYourWeightBlue) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 }

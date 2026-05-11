@@ -6,10 +6,10 @@
 package notimplemented
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 // not implemented: self-destroys + wipes all arsenals on a 2-damage hit
 
-func (TalismanOfWarfareYellow) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
+func (TalismanOfWarfareYellow) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 }

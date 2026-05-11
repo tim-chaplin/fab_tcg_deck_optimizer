@@ -6,13 +6,13 @@
 package notimplemented
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
 )
 
 // not implemented: Bloodrot Pox health-gain rider dropped (status tokens not tracked)
 
-func (ClearwaterElixirRed) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
+func (ClearwaterElixirRed) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 	cards.GrantNextCardBonusAttack(s, 3, cards.IsAttack)
 }

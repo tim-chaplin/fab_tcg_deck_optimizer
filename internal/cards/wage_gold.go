@@ -7,26 +7,26 @@
 package cards
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
-func wageGoldOnHit(s sim.GameEngine, l sim.Logger, self *sim.CardState, _ *sim.OnHitHandler) {
+func wageGoldOnHit(s card.GameEngine, l card.Logger, self *card.CardState, _ *card.OnHitHandler) {
 	s.CreateGold(1)
 	l.AppendPostTrigger(self.Card.DisplayName(), "On-hit won wager", 0)
 }
 
-func wageGoldPlay(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
+func wageGoldPlay(s card.GameEngine, l card.Logger, self *card.CardState) {
 	self.RegisterOnHit(wageGoldOnHit)
 }
 
-func (WageGoldRed) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
+func (WageGoldRed) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 	wageGoldPlay(s, l, self)
 }
 
-func (WageGoldYellow) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
+func (WageGoldYellow) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 	wageGoldPlay(s, l, self)
 }
 
-func (WageGoldBlue) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
+func (WageGoldBlue) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 	wageGoldPlay(s, l, self)
 }

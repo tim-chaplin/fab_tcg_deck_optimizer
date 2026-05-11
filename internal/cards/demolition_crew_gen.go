@@ -3,45 +3,44 @@
 package cards
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 var demolitionCrewTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 
 type DemolitionCrewRed struct{}
 
-func (DemolitionCrewRed) ID() ids.CardID          { return ids.DemolitionCrewRed }
-func (DemolitionCrewRed) Name() string            { return "Demolition Crew" }
-func (DemolitionCrewRed) DisplayName() string     { return "Demolition Crew [R]" }
-func (DemolitionCrewRed) Cost(sim.GameEngine) int { return 2 }
-func (DemolitionCrewRed) Pitch() int              { return 1 }
-func (DemolitionCrewRed) Attack() int             { return 6 }
-func (DemolitionCrewRed) Defense() int            { return 2 }
-func (DemolitionCrewRed) Types() card.TypeSet     { return demolitionCrewTypes }
-func (DemolitionCrewRed) GoAgain() bool           { return false }
+func (DemolitionCrewRed) ID() ids.CardID           { return ids.DemolitionCrewRed }
+func (DemolitionCrewRed) Name() string             { return "Demolition Crew" }
+func (DemolitionCrewRed) DisplayName() string      { return "Demolition Crew [R]" }
+func (DemolitionCrewRed) Cost(card.GameEngine) int { return 2 }
+func (DemolitionCrewRed) Pitch() int               { return 1 }
+func (DemolitionCrewRed) Attack() int              { return 6 }
+func (DemolitionCrewRed) Defense() int             { return 2 }
+func (DemolitionCrewRed) Types() card.TypeSet      { return demolitionCrewTypes }
+func (DemolitionCrewRed) GoAgain() bool            { return false }
 
 type DemolitionCrewYellow struct{}
 
-func (DemolitionCrewYellow) ID() ids.CardID          { return ids.DemolitionCrewYellow }
-func (DemolitionCrewYellow) Name() string            { return "Demolition Crew" }
-func (DemolitionCrewYellow) DisplayName() string     { return "Demolition Crew [Y]" }
-func (DemolitionCrewYellow) Cost(sim.GameEngine) int { return 2 }
-func (DemolitionCrewYellow) Pitch() int              { return 2 }
-func (DemolitionCrewYellow) Attack() int             { return 5 }
-func (DemolitionCrewYellow) Defense() int            { return 2 }
-func (DemolitionCrewYellow) Types() card.TypeSet     { return demolitionCrewTypes }
-func (DemolitionCrewYellow) GoAgain() bool           { return false }
+func (DemolitionCrewYellow) ID() ids.CardID           { return ids.DemolitionCrewYellow }
+func (DemolitionCrewYellow) Name() string             { return "Demolition Crew" }
+func (DemolitionCrewYellow) DisplayName() string      { return "Demolition Crew [Y]" }
+func (DemolitionCrewYellow) Cost(card.GameEngine) int { return 2 }
+func (DemolitionCrewYellow) Pitch() int               { return 2 }
+func (DemolitionCrewYellow) Attack() int              { return 5 }
+func (DemolitionCrewYellow) Defense() int             { return 2 }
+func (DemolitionCrewYellow) Types() card.TypeSet      { return demolitionCrewTypes }
+func (DemolitionCrewYellow) GoAgain() bool            { return false }
 
 type DemolitionCrewBlue struct{}
 
-func (DemolitionCrewBlue) ID() ids.CardID          { return ids.DemolitionCrewBlue }
-func (DemolitionCrewBlue) Name() string            { return "Demolition Crew" }
-func (DemolitionCrewBlue) DisplayName() string     { return "Demolition Crew [B]" }
-func (DemolitionCrewBlue) Cost(sim.GameEngine) int { return 2 }
-func (DemolitionCrewBlue) Pitch() int              { return 3 }
-func (DemolitionCrewBlue) Attack() int             { return 4 }
-func (DemolitionCrewBlue) Defense() int            { return 2 }
-func (DemolitionCrewBlue) Types() card.TypeSet     { return demolitionCrewTypes }
-func (DemolitionCrewBlue) GoAgain() bool           { return false }
+func (DemolitionCrewBlue) ID() ids.CardID           { return ids.DemolitionCrewBlue }
+func (DemolitionCrewBlue) Name() string             { return "Demolition Crew" }
+func (DemolitionCrewBlue) DisplayName() string      { return "Demolition Crew [B]" }
+func (DemolitionCrewBlue) Cost(card.GameEngine) int { return 2 }
+func (DemolitionCrewBlue) Pitch() int               { return 3 }
+func (DemolitionCrewBlue) Attack() int              { return 4 }
+func (DemolitionCrewBlue) Defense() int             { return 2 }
+func (DemolitionCrewBlue) Types() card.TypeSet      { return demolitionCrewTypes }
+func (DemolitionCrewBlue) GoAgain() bool            { return false }

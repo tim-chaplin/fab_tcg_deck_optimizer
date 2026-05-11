@@ -3,22 +3,21 @@
 package unplayable
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 var timesnapPotionTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeItem)
 
 type TimesnapPotionBlue struct{}
 
-func (TimesnapPotionBlue) ID() ids.CardID          { return ids.TimesnapPotionBlue }
-func (TimesnapPotionBlue) Name() string            { return "Timesnap Potion" }
-func (TimesnapPotionBlue) DisplayName() string     { return "Timesnap Potion [B]" }
-func (TimesnapPotionBlue) Cost(sim.GameEngine) int { return 0 }
-func (TimesnapPotionBlue) Pitch() int              { return 3 }
-func (TimesnapPotionBlue) Attack() int             { return 0 }
-func (TimesnapPotionBlue) Defense() int            { return 0 }
-func (TimesnapPotionBlue) Types() card.TypeSet     { return timesnapPotionTypes }
-func (TimesnapPotionBlue) GoAgain() bool           { return false }
-func (TimesnapPotionBlue) Unplayable()             {}
+func (TimesnapPotionBlue) ID() ids.CardID           { return ids.TimesnapPotionBlue }
+func (TimesnapPotionBlue) Name() string             { return "Timesnap Potion" }
+func (TimesnapPotionBlue) DisplayName() string      { return "Timesnap Potion [B]" }
+func (TimesnapPotionBlue) Cost(card.GameEngine) int { return 0 }
+func (TimesnapPotionBlue) Pitch() int               { return 3 }
+func (TimesnapPotionBlue) Attack() int              { return 0 }
+func (TimesnapPotionBlue) Defense() int             { return 0 }
+func (TimesnapPotionBlue) Types() card.TypeSet      { return timesnapPotionTypes }
+func (TimesnapPotionBlue) GoAgain() bool            { return false }
+func (TimesnapPotionBlue) Unplayable()              {}

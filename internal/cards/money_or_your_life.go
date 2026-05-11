@@ -9,12 +9,12 @@
 package cards
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
 
-func moneyOrYourLifeOnHit(s sim.GameEngine, l sim.Logger, self *sim.CardState, _ *sim.OnHitHandler) {
+func moneyOrYourLifeOnHit(s card.GameEngine, l card.Logger, self *card.CardState, _ *card.OnHitHandler) {
 	n := 2
 	if sim.CurrentHero != nil && sim.CurrentHero.Types().Has(card.TypeThief) {
 		n = 4
@@ -23,18 +23,18 @@ func moneyOrYourLifeOnHit(s sim.GameEngine, l sim.Logger, self *sim.CardState, _
 	l.AppendPostTriggerf(self.Card.DisplayName(), n, "On-hit dealt %d (opponent surrendered no Gold)", n)
 }
 
-func moneyOrYourLifePlay(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
+func moneyOrYourLifePlay(s card.GameEngine, l card.Logger, self *card.CardState) {
 	self.RegisterOnHit(moneyOrYourLifeOnHit)
 }
 
-func (MoneyOrYourLifeRed) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
+func (MoneyOrYourLifeRed) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 	moneyOrYourLifePlay(s, l, self)
 }
 
-func (MoneyOrYourLifeYellow) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
+func (MoneyOrYourLifeYellow) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 	moneyOrYourLifePlay(s, l, self)
 }
 
-func (MoneyOrYourLifeBlue) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
+func (MoneyOrYourLifeBlue) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 	moneyOrYourLifePlay(s, l, self)
 }

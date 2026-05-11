@@ -10,26 +10,26 @@
 package cards
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 // weepingBattlegroundPlay emits the chain step then writes the banish-for-arcane rider as
 // a sub-line under self when an aura was successfully banished from the graveyard.
-func weepingBattlegroundPlay(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
+func weepingBattlegroundPlay(s card.GameEngine, l card.Logger, self *card.CardState) {
 	if n := banishAuraFromGraveyard(s); n > 0 {
 		s.AddValue(n)
 		l.AppendPostTrigger(self.Card.DisplayName(), "Banished an aura, dealt 1 arcane damage", n)
 	}
 }
 
-func (WeepingBattlegroundRed) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
+func (WeepingBattlegroundRed) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 	weepingBattlegroundPlay(s, l, self)
 }
 
-func (WeepingBattlegroundYellow) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
+func (WeepingBattlegroundYellow) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 	weepingBattlegroundPlay(s, l, self)
 }
 
-func (WeepingBattlegroundBlue) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
+func (WeepingBattlegroundBlue) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 	weepingBattlegroundPlay(s, l, self)
 }

@@ -10,14 +10,14 @@
 package cards
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 // ravenousRabbleApplyDebuff routes the -X{p} self-debuff (X = revealed deck-top pitch)
 // through self.BonusAttack so EffectiveAttack and LikelyToHit see the debuffed power; the
 // chain step's (+N) reflects the post-clamp result. No deck top means no penalty. Reads
 // the deck top so the cacheable bit flips — the debuff size depends on hidden shuffle order.
-func ravenousRabbleApplyDebuff(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
+func ravenousRabbleApplyDebuff(s card.GameEngine, l card.Logger, self *card.CardState) {
 	top, ok := s.PeekDeck()
 	if !ok {
 		return
@@ -25,14 +25,14 @@ func ravenousRabbleApplyDebuff(s sim.GameEngine, l sim.Logger, self *sim.CardSta
 	self.BonusAttack -= top.Pitch()
 }
 
-func (RavenousRabbleRed) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
+func (RavenousRabbleRed) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 	ravenousRabbleApplyDebuff(s, l, self)
 }
 
-func (RavenousRabbleYellow) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
+func (RavenousRabbleYellow) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 	ravenousRabbleApplyDebuff(s, l, self)
 }
 
-func (RavenousRabbleBlue) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
+func (RavenousRabbleBlue) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 	ravenousRabbleApplyDebuff(s, l, self)
 }

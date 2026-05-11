@@ -3,45 +3,44 @@
 package cards
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 var brutalAssaultTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 
 type BrutalAssaultRed struct{}
 
-func (BrutalAssaultRed) ID() ids.CardID          { return ids.BrutalAssaultRed }
-func (BrutalAssaultRed) Name() string            { return "Brutal Assault" }
-func (BrutalAssaultRed) DisplayName() string     { return "Brutal Assault [R]" }
-func (BrutalAssaultRed) Cost(sim.GameEngine) int { return 2 }
-func (BrutalAssaultRed) Pitch() int              { return 1 }
-func (BrutalAssaultRed) Attack() int             { return 6 }
-func (BrutalAssaultRed) Defense() int            { return 3 }
-func (BrutalAssaultRed) Types() card.TypeSet     { return brutalAssaultTypes }
-func (BrutalAssaultRed) GoAgain() bool           { return false }
+func (BrutalAssaultRed) ID() ids.CardID           { return ids.BrutalAssaultRed }
+func (BrutalAssaultRed) Name() string             { return "Brutal Assault" }
+func (BrutalAssaultRed) DisplayName() string      { return "Brutal Assault [R]" }
+func (BrutalAssaultRed) Cost(card.GameEngine) int { return 2 }
+func (BrutalAssaultRed) Pitch() int               { return 1 }
+func (BrutalAssaultRed) Attack() int              { return 6 }
+func (BrutalAssaultRed) Defense() int             { return 3 }
+func (BrutalAssaultRed) Types() card.TypeSet      { return brutalAssaultTypes }
+func (BrutalAssaultRed) GoAgain() bool            { return false }
 
 type BrutalAssaultYellow struct{}
 
-func (BrutalAssaultYellow) ID() ids.CardID          { return ids.BrutalAssaultYellow }
-func (BrutalAssaultYellow) Name() string            { return "Brutal Assault" }
-func (BrutalAssaultYellow) DisplayName() string     { return "Brutal Assault [Y]" }
-func (BrutalAssaultYellow) Cost(sim.GameEngine) int { return 2 }
-func (BrutalAssaultYellow) Pitch() int              { return 2 }
-func (BrutalAssaultYellow) Attack() int             { return 5 }
-func (BrutalAssaultYellow) Defense() int            { return 3 }
-func (BrutalAssaultYellow) Types() card.TypeSet     { return brutalAssaultTypes }
-func (BrutalAssaultYellow) GoAgain() bool           { return false }
+func (BrutalAssaultYellow) ID() ids.CardID           { return ids.BrutalAssaultYellow }
+func (BrutalAssaultYellow) Name() string             { return "Brutal Assault" }
+func (BrutalAssaultYellow) DisplayName() string      { return "Brutal Assault [Y]" }
+func (BrutalAssaultYellow) Cost(card.GameEngine) int { return 2 }
+func (BrutalAssaultYellow) Pitch() int               { return 2 }
+func (BrutalAssaultYellow) Attack() int              { return 5 }
+func (BrutalAssaultYellow) Defense() int             { return 3 }
+func (BrutalAssaultYellow) Types() card.TypeSet      { return brutalAssaultTypes }
+func (BrutalAssaultYellow) GoAgain() bool            { return false }
 
 type BrutalAssaultBlue struct{}
 
-func (BrutalAssaultBlue) ID() ids.CardID          { return ids.BrutalAssaultBlue }
-func (BrutalAssaultBlue) Name() string            { return "Brutal Assault" }
-func (BrutalAssaultBlue) DisplayName() string     { return "Brutal Assault [B]" }
-func (BrutalAssaultBlue) Cost(sim.GameEngine) int { return 2 }
-func (BrutalAssaultBlue) Pitch() int              { return 3 }
-func (BrutalAssaultBlue) Attack() int             { return 4 }
-func (BrutalAssaultBlue) Defense() int            { return 3 }
-func (BrutalAssaultBlue) Types() card.TypeSet     { return brutalAssaultTypes }
-func (BrutalAssaultBlue) GoAgain() bool           { return false }
+func (BrutalAssaultBlue) ID() ids.CardID           { return ids.BrutalAssaultBlue }
+func (BrutalAssaultBlue) Name() string             { return "Brutal Assault" }
+func (BrutalAssaultBlue) DisplayName() string      { return "Brutal Assault [B]" }
+func (BrutalAssaultBlue) Cost(card.GameEngine) int { return 2 }
+func (BrutalAssaultBlue) Pitch() int               { return 3 }
+func (BrutalAssaultBlue) Attack() int              { return 4 }
+func (BrutalAssaultBlue) Defense() int             { return 3 }
+func (BrutalAssaultBlue) Types() card.TypeSet      { return brutalAssaultTypes }
+func (BrutalAssaultBlue) GoAgain() bool            { return false }

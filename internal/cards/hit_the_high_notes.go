@@ -5,21 +5,21 @@
 package cards
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
-func (HitTheHighNotesRed) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
+func (HitTheHighNotesRed) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 	self.BonusAttack += hitTheHighNotesBonus(s)
 }
 
-func (HitTheHighNotesYellow) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
+func (HitTheHighNotesYellow) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 	self.BonusAttack += hitTheHighNotesBonus(s)
 }
 
-func (HitTheHighNotesBlue) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
+func (HitTheHighNotesBlue) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 	self.BonusAttack += hitTheHighNotesBonus(s)
 }
-func hitTheHighNotesBonus(s sim.GameEngine) int {
+func hitTheHighNotesBonus(s card.GameEngine) int {
 	if s.HasPlayedOrCreatedAura() {
 		return 2
 	}

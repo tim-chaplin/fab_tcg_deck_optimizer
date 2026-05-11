@@ -11,27 +11,27 @@
 package notimplemented
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
-func promiseOfPlentyPlay(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
+func promiseOfPlentyPlay(s card.GameEngine, l card.Logger, self *card.CardState) {
 	self.GrantGoAgainIfFromArsenal()
 }
 
 // not implemented: on-hit arsenal-placement rider (arsenal/deck content tracking would be required)
 
-func (PromiseOfPlentyRed) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
+func (PromiseOfPlentyRed) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 	promiseOfPlentyPlay(s, l, self)
 }
 
 // not implemented: on-hit arsenal-placement rider (arsenal/deck content tracking would be required)
 
-func (PromiseOfPlentyYellow) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
+func (PromiseOfPlentyYellow) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 	promiseOfPlentyPlay(s, l, self)
 }
 
 // not implemented: on-hit arsenal-placement rider (arsenal/deck content tracking would be required)
 
-func (PromiseOfPlentyBlue) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
+func (PromiseOfPlentyBlue) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 	promiseOfPlentyPlay(s, l, self)
 }

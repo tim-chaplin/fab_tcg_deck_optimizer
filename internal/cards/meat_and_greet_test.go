@@ -5,6 +5,7 @@ import (
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 // Tests that the on-hit Runechant rider fires only on likely-hit variants.
@@ -19,7 +20,7 @@ func TestMeatAndGreet_OnHitRunechantGatedByLikelyToHit(t *testing.T) {
 	}
 	for _, tc := range cases {
 		s := sim.TurnState{}
-		self := &sim.CardState{Card: tc.c}
+		self := &card.CardState{Card: tc.c}
 		sim.ResolveChainStep(&s, s.Logger(), self)
 		testutils.FireOnHitIfLikely(&s, s.Logger(), self)
 		if got := s.Value(); got != tc.wantDmg {
@@ -44,7 +45,7 @@ func TestMeatAndGreet_ArcaneDamageDealtGrantsGoAgain(t *testing.T) {
 	}
 	for _, c := range cases {
 		s := sim.NewTurnStateFromSpec(sim.TurnStateSpec{ArcaneDamageDealt: true})
-		self := &sim.CardState{Card: c}
+		self := &card.CardState{Card: c}
 		sim.ResolveChainStep(&s, s.Logger(), self)
 		if !self.GrantedGoAgain {
 			t.Errorf("%s: GrantedGoAgain = false, want true (ArcaneDamageDealt → go again)", c.Name())

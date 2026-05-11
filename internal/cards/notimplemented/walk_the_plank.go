@@ -6,20 +6,20 @@
 package notimplemented
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 // not implemented: pirate-target freeze rider
 
-func (WalkThePlankRed) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
+func (WalkThePlankRed) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 }
 
 // not implemented: pirate-target freeze rider
 
-func (WalkThePlankYellow) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
+func (WalkThePlankYellow) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 }
 
 // not implemented: pirate-target freeze rider
 
-func (WalkThePlankBlue) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
+func (WalkThePlankBlue) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 }

@@ -9,14 +9,14 @@
 package cards
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 // skyFireLanternsPlay emits the chain step then writes a runechant rider sub-line under
 // self when the deck-top card matches this variant's pitch (color). Reads the deck top
 // via PeekDeck so the cacheable bit flips — whether the rider fires depends on shuffle
 // order.
-func skyFireLanternsPlay(s sim.GameEngine, l sim.Logger, self *sim.CardState, selfPitch int) {
+func skyFireLanternsPlay(s card.GameEngine, l card.Logger, self *card.CardState, selfPitch int) {
 	top, ok := s.PeekDeck()
 	if !ok || top.Pitch() != selfPitch {
 		return
@@ -25,14 +25,14 @@ func skyFireLanternsPlay(s sim.GameEngine, l sim.Logger, self *sim.CardState, se
 	l.AppendPostTrigger(self.Card.DisplayName(), "Created a runechant", 1)
 }
 
-func (c SkyFireLanternsRed) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
+func (c SkyFireLanternsRed) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 	skyFireLanternsPlay(s, l, self, c.Pitch())
 }
 
-func (c SkyFireLanternsYellow) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
+func (c SkyFireLanternsYellow) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 	skyFireLanternsPlay(s, l, self, c.Pitch())
 }
 
-func (c SkyFireLanternsBlue) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
+func (c SkyFireLanternsBlue) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 	skyFireLanternsPlay(s, l, self, c.Pitch())
 }

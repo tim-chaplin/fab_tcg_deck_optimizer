@@ -3,22 +3,21 @@
 package unplayable
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 var pilferTheTombTypes = card.NewTypeSet(card.TypeGeneric, card.TypeInstant)
 
 type PilferTheTombBlue struct{}
 
-func (PilferTheTombBlue) ID() ids.CardID          { return ids.PilferTheTombBlue }
-func (PilferTheTombBlue) Name() string            { return "Pilfer the Tomb" }
-func (PilferTheTombBlue) DisplayName() string     { return "Pilfer the Tomb [B]" }
-func (PilferTheTombBlue) Cost(sim.GameEngine) int { return 0 }
-func (PilferTheTombBlue) Pitch() int              { return 3 }
-func (PilferTheTombBlue) Attack() int             { return 0 }
-func (PilferTheTombBlue) Defense() int            { return 0 }
-func (PilferTheTombBlue) Types() card.TypeSet     { return pilferTheTombTypes }
-func (PilferTheTombBlue) GoAgain() bool           { return false }
-func (PilferTheTombBlue) Unplayable()             {}
+func (PilferTheTombBlue) ID() ids.CardID           { return ids.PilferTheTombBlue }
+func (PilferTheTombBlue) Name() string             { return "Pilfer the Tomb" }
+func (PilferTheTombBlue) DisplayName() string      { return "Pilfer the Tomb [B]" }
+func (PilferTheTombBlue) Cost(card.GameEngine) int { return 0 }
+func (PilferTheTombBlue) Pitch() int               { return 3 }
+func (PilferTheTombBlue) Attack() int              { return 0 }
+func (PilferTheTombBlue) Defense() int             { return 0 }
+func (PilferTheTombBlue) Types() card.TypeSet      { return pilferTheTombTypes }
+func (PilferTheTombBlue) GoAgain() bool            { return false }
+func (PilferTheTombBlue) Unplayable()              {}

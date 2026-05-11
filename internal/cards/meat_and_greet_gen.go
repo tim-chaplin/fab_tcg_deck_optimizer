@@ -3,45 +3,44 @@
 package cards
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 var meatAndGreetTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeAction, card.TypeAttack)
 
 type MeatAndGreetRed struct{}
 
-func (MeatAndGreetRed) ID() ids.CardID          { return ids.MeatAndGreetRed }
-func (MeatAndGreetRed) Name() string            { return "Meat and Greet" }
-func (MeatAndGreetRed) DisplayName() string     { return "Meat and Greet [R]" }
-func (MeatAndGreetRed) Cost(sim.GameEngine) int { return 1 }
-func (MeatAndGreetRed) Pitch() int              { return 1 }
-func (MeatAndGreetRed) Attack() int             { return 4 }
-func (MeatAndGreetRed) Defense() int            { return 3 }
-func (MeatAndGreetRed) Types() card.TypeSet     { return meatAndGreetTypes }
-func (MeatAndGreetRed) GoAgain() bool           { return false }
+func (MeatAndGreetRed) ID() ids.CardID           { return ids.MeatAndGreetRed }
+func (MeatAndGreetRed) Name() string             { return "Meat and Greet" }
+func (MeatAndGreetRed) DisplayName() string      { return "Meat and Greet [R]" }
+func (MeatAndGreetRed) Cost(card.GameEngine) int { return 1 }
+func (MeatAndGreetRed) Pitch() int               { return 1 }
+func (MeatAndGreetRed) Attack() int              { return 4 }
+func (MeatAndGreetRed) Defense() int             { return 3 }
+func (MeatAndGreetRed) Types() card.TypeSet      { return meatAndGreetTypes }
+func (MeatAndGreetRed) GoAgain() bool            { return false }
 
 type MeatAndGreetYellow struct{}
 
-func (MeatAndGreetYellow) ID() ids.CardID          { return ids.MeatAndGreetYellow }
-func (MeatAndGreetYellow) Name() string            { return "Meat and Greet" }
-func (MeatAndGreetYellow) DisplayName() string     { return "Meat and Greet [Y]" }
-func (MeatAndGreetYellow) Cost(sim.GameEngine) int { return 1 }
-func (MeatAndGreetYellow) Pitch() int              { return 2 }
-func (MeatAndGreetYellow) Attack() int             { return 3 }
-func (MeatAndGreetYellow) Defense() int            { return 3 }
-func (MeatAndGreetYellow) Types() card.TypeSet     { return meatAndGreetTypes }
-func (MeatAndGreetYellow) GoAgain() bool           { return false }
+func (MeatAndGreetYellow) ID() ids.CardID           { return ids.MeatAndGreetYellow }
+func (MeatAndGreetYellow) Name() string             { return "Meat and Greet" }
+func (MeatAndGreetYellow) DisplayName() string      { return "Meat and Greet [Y]" }
+func (MeatAndGreetYellow) Cost(card.GameEngine) int { return 1 }
+func (MeatAndGreetYellow) Pitch() int               { return 2 }
+func (MeatAndGreetYellow) Attack() int              { return 3 }
+func (MeatAndGreetYellow) Defense() int             { return 3 }
+func (MeatAndGreetYellow) Types() card.TypeSet      { return meatAndGreetTypes }
+func (MeatAndGreetYellow) GoAgain() bool            { return false }
 
 type MeatAndGreetBlue struct{}
 
-func (MeatAndGreetBlue) ID() ids.CardID          { return ids.MeatAndGreetBlue }
-func (MeatAndGreetBlue) Name() string            { return "Meat and Greet" }
-func (MeatAndGreetBlue) DisplayName() string     { return "Meat and Greet [B]" }
-func (MeatAndGreetBlue) Cost(sim.GameEngine) int { return 1 }
-func (MeatAndGreetBlue) Pitch() int              { return 3 }
-func (MeatAndGreetBlue) Attack() int             { return 2 }
-func (MeatAndGreetBlue) Defense() int            { return 3 }
-func (MeatAndGreetBlue) Types() card.TypeSet     { return meatAndGreetTypes }
-func (MeatAndGreetBlue) GoAgain() bool           { return false }
+func (MeatAndGreetBlue) ID() ids.CardID           { return ids.MeatAndGreetBlue }
+func (MeatAndGreetBlue) Name() string             { return "Meat and Greet" }
+func (MeatAndGreetBlue) DisplayName() string      { return "Meat and Greet [B]" }
+func (MeatAndGreetBlue) Cost(card.GameEngine) int { return 1 }
+func (MeatAndGreetBlue) Pitch() int               { return 3 }
+func (MeatAndGreetBlue) Attack() int              { return 2 }
+func (MeatAndGreetBlue) Defense() int             { return 3 }
+func (MeatAndGreetBlue) Types() card.TypeSet      { return meatAndGreetTypes }
+func (MeatAndGreetBlue) GoAgain() bool            { return false }

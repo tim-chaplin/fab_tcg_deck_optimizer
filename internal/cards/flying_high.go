@@ -6,7 +6,7 @@
 package cards
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 // flyingHighApplySideEffect grants go again to the next attack scheduled later this turn
@@ -15,7 +15,7 @@ import (
 // also add +1 to its BonusAttack — the "+1{p} if it's <matching color>" rider — so
 // EffectiveAttack picks the buff up in any LikelyToHit check on the buffed attack. The
 // +1 attributes to the target's slot, not Flying High's.
-func flyingHighApplySideEffect(s sim.GameEngine, matchPitch int) {
+func flyingHighApplySideEffect(s card.GameEngine, matchPitch int) {
 	for _, pc := range s.CardsRemaining() {
 		if !pc.Card.Types().IsAttack() {
 			continue
@@ -28,14 +28,14 @@ func flyingHighApplySideEffect(s sim.GameEngine, matchPitch int) {
 	}
 }
 
-func (FlyingHighRed) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
+func (FlyingHighRed) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 	flyingHighApplySideEffect(s, 1)
 }
 
-func (FlyingHighYellow) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
+func (FlyingHighYellow) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 	flyingHighApplySideEffect(s, 2)
 }
 
-func (FlyingHighBlue) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
+func (FlyingHighBlue) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 	flyingHighApplySideEffect(s, 3)
 }

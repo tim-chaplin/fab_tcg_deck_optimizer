@@ -3,21 +3,20 @@
 package cards
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 var lookTuffTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 
 type LookTuffRed struct{}
 
-func (LookTuffRed) ID() ids.CardID          { return ids.LookTuffRed }
-func (LookTuffRed) Name() string            { return "Look Tuff" }
-func (LookTuffRed) DisplayName() string     { return "Look Tuff [R]" }
-func (LookTuffRed) Cost(sim.GameEngine) int { return 3 }
-func (LookTuffRed) Pitch() int              { return 1 }
-func (LookTuffRed) Attack() int             { return 8 }
-func (LookTuffRed) Defense() int            { return 3 }
-func (LookTuffRed) Types() card.TypeSet     { return lookTuffTypes }
-func (LookTuffRed) GoAgain() bool           { return false }
+func (LookTuffRed) ID() ids.CardID           { return ids.LookTuffRed }
+func (LookTuffRed) Name() string             { return "Look Tuff" }
+func (LookTuffRed) DisplayName() string      { return "Look Tuff [R]" }
+func (LookTuffRed) Cost(card.GameEngine) int { return 3 }
+func (LookTuffRed) Pitch() int               { return 1 }
+func (LookTuffRed) Attack() int              { return 8 }
+func (LookTuffRed) Defense() int             { return 3 }
+func (LookTuffRed) Types() card.TypeSet      { return lookTuffTypes }
+func (LookTuffRed) GoAgain() bool            { return false }

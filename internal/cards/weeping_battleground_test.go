@@ -4,13 +4,14 @@ import (
 	"testing"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 // TestWeepingBattleground_AuraInGraveyard: an aura in the graveyard gets banished for 1 arcane.
 func TestWeepingBattleground_AuraInGraveyard(t *testing.T) {
 	aura := SigilOfSilphidaeBlue{}
 	s := sim.NewTurnStateFromCards(nil, []sim.Card{aura})
-	sim.ResolveChainStep(s, s.Logger(), &sim.CardState{Card: WeepingBattlegroundRed{}})
+	sim.ResolveChainStep(s, s.Logger(), &card.CardState{Card: WeepingBattlegroundRed{}})
 	if got := s.Value(); got != 1 {
 		t.Fatalf("Play() = %d, want 1", got)
 	}
@@ -25,7 +26,7 @@ func TestWeepingBattleground_NoAuraInGraveyard(t *testing.T) {
 	// Shrill of Skullform is an Action - Attack (no Aura type), so it fails the aura scan.
 	nonAura := ShrillOfSkullformRed{}
 	s := sim.NewTurnStateFromCards(nil, []sim.Card{nonAura})
-	sim.ResolveChainStep(s, s.Logger(), &sim.CardState{Card: WeepingBattlegroundRed{}})
+	sim.ResolveChainStep(s, s.Logger(), &card.CardState{Card: WeepingBattlegroundRed{}})
 	if got := s.Value(); got != 0 {
 		t.Fatalf("Play() = %d, want 0 (no aura to banish)", got)
 	}
@@ -37,7 +38,7 @@ func TestWeepingBattleground_NoAuraInGraveyard(t *testing.T) {
 // TestWeepingBattleground_EmptyGraveyard: no graveyard at all means no banish, no damage.
 func TestWeepingBattleground_EmptyGraveyard(t *testing.T) {
 	var s sim.TurnState
-	sim.ResolveChainStep(&s, s.Logger(), &sim.CardState{Card: WeepingBattlegroundRed{}})
+	sim.ResolveChainStep(&s, s.Logger(), &card.CardState{Card: WeepingBattlegroundRed{}})
 	if got := s.Value(); got != 0 {
 		t.Fatalf("Play() = %d, want 0", got)
 	}
@@ -49,7 +50,7 @@ func TestWeepingBattleground_BanishesAura(t *testing.T) {
 	aura := SigilOfSilphidaeBlue{}
 	nonAura := ShrillOfSkullformRed{}
 	s := sim.NewTurnStateFromCards(nil, []sim.Card{nonAura, aura})
-	sim.ResolveChainStep(s, s.Logger(), &sim.CardState{Card: WeepingBattlegroundRed{}})
+	sim.ResolveChainStep(s, s.Logger(), &card.CardState{Card: WeepingBattlegroundRed{}})
 	g := s.Graveyard()
 	if len(g) != 1 || g[0].ID() != nonAura.ID() {
 		t.Errorf("want graveyard with only non-aura left, got %+v", g)
@@ -66,7 +67,7 @@ func TestWeepingBattleground_OnlyOneAuraBanished(t *testing.T) {
 	aura1 := SigilOfSilphidaeBlue{}
 	aura2 := SigilOfSilphidaeBlue{}
 	s := sim.NewTurnStateFromCards(nil, []sim.Card{aura1, aura2})
-	sim.ResolveChainStep(s, s.Logger(), &sim.CardState{Card: WeepingBattlegroundRed{}})
+	sim.ResolveChainStep(s, s.Logger(), &card.CardState{Card: WeepingBattlegroundRed{}})
 	if g := s.Graveyard(); len(g) != 1 {
 		t.Fatalf("want one aura left in graveyard, got %d", len(g))
 	}
@@ -82,11 +83,11 @@ func TestWeepingBattleground_SecondCopyAlsoFires(t *testing.T) {
 	aura1 := SigilOfSilphidaeBlue{}
 	aura2 := SigilOfSilphidaeBlue{}
 	s := sim.NewTurnStateFromCards(nil, []sim.Card{aura1, aura2})
-	sim.ResolveChainStep(s, s.Logger(), &sim.CardState{Card: WeepingBattlegroundRed{}})
+	sim.ResolveChainStep(s, s.Logger(), &card.CardState{Card: WeepingBattlegroundRed{}})
 	if got := s.Value(); got != 1 {
 		t.Fatalf("first Play() Value = %d, want 1", got)
 	}
-	sim.ResolveChainStep(s, s.Logger(), &sim.CardState{Card: WeepingBattlegroundBlue{}})
+	sim.ResolveChainStep(s, s.Logger(), &card.CardState{Card: WeepingBattlegroundBlue{}})
 	if got := s.Value(); got != 2 {
 		t.Fatalf("second Play() cumulative Value = %d, want 2", got)
 	}
@@ -103,11 +104,11 @@ func TestWeepingBattleground_SecondCopyAlsoFires(t *testing.T) {
 func TestWeepingBattleground_SecondCopyFizzlesWhenOutOfAuras(t *testing.T) {
 	aura := SigilOfSilphidaeBlue{}
 	s := sim.NewTurnStateFromCards(nil, []sim.Card{aura})
-	sim.ResolveChainStep(s, s.Logger(), &sim.CardState{Card: WeepingBattlegroundRed{}})
+	sim.ResolveChainStep(s, s.Logger(), &card.CardState{Card: WeepingBattlegroundRed{}})
 	if got := s.Value(); got != 1 {
 		t.Fatalf("first Play() Value = %d, want 1", got)
 	}
-	sim.ResolveChainStep(s, s.Logger(), &sim.CardState{Card: WeepingBattlegroundBlue{}})
+	sim.ResolveChainStep(s, s.Logger(), &card.CardState{Card: WeepingBattlegroundBlue{}})
 	if got := s.Value(); got != 1 {
 		t.Fatalf("second Play() cumulative Value = %d, want 1 (no aura left, fizzle adds 0)", got)
 	}

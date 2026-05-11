@@ -3,22 +3,21 @@
 package unplayable
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 var healingPotionTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeItem)
 
 type HealingPotionBlue struct{}
 
-func (HealingPotionBlue) ID() ids.CardID          { return ids.HealingPotionBlue }
-func (HealingPotionBlue) Name() string            { return "Healing Potion" }
-func (HealingPotionBlue) DisplayName() string     { return "Healing Potion [B]" }
-func (HealingPotionBlue) Cost(sim.GameEngine) int { return 0 }
-func (HealingPotionBlue) Pitch() int              { return 3 }
-func (HealingPotionBlue) Attack() int             { return 0 }
-func (HealingPotionBlue) Defense() int            { return 0 }
-func (HealingPotionBlue) Types() card.TypeSet     { return healingPotionTypes }
-func (HealingPotionBlue) GoAgain() bool           { return false }
-func (HealingPotionBlue) Unplayable()             {}
+func (HealingPotionBlue) ID() ids.CardID           { return ids.HealingPotionBlue }
+func (HealingPotionBlue) Name() string             { return "Healing Potion" }
+func (HealingPotionBlue) DisplayName() string      { return "Healing Potion [B]" }
+func (HealingPotionBlue) Cost(card.GameEngine) int { return 0 }
+func (HealingPotionBlue) Pitch() int               { return 3 }
+func (HealingPotionBlue) Attack() int              { return 0 }
+func (HealingPotionBlue) Defense() int             { return 0 }
+func (HealingPotionBlue) Types() card.TypeSet      { return healingPotionTypes }
+func (HealingPotionBlue) GoAgain() bool            { return false }
+func (HealingPotionBlue) Unplayable()              {}

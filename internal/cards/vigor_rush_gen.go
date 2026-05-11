@@ -3,45 +3,44 @@
 package cards
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 var vigorRushTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 
 type VigorRushRed struct{}
 
-func (VigorRushRed) ID() ids.CardID          { return ids.VigorRushRed }
-func (VigorRushRed) Name() string            { return "Vigor Rush" }
-func (VigorRushRed) DisplayName() string     { return "Vigor Rush [R]" }
-func (VigorRushRed) Cost(sim.GameEngine) int { return 1 }
-func (VigorRushRed) Pitch() int              { return 1 }
-func (VigorRushRed) Attack() int             { return 4 }
-func (VigorRushRed) Defense() int            { return 2 }
-func (VigorRushRed) Types() card.TypeSet     { return vigorRushTypes }
-func (VigorRushRed) GoAgain() bool           { return false }
+func (VigorRushRed) ID() ids.CardID           { return ids.VigorRushRed }
+func (VigorRushRed) Name() string             { return "Vigor Rush" }
+func (VigorRushRed) DisplayName() string      { return "Vigor Rush [R]" }
+func (VigorRushRed) Cost(card.GameEngine) int { return 1 }
+func (VigorRushRed) Pitch() int               { return 1 }
+func (VigorRushRed) Attack() int              { return 4 }
+func (VigorRushRed) Defense() int             { return 2 }
+func (VigorRushRed) Types() card.TypeSet      { return vigorRushTypes }
+func (VigorRushRed) GoAgain() bool            { return false }
 
 type VigorRushYellow struct{}
 
-func (VigorRushYellow) ID() ids.CardID          { return ids.VigorRushYellow }
-func (VigorRushYellow) Name() string            { return "Vigor Rush" }
-func (VigorRushYellow) DisplayName() string     { return "Vigor Rush [Y]" }
-func (VigorRushYellow) Cost(sim.GameEngine) int { return 1 }
-func (VigorRushYellow) Pitch() int              { return 2 }
-func (VigorRushYellow) Attack() int             { return 3 }
-func (VigorRushYellow) Defense() int            { return 2 }
-func (VigorRushYellow) Types() card.TypeSet     { return vigorRushTypes }
-func (VigorRushYellow) GoAgain() bool           { return false }
+func (VigorRushYellow) ID() ids.CardID           { return ids.VigorRushYellow }
+func (VigorRushYellow) Name() string             { return "Vigor Rush" }
+func (VigorRushYellow) DisplayName() string      { return "Vigor Rush [Y]" }
+func (VigorRushYellow) Cost(card.GameEngine) int { return 1 }
+func (VigorRushYellow) Pitch() int               { return 2 }
+func (VigorRushYellow) Attack() int              { return 3 }
+func (VigorRushYellow) Defense() int             { return 2 }
+func (VigorRushYellow) Types() card.TypeSet      { return vigorRushTypes }
+func (VigorRushYellow) GoAgain() bool            { return false }
 
 type VigorRushBlue struct{}
 
-func (VigorRushBlue) ID() ids.CardID          { return ids.VigorRushBlue }
-func (VigorRushBlue) Name() string            { return "Vigor Rush" }
-func (VigorRushBlue) DisplayName() string     { return "Vigor Rush [B]" }
-func (VigorRushBlue) Cost(sim.GameEngine) int { return 1 }
-func (VigorRushBlue) Pitch() int              { return 3 }
-func (VigorRushBlue) Attack() int             { return 2 }
-func (VigorRushBlue) Defense() int            { return 2 }
-func (VigorRushBlue) Types() card.TypeSet     { return vigorRushTypes }
-func (VigorRushBlue) GoAgain() bool           { return false }
+func (VigorRushBlue) ID() ids.CardID           { return ids.VigorRushBlue }
+func (VigorRushBlue) Name() string             { return "Vigor Rush" }
+func (VigorRushBlue) DisplayName() string      { return "Vigor Rush [B]" }
+func (VigorRushBlue) Cost(card.GameEngine) int { return 1 }
+func (VigorRushBlue) Pitch() int               { return 3 }
+func (VigorRushBlue) Attack() int              { return 2 }
+func (VigorRushBlue) Defense() int             { return 2 }
+func (VigorRushBlue) Types() card.TypeSet      { return vigorRushTypes }
+func (VigorRushBlue) GoAgain() bool            { return false }

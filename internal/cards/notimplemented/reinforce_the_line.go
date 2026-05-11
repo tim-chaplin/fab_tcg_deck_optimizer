@@ -5,18 +5,18 @@
 package notimplemented
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 // not implemented: Instant +N{d} grant to a defending attack action card
 
-func (ReinforceTheLineRed) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {}
+func (ReinforceTheLineRed) Play(s card.GameEngine, l card.Logger, self *card.CardState) {}
 
 // not implemented: Instant +N{d} grant to a defending attack action card
 
-func (ReinforceTheLineYellow) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
+func (ReinforceTheLineYellow) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 }
 
 // not implemented: Instant +N{d} grant to a defending attack action card
 
-func (ReinforceTheLineBlue) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {}
+func (ReinforceTheLineBlue) Play(s card.GameEngine, l card.Logger, self *card.CardState) {}

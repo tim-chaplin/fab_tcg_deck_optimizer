@@ -3,45 +3,44 @@
 package cards
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 var hitTheHighNotesTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeAction, card.TypeAttack)
 
 type HitTheHighNotesRed struct{}
 
-func (HitTheHighNotesRed) ID() ids.CardID          { return ids.HitTheHighNotesRed }
-func (HitTheHighNotesRed) Name() string            { return "Hit the High Notes" }
-func (HitTheHighNotesRed) DisplayName() string     { return "Hit the High Notes [R]" }
-func (HitTheHighNotesRed) Cost(sim.GameEngine) int { return 1 }
-func (HitTheHighNotesRed) Pitch() int              { return 1 }
-func (HitTheHighNotesRed) Attack() int             { return 4 }
-func (HitTheHighNotesRed) Defense() int            { return 3 }
-func (HitTheHighNotesRed) Types() card.TypeSet     { return hitTheHighNotesTypes }
-func (HitTheHighNotesRed) GoAgain() bool           { return false }
+func (HitTheHighNotesRed) ID() ids.CardID           { return ids.HitTheHighNotesRed }
+func (HitTheHighNotesRed) Name() string             { return "Hit the High Notes" }
+func (HitTheHighNotesRed) DisplayName() string      { return "Hit the High Notes [R]" }
+func (HitTheHighNotesRed) Cost(card.GameEngine) int { return 1 }
+func (HitTheHighNotesRed) Pitch() int               { return 1 }
+func (HitTheHighNotesRed) Attack() int              { return 4 }
+func (HitTheHighNotesRed) Defense() int             { return 3 }
+func (HitTheHighNotesRed) Types() card.TypeSet      { return hitTheHighNotesTypes }
+func (HitTheHighNotesRed) GoAgain() bool            { return false }
 
 type HitTheHighNotesYellow struct{}
 
-func (HitTheHighNotesYellow) ID() ids.CardID          { return ids.HitTheHighNotesYellow }
-func (HitTheHighNotesYellow) Name() string            { return "Hit the High Notes" }
-func (HitTheHighNotesYellow) DisplayName() string     { return "Hit the High Notes [Y]" }
-func (HitTheHighNotesYellow) Cost(sim.GameEngine) int { return 1 }
-func (HitTheHighNotesYellow) Pitch() int              { return 2 }
-func (HitTheHighNotesYellow) Attack() int             { return 3 }
-func (HitTheHighNotesYellow) Defense() int            { return 3 }
-func (HitTheHighNotesYellow) Types() card.TypeSet     { return hitTheHighNotesTypes }
-func (HitTheHighNotesYellow) GoAgain() bool           { return false }
+func (HitTheHighNotesYellow) ID() ids.CardID           { return ids.HitTheHighNotesYellow }
+func (HitTheHighNotesYellow) Name() string             { return "Hit the High Notes" }
+func (HitTheHighNotesYellow) DisplayName() string      { return "Hit the High Notes [Y]" }
+func (HitTheHighNotesYellow) Cost(card.GameEngine) int { return 1 }
+func (HitTheHighNotesYellow) Pitch() int               { return 2 }
+func (HitTheHighNotesYellow) Attack() int              { return 3 }
+func (HitTheHighNotesYellow) Defense() int             { return 3 }
+func (HitTheHighNotesYellow) Types() card.TypeSet      { return hitTheHighNotesTypes }
+func (HitTheHighNotesYellow) GoAgain() bool            { return false }
 
 type HitTheHighNotesBlue struct{}
 
-func (HitTheHighNotesBlue) ID() ids.CardID          { return ids.HitTheHighNotesBlue }
-func (HitTheHighNotesBlue) Name() string            { return "Hit the High Notes" }
-func (HitTheHighNotesBlue) DisplayName() string     { return "Hit the High Notes [B]" }
-func (HitTheHighNotesBlue) Cost(sim.GameEngine) int { return 1 }
-func (HitTheHighNotesBlue) Pitch() int              { return 3 }
-func (HitTheHighNotesBlue) Attack() int             { return 2 }
-func (HitTheHighNotesBlue) Defense() int            { return 3 }
-func (HitTheHighNotesBlue) Types() card.TypeSet     { return hitTheHighNotesTypes }
-func (HitTheHighNotesBlue) GoAgain() bool           { return false }
+func (HitTheHighNotesBlue) ID() ids.CardID           { return ids.HitTheHighNotesBlue }
+func (HitTheHighNotesBlue) Name() string             { return "Hit the High Notes" }
+func (HitTheHighNotesBlue) DisplayName() string      { return "Hit the High Notes [B]" }
+func (HitTheHighNotesBlue) Cost(card.GameEngine) int { return 1 }
+func (HitTheHighNotesBlue) Pitch() int               { return 3 }
+func (HitTheHighNotesBlue) Attack() int              { return 2 }
+func (HitTheHighNotesBlue) Defense() int             { return 3 }
+func (HitTheHighNotesBlue) Types() card.TypeSet      { return hitTheHighNotesTypes }
+func (HitTheHighNotesBlue) GoAgain() bool            { return false }

@@ -11,9 +11,10 @@ package cards
 
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
-func oasisRespitePlay(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
+func oasisRespitePlay(s card.GameEngine, l card.Logger, self *card.CardState) {
 	if sim.HeroWantsLowerHealth() {
 		// Flip BonusDefense so the sim's chain-step resolver folds the +1{h} into the
 		// "(+N)" delta when it credits EffectiveDefense after Play returns.
@@ -22,16 +23,16 @@ func oasisRespitePlay(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 }
 
 func (OasisRespiteRed) DefensiveInstant() {}
-func (OasisRespiteRed) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
+func (OasisRespiteRed) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 	oasisRespitePlay(s, l, self)
 }
 
 func (OasisRespiteYellow) DefensiveInstant() {}
-func (OasisRespiteYellow) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
+func (OasisRespiteYellow) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 	oasisRespitePlay(s, l, self)
 }
 
 func (OasisRespiteBlue) DefensiveInstant() {}
-func (OasisRespiteBlue) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
+func (OasisRespiteBlue) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 	oasisRespitePlay(s, l, self)
 }

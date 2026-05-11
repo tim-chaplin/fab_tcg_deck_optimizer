@@ -9,10 +9,10 @@
 package cards
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
-func meatAndGreetPlay(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
+func meatAndGreetPlay(s card.GameEngine, l card.Logger, self *card.CardState) {
 	if s.ArcaneDamageDealt() {
 		self.GrantedGoAgain = true
 	}
@@ -21,19 +21,19 @@ func meatAndGreetPlay(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
 
 // meatAndGreetOnHit fires the printed "When this hits, create a Runechant token" rider.
 // Top-level so registration stays alloc-free.
-func meatAndGreetOnHit(s sim.GameEngine, l sim.Logger, self *sim.CardState, _ *sim.OnHitHandler) {
+func meatAndGreetOnHit(s card.GameEngine, l card.Logger, self *card.CardState, _ *card.OnHitHandler) {
 	s.CreateRunechants(1)
 	l.AppendPostTrigger(self.Card.DisplayName(), "On-hit created a runechant", 1)
 }
 
-func (MeatAndGreetRed) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
+func (MeatAndGreetRed) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 	meatAndGreetPlay(s, l, self)
 }
 
-func (MeatAndGreetYellow) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
+func (MeatAndGreetYellow) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 	meatAndGreetPlay(s, l, self)
 }
 
-func (MeatAndGreetBlue) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
+func (MeatAndGreetBlue) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 	meatAndGreetPlay(s, l, self)
 }

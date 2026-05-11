@@ -8,18 +8,18 @@
 package notimplemented
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 // not implemented: silver tokens, opponent hand inspection
 
-func (PickACardAnyCardRed) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {}
+func (PickACardAnyCardRed) Play(s card.GameEngine, l card.Logger, self *card.CardState) {}
 
 // not implemented: silver tokens, opponent hand inspection
 
-func (PickACardAnyCardYellow) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
+func (PickACardAnyCardYellow) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 }
 
 // not implemented: silver tokens, opponent hand inspection
 
-func (PickACardAnyCardBlue) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {}
+func (PickACardAnyCardBlue) Play(s card.GameEngine, l card.Logger, self *card.CardState) {}

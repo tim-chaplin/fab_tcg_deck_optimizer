@@ -3,22 +3,21 @@
 package notimplemented
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 var emissaryOfWindTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 
 type EmissaryOfWindRed struct{}
 
-func (EmissaryOfWindRed) ID() ids.CardID          { return ids.EmissaryOfWindRed }
-func (EmissaryOfWindRed) Name() string            { return "Emissary of Wind" }
-func (EmissaryOfWindRed) DisplayName() string     { return "Emissary of Wind [R]" }
-func (EmissaryOfWindRed) Cost(sim.GameEngine) int { return 0 }
-func (EmissaryOfWindRed) Pitch() int              { return 1 }
-func (EmissaryOfWindRed) Attack() int             { return 4 }
-func (EmissaryOfWindRed) Defense() int            { return 2 }
-func (EmissaryOfWindRed) Types() card.TypeSet     { return emissaryOfWindTypes }
-func (EmissaryOfWindRed) GoAgain() bool           { return false }
-func (EmissaryOfWindRed) NotImplemented()         {}
+func (EmissaryOfWindRed) ID() ids.CardID           { return ids.EmissaryOfWindRed }
+func (EmissaryOfWindRed) Name() string             { return "Emissary of Wind" }
+func (EmissaryOfWindRed) DisplayName() string      { return "Emissary of Wind [R]" }
+func (EmissaryOfWindRed) Cost(card.GameEngine) int { return 0 }
+func (EmissaryOfWindRed) Pitch() int               { return 1 }
+func (EmissaryOfWindRed) Attack() int              { return 4 }
+func (EmissaryOfWindRed) Defense() int             { return 2 }
+func (EmissaryOfWindRed) Types() card.TypeSet      { return emissaryOfWindTypes }
+func (EmissaryOfWindRed) GoAgain() bool            { return false }
+func (EmissaryOfWindRed) NotImplemented()          {}

@@ -3,45 +3,44 @@
 package cards
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 var barragingBrawnhideTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 
 type BarragingBrawnhideRed struct{}
 
-func (BarragingBrawnhideRed) ID() ids.CardID          { return ids.BarragingBrawnhideRed }
-func (BarragingBrawnhideRed) Name() string            { return "Barraging Brawnhide" }
-func (BarragingBrawnhideRed) DisplayName() string     { return "Barraging Brawnhide [R]" }
-func (BarragingBrawnhideRed) Cost(sim.GameEngine) int { return 3 }
-func (BarragingBrawnhideRed) Pitch() int              { return 1 }
-func (BarragingBrawnhideRed) Attack() int             { return 7 }
-func (BarragingBrawnhideRed) Defense() int            { return 2 }
-func (BarragingBrawnhideRed) Types() card.TypeSet     { return barragingBrawnhideTypes }
-func (BarragingBrawnhideRed) GoAgain() bool           { return false }
+func (BarragingBrawnhideRed) ID() ids.CardID           { return ids.BarragingBrawnhideRed }
+func (BarragingBrawnhideRed) Name() string             { return "Barraging Brawnhide" }
+func (BarragingBrawnhideRed) DisplayName() string      { return "Barraging Brawnhide [R]" }
+func (BarragingBrawnhideRed) Cost(card.GameEngine) int { return 3 }
+func (BarragingBrawnhideRed) Pitch() int               { return 1 }
+func (BarragingBrawnhideRed) Attack() int              { return 7 }
+func (BarragingBrawnhideRed) Defense() int             { return 2 }
+func (BarragingBrawnhideRed) Types() card.TypeSet      { return barragingBrawnhideTypes }
+func (BarragingBrawnhideRed) GoAgain() bool            { return false }
 
 type BarragingBrawnhideYellow struct{}
 
-func (BarragingBrawnhideYellow) ID() ids.CardID          { return ids.BarragingBrawnhideYellow }
-func (BarragingBrawnhideYellow) Name() string            { return "Barraging Brawnhide" }
-func (BarragingBrawnhideYellow) DisplayName() string     { return "Barraging Brawnhide [Y]" }
-func (BarragingBrawnhideYellow) Cost(sim.GameEngine) int { return 3 }
-func (BarragingBrawnhideYellow) Pitch() int              { return 2 }
-func (BarragingBrawnhideYellow) Attack() int             { return 6 }
-func (BarragingBrawnhideYellow) Defense() int            { return 2 }
-func (BarragingBrawnhideYellow) Types() card.TypeSet     { return barragingBrawnhideTypes }
-func (BarragingBrawnhideYellow) GoAgain() bool           { return false }
+func (BarragingBrawnhideYellow) ID() ids.CardID           { return ids.BarragingBrawnhideYellow }
+func (BarragingBrawnhideYellow) Name() string             { return "Barraging Brawnhide" }
+func (BarragingBrawnhideYellow) DisplayName() string      { return "Barraging Brawnhide [Y]" }
+func (BarragingBrawnhideYellow) Cost(card.GameEngine) int { return 3 }
+func (BarragingBrawnhideYellow) Pitch() int               { return 2 }
+func (BarragingBrawnhideYellow) Attack() int              { return 6 }
+func (BarragingBrawnhideYellow) Defense() int             { return 2 }
+func (BarragingBrawnhideYellow) Types() card.TypeSet      { return barragingBrawnhideTypes }
+func (BarragingBrawnhideYellow) GoAgain() bool            { return false }
 
 type BarragingBrawnhideBlue struct{}
 
-func (BarragingBrawnhideBlue) ID() ids.CardID          { return ids.BarragingBrawnhideBlue }
-func (BarragingBrawnhideBlue) Name() string            { return "Barraging Brawnhide" }
-func (BarragingBrawnhideBlue) DisplayName() string     { return "Barraging Brawnhide [B]" }
-func (BarragingBrawnhideBlue) Cost(sim.GameEngine) int { return 3 }
-func (BarragingBrawnhideBlue) Pitch() int              { return 3 }
-func (BarragingBrawnhideBlue) Attack() int             { return 5 }
-func (BarragingBrawnhideBlue) Defense() int            { return 2 }
-func (BarragingBrawnhideBlue) Types() card.TypeSet     { return barragingBrawnhideTypes }
-func (BarragingBrawnhideBlue) GoAgain() bool           { return false }
+func (BarragingBrawnhideBlue) ID() ids.CardID           { return ids.BarragingBrawnhideBlue }
+func (BarragingBrawnhideBlue) Name() string             { return "Barraging Brawnhide" }
+func (BarragingBrawnhideBlue) DisplayName() string      { return "Barraging Brawnhide [B]" }
+func (BarragingBrawnhideBlue) Cost(card.GameEngine) int { return 3 }
+func (BarragingBrawnhideBlue) Pitch() int               { return 3 }
+func (BarragingBrawnhideBlue) Attack() int              { return 5 }
+func (BarragingBrawnhideBlue) Defense() int             { return 2 }
+func (BarragingBrawnhideBlue) Types() card.TypeSet      { return barragingBrawnhideTypes }
+func (BarragingBrawnhideBlue) GoAgain() bool            { return false }

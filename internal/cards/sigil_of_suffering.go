@@ -14,23 +14,24 @@ package cards
 
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
-func sigilOfSufferingPlay(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
+func sigilOfSufferingPlay(s card.GameEngine, l card.Logger, self *card.CardState) {
 	if s.ArcaneDamageDealt() || sim.LikelyDamageHits(1, false) {
 		self.BonusDefense++
 	}
 	s.DealArcaneDamage(l, self, 1)
 }
 
-func (SigilOfSufferingRed) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
+func (SigilOfSufferingRed) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 	sigilOfSufferingPlay(s, l, self)
 }
 
-func (SigilOfSufferingYellow) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
+func (SigilOfSufferingYellow) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 	sigilOfSufferingPlay(s, l, self)
 }
 
-func (SigilOfSufferingBlue) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
+func (SigilOfSufferingBlue) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 	sigilOfSufferingPlay(s, l, self)
 }

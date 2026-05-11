@@ -3,22 +3,21 @@
 package notimplemented
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 var talismanOfWarfareTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeItem)
 
 type TalismanOfWarfareYellow struct{}
 
-func (TalismanOfWarfareYellow) ID() ids.CardID          { return ids.TalismanOfWarfareYellow }
-func (TalismanOfWarfareYellow) Name() string            { return "Talisman of Warfare" }
-func (TalismanOfWarfareYellow) DisplayName() string     { return "Talisman of Warfare [Y]" }
-func (TalismanOfWarfareYellow) Cost(sim.GameEngine) int { return 0 }
-func (TalismanOfWarfareYellow) Pitch() int              { return 2 }
-func (TalismanOfWarfareYellow) Attack() int             { return 0 }
-func (TalismanOfWarfareYellow) Defense() int            { return 0 }
-func (TalismanOfWarfareYellow) Types() card.TypeSet     { return talismanOfWarfareTypes }
-func (TalismanOfWarfareYellow) GoAgain() bool           { return true }
-func (TalismanOfWarfareYellow) NotImplemented()         {}
+func (TalismanOfWarfareYellow) ID() ids.CardID           { return ids.TalismanOfWarfareYellow }
+func (TalismanOfWarfareYellow) Name() string             { return "Talisman of Warfare" }
+func (TalismanOfWarfareYellow) DisplayName() string      { return "Talisman of Warfare [Y]" }
+func (TalismanOfWarfareYellow) Cost(card.GameEngine) int { return 0 }
+func (TalismanOfWarfareYellow) Pitch() int               { return 2 }
+func (TalismanOfWarfareYellow) Attack() int              { return 0 }
+func (TalismanOfWarfareYellow) Defense() int             { return 0 }
+func (TalismanOfWarfareYellow) Types() card.TypeSet      { return talismanOfWarfareTypes }
+func (TalismanOfWarfareYellow) GoAgain() bool            { return true }
+func (TalismanOfWarfareYellow) NotImplemented()          {}

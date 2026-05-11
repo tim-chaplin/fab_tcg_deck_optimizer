@@ -6,9 +6,9 @@
 package weapons
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 var nebulaBladeTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeWeapon, card.TypeSword, card.TypeTwoHand)
@@ -30,16 +30,16 @@ var nebulaBladeAbilityTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeWeapo
 
 type NebulaBladeAbility struct{}
 
-func (NebulaBladeAbility) ID() ids.CardID          { return ids.NebulaBladeAbilityID }
-func (NebulaBladeAbility) Name() string            { return "Nebula Blade" }
-func (NebulaBladeAbility) DisplayName() string     { return "Nebula Blade" }
-func (NebulaBladeAbility) Cost(sim.GameEngine) int { return 2 }
-func (NebulaBladeAbility) Pitch() int              { return 0 }
-func (NebulaBladeAbility) Attack() int             { return 1 }
-func (NebulaBladeAbility) Defense() int            { return 0 }
-func (NebulaBladeAbility) Types() card.TypeSet     { return nebulaBladeAbilityTypes }
-func (NebulaBladeAbility) GoAgain() bool           { return false }
-func (NebulaBladeAbility) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
+func (NebulaBladeAbility) ID() ids.CardID           { return ids.NebulaBladeAbilityID }
+func (NebulaBladeAbility) Name() string             { return "Nebula Blade" }
+func (NebulaBladeAbility) DisplayName() string      { return "Nebula Blade" }
+func (NebulaBladeAbility) Cost(card.GameEngine) int { return 2 }
+func (NebulaBladeAbility) Pitch() int               { return 0 }
+func (NebulaBladeAbility) Attack() int              { return 1 }
+func (NebulaBladeAbility) Defense() int             { return 0 }
+func (NebulaBladeAbility) Types() card.TypeSet      { return nebulaBladeAbilityTypes }
+func (NebulaBladeAbility) GoAgain() bool            { return false }
+func (NebulaBladeAbility) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 	if s.NonAttackActionPlayed() {
 		self.BonusAttack += 3
 	}
@@ -48,7 +48,7 @@ func (NebulaBladeAbility) Play(s sim.GameEngine, l sim.Logger, self *sim.CardSta
 
 // nebulaBladeOnHit fires the printed "If Nebula Blade hits, create a Runechant token"
 // rider. Top-level so registration stays alloc-free.
-func nebulaBladeOnHit(s sim.GameEngine, l sim.Logger, self *sim.CardState, _ *sim.OnHitHandler) {
+func nebulaBladeOnHit(s card.GameEngine, l card.Logger, self *card.CardState, _ *card.OnHitHandler) {
 	s.CreateRunechants(1)
 	l.AppendPostTrigger(self.Card.DisplayName(), "On-hit created a runechant", 1)
 }

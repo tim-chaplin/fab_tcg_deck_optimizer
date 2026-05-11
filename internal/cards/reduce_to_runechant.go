@@ -12,12 +12,12 @@
 package cards
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 const reduceToRunechantPrintedCost = 1
 
-func reduceToRunechantCost(s sim.GameEngine) int {
+func reduceToRunechantCost(s card.GameEngine) int {
 	eff := reduceToRunechantPrintedCost - s.Runechants()
 	if eff < 0 {
 		return 0
@@ -25,29 +25,29 @@ func reduceToRunechantCost(s sim.GameEngine) int {
 	return eff
 }
 
-func (ReduceToRunechantRed) Cost(s sim.GameEngine) int { return reduceToRunechantCost(s) }
-func (ReduceToRunechantRed) MinCost() int              { return 0 }
-func (ReduceToRunechantRed) MaxCost() int              { return reduceToRunechantPrintedCost }
+func (ReduceToRunechantRed) Cost(s card.GameEngine) int { return reduceToRunechantCost(s) }
+func (ReduceToRunechantRed) MinCost() int               { return 0 }
+func (ReduceToRunechantRed) MaxCost() int               { return reduceToRunechantPrintedCost }
 
-func (ReduceToRunechantRed) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
+func (ReduceToRunechantRed) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 	s.CreateRunechants(1)
 	l.AppendPostTrigger(self.Card.DisplayName(), "Created a runechant", 1)
 }
 
-func (ReduceToRunechantYellow) Cost(s sim.GameEngine) int { return reduceToRunechantCost(s) }
-func (ReduceToRunechantYellow) MinCost() int              { return 0 }
-func (ReduceToRunechantYellow) MaxCost() int              { return reduceToRunechantPrintedCost }
+func (ReduceToRunechantYellow) Cost(s card.GameEngine) int { return reduceToRunechantCost(s) }
+func (ReduceToRunechantYellow) MinCost() int               { return 0 }
+func (ReduceToRunechantYellow) MaxCost() int               { return reduceToRunechantPrintedCost }
 
-func (ReduceToRunechantYellow) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
+func (ReduceToRunechantYellow) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 	s.CreateRunechants(1)
 	l.AppendPostTrigger(self.Card.DisplayName(), "Created a runechant", 1)
 }
 
-func (ReduceToRunechantBlue) Cost(s sim.GameEngine) int { return reduceToRunechantCost(s) }
-func (ReduceToRunechantBlue) MinCost() int              { return 0 }
-func (ReduceToRunechantBlue) MaxCost() int              { return reduceToRunechantPrintedCost }
+func (ReduceToRunechantBlue) Cost(s card.GameEngine) int { return reduceToRunechantCost(s) }
+func (ReduceToRunechantBlue) MinCost() int               { return 0 }
+func (ReduceToRunechantBlue) MaxCost() int               { return reduceToRunechantPrintedCost }
 
-func (ReduceToRunechantBlue) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
+func (ReduceToRunechantBlue) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 	s.CreateRunechants(1)
 	l.AppendPostTrigger(self.Card.DisplayName(), "Created a runechant", 1)
 }

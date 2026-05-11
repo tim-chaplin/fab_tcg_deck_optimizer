@@ -6,21 +6,21 @@
 package cards
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
-func whisperOfTheOraclePlay(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
+func whisperOfTheOraclePlay(s card.GameEngine, l card.Logger, self *card.CardState) {
 	s.Opt(l, 4)
 }
 
-func (WhisperOfTheOracleRed) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
+func (WhisperOfTheOracleRed) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 	whisperOfTheOraclePlay(s, l, self)
 }
 
-func (WhisperOfTheOracleYellow) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
+func (WhisperOfTheOracleYellow) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 	whisperOfTheOraclePlay(s, l, self)
 }
 
-func (WhisperOfTheOracleBlue) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
+func (WhisperOfTheOracleBlue) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 	whisperOfTheOraclePlay(s, l, self)
 }

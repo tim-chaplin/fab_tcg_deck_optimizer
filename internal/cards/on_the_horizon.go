@@ -11,11 +11,11 @@
 package cards
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
-func (OnTheHorizonRed) Play(sim.GameEngine, sim.Logger, *sim.CardState) {}
+func (OnTheHorizonRed) Play(card.GameEngine, card.Logger, *card.CardState) {}
 
-func (OnTheHorizonYellow) Play(sim.GameEngine, sim.Logger, *sim.CardState) {}
+func (OnTheHorizonYellow) Play(card.GameEngine, card.Logger, *card.CardState) {}
 
-func (OnTheHorizonBlue) Play(sim.GameEngine, sim.Logger, *sim.CardState) {}
+func (OnTheHorizonBlue) Play(card.GameEngine, card.Logger, *card.CardState) {}

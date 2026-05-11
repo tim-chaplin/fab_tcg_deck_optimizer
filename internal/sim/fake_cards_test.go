@@ -6,8 +6,8 @@ package sim
 // the external (sim_test) tests use, just with a Fake prefix instead of Stub.
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 // FakeCard is a configurable Card stand-in. Tests construct it via NewFakeCard plus

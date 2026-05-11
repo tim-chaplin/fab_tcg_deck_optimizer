@@ -3,21 +3,20 @@
 package cards
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 var testOfStrengthTypes = card.NewTypeSet(card.TypeGeneric, card.TypeDefenseReaction)
 
 type TestOfStrengthRed struct{}
 
-func (TestOfStrengthRed) ID() ids.CardID          { return ids.TestOfStrengthRed }
-func (TestOfStrengthRed) Name() string            { return "Test of Strength" }
-func (TestOfStrengthRed) DisplayName() string     { return "Test of Strength [R]" }
-func (TestOfStrengthRed) Cost(sim.GameEngine) int { return 0 }
-func (TestOfStrengthRed) Pitch() int              { return 1 }
-func (TestOfStrengthRed) Attack() int             { return 0 }
-func (TestOfStrengthRed) Defense() int            { return 4 }
-func (TestOfStrengthRed) Types() card.TypeSet     { return testOfStrengthTypes }
-func (TestOfStrengthRed) GoAgain() bool           { return false }
+func (TestOfStrengthRed) ID() ids.CardID           { return ids.TestOfStrengthRed }
+func (TestOfStrengthRed) Name() string             { return "Test of Strength" }
+func (TestOfStrengthRed) DisplayName() string      { return "Test of Strength [R]" }
+func (TestOfStrengthRed) Cost(card.GameEngine) int { return 0 }
+func (TestOfStrengthRed) Pitch() int               { return 1 }
+func (TestOfStrengthRed) Attack() int              { return 0 }
+func (TestOfStrengthRed) Defense() int             { return 4 }
+func (TestOfStrengthRed) Types() card.TypeSet      { return testOfStrengthTypes }
+func (TestOfStrengthRed) GoAgain() bool            { return false }

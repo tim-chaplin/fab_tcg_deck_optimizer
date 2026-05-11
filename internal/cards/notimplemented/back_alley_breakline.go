@@ -7,20 +7,20 @@
 package notimplemented
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 // not implemented: face-up-from-deck action point grant
 
-func (c BackAlleyBreaklineRed) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
+func (c BackAlleyBreaklineRed) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 }
 
 // not implemented: face-up-from-deck action point grant
 
-func (c BackAlleyBreaklineYellow) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
+func (c BackAlleyBreaklineYellow) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 }
 
 // not implemented: face-up-from-deck action point grant
 
-func (c BackAlleyBreaklineBlue) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
+func (c BackAlleyBreaklineBlue) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 }

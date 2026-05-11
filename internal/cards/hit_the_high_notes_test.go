@@ -5,6 +5,7 @@ import (
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 func TestHitTheHighNotes_NoAuraReturnsBase(t *testing.T) {
@@ -19,7 +20,7 @@ func TestHitTheHighNotes_NoAuraReturnsBase(t *testing.T) {
 	}
 	for _, tc := range cases {
 		var s sim.TurnState
-		sim.ResolveChainStep(&s, s.Logger(), &sim.CardState{Card: tc.c})
+		sim.ResolveChainStep(&s, s.Logger(), &card.CardState{Card: tc.c})
 		if got := s.Value(); got != tc.base {
 			t.Errorf("%s: Play() = %d, want %d", tc.c.Name(), got, tc.base)
 		}
@@ -29,7 +30,7 @@ func TestHitTheHighNotes_NoAuraReturnsBase(t *testing.T) {
 func TestHitTheHighNotes_AuraPlayedTriggersBonus(t *testing.T) {
 	// An Aura-typed card earlier in the turn's CardsPlayed → +2 power.
 	s := sim.NewTurnStateFromSpec(sim.TurnStateSpec{CardsPlayed: []sim.Card{testutils.Aura{}}})
-	sim.ResolveChainStep(&s, s.Logger(), &sim.CardState{Card: HitTheHighNotesRed{}})
+	sim.ResolveChainStep(&s, s.Logger(), &card.CardState{Card: HitTheHighNotesRed{}})
 	if got := s.Value(); got != 6 {
 		t.Errorf("Play() = %d, want 6 (base 4 + 2 aura bonus)", got)
 	}
@@ -39,7 +40,7 @@ func TestHitTheHighNotes_AuraCreatedTriggersBonus(t *testing.T) {
 	// AuraCreated flag set earlier in the chain (e.g. Runechant creation) → +2 power, even
 	// without an Aura-typed card in CardsPlayed.
 	s := sim.NewTurnStateFromSpec(sim.TurnStateSpec{AuraCreated: true})
-	sim.ResolveChainStep(&s, s.Logger(), &sim.CardState{Card: HitTheHighNotesRed{}})
+	sim.ResolveChainStep(&s, s.Logger(), &card.CardState{Card: HitTheHighNotesRed{}})
 	if got := s.Value(); got != 6 {
 		t.Errorf("Play() = %d, want 6 (base 4 + 2 AuraCreated bonus)", got)
 	}
@@ -49,7 +50,7 @@ func TestHitTheHighNotes_AuraCreatedTriggersBonus(t *testing.T) {
 // LikelyToHit see the buffed power.
 func TestHitTheHighNotes_BonusFlowsThroughBonusAttack(t *testing.T) {
 	s := sim.NewTurnStateFromSpec(sim.TurnStateSpec{AuraCreated: true})
-	self := &sim.CardState{Card: HitTheHighNotesRed{}}
+	self := &card.CardState{Card: HitTheHighNotesRed{}}
 	sim.ResolveChainStep(&s, s.Logger(), self)
 	if got := self.EffectiveAttack(); got != 6 {
 		t.Errorf("EffectiveAttack() = %d, want 6 (base 4 + 2 power buff)", got)

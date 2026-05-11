@@ -3,48 +3,47 @@
 package notimplemented
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 var flexTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 
 type FlexRed struct{}
 
-func (FlexRed) ID() ids.CardID          { return ids.FlexRed }
-func (FlexRed) Name() string            { return "Flex" }
-func (FlexRed) DisplayName() string     { return "Flex [R]" }
-func (FlexRed) Cost(sim.GameEngine) int { return 0 }
-func (FlexRed) Pitch() int              { return 1 }
-func (FlexRed) Attack() int             { return 4 }
-func (FlexRed) Defense() int            { return 2 }
-func (FlexRed) Types() card.TypeSet     { return flexTypes }
-func (FlexRed) GoAgain() bool           { return false }
-func (FlexRed) NotImplemented()         {}
+func (FlexRed) ID() ids.CardID           { return ids.FlexRed }
+func (FlexRed) Name() string             { return "Flex" }
+func (FlexRed) DisplayName() string      { return "Flex [R]" }
+func (FlexRed) Cost(card.GameEngine) int { return 0 }
+func (FlexRed) Pitch() int               { return 1 }
+func (FlexRed) Attack() int              { return 4 }
+func (FlexRed) Defense() int             { return 2 }
+func (FlexRed) Types() card.TypeSet      { return flexTypes }
+func (FlexRed) GoAgain() bool            { return false }
+func (FlexRed) NotImplemented()          {}
 
 type FlexYellow struct{}
 
-func (FlexYellow) ID() ids.CardID          { return ids.FlexYellow }
-func (FlexYellow) Name() string            { return "Flex" }
-func (FlexYellow) DisplayName() string     { return "Flex [Y]" }
-func (FlexYellow) Cost(sim.GameEngine) int { return 0 }
-func (FlexYellow) Pitch() int              { return 2 }
-func (FlexYellow) Attack() int             { return 3 }
-func (FlexYellow) Defense() int            { return 2 }
-func (FlexYellow) Types() card.TypeSet     { return flexTypes }
-func (FlexYellow) GoAgain() bool           { return false }
-func (FlexYellow) NotImplemented()         {}
+func (FlexYellow) ID() ids.CardID           { return ids.FlexYellow }
+func (FlexYellow) Name() string             { return "Flex" }
+func (FlexYellow) DisplayName() string      { return "Flex [Y]" }
+func (FlexYellow) Cost(card.GameEngine) int { return 0 }
+func (FlexYellow) Pitch() int               { return 2 }
+func (FlexYellow) Attack() int              { return 3 }
+func (FlexYellow) Defense() int             { return 2 }
+func (FlexYellow) Types() card.TypeSet      { return flexTypes }
+func (FlexYellow) GoAgain() bool            { return false }
+func (FlexYellow) NotImplemented()          {}
 
 type FlexBlue struct{}
 
-func (FlexBlue) ID() ids.CardID          { return ids.FlexBlue }
-func (FlexBlue) Name() string            { return "Flex" }
-func (FlexBlue) DisplayName() string     { return "Flex [B]" }
-func (FlexBlue) Cost(sim.GameEngine) int { return 0 }
-func (FlexBlue) Pitch() int              { return 3 }
-func (FlexBlue) Attack() int             { return 2 }
-func (FlexBlue) Defense() int            { return 2 }
-func (FlexBlue) Types() card.TypeSet     { return flexTypes }
-func (FlexBlue) GoAgain() bool           { return false }
-func (FlexBlue) NotImplemented()         {}
+func (FlexBlue) ID() ids.CardID           { return ids.FlexBlue }
+func (FlexBlue) Name() string             { return "Flex" }
+func (FlexBlue) DisplayName() string      { return "Flex [B]" }
+func (FlexBlue) Cost(card.GameEngine) int { return 0 }
+func (FlexBlue) Pitch() int               { return 3 }
+func (FlexBlue) Attack() int              { return 2 }
+func (FlexBlue) Defense() int             { return 2 }
+func (FlexBlue) Types() card.TypeSet      { return flexTypes }
+func (FlexBlue) GoAgain() bool            { return false }
+func (FlexBlue) NotImplemented()          {}

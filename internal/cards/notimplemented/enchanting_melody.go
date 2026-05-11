@@ -10,23 +10,23 @@
 package notimplemented
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 // not implemented: damage-prevention trigger, end-phase destruction clause
 
-func (EnchantingMelodyRed) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
+func (EnchantingMelodyRed) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 	s.SetAuraCreated(true)
 }
 
 // not implemented: damage-prevention trigger, end-phase destruction clause
 
-func (EnchantingMelodyYellow) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
+func (EnchantingMelodyYellow) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 	s.SetAuraCreated(true)
 }
 
 // not implemented: damage-prevention trigger, end-phase destruction clause
 
-func (EnchantingMelodyBlue) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
+func (EnchantingMelodyBlue) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 	s.SetAuraCreated(true)
 }

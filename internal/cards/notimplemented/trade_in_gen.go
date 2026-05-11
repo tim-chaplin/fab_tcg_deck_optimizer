@@ -3,48 +3,47 @@
 package notimplemented
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 var tradeInTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 
 type TradeInRed struct{}
 
-func (TradeInRed) ID() ids.CardID          { return ids.TradeInRed }
-func (TradeInRed) Name() string            { return "Trade In" }
-func (TradeInRed) DisplayName() string     { return "Trade In [R]" }
-func (TradeInRed) Cost(sim.GameEngine) int { return 0 }
-func (TradeInRed) Pitch() int              { return 1 }
-func (TradeInRed) Attack() int             { return 3 }
-func (TradeInRed) Defense() int            { return 2 }
-func (TradeInRed) Types() card.TypeSet     { return tradeInTypes }
-func (TradeInRed) GoAgain() bool           { return false }
-func (TradeInRed) NotImplemented()         {}
+func (TradeInRed) ID() ids.CardID           { return ids.TradeInRed }
+func (TradeInRed) Name() string             { return "Trade In" }
+func (TradeInRed) DisplayName() string      { return "Trade In [R]" }
+func (TradeInRed) Cost(card.GameEngine) int { return 0 }
+func (TradeInRed) Pitch() int               { return 1 }
+func (TradeInRed) Attack() int              { return 3 }
+func (TradeInRed) Defense() int             { return 2 }
+func (TradeInRed) Types() card.TypeSet      { return tradeInTypes }
+func (TradeInRed) GoAgain() bool            { return false }
+func (TradeInRed) NotImplemented()          {}
 
 type TradeInYellow struct{}
 
-func (TradeInYellow) ID() ids.CardID          { return ids.TradeInYellow }
-func (TradeInYellow) Name() string            { return "Trade In" }
-func (TradeInYellow) DisplayName() string     { return "Trade In [Y]" }
-func (TradeInYellow) Cost(sim.GameEngine) int { return 0 }
-func (TradeInYellow) Pitch() int              { return 2 }
-func (TradeInYellow) Attack() int             { return 2 }
-func (TradeInYellow) Defense() int            { return 2 }
-func (TradeInYellow) Types() card.TypeSet     { return tradeInTypes }
-func (TradeInYellow) GoAgain() bool           { return false }
-func (TradeInYellow) NotImplemented()         {}
+func (TradeInYellow) ID() ids.CardID           { return ids.TradeInYellow }
+func (TradeInYellow) Name() string             { return "Trade In" }
+func (TradeInYellow) DisplayName() string      { return "Trade In [Y]" }
+func (TradeInYellow) Cost(card.GameEngine) int { return 0 }
+func (TradeInYellow) Pitch() int               { return 2 }
+func (TradeInYellow) Attack() int              { return 2 }
+func (TradeInYellow) Defense() int             { return 2 }
+func (TradeInYellow) Types() card.TypeSet      { return tradeInTypes }
+func (TradeInYellow) GoAgain() bool            { return false }
+func (TradeInYellow) NotImplemented()          {}
 
 type TradeInBlue struct{}
 
-func (TradeInBlue) ID() ids.CardID          { return ids.TradeInBlue }
-func (TradeInBlue) Name() string            { return "Trade In" }
-func (TradeInBlue) DisplayName() string     { return "Trade In [B]" }
-func (TradeInBlue) Cost(sim.GameEngine) int { return 0 }
-func (TradeInBlue) Pitch() int              { return 3 }
-func (TradeInBlue) Attack() int             { return 1 }
-func (TradeInBlue) Defense() int            { return 2 }
-func (TradeInBlue) Types() card.TypeSet     { return tradeInTypes }
-func (TradeInBlue) GoAgain() bool           { return false }
-func (TradeInBlue) NotImplemented()         {}
+func (TradeInBlue) ID() ids.CardID           { return ids.TradeInBlue }
+func (TradeInBlue) Name() string             { return "Trade In" }
+func (TradeInBlue) DisplayName() string      { return "Trade In [B]" }
+func (TradeInBlue) Cost(card.GameEngine) int { return 0 }
+func (TradeInBlue) Pitch() int               { return 3 }
+func (TradeInBlue) Attack() int              { return 1 }
+func (TradeInBlue) Defense() int             { return 2 }
+func (TradeInBlue) Types() card.TypeSet      { return tradeInTypes }
+func (TradeInBlue) GoAgain() bool            { return false }
+func (TradeInBlue) NotImplemented()          {}

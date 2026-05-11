@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 // Tests that with no arcane incoming the default branch credits 1{h}.
@@ -15,7 +16,7 @@ func TestArcanePolarity_NoArcaneIncomingCreditsOne(t *testing.T) {
 	}
 	for _, c := range cases {
 		var s sim.TurnState
-		sim.ResolveChainStep(&s, s.Logger(), &sim.CardState{Card: c})
+		sim.ResolveChainStep(&s, s.Logger(), &card.CardState{Card: c})
 		if s.Value() != 1 {
 			t.Errorf("%s: Value = %d, want 1", c.Name(), s.Value())
 		}
@@ -34,7 +35,7 @@ func TestArcanePolarity_ArcaneIncomingCreditsLargeGain(t *testing.T) {
 	}
 	for _, tc := range cases {
 		s := sim.NewTurnStateFromSpec(sim.TurnStateSpec{ArcaneIncomingDamage: 1})
-		sim.ResolveChainStep(&s, s.Logger(), &sim.CardState{Card: tc.c})
+		sim.ResolveChainStep(&s, s.Logger(), &card.CardState{Card: tc.c})
 		if s.Value() != tc.gain {
 			t.Errorf("%s: Value = %d, want %d", tc.c.Name(), s.Value(), tc.gain)
 		}

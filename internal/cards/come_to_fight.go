@@ -7,17 +7,17 @@
 package cards
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
-func (ComeToFightRed) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
+func (ComeToFightRed) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 	GrantNextCardBonusAttack(s, 3, IsAttackAction)
 }
 
-func (ComeToFightYellow) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
+func (ComeToFightYellow) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 	GrantNextCardBonusAttack(s, 2, IsAttackAction)
 }
 
-func (ComeToFightBlue) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
+func (ComeToFightBlue) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 	GrantNextCardBonusAttack(s, 1, IsAttackAction)
 }

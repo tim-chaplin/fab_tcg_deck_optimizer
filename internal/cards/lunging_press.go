@@ -8,11 +8,12 @@ package cards
 
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 func (LungingPressBlue) ARTargetAllowed(c sim.Card, _ int8) bool {
 	return c.Types().IsAttackAction()
 }
-func (LungingPressBlue) Play(s sim.GameEngine, l sim.Logger, self *sim.CardState) {
+func (LungingPressBlue) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 	sim.GrantAttackReactionBuff(s, l, self, 1)
 }

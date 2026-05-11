@@ -4,12 +4,13 @@ import (
 	"testing"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 // Tests that mode 0 fires the -1{p} self-debuff before crediting attack damage.
 func TestBlusterBuff_Mode0DebuffsByOne(t *testing.T) {
 	s := sim.TurnState{}
-	self := &sim.CardState{Card: BlusterBuffRed{}}
+	self := &card.CardState{Card: BlusterBuffRed{}}
 	sim.ResolveChainStep(&s, s.Logger(), self)
 	if s.Value() != 5 {
 		t.Errorf("mode 0 Value = %d, want 5 (printed 6 - 1)", s.Value())
@@ -19,7 +20,7 @@ func TestBlusterBuff_Mode0DebuffsByOne(t *testing.T) {
 // Tests that mode 1 keeps the printed power.
 func TestBlusterBuff_Mode1KeepsPrintedPower(t *testing.T) {
 	s := sim.TurnState{}
-	self := &sim.CardState{Card: BlusterBuffRed{}, Mode: 1}
+	self := &card.CardState{Card: BlusterBuffRed{}, Mode: 1}
 	sim.ResolveChainStep(&s, s.Logger(), self)
 	if s.Value() != 6 {
 		t.Errorf("mode 1 Value = %d, want 6 (printed)", s.Value())
