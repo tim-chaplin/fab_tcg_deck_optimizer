@@ -61,7 +61,7 @@ type CardState struct {
 	// "OnHit registrations" for the wiring contract.
 	OnHit []OnHitHandler
 	// SkipGraveyard is set by Play helpers that route this card to a non-graveyard
-	// zone — e.g. State.RecycleToDeckBottom for Relentless Pursuit's "put this on the
+	// zone — e.g. GameEngine.RecycleToDeckBottom for Relentless Pursuit's "put this on the
 	// bottom of its owner's deck" clause. The chain dispatcher's "non-persistent →
 	// graveyard" append checks this flag and skips the append when set, so the
 	// helper that moved the card owns its destination zone fully.
@@ -75,7 +75,7 @@ type CardState struct {
 // OnHit (Mauvrion Skies, Runic Reaping). N and LogText are optional small payloads
 // cards use to avoid closures.
 type OnHitHandler struct {
-	Fire    func(s State, l Logger, self *CardState, h *OnHitHandler)
+	Fire    func(s GameEngine, l Logger, self *CardState, h *OnHitHandler)
 	Source  Card
 	LogText string
 	N       int
@@ -84,7 +84,7 @@ type OnHitHandler struct {
 // RegisterOnHit appends a fire-only on-hit handler — the common case for "if this
 // hits, do X" riders. Cards needing Source / N / LogText payloads on the handler
 // append an OnHitHandler literal directly.
-func (p *CardState) RegisterOnHit(fire func(s State, l Logger, self *CardState, h *OnHitHandler)) {
+func (p *CardState) RegisterOnHit(fire func(s GameEngine, l Logger, self *CardState, h *OnHitHandler)) {
 	p.OnHit = append(p.OnHit, OnHitHandler{Fire: fire})
 }
 

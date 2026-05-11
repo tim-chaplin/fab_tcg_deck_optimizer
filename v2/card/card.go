@@ -29,7 +29,7 @@ type Card interface {
 	// discount-per-token effects) additionally implement VariableCost so the solver
 	// can pre-screen with cheap MinCost / MaxCost bounds before enumerating chain
 	// permutations.
-	Cost(s State) int
+	Cost(s GameEngine) int
 	Pitch() int
 	// Attack is the printed attack value. Conditional bonuses belong in Play, not
 	// here.
@@ -48,5 +48,5 @@ type Card interface {
 	// capped EffectiveDefense to s and emit the <Card>: <VERB> (+N) chain step"
 	// mechanic happens in sim.ResolveChainStep after Play returns — vanilla attack /
 	// DR cards have an empty Play body.
-	Play(s State, l Logger, self *CardState)
+	Play(s GameEngine, l Logger, self *CardState)
 }
