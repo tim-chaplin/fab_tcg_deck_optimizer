@@ -5,11 +5,11 @@
 package notimplemented
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 // not implemented: marked-defender state not tracked; treated as always legal and the -1{p}
 // attacker debuff is dropped
 
-func (LayLowYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (LayLowYellow) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 }

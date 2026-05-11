@@ -9,12 +9,12 @@
 package cards
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 const runeFlashPrintedCost = 3
 
-func runeFlashCost(s *sim.TurnState) int {
+func runeFlashCost(s card.GameEngine) int {
 	eff := runeFlashPrintedCost - s.Runechants()
 	if eff < 0 {
 		return 0
@@ -22,23 +22,23 @@ func runeFlashCost(s *sim.TurnState) int {
 	return eff
 }
 
-func (RuneFlashRed) Cost(s *sim.TurnState) int { return runeFlashCost(s) }
-func (RuneFlashRed) MinCost() int              { return 0 }
-func (RuneFlashRed) MaxCost() int              { return runeFlashPrintedCost }
+func (RuneFlashRed) Cost(s card.GameEngine) int { return runeFlashCost(s) }
+func (RuneFlashRed) MinCost() int               { return 0 }
+func (RuneFlashRed) MaxCost() int               { return runeFlashPrintedCost }
 
-func (RuneFlashRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (RuneFlashRed) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 }
 
-func (RuneFlashYellow) Cost(s *sim.TurnState) int { return runeFlashCost(s) }
-func (RuneFlashYellow) MinCost() int              { return 0 }
-func (RuneFlashYellow) MaxCost() int              { return runeFlashPrintedCost }
+func (RuneFlashYellow) Cost(s card.GameEngine) int { return runeFlashCost(s) }
+func (RuneFlashYellow) MinCost() int               { return 0 }
+func (RuneFlashYellow) MaxCost() int               { return runeFlashPrintedCost }
 
-func (RuneFlashYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (RuneFlashYellow) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 }
 
-func (RuneFlashBlue) Cost(s *sim.TurnState) int { return runeFlashCost(s) }
-func (RuneFlashBlue) MinCost() int              { return 0 }
-func (RuneFlashBlue) MaxCost() int              { return runeFlashPrintedCost }
+func (RuneFlashBlue) Cost(s card.GameEngine) int { return runeFlashCost(s) }
+func (RuneFlashBlue) MinCost() int               { return 0 }
+func (RuneFlashBlue) MaxCost() int               { return runeFlashPrintedCost }
 
-func (RuneFlashBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (RuneFlashBlue) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 }

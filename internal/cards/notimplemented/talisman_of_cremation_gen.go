@@ -3,22 +3,21 @@
 package notimplemented
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 var talismanOfCremationTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeItem)
 
 type TalismanOfCremationBlue struct{}
 
-func (TalismanOfCremationBlue) ID() ids.CardID          { return ids.TalismanOfCremationBlue }
-func (TalismanOfCremationBlue) Name() string            { return "Talisman of Cremation" }
-func (TalismanOfCremationBlue) DisplayName() string     { return "Talisman of Cremation [B]" }
-func (TalismanOfCremationBlue) Cost(*sim.TurnState) int { return 0 }
-func (TalismanOfCremationBlue) Pitch() int              { return 3 }
-func (TalismanOfCremationBlue) Attack() int             { return 0 }
-func (TalismanOfCremationBlue) Defense() int            { return 0 }
-func (TalismanOfCremationBlue) Types() card.TypeSet     { return talismanOfCremationTypes }
-func (TalismanOfCremationBlue) GoAgain() bool           { return true }
-func (TalismanOfCremationBlue) NotImplemented()         {}
+func (TalismanOfCremationBlue) ID() ids.CardID           { return ids.TalismanOfCremationBlue }
+func (TalismanOfCremationBlue) Name() string             { return "Talisman of Cremation" }
+func (TalismanOfCremationBlue) DisplayName() string      { return "Talisman of Cremation [B]" }
+func (TalismanOfCremationBlue) Cost(card.GameEngine) int { return 0 }
+func (TalismanOfCremationBlue) Pitch() int               { return 3 }
+func (TalismanOfCremationBlue) Attack() int              { return 0 }
+func (TalismanOfCremationBlue) Defense() int             { return 0 }
+func (TalismanOfCremationBlue) Types() card.TypeSet      { return talismanOfCremationTypes }
+func (TalismanOfCremationBlue) GoAgain() bool            { return true }
+func (TalismanOfCremationBlue) NotImplemented()          {}

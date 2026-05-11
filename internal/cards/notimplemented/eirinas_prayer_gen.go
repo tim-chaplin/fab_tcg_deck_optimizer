@@ -3,48 +3,47 @@
 package notimplemented
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 var eirinaSPrayerTypes = card.NewTypeSet(card.TypeGeneric, card.TypeInstant)
 
 type EirinasPrayerRed struct{}
 
-func (EirinasPrayerRed) ID() ids.CardID          { return ids.EirinasPrayerRed }
-func (EirinasPrayerRed) Name() string            { return "Eirina's Prayer" }
-func (EirinasPrayerRed) DisplayName() string     { return "Eirina's Prayer [R]" }
-func (EirinasPrayerRed) Cost(*sim.TurnState) int { return 1 }
-func (EirinasPrayerRed) Pitch() int              { return 1 }
-func (EirinasPrayerRed) Attack() int             { return 0 }
-func (EirinasPrayerRed) Defense() int            { return 0 }
-func (EirinasPrayerRed) Types() card.TypeSet     { return eirinaSPrayerTypes }
-func (EirinasPrayerRed) GoAgain() bool           { return false }
-func (EirinasPrayerRed) NotImplemented()         {}
+func (EirinasPrayerRed) ID() ids.CardID           { return ids.EirinasPrayerRed }
+func (EirinasPrayerRed) Name() string             { return "Eirina's Prayer" }
+func (EirinasPrayerRed) DisplayName() string      { return "Eirina's Prayer [R]" }
+func (EirinasPrayerRed) Cost(card.GameEngine) int { return 1 }
+func (EirinasPrayerRed) Pitch() int               { return 1 }
+func (EirinasPrayerRed) Attack() int              { return 0 }
+func (EirinasPrayerRed) Defense() int             { return 0 }
+func (EirinasPrayerRed) Types() card.TypeSet      { return eirinaSPrayerTypes }
+func (EirinasPrayerRed) GoAgain() bool            { return false }
+func (EirinasPrayerRed) NotImplemented()          {}
 
 type EirinasPrayerYellow struct{}
 
-func (EirinasPrayerYellow) ID() ids.CardID          { return ids.EirinasPrayerYellow }
-func (EirinasPrayerYellow) Name() string            { return "Eirina's Prayer" }
-func (EirinasPrayerYellow) DisplayName() string     { return "Eirina's Prayer [Y]" }
-func (EirinasPrayerYellow) Cost(*sim.TurnState) int { return 1 }
-func (EirinasPrayerYellow) Pitch() int              { return 2 }
-func (EirinasPrayerYellow) Attack() int             { return 0 }
-func (EirinasPrayerYellow) Defense() int            { return 0 }
-func (EirinasPrayerYellow) Types() card.TypeSet     { return eirinaSPrayerTypes }
-func (EirinasPrayerYellow) GoAgain() bool           { return false }
-func (EirinasPrayerYellow) NotImplemented()         {}
+func (EirinasPrayerYellow) ID() ids.CardID           { return ids.EirinasPrayerYellow }
+func (EirinasPrayerYellow) Name() string             { return "Eirina's Prayer" }
+func (EirinasPrayerYellow) DisplayName() string      { return "Eirina's Prayer [Y]" }
+func (EirinasPrayerYellow) Cost(card.GameEngine) int { return 1 }
+func (EirinasPrayerYellow) Pitch() int               { return 2 }
+func (EirinasPrayerYellow) Attack() int              { return 0 }
+func (EirinasPrayerYellow) Defense() int             { return 0 }
+func (EirinasPrayerYellow) Types() card.TypeSet      { return eirinaSPrayerTypes }
+func (EirinasPrayerYellow) GoAgain() bool            { return false }
+func (EirinasPrayerYellow) NotImplemented()          {}
 
 type EirinasPrayerBlue struct{}
 
-func (EirinasPrayerBlue) ID() ids.CardID          { return ids.EirinasPrayerBlue }
-func (EirinasPrayerBlue) Name() string            { return "Eirina's Prayer" }
-func (EirinasPrayerBlue) DisplayName() string     { return "Eirina's Prayer [B]" }
-func (EirinasPrayerBlue) Cost(*sim.TurnState) int { return 1 }
-func (EirinasPrayerBlue) Pitch() int              { return 3 }
-func (EirinasPrayerBlue) Attack() int             { return 0 }
-func (EirinasPrayerBlue) Defense() int            { return 0 }
-func (EirinasPrayerBlue) Types() card.TypeSet     { return eirinaSPrayerTypes }
-func (EirinasPrayerBlue) GoAgain() bool           { return false }
-func (EirinasPrayerBlue) NotImplemented()         {}
+func (EirinasPrayerBlue) ID() ids.CardID           { return ids.EirinasPrayerBlue }
+func (EirinasPrayerBlue) Name() string             { return "Eirina's Prayer" }
+func (EirinasPrayerBlue) DisplayName() string      { return "Eirina's Prayer [B]" }
+func (EirinasPrayerBlue) Cost(card.GameEngine) int { return 1 }
+func (EirinasPrayerBlue) Pitch() int               { return 3 }
+func (EirinasPrayerBlue) Attack() int              { return 0 }
+func (EirinasPrayerBlue) Defense() int             { return 0 }
+func (EirinasPrayerBlue) Types() card.TypeSet      { return eirinaSPrayerTypes }
+func (EirinasPrayerBlue) GoAgain() bool            { return false }
+func (EirinasPrayerBlue) NotImplemented()          {}

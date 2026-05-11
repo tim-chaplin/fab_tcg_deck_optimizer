@@ -7,10 +7,10 @@
 package notimplemented
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 // not implemented: hand-cycle-for-+2{p} rider
 
-func (c EmissaryOfTidesRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (c EmissaryOfTidesRed) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 }

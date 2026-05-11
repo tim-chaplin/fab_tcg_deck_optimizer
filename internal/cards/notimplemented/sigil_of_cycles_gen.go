@@ -3,22 +3,21 @@
 package notimplemented
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 var sigilOfCyclesTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAura)
 
 type SigilOfCyclesBlue struct{}
 
-func (SigilOfCyclesBlue) ID() ids.CardID          { return ids.SigilOfCyclesBlue }
-func (SigilOfCyclesBlue) Name() string            { return "Sigil of Cycles" }
-func (SigilOfCyclesBlue) DisplayName() string     { return "Sigil of Cycles [B]" }
-func (SigilOfCyclesBlue) Cost(*sim.TurnState) int { return 0 }
-func (SigilOfCyclesBlue) Pitch() int              { return 3 }
-func (SigilOfCyclesBlue) Attack() int             { return 0 }
-func (SigilOfCyclesBlue) Defense() int            { return 2 }
-func (SigilOfCyclesBlue) Types() card.TypeSet     { return sigilOfCyclesTypes }
-func (SigilOfCyclesBlue) GoAgain() bool           { return true }
-func (SigilOfCyclesBlue) NotImplemented()         {}
+func (SigilOfCyclesBlue) ID() ids.CardID           { return ids.SigilOfCyclesBlue }
+func (SigilOfCyclesBlue) Name() string             { return "Sigil of Cycles" }
+func (SigilOfCyclesBlue) DisplayName() string      { return "Sigil of Cycles [B]" }
+func (SigilOfCyclesBlue) Cost(card.GameEngine) int { return 0 }
+func (SigilOfCyclesBlue) Pitch() int               { return 3 }
+func (SigilOfCyclesBlue) Attack() int              { return 0 }
+func (SigilOfCyclesBlue) Defense() int             { return 2 }
+func (SigilOfCyclesBlue) Types() card.TypeSet      { return sigilOfCyclesTypes }
+func (SigilOfCyclesBlue) GoAgain() bool            { return true }
+func (SigilOfCyclesBlue) NotImplemented()          {}

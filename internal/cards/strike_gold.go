@@ -4,26 +4,26 @@
 package cards
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
-func strikeGoldOnHit(s *sim.TurnState, l sim.Logger, self *sim.CardState, _ *sim.OnHitHandler) {
+func strikeGoldOnHit(s card.GameEngine, l card.Logger, self *card.CardState, _ *card.OnHitHandler) {
 	s.CreateGold(1)
 	l.AppendPostTrigger(self.Card.DisplayName(), "On-hit created a gold token", 0)
 }
 
-func strikeGoldPlay(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func strikeGoldPlay(s card.GameEngine, l card.Logger, self *card.CardState) {
 	self.RegisterOnHit(strikeGoldOnHit)
 }
 
-func (StrikeGoldRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (StrikeGoldRed) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 	strikeGoldPlay(s, l, self)
 }
 
-func (StrikeGoldYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (StrikeGoldYellow) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 	strikeGoldPlay(s, l, self)
 }
 
-func (StrikeGoldBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (StrikeGoldBlue) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 	strikeGoldPlay(s, l, self)
 }

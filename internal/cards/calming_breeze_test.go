@@ -4,12 +4,13 @@ import (
 	"testing"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 // Tests that Play credits the flat 3-damage prevention.
 func TestCalmingBreeze_PreventsFlat3(t *testing.T) {
 	s := sim.NewTurnStateFromSpec(sim.TurnStateSpec{IncomingDamage: 5})
-	self := &sim.CardState{Card: CalmingBreezeRed{}}
+	self := &card.CardState{Card: CalmingBreezeRed{}}
 	sim.ResolveChainStep(&s, s.Logger(), self)
 	if s.Value() != 3 {
 		t.Errorf("Value = %d, want 3", s.Value())

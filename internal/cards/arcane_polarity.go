@@ -9,11 +9,11 @@
 package cards
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 // arcanePolarityPlay credits the conditional life gain as the chain step.
-func arcanePolarityPlay(s *sim.TurnState, l sim.Logger, self *sim.CardState, arcaneGain int) {
+func arcanePolarityPlay(s card.GameEngine, l card.Logger, self *card.CardState, arcaneGain int) {
 	gain := 1
 	if s.ArcaneIncomingDamage() > 0 {
 		gain = arcaneGain
@@ -21,14 +21,14 @@ func arcanePolarityPlay(s *sim.TurnState, l sim.Logger, self *sim.CardState, arc
 	s.AddValue(gain)
 }
 
-func (ArcanePolarityRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (ArcanePolarityRed) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 	arcanePolarityPlay(s, l, self, 4)
 }
 
-func (ArcanePolarityYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (ArcanePolarityYellow) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 	arcanePolarityPlay(s, l, self, 3)
 }
 
-func (ArcanePolarityBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (ArcanePolarityBlue) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 	arcanePolarityPlay(s, l, self, 2)
 }

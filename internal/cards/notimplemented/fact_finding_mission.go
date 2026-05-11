@@ -7,20 +7,20 @@
 package notimplemented
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 // not implemented: on-hit opponent-arsenal/equipment peek
 
-func (FactFindingMissionRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (FactFindingMissionRed) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 }
 
 // not implemented: on-hit opponent-arsenal/equipment peek
 
-func (FactFindingMissionYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (FactFindingMissionYellow) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 }
 
 // not implemented: on-hit opponent-arsenal/equipment peek
 
-func (FactFindingMissionBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (FactFindingMissionBlue) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 }

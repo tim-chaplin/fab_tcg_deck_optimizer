@@ -5,6 +5,7 @@ import (
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 // TestSunKiss_SoloIsHealOnly: with no Moon Wish in CardsPlayed the printed health-gain
@@ -21,7 +22,7 @@ func TestSunKiss_SoloIsHealOnly(t *testing.T) {
 	}
 	for _, tc := range cases {
 		s := sim.NewTurnStateFromCards([]sim.Card{testutils.GenericAttack(0, 0)}, nil)
-		self := &sim.CardState{Card: tc.c}
+		self := &card.CardState{Card: tc.c}
 		sim.ResolveChainStep(s, s.Logger(), self)
 		got := s.Value()
 		if got != tc.heal {
@@ -51,7 +52,7 @@ func TestSunKiss_SynergyFiresOnPriorMoonWish(t *testing.T) {
 		} {
 			s := sim.NewTurnStateFromCards([]sim.Card{testutils.GenericAttack(0, 0)}, nil)
 			s.SetCardsPlayed([]sim.Card{mw})
-			self := &sim.CardState{Card: sk.c}
+			self := &card.CardState{Card: sk.c}
 			sim.ResolveChainStep(s, s.Logger(), self)
 			got := s.Value()
 			if got != sk.heal {
@@ -74,7 +75,7 @@ func TestSunKiss_SynergyDoesNotFireOnUnrelatedAttacks(t *testing.T) {
 	notMoonWish := testutils.GenericAttackPitch(0, 0, 1)
 	s := sim.NewTurnStateFromCards([]sim.Card{testutils.GenericAttack(0, 0)}, nil)
 	s.SetCardsPlayed([]sim.Card{notMoonWish})
-	self := &sim.CardState{Card: SunKissRed{}}
+	self := &card.CardState{Card: SunKissRed{}}
 	sim.ResolveChainStep(s, s.Logger(), self)
 	got := s.Value()
 	if got != 3 {
@@ -96,7 +97,7 @@ func TestSunKiss_SynergyHandlesEmptyDeck(t *testing.T) {
 		CardsPlayed: []sim.Card{MoonWishRed{}},
 		// Deck intentionally nil.
 	})
-	self := &sim.CardState{Card: SunKissRed{}}
+	self := &card.CardState{Card: SunKissRed{}}
 	sim.ResolveChainStep(s, s.Logger(), self)
 	got := s.Value()
 	if got != 3 {

@@ -7,20 +7,20 @@
 package notimplemented
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 // not implemented: hand-as-cost alt cost not modelled; card fails when printed cost can't be paid
 
-func (RiseAboveRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (RiseAboveRed) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 }
 
 // not implemented: hand-as-cost alt cost not modelled; card fails when printed cost can't be paid
 
-func (RiseAboveYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (RiseAboveYellow) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 }
 
 // not implemented: hand-as-cost alt cost not modelled; card fails when printed cost can't be paid
 
-func (RiseAboveBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (RiseAboveBlue) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 }

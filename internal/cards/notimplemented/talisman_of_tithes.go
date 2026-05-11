@@ -6,10 +6,10 @@
 package notimplemented
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 // not implemented: self-destroys on an opposing draw during your action phase → opponent draws
 // minus 1
 
-func (TalismanOfTithesBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {}
+func (TalismanOfTithesBlue) Play(s card.GameEngine, l card.Logger, self *card.CardState) {}

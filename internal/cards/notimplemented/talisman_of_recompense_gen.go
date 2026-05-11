@@ -3,22 +3,21 @@
 package notimplemented
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 var talismanOfRecompenseTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeItem)
 
 type TalismanOfRecompenseYellow struct{}
 
-func (TalismanOfRecompenseYellow) ID() ids.CardID          { return ids.TalismanOfRecompenseYellow }
-func (TalismanOfRecompenseYellow) Name() string            { return "Talisman of Recompense" }
-func (TalismanOfRecompenseYellow) DisplayName() string     { return "Talisman of Recompense [Y]" }
-func (TalismanOfRecompenseYellow) Cost(*sim.TurnState) int { return 0 }
-func (TalismanOfRecompenseYellow) Pitch() int              { return 2 }
-func (TalismanOfRecompenseYellow) Attack() int             { return 0 }
-func (TalismanOfRecompenseYellow) Defense() int            { return 0 }
-func (TalismanOfRecompenseYellow) Types() card.TypeSet     { return talismanOfRecompenseTypes }
-func (TalismanOfRecompenseYellow) GoAgain() bool           { return true }
-func (TalismanOfRecompenseYellow) NotImplemented()         {}
+func (TalismanOfRecompenseYellow) ID() ids.CardID           { return ids.TalismanOfRecompenseYellow }
+func (TalismanOfRecompenseYellow) Name() string             { return "Talisman of Recompense" }
+func (TalismanOfRecompenseYellow) DisplayName() string      { return "Talisman of Recompense [Y]" }
+func (TalismanOfRecompenseYellow) Cost(card.GameEngine) int { return 0 }
+func (TalismanOfRecompenseYellow) Pitch() int               { return 2 }
+func (TalismanOfRecompenseYellow) Attack() int              { return 0 }
+func (TalismanOfRecompenseYellow) Defense() int             { return 0 }
+func (TalismanOfRecompenseYellow) Types() card.TypeSet      { return talismanOfRecompenseTypes }
+func (TalismanOfRecompenseYellow) GoAgain() bool            { return true }
+func (TalismanOfRecompenseYellow) NotImplemented()          {}

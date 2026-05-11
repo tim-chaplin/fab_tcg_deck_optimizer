@@ -5,9 +5,9 @@
 package weapons
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 var scepterOfPainTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeWeapon, card.TypeScepter, card.TypeOneHand)
@@ -27,16 +27,16 @@ var scepterOfPainAbilityTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeWea
 
 type ScepterOfPainAbility struct{}
 
-func (ScepterOfPainAbility) ID() ids.CardID          { return ids.ScepterOfPainAbilityID }
-func (ScepterOfPainAbility) Name() string            { return "Scepter of Pain" }
-func (ScepterOfPainAbility) DisplayName() string     { return "Scepter of Pain" }
-func (ScepterOfPainAbility) Cost(*sim.TurnState) int { return 2 }
-func (ScepterOfPainAbility) Pitch() int              { return 0 }
-func (ScepterOfPainAbility) Attack() int             { return 1 }
-func (ScepterOfPainAbility) Defense() int            { return 0 }
-func (ScepterOfPainAbility) Types() card.TypeSet     { return scepterOfPainAbilityTypes }
-func (ScepterOfPainAbility) GoAgain() bool           { return false }
-func (ScepterOfPainAbility) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (ScepterOfPainAbility) ID() ids.CardID           { return ids.ScepterOfPainAbilityID }
+func (ScepterOfPainAbility) Name() string             { return "Scepter of Pain" }
+func (ScepterOfPainAbility) DisplayName() string      { return "Scepter of Pain" }
+func (ScepterOfPainAbility) Cost(card.GameEngine) int { return 2 }
+func (ScepterOfPainAbility) Pitch() int               { return 0 }
+func (ScepterOfPainAbility) Attack() int              { return 1 }
+func (ScepterOfPainAbility) Defense() int             { return 0 }
+func (ScepterOfPainAbility) Types() card.TypeSet      { return scepterOfPainAbilityTypes }
+func (ScepterOfPainAbility) GoAgain() bool            { return false }
+func (ScepterOfPainAbility) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 	s.CreateRunechants(1)
 	l.AppendPostTrigger(self.Card.DisplayName(), "Created a runechant", 1)
 }

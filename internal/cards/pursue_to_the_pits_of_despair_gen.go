@@ -3,21 +3,20 @@
 package cards
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 var pursueToThePitsOfDespairTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 
 type PursueToThePitsOfDespairRed struct{}
 
-func (PursueToThePitsOfDespairRed) ID() ids.CardID          { return ids.PursueToThePitsOfDespairRed }
-func (PursueToThePitsOfDespairRed) Name() string            { return "Pursue to the Pits of Despair" }
-func (PursueToThePitsOfDespairRed) DisplayName() string     { return "Pursue to the Pits of Despair [R]" }
-func (PursueToThePitsOfDespairRed) Cost(*sim.TurnState) int { return 1 }
-func (PursueToThePitsOfDespairRed) Pitch() int              { return 1 }
-func (PursueToThePitsOfDespairRed) Attack() int             { return 5 }
-func (PursueToThePitsOfDespairRed) Defense() int            { return 3 }
-func (PursueToThePitsOfDespairRed) Types() card.TypeSet     { return pursueToThePitsOfDespairTypes }
-func (PursueToThePitsOfDespairRed) GoAgain() bool           { return false }
+func (PursueToThePitsOfDespairRed) ID() ids.CardID           { return ids.PursueToThePitsOfDespairRed }
+func (PursueToThePitsOfDespairRed) Name() string             { return "Pursue to the Pits of Despair" }
+func (PursueToThePitsOfDespairRed) DisplayName() string      { return "Pursue to the Pits of Despair [R]" }
+func (PursueToThePitsOfDespairRed) Cost(card.GameEngine) int { return 1 }
+func (PursueToThePitsOfDespairRed) Pitch() int               { return 1 }
+func (PursueToThePitsOfDespairRed) Attack() int              { return 5 }
+func (PursueToThePitsOfDespairRed) Defense() int             { return 3 }
+func (PursueToThePitsOfDespairRed) Types() card.TypeSet      { return pursueToThePitsOfDespairTypes }
+func (PursueToThePitsOfDespairRed) GoAgain() bool            { return false }

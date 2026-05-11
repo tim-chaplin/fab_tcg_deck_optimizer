@@ -5,6 +5,7 @@ import (
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 // Tests that the discard rider stays dormant when ArcaneDamageDealt is false.
@@ -19,7 +20,7 @@ func TestConsumingVolition_ArcaneDamageNotDealtReturnsBaseAttack(t *testing.T) {
 	}
 	for _, tc := range cases {
 		s := sim.TurnState{}
-		cs := &sim.CardState{Card: tc.c}
+		cs := &card.CardState{Card: tc.c}
 		sim.ResolveChainStep(&s, s.Logger(), cs)
 		testutils.FireOnHitIfLikely(&s, s.Logger(), cs)
 		if got := s.Value(); got != tc.want {
@@ -33,7 +34,7 @@ func TestConsumingVolition_ArcaneDamageNotDealtReturnsBaseAttack(t *testing.T) {
 func TestConsumingVolition_LikelyToHitAndArcaneTriggersDiscard(t *testing.T) {
 	s := sim.NewTurnStateFromSpec(sim.TurnStateSpec{ArcaneDamageDealt: true})
 	c := ConsumingVolitionRed{}
-	cs := &sim.CardState{Card: c}
+	cs := &card.CardState{Card: c}
 	sim.ResolveChainStep(&s, s.Logger(), cs)
 	testutils.FireOnHitIfLikely(&s, s.Logger(), cs)
 	if got := s.Value(); got != 4+3 {
@@ -53,7 +54,7 @@ func TestConsumingVolition_BlockableBaseSuppressesDiscard(t *testing.T) {
 	}
 	for _, tc := range cases {
 		s := sim.NewTurnStateFromSpec(sim.TurnStateSpec{ArcaneDamageDealt: true})
-		sim.ResolveChainStep(&s, s.Logger(), &sim.CardState{Card: tc.c})
+		sim.ResolveChainStep(&s, s.Logger(), &card.CardState{Card: tc.c})
 		if got := s.Value(); got != tc.want {
 			t.Errorf("%s with ArcaneDamageDealt: Play() = %d, want %d (blockable, no rider)", tc.c.Name(), got, tc.want)
 		}
@@ -65,7 +66,7 @@ func TestConsumingVolition_BlockableBaseSuppressesDiscard(t *testing.T) {
 func TestConsumingVolition_RunechantsDontRescue(t *testing.T) {
 	s := sim.NewTurnStateFromSpec(sim.TurnStateSpec{ArcaneDamageDealt: true, Auras: []sim.Aura{sim.NewRunechantAura(1)}})
 	c := ConsumingVolitionYellow{}
-	sim.ResolveChainStep(&s, s.Logger(), &sim.CardState{Card: c})
+	sim.ResolveChainStep(&s, s.Logger(), &card.CardState{Card: c})
 	if got := s.Value(); got != 3 {
 		t.Errorf("Yellow with 1 Runechant: Play() = %d, want 3 (runechant isn't 'this' damage)", got)
 	}

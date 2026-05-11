@@ -3,22 +3,21 @@
 package notimplemented
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 var handBehindThePenTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 
 type HandBehindThePenRed struct{}
 
-func (HandBehindThePenRed) ID() ids.CardID          { return ids.HandBehindThePenRed }
-func (HandBehindThePenRed) Name() string            { return "Hand Behind the Pen" }
-func (HandBehindThePenRed) DisplayName() string     { return "Hand Behind the Pen [R]" }
-func (HandBehindThePenRed) Cost(*sim.TurnState) int { return 2 }
-func (HandBehindThePenRed) Pitch() int              { return 1 }
-func (HandBehindThePenRed) Attack() int             { return 6 }
-func (HandBehindThePenRed) Defense() int            { return 2 }
-func (HandBehindThePenRed) Types() card.TypeSet     { return handBehindThePenTypes }
-func (HandBehindThePenRed) GoAgain() bool           { return false }
-func (HandBehindThePenRed) NotImplemented()         {}
+func (HandBehindThePenRed) ID() ids.CardID           { return ids.HandBehindThePenRed }
+func (HandBehindThePenRed) Name() string             { return "Hand Behind the Pen" }
+func (HandBehindThePenRed) DisplayName() string      { return "Hand Behind the Pen [R]" }
+func (HandBehindThePenRed) Cost(card.GameEngine) int { return 2 }
+func (HandBehindThePenRed) Pitch() int               { return 1 }
+func (HandBehindThePenRed) Attack() int              { return 6 }
+func (HandBehindThePenRed) Defense() int             { return 2 }
+func (HandBehindThePenRed) Types() card.TypeSet      { return handBehindThePenTypes }
+func (HandBehindThePenRed) GoAgain() bool            { return false }
+func (HandBehindThePenRed) NotImplemented()          {}

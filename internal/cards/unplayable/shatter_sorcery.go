@@ -6,8 +6,8 @@
 package unplayable
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
-func (ShatterSorceryBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (ShatterSorceryBlue) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 }

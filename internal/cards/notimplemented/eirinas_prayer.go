@@ -6,17 +6,17 @@
 package notimplemented
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 // not implemented: Instant prevent X arcane to your hero; X scaled by revealed top-card pitch
 
-func (EirinasPrayerRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {}
+func (EirinasPrayerRed) Play(s card.GameEngine, l card.Logger, self *card.CardState) {}
 
 // not implemented: Instant prevent X arcane to your hero; X scaled by revealed top-card pitch
 
-func (EirinasPrayerYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {}
+func (EirinasPrayerYellow) Play(s card.GameEngine, l card.Logger, self *card.CardState) {}
 
 // not implemented: Instant prevent X arcane to your hero; X scaled by revealed top-card pitch
 
-func (EirinasPrayerBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {}
+func (EirinasPrayerBlue) Play(s card.GameEngine, l card.Logger, self *card.CardState) {}

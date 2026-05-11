@@ -2,14 +2,14 @@
 // Yellow.
 // Text: "If Springboard Somersault is played from arsenal, it gains +2{d}."
 //
-// +2{d} when played from arsenal via sim.ArsenalDefenseBonus (docs/dev-standards.md).
+// +2{d} when played from arsenal via card.ArsenalDefenseBonus (docs/dev-standards.md).
 
 package cards
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
-func (SpringboardSomersaultYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (SpringboardSomersaultYellow) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 }
 func (SpringboardSomersaultYellow) ArsenalDefenseBonus() int { return 2 }

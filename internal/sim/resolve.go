@@ -20,9 +20,9 @@ package sim
 // (appendGroupedChainEntries) buffers post-triggers and attaches them under the
 // matching chain step regardless of stream order, so the rendered printout still reads
 // "chain step, then indented riders" as before.
-func ResolveChainStep(s *TurnState, l Logger, self *CardState) {
-	self.Card.Play(s, l, self)
-	n := chainStepDelta(s, self)
+func ResolveChainStep(g GameEngine, l Logger, self *CardState) {
+	self.Card.Play(g, l, self)
+	n := chainStepDelta(g.(*TurnState), self)
 	l.AppendChainStep(ChainStepText(self), n)
 }
 

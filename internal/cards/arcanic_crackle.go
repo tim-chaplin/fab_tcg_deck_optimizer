@@ -9,17 +9,17 @@
 package cards
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
-func (ArcanicCrackleRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (ArcanicCrackleRed) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 	s.DealArcaneDamage(l, self, 1)
 }
 
-func (ArcanicCrackleYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (ArcanicCrackleYellow) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 	s.DealArcaneDamage(l, self, 1)
 }
 
-func (ArcanicCrackleBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (ArcanicCrackleBlue) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 	s.DealArcaneDamage(l, self, 1)
 }

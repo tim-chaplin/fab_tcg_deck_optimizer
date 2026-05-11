@@ -8,10 +8,10 @@
 package notimplemented
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 // not implemented: opponent hand reveal, defense-reaction deck search
 
-func (c SoundTheAlarmRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (c SoundTheAlarmRed) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 }

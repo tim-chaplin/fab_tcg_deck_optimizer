@@ -3,11 +3,11 @@ package turntests
 import (
 	"testing"
 
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
 )
 
@@ -16,16 +16,16 @@ import (
 // tests can isolate Weeping Battleground's +1 arcane banish rider.
 type zeroDefenseAura struct{}
 
-func (zeroDefenseAura) ID() ids.CardID                                  { return ids.InvalidCard }
-func (zeroDefenseAura) Name() string                                    { return "zeroDefenseAura" }
-func (zeroDefenseAura) DisplayName() string                             { return "zeroDefenseAura" }
-func (zeroDefenseAura) Cost(*sim.TurnState) int                         { return 0 }
-func (zeroDefenseAura) Pitch() int                                      { return 0 }
-func (zeroDefenseAura) Attack() int                                     { return 0 }
-func (zeroDefenseAura) Defense() int                                    { return 0 }
-func (zeroDefenseAura) Types() card.TypeSet                             { return card.NewTypeSet(card.TypeAura) }
-func (zeroDefenseAura) GoAgain() bool                                   { return false }
-func (zeroDefenseAura) Play(*sim.TurnState, sim.Logger, *sim.CardState) {}
+func (zeroDefenseAura) ID() ids.CardID                                     { return ids.InvalidCard }
+func (zeroDefenseAura) Name() string                                       { return "zeroDefenseAura" }
+func (zeroDefenseAura) DisplayName() string                                { return "zeroDefenseAura" }
+func (zeroDefenseAura) Cost(card.GameEngine) int                           { return 0 }
+func (zeroDefenseAura) Pitch() int                                         { return 0 }
+func (zeroDefenseAura) Attack() int                                        { return 0 }
+func (zeroDefenseAura) Defense() int                                       { return 0 }
+func (zeroDefenseAura) Types() card.TypeSet                                { return card.NewTypeSet(card.TypeAura) }
+func (zeroDefenseAura) GoAgain() bool                                      { return false }
+func (zeroDefenseAura) Play(card.GameEngine, card.Logger, *card.CardState) {}
 
 // Tests that Weeping Battleground banishes a same-turn-blocked aura from the graveyard
 // for 1 arcane while also defending.

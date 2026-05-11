@@ -3,22 +3,21 @@
 package notimplemented
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 var talismanOfFeatherfootTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeItem)
 
 type TalismanOfFeatherfootYellow struct{}
 
-func (TalismanOfFeatherfootYellow) ID() ids.CardID          { return ids.TalismanOfFeatherfootYellow }
-func (TalismanOfFeatherfootYellow) Name() string            { return "Talisman of Featherfoot" }
-func (TalismanOfFeatherfootYellow) DisplayName() string     { return "Talisman of Featherfoot [Y]" }
-func (TalismanOfFeatherfootYellow) Cost(*sim.TurnState) int { return 0 }
-func (TalismanOfFeatherfootYellow) Pitch() int              { return 2 }
-func (TalismanOfFeatherfootYellow) Attack() int             { return 0 }
-func (TalismanOfFeatherfootYellow) Defense() int            { return 0 }
-func (TalismanOfFeatherfootYellow) Types() card.TypeSet     { return talismanOfFeatherfootTypes }
-func (TalismanOfFeatherfootYellow) GoAgain() bool           { return true }
-func (TalismanOfFeatherfootYellow) NotImplemented()         {}
+func (TalismanOfFeatherfootYellow) ID() ids.CardID           { return ids.TalismanOfFeatherfootYellow }
+func (TalismanOfFeatherfootYellow) Name() string             { return "Talisman of Featherfoot" }
+func (TalismanOfFeatherfootYellow) DisplayName() string      { return "Talisman of Featherfoot [Y]" }
+func (TalismanOfFeatherfootYellow) Cost(card.GameEngine) int { return 0 }
+func (TalismanOfFeatherfootYellow) Pitch() int               { return 2 }
+func (TalismanOfFeatherfootYellow) Attack() int              { return 0 }
+func (TalismanOfFeatherfootYellow) Defense() int             { return 0 }
+func (TalismanOfFeatherfootYellow) Types() card.TypeSet      { return talismanOfFeatherfootTypes }
+func (TalismanOfFeatherfootYellow) GoAgain() bool            { return true }
+func (TalismanOfFeatherfootYellow) NotImplemented()          {}

@@ -7,20 +7,20 @@
 package notimplemented
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 // not implemented: discard-to-draw rider, arsenal-conditional go again
 
-func (c TradeInRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (c TradeInRed) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 }
 
 // not implemented: discard-to-draw rider, arsenal-conditional go again
 
-func (c TradeInYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (c TradeInYellow) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 }
 
 // not implemented: discard-to-draw rider, arsenal-conditional go again
 
-func (c TradeInBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (c TradeInBlue) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 }

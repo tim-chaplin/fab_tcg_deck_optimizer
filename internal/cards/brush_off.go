@@ -7,14 +7,14 @@
 package cards
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
-func (BrushOffRed) DefensiveInstant()                                        {}
-func (BrushOffRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {}
+func (BrushOffRed) DefensiveInstant()                                           {}
+func (BrushOffRed) Play(s card.GameEngine, l card.Logger, self *card.CardState) {}
 
-func (BrushOffYellow) DefensiveInstant()                                        {}
-func (BrushOffYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {}
+func (BrushOffYellow) DefensiveInstant()                                           {}
+func (BrushOffYellow) Play(s card.GameEngine, l card.Logger, self *card.CardState) {}
 
-func (BrushOffBlue) DefensiveInstant()                                        {}
-func (BrushOffBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {}
+func (BrushOffBlue) DefensiveInstant()                                           {}
+func (BrushOffBlue) Play(s card.GameEngine, l card.Logger, self *card.CardState) {}

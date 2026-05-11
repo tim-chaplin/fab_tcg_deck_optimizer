@@ -3,21 +3,20 @@
 package cards
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 var outedTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 
 type OutedRed struct{}
 
-func (OutedRed) ID() ids.CardID          { return ids.OutedRed }
-func (OutedRed) Name() string            { return "Outed" }
-func (OutedRed) DisplayName() string     { return "Outed [R]" }
-func (OutedRed) Cost(*sim.TurnState) int { return 0 }
-func (OutedRed) Pitch() int              { return 1 }
-func (OutedRed) Attack() int             { return 3 }
-func (OutedRed) Defense() int            { return 0 }
-func (OutedRed) Types() card.TypeSet     { return outedTypes }
-func (OutedRed) GoAgain() bool           { return true }
+func (OutedRed) ID() ids.CardID           { return ids.OutedRed }
+func (OutedRed) Name() string             { return "Outed" }
+func (OutedRed) DisplayName() string      { return "Outed [R]" }
+func (OutedRed) Cost(card.GameEngine) int { return 0 }
+func (OutedRed) Pitch() int               { return 1 }
+func (OutedRed) Attack() int              { return 3 }
+func (OutedRed) Defense() int             { return 0 }
+func (OutedRed) Types() card.TypeSet      { return outedTypes }
+func (OutedRed) GoAgain() bool            { return true }

@@ -3,45 +3,44 @@
 package cards
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 var scoutThePeripheryTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction)
 
 type ScoutThePeripheryRed struct{}
 
-func (ScoutThePeripheryRed) ID() ids.CardID          { return ids.ScoutThePeripheryRed }
-func (ScoutThePeripheryRed) Name() string            { return "Scout the Periphery" }
-func (ScoutThePeripheryRed) DisplayName() string     { return "Scout the Periphery [R]" }
-func (ScoutThePeripheryRed) Cost(*sim.TurnState) int { return 0 }
-func (ScoutThePeripheryRed) Pitch() int              { return 1 }
-func (ScoutThePeripheryRed) Attack() int             { return 0 }
-func (ScoutThePeripheryRed) Defense() int            { return 2 }
-func (ScoutThePeripheryRed) Types() card.TypeSet     { return scoutThePeripheryTypes }
-func (ScoutThePeripheryRed) GoAgain() bool           { return true }
+func (ScoutThePeripheryRed) ID() ids.CardID           { return ids.ScoutThePeripheryRed }
+func (ScoutThePeripheryRed) Name() string             { return "Scout the Periphery" }
+func (ScoutThePeripheryRed) DisplayName() string      { return "Scout the Periphery [R]" }
+func (ScoutThePeripheryRed) Cost(card.GameEngine) int { return 0 }
+func (ScoutThePeripheryRed) Pitch() int               { return 1 }
+func (ScoutThePeripheryRed) Attack() int              { return 0 }
+func (ScoutThePeripheryRed) Defense() int             { return 2 }
+func (ScoutThePeripheryRed) Types() card.TypeSet      { return scoutThePeripheryTypes }
+func (ScoutThePeripheryRed) GoAgain() bool            { return true }
 
 type ScoutThePeripheryYellow struct{}
 
-func (ScoutThePeripheryYellow) ID() ids.CardID          { return ids.ScoutThePeripheryYellow }
-func (ScoutThePeripheryYellow) Name() string            { return "Scout the Periphery" }
-func (ScoutThePeripheryYellow) DisplayName() string     { return "Scout the Periphery [Y]" }
-func (ScoutThePeripheryYellow) Cost(*sim.TurnState) int { return 0 }
-func (ScoutThePeripheryYellow) Pitch() int              { return 2 }
-func (ScoutThePeripheryYellow) Attack() int             { return 0 }
-func (ScoutThePeripheryYellow) Defense() int            { return 2 }
-func (ScoutThePeripheryYellow) Types() card.TypeSet     { return scoutThePeripheryTypes }
-func (ScoutThePeripheryYellow) GoAgain() bool           { return true }
+func (ScoutThePeripheryYellow) ID() ids.CardID           { return ids.ScoutThePeripheryYellow }
+func (ScoutThePeripheryYellow) Name() string             { return "Scout the Periphery" }
+func (ScoutThePeripheryYellow) DisplayName() string      { return "Scout the Periphery [Y]" }
+func (ScoutThePeripheryYellow) Cost(card.GameEngine) int { return 0 }
+func (ScoutThePeripheryYellow) Pitch() int               { return 2 }
+func (ScoutThePeripheryYellow) Attack() int              { return 0 }
+func (ScoutThePeripheryYellow) Defense() int             { return 2 }
+func (ScoutThePeripheryYellow) Types() card.TypeSet      { return scoutThePeripheryTypes }
+func (ScoutThePeripheryYellow) GoAgain() bool            { return true }
 
 type ScoutThePeripheryBlue struct{}
 
-func (ScoutThePeripheryBlue) ID() ids.CardID          { return ids.ScoutThePeripheryBlue }
-func (ScoutThePeripheryBlue) Name() string            { return "Scout the Periphery" }
-func (ScoutThePeripheryBlue) DisplayName() string     { return "Scout the Periphery [B]" }
-func (ScoutThePeripheryBlue) Cost(*sim.TurnState) int { return 0 }
-func (ScoutThePeripheryBlue) Pitch() int              { return 3 }
-func (ScoutThePeripheryBlue) Attack() int             { return 0 }
-func (ScoutThePeripheryBlue) Defense() int            { return 2 }
-func (ScoutThePeripheryBlue) Types() card.TypeSet     { return scoutThePeripheryTypes }
-func (ScoutThePeripheryBlue) GoAgain() bool           { return true }
+func (ScoutThePeripheryBlue) ID() ids.CardID           { return ids.ScoutThePeripheryBlue }
+func (ScoutThePeripheryBlue) Name() string             { return "Scout the Periphery" }
+func (ScoutThePeripheryBlue) DisplayName() string      { return "Scout the Periphery [B]" }
+func (ScoutThePeripheryBlue) Cost(card.GameEngine) int { return 0 }
+func (ScoutThePeripheryBlue) Pitch() int               { return 3 }
+func (ScoutThePeripheryBlue) Attack() int              { return 0 }
+func (ScoutThePeripheryBlue) Defense() int             { return 2 }
+func (ScoutThePeripheryBlue) Types() card.TypeSet      { return scoutThePeripheryTypes }
+func (ScoutThePeripheryBlue) GoAgain() bool            { return true }

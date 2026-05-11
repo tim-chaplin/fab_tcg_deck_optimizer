@@ -1,8 +1,8 @@
 package sim_test
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	. "github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 	"testing"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
@@ -56,7 +56,7 @@ type gravSpyDR struct{ saw *[]Card }
 func (gravSpyDR) ID() ids.CardID      { return ids.InvalidCard }
 func (gravSpyDR) Name() string        { return "gravSpyDR" }
 func (gravSpyDR) DisplayName() string { return "gravSpyDR" }
-func (gravSpyDR) Cost(*TurnState) int { return 0 }
+func (gravSpyDR) Cost(GameEngine) int { return 0 }
 func (gravSpyDR) Pitch() int          { return 0 }
 func (gravSpyDR) Attack() int         { return 0 }
 func (gravSpyDR) Defense() int        { return 1 }
@@ -64,7 +64,7 @@ func (gravSpyDR) Types() card.TypeSet {
 	return card.NewTypeSet(card.TypeGeneric, card.TypeDefenseReaction)
 }
 func (gravSpyDR) GoAgain() bool { return false }
-func (g gravSpyDR) Play(s *TurnState, l Logger, self *CardState) {
+func (g gravSpyDR) Play(s GameEngine, l Logger, self *CardState) {
 	*g.saw = append((*g.saw)[:0], s.Graveyard()...)
 }
 
@@ -77,13 +77,13 @@ type auraDefender struct{}
 func (auraDefender) ID() ids.CardID                      { return ids.InvalidCard }
 func (auraDefender) Name() string                        { return "auraDefender" }
 func (auraDefender) DisplayName() string                 { return "auraDefender" }
-func (auraDefender) Cost(*TurnState) int                 { return 0 }
+func (auraDefender) Cost(GameEngine) int                 { return 0 }
 func (auraDefender) Pitch() int                          { return 0 }
 func (auraDefender) Attack() int                         { return 0 }
 func (auraDefender) Defense() int                        { return 3 }
 func (auraDefender) Types() card.TypeSet                 { return card.NewTypeSet(card.TypeAura) }
 func (auraDefender) GoAgain() bool                       { return false }
-func (auraDefender) Play(*TurnState, Logger, *CardState) {}
+func (auraDefender) Play(GameEngine, Logger, *CardState) {}
 
 // Tests that a plain blocker enters the graveyard regardless of PersistsInPlay — a paired
 // DR snapshotting state.Graveyard sees the blocker.

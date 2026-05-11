@@ -9,24 +9,24 @@
 package cards
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 // healingBalmPlay emits the chain step then writes the printed N{h} as a "Gained N health"
 // sub-line under self. Health is valued 1-to-1 with damage.
-func healingBalmPlay(s *sim.TurnState, l sim.Logger, self *sim.CardState, heal int) {
+func healingBalmPlay(s card.GameEngine, l card.Logger, self *card.CardState, heal int) {
 	s.AddValue(heal)
 	l.AppendPostTriggerf(self.Card.DisplayName(), heal, "Gained %d health", heal)
 }
 
-func (HealingBalmRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (HealingBalmRed) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 	healingBalmPlay(s, l, self, 3)
 }
 
-func (HealingBalmYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (HealingBalmYellow) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 	healingBalmPlay(s, l, self, 2)
 }
 
-func (HealingBalmBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (HealingBalmBlue) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 	healingBalmPlay(s, l, self, 1)
 }

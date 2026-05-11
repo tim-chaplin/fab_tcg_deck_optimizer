@@ -5,6 +5,7 @@ import (
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 // TestBloodspillInvocation_BlockCoversIncomingReturnsN: the aura survives the opponent's turn
@@ -20,7 +21,7 @@ func TestBloodspillInvocation_BlockCoversIncomingReturnsN(t *testing.T) {
 	}
 	for _, tc := range cases {
 		s := sim.NewTurnStateFromSpec(sim.TurnStateSpec{IncomingDamage: 3, BlockTotal: 3})
-		sim.ResolveChainStep(&s, s.Logger(), &sim.CardState{Card: tc.c})
+		sim.ResolveChainStep(&s, s.Logger(), &card.CardState{Card: tc.c})
 		if got := s.Value(); got != tc.n {
 			t.Errorf("%s: Play() = %d, want %d (block == incoming)", tc.c.Name(), got, tc.n)
 		}
@@ -37,7 +38,7 @@ func TestBloodspillInvocation_BlockShortReturnsZero(t *testing.T) {
 	}
 	for _, c := range cases {
 		s := sim.NewTurnStateFromSpec(sim.TurnStateSpec{IncomingDamage: 3, BlockTotal: 2})
-		sim.ResolveChainStep(&s, s.Logger(), &sim.CardState{Card: c})
+		sim.ResolveChainStep(&s, s.Logger(), &card.CardState{Card: c})
 		if got := s.Value(); got != 0 {
 			t.Errorf("%s: Play() = %d, want 0 (block < incoming, no same-turn pop)", c.Name(), got)
 		}
@@ -50,9 +51,9 @@ func TestBloodspillInvocation_SameTurnPopBySalientAttackAction(t *testing.T) {
 	s := sim.NewTurnStateFromSpec(sim.TurnStateSpec{
 		IncomingDamage: 3,
 		BlockTotal:     0,
-		CardsRemaining: []*sim.CardState{{Card: testutils.AttackWithPower{Power: 4}}},
+		CardsRemaining: []*card.CardState{{Card: testutils.AttackWithPower{Power: 4}}},
 	})
-	sim.ResolveChainStep(&s, s.Logger(), &sim.CardState{Card: BloodspillInvocationRed{}})
+	sim.ResolveChainStep(&s, s.Logger(), &card.CardState{Card: BloodspillInvocationRed{}})
 	if got := s.Value(); got != 3 {
 		t.Errorf("Play() = %d, want 3 (Attack=4 attack action pops Bloodspill same turn)", got)
 	}
@@ -66,9 +67,9 @@ func TestBloodspillInvocation_WeaponDoesNotPop(t *testing.T) {
 		IncomingDamage: 3,
 		BlockTotal:     0,
 		Auras:          []sim.Aura{sim.NewRunechantAura(1)},
-		CardsRemaining: []*sim.CardState{{Card: testutils.RunebladeWeapon{}}},
+		CardsRemaining: []*card.CardState{{Card: testutils.RunebladeWeapon{}}},
 	})
-	sim.ResolveChainStep(&s, s.Logger(), &sim.CardState{Card: BloodspillInvocationRed{}})
+	sim.ResolveChainStep(&s, s.Logger(), &card.CardState{Card: BloodspillInvocationRed{}})
 	if got := s.Value(); got != 0 {
 		t.Errorf("Play() = %d, want 0 (weapon hits don't trigger Bloodspill; under-block collapses value)", got)
 	}
@@ -81,9 +82,9 @@ func TestBloodspillInvocation_SameTurnPopByRunechant(t *testing.T) {
 		IncomingDamage: 3,
 		BlockTotal:     0,
 		Auras:          []sim.Aura{sim.NewRunechantAura(1)},
-		CardsRemaining: []*sim.CardState{{Card: testutils.AttackWithPower{Power: 6}}},
+		CardsRemaining: []*card.CardState{{Card: testutils.AttackWithPower{Power: 6}}},
 	})
-	sim.ResolveChainStep(&s, s.Logger(), &sim.CardState{Card: BloodspillInvocationRed{}})
+	sim.ResolveChainStep(&s, s.Logger(), &card.CardState{Card: BloodspillInvocationRed{}})
 	if got := s.Value(); got != 3 {
 		t.Errorf("Play() = %d, want 3 (Attack=6 blockable, 1 Runechant likely to hit)", got)
 	}

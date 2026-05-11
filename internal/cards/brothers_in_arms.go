@@ -11,11 +11,12 @@ package cards
 
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 // brothersInArmsBlock fires +2{d} on mode 1 (caller already deducted 1{r} from the spare
 // defense budget). Mode 0 is the printed default with no modification.
-func brothersInArmsBlock(_ *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func brothersInArmsBlock(_ card.GameEngine, l card.Logger, self *card.CardState) {
 	if self.Mode == 1 {
 		self.BonusDefense += 2
 	}
@@ -23,21 +24,21 @@ func brothersInArmsBlock(_ *sim.TurnState, l sim.Logger, self *sim.CardState) {
 
 func (BrothersInArmsRed) Modes() int              { return 2 }
 func (BrothersInArmsRed) BlockCost(mode int8) int { return int(mode) }
-func (BrothersInArmsRed) Block(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (BrothersInArmsRed) Block(s *sim.TurnState, l card.Logger, self *card.CardState) {
 	brothersInArmsBlock(s, l, self)
 }
-func (BrothersInArmsRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {}
+func (BrothersInArmsRed) Play(s card.GameEngine, l card.Logger, self *card.CardState) {}
 
 func (BrothersInArmsYellow) Modes() int              { return 2 }
 func (BrothersInArmsYellow) BlockCost(mode int8) int { return int(mode) }
-func (BrothersInArmsYellow) Block(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (BrothersInArmsYellow) Block(s *sim.TurnState, l card.Logger, self *card.CardState) {
 	brothersInArmsBlock(s, l, self)
 }
-func (BrothersInArmsYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {}
+func (BrothersInArmsYellow) Play(s card.GameEngine, l card.Logger, self *card.CardState) {}
 
 func (BrothersInArmsBlue) Modes() int              { return 2 }
 func (BrothersInArmsBlue) BlockCost(mode int8) int { return int(mode) }
-func (BrothersInArmsBlue) Block(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (BrothersInArmsBlue) Block(s *sim.TurnState, l card.Logger, self *card.CardState) {
 	brothersInArmsBlock(s, l, self)
 }
-func (BrothersInArmsBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {}
+func (BrothersInArmsBlue) Play(s card.GameEngine, l card.Logger, self *card.CardState) {}

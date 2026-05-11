@@ -3,8 +3,8 @@ package sim
 import (
 	"testing"
 
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 // Each card-type branch of ResolveChainStep gets one assertion so the standard
@@ -18,7 +18,7 @@ type attackStub struct{}
 func (attackStub) ID() ids.CardID      { return ids.InvalidCard }
 func (attackStub) Name() string        { return "attackStub" }
 func (attackStub) DisplayName() string { return "attackStub" }
-func (attackStub) Cost(*TurnState) int { return 0 }
+func (attackStub) Cost(GameEngine) int { return 0 }
 func (attackStub) Pitch() int          { return 0 }
 func (attackStub) Attack() int         { return 3 }
 func (attackStub) Defense() int        { return 0 }
@@ -26,7 +26,7 @@ func (attackStub) Types() card.TypeSet {
 	return card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 }
 func (attackStub) GoAgain() bool                                { return false }
-func (attackStub) Play(s *TurnState, l Logger, self *CardState) {}
+func (attackStub) Play(s GameEngine, l Logger, self *CardState) {}
 
 // drStub is a vanilla defense-reaction card with printed defense 4.
 type drStub struct{}
@@ -34,7 +34,7 @@ type drStub struct{}
 func (drStub) ID() ids.CardID      { return ids.InvalidCard }
 func (drStub) Name() string        { return "drStub" }
 func (drStub) DisplayName() string { return "drStub" }
-func (drStub) Cost(*TurnState) int { return 0 }
+func (drStub) Cost(GameEngine) int { return 0 }
 func (drStub) Pitch() int          { return 0 }
 func (drStub) Attack() int         { return 0 }
 func (drStub) Defense() int        { return 4 }
@@ -42,7 +42,7 @@ func (drStub) Types() card.TypeSet {
 	return card.NewTypeSet(card.TypeGeneric, card.TypeDefenseReaction)
 }
 func (drStub) GoAgain() bool                                { return false }
-func (drStub) Play(s *TurnState, l Logger, self *CardState) {}
+func (drStub) Play(s GameEngine, l Logger, self *CardState) {}
 
 // nonAttackStub is a non-attack action that flips a flag from Play (used to
 // confirm the Play body still runs even though the sim contributes no n).
@@ -51,13 +51,13 @@ type nonAttackStub struct{ played *bool }
 func (nonAttackStub) ID() ids.CardID                                 { return ids.InvalidCard }
 func (nonAttackStub) Name() string                                   { return "nonAttackStub" }
 func (nonAttackStub) DisplayName() string                            { return "nonAttackStub" }
-func (nonAttackStub) Cost(*TurnState) int                            { return 0 }
+func (nonAttackStub) Cost(GameEngine) int                            { return 0 }
 func (nonAttackStub) Pitch() int                                     { return 0 }
 func (nonAttackStub) Attack() int                                    { return 0 }
 func (nonAttackStub) Defense() int                                   { return 0 }
 func (nonAttackStub) Types() card.TypeSet                            { return card.NewTypeSet(card.TypeGeneric, card.TypeAction) }
 func (nonAttackStub) GoAgain() bool                                  { return false }
-func (n nonAttackStub) Play(s *TurnState, l Logger, self *CardState) { *n.played = true }
+func (n nonAttackStub) Play(s GameEngine, l Logger, self *CardState) { *n.played = true }
 
 // selfBuffStub is an attack action whose Play body flips BonusAttack so the
 // sim's post-Play EffectiveAttack reads the buffed value. Pins the contract
@@ -67,7 +67,7 @@ type selfBuffStub struct{}
 func (selfBuffStub) ID() ids.CardID      { return ids.InvalidCard }
 func (selfBuffStub) Name() string        { return "selfBuffStub" }
 func (selfBuffStub) DisplayName() string { return "selfBuffStub" }
-func (selfBuffStub) Cost(*TurnState) int { return 0 }
+func (selfBuffStub) Cost(GameEngine) int { return 0 }
 func (selfBuffStub) Pitch() int          { return 0 }
 func (selfBuffStub) Attack() int         { return 2 }
 func (selfBuffStub) Defense() int        { return 0 }
@@ -75,7 +75,7 @@ func (selfBuffStub) Types() card.TypeSet {
 	return card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 }
 func (selfBuffStub) GoAgain() bool { return false }
-func (selfBuffStub) Play(s *TurnState, l Logger, self *CardState) {
+func (selfBuffStub) Play(s GameEngine, l Logger, self *CardState) {
 	self.BonusAttack += 1
 }
 

@@ -5,11 +5,12 @@ import (
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 func TestSutcliffesResearchNotes_EmptyDeck(t *testing.T) {
 	s := &sim.TurnState{}
-	sim.ResolveChainStep(s, s.Logger(), &sim.CardState{Card: SutcliffesResearchNotesRed{}})
+	sim.ResolveChainStep(s, s.Logger(), &card.CardState{Card: SutcliffesResearchNotesRed{}})
 	if got := s.Value(); got != 0 {
 		t.Errorf("Play() = %d, want 0 (empty deck reveals nothing)", got)
 	}
@@ -22,7 +23,7 @@ func TestSutcliffesResearchNotes_CountsRunebladeAttackActions(t *testing.T) {
 		testutils.RunebladeAttack{},
 	}
 	s := sim.NewTurnStateFromCards(deck, nil)
-	sim.ResolveChainStep(s, s.Logger(), &sim.CardState{Card: SutcliffesResearchNotesRed{}})
+	sim.ResolveChainStep(s, s.Logger(), &card.CardState{Card: SutcliffesResearchNotesRed{}})
 	if got := s.Value(); got != 2 {
 		t.Errorf("Red (reveal 3): Play() = %d, want 2 (2 of 3 are Runeblade attack actions)", got)
 	}
@@ -34,7 +35,7 @@ func TestSutcliffesResearchNotes_CountsRunebladeAttackActions(t *testing.T) {
 func TestSutcliffesResearchNotes_DeckShorterThanRevealCount(t *testing.T) {
 	deck := []sim.Card{testutils.RunebladeAttack{}}
 	s := sim.NewTurnStateFromCards(deck, nil)
-	sim.ResolveChainStep(s, s.Logger(), &sim.CardState{Card: SutcliffesResearchNotesRed{}})
+	sim.ResolveChainStep(s, s.Logger(), &card.CardState{Card: SutcliffesResearchNotesRed{}})
 	if got := s.Value(); got != 1 {
 		t.Errorf("Red (reveal 3, deck 1): Play() = %d, want 1 (only 1 card to reveal)", got)
 	}
@@ -45,7 +46,7 @@ func TestSutcliffesResearchNotes_RunebladeNonAttackIgnored(t *testing.T) {
 	// Attack type) shouldn't count toward the Runechant creation.
 	deck := []sim.Card{ReadTheRunesRed{}}
 	s := sim.NewTurnStateFromCards(deck, nil)
-	sim.ResolveChainStep(s, s.Logger(), &sim.CardState{Card: SutcliffesResearchNotesRed{}})
+	sim.ResolveChainStep(s, s.Logger(), &card.CardState{Card: SutcliffesResearchNotesRed{}})
 	if got := s.Value(); got != 0 {
 		t.Errorf("Play() = %d, want 0 (Runeblade non-attack card shouldn't count)", got)
 	}
@@ -55,7 +56,7 @@ func TestSutcliffesResearchNotes_NonRunebladeAttackIgnored(t *testing.T) {
 	// An attack action that isn't Runeblade-classed shouldn't count.
 	deck := []sim.Card{testutils.NonRunebladeAttack{}}
 	s := sim.NewTurnStateFromCards(deck, nil)
-	sim.ResolveChainStep(s, s.Logger(), &sim.CardState{Card: SutcliffesResearchNotesRed{}})
+	sim.ResolveChainStep(s, s.Logger(), &card.CardState{Card: SutcliffesResearchNotesRed{}})
 	if got := s.Value(); got != 0 {
 		t.Errorf("Play() = %d, want 0 (non-Runeblade attack shouldn't count)", got)
 	}
@@ -77,7 +78,7 @@ func TestSutcliffesResearchNotes_VariantRevealCounts(t *testing.T) {
 	}
 	for _, tc := range cases {
 		s := sim.NewTurnStateFromCards(deck, nil)
-		sim.ResolveChainStep(s, s.Logger(), &sim.CardState{Card: tc.c})
+		sim.ResolveChainStep(s, s.Logger(), &card.CardState{Card: tc.c})
 		if got := s.Value(); got != tc.want {
 			t.Errorf("%s: Play() = %d, want %d", tc.c.Name(), got, tc.want)
 		}

@@ -3,48 +3,47 @@
 package notimplemented
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 var frontlineScoutTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 
 type FrontlineScoutRed struct{}
 
-func (FrontlineScoutRed) ID() ids.CardID          { return ids.FrontlineScoutRed }
-func (FrontlineScoutRed) Name() string            { return "Frontline Scout" }
-func (FrontlineScoutRed) DisplayName() string     { return "Frontline Scout [R]" }
-func (FrontlineScoutRed) Cost(*sim.TurnState) int { return 0 }
-func (FrontlineScoutRed) Pitch() int              { return 1 }
-func (FrontlineScoutRed) Attack() int             { return 3 }
-func (FrontlineScoutRed) Defense() int            { return 2 }
-func (FrontlineScoutRed) Types() card.TypeSet     { return frontlineScoutTypes }
-func (FrontlineScoutRed) GoAgain() bool           { return false }
-func (FrontlineScoutRed) NotImplemented()         {}
+func (FrontlineScoutRed) ID() ids.CardID           { return ids.FrontlineScoutRed }
+func (FrontlineScoutRed) Name() string             { return "Frontline Scout" }
+func (FrontlineScoutRed) DisplayName() string      { return "Frontline Scout [R]" }
+func (FrontlineScoutRed) Cost(card.GameEngine) int { return 0 }
+func (FrontlineScoutRed) Pitch() int               { return 1 }
+func (FrontlineScoutRed) Attack() int              { return 3 }
+func (FrontlineScoutRed) Defense() int             { return 2 }
+func (FrontlineScoutRed) Types() card.TypeSet      { return frontlineScoutTypes }
+func (FrontlineScoutRed) GoAgain() bool            { return false }
+func (FrontlineScoutRed) NotImplemented()          {}
 
 type FrontlineScoutYellow struct{}
 
-func (FrontlineScoutYellow) ID() ids.CardID          { return ids.FrontlineScoutYellow }
-func (FrontlineScoutYellow) Name() string            { return "Frontline Scout" }
-func (FrontlineScoutYellow) DisplayName() string     { return "Frontline Scout [Y]" }
-func (FrontlineScoutYellow) Cost(*sim.TurnState) int { return 0 }
-func (FrontlineScoutYellow) Pitch() int              { return 2 }
-func (FrontlineScoutYellow) Attack() int             { return 2 }
-func (FrontlineScoutYellow) Defense() int            { return 2 }
-func (FrontlineScoutYellow) Types() card.TypeSet     { return frontlineScoutTypes }
-func (FrontlineScoutYellow) GoAgain() bool           { return false }
-func (FrontlineScoutYellow) NotImplemented()         {}
+func (FrontlineScoutYellow) ID() ids.CardID           { return ids.FrontlineScoutYellow }
+func (FrontlineScoutYellow) Name() string             { return "Frontline Scout" }
+func (FrontlineScoutYellow) DisplayName() string      { return "Frontline Scout [Y]" }
+func (FrontlineScoutYellow) Cost(card.GameEngine) int { return 0 }
+func (FrontlineScoutYellow) Pitch() int               { return 2 }
+func (FrontlineScoutYellow) Attack() int              { return 2 }
+func (FrontlineScoutYellow) Defense() int             { return 2 }
+func (FrontlineScoutYellow) Types() card.TypeSet      { return frontlineScoutTypes }
+func (FrontlineScoutYellow) GoAgain() bool            { return false }
+func (FrontlineScoutYellow) NotImplemented()          {}
 
 type FrontlineScoutBlue struct{}
 
-func (FrontlineScoutBlue) ID() ids.CardID          { return ids.FrontlineScoutBlue }
-func (FrontlineScoutBlue) Name() string            { return "Frontline Scout" }
-func (FrontlineScoutBlue) DisplayName() string     { return "Frontline Scout [B]" }
-func (FrontlineScoutBlue) Cost(*sim.TurnState) int { return 0 }
-func (FrontlineScoutBlue) Pitch() int              { return 3 }
-func (FrontlineScoutBlue) Attack() int             { return 1 }
-func (FrontlineScoutBlue) Defense() int            { return 2 }
-func (FrontlineScoutBlue) Types() card.TypeSet     { return frontlineScoutTypes }
-func (FrontlineScoutBlue) GoAgain() bool           { return false }
-func (FrontlineScoutBlue) NotImplemented()         {}
+func (FrontlineScoutBlue) ID() ids.CardID           { return ids.FrontlineScoutBlue }
+func (FrontlineScoutBlue) Name() string             { return "Frontline Scout" }
+func (FrontlineScoutBlue) DisplayName() string      { return "Frontline Scout [B]" }
+func (FrontlineScoutBlue) Cost(card.GameEngine) int { return 0 }
+func (FrontlineScoutBlue) Pitch() int               { return 3 }
+func (FrontlineScoutBlue) Attack() int              { return 1 }
+func (FrontlineScoutBlue) Defense() int             { return 2 }
+func (FrontlineScoutBlue) Types() card.TypeSet      { return frontlineScoutTypes }
+func (FrontlineScoutBlue) GoAgain() bool            { return false }
+func (FrontlineScoutBlue) NotImplemented()          {}

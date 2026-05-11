@@ -3,22 +3,21 @@
 package notimplemented
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 var talismanOfBalanceTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeItem)
 
 type TalismanOfBalanceBlue struct{}
 
-func (TalismanOfBalanceBlue) ID() ids.CardID          { return ids.TalismanOfBalanceBlue }
-func (TalismanOfBalanceBlue) Name() string            { return "Talisman of Balance" }
-func (TalismanOfBalanceBlue) DisplayName() string     { return "Talisman of Balance [B]" }
-func (TalismanOfBalanceBlue) Cost(*sim.TurnState) int { return 0 }
-func (TalismanOfBalanceBlue) Pitch() int              { return 3 }
-func (TalismanOfBalanceBlue) Attack() int             { return 0 }
-func (TalismanOfBalanceBlue) Defense() int            { return 0 }
-func (TalismanOfBalanceBlue) Types() card.TypeSet     { return talismanOfBalanceTypes }
-func (TalismanOfBalanceBlue) GoAgain() bool           { return true }
-func (TalismanOfBalanceBlue) NotImplemented()         {}
+func (TalismanOfBalanceBlue) ID() ids.CardID           { return ids.TalismanOfBalanceBlue }
+func (TalismanOfBalanceBlue) Name() string             { return "Talisman of Balance" }
+func (TalismanOfBalanceBlue) DisplayName() string      { return "Talisman of Balance [B]" }
+func (TalismanOfBalanceBlue) Cost(card.GameEngine) int { return 0 }
+func (TalismanOfBalanceBlue) Pitch() int               { return 3 }
+func (TalismanOfBalanceBlue) Attack() int              { return 0 }
+func (TalismanOfBalanceBlue) Defense() int             { return 0 }
+func (TalismanOfBalanceBlue) Types() card.TypeSet      { return talismanOfBalanceTypes }
+func (TalismanOfBalanceBlue) GoAgain() bool            { return true }
+func (TalismanOfBalanceBlue) NotImplemented()          {}

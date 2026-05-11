@@ -3,22 +3,21 @@
 package notimplemented
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 var talismanOfDousingTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeItem)
 
 type TalismanOfDousingYellow struct{}
 
-func (TalismanOfDousingYellow) ID() ids.CardID          { return ids.TalismanOfDousingYellow }
-func (TalismanOfDousingYellow) Name() string            { return "Talisman of Dousing" }
-func (TalismanOfDousingYellow) DisplayName() string     { return "Talisman of Dousing [Y]" }
-func (TalismanOfDousingYellow) Cost(*sim.TurnState) int { return 0 }
-func (TalismanOfDousingYellow) Pitch() int              { return 2 }
-func (TalismanOfDousingYellow) Attack() int             { return 0 }
-func (TalismanOfDousingYellow) Defense() int            { return 0 }
-func (TalismanOfDousingYellow) Types() card.TypeSet     { return talismanOfDousingTypes }
-func (TalismanOfDousingYellow) GoAgain() bool           { return true }
-func (TalismanOfDousingYellow) NotImplemented()         {}
+func (TalismanOfDousingYellow) ID() ids.CardID           { return ids.TalismanOfDousingYellow }
+func (TalismanOfDousingYellow) Name() string             { return "Talisman of Dousing" }
+func (TalismanOfDousingYellow) DisplayName() string      { return "Talisman of Dousing [Y]" }
+func (TalismanOfDousingYellow) Cost(card.GameEngine) int { return 0 }
+func (TalismanOfDousingYellow) Pitch() int               { return 2 }
+func (TalismanOfDousingYellow) Attack() int              { return 0 }
+func (TalismanOfDousingYellow) Defense() int             { return 0 }
+func (TalismanOfDousingYellow) Types() card.TypeSet      { return talismanOfDousingTypes }
+func (TalismanOfDousingYellow) GoAgain() bool            { return true }
+func (TalismanOfDousingYellow) NotImplemented()          {}

@@ -3,22 +3,21 @@
 package notimplemented
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 var smashUpTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 
 type SmashUpRed struct{}
 
-func (SmashUpRed) ID() ids.CardID          { return ids.SmashUpRed }
-func (SmashUpRed) Name() string            { return "Smash Up" }
-func (SmashUpRed) DisplayName() string     { return "Smash Up [R]" }
-func (SmashUpRed) Cost(*sim.TurnState) int { return 1 }
-func (SmashUpRed) Pitch() int              { return 1 }
-func (SmashUpRed) Attack() int             { return 5 }
-func (SmashUpRed) Defense() int            { return 2 }
-func (SmashUpRed) Types() card.TypeSet     { return smashUpTypes }
-func (SmashUpRed) GoAgain() bool           { return false }
-func (SmashUpRed) NotImplemented()         {}
+func (SmashUpRed) ID() ids.CardID           { return ids.SmashUpRed }
+func (SmashUpRed) Name() string             { return "Smash Up" }
+func (SmashUpRed) DisplayName() string      { return "Smash Up [R]" }
+func (SmashUpRed) Cost(card.GameEngine) int { return 1 }
+func (SmashUpRed) Pitch() int               { return 1 }
+func (SmashUpRed) Attack() int              { return 5 }
+func (SmashUpRed) Defense() int             { return 2 }
+func (SmashUpRed) Types() card.TypeSet      { return smashUpTypes }
+func (SmashUpRed) GoAgain() bool            { return false }
+func (SmashUpRed) NotImplemented()          {}

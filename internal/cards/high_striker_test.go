@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 // Tests that High Striker queues a TriggerHit Trigger so a later attack hit creates
@@ -11,7 +12,7 @@ import (
 // it requires the chain runner to actually fire.
 func TestHighStriker_QueuesTriggerHit(t *testing.T) {
 	s := sim.NewTurnStateFromCards(nil, nil)
-	sim.ResolveChainStep(s, s.Logger(), &sim.CardState{Card: HighStrikerRed{}})
+	sim.ResolveChainStep(s, s.Logger(), &card.CardState{Card: HighStrikerRed{}})
 	if got := triggerHitCount(s); got != 1 {
 		t.Fatalf("TriggerHit triggers = %d, want 1 (registered the rider)", got)
 	}
@@ -20,10 +21,12 @@ func TestHighStriker_QueuesTriggerHit(t *testing.T) {
 	}
 }
 
-// triggerHitCount returns the number of queued TriggerHit triggers on s.
-func triggerHitCount(s *sim.TurnState) int {
+// triggerHitCount returns the number of queued TriggerHit triggers on s. Reaches
+// past GameEngine to the concrete *sim.TurnState — Triggers is sim-owned and the
+// engine interface stays sim-free.
+func triggerHitCount(s card.GameEngine) int {
 	n := 0
-	for _, t := range s.Triggers() {
+	for _, t := range s.(*sim.TurnState).Triggers() {
 		if t.TriggerType == sim.TriggerHit {
 			n++
 		}

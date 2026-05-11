@@ -6,20 +6,20 @@
 package notimplemented
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 // not implemented: instant discard-to-mark activation
 
-func (c TipOffRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (c TipOffRed) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 }
 
 // not implemented: instant discard-to-mark activation
 
-func (c TipOffYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (c TipOffYellow) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 }
 
 // not implemented: instant discard-to-mark activation
 
-func (c TipOffBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (c TipOffBlue) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 }

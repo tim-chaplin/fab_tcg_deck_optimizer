@@ -8,20 +8,20 @@
 package notimplemented
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 // not implemented: deck-reveal comparison + on-hit deck-top destruction
 
-func (CrashDownTheGatesRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (CrashDownTheGatesRed) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 }
 
 // not implemented: deck-reveal comparison + on-hit deck-top destruction
 
-func (CrashDownTheGatesYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (CrashDownTheGatesYellow) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 }
 
 // not implemented: deck-reveal comparison + on-hit deck-top destruction
 
-func (CrashDownTheGatesBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (CrashDownTheGatesBlue) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 }

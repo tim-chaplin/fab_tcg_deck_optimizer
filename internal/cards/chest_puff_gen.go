@@ -3,21 +3,20 @@
 package cards
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 var chestPuffTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 
 type ChestPuffRed struct{}
 
-func (ChestPuffRed) ID() ids.CardID          { return ids.ChestPuffRed }
-func (ChestPuffRed) Name() string            { return "Chest Puff" }
-func (ChestPuffRed) DisplayName() string     { return "Chest Puff [R]" }
-func (ChestPuffRed) Cost(*sim.TurnState) int { return 2 }
-func (ChestPuffRed) Pitch() int              { return 1 }
-func (ChestPuffRed) Attack() int             { return 7 }
-func (ChestPuffRed) Defense() int            { return 3 }
-func (ChestPuffRed) Types() card.TypeSet     { return chestPuffTypes }
-func (ChestPuffRed) GoAgain() bool           { return false }
+func (ChestPuffRed) ID() ids.CardID           { return ids.ChestPuffRed }
+func (ChestPuffRed) Name() string             { return "Chest Puff" }
+func (ChestPuffRed) DisplayName() string      { return "Chest Puff [R]" }
+func (ChestPuffRed) Cost(card.GameEngine) int { return 2 }
+func (ChestPuffRed) Pitch() int               { return 1 }
+func (ChestPuffRed) Attack() int              { return 7 }
+func (ChestPuffRed) Defense() int             { return 3 }
+func (ChestPuffRed) Types() card.TypeSet      { return chestPuffTypes }
+func (ChestPuffRed) GoAgain() bool            { return false }

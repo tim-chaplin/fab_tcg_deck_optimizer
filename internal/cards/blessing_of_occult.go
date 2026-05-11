@@ -9,6 +9,7 @@ package cards
 
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 // blessingOfOccultTriggerText pre-formats the trigger log text for each Runechant count
@@ -20,15 +21,15 @@ var blessingOfOccultTriggerText = [...]string{
 	3: "Created 3 runechants",
 }
 
-func (c BlessingOfOccultRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (c BlessingOfOccultRed) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 	blessingOfOccultPlay(s, l, self, c, 3)
 }
 
-func (c BlessingOfOccultYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (c BlessingOfOccultYellow) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 	blessingOfOccultPlay(s, l, self, c, 2)
 }
 
-func (c BlessingOfOccultBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (c BlessingOfOccultBlue) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 	blessingOfOccultPlay(s, l, self, c, 1)
 }
 
@@ -40,7 +41,7 @@ func (c BlessingOfOccultBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.Car
 // carries the per-variant rune count (R=3 / Y=2 / B=1) — the handler is one-shot, so
 // Count's "fires remaining" interpretation collapses to "runechants to create on the
 // only fire".
-func blessingOfOccultHandler(s *sim.TurnState, l sim.Logger, _ *sim.Trigger, a *sim.Aura) {
+func blessingOfOccultHandler(s *sim.TurnState, l card.Logger, _ *sim.Trigger, a *sim.Aura) {
 	n := a.Count
 	name := a.Self.DisplayName()
 	s.CreateRunechants(n)
@@ -48,7 +49,7 @@ func blessingOfOccultHandler(s *sim.TurnState, l sim.Logger, _ *sim.Trigger, a *
 	s.DestroyAura(a, true)
 }
 
-func blessingOfOccultPlay(s *sim.TurnState, l sim.Logger, selfState *sim.CardState, selfCard sim.Card, n int) {
+func blessingOfOccultPlay(s card.GameEngine, l card.Logger, selfState *card.CardState, selfCard sim.Card, n int) {
 	s.AddAura(sim.Aura{
 		Trigger: sim.Trigger{TriggerType: sim.TriggerStartOfTurn, Handler: blessingOfOccultHandler},
 		Self:    sim.CardOrTokenType{Card: selfCard},

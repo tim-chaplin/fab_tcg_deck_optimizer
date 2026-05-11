@@ -3,45 +3,44 @@
 package cards
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 var flyingHighTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction)
 
 type FlyingHighRed struct{}
 
-func (FlyingHighRed) ID() ids.CardID          { return ids.FlyingHighRed }
-func (FlyingHighRed) Name() string            { return "Flying High" }
-func (FlyingHighRed) DisplayName() string     { return "Flying High [R]" }
-func (FlyingHighRed) Cost(*sim.TurnState) int { return 0 }
-func (FlyingHighRed) Pitch() int              { return 1 }
-func (FlyingHighRed) Attack() int             { return 0 }
-func (FlyingHighRed) Defense() int            { return 2 }
-func (FlyingHighRed) Types() card.TypeSet     { return flyingHighTypes }
-func (FlyingHighRed) GoAgain() bool           { return true }
+func (FlyingHighRed) ID() ids.CardID           { return ids.FlyingHighRed }
+func (FlyingHighRed) Name() string             { return "Flying High" }
+func (FlyingHighRed) DisplayName() string      { return "Flying High [R]" }
+func (FlyingHighRed) Cost(card.GameEngine) int { return 0 }
+func (FlyingHighRed) Pitch() int               { return 1 }
+func (FlyingHighRed) Attack() int              { return 0 }
+func (FlyingHighRed) Defense() int             { return 2 }
+func (FlyingHighRed) Types() card.TypeSet      { return flyingHighTypes }
+func (FlyingHighRed) GoAgain() bool            { return true }
 
 type FlyingHighYellow struct{}
 
-func (FlyingHighYellow) ID() ids.CardID          { return ids.FlyingHighYellow }
-func (FlyingHighYellow) Name() string            { return "Flying High" }
-func (FlyingHighYellow) DisplayName() string     { return "Flying High [Y]" }
-func (FlyingHighYellow) Cost(*sim.TurnState) int { return 0 }
-func (FlyingHighYellow) Pitch() int              { return 2 }
-func (FlyingHighYellow) Attack() int             { return 0 }
-func (FlyingHighYellow) Defense() int            { return 2 }
-func (FlyingHighYellow) Types() card.TypeSet     { return flyingHighTypes }
-func (FlyingHighYellow) GoAgain() bool           { return true }
+func (FlyingHighYellow) ID() ids.CardID           { return ids.FlyingHighYellow }
+func (FlyingHighYellow) Name() string             { return "Flying High" }
+func (FlyingHighYellow) DisplayName() string      { return "Flying High [Y]" }
+func (FlyingHighYellow) Cost(card.GameEngine) int { return 0 }
+func (FlyingHighYellow) Pitch() int               { return 2 }
+func (FlyingHighYellow) Attack() int              { return 0 }
+func (FlyingHighYellow) Defense() int             { return 2 }
+func (FlyingHighYellow) Types() card.TypeSet      { return flyingHighTypes }
+func (FlyingHighYellow) GoAgain() bool            { return true }
 
 type FlyingHighBlue struct{}
 
-func (FlyingHighBlue) ID() ids.CardID          { return ids.FlyingHighBlue }
-func (FlyingHighBlue) Name() string            { return "Flying High" }
-func (FlyingHighBlue) DisplayName() string     { return "Flying High [B]" }
-func (FlyingHighBlue) Cost(*sim.TurnState) int { return 0 }
-func (FlyingHighBlue) Pitch() int              { return 3 }
-func (FlyingHighBlue) Attack() int             { return 0 }
-func (FlyingHighBlue) Defense() int            { return 2 }
-func (FlyingHighBlue) Types() card.TypeSet     { return flyingHighTypes }
-func (FlyingHighBlue) GoAgain() bool           { return true }
+func (FlyingHighBlue) ID() ids.CardID           { return ids.FlyingHighBlue }
+func (FlyingHighBlue) Name() string             { return "Flying High" }
+func (FlyingHighBlue) DisplayName() string      { return "Flying High [B]" }
+func (FlyingHighBlue) Cost(card.GameEngine) int { return 0 }
+func (FlyingHighBlue) Pitch() int               { return 3 }
+func (FlyingHighBlue) Attack() int              { return 0 }
+func (FlyingHighBlue) Defense() int             { return 2 }
+func (FlyingHighBlue) Types() card.TypeSet      { return flyingHighTypes }
+func (FlyingHighBlue) GoAgain() bool            { return true }

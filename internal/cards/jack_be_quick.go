@@ -11,10 +11,10 @@
 package cards
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
-func jackBeQuickPlay(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func jackBeQuickPlay(s card.GameEngine, l card.Logger, self *card.CardState) {
 	if _, ok := s.BanishFromGraveyard(isNimblism); ok {
 		self.BonusAttack++
 		self.GrantedGoAgain = true
@@ -22,6 +22,6 @@ func jackBeQuickPlay(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	}
 }
 
-func (JackBeQuickRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (JackBeQuickRed) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 	jackBeQuickPlay(s, l, self)
 }

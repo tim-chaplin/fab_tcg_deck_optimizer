@@ -1,6 +1,6 @@
 package sim
 
-import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+import "github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 
 // Trigger holds the firing-data shared between Auras and standalone one-shot riders.
 // Source identifies the card that registered the trigger; TriggerType matches the firing

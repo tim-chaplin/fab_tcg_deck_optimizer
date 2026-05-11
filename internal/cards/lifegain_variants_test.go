@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 // TestLifegainPerVariant guards against a regression where all three colour variants of a
@@ -27,7 +28,7 @@ func TestLifegainPerVariant(t *testing.T) {
 	}
 	for _, tc := range cases {
 		var s sim.TurnState
-		sim.ResolveChainStep(&s, s.Logger(), &sim.CardState{Card: tc.card})
+		sim.ResolveChainStep(&s, s.Logger(), &card.CardState{Card: tc.card})
 		if got := s.Value(); got != tc.want {
 			t.Errorf("%s: Play() = %d, want %d", tc.name, got, tc.want)
 		}

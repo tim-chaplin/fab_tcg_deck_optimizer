@@ -3,51 +3,50 @@
 package unplayable
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 var sigilOfSolaceTypes = card.NewTypeSet(card.TypeGeneric, card.TypeInstant)
 
 type SigilOfSolaceRed struct{}
 
-func (SigilOfSolaceRed) ID() ids.CardID          { return ids.SigilOfSolaceRed }
-func (SigilOfSolaceRed) Name() string            { return "Sigil of Solace" }
-func (SigilOfSolaceRed) DisplayName() string     { return "Sigil of Solace [R]" }
-func (SigilOfSolaceRed) Cost(*sim.TurnState) int { return 0 }
-func (SigilOfSolaceRed) Pitch() int              { return 1 }
-func (SigilOfSolaceRed) Attack() int             { return 0 }
-func (SigilOfSolaceRed) Defense() int            { return 0 }
-func (SigilOfSolaceRed) Types() card.TypeSet     { return sigilOfSolaceTypes }
-func (SigilOfSolaceRed) GoAgain() bool           { return false }
-func (SigilOfSolaceRed) NotSilverAgeLegal()      {}
-func (SigilOfSolaceRed) Unplayable()             {}
+func (SigilOfSolaceRed) ID() ids.CardID           { return ids.SigilOfSolaceRed }
+func (SigilOfSolaceRed) Name() string             { return "Sigil of Solace" }
+func (SigilOfSolaceRed) DisplayName() string      { return "Sigil of Solace [R]" }
+func (SigilOfSolaceRed) Cost(card.GameEngine) int { return 0 }
+func (SigilOfSolaceRed) Pitch() int               { return 1 }
+func (SigilOfSolaceRed) Attack() int              { return 0 }
+func (SigilOfSolaceRed) Defense() int             { return 0 }
+func (SigilOfSolaceRed) Types() card.TypeSet      { return sigilOfSolaceTypes }
+func (SigilOfSolaceRed) GoAgain() bool            { return false }
+func (SigilOfSolaceRed) NotSilverAgeLegal()       {}
+func (SigilOfSolaceRed) Unplayable()              {}
 
 type SigilOfSolaceYellow struct{}
 
-func (SigilOfSolaceYellow) ID() ids.CardID          { return ids.SigilOfSolaceYellow }
-func (SigilOfSolaceYellow) Name() string            { return "Sigil of Solace" }
-func (SigilOfSolaceYellow) DisplayName() string     { return "Sigil of Solace [Y]" }
-func (SigilOfSolaceYellow) Cost(*sim.TurnState) int { return 0 }
-func (SigilOfSolaceYellow) Pitch() int              { return 2 }
-func (SigilOfSolaceYellow) Attack() int             { return 0 }
-func (SigilOfSolaceYellow) Defense() int            { return 0 }
-func (SigilOfSolaceYellow) Types() card.TypeSet     { return sigilOfSolaceTypes }
-func (SigilOfSolaceYellow) GoAgain() bool           { return false }
-func (SigilOfSolaceYellow) NotSilverAgeLegal()      {}
-func (SigilOfSolaceYellow) Unplayable()             {}
+func (SigilOfSolaceYellow) ID() ids.CardID           { return ids.SigilOfSolaceYellow }
+func (SigilOfSolaceYellow) Name() string             { return "Sigil of Solace" }
+func (SigilOfSolaceYellow) DisplayName() string      { return "Sigil of Solace [Y]" }
+func (SigilOfSolaceYellow) Cost(card.GameEngine) int { return 0 }
+func (SigilOfSolaceYellow) Pitch() int               { return 2 }
+func (SigilOfSolaceYellow) Attack() int              { return 0 }
+func (SigilOfSolaceYellow) Defense() int             { return 0 }
+func (SigilOfSolaceYellow) Types() card.TypeSet      { return sigilOfSolaceTypes }
+func (SigilOfSolaceYellow) GoAgain() bool            { return false }
+func (SigilOfSolaceYellow) NotSilverAgeLegal()       {}
+func (SigilOfSolaceYellow) Unplayable()              {}
 
 type SigilOfSolaceBlue struct{}
 
-func (SigilOfSolaceBlue) ID() ids.CardID          { return ids.SigilOfSolaceBlue }
-func (SigilOfSolaceBlue) Name() string            { return "Sigil of Solace" }
-func (SigilOfSolaceBlue) DisplayName() string     { return "Sigil of Solace [B]" }
-func (SigilOfSolaceBlue) Cost(*sim.TurnState) int { return 0 }
-func (SigilOfSolaceBlue) Pitch() int              { return 3 }
-func (SigilOfSolaceBlue) Attack() int             { return 0 }
-func (SigilOfSolaceBlue) Defense() int            { return 0 }
-func (SigilOfSolaceBlue) Types() card.TypeSet     { return sigilOfSolaceTypes }
-func (SigilOfSolaceBlue) GoAgain() bool           { return false }
-func (SigilOfSolaceBlue) NotSilverAgeLegal()      {}
-func (SigilOfSolaceBlue) Unplayable()             {}
+func (SigilOfSolaceBlue) ID() ids.CardID           { return ids.SigilOfSolaceBlue }
+func (SigilOfSolaceBlue) Name() string             { return "Sigil of Solace" }
+func (SigilOfSolaceBlue) DisplayName() string      { return "Sigil of Solace [B]" }
+func (SigilOfSolaceBlue) Cost(card.GameEngine) int { return 0 }
+func (SigilOfSolaceBlue) Pitch() int               { return 3 }
+func (SigilOfSolaceBlue) Attack() int              { return 0 }
+func (SigilOfSolaceBlue) Defense() int             { return 0 }
+func (SigilOfSolaceBlue) Types() card.TypeSet      { return sigilOfSolaceTypes }
+func (SigilOfSolaceBlue) GoAgain() bool            { return false }
+func (SigilOfSolaceBlue) NotSilverAgeLegal()       {}
+func (SigilOfSolaceBlue) Unplayable()              {}

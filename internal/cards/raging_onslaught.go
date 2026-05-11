@@ -4,14 +4,14 @@
 package cards
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
-func (c RagingOnslaughtRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (c RagingOnslaughtRed) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 }
 
-func (c RagingOnslaughtYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (c RagingOnslaughtYellow) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 }
 
-func (c RagingOnslaughtBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (c RagingOnslaughtBlue) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 }

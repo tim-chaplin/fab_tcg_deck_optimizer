@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/turnlogger"
 )
@@ -950,16 +950,19 @@ func (s *TurnState) AddToGraveyard(c Card) {
 
 // AddAura is the Play-side combo every Action - Aura card reaches for: flip
 // AuraCreated so same-turn "if you've played or created an aura" riders see the entry, and
-// append t to s.auras so the sim fires it on its matching TriggerType condition.
-func (s *TurnState) AddAura(t Aura) {
+// append t to s.auras so the sim fires it on its matching TriggerType condition. Accepts
+// `any` so the method matches v2/card.GameEngine's sim-free interface; the concrete value
+// must be a sim.Aura.
+func (s *TurnState) AddAura(t any) {
 	s.auraCreated = true
-	s.auras = append(s.auras, t)
+	s.auras = append(s.auras, t.(Aura))
 }
 
 // AddTrigger appends t to s.triggers. The sim fires t once on its matching TriggerType
-// condition then removes it.
-func (s *TurnState) AddTrigger(t Trigger) {
-	s.triggers = append(s.triggers, t)
+// condition then removes it. Accepts `any` for v2/card.GameEngine; concrete value must be
+// a sim.Trigger.
+func (s *TurnState) AddTrigger(t any) {
+	s.triggers = append(s.triggers, t.(Trigger))
 }
 
 // DestroyAura removes a from s.auras and, when addToGraveyard, appends a.Self.Card to
@@ -969,9 +972,12 @@ func (s *TurnState) AddTrigger(t Trigger) {
 // CreateRunechants has appended a new aura since the handler started; a is read for
 // Self only and may legitimately point at the pre-realloc backing.
 //
+// Accepts `any` (concrete *sim.Aura) so the method matches v2/card.GameEngine.
+//
 // Direct graveyard append (no cacheable flip): destruction is deterministic from the
 // triggering event the sim already accounts for, not from hidden state.
-func (s *TurnState) DestroyAura(a *Aura, addToGraveyard bool) {
+func (s *TurnState) DestroyAura(aIn any, addToGraveyard bool) {
+	a := aIn.(*Aura)
 	if addToGraveyard && a.Self.Card != nil {
 		s.graveyard = append(s.graveyard, a.Self.Card)
 	}

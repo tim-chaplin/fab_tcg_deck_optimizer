@@ -3,45 +3,44 @@
 package cards
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 var regurgitatingSlogTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 
 type RegurgitatingSlogRed struct{}
 
-func (RegurgitatingSlogRed) ID() ids.CardID          { return ids.RegurgitatingSlogRed }
-func (RegurgitatingSlogRed) Name() string            { return "Regurgitating Slog" }
-func (RegurgitatingSlogRed) DisplayName() string     { return "Regurgitating Slog [R]" }
-func (RegurgitatingSlogRed) Cost(*sim.TurnState) int { return 2 }
-func (RegurgitatingSlogRed) Pitch() int              { return 1 }
-func (RegurgitatingSlogRed) Attack() int             { return 6 }
-func (RegurgitatingSlogRed) Defense() int            { return 2 }
-func (RegurgitatingSlogRed) Types() card.TypeSet     { return regurgitatingSlogTypes }
-func (RegurgitatingSlogRed) GoAgain() bool           { return false }
+func (RegurgitatingSlogRed) ID() ids.CardID           { return ids.RegurgitatingSlogRed }
+func (RegurgitatingSlogRed) Name() string             { return "Regurgitating Slog" }
+func (RegurgitatingSlogRed) DisplayName() string      { return "Regurgitating Slog [R]" }
+func (RegurgitatingSlogRed) Cost(card.GameEngine) int { return 2 }
+func (RegurgitatingSlogRed) Pitch() int               { return 1 }
+func (RegurgitatingSlogRed) Attack() int              { return 6 }
+func (RegurgitatingSlogRed) Defense() int             { return 2 }
+func (RegurgitatingSlogRed) Types() card.TypeSet      { return regurgitatingSlogTypes }
+func (RegurgitatingSlogRed) GoAgain() bool            { return false }
 
 type RegurgitatingSlogYellow struct{}
 
-func (RegurgitatingSlogYellow) ID() ids.CardID          { return ids.RegurgitatingSlogYellow }
-func (RegurgitatingSlogYellow) Name() string            { return "Regurgitating Slog" }
-func (RegurgitatingSlogYellow) DisplayName() string     { return "Regurgitating Slog [Y]" }
-func (RegurgitatingSlogYellow) Cost(*sim.TurnState) int { return 2 }
-func (RegurgitatingSlogYellow) Pitch() int              { return 2 }
-func (RegurgitatingSlogYellow) Attack() int             { return 5 }
-func (RegurgitatingSlogYellow) Defense() int            { return 2 }
-func (RegurgitatingSlogYellow) Types() card.TypeSet     { return regurgitatingSlogTypes }
-func (RegurgitatingSlogYellow) GoAgain() bool           { return false }
+func (RegurgitatingSlogYellow) ID() ids.CardID           { return ids.RegurgitatingSlogYellow }
+func (RegurgitatingSlogYellow) Name() string             { return "Regurgitating Slog" }
+func (RegurgitatingSlogYellow) DisplayName() string      { return "Regurgitating Slog [Y]" }
+func (RegurgitatingSlogYellow) Cost(card.GameEngine) int { return 2 }
+func (RegurgitatingSlogYellow) Pitch() int               { return 2 }
+func (RegurgitatingSlogYellow) Attack() int              { return 5 }
+func (RegurgitatingSlogYellow) Defense() int             { return 2 }
+func (RegurgitatingSlogYellow) Types() card.TypeSet      { return regurgitatingSlogTypes }
+func (RegurgitatingSlogYellow) GoAgain() bool            { return false }
 
 type RegurgitatingSlogBlue struct{}
 
-func (RegurgitatingSlogBlue) ID() ids.CardID          { return ids.RegurgitatingSlogBlue }
-func (RegurgitatingSlogBlue) Name() string            { return "Regurgitating Slog" }
-func (RegurgitatingSlogBlue) DisplayName() string     { return "Regurgitating Slog [B]" }
-func (RegurgitatingSlogBlue) Cost(*sim.TurnState) int { return 2 }
-func (RegurgitatingSlogBlue) Pitch() int              { return 3 }
-func (RegurgitatingSlogBlue) Attack() int             { return 4 }
-func (RegurgitatingSlogBlue) Defense() int            { return 2 }
-func (RegurgitatingSlogBlue) Types() card.TypeSet     { return regurgitatingSlogTypes }
-func (RegurgitatingSlogBlue) GoAgain() bool           { return false }
+func (RegurgitatingSlogBlue) ID() ids.CardID           { return ids.RegurgitatingSlogBlue }
+func (RegurgitatingSlogBlue) Name() string             { return "Regurgitating Slog" }
+func (RegurgitatingSlogBlue) DisplayName() string      { return "Regurgitating Slog [B]" }
+func (RegurgitatingSlogBlue) Cost(card.GameEngine) int { return 2 }
+func (RegurgitatingSlogBlue) Pitch() int               { return 3 }
+func (RegurgitatingSlogBlue) Attack() int              { return 4 }
+func (RegurgitatingSlogBlue) Defense() int             { return 2 }
+func (RegurgitatingSlogBlue) Types() card.TypeSet      { return regurgitatingSlogTypes }
+func (RegurgitatingSlogBlue) GoAgain() bool            { return false }

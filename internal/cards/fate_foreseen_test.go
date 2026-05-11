@@ -5,6 +5,7 @@ import (
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 // Tests that Fate Foreseen blocks for printed defense and emits an Opt 1 log entry.
@@ -23,7 +24,7 @@ func TestFateForeseen_BlocksAndCallsOpt1(t *testing.T) {
 		top := testutils.NewStubCard("top")
 		s := sim.NewTurnStateFromCards([]sim.Card{top}, nil)
 		s.SetIncomingDamage(10)
-		sim.ResolveChainStep(s, s.Logger(), &sim.CardState{Card: tc.c})
+		sim.ResolveChainStep(s, s.Logger(), &card.CardState{Card: tc.c})
 		if s.Value() != tc.block {
 			t.Errorf("%s: Play(IncomingDamage=10) Value = %d, want %d (block only)",
 				tc.c.Name(), s.Value(), tc.block)

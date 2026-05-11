@@ -5,7 +5,7 @@
 package cards
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
@@ -13,23 +13,23 @@ import (
 // highStrikerOnHit{6,4,2} fire on the next hit matching the trigger's TypeFilter (any
 // attack per the printed wording). One top-level function per variant keeps the handler
 // a static function value — no closure allocation per Play.
-func highStrikerOnHit6(s *sim.TurnState, l sim.Logger, t *sim.Trigger, _ *sim.Aura) {
+func highStrikerOnHit6(s *sim.TurnState, l card.Logger, t *sim.Trigger, _ *sim.Aura) {
 	highStrikerCreate(s, l, t, 6)
 }
-func highStrikerOnHit4(s *sim.TurnState, l sim.Logger, t *sim.Trigger, _ *sim.Aura) {
+func highStrikerOnHit4(s *sim.TurnState, l card.Logger, t *sim.Trigger, _ *sim.Aura) {
 	highStrikerCreate(s, l, t, 4)
 }
-func highStrikerOnHit2(s *sim.TurnState, l sim.Logger, t *sim.Trigger, _ *sim.Aura) {
+func highStrikerOnHit2(s *sim.TurnState, l card.Logger, t *sim.Trigger, _ *sim.Aura) {
 	highStrikerCreate(s, l, t, 2)
 }
 
-func highStrikerCreate(s *sim.TurnState, l sim.Logger, t *sim.Trigger, n int) {
+func highStrikerCreate(s *sim.TurnState, l card.Logger, t *sim.Trigger, n int) {
 	s.CreateCopper(n)
 	l.AppendPostTriggerf(s.TriggeringCard().DisplayName(), 0,
 		"%s created %d copper tokens on attack hit", t.Source.DisplayName(), n)
 }
 
-func highStrikerPlay(s *sim.TurnState, l sim.Logger, self *sim.CardState, source sim.Card, handler sim.TriggerHandler) {
+func highStrikerPlay(s card.GameEngine, l card.Logger, self *card.CardState, source sim.Card, handler sim.TriggerHandler) {
 	s.AddTrigger(sim.Trigger{
 		Source:      source,
 		TriggerType: sim.TriggerHit,
@@ -38,14 +38,14 @@ func highStrikerPlay(s *sim.TurnState, l sim.Logger, self *sim.CardState, source
 	})
 }
 
-func (c HighStrikerRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (c HighStrikerRed) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 	highStrikerPlay(s, l, self, c, highStrikerOnHit6)
 }
 
-func (c HighStrikerYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (c HighStrikerYellow) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 	highStrikerPlay(s, l, self, c, highStrikerOnHit4)
 }
 
-func (c HighStrikerBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (c HighStrikerBlue) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 	highStrikerPlay(s, l, self, c, highStrikerOnHit2)
 }

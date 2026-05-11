@@ -8,7 +8,7 @@
 package cards
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
@@ -17,7 +17,7 @@ func (BladeFlashBlue) ARTargetAllowed(c sim.Card, _ int8) bool {
 	t := c.Types()
 	return t.Has(card.TypeSword) && t.IsAttack()
 }
-func (BladeFlashBlue) Play(s *sim.TurnState, l sim.Logger, _ *sim.CardState) {
+func (BladeFlashBlue) Play(s card.GameEngine, l card.Logger, _ *card.CardState) {
 	if s.AttackReactionTarget() == nil {
 		return
 	}

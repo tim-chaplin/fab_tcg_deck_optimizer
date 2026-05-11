@@ -3,45 +3,44 @@
 package cards
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 var aetherSlashTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeAction, card.TypeAttack)
 
 type AetherSlashRed struct{}
 
-func (AetherSlashRed) ID() ids.CardID          { return ids.AetherSlashRed }
-func (AetherSlashRed) Name() string            { return "Aether Slash" }
-func (AetherSlashRed) DisplayName() string     { return "Aether Slash [R]" }
-func (AetherSlashRed) Cost(*sim.TurnState) int { return 1 }
-func (AetherSlashRed) Pitch() int              { return 1 }
-func (AetherSlashRed) Attack() int             { return 4 }
-func (AetherSlashRed) Defense() int            { return 3 }
-func (AetherSlashRed) Types() card.TypeSet     { return aetherSlashTypes }
-func (AetherSlashRed) GoAgain() bool           { return false }
+func (AetherSlashRed) ID() ids.CardID           { return ids.AetherSlashRed }
+func (AetherSlashRed) Name() string             { return "Aether Slash" }
+func (AetherSlashRed) DisplayName() string      { return "Aether Slash [R]" }
+func (AetherSlashRed) Cost(card.GameEngine) int { return 1 }
+func (AetherSlashRed) Pitch() int               { return 1 }
+func (AetherSlashRed) Attack() int              { return 4 }
+func (AetherSlashRed) Defense() int             { return 3 }
+func (AetherSlashRed) Types() card.TypeSet      { return aetherSlashTypes }
+func (AetherSlashRed) GoAgain() bool            { return false }
 
 type AetherSlashYellow struct{}
 
-func (AetherSlashYellow) ID() ids.CardID          { return ids.AetherSlashYellow }
-func (AetherSlashYellow) Name() string            { return "Aether Slash" }
-func (AetherSlashYellow) DisplayName() string     { return "Aether Slash [Y]" }
-func (AetherSlashYellow) Cost(*sim.TurnState) int { return 1 }
-func (AetherSlashYellow) Pitch() int              { return 2 }
-func (AetherSlashYellow) Attack() int             { return 3 }
-func (AetherSlashYellow) Defense() int            { return 3 }
-func (AetherSlashYellow) Types() card.TypeSet     { return aetherSlashTypes }
-func (AetherSlashYellow) GoAgain() bool           { return false }
+func (AetherSlashYellow) ID() ids.CardID           { return ids.AetherSlashYellow }
+func (AetherSlashYellow) Name() string             { return "Aether Slash" }
+func (AetherSlashYellow) DisplayName() string      { return "Aether Slash [Y]" }
+func (AetherSlashYellow) Cost(card.GameEngine) int { return 1 }
+func (AetherSlashYellow) Pitch() int               { return 2 }
+func (AetherSlashYellow) Attack() int              { return 3 }
+func (AetherSlashYellow) Defense() int             { return 3 }
+func (AetherSlashYellow) Types() card.TypeSet      { return aetherSlashTypes }
+func (AetherSlashYellow) GoAgain() bool            { return false }
 
 type AetherSlashBlue struct{}
 
-func (AetherSlashBlue) ID() ids.CardID          { return ids.AetherSlashBlue }
-func (AetherSlashBlue) Name() string            { return "Aether Slash" }
-func (AetherSlashBlue) DisplayName() string     { return "Aether Slash [B]" }
-func (AetherSlashBlue) Cost(*sim.TurnState) int { return 1 }
-func (AetherSlashBlue) Pitch() int              { return 3 }
-func (AetherSlashBlue) Attack() int             { return 2 }
-func (AetherSlashBlue) Defense() int            { return 3 }
-func (AetherSlashBlue) Types() card.TypeSet     { return aetherSlashTypes }
-func (AetherSlashBlue) GoAgain() bool           { return false }
+func (AetherSlashBlue) ID() ids.CardID           { return ids.AetherSlashBlue }
+func (AetherSlashBlue) Name() string             { return "Aether Slash" }
+func (AetherSlashBlue) DisplayName() string      { return "Aether Slash [B]" }
+func (AetherSlashBlue) Cost(card.GameEngine) int { return 1 }
+func (AetherSlashBlue) Pitch() int               { return 3 }
+func (AetherSlashBlue) Attack() int              { return 2 }
+func (AetherSlashBlue) Defense() int             { return 3 }
+func (AetherSlashBlue) Types() card.TypeSet      { return aetherSlashTypes }
+func (AetherSlashBlue) GoAgain() bool            { return false }

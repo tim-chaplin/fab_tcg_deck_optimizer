@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 // TestRunebloodIncantation_PlayRegistersStartOfTurnTriggerWithCountN: Play flips AuraCreated
@@ -20,7 +21,7 @@ func TestRunebloodIncantation_PlayRegistersStartOfTurnTriggerWithCountN(t *testi
 	}
 	for _, tc := range cases {
 		var s sim.TurnState
-		sim.ResolveChainStep(&s, s.Logger(), &sim.CardState{Card: tc.c})
+		sim.ResolveChainStep(&s, s.Logger(), &card.CardState{Card: tc.c})
 		if got := s.Value(); got != 0 {
 			t.Errorf("%s: Play() = %d, want 0 (every rune fires on a future turn)", tc.c.Name(), got)
 		}
@@ -49,7 +50,7 @@ func TestRunebloodIncantation_PlayRegistersStartOfTurnTriggerWithCountN(t *testi
 func TestRunebloodIncantation_HandlerCreatesOneRunechantPerFire(t *testing.T) {
 	for _, c := range []sim.Card{RunebloodIncantationRed{}, RunebloodIncantationYellow{}, RunebloodIncantationBlue{}} {
 		var play sim.TurnState
-		sim.ResolveChainStep(&play, play.Logger(), &sim.CardState{Card: c})
+		sim.ResolveChainStep(&play, play.Logger(), &card.CardState{Card: c})
 		fire := sim.NewTurnStateFromCards(nil, nil)
 		fire.SetAuras(append(fire.Auras(), play.Auras()[0]))
 		fire.SetCurrentAuraIdxForTesting(0)

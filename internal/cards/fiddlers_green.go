@@ -11,24 +11,24 @@
 package cards
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 // fiddlersGreenPlay emits the chain step then writes the printed N{h} as a "Gained N
 // health (graveyard trigger)" sub-line under self. Health is valued 1-to-1 with damage.
-func fiddlersGreenPlay(s *sim.TurnState, l sim.Logger, self *sim.CardState, heal int) {
+func fiddlersGreenPlay(s card.GameEngine, l card.Logger, self *card.CardState, heal int) {
 	s.AddValue(heal)
 	l.AppendPostTriggerf(self.Card.DisplayName(), heal, "Gained %d health (graveyard trigger)", heal)
 }
 
-func (FiddlersGreenRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (FiddlersGreenRed) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 	fiddlersGreenPlay(s, l, self, 3)
 }
 
-func (FiddlersGreenYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (FiddlersGreenYellow) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 	fiddlersGreenPlay(s, l, self, 2)
 }
 
-func (FiddlersGreenBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (FiddlersGreenBlue) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 	fiddlersGreenPlay(s, l, self, 1)
 }

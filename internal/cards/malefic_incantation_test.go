@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 // Tests that Play credits 0 immediately and registers an OncePerTurn TriggerAttackAction
@@ -19,7 +20,7 @@ func TestMaleficIncantation_PlayRegistersAttackActionTrigger(t *testing.T) {
 	}
 	for _, tc := range cases {
 		var s sim.TurnState
-		sim.ResolveChainStep(&s, s.Logger(), &sim.CardState{Card: tc.c})
+		sim.ResolveChainStep(&s, s.Logger(), &card.CardState{Card: tc.c})
 		if got := s.Value(); got != 0 {
 			t.Errorf("%s: Play() = %d, want 0 (rune comes from trigger, not Play)", tc.c.Name(), got)
 		}
@@ -49,7 +50,7 @@ func TestMaleficIncantation_PlayRegistersAttackActionTrigger(t *testing.T) {
 func TestMaleficIncantation_HandlerCreatesOneRunechantPerFire(t *testing.T) {
 	for _, c := range []sim.Card{MaleficIncantationRed{}, MaleficIncantationYellow{}, MaleficIncantationBlue{}} {
 		var s sim.TurnState
-		sim.ResolveChainStep(&s, s.Logger(), &sim.CardState{Card: c})
+		sim.ResolveChainStep(&s, s.Logger(), &card.CardState{Card: c})
 		chain := sim.NewTurnStateFromCards(nil, nil)
 		chain.SetTriggeringCard(c)
 		chain.SetAuras(append(chain.Auras(), s.Auras()[0]))

@@ -5,20 +5,20 @@
 package cards
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
-func (SpellbladeStrikeRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (SpellbladeStrikeRed) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 	s.CreateRunechants(1)
 	l.AppendPostTrigger(self.Card.DisplayName(), "Created a runechant", 1)
 }
 
-func (SpellbladeStrikeYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (SpellbladeStrikeYellow) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 	s.CreateRunechants(1)
 	l.AppendPostTrigger(self.Card.DisplayName(), "Created a runechant", 1)
 }
 
-func (SpellbladeStrikeBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (SpellbladeStrikeBlue) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 	s.CreateRunechants(1)
 	l.AppendPostTrigger(self.Card.DisplayName(), "Created a runechant", 1)
 }

@@ -10,12 +10,12 @@
 package cards
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 // captainsCallPlay applies the modal grant to the next cost-≤maxCost attack action card in
 // CardsRemaining. Fizzles silently if no follow-up attack action matches.
-func captainsCallPlay(s *sim.TurnState, l sim.Logger, self *sim.CardState, maxCost int) {
+func captainsCallPlay(s card.GameEngine, l card.Logger, self *card.CardState, maxCost int) {
 	for _, pc := range s.CardsRemaining() {
 		if !pc.Card.Types().IsAttackAction() {
 			continue
@@ -34,16 +34,16 @@ func captainsCallPlay(s *sim.TurnState, l sim.Logger, self *sim.CardState, maxCo
 }
 
 func (CaptainsCallRed) Modes() int { return 2 }
-func (CaptainsCallRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (CaptainsCallRed) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 	captainsCallPlay(s, l, self, 2)
 }
 
 func (CaptainsCallYellow) Modes() int { return 2 }
-func (CaptainsCallYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (CaptainsCallYellow) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 	captainsCallPlay(s, l, self, 1)
 }
 
 func (CaptainsCallBlue) Modes() int { return 2 }
-func (CaptainsCallBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (CaptainsCallBlue) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 	captainsCallPlay(s, l, self, 0)
 }

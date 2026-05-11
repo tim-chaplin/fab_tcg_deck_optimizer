@@ -9,21 +9,21 @@
 package cards
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
-func freewheelingRenegadesPlay(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func freewheelingRenegadesPlay(s card.GameEngine, l card.Logger, self *card.CardState) {
 	self.BonusAttack -= 2
 }
 
-func (FreewheelingRenegadesRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (FreewheelingRenegadesRed) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 	freewheelingRenegadesPlay(s, l, self)
 }
 
-func (FreewheelingRenegadesYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (FreewheelingRenegadesYellow) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 	freewheelingRenegadesPlay(s, l, self)
 }
 
-func (FreewheelingRenegadesBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (FreewheelingRenegadesBlue) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 	freewheelingRenegadesPlay(s, l, self)
 }

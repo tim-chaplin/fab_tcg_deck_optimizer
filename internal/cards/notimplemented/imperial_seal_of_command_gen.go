@@ -3,22 +3,21 @@
 package notimplemented
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 var imperialSealOfCommandTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeItem)
 
 type ImperialSealOfCommandRed struct{}
 
-func (ImperialSealOfCommandRed) ID() ids.CardID          { return ids.ImperialSealOfCommandRed }
-func (ImperialSealOfCommandRed) Name() string            { return "Imperial Seal of Command" }
-func (ImperialSealOfCommandRed) DisplayName() string     { return "Imperial Seal of Command [R]" }
-func (ImperialSealOfCommandRed) Cost(*sim.TurnState) int { return 0 }
-func (ImperialSealOfCommandRed) Pitch() int              { return 1 }
-func (ImperialSealOfCommandRed) Attack() int             { return 0 }
-func (ImperialSealOfCommandRed) Defense() int            { return 0 }
-func (ImperialSealOfCommandRed) Types() card.TypeSet     { return imperialSealOfCommandTypes }
-func (ImperialSealOfCommandRed) GoAgain() bool           { return false }
-func (ImperialSealOfCommandRed) NotImplemented()         {}
+func (ImperialSealOfCommandRed) ID() ids.CardID           { return ids.ImperialSealOfCommandRed }
+func (ImperialSealOfCommandRed) Name() string             { return "Imperial Seal of Command" }
+func (ImperialSealOfCommandRed) DisplayName() string      { return "Imperial Seal of Command [R]" }
+func (ImperialSealOfCommandRed) Cost(card.GameEngine) int { return 0 }
+func (ImperialSealOfCommandRed) Pitch() int               { return 1 }
+func (ImperialSealOfCommandRed) Attack() int              { return 0 }
+func (ImperialSealOfCommandRed) Defense() int             { return 0 }
+func (ImperialSealOfCommandRed) Types() card.TypeSet      { return imperialSealOfCommandTypes }
+func (ImperialSealOfCommandRed) GoAgain() bool            { return false }
+func (ImperialSealOfCommandRed) NotImplemented()          {}

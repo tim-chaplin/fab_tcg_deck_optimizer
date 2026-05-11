@@ -7,20 +7,20 @@
 package notimplemented
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 // not implemented: defense-reaction lockout, on-hit arsenal banish
 
-func (WreckHavocRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (WreckHavocRed) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 }
 
 // not implemented: defense-reaction lockout, on-hit arsenal banish
 
-func (WreckHavocYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (WreckHavocYellow) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 }
 
 // not implemented: defense-reaction lockout, on-hit arsenal banish
 
-func (WreckHavocBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (WreckHavocBlue) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 }

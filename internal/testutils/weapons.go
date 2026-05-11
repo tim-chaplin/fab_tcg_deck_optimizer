@@ -5,9 +5,9 @@
 package testutils
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 var clubWeaponTypes = card.NewTypeSet(card.TypeGeneric, card.TypeWeapon, card.TypeClub, card.TypeOneHand)
@@ -30,16 +30,16 @@ var clubWeaponAbilityTypes = card.NewTypeSet(card.TypeGeneric, card.TypeWeapon, 
 // ClubWeaponAbility is the activated-ability Card for ClubWeapon: cost 0, power 1, no rider.
 type ClubWeaponAbility struct{}
 
-func (ClubWeaponAbility) ID() ids.CardID          { return FakeClubWeaponAbility }
-func (ClubWeaponAbility) Name() string            { return "test.ClubWeapon" }
-func (ClubWeaponAbility) DisplayName() string     { return "test.ClubWeapon" }
-func (ClubWeaponAbility) Cost(*sim.TurnState) int { return 0 }
-func (ClubWeaponAbility) Pitch() int              { return 0 }
-func (ClubWeaponAbility) Attack() int             { return 1 }
-func (ClubWeaponAbility) Defense() int            { return 0 }
-func (ClubWeaponAbility) Types() card.TypeSet     { return clubWeaponAbilityTypes }
-func (ClubWeaponAbility) GoAgain() bool           { return false }
-func (ClubWeaponAbility) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (ClubWeaponAbility) ID() ids.CardID           { return FakeClubWeaponAbility }
+func (ClubWeaponAbility) Name() string             { return "test.ClubWeapon" }
+func (ClubWeaponAbility) DisplayName() string      { return "test.ClubWeapon" }
+func (ClubWeaponAbility) Cost(card.GameEngine) int { return 0 }
+func (ClubWeaponAbility) Pitch() int               { return 0 }
+func (ClubWeaponAbility) Attack() int              { return 1 }
+func (ClubWeaponAbility) Defense() int             { return 0 }
+func (ClubWeaponAbility) Types() card.TypeSet      { return clubWeaponAbilityTypes }
+func (ClubWeaponAbility) GoAgain() bool            { return false }
+func (ClubWeaponAbility) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 }
 
 var hammerWeaponAbilityTypes = card.NewTypeSet(card.TypeGeneric, card.TypeWeapon, card.TypeHammer, card.TypeOneHand, card.TypeAttack)
@@ -49,14 +49,14 @@ var hammerWeaponAbilityTypes = card.NewTypeSet(card.TypeGeneric, card.TypeWeapon
 // weapon printing to back it.
 type HammerWeaponAbility struct{}
 
-func (HammerWeaponAbility) ID() ids.CardID          { return FakeHammerWeaponAbility }
-func (HammerWeaponAbility) Name() string            { return "test.HammerWeapon" }
-func (HammerWeaponAbility) DisplayName() string     { return "test.HammerWeapon" }
-func (HammerWeaponAbility) Cost(*sim.TurnState) int { return 0 }
-func (HammerWeaponAbility) Pitch() int              { return 0 }
-func (HammerWeaponAbility) Attack() int             { return 1 }
-func (HammerWeaponAbility) Defense() int            { return 0 }
-func (HammerWeaponAbility) Types() card.TypeSet     { return hammerWeaponAbilityTypes }
-func (HammerWeaponAbility) GoAgain() bool           { return false }
-func (HammerWeaponAbility) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (HammerWeaponAbility) ID() ids.CardID           { return FakeHammerWeaponAbility }
+func (HammerWeaponAbility) Name() string             { return "test.HammerWeapon" }
+func (HammerWeaponAbility) DisplayName() string      { return "test.HammerWeapon" }
+func (HammerWeaponAbility) Cost(card.GameEngine) int { return 0 }
+func (HammerWeaponAbility) Pitch() int               { return 0 }
+func (HammerWeaponAbility) Attack() int              { return 1 }
+func (HammerWeaponAbility) Defense() int             { return 0 }
+func (HammerWeaponAbility) Types() card.TypeSet      { return hammerWeaponAbilityTypes }
+func (HammerWeaponAbility) GoAgain() bool            { return false }
+func (HammerWeaponAbility) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 }

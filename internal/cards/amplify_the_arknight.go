@@ -9,12 +9,12 @@
 package cards
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 const amplifyTheArknightPrintedCost = 3
 
-func amplifyTheArknightCost(s *sim.TurnState) int {
+func amplifyTheArknightCost(s card.GameEngine) int {
 	eff := amplifyTheArknightPrintedCost - s.Runechants()
 	if eff < 0 {
 		return 0
@@ -22,23 +22,23 @@ func amplifyTheArknightCost(s *sim.TurnState) int {
 	return eff
 }
 
-func (AmplifyTheArknightRed) Cost(s *sim.TurnState) int { return amplifyTheArknightCost(s) }
-func (AmplifyTheArknightRed) MinCost() int              { return 0 }
-func (AmplifyTheArknightRed) MaxCost() int              { return amplifyTheArknightPrintedCost }
+func (AmplifyTheArknightRed) Cost(s card.GameEngine) int { return amplifyTheArknightCost(s) }
+func (AmplifyTheArknightRed) MinCost() int               { return 0 }
+func (AmplifyTheArknightRed) MaxCost() int               { return amplifyTheArknightPrintedCost }
 
-func (AmplifyTheArknightRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (AmplifyTheArknightRed) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 }
 
-func (AmplifyTheArknightYellow) Cost(s *sim.TurnState) int { return amplifyTheArknightCost(s) }
-func (AmplifyTheArknightYellow) MinCost() int              { return 0 }
-func (AmplifyTheArknightYellow) MaxCost() int              { return amplifyTheArknightPrintedCost }
+func (AmplifyTheArknightYellow) Cost(s card.GameEngine) int { return amplifyTheArknightCost(s) }
+func (AmplifyTheArknightYellow) MinCost() int               { return 0 }
+func (AmplifyTheArknightYellow) MaxCost() int               { return amplifyTheArknightPrintedCost }
 
-func (AmplifyTheArknightYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (AmplifyTheArknightYellow) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 }
 
-func (AmplifyTheArknightBlue) Cost(s *sim.TurnState) int { return amplifyTheArknightCost(s) }
-func (AmplifyTheArknightBlue) MinCost() int              { return 0 }
-func (AmplifyTheArknightBlue) MaxCost() int              { return amplifyTheArknightPrintedCost }
+func (AmplifyTheArknightBlue) Cost(s card.GameEngine) int { return amplifyTheArknightCost(s) }
+func (AmplifyTheArknightBlue) MinCost() int               { return 0 }
+func (AmplifyTheArknightBlue) MaxCost() int               { return amplifyTheArknightPrintedCost }
 
-func (AmplifyTheArknightBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (AmplifyTheArknightBlue) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 }

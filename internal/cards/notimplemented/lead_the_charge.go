@@ -7,17 +7,17 @@
 package notimplemented
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 // not implemented: action point grant
 
-func (LeadTheChargeRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {}
+func (LeadTheChargeRed) Play(s card.GameEngine, l card.Logger, self *card.CardState) {}
 
 // not implemented: action point grant
 
-func (LeadTheChargeYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {}
+func (LeadTheChargeYellow) Play(s card.GameEngine, l card.Logger, self *card.CardState) {}
 
 // not implemented: action point grant
 
-func (LeadTheChargeBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {}
+func (LeadTheChargeBlue) Play(s card.GameEngine, l card.Logger, self *card.CardState) {}

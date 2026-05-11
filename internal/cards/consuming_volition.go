@@ -10,17 +10,18 @@ package cards
 
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 // consumingVolitionApplyRider registers the on-hit discard rider; the ArcaneDamageDealt
 // gate runs at hit time so a Runechant firing on this same attack can satisfy it.
-func consumingVolitionApplyRider(_ *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func consumingVolitionApplyRider(_ card.GameEngine, l card.Logger, self *card.CardState) {
 	self.RegisterOnHit(consumingVolitionOnHit)
 }
 
 // consumingVolitionOnHit fires the "When this hits a hero, they discard a card" rider
 // when ArcaneDamageDealt is set. Top-level so registration stays alloc-free.
-func consumingVolitionOnHit(s *sim.TurnState, l sim.Logger, self *sim.CardState, _ *sim.OnHitHandler) {
+func consumingVolitionOnHit(s card.GameEngine, l card.Logger, self *card.CardState, _ *card.OnHitHandler) {
 	if !s.ArcaneDamageDealt() {
 		return
 	}
@@ -28,14 +29,14 @@ func consumingVolitionOnHit(s *sim.TurnState, l sim.Logger, self *sim.CardState,
 	l.AppendPostTrigger(self.Card.DisplayName(), "On-hit discarded a card", sim.DiscardValue)
 }
 
-func (ConsumingVolitionRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (ConsumingVolitionRed) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 	consumingVolitionApplyRider(s, l, self)
 }
 
-func (ConsumingVolitionYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (ConsumingVolitionYellow) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 	consumingVolitionApplyRider(s, l, self)
 }
 
-func (ConsumingVolitionBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (ConsumingVolitionBlue) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 	consumingVolitionApplyRider(s, l, self)
 }

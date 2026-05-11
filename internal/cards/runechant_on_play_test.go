@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 // Tests that the on-play "create N Runechant tokens" rider raises s.Runechants() by N,
@@ -28,7 +29,7 @@ func TestRunechantOnPlay_CreatesNTokens(t *testing.T) {
 	}
 	for _, tc := range cases {
 		var s sim.TurnState
-		sim.ResolveChainStep(&s, s.Logger(), &sim.CardState{Card: tc.c})
+		sim.ResolveChainStep(&s, s.Logger(), &card.CardState{Card: tc.c})
 		if s.Runechants() != tc.n {
 			t.Errorf("%s: Runechants = %d, want %d", tc.c.Name(), s.Runechants(), tc.n)
 		}

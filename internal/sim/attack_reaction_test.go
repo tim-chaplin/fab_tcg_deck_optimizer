@@ -3,8 +3,8 @@ package sim
 import (
 	"testing"
 
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 // stubAR is a minimal Card + AttackReaction stub. The unit tests exercise
@@ -14,7 +14,7 @@ type stubAR struct{}
 func (stubAR) ID() ids.CardID      { return ids.InvalidCard }
 func (stubAR) Name() string        { return "stubAR" }
 func (stubAR) DisplayName() string { return "stubAR [B]" }
-func (stubAR) Cost(*TurnState) int { return 0 }
+func (stubAR) Cost(GameEngine) int { return 0 }
 func (stubAR) Pitch() int          { return 3 }
 func (stubAR) Attack() int         { return 0 }
 func (stubAR) Defense() int        { return 0 }
@@ -23,7 +23,7 @@ func (stubAR) Types() card.TypeSet {
 }
 func (stubAR) GoAgain() bool                       { return false }
 func (stubAR) ARTargetAllowed(c Card, _ int8) bool { return true }
-func (stubAR) Play(*TurnState, Logger, *CardState) {}
+func (stubAR) Play(GameEngine, Logger, *CardState) {}
 
 // stubAttack is a Generic Action - Attack target candidate.
 type stubAttack struct{}
@@ -31,7 +31,7 @@ type stubAttack struct{}
 func (stubAttack) ID() ids.CardID      { return ids.InvalidCard }
 func (stubAttack) Name() string        { return "stubAttack" }
 func (stubAttack) DisplayName() string { return "stubAttack [R]" }
-func (stubAttack) Cost(*TurnState) int { return 0 }
+func (stubAttack) Cost(GameEngine) int { return 0 }
 func (stubAttack) Pitch() int          { return 1 }
 func (stubAttack) Attack() int         { return 1 }
 func (stubAttack) Defense() int        { return 0 }
@@ -39,7 +39,7 @@ func (stubAttack) Types() card.TypeSet {
 	return card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 }
 func (stubAttack) GoAgain() bool                       { return true }
-func (stubAttack) Play(*TurnState, Logger, *CardState) {}
+func (stubAttack) Play(GameEngine, Logger, *CardState) {}
 
 // Tests that GrantAttackReactionBuff is a no-op when no target is set.
 func TestGrantAttackReactionBuff_NoTargetIsNoOp(t *testing.T) {

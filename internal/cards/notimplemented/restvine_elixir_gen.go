@@ -3,22 +3,21 @@
 package notimplemented
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 var restvineElixirTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction)
 
 type RestvineElixirRed struct{}
 
-func (RestvineElixirRed) ID() ids.CardID          { return ids.RestvineElixirRed }
-func (RestvineElixirRed) Name() string            { return "Restvine Elixir" }
-func (RestvineElixirRed) DisplayName() string     { return "Restvine Elixir [R]" }
-func (RestvineElixirRed) Cost(*sim.TurnState) int { return 1 }
-func (RestvineElixirRed) Pitch() int              { return 1 }
-func (RestvineElixirRed) Attack() int             { return 0 }
-func (RestvineElixirRed) Defense() int            { return 3 }
-func (RestvineElixirRed) Types() card.TypeSet     { return restvineElixirTypes }
-func (RestvineElixirRed) GoAgain() bool           { return true }
-func (RestvineElixirRed) NotImplemented()         {}
+func (RestvineElixirRed) ID() ids.CardID           { return ids.RestvineElixirRed }
+func (RestvineElixirRed) Name() string             { return "Restvine Elixir" }
+func (RestvineElixirRed) DisplayName() string      { return "Restvine Elixir [R]" }
+func (RestvineElixirRed) Cost(card.GameEngine) int { return 1 }
+func (RestvineElixirRed) Pitch() int               { return 1 }
+func (RestvineElixirRed) Attack() int              { return 0 }
+func (RestvineElixirRed) Defense() int             { return 3 }
+func (RestvineElixirRed) Types() card.TypeSet      { return restvineElixirTypes }
+func (RestvineElixirRed) GoAgain() bool            { return true }
+func (RestvineElixirRed) NotImplemented()          {}

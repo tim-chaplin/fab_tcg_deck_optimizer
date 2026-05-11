@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 // Tests that Play flips AuraCreated, makes no runes this turn, and registers an aura with
@@ -19,7 +20,7 @@ func TestBlessingOfOccult_PlayCreatesAuraNoThisTurnRunes(t *testing.T) {
 	}
 	for _, tc := range cases {
 		var s sim.TurnState
-		sim.ResolveChainStep(&s, s.Logger(), &sim.CardState{Card: tc.c})
+		sim.ResolveChainStep(&s, s.Logger(), &card.CardState{Card: tc.c})
 		if got := s.Value(); got != 0 {
 			t.Errorf("%s: Play() = %d, want 0 (rune creation deferred to trigger)", tc.c.Name(), got)
 		}
@@ -54,7 +55,7 @@ func TestBlessingOfOccult_TriggerHandlerCreatesNRunes(t *testing.T) {
 	}
 	for _, tc := range cases {
 		var play sim.TurnState
-		sim.ResolveChainStep(&play, play.Logger(), &sim.CardState{Card: tc.c})
+		sim.ResolveChainStep(&play, play.Logger(), &card.CardState{Card: tc.c})
 		next := sim.NewTurnStateFromCards(nil, nil)
 		next.SetAuras(append(next.Auras(), play.Auras()[0]))
 		next.SetCurrentAuraIdxForTesting(0)

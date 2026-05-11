@@ -5,12 +5,13 @@ import (
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 // Tests that Cadaverous Contraband's Play registers an OnHit handler.
 func TestCadaverousContraband_RegistersOnHit(t *testing.T) {
 	for _, c := range []sim.Card{CadaverousContrabandRed{}, CadaverousContrabandYellow{}, CadaverousContrabandBlue{}} {
-		self := &sim.CardState{Card: c}
+		self := &card.CardState{Card: c}
 		s := sim.NewTurnStateFromCards(nil, nil)
 		sim.ResolveChainStep(s, s.Logger(), self)
 		if len(self.OnHit) != 1 {
@@ -24,7 +25,7 @@ func TestCadaverousContraband_OnHitRecyclesNonAttackToTop(t *testing.T) {
 	non := testutils.GenericAction()
 	deck := []sim.Card{testutils.RedAttack{}}
 	s := sim.NewTurnStateFromCards(deck, []sim.Card{non})
-	self := &sim.CardState{Card: CadaverousContrabandRed{}}
+	self := &card.CardState{Card: CadaverousContrabandRed{}}
 	sim.ResolveChainStep(s, s.Logger(), self)
 	self.BonusAttack = 1
 	testutils.FireOnHitIfLikely(s, s.Logger(), self)
@@ -43,7 +44,7 @@ func TestCadaverousContraband_OnHitRecyclesNonAttackToTop(t *testing.T) {
 // graveyard and deck untouched.
 func TestCadaverousContraband_OnHitNoEligibleCardNoOp(t *testing.T) {
 	s := sim.NewTurnStateFromCards(nil, []sim.Card{testutils.RedAttack{}})
-	self := &sim.CardState{Card: CadaverousContrabandRed{}}
+	self := &card.CardState{Card: CadaverousContrabandRed{}}
 	sim.ResolveChainStep(s, s.Logger(), self)
 	testutils.FireOnHitIfLikely(s, s.Logger(), self)
 	if len(s.Graveyard()) != 1 {

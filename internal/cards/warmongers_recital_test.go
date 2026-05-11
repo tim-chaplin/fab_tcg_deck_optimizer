@@ -6,6 +6,7 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 // TestWarmongersRecital_NoAttackReturnsZero: no qualifying next attack card → +N rider fizzles.
@@ -14,7 +15,7 @@ func TestWarmongersRecital_NoAttackReturnsZero(t *testing.T) {
 	for _, c := range []sim.Card{
 		cards.WarmongersRecitalRed{}, cards.WarmongersRecitalYellow{}, cards.WarmongersRecitalBlue{},
 	} {
-		sim.ResolveChainStep(&s, s.Logger(), &sim.CardState{Card: c})
+		sim.ResolveChainStep(&s, s.Logger(), &card.CardState{Card: c})
 		if s.Value() != 0 {
 			t.Errorf("%s: Play() = %d, want 0", c.Name(), s.Value())
 		}
@@ -23,8 +24,8 @@ func TestWarmongersRecital_NoAttackReturnsZero(t *testing.T) {
 
 // TestWarmongersRecital_NonAttackInRemainingFizzles: non-attack action fails the predicate.
 func TestWarmongersRecital_NonAttackInRemainingFizzles(t *testing.T) {
-	s := sim.NewTurnStateFromSpec(sim.TurnStateSpec{CardsRemaining: []*sim.CardState{{Card: testutils.GenericAction()}}})
-	sim.ResolveChainStep(&s, s.Logger(), &sim.CardState{Card: cards.WarmongersRecitalRed{}})
+	s := sim.NewTurnStateFromSpec(sim.TurnStateSpec{CardsRemaining: []*card.CardState{{Card: testutils.GenericAction()}}})
+	sim.ResolveChainStep(&s, s.Logger(), &card.CardState{Card: cards.WarmongersRecitalRed{}})
 	if s.Value() != 0 {
 		t.Errorf("Play() = %d, want 0 (non-attack skipped)", s.Value())
 	}
@@ -42,9 +43,9 @@ func TestWarmongersRecital_NextAttackReceivesBonusAndOnHit(t *testing.T) {
 		{cards.WarmongersRecitalBlue{}, 1},
 	}
 	for _, tc := range cases {
-		target := &sim.CardState{Card: testutils.GenericAttack(0, 0)}
-		s := sim.NewTurnStateFromSpec(sim.TurnStateSpec{CardsRemaining: []*sim.CardState{target}})
-		sim.ResolveChainStep(&s, s.Logger(), &sim.CardState{Card: tc.c})
+		target := &card.CardState{Card: testutils.GenericAttack(0, 0)}
+		s := sim.NewTurnStateFromSpec(sim.TurnStateSpec{CardsRemaining: []*card.CardState{target}})
+		sim.ResolveChainStep(&s, s.Logger(), &card.CardState{Card: tc.c})
 		if target.BonusAttack != tc.want {
 			t.Errorf("%s: target BonusAttack = %d, want %d", tc.c.Name(), target.BonusAttack, tc.want)
 		}
@@ -58,11 +59,11 @@ func TestWarmongersRecital_NextAttackReceivesBonusAndOnHit(t *testing.T) {
 // handler pulls target from graveyard and appends it to the bottom of the deck.
 func TestWarmongersRecital_OnHitFireRecyclesTargetFromGraveyardToDeckBottom(t *testing.T) {
 	target := testutils.GenericAttack(0, 5)
-	targetState := &sim.CardState{Card: target}
+	targetState := &card.CardState{Card: target}
 	deckTop := testutils.GenericAttack(1, 7)
 	s := sim.NewTurnStateFromCards([]sim.Card{deckTop}, nil)
-	s.SetCardsRemaining([]*sim.CardState{targetState})
-	sim.ResolveChainStep(s, s.Logger(), &sim.CardState{Card: cards.WarmongersRecitalRed{}})
+	s.SetCardsRemaining([]*card.CardState{targetState})
+	sim.ResolveChainStep(s, s.Logger(), &card.CardState{Card: cards.WarmongersRecitalRed{}})
 	if len(targetState.OnHit) != 1 {
 		t.Fatalf("OnHit not registered: len=%d", len(targetState.OnHit))
 	}

@@ -10,27 +10,27 @@
 package notimplemented
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
-func frontlineScoutPlay(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func frontlineScoutPlay(s card.GameEngine, l card.Logger, self *card.CardState) {
 	self.GrantGoAgainIfFromArsenal()
 }
 
 // not implemented: opposing-hand-peek rider
 
-func (FrontlineScoutRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (FrontlineScoutRed) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 	frontlineScoutPlay(s, l, self)
 }
 
 // not implemented: opposing-hand-peek rider
 
-func (FrontlineScoutYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (FrontlineScoutYellow) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 	frontlineScoutPlay(s, l, self)
 }
 
 // not implemented: opposing-hand-peek rider
 
-func (FrontlineScoutBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (FrontlineScoutBlue) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 	frontlineScoutPlay(s, l, self)
 }

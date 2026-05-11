@@ -5,14 +5,14 @@
 package unplayable
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
-func (CountYourBlessingsRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (CountYourBlessingsRed) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 }
 
-func (CountYourBlessingsYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (CountYourBlessingsYellow) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 }
 
-func (CountYourBlessingsBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (CountYourBlessingsBlue) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 }

@@ -1,7 +1,6 @@
 package card
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
 )
 
@@ -35,9 +34,9 @@ type Card interface {
 	// here.
 	Attack() int
 	Defense() int
-	// Types returns the card's type-line descriptors as a card.TypeSet bitfield,
-	// e.g. card.NewTypeSet(card.TypeRuneblade, card.TypeAction, card.TypeAttack).
-	Types() card.TypeSet
+	// Types returns the card's type-line descriptors as a TypeSet bitfield,
+	// e.g. NewTypeSet(TypeRuneblade, TypeAction, TypeAttack).
+	Types() TypeSet
 	// GoAgain reports whether playing this card grants an additional action point.
 	// Cards printed with "Go again" return true.
 	GoAgain() bool

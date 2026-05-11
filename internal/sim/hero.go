@@ -4,8 +4,8 @@
 package sim
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 // Hero is a FaB hero card. Intelligence is the hand size drawn per turn; Health is starting

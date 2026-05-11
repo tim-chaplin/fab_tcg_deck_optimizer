@@ -5,6 +5,7 @@ import (
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 var ferventForerunnerVariants = []sim.Card{
@@ -38,7 +39,7 @@ func TestFerventForerunner_OnHitOptFiresOnlyWhenInHitWindow(t *testing.T) {
 	}
 	for _, tc := range cases {
 		s := sim.NewTurnStateFromCards([]sim.Card{a, b}, nil)
-		cs := &sim.CardState{Card: tc.c}
+		cs := &card.CardState{Card: tc.c}
 		sim.ResolveChainStep(s, s.Logger(), cs)
 		testutils.FireOnHitIfLikely(s, s.Logger(), cs)
 		if s.Value() != tc.printed {
@@ -70,7 +71,7 @@ func TestFerventForerunner_OnHitOptFiresWithBonusAttackInWindow(t *testing.T) {
 	a, b := testutils.NewStubCard("a"), testutils.NewStubCard("b")
 	c := FerventForerunnerRed{}
 	s := sim.NewTurnStateFromCards([]sim.Card{a, b}, nil)
-	cs := &sim.CardState{Card: c, BonusAttack: 1}
+	cs := &card.CardState{Card: c, BonusAttack: 1}
 	sim.ResolveChainStep(s, s.Logger(), cs)
 	testutils.FireOnHitIfLikely(s, s.Logger(), cs)
 	want := 3 + 1

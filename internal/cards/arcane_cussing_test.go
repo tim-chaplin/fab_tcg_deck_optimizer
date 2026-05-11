@@ -5,6 +5,7 @@ import (
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 // TestArcaneCussing_BlockCoversIncomingReturnsN confirms the aura's value is N when the
@@ -21,7 +22,7 @@ func TestArcaneCussing_BlockCoversIncomingReturnsN(t *testing.T) {
 	}
 	for _, tc := range cases {
 		s := sim.NewTurnStateFromSpec(sim.TurnStateSpec{IncomingDamage: 3, BlockTotal: 3})
-		sim.ResolveChainStep(&s, s.Logger(), &sim.CardState{Card: tc.c})
+		sim.ResolveChainStep(&s, s.Logger(), &card.CardState{Card: tc.c})
 		if got := s.Value(); got != tc.n {
 			t.Errorf("%s: Play() = %d, want %d (block == incoming)", tc.c.Name(), got, tc.n)
 		}
@@ -32,7 +33,7 @@ func TestArcaneCussing_BlockCoversIncomingReturnsN(t *testing.T) {
 // counts as covering incoming.
 func TestArcaneCussing_OverBlockReturnsN(t *testing.T) {
 	s := sim.NewTurnStateFromSpec(sim.TurnStateSpec{IncomingDamage: 3, BlockTotal: 7})
-	sim.ResolveChainStep(&s, s.Logger(), &sim.CardState{Card: ArcaneCussingRed{}})
+	sim.ResolveChainStep(&s, s.Logger(), &card.CardState{Card: ArcaneCussingRed{}})
 	if got := s.Value(); got != 3 {
 		t.Errorf("Play() = %d, want 3 (over-block still covers)", got)
 	}
@@ -48,7 +49,7 @@ func TestArcaneCussing_BlockShortReturnsZero(t *testing.T) {
 	}
 	for _, c := range cases {
 		s := sim.NewTurnStateFromSpec(sim.TurnStateSpec{IncomingDamage: 3, BlockTotal: 2})
-		sim.ResolveChainStep(&s, s.Logger(), &sim.CardState{Card: c})
+		sim.ResolveChainStep(&s, s.Logger(), &card.CardState{Card: c})
 		if got := s.Value(); got != 0 {
 			t.Errorf("%s: Play() = %d, want 0 (block < incoming, no same-turn pop)", c.Name(), got)
 		}
@@ -61,9 +62,9 @@ func TestArcaneCussing_SameTurnPopBySalientAttack(t *testing.T) {
 	s := sim.NewTurnStateFromSpec(sim.TurnStateSpec{
 		IncomingDamage: 3,
 		BlockTotal:     0,
-		CardsRemaining: []*sim.CardState{{Card: testutils.AttackWithPower{Power: 4}}},
+		CardsRemaining: []*card.CardState{{Card: testutils.AttackWithPower{Power: 4}}},
 	})
-	sim.ResolveChainStep(&s, s.Logger(), &sim.CardState{Card: ArcaneCussingRed{}})
+	sim.ResolveChainStep(&s, s.Logger(), &card.CardState{Card: ArcaneCussingRed{}})
 	if got := s.Value(); got != 3 {
 		t.Errorf("Play() = %d, want 3 (Attack=4 likely to hit, pops Cussing same turn)", got)
 	}
@@ -75,9 +76,9 @@ func TestArcaneCussing_SameTurnPopByWeaponSwing(t *testing.T) {
 		IncomingDamage: 3,
 		BlockTotal:     0,
 		Auras:          []sim.Aura{sim.NewRunechantAura(1)},
-		CardsRemaining: []*sim.CardState{{Card: testutils.RunebladeWeapon{}}},
+		CardsRemaining: []*card.CardState{{Card: testutils.RunebladeWeapon{}}},
 	})
-	sim.ResolveChainStep(&s, s.Logger(), &sim.CardState{Card: ArcaneCussingRed{}})
+	sim.ResolveChainStep(&s, s.Logger(), &card.CardState{Card: ArcaneCussingRed{}})
 	if got := s.Value(); got != 3 {
 		t.Errorf("Play() = %d, want 3 (1 Runechant fires with weapon, likely to hit)", got)
 	}
@@ -90,9 +91,9 @@ func TestArcaneCussing_SameTurnPopByRunechantAlone(t *testing.T) {
 		IncomingDamage: 3,
 		BlockTotal:     0,
 		Auras:          []sim.Aura{sim.NewRunechantAura(1)},
-		CardsRemaining: []*sim.CardState{{Card: testutils.AttackWithPower{Power: 6}}},
+		CardsRemaining: []*card.CardState{{Card: testutils.AttackWithPower{Power: 6}}},
 	})
-	sim.ResolveChainStep(&s, s.Logger(), &sim.CardState{Card: ArcaneCussingRed{}})
+	sim.ResolveChainStep(&s, s.Logger(), &card.CardState{Card: ArcaneCussingRed{}})
 	if got := s.Value(); got != 3 {
 		t.Errorf("Play() = %d, want 3 (Attack=6 blockable, but 1 Runechant likely to slip through)", got)
 	}
@@ -105,9 +106,9 @@ func TestArcaneCussing_BlockableAttackNoRunechantReturnsZero(t *testing.T) {
 	s := sim.NewTurnStateFromSpec(sim.TurnStateSpec{
 		IncomingDamage: 3,
 		BlockTotal:     0,
-		CardsRemaining: []*sim.CardState{{Card: testutils.AttackWithPower{Power: 6}}},
+		CardsRemaining: []*card.CardState{{Card: testutils.AttackWithPower{Power: 6}}},
 	})
-	sim.ResolveChainStep(&s, s.Logger(), &sim.CardState{Card: ArcaneCussingRed{}})
+	sim.ResolveChainStep(&s, s.Logger(), &card.CardState{Card: ArcaneCussingRed{}})
 	if got := s.Value(); got != 0 {
 		t.Errorf("Play() = %d, want 0 (Attack=6 blockable, no Runechants, taking damage)", got)
 	}

@@ -3,7 +3,7 @@
 // through the hand/deck/cards stack.
 package sim
 
-import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+import "github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 
 // CurrentHero is the hero playing the current simulation. Set once at the start of a run; card
 // effects read profile info like Intelligence without plumbing it through TurnState.

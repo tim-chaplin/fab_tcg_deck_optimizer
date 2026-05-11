@@ -3,51 +3,50 @@
 package unplayable
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 var countYourBlessingsTypes = card.NewTypeSet(card.TypeGeneric, card.TypeInstant)
 
 type CountYourBlessingsRed struct{}
 
-func (CountYourBlessingsRed) ID() ids.CardID          { return ids.CountYourBlessingsRed }
-func (CountYourBlessingsRed) Name() string            { return "Count Your Blessings" }
-func (CountYourBlessingsRed) DisplayName() string     { return "Count Your Blessings [R]" }
-func (CountYourBlessingsRed) Cost(*sim.TurnState) int { return 2 }
-func (CountYourBlessingsRed) Pitch() int              { return 1 }
-func (CountYourBlessingsRed) Attack() int             { return 0 }
-func (CountYourBlessingsRed) Defense() int            { return 0 }
-func (CountYourBlessingsRed) Types() card.TypeSet     { return countYourBlessingsTypes }
-func (CountYourBlessingsRed) GoAgain() bool           { return false }
-func (CountYourBlessingsRed) NotSilverAgeLegal()      {}
-func (CountYourBlessingsRed) Unplayable()             {}
+func (CountYourBlessingsRed) ID() ids.CardID           { return ids.CountYourBlessingsRed }
+func (CountYourBlessingsRed) Name() string             { return "Count Your Blessings" }
+func (CountYourBlessingsRed) DisplayName() string      { return "Count Your Blessings [R]" }
+func (CountYourBlessingsRed) Cost(card.GameEngine) int { return 2 }
+func (CountYourBlessingsRed) Pitch() int               { return 1 }
+func (CountYourBlessingsRed) Attack() int              { return 0 }
+func (CountYourBlessingsRed) Defense() int             { return 0 }
+func (CountYourBlessingsRed) Types() card.TypeSet      { return countYourBlessingsTypes }
+func (CountYourBlessingsRed) GoAgain() bool            { return false }
+func (CountYourBlessingsRed) NotSilverAgeLegal()       {}
+func (CountYourBlessingsRed) Unplayable()              {}
 
 type CountYourBlessingsYellow struct{}
 
-func (CountYourBlessingsYellow) ID() ids.CardID          { return ids.CountYourBlessingsYellow }
-func (CountYourBlessingsYellow) Name() string            { return "Count Your Blessings" }
-func (CountYourBlessingsYellow) DisplayName() string     { return "Count Your Blessings [Y]" }
-func (CountYourBlessingsYellow) Cost(*sim.TurnState) int { return 2 }
-func (CountYourBlessingsYellow) Pitch() int              { return 2 }
-func (CountYourBlessingsYellow) Attack() int             { return 0 }
-func (CountYourBlessingsYellow) Defense() int            { return 0 }
-func (CountYourBlessingsYellow) Types() card.TypeSet     { return countYourBlessingsTypes }
-func (CountYourBlessingsYellow) GoAgain() bool           { return false }
-func (CountYourBlessingsYellow) NotSilverAgeLegal()      {}
-func (CountYourBlessingsYellow) Unplayable()             {}
+func (CountYourBlessingsYellow) ID() ids.CardID           { return ids.CountYourBlessingsYellow }
+func (CountYourBlessingsYellow) Name() string             { return "Count Your Blessings" }
+func (CountYourBlessingsYellow) DisplayName() string      { return "Count Your Blessings [Y]" }
+func (CountYourBlessingsYellow) Cost(card.GameEngine) int { return 2 }
+func (CountYourBlessingsYellow) Pitch() int               { return 2 }
+func (CountYourBlessingsYellow) Attack() int              { return 0 }
+func (CountYourBlessingsYellow) Defense() int             { return 0 }
+func (CountYourBlessingsYellow) Types() card.TypeSet      { return countYourBlessingsTypes }
+func (CountYourBlessingsYellow) GoAgain() bool            { return false }
+func (CountYourBlessingsYellow) NotSilverAgeLegal()       {}
+func (CountYourBlessingsYellow) Unplayable()              {}
 
 type CountYourBlessingsBlue struct{}
 
-func (CountYourBlessingsBlue) ID() ids.CardID          { return ids.CountYourBlessingsBlue }
-func (CountYourBlessingsBlue) Name() string            { return "Count Your Blessings" }
-func (CountYourBlessingsBlue) DisplayName() string     { return "Count Your Blessings [B]" }
-func (CountYourBlessingsBlue) Cost(*sim.TurnState) int { return 2 }
-func (CountYourBlessingsBlue) Pitch() int              { return 3 }
-func (CountYourBlessingsBlue) Attack() int             { return 0 }
-func (CountYourBlessingsBlue) Defense() int            { return 0 }
-func (CountYourBlessingsBlue) Types() card.TypeSet     { return countYourBlessingsTypes }
-func (CountYourBlessingsBlue) GoAgain() bool           { return false }
-func (CountYourBlessingsBlue) NotSilverAgeLegal()      {}
-func (CountYourBlessingsBlue) Unplayable()             {}
+func (CountYourBlessingsBlue) ID() ids.CardID           { return ids.CountYourBlessingsBlue }
+func (CountYourBlessingsBlue) Name() string             { return "Count Your Blessings" }
+func (CountYourBlessingsBlue) DisplayName() string      { return "Count Your Blessings [B]" }
+func (CountYourBlessingsBlue) Cost(card.GameEngine) int { return 2 }
+func (CountYourBlessingsBlue) Pitch() int               { return 3 }
+func (CountYourBlessingsBlue) Attack() int              { return 0 }
+func (CountYourBlessingsBlue) Defense() int             { return 0 }
+func (CountYourBlessingsBlue) Types() card.TypeSet      { return countYourBlessingsTypes }
+func (CountYourBlessingsBlue) GoAgain() bool            { return false }
+func (CountYourBlessingsBlue) NotSilverAgeLegal()       {}
+func (CountYourBlessingsBlue) Unplayable()              {}

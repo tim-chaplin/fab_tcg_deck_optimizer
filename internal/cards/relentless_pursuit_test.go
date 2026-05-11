@@ -5,12 +5,13 @@ import (
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 // Tests that Relentless Pursuit always marks the opposing hero on Play.
 func TestRelentlessPursuit_MarksOpponent(t *testing.T) {
 	s := sim.NewTurnStateFromCards(nil, nil)
-	sim.ResolveChainStep(s, s.Logger(), &sim.CardState{Card: RelentlessPursuitBlue{}})
+	sim.ResolveChainStep(s, s.Logger(), &card.CardState{Card: RelentlessPursuitBlue{}})
 	if !s.OpponentMarked() {
 		t.Errorf("OpponentMarked = false after Play, want true")
 	}
@@ -19,7 +20,7 @@ func TestRelentlessPursuit_MarksOpponent(t *testing.T) {
 // Tests that Play without a prior attack leaves the recycle clause off — the card resolves
 // normally and lands in the graveyard via the chain dispatcher.
 func TestRelentlessPursuit_NoRecycleWithoutPriorAttack(t *testing.T) {
-	self := &sim.CardState{Card: RelentlessPursuitBlue{}}
+	self := &card.CardState{Card: RelentlessPursuitBlue{}}
 	s := sim.NewTurnStateFromCards(nil, nil)
 	sim.ResolveChainStep(s, s.Logger(), self)
 	if self.SkipGraveyard {
@@ -30,7 +31,7 @@ func TestRelentlessPursuit_NoRecycleWithoutPriorAttack(t *testing.T) {
 // Tests that Play after an attack-typed CardsPlayed entry recycles to the bottom of the
 // deck and flips SkipGraveyard so the dispatcher will skip the graveyard append.
 func TestRelentlessPursuit_RecyclesAfterPriorAttack(t *testing.T) {
-	self := &sim.CardState{Card: RelentlessPursuitBlue{}}
+	self := &card.CardState{Card: RelentlessPursuitBlue{}}
 	s := sim.NewTurnStateFromCards(nil, nil)
 	s.SetCardsPlayed([]sim.Card{testutils.GenericAttack(0, 3)})
 	sim.ResolveChainStep(s, s.Logger(), self)

@@ -3,45 +3,44 @@
 package cards
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 var arcanicSpikeTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeAction, card.TypeAttack)
 
 type ArcanicSpikeRed struct{}
 
-func (ArcanicSpikeRed) ID() ids.CardID          { return ids.ArcanicSpikeRed }
-func (ArcanicSpikeRed) Name() string            { return "Arcanic Spike" }
-func (ArcanicSpikeRed) DisplayName() string     { return "Arcanic Spike [R]" }
-func (ArcanicSpikeRed) Cost(*sim.TurnState) int { return 2 }
-func (ArcanicSpikeRed) Pitch() int              { return 1 }
-func (ArcanicSpikeRed) Attack() int             { return 5 }
-func (ArcanicSpikeRed) Defense() int            { return 3 }
-func (ArcanicSpikeRed) Types() card.TypeSet     { return arcanicSpikeTypes }
-func (ArcanicSpikeRed) GoAgain() bool           { return false }
+func (ArcanicSpikeRed) ID() ids.CardID           { return ids.ArcanicSpikeRed }
+func (ArcanicSpikeRed) Name() string             { return "Arcanic Spike" }
+func (ArcanicSpikeRed) DisplayName() string      { return "Arcanic Spike [R]" }
+func (ArcanicSpikeRed) Cost(card.GameEngine) int { return 2 }
+func (ArcanicSpikeRed) Pitch() int               { return 1 }
+func (ArcanicSpikeRed) Attack() int              { return 5 }
+func (ArcanicSpikeRed) Defense() int             { return 3 }
+func (ArcanicSpikeRed) Types() card.TypeSet      { return arcanicSpikeTypes }
+func (ArcanicSpikeRed) GoAgain() bool            { return false }
 
 type ArcanicSpikeYellow struct{}
 
-func (ArcanicSpikeYellow) ID() ids.CardID          { return ids.ArcanicSpikeYellow }
-func (ArcanicSpikeYellow) Name() string            { return "Arcanic Spike" }
-func (ArcanicSpikeYellow) DisplayName() string     { return "Arcanic Spike [Y]" }
-func (ArcanicSpikeYellow) Cost(*sim.TurnState) int { return 2 }
-func (ArcanicSpikeYellow) Pitch() int              { return 2 }
-func (ArcanicSpikeYellow) Attack() int             { return 4 }
-func (ArcanicSpikeYellow) Defense() int            { return 3 }
-func (ArcanicSpikeYellow) Types() card.TypeSet     { return arcanicSpikeTypes }
-func (ArcanicSpikeYellow) GoAgain() bool           { return false }
+func (ArcanicSpikeYellow) ID() ids.CardID           { return ids.ArcanicSpikeYellow }
+func (ArcanicSpikeYellow) Name() string             { return "Arcanic Spike" }
+func (ArcanicSpikeYellow) DisplayName() string      { return "Arcanic Spike [Y]" }
+func (ArcanicSpikeYellow) Cost(card.GameEngine) int { return 2 }
+func (ArcanicSpikeYellow) Pitch() int               { return 2 }
+func (ArcanicSpikeYellow) Attack() int              { return 4 }
+func (ArcanicSpikeYellow) Defense() int             { return 3 }
+func (ArcanicSpikeYellow) Types() card.TypeSet      { return arcanicSpikeTypes }
+func (ArcanicSpikeYellow) GoAgain() bool            { return false }
 
 type ArcanicSpikeBlue struct{}
 
-func (ArcanicSpikeBlue) ID() ids.CardID          { return ids.ArcanicSpikeBlue }
-func (ArcanicSpikeBlue) Name() string            { return "Arcanic Spike" }
-func (ArcanicSpikeBlue) DisplayName() string     { return "Arcanic Spike [B]" }
-func (ArcanicSpikeBlue) Cost(*sim.TurnState) int { return 2 }
-func (ArcanicSpikeBlue) Pitch() int              { return 3 }
-func (ArcanicSpikeBlue) Attack() int             { return 3 }
-func (ArcanicSpikeBlue) Defense() int            { return 3 }
-func (ArcanicSpikeBlue) Types() card.TypeSet     { return arcanicSpikeTypes }
-func (ArcanicSpikeBlue) GoAgain() bool           { return false }
+func (ArcanicSpikeBlue) ID() ids.CardID           { return ids.ArcanicSpikeBlue }
+func (ArcanicSpikeBlue) Name() string             { return "Arcanic Spike" }
+func (ArcanicSpikeBlue) DisplayName() string      { return "Arcanic Spike [B]" }
+func (ArcanicSpikeBlue) Cost(card.GameEngine) int { return 2 }
+func (ArcanicSpikeBlue) Pitch() int               { return 3 }
+func (ArcanicSpikeBlue) Attack() int              { return 3 }
+func (ArcanicSpikeBlue) Defense() int             { return 3 }
+func (ArcanicSpikeBlue) Types() card.TypeSet      { return arcanicSpikeTypes }
+func (ArcanicSpikeBlue) GoAgain() bool            { return false }

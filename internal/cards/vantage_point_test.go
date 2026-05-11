@@ -5,6 +5,7 @@ import (
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 // Tests that with no aura played or created the printed power is credited and Overpower stays false.
@@ -19,7 +20,7 @@ func TestVantagePoint_BaseDamageNoAura(t *testing.T) {
 	}
 	for _, tc := range cases {
 		var s sim.TurnState
-		sim.ResolveChainStep(&s, s.Logger(), &sim.CardState{Card: tc.c})
+		sim.ResolveChainStep(&s, s.Logger(), &card.CardState{Card: tc.c})
 		if got := s.Value(); got != tc.base {
 			t.Errorf("%s: Play() = %d, want %d", tc.c.Name(), got, tc.base)
 		}
@@ -32,7 +33,7 @@ func TestVantagePoint_BaseDamageNoAura(t *testing.T) {
 // Tests that an aura already played this turn flips s.Overpower().
 func TestVantagePoint_AuraPlayedSetsOverpower(t *testing.T) {
 	s := sim.NewTurnStateFromSpec(sim.TurnStateSpec{CardsPlayed: []sim.Card{testutils.Aura{}}})
-	sim.ResolveChainStep(&s, s.Logger(), &sim.CardState{Card: VantagePointRed{}})
+	sim.ResolveChainStep(&s, s.Logger(), &card.CardState{Card: VantagePointRed{}})
 	if got := s.Value(); got != 7 {
 		t.Errorf("Play() = %d, want 7", got)
 	}
@@ -44,7 +45,7 @@ func TestVantagePoint_AuraPlayedSetsOverpower(t *testing.T) {
 // Tests that the AuraCreated flag also flips s.Overpower().
 func TestVantagePoint_AuraCreatedSetsOverpower(t *testing.T) {
 	s := sim.NewTurnStateFromSpec(sim.TurnStateSpec{AuraCreated: true})
-	sim.ResolveChainStep(&s, s.Logger(), &sim.CardState{Card: VantagePointRed{}})
+	sim.ResolveChainStep(&s, s.Logger(), &card.CardState{Card: VantagePointRed{}})
 	if got := s.Value(); got != 7 {
 		t.Errorf("Play() = %d, want 7", got)
 	}

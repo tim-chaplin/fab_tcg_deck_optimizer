@@ -9,11 +9,11 @@
 package cards
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
-func (OutMuscleRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {}
+func (OutMuscleRed) Play(s card.GameEngine, l card.Logger, self *card.CardState) {}
 
-func (OutMuscleYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {}
+func (OutMuscleYellow) Play(s card.GameEngine, l card.Logger, self *card.CardState) {}
 
-func (OutMuscleBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {}
+func (OutMuscleBlue) Play(s card.GameEngine, l card.Logger, self *card.CardState) {}

@@ -8,10 +8,11 @@ package cards
 
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 // warmongersRecitalRecycleOnHit pulls the buffed attack out of graveyard onto the deck bottom.
-func warmongersRecitalRecycleOnHit(s *sim.TurnState, l sim.Logger, self *sim.CardState, _ *sim.OnHitHandler) {
+func warmongersRecitalRecycleOnHit(s card.GameEngine, l card.Logger, self *card.CardState, _ *card.OnHitHandler) {
 	target := self.Card
 	if _, ok := s.RecycleFromGraveyardToBottom(func(c sim.Card) bool { return c == target }); !ok {
 		return
@@ -21,11 +22,11 @@ func warmongersRecitalRecycleOnHit(s *sim.TurnState, l sim.Logger, self *sim.Car
 
 // warmongersRecitalPlay grants the next attack action +n{p} and the on-hit recycle rider.
 // Fizzles silently if no attack action follows in CardsRemaining.
-func warmongersRecitalPlay(s *sim.TurnState, l sim.Logger, self *sim.CardState, source sim.Card, n int) {
+func warmongersRecitalPlay(s card.GameEngine, l card.Logger, self *card.CardState, source sim.Card, n int) {
 	for _, pc := range s.CardsRemaining() {
 		if pc.Card.Types().IsAttackAction() {
 			pc.BonusAttack += n
-			pc.OnHit = append(pc.OnHit, sim.OnHitHandler{
+			pc.OnHit = append(pc.OnHit, card.OnHitHandler{
 				Fire:   warmongersRecitalRecycleOnHit,
 				Source: source,
 			})
@@ -34,14 +35,14 @@ func warmongersRecitalPlay(s *sim.TurnState, l sim.Logger, self *sim.CardState, 
 	}
 }
 
-func (c WarmongersRecitalRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (c WarmongersRecitalRed) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 	warmongersRecitalPlay(s, l, self, c, 3)
 }
 
-func (c WarmongersRecitalYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (c WarmongersRecitalYellow) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 	warmongersRecitalPlay(s, l, self, c, 2)
 }
 
-func (c WarmongersRecitalBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (c WarmongersRecitalBlue) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 	warmongersRecitalPlay(s, l, self, c, 1)
 }

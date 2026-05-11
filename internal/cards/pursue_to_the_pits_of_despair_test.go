@@ -5,12 +5,13 @@ import (
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 // Tests that Pursue to the Pits of Despair's Play registers an OnHit handler that marks
 // the opposing hero when LikelyToHit fires.
 func TestPursueToThePitsOfDespair_OnHitMarksOpponent(t *testing.T) {
-	self := &sim.CardState{Card: PursueToThePitsOfDespairRed{}}
+	self := &card.CardState{Card: PursueToThePitsOfDespairRed{}}
 	s := sim.TurnState{}
 	sim.ResolveChainStep(&s, s.Logger(), self)
 	if len(self.OnHit) != 1 {

@@ -3,22 +3,21 @@
 package notimplemented
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 var sapwoodElixirTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction)
 
 type SapwoodElixirRed struct{}
 
-func (SapwoodElixirRed) ID() ids.CardID          { return ids.SapwoodElixirRed }
-func (SapwoodElixirRed) Name() string            { return "Sapwood Elixir" }
-func (SapwoodElixirRed) DisplayName() string     { return "Sapwood Elixir [R]" }
-func (SapwoodElixirRed) Cost(*sim.TurnState) int { return 1 }
-func (SapwoodElixirRed) Pitch() int              { return 1 }
-func (SapwoodElixirRed) Attack() int             { return 0 }
-func (SapwoodElixirRed) Defense() int            { return 3 }
-func (SapwoodElixirRed) Types() card.TypeSet     { return sapwoodElixirTypes }
-func (SapwoodElixirRed) GoAgain() bool           { return true }
-func (SapwoodElixirRed) NotImplemented()         {}
+func (SapwoodElixirRed) ID() ids.CardID           { return ids.SapwoodElixirRed }
+func (SapwoodElixirRed) Name() string             { return "Sapwood Elixir" }
+func (SapwoodElixirRed) DisplayName() string      { return "Sapwood Elixir [R]" }
+func (SapwoodElixirRed) Cost(card.GameEngine) int { return 1 }
+func (SapwoodElixirRed) Pitch() int               { return 1 }
+func (SapwoodElixirRed) Attack() int              { return 0 }
+func (SapwoodElixirRed) Defense() int             { return 3 }
+func (SapwoodElixirRed) Types() card.TypeSet      { return sapwoodElixirTypes }
+func (SapwoodElixirRed) GoAgain() bool            { return true }
+func (SapwoodElixirRed) NotImplemented()          {}

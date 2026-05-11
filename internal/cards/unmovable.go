@@ -3,22 +3,22 @@
 // Printed defense: Red 7, Yellow 6, Blue 5.
 // Text: "If Unmovable is played from arsenal, it gains +1{d}."
 //
-// +1{d} when played from arsenal via sim.ArsenalDefenseBonus (docs/dev-standards.md).
+// +1{d} when played from arsenal via card.ArsenalDefenseBonus (docs/dev-standards.md).
 
 package cards
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
-func (UnmovableRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (UnmovableRed) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 }
 func (UnmovableRed) ArsenalDefenseBonus() int { return 1 }
 
-func (UnmovableYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (UnmovableYellow) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 }
 func (UnmovableYellow) ArsenalDefenseBonus() int { return 1 }
 
-func (UnmovableBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (UnmovableBlue) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 }
 func (UnmovableBlue) ArsenalDefenseBonus() int { return 1 }

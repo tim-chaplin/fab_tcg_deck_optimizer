@@ -12,22 +12,22 @@
 package cards
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 // scoutThePeripheryIsTarget gates the rider on attack action cards played from arsenal.
-func scoutThePeripheryIsTarget(_ *sim.TurnState, pc *sim.CardState) bool {
+func scoutThePeripheryIsTarget(_ card.GameEngine, pc *card.CardState) bool {
 	return pc.FromArsenal && pc.Card.Types().IsAttackAction()
 }
 
-func (ScoutThePeripheryRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (ScoutThePeripheryRed) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 	GrantNextCardBonusAttack(s, 3, scoutThePeripheryIsTarget)
 }
 
-func (ScoutThePeripheryYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (ScoutThePeripheryYellow) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 	GrantNextCardBonusAttack(s, 2, scoutThePeripheryIsTarget)
 }
 
-func (ScoutThePeripheryBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (ScoutThePeripheryBlue) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 	GrantNextCardBonusAttack(s, 1, scoutThePeripheryIsTarget)
 }

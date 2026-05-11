@@ -3,21 +3,20 @@
 package cards
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 var nipAtTheHeelsTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAttackReaction)
 
 type NipAtTheHeelsBlue struct{}
 
-func (NipAtTheHeelsBlue) ID() ids.CardID          { return ids.NipAtTheHeelsBlue }
-func (NipAtTheHeelsBlue) Name() string            { return "Nip at the Heels" }
-func (NipAtTheHeelsBlue) DisplayName() string     { return "Nip at the Heels [B]" }
-func (NipAtTheHeelsBlue) Cost(*sim.TurnState) int { return 0 }
-func (NipAtTheHeelsBlue) Pitch() int              { return 3 }
-func (NipAtTheHeelsBlue) Attack() int             { return 0 }
-func (NipAtTheHeelsBlue) Defense() int            { return 3 }
-func (NipAtTheHeelsBlue) Types() card.TypeSet     { return nipAtTheHeelsTypes }
-func (NipAtTheHeelsBlue) GoAgain() bool           { return false }
+func (NipAtTheHeelsBlue) ID() ids.CardID           { return ids.NipAtTheHeelsBlue }
+func (NipAtTheHeelsBlue) Name() string             { return "Nip at the Heels" }
+func (NipAtTheHeelsBlue) DisplayName() string      { return "Nip at the Heels [B]" }
+func (NipAtTheHeelsBlue) Cost(card.GameEngine) int { return 0 }
+func (NipAtTheHeelsBlue) Pitch() int               { return 3 }
+func (NipAtTheHeelsBlue) Attack() int              { return 0 }
+func (NipAtTheHeelsBlue) Defense() int             { return 3 }
+func (NipAtTheHeelsBlue) Types() card.TypeSet      { return nipAtTheHeelsTypes }
+func (NipAtTheHeelsBlue) GoAgain() bool            { return false }

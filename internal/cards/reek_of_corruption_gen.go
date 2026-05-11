@@ -3,45 +3,44 @@
 package cards
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 var reekOfCorruptionTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeAction, card.TypeAttack)
 
 type ReekOfCorruptionRed struct{}
 
-func (ReekOfCorruptionRed) ID() ids.CardID          { return ids.ReekOfCorruptionRed }
-func (ReekOfCorruptionRed) Name() string            { return "Reek of Corruption" }
-func (ReekOfCorruptionRed) DisplayName() string     { return "Reek of Corruption [R]" }
-func (ReekOfCorruptionRed) Cost(*sim.TurnState) int { return 2 }
-func (ReekOfCorruptionRed) Pitch() int              { return 1 }
-func (ReekOfCorruptionRed) Attack() int             { return 4 }
-func (ReekOfCorruptionRed) Defense() int            { return 3 }
-func (ReekOfCorruptionRed) Types() card.TypeSet     { return reekOfCorruptionTypes }
-func (ReekOfCorruptionRed) GoAgain() bool           { return false }
+func (ReekOfCorruptionRed) ID() ids.CardID           { return ids.ReekOfCorruptionRed }
+func (ReekOfCorruptionRed) Name() string             { return "Reek of Corruption" }
+func (ReekOfCorruptionRed) DisplayName() string      { return "Reek of Corruption [R]" }
+func (ReekOfCorruptionRed) Cost(card.GameEngine) int { return 2 }
+func (ReekOfCorruptionRed) Pitch() int               { return 1 }
+func (ReekOfCorruptionRed) Attack() int              { return 4 }
+func (ReekOfCorruptionRed) Defense() int             { return 3 }
+func (ReekOfCorruptionRed) Types() card.TypeSet      { return reekOfCorruptionTypes }
+func (ReekOfCorruptionRed) GoAgain() bool            { return false }
 
 type ReekOfCorruptionYellow struct{}
 
-func (ReekOfCorruptionYellow) ID() ids.CardID          { return ids.ReekOfCorruptionYellow }
-func (ReekOfCorruptionYellow) Name() string            { return "Reek of Corruption" }
-func (ReekOfCorruptionYellow) DisplayName() string     { return "Reek of Corruption [Y]" }
-func (ReekOfCorruptionYellow) Cost(*sim.TurnState) int { return 2 }
-func (ReekOfCorruptionYellow) Pitch() int              { return 2 }
-func (ReekOfCorruptionYellow) Attack() int             { return 3 }
-func (ReekOfCorruptionYellow) Defense() int            { return 3 }
-func (ReekOfCorruptionYellow) Types() card.TypeSet     { return reekOfCorruptionTypes }
-func (ReekOfCorruptionYellow) GoAgain() bool           { return false }
+func (ReekOfCorruptionYellow) ID() ids.CardID           { return ids.ReekOfCorruptionYellow }
+func (ReekOfCorruptionYellow) Name() string             { return "Reek of Corruption" }
+func (ReekOfCorruptionYellow) DisplayName() string      { return "Reek of Corruption [Y]" }
+func (ReekOfCorruptionYellow) Cost(card.GameEngine) int { return 2 }
+func (ReekOfCorruptionYellow) Pitch() int               { return 2 }
+func (ReekOfCorruptionYellow) Attack() int              { return 3 }
+func (ReekOfCorruptionYellow) Defense() int             { return 3 }
+func (ReekOfCorruptionYellow) Types() card.TypeSet      { return reekOfCorruptionTypes }
+func (ReekOfCorruptionYellow) GoAgain() bool            { return false }
 
 type ReekOfCorruptionBlue struct{}
 
-func (ReekOfCorruptionBlue) ID() ids.CardID          { return ids.ReekOfCorruptionBlue }
-func (ReekOfCorruptionBlue) Name() string            { return "Reek of Corruption" }
-func (ReekOfCorruptionBlue) DisplayName() string     { return "Reek of Corruption [B]" }
-func (ReekOfCorruptionBlue) Cost(*sim.TurnState) int { return 2 }
-func (ReekOfCorruptionBlue) Pitch() int              { return 3 }
-func (ReekOfCorruptionBlue) Attack() int             { return 2 }
-func (ReekOfCorruptionBlue) Defense() int            { return 3 }
-func (ReekOfCorruptionBlue) Types() card.TypeSet     { return reekOfCorruptionTypes }
-func (ReekOfCorruptionBlue) GoAgain() bool           { return false }
+func (ReekOfCorruptionBlue) ID() ids.CardID           { return ids.ReekOfCorruptionBlue }
+func (ReekOfCorruptionBlue) Name() string             { return "Reek of Corruption" }
+func (ReekOfCorruptionBlue) DisplayName() string      { return "Reek of Corruption [B]" }
+func (ReekOfCorruptionBlue) Cost(card.GameEngine) int { return 2 }
+func (ReekOfCorruptionBlue) Pitch() int               { return 3 }
+func (ReekOfCorruptionBlue) Attack() int              { return 2 }
+func (ReekOfCorruptionBlue) Defense() int             { return 3 }
+func (ReekOfCorruptionBlue) Types() card.TypeSet      { return reekOfCorruptionTypes }
+func (ReekOfCorruptionBlue) GoAgain() bool            { return false }

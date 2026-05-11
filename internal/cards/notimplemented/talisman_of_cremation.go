@@ -6,11 +6,11 @@
 package notimplemented
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 // not implemented: self-destroys on play-from-banished → banish a named card from opposing
 // graveyards
 
-func (TalismanOfCremationBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (TalismanOfCremationBlue) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 }

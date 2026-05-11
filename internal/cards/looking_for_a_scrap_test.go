@@ -5,12 +5,13 @@ import (
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 // Tests that with no banishable graveyard target the rider stays off.
 func TestLookingForAScrap_NoBanishableRiderOff(t *testing.T) {
 	for _, c := range []sim.Card{LookingForAScrapRed{}, LookingForAScrapYellow{}, LookingForAScrapBlue{}} {
-		self := &sim.CardState{Card: c}
+		self := &card.CardState{Card: c}
 		s := sim.NewTurnStateFromCards(nil, nil)
 		sim.ResolveChainStep(s, s.Logger(), self)
 		if self.GrantedGoAgain {
@@ -27,7 +28,7 @@ func TestLookingForAScrap_NoBanishableRiderOff(t *testing.T) {
 func TestLookingForAScrap_BanishesOnePowerForBonus(t *testing.T) {
 	for _, c := range []sim.Card{LookingForAScrapRed{}, LookingForAScrapYellow{}, LookingForAScrapBlue{}} {
 		s := sim.NewTurnStateFromCards(nil, []sim.Card{testutils.GenericAttack(0, 1)})
-		self := &sim.CardState{Card: c}
+		self := &card.CardState{Card: c}
 		sim.ResolveChainStep(s, s.Logger(), self)
 		if !self.GrantedGoAgain {
 			t.Errorf("%s [%d{p}]: GrantedGoAgain = false after banish, want true", c.Name(), c.Pitch())

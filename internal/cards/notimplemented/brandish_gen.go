@@ -3,48 +3,47 @@
 package notimplemented
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 var brandishTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 
 type BrandishRed struct{}
 
-func (BrandishRed) ID() ids.CardID          { return ids.BrandishRed }
-func (BrandishRed) Name() string            { return "Brandish" }
-func (BrandishRed) DisplayName() string     { return "Brandish [R]" }
-func (BrandishRed) Cost(*sim.TurnState) int { return 1 }
-func (BrandishRed) Pitch() int              { return 1 }
-func (BrandishRed) Attack() int             { return 3 }
-func (BrandishRed) Defense() int            { return 2 }
-func (BrandishRed) Types() card.TypeSet     { return brandishTypes }
-func (BrandishRed) GoAgain() bool           { return true }
-func (BrandishRed) NotImplemented()         {}
+func (BrandishRed) ID() ids.CardID           { return ids.BrandishRed }
+func (BrandishRed) Name() string             { return "Brandish" }
+func (BrandishRed) DisplayName() string      { return "Brandish [R]" }
+func (BrandishRed) Cost(card.GameEngine) int { return 1 }
+func (BrandishRed) Pitch() int               { return 1 }
+func (BrandishRed) Attack() int              { return 3 }
+func (BrandishRed) Defense() int             { return 2 }
+func (BrandishRed) Types() card.TypeSet      { return brandishTypes }
+func (BrandishRed) GoAgain() bool            { return true }
+func (BrandishRed) NotImplemented()          {}
 
 type BrandishYellow struct{}
 
-func (BrandishYellow) ID() ids.CardID          { return ids.BrandishYellow }
-func (BrandishYellow) Name() string            { return "Brandish" }
-func (BrandishYellow) DisplayName() string     { return "Brandish [Y]" }
-func (BrandishYellow) Cost(*sim.TurnState) int { return 1 }
-func (BrandishYellow) Pitch() int              { return 2 }
-func (BrandishYellow) Attack() int             { return 2 }
-func (BrandishYellow) Defense() int            { return 2 }
-func (BrandishYellow) Types() card.TypeSet     { return brandishTypes }
-func (BrandishYellow) GoAgain() bool           { return true }
-func (BrandishYellow) NotImplemented()         {}
+func (BrandishYellow) ID() ids.CardID           { return ids.BrandishYellow }
+func (BrandishYellow) Name() string             { return "Brandish" }
+func (BrandishYellow) DisplayName() string      { return "Brandish [Y]" }
+func (BrandishYellow) Cost(card.GameEngine) int { return 1 }
+func (BrandishYellow) Pitch() int               { return 2 }
+func (BrandishYellow) Attack() int              { return 2 }
+func (BrandishYellow) Defense() int             { return 2 }
+func (BrandishYellow) Types() card.TypeSet      { return brandishTypes }
+func (BrandishYellow) GoAgain() bool            { return true }
+func (BrandishYellow) NotImplemented()          {}
 
 type BrandishBlue struct{}
 
-func (BrandishBlue) ID() ids.CardID          { return ids.BrandishBlue }
-func (BrandishBlue) Name() string            { return "Brandish" }
-func (BrandishBlue) DisplayName() string     { return "Brandish [B]" }
-func (BrandishBlue) Cost(*sim.TurnState) int { return 1 }
-func (BrandishBlue) Pitch() int              { return 3 }
-func (BrandishBlue) Attack() int             { return 1 }
-func (BrandishBlue) Defense() int            { return 2 }
-func (BrandishBlue) Types() card.TypeSet     { return brandishTypes }
-func (BrandishBlue) GoAgain() bool           { return true }
-func (BrandishBlue) NotImplemented()         {}
+func (BrandishBlue) ID() ids.CardID           { return ids.BrandishBlue }
+func (BrandishBlue) Name() string             { return "Brandish" }
+func (BrandishBlue) DisplayName() string      { return "Brandish [B]" }
+func (BrandishBlue) Cost(card.GameEngine) int { return 1 }
+func (BrandishBlue) Pitch() int               { return 3 }
+func (BrandishBlue) Attack() int              { return 1 }
+func (BrandishBlue) Defense() int             { return 2 }
+func (BrandishBlue) Types() card.TypeSet      { return brandishTypes }
+func (BrandishBlue) GoAgain() bool            { return true }
+func (BrandishBlue) NotImplemented()          {}

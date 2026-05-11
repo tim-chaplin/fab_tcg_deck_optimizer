@@ -10,11 +10,12 @@ package cards
 
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 // reekOfCorruptionApplyRider registers the on-hit discard rider when the aura
 // precondition is satisfied.
-func reekOfCorruptionApplyRider(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func reekOfCorruptionApplyRider(s card.GameEngine, l card.Logger, self *card.CardState) {
 	if !s.HasPlayedOrCreatedAura() {
 		return
 	}
@@ -23,19 +24,19 @@ func reekOfCorruptionApplyRider(s *sim.TurnState, l sim.Logger, self *sim.CardSt
 
 // reekOfCorruptionOnHit fires the conditional "When this hits a hero, they discard a card"
 // rider. Top-level so registration stays alloc-free.
-func reekOfCorruptionOnHit(s *sim.TurnState, l sim.Logger, self *sim.CardState, _ *sim.OnHitHandler) {
+func reekOfCorruptionOnHit(s card.GameEngine, l card.Logger, self *card.CardState, _ *card.OnHitHandler) {
 	s.AddValue(sim.DiscardValue)
 	l.AppendPostTrigger(self.Card.DisplayName(), "On-hit discarded a card", sim.DiscardValue)
 }
 
-func (ReekOfCorruptionRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (ReekOfCorruptionRed) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 	reekOfCorruptionApplyRider(s, l, self)
 }
 
-func (ReekOfCorruptionYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (ReekOfCorruptionYellow) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 	reekOfCorruptionApplyRider(s, l, self)
 }
 
-func (ReekOfCorruptionBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (ReekOfCorruptionBlue) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 	reekOfCorruptionApplyRider(s, l, self)
 }

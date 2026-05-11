@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 // Tests that each printing prevents its full Defense() amount (4/3/2) and that the
@@ -22,13 +23,13 @@ func TestOasisRespite_PreventsAndLifeRider(t *testing.T) {
 	for _, tc := range cases {
 		sim.CurrentHero = stubLowHeroOff{}
 		sOff := sim.NewTurnStateFromSpec(sim.TurnStateSpec{IncomingDamage: 10})
-		sim.ResolveChainStep(&sOff, sOff.Logger(), &sim.CardState{Card: tc.card})
+		sim.ResolveChainStep(&sOff, sOff.Logger(), &card.CardState{Card: tc.card})
 		if sOff.Value() != tc.wantOff {
 			t.Errorf("%s: hero off Value = %d, want %d", tc.card.Name(), sOff.Value(), tc.wantOff)
 		}
 		sim.CurrentHero = stubLowHeroOn{}
 		sOn := sim.NewTurnStateFromSpec(sim.TurnStateSpec{IncomingDamage: 10})
-		sim.ResolveChainStep(&sOn, sOn.Logger(), &sim.CardState{Card: tc.card})
+		sim.ResolveChainStep(&sOn, sOn.Logger(), &card.CardState{Card: tc.card})
 		if sOn.Value() != tc.wantOn {
 			t.Errorf("%s: hero on Value = %d, want %d", tc.card.Name(), sOn.Value(), tc.wantOn)
 		}

@@ -5,20 +5,20 @@
 package cards
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
-func (HocusPocusRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (HocusPocusRed) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 	s.CreateRunechants(1)
 	l.AppendPostTrigger(self.Card.DisplayName(), "Created a runechant", 1)
 }
 
-func (HocusPocusYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (HocusPocusYellow) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 	s.CreateRunechants(1)
 	l.AppendPostTrigger(self.Card.DisplayName(), "Created a runechant", 1)
 }
 
-func (HocusPocusBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (HocusPocusBlue) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 	s.CreateRunechants(1)
 	l.AppendPostTrigger(self.Card.DisplayName(), "Created a runechant", 1)
 }

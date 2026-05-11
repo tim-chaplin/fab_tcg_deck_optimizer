@@ -8,27 +8,27 @@
 package cards
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 // forceSightPlay grants the next attack action +bonus{p}, logs the chain step (Force
 // Sight is a non-attack action — no Attack() to apply), and resolves the arsenal-gated
 // Opt 2.
-func forceSightPlay(s *sim.TurnState, l sim.Logger, self *sim.CardState, bonus int) {
+func forceSightPlay(s card.GameEngine, l card.Logger, self *card.CardState, bonus int) {
 	GrantNextCardBonusAttack(s, bonus, IsAttackAction)
 	if self.FromArsenal {
 		s.Opt(l, 2)
 	}
 }
 
-func (ForceSightRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (ForceSightRed) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 	forceSightPlay(s, l, self, 3)
 }
 
-func (ForceSightYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (ForceSightYellow) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 	forceSightPlay(s, l, self, 2)
 }
 
-func (ForceSightBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (ForceSightBlue) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 	forceSightPlay(s, l, self, 1)
 }

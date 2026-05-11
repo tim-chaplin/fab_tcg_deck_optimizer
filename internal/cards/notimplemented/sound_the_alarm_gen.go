@@ -3,22 +3,21 @@
 package notimplemented
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 var soundTheAlarmTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 
 type SoundTheAlarmRed struct{}
 
-func (SoundTheAlarmRed) ID() ids.CardID          { return ids.SoundTheAlarmRed }
-func (SoundTheAlarmRed) Name() string            { return "Sound the Alarm" }
-func (SoundTheAlarmRed) DisplayName() string     { return "Sound the Alarm [R]" }
-func (SoundTheAlarmRed) Cost(*sim.TurnState) int { return 1 }
-func (SoundTheAlarmRed) Pitch() int              { return 1 }
-func (SoundTheAlarmRed) Attack() int             { return 5 }
-func (SoundTheAlarmRed) Defense() int            { return 3 }
-func (SoundTheAlarmRed) Types() card.TypeSet     { return soundTheAlarmTypes }
-func (SoundTheAlarmRed) GoAgain() bool           { return false }
-func (SoundTheAlarmRed) NotImplemented()         {}
+func (SoundTheAlarmRed) ID() ids.CardID           { return ids.SoundTheAlarmRed }
+func (SoundTheAlarmRed) Name() string             { return "Sound the Alarm" }
+func (SoundTheAlarmRed) DisplayName() string      { return "Sound the Alarm [R]" }
+func (SoundTheAlarmRed) Cost(card.GameEngine) int { return 1 }
+func (SoundTheAlarmRed) Pitch() int               { return 1 }
+func (SoundTheAlarmRed) Attack() int              { return 5 }
+func (SoundTheAlarmRed) Defense() int             { return 3 }
+func (SoundTheAlarmRed) Types() card.TypeSet      { return soundTheAlarmTypes }
+func (SoundTheAlarmRed) GoAgain() bool            { return false }
+func (SoundTheAlarmRed) NotImplemented()          {}

@@ -3,48 +3,47 @@
 package notimplemented
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 var evenBiggerThanThatTypes = card.NewTypeSet(card.TypeGeneric, card.TypeInstant)
 
 type EvenBiggerThanThatRed struct{}
 
-func (EvenBiggerThanThatRed) ID() ids.CardID          { return ids.EvenBiggerThanThatRed }
-func (EvenBiggerThanThatRed) Name() string            { return "Even Bigger Than That!" }
-func (EvenBiggerThanThatRed) DisplayName() string     { return "Even Bigger Than That! [R]" }
-func (EvenBiggerThanThatRed) Cost(*sim.TurnState) int { return 0 }
-func (EvenBiggerThanThatRed) Pitch() int              { return 1 }
-func (EvenBiggerThanThatRed) Attack() int             { return 0 }
-func (EvenBiggerThanThatRed) Defense() int            { return 0 }
-func (EvenBiggerThanThatRed) Types() card.TypeSet     { return evenBiggerThanThatTypes }
-func (EvenBiggerThanThatRed) GoAgain() bool           { return false }
-func (EvenBiggerThanThatRed) NotImplemented()         {}
+func (EvenBiggerThanThatRed) ID() ids.CardID           { return ids.EvenBiggerThanThatRed }
+func (EvenBiggerThanThatRed) Name() string             { return "Even Bigger Than That!" }
+func (EvenBiggerThanThatRed) DisplayName() string      { return "Even Bigger Than That! [R]" }
+func (EvenBiggerThanThatRed) Cost(card.GameEngine) int { return 0 }
+func (EvenBiggerThanThatRed) Pitch() int               { return 1 }
+func (EvenBiggerThanThatRed) Attack() int              { return 0 }
+func (EvenBiggerThanThatRed) Defense() int             { return 0 }
+func (EvenBiggerThanThatRed) Types() card.TypeSet      { return evenBiggerThanThatTypes }
+func (EvenBiggerThanThatRed) GoAgain() bool            { return false }
+func (EvenBiggerThanThatRed) NotImplemented()          {}
 
 type EvenBiggerThanThatYellow struct{}
 
-func (EvenBiggerThanThatYellow) ID() ids.CardID          { return ids.EvenBiggerThanThatYellow }
-func (EvenBiggerThanThatYellow) Name() string            { return "Even Bigger Than That!" }
-func (EvenBiggerThanThatYellow) DisplayName() string     { return "Even Bigger Than That! [Y]" }
-func (EvenBiggerThanThatYellow) Cost(*sim.TurnState) int { return 0 }
-func (EvenBiggerThanThatYellow) Pitch() int              { return 2 }
-func (EvenBiggerThanThatYellow) Attack() int             { return 0 }
-func (EvenBiggerThanThatYellow) Defense() int            { return 0 }
-func (EvenBiggerThanThatYellow) Types() card.TypeSet     { return evenBiggerThanThatTypes }
-func (EvenBiggerThanThatYellow) GoAgain() bool           { return false }
-func (EvenBiggerThanThatYellow) NotImplemented()         {}
+func (EvenBiggerThanThatYellow) ID() ids.CardID           { return ids.EvenBiggerThanThatYellow }
+func (EvenBiggerThanThatYellow) Name() string             { return "Even Bigger Than That!" }
+func (EvenBiggerThanThatYellow) DisplayName() string      { return "Even Bigger Than That! [Y]" }
+func (EvenBiggerThanThatYellow) Cost(card.GameEngine) int { return 0 }
+func (EvenBiggerThanThatYellow) Pitch() int               { return 2 }
+func (EvenBiggerThanThatYellow) Attack() int              { return 0 }
+func (EvenBiggerThanThatYellow) Defense() int             { return 0 }
+func (EvenBiggerThanThatYellow) Types() card.TypeSet      { return evenBiggerThanThatTypes }
+func (EvenBiggerThanThatYellow) GoAgain() bool            { return false }
+func (EvenBiggerThanThatYellow) NotImplemented()          {}
 
 type EvenBiggerThanThatBlue struct{}
 
-func (EvenBiggerThanThatBlue) ID() ids.CardID          { return ids.EvenBiggerThanThatBlue }
-func (EvenBiggerThanThatBlue) Name() string            { return "Even Bigger Than That!" }
-func (EvenBiggerThanThatBlue) DisplayName() string     { return "Even Bigger Than That! [B]" }
-func (EvenBiggerThanThatBlue) Cost(*sim.TurnState) int { return 0 }
-func (EvenBiggerThanThatBlue) Pitch() int              { return 3 }
-func (EvenBiggerThanThatBlue) Attack() int             { return 0 }
-func (EvenBiggerThanThatBlue) Defense() int            { return 0 }
-func (EvenBiggerThanThatBlue) Types() card.TypeSet     { return evenBiggerThanThatTypes }
-func (EvenBiggerThanThatBlue) GoAgain() bool           { return false }
-func (EvenBiggerThanThatBlue) NotImplemented()         {}
+func (EvenBiggerThanThatBlue) ID() ids.CardID           { return ids.EvenBiggerThanThatBlue }
+func (EvenBiggerThanThatBlue) Name() string             { return "Even Bigger Than That!" }
+func (EvenBiggerThanThatBlue) DisplayName() string      { return "Even Bigger Than That! [B]" }
+func (EvenBiggerThanThatBlue) Cost(card.GameEngine) int { return 0 }
+func (EvenBiggerThanThatBlue) Pitch() int               { return 3 }
+func (EvenBiggerThanThatBlue) Attack() int              { return 0 }
+func (EvenBiggerThanThatBlue) Defense() int             { return 0 }
+func (EvenBiggerThanThatBlue) Types() card.TypeSet      { return evenBiggerThanThatTypes }
+func (EvenBiggerThanThatBlue) GoAgain() bool            { return false }
+func (EvenBiggerThanThatBlue) NotImplemented()          {}

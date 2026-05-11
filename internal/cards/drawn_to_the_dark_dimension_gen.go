@@ -3,8 +3,8 @@
 package cards
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 var drawnToTheDarkDimensionTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeAction, card.TypeAttack)

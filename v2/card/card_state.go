@@ -178,7 +178,12 @@ type ArsenalDefenseBonus interface {
 // (CardState.FromArsenal, partition arsenal-slot index, BestLine.FromArsenal)
 // before invoking — the helper does NOT decide whether the bonus applies, only how
 // to extract it.
-func arsenalDefenseBonusOf(c Card) int {
+func arsenalDefenseBonusOf(c Card) int { return ArsenalDefenseBonusOf(c) }
+
+// ArsenalDefenseBonusOf is the exported variant for callers outside this package (the sim's
+// partition pre-screen folds the bonus in for arsenal-slot defenders without going through
+// a CardState).
+func ArsenalDefenseBonusOf(c Card) int {
 	if ab, ok := c.(ArsenalDefenseBonus); ok {
 		return ab.ArsenalDefenseBonus()
 	}

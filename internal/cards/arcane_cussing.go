@@ -9,17 +9,17 @@
 package cards
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
-func (ArcaneCussingRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (ArcaneCussingRed) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 	fragileAuraPlay(s, l, self, 3, false)
 }
 
-func (ArcaneCussingYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (ArcaneCussingYellow) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 	fragileAuraPlay(s, l, self, 2, false)
 }
 
-func (ArcaneCussingBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (ArcaneCussingBlue) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 	fragileAuraPlay(s, l, self, 1, false)
 }

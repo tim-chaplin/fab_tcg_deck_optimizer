@@ -11,14 +11,14 @@
 package notimplemented
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
 )
 
 // not implemented: on-hit item-destruction rider
 
-func (SmashingGoodTimeRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (SmashingGoodTimeRed) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 	if self.FromArsenal {
 		cards.GrantNextCardBonusAttack(s, 3, cards.IsAttackAction)
 	}
@@ -26,7 +26,7 @@ func (SmashingGoodTimeRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardSt
 
 // not implemented: on-hit item-destruction rider
 
-func (SmashingGoodTimeYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (SmashingGoodTimeYellow) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 	if self.FromArsenal {
 		cards.GrantNextCardBonusAttack(s, 2, cards.IsAttackAction)
 	}
@@ -34,7 +34,7 @@ func (SmashingGoodTimeYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.Car
 
 // not implemented: on-hit item-destruction rider
 
-func (SmashingGoodTimeBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (SmashingGoodTimeBlue) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 	if self.FromArsenal {
 		cards.GrantNextCardBonusAttack(s, 1, cards.IsAttackAction)
 	}

@@ -7,6 +7,7 @@ import (
 	notimpl "github.com/tim-chaplin/fab-deck-optimizer/internal/cards/notimplemented"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 // Tests that Plunder Run and Smashing Good Time grant +N{p} to the next scheduled attack
@@ -25,16 +26,16 @@ func TestFromArsenalNextAttackBonus_GrantsOnArsenalCopyOnly(t *testing.T) {
 	}
 	for _, tc := range cases {
 		// Hand-played copy: the bonus must NOT land on the queued attack action.
-		handTarget := &sim.CardState{Card: testutils.GenericAttack(0, 0)}
-		handState := sim.NewTurnStateFromSpec(sim.TurnStateSpec{CardsRemaining: []*sim.CardState{handTarget}})
-		sim.ResolveChainStep(&handState, handState.Logger(), &sim.CardState{Card: tc.c})
+		handTarget := &card.CardState{Card: testutils.GenericAttack(0, 0)}
+		handState := sim.NewTurnStateFromSpec(sim.TurnStateSpec{CardsRemaining: []*card.CardState{handTarget}})
+		sim.ResolveChainStep(&handState, handState.Logger(), &card.CardState{Card: tc.c})
 		if handTarget.BonusAttack != 0 {
 			t.Errorf("%s: hand-play target BonusAttack = %d, want 0", tc.c.Name(), handTarget.BonusAttack)
 		}
 		// Arsenal-played copy: the bonus must land on the next attack action.
-		arsenalTarget := &sim.CardState{Card: testutils.GenericAttack(0, 0)}
-		arsenalState := sim.NewTurnStateFromSpec(sim.TurnStateSpec{CardsRemaining: []*sim.CardState{arsenalTarget}})
-		sim.ResolveChainStep(&arsenalState, arsenalState.Logger(), &sim.CardState{Card: tc.c, FromArsenal: true})
+		arsenalTarget := &card.CardState{Card: testutils.GenericAttack(0, 0)}
+		arsenalState := sim.NewTurnStateFromSpec(sim.TurnStateSpec{CardsRemaining: []*card.CardState{arsenalTarget}})
+		sim.ResolveChainStep(&arsenalState, arsenalState.Logger(), &card.CardState{Card: tc.c, FromArsenal: true})
 		if arsenalTarget.BonusAttack != tc.n {
 			t.Errorf("%s: arsenal-play target BonusAttack = %d, want %d", tc.c.Name(), arsenalTarget.BonusAttack, tc.n)
 		}

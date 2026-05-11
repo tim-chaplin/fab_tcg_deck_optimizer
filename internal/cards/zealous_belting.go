@@ -7,12 +7,12 @@
 package cards
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 // zealousBeltingPlay grants go again when any pitched card this turn has base power greater
 // than the card's own base power, then emits the chain step.
-func zealousBeltingPlay(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func zealousBeltingPlay(s card.GameEngine, l card.Logger, self *card.CardState) {
 	base := self.Card.Attack()
 	for _, p := range s.Pitched() {
 		if p.Attack() > base {
@@ -22,14 +22,14 @@ func zealousBeltingPlay(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	}
 }
 
-func (ZealousBeltingRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (ZealousBeltingRed) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 	zealousBeltingPlay(s, l, self)
 }
 
-func (ZealousBeltingYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (ZealousBeltingYellow) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 	zealousBeltingPlay(s, l, self)
 }
 
-func (ZealousBeltingBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (ZealousBeltingBlue) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 	zealousBeltingPlay(s, l, self)
 }

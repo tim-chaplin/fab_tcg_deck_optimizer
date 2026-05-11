@@ -3,8 +3,8 @@ package sim
 import (
 	"testing"
 
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 // soloBlocker fires +1{d} when no other plain block shares the defenders slot — the
@@ -14,7 +14,7 @@ type soloBlocker struct{}
 func (soloBlocker) ID() ids.CardID      { return ids.InvalidCard }
 func (soloBlocker) Name() string        { return "soloBlocker" }
 func (soloBlocker) DisplayName() string { return "soloBlocker" }
-func (soloBlocker) Cost(*TurnState) int { return 0 }
+func (soloBlocker) Cost(GameEngine) int { return 0 }
 func (soloBlocker) Pitch() int          { return 0 }
 func (soloBlocker) Attack() int         { return 0 }
 func (soloBlocker) Defense() int        { return 2 }
@@ -22,7 +22,7 @@ func (soloBlocker) Types() card.TypeSet {
 	return card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 }
 func (soloBlocker) GoAgain() bool                       { return false }
-func (soloBlocker) Play(*TurnState, Logger, *CardState) {}
+func (soloBlocker) Play(GameEngine, Logger, *CardState) {}
 func (soloBlocker) Block(s *TurnState, l Logger, self *CardState) {
 	plainCount := 0
 	for _, d := range s.Defenders() {
@@ -44,7 +44,7 @@ type togetherBlocker struct{}
 func (togetherBlocker) ID() ids.CardID      { return ids.InvalidCard }
 func (togetherBlocker) Name() string        { return "togetherBlocker" }
 func (togetherBlocker) DisplayName() string { return "togetherBlocker" }
-func (togetherBlocker) Cost(*TurnState) int { return 0 }
+func (togetherBlocker) Cost(GameEngine) int { return 0 }
 func (togetherBlocker) Pitch() int          { return 0 }
 func (togetherBlocker) Attack() int         { return 0 }
 func (togetherBlocker) Defense() int        { return 2 }
@@ -52,7 +52,7 @@ func (togetherBlocker) Types() card.TypeSet {
 	return card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 }
 func (togetherBlocker) GoAgain() bool                       { return false }
-func (togetherBlocker) Play(*TurnState, Logger, *CardState) {}
+func (togetherBlocker) Play(GameEngine, Logger, *CardState) {}
 func (togetherBlocker) Block(s *TurnState, l Logger, self *CardState) {
 	plainCount := 0
 	for _, d := range s.Defenders() {
@@ -73,7 +73,7 @@ type plainBlocker struct{}
 func (plainBlocker) ID() ids.CardID      { return ids.InvalidCard }
 func (plainBlocker) Name() string        { return "plainBlocker" }
 func (plainBlocker) DisplayName() string { return "plainBlocker" }
-func (plainBlocker) Cost(*TurnState) int { return 0 }
+func (plainBlocker) Cost(GameEngine) int { return 0 }
 func (plainBlocker) Pitch() int          { return 0 }
 func (plainBlocker) Attack() int         { return 0 }
 func (plainBlocker) Defense() int        { return 2 }
@@ -81,7 +81,7 @@ func (plainBlocker) Types() card.TypeSet {
 	return card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 }
 func (plainBlocker) GoAgain() bool                       { return false }
-func (plainBlocker) Play(*TurnState, Logger, *CardState) {}
+func (plainBlocker) Play(GameEngine, Logger, *CardState) {}
 
 // blockOneDR is a 1-defense Defense Reaction. Used to verify DRs alongside a plain blocker
 // don't satisfy "another plain block" for either Block-time pattern.
@@ -90,7 +90,7 @@ type blockOneDR struct{}
 func (blockOneDR) ID() ids.CardID      { return ids.InvalidCard }
 func (blockOneDR) Name() string        { return "blockOneDR" }
 func (blockOneDR) DisplayName() string { return "blockOneDR" }
-func (blockOneDR) Cost(*TurnState) int { return 0 }
+func (blockOneDR) Cost(GameEngine) int { return 0 }
 func (blockOneDR) Pitch() int          { return 0 }
 func (blockOneDR) Attack() int         { return 0 }
 func (blockOneDR) Defense() int        { return 1 }
@@ -98,7 +98,7 @@ func (blockOneDR) Types() card.TypeSet {
 	return card.NewTypeSet(card.TypeGeneric, card.TypeDefenseReaction)
 }
 func (blockOneDR) GoAgain() bool { return false }
-func (blockOneDR) Play(s *TurnState, l Logger, self *CardState) {
+func (blockOneDR) Play(s GameEngine, l Logger, self *CardState) {
 }
 
 // Tests that defendersDamage folds the alone-style Block hook's BonusDefense into the

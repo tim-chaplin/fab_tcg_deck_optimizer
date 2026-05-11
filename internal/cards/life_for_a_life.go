@@ -11,6 +11,7 @@ package cards
 
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 // lifeForALifeHealValue is the damage-equivalent credited when the on-hit 1{h} gain fires.
@@ -18,22 +19,22 @@ const lifeForALifeHealValue = 1
 
 // lifeForALifeOnHit fires the printed "When this hits, gain 1{h}" rider. Top-level so
 // registration stays alloc-free.
-func lifeForALifeOnHit(s *sim.TurnState, l sim.Logger, self *sim.CardState, _ *sim.OnHitHandler) {
+func lifeForALifeOnHit(s card.GameEngine, l card.Logger, self *card.CardState, _ *card.OnHitHandler) {
 	s.AddValue(lifeForALifeHealValue)
 	l.AppendPostTrigger(self.Card.DisplayName(), "On-hit gained 1 health", lifeForALifeHealValue)
 }
 
 func (LifeForALifeRed) GoAgain() bool { return sim.HeroWantsLowerHealth() }
-func (LifeForALifeRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (LifeForALifeRed) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 	self.RegisterOnHit(lifeForALifeOnHit)
 }
 
 func (LifeForALifeYellow) GoAgain() bool { return sim.HeroWantsLowerHealth() }
-func (LifeForALifeYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (LifeForALifeYellow) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 	self.RegisterOnHit(lifeForALifeOnHit)
 }
 
 func (LifeForALifeBlue) GoAgain() bool { return sim.HeroWantsLowerHealth() }
-func (LifeForALifeBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (LifeForALifeBlue) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 	self.RegisterOnHit(lifeForALifeOnHit)
 }

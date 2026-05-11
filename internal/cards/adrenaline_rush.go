@@ -7,6 +7,7 @@ package cards
 
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 // adrenalineRushBonus returns the +3{p} rider when the current hero opts into
@@ -18,14 +19,14 @@ func adrenalineRushBonus() int {
 	return 0
 }
 
-func (AdrenalineRushRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (AdrenalineRushRed) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 	self.BonusAttack += adrenalineRushBonus()
 }
 
-func (AdrenalineRushYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (AdrenalineRushYellow) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 	self.BonusAttack += adrenalineRushBonus()
 }
 
-func (AdrenalineRushBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+func (AdrenalineRushBlue) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 	self.BonusAttack += adrenalineRushBonus()
 }

@@ -3,45 +3,44 @@
 package cards
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 var ferventForerunnerTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 
 type FerventForerunnerRed struct{}
 
-func (FerventForerunnerRed) ID() ids.CardID          { return ids.FerventForerunnerRed }
-func (FerventForerunnerRed) Name() string            { return "Fervent Forerunner" }
-func (FerventForerunnerRed) DisplayName() string     { return "Fervent Forerunner [R]" }
-func (FerventForerunnerRed) Cost(*sim.TurnState) int { return 0 }
-func (FerventForerunnerRed) Pitch() int              { return 1 }
-func (FerventForerunnerRed) Attack() int             { return 3 }
-func (FerventForerunnerRed) Defense() int            { return 2 }
-func (FerventForerunnerRed) Types() card.TypeSet     { return ferventForerunnerTypes }
-func (FerventForerunnerRed) GoAgain() bool           { return false }
+func (FerventForerunnerRed) ID() ids.CardID           { return ids.FerventForerunnerRed }
+func (FerventForerunnerRed) Name() string             { return "Fervent Forerunner" }
+func (FerventForerunnerRed) DisplayName() string      { return "Fervent Forerunner [R]" }
+func (FerventForerunnerRed) Cost(card.GameEngine) int { return 0 }
+func (FerventForerunnerRed) Pitch() int               { return 1 }
+func (FerventForerunnerRed) Attack() int              { return 3 }
+func (FerventForerunnerRed) Defense() int             { return 2 }
+func (FerventForerunnerRed) Types() card.TypeSet      { return ferventForerunnerTypes }
+func (FerventForerunnerRed) GoAgain() bool            { return false }
 
 type FerventForerunnerYellow struct{}
 
-func (FerventForerunnerYellow) ID() ids.CardID          { return ids.FerventForerunnerYellow }
-func (FerventForerunnerYellow) Name() string            { return "Fervent Forerunner" }
-func (FerventForerunnerYellow) DisplayName() string     { return "Fervent Forerunner [Y]" }
-func (FerventForerunnerYellow) Cost(*sim.TurnState) int { return 0 }
-func (FerventForerunnerYellow) Pitch() int              { return 2 }
-func (FerventForerunnerYellow) Attack() int             { return 2 }
-func (FerventForerunnerYellow) Defense() int            { return 2 }
-func (FerventForerunnerYellow) Types() card.TypeSet     { return ferventForerunnerTypes }
-func (FerventForerunnerYellow) GoAgain() bool           { return false }
+func (FerventForerunnerYellow) ID() ids.CardID           { return ids.FerventForerunnerYellow }
+func (FerventForerunnerYellow) Name() string             { return "Fervent Forerunner" }
+func (FerventForerunnerYellow) DisplayName() string      { return "Fervent Forerunner [Y]" }
+func (FerventForerunnerYellow) Cost(card.GameEngine) int { return 0 }
+func (FerventForerunnerYellow) Pitch() int               { return 2 }
+func (FerventForerunnerYellow) Attack() int              { return 2 }
+func (FerventForerunnerYellow) Defense() int             { return 2 }
+func (FerventForerunnerYellow) Types() card.TypeSet      { return ferventForerunnerTypes }
+func (FerventForerunnerYellow) GoAgain() bool            { return false }
 
 type FerventForerunnerBlue struct{}
 
-func (FerventForerunnerBlue) ID() ids.CardID          { return ids.FerventForerunnerBlue }
-func (FerventForerunnerBlue) Name() string            { return "Fervent Forerunner" }
-func (FerventForerunnerBlue) DisplayName() string     { return "Fervent Forerunner [B]" }
-func (FerventForerunnerBlue) Cost(*sim.TurnState) int { return 0 }
-func (FerventForerunnerBlue) Pitch() int              { return 3 }
-func (FerventForerunnerBlue) Attack() int             { return 1 }
-func (FerventForerunnerBlue) Defense() int            { return 2 }
-func (FerventForerunnerBlue) Types() card.TypeSet     { return ferventForerunnerTypes }
-func (FerventForerunnerBlue) GoAgain() bool           { return false }
+func (FerventForerunnerBlue) ID() ids.CardID           { return ids.FerventForerunnerBlue }
+func (FerventForerunnerBlue) Name() string             { return "Fervent Forerunner" }
+func (FerventForerunnerBlue) DisplayName() string      { return "Fervent Forerunner [B]" }
+func (FerventForerunnerBlue) Cost(card.GameEngine) int { return 0 }
+func (FerventForerunnerBlue) Pitch() int               { return 3 }
+func (FerventForerunnerBlue) Attack() int              { return 1 }
+func (FerventForerunnerBlue) Defense() int             { return 2 }
+func (FerventForerunnerBlue) Types() card.TypeSet      { return ferventForerunnerTypes }
+func (FerventForerunnerBlue) GoAgain() bool            { return false }
