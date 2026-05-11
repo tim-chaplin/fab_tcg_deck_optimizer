@@ -25,7 +25,7 @@ func highStrikerOnHit2(s *sim.TurnState, l sim.Logger, t *sim.Trigger, _ *sim.Au
 
 func highStrikerCreate(s *sim.TurnState, l sim.Logger, t *sim.Trigger, n int) {
 	s.CreateCopper(n)
-	l.AppendPostTriggerf(s.TriggeringCard.DisplayName(), 0,
+	l.AppendPostTriggerf(s.TriggeringCard().DisplayName(), 0,
 		"%s created %d copper tokens on attack hit", t.Source.DisplayName(), n)
 }
 

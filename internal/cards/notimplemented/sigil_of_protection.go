@@ -9,24 +9,22 @@ package notimplemented
 
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
-
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
 )
 
 // not implemented: ward (opponent damage prevention)
 
 func (SigilOfProtectionRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
-	cards.SetAuraCreated(s)
+	s.SetAuraCreated(true)
 }
 
 // not implemented: ward (opponent damage prevention)
 
 func (SigilOfProtectionYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
-	cards.SetAuraCreated(s)
+	s.SetAuraCreated(true)
 }
 
 // not implemented: ward (opponent damage prevention)
 
 func (SigilOfProtectionBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
-	cards.SetAuraCreated(s)
+	s.SetAuraCreated(true)
 }

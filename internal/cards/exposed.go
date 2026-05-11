@@ -14,5 +14,5 @@ func (ExposedBlue) ARTargetAllowed(c sim.Card, _ int8) bool {
 }
 func (ExposedBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	sim.GrantAttackReactionBuff(s, l, self, 1)
-	s.OpponentMarked = true
+	s.SetOpponentMarked(true)
 }

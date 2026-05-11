@@ -16,8 +16,8 @@ func TestFireEndOfTurn_FiresOnceAndRemoves(t *testing.T) {
 	if calls != 1 {
 		t.Fatalf("handler calls = %d, want 1", calls)
 	}
-	if len(s.Triggers) != 0 {
-		t.Fatalf("triggers after fire = %d, want 0", len(s.Triggers))
+	if len(s.Triggers()) != 0 {
+		t.Fatalf("triggers after fire = %d, want 0", len(s.Triggers()))
 	}
 }
 
@@ -33,8 +33,8 @@ func TestFireEndOfTurn_LeavesNonMatchingType(t *testing.T) {
 	if calls != 0 {
 		t.Fatalf("handler calls = %d, want 0 (TriggerAttack should not fire from end-of-turn walk)", calls)
 	}
-	if len(s.Triggers) != 1 {
-		t.Fatalf("triggers after fire = %d, want 1 (non-matching trigger preserved)", len(s.Triggers))
+	if len(s.Triggers()) != 1 {
+		t.Fatalf("triggers after fire = %d, want 1 (non-matching trigger preserved)", len(s.Triggers()))
 	}
 }
 
@@ -57,8 +57,8 @@ func TestFireEndOfTurn_HandlerAddTriggerSafeReentry(t *testing.T) {
 	if calls != 1 {
 		t.Fatalf("handler calls during first walk = %d, want 1 (handler-added trigger should not fire on the same pass)", calls)
 	}
-	if len(s.Triggers) != 1 {
-		t.Fatalf("triggers after fire = %d, want 1 (handler-added trigger preserved)", len(s.Triggers))
+	if len(s.Triggers()) != 1 {
+		t.Fatalf("triggers after fire = %d, want 1 (handler-added trigger preserved)", len(s.Triggers()))
 	}
 	FireEndOfTurn(s)
 	if calls != 2 {

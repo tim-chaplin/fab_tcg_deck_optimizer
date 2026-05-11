@@ -3,7 +3,7 @@
 //
 // Text: "If you have played a 'non-attack' action card this turn, Vigor Rush gains **go again**."
 //
-// Conditional go-again gated on s.NonAttackActionPlayed (an O(1) flag the sim maintains as it
+// Conditional go-again gated on s.NonAttackActionPlayed() (an O(1) flag the sim maintains as it
 // walks the chain).
 
 package cards
@@ -13,7 +13,7 @@ import (
 )
 
 func vigorRushPlay(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
-	if s.NonAttackActionPlayed {
+	if s.NonAttackActionPlayed() {
 		self.GrantedGoAgain = true
 	}
 }

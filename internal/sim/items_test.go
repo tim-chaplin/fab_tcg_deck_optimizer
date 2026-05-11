@@ -86,8 +86,8 @@ func TestEvalCache_PriorItemsKeyedDistinctly(t *testing.T) {
 	hand := []Card{FakeRedAttack{}}
 	ev := NewEvaluator()
 	mp := Matchup{IncomingDamage: 0}
-	_ = ev.Best(FakeHero{Intel: 4}, nil, hand, mp, nil, TurnState{Items: []Item{NewGoldItem(1)}})
-	_ = ev.Best(FakeHero{Intel: 4}, nil, hand, mp, nil, TurnState{Items: []Item{NewGoldItem(2)}})
+	_ = ev.Best(FakeHero{Intel: 4}, nil, hand, mp, nil, NewTurnStateFromSpec(TurnStateSpec{Items: []Item{NewGoldItem(1)}}))
+	_ = ev.Best(FakeHero{Intel: 4}, nil, hand, mp, nil, NewTurnStateFromSpec(TurnStateSpec{Items: []Item{NewGoldItem(2)}}))
 	stats := ev.CacheStats()
 	// Two distinct item-count keys → both miss; neither hits.
 	if stats.Hits != 0 {
@@ -97,7 +97,7 @@ func TestEvalCache_PriorItemsKeyedDistinctly(t *testing.T) {
 		t.Errorf("misses = %d, want 2 (one per distinct item key)", stats.Misses)
 	}
 	// Repeating the second call should hit.
-	_ = ev.Best(FakeHero{Intel: 4}, nil, hand, mp, nil, TurnState{Items: []Item{NewGoldItem(2)}})
+	_ = ev.Best(FakeHero{Intel: 4}, nil, hand, mp, nil, NewTurnStateFromSpec(TurnStateSpec{Items: []Item{NewGoldItem(2)}}))
 	stats = ev.CacheStats()
 	if stats.Hits != 1 {
 		t.Errorf("hits after repeat = %d, want 1 (matching item key should hit)", stats.Hits)

@@ -16,7 +16,7 @@ import (
 // captainsCallPlay applies the modal grant to the next cost-≤maxCost attack action card in
 // CardsRemaining. Fizzles silently if no follow-up attack action matches.
 func captainsCallPlay(s *sim.TurnState, l sim.Logger, self *sim.CardState, maxCost int) {
-	for _, pc := range s.CardsRemaining {
+	for _, pc := range s.CardsRemaining() {
 		if !pc.Card.Types().IsAttackAction() {
 			continue
 		}

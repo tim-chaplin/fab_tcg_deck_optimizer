@@ -36,7 +36,7 @@ func (CondemnToSlaughterBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.Car
 // the bonus into LikelyToHit and the chain credit lands on the target's slot. Condemn's own
 // contribution is zero.
 func condemnToSlaughterApplySideEffect(s *sim.TurnState, n int) {
-	for _, pc := range s.CardsRemaining {
+	for _, pc := range s.CardsRemaining() {
 		if pc.Card.Types().IsRunebladeAttack() {
 			pc.BonusAttack += n
 			return

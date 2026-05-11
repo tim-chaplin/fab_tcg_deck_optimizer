@@ -20,8 +20,8 @@ func TestTremorOfIArathael_NoBanishReturnsBaseAttack(t *testing.T) {
 	for _, tc := range cases {
 		s := sim.TurnState{}
 		sim.ResolveChainStep(&s, s.Logger(), &sim.CardState{Card: tc.c})
-		if s.Value != tc.base {
-			t.Errorf("%s: Value = %d, want %d (no banish, base attack only)", tc.c.Name(), s.Value, tc.base)
+		if s.Value() != tc.base {
+			t.Errorf("%s: Value = %d, want %d (no banish, base attack only)", tc.c.Name(), s.Value(), tc.base)
 		}
 	}
 }
@@ -37,10 +37,10 @@ func TestTremorOfIArathael_BanishGrantsPlusTwo(t *testing.T) {
 		{cards.TremorOfIArathaelBlue{}, 2},
 	}
 	for _, tc := range cases {
-		s := sim.TurnState{CardBanished: true}
+		s := sim.NewTurnStateFromSpec(sim.TurnStateSpec{CardBanished: true})
 		sim.ResolveChainStep(&s, s.Logger(), &sim.CardState{Card: tc.c})
-		if want := tc.base + 2; s.Value != want {
-			t.Errorf("%s: Value = %d, want %d (CardBanished set, +2{p} rider on)", tc.c.Name(), s.Value, want)
+		if want := tc.base + 2; s.Value() != want {
+			t.Errorf("%s: Value = %d, want %d (CardBanished set, +2{p} rider on)", tc.c.Name(), s.Value(), want)
 		}
 	}
 }

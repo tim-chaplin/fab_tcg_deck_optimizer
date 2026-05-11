@@ -177,10 +177,10 @@ func formatBlockLine(a CardAssignment) string {
 // can thread it into the next DR.
 func appendDefenseReactionLines(out []string, a CardAssignment, defenders []Card, remaining int) ([]string, int) {
 	state := NewTurnState(nil, append([]Card(nil), defenders...))
-	state.IncomingDamage = remaining
+	state.incomingDamage = remaining
 	cs := CardState{Card: a.Card, FromArsenal: a.FromArsenal}
 	ResolveChainStep(state, state.logger, &cs)
-	return appendGroupedChainEntries(out, state.LogEntries()), state.IncomingDamage
+	return appendGroupedChainEntries(out, state.LogEntries()), state.incomingDamage
 }
 
 // defendersFromParts collects every card committed to defense — Defense Reactions and plain

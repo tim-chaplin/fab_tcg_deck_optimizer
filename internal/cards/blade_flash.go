@@ -21,5 +21,5 @@ func (BladeFlashBlue) Play(s *sim.TurnState, l sim.Logger, _ *sim.CardState) {
 	if s.AttackReactionTarget() == nil {
 		return
 	}
-	s.ActionPoints++
+	s.AddActionPoints(1)
 }

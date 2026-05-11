@@ -13,7 +13,7 @@ func TestStrategicPlanning_QueuesEndOfTurnTrigger(t *testing.T) {
 		s := sim.NewTurnStateFromCards(nil, nil)
 		sim.ResolveChainStep(s, s.Logger(), &sim.CardState{Card: c})
 		matching := 0
-		for _, tr := range s.Triggers {
+		for _, tr := range s.Triggers() {
 			if tr.TriggerType == sim.TriggerEndOfTurn && tr.Source == c {
 				matching++
 			}

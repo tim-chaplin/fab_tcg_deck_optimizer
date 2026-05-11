@@ -5,30 +5,28 @@
 // prevent 4 damage that source would deal. At the beginning of your end phase, destroy Enchanting
 // Melody unless you have played a 'non-attack' action card this turn."
 //
-// Sets s.AuraCreated so same-turn aura-readers see the entry.
+// Sets s.AuraCreated() so same-turn aura-readers see the entry.
 
 package notimplemented
 
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
-
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
 )
 
 // not implemented: damage-prevention trigger, end-phase destruction clause
 
 func (EnchantingMelodyRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
-	cards.SetAuraCreated(s)
+	s.SetAuraCreated(true)
 }
 
 // not implemented: damage-prevention trigger, end-phase destruction clause
 
 func (EnchantingMelodyYellow) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
-	cards.SetAuraCreated(s)
+	s.SetAuraCreated(true)
 }
 
 // not implemented: damage-prevention trigger, end-phase destruction clause
 
 func (EnchantingMelodyBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
-	cards.SetAuraCreated(s)
+	s.SetAuraCreated(true)
 }

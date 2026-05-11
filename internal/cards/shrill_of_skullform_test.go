@@ -20,7 +20,7 @@ func TestShrillOfSkullform_BaseDamage(t *testing.T) {
 	for _, tc := range cases {
 		var s sim.TurnState
 		sim.ResolveChainStep(&s, s.Logger(), &sim.CardState{Card: tc.c})
-		got := s.Value
+		got := s.Value()
 		if got != tc.want {
 			t.Errorf("%s: Play() = %d, want %d", tc.c.Name(), got, tc.want)
 		}
@@ -38,9 +38,9 @@ func TestShrillOfSkullform_AuraBonus(t *testing.T) {
 		{ShrillOfSkullformBlue{}, 5},
 	}
 	for _, tc := range cases {
-		s := sim.TurnState{CardsPlayed: []sim.Card{testutils.Aura{}}}
+		s := sim.NewTurnStateFromSpec(sim.TurnStateSpec{CardsPlayed: []sim.Card{testutils.Aura{}}})
 		sim.ResolveChainStep(&s, s.Logger(), &sim.CardState{Card: tc.c})
-		got := s.Value
+		got := s.Value()
 		if got != tc.want {
 			t.Errorf("%s with aura: Play() = %d, want %d", tc.c.Name(), got, tc.want)
 		}

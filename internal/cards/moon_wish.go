@@ -78,10 +78,10 @@ func moonWishOnHit(s *sim.TurnState, l sim.Logger, self *sim.CardState, _ *sim.O
 	// Kiss's "if you've played Moon Wish" synergy fires; pop after so the sim's normal
 	// post-Play append doesn't double-add.
 	l.AppendPostTriggerf(name, 0, "%s tutored %s and played it", name, sk.DisplayName())
-	s.CardsPlayed = append(s.CardsPlayed, c)
+	s.SetCardsPlayed(append(s.CardsPlayed(), c))
 	skSelf := &sim.CardState{Card: sk}
 	sim.ResolveChainStep(s, l, skSelf)
-	s.CardsPlayed = s.CardsPlayed[:len(s.CardsPlayed)-1]
+	s.SetCardsPlayed(s.CardsPlayed()[:len(s.CardsPlayed())-1])
 	s.AddToGraveyard(sk)
 }
 

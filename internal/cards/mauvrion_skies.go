@@ -25,7 +25,7 @@ func mauvrionTargetMatches(target *sim.CardState) bool {
 // mauvrionSkiesPlay grants the next matching attack go-again and an on-hit n-runechant
 // rider.
 func mauvrionSkiesPlay(s *sim.TurnState, l sim.Logger, selfState *sim.CardState, source sim.Card, n int) {
-	for _, pc := range s.CardsRemaining {
+	for _, pc := range s.CardsRemaining() {
 		if mauvrionTargetMatches(pc) {
 			pc.GrantedGoAgain = true
 			text := onHitRunechantText[source.ID()]

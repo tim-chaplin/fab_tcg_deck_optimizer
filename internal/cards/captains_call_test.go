@@ -10,7 +10,7 @@ import (
 // Tests that mode 0 grants +2{p} to the next cost-≤N attack action card.
 func TestCaptainsCall_Mode0BuffsBonusAttack(t *testing.T) {
 	target := &sim.CardState{Card: testutils.GenericAttack(1, 4)}
-	s := sim.TurnState{CardsRemaining: []*sim.CardState{target}}
+	s := sim.NewTurnStateFromSpec(sim.TurnStateSpec{CardsRemaining: []*sim.CardState{target}})
 	self := &sim.CardState{Card: CaptainsCallRed{}, Mode: 0}
 	sim.ResolveChainStep(&s, s.Logger(), self)
 	if target.BonusAttack != 2 {
@@ -24,7 +24,7 @@ func TestCaptainsCall_Mode0BuffsBonusAttack(t *testing.T) {
 // Tests that mode 1 grants go again to the next cost-≤N attack action card.
 func TestCaptainsCall_Mode1GrantsGoAgain(t *testing.T) {
 	target := &sim.CardState{Card: testutils.GenericAttack(1, 4)}
-	s := sim.TurnState{CardsRemaining: []*sim.CardState{target}}
+	s := sim.NewTurnStateFromSpec(sim.TurnStateSpec{CardsRemaining: []*sim.CardState{target}})
 	self := &sim.CardState{Card: CaptainsCallRed{}, Mode: 1}
 	sim.ResolveChainStep(&s, s.Logger(), self)
 	if !target.GrantedGoAgain {
@@ -38,7 +38,7 @@ func TestCaptainsCall_Mode1GrantsGoAgain(t *testing.T) {
 // Tests that the cost cap rejects too-expensive attack action cards.
 func TestCaptainsCall_BlueRejectsCostAboveZero(t *testing.T) {
 	target := &sim.CardState{Card: testutils.GenericAttack(1, 4)}
-	s := sim.TurnState{CardsRemaining: []*sim.CardState{target}}
+	s := sim.NewTurnStateFromSpec(sim.TurnStateSpec{CardsRemaining: []*sim.CardState{target}})
 	self := &sim.CardState{Card: CaptainsCallBlue{}, Mode: 0}
 	sim.ResolveChainStep(&s, s.Logger(), self)
 	if target.BonusAttack != 0 {

@@ -14,7 +14,7 @@ func TestLifeForALife_LikelyHitCreditsHeal(t *testing.T) {
 	cs := &sim.CardState{Card: c}
 	sim.ResolveChainStep(&s, s.Logger(), cs)
 	testutils.FireOnHitIfLikely(&s, s.Logger(), cs)
-	if got := s.Value; got != 4+1 {
+	if got := s.Value(); got != 4+1 {
 		t.Errorf("Red: Play() = %d, want 5 (4 likely to hit + 1 heal)", got)
 	}
 }
@@ -31,7 +31,7 @@ func TestLifeForALife_BlockableSuppressesHeal(t *testing.T) {
 	for _, tc := range cases {
 		var s sim.TurnState
 		sim.ResolveChainStep(&s, s.Logger(), &sim.CardState{Card: tc.c})
-		if got := s.Value; got != tc.want {
+		if got := s.Value(); got != tc.want {
 			t.Errorf("%s: Play() = %d, want %d (blockable, no heal)", tc.c.Name(), got, tc.want)
 		}
 	}

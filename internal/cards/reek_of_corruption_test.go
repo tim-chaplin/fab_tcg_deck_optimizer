@@ -22,7 +22,7 @@ func TestReekOfCorruption_NoAuraReturnsBaseAttack(t *testing.T) {
 		cs := &sim.CardState{Card: tc.c}
 		sim.ResolveChainStep(&s, s.Logger(), cs)
 		testutils.FireOnHitIfLikely(&s, s.Logger(), cs)
-		if got := s.Value; got != tc.want {
+		if got := s.Value(); got != tc.want {
 			t.Errorf("%s: Play() = %d, want %d (base attack, no aura)", tc.c.Name(), got, tc.want)
 		}
 	}
@@ -30,24 +30,24 @@ func TestReekOfCorruption_NoAuraReturnsBaseAttack(t *testing.T) {
 
 // Tests that the discard rider fires with AuraCreated set on a likely-hit attack.
 func TestReekOfCorruption_LikelyToHitWithAuraCreatedTriggersDiscard(t *testing.T) {
-	s := sim.TurnState{AuraCreated: true}
+	s := sim.NewTurnStateFromSpec(sim.TurnStateSpec{AuraCreated: true})
 	c := ReekOfCorruptionRed{}
 	cs := &sim.CardState{Card: c}
 	sim.ResolveChainStep(&s, s.Logger(), cs)
 	testutils.FireOnHitIfLikely(&s, s.Logger(), cs)
-	if got := s.Value; got != 4+3 {
+	if got := s.Value(); got != 4+3 {
 		t.Errorf("Red with AuraCreated: Play() = %d, want 7 (base 4 likely to hit + 3 discard)", got)
 	}
 }
 
 // Tests that an aura earlier in CardsPlayed satisfies the rider precondition.
 func TestReekOfCorruption_AuraPlayedTriggersDiscard(t *testing.T) {
-	s := sim.TurnState{CardsPlayed: []sim.Card{testutils.Aura{}}}
+	s := sim.NewTurnStateFromSpec(sim.TurnStateSpec{CardsPlayed: []sim.Card{testutils.Aura{}}})
 	c := ReekOfCorruptionRed{}
 	cs := &sim.CardState{Card: c}
 	sim.ResolveChainStep(&s, s.Logger(), cs)
 	testutils.FireOnHitIfLikely(&s, s.Logger(), cs)
-	if got := s.Value; got != 4+3 {
+	if got := s.Value(); got != 4+3 {
 		t.Errorf("Play() = %d, want %d (aura earlier in chain triggers rider)", got, 4+3)
 	}
 }
@@ -62,9 +62,9 @@ func TestReekOfCorruption_BlockableBaseSuppressesDiscard(t *testing.T) {
 		{ReekOfCorruptionBlue{}, 2},
 	}
 	for _, tc := range cases {
-		s := sim.TurnState{AuraCreated: true}
+		s := sim.NewTurnStateFromSpec(sim.TurnStateSpec{AuraCreated: true})
 		sim.ResolveChainStep(&s, s.Logger(), &sim.CardState{Card: tc.c})
-		if got := s.Value; got != tc.want {
+		if got := s.Value(); got != tc.want {
 			t.Errorf("%s with AuraCreated: Play() = %d, want %d (blockable, no rider)", tc.c.Name(), got, tc.want)
 		}
 	}
@@ -73,10 +73,10 @@ func TestReekOfCorruption_BlockableBaseSuppressesDiscard(t *testing.T) {
 // Tests that co-firing runechants don't rescue a blockable variant — "this hits" reads only
 // this card's own damage.
 func TestReekOfCorruption_RunechantsDontRescue(t *testing.T) {
-	s := sim.TurnState{AuraCreated: true, Auras: []sim.Aura{sim.NewRunechantAura(1)}}
+	s := sim.NewTurnStateFromSpec(sim.TurnStateSpec{AuraCreated: true, Auras: []sim.Aura{sim.NewRunechantAura(1)}})
 	c := ReekOfCorruptionYellow{}
 	sim.ResolveChainStep(&s, s.Logger(), &sim.CardState{Card: c})
-	if got := s.Value; got != 3 {
+	if got := s.Value(); got != 3 {
 		t.Errorf("Yellow with 1 Runechant: Play() = %d, want 3 (runechant isn't 'this' damage)", got)
 	}
 }

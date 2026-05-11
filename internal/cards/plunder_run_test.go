@@ -10,7 +10,7 @@ import (
 // Plunder Run from hand registers the on-hit-draw trigger and skips the +N{p} grant.
 func TestPlunderRun_FromHandQueuesTriggerNoBonus(t *testing.T) {
 	target := &sim.CardState{Card: testutils.GenericAttack(0, 4)}
-	s := sim.TurnState{CardsRemaining: []*sim.CardState{target}}
+	s := sim.NewTurnStateFromSpec(sim.TurnStateSpec{CardsRemaining: []*sim.CardState{target}})
 	self := &sim.CardState{Card: PlunderRunRed{}}
 	sim.ResolveChainStep(&s, s.Logger(), self)
 	if got := triggerHitCount(&s); got != 1 {
@@ -34,7 +34,7 @@ func TestPlunderRun_FromArsenalAddsBonusAttack(t *testing.T) {
 	}
 	for _, tc := range cases {
 		target := &sim.CardState{Card: testutils.GenericAttack(0, 4)}
-		s := sim.TurnState{CardsRemaining: []*sim.CardState{target}}
+		s := sim.NewTurnStateFromSpec(sim.TurnStateSpec{CardsRemaining: []*sim.CardState{target}})
 		self := &sim.CardState{Card: tc.c, FromArsenal: true}
 		sim.ResolveChainStep(&s, s.Logger(), self)
 		if got := triggerHitCount(&s); got != 1 {

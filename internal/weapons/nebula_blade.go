@@ -40,7 +40,7 @@ func (NebulaBladeAbility) Defense() int            { return 0 }
 func (NebulaBladeAbility) Types() card.TypeSet     { return nebulaBladeAbilityTypes }
 func (NebulaBladeAbility) GoAgain() bool           { return false }
 func (NebulaBladeAbility) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
-	if s.NonAttackActionPlayed {
+	if s.NonAttackActionPlayed() {
 		self.BonusAttack += 3
 	}
 	self.RegisterOnHit(nebulaBladeOnHit)

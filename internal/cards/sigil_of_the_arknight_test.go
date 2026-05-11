@@ -13,14 +13,14 @@ import (
 func TestSigilOfTheArknight_PlayOnlySetsAuraCreated(t *testing.T) {
 	s := sim.NewTurnStateFromCards([]sim.Card{testutils.RunebladeAttack{}}, nil)
 	sim.ResolveChainStep(s, s.Logger(), &sim.CardState{Card: SigilOfTheArknightBlue{}})
-	if got := s.Value; got != 0 {
+	if got := s.Value(); got != 0 {
 		t.Errorf("Play() = %d, want 0 (reveal deferred to trigger)", got)
 	}
-	if !s.AuraCreated {
+	if !s.AuraCreated() {
 		t.Error("AuraCreated = false, want true")
 	}
-	if len(s.Auras) != 1 || s.Auras[0].TriggerType != sim.TriggerStartOfTurn {
-		t.Errorf("Auras = %+v, want one TriggerStartOfTurn entry", s.Auras)
+	if len(s.Auras()) != 1 || s.Auras()[0].TriggerType != sim.TriggerStartOfTurn {
+		t.Errorf("Auras = %+v, want one TriggerStartOfTurn entry", s.Auras())
 	}
 }
 
@@ -32,9 +32,9 @@ func TestSigilOfTheArknight_TriggerRevealsAttackActionIntoHand(t *testing.T) {
 	sim.ResolveChainStep(&play, play.Logger(), &sim.CardState{Card: SigilOfTheArknightBlue{}})
 	top := testutils.RunebladeAttack{}
 	next := sim.NewTurnStateFromCards([]sim.Card{top, testutils.NonAttack{}}, nil)
-	play.Auras[0].Handler(next, next.Logger(), &play.Auras[0].Trigger, &play.Auras[0])
-	if next.Value != 0 {
-		t.Errorf("handler Value = %d, want 0 (tempo credited via the draw, not damage)", next.Value)
+	play.Auras()[0].Handler(next, next.Logger(), &play.Auras()[0].Trigger, &play.Auras()[0])
+	if next.Value() != 0 {
+		t.Errorf("handler Value = %d, want 0 (tempo credited via the draw, not damage)", next.Value())
 	}
 	if h := next.Hand(); len(h) != 1 || h[0] != top {
 		t.Errorf("Hand = %v, want [%v] (top of post-draw deck)", h, top)
@@ -50,9 +50,9 @@ func TestSigilOfTheArknight_TriggerRevealsNonAttack(t *testing.T) {
 	var play sim.TurnState
 	sim.ResolveChainStep(&play, play.Logger(), &sim.CardState{Card: SigilOfTheArknightBlue{}})
 	next := sim.NewTurnStateFromCards([]sim.Card{testutils.Aura{}, testutils.RunebladeAttack{}}, nil)
-	play.Auras[0].Handler(next, next.Logger(), &play.Auras[0].Trigger, &play.Auras[0])
-	if next.Value != 0 {
-		t.Errorf("handler Value = %d, want 0", next.Value)
+	play.Auras()[0].Handler(next, next.Logger(), &play.Auras()[0].Trigger, &play.Auras()[0])
+	if next.Value() != 0 {
+		t.Errorf("handler Value = %d, want 0", next.Value())
 	}
 	if h := next.Hand(); h != nil {
 		t.Errorf("Hand = %v, want nil (non-attack top, no draw)", h)
@@ -67,9 +67,9 @@ func TestSigilOfTheArknight_TriggerEmptyDeck(t *testing.T) {
 	var play sim.TurnState
 	sim.ResolveChainStep(&play, play.Logger(), &sim.CardState{Card: SigilOfTheArknightBlue{}})
 	var next sim.TurnState
-	play.Auras[0].Handler(&next, next.Logger(), &play.Auras[0].Trigger, &play.Auras[0])
-	if next.Value != 0 {
-		t.Errorf("handler Value = %d, want 0", next.Value)
+	play.Auras()[0].Handler(&next, next.Logger(), &play.Auras()[0].Trigger, &play.Auras()[0])
+	if next.Value() != 0 {
+		t.Errorf("handler Value = %d, want 0", next.Value())
 	}
 	if h := next.Hand(); h != nil {
 		t.Errorf("Hand = %v, want nil (empty deck)", h)

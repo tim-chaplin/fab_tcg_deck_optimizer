@@ -33,14 +33,14 @@ func TestTestOfStrength_TieNoGold(t *testing.T) {
 func TestTestOfStrength_LossNoGoldAndDocksValue(t *testing.T) {
 	for _, power := range []int{0, 1, 2, 3, 4} {
 		s := sim.NewTurnStateFromCards([]sim.Card{testutils.GenericAttack(0, power)}, nil)
-		valueBefore := s.Value
+		valueBefore := s.Value()
 		sim.ResolveChainStep(s, s.Logger(), &sim.CardState{Card: TestOfStrengthRed{}})
 		if s.Gold() != 0 {
 			t.Errorf("top power %d: Gold = %d, want 0 (clash loss)", power, s.Gold())
 		}
-		if s.Value-valueBefore != -1 {
+		if s.Value()-valueBefore != -1 {
 			t.Errorf("top power %d: Value delta = %d, want -1 (Clash loss costs 1)",
-				power, s.Value-valueBefore)
+				power, s.Value()-valueBefore)
 		}
 	}
 }

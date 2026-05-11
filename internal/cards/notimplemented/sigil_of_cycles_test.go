@@ -10,10 +10,10 @@ import (
 func TestSigilOfCycles_SetsAuraCreated(t *testing.T) {
 	s := sim.TurnState{}
 	sim.ResolveChainStep(&s, s.Logger(), &sim.CardState{Card: SigilOfCyclesBlue{}})
-	if got := s.Value; got != 0 {
+	if got := s.Value(); got != 0 {
 		t.Errorf("Play() = %d, want 0", got)
 	}
-	if !s.AuraCreated {
+	if !s.AuraCreated() {
 		t.Error("AuraCreated = false, want true")
 	}
 }

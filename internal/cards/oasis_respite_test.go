@@ -21,16 +21,16 @@ func TestOasisRespite_PreventsAndLifeRider(t *testing.T) {
 	defer func() { sim.CurrentHero = saved }()
 	for _, tc := range cases {
 		sim.CurrentHero = stubLowHeroOff{}
-		sOff := sim.TurnState{IncomingDamage: 10}
+		sOff := sim.NewTurnStateFromSpec(sim.TurnStateSpec{IncomingDamage: 10})
 		sim.ResolveChainStep(&sOff, sOff.Logger(), &sim.CardState{Card: tc.card})
-		if sOff.Value != tc.wantOff {
-			t.Errorf("%s: hero off Value = %d, want %d", tc.card.Name(), sOff.Value, tc.wantOff)
+		if sOff.Value() != tc.wantOff {
+			t.Errorf("%s: hero off Value = %d, want %d", tc.card.Name(), sOff.Value(), tc.wantOff)
 		}
 		sim.CurrentHero = stubLowHeroOn{}
-		sOn := sim.TurnState{IncomingDamage: 10}
+		sOn := sim.NewTurnStateFromSpec(sim.TurnStateSpec{IncomingDamage: 10})
 		sim.ResolveChainStep(&sOn, sOn.Logger(), &sim.CardState{Card: tc.card})
-		if sOn.Value != tc.wantOn {
-			t.Errorf("%s: hero on Value = %d, want %d", tc.card.Name(), sOn.Value, tc.wantOn)
+		if sOn.Value() != tc.wantOn {
+			t.Errorf("%s: hero on Value = %d, want %d", tc.card.Name(), sOn.Value(), tc.wantOn)
 		}
 	}
 }

@@ -76,9 +76,10 @@ func (t TurnStartState) Copper() int {
 // the tested turn's outcome plus the start-of-next-turn state. initial seeds the start-of-turn
 // state — Arsenal, Auras, Items — modelling carryover from a hypothetical previous turn; the
 // other TurnState fields are ignored (transient mid-chain state, hand / deck / graveyard which
-// are seeded from this function's own inputs). initialHand sets turn 1's starting hand; nil
-// draws the hand off the top of the deck, non-nil uses the slice directly (may be shorter
-// than handSize) and leaves the deck untouched. Test-only — production callers use Evaluate.
+// are seeded from this function's own inputs). External tests build initial via
+// NewTurnStateFromSpec(TurnStateSpec{...}). initialHand sets turn 1's starting hand; nil draws
+// the hand off the top of the deck, non-nil uses the slice directly (may be shorter than
+// handSize) and leaves the deck untouched. Test-only — production callers use Evaluate.
 //
 // Free function (not a method) because deck.Deck lives in another package; Go disallows
 // methods on imported types.

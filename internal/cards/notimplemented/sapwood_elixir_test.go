@@ -11,16 +11,16 @@ import (
 func TestSapwoodElixir_NoAttackReturnsZero(t *testing.T) {
 	s := sim.TurnState{}
 	sim.ResolveChainStep(&s, s.Logger(), &sim.CardState{Card: SapwoodElixirRed{}})
-	if got := s.Value; got != 0 {
+	if got := s.Value(); got != 0 {
 		t.Errorf("Play() = %d, want 0", got)
 	}
 }
 
 // TestSapwoodElixir_NonAttackInRemainingFizzles: non-attack action fails the predicate.
 func TestSapwoodElixir_NonAttackInRemainingFizzles(t *testing.T) {
-	s := sim.TurnState{CardsRemaining: []*sim.CardState{{Card: testutils.GenericAction()}}}
+	s := sim.NewTurnStateFromSpec(sim.TurnStateSpec{CardsRemaining: []*sim.CardState{{Card: testutils.GenericAction()}}})
 	sim.ResolveChainStep(&s, s.Logger(), &sim.CardState{Card: SapwoodElixirRed{}})
-	if got := s.Value; got != 0 {
+	if got := s.Value(); got != 0 {
 		t.Errorf("Play() = %d, want 0 (non-attack skipped)", got)
 	}
 }
@@ -29,9 +29,9 @@ func TestSapwoodElixir_NonAttackInRemainingFizzles(t *testing.T) {
 // BonusAttack. Granter returns 0; the +3 attributes to the target.
 func TestSapwoodElixir_NextAttackGrantsBonusAttack(t *testing.T) {
 	target := &sim.CardState{Card: testutils.GenericAttack(0, 0)}
-	s := sim.TurnState{CardsRemaining: []*sim.CardState{target}}
+	s := sim.NewTurnStateFromSpec(sim.TurnStateSpec{CardsRemaining: []*sim.CardState{target}})
 	sim.ResolveChainStep(&s, s.Logger(), &sim.CardState{Card: SapwoodElixirRed{}})
-	if got := s.Value; got != 0 {
+	if got := s.Value(); got != 0 {
 		t.Errorf("Play() = %d, want 0 (granter returns 0; +N rides on target's BonusAttack)", got)
 	}
 	if target.BonusAttack != 3 {

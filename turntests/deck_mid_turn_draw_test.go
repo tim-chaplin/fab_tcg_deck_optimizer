@@ -107,7 +107,7 @@ func TestEvalOneTurn_ThreeMidTurnDraws_ArsenalFromDrawnPool(t *testing.T) {
 		testutils.YellowAttack{},
 	}
 	d := deck.New(heroes.Viserai{}, nil, deckCards)
-	state := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, sim.TurnState{Arsenal: arsenalIn}, nil)
+	state := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, sim.NewTurnStateFromSpec(sim.TurnStateSpec{Arsenal: arsenalIn}), nil)
 
 	// Two held beacons plus two fresh Blues from deck positions 7..8.
 	wantHand := []deck.Card{
@@ -146,7 +146,7 @@ func TestEvalOneTurn_MidTurnDrawHeldWhenArsenalFull(t *testing.T) {
 		testutils.YellowAttack{},
 	}
 	d := deck.New(heroes.Viserai{}, nil, deckCards)
-	state := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, sim.TurnState{Arsenal: arsenalIn}, nil)
+	state := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, sim.NewTurnStateFromSpec(sim.TurnStateSpec{Arsenal: arsenalIn}), nil)
 
 	wantHand := []deck.Card{
 		beacon,

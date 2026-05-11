@@ -77,7 +77,7 @@ func TestDefensiveInstant_StacksWithDR(t *testing.T) {
 func TestDefensiveInstant_DefendsFromArsenal(t *testing.T) {
 	d := deck.New(heroes.Viserai{}, nil, fillerDeck())
 	hand := []deck.Card{testutils.BluePitch{}}
-	if got := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 3}, sim.TurnState{Arsenal: cards.BrushOffRed{}}, hand).Value; got != 3 {
+	if got := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 3}, sim.NewTurnStateFromSpec(sim.TurnStateSpec{Arsenal: cards.BrushOffRed{}}), hand).Value; got != 3 {
 		t.Fatalf("Value = %d, want 3 (Brush Off plays from arsenal as defender)", got)
 	}
 }

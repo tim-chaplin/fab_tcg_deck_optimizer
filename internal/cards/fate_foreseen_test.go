@@ -22,11 +22,11 @@ func TestFateForeseen_BlocksAndCallsOpt1(t *testing.T) {
 	for _, tc := range cases {
 		top := testutils.NewStubCard("top")
 		s := sim.NewTurnStateFromCards([]sim.Card{top}, nil)
-		s.IncomingDamage = 10
+		s.SetIncomingDamage(10)
 		sim.ResolveChainStep(s, s.Logger(), &sim.CardState{Card: tc.c})
-		if s.Value != tc.block {
+		if s.Value() != tc.block {
 			t.Errorf("%s: Play(IncomingDamage=10) Value = %d, want %d (block only)",
-				tc.c.Name(), s.Value, tc.block)
+				tc.c.Name(), s.Value(), tc.block)
 		}
 		if len(s.LogEntries()) != 2 {
 			t.Errorf("%s: Log len = %d, want 2 (Opted... + chain step)", tc.c.Name(), len(s.LogEntries()))

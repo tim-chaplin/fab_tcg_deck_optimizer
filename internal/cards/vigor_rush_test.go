@@ -22,13 +22,13 @@ func TestVigorRush_BaseGoAgainFalse(t *testing.T) {
 func TestVigorRush_NoNonAttackActionNoGoAgain(t *testing.T) {
 	cases := []sim.Card{VigorRushRed{}, VigorRushYellow{}, VigorRushBlue{}}
 	for _, c := range cases {
-		s := sim.TurnState{
+		s := sim.NewTurnStateFromSpec(sim.TurnStateSpec{
 			CardsPlayed:           []sim.Card{testutils.GenericAttack(0, 0)}, // attack, not non-attack
 			NonAttackActionPlayed: false,
-		}
+		})
 		self := &sim.CardState{Card: c}
 		sim.ResolveChainStep(&s, s.Logger(), self)
-		if got := s.Value; got != c.Attack() {
+		if got := s.Value(); got != c.Attack() {
 			t.Errorf("%s: Play() = %d, want %d (base power)", c.Name(), got, c.Attack())
 		}
 		if self.GrantedGoAgain {
@@ -42,10 +42,10 @@ func TestVigorRush_NoNonAttackActionNoGoAgain(t *testing.T) {
 func TestVigorRush_NonAttackActionGrantsGoAgain(t *testing.T) {
 	cases := []sim.Card{VigorRushRed{}, VigorRushYellow{}, VigorRushBlue{}}
 	for _, c := range cases {
-		s := sim.TurnState{
+		s := sim.NewTurnStateFromSpec(sim.TurnStateSpec{
 			CardsPlayed:           []sim.Card{testutils.GenericAction()},
 			NonAttackActionPlayed: true,
-		}
+		})
 		self := &sim.CardState{Card: c}
 		sim.ResolveChainStep(&s, s.Logger(), self)
 		if !self.GrantedGoAgain {

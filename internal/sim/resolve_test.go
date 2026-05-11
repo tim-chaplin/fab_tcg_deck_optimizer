@@ -5,7 +5,6 @@ import (
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
-	"github.com/tim-chaplin/fab-deck-optimizer/v2/turnlogger"
 )
 
 // Each card-type branch of ResolveChainStep gets one assertion so the standard
@@ -81,11 +80,11 @@ func (selfBuffStub) Play(s *TurnState, l Logger, self *CardState) {
 }
 
 func TestResolveChainStep_AttackCreditsEffectiveAttack(t *testing.T) {
-	s := &TurnState{logger: turnlogger.New()}
+	s := NewTurnStatePtr(TurnStateSpec{})
 	self := &CardState{Card: attackStub{}}
 	ResolveChainStep(s, s.logger, self)
-	if s.Value != 3 {
-		t.Errorf("Value = %d, want 3 (printed attack)", s.Value)
+	if s.Value() != 3 {
+		t.Errorf("Value = %d, want 3 (printed attack)", s.Value())
 	}
 	if got := s.LogEntries(); len(got) != 1 || got[0].N != 3 {
 		t.Errorf("log = %v, want one chain-step entry with N=3", got)
@@ -93,14 +92,14 @@ func TestResolveChainStep_AttackCreditsEffectiveAttack(t *testing.T) {
 }
 
 func TestResolveChainStep_DefenseReactionCapsToIncomingDamage(t *testing.T) {
-	s := &TurnState{logger: turnlogger.New(), IncomingDamage: 2}
+	s := NewTurnStatePtr(TurnStateSpec{IncomingDamage: 2})
 	self := &CardState{Card: drStub{}}
 	ResolveChainStep(s, s.logger, self)
-	if s.Value != 2 {
-		t.Errorf("Value = %d, want 2 (capped at IncomingDamage)", s.Value)
+	if s.Value() != 2 {
+		t.Errorf("Value = %d, want 2 (capped at IncomingDamage)", s.Value())
 	}
-	if s.IncomingDamage != 0 {
-		t.Errorf("IncomingDamage = %d, want 0 (decremented by capped block)", s.IncomingDamage)
+	if s.IncomingDamage() != 0 {
+		t.Errorf("IncomingDamage = %d, want 0 (decremented by capped block)", s.IncomingDamage())
 	}
 	if got := s.LogEntries(); len(got) != 1 || got[0].N != 2 {
 		t.Errorf("log = %v, want one chain-step entry with N=2", got)
@@ -108,27 +107,27 @@ func TestResolveChainStep_DefenseReactionCapsToIncomingDamage(t *testing.T) {
 }
 
 func TestResolveChainStep_DefenseReactionUncappedWhenIncomingExceedsDefense(t *testing.T) {
-	s := &TurnState{logger: turnlogger.New(), IncomingDamage: 10}
+	s := NewTurnStatePtr(TurnStateSpec{IncomingDamage: 10})
 	self := &CardState{Card: drStub{}}
 	ResolveChainStep(s, s.logger, self)
-	if s.Value != 4 {
-		t.Errorf("Value = %d, want 4 (printed defense, uncapped)", s.Value)
+	if s.Value() != 4 {
+		t.Errorf("Value = %d, want 4 (printed defense, uncapped)", s.Value())
 	}
-	if s.IncomingDamage != 6 {
-		t.Errorf("IncomingDamage = %d, want 6 (10 - 4)", s.IncomingDamage)
+	if s.IncomingDamage() != 6 {
+		t.Errorf("IncomingDamage = %d, want 6 (10 - 4)", s.IncomingDamage())
 	}
 }
 
 func TestResolveChainStep_NonAttackContributesZero(t *testing.T) {
 	played := false
-	s := &TurnState{logger: turnlogger.New()}
+	s := NewTurnStatePtr(TurnStateSpec{})
 	self := &CardState{Card: nonAttackStub{played: &played}}
 	ResolveChainStep(s, s.logger, self)
 	if !played {
 		t.Error("non-attack Play body did not run")
 	}
-	if s.Value != 0 {
-		t.Errorf("Value = %d, want 0", s.Value)
+	if s.Value() != 0 {
+		t.Errorf("Value = %d, want 0", s.Value())
 	}
 	if got := s.LogEntries(); len(got) != 1 || got[0].N != 0 {
 		t.Errorf("log = %v, want one chain-step entry with N=0", got)
@@ -136,11 +135,11 @@ func TestResolveChainStep_NonAttackContributesZero(t *testing.T) {
 }
 
 func TestResolveChainStep_SelfBuffInPlayAppliesBeforeCredit(t *testing.T) {
-	s := &TurnState{logger: turnlogger.New()}
+	s := NewTurnStatePtr(TurnStateSpec{})
 	self := &CardState{Card: selfBuffStub{}}
 	ResolveChainStep(s, s.logger, self)
-	if s.Value != 3 {
-		t.Errorf("Value = %d, want 3 (printed 2 + Play's +1 BonusAttack)", s.Value)
+	if s.Value() != 3 {
+		t.Errorf("Value = %d, want 3 (printed 2 + Play's +1 BonusAttack)", s.Value())
 	}
 	if got := s.LogEntries(); len(got) != 1 || got[0].N != 3 {
 		t.Errorf("log = %v, want one chain-step entry with N=3", got)

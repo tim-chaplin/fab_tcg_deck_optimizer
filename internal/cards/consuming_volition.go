@@ -21,7 +21,7 @@ func consumingVolitionApplyRider(_ *sim.TurnState, l sim.Logger, self *sim.CardS
 // consumingVolitionOnHit fires the "When this hits a hero, they discard a card" rider
 // when ArcaneDamageDealt is set. Top-level so registration stays alloc-free.
 func consumingVolitionOnHit(s *sim.TurnState, l sim.Logger, self *sim.CardState, _ *sim.OnHitHandler) {
-	if !s.ArcaneDamageDealt {
+	if !s.ArcaneDamageDealt() {
 		return
 	}
 	s.AddValue(sim.DiscardValue)

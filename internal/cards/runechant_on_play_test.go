@@ -32,13 +32,13 @@ func TestRunechantOnPlay_CreatesNTokens(t *testing.T) {
 		if s.Runechants() != tc.n {
 			t.Errorf("%s: Runechants = %d, want %d", tc.c.Name(), s.Runechants(), tc.n)
 		}
-		if !s.AuraCreated {
+		if !s.AuraCreated() {
 			t.Errorf("%s: AuraCreated = false, want true", tc.c.Name())
 		}
 		want := tc.c.Attack() + tc.n
-		if s.Value != want {
+		if s.Value() != want {
 			t.Errorf("%s: Value = %d, want %d (Attack %d + %d runechants)",
-				tc.c.Name(), s.Value, want, tc.c.Attack(), tc.n)
+				tc.c.Name(), s.Value(), want, tc.c.Attack(), tc.n)
 		}
 	}
 }

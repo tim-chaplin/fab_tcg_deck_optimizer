@@ -12,7 +12,7 @@ import (
 // this turn — attack action card OR weapon swing per the "your next attack" wording —
 // gated on base power 3 or less.
 func trotAlongApplySideEffect(s *sim.TurnState) {
-	for _, pc := range s.CardsRemaining {
+	for _, pc := range s.CardsRemaining() {
 		if !pc.Card.Types().IsAttack() {
 			continue
 		}

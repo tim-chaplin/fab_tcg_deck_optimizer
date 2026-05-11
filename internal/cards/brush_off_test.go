@@ -18,24 +18,24 @@ func TestBrushOff_PreventsCap(t *testing.T) {
 		{BrushOffBlue{}, 1},
 	}
 	for _, tc := range cases {
-		s := sim.TurnState{IncomingDamage: 5}
+		s := sim.NewTurnStateFromSpec(sim.TurnStateSpec{IncomingDamage: 5})
 		self := &sim.CardState{Card: tc.card}
 		sim.ResolveChainStep(&s, s.Logger(), self)
-		if s.Value != tc.want {
-			t.Errorf("%s: Value = %d, want %d", tc.card.Name(), s.Value, tc.want)
+		if s.Value() != tc.want {
+			t.Errorf("%s: Value = %d, want %d", tc.card.Name(), s.Value(), tc.want)
 		}
-		if s.IncomingDamage != 5-tc.want {
-			t.Errorf("%s: IncomingDamage = %d, want %d", tc.card.Name(), s.IncomingDamage, 5-tc.want)
+		if s.IncomingDamage() != 5-tc.want {
+			t.Errorf("%s: IncomingDamage = %d, want %d", tc.card.Name(), s.IncomingDamage(), 5-tc.want)
 		}
 	}
 }
 
 // Tests that prevention caps at IncomingDamage when incoming is less than Defense().
 func TestBrushOff_CapsAtIncoming(t *testing.T) {
-	s := sim.TurnState{IncomingDamage: 1}
+	s := sim.NewTurnStateFromSpec(sim.TurnStateSpec{IncomingDamage: 1})
 	self := &sim.CardState{Card: BrushOffRed{}}
 	sim.ResolveChainStep(&s, s.Logger(), self)
-	if s.Value != 1 {
-		t.Errorf("Value = %d, want 1 (capped at IncomingDamage)", s.Value)
+	if s.Value() != 1 {
+		t.Errorf("Value = %d, want 1 (capped at IncomingDamage)", s.Value())
 	}
 }

@@ -6,7 +6,7 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
 
-// Tests that each variant credits printed_power - 2 to s.Value.
+// Tests that each variant credits printed_power - 2 to s.Value().
 func TestFreewheelingRenegades_AlwaysDebuffedByTwo(t *testing.T) {
 	cases := []struct {
 		c    sim.Card
@@ -19,7 +19,7 @@ func TestFreewheelingRenegades_AlwaysDebuffedByTwo(t *testing.T) {
 	for _, tc := range cases {
 		s := sim.TurnState{}
 		sim.ResolveChainStep(&s, s.Logger(), &sim.CardState{Card: tc.c})
-		if got := s.Value; got != tc.want {
+		if got := s.Value(); got != tc.want {
 			t.Errorf("%s: Play() = %d, want %d (printed - 2)", tc.c.Name(), got, tc.want)
 		}
 	}

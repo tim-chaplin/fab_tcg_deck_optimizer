@@ -14,7 +14,7 @@ func TestBlowForABlow_LikelyHitCreditsPing(t *testing.T) {
 	cs := &sim.CardState{Card: c}
 	sim.ResolveChainStep(&s, s.Logger(), cs)
 	testutils.FireOnHitIfLikely(&s, s.Logger(), cs)
-	if got := s.Value; got != 4+1 {
+	if got := s.Value(); got != 4+1 {
 		t.Errorf("Play() = %d, want 5 (4 likely to hit + 1 ping)", got)
 	}
 }

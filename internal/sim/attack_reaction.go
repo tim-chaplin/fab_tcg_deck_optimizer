@@ -12,7 +12,7 @@ type AttackReaction interface {
 }
 
 // GrantAttackReactionBuff buffs the active attack target by n: adds to BonusAttack, credits
-// s.Value, amends the target's chain-step delta, and logs the rider under the target's
+// s.value, amends the target's chain-step delta, and logs the rider under the target's
 // entry. Cards call this from Play; the chain runner has already validated the target.
 func GrantAttackReactionBuff(s *TurnState, l Logger, self *CardState, n int) {
 	target := s.AttackReactionTarget()

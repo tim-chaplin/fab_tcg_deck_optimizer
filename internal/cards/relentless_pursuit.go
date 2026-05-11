@@ -12,7 +12,7 @@ import (
 )
 
 func (RelentlessPursuitBlue) Play(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
-	s.OpponentMarked = true
+	s.SetOpponentMarked(true)
 	recycled := s.HasPlayedType(card.TypeAttack)
 	if recycled {
 		s.RecycleToDeckBottom(self)

@@ -59,7 +59,7 @@ func (e *Evaluator) replayBest(
 
 	// defenseSum has to match what the original search computed — sum of Defense() across
 	// every Defend-role card (DR or plain), per fillPartitionPerCardBufs. It feeds
-	// state.BlockTotal so DR Plays that read "did we block all incoming?" see the right
+	// state.blockTotal so DR Plays that read "did we block all incoming?" see the right
 	// shape. We compute it here rather than via fillPartitionPerCardBufs because the
 	// recurse path's accumulator-arg threading isn't available — replay knows the role
 	// assignment directly.

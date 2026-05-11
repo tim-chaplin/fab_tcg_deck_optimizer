@@ -41,9 +41,9 @@ func TestFerventForerunner_OnHitOptFiresOnlyWhenInHitWindow(t *testing.T) {
 		cs := &sim.CardState{Card: tc.c}
 		sim.ResolveChainStep(s, s.Logger(), cs)
 		testutils.FireOnHitIfLikely(s, s.Logger(), cs)
-		if s.Value != tc.printed {
+		if s.Value() != tc.printed {
 			t.Errorf("%s: Play() Value = %d, want %d (printed power)",
-				tc.c.Name(), s.Value, tc.printed)
+				tc.c.Name(), s.Value(), tc.printed)
 		}
 		wantLogLen := 1
 		if tc.hitOpt {
@@ -74,8 +74,8 @@ func TestFerventForerunner_OnHitOptFiresWithBonusAttackInWindow(t *testing.T) {
 	sim.ResolveChainStep(s, s.Logger(), cs)
 	testutils.FireOnHitIfLikely(s, s.Logger(), cs)
 	want := 3 + 1
-	if s.Value != want {
-		t.Errorf("Play() Value = %d, want %d (3 printed + 1 BonusAttack)", s.Value, want)
+	if s.Value() != want {
+		t.Errorf("Play() Value = %d, want %d (3 printed + 1 BonusAttack)", s.Value(), want)
 	}
 	if len(s.LogEntries()) != 2 {
 		t.Fatalf("Log len = %d, want 2 (chain step + Opted ...)", len(s.LogEntries()))

@@ -20,7 +20,7 @@ func (TestOfStrengthRed) Play(s *sim.TurnState, l sim.Logger, self *sim.CardStat
 		func() {
 			// AddValue clamps negatives, so write directly: opponent gains the Gold token,
 			// netting us roughly one resource of opposing tempo.
-			s.Value--
+			s.SetValue(s.Value() - 1)
 			l.AppendPostTrigger(self.Card.DisplayName(), "Clash loss conceded gold to opponent", -1)
 		},
 	)

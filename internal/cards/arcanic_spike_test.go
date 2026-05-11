@@ -21,7 +21,7 @@ func TestArcanicSpike_ArcaneDamageNotDealtReturnsBaseAttack(t *testing.T) {
 	for _, tc := range cases {
 		s := sim.TurnState{}
 		sim.ResolveChainStep(&s, s.Logger(), &sim.CardState{Card: tc.c})
-		if got := s.Value; got != tc.want {
+		if got := s.Value(); got != tc.want {
 			t.Errorf("%s: Play() = %d, want %d (base attack, ArcaneDamageDealt=false)", tc.c.Name(), got, tc.want)
 		}
 	}
@@ -40,9 +40,9 @@ func TestArcanicSpike_ArcaneDamageDealtTriggersBonus(t *testing.T) {
 		{ArcanicSpikeBlue{}, 3 + 2},
 	}
 	for _, tc := range cases {
-		s := sim.TurnState{ArcaneDamageDealt: true}
+		s := sim.NewTurnStateFromSpec(sim.TurnStateSpec{ArcaneDamageDealt: true})
 		sim.ResolveChainStep(&s, s.Logger(), &sim.CardState{Card: tc.c})
-		if got := s.Value; got != tc.want {
+		if got := s.Value(); got != tc.want {
 			t.Errorf("%s: Play() = %d, want %d (attack + arcane bonus)", tc.c.Name(), got, tc.want)
 		}
 	}

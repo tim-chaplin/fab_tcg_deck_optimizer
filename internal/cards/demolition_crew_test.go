@@ -50,7 +50,7 @@ func TestDemolitionCrew_PlayAttacksForPrintedPower(t *testing.T) {
 	for _, tc := range cases {
 		var s sim.TurnState
 		sim.ResolveChainStep(&s, s.Logger(), &sim.CardState{Card: tc.c})
-		if got := s.Value; got != tc.want {
+		if got := s.Value(); got != tc.want {
 			t.Errorf("%s: Play() = %d, want %d", tc.c.Name(), got, tc.want)
 		}
 	}

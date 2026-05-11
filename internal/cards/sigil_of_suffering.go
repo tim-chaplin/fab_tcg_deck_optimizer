@@ -17,7 +17,7 @@ import (
 )
 
 func sigilOfSufferingPlay(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
-	if s.ArcaneDamageDealt || sim.LikelyDamageHits(1, false) {
+	if s.ArcaneDamageDealt() || sim.LikelyDamageHits(1, false) {
 		self.BonusDefense++
 	}
 	s.DealArcaneDamage(l, self, 1)

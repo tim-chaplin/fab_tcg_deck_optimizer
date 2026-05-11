@@ -56,13 +56,13 @@ func TestLowerHealthWanter_DamageRiders(t *testing.T) {
 		sim.CurrentHero = stubLowHeroOff{}
 		var sOff sim.TurnState
 		sim.ResolveChainStep(&sOff, sOff.Logger(), &sim.CardState{Card: tc.card})
-		if got := sOff.Value; got != tc.wantOff {
+		if got := sOff.Value(); got != tc.wantOff {
 			t.Errorf("%s: Play() off = %d, want %d (hero does not opt in)", tc.name, got, tc.wantOff)
 		}
 		sim.CurrentHero = stubLowHeroOn{}
 		var sOn sim.TurnState
 		sim.ResolveChainStep(&sOn, sOn.Logger(), &sim.CardState{Card: tc.card})
-		if got := sOn.Value; got != tc.wantOn {
+		if got := sOn.Value(); got != tc.wantOn {
 			t.Errorf("%s: Play() on = %d, want %d (hero opts in)", tc.name, got, tc.wantOn)
 		}
 	}
@@ -98,7 +98,7 @@ func TestLowerHealthWanter_NilHeroIsOff(t *testing.T) {
 	sim.CurrentHero = nil
 	var s sim.TurnState
 	sim.ResolveChainStep(&s, s.Logger(), &sim.CardState{Card: AdrenalineRushRed{}})
-	if got := s.Value; got != 4 {
+	if got := s.Value(); got != 4 {
 		t.Errorf("AdrenalineRushRed nil-hero Play() = %d, want 4", got)
 	}
 	if (ScarForAScarRed{}).GoAgain() {

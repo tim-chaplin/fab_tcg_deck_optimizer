@@ -63,7 +63,7 @@ func TestViserai_RunebladeAfterNonAttackActionTriggers(t *testing.T) {
 	// token on state.Runechants() for downstream consume or carryover. NonAttackActionPlayed is
 	// maintained by the attack-chain driver as non-attack actions resolve; callers must set it
 	// when seeding a TurnState for trigger checks.
-	s := sim.TurnState{CardsPlayed: []sim.Card{stubRuneAura{}}, NonAttackActionPlayed: true}
+	s := sim.NewTurnStateFromSpec(sim.TurnStateSpec{CardsPlayed: []sim.Card{stubRuneAura{}}, NonAttackActionPlayed: true})
 	if got := (Viserai{}).OnCardPlayed(stubRuneAttack{}, &s, s.Logger()); got != 1 {
 		t.Fatalf("expected +1 damage from OnCardPlayed, got %d", got)
 	}
@@ -74,7 +74,7 @@ func TestViserai_RunebladeAfterNonAttackActionTriggers(t *testing.T) {
 
 func TestViserai_NoPriorNonAttackAction(t *testing.T) {
 	// Runeblade card, but the only prior play was an attack — no trigger.
-	s := sim.TurnState{CardsPlayed: []sim.Card{stubRuneAttack{}}}
+	s := sim.NewTurnStateFromSpec(sim.TurnStateSpec{CardsPlayed: []sim.Card{stubRuneAttack{}}})
 	if got := (Viserai{}).OnCardPlayed(stubRuneAttack{}, &s, s.Logger()); got != 0 {
 		t.Fatalf("expected 0 (no non-attack action in CardsPlayed), got %d", got)
 	}
@@ -83,7 +83,7 @@ func TestViserai_NoPriorNonAttackAction(t *testing.T) {
 func TestViserai_CardStateNotRuneblade(t *testing.T) {
 	// Played card isn't Runeblade — Viserai's ability doesn't trigger even if a non-attack
 	// action was played earlier.
-	s := sim.TurnState{CardsPlayed: []sim.Card{stubRuneAura{}}, NonAttackActionPlayed: true}
+	s := sim.NewTurnStateFromSpec(sim.TurnStateSpec{CardsPlayed: []sim.Card{stubRuneAura{}}, NonAttackActionPlayed: true})
 	if got := (Viserai{}).OnCardPlayed(stubNonRuneblade{}, &s, s.Logger()); got != 0 {
 		t.Fatalf("expected 0 (non-Runeblade played), got %d", got)
 	}
@@ -108,7 +108,7 @@ func (stubRuneWeapon) Play(*sim.TurnState, sim.Logger, *sim.CardState) {}
 func TestViserai_WeaponSwingDoesNotTrigger(t *testing.T) {
 	// Even with a prior non-attack action in CardsPlayed, swinging a Runeblade weapon isn't "playing a
 	// card" and must not trigger.
-	s := sim.TurnState{CardsPlayed: []sim.Card{stubRuneAura{}}, NonAttackActionPlayed: true}
+	s := sim.NewTurnStateFromSpec(sim.TurnStateSpec{CardsPlayed: []sim.Card{stubRuneAura{}}, NonAttackActionPlayed: true})
 	if got := (Viserai{}).OnCardPlayed(stubRuneWeapon{}, &s, s.Logger()); got != 0 {
 		t.Fatalf("expected 0 for weapon swing, got %d", got)
 	}

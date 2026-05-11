@@ -19,8 +19,8 @@ func TestDestructiveDeliberation_PlayCreditsAttack(t *testing.T) {
 		s := sim.TurnState{}
 		self := &sim.CardState{Card: tc.c}
 		sim.ResolveChainStep(&s, s.Logger(), self)
-		if s.Value != tc.want {
-			t.Errorf("%s: Value = %d, want %d", tc.c.Name(), s.Value, tc.want)
+		if s.Value() != tc.want {
+			t.Errorf("%s: Value = %d, want %d", tc.c.Name(), s.Value(), tc.want)
 		}
 		if len(self.OnHit) != 1 {
 			t.Errorf("%s: OnHit = %d, want 1 (Ponder rider)", tc.c.Name(), len(self.OnHit))
@@ -41,7 +41,7 @@ func TestDestructiveDeliberation_OnHitCreatesPonder(t *testing.T) {
 		if got := s.Ponders(); got != 1 {
 			t.Errorf("%s: Ponders = %d, want 1", c.Name(), got)
 		}
-		if !s.AuraCreated {
+		if !s.AuraCreated() {
 			t.Errorf("%s: AuraCreated = false, want true", c.Name())
 		}
 	}

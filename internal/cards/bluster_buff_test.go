@@ -11,8 +11,8 @@ func TestBlusterBuff_Mode0DebuffsByOne(t *testing.T) {
 	s := sim.TurnState{}
 	self := &sim.CardState{Card: BlusterBuffRed{}}
 	sim.ResolveChainStep(&s, s.Logger(), self)
-	if s.Value != 5 {
-		t.Errorf("mode 0 Value = %d, want 5 (printed 6 - 1)", s.Value)
+	if s.Value() != 5 {
+		t.Errorf("mode 0 Value = %d, want 5 (printed 6 - 1)", s.Value())
 	}
 }
 
@@ -21,8 +21,8 @@ func TestBlusterBuff_Mode1KeepsPrintedPower(t *testing.T) {
 	s := sim.TurnState{}
 	self := &sim.CardState{Card: BlusterBuffRed{}, Mode: 1}
 	sim.ResolveChainStep(&s, s.Logger(), self)
-	if s.Value != 6 {
-		t.Errorf("mode 1 Value = %d, want 6 (printed)", s.Value)
+	if s.Value() != 6 {
+		t.Errorf("mode 1 Value = %d, want 6 (printed)", s.Value())
 	}
 }
 

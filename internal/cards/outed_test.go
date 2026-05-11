@@ -19,10 +19,10 @@ func TestOuted_NoMarkUnbuffed(t *testing.T) {
 // Tests that Outed self-buffs +1{p} when the opposing hero is marked at Play time.
 func TestOuted_MarkedDefenderAddsOne(t *testing.T) {
 	self := &sim.CardState{Card: OutedRed{}}
-	s := sim.TurnState{OpponentMarked: true}
+	s := sim.NewTurnStateFromSpec(sim.TurnStateSpec{OpponentMarked: true})
 	sim.ResolveChainStep(&s, s.Logger(), self)
-	if s.Value != 4 {
-		t.Errorf("Play() Value = %d, want 4 (3 printed + 1 marked-defender)", s.Value)
+	if s.Value() != 4 {
+		t.Errorf("Play() Value = %d, want 4 (3 printed + 1 marked-defender)", s.Value())
 	}
 	if self.BonusAttack != 1 {
 		t.Errorf("BonusAttack = %d, want 1", self.BonusAttack)

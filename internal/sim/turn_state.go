@@ -82,17 +82,17 @@ type TurnState struct {
 	// appends a card. Reset (alongside banished's per-permutation re-seed) in
 	// resetStateForPermutation so "any card banished this turn" reads true only for
 	// the current chain. Tremor of íArathael's +2{p} rider is the canary.
-	CardBanished bool
+	cardBanished bool
 	// ActionPoints is the chain runner's running AP pool. Seeded to 1 per permutation,
 	// decremented before each paying chain step, incremented after a Go-again card resolves.
 	// Free chain steps (Instants, Attack Reactions) cost 0; Action cards and weapon swings
 	// cost 1. A paying card resolving with no AP available makes the chain illegal.
-	ActionPoints int
+	actionPoints int
 	// ArcaneDamageDealt sticks true once any source of arcane damage fires this turn:
 	// a Runechant token consuming itself on an attack / weapon swing, or a card whose Play
 	// deals arcane directly. Effects that read "if you've dealt arcane damage this turn"
 	// consult this flag rather than Runechants. Reset at turn boundary.
-	ArcaneDamageDealt bool
+	arcaneDamageDealt bool
 	// OpponentMarked tracks Mark on the opposing hero. Set by a Mark effect, cleared
 	// when an attack action card or weapon swing resolves — modelled as the opponent's
 	// first incoming physical damage stripping the mark. Arcane damage (Runechants,
@@ -100,16 +100,16 @@ type TurnState struct {
 	// riders. Our own hero is never modelled as marked, so "if you are marked, can't
 	// play" gates on opposing cards drop out. Carries across turns via CarryState so
 	// next turn's chain seed sees a Mark applied late in the previous turn.
-	OpponentMarked bool
+	opponentMarked bool
 	// Auras is the list of auras currently in play. Cards add entries during Play via
 	// AddAura; the sim fires matching entries on each TriggerType condition and drops
 	// entries whose handler called s.DestroyAura. Carries across turns.
-	Auras []Aura
+	auras []Aura
 	// Triggers is the list of one-shot deferred handlers keyed to a TriggerType. Cards
 	// add entries during Play via AddTrigger; the sim fires matching entries on each
 	// TriggerType condition and removes them after firing. Reset per permutation; not
 	// snapshotted into CarryState (TriggerEndOfTurn fires before the carry snapshot).
-	Triggers []Trigger
+	triggers []Trigger
 	// Items is the list of items currently in play. Cards add entries via the
 	// per-token-type Create helper (CreateGold); the chain runner enqueues each item's
 	// Ability as a playable activated ability each turn. Carries across turns.
@@ -136,7 +136,7 @@ type TurnState struct {
 	// step's Play+BonusAttack contribution via AddLogEntry; trigger handlers (hero, aura,
 	// OnHit) credit themselves the same way. The solver compares permutations on this
 	// field. Reset by the sim per permutation.
-	Value int
+	value int
 	// logger is the per-turn log sink. Nil during the eval-loop's "find best" pass so
 	// every Append* helper short-circuits via the nil-receiver guard on TurnLogger;
 	// points at bufs.logger during the rare "replay best turn" pass that materialises
@@ -148,45 +148,45 @@ type TurnState struct {
 	// CardsPlayed is the sequence of cards played (as attacks) this turn, in order.
 	// Populated by the sim after each Play returns so later cards this turn see what was
 	// played before them.
-	CardsPlayed []Card
+	cardsPlayed []Card
 	// AuraCreated is set when a card or ability creates an aura this turn (e.g. Runechant
 	// tokens). Effects that check "if you've played or created an aura this turn" should
 	// OR this with CardsPlayed containing an Aura-typed card.
-	AuraCreated bool
+	auraCreated bool
 	// CardsRemaining is the cards that will be played after the current one in chain order.
 	// Populated by the sim before each Play so an effect can peek forward ("next X attack")
 	// or grant keywords to a later card by flipping flags on its CardState entry.
-	CardsRemaining []*CardState
+	cardsRemaining []*CardState
 	// Pitched is the cards pitched this turn for resources. Populated by the sim before any
 	// Play. Effects that check "if an attack card was pitched" scan this list.
-	Pitched []Card
+	pitched []Card
 	// Overpower is set when an attack with the Overpower keyword is being played. Not yet
 	// consumed by the sim — blocked damage should eventually be forwarded to the hero when
 	// Overpower is true.
-	Overpower bool
+	overpower bool
 	// NonAttackActionPlayed is set true once any non-attack action card has been appended to
 	// CardsPlayed this turn. Maintained by the chain runner so hero triggers that ask "was a
 	// non-attack action played earlier?" can answer in O(1).
-	NonAttackActionPlayed bool
+	nonAttackActionPlayed bool
 	// IncomingDamage is the opponent damage this turn — seeded by the sim from the value
 	// passed to Best, and decremented by ApplyAndLogEffectiveDefense as defenders block.
 	// Cards reading "did we block all incoming?" against the static partition aggregate use
 	// BlockTotal instead.
-	IncomingDamage int
+	incomingDamage int
 	// ArcaneIncomingDamage is the opponent's arcane damage this turn, seeded from the
 	// -arcane-incoming flag. Cards whose riders gate on "if you've been dealt arcane damage
 	// this turn" read this directly; not decremented during the chain (defending arcane isn't
 	// modelled).
-	ArcaneIncomingDamage int
+	arcaneIncomingDamage int
 	// BlockTotal is the sum of Defense() across every Defend-role card in the current
 	// partition. Uncapped: if the partition over-blocks, BlockTotal is the full sum, not
 	// clamped to IncomingDamage.
-	BlockTotal int
+	blockTotal int
 	// Defenders is the partition's defender slice (DRs + plain blocks together) populated
 	// by the chain runner before invoking each defender's Play / Block hook. Cards reading
 	// "how many other plain blockers / DRs are defending alongside" iterate this list — the
 	// defender-side counterpart to CardsRemaining for attackers.
-	Defenders []Card
+	defenders []Card
 	// attackReactionTarget is the buff target for the currently-resolving Attack Reaction.
 	// Set by the chain runner around AR.Play; ARs read it via AttackReactionTarget().
 	attackReactionTarget *CardState
@@ -195,7 +195,7 @@ type TurnState struct {
 	// the handler reads it to attribute its log line back to the triggering card. Hero
 	// and OnHit handlers receive the triggering card as a direct arg already and don't
 	// need this field. Nil during direct chain-step resolution and start-of-turn fires.
-	TriggeringCard Card
+	triggeringCard Card
 	// cacheable is true while the chain hasn't read or mutated deck / graveyard through any
 	// public accessor (Deck / Graveyard / PopDeckTop / PrependToDeck / TutorFromDeck /
 	// BanishFromGraveyard / AddToGraveyard) or framework helper built on them (DrawOne,
@@ -215,6 +215,107 @@ func (s *TurnState) IsCacheable() bool { return s.cacheable }
 // AttackReactionTarget returns the buff target for the currently-resolving AR, or nil when
 // no AR is resolving.
 func (s *TurnState) AttackReactionTarget() *CardState { return s.attackReactionTarget }
+
+// Field accessors below: each returns or mutates one privatized struct field. Cards
+// reach them through these methods so the cards-side surface matches v2/card.GameEngine.
+// Setters exist only for fields cards actually mutate; other fields are seeded via
+// TurnStateSpec or via dedicated mutation helpers (AddValue, AddAura, AddTrigger, …).
+
+// ActionPoints returns the chain runner's running AP pool.
+func (s *TurnState) ActionPoints() int { return s.actionPoints }
+
+// AddActionPoints credits n AP to the running pool. Negative n is allowed (some cards
+// spend AP) but callers should ensure the result stays non-negative.
+func (s *TurnState) AddActionPoints(n int) { s.actionPoints += n }
+
+// ArcaneDamageDealt reports whether any arcane damage source has fired this turn.
+func (s *TurnState) ArcaneDamageDealt() bool { return s.arcaneDamageDealt }
+
+// SetArcaneDamageDealt flips the sticky arcane-damage-dealt flag.
+func (s *TurnState) SetArcaneDamageDealt(v bool) { s.arcaneDamageDealt = v }
+
+// ArcaneIncomingDamage returns the opponent's arcane damage this turn.
+func (s *TurnState) ArcaneIncomingDamage() int { return s.arcaneIncomingDamage }
+
+// AuraCreated reports whether a card or ability has created an aura this turn.
+func (s *TurnState) AuraCreated() bool { return s.auraCreated }
+
+// SetAuraCreated flips the aura-created-this-turn flag.
+func (s *TurnState) SetAuraCreated(v bool) { s.auraCreated = v }
+
+// Auras returns the live aura set.
+func (s *TurnState) Auras() []Aura { return s.auras }
+
+// SetAuras replaces the aura set wholesale. Used by tests that seed a prior-turn aura
+// carryover; production code uses AddAura, which also flips AuraCreated.
+func (s *TurnState) SetAuras(a []Aura) { s.auras = a }
+
+// BlockTotal returns the partition's uncapped defense sum.
+func (s *TurnState) BlockTotal() int { return s.blockTotal }
+
+// CardBanished reports whether any card has been banished this turn.
+func (s *TurnState) CardBanished() bool { return s.cardBanished }
+
+// CardsPlayed returns the sequence of cards played (as attacks) this turn.
+func (s *TurnState) CardsPlayed() []Card { return s.cardsPlayed }
+
+// SetCardsPlayed replaces the cards-played slice — used by Moon Wish's transient
+// pre-append + pop around its go-again Sun Kiss invocation so the synergy fires.
+func (s *TurnState) SetCardsPlayed(cs []Card) { s.cardsPlayed = cs }
+
+// CardsRemaining returns the cards scheduled after the current chain step.
+func (s *TurnState) CardsRemaining() []*CardState { return s.cardsRemaining }
+
+// SetCardsRemaining replaces the look-ahead queue — currently used only by tests that
+// seed a partial chain for predicate evaluation.
+func (s *TurnState) SetCardsRemaining(cs []*CardState) { s.cardsRemaining = cs }
+
+// Defenders returns the partition's defender slice (DRs + plain blocks).
+func (s *TurnState) Defenders() []Card { return s.defenders }
+
+// IncomingDamage returns the opponent damage left to allocate this turn.
+func (s *TurnState) IncomingDamage() int { return s.incomingDamage }
+
+// SetIncomingDamage replaces the running incoming-damage tally — used by the per-DR
+// seed inside defendersDamage.
+func (s *TurnState) SetIncomingDamage(n int) { s.incomingDamage = n }
+
+// NonAttackActionPlayed reports whether any non-attack action has resolved this turn.
+func (s *TurnState) NonAttackActionPlayed() bool { return s.nonAttackActionPlayed }
+
+// OpponentMarked reports whether the opposing hero currently carries the Mark token.
+func (s *TurnState) OpponentMarked() bool { return s.opponentMarked }
+
+// SetOpponentMarked flips the opposing hero's Mark.
+func (s *TurnState) SetOpponentMarked(v bool) { s.opponentMarked = v }
+
+// Overpower reports whether the chain step currently in flight has Overpower.
+func (s *TurnState) Overpower() bool { return s.overpower }
+
+// SetOverpower toggles the Overpower flag for the current chain step.
+func (s *TurnState) SetOverpower(v bool) { s.overpower = v }
+
+// Pitched returns the cards pitched this turn for resources.
+func (s *TurnState) Pitched() []Card { return s.pitched }
+
+// TriggeringCard returns the card whose Play caused the currently-firing aura
+// attack-action trigger, or nil outside of a trigger fire.
+func (s *TurnState) TriggeringCard() Card { return s.triggeringCard }
+
+// SetTriggeringCard replaces the triggering-card slot. Used by tests that drive a
+// trigger handler directly; production code threads it through the trigger fire loop.
+func (s *TurnState) SetTriggeringCard(c Card) { s.triggeringCard = c }
+
+// Triggers returns the one-shot trigger queue.
+func (s *TurnState) Triggers() []Trigger { return s.triggers }
+
+// Value returns the running damage-equivalent total for this chain.
+func (s *TurnState) Value() int { return s.value }
+
+// SetValue replaces the running damage-equivalent total. Prefer AddValue for the usual
+// "credit n" case; this exists for the rare decrement (e.g. Test of Strength's clash
+// loss concedes a Gold token).
+func (s *TurnState) SetValue(n int) { s.value = n }
 
 // AmendLastChainStepN adds n to the most recent ChainStep entry's N field. ARs use this to
 // fold their +{p} buff into the buffed attack's display delta. No-op when the logger is
@@ -278,24 +379,43 @@ func (s *TurnState) PopHandAt(i int) Card {
 	return c
 }
 
-// TurnStateSpec is the cross-turn input shape: every field a fresh-turn TurnState reads
-// as prior-turn state. Mirrors the unexported TurnState fields outside-package callers
-// (turntests, anything assembling a prior state) need to seed without reaching into
-// TurnState's unexported fields directly. Construct via NewTurnStateFromSpec.
+// TurnStateSpec is the cross-turn / test-construction input shape: every field
+// outside-package callers (turntests, internal/cards tests, anything assembling a
+// prior state) need to seed on a fresh TurnState. Mirrors TurnState's private fields
+// in exported form so external code doesn't have to go through one Set* call per
+// field. Construct via NewTurnStateFromSpec.
 type TurnStateSpec struct {
-	// Arsenal is the card in the arsenal slot at start of turn (nil if empty).
-	Arsenal Card
-	// Auras is the live aura set carried in from the previous turn.
-	Auras []Aura
-	// Items is the live item set carried in from the previous turn.
-	Items []Item
-	// Banished is the cards-already-in-banished-zone snapshot. Cards stay banished forever
-	// by default, so this slice grows monotonically across the game.
-	Banished []deck.Card
-	// Graveyard is the cards-already-in-graveyard snapshot from the previous turn.
-	Graveyard []deck.Card
-	// OpponentMarked carries the Mark state on the opposing hero into this turn.
-	OpponentMarked bool
+	Arsenal               Card
+	Auras                 []Aura
+	Triggers              []Trigger
+	Items                 []Item
+	Banished              []deck.Card
+	Graveyard             []deck.Card
+	Pitched               []Card
+	Defenders             []Card
+	CardsPlayed           []Card
+	CardsRemaining        []*CardState
+	OpponentMarked        bool
+	ArcaneDamageDealt     bool
+	AuraCreated           bool
+	CardBanished          bool
+	Overpower             bool
+	NonAttackActionPlayed bool
+	ActionPoints          int
+	IncomingDamage        int
+	ArcaneIncomingDamage  int
+	BlockTotal            int
+	Value                 int
+	TriggeringCard        Card
+	AttackReactionTarget  *CardState
+}
+
+// NewTurnStatePtr is the pointer variant of NewTurnStateFromSpec — convenience for callers
+// that pass the result by pointer in the same expression (e.g. card.Cost(s) tests). The
+// returned pointer is independent of the caller's TurnStateSpec value.
+func NewTurnStatePtr(spec TurnStateSpec) *TurnState {
+	s := NewTurnStateFromSpec(spec)
+	return &s
 }
 
 // NewTurnStateFromSpec builds a TurnState from a TurnStateSpec, sealing the unexported
@@ -312,15 +432,32 @@ func NewTurnStateFromSpec(spec TurnStateSpec) TurnState {
 		graveyard[i] = c.(Card)
 	}
 	return TurnState{
-		Arsenal:        spec.Arsenal,
-		Auras:          spec.Auras,
-		Items:          spec.Items,
-		banished:       banished,
-		graveyard:      graveyard,
-		OpponentMarked: spec.OpponentMarked,
-		cacheable:      true,
-		currentAuraIdx: -1,
-		logger:         turnlogger.New(),
+		Arsenal:               spec.Arsenal,
+		auras:                 spec.Auras,
+		triggers:              spec.Triggers,
+		Items:                 spec.Items,
+		banished:              banished,
+		graveyard:             graveyard,
+		pitched:               spec.Pitched,
+		defenders:             spec.Defenders,
+		cardsPlayed:           spec.CardsPlayed,
+		cardsRemaining:        spec.CardsRemaining,
+		opponentMarked:        spec.OpponentMarked,
+		arcaneDamageDealt:     spec.ArcaneDamageDealt,
+		auraCreated:           spec.AuraCreated,
+		cardBanished:          spec.CardBanished,
+		overpower:             spec.Overpower,
+		nonAttackActionPlayed: spec.NonAttackActionPlayed,
+		actionPoints:          spec.ActionPoints,
+		incomingDamage:        spec.IncomingDamage,
+		arcaneIncomingDamage:  spec.ArcaneIncomingDamage,
+		blockTotal:            spec.BlockTotal,
+		value:                 spec.Value,
+		triggeringCard:        spec.TriggeringCard,
+		attackReactionTarget:  spec.AttackReactionTarget,
+		cacheable:             true,
+		currentAuraIdx:        -1,
+		logger:                turnlogger.New(),
 	}
 }
 
@@ -512,7 +649,7 @@ func (s *TurnState) BanishFromGraveyard(pred func(Card) bool) (Card, bool) {
 			continue
 		}
 		s.banished = append(s.banished, c)
-		s.CardBanished = true
+		s.cardBanished = true
 		s.graveyard = append(s.graveyard[:i], s.graveyard[i+1:]...)
 		return c, true
 	}
@@ -585,14 +722,14 @@ func NewTurnStateFromCards(deckCards, graveyard []Card) *TurnState {
 	return NewTurnState(deck.New(nil, nil, dc), graveyard)
 }
 
-// AddValue credits n to s.Value, clamped at 0. Pair with a Log helper when you also want a
+// AddValue credits n to s.value, clamped at 0. Pair with a Log helper when you also want a
 // log line; call alone for silent value (an aura that pays out without surfacing in the
 // printout). Negative n is a no-op (FaB damage / prevention can't drive the running total
 // negative). The convention is to put AddValue on its own line, separate from any Log call,
 // so a line beginning with Log( has no side effects.
 func (s *TurnState) AddValue(n int) {
 	if n > 0 {
-		s.Value += n
+		s.value += n
 	}
 }
 
@@ -623,7 +760,7 @@ func (s *TurnState) DrawOne() {
 
 // HasPlayedType reports whether any card played this turn has the given type in its Types() set.
 func (s *TurnState) HasPlayedType(t card.CardType) bool {
-	for _, c := range s.CardsPlayed {
+	for _, c := range s.cardsPlayed {
 		if c.Types().Has(t) {
 			return true
 		}
@@ -635,7 +772,7 @@ func (s *TurnState) HasPlayedType(t card.CardType) bool {
 // condition behind "if you've played or created an aura this turn" riders. The aura need
 // not still be on the battlefield; the flag is sticky for the rest of the turn.
 func (s *TurnState) HasPlayedOrCreatedAura() bool {
-	return s.AuraCreated || s.HasPlayedType(card.TypeAura)
+	return s.auraCreated || s.HasPlayedType(card.TypeAura)
 }
 
 // Clash models a clash (rule 8.5.45): we and the opponent reveal the top card of our decks
@@ -670,11 +807,11 @@ func (s *TurnState) CreateRunechants(n int) {
 	if n <= 0 {
 		return
 	}
-	s.AuraCreated = true
+	s.auraCreated = true
 	s.AddValue(n)
-	for i := range s.Auras {
-		if s.Auras[i].Self.TokenType == TokenTypeRunechant {
-			s.Auras[i].Count += n
+	for i := range s.auras {
+		if s.auras[i].Self.TokenType == TokenTypeRunechant {
+			s.auras[i].Count += n
 			return
 		}
 	}
@@ -687,10 +824,10 @@ func (s *TurnState) CreatePonder(n int) {
 	if n <= 0 {
 		return
 	}
-	s.AuraCreated = true
-	for i := range s.Auras {
-		if s.Auras[i].Self.TokenType == TokenTypePonder {
-			s.Auras[i].Count += n
+	s.auraCreated = true
+	for i := range s.auras {
+		if s.auras[i].Self.TokenType == TokenTypePonder {
+			s.auras[i].Count += n
 			return
 		}
 	}
@@ -698,10 +835,10 @@ func (s *TurnState) CreatePonder(n int) {
 }
 
 // Runechants returns the current Runechant token count, or zero when none are in play.
-func (s *TurnState) Runechants() int { return tokenCountIn(s.Auras, TokenTypeRunechant) }
+func (s *TurnState) Runechants() int { return tokenCountIn(s.auras, TokenTypeRunechant) }
 
 // Ponders returns the current Ponder token count, or zero when none are in play.
-func (s *TurnState) Ponders() int { return tokenCountIn(s.Auras, TokenTypePonder) }
+func (s *TurnState) Ponders() int { return tokenCountIn(s.auras, TokenTypePonder) }
 
 // CreateGold creates n Gold tokens, bumping the existing item entry's Count or adding a
 // new one. No Value credit — Gold only pays out when the player spends one via
@@ -780,7 +917,7 @@ func (s *TurnState) ConsumeItem(t TokenType, n int) {
 func (s *TurnState) DealArcaneDamage(l Logger, self *CardState, n int) {
 	s.AddValue(n)
 	if LikelyDamageHits(n, false) {
-		s.ArcaneDamageDealt = true
+		s.arcaneDamageDealt = true
 	}
 	if n >= 0 && n < len(dealtArcaneText) {
 		l.AppendPostTrigger(self.Card.DisplayName(), dealtArcaneText[n], n)
@@ -813,22 +950,22 @@ func (s *TurnState) AddToGraveyard(c Card) {
 
 // AddAura is the Play-side combo every Action - Aura card reaches for: flip
 // AuraCreated so same-turn "if you've played or created an aura" riders see the entry, and
-// append t to s.Auras so the sim fires it on its matching TriggerType condition.
+// append t to s.auras so the sim fires it on its matching TriggerType condition.
 func (s *TurnState) AddAura(t Aura) {
-	s.AuraCreated = true
-	s.Auras = append(s.Auras, t)
+	s.auraCreated = true
+	s.auras = append(s.auras, t)
 }
 
-// AddTrigger appends t to s.Triggers. The sim fires t once on its matching TriggerType
+// AddTrigger appends t to s.triggers. The sim fires t once on its matching TriggerType
 // condition then removes it.
 func (s *TurnState) AddTrigger(t Trigger) {
-	s.Triggers = append(s.Triggers, t)
+	s.triggers = append(s.triggers, t)
 }
 
-// DestroyAura removes a from s.Auras and, when addToGraveyard, appends a.Self.Card to
+// DestroyAura removes a from s.auras and, when addToGraveyard, appends a.Self.Card to
 // s.graveyard. Token-style auras (Self.Card == nil) skip the graveyard append
 // unconditionally. The splice uses currentAuraIdx (the fire loop maintains it through
-// any mid-handler s.Auras realloc), so it resolves to the correct live slot even when
+// any mid-handler s.auras realloc), so it resolves to the correct live slot even when
 // CreateRunechants has appended a new aura since the handler started; a is read for
 // Self only and may legitimately point at the pre-realloc backing.
 //
@@ -839,9 +976,9 @@ func (s *TurnState) DestroyAura(a *Aura, addToGraveyard bool) {
 		s.graveyard = append(s.graveyard, a.Self.Card)
 	}
 	i := s.currentAuraIdx
-	if i < 0 || i >= len(s.Auras) {
+	if i < 0 || i >= len(s.auras) {
 		return
 	}
-	s.Auras = append(s.Auras[:i], s.Auras[i+1:]...)
+	s.auras = append(s.auras[:i], s.auras[i+1:]...)
 	s.currentAuraDestroyed = true
 }

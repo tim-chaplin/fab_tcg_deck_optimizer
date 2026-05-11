@@ -29,7 +29,7 @@ func sunKissPlay(heal int, s *sim.TurnState, l sim.Logger, self *sim.CardState) 
 // printing. Exact-match on Name() works because all three Moon Wish printings share the
 // base name "Moon Wish" — the pitch suffix lives in DisplayName, not Name.
 func playedMoonWishThisTurn(s *sim.TurnState) bool {
-	for _, c := range s.CardsPlayed {
+	for _, c := range s.CardsPlayed() {
 		if c.Name() == "Moon Wish" {
 			return true
 		}

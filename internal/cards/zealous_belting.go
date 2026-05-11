@@ -14,7 +14,7 @@ import (
 // than the card's own base power, then emits the chain step.
 func zealousBeltingPlay(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
 	base := self.Card.Attack()
-	for _, p := range s.Pitched {
+	for _, p := range s.Pitched() {
 		if p.Attack() > base {
 			self.GrantedGoAgain = true
 			break

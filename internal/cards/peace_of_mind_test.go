@@ -17,11 +17,11 @@ func TestPeaceOfMind_PreventsByPrinting(t *testing.T) {
 		{PeaceOfMindBlue{}, 2},
 	}
 	for _, tc := range cases {
-		s := sim.TurnState{IncomingDamage: 10}
+		s := sim.NewTurnStateFromSpec(sim.TurnStateSpec{IncomingDamage: 10})
 		self := &sim.CardState{Card: tc.card}
 		sim.ResolveChainStep(&s, s.Logger(), self)
-		if s.Value != tc.want {
-			t.Errorf("%s: Value = %d, want %d", tc.card.Name(), s.Value, tc.want)
+		if s.Value() != tc.want {
+			t.Errorf("%s: Value = %d, want %d", tc.card.Name(), s.Value(), tc.want)
 		}
 	}
 }
@@ -29,13 +29,13 @@ func TestPeaceOfMind_PreventsByPrinting(t *testing.T) {
 // Tests that each printing creates one Ponder token on play.
 func TestPeaceOfMind_CreatesPonder(t *testing.T) {
 	for _, c := range []sim.Card{PeaceOfMindRed{}, PeaceOfMindYellow{}, PeaceOfMindBlue{}} {
-		s := sim.TurnState{IncomingDamage: 10}
+		s := sim.NewTurnStateFromSpec(sim.TurnStateSpec{IncomingDamage: 10})
 		self := &sim.CardState{Card: c}
 		sim.ResolveChainStep(&s, s.Logger(), self)
 		if got := s.Ponders(); got != 1 {
 			t.Errorf("%s: Ponders = %d, want 1", c.Name(), got)
 		}
-		if !s.AuraCreated {
+		if !s.AuraCreated() {
 			t.Errorf("%s: AuraCreated = false, want true after creating a Ponder", c.Name())
 		}
 	}

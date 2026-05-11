@@ -25,7 +25,7 @@ func (soloBlocker) GoAgain() bool                       { return false }
 func (soloBlocker) Play(*TurnState, Logger, *CardState) {}
 func (soloBlocker) Block(s *TurnState, l Logger, self *CardState) {
 	plainCount := 0
-	for _, d := range s.Defenders {
+	for _, d := range s.Defenders() {
 		if d.Types().IsDefenseReaction() {
 			continue
 		}
@@ -55,7 +55,7 @@ func (togetherBlocker) GoAgain() bool                       { return false }
 func (togetherBlocker) Play(*TurnState, Logger, *CardState) {}
 func (togetherBlocker) Block(s *TurnState, l Logger, self *CardState) {
 	plainCount := 0
-	for _, d := range s.Defenders {
+	for _, d := range s.Defenders() {
 		if d.Types().IsDefenseReaction() {
 			continue
 		}

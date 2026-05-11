@@ -12,7 +12,7 @@ func TestScoutThePeriphery_NoAttackReturnsZero(t *testing.T) {
 	s := sim.TurnState{}
 	for _, c := range []sim.Card{ScoutThePeripheryRed{}, ScoutThePeripheryYellow{}, ScoutThePeripheryBlue{}} {
 		sim.ResolveChainStep(&s, s.Logger(), &sim.CardState{Card: c})
-		if got := s.Value; got != 0 {
+		if got := s.Value(); got != 0 {
 			t.Errorf("%s: Play() = %d, want 0", c.Name(), got)
 		}
 	}
@@ -21,9 +21,9 @@ func TestScoutThePeriphery_NoAttackReturnsZero(t *testing.T) {
 // TestScoutThePeriphery_NonAttackInRemainingFizzles: non-attack action (even from arsenal)
 // fails the predicate — only attack actions count as the rider's target.
 func TestScoutThePeriphery_NonAttackInRemainingFizzles(t *testing.T) {
-	s := sim.TurnState{CardsRemaining: []*sim.CardState{{Card: testutils.GenericAction(), FromArsenal: true}}}
+	s := sim.NewTurnStateFromSpec(sim.TurnStateSpec{CardsRemaining: []*sim.CardState{{Card: testutils.GenericAction(), FromArsenal: true}}})
 	sim.ResolveChainStep(&s, s.Logger(), &sim.CardState{Card: ScoutThePeripheryRed{}})
-	if got := s.Value; got != 0 {
+	if got := s.Value(); got != 0 {
 		t.Errorf("Play() = %d, want 0 (non-attack skipped)", got)
 	}
 }
@@ -31,9 +31,9 @@ func TestScoutThePeriphery_NonAttackInRemainingFizzles(t *testing.T) {
 // TestScoutThePeriphery_HandPlayedAttackFizzles: queued attack action that wasn't played from
 // arsenal fails the rider's "next attack action card you play from arsenal" target gate.
 func TestScoutThePeriphery_HandPlayedAttackFizzles(t *testing.T) {
-	s := sim.TurnState{CardsRemaining: []*sim.CardState{{Card: testutils.GenericAttack(0, 0)}}}
+	s := sim.NewTurnStateFromSpec(sim.TurnStateSpec{CardsRemaining: []*sim.CardState{{Card: testutils.GenericAttack(0, 0)}}})
 	sim.ResolveChainStep(&s, s.Logger(), &sim.CardState{Card: ScoutThePeripheryRed{}})
-	if got := s.Value; got != 0 {
+	if got := s.Value(); got != 0 {
 		t.Errorf("Play() = %d, want 0 (target attack not from arsenal)", got)
 	}
 }
@@ -51,9 +51,9 @@ func TestScoutThePeriphery_NextArsenalAttackReturnsBonus(t *testing.T) {
 	}
 	for _, tc := range cases {
 		target := &sim.CardState{Card: testutils.GenericAttack(0, 0), FromArsenal: true}
-		s := sim.TurnState{CardsRemaining: []*sim.CardState{target}}
+		s := sim.NewTurnStateFromSpec(sim.TurnStateSpec{CardsRemaining: []*sim.CardState{target}})
 		sim.ResolveChainStep(&s, s.Logger(), &sim.CardState{Card: tc.c})
-		if got := s.Value; got != 0 {
+		if got := s.Value(); got != 0 {
 			t.Errorf("%s: granter credits %d, want 0 (bonus rides on target)", tc.c.Name(), got)
 		}
 		if got := target.BonusAttack; got != tc.want {

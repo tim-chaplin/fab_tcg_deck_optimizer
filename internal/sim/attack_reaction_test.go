@@ -5,7 +5,6 @@ import (
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
-	"github.com/tim-chaplin/fab-deck-optimizer/v2/turnlogger"
 )
 
 // stubAR is a minimal Card + AttackReaction stub. The unit tests exercise
@@ -46,8 +45,8 @@ func (stubAttack) Play(*TurnState, Logger, *CardState) {}
 func TestGrantAttackReactionBuff_NoTargetIsNoOp(t *testing.T) {
 	s := TurnState{}
 	GrantAttackReactionBuff(&s, s.Logger(), &CardState{Card: stubAR{}}, 5)
-	if s.Value != 0 {
-		t.Errorf("Value = %d, want 0", s.Value)
+	if s.Value() != 0 {
+		t.Errorf("Value = %d, want 0", s.Value())
 	}
 }
 
@@ -55,14 +54,14 @@ func TestGrantAttackReactionBuff_NoTargetIsNoOp(t *testing.T) {
 // target's chain-step log delta.
 func TestGrantAttackReactionBuff_AppliesBuffAndCreditsValue(t *testing.T) {
 	target := &CardState{Card: stubAttack{}}
-	s := TurnState{attackReactionTarget: target, logger: turnlogger.New()}
+	s := NewTurnStateFromSpec(TurnStateSpec{AttackReactionTarget: target})
 	s.logger.AppendChainStep("stubAttack: ATTACK", 1)
 	GrantAttackReactionBuff(&s, s.Logger(), &CardState{Card: stubAR{}}, 3)
 	if target.BonusAttack != 3 {
 		t.Errorf("target BonusAttack = %d, want 3", target.BonusAttack)
 	}
-	if s.Value != 3 {
-		t.Errorf("Value = %d, want 3", s.Value)
+	if s.Value() != 3 {
+		t.Errorf("Value = %d, want 3", s.Value())
 	}
 	if got := s.LogEntries()[0].N; got != 4 {
 		t.Errorf("amended chain-step N = %d, want 4", got)
@@ -72,7 +71,7 @@ func TestGrantAttackReactionBuff_AppliesBuffAndCreditsValue(t *testing.T) {
 // Tests that AmendLastChainStepN skips non-chain-step entries to find the most recent
 // chain-step.
 func TestAmendLastChainStepN_SkipsNonChainEntries(t *testing.T) {
-	s := TurnState{logger: turnlogger.New()}
+	s := NewTurnStateFromSpec(TurnStateSpec{})
 	s.logger.AppendChainStep("first", 2)
 	s.logger.AppendPostTrigger("first", "rider", 0)
 	s.Logger().AmendLastChainStepN(5)

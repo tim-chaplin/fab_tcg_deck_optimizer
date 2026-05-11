@@ -33,8 +33,8 @@ func TestDrawnToTheDarkDimension_CostBounds(t *testing.T) {
 		if c.Cost(&sim.TurnState{}) != 2 {
 			t.Errorf("%s: Cost(zeroState) = %d, want 2", c.Name(), c.Cost(&sim.TurnState{}))
 		}
-		if c.Cost(&sim.TurnState{Auras: []sim.Aura{sim.NewRunechantAura(5)}}) != 0 {
-			t.Errorf("%s: Cost(Runechants=5) = %d, want 0", c.Name(), c.Cost(&sim.TurnState{Auras: []sim.Aura{sim.NewRunechantAura(5)}}))
+		if c.Cost(sim.NewTurnStatePtr(sim.TurnStateSpec{Auras: []sim.Aura{sim.NewRunechantAura(5)}})) != 0 {
+			t.Errorf("%s: Cost(Runechants=5) = %d, want 0", c.Name(), c.Cost(sim.NewTurnStatePtr(sim.TurnStateSpec{Auras: []sim.Aura{sim.NewRunechantAura(5)}})))
 		}
 	}
 }

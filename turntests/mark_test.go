@@ -24,7 +24,7 @@ func TestPursueToTheEdgeOfOblivion_MarksOpponentOnHit(t *testing.T) {
 func TestPursueToTheEdgeOfOblivion_PreservesMarkWhenOpponentAlreadyMarked(t *testing.T) {
 	d := deck.New(heroes.Viserai{}, nil, fillerDeck())
 	hand := []deck.Card{cards.PursueToTheEdgeOfOblivionRed{}}
-	state := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, sim.TurnState{OpponentMarked: true}, hand)
+	state := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, sim.NewTurnStateFromSpec(sim.TurnStateSpec{OpponentMarked: true}), hand)
 	if !state.OpponentMarked {
 		t.Fatalf("OpponentMarked = false after Pursue resolved against pre-marked opponent, want true")
 	}
@@ -45,7 +45,7 @@ func TestOuted_NoBonusWhenOpponentUnmarked(t *testing.T) {
 func TestOuted_BonusWhenOpponentAlreadyMarked(t *testing.T) {
 	d := deck.New(heroes.Viserai{}, nil, fillerDeck())
 	hand := []deck.Card{cards.OutedRed{}}
-	state := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, sim.TurnState{OpponentMarked: true}, hand)
+	state := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, sim.NewTurnStateFromSpec(sim.TurnStateSpec{OpponentMarked: true}), hand)
 	if state.Value != 4 {
 		t.Fatalf("Value = %d, want 4 (Outed printed 3{p} + 1 marked-defender)", state.Value)
 	}

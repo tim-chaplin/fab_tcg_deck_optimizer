@@ -22,7 +22,7 @@ func TestOverload_OnHitGoAgainEagerByLikelyToHit(t *testing.T) {
 		s := sim.TurnState{}
 		self := &sim.CardState{Card: tc.c}
 		sim.ResolveChainStep(&s, s.Logger(), self)
-		if got := s.Value; got != tc.wantDmg {
+		if got := s.Value(); got != tc.wantDmg {
 			t.Errorf("%s: Play() Value = %d, want %d", tc.c.Name(), got, tc.wantDmg)
 		}
 		if self.GrantedGoAgain != tc.wantGA {

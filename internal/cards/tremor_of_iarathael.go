@@ -16,7 +16,7 @@ import (
 )
 
 func tremorOfIArathaelPlay(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
-	if s.CardBanished {
+	if s.CardBanished() {
 		self.BonusAttack += 2
 	}
 }

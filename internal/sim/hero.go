@@ -24,7 +24,7 @@ type Hero interface {
 	// hero's printed ability fires ahead of the card itself (matching FaB stack order). Heroes
 	// that contribute damage-equivalent (e.g. a Runechant token) credit it through l (the
 	// recording Logger the chain runner threads through) — hero abilities are pre-triggers
-	// — and bump s.Value alongside. The int return is informational and discarded by the
+	// — and bump s.value alongside. The int return is informational and discarded by the
 	// dispatcher; heroes without a triggered ability return 0.
 	OnCardPlayed(played Card, s *TurnState, l Logger) int
 	// Opt is the hero's heuristic for the FaB Opt N keyword. TurnState.Opt(N) pops up to N

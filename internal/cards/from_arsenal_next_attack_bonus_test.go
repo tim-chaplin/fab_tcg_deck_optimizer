@@ -26,14 +26,14 @@ func TestFromArsenalNextAttackBonus_GrantsOnArsenalCopyOnly(t *testing.T) {
 	for _, tc := range cases {
 		// Hand-played copy: the bonus must NOT land on the queued attack action.
 		handTarget := &sim.CardState{Card: testutils.GenericAttack(0, 0)}
-		handState := sim.TurnState{CardsRemaining: []*sim.CardState{handTarget}}
+		handState := sim.NewTurnStateFromSpec(sim.TurnStateSpec{CardsRemaining: []*sim.CardState{handTarget}})
 		sim.ResolveChainStep(&handState, handState.Logger(), &sim.CardState{Card: tc.c})
 		if handTarget.BonusAttack != 0 {
 			t.Errorf("%s: hand-play target BonusAttack = %d, want 0", tc.c.Name(), handTarget.BonusAttack)
 		}
 		// Arsenal-played copy: the bonus must land on the next attack action.
 		arsenalTarget := &sim.CardState{Card: testutils.GenericAttack(0, 0)}
-		arsenalState := sim.TurnState{CardsRemaining: []*sim.CardState{arsenalTarget}}
+		arsenalState := sim.NewTurnStateFromSpec(sim.TurnStateSpec{CardsRemaining: []*sim.CardState{arsenalTarget}})
 		sim.ResolveChainStep(&arsenalState, arsenalState.Logger(), &sim.CardState{Card: tc.c, FromArsenal: true})
 		if arsenalTarget.BonusAttack != tc.n {
 			t.Errorf("%s: arsenal-play target BonusAttack = %d, want %d", tc.c.Name(), arsenalTarget.BonusAttack, tc.n)

@@ -14,10 +14,10 @@ func TestRunicReaping_NoNextAttackReturnsZero(t *testing.T) {
 		Card:          RunicReapingRed{},
 		PitchedToPlay: []sim.Card{testutils.AttackWithPower{Power: 4}},
 	})
-	if got := s.Value; got != 0 {
+	if got := s.Value(); got != 0 {
 		t.Fatalf("Play() = %d, want 0", got)
 	}
-	if s.AuraCreated {
+	if s.AuraCreated() {
 		t.Fatalf("AuraCreated should stay false when no rider fires")
 	}
 }
@@ -25,9 +25,9 @@ func TestRunicReaping_NoNextAttackReturnsZero(t *testing.T) {
 // Tests that a Runeblade weapon as the next attack does not satisfy either rider.
 func TestRunicReaping_WeaponNextDoesNotQualify(t *testing.T) {
 	target := &sim.CardState{Card: testutils.RunebladeWeapon{}}
-	s := sim.TurnState{CardsRemaining: []*sim.CardState{target}}
+	s := sim.NewTurnStateFromSpec(sim.TurnStateSpec{CardsRemaining: []*sim.CardState{target}})
 	sim.ResolveChainStep(&s, s.Logger(), &sim.CardState{Card: RunicReapingRed{}})
-	if got := s.Value; got != 0 {
+	if got := s.Value(); got != 0 {
 		t.Fatalf("Play() = %d, want 0", got)
 	}
 	if target.BonusAttack != 0 {
@@ -42,12 +42,12 @@ func TestRunicReaping_WeaponNextDoesNotQualify(t *testing.T) {
 // on-hit trigger.
 func TestRunicReaping_RegistersTriggerAndGrantsPitchedAttackBonus(t *testing.T) {
 	target := &sim.CardState{Card: testutils.AttackWithPower{Power: 3}}
-	s := sim.TurnState{CardsRemaining: []*sim.CardState{target}}
+	s := sim.NewTurnStateFromSpec(sim.TurnStateSpec{CardsRemaining: []*sim.CardState{target}})
 	(RunicReapingRed{}).Play(&s, s.Logger(), &sim.CardState{
 		Card:          RunicReapingRed{},
 		PitchedToPlay: []sim.Card{testutils.RunebladeAttack{}},
 	})
-	if got := s.Value; got != 0 {
+	if got := s.Value(); got != 0 {
 		t.Fatalf("Play() = %d, want 0 (Runechant rider deferred to target's OnHit)", got)
 	}
 	if target.BonusAttack != 1 {
@@ -62,12 +62,12 @@ func TestRunicReaping_RegistersTriggerAndGrantsPitchedAttackBonus(t *testing.T) 
 // still registers.
 func TestRunicReaping_NoPitchedAttackSkipsBonusButRegistersTrigger(t *testing.T) {
 	target := &sim.CardState{Card: testutils.AttackWithPower{Power: 4}}
-	s := sim.TurnState{CardsRemaining: []*sim.CardState{target}}
+	s := sim.NewTurnStateFromSpec(sim.TurnStateSpec{CardsRemaining: []*sim.CardState{target}})
 	(RunicReapingRed{}).Play(&s, s.Logger(), &sim.CardState{
 		Card:          RunicReapingRed{},
 		PitchedToPlay: []sim.Card{testutils.NonAttack{}},
 	})
-	if got := s.Value; got != 0 {
+	if got := s.Value(); got != 0 {
 		t.Fatalf("Play() = %d, want 0", got)
 	}
 	if target.BonusAttack != 0 {

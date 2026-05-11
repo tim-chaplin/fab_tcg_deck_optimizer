@@ -129,7 +129,7 @@ func TestMoonWish_GoAgainPlaysSunKissImmediately(t *testing.T) {
 		self := &sim.CardState{Card: MoonWishYellow{}, GrantedGoAgain: true}
 		sim.ResolveChainStep(s, s.Logger(), self)
 		testutils.FireOnHitIfLikely(s, s.Logger(), self)
-		dmg := s.Value
+		dmg := s.Value()
 		if dmg != 4+3 {
 			t.Errorf("with go-again: damage = %d, want 7 (Moon Wish 4 + Sun Kiss 3)", dmg)
 		}
@@ -146,7 +146,7 @@ func TestMoonWish_GoAgainPlaysSunKissImmediately(t *testing.T) {
 		self := &sim.CardState{Card: MoonWishYellow{}}
 		sim.ResolveChainStep(s, s.Logger(), self)
 		testutils.FireOnHitIfLikely(s, s.Logger(), self)
-		dmg := s.Value
+		dmg := s.Value()
 		if dmg != 4 {
 			t.Errorf("no go-again: damage = %d, want 4 (Sun Kiss not played)", dmg)
 		}

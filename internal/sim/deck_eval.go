@@ -302,7 +302,7 @@ func runOneShuffle(master *deck.Deck, scratch *shuffleScratch, stats *DeckStats,
 		}
 		arsenalIn := arsenalCard
 		sortHandByID(h)
-		play := runBestForTurn(hero, weapons, h, mp, d, TurnState{Arsenal: arsenalCard, Auras: auraTriggerBuf, Items: itemBuf, banished: banishBuf, graveyard: graveyardBuf, OpponentMarked: opponentMarked}, ev)
+		play := runBestForTurn(hero, weapons, h, mp, d, TurnState{Arsenal: arsenalCard, auras: auraTriggerBuf, Items: itemBuf, banished: banishBuf, graveyard: graveyardBuf, opponentMarked: opponentMarked}, ev)
 		arsenalCard = play.State.Arsenal
 		play.Value += trigDamage
 		play.TriggersFromLastTurn = trigContribs
@@ -310,7 +310,7 @@ func runOneShuffle(master *deck.Deck, scratch *shuffleScratch, stats *DeckStats,
 		play.DealtHand = dealtHand
 
 		if recordTurnStats(stats, play, handIdx, handsPerCycle) {
-			replay := replayBestForTurnWithLog(hero, weapons, h, mp, d, TurnState{Arsenal: arsenalIn, Auras: auraTriggerBuf, Items: itemBuf, banished: banishBuf, graveyard: graveyardBuf, OpponentMarked: opponentMarked}, ev)
+			replay := replayBestForTurnWithLog(hero, weapons, h, mp, d, TurnState{Arsenal: arsenalIn, auras: auraTriggerBuf, Items: itemBuf, banished: banishBuf, graveyard: graveyardBuf, opponentMarked: opponentMarked}, ev)
 			replay.Value = play.Value
 			replay.TriggersFromLastTurn = trigContribs
 			replay.StartOfTurnAuras = startOfTurnAuras
@@ -474,7 +474,7 @@ const startOfTurnRevealRoom = 8
 //     OncePerTurn gates.
 //   - Fires every TriggerStartOfTurn handler against a shared TurnState seeded with the
 //     post-draw deck, so handlers that peek the top read the card about to be revealed.
-//     Handlers that destroy themselves call s.DestroyAura, which splices ts.Auras
+//     Handlers that destroy themselves call s.DestroyAura, which splices ts.auras
 //     immediately and (when addToGraveyard) appends Self to the start-of-turn graveyard.
 //   - Leaves non-start-of-turn auras in place so they can fire mid-chain.
 //
@@ -498,12 +498,12 @@ func processAurasAtStartOfTurn(queued []Aura, d *deck.Deck) (
 	// Arknight will flip it via PopDeckTop, which mutates the eval-loop deck d directly.
 	// The cacheable result isn't currently consumed (callers don't read ts.IsCacheable)
 	// but routing through NewTurnState keeps the per-state semantics consistent with
-	// the rest of the framework. Adopting queued onto ts.Auras lets handlers'
+	// the rest of the framework. Adopting queued onto ts.auras lets handlers'
 	// s.DestroyAura splice the live list directly.
 	ts := NewTurnState(d, nil)
-	ts.Auras = queued
-	for i := 0; i < len(ts.Auras); {
-		t := &ts.Auras[i]
+	ts.auras = queued
+	for i := 0; i < len(ts.auras); {
+		t := &ts.auras[i]
 		// Re-arm the OncePerTurn gate before the start-of-turn fire so handlers that read
 		// FiredThisTurn see the cleared state.
 		t.FiredThisTurn = false
@@ -514,12 +514,12 @@ func processAurasAtStartOfTurn(queued []Aura, d *deck.Deck) (
 		self := t.Self.Card
 		preHand := len(ts.hand)
 		preLog := len(ts.logger.Entries())
-		preValue := ts.Value
+		preValue := ts.value
 		ts.currentAuraIdx = i
 		ts.currentAuraDestroyed = false
 		t.Handler(ts, ts.logger, &t.Trigger, t)
 		ts.currentAuraIdx = -1
-		d := ts.Value - preValue
+		d := ts.value - preValue
 		damage += d
 		// Attribute any newly-drawn card to this trigger so the best-turn printout can
 		// show what the handler drew (e.g. Sigil of the Arknight: "drew X into hand"). Taking
@@ -543,7 +543,7 @@ func processAurasAtStartOfTurn(queued []Aura, d *deck.Deck) (
 			i++
 		}
 	}
-	return ts.Auras, contribs, damage, ts.hand, ts.graveyard
+	return ts.auras, contribs, damage, ts.hand, ts.graveyard
 }
 
 // pitchedFromBestLine returns the cards in BestLine assigned the Pitch role (excluding the
