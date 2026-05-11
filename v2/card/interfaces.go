@@ -46,11 +46,12 @@ type GameEngine interface {
 	BanishFromGraveyard(func(Card) bool) (Card, bool)
 	Banished() []Card
 
-	// Auras / Triggers (opaque — cards still import sim to construct the concrete
-	// sim.Aura / sim.Trigger values these methods accept).
-	AddAura(any)
-	AddTrigger(any)
-	DestroyAura(any, bool)
+	// Auras / Triggers (opaque from v2/card's perspective — cards construct concrete
+	// values in whatever package owns the aura/trigger representation and pass them
+	// through the card.Aura / card.Trigger type-tags).
+	AddAura(Aura)
+	AddTrigger(Trigger)
+	DestroyAura(Aura, bool)
 
 	// Token economy
 	CreateRunechants(int)
@@ -148,3 +149,16 @@ type Logger interface {
 	AppendPreTriggerf(source string, n int, format string, args ...any)
 	AmendLastChainStepN(n int)
 }
+
+// Aura is the type-tag for aura values passed through the GameEngine surface
+// (AddAura / DestroyAura). v2/card treats auras as opaque — the engine doesn't
+// introspect them, only stores and hands them back to the firing pipeline.
+// Cards construct concrete aura values in whatever package owns the
+// representation (currently internal/sim; planned to move to its own v2 package)
+// and pass them through this interface.
+type Aura interface{}
+
+// Trigger is the type-tag for trigger values passed through GameEngine.AddTrigger.
+// Same shape as Aura: v2/card holds the contract, the implementation lives
+// elsewhere.
+type Trigger interface{}

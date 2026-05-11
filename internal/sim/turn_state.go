@@ -950,18 +950,18 @@ func (s *TurnState) AddToGraveyard(c card.Card) {
 
 // AddAura is the Play-side combo every Action - Aura card reaches for: flip
 // AuraCreated so same-turn "if you've played or created an aura" riders see the entry, and
-// append t to s.auras so the sim fires it on its matching TriggerType condition. Accepts
-// `any` so the method matches v2/card.GameEngine's sim-free interface; the concrete value
-// must be a sim.Aura.
-func (s *TurnState) AddAura(t any) {
+// append t to s.auras so the sim fires it on its matching TriggerType condition. Takes a
+// card.Aura type-tag so the method matches v2/card.GameEngine's contract; the concrete
+// value must be a sim.Aura.
+func (s *TurnState) AddAura(t card.Aura) {
 	s.auraCreated = true
 	s.auras = append(s.auras, t.(Aura))
 }
 
 // AddTrigger appends t to s.triggers. The sim fires t once on its matching TriggerType
-// condition then removes it. Accepts `any` for v2/card.GameEngine; concrete value must be
-// a sim.Trigger.
-func (s *TurnState) AddTrigger(t any) {
+// condition then removes it. Takes a card.Trigger type-tag; concrete value must be a
+// sim.Trigger.
+func (s *TurnState) AddTrigger(t card.Trigger) {
 	s.triggers = append(s.triggers, t.(Trigger))
 }
 
@@ -972,11 +972,11 @@ func (s *TurnState) AddTrigger(t any) {
 // CreateRunechants has appended a new aura since the handler started; a is read for
 // Self only and may legitimately point at the pre-realloc backing.
 //
-// Accepts `any` (concrete *sim.Aura) so the method matches v2/card.GameEngine.
+// Takes a card.Aura type-tag (concrete *sim.Aura) so the method matches v2/card.GameEngine.
 //
 // Direct graveyard append (no cacheable flip): destruction is deterministic from the
 // triggering event the sim already accounts for, not from hidden state.
-func (s *TurnState) DestroyAura(aIn any, addToGraveyard bool) {
+func (s *TurnState) DestroyAura(aIn card.Aura, addToGraveyard bool) {
 	a := aIn.(*Aura)
 	if addToGraveyard && a.Self.Card != nil {
 		s.graveyard = append(s.graveyard, a.Self.Card)
