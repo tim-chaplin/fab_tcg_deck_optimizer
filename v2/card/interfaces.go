@@ -83,7 +83,11 @@ type GameEngine interface {
 	// Clash (top-of-deck power compare)
 	Clash(win, lose func())
 
-	// Attack reaction target accessor
+	// Attack reaction target accessor.
+	// TODO: evaluate if we actually need this. It leaks an engine implementation
+	// detail (that the engine has to remember which attack is on the stack while
+	// it's processing attack reactions). A more natural shape would be passing the
+	// target directly into the AttackReaction's Play.
 	AttackReactionTarget() *CardState
 }
 
