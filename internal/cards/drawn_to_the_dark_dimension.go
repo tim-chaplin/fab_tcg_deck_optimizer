@@ -5,7 +5,7 @@
 // Draw a card."
 //
 // Cost reads s.Runechants() to return max(0, printed - Runechants) at play time; implements
-// sim.VariableCost with bounds [0, printed].
+// card.VariableCost with bounds [0, printed].
 //
 // The "Draw a card" rider fires unconditionally on play.
 

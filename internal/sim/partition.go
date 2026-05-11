@@ -15,7 +15,7 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
 )
 
-func (e *Evaluator) findBest(hero Hero, weapons []Weapon, hand []Card, mp Matchup, d *deck.Deck, prior TurnState, skipLog bool) TurnSummary {
+func (e *Evaluator) findBest(hero Hero, weapons []Weapon, hand []card.Card, mp Matchup, d *deck.Deck, prior TurnState, skipLog bool) TurnSummary {
 	// Cache fast-path. Bypassed when disabled (e.cache nil) or when any input overflows
 	// a fixed-size cache-key slot (hand size, weapons, auras, items).
 	var cacheKey evalCacheKey
@@ -57,7 +57,7 @@ func (e *Evaluator) findBest(hero Hero, weapons []Weapon, hand []Card, mp Matchu
 		IncomingDamage: mp.IncomingDamage,
 		Cacheable:      true,
 		State: CarryState{
-			Hand:    append([]Card(nil), hand...),
+			Hand:    append([]card.Card(nil), hand...),
 			Deck:    d.Copy(),
 			Arsenal: arsenalCardIn,
 			Auras:   append([]Aura(nil), prior.auras...),
@@ -219,7 +219,7 @@ func (e *Evaluator) findBest(hero Hero, weapons []Weapon, hand []Card, mp Matchu
 // When the promoted card matches a Held entry in BestLine, that entry's Role flips to
 // Arsenal so the per-card display still attributes the slot. Tutored cards (not in BestLine)
 // just live in State.Arsenal without a Role flip — there's no BestLine entry to update.
-func promoteRandomHandCardToArsenal(best *TurnSummary, startingHand []Card, arsenalCardIn Card) {
+func promoteRandomHandCardToArsenal(best *TurnSummary, startingHand []card.Card, arsenalCardIn card.Card) {
 	if len(best.State.Hand) == 0 {
 		return
 	}
@@ -254,7 +254,7 @@ func promoteRandomHandCardToArsenal(best *TurnSummary, startingHand []Card, arse
 // fills an empty arsenal slot. FNV-1a over the starting-hand IDs + state-Hand IDs + arsenal-
 // in ID — the only requirement is a uniform spread across bucket counts so the same hand
 // always picks the same slot.
-func arsenalPromotionHash(startingHand, stateHand []Card, arsenalCardIn Card) uint64 {
+func arsenalPromotionHash(startingHand, stateHand []card.Card, arsenalCardIn card.Card) uint64 {
 	const (
 		fnvOffsetBasis uint64 = 1469598103934665603
 		fnvPrime       uint64 = 1099511628211
@@ -277,7 +277,7 @@ func arsenalPromotionHash(startingHand, stateHand []Card, arsenalCardIn Card) ui
 
 // groupByRoleInto appends hand cards into caller-provided pitched/attackers/defenders slices
 // (passed pre-reset to length 0) to avoid per-partition heap allocation.
-func groupByRoleInto(hand []Card, roles []Role, pitched, attackers, defenders []Card) ([]Card, []Card, []Card) {
+func groupByRoleInto(hand []card.Card, roles []Role, pitched, attackers, defenders []card.Card) ([]card.Card, []card.Card, []card.Card) {
 	for i, c := range hand {
 		switch roles[i] {
 		case Pitch:
@@ -294,7 +294,7 @@ func groupByRoleInto(hand []Card, roles []Role, pitched, attackers, defenders []
 // gatherHeldCards appends every hand card with role Held into the caller-provided held slice
 // (passed pre-reset to length 0) and returns it. Threads the partition's Held set into
 // bestAttackWithWeapons so alt-cost effects can consult it via TurnState.Hand.
-func gatherHeldCards(hand []Card, roles []Role, held []Card) []Card {
+func gatherHeldCards(hand []card.Card, roles []Role, held []card.Card) []card.Card {
 	for i, c := range hand {
 		if roles[i] == Held {
 			held = append(held, c)
@@ -306,7 +306,7 @@ func gatherHeldCards(hand []Card, roles []Role, held []Card) []Card {
 // findArsenalCard returns the arsenal-in card when it stays in the arsenal slot, nil otherwise.
 // Hand cards never take Arsenal role during enumeration (post-hoc promotion handles that), so
 // the only slot that can be Arsenal is the arsenal-in slot at index n.
-func findArsenalCard(rolesBuf []Role, arsenalCardIn Card, n int) Card {
+func findArsenalCard(rolesBuf []Role, arsenalCardIn card.Card, n int) card.Card {
 	if arsenalCardIn != nil && rolesBuf[n] == Arsenal {
 		return arsenalCardIn
 	}
@@ -361,7 +361,7 @@ func roleAllowed(r Role, isArsenalSlot, isDefenseReaction, canAttack bool) bool 
 // Returns the per-DR cacheable status as a sticky bit — once a DR reads deck or graveyard
 // via the accessors, the partition's defense-phase output isn't safe to cache; aggregated up
 // through bestAttackWithWeapons.
-func defendersDamage(defenders, pitched []Card, deckPile *deck.Deck, state *TurnState, gravBuf []Card, cs *CardState, incomingDamage, blockBudget, arsenalDefenderIdx int) (int, []Card, bool) {
+func defendersDamage(defenders, pitched []card.Card, deckPile *deck.Deck, state *TurnState, gravBuf []card.Card, cs *card.CardState, incomingDamage, blockBudget, arsenalDefenderIdx int) (int, []card.Card, bool) {
 	total := 0
 	remaining := incomingDamage
 	cacheable := true
@@ -386,7 +386,7 @@ func defendersDamage(defenders, pitched []Card, deckPile *deck.Deck, state *Turn
 		// Copy the deck per DR so a DR's mid-Play deck mutations stay scoped — the next
 		// DR sees the original pre-DR deck order.
 		*state = TurnState{pitched: pitched, deck: deckPile.Copy(), graveyard: gravBuf, incomingDamage: remaining, cacheable: true, defenders: defenders, auras: preservedAuras, logger: preservedLogger}
-		*cs = CardState{Card: def, FromArsenal: i == arsenalDefenderIdx}
+		*cs = card.CardState{Card: def, FromArsenal: i == arsenalDefenderIdx}
 		ResolveChainStep(state, state.logger, cs)
 		total += state.value
 		remaining = state.incomingDamage
@@ -406,8 +406,8 @@ func defendersDamage(defenders, pitched []Card, deckPile *deck.Deck, state *Turn
 		}
 		bestMode, bestCost := pickBlockerMode(def, state, cs, blockBudget)
 		blockBudget -= bestCost
-		*cs = CardState{Card: def, Mode: bestMode}
-		if b, ok := def.(Blocker); ok {
+		*cs = card.CardState{Card: def, Mode: bestMode}
+		if b, ok := def.(card.Blocker); ok {
 			b.Block(state, state.logger, cs)
 		}
 		block := cs.EffectiveDefense()
@@ -427,16 +427,16 @@ func defendersDamage(defenders, pitched []Card, deckPile *deck.Deck, state *Turn
 // — the chain runner runs Block once at mode 0. Modal+BlockCost cards probe each mode by
 // running Block on the cs scratch with the candidate mode, observing the resulting
 // BonusDefense; the caller re-runs Block with the chosen mode for the actual contribution.
-func pickBlockerMode(d Card, state *TurnState, cs *CardState, blockBudget int) (int8, int) {
-	mc, ok := d.(ModalCard)
+func pickBlockerMode(d card.Card, state *TurnState, cs *card.CardState, blockBudget int) (int8, int) {
+	mc, ok := d.(card.ModalCard)
 	if !ok {
 		return 0, 0
 	}
-	bc, ok := d.(BlockCost)
+	bc, ok := d.(card.BlockCost)
 	if !ok {
 		return 0, 0
 	}
-	b, ok := d.(Blocker)
+	b, ok := d.(card.Blocker)
 	if !ok {
 		return 0, 0
 	}
@@ -448,7 +448,7 @@ func pickBlockerMode(d Card, state *TurnState, cs *CardState, blockBudget int) (
 		if cost > blockBudget {
 			continue
 		}
-		*cs = CardState{Card: d, Mode: mode}
+		*cs = card.CardState{Card: d, Mode: mode}
 		b.Block(state, state.logger, cs)
 		if cs.BonusDefense > bestBonus {
 			bestBonus = cs.BonusDefense
@@ -506,7 +506,7 @@ func splitPitchesAcrossPhases(pitchedVals []int, pmask, phaseCount int) phaseBud
 // The partition-leaf precompute uses this to decide whether the defense-phase pitch
 // enumeration needs to split budgets at all — no such cards means every pitch funds the
 // attack phase.
-func containsDefenseReaction(cards []Card) bool {
+func containsDefenseReaction(cards []card.Card) bool {
 	for _, c := range cards {
 		if attackerMetaPtrFor(c).actsAsDR {
 			return true
@@ -522,13 +522,13 @@ func containsDefenseReaction(cards []Card) bool {
 // without one keep the once-per-leaf defendersDamage shortcut. Defenders are short
 // (≤ 4 cards in practice), so the inline type-assertion chain stays cheap and fast-fails
 // on the BlockCost gate for the common no-modal-blocker case.
-func containsModalBlocker(cards []Card) bool {
+func containsModalBlocker(cards []card.Card) bool {
 	for _, c := range cards {
-		if _, ok := c.(BlockCost); !ok {
+		if _, ok := c.(card.BlockCost); !ok {
 			continue
 		}
-		if mc, ok := c.(ModalCard); ok && mc.Modes() > 1 {
-			if _, ok := c.(Blocker); ok {
+		if mc, ok := c.(card.ModalCard); ok && mc.Modes() > 1 {
+			if _, ok := c.(card.Blocker); ok {
 				return true
 			}
 		}

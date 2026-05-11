@@ -7,11 +7,11 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
-// Compile-time: the Drawn to the Dark Dimension variants must implement sim.VariableCost.
+// Compile-time: the Drawn to the Dark Dimension variants must implement card.VariableCost.
 var (
-	_ sim.VariableCost = DrawnToTheDarkDimensionRed{}
-	_ sim.VariableCost = DrawnToTheDarkDimensionYellow{}
-	_ sim.VariableCost = DrawnToTheDarkDimensionBlue{}
+	_ card.VariableCost = DrawnToTheDarkDimensionRed{}
+	_ card.VariableCost = DrawnToTheDarkDimensionYellow{}
+	_ card.VariableCost = DrawnToTheDarkDimensionBlue{}
 )
 
 func TestDrawnToTheDarkDimension_CostBounds(t *testing.T) {
@@ -21,9 +21,9 @@ func TestDrawnToTheDarkDimension_CostBounds(t *testing.T) {
 		DrawnToTheDarkDimensionBlue{},
 	}
 	for _, c := range cases {
-		vc, ok := c.(sim.VariableCost)
+		vc, ok := c.(card.VariableCost)
 		if !ok {
-			t.Fatalf("%s: does not implement sim.VariableCost", c.Name())
+			t.Fatalf("%s: does not implement card.VariableCost", c.Name())
 		}
 		if vc.MaxCost() != 2 {
 			t.Errorf("%s: MaxCost() = %d, want 2", c.Name(), vc.MaxCost())

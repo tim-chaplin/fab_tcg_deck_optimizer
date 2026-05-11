@@ -1,10 +1,13 @@
 package sim
 
+import (
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
+)
+
 // Entry points for hand evaluation. Best computes the optimal turn line for a given hand
 // against the supplied Matchup. The Evaluator type caches per-goroutine scratch state and
 // the optional hand-eval cache; concurrent callers construct one per goroutine.
-
-import "github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
 
 // best returns the optimal TurnSummary for the given hand against the matchup mp.
 // Equipped weapons may be swung for their Cost if resources allow.
@@ -23,13 +26,13 @@ import "github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
 // Package-private so external packages can't bypass EvalOneTurnForTesting — the turntests
 // convention is to drive the chain runner through that deck-level entry point so every test
 // exercises the same per-turn pipeline production runs through Evaluate.
-func best(hero Hero, weapons []Weapon, hand []Card, mp Matchup, d *deck.Deck, prior TurnState) TurnSummary {
+func best(hero Hero, weapons []Weapon, hand []card.Card, mp Matchup, d *deck.Deck, prior TurnState) TurnSummary {
 	return sharedEvaluator.Best(hero, weapons, hand, mp, d, prior)
 }
 
 // Best is the method form of the package-level Best. Returns a TurnSummary with
 // State.Log fully populated.
-func (e *Evaluator) Best(hero Hero, weapons []Weapon, hand []Card, mp Matchup, d *deck.Deck, prior TurnState) TurnSummary {
+func (e *Evaluator) Best(hero Hero, weapons []Weapon, hand []card.Card, mp Matchup, d *deck.Deck, prior TurnState) TurnSummary {
 	return e.findBest(hero, weapons, hand, mp, d, prior, false)
 }
 
@@ -37,7 +40,7 @@ func (e *Evaluator) Best(hero Hero, weapons []Weapon, hand []Card, mp Matchup, d
 // fields; State.Log comes back empty. The deck-eval loop uses this for every turn to skip
 // the per-chain Log slice copy that dominates allocation bytes; only turns that become the
 // new deck-best are replayed via Best to recover Log.
-func (e *Evaluator) BestSkipLog(hero Hero, weapons []Weapon, hand []Card, mp Matchup, d *deck.Deck, prior TurnState) TurnSummary {
+func (e *Evaluator) BestSkipLog(hero Hero, weapons []Weapon, hand []card.Card, mp Matchup, d *deck.Deck, prior TurnState) TurnSummary {
 	return e.findBest(hero, weapons, hand, mp, d, prior, true)
 }
 

@@ -13,6 +13,7 @@ import (
 	"sync"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
 )
 
@@ -208,12 +209,12 @@ func (ev *Evaluator) evaluateParallelImpl(d *deck.Deck, maxRuns int, mp Matchup,
 // (held / aura / item / banish / graveyard buffers) is alloc-free.
 type shuffleScratch struct {
 	weaponsBuf                      []Weapon
-	handBuf                         []Card
-	heldBuf, nextHeld               []Card
+	handBuf                         []card.Card
+	heldBuf, nextHeld               []card.Card
 	auraTriggerBuf, nextAuraTrigger []Aura
 	itemBuf, nextItem               []Item
-	banishBuf, nextBanish           []Card
-	graveyardBuf, nextGraveyard     []Card
+	banishBuf, nextBanish           []card.Card
+	graveyardBuf, nextGraveyard     []card.Card
 	presentBuf                      []bool
 	marginalBuf                     []CardMarginalStats
 }
@@ -225,17 +226,17 @@ type shuffleScratch struct {
 func newShuffleScratch(weaponCount, deckSize, handSize, numUniqueIDs int) *shuffleScratch {
 	return &shuffleScratch{
 		weaponsBuf:      make([]Weapon, weaponCount),
-		handBuf:         make([]Card, handSize, handSize+startOfTurnRevealRoom),
-		heldBuf:         make([]Card, 0, handSize),
-		nextHeld:        make([]Card, 0, handSize),
+		handBuf:         make([]card.Card, handSize, handSize+startOfTurnRevealRoom),
+		heldBuf:         make([]card.Card, 0, handSize),
+		nextHeld:        make([]card.Card, 0, handSize),
 		auraTriggerBuf:  make([]Aura, 0, handSize),
 		nextAuraTrigger: make([]Aura, 0, handSize),
 		itemBuf:         make([]Item, 0, 4),
 		nextItem:        make([]Item, 0, 4),
-		banishBuf:       make([]Card, 0, 4),
-		nextBanish:      make([]Card, 0, 4),
-		graveyardBuf:    make([]Card, 0, deckSize),
-		nextGraveyard:   make([]Card, 0, deckSize),
+		banishBuf:       make([]card.Card, 0, 4),
+		nextBanish:      make([]card.Card, 0, 4),
+		graveyardBuf:    make([]card.Card, 0, deckSize),
+		nextGraveyard:   make([]card.Card, 0, deckSize),
 		presentBuf:      make([]bool, numUniqueIDs),
 		marginalBuf:     make([]CardMarginalStats, numUniqueIDs),
 	}
@@ -260,7 +261,7 @@ func runOneShuffle(master *deck.Deck, scratch *shuffleScratch, stats *DeckStats,
 	}
 
 	handIdx := 0
-	var arsenalCard Card
+	var arsenalCard card.Card
 	var opponentMarked bool
 	heldBuf := scratch.heldBuf[:0]
 	auraTriggerBuf := scratch.auraTriggerBuf[:0]
@@ -284,18 +285,18 @@ func runOneShuffle(master *deck.Deck, scratch *shuffleScratch, stats *DeckStats,
 		copy(h, heldBuf)
 		drawn := d.Draw(drawCount)
 		for i, c := range drawn {
-			h[len(heldBuf)+i] = c.(Card)
+			h[len(heldBuf)+i] = c.(card.Card)
 		}
 		startingAuras := append([]Aura(nil), auraTriggerBuf...)
 		startingItems := append([]Item(nil), itemBuf...)
 		startOfTurnAuras := snapshotStartOfTurnAuras(auraTriggerBuf)
-		dealtHand := append([]Card(nil), h...)
+		dealtHand := append([]card.Card(nil), h...)
 		// processAurasAtStartOfTurn drives the deck through PopDeckTop on reveal-handling
 		// auras (Sigil of the Arknight). Pass d directly so reveals mutate the eval-loop
 		// deck in place — trigRevealed lists what got drawn.
 		var trigContribs []TriggerContribution
 		var trigDamage int
-		var trigRevealed []Card
+		var trigRevealed []card.Card
 		auraTriggerBuf, trigContribs, trigDamage, trigRevealed, _ = processAurasAtStartOfTurn(auraTriggerBuf, d)
 		for _, c := range trigRevealed {
 			h = append(h, c)
@@ -388,11 +389,11 @@ func finalizeBestTurnLog(stats *DeckStats) {
 // processAurasAtStartOfTurn fires and potentially destroys any. Token-style auras
 // (Runechants, …) are skipped: the formatter renders them separately. Returns nil when
 // the queue holds no card auras.
-func snapshotStartOfTurnAuras(queued []Aura) []Card {
+func snapshotStartOfTurnAuras(queued []Aura) []card.Card {
 	if len(queued) == 0 {
 		return nil
 	}
-	var out []Card
+	var out []card.Card
 	for _, t := range queued {
 		if t.Self.Card != nil {
 			out = append(out, t.Self.Card)
@@ -407,7 +408,7 @@ func snapshotStartOfTurnAuras(queued []Aura) []Card {
 func runBestForTurn(
 	hero Hero,
 	weapons []Weapon,
-	h []Card,
+	h []card.Card,
 	mp Matchup,
 	d *deck.Deck,
 	prior TurnState,
@@ -424,7 +425,7 @@ func runBestForTurn(
 func replayBestForTurnWithLog(
 	hero Hero,
 	weapons []Weapon,
-	h []Card,
+	h []card.Card,
 	mp Matchup,
 	d *deck.Deck,
 	prior TurnState,
@@ -488,8 +489,8 @@ func processAurasAtStartOfTurn(queued []Aura, d *deck.Deck) (
 	survivors []Aura,
 	contribs []TriggerContribution,
 	damage int,
-	revealed []Card,
-	graveyarded []Card,
+	revealed []card.Card,
+	graveyarded []card.Card,
 ) {
 	if len(queued) == 0 {
 		return queued[:0], nil, 0, nil, nil
@@ -525,7 +526,7 @@ func processAurasAtStartOfTurn(queued []Aura, d *deck.Deck) (
 		// show what the handler drew (e.g. Sigil of the Arknight: "drew X into hand"). Taking
 		// ts.hand[preHand] instead of counting from the end handles cascading draws where
 		// a later handler also draws — each trigger sees its own first-drawn card.
-		var rev Card
+		var rev card.Card
 		if len(ts.hand) > preHand {
 			rev = ts.hand[preHand]
 		}
@@ -555,8 +556,8 @@ func processAurasAtStartOfTurn(queued []Aura, d *deck.Deck) (
 // pick (different tie-break winner among optimal partitions), and without canonical
 // sorting the two paths' recycled decks would diverge by card position even though the
 // chain output is identical.
-func pitchedFromBestLine(line []CardAssignment) []Card {
-	var out []Card
+func pitchedFromBestLine(line []CardAssignment) []card.Card {
+	var out []card.Card
 	for _, a := range line {
 		if a.FromArsenal {
 			continue
@@ -576,7 +577,7 @@ func pitchedFromBestLine(line []CardAssignment) []Card {
 // Insertion sort instead of sort.SliceStable: hand sizes top out around 7 and the standard
 // library's reflection-based interface comparator is ~30% of the bench's wall-clock at
 // these sizes; insertion sort is stable and beats it handily for small N.
-func sortHandByID(hand []Card) {
+func sortHandByID(hand []card.Card) {
 	for i := 1; i < len(hand); i++ {
 		c := hand[i]
 		id := c.ID()
@@ -607,14 +608,14 @@ func recordBestTurn(stats *DeckStats, play TurnSummary, startingAuras []Aura, st
 		trigCopy = make([]TriggerContribution, len(play.TriggersFromLastTurn))
 		copy(trigCopy, play.TriggersFromLastTurn)
 	}
-	var aurasCopy []Card
+	var aurasCopy []card.Card
 	if len(play.StartOfTurnAuras) > 0 {
-		aurasCopy = make([]Card, len(play.StartOfTurnAuras))
+		aurasCopy = make([]card.Card, len(play.StartOfTurnAuras))
 		copy(aurasCopy, play.StartOfTurnAuras)
 	}
-	var dealtCopy []Card
+	var dealtCopy []card.Card
 	if len(play.DealtHand) > 0 {
-		dealtCopy = append([]Card(nil), play.DealtHand...)
+		dealtCopy = append([]card.Card(nil), play.DealtHand...)
 	}
 	stats.Best = BestTurn{
 		Summary: TurnSummary{
@@ -637,7 +638,7 @@ func recordBestTurn(stats *DeckStats, play TurnSummary, startingAuras []Aura, st
 // ran. presentBuf is a scratch slice indexed parallel to marginalBuf; the caller owns both
 // across turns to keep this path allocation-free. Operates entirely on slices so the inner
 // loop avoids the per-turn map churn a direct PerCardMarginal[id] update would cost.
-func tallyMarginalPresence(marginalBuf []CardMarginalStats, idIndex map[ids.CardID]int, presentBuf []bool, dealt []Card, arsenalIn Card, value float64) {
+func tallyMarginalPresence(marginalBuf []CardMarginalStats, idIndex map[ids.CardID]int, presentBuf []bool, dealt []card.Card, arsenalIn card.Card, value float64) {
 	if len(marginalBuf) == 0 {
 		return
 	}

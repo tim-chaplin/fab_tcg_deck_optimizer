@@ -1,6 +1,9 @@
 package sim
 
-import "github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
+import (
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
+)
 
 // evaluatePartition is the shared "given a fixed role assignment, score it" body used by
 // both findBest's recurse leaf (one of many partitions explored during the search) and
@@ -19,7 +22,7 @@ import "github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
 // Mutates the bufs scratch slices (pitchedBuf, attackersBuf, defendersBuf, heldBuf) in
 // place; both callers feed pooled scratch through bufs and tolerate the rewrite.
 func (e *Evaluator) evaluatePartition(
-	hero Hero, weapons []Weapon, hand []Card,
+	hero Hero, weapons []Weapon, hand []card.Card,
 	d *deck.Deck,
 	rolesBuf []Role, n int, bufs *attackBufs,
 	mp Matchup, defenseSum int,
@@ -28,7 +31,7 @@ func (e *Evaluator) evaluatePartition(
 	attackDealt, defenseDealt int,
 	swung []string, carry CarryState,
 	ok, cacheable bool,
-	arsenalAtChainStart Card,
+	arsenalAtChainStart card.Card,
 ) {
 	arsenalCardIn := prior.Arsenal
 	// Group hand cards into played / pitched / defending buckets, then fold in the

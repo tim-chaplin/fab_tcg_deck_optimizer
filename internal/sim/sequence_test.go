@@ -1,13 +1,15 @@
 package sim_test
 
 import (
-	. "github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 	"testing"
+
+	. "github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/heroes"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapons"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 func TestBest_ViseraiMaleficShrillCombo(t *testing.T) {
@@ -17,7 +19,7 @@ func TestBest_ViseraiMaleficShrillCombo(t *testing.T) {
 	// zero). Plus Viserai's runechant on Shrill, plus Shrill's 4+3 aura-bonus = 11. Future
 	// turns will keep ticking each Malefic for two more runes apiece, but those don't show
 	// up in this turn's Value.
-	h := []Card{
+	h := []card.Card{
 		cards.MaleficIncantationBlue{},
 		cards.MaleficIncantationRed{},
 		cards.MaleficIncantationRed{},
@@ -36,7 +38,7 @@ func TestBest_ViseraiReapingBladeBlueMalefics(t *testing.T) {
 	// don't fire here — the only attack is the weapon swing, which isn't an attack ACTION
 	// card. Value = 0 + 1 + 1 + 3 = 5. The 3 Malefic verse counters carry forward and pay
 	// out one rune apiece on future turns when an attack action lands.
-	h := []Card{
+	h := []card.Card{
 		cards.MaleficIncantationBlue{},
 		cards.MaleficIncantationBlue{},
 		cards.MaleficIncantationBlue{},
@@ -54,7 +56,7 @@ func TestBest_ViseraiReapingBladeMaleficsPlusShrill(t *testing.T) {
 	// Pitch 1 Blue Malefic (3 res), play 2 Blue Malefics (2 dmg + 1 Runechant), then Red Shrill
 	// (cost 2, 4+3 aura bonus + 1 Runechant = 8). Reaping Blade stays holstered — Shrill has no
 	// Go again, so nothing can follow it. Value = 2 + 1 + 8 = 11.
-	h := []Card{
+	h := []card.Card{
 		cards.MaleficIncantationBlue{},
 		cards.MaleficIncantationBlue{},
 		cards.MaleficIncantationBlue{},
@@ -74,7 +76,7 @@ func TestBest_ViseraiOathBlueHocusRedMalefic(t *testing.T) {
 	// bonus, +1 Viserai Runechant from prior non-attack action = 5). Swing Reaping Blade
 	// (cost 1, 3 dmg) — Malefic's trigger doesn't fire (weapon swings aren't attack ACTION
 	// cards). Value = 5 + 3 = 8. Future turns will tick Malefic when an attack action lands.
-	h := []Card{
+	h := []card.Card{
 		cards.HocusPocusBlue{},
 		cards.OathOfTheArknightRed{},
 		cards.MaleficIncantationRed{},
@@ -98,7 +100,7 @@ func TestBest_RunicReapingPrefersAttackPitch(t *testing.T) {
 	// Blue Malefic (1 arcane + 1 Viserai runechant = 2) → Runic Reaping (0 own damage + 1
 	// Viserai runechant = 1) → Shrill (4 base + 3 aura-created bonus + 1 BonusAttack = 8).
 	// Value = 2 + 1 + 8 = 11.
-	h := []Card{
+	h := []card.Card{
 		cards.HocusPocusBlue{},
 		cards.MaleficIncantationBlue{},
 		cards.RunicReapingRed{},
@@ -118,7 +120,7 @@ func TestBest_ViseraiMauvrionGrantsGoAgainToShrill(t *testing.T) {
 	// thanks to Mauvrion's grant). Swing Reaping Blade (cost 1, 3 dmg). Viserai fires +1 on
 	// Mauvrion (prior Malefic is a non-attack action) and +1 on Shrill (priors include non-attack
 	// actions). Value = 1 + 3 + 7 + 3 + 2 = 16.
-	h := []Card{
+	h := []card.Card{
 		cards.HocusPocusBlue{},
 		cards.MaleficIncantationBlue{},
 		cards.MauvrionSkiesRed{},
@@ -135,7 +137,7 @@ func TestBest_ViseraiMauvrionGrantsGoAgainToShrill(t *testing.T) {
 // Tests the resolution order: Viserai creates a Runechant on Drowning Dire's play →
 // DD gains Dominate → Mauvrion's OnAttack fires against the now-likely-to-hit attack.
 func TestBest_ViseraiMauvrionPredictsDrowningDireDominate(t *testing.T) {
-	h := []Card{
+	h := []card.Card{
 		cards.MauvrionSkiesRed{},
 		cards.DrowningDireRed{},
 		testutils.YellowAttack{},
@@ -152,7 +154,7 @@ func TestIsLegalOrder_MauvrionCantSaveShrillWhenRuneragerIsAhead(t *testing.T) {
 	// In the ordering Mauvrion → Runerager → Shrill → weapon, Runerager is that first match, so
 	// Shrill never gets the grant. Shrill has no printed go-again, so the Shrill → weapon chain
 	// must break — isLegalOrder rejects the ordering.
-	order := []Card{
+	order := []card.Card{
 		cards.MauvrionSkiesRed{},
 		cards.RuneragerSwarmRed{},
 		cards.ShrillOfSkullformRed{},
@@ -168,7 +170,7 @@ func TestIsLegalOrder_MauvrionCantSaveShrillWhenRuneragerIsAhead(t *testing.T) {
 func TestBest_ViseraiMauvrionChainsShrillIntoRuneragerIntoWeapon(t *testing.T) {
 	// Pitch Blue Hocus → Mauvrion → Shrill → Runerager → Reaping Blade. Value = 3+7+3+3+2 +
 	// Viserai runechants = 18.
-	h := []Card{
+	h := []card.Card{
 		cards.HocusPocusBlue{},
 		cards.MauvrionSkiesRed{},
 		cards.RuneragerSwarmRed{},
@@ -184,7 +186,7 @@ func TestBest_ViseraiMauvrionChainsShrillIntoRuneragerIntoWeapon(t *testing.T) {
 
 // Tests that state.Value equals the summed Play returns (no double-counting or drops).
 func TestBest_StateValueMatchesSummedReturns(t *testing.T) {
-	h := []Card{testutils.BlueAttack{}, testutils.BlueAttack{}, testutils.RedAttack{}, testutils.RedAttack{}}
+	h := []card.Card{testutils.BlueAttack{}, testutils.BlueAttack{}, testutils.RedAttack{}, testutils.RedAttack{}}
 	got := Best(testutils.Hero{Intel: 4}, nil, h, Matchup{IncomingDamage: 0}, nil, TurnState{})
 	if got.Value != 7 {
 		t.Errorf("Value = %d, want 7 (Blue 1 + Red 3 + Red 3 chain off one Blue pitch). Roles=[%s]",
@@ -196,7 +198,7 @@ func TestBest_StateValueMatchesSummedReturns(t *testing.T) {
 // applied in one permutation can't leak into a later permutation's checks.
 func TestBestSequence_CardStateGrantsDontLeakAcrossPermutations(t *testing.T) {
 	var sawLeak bool
-	attackers := []Card{testutils.GrantAll{}, testutils.GrantSpy{Saw: &sawLeak}, testutils.GrantAll{}}
+	attackers := []card.Card{testutils.GrantAll{}, testutils.GrantSpy{Saw: &sawLeak}, testutils.GrantAll{}}
 	ctx := NewSequenceContextForTest(testutils.Hero{Intel: 4}, nil, nil, 1_000_000, 0, len(attackers))
 	_, _, _ = ctx.BestSequence(attackers)
 	if sawLeak {
@@ -207,7 +209,7 @@ func TestBestSequence_CardStateGrantsDontLeakAcrossPermutations(t *testing.T) {
 // Tests that a non-Go-again attack followed by a non-Instant card rejects the chain — the
 // AP pool drains to 0 on the first card and the second can't pay its 1 AP cost.
 func TestPlaySequence_NonGoAgainStopsChain(t *testing.T) {
-	order := []Card{testutils.NoGoAgainAttackStub{}, testutils.NoGoAgainAttackStub{}}
+	order := []card.Card{testutils.NoGoAgainAttackStub{}, testutils.NoGoAgainAttackStub{}}
 	ctx := NewSequenceContextForTest(testutils.Hero{Intel: 4}, nil, nil, 1_000_000, 0, len(order))
 	if _, _, _, legal := ctx.PlaySequence(order); legal {
 		t.Fatalf("ordering %v should be illegal (no Go again grant after card 0)", testutils.CardNamesSim(order))
@@ -217,7 +219,7 @@ func TestPlaySequence_NonGoAgainStopsChain(t *testing.T) {
 // Tests that an Instant follow-up after a non-Go-again card resolves legally — Instants cost
 // 0 AP so the empty pool isn't a barrier.
 func TestPlaySequence_InstantBypassesAPRequirement(t *testing.T) {
-	order := []Card{testutils.NoGoAgainAttackStub{}, testutils.InstantStub{}}
+	order := []card.Card{testutils.NoGoAgainAttackStub{}, testutils.InstantStub{}}
 	ctx := NewSequenceContextForTest(testutils.Hero{Intel: 4}, nil, nil, 1_000_000, 0, len(order))
 	dmg, _, _, legal := ctx.PlaySequence(order)
 	if !legal {
@@ -232,7 +234,7 @@ func TestPlaySequence_InstantBypassesAPRequirement(t *testing.T) {
 // at 1 the whole way, and a non-Instant follow-up still works (which would fail if Instants
 // had silently consumed AP).
 func TestPlaySequence_InstantsDontConsumeAP(t *testing.T) {
-	order := []Card{testutils.InstantStub{}, testutils.InstantStub{}, testutils.NoGoAgainAttackStub{}}
+	order := []card.Card{testutils.InstantStub{}, testutils.InstantStub{}, testutils.NoGoAgainAttackStub{}}
 	ctx := NewSequenceContextForTest(testutils.Hero{Intel: 4}, nil, nil, 1_000_000, 0, len(order))
 	dmg, _, _, legal := ctx.PlaySequence(order)
 	if !legal {

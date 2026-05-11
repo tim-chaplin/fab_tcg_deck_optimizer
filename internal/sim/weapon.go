@@ -16,5 +16,5 @@ type Weapon interface {
 	Name() string
 	Types() card.TypeSet
 	Hands() int
-	Ability() Card
+	Ability() card.Card
 }

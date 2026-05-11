@@ -7,7 +7,7 @@ import (
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards/unplayable"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/registry"
 )
 
@@ -68,7 +68,7 @@ func TestSilverAgeBanlistParity(t *testing.T) {
 		if !banned[base] {
 			continue
 		}
-		if _, ok := c.(sim.NotSilverAgeLegal); !ok {
+		if _, ok := c.(registry.NotSilverAgeLegal); !ok {
 			t.Errorf("%s is on the Silver Age banlist but isn't tagged with NotSilverAgeLegal", c.Name())
 		}
 	}
@@ -98,16 +98,16 @@ func TestIsLegal(t *testing.T) {
 
 	// Sanity: the marker is present on the banned card and absent on the legal one. Guards
 	// against accidentally dropping the tag.
-	if _, ok := sim.Card(banned).(sim.NotSilverAgeLegal); !ok {
+	if _, ok := deck.Card(banned).(registry.NotSilverAgeLegal); !ok {
 		t.Fatal("BelittleRed: missing NotSilverAgeLegal marker")
 	}
-	if _, ok := sim.Card(legal).(sim.NotSilverAgeLegal); ok {
+	if _, ok := deck.Card(legal).(registry.NotSilverAgeLegal); ok {
 		t.Fatal("NimblismRed: has NotSilverAgeLegal marker but shouldn't")
 	}
 
 	cases := []struct {
 		f    Format
-		c    sim.Card
+		c    deck.Card
 		want bool
 	}{
 		{SilverAge, banned, false},
@@ -115,7 +115,7 @@ func TestIsLegal(t *testing.T) {
 	}
 	for _, tc := range cases {
 		if got := tc.f.IsLegal(tc.c); got != tc.want {
-			t.Errorf("Format(%q).IsLegal(%s) = %v, want %v", tc.f, tc.c.Name(), got, tc.want)
+			t.Errorf("Format(%q).IsLegal(%s) = %v, want %v", tc.f, tc.c.DisplayName(), got, tc.want)
 		}
 	}
 }

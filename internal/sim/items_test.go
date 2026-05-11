@@ -2,14 +2,16 @@ package sim
 
 import (
 	"testing"
+
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 // Tests that GoldTokenAbility.Play decrements Count and removes the entry at zero. Drives
 // Play directly because the optimizer credits no Value for spending Gold.
 func TestGoldAbility_PlaysDecrementsAndDestroys(t *testing.T) {
-	s := NewTurnStateFromCards([]Card{FakeRedAttack{}}, nil)
+	s := NewTurnStateFromCards([]card.Card{FakeRedAttack{}}, nil)
 	s.Items = []Item{NewGoldItem(1)}
-	ResolveChainStep(s, s.Logger(), &CardState{Card: GoldTokenAbility{}})
+	ResolveChainStep(s, s.Logger(), &card.CardState{Card: GoldTokenAbility{}})
 	if s.Gold() != 0 {
 		t.Fatalf("Gold = %d after spending the only token, want 0", s.Gold())
 	}
@@ -23,9 +25,9 @@ func TestGoldAbility_PlaysDecrementsAndDestroys(t *testing.T) {
 
 // Tests that spending one of multiple Gold tokens leaves the entry at decremented Count.
 func TestGoldAbility_PlayDecrementsCountWhenMultiple(t *testing.T) {
-	s := NewTurnStateFromCards([]Card{FakeRedAttack{}}, nil)
+	s := NewTurnStateFromCards([]card.Card{FakeRedAttack{}}, nil)
 	s.Items = []Item{NewGoldItem(3)}
-	ResolveChainStep(s, s.Logger(), &CardState{Card: GoldTokenAbility{}})
+	ResolveChainStep(s, s.Logger(), &card.CardState{Card: GoldTokenAbility{}})
 	if s.Gold() != 2 {
 		t.Fatalf("Gold = %d after spending 1 of 3, want 2", s.Gold())
 	}
@@ -33,9 +35,9 @@ func TestGoldAbility_PlayDecrementsCountWhenMultiple(t *testing.T) {
 
 // Tests SilverTokenAbility.Play decrement + draw behaviour, mirroring the Gold case.
 func TestSilverAbility_PlaysDecrementsAndDestroys(t *testing.T) {
-	s := NewTurnStateFromCards([]Card{FakeRedAttack{}}, nil)
+	s := NewTurnStateFromCards([]card.Card{FakeRedAttack{}}, nil)
 	s.Items = []Item{NewSilverItem(1)}
-	ResolveChainStep(s, s.Logger(), &CardState{Card: SilverTokenAbility{}})
+	ResolveChainStep(s, s.Logger(), &card.CardState{Card: SilverTokenAbility{}})
 	if s.Silver() != 0 {
 		t.Fatalf("Silver = %d after spending the only token, want 0", s.Silver())
 	}
@@ -49,9 +51,9 @@ func TestSilverAbility_PlaysDecrementsAndDestroys(t *testing.T) {
 
 // Tests CopperTokenAbility.Play decrement + draw behaviour, mirroring the Gold case.
 func TestCopperAbility_PlaysDecrementsAndDestroys(t *testing.T) {
-	s := NewTurnStateFromCards([]Card{FakeRedAttack{}}, nil)
+	s := NewTurnStateFromCards([]card.Card{FakeRedAttack{}}, nil)
 	s.Items = []Item{NewCopperItem(1)}
-	ResolveChainStep(s, s.Logger(), &CardState{Card: CopperTokenAbility{}})
+	ResolveChainStep(s, s.Logger(), &card.CardState{Card: CopperTokenAbility{}})
 	if s.Copper() != 0 {
 		t.Fatalf("Copper = %d after spending the only token, want 0", s.Copper())
 	}
@@ -83,7 +85,7 @@ func TestCreateSilverCopper_BumpsExistingEntry(t *testing.T) {
 // Tests that the eval cache fingerprints priorItems so calls with different gold
 // counts don't collide.
 func TestEvalCache_PriorItemsKeyedDistinctly(t *testing.T) {
-	hand := []Card{FakeRedAttack{}}
+	hand := []card.Card{FakeRedAttack{}}
 	ev := NewEvaluator()
 	mp := Matchup{IncomingDamage: 0}
 	_ = ev.Best(FakeHero{Intel: 4}, nil, hand, mp, nil, NewTurnStateFromSpec(TurnStateSpec{Items: []Item{NewGoldItem(1)}}))

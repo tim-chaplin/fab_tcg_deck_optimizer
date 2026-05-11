@@ -20,7 +20,7 @@ var OptDebug bool
 // with a "less {h} than an opposing hero" rider credit the rider when this returns true. Returns
 // false when no hero is set (tests, startup).
 func HeroWantsLowerHealth() bool {
-	_, ok := CurrentHero.(LowerHealthWanter)
+	_, ok := CurrentHero.(card.LowerHealthWanter)
 	return ok
 }
 

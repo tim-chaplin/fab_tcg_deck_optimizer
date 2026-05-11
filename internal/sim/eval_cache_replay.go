@@ -10,6 +10,7 @@ package sim
 import (
 	"fmt"
 
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
 )
 
@@ -26,7 +27,7 @@ import (
 // on the BestLine afterward.
 func (e *Evaluator) replayBest(
 	entry evalCacheEntry,
-	hero Hero, weapons []Weapon, hand []Card,
+	hero Hero, weapons []Weapon, hand []card.Card,
 	mp Matchup, d *deck.Deck,
 	prior TurnState, skipLog bool,
 ) TurnSummary {
@@ -117,7 +118,7 @@ func (e *Evaluator) replayBest(
 // Defend role — matching fillPartitionPerCardBufs's per-card dvals layout. Hand cards
 // that opt into ArsenalDefenseBonus don't get the bonus here because they aren't in the
 // arsenal slot; the bonus only applies to cards actually played from arsenal.
-func defenseSumFromRoles(hand []Card, arsenalCardIn Card, rolesBuf []Role, n int) int {
+func defenseSumFromRoles(hand []card.Card, arsenalCardIn card.Card, rolesBuf []Role, n int) int {
 	sum := 0
 	for i := 0; i < n; i++ {
 		if rolesBuf[i] == Defend {
@@ -125,7 +126,7 @@ func defenseSumFromRoles(hand []Card, arsenalCardIn Card, rolesBuf []Role, n int
 		}
 	}
 	if arsenalCardIn != nil && rolesBuf[n] == Defend {
-		sum += arsenalCardIn.Defense() + arsenalDefenseBonusOf(arsenalCardIn)
+		sum += arsenalCardIn.Defense() + card.ArsenalDefenseBonusOf(arsenalCardIn)
 	}
 	return sum
 }
@@ -139,7 +140,7 @@ func defenseSumFromRoles(hand []Card, arsenalCardIn Card, rolesBuf []Role, n int
 // Hand cards consume the remaining ID-matched roles in order. postPromotedFromHeld is set
 // to the hand index of a card whose cached role is Arsenal but FromArsenal=false (the
 // post-hoc promotion target); -1 if no such card exists.
-func mapCachedRolesToHand(cachedLine []CardAssignment, hand []Card, arsenalCardIn Card, rolesBuf []Role, postPromotedFromHeld *int) bool {
+func mapCachedRolesToHand(cachedLine []CardAssignment, hand []card.Card, arsenalCardIn card.Card, rolesBuf []Role, postPromotedFromHeld *int) bool {
 	*postPromotedFromHeld = -1
 	// First pass: pick out the FromArsenal=true entry (if any) and reserve it for the
 	// arsenal-in card. The rest stay available for hand-card matching.

@@ -1,11 +1,14 @@
 package sim
 
+import (
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
+)
+
 // Turn-summary data shapes returned by Best: Role, CardAssignment, TurnSummary, plus the
 // CarryState snapshot that captures the winning permutation's end-of-chain TurnState. The
 // deck loop adopts CarryState wholesale into the next turn's seed — no per-field
 // reconstruction.
-
-import "github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
 
 // Role is what a card did on a given turn cycle.
 type Role uint8
@@ -24,7 +27,7 @@ const (
 // CardAssignment is a single card + the role it took this turn. Hand cards produce one per
 // card; an arsenal-in card contributes one with FromArsenal set so a turn fits in one slice.
 type CardAssignment struct {
-	Card        Card
+	Card        card.Card
 	Role        Role
 	FromArsenal bool
 }
@@ -36,7 +39,7 @@ type CardAssignment struct {
 type CarryState struct {
 	// Hand is the cards in hand at end of chain — partition Held cards plus anything
 	// tutored or drawn that didn't get played. Becomes next turn's Held prefix.
-	Hand []Card
+	Hand []card.Card
 	// Deck is the deck at end of chain. Reflects every mid-chain mutation (DrawOne pops,
 	// tutor removals, alt-cost prepends). The eval loop adopts this directly as next
 	// turn's deck (`d = play.State.Deck`); each chain-runner call returns a fresh
@@ -44,12 +47,12 @@ type CarryState struct {
 	Deck *deck.Deck
 	// Arsenal is the arsenal slot at end of chain. Set by the partition (arsenal-in stayed),
 	// or filled post-hoc by promoting a Hand card when the slot is empty.
-	Arsenal Card
+	Arsenal card.Card
 	// Graveyard is every card that landed in the graveyard this turn — played hand cards,
 	// tutored-and-played cards, Auras that destroyed themselves.
-	Graveyard []Card
+	Graveyard []card.Card
 	// Banish is cards moved into the banished zone this turn.
-	Banish []Card
+	Banish []card.Card
 	// Auras is the surviving Aura set at end of chain — including the Runechant token aura
 	// when one is live. Carries across.
 	Auras []Aura
@@ -110,13 +113,13 @@ type TurnSummary struct {
 	TriggersFromLastTurn []TriggerContribution
 	// StartOfTurnAuras lists the aura cards that were in play at the top of this turn — one
 	// entry per Aura carried in from the previous turn.
-	StartOfTurnAuras []Card
+	StartOfTurnAuras []card.Card
 	// DealtHand is the hand the deck loop snapshotted right after the draw step, before
 	// processAurasAtStartOfTurn appended any reveal-handler outputs (Sigil of the
 	// Arknight). Solver-internal call paths leave this nil; the deck loop populates it so
 	// the printout's "Start of turn → Hand:" line reflects the dealt cards only, with
 	// reveals showing up under MyTurn where they actually resolve.
-	DealtHand []Card
+	DealtHand []card.Card
 	// IncomingDamage is the opponent damage the partition was scored against. Surfaced on
 	// the summary so format-time helpers (DR (+N) recompute) can reseed a fresh TurnState
 	// with the same value the simulator used.
@@ -140,9 +143,9 @@ type TurnSummary struct {
 // suffix synthesis. Handlers populate Text by calling state.AddPostTriggerLogEntry on
 // the trigger's TurnState, which processAurasAtStartOfTurn captures.
 type TriggerContribution struct {
-	Card     Card
+	Card     card.Card
 	Damage   int
-	Revealed Card
+	Revealed card.Card
 	Text     string
 }
 

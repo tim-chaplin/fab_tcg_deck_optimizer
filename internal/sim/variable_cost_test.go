@@ -1,19 +1,21 @@
 package sim_test
 
 import (
-	. "github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 	"testing"
+
+	. "github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/heroes"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapons"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 // Tests that playSequence flips ArcaneDamageDealt before calling Play when Runechants are
 // live, and leaves it false otherwise.
 func TestPlaySequence_SetsArcaneDamageDealtWhenRunechantsFire(t *testing.T) {
-	order := []Card{testutils.RedAttack{}}
+	order := []card.Card{testutils.RedAttack{}}
 
 	// No runechants → flag stays false.
 	ctx := NewSequenceContextForTest(heroes.Viserai{}, nil, nil, 10, 0, len(order))
@@ -34,7 +36,7 @@ func TestPlaySequence_SetsArcaneDamageDealtWhenRunechantsFire(t *testing.T) {
 // fails its per-play cost check when the sequence's resource budget can't cover the effective
 // cost.
 func TestPlaySequence_DiscountRejectsInsufficientBudget(t *testing.T) {
-	order := []Card{cards.AmplifyTheArknightRed{}} // printed cost 3, MinCost 0
+	order := []card.Card{cards.AmplifyTheArknightRed{}} // printed cost 3, MinCost 0
 	ctx := NewSequenceContextForTest(heroes.Viserai{}, nil, nil, 0, 0, len(order))
 	// Resource budget 0, carryover 0 → effective cost = 3 - 0 = 3 > 0, sequence illegal.
 	dmg, leftover, _, legal := ctx.PlaySequence(order)
@@ -46,7 +48,7 @@ func TestPlaySequence_DiscountRejectsInsufficientBudget(t *testing.T) {
 // TestPlaySequence_DiscountAffordableWithBudget shows the same card becomes legal once the
 // budget covers its printed cost.
 func TestPlaySequence_DiscountAffordableWithBudget(t *testing.T) {
-	order := []Card{cards.AmplifyTheArknightRed{}}
+	order := []card.Card{cards.AmplifyTheArknightRed{}}
 	ctx := NewSequenceContextForTest(heroes.Viserai{}, nil, nil, 3, 0, len(order))
 	// Resource budget 3, carryover 0 → effective cost 3, budget just covers it. Amplify's
 	// Attack(6) is the only damage; no runechants to consume.
@@ -65,7 +67,7 @@ func TestPlaySequence_DiscountAffordableWithBudget(t *testing.T) {
 // TestPlaySequence_DiscountUsesCarryoverRunechants shows the discount applies from carryover
 // tokens — no resource budget needed when there are enough runechants already in play.
 func TestPlaySequence_DiscountUsesCarryoverRunechants(t *testing.T) {
-	order := []Card{cards.AmplifyTheArknightRed{}}
+	order := []card.Card{cards.AmplifyTheArknightRed{}}
 	ctx := NewSequenceContextForTest(heroes.Viserai{}, nil, nil, 0, 3, len(order))
 	// Resource budget 0, carryover 3 → effective cost 3-3 = 0, legal. Damage is just Amplify's
 	// Attack(); the consumed carryover tokens aren't re-credited (they were credited on the
@@ -85,7 +87,7 @@ func TestPlaySequence_DiscountUsesCarryoverRunechants(t *testing.T) {
 // TestPlaySequence_LeftoverFromNonAttackAction confirms that runechants created by a non-attack
 // action with no following attack persist as leftover, and that their creation credits damage.
 func TestPlaySequence_LeftoverFromNonAttackAction(t *testing.T) {
-	order := []Card{cards.ReadTheRunesRed{}} // creates 3 runechants, not an attack
+	order := []card.Card{cards.ReadTheRunesRed{}} // creates 3 runechants, not an attack
 	ctx := NewSequenceContextForTest(heroes.Viserai{}, nil, nil, 0, 0, len(order))
 	dmg, leftover, _, legal := ctx.PlaySequence(order)
 	if !legal {
@@ -111,7 +113,7 @@ func withRunechants(n int) []Aura {
 // Tests carryover bookkeeping end-to-end with no starting runechants — every created token
 // is credited once and persists as leftover.
 func TestBest_MauvrionReadNoCarryover(t *testing.T) {
-	h := []Card{cards.MauvrionSkiesRed{}, cards.ReadTheRunesRed{}}
+	h := []card.Card{cards.MauvrionSkiesRed{}, cards.ReadTheRunesRed{}}
 	got := Best(heroes.Viserai{}, nil, h, Matchup{IncomingDamage: 0}, nil, TurnState{})
 	if got.Value != 4 {
 		t.Errorf("Value = %d, want 4 (3 Read tokens + 1 Viserai token)", got.Value)
@@ -126,7 +128,7 @@ func TestBest_MauvrionReadNoCarryover(t *testing.T) {
 // previous turn. The hand still creates 4 tokens this turn, and the 1 carryover token doesn't
 // get consumed (no attack in the chain), so leftover = 5.
 func TestBest_MauvrionReadWithCarryover(t *testing.T) {
-	h := []Card{cards.MauvrionSkiesRed{}, cards.ReadTheRunesRed{}}
+	h := []card.Card{cards.MauvrionSkiesRed{}, cards.ReadTheRunesRed{}}
 	got := Best(heroes.Viserai{}, nil, h, Matchup{IncomingDamage: 0}, nil, NewTurnStateFromSpec(TurnStateSpec{Auras: withRunechants(1)}))
 	if got.State.Runechants() != 5 {
 		t.Errorf("leftover Runechants = %d, want 5 (1 carryover + 4 created)", got.State.Runechants())
@@ -135,7 +137,7 @@ func TestBest_MauvrionReadWithCarryover(t *testing.T) {
 
 // Tests that an attack consumes a carryover runechant without re-crediting damage.
 func TestBest_AetherSlashAloneConsumesCarryover(t *testing.T) {
-	h := []Card{cards.AetherSlashRed{}}
+	h := []card.Card{cards.AetherSlashRed{}}
 	weapons := []Weapon{weapons.ReapingBlade{}}
 	got := Best(heroes.Viserai{}, weapons, h, Matchup{IncomingDamage: 0}, nil, NewTurnStateFromSpec(TurnStateSpec{Auras: withRunechants(1)}))
 	if got.Value != 3 {
@@ -148,7 +150,7 @@ func TestBest_AetherSlashAloneConsumesCarryover(t *testing.T) {
 
 // Tests that Blessing's start-of-turn-deferred runes don't appear in the same-turn chain.
 func TestBest_BlessingOfOccultTokensDoNotAffectSameTurnChain(t *testing.T) {
-	h := []Card{
+	h := []card.Card{
 		cards.MaleficIncantationRed{},
 		cards.BlessingOfOccultRed{},
 	}
@@ -165,7 +167,7 @@ func TestBest_BlessingOfOccultTokensDoNotAffectSameTurnChain(t *testing.T) {
 // Tests that a single carryover runechant covers Reduce's printed cost so it can defend with
 // no pitch.
 func TestBest_ReduceToRunechantAffordableWithCarryover(t *testing.T) {
-	h := []Card{cards.ReduceToRunechantRed{}}
+	h := []card.Card{cards.ReduceToRunechantRed{}}
 	got := Best(heroes.Viserai{}, nil, h, Matchup{IncomingDamage: 4}, nil, NewTurnStateFromSpec(TurnStateSpec{Auras: withRunechants(1)}))
 	if got.Value != 5 {
 		t.Errorf("Value = %d, want 5 (Reduce defends at cost 0 thanks to 1 carryover Runechant)", got.Value)
@@ -175,7 +177,7 @@ func TestBest_ReduceToRunechantAffordableWithCarryover(t *testing.T) {
 // Tests that solo Reduce with no carryover and no pitch source is unplayable, falling back to
 // a pitch (Value 0).
 func TestBest_ReduceToRunechantUnaffordableWithoutCarryover(t *testing.T) {
-	h := []Card{cards.ReduceToRunechantRed{}}
+	h := []card.Card{cards.ReduceToRunechantRed{}}
 	got := Best(heroes.Viserai{}, nil, h, Matchup{IncomingDamage: 4}, nil, TurnState{})
 	if got.Value != 0 {
 		t.Errorf("Value = %d, want 0 (Reduce can't pay its cost without Runechants or pitch)", got.Value)
@@ -185,7 +187,7 @@ func TestBest_ReduceToRunechantUnaffordableWithoutCarryover(t *testing.T) {
 // Tests that a variable-cost attack pays its full printed cost by pitch when no runechants
 // are available.
 func TestBest_DiscountAttackerPaysByPitchWithoutCarryover(t *testing.T) {
-	h := []Card{cards.AmplifyTheArknightRed{}, testutils.BlueAttack{}}
+	h := []card.Card{cards.AmplifyTheArknightRed{}, testutils.BlueAttack{}}
 	got := Best(testutils.Hero{Intel: 4}, nil, h, Matchup{IncomingDamage: 0}, nil, TurnState{})
 	if got.Value != 6 {
 		t.Errorf("Value = %d, want 6", got.Value)
@@ -194,7 +196,7 @@ func TestBest_DiscountAttackerPaysByPitchWithoutCarryover(t *testing.T) {
 
 // Tests that runechants cover part of the printed cost and a tight pitch covers the rest.
 func TestBest_DiscountAttackerPaysByPartialCarryoverAndTightPitch(t *testing.T) {
-	h := []Card{cards.AmplifyTheArknightRed{}, testutils.RedAttack{}}
+	h := []card.Card{cards.AmplifyTheArknightRed{}, testutils.RedAttack{}}
 	got := Best(testutils.Hero{Intel: 4}, nil, h, Matchup{IncomingDamage: 0}, nil, NewTurnStateFromSpec(TurnStateSpec{Auras: withRunechants(2)}))
 	if got.Value != 6 {
 		t.Errorf("Value = %d, want 6", got.Value)
@@ -204,7 +206,7 @@ func TestBest_DiscountAttackerPaysByPartialCarryoverAndTightPitch(t *testing.T) 
 // Tests that a variable-cost defense reaction pays its full printed cost by pitch when no
 // runechants are available.
 func TestBest_DiscountDefenderPaysByPitchWithoutCarryover(t *testing.T) {
-	h := []Card{cards.ReduceToRunechantRed{}, testutils.RedAttack{}}
+	h := []card.Card{cards.ReduceToRunechantRed{}, testutils.RedAttack{}}
 	got := Best(testutils.Hero{Intel: 4}, nil, h, Matchup{IncomingDamage: 4}, nil, TurnState{})
 	if got.Value != 5 {
 		t.Errorf("Value = %d, want 5", got.Value)
@@ -214,7 +216,7 @@ func TestBest_DiscountDefenderPaysByPitchWithoutCarryover(t *testing.T) {
 // Tests end-to-end that a hand containing a discount attacker is playable iff carryover
 // runechants cover the printed cost.
 func TestBest_CarryoverFeedsDiscount(t *testing.T) {
-	h := []Card{cards.AmplifyTheArknightRed{}}
+	h := []card.Card{cards.AmplifyTheArknightRed{}}
 	got := Best(testutils.Hero{Intel: 4}, nil, h, Matchup{IncomingDamage: 0}, nil, TurnState{})
 	if got.Value != 0 {
 		t.Errorf("no carryover: Value = %d, want 0 (discount insufficient without runechants)", got.Value)

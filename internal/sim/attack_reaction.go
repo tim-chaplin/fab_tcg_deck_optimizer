@@ -1,5 +1,9 @@
 package sim
 
+import (
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
+)
+
 // Attack Reaction support. See docs/dev-standards.md "Attack Reactions".
 
 // AttackReaction is implemented by every Attack Reaction card. ARTargetAllowed reports
@@ -8,13 +12,13 @@ package sim
 // target text becomes its own predicate leg, and the chain runner rejects the permutation
 // when the chosen mode doesn't accept the active attack.
 type AttackReaction interface {
-	ARTargetAllowed(c Card, mode int8) bool
+	ARTargetAllowed(c card.Card, mode int8) bool
 }
 
 // GrantAttackReactionBuff buffs the active attack target by n: adds to BonusAttack, credits
 // g's value, amends the target's chain-step delta, and logs the rider under the target's
 // entry. Cards call this from Play; the chain runner has already validated the target.
-func GrantAttackReactionBuff(g GameEngine, l Logger, self *CardState, n int) {
+func GrantAttackReactionBuff(g card.GameEngine, l card.Logger, self *card.CardState, n int) {
 	target := g.AttackReactionTarget()
 	if target == nil {
 		return

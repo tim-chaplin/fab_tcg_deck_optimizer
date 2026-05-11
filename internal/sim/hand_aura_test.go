@@ -2,6 +2,8 @@ package sim
 
 import (
 	"testing"
+
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 // Tests that an OncePerTurn AttackAction trigger fires on the first call and is gated by
@@ -12,7 +14,7 @@ func TestFireAttackActionAuras_FiresOnceWhenGated(t *testing.T) {
 	state := NewTurnStatePtr(TurnStateSpec{Auras: []Aura{{
 		Trigger: Trigger{
 			TriggerType: TriggerAttackAction,
-			Handler: func(s GameEngine, l Logger, _ *Trigger, _ *Aura) {
+			Handler: func(s card.GameEngine, l card.Logger, _ *Trigger, _ *Aura) {
 				calls++
 				s.AddValue(1)
 				l.AppendPreTriggerf("TestCard", 1, "test trigger fired")
@@ -49,7 +51,7 @@ func TestFireAttackActionAuras_GraveyardsExhaustedAura(t *testing.T) {
 	state := NewTurnStatePtr(TurnStateSpec{Auras: []Aura{{
 		Trigger: Trigger{
 			TriggerType: TriggerAttackAction,
-			Handler: func(s GameEngine, _ Logger, _ *Trigger, a *Aura) {
+			Handler: func(s card.GameEngine, _ card.Logger, _ *Trigger, a *Aura) {
 				s.AddValue(1)
 				s.DestroyAura(a, true)
 			},
@@ -76,7 +78,7 @@ func TestFireAttackActionAuras_PassesThroughNonAttackActionTriggers(t *testing.T
 	state := NewTurnStatePtr(TurnStateSpec{Auras: []Aura{{
 		Trigger: Trigger{
 			TriggerType: TriggerStartOfTurn,
-			Handler:     func(GameEngine, Logger, *Trigger, *Aura) { calls++ },
+			Handler:     func(card.GameEngine, card.Logger, *Trigger, *Aura) { calls++ },
 		},
 		Self:  CardOrTokenType{Card: aura},
 		Count: 1,

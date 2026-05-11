@@ -11,21 +11,21 @@ import (
 // the printed Defense (2); mode 1 costs 1 and contributes Defense + 2.
 type modalBlocker struct{}
 
-func (modalBlocker) ID() ids.CardID      { return ids.InvalidCard }
-func (modalBlocker) Name() string        { return "modalBlocker" }
-func (modalBlocker) DisplayName() string { return "modalBlocker" }
-func (modalBlocker) Cost(GameEngine) int { return 0 }
-func (modalBlocker) Pitch() int          { return 0 }
-func (modalBlocker) Attack() int         { return 0 }
-func (modalBlocker) Defense() int        { return 2 }
+func (modalBlocker) ID() ids.CardID           { return ids.InvalidCard }
+func (modalBlocker) Name() string             { return "modalBlocker" }
+func (modalBlocker) DisplayName() string      { return "modalBlocker" }
+func (modalBlocker) Cost(card.GameEngine) int { return 0 }
+func (modalBlocker) Pitch() int               { return 0 }
+func (modalBlocker) Attack() int              { return 0 }
+func (modalBlocker) Defense() int             { return 2 }
 func (modalBlocker) Types() card.TypeSet {
 	return card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 }
-func (modalBlocker) GoAgain() bool                       { return false }
-func (modalBlocker) Modes() int                          { return 2 }
-func (modalBlocker) BlockCost(mode int8) int             { return int(mode) }
-func (modalBlocker) Play(GameEngine, Logger, *CardState) {}
-func (modalBlocker) Block(_ GameEngine, _ Logger, self *CardState) {
+func (modalBlocker) GoAgain() bool                                      { return false }
+func (modalBlocker) Modes() int                                         { return 2 }
+func (modalBlocker) BlockCost(mode int8) int                            { return int(mode) }
+func (modalBlocker) Play(card.GameEngine, card.Logger, *card.CardState) {}
+func (modalBlocker) Block(_ card.GameEngine, _ card.Logger, self *card.CardState) {
 	if self.Mode == 1 {
 		self.BonusDefense += 2
 	}
@@ -35,7 +35,7 @@ func (modalBlocker) Block(_ GameEngine, _ Logger, self *CardState) {
 func TestModalBlocker_FiresWhenBudgetCovers(t *testing.T) {
 	bufs := NewAttackBufs(2, 0, nil)
 	got, _ := DefendersDamageWithBudget(
-		[]Card{modalBlocker{}},
+		[]card.Card{modalBlocker{}},
 		nil, nil,
 		bufs.State(),
 		bufs.DefenseGravScratch(),
@@ -52,7 +52,7 @@ func TestModalBlocker_FiresWhenBudgetCovers(t *testing.T) {
 func TestModalBlocker_FallsBackToMode0WhenBudgetTight(t *testing.T) {
 	bufs := NewAttackBufs(2, 0, nil)
 	got, _ := DefendersDamageWithBudget(
-		[]Card{modalBlocker{}},
+		[]card.Card{modalBlocker{}},
 		nil, nil,
 		bufs.State(),
 		bufs.DefenseGravScratch(),

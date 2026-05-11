@@ -1,24 +1,26 @@
 package sim_test
 
 import (
-	. "github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 	"testing"
+
+	. "github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/heroes"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 // Tests that state.deck and state.hand are reset between permutations so a draw in one
 // permutation doesn't poison the next.
 func TestPlaySequence_DrawDoesNotPoisonSubsequentPermutations(t *testing.T) {
 	top := testutils.RedAttack{}
-	deck := []Card{top, testutils.BlueAttack{}, testutils.RedAttack{}}
+	deck := []card.Card{top, testutils.BlueAttack{}, testutils.RedAttack{}}
 	ctx := NewSequenceContextForTest(heroes.Viserai{}, nil, deck, 10, 0, 1)
 
 	// First permutation: Snatch fires, DrawOne pops the top of the deck into Hand.
-	_, _, _, _ = ctx.PlaySequence([]Card{cards.SnatchRed{}})
+	_, _, _, _ = ctx.PlaySequence([]card.Card{cards.SnatchRed{}})
 	if h := ctx.Bufs().State().Hand(); len(h) != 1 || h[0] != top {
 		t.Fatalf("after first permutation: Hand = %v, want [top]", h)
 	}
@@ -29,7 +31,7 @@ func TestPlaySequence_DrawDoesNotPoisonSubsequentPermutations(t *testing.T) {
 
 	// Second permutation: plain attack, no draw. The reset at the top of playSequenceWithMeta
 	// must restore state.deck to the original and clear state.hand before this call runs.
-	_, _, _, _ = ctx.PlaySequence([]Card{testutils.RedAttack{}})
+	_, _, _, _ = ctx.PlaySequence([]card.Card{testutils.RedAttack{}})
 	if h := ctx.Bufs().State().Hand(); len(h) != 0 {
 		t.Errorf("after second permutation: Hand = %v, want empty (reset lost)", h)
 	}
@@ -43,14 +45,14 @@ func TestPlaySequence_DrawDoesNotPoisonSubsequentPermutations(t *testing.T) {
 // contents the solver actually receives — two Best calls with identical hands but different
 // decks must report distinct end-of-turn State.Hand contents (the cards drawn off the top).
 func TestBest_DrawRiderSeesActualDeck(t *testing.T) {
-	h := []Card{cards.SnatchRed{}}
+	h := []card.Card{cards.SnatchRed{}}
 	deckA := DeckOf(testutils.RedAttack{})
 	deckB := DeckOf(testutils.BlueAttack{})
 
 	resA := Best(heroes.Viserai{}, nil, h, Matchup{IncomingDamage: 0}, deckA, TurnState{})
 	resB := Best(heroes.Viserai{}, nil, h, Matchup{IncomingDamage: 0}, deckB, TurnState{})
 
-	containsID := func(cs []Card, id ids.CardID) bool {
+	containsID := func(cs []card.Card, id ids.CardID) bool {
 		for _, c := range cs {
 			if c.ID() == id {
 				return true
@@ -71,7 +73,7 @@ func TestBest_DrawRiderSeesActualDeck(t *testing.T) {
 // Tests an information-leak invariant: with a hand containing a "draw a card" action, the
 // chosen hand roles must not depend on Deck[0] — the player commits before seeing the draw.
 func TestBest_DeckOrderDoesNotAffectHandRoles(t *testing.T) {
-	h := []Card{testutils.CostlyDraw{}, testutils.CostlyAttack{}, testutils.PitchOneDR{}}
+	h := []card.Card{testutils.CostlyDraw{}, testutils.CostlyAttack{}, testutils.PitchOneDR{}}
 	deckA := DeckOf(testutils.HugeAttack{}, testutils.PitchOneDR{})
 	deckB := DeckOf(testutils.PitchOneDR{}, testutils.HugeAttack{})
 

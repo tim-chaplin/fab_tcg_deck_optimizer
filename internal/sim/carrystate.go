@@ -1,5 +1,9 @@
 package sim
 
+import (
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
+)
+
 // CarryState's reuse / clone helpers. CarryState owns its slice fields, so the methods
 // that copy it from various sources or duplicate it for ownership transfer live with the
 // type — adding a new persistent field means updating one method per helper.
@@ -84,16 +88,16 @@ func (c CarryState) Clone() CarryState {
 		OpponentMarked: c.OpponentMarked,
 	}
 	if len(c.Hand) > 0 {
-		out.Hand = append([]Card(nil), c.Hand...)
+		out.Hand = append([]card.Card(nil), c.Hand...)
 	}
 	if c.Deck != nil {
 		out.Deck = c.Deck.Copy()
 	}
 	if len(c.Graveyard) > 0 {
-		out.Graveyard = append([]Card(nil), c.Graveyard...)
+		out.Graveyard = append([]card.Card(nil), c.Graveyard...)
 	}
 	if len(c.Banish) > 0 {
-		out.Banish = append([]Card(nil), c.Banish...)
+		out.Banish = append([]card.Card(nil), c.Banish...)
 	}
 	if len(c.Auras) > 0 {
 		out.Auras = append([]Aura(nil), c.Auras...)

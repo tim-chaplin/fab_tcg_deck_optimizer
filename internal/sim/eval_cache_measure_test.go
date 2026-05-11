@@ -25,6 +25,7 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/deckio"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/heroes"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 // loadRealDeck reads mydecks/viserai_v4.json from somewhere up the directory tree.
@@ -133,7 +134,7 @@ func TestEvalCache_ParallelEquivalentToSequential(t *testing.T) {
 // Tests that ResetCache drops cache entries while preserving the hit/miss counters.
 func TestEvalCache_ResetCache(t *testing.T) {
 	ev := NewEvaluator()
-	hand := []Card{cards.MaleficIncantationBlue{}, cards.MaleficIncantationBlue{}}
+	hand := []card.Card{cards.MaleficIncantationBlue{}, cards.MaleficIncantationBlue{}}
 
 	// First call populates the cache (miss + store).
 	ev.Best(heroes.Viserai{}, nil, hand, Matchup{IncomingDamage: 0}, nil, TurnState{})
@@ -168,7 +169,7 @@ func TestEvalCache_ResetCache(t *testing.T) {
 
 // Tests that cached and uncached Best produce equal Value for the same hand inputs.
 func TestEvalCache_PerHandEquivalence(t *testing.T) {
-	hands := [][]Card{
+	hands := [][]card.Card{
 		{cards.SkyFireLanternsRed{}, cards.MaleficIncantationBlue{}},
 		{cards.MoonWishYellow{}, cards.FlyingHighRed{}},
 		{cards.RavenousRabbleRed{}, cards.RavenousRabbleRed{}},

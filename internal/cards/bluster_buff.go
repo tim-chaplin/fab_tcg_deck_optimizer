@@ -2,7 +2,7 @@
 //
 // Text: "When this attacks, it gets -1{p} unless you pay {r}."
 //
-// Two modes via sim.ModalCard + sim.ModalCost: mode 0 pays the printed 1{r} for 5{p};
+// Two modes via card.ModalCard + card.ModalCost: mode 0 pays the printed 1{r} for 5{p};
 // mode 1 spends an extra {r} for the full 6{p}. The chain runner enumerates both and
 // picks the higher-Value tuple per partition.
 

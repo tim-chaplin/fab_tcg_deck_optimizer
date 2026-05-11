@@ -1,5 +1,9 @@
 package sim
 
+import (
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
+)
+
 // Item is a permanent in play with an activated ability the player chooses to play during
 // their turn. Each turn the chain runner enqueues the Ability() Card as a playable option
 // (1 AP, pays the printed activation cost; the Ability's Play decrements Count and removes
@@ -17,7 +21,7 @@ type Item struct {
 	// ability's Play calls back into TurnState (e.g. ConsumeItem) to decrement Count and
 	// destroy this entry when Count reaches zero. Token items don't head to the graveyard
 	// on destroy.
-	Ability Card
+	Ability card.Card
 }
 
 // itemCountIn returns the Count of the item entry matching token type t, or zero.

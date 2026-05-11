@@ -2,6 +2,8 @@ package sim
 
 import (
 	"testing"
+
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 // Tests that an end-of-turn Trigger fires once and is removed.
@@ -10,7 +12,7 @@ func TestFireEndOfTurn_FiresOnceAndRemoves(t *testing.T) {
 	calls := 0
 	s.AddTrigger(Trigger{
 		TriggerType: TriggerEndOfTurn,
-		Handler:     func(_ GameEngine, _ Logger, _ *Trigger, _ *Aura) { calls++ },
+		Handler:     func(_ card.GameEngine, _ card.Logger, _ *Trigger, _ *Aura) { calls++ },
 	})
 	FireEndOfTurn(s)
 	if calls != 1 {
@@ -27,7 +29,7 @@ func TestFireEndOfTurn_LeavesNonMatchingType(t *testing.T) {
 	calls := 0
 	s.AddTrigger(Trigger{
 		TriggerType: TriggerAttack,
-		Handler:     func(_ GameEngine, _ Logger, _ *Trigger, _ *Aura) { calls++ },
+		Handler:     func(_ card.GameEngine, _ card.Logger, _ *Trigger, _ *Aura) { calls++ },
 	})
 	FireEndOfTurn(s)
 	if calls != 0 {
@@ -45,11 +47,11 @@ func TestFireEndOfTurn_HandlerAddTriggerSafeReentry(t *testing.T) {
 	calls := 0
 	s.AddTrigger(Trigger{
 		TriggerType: TriggerEndOfTurn,
-		Handler: func(s GameEngine, _ Logger, _ *Trigger, _ *Aura) {
+		Handler: func(s card.GameEngine, _ card.Logger, _ *Trigger, _ *Aura) {
 			calls++
 			s.AddTrigger(Trigger{
 				TriggerType: TriggerEndOfTurn,
-				Handler:     func(_ GameEngine, _ Logger, _ *Trigger, _ *Aura) { calls++ },
+				Handler:     func(_ card.GameEngine, _ card.Logger, _ *Trigger, _ *Aura) { calls++ },
 			})
 		},
 	})

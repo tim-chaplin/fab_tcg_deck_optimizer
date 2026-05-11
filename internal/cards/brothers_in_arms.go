@@ -3,7 +3,7 @@
 //
 // Text: "When this defends, you may pay {r}. If you do, it gets +2{d}."
 //
-// Two block-time modes via sim.ModalCard + sim.BlockCost: mode 0 spends nothing for the
+// Two block-time modes via card.ModalCard + card.BlockCost: mode 0 spends nothing for the
 // printed 2{d}; mode 1 spends 1{r} for 4{d}. The chain runner enumerates both and picks
 // the higher-defense mode that fits the partition's spare defense budget.
 

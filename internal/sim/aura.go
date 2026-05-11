@@ -1,6 +1,9 @@
 package sim
 
-import "github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+import (
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
+)
 
 // Aura is a persistent hook attached to a card or a token in play. The sim walks each
 // TurnState's Auras list on every Trigger condition and fires the matching handlers;
@@ -40,7 +43,7 @@ const (
 // aura token. Exactly one of Card / TokenType is set; the other carries its zero value.
 type CardOrTokenType struct {
 	// Card is the originating card for non-token auras. nil for token auras.
-	Card Card
+	Card card.Card
 	// TokenType identifies the token kind for token auras. TokenTypeNone for card auras.
 	TokenType TokenType
 }

@@ -3,6 +3,7 @@ package sim
 import (
 	"math/rand"
 
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
 )
 
@@ -15,14 +16,14 @@ import (
 
 // Best re-exports the package-private best for sim_test consumers. External-package
 // (turntests) callers don't see this — only sim_test files in the same directory do.
-func Best(hero Hero, weapons []Weapon, hand []Card, mp Matchup, d *deck.Deck, prior TurnState) TurnSummary {
+func Best(hero Hero, weapons []Weapon, hand []card.Card, mp Matchup, d *deck.Deck, prior TurnState) TurnSummary {
 	return best(hero, weapons, hand, mp, d, prior)
 }
 
 // DeckOf builds a *deck.Deck from a list of sim.Cards. Test-only convenience for tests
 // that want to seed a TurnState or chain runner without writing the type-conversion loop
 // inline.
-func DeckOf(cards ...Card) *deck.Deck {
+func DeckOf(cards ...card.Card) *deck.Deck {
 	dc := make([]deck.Card, len(cards))
 	for i, c := range cards {
 		dc[i] = c
@@ -37,22 +38,22 @@ type SequenceContextForTest struct{ ctx *sequenceContext }
 
 // NewSequenceContextForTest builds a sequenceContext with the same shape as the
 // in-package newSequenceContextForTest helper.
-func NewSequenceContextForTest(h Hero, pitched, deck []Card, resourceBudget, runechantCarryover, chainLen int) *SequenceContextForTest {
+func NewSequenceContextForTest(h Hero, pitched, deck []card.Card, resourceBudget, runechantCarryover, chainLen int) *SequenceContextForTest {
 	return &SequenceContextForTest{ctx: newSequenceContextForTest(h, pitched, deck, resourceBudget, runechantCarryover, chainLen)}
 }
 
 // PlaySequence wraps (*sequenceContext).playSequence.
-func (s *SequenceContextForTest) PlaySequence(order []Card) (damage int, futureValue int, residualBudget int, legal bool) {
+func (s *SequenceContextForTest) PlaySequence(order []card.Card) (damage int, futureValue int, residualBudget int, legal bool) {
 	return s.ctx.playSequence(order)
 }
 
 // BestSequence wraps (*sequenceContext).bestSequence.
-func (s *SequenceContextForTest) BestSequence(attackers []Card) (int, int, bool) {
+func (s *SequenceContextForTest) BestSequence(attackers []card.Card) (int, int, bool) {
 	return s.ctx.bestSequence(attackers)
 }
 
 // FireAttackActionAuras re-exports fireAttackActionAuras for sim_test consumers.
-func FireAttackActionAuras(state *TurnState, triggeringCard Card) {
+func FireAttackActionAuras(state *TurnState, triggeringCard card.Card) {
 	fireAttackActionAuras(state, triggeringCard)
 }
 
@@ -61,7 +62,7 @@ func FireEndOfTurn(state *TurnState) { fireEndOfTurn(state) }
 
 // PromoteRandomHandCardToArsenal re-exports promoteRandomHandCardToArsenal for sim_test
 // consumers exercising the post-hoc arsenal-promotion path in isolation.
-func PromoteRandomHandCardToArsenal(best *TurnSummary, startingHand []Card, arsenalCardIn Card) {
+func PromoteRandomHandCardToArsenal(best *TurnSummary, startingHand []card.Card, arsenalCardIn card.Card) {
 	promoteRandomHandCardToArsenal(best, startingHand, arsenalCardIn)
 }
 
@@ -81,14 +82,14 @@ func AppendGroupedChainEntries(out []string, log []LogEntry) []string {
 // DefendersDamage re-exports defendersDamage for sim_test consumers with an unbounded
 // block budget (no modal-blocker pressure). Drops the trailing cacheable bool so call
 // sites that don't care about cacheable propagation stay terse.
-func DefendersDamage(defenders, pitched []Card, d *deck.Deck, state *TurnState, gravBuf []Card, cs *CardState, incomingDamage, arsenalDefenderIdx int) (int, []Card) {
+func DefendersDamage(defenders, pitched []card.Card, d *deck.Deck, state *TurnState, gravBuf []card.Card, cs *card.CardState, incomingDamage, arsenalDefenderIdx int) (int, []card.Card) {
 	total, gravBuf, _ := defendersDamage(defenders, pitched, d, state, gravBuf, cs, incomingDamage, noBlockBudgetCap, arsenalDefenderIdx)
 	return total, gravBuf
 }
 
 // DefendersDamageWithBudget is the budget-aware export — sim_test consumers exercising
 // modal blockers (Brothers in Arms, …) pass blockBudget directly to gate the mode pick.
-func DefendersDamageWithBudget(defenders, pitched []Card, d *deck.Deck, state *TurnState, gravBuf []Card, cs *CardState, incomingDamage, blockBudget, arsenalDefenderIdx int) (int, []Card) {
+func DefendersDamageWithBudget(defenders, pitched []card.Card, d *deck.Deck, state *TurnState, gravBuf []card.Card, cs *card.CardState, incomingDamage, blockBudget, arsenalDefenderIdx int) (int, []card.Card) {
 	total, gravBuf, _ := defendersDamage(defenders, pitched, d, state, gravBuf, cs, incomingDamage, blockBudget, arsenalDefenderIdx)
 	return total, gravBuf
 }
@@ -112,9 +113,9 @@ func (s *SequenceContextForTest) Bufs() *AttackBufs { return s.ctx.bufs }
 
 // State / DefenseGravScratch / DRCardStateScratch expose the unexported attackBufs fields
 // the sim_test files probe for chain-state assertions.
-func (b *attackBufs) State() *TurnState              { return b.state }
-func (b *attackBufs) DefenseGravScratch() []Card     { return b.defenseGravScratch }
-func (b *attackBufs) DRCardStateScratch() *CardState { return &b.drCardStateScratch }
+func (b *attackBufs) State() *TurnState                   { return b.state }
+func (b *attackBufs) DefenseGravScratch() []card.Card     { return b.defenseGravScratch }
+func (b *attackBufs) DRCardStateScratch() *card.CardState { return &b.drCardStateScratch }
 
 // EvaluateImplForTest re-exports the unexported (*Evaluator).evaluateImpl as an exported
 // method for sim_test consumers exercising the eval-with-stop-condition path directly.
@@ -142,8 +143,8 @@ func ProcessAurasAtStartOfTurn(queued []Aura, d *deck.Deck) (
 	survivors []Aura,
 	contribs []TriggerContribution,
 	damage int,
-	revealed []Card,
-	graveyarded []Card,
+	revealed []card.Card,
+	graveyarded []card.Card,
 ) {
 	return processAurasAtStartOfTurn(queued, d)
 }

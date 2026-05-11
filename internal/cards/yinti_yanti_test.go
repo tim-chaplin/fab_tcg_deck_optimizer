@@ -52,7 +52,7 @@ func TestYintiYanti_BlockNoAuraNoBonus(t *testing.T) {
 	for _, c := range []card.Card{YintiYantiRed{}, YintiYantiYellow{}, YintiYantiBlue{}} {
 		s := sim.TurnState{}
 		self := &card.CardState{Card: c}
-		c.(sim.Blocker).Block(&s, s.Logger(), self)
+		c.(card.Blocker).Block(&s, s.Logger(), self)
 		if self.BonusDefense != 0 {
 			t.Errorf("%s: BonusDefense = %d, want 0 (no aura)", c.Name(), self.BonusDefense)
 		}
@@ -64,7 +64,7 @@ func TestYintiYanti_BlockWithAuraGetsBonus(t *testing.T) {
 	for _, c := range []card.Card{YintiYantiRed{}, YintiYantiYellow{}, YintiYantiBlue{}} {
 		s := sim.NewTurnStateFromSpec(sim.TurnStateSpec{Auras: []sim.Aura{sim.NewRunechantAura(1)}})
 		self := &card.CardState{Card: c}
-		c.(sim.Blocker).Block(&s, s.Logger(), self)
+		c.(card.Blocker).Block(&s, s.Logger(), self)
 		if self.BonusDefense != 1 {
 			t.Errorf("%s with aura: BonusDefense = %d, want 1", c.Name(), self.BonusDefense)
 		}

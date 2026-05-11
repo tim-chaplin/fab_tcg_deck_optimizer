@@ -1,6 +1,6 @@
 package turntests
 
-// End-to-end tests for the DefensiveInstant marker. See sim.DefensiveInstant for the
+// End-to-end tests for the DefensiveInstant marker. See card.DefensiveInstant for the
 // contract; docs/dev-standards.md for the rider wiring.
 
 import (

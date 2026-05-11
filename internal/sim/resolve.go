@@ -1,5 +1,9 @@
 package sim
 
+import (
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
+)
+
 // ResolveChainStep runs card.Play and then applies the standard chain-step resolution:
 // for an attack-action or weapon-attack, credit self.EffectiveAttack() to s.value; for
 // a defense-reaction (or DefensiveInstant), credit the EffectiveDefense capped at
@@ -20,7 +24,7 @@ package sim
 // (appendGroupedChainEntries) buffers post-triggers and attaches them under the
 // matching chain step regardless of stream order, so the rendered printout still reads
 // "chain step, then indented riders" as before.
-func ResolveChainStep(g GameEngine, l Logger, self *CardState) {
+func ResolveChainStep(g card.GameEngine, l card.Logger, self *card.CardState) {
 	self.Card.Play(g, l, self)
 	n := chainStepDelta(g.(*TurnState), self)
 	l.AppendChainStep(ChainStepText(self), n)
@@ -28,7 +32,7 @@ func ResolveChainStep(g GameEngine, l Logger, self *CardState) {
 
 // chainStepDelta computes the chain step's display delta and applies the standard
 // damage / block side effects. Returns the (+N) value for the log line.
-func chainStepDelta(s *TurnState, self *CardState) int {
+func chainStepDelta(s *TurnState, self *card.CardState) int {
 	types := self.Card.Types()
 	switch {
 	case types.IsAttackAction() || types.IsWeaponAttack():
@@ -53,7 +57,7 @@ func chainStepDelta(s *TurnState, self *CardState) int {
 // isDefensiveInstant reports whether c opts into the DR resolution path via the
 // DefensiveInstant marker. Centralised here so ResolveChainStep doesn't repeat the
 // type-assertion shape.
-func isDefensiveInstant(c Card) bool {
-	_, ok := c.(DefensiveInstant)
+func isDefensiveInstant(c card.Card) bool {
+	_, ok := c.(card.DefensiveInstant)
 	return ok
 }

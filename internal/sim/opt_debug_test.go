@@ -5,6 +5,8 @@ import (
 	"os"
 	"strings"
 	"testing"
+
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 // captureStdout redirects os.Stdout into a pipe for the duration of fn and returns whatever
@@ -39,14 +41,14 @@ func TestOptDebug_PrintsOnlyWhenSet(t *testing.T) {
 	defer func() { OptDebug = prev }()
 
 	withOptHero(t, FakeHero{
-		OptStrategy: func(cards []Card) (top, bottom []Card) {
-			return []Card{cards[1]}, []Card{cards[0]} // swap: bottom a, keep b on top
+		OptStrategy: func(cards []card.Card) (top, bottom []card.Card) {
+			return []card.Card{cards[1]}, []card.Card{cards[0]} // swap: bottom a, keep b on top
 		},
 	}, func() {
 		// Off by default: no output.
 		OptDebug = false
 		out := captureStdout(t, func() {
-			s := NewTurnStateFromCards([]Card{a, b}, nil)
+			s := NewTurnStateFromCards([]card.Card{a, b}, nil)
 			s.Opt(s.Logger(), 2)
 		})
 		if out != "" {
@@ -56,7 +58,7 @@ func TestOptDebug_PrintsOnlyWhenSet(t *testing.T) {
 		// On: a single line naming inputs, top, and bottom.
 		OptDebug = true
 		out = captureStdout(t, func() {
-			s := NewTurnStateFromCards([]Card{a, b}, nil)
+			s := NewTurnStateFromCards([]card.Card{a, b}, nil)
 			s.Opt(s.Logger(), 2)
 		})
 		if !strings.Contains(out, "Opt(2)") || !strings.Contains(out, "top=") || !strings.Contains(out, "bottom=") {
