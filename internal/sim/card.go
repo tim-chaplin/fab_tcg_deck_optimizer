@@ -135,9 +135,9 @@ func (p *CardState) EffectiveAttack() int {
 }
 
 // EffectiveDefense returns the card's printed Defense() plus any granted BonusDefense plus
-// the ArsenalDefenseBonus when this copy came from the arsenal slot, clamped at 0. Defense
-// Reactions feed this through DealEffectiveDefense so the chain step's (+N) reflects the
-// buffed block.
+// the ArsenalDefenseBonus when this copy came from the arsenal slot, clamped at 0. The
+// sim reads this in ResolveChainStep to credit the DR's chain-step "(+N)" delta and to
+// decrement IncomingDamage.
 func (p *CardState) EffectiveDefense() int {
 	n := p.Card.Defense() + p.BonusDefense
 	if p.FromArsenal {
@@ -146,39 +146,6 @@ func (p *CardState) EffectiveDefense() int {
 	if n < 0 {
 		return 0
 	}
-	return n
-}
-
-// DealEffectiveAttack credits self.EffectiveAttack() to s.Value (clamped at 0) and returns
-// the credited amount so callers can pair it with a Log call:
-//
-//	n := self.DealEffectiveAttack(s)
-//	s.Log(self, n)
-//
-// Splits the side-effect (Value mutation) from the log call so the line beginning with
-// s.Log(...) has no side effects.
-func (p *CardState) DealEffectiveAttack(s *TurnState) int {
-	n := p.EffectiveAttack()
-	s.AddValue(n)
-	return n
-}
-
-// DealEffectiveDefense is the Defense Reaction counterpart to DealEffectiveAttack: caps the
-// effective defense at the remaining s.IncomingDamage so an over-blocked DR doesn't credit
-// past what was actually prevented, decrements IncomingDamage by the credited amount,
-// credits that to s.Value, and returns the credited amount. Pair with s.Log(self, n) on the
-// next line. The cap-and-decrement bookkeeping is the bit intricate enough to keep on a
-// CardState method instead of inline at every DR.
-func (p *CardState) DealEffectiveDefense(s *TurnState) int {
-	n := p.EffectiveDefense()
-	if n > s.IncomingDamage {
-		n = s.IncomingDamage
-	}
-	if n < 0 {
-		n = 0
-	}
-	s.IncomingDamage -= n
-	s.Value += n
 	return n
 }
 
@@ -244,11 +211,13 @@ type Card interface {
 	// GoAgain reports whether playing this card grants an additional action point. Cards
 	// printed with "Go again" return true.
 	GoAgain() bool
-	// Play is called when the card resolves — as an attack or as a defense reaction. Cards
-	// own state mutation: they read self.FromArsenal for arsenal-gated riders, write
-	// self.GrantedGoAgain to grant themselves Go again, and emit chain / rider log lines
-	// via l (the Logger param the framework threads through). Damage credit pairs with
-	// l.Log: self.DealEffectiveAttack(s) on one line, self.Log(l, n) on the next.
+	// Play is called when the card resolves — as an attack or as a defense reaction.
+	// Cards own card-specific behaviour only: conditional self-buffs (flip
+	// self.BonusAttack / self.BonusDefense), riders (l.AppendPostTrigger sub-lines),
+	// OnHit registration, mid-chain effects. The standard "credit EffectiveAttack /
+	// capped EffectiveDefense to s.Value and emit the <Card>: <VERB> (+N) chain step"
+	// mechanic happens in sim.ResolveChainStep after Play returns — vanilla attack /
+	// DR cards have an empty Play body.
 	Play(s *TurnState, l Logger, self *CardState)
 }
 
@@ -366,10 +335,11 @@ type BlockCost interface {
 
 // DefensiveInstant marks a TypeInstant card whose printed effect prevents damage during
 // the defense phase. Opting in routes the card through the Defense-Reaction partition
-// slot, cost summing, and chain-step Play; the type stays TypeInstant. Play should call
-// self.DealEffectiveDefense(s) so prevention = min(Defense(), IncomingDamage). Cards
-// whose prevention is gated by hidden state (arcane-only, multi-source rationing) must
-// not opt in — the marker promises a full single-bucket prevention. See
+// slot, cost summing, and chain-step Play; the type stays TypeInstant. ResolveChainStep
+// treats DefensiveInstant cards like DRs — caps EffectiveDefense at IncomingDamage and
+// decrements — so an empty Play body covers the standard prevention case. Cards whose
+// prevention is gated by hidden state (arcane-only, multi-source rationing) must not
+// opt in — the marker promises a full single-bucket prevention. See
 // docs/dev-standards.md: DefensiveInstant markers.
 type DefensiveInstant interface {
 	DefensiveInstant()

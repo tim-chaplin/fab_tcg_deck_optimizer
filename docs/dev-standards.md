@@ -85,38 +85,46 @@ The plumbing below is uniform; card docstrings call out the printed rider and an
 - **Modal "Choose 1" cards** (Captain's Call, …): implement `sim.ModalCard.Modes() int` and dispatch on `self.Mode` inside `Play`. Chain runner enumerates the cartesian product of modes across modal cards and picks the highest-Value tuple. Modes that are no-ops should resolve as zero-Value no-ops. Card docstrings call out each mode's effect.
 - **Modal cost** (Bluster Buff / Chest Puff / Look Tuff cycle): ModalCards whose resource cost varies by mode implement `sim.ModalCost.ModalCost(mode int8) int`. Attacker meta cache folds per-mode min/max into the partition pre-screen; chain runner reads the mode's cost via `costAt(state, self.Mode)`. Card docstrings call out each (cost, effect) pair.
 - **Modal blockers** (Brothers in Arms, …): plain blockers with mode-dependent block-time cost implement `sim.ModalCard.Modes()` + `sim.Blocker.Block(s, self)` + `sim.BlockCost(mode int8) int`. `defendersDamage` enumerates modes within spare defense budget (`phase.defendBudget − drCost`) and picks the highest-`BonusDefense` mode that fits. Mode 0 is conventionally the printed default (cost 0, no extra effect). Card docstrings call out each (cost, effect) pair.
-- **`DefensiveInstant`** (Brush Off, Calming Breeze, Oasis Respite, Peace of Mind, …): `TypeInstant` cards whose printed effect prevents damage opt in via `sim.DefensiveInstant`. Partition treats them as defenders; `Cost()` is summed against the defense budget; `Play` calls `self.DealEffectiveDefense(s)` so prevention is `min(Defense(), IncomingDamage)`. Damage prevention collapses against the single `IncomingDamage` bucket: "the next N damage" and "the next K times … prevent 1 each" both reduce to `Defense() = N`; "next damage of M or less" credits `min(M, IncomingDamage)`. Card docstrings note the printed prevention amount and any rider that's dropped.
+- **`DefensiveInstant`** (Brush Off, Calming Breeze, Oasis Respite, Peace of Mind, …): `TypeInstant` cards whose printed effect prevents damage opt in via `sim.DefensiveInstant`. Partition treats them as defenders; `Cost()` is summed against the defense budget; `sim.ResolveChainStep` caps `EffectiveDefense` at `IncomingDamage` and decrements — vanilla prevention covers `Play` with an empty body. Damage prevention collapses against the single `IncomingDamage` bucket: "the next N damage" and "the next K times … prevent 1 each" both reduce to `Defense() = N`; "next damage of M or less" credits `min(M, IncomingDamage)`. Conditional riders that modify the prevented amount (e.g. Oasis Respite's life-gain) bump `self.BonusDefense` so the sim's resolver folds them into the capped `(+N)`. Card docstrings note the printed prevention amount and any rider that's dropped.
 - **Optional additional costs** (Looking for a Scrap, Nimble Strike, Regurgitating Slog, …): "you may pay X" gates where the cost spends graveyard residency (or other state the sim doesn't otherwise value) for a strictly-upside buff are paid unconditionally; the sim doesn't enumerate the skip branch. Card docstrings note the printed gate; no per-card rationale for "always tries".
 ## Logging idioms
 
-`Card.Play` uses two orthogonal `TurnState` primitives: `AddValue(n)` mutates `s.Value`; `Log` / `LogRider` / `LogPreTrigger` / `LogPostTrigger` (plus `f` variants) append a `LogEntry`. The `skipLog` gate lives inside the Log helpers — cards never check it.
+Cards' `Play` body does **not** emit the chain step itself. `sim.ResolveChainStep` runs the card's `Play`, then credits `s.Value` and appends the canonical `<Card>: <VERB> (+N)` chain-step entry — `EffectiveAttack` for attacks and weapon-swings, capped `EffectiveDefense` (with `IncomingDamage` decrement) for defense-reactions and `DefensiveInstant` cards, 0 otherwise. Vanilla attack / DR / non-attack cards have an empty `Play` body.
 
-**A line starting with `s.Log(...` (or any `Log*` helper) must have no side effects.** Put the value change on its own preceding line:
+Cards' `Play` body emits **rider sub-lines only** — post-triggers attributed to `self.Card.DisplayName()` for self-riders, or to a different source for cross-card riders (e.g. an `OnHit` attached to a target card). The framework threads a `sim.Logger` into every Card-shaped hook (`Play`, `Block`, `OnHitHandler.Fire`, `TriggerHandler`, `Hero.OnCardPlayed`). Logger's method set matches `*turnlogger.TurnLogger`: `AppendChainStep` / `AppendChainStepf` / `AppendPostTrigger` / `AppendPostTriggerf` / `AppendPreTrigger` / `AppendPreTriggerf` / `AmendLastChainStepN`. A nil-pointer Logger (the find-best skip pass) silently elides every call — cards never gate manually.
+
+**A line starting with `l.AppendXxx(...)` must have no side effects.** Put the value change on its own preceding line:
 
 ```go
-// Good — Log line is pure:
-s.AddValue(s.CreateRunechants(2))
-s.LogRider(self, 2, "Created 2 runechants")
+// Good — Append line is pure:
+s.CreateRunechants(2)
+l.AppendPostTrigger(self.Card.DisplayName(), "Created 2 runechants", 2)
 
-// Bad — side effect hidden inside Log:
-s.LogRider(self, s.AddValue(s.CreateRunechants(2)), "Created 2 runechants")
+// Bad — side effect hidden inside the log call:
+l.AppendPostTrigger(self.Card.DisplayName(), "Created 2 runechants", s.CreateRunechants(2))
 ```
 
-A reader scanning for "what does this card do" can skip every `Log*` line; a future profile-driven optimisation that short-circuits log construction won't silently drop the side effect.
+A reader scanning for "what does this card do" can skip every `l.AppendXxx` line; the side effects all live on their own preceding lines.
 
-For attack and defense chain steps the standard idiom is two lines — capture the credited amount via `self.DealEffectiveAttack(s)` / `DealEffectiveDefense(s)` (which encapsulates `AddValue`) and pass it to `s.Log(self, n)`:
+Conditional self-buffs go before the chain step gets logged — they live in the `Play` body, and `ResolveChainStep` reads the buffed `EffectiveAttack` / `EffectiveDefense` after `Play` returns:
 
 ```go
-// Attack action:
-n := self.DealEffectiveAttack(s)
-s.Log(self, n)
+// Bluster Buff (mode 1): +2{p} for paying {r}.
+func blusterBuffPlay(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+    if self.Mode == 1 {
+        self.BonusAttack += 2
+    }
+}
 
-// Defense reaction:
-n := self.DealEffectiveDefense(s)
-s.Log(self, n)
-
-// Non-attack chain step:
-s.Log(self, 0)
+// Aether Slash: deal 1 arcane if a non-attack action was pitched to play it.
+func aetherSlashApplyRider(s *sim.TurnState, l sim.Logger, self *sim.CardState) {
+    for _, p := range self.PitchedToPlay {
+        if p.Types().IsNonAttackAction() {
+            s.DealArcaneDamage(l, self, 1)
+            return
+        }
+    }
+}
 ```
 
 ## Weapon activated abilities
