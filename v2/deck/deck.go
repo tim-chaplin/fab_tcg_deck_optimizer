@@ -129,6 +129,33 @@ func (d *Deck) Copy() *Deck {
 	return out
 }
 
+// CopyFrom provides a memory-efficient way to copy a Deck by reusing an already-allocated
+// Deck (the receiver) that's no longer needed: d's cards / Weapons / Hero are overwritten
+// from src, reusing d's existing slice backing arrays when they have enough capacity.
+// Sideboard and Equipment are skipped. Callers that need a full deep copy should use Copy.
+//
+// d must be a non-nil receiver. A nil src is treated as an empty deck — d's slice lengths
+// drop to 0 (backings retained) and Hero zeroes.
+func (d *Deck) CopyFrom(src *Deck) {
+	if src == nil {
+		d.Hero = nil
+		d.cards = d.cards[:0]
+		d.Weapons = d.Weapons[:0]
+		return
+	}
+	d.Hero = src.Hero
+	if cap(d.cards) >= len(src.cards) {
+		d.cards = append(d.cards[:0], src.cards...)
+	} else {
+		d.cards = append(make([]Card, 0, len(src.cards)), src.cards...)
+	}
+	if cap(d.Weapons) >= len(src.Weapons) {
+		d.Weapons = append(d.Weapons[:0], src.Weapons...)
+	} else {
+		d.Weapons = append(make([]Weapon, 0, len(src.Weapons)), src.Weapons...)
+	}
+}
+
 // Shuffle randomises the deck in place via Fisher-Yates. Mutates the receiver — callers
 // running independent trials should Copy() the master deck first.
 func (d *Deck) Shuffle(rng *rand.Rand) {

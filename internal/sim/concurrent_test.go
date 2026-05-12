@@ -163,9 +163,10 @@ func TestIterateParallel_TerminatesWithNoImprovement(t *testing.T) {
 	if idx != -1 {
 		t.Errorf("idx=%d; want -1", idx)
 	}
-	// Threshold loosened to 90s while the per-permutation deck.Copy() in the chain runner is
-	// in flight; tightens back to 30s once the follow-up perf pass amortizes the extra copy.
-	if elapsed > 90*time.Second {
-		t.Errorf("IterateParallel returned after %s for 40 mutations; want under 90s", elapsed)
+	// Threshold sized for the parallel 40-mutation pass: each worker calls Best on a different
+	// hand seed, so the bufs.deckScratch pool eliminates the per-permutation deck allocation
+	// without holding the whole run hostage to CI's noisier slots.
+	if elapsed > 60*time.Second {
+		t.Errorf("IterateParallel returned after %s for 40 mutations; want under 60s", elapsed)
 	}
 }
