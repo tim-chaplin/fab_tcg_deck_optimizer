@@ -11,13 +11,13 @@ var sigilOfCyclesTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card
 
 type SigilOfCyclesBlue struct{}
 
-func (SigilOfCyclesBlue) ID() ids.CardID           { return ids.SigilOfCyclesBlue }
-func (SigilOfCyclesBlue) Name() string             { return "Sigil of Cycles" }
-func (SigilOfCyclesBlue) DisplayName() string      { return "Sigil of Cycles [B]" }
-func (SigilOfCyclesBlue) Cost(card.GameEngine) int { return 0 }
-func (SigilOfCyclesBlue) Pitch() int               { return 3 }
-func (SigilOfCyclesBlue) Attack() int              { return 0 }
-func (SigilOfCyclesBlue) Defense() int             { return 2 }
-func (SigilOfCyclesBlue) Types() card.TypeSet      { return sigilOfCyclesTypes }
-func (SigilOfCyclesBlue) GoAgain() bool            { return true }
-func (SigilOfCyclesBlue) NotImplemented()          {}
+func (SigilOfCyclesBlue) ID() ids.CardID                     { return ids.SigilOfCyclesBlue }
+func (SigilOfCyclesBlue) Name() string                       { return "Sigil of Cycles" }
+func (SigilOfCyclesBlue) DisplayName() string                { return "Sigil of Cycles [B]" }
+func (SigilOfCyclesBlue) Cost(card.GameEngine) int           { return 0 }
+func (SigilOfCyclesBlue) Pitch() int                         { return 3 }
+func (SigilOfCyclesBlue) Attack() int                        { return 0 }
+func (SigilOfCyclesBlue) Defense() int                       { return 2 }
+func (SigilOfCyclesBlue) Types(card.GameEngine) card.TypeSet { return sigilOfCyclesTypes }
+func (SigilOfCyclesBlue) GoAgain() bool                      { return true }
+func (SigilOfCyclesBlue) NotImplemented()                    {}

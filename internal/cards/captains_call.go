@@ -17,7 +17,7 @@ import (
 // CardsRemaining. Fizzles silently if no follow-up attack action matches.
 func captainsCallPlay(s card.GameEngine, l card.Logger, self *card.CardState, maxCost int) {
 	for _, pc := range s.CardsRemaining() {
-		if !pc.Card.Types().IsAttackAction() {
+		if !pc.Card.Types(nil).IsAttackAction() {
 			continue
 		}
 		if pc.Card.Cost(s) > maxCost {

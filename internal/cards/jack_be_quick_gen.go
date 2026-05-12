@@ -11,12 +11,12 @@ var jackBeQuickTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.T
 
 type JackBeQuickRed struct{}
 
-func (JackBeQuickRed) ID() ids.CardID           { return ids.JackBeQuickRed }
-func (JackBeQuickRed) Name() string             { return "Jack Be Quick" }
-func (JackBeQuickRed) DisplayName() string      { return "Jack Be Quick [R]" }
-func (JackBeQuickRed) Cost(card.GameEngine) int { return 0 }
-func (JackBeQuickRed) Pitch() int               { return 1 }
-func (JackBeQuickRed) Attack() int              { return 3 }
-func (JackBeQuickRed) Defense() int             { return 3 }
-func (JackBeQuickRed) Types() card.TypeSet      { return jackBeQuickTypes }
-func (JackBeQuickRed) GoAgain() bool            { return false }
+func (JackBeQuickRed) ID() ids.CardID                     { return ids.JackBeQuickRed }
+func (JackBeQuickRed) Name() string                       { return "Jack Be Quick" }
+func (JackBeQuickRed) DisplayName() string                { return "Jack Be Quick [R]" }
+func (JackBeQuickRed) Cost(card.GameEngine) int           { return 0 }
+func (JackBeQuickRed) Pitch() int                         { return 1 }
+func (JackBeQuickRed) Attack() int                        { return 3 }
+func (JackBeQuickRed) Defense() int                       { return 3 }
+func (JackBeQuickRed) Types(card.GameEngine) card.TypeSet { return jackBeQuickTypes }
+func (JackBeQuickRed) GoAgain() bool                      { return false }

@@ -11,11 +11,11 @@ var blowForABlowTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.
 
 type BlowForABlowRed struct{}
 
-func (BlowForABlowRed) ID() ids.CardID           { return ids.BlowForABlowRed }
-func (BlowForABlowRed) Name() string             { return "Blow for a Blow" }
-func (BlowForABlowRed) DisplayName() string      { return "Blow for a Blow [R]" }
-func (BlowForABlowRed) Cost(card.GameEngine) int { return 2 }
-func (BlowForABlowRed) Pitch() int               { return 1 }
-func (BlowForABlowRed) Attack() int              { return 4 }
-func (BlowForABlowRed) Defense() int             { return 2 }
-func (BlowForABlowRed) Types() card.TypeSet      { return blowForABlowTypes }
+func (BlowForABlowRed) ID() ids.CardID                     { return ids.BlowForABlowRed }
+func (BlowForABlowRed) Name() string                       { return "Blow for a Blow" }
+func (BlowForABlowRed) DisplayName() string                { return "Blow for a Blow [R]" }
+func (BlowForABlowRed) Cost(card.GameEngine) int           { return 2 }
+func (BlowForABlowRed) Pitch() int                         { return 1 }
+func (BlowForABlowRed) Attack() int                        { return 4 }
+func (BlowForABlowRed) Defense() int                       { return 2 }
+func (BlowForABlowRed) Types(card.GameEngine) card.TypeSet { return blowForABlowTypes }

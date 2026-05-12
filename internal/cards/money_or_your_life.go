@@ -10,13 +10,11 @@ package cards
 
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
-
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
 
 func moneyOrYourLifeOnHit(s card.GameEngine, l card.Logger, self *card.CardState, _ *card.OnHitHandler) {
 	n := 2
-	if sim.CurrentHero != nil && sim.CurrentHero.Types().Has(card.TypeThief) {
+	if s.CurrentHeroClass() == card.TypeThief {
 		n = 4
 	}
 	s.AddValue(n)

@@ -225,7 +225,7 @@ func promoteRandomHandCardToArsenal(best *TurnSummary, startingHand []card.Card,
 	}
 	eligible := make([]int, 0, len(best.State.Hand))
 	for i, c := range best.State.Hand {
-		t := c.Types()
+		t := c.Types(nil)
 		if t.Has(card.TypeBlock) || t.IsResource() {
 			continue
 		}

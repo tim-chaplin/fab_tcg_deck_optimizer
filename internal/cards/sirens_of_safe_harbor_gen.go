@@ -11,39 +11,39 @@ var sirensOfSafeHarborTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction,
 
 type SirensOfSafeHarborRed struct{}
 
-func (SirensOfSafeHarborRed) ID() ids.CardID           { return ids.SirensOfSafeHarborRed }
-func (SirensOfSafeHarborRed) Name() string             { return "Sirens of Safe Harbor" }
-func (SirensOfSafeHarborRed) DisplayName() string      { return "Sirens of Safe Harbor [R]" }
-func (SirensOfSafeHarborRed) Cost(card.GameEngine) int { return 2 }
-func (SirensOfSafeHarborRed) Pitch() int               { return 1 }
-func (SirensOfSafeHarborRed) Attack() int              { return 6 }
-func (SirensOfSafeHarborRed) Defense() int             { return 2 }
-func (SirensOfSafeHarborRed) Types() card.TypeSet      { return sirensOfSafeHarborTypes }
-func (SirensOfSafeHarborRed) GoAgain() bool            { return false }
-func (SirensOfSafeHarborRed) NotSilverAgeLegal()       {}
+func (SirensOfSafeHarborRed) ID() ids.CardID                     { return ids.SirensOfSafeHarborRed }
+func (SirensOfSafeHarborRed) Name() string                       { return "Sirens of Safe Harbor" }
+func (SirensOfSafeHarborRed) DisplayName() string                { return "Sirens of Safe Harbor [R]" }
+func (SirensOfSafeHarborRed) Cost(card.GameEngine) int           { return 2 }
+func (SirensOfSafeHarborRed) Pitch() int                         { return 1 }
+func (SirensOfSafeHarborRed) Attack() int                        { return 6 }
+func (SirensOfSafeHarborRed) Defense() int                       { return 2 }
+func (SirensOfSafeHarborRed) Types(card.GameEngine) card.TypeSet { return sirensOfSafeHarborTypes }
+func (SirensOfSafeHarborRed) GoAgain() bool                      { return false }
+func (SirensOfSafeHarborRed) NotSilverAgeLegal()                 {}
 
 type SirensOfSafeHarborYellow struct{}
 
-func (SirensOfSafeHarborYellow) ID() ids.CardID           { return ids.SirensOfSafeHarborYellow }
-func (SirensOfSafeHarborYellow) Name() string             { return "Sirens of Safe Harbor" }
-func (SirensOfSafeHarborYellow) DisplayName() string      { return "Sirens of Safe Harbor [Y]" }
-func (SirensOfSafeHarborYellow) Cost(card.GameEngine) int { return 2 }
-func (SirensOfSafeHarborYellow) Pitch() int               { return 2 }
-func (SirensOfSafeHarborYellow) Attack() int              { return 5 }
-func (SirensOfSafeHarborYellow) Defense() int             { return 2 }
-func (SirensOfSafeHarborYellow) Types() card.TypeSet      { return sirensOfSafeHarborTypes }
-func (SirensOfSafeHarborYellow) GoAgain() bool            { return false }
-func (SirensOfSafeHarborYellow) NotSilverAgeLegal()       {}
+func (SirensOfSafeHarborYellow) ID() ids.CardID                     { return ids.SirensOfSafeHarborYellow }
+func (SirensOfSafeHarborYellow) Name() string                       { return "Sirens of Safe Harbor" }
+func (SirensOfSafeHarborYellow) DisplayName() string                { return "Sirens of Safe Harbor [Y]" }
+func (SirensOfSafeHarborYellow) Cost(card.GameEngine) int           { return 2 }
+func (SirensOfSafeHarborYellow) Pitch() int                         { return 2 }
+func (SirensOfSafeHarborYellow) Attack() int                        { return 5 }
+func (SirensOfSafeHarborYellow) Defense() int                       { return 2 }
+func (SirensOfSafeHarborYellow) Types(card.GameEngine) card.TypeSet { return sirensOfSafeHarborTypes }
+func (SirensOfSafeHarborYellow) GoAgain() bool                      { return false }
+func (SirensOfSafeHarborYellow) NotSilverAgeLegal()                 {}
 
 type SirensOfSafeHarborBlue struct{}
 
-func (SirensOfSafeHarborBlue) ID() ids.CardID           { return ids.SirensOfSafeHarborBlue }
-func (SirensOfSafeHarborBlue) Name() string             { return "Sirens of Safe Harbor" }
-func (SirensOfSafeHarborBlue) DisplayName() string      { return "Sirens of Safe Harbor [B]" }
-func (SirensOfSafeHarborBlue) Cost(card.GameEngine) int { return 2 }
-func (SirensOfSafeHarborBlue) Pitch() int               { return 3 }
-func (SirensOfSafeHarborBlue) Attack() int              { return 4 }
-func (SirensOfSafeHarborBlue) Defense() int             { return 2 }
-func (SirensOfSafeHarborBlue) Types() card.TypeSet      { return sirensOfSafeHarborTypes }
-func (SirensOfSafeHarborBlue) GoAgain() bool            { return false }
-func (SirensOfSafeHarborBlue) NotSilverAgeLegal()       {}
+func (SirensOfSafeHarborBlue) ID() ids.CardID                     { return ids.SirensOfSafeHarborBlue }
+func (SirensOfSafeHarborBlue) Name() string                       { return "Sirens of Safe Harbor" }
+func (SirensOfSafeHarborBlue) DisplayName() string                { return "Sirens of Safe Harbor [B]" }
+func (SirensOfSafeHarborBlue) Cost(card.GameEngine) int           { return 2 }
+func (SirensOfSafeHarborBlue) Pitch() int                         { return 3 }
+func (SirensOfSafeHarborBlue) Attack() int                        { return 4 }
+func (SirensOfSafeHarborBlue) Defense() int                       { return 2 }
+func (SirensOfSafeHarborBlue) Types(card.GameEngine) card.TypeSet { return sirensOfSafeHarborTypes }
+func (SirensOfSafeHarborBlue) GoAgain() bool                      { return false }
+func (SirensOfSafeHarborBlue) NotSilverAgeLegal()                 {}

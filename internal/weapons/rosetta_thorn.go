@@ -35,14 +35,14 @@ var rosettaThornAbilityTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeWeap
 
 type RosettaThornAbility struct{}
 
-func (RosettaThornAbility) ID() ids.CardID           { return ids.RosettaThornAbilityID }
-func (RosettaThornAbility) Name() string             { return "Rosetta Thorn" }
-func (RosettaThornAbility) DisplayName() string      { return "Rosetta Thorn" }
-func (RosettaThornAbility) Cost(card.GameEngine) int { return 1 }
-func (RosettaThornAbility) Pitch() int               { return 0 }
-func (RosettaThornAbility) Attack() int              { return 2 }
-func (RosettaThornAbility) Defense() int             { return 0 }
-func (RosettaThornAbility) Types() card.TypeSet      { return rosettaThornAbilityTypes }
-func (RosettaThornAbility) GoAgain() bool            { return false }
+func (RosettaThornAbility) ID() ids.CardID                     { return ids.RosettaThornAbilityID }
+func (RosettaThornAbility) Name() string                       { return "Rosetta Thorn" }
+func (RosettaThornAbility) DisplayName() string                { return "Rosetta Thorn" }
+func (RosettaThornAbility) Cost(card.GameEngine) int           { return 1 }
+func (RosettaThornAbility) Pitch() int                         { return 0 }
+func (RosettaThornAbility) Attack() int                        { return 2 }
+func (RosettaThornAbility) Defense() int                       { return 0 }
+func (RosettaThornAbility) Types(card.GameEngine) card.TypeSet { return rosettaThornAbilityTypes }
+func (RosettaThornAbility) GoAgain() bool                      { return false }
 func (RosettaThornAbility) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 }

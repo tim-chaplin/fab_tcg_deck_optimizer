@@ -11,13 +11,13 @@ var energyPotionTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.
 
 type EnergyPotionBlue struct{}
 
-func (EnergyPotionBlue) ID() ids.CardID           { return ids.EnergyPotionBlue }
-func (EnergyPotionBlue) Name() string             { return "Energy Potion" }
-func (EnergyPotionBlue) DisplayName() string      { return "Energy Potion [B]" }
-func (EnergyPotionBlue) Cost(card.GameEngine) int { return 0 }
-func (EnergyPotionBlue) Pitch() int               { return 3 }
-func (EnergyPotionBlue) Attack() int              { return 0 }
-func (EnergyPotionBlue) Defense() int             { return 0 }
-func (EnergyPotionBlue) Types() card.TypeSet      { return energyPotionTypes }
-func (EnergyPotionBlue) GoAgain() bool            { return false }
-func (EnergyPotionBlue) Unplayable()              {}
+func (EnergyPotionBlue) ID() ids.CardID                     { return ids.EnergyPotionBlue }
+func (EnergyPotionBlue) Name() string                       { return "Energy Potion" }
+func (EnergyPotionBlue) DisplayName() string                { return "Energy Potion [B]" }
+func (EnergyPotionBlue) Cost(card.GameEngine) int           { return 0 }
+func (EnergyPotionBlue) Pitch() int                         { return 3 }
+func (EnergyPotionBlue) Attack() int                        { return 0 }
+func (EnergyPotionBlue) Defense() int                       { return 0 }
+func (EnergyPotionBlue) Types(card.GameEngine) card.TypeSet { return energyPotionTypes }
+func (EnergyPotionBlue) GoAgain() bool                      { return false }
+func (EnergyPotionBlue) Unplayable()                        {}

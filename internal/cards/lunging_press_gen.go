@@ -11,12 +11,12 @@ var lungingPressTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAttackReactio
 
 type LungingPressBlue struct{}
 
-func (LungingPressBlue) ID() ids.CardID           { return ids.LungingPressBlue }
-func (LungingPressBlue) Name() string             { return "Lunging Press" }
-func (LungingPressBlue) DisplayName() string      { return "Lunging Press [B]" }
-func (LungingPressBlue) Cost(card.GameEngine) int { return 0 }
-func (LungingPressBlue) Pitch() int               { return 3 }
-func (LungingPressBlue) Attack() int              { return 0 }
-func (LungingPressBlue) Defense() int             { return 2 }
-func (LungingPressBlue) Types() card.TypeSet      { return lungingPressTypes }
-func (LungingPressBlue) GoAgain() bool            { return false }
+func (LungingPressBlue) ID() ids.CardID                     { return ids.LungingPressBlue }
+func (LungingPressBlue) Name() string                       { return "Lunging Press" }
+func (LungingPressBlue) DisplayName() string                { return "Lunging Press [B]" }
+func (LungingPressBlue) Cost(card.GameEngine) int           { return 0 }
+func (LungingPressBlue) Pitch() int                         { return 3 }
+func (LungingPressBlue) Attack() int                        { return 0 }
+func (LungingPressBlue) Defense() int                       { return 2 }
+func (LungingPressBlue) Types(card.GameEngine) card.TypeSet { return lungingPressTypes }
+func (LungingPressBlue) GoAgain() bool                      { return false }

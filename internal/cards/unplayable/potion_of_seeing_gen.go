@@ -11,13 +11,13 @@ var potionOfSeeingTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, car
 
 type PotionOfSeeingBlue struct{}
 
-func (PotionOfSeeingBlue) ID() ids.CardID           { return ids.PotionOfSeeingBlue }
-func (PotionOfSeeingBlue) Name() string             { return "Potion of Seeing" }
-func (PotionOfSeeingBlue) DisplayName() string      { return "Potion of Seeing [B]" }
-func (PotionOfSeeingBlue) Cost(card.GameEngine) int { return 0 }
-func (PotionOfSeeingBlue) Pitch() int               { return 3 }
-func (PotionOfSeeingBlue) Attack() int              { return 0 }
-func (PotionOfSeeingBlue) Defense() int             { return 0 }
-func (PotionOfSeeingBlue) Types() card.TypeSet      { return potionOfSeeingTypes }
-func (PotionOfSeeingBlue) GoAgain() bool            { return false }
-func (PotionOfSeeingBlue) Unplayable()              {}
+func (PotionOfSeeingBlue) ID() ids.CardID                     { return ids.PotionOfSeeingBlue }
+func (PotionOfSeeingBlue) Name() string                       { return "Potion of Seeing" }
+func (PotionOfSeeingBlue) DisplayName() string                { return "Potion of Seeing [B]" }
+func (PotionOfSeeingBlue) Cost(card.GameEngine) int           { return 0 }
+func (PotionOfSeeingBlue) Pitch() int                         { return 3 }
+func (PotionOfSeeingBlue) Attack() int                        { return 0 }
+func (PotionOfSeeingBlue) Defense() int                       { return 0 }
+func (PotionOfSeeingBlue) Types(card.GameEngine) card.TypeSet { return potionOfSeeingTypes }
+func (PotionOfSeeingBlue) GoAgain() bool                      { return false }
+func (PotionOfSeeingBlue) Unplayable()                        {}

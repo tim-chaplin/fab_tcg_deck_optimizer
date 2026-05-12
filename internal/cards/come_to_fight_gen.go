@@ -11,36 +11,36 @@ var comeToFightTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction)
 
 type ComeToFightRed struct{}
 
-func (ComeToFightRed) ID() ids.CardID           { return ids.ComeToFightRed }
-func (ComeToFightRed) Name() string             { return "Come to Fight" }
-func (ComeToFightRed) DisplayName() string      { return "Come to Fight [R]" }
-func (ComeToFightRed) Cost(card.GameEngine) int { return 1 }
-func (ComeToFightRed) Pitch() int               { return 1 }
-func (ComeToFightRed) Attack() int              { return 0 }
-func (ComeToFightRed) Defense() int             { return 3 }
-func (ComeToFightRed) Types() card.TypeSet      { return comeToFightTypes }
-func (ComeToFightRed) GoAgain() bool            { return true }
+func (ComeToFightRed) ID() ids.CardID                     { return ids.ComeToFightRed }
+func (ComeToFightRed) Name() string                       { return "Come to Fight" }
+func (ComeToFightRed) DisplayName() string                { return "Come to Fight [R]" }
+func (ComeToFightRed) Cost(card.GameEngine) int           { return 1 }
+func (ComeToFightRed) Pitch() int                         { return 1 }
+func (ComeToFightRed) Attack() int                        { return 0 }
+func (ComeToFightRed) Defense() int                       { return 3 }
+func (ComeToFightRed) Types(card.GameEngine) card.TypeSet { return comeToFightTypes }
+func (ComeToFightRed) GoAgain() bool                      { return true }
 
 type ComeToFightYellow struct{}
 
-func (ComeToFightYellow) ID() ids.CardID           { return ids.ComeToFightYellow }
-func (ComeToFightYellow) Name() string             { return "Come to Fight" }
-func (ComeToFightYellow) DisplayName() string      { return "Come to Fight [Y]" }
-func (ComeToFightYellow) Cost(card.GameEngine) int { return 1 }
-func (ComeToFightYellow) Pitch() int               { return 2 }
-func (ComeToFightYellow) Attack() int              { return 0 }
-func (ComeToFightYellow) Defense() int             { return 3 }
-func (ComeToFightYellow) Types() card.TypeSet      { return comeToFightTypes }
-func (ComeToFightYellow) GoAgain() bool            { return true }
+func (ComeToFightYellow) ID() ids.CardID                     { return ids.ComeToFightYellow }
+func (ComeToFightYellow) Name() string                       { return "Come to Fight" }
+func (ComeToFightYellow) DisplayName() string                { return "Come to Fight [Y]" }
+func (ComeToFightYellow) Cost(card.GameEngine) int           { return 1 }
+func (ComeToFightYellow) Pitch() int                         { return 2 }
+func (ComeToFightYellow) Attack() int                        { return 0 }
+func (ComeToFightYellow) Defense() int                       { return 3 }
+func (ComeToFightYellow) Types(card.GameEngine) card.TypeSet { return comeToFightTypes }
+func (ComeToFightYellow) GoAgain() bool                      { return true }
 
 type ComeToFightBlue struct{}
 
-func (ComeToFightBlue) ID() ids.CardID           { return ids.ComeToFightBlue }
-func (ComeToFightBlue) Name() string             { return "Come to Fight" }
-func (ComeToFightBlue) DisplayName() string      { return "Come to Fight [B]" }
-func (ComeToFightBlue) Cost(card.GameEngine) int { return 1 }
-func (ComeToFightBlue) Pitch() int               { return 3 }
-func (ComeToFightBlue) Attack() int              { return 0 }
-func (ComeToFightBlue) Defense() int             { return 3 }
-func (ComeToFightBlue) Types() card.TypeSet      { return comeToFightTypes }
-func (ComeToFightBlue) GoAgain() bool            { return true }
+func (ComeToFightBlue) ID() ids.CardID                     { return ids.ComeToFightBlue }
+func (ComeToFightBlue) Name() string                       { return "Come to Fight" }
+func (ComeToFightBlue) DisplayName() string                { return "Come to Fight [B]" }
+func (ComeToFightBlue) Cost(card.GameEngine) int           { return 1 }
+func (ComeToFightBlue) Pitch() int                         { return 3 }
+func (ComeToFightBlue) Attack() int                        { return 0 }
+func (ComeToFightBlue) Defense() int                       { return 3 }
+func (ComeToFightBlue) Types(card.GameEngine) card.TypeSet { return comeToFightTypes }
+func (ComeToFightBlue) GoAgain() bool                      { return true }

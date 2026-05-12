@@ -19,15 +19,15 @@ func TestOasisRespite_PreventsAndLifeRider(t *testing.T) {
 		{OasisRespiteBlue{}, 2, 3},
 	}
 	saved := sim.CurrentHero
-	defer func() { sim.CurrentHero = saved }()
+	defer func() { sim.SetCurrentHero(saved) }()
 	for _, tc := range cases {
-		sim.CurrentHero = stubLowHeroOff{}
+		sim.SetCurrentHero(stubLowHeroOff{})
 		sOff := sim.NewTurnStateFromSpec(sim.TurnStateSpec{IncomingDamage: 10})
 		sim.ResolveChainStep(&sOff, sOff.Logger(), &card.CardState{Card: tc.card})
 		if sOff.Value() != tc.wantOff {
 			t.Errorf("%s: hero off Value = %d, want %d", tc.card.Name(), sOff.Value(), tc.wantOff)
 		}
-		sim.CurrentHero = stubLowHeroOn{}
+		sim.SetCurrentHero(stubLowHeroOn{})
 		sOn := sim.NewTurnStateFromSpec(sim.TurnStateSpec{IncomingDamage: 10})
 		sim.ResolveChainStep(&sOn, sOn.Logger(), &card.CardState{Card: tc.card})
 		if sOn.Value() != tc.wantOn {

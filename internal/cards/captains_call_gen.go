@@ -11,36 +11,36 @@ var captainSCallTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction)
 
 type CaptainsCallRed struct{}
 
-func (CaptainsCallRed) ID() ids.CardID           { return ids.CaptainsCallRed }
-func (CaptainsCallRed) Name() string             { return "Captain's Call" }
-func (CaptainsCallRed) DisplayName() string      { return "Captain's Call [R]" }
-func (CaptainsCallRed) Cost(card.GameEngine) int { return 0 }
-func (CaptainsCallRed) Pitch() int               { return 1 }
-func (CaptainsCallRed) Attack() int              { return 0 }
-func (CaptainsCallRed) Defense() int             { return 2 }
-func (CaptainsCallRed) Types() card.TypeSet      { return captainSCallTypes }
-func (CaptainsCallRed) GoAgain() bool            { return true }
+func (CaptainsCallRed) ID() ids.CardID                     { return ids.CaptainsCallRed }
+func (CaptainsCallRed) Name() string                       { return "Captain's Call" }
+func (CaptainsCallRed) DisplayName() string                { return "Captain's Call [R]" }
+func (CaptainsCallRed) Cost(card.GameEngine) int           { return 0 }
+func (CaptainsCallRed) Pitch() int                         { return 1 }
+func (CaptainsCallRed) Attack() int                        { return 0 }
+func (CaptainsCallRed) Defense() int                       { return 2 }
+func (CaptainsCallRed) Types(card.GameEngine) card.TypeSet { return captainSCallTypes }
+func (CaptainsCallRed) GoAgain() bool                      { return true }
 
 type CaptainsCallYellow struct{}
 
-func (CaptainsCallYellow) ID() ids.CardID           { return ids.CaptainsCallYellow }
-func (CaptainsCallYellow) Name() string             { return "Captain's Call" }
-func (CaptainsCallYellow) DisplayName() string      { return "Captain's Call [Y]" }
-func (CaptainsCallYellow) Cost(card.GameEngine) int { return 0 }
-func (CaptainsCallYellow) Pitch() int               { return 2 }
-func (CaptainsCallYellow) Attack() int              { return 0 }
-func (CaptainsCallYellow) Defense() int             { return 2 }
-func (CaptainsCallYellow) Types() card.TypeSet      { return captainSCallTypes }
-func (CaptainsCallYellow) GoAgain() bool            { return true }
+func (CaptainsCallYellow) ID() ids.CardID                     { return ids.CaptainsCallYellow }
+func (CaptainsCallYellow) Name() string                       { return "Captain's Call" }
+func (CaptainsCallYellow) DisplayName() string                { return "Captain's Call [Y]" }
+func (CaptainsCallYellow) Cost(card.GameEngine) int           { return 0 }
+func (CaptainsCallYellow) Pitch() int                         { return 2 }
+func (CaptainsCallYellow) Attack() int                        { return 0 }
+func (CaptainsCallYellow) Defense() int                       { return 2 }
+func (CaptainsCallYellow) Types(card.GameEngine) card.TypeSet { return captainSCallTypes }
+func (CaptainsCallYellow) GoAgain() bool                      { return true }
 
 type CaptainsCallBlue struct{}
 
-func (CaptainsCallBlue) ID() ids.CardID           { return ids.CaptainsCallBlue }
-func (CaptainsCallBlue) Name() string             { return "Captain's Call" }
-func (CaptainsCallBlue) DisplayName() string      { return "Captain's Call [B]" }
-func (CaptainsCallBlue) Cost(card.GameEngine) int { return 0 }
-func (CaptainsCallBlue) Pitch() int               { return 3 }
-func (CaptainsCallBlue) Attack() int              { return 0 }
-func (CaptainsCallBlue) Defense() int             { return 2 }
-func (CaptainsCallBlue) Types() card.TypeSet      { return captainSCallTypes }
-func (CaptainsCallBlue) GoAgain() bool            { return true }
+func (CaptainsCallBlue) ID() ids.CardID                     { return ids.CaptainsCallBlue }
+func (CaptainsCallBlue) Name() string                       { return "Captain's Call" }
+func (CaptainsCallBlue) DisplayName() string                { return "Captain's Call [B]" }
+func (CaptainsCallBlue) Cost(card.GameEngine) int           { return 0 }
+func (CaptainsCallBlue) Pitch() int                         { return 3 }
+func (CaptainsCallBlue) Attack() int                        { return 0 }
+func (CaptainsCallBlue) Defense() int                       { return 2 }
+func (CaptainsCallBlue) Types(card.GameEngine) card.TypeSet { return captainSCallTypes }
+func (CaptainsCallBlue) GoAgain() bool                      { return true }

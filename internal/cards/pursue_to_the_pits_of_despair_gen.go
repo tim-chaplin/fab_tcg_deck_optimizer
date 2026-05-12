@@ -18,5 +18,7 @@ func (PursueToThePitsOfDespairRed) Cost(card.GameEngine) int { return 1 }
 func (PursueToThePitsOfDespairRed) Pitch() int               { return 1 }
 func (PursueToThePitsOfDespairRed) Attack() int              { return 5 }
 func (PursueToThePitsOfDespairRed) Defense() int             { return 3 }
-func (PursueToThePitsOfDespairRed) Types() card.TypeSet      { return pursueToThePitsOfDespairTypes }
-func (PursueToThePitsOfDespairRed) GoAgain() bool            { return false }
+func (PursueToThePitsOfDespairRed) Types(card.GameEngine) card.TypeSet {
+	return pursueToThePitsOfDespairTypes
+}
+func (PursueToThePitsOfDespairRed) GoAgain() bool { return false }

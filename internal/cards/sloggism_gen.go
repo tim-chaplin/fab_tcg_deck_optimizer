@@ -11,36 +11,36 @@ var sloggismTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction)
 
 type SloggismRed struct{}
 
-func (SloggismRed) ID() ids.CardID           { return ids.SloggismRed }
-func (SloggismRed) Name() string             { return "Sloggism" }
-func (SloggismRed) DisplayName() string      { return "Sloggism [R]" }
-func (SloggismRed) Cost(card.GameEngine) int { return 3 }
-func (SloggismRed) Pitch() int               { return 1 }
-func (SloggismRed) Attack() int              { return 0 }
-func (SloggismRed) Defense() int             { return 2 }
-func (SloggismRed) Types() card.TypeSet      { return sloggismTypes }
-func (SloggismRed) GoAgain() bool            { return true }
+func (SloggismRed) ID() ids.CardID                     { return ids.SloggismRed }
+func (SloggismRed) Name() string                       { return "Sloggism" }
+func (SloggismRed) DisplayName() string                { return "Sloggism [R]" }
+func (SloggismRed) Cost(card.GameEngine) int           { return 3 }
+func (SloggismRed) Pitch() int                         { return 1 }
+func (SloggismRed) Attack() int                        { return 0 }
+func (SloggismRed) Defense() int                       { return 2 }
+func (SloggismRed) Types(card.GameEngine) card.TypeSet { return sloggismTypes }
+func (SloggismRed) GoAgain() bool                      { return true }
 
 type SloggismYellow struct{}
 
-func (SloggismYellow) ID() ids.CardID           { return ids.SloggismYellow }
-func (SloggismYellow) Name() string             { return "Sloggism" }
-func (SloggismYellow) DisplayName() string      { return "Sloggism [Y]" }
-func (SloggismYellow) Cost(card.GameEngine) int { return 3 }
-func (SloggismYellow) Pitch() int               { return 2 }
-func (SloggismYellow) Attack() int              { return 0 }
-func (SloggismYellow) Defense() int             { return 2 }
-func (SloggismYellow) Types() card.TypeSet      { return sloggismTypes }
-func (SloggismYellow) GoAgain() bool            { return true }
+func (SloggismYellow) ID() ids.CardID                     { return ids.SloggismYellow }
+func (SloggismYellow) Name() string                       { return "Sloggism" }
+func (SloggismYellow) DisplayName() string                { return "Sloggism [Y]" }
+func (SloggismYellow) Cost(card.GameEngine) int           { return 3 }
+func (SloggismYellow) Pitch() int                         { return 2 }
+func (SloggismYellow) Attack() int                        { return 0 }
+func (SloggismYellow) Defense() int                       { return 2 }
+func (SloggismYellow) Types(card.GameEngine) card.TypeSet { return sloggismTypes }
+func (SloggismYellow) GoAgain() bool                      { return true }
 
 type SloggismBlue struct{}
 
-func (SloggismBlue) ID() ids.CardID           { return ids.SloggismBlue }
-func (SloggismBlue) Name() string             { return "Sloggism" }
-func (SloggismBlue) DisplayName() string      { return "Sloggism [B]" }
-func (SloggismBlue) Cost(card.GameEngine) int { return 3 }
-func (SloggismBlue) Pitch() int               { return 3 }
-func (SloggismBlue) Attack() int              { return 0 }
-func (SloggismBlue) Defense() int             { return 2 }
-func (SloggismBlue) Types() card.TypeSet      { return sloggismTypes }
-func (SloggismBlue) GoAgain() bool            { return true }
+func (SloggismBlue) ID() ids.CardID                     { return ids.SloggismBlue }
+func (SloggismBlue) Name() string                       { return "Sloggism" }
+func (SloggismBlue) DisplayName() string                { return "Sloggism [B]" }
+func (SloggismBlue) Cost(card.GameEngine) int           { return 3 }
+func (SloggismBlue) Pitch() int                         { return 3 }
+func (SloggismBlue) Attack() int                        { return 0 }
+func (SloggismBlue) Defense() int                       { return 2 }
+func (SloggismBlue) Types(card.GameEngine) card.TypeSet { return sloggismTypes }
+func (SloggismBlue) GoAgain() bool                      { return true }

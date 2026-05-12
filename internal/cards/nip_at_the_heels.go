@@ -13,7 +13,7 @@ import (
 )
 
 func (NipAtTheHeelsBlue) ARTargetAllowed(c card.Card, _ int8) bool {
-	return c.Types().IsAttack() && c.Attack() <= 3
+	return c.Types(nil).IsAttack() && c.Attack() <= 3
 }
 func (NipAtTheHeelsBlue) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 	card.GrantAttackReactionBuff(s, l, self, 1)

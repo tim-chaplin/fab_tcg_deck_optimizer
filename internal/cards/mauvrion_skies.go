@@ -16,8 +16,10 @@ import (
 )
 
 // mauvrionTargetMatches accepts Runeblade attack action cards (weapons don't qualify).
-func mauvrionTargetMatches(target *card.CardState) bool {
-	t := target.Card.Types()
+// The engine is threaded through so Universal cards fold the active hero's class into
+// their Types — Wage Gold under Viserai then matches TypeRuneblade.
+func mauvrionTargetMatches(s card.GameEngine, target *card.CardState) bool {
+	t := target.Card.Types(s)
 	return t.Has(card.TypeRuneblade) && t.IsAttackAction()
 }
 
@@ -25,7 +27,7 @@ func mauvrionTargetMatches(target *card.CardState) bool {
 // rider.
 func mauvrionSkiesPlay(s card.GameEngine, l card.Logger, selfState *card.CardState, source card.Card, n int) {
 	for _, pc := range s.CardsRemaining() {
-		if mauvrionTargetMatches(pc) {
+		if mauvrionTargetMatches(s, pc) {
 			pc.GrantedGoAgain = true
 			text := onHitRunechantText[source.ID()]
 			pc.OnHit = append(pc.OnHit, card.OnHitHandler{

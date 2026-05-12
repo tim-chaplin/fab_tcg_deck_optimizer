@@ -11,13 +11,13 @@ var healingPotionTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card
 
 type HealingPotionBlue struct{}
 
-func (HealingPotionBlue) ID() ids.CardID           { return ids.HealingPotionBlue }
-func (HealingPotionBlue) Name() string             { return "Healing Potion" }
-func (HealingPotionBlue) DisplayName() string      { return "Healing Potion [B]" }
-func (HealingPotionBlue) Cost(card.GameEngine) int { return 0 }
-func (HealingPotionBlue) Pitch() int               { return 3 }
-func (HealingPotionBlue) Attack() int              { return 0 }
-func (HealingPotionBlue) Defense() int             { return 0 }
-func (HealingPotionBlue) Types() card.TypeSet      { return healingPotionTypes }
-func (HealingPotionBlue) GoAgain() bool            { return false }
-func (HealingPotionBlue) Unplayable()              {}
+func (HealingPotionBlue) ID() ids.CardID                     { return ids.HealingPotionBlue }
+func (HealingPotionBlue) Name() string                       { return "Healing Potion" }
+func (HealingPotionBlue) DisplayName() string                { return "Healing Potion [B]" }
+func (HealingPotionBlue) Cost(card.GameEngine) int           { return 0 }
+func (HealingPotionBlue) Pitch() int                         { return 3 }
+func (HealingPotionBlue) Attack() int                        { return 0 }
+func (HealingPotionBlue) Defense() int                       { return 0 }
+func (HealingPotionBlue) Types(card.GameEngine) card.TypeSet { return healingPotionTypes }
+func (HealingPotionBlue) GoAgain() bool                      { return false }
+func (HealingPotionBlue) Unplayable()                        {}

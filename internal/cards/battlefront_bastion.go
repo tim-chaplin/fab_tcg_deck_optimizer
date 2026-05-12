@@ -18,7 +18,7 @@ import (
 func battlefrontBastionBlock(s card.GameEngine, l card.Logger, self *card.CardState) {
 	plainCount := 0
 	for _, d := range s.Defenders() {
-		if d.Types().IsDefenseReaction() {
+		if d.Types(nil).IsDefenseReaction() {
 			continue
 		}
 		plainCount++

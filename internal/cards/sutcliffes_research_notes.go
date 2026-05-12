@@ -20,7 +20,7 @@ import (
 func sutcliffesResearchNotesPlay(s card.GameEngine, l card.Logger, self *card.CardState, revealCount int) {
 	count := 0
 	for _, c := range s.PeekTopN(revealCount) {
-		t := c.Types()
+		t := c.Types(nil)
 		if t.Has(card.TypeRuneblade) && t.IsAttackAction() {
 			count++
 		}

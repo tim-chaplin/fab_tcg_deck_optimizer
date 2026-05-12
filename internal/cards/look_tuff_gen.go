@@ -11,12 +11,12 @@ var lookTuffTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.Type
 
 type LookTuffRed struct{}
 
-func (LookTuffRed) ID() ids.CardID           { return ids.LookTuffRed }
-func (LookTuffRed) Name() string             { return "Look Tuff" }
-func (LookTuffRed) DisplayName() string      { return "Look Tuff [R]" }
-func (LookTuffRed) Cost(card.GameEngine) int { return 3 }
-func (LookTuffRed) Pitch() int               { return 1 }
-func (LookTuffRed) Attack() int              { return 8 }
-func (LookTuffRed) Defense() int             { return 3 }
-func (LookTuffRed) Types() card.TypeSet      { return lookTuffTypes }
-func (LookTuffRed) GoAgain() bool            { return false }
+func (LookTuffRed) ID() ids.CardID                     { return ids.LookTuffRed }
+func (LookTuffRed) Name() string                       { return "Look Tuff" }
+func (LookTuffRed) DisplayName() string                { return "Look Tuff [R]" }
+func (LookTuffRed) Cost(card.GameEngine) int           { return 3 }
+func (LookTuffRed) Pitch() int                         { return 1 }
+func (LookTuffRed) Attack() int                        { return 8 }
+func (LookTuffRed) Defense() int                       { return 3 }
+func (LookTuffRed) Types(card.GameEngine) card.TypeSet { return lookTuffTypes }
+func (LookTuffRed) GoAgain() bool                      { return false }

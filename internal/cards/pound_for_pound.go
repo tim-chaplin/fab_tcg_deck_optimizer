@@ -6,20 +6,19 @@
 //
 // Modelling: the "less {h} than an opposing hero" clause is treated as a hero attribute — the
 // Dominate grant fires for heroes that implement card.LowerHealthWanter (via
-// sim.HeroWantsLowerHealth) and never fires otherwise, a coarse proxy that skips per-turn
+// s.HeroWantsLowerHealth) and never fires otherwise, a coarse proxy that skips per-turn
 // life tracking. Standard self.GrantedDominate wiring (docs/dev-standards.md).
 
 package cards
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 // poundForPoundPlay grants self Dominate when the current hero opts into LowerHealthWanter,
 // then emits the chain step.
 func poundForPoundPlay(s card.GameEngine, l card.Logger, self *card.CardState) {
-	if sim.HeroWantsLowerHealth() {
+	if s.HeroWantsLowerHealth() {
 		self.GrantedDominate = true
 	}
 }

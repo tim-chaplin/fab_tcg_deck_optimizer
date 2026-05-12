@@ -119,7 +119,7 @@ func cardMetaSlowPath(c card.Card, id ids.CardID) attackerMeta {
 // buildAttackerMeta computes a fresh attackerMeta from c. Shared by the cache slow path
 // and the InvalidCard bypass in attackerMetaPtrFor.
 func buildAttackerMeta(c card.Card) attackerMeta {
-	t := c.Types()
+	t := c.Types(nil)
 	_, isDefensiveInstant := c.(card.DefensiveInstant)
 	m := attackerMeta{
 		types:           t,

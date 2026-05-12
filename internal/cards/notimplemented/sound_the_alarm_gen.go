@@ -11,13 +11,13 @@ var soundTheAlarmTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card
 
 type SoundTheAlarmRed struct{}
 
-func (SoundTheAlarmRed) ID() ids.CardID           { return ids.SoundTheAlarmRed }
-func (SoundTheAlarmRed) Name() string             { return "Sound the Alarm" }
-func (SoundTheAlarmRed) DisplayName() string      { return "Sound the Alarm [R]" }
-func (SoundTheAlarmRed) Cost(card.GameEngine) int { return 1 }
-func (SoundTheAlarmRed) Pitch() int               { return 1 }
-func (SoundTheAlarmRed) Attack() int              { return 5 }
-func (SoundTheAlarmRed) Defense() int             { return 3 }
-func (SoundTheAlarmRed) Types() card.TypeSet      { return soundTheAlarmTypes }
-func (SoundTheAlarmRed) GoAgain() bool            { return false }
-func (SoundTheAlarmRed) NotImplemented()          {}
+func (SoundTheAlarmRed) ID() ids.CardID                     { return ids.SoundTheAlarmRed }
+func (SoundTheAlarmRed) Name() string                       { return "Sound the Alarm" }
+func (SoundTheAlarmRed) DisplayName() string                { return "Sound the Alarm [R]" }
+func (SoundTheAlarmRed) Cost(card.GameEngine) int           { return 1 }
+func (SoundTheAlarmRed) Pitch() int                         { return 1 }
+func (SoundTheAlarmRed) Attack() int                        { return 5 }
+func (SoundTheAlarmRed) Defense() int                       { return 3 }
+func (SoundTheAlarmRed) Types(card.GameEngine) card.TypeSet { return soundTheAlarmTypes }
+func (SoundTheAlarmRed) GoAgain() bool                      { return false }
+func (SoundTheAlarmRed) NotImplemented()                    {}

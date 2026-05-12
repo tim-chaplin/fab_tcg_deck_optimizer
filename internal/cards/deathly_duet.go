@@ -36,7 +36,7 @@ func (DeathlyDuetBlue) Play(s card.GameEngine, l card.Logger, self *card.CardSta
 func deathlyDuetApplyRiders(s card.GameEngine, l card.Logger, self *card.CardState) {
 	var attackPitched, nonAttackActionPitched bool
 	for _, p := range self.PitchedToPlay {
-		t := p.Types()
+		t := p.Types(nil)
 		if t.Has(card.TypeAttack) {
 			attackPitched = true
 		}

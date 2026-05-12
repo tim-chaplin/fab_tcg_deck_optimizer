@@ -18,7 +18,7 @@ func (modalBlocker) Cost(card.GameEngine) int { return 0 }
 func (modalBlocker) Pitch() int               { return 0 }
 func (modalBlocker) Attack() int              { return 0 }
 func (modalBlocker) Defense() int             { return 2 }
-func (modalBlocker) Types() card.TypeSet {
+func (modalBlocker) Types(card.GameEngine) card.TypeSet {
 	return card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 }
 func (modalBlocker) GoAgain() bool                                      { return false }

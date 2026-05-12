@@ -18,6 +18,8 @@ func (TalismanOfRecompenseYellow) Cost(card.GameEngine) int { return 0 }
 func (TalismanOfRecompenseYellow) Pitch() int               { return 2 }
 func (TalismanOfRecompenseYellow) Attack() int              { return 0 }
 func (TalismanOfRecompenseYellow) Defense() int             { return 0 }
-func (TalismanOfRecompenseYellow) Types() card.TypeSet      { return talismanOfRecompenseTypes }
-func (TalismanOfRecompenseYellow) GoAgain() bool            { return true }
-func (TalismanOfRecompenseYellow) NotImplemented()          {}
+func (TalismanOfRecompenseYellow) Types(card.GameEngine) card.TypeSet {
+	return talismanOfRecompenseTypes
+}
+func (TalismanOfRecompenseYellow) GoAgain() bool   { return true }
+func (TalismanOfRecompenseYellow) NotImplemented() {}

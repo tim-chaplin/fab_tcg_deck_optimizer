@@ -31,7 +31,7 @@ func sigilOfTheArknightReveal(s card.GameEngine, l card.Logger, a card.Aura) {
 		return
 	}
 	self := SigilOfTheArknightBlue{}.DisplayName()
-	if top.Types().IsAttackAction() {
+	if top.Types(nil).IsAttackAction() {
 		s.DrawOne()
 		l.AppendPostTriggerf(self, 0, "%s drew %s into hand", self, top.DisplayName())
 		return

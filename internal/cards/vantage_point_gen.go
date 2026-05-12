@@ -11,36 +11,36 @@ var vantagePointTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeAction, car
 
 type VantagePointRed struct{}
 
-func (VantagePointRed) ID() ids.CardID           { return ids.VantagePointRed }
-func (VantagePointRed) Name() string             { return "Vantage Point" }
-func (VantagePointRed) DisplayName() string      { return "Vantage Point [R]" }
-func (VantagePointRed) Cost(card.GameEngine) int { return 3 }
-func (VantagePointRed) Pitch() int               { return 1 }
-func (VantagePointRed) Attack() int              { return 7 }
-func (VantagePointRed) Defense() int             { return 3 }
-func (VantagePointRed) Types() card.TypeSet      { return vantagePointTypes }
-func (VantagePointRed) GoAgain() bool            { return false }
+func (VantagePointRed) ID() ids.CardID                     { return ids.VantagePointRed }
+func (VantagePointRed) Name() string                       { return "Vantage Point" }
+func (VantagePointRed) DisplayName() string                { return "Vantage Point [R]" }
+func (VantagePointRed) Cost(card.GameEngine) int           { return 3 }
+func (VantagePointRed) Pitch() int                         { return 1 }
+func (VantagePointRed) Attack() int                        { return 7 }
+func (VantagePointRed) Defense() int                       { return 3 }
+func (VantagePointRed) Types(card.GameEngine) card.TypeSet { return vantagePointTypes }
+func (VantagePointRed) GoAgain() bool                      { return false }
 
 type VantagePointYellow struct{}
 
-func (VantagePointYellow) ID() ids.CardID           { return ids.VantagePointYellow }
-func (VantagePointYellow) Name() string             { return "Vantage Point" }
-func (VantagePointYellow) DisplayName() string      { return "Vantage Point [Y]" }
-func (VantagePointYellow) Cost(card.GameEngine) int { return 3 }
-func (VantagePointYellow) Pitch() int               { return 2 }
-func (VantagePointYellow) Attack() int              { return 6 }
-func (VantagePointYellow) Defense() int             { return 3 }
-func (VantagePointYellow) Types() card.TypeSet      { return vantagePointTypes }
-func (VantagePointYellow) GoAgain() bool            { return false }
+func (VantagePointYellow) ID() ids.CardID                     { return ids.VantagePointYellow }
+func (VantagePointYellow) Name() string                       { return "Vantage Point" }
+func (VantagePointYellow) DisplayName() string                { return "Vantage Point [Y]" }
+func (VantagePointYellow) Cost(card.GameEngine) int           { return 3 }
+func (VantagePointYellow) Pitch() int                         { return 2 }
+func (VantagePointYellow) Attack() int                        { return 6 }
+func (VantagePointYellow) Defense() int                       { return 3 }
+func (VantagePointYellow) Types(card.GameEngine) card.TypeSet { return vantagePointTypes }
+func (VantagePointYellow) GoAgain() bool                      { return false }
 
 type VantagePointBlue struct{}
 
-func (VantagePointBlue) ID() ids.CardID           { return ids.VantagePointBlue }
-func (VantagePointBlue) Name() string             { return "Vantage Point" }
-func (VantagePointBlue) DisplayName() string      { return "Vantage Point [B]" }
-func (VantagePointBlue) Cost(card.GameEngine) int { return 3 }
-func (VantagePointBlue) Pitch() int               { return 3 }
-func (VantagePointBlue) Attack() int              { return 5 }
-func (VantagePointBlue) Defense() int             { return 3 }
-func (VantagePointBlue) Types() card.TypeSet      { return vantagePointTypes }
-func (VantagePointBlue) GoAgain() bool            { return false }
+func (VantagePointBlue) ID() ids.CardID                     { return ids.VantagePointBlue }
+func (VantagePointBlue) Name() string                       { return "Vantage Point" }
+func (VantagePointBlue) DisplayName() string                { return "Vantage Point [B]" }
+func (VantagePointBlue) Cost(card.GameEngine) int           { return 3 }
+func (VantagePointBlue) Pitch() int                         { return 3 }
+func (VantagePointBlue) Attack() int                        { return 5 }
+func (VantagePointBlue) Defense() int                       { return 3 }
+func (VantagePointBlue) Types(card.GameEngine) card.TypeSet { return vantagePointTypes }
+func (VantagePointBlue) GoAgain() bool                      { return false }

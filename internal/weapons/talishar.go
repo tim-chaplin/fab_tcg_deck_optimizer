@@ -31,14 +31,14 @@ var talisharAbilityTypes = card.NewTypeSet(card.TypeGeneric, card.TypeWeapon, ca
 
 type TalisharAbility struct{}
 
-func (TalisharAbility) ID() ids.CardID           { return ids.TalisharAbilityID }
-func (TalisharAbility) Name() string             { return "Talishar, the Lost Prince" }
-func (TalisharAbility) DisplayName() string      { return "Talishar, the Lost Prince" }
-func (TalisharAbility) Cost(card.GameEngine) int { return 0 }
-func (TalisharAbility) Pitch() int               { return 0 }
-func (TalisharAbility) Attack() int              { return 4 }
-func (TalisharAbility) Defense() int             { return 0 }
-func (TalisharAbility) Types() card.TypeSet      { return talisharAbilityTypes }
-func (TalisharAbility) GoAgain() bool            { return false }
+func (TalisharAbility) ID() ids.CardID                     { return ids.TalisharAbilityID }
+func (TalisharAbility) Name() string                       { return "Talishar, the Lost Prince" }
+func (TalisharAbility) DisplayName() string                { return "Talishar, the Lost Prince" }
+func (TalisharAbility) Cost(card.GameEngine) int           { return 0 }
+func (TalisharAbility) Pitch() int                         { return 0 }
+func (TalisharAbility) Attack() int                        { return 4 }
+func (TalisharAbility) Defense() int                       { return 0 }
+func (TalisharAbility) Types(card.GameEngine) card.TypeSet { return talisharAbilityTypes }
+func (TalisharAbility) GoAgain() bool                      { return false }
 func (TalisharAbility) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 }

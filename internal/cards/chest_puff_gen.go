@@ -11,12 +11,12 @@ var chestPuffTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.Typ
 
 type ChestPuffRed struct{}
 
-func (ChestPuffRed) ID() ids.CardID           { return ids.ChestPuffRed }
-func (ChestPuffRed) Name() string             { return "Chest Puff" }
-func (ChestPuffRed) DisplayName() string      { return "Chest Puff [R]" }
-func (ChestPuffRed) Cost(card.GameEngine) int { return 2 }
-func (ChestPuffRed) Pitch() int               { return 1 }
-func (ChestPuffRed) Attack() int              { return 7 }
-func (ChestPuffRed) Defense() int             { return 3 }
-func (ChestPuffRed) Types() card.TypeSet      { return chestPuffTypes }
-func (ChestPuffRed) GoAgain() bool            { return false }
+func (ChestPuffRed) ID() ids.CardID                     { return ids.ChestPuffRed }
+func (ChestPuffRed) Name() string                       { return "Chest Puff" }
+func (ChestPuffRed) DisplayName() string                { return "Chest Puff [R]" }
+func (ChestPuffRed) Cost(card.GameEngine) int           { return 2 }
+func (ChestPuffRed) Pitch() int                         { return 1 }
+func (ChestPuffRed) Attack() int                        { return 7 }
+func (ChestPuffRed) Defense() int                       { return 3 }
+func (ChestPuffRed) Types(card.GameEngine) card.TypeSet { return chestPuffTypes }
+func (ChestPuffRed) GoAgain() bool                      { return false }

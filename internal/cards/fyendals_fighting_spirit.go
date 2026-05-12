@@ -6,14 +6,13 @@
 package cards
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 // fyendalsFightingSpiritApplyRider emits the 1{h} gain as a sub-line under self when the
 // current hero opts into LowerHealthWanter.
 func fyendalsFightingSpiritApplyRider(s card.GameEngine, l card.Logger, self *card.CardState) {
-	if !sim.HeroWantsLowerHealth() {
+	if !s.HeroWantsLowerHealth() {
 		return
 	}
 	s.AddValue(1)

@@ -20,7 +20,7 @@ func (stubRuneAttack) Cost(card.GameEngine) int { return 0 }
 func (stubRuneAttack) Pitch() int               { return 0 }
 func (stubRuneAttack) Attack() int              { return 0 }
 func (stubRuneAttack) Defense() int             { return 0 }
-func (stubRuneAttack) Types() card.TypeSet {
+func (stubRuneAttack) Types(card.GameEngine) card.TypeSet {
 	return card.NewTypeSet(card.TypeRuneblade, card.TypeAction, card.TypeAttack)
 }
 func (stubRuneAttack) GoAgain() bool                                      { return true }
@@ -36,7 +36,7 @@ func (stubRuneAura) Cost(card.GameEngine) int { return 0 }
 func (stubRuneAura) Pitch() int               { return 0 }
 func (stubRuneAura) Attack() int              { return 0 }
 func (stubRuneAura) Defense() int             { return 0 }
-func (stubRuneAura) Types() card.TypeSet {
+func (stubRuneAura) Types(card.GameEngine) card.TypeSet {
 	return card.NewTypeSet(card.TypeRuneblade, card.TypeAction, card.TypeAura)
 }
 func (stubRuneAura) GoAgain() bool                                      { return true }
@@ -52,7 +52,7 @@ func (stubNonRuneblade) Cost(card.GameEngine) int { return 0 }
 func (stubNonRuneblade) Pitch() int               { return 0 }
 func (stubNonRuneblade) Attack() int              { return 0 }
 func (stubNonRuneblade) Defense() int             { return 0 }
-func (stubNonRuneblade) Types() card.TypeSet {
+func (stubNonRuneblade) Types(card.GameEngine) card.TypeSet {
 	return card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 }
 func (stubNonRuneblade) GoAgain() bool                                      { return true }
@@ -100,7 +100,7 @@ func (stubRuneWeapon) Cost(card.GameEngine) int { return 0 }
 func (stubRuneWeapon) Pitch() int               { return 0 }
 func (stubRuneWeapon) Attack() int              { return 0 }
 func (stubRuneWeapon) Defense() int             { return 0 }
-func (stubRuneWeapon) Types() card.TypeSet {
+func (stubRuneWeapon) Types(card.GameEngine) card.TypeSet {
 	return card.NewTypeSet(card.TypeRuneblade, card.TypeWeapon, card.TypeAttack)
 }
 func (stubRuneWeapon) GoAgain() bool                                      { return true }

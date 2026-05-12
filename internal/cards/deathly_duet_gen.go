@@ -11,36 +11,36 @@ var deathlyDuetTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeAction, card
 
 type DeathlyDuetRed struct{}
 
-func (DeathlyDuetRed) ID() ids.CardID           { return ids.DeathlyDuetRed }
-func (DeathlyDuetRed) Name() string             { return "Deathly Duet" }
-func (DeathlyDuetRed) DisplayName() string      { return "Deathly Duet [R]" }
-func (DeathlyDuetRed) Cost(card.GameEngine) int { return 2 }
-func (DeathlyDuetRed) Pitch() int               { return 1 }
-func (DeathlyDuetRed) Attack() int              { return 4 }
-func (DeathlyDuetRed) Defense() int             { return 3 }
-func (DeathlyDuetRed) Types() card.TypeSet      { return deathlyDuetTypes }
-func (DeathlyDuetRed) GoAgain() bool            { return false }
+func (DeathlyDuetRed) ID() ids.CardID                     { return ids.DeathlyDuetRed }
+func (DeathlyDuetRed) Name() string                       { return "Deathly Duet" }
+func (DeathlyDuetRed) DisplayName() string                { return "Deathly Duet [R]" }
+func (DeathlyDuetRed) Cost(card.GameEngine) int           { return 2 }
+func (DeathlyDuetRed) Pitch() int                         { return 1 }
+func (DeathlyDuetRed) Attack() int                        { return 4 }
+func (DeathlyDuetRed) Defense() int                       { return 3 }
+func (DeathlyDuetRed) Types(card.GameEngine) card.TypeSet { return deathlyDuetTypes }
+func (DeathlyDuetRed) GoAgain() bool                      { return false }
 
 type DeathlyDuetYellow struct{}
 
-func (DeathlyDuetYellow) ID() ids.CardID           { return ids.DeathlyDuetYellow }
-func (DeathlyDuetYellow) Name() string             { return "Deathly Duet" }
-func (DeathlyDuetYellow) DisplayName() string      { return "Deathly Duet [Y]" }
-func (DeathlyDuetYellow) Cost(card.GameEngine) int { return 2 }
-func (DeathlyDuetYellow) Pitch() int               { return 2 }
-func (DeathlyDuetYellow) Attack() int              { return 3 }
-func (DeathlyDuetYellow) Defense() int             { return 3 }
-func (DeathlyDuetYellow) Types() card.TypeSet      { return deathlyDuetTypes }
-func (DeathlyDuetYellow) GoAgain() bool            { return false }
+func (DeathlyDuetYellow) ID() ids.CardID                     { return ids.DeathlyDuetYellow }
+func (DeathlyDuetYellow) Name() string                       { return "Deathly Duet" }
+func (DeathlyDuetYellow) DisplayName() string                { return "Deathly Duet [Y]" }
+func (DeathlyDuetYellow) Cost(card.GameEngine) int           { return 2 }
+func (DeathlyDuetYellow) Pitch() int                         { return 2 }
+func (DeathlyDuetYellow) Attack() int                        { return 3 }
+func (DeathlyDuetYellow) Defense() int                       { return 3 }
+func (DeathlyDuetYellow) Types(card.GameEngine) card.TypeSet { return deathlyDuetTypes }
+func (DeathlyDuetYellow) GoAgain() bool                      { return false }
 
 type DeathlyDuetBlue struct{}
 
-func (DeathlyDuetBlue) ID() ids.CardID           { return ids.DeathlyDuetBlue }
-func (DeathlyDuetBlue) Name() string             { return "Deathly Duet" }
-func (DeathlyDuetBlue) DisplayName() string      { return "Deathly Duet [B]" }
-func (DeathlyDuetBlue) Cost(card.GameEngine) int { return 2 }
-func (DeathlyDuetBlue) Pitch() int               { return 3 }
-func (DeathlyDuetBlue) Attack() int              { return 2 }
-func (DeathlyDuetBlue) Defense() int             { return 3 }
-func (DeathlyDuetBlue) Types() card.TypeSet      { return deathlyDuetTypes }
-func (DeathlyDuetBlue) GoAgain() bool            { return false }
+func (DeathlyDuetBlue) ID() ids.CardID                     { return ids.DeathlyDuetBlue }
+func (DeathlyDuetBlue) Name() string                       { return "Deathly Duet" }
+func (DeathlyDuetBlue) DisplayName() string                { return "Deathly Duet [B]" }
+func (DeathlyDuetBlue) Cost(card.GameEngine) int           { return 2 }
+func (DeathlyDuetBlue) Pitch() int                         { return 3 }
+func (DeathlyDuetBlue) Attack() int                        { return 2 }
+func (DeathlyDuetBlue) Defense() int                       { return 3 }
+func (DeathlyDuetBlue) Types(card.GameEngine) card.TypeSet { return deathlyDuetTypes }
+func (DeathlyDuetBlue) GoAgain() bool                      { return false }

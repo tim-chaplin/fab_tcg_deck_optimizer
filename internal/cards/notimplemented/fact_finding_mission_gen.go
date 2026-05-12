@@ -11,39 +11,39 @@ var factFindingMissionTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction,
 
 type FactFindingMissionRed struct{}
 
-func (FactFindingMissionRed) ID() ids.CardID           { return ids.FactFindingMissionRed }
-func (FactFindingMissionRed) Name() string             { return "Fact-Finding Mission" }
-func (FactFindingMissionRed) DisplayName() string      { return "Fact-Finding Mission [R]" }
-func (FactFindingMissionRed) Cost(card.GameEngine) int { return 2 }
-func (FactFindingMissionRed) Pitch() int               { return 1 }
-func (FactFindingMissionRed) Attack() int              { return 6 }
-func (FactFindingMissionRed) Defense() int             { return 2 }
-func (FactFindingMissionRed) Types() card.TypeSet      { return factFindingMissionTypes }
-func (FactFindingMissionRed) GoAgain() bool            { return false }
-func (FactFindingMissionRed) NotImplemented()          {}
+func (FactFindingMissionRed) ID() ids.CardID                     { return ids.FactFindingMissionRed }
+func (FactFindingMissionRed) Name() string                       { return "Fact-Finding Mission" }
+func (FactFindingMissionRed) DisplayName() string                { return "Fact-Finding Mission [R]" }
+func (FactFindingMissionRed) Cost(card.GameEngine) int           { return 2 }
+func (FactFindingMissionRed) Pitch() int                         { return 1 }
+func (FactFindingMissionRed) Attack() int                        { return 6 }
+func (FactFindingMissionRed) Defense() int                       { return 2 }
+func (FactFindingMissionRed) Types(card.GameEngine) card.TypeSet { return factFindingMissionTypes }
+func (FactFindingMissionRed) GoAgain() bool                      { return false }
+func (FactFindingMissionRed) NotImplemented()                    {}
 
 type FactFindingMissionYellow struct{}
 
-func (FactFindingMissionYellow) ID() ids.CardID           { return ids.FactFindingMissionYellow }
-func (FactFindingMissionYellow) Name() string             { return "Fact-Finding Mission" }
-func (FactFindingMissionYellow) DisplayName() string      { return "Fact-Finding Mission [Y]" }
-func (FactFindingMissionYellow) Cost(card.GameEngine) int { return 2 }
-func (FactFindingMissionYellow) Pitch() int               { return 2 }
-func (FactFindingMissionYellow) Attack() int              { return 5 }
-func (FactFindingMissionYellow) Defense() int             { return 2 }
-func (FactFindingMissionYellow) Types() card.TypeSet      { return factFindingMissionTypes }
-func (FactFindingMissionYellow) GoAgain() bool            { return false }
-func (FactFindingMissionYellow) NotImplemented()          {}
+func (FactFindingMissionYellow) ID() ids.CardID                     { return ids.FactFindingMissionYellow }
+func (FactFindingMissionYellow) Name() string                       { return "Fact-Finding Mission" }
+func (FactFindingMissionYellow) DisplayName() string                { return "Fact-Finding Mission [Y]" }
+func (FactFindingMissionYellow) Cost(card.GameEngine) int           { return 2 }
+func (FactFindingMissionYellow) Pitch() int                         { return 2 }
+func (FactFindingMissionYellow) Attack() int                        { return 5 }
+func (FactFindingMissionYellow) Defense() int                       { return 2 }
+func (FactFindingMissionYellow) Types(card.GameEngine) card.TypeSet { return factFindingMissionTypes }
+func (FactFindingMissionYellow) GoAgain() bool                      { return false }
+func (FactFindingMissionYellow) NotImplemented()                    {}
 
 type FactFindingMissionBlue struct{}
 
-func (FactFindingMissionBlue) ID() ids.CardID           { return ids.FactFindingMissionBlue }
-func (FactFindingMissionBlue) Name() string             { return "Fact-Finding Mission" }
-func (FactFindingMissionBlue) DisplayName() string      { return "Fact-Finding Mission [B]" }
-func (FactFindingMissionBlue) Cost(card.GameEngine) int { return 2 }
-func (FactFindingMissionBlue) Pitch() int               { return 3 }
-func (FactFindingMissionBlue) Attack() int              { return 4 }
-func (FactFindingMissionBlue) Defense() int             { return 2 }
-func (FactFindingMissionBlue) Types() card.TypeSet      { return factFindingMissionTypes }
-func (FactFindingMissionBlue) GoAgain() bool            { return false }
-func (FactFindingMissionBlue) NotImplemented()          {}
+func (FactFindingMissionBlue) ID() ids.CardID                     { return ids.FactFindingMissionBlue }
+func (FactFindingMissionBlue) Name() string                       { return "Fact-Finding Mission" }
+func (FactFindingMissionBlue) DisplayName() string                { return "Fact-Finding Mission [B]" }
+func (FactFindingMissionBlue) Cost(card.GameEngine) int           { return 2 }
+func (FactFindingMissionBlue) Pitch() int                         { return 3 }
+func (FactFindingMissionBlue) Attack() int                        { return 4 }
+func (FactFindingMissionBlue) Defense() int                       { return 2 }
+func (FactFindingMissionBlue) Types(card.GameEngine) card.TypeSet { return factFindingMissionTypes }
+func (FactFindingMissionBlue) GoAgain() bool                      { return false }
+func (FactFindingMissionBlue) NotImplemented()                    {}

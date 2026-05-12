@@ -35,8 +35,10 @@ type Card interface {
 	Attack() int
 	Defense() int
 	// Types returns the card's type-line descriptors as a TypeSet bitfield,
-	// e.g. NewTypeSet(TypeRuneblade, TypeAction, TypeAttack).
-	Types() TypeSet
+	// e.g. NewTypeSet(TypeRuneblade, TypeAction, TypeAttack). Universal cards fold
+	// the active hero's class into the result via g.CurrentHeroClass(); non-Universal
+	// cards ignore g.
+	Types(g GameEngine) TypeSet
 	// GoAgain reports whether playing this card grants an additional action point.
 	// Cards printed with "Go again" return true.
 	GoAgain() bool

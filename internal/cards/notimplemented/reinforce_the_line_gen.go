@@ -11,39 +11,39 @@ var reinforceTheLineTypes = card.NewTypeSet(card.TypeGeneric, card.TypeInstant)
 
 type ReinforceTheLineRed struct{}
 
-func (ReinforceTheLineRed) ID() ids.CardID           { return ids.ReinforceTheLineRed }
-func (ReinforceTheLineRed) Name() string             { return "Reinforce the Line" }
-func (ReinforceTheLineRed) DisplayName() string      { return "Reinforce the Line [R]" }
-func (ReinforceTheLineRed) Cost(card.GameEngine) int { return 0 }
-func (ReinforceTheLineRed) Pitch() int               { return 1 }
-func (ReinforceTheLineRed) Attack() int              { return 0 }
-func (ReinforceTheLineRed) Defense() int             { return 0 }
-func (ReinforceTheLineRed) Types() card.TypeSet      { return reinforceTheLineTypes }
-func (ReinforceTheLineRed) GoAgain() bool            { return false }
-func (ReinforceTheLineRed) NotImplemented()          {}
+func (ReinforceTheLineRed) ID() ids.CardID                     { return ids.ReinforceTheLineRed }
+func (ReinforceTheLineRed) Name() string                       { return "Reinforce the Line" }
+func (ReinforceTheLineRed) DisplayName() string                { return "Reinforce the Line [R]" }
+func (ReinforceTheLineRed) Cost(card.GameEngine) int           { return 0 }
+func (ReinforceTheLineRed) Pitch() int                         { return 1 }
+func (ReinforceTheLineRed) Attack() int                        { return 0 }
+func (ReinforceTheLineRed) Defense() int                       { return 0 }
+func (ReinforceTheLineRed) Types(card.GameEngine) card.TypeSet { return reinforceTheLineTypes }
+func (ReinforceTheLineRed) GoAgain() bool                      { return false }
+func (ReinforceTheLineRed) NotImplemented()                    {}
 
 type ReinforceTheLineYellow struct{}
 
-func (ReinforceTheLineYellow) ID() ids.CardID           { return ids.ReinforceTheLineYellow }
-func (ReinforceTheLineYellow) Name() string             { return "Reinforce the Line" }
-func (ReinforceTheLineYellow) DisplayName() string      { return "Reinforce the Line [Y]" }
-func (ReinforceTheLineYellow) Cost(card.GameEngine) int { return 0 }
-func (ReinforceTheLineYellow) Pitch() int               { return 2 }
-func (ReinforceTheLineYellow) Attack() int              { return 0 }
-func (ReinforceTheLineYellow) Defense() int             { return 0 }
-func (ReinforceTheLineYellow) Types() card.TypeSet      { return reinforceTheLineTypes }
-func (ReinforceTheLineYellow) GoAgain() bool            { return false }
-func (ReinforceTheLineYellow) NotImplemented()          {}
+func (ReinforceTheLineYellow) ID() ids.CardID                     { return ids.ReinforceTheLineYellow }
+func (ReinforceTheLineYellow) Name() string                       { return "Reinforce the Line" }
+func (ReinforceTheLineYellow) DisplayName() string                { return "Reinforce the Line [Y]" }
+func (ReinforceTheLineYellow) Cost(card.GameEngine) int           { return 0 }
+func (ReinforceTheLineYellow) Pitch() int                         { return 2 }
+func (ReinforceTheLineYellow) Attack() int                        { return 0 }
+func (ReinforceTheLineYellow) Defense() int                       { return 0 }
+func (ReinforceTheLineYellow) Types(card.GameEngine) card.TypeSet { return reinforceTheLineTypes }
+func (ReinforceTheLineYellow) GoAgain() bool                      { return false }
+func (ReinforceTheLineYellow) NotImplemented()                    {}
 
 type ReinforceTheLineBlue struct{}
 
-func (ReinforceTheLineBlue) ID() ids.CardID           { return ids.ReinforceTheLineBlue }
-func (ReinforceTheLineBlue) Name() string             { return "Reinforce the Line" }
-func (ReinforceTheLineBlue) DisplayName() string      { return "Reinforce the Line [B]" }
-func (ReinforceTheLineBlue) Cost(card.GameEngine) int { return 0 }
-func (ReinforceTheLineBlue) Pitch() int               { return 3 }
-func (ReinforceTheLineBlue) Attack() int              { return 0 }
-func (ReinforceTheLineBlue) Defense() int             { return 0 }
-func (ReinforceTheLineBlue) Types() card.TypeSet      { return reinforceTheLineTypes }
-func (ReinforceTheLineBlue) GoAgain() bool            { return false }
-func (ReinforceTheLineBlue) NotImplemented()          {}
+func (ReinforceTheLineBlue) ID() ids.CardID                     { return ids.ReinforceTheLineBlue }
+func (ReinforceTheLineBlue) Name() string                       { return "Reinforce the Line" }
+func (ReinforceTheLineBlue) DisplayName() string                { return "Reinforce the Line [B]" }
+func (ReinforceTheLineBlue) Cost(card.GameEngine) int           { return 0 }
+func (ReinforceTheLineBlue) Pitch() int                         { return 3 }
+func (ReinforceTheLineBlue) Attack() int                        { return 0 }
+func (ReinforceTheLineBlue) Defense() int                       { return 0 }
+func (ReinforceTheLineBlue) Types(card.GameEngine) card.TypeSet { return reinforceTheLineTypes }
+func (ReinforceTheLineBlue) GoAgain() bool                      { return false }
+func (ReinforceTheLineBlue) NotImplemented()                    {}

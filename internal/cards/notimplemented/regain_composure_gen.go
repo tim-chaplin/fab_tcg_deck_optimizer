@@ -11,13 +11,13 @@ var regainComposureTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction)
 
 type RegainComposureBlue struct{}
 
-func (RegainComposureBlue) ID() ids.CardID           { return ids.RegainComposureBlue }
-func (RegainComposureBlue) Name() string             { return "Regain Composure" }
-func (RegainComposureBlue) DisplayName() string      { return "Regain Composure [B]" }
-func (RegainComposureBlue) Cost(card.GameEngine) int { return 0 }
-func (RegainComposureBlue) Pitch() int               { return 3 }
-func (RegainComposureBlue) Attack() int              { return 0 }
-func (RegainComposureBlue) Defense() int             { return 2 }
-func (RegainComposureBlue) Types() card.TypeSet      { return regainComposureTypes }
-func (RegainComposureBlue) GoAgain() bool            { return true }
-func (RegainComposureBlue) NotImplemented()          {}
+func (RegainComposureBlue) ID() ids.CardID                     { return ids.RegainComposureBlue }
+func (RegainComposureBlue) Name() string                       { return "Regain Composure" }
+func (RegainComposureBlue) DisplayName() string                { return "Regain Composure [B]" }
+func (RegainComposureBlue) Cost(card.GameEngine) int           { return 0 }
+func (RegainComposureBlue) Pitch() int                         { return 3 }
+func (RegainComposureBlue) Attack() int                        { return 0 }
+func (RegainComposureBlue) Defense() int                       { return 2 }
+func (RegainComposureBlue) Types(card.GameEngine) card.TypeSet { return regainComposureTypes }
+func (RegainComposureBlue) GoAgain() bool                      { return true }
+func (RegainComposureBlue) NotImplemented()                    {}

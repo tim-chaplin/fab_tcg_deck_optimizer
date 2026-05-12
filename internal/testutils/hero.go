@@ -44,6 +44,6 @@ func (h Hero) Opt(cards []card.Card) (top, bottom []card.Card) {
 // `defer testutils.SwapCurrentHero(testutils.Hero{})()`.
 func SwapCurrentHero(h sim.Hero) (restore func()) {
 	prev := sim.CurrentHero
-	sim.CurrentHero = h
-	return func() { sim.CurrentHero = prev }
+	sim.SetCurrentHero(h)
+	return func() { sim.SetCurrentHero(prev) }
 }

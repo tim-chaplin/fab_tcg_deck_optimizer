@@ -12,7 +12,7 @@ import (
 )
 
 func (BladeFlashBlue) ARTargetAllowed(c card.Card, _ int8) bool {
-	t := c.Types()
+	t := c.Types(nil)
 	return t.Has(card.TypeSword) && t.IsAttack()
 }
 func (BladeFlashBlue) Play(s card.GameEngine, l card.Logger, _ *card.CardState) {

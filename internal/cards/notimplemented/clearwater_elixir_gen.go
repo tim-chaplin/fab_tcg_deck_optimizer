@@ -11,13 +11,13 @@ var clearwaterElixirTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction)
 
 type ClearwaterElixirRed struct{}
 
-func (ClearwaterElixirRed) ID() ids.CardID           { return ids.ClearwaterElixirRed }
-func (ClearwaterElixirRed) Name() string             { return "Clearwater Elixir" }
-func (ClearwaterElixirRed) DisplayName() string      { return "Clearwater Elixir [R]" }
-func (ClearwaterElixirRed) Cost(card.GameEngine) int { return 1 }
-func (ClearwaterElixirRed) Pitch() int               { return 1 }
-func (ClearwaterElixirRed) Attack() int              { return 0 }
-func (ClearwaterElixirRed) Defense() int             { return 3 }
-func (ClearwaterElixirRed) Types() card.TypeSet      { return clearwaterElixirTypes }
-func (ClearwaterElixirRed) GoAgain() bool            { return true }
-func (ClearwaterElixirRed) NotImplemented()          {}
+func (ClearwaterElixirRed) ID() ids.CardID                     { return ids.ClearwaterElixirRed }
+func (ClearwaterElixirRed) Name() string                       { return "Clearwater Elixir" }
+func (ClearwaterElixirRed) DisplayName() string                { return "Clearwater Elixir [R]" }
+func (ClearwaterElixirRed) Cost(card.GameEngine) int           { return 1 }
+func (ClearwaterElixirRed) Pitch() int                         { return 1 }
+func (ClearwaterElixirRed) Attack() int                        { return 0 }
+func (ClearwaterElixirRed) Defense() int                       { return 3 }
+func (ClearwaterElixirRed) Types(card.GameEngine) card.TypeSet { return clearwaterElixirTypes }
+func (ClearwaterElixirRed) GoAgain() bool                      { return true }
+func (ClearwaterElixirRed) NotImplemented()                    {}

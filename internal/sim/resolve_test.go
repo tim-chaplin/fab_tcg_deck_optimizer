@@ -22,7 +22,7 @@ func (attackStub) Cost(card.GameEngine) int { return 0 }
 func (attackStub) Pitch() int               { return 0 }
 func (attackStub) Attack() int              { return 3 }
 func (attackStub) Defense() int             { return 0 }
-func (attackStub) Types() card.TypeSet {
+func (attackStub) Types(card.GameEngine) card.TypeSet {
 	return card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 }
 func (attackStub) GoAgain() bool                                               { return false }
@@ -38,7 +38,7 @@ func (drStub) Cost(card.GameEngine) int { return 0 }
 func (drStub) Pitch() int               { return 0 }
 func (drStub) Attack() int              { return 0 }
 func (drStub) Defense() int             { return 4 }
-func (drStub) Types() card.TypeSet {
+func (drStub) Types(card.GameEngine) card.TypeSet {
 	return card.NewTypeSet(card.TypeGeneric, card.TypeDefenseReaction)
 }
 func (drStub) GoAgain() bool                                               { return false }
@@ -55,8 +55,10 @@ func (nonAttackStub) Cost(card.GameEngine) int { return 0 }
 func (nonAttackStub) Pitch() int               { return 0 }
 func (nonAttackStub) Attack() int              { return 0 }
 func (nonAttackStub) Defense() int             { return 0 }
-func (nonAttackStub) Types() card.TypeSet      { return card.NewTypeSet(card.TypeGeneric, card.TypeAction) }
-func (nonAttackStub) GoAgain() bool            { return false }
+func (nonAttackStub) Types(card.GameEngine) card.TypeSet {
+	return card.NewTypeSet(card.TypeGeneric, card.TypeAction)
+}
+func (nonAttackStub) GoAgain() bool { return false }
 func (n nonAttackStub) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 	*n.played = true
 }
@@ -73,7 +75,7 @@ func (selfBuffStub) Cost(card.GameEngine) int { return 0 }
 func (selfBuffStub) Pitch() int               { return 0 }
 func (selfBuffStub) Attack() int              { return 2 }
 func (selfBuffStub) Defense() int             { return 0 }
-func (selfBuffStub) Types() card.TypeSet {
+func (selfBuffStub) Types(card.GameEngine) card.TypeSet {
 	return card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 }
 func (selfBuffStub) GoAgain() bool { return false }

@@ -4,7 +4,6 @@ package cards
 
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
@@ -19,8 +18,14 @@ func (WageGoldRed) Cost(card.GameEngine) int { return 3 }
 func (WageGoldRed) Pitch() int               { return 1 }
 func (WageGoldRed) Attack() int              { return 7 }
 func (WageGoldRed) Defense() int             { return 2 }
-func (WageGoldRed) Types() card.TypeSet      { return wageGoldTypes | sim.Universal() }
-func (WageGoldRed) GoAgain() bool            { return false }
+func (WageGoldRed) Types(g card.GameEngine) card.TypeSet {
+	if g == nil {
+		return wageGoldTypes
+	}
+	return wageGoldTypes | card.NewTypeSet(g.CurrentHeroClass())
+}
+func (WageGoldRed) Universal()    {}
+func (WageGoldRed) GoAgain() bool { return false }
 
 type WageGoldYellow struct{}
 
@@ -31,8 +36,14 @@ func (WageGoldYellow) Cost(card.GameEngine) int { return 3 }
 func (WageGoldYellow) Pitch() int               { return 2 }
 func (WageGoldYellow) Attack() int              { return 6 }
 func (WageGoldYellow) Defense() int             { return 2 }
-func (WageGoldYellow) Types() card.TypeSet      { return wageGoldTypes | sim.Universal() }
-func (WageGoldYellow) GoAgain() bool            { return false }
+func (WageGoldYellow) Types(g card.GameEngine) card.TypeSet {
+	if g == nil {
+		return wageGoldTypes
+	}
+	return wageGoldTypes | card.NewTypeSet(g.CurrentHeroClass())
+}
+func (WageGoldYellow) Universal()    {}
+func (WageGoldYellow) GoAgain() bool { return false }
 
 type WageGoldBlue struct{}
 
@@ -43,5 +54,11 @@ func (WageGoldBlue) Cost(card.GameEngine) int { return 3 }
 func (WageGoldBlue) Pitch() int               { return 3 }
 func (WageGoldBlue) Attack() int              { return 5 }
 func (WageGoldBlue) Defense() int             { return 2 }
-func (WageGoldBlue) Types() card.TypeSet      { return wageGoldTypes | sim.Universal() }
-func (WageGoldBlue) GoAgain() bool            { return false }
+func (WageGoldBlue) Types(g card.GameEngine) card.TypeSet {
+	if g == nil {
+		return wageGoldTypes
+	}
+	return wageGoldTypes | card.NewTypeSet(g.CurrentHeroClass())
+}
+func (WageGoldBlue) Universal()    {}
+func (WageGoldBlue) GoAgain() bool { return false }

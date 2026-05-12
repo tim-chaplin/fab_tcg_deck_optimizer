@@ -1,8 +1,9 @@
 // Wage Gold — Generic Action - Attack. Cost 3.
 // Text: "**Universal** When this attacks a hero, you may **wager** a Gold token with them."
 //
-// Types() ORs in sim.Universal() so the keyword applies. The "may" wager opts in only when
-// likely-to-hit; the win (a Gold token) resolves on hit.
+// Types(g) ORs in card.NewTypeSet(g.CurrentHeroClass()) so the Universal keyword grants
+// the active hero's class to the type-line for class-gated triggers. The "may" wager
+// opts in only when likely-to-hit; the win (a Gold token) resolves on hit.
 
 package cards
 

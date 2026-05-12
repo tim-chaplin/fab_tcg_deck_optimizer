@@ -18,6 +18,8 @@ func (DestructiveTendenciesBlue) Cost(card.GameEngine) int { return 0 }
 func (DestructiveTendenciesBlue) Pitch() int               { return 3 }
 func (DestructiveTendenciesBlue) Attack() int              { return 0 }
 func (DestructiveTendenciesBlue) Defense() int             { return 0 }
-func (DestructiveTendenciesBlue) Types() card.TypeSet      { return destructiveTendenciesTypes }
-func (DestructiveTendenciesBlue) GoAgain() bool            { return false }
-func (DestructiveTendenciesBlue) Unplayable()              {}
+func (DestructiveTendenciesBlue) Types(card.GameEngine) card.TypeSet {
+	return destructiveTendenciesTypes
+}
+func (DestructiveTendenciesBlue) GoAgain() bool { return false }
+func (DestructiveTendenciesBlue) Unplayable()   {}

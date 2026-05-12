@@ -11,13 +11,13 @@ var timesnapPotionTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, car
 
 type TimesnapPotionBlue struct{}
 
-func (TimesnapPotionBlue) ID() ids.CardID           { return ids.TimesnapPotionBlue }
-func (TimesnapPotionBlue) Name() string             { return "Timesnap Potion" }
-func (TimesnapPotionBlue) DisplayName() string      { return "Timesnap Potion [B]" }
-func (TimesnapPotionBlue) Cost(card.GameEngine) int { return 0 }
-func (TimesnapPotionBlue) Pitch() int               { return 3 }
-func (TimesnapPotionBlue) Attack() int              { return 0 }
-func (TimesnapPotionBlue) Defense() int             { return 0 }
-func (TimesnapPotionBlue) Types() card.TypeSet      { return timesnapPotionTypes }
-func (TimesnapPotionBlue) GoAgain() bool            { return false }
-func (TimesnapPotionBlue) Unplayable()              {}
+func (TimesnapPotionBlue) ID() ids.CardID                     { return ids.TimesnapPotionBlue }
+func (TimesnapPotionBlue) Name() string                       { return "Timesnap Potion" }
+func (TimesnapPotionBlue) DisplayName() string                { return "Timesnap Potion [B]" }
+func (TimesnapPotionBlue) Cost(card.GameEngine) int           { return 0 }
+func (TimesnapPotionBlue) Pitch() int                         { return 3 }
+func (TimesnapPotionBlue) Attack() int                        { return 0 }
+func (TimesnapPotionBlue) Defense() int                       { return 0 }
+func (TimesnapPotionBlue) Types(card.GameEngine) card.TypeSet { return timesnapPotionTypes }
+func (TimesnapPotionBlue) GoAgain() bool                      { return false }
+func (TimesnapPotionBlue) Unplayable()                        {}

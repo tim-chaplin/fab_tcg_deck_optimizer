@@ -11,13 +11,13 @@ var amuletOfOblationTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, c
 
 type AmuletOfOblationBlue struct{}
 
-func (AmuletOfOblationBlue) ID() ids.CardID           { return ids.AmuletOfOblationBlue }
-func (AmuletOfOblationBlue) Name() string             { return "Amulet of Oblation" }
-func (AmuletOfOblationBlue) DisplayName() string      { return "Amulet of Oblation [B]" }
-func (AmuletOfOblationBlue) Cost(card.GameEngine) int { return 0 }
-func (AmuletOfOblationBlue) Pitch() int               { return 3 }
-func (AmuletOfOblationBlue) Attack() int              { return 0 }
-func (AmuletOfOblationBlue) Defense() int             { return 0 }
-func (AmuletOfOblationBlue) Types() card.TypeSet      { return amuletOfOblationTypes }
-func (AmuletOfOblationBlue) GoAgain() bool            { return true }
-func (AmuletOfOblationBlue) Unplayable()              {}
+func (AmuletOfOblationBlue) ID() ids.CardID                     { return ids.AmuletOfOblationBlue }
+func (AmuletOfOblationBlue) Name() string                       { return "Amulet of Oblation" }
+func (AmuletOfOblationBlue) DisplayName() string                { return "Amulet of Oblation [B]" }
+func (AmuletOfOblationBlue) Cost(card.GameEngine) int           { return 0 }
+func (AmuletOfOblationBlue) Pitch() int                         { return 3 }
+func (AmuletOfOblationBlue) Attack() int                        { return 0 }
+func (AmuletOfOblationBlue) Defense() int                       { return 0 }
+func (AmuletOfOblationBlue) Types(card.GameEngine) card.TypeSet { return amuletOfOblationTypes }
+func (AmuletOfOblationBlue) GoAgain() bool                      { return true }
+func (AmuletOfOblationBlue) Unplayable()                        {}

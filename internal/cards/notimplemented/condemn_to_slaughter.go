@@ -37,7 +37,7 @@ func (CondemnToSlaughterBlue) Play(s card.GameEngine, l card.Logger, self *card.
 // contribution is zero.
 func condemnToSlaughterApplySideEffect(s card.GameEngine, n int) {
 	for _, pc := range s.CardsRemaining() {
-		if pc.Card.Types().IsRunebladeAttack() {
+		if pc.Card.Types(s).IsRunebladeAttack() {
 			pc.BonusAttack += n
 			return
 		}

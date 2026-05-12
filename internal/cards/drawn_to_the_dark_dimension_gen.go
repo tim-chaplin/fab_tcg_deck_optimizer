@@ -17,8 +17,10 @@ func (DrawnToTheDarkDimensionRed) DisplayName() string { return "Drawn to the Da
 func (DrawnToTheDarkDimensionRed) Pitch() int          { return 1 }
 func (DrawnToTheDarkDimensionRed) Attack() int         { return 3 }
 func (DrawnToTheDarkDimensionRed) Defense() int        { return 3 }
-func (DrawnToTheDarkDimensionRed) Types() card.TypeSet { return drawnToTheDarkDimensionTypes }
-func (DrawnToTheDarkDimensionRed) GoAgain() bool       { return false }
+func (DrawnToTheDarkDimensionRed) Types(card.GameEngine) card.TypeSet {
+	return drawnToTheDarkDimensionTypes
+}
+func (DrawnToTheDarkDimensionRed) GoAgain() bool { return false }
 
 type DrawnToTheDarkDimensionYellow struct{}
 
@@ -28,8 +30,10 @@ func (DrawnToTheDarkDimensionYellow) DisplayName() string { return "Drawn to the
 func (DrawnToTheDarkDimensionYellow) Pitch() int          { return 2 }
 func (DrawnToTheDarkDimensionYellow) Attack() int         { return 2 }
 func (DrawnToTheDarkDimensionYellow) Defense() int        { return 3 }
-func (DrawnToTheDarkDimensionYellow) Types() card.TypeSet { return drawnToTheDarkDimensionTypes }
-func (DrawnToTheDarkDimensionYellow) GoAgain() bool       { return false }
+func (DrawnToTheDarkDimensionYellow) Types(card.GameEngine) card.TypeSet {
+	return drawnToTheDarkDimensionTypes
+}
+func (DrawnToTheDarkDimensionYellow) GoAgain() bool { return false }
 
 type DrawnToTheDarkDimensionBlue struct{}
 
@@ -39,5 +43,7 @@ func (DrawnToTheDarkDimensionBlue) DisplayName() string { return "Drawn to the D
 func (DrawnToTheDarkDimensionBlue) Pitch() int          { return 3 }
 func (DrawnToTheDarkDimensionBlue) Attack() int         { return 1 }
 func (DrawnToTheDarkDimensionBlue) Defense() int        { return 3 }
-func (DrawnToTheDarkDimensionBlue) Types() card.TypeSet { return drawnToTheDarkDimensionTypes }
-func (DrawnToTheDarkDimensionBlue) GoAgain() bool       { return false }
+func (DrawnToTheDarkDimensionBlue) Types(card.GameEngine) card.TypeSet {
+	return drawnToTheDarkDimensionTypes
+}
+func (DrawnToTheDarkDimensionBlue) GoAgain() bool { return false }

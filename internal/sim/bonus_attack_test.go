@@ -25,7 +25,7 @@ func (pitchOnlyRed) Cost(card.GameEngine) int { return 0 }
 func (pitchOnlyRed) Pitch() int               { return 1 }
 func (pitchOnlyRed) Attack() int              { return 0 }
 func (pitchOnlyRed) Defense() int             { return 0 }
-func (pitchOnlyRed) Types() card.TypeSet {
+func (pitchOnlyRed) Types(card.GameEngine) card.TypeSet {
 	return card.NewTypeSet(card.TypeGeneric, card.TypeAction)
 }
 func (pitchOnlyRed) GoAgain() bool                                      { return false }
@@ -44,13 +44,13 @@ func (grantBonusAttack) Cost(card.GameEngine) int { return 0 }
 func (grantBonusAttack) Pitch() int               { return 0 }
 func (grantBonusAttack) Attack() int              { return 0 }
 func (grantBonusAttack) Defense() int             { return 0 }
-func (grantBonusAttack) Types() card.TypeSet {
+func (grantBonusAttack) Types(card.GameEngine) card.TypeSet {
 	return card.NewTypeSet(card.TypeGeneric, card.TypeAction)
 }
 func (grantBonusAttack) GoAgain() bool { return true }
 func (g grantBonusAttack) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 	for _, pc := range s.CardsRemaining() {
-		if pc.Card.Types().IsAttackAction() {
+		if pc.Card.Types(nil).IsAttackAction() {
 			pc.BonusAttack += g.n
 			break
 		}
@@ -70,13 +70,13 @@ func (grantBonusAttackWeapon) Cost(card.GameEngine) int { return 0 }
 func (grantBonusAttackWeapon) Pitch() int               { return 0 }
 func (grantBonusAttackWeapon) Attack() int              { return 0 }
 func (grantBonusAttackWeapon) Defense() int             { return 0 }
-func (grantBonusAttackWeapon) Types() card.TypeSet {
+func (grantBonusAttackWeapon) Types(card.GameEngine) card.TypeSet {
 	return card.NewTypeSet(card.TypeGeneric, card.TypeAction)
 }
 func (grantBonusAttackWeapon) GoAgain() bool { return true }
 func (g grantBonusAttackWeapon) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 	for _, pc := range s.CardsRemaining() {
-		if pc.Card.Types().IsWeaponAttack() {
+		if pc.Card.Types(nil).IsWeaponAttack() {
 			pc.BonusAttack += g.n
 			break
 		}

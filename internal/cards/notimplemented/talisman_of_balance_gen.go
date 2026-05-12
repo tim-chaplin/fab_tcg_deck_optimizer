@@ -11,13 +11,13 @@ var talismanOfBalanceTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, 
 
 type TalismanOfBalanceBlue struct{}
 
-func (TalismanOfBalanceBlue) ID() ids.CardID           { return ids.TalismanOfBalanceBlue }
-func (TalismanOfBalanceBlue) Name() string             { return "Talisman of Balance" }
-func (TalismanOfBalanceBlue) DisplayName() string      { return "Talisman of Balance [B]" }
-func (TalismanOfBalanceBlue) Cost(card.GameEngine) int { return 0 }
-func (TalismanOfBalanceBlue) Pitch() int               { return 3 }
-func (TalismanOfBalanceBlue) Attack() int              { return 0 }
-func (TalismanOfBalanceBlue) Defense() int             { return 0 }
-func (TalismanOfBalanceBlue) Types() card.TypeSet      { return talismanOfBalanceTypes }
-func (TalismanOfBalanceBlue) GoAgain() bool            { return true }
-func (TalismanOfBalanceBlue) NotImplemented()          {}
+func (TalismanOfBalanceBlue) ID() ids.CardID                     { return ids.TalismanOfBalanceBlue }
+func (TalismanOfBalanceBlue) Name() string                       { return "Talisman of Balance" }
+func (TalismanOfBalanceBlue) DisplayName() string                { return "Talisman of Balance [B]" }
+func (TalismanOfBalanceBlue) Cost(card.GameEngine) int           { return 0 }
+func (TalismanOfBalanceBlue) Pitch() int                         { return 3 }
+func (TalismanOfBalanceBlue) Attack() int                        { return 0 }
+func (TalismanOfBalanceBlue) Defense() int                       { return 0 }
+func (TalismanOfBalanceBlue) Types(card.GameEngine) card.TypeSet { return talismanOfBalanceTypes }
+func (TalismanOfBalanceBlue) GoAgain() bool                      { return true }
+func (TalismanOfBalanceBlue) NotImplemented()                    {}

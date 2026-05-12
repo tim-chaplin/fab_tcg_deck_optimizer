@@ -30,14 +30,14 @@ var reapingBladeAbilityTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeWeap
 
 type ReapingBladeAbility struct{}
 
-func (ReapingBladeAbility) ID() ids.CardID           { return ids.ReapingBladeAbilityID }
-func (ReapingBladeAbility) Name() string             { return "Reaping Blade" }
-func (ReapingBladeAbility) DisplayName() string      { return "Reaping Blade" }
-func (ReapingBladeAbility) Cost(card.GameEngine) int { return 1 }
-func (ReapingBladeAbility) Pitch() int               { return 0 }
-func (ReapingBladeAbility) Attack() int              { return 3 }
-func (ReapingBladeAbility) Defense() int             { return 0 }
-func (ReapingBladeAbility) Types() card.TypeSet      { return reapingBladeAbilityTypes }
-func (ReapingBladeAbility) GoAgain() bool            { return false }
+func (ReapingBladeAbility) ID() ids.CardID                     { return ids.ReapingBladeAbilityID }
+func (ReapingBladeAbility) Name() string                       { return "Reaping Blade" }
+func (ReapingBladeAbility) DisplayName() string                { return "Reaping Blade" }
+func (ReapingBladeAbility) Cost(card.GameEngine) int           { return 1 }
+func (ReapingBladeAbility) Pitch() int                         { return 0 }
+func (ReapingBladeAbility) Attack() int                        { return 3 }
+func (ReapingBladeAbility) Defense() int                       { return 0 }
+func (ReapingBladeAbility) Types(card.GameEngine) card.TypeSet { return reapingBladeAbilityTypes }
+func (ReapingBladeAbility) GoAgain() bool                      { return false }
 func (ReapingBladeAbility) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 }

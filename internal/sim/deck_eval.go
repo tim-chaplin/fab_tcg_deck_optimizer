@@ -91,7 +91,7 @@ func meanStandardError(stats *DeckStats) float64 {
 }
 
 func (ev *Evaluator) evaluateImpl(d *deck.Deck, maxRuns int, mp Matchup, rng *rand.Rand, stop shuffleStopper) DeckStats {
-	CurrentHero = d.Hero.(Hero)
+	SetCurrentHero(d.Hero.(Hero))
 	handSize := d.Hero.(Hero).Intelligence()
 	deckSize := d.Size()
 	if handSize <= 0 || deckSize < handSize {

@@ -11,39 +11,39 @@ var wreckHavocTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.Ty
 
 type WreckHavocRed struct{}
 
-func (WreckHavocRed) ID() ids.CardID           { return ids.WreckHavocRed }
-func (WreckHavocRed) Name() string             { return "Wreck Havoc" }
-func (WreckHavocRed) DisplayName() string      { return "Wreck Havoc [R]" }
-func (WreckHavocRed) Cost(card.GameEngine) int { return 2 }
-func (WreckHavocRed) Pitch() int               { return 1 }
-func (WreckHavocRed) Attack() int              { return 6 }
-func (WreckHavocRed) Defense() int             { return 2 }
-func (WreckHavocRed) Types() card.TypeSet      { return wreckHavocTypes }
-func (WreckHavocRed) GoAgain() bool            { return false }
-func (WreckHavocRed) NotImplemented()          {}
+func (WreckHavocRed) ID() ids.CardID                     { return ids.WreckHavocRed }
+func (WreckHavocRed) Name() string                       { return "Wreck Havoc" }
+func (WreckHavocRed) DisplayName() string                { return "Wreck Havoc [R]" }
+func (WreckHavocRed) Cost(card.GameEngine) int           { return 2 }
+func (WreckHavocRed) Pitch() int                         { return 1 }
+func (WreckHavocRed) Attack() int                        { return 6 }
+func (WreckHavocRed) Defense() int                       { return 2 }
+func (WreckHavocRed) Types(card.GameEngine) card.TypeSet { return wreckHavocTypes }
+func (WreckHavocRed) GoAgain() bool                      { return false }
+func (WreckHavocRed) NotImplemented()                    {}
 
 type WreckHavocYellow struct{}
 
-func (WreckHavocYellow) ID() ids.CardID           { return ids.WreckHavocYellow }
-func (WreckHavocYellow) Name() string             { return "Wreck Havoc" }
-func (WreckHavocYellow) DisplayName() string      { return "Wreck Havoc [Y]" }
-func (WreckHavocYellow) Cost(card.GameEngine) int { return 2 }
-func (WreckHavocYellow) Pitch() int               { return 2 }
-func (WreckHavocYellow) Attack() int              { return 5 }
-func (WreckHavocYellow) Defense() int             { return 2 }
-func (WreckHavocYellow) Types() card.TypeSet      { return wreckHavocTypes }
-func (WreckHavocYellow) GoAgain() bool            { return false }
-func (WreckHavocYellow) NotImplemented()          {}
+func (WreckHavocYellow) ID() ids.CardID                     { return ids.WreckHavocYellow }
+func (WreckHavocYellow) Name() string                       { return "Wreck Havoc" }
+func (WreckHavocYellow) DisplayName() string                { return "Wreck Havoc [Y]" }
+func (WreckHavocYellow) Cost(card.GameEngine) int           { return 2 }
+func (WreckHavocYellow) Pitch() int                         { return 2 }
+func (WreckHavocYellow) Attack() int                        { return 5 }
+func (WreckHavocYellow) Defense() int                       { return 2 }
+func (WreckHavocYellow) Types(card.GameEngine) card.TypeSet { return wreckHavocTypes }
+func (WreckHavocYellow) GoAgain() bool                      { return false }
+func (WreckHavocYellow) NotImplemented()                    {}
 
 type WreckHavocBlue struct{}
 
-func (WreckHavocBlue) ID() ids.CardID           { return ids.WreckHavocBlue }
-func (WreckHavocBlue) Name() string             { return "Wreck Havoc" }
-func (WreckHavocBlue) DisplayName() string      { return "Wreck Havoc [B]" }
-func (WreckHavocBlue) Cost(card.GameEngine) int { return 2 }
-func (WreckHavocBlue) Pitch() int               { return 3 }
-func (WreckHavocBlue) Attack() int              { return 4 }
-func (WreckHavocBlue) Defense() int             { return 2 }
-func (WreckHavocBlue) Types() card.TypeSet      { return wreckHavocTypes }
-func (WreckHavocBlue) GoAgain() bool            { return false }
-func (WreckHavocBlue) NotImplemented()          {}
+func (WreckHavocBlue) ID() ids.CardID                     { return ids.WreckHavocBlue }
+func (WreckHavocBlue) Name() string                       { return "Wreck Havoc" }
+func (WreckHavocBlue) DisplayName() string                { return "Wreck Havoc [B]" }
+func (WreckHavocBlue) Cost(card.GameEngine) int           { return 2 }
+func (WreckHavocBlue) Pitch() int                         { return 3 }
+func (WreckHavocBlue) Attack() int                        { return 4 }
+func (WreckHavocBlue) Defense() int                       { return 2 }
+func (WreckHavocBlue) Types(card.GameEngine) card.TypeSet { return wreckHavocTypes }
+func (WreckHavocBlue) GoAgain() bool                      { return false }
+func (WreckHavocBlue) NotImplemented()                    {}

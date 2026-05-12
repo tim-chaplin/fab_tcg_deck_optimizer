@@ -11,13 +11,13 @@ var amuletOfEchoesTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, car
 
 type AmuletOfEchoesBlue struct{}
 
-func (AmuletOfEchoesBlue) ID() ids.CardID           { return ids.AmuletOfEchoesBlue }
-func (AmuletOfEchoesBlue) Name() string             { return "Amulet of Echoes" }
-func (AmuletOfEchoesBlue) DisplayName() string      { return "Amulet of Echoes [B]" }
-func (AmuletOfEchoesBlue) Cost(card.GameEngine) int { return 0 }
-func (AmuletOfEchoesBlue) Pitch() int               { return 3 }
-func (AmuletOfEchoesBlue) Attack() int              { return 0 }
-func (AmuletOfEchoesBlue) Defense() int             { return 0 }
-func (AmuletOfEchoesBlue) Types() card.TypeSet      { return amuletOfEchoesTypes }
-func (AmuletOfEchoesBlue) GoAgain() bool            { return true }
-func (AmuletOfEchoesBlue) Unplayable()              {}
+func (AmuletOfEchoesBlue) ID() ids.CardID                     { return ids.AmuletOfEchoesBlue }
+func (AmuletOfEchoesBlue) Name() string                       { return "Amulet of Echoes" }
+func (AmuletOfEchoesBlue) DisplayName() string                { return "Amulet of Echoes [B]" }
+func (AmuletOfEchoesBlue) Cost(card.GameEngine) int           { return 0 }
+func (AmuletOfEchoesBlue) Pitch() int                         { return 3 }
+func (AmuletOfEchoesBlue) Attack() int                        { return 0 }
+func (AmuletOfEchoesBlue) Defense() int                       { return 0 }
+func (AmuletOfEchoesBlue) Types(card.GameEngine) card.TypeSet { return amuletOfEchoesTypes }
+func (AmuletOfEchoesBlue) GoAgain() bool                      { return true }
+func (AmuletOfEchoesBlue) Unplayable()                        {}

@@ -11,13 +11,13 @@ var potionOfDJVuTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.
 
 type PotionOfDejaVuBlue struct{}
 
-func (PotionOfDejaVuBlue) ID() ids.CardID           { return ids.PotionOfDejaVuBlue }
-func (PotionOfDejaVuBlue) Name() string             { return "Potion of Déjà Vu" }
-func (PotionOfDejaVuBlue) DisplayName() string      { return "Potion of Déjà Vu [B]" }
-func (PotionOfDejaVuBlue) Cost(card.GameEngine) int { return 0 }
-func (PotionOfDejaVuBlue) Pitch() int               { return 3 }
-func (PotionOfDejaVuBlue) Attack() int              { return 0 }
-func (PotionOfDejaVuBlue) Defense() int             { return 0 }
-func (PotionOfDejaVuBlue) Types() card.TypeSet      { return potionOfDJVuTypes }
-func (PotionOfDejaVuBlue) GoAgain() bool            { return false }
-func (PotionOfDejaVuBlue) Unplayable()              {}
+func (PotionOfDejaVuBlue) ID() ids.CardID                     { return ids.PotionOfDejaVuBlue }
+func (PotionOfDejaVuBlue) Name() string                       { return "Potion of Déjà Vu" }
+func (PotionOfDejaVuBlue) DisplayName() string                { return "Potion of Déjà Vu [B]" }
+func (PotionOfDejaVuBlue) Cost(card.GameEngine) int           { return 0 }
+func (PotionOfDejaVuBlue) Pitch() int                         { return 3 }
+func (PotionOfDejaVuBlue) Attack() int                        { return 0 }
+func (PotionOfDejaVuBlue) Defense() int                       { return 0 }
+func (PotionOfDejaVuBlue) Types(card.GameEngine) card.TypeSet { return potionOfDJVuTypes }
+func (PotionOfDejaVuBlue) GoAgain() bool                      { return false }
+func (PotionOfDejaVuBlue) Unplayable()                        {}
