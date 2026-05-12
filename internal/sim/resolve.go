@@ -30,6 +30,12 @@ func ResolveChainStep(g card.GameEngine, l card.Logger, self *card.CardState) {
 	l.AppendChainStep(ChainStepText(self), n)
 }
 
+// PlayCard implements card.GameEngine.PlayCard. Cards reach this when they resolve
+// another card mid-handler (Moon Wish tutoring Sun Kiss into play on go-again).
+func (s *TurnState) PlayCard(l card.Logger, self *card.CardState) {
+	ResolveChainStep(s, l, self)
+}
+
 // chainStepDelta computes the chain step's display delta and applies the standard
 // damage / block side effects. Returns the (+N) value for the log line.
 func chainStepDelta(s *TurnState, self *card.CardState) int {
