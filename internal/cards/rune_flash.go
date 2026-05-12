@@ -3,8 +3,7 @@
 // Printed power: Red 4, Yellow 3, Blue 2.
 // Text: "Rune Flash costs {r} less to play for each Runechant you control."
 //
-// Variable cost: Cost reads g.RunechantCount() to return max(0, printed - Runechants).
-// Standard card.VariableCost wiring (docs/dev-standards.md).
+// Cost returns max(0, printed - RunechantCount).
 
 package cards
 

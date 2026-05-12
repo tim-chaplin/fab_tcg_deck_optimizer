@@ -15,8 +15,7 @@ func (SigilOfDeadwoodBlue) Play(g card.GameEngine, l card.Logger, self *card.Car
 	g.CreateStartOfTurnAura(self, sigilOfDeadwoodAuraHandler, 1)
 }
 
-// sigilOfDeadwoodAuraHandler creates 1 runechant on the next-turn fire and destroys the
-// aura. Top-level so the Aura.Handler assignment doesn't allocate a closure.
+// sigilOfDeadwoodAuraHandler creates 1 runechant on the next-turn fire and destroys the aura.
 func sigilOfDeadwoodAuraHandler(g card.GameEngine, l card.Logger, a card.Aura) {
 	g.CreateRunechants(1)
 	l.AppendPostTrigger(a.CardName(), "Created a runechant", 1)

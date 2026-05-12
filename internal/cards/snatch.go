@@ -13,8 +13,7 @@ func snatchPlay(g card.GameEngine, l card.Logger, self *card.CardState) {
 	self.RegisterOnHit(snatchOnHit)
 }
 
-// snatchOnHit fires the printed "When this hits, draw a card" rider. Top-level so
-// registration stays alloc-free.
+// snatchOnHit fires the printed "When this hits, draw a card" rider.
 func snatchOnHit(g card.GameEngine, l card.Logger, _ *card.CardState, _ *card.OnHitHandler) {
 	g.DrawOne()
 }

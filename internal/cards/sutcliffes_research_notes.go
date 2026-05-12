@@ -14,9 +14,7 @@ import (
 )
 
 // sutcliffesResearchNotesPlay scans the top revealCount cards of the deck and creates one
-// runechant per Runeblade attack action card found, emitting the rider sub-line under self
-// when any are created. Reads the top via PeekTopN so the cacheable bit flips — the
-// runechant count produced depends on shuffle order.
+// runechant per Runeblade attack action card found.
 func sutcliffesResearchNotesPlay(g card.GameEngine, l card.Logger, self *card.CardState, revealCount int) {
 	count := 0
 	for _, c := range g.PeekTopN(revealCount) {

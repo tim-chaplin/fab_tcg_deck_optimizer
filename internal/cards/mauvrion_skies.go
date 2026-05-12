@@ -16,8 +16,6 @@ import (
 )
 
 // mauvrionTargetMatches accepts Runeblade attack action cards (weapons don't qualify).
-// The engine is threaded through so Universal cards fold the active hero's class into
-// their Types — Wage Gold under Viserai then matches TypeRuneblade.
 func mauvrionTargetMatches(g card.GameEngine, target *card.CardState) bool {
 	t := target.Card.Types(g)
 	return t.Has(card.TypeRuneblade) && t.IsAttackAction()
@@ -42,16 +40,15 @@ func mauvrionSkiesPlay(g card.GameEngine, l card.Logger, selfState *card.CardSta
 }
 
 // onHitCreateRunechants fires the on-hit "create N runechants" rider attached to the
-// targeted attack by Mauvrion Skies / Runic Reaping. Reads N and the precomputed log
-// line off the handler so registration stays alloc-free; self is the targeted attack
-// (whose name credits the trigger line).
+// targeted attack. Reads N and the precomputed log line off the handler; self is the
+// targeted attack (whose name credits the trigger line).
 func onHitCreateRunechants(g card.GameEngine, l card.Logger, self *card.CardState, h *card.OnHitHandler) {
 	g.CreateRunechants(h.N)
 	l.AppendPostTrigger(self.Card.DisplayName(), h.LogText, h.N)
 }
 
 // onHitRunechantText is the precomputed rider line for each Mauvrion Skies / Runic Reaping
-// printing — built once so the OnHit closure doesn't fmt.Sprintf on the hot path.
+// printing.
 var onHitRunechantText = func() map[ids.CardID]string {
 	out := make(map[ids.CardID]string, 6)
 	for _, p := range []struct {

@@ -4,8 +4,7 @@
 // Text: "When this attacks, your next attack this combat chain with 1 or less base {p} gets +1{p}.
 // **Go again**"
 //
-// Scans TurnState.CardsRemaining for the first attack action card with base power 1 or less and
-// credits the +1 assuming it will be played; if no matching attack follows, the rider fizzles.
+// Fizzles silently if no matching attack follows.
 
 package cards
 

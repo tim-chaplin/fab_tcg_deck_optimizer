@@ -3,8 +3,7 @@
 // Printed power: Red 6, Yellow 5, Blue 4.
 // Text: "Amplify the Arknight costs {r} less to play for each Runechant you control."
 //
-// Variable cost: Cost reads g.RunechantCount() to return max(0, printed - Runechants).
-// Standard card.VariableCost wiring (docs/dev-standards.md).
+// Cost returns max(0, printed - RunechantCount).
 
 package cards
 

@@ -1,8 +1,7 @@
 package card
 
-// Card-type keywords and the TypeSet bitfield that pools them. Every type-line check on the
-// hot path (attack action? defense reaction? persists in play?) routes through a single
-// bitmask AND, so the solver's tight inner loops avoid string comparison / map lookup.
+// Card-type keywords and the TypeSet bitfield that pools them. Every type-line check
+// routes through a single bitmask AND — no string comparison or map lookup on the hot path.
 
 // CardType is a card-type descriptor. Each constant corresponds to one keyword from a FaB
 // card's type line (e.g. "Runeblade", "Action", "Attack").
@@ -33,14 +32,13 @@ const (
 	TypeYoung                                // "Young"
 )
 
-// persistsInPlayMask is the set of types that keep a card in its zone after resolving rather
-// than heading to the graveyard. Auras (e.g. Sigil of the Arknight: Runeblade, Action, Aura)
-// and Items linger in the arena until a destroy condition fires; weapons stay equipped.
+// persistsInPlayMask is the set of types that keep a card in its zone after resolving
+// rather than heading to the graveyard. Auras and Items linger in the arena until a
+// destroy condition fires; weapons stay equipped.
 const persistsInPlayMask TypeSet = TypeSet(TypeAura) | TypeSet(TypeItem) | TypeSet(TypeWeapon)
 
-// PersistsInPlay reports whether a card with this type set stays in its zone when it resolves
-// instead of heading to the graveyard. Used by the solver to decide whether to append a
-// just-played card to state.Graveyard.
+// PersistsInPlay reports whether a card with this type set stays in its zone on resolve
+// instead of heading to the graveyard.
 func (s TypeSet) PersistsInPlay() bool {
 	return s&persistsInPlayMask != 0
 }
@@ -68,7 +66,6 @@ func (s TypeSet) IsNonAttackAction() bool {
 }
 
 // IsAttackAction reports whether s is an attack action card — both Action and Attack.
-// Single-expression bitmask keeps the "next attack action" peek loops lean.
 func (s TypeSet) IsAttackAction() bool {
 	return s&TypeSet(TypeAction) != 0 && s&TypeSet(TypeAttack) != 0
 }
@@ -81,8 +78,7 @@ func (s TypeSet) IsAttack() bool {
 }
 
 // IsWeaponAttack reports whether s represents a weapon attack — both TypeWeapon and
-// TypeAttack present. Backs "weapon attack" riders (e.g. Pummel's "club or hammer
-// weapon attack").
+// TypeAttack present. Backs "weapon attack" riders.
 func (s TypeSet) IsWeaponAttack() bool {
 	return s&TypeSet(TypeWeapon) != 0 && s&TypeSet(TypeAttack) != 0
 }
@@ -104,9 +100,9 @@ func (s TypeSet) IsAttackReaction() bool {
 }
 
 // IsResource reports whether s carries the Resource type. Resource cards have no Action
-// subtype so they can't be played, but their printed Defense is still a legal block like
-// any non-Action hand card. The post-hoc arsenal promotion skips them (alongside pure
-// Block cards) since neither has a legal play from arsenal.
+// subtype so they can't be played, but their printed Defense is still a legal block. The
+// post-hoc arsenal promotion skips them (alongside pure Block cards) since neither has a
+// legal play from arsenal.
 func (s TypeSet) IsResource() bool {
 	return s&TypeSet(TypeResource) != 0
 }

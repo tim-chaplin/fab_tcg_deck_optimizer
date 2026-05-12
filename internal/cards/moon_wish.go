@@ -6,12 +6,9 @@
 // your hand, then shuffle your deck."
 //
 // Card-specific quirks:
-//   - Tutor priority is Red > Yellow > Blue — the Red printing heals the most (3{h} vs 2 vs
-//     1), so the highest-power variant present wins.
-//   - The on-hit Sun Kiss tutor wants the synergy ("if you've played Moon Wish") to fire
-//     when Sun Kiss resolves immediately (go-again branch), but Moon Wish hasn't been
-//     appended to CardsPlayed yet. Play does a transient pre-append + pop around the Sun
-//     Kiss invocation so Sun Kiss sees Moon Wish in CardsPlayed without double-adding.
+//   - Tutor priority is Red > Yellow > Blue — the Red printing heals the most (3{h} vs 2 vs 1).
+//   - On the go-again branch, Play transiently appends Moon Wish to CardsPlayed before
+//     invoking Sun Kiss so Sun Kiss's "if you've played Moon Wish" synergy fires; pops after.
 //   - The printed "shuffle your deck" is dropped: deck order isn't modelled beyond removal.
 
 package cards
@@ -34,31 +31,25 @@ func moonWishCost(g card.GameEngine) int {
 	return moonWishPrintedCost
 }
 
-// moonWishPlay pays the alt cost (when a hand card is available), emits the chain step,
-// and registers an OnHit that tutors Sun Kiss. Tutored Sun Kiss plays immediately when
-// self has go-again granted; otherwise it lands in hand for next turn.
+// moonWishPlay pays the alt cost (when a hand card is available) and registers an OnHit
+// that tutors Sun Kiss. Tutored Sun Kiss plays immediately when self has go-again granted;
+// otherwise it lands in hand for next turn.
 func moonWishPlay(c card.Card, g card.GameEngine, l card.Logger, self *card.CardState) {
 	name := c.DisplayName()
-	// Alt cost: pop a hand card and prepend it to the deck (PrependToDeck flips cacheable).
+	// Alt cost: pop a hand card and prepend it to the deck.
 	var returned card.Card
 	if len(g.Hand()) > 0 {
 		returned = g.PopHandAt(0)
 		g.PrependToDeck(returned)
 	}
-
-	// Emit Moon Wish's chain step first so the alt-cost / tutor lines follow it in order.
-
 	if returned != nil {
 		l.AppendPostTriggerf(name, 0, "%s returned %s to top of deck", name, returned.DisplayName())
 	}
-
 	self.RegisterOnHit(moonWishOnHit)
 }
 
-// moonWishOnHit fires the printed "If this hits, search for Sun Kiss" rider. Top-level so
-// registration stays alloc-free; reads the Moon Wish printing off self.Card so we don't
-// need a captured copy or a Source-field detour (self IS the Moon Wish that registered
-// the handler).
+// moonWishOnHit fires the printed "If this hits, search for Sun Kiss" rider. Reads the
+// Moon Wish printing off self.Card — self IS the Moon Wish that registered the handler.
 func moonWishOnHit(g card.GameEngine, l card.Logger, self *card.CardState, _ *card.OnHitHandler) {
 	c := self.Card
 	name := c.DisplayName()

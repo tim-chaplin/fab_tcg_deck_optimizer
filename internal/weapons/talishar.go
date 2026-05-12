@@ -21,7 +21,6 @@ func (Talishar) Types() card.TypeSet { return talisharTypes }
 func (Talishar) Hands() int          { return 2 }
 func (Talishar) Ability() card.Card  { return talisharAbility }
 
-// Cached at package init — see nebula_blade.go for the alloc-free rationale.
 var talisharAbility card.Card = TalisharAbility{}
 
 // not implemented: rust-counter activation cost and end-phase self-destruct at 3+ counters

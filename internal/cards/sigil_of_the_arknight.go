@@ -19,11 +19,9 @@ func (SigilOfTheArknightBlue) Play(g card.GameEngine, l card.Logger, self *card.
 	g.CreateStartOfTurnAura(self, sigilOfTheArknightReveal, 1)
 }
 
-// sigilOfTheArknightReveal implements the handler described in the file docstring. Logs
-// the outcome on every fire — "drew X into hand" on a hit or "revealed X but didn't draw
-// it" on a whiff — so the printout makes the random reveal visible either way. Empty deck
-// is the silent edge case (no card to name). PeekDeck flips the cacheable bit either way
-// since the reveal outcome depends on shuffle order.
+// sigilOfTheArknightReveal logs the outcome on every fire — "drew X into hand" on a hit or
+// "revealed X but didn't draw it" on a whiff — so the printout makes the random reveal
+// visible. Empty deck is the silent edge case.
 func sigilOfTheArknightReveal(g card.GameEngine, l card.Logger, a card.Aura) {
 	a.Destroy(true)
 	top, ok := g.PeekDeck()

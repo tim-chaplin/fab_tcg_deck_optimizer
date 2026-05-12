@@ -3,8 +3,7 @@
 // Text: "When Aether Slash attacks, if a 'non-attack' action card was pitched to play it, deal 1
 // arcane damage to any target."
 //
-// Reads self.PitchedToPlay (the cards the chain runner attributed to funding THIS copy's
-// cost) to gate the +1 arcane rider.
+// Reads self.PitchedToPlay to gate the +1 arcane rider.
 
 package cards
 
@@ -24,8 +23,7 @@ func (AetherSlashBlue) Play(g card.GameEngine, l card.Logger, self *card.CardSta
 	aetherSlashApplyRider(g, l, self)
 }
 
-// aetherSlashApplyRider deals 1 arcane and emits the rider sub-line when a non-attack action
-// is among the pitched cards the runner attributed to paying for this Aether Slash.
+// aetherSlashApplyRider deals 1 arcane when a non-attack action is among the pitched cards.
 func aetherSlashApplyRider(g card.GameEngine, l card.Logger, self *card.CardState) {
 	for _, p := range self.PitchedToPlay {
 		if p.Types(nil).IsNonAttackAction() {

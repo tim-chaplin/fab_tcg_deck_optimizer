@@ -4,10 +4,7 @@
 // Text: "As an additional cost to play Demolition Crew, reveal a card in your hand with cost 2 or
 // greater. **Dominate**"
 //
-// The reveal is non-consuming — the revealed card stays in hand. The "reveal a cost-2+ card"
-// clause is the additional cost, modelled via the PlayPrecondition opt-in: with no eligible
-// reveal target the chain runner aborts the permutation as illegal (FaB rule: a card whose
-// costs you can't fully pay is illegal to declare).
+// The reveal is non-consuming — the revealed card stays in hand.
 
 package cards
 
@@ -16,9 +13,7 @@ import (
 )
 
 // demolitionCrewPrecondition is the shared additional-cost check across all 3 pitch
-// variants. The chain runner's hand snapshot has already removed the playing card and
-// popped this card's pitches by the time PlayPrecondition runs, so the scan only sees
-// cards that genuinely remain in hand.
+// variants.
 func demolitionCrewPrecondition(g card.GameEngine) bool {
 	for _, c := range g.Hand() {
 		if c.Cost(g) >= 2 {

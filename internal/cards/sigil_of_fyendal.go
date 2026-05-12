@@ -16,7 +16,7 @@ func (SigilOfFyendalBlue) Play(g card.GameEngine, l card.Logger, self *card.Card
 }
 
 // sigilOfFyendalAuraHandler credits the +1 health (valued 1-to-1 with damage) next turn
-// and destroys the aura. Top-level so Aura.Handler doesn't allocate a closure.
+// and destroys the aura.
 func sigilOfFyendalAuraHandler(g card.GameEngine, l card.Logger, a card.Aura) {
 	g.AddValue(1)
 	l.AppendPostTrigger(a.CardName(), "Gained 1 health", 1)

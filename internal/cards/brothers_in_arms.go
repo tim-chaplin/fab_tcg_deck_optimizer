@@ -3,9 +3,7 @@
 //
 // Text: "When this defends, you may pay {r}. If you do, it gets +2{d}."
 //
-// Two block-time modes via card.Modal + card.BlockCost: mode 0 spends nothing for the
-// printed 2{d}; mode 1 spends 1{r} for 4{d}. The chain runner enumerates both and picks
-// the higher-defense mode that fits the partition's spare defense budget.
+// Mode 0 spends nothing for the printed 2{d}; mode 1 spends 1{r} for 4{d}.
 
 package cards
 
@@ -13,8 +11,7 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
-// brothersInArmsBlock fires +2{d} on mode 1 (caller already deducted 1{r} from the spare
-// defense budget). Mode 0 is the printed default with no modification.
+// brothersInArmsBlock fires +2{d} on mode 1; mode 0 is the printed default.
 func brothersInArmsBlock(_ card.GameEngine, l card.Logger, self *card.CardState) {
 	if self.Mode == 1 {
 		self.BonusDefense += 2

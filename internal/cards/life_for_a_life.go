@@ -16,16 +16,14 @@ import (
 // lifeForALifeHealValue is the damage-equivalent credited when the on-hit 1{h} gain fires.
 const lifeForALifeHealValue = 1
 
-// lifeForALifeOnHit fires the printed "When this hits, gain 1{h}" rider. Top-level so
-// registration stays alloc-free.
+// lifeForALifeOnHit fires the printed "When this hits, gain 1{h}" rider.
 func lifeForALifeOnHit(g card.GameEngine, l card.Logger, self *card.CardState, _ *card.OnHitHandler) {
 	g.AddValue(lifeForALifeHealValue)
 	l.AppendPostTrigger(self.Card.DisplayName(), "On-hit gained 1 health", lifeForALifeHealValue)
 }
 
-// lifeForALifeGoAgain returns the printed "less {h}" go-again rider when the active hero
-// opts into LowerHealthWanter. nil-g (Opt-time / cardmeta lookups before a hero is set)
-// reads as false — printed default.
+// lifeForALifeGoAgain returns true when the active hero opts into LowerHealthWanter. nil-g
+// reads as false (the printed default).
 func lifeForALifeGoAgain(g card.GameEngine) bool {
 	if g == nil {
 		return false

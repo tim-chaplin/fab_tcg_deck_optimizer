@@ -19,7 +19,7 @@ func consumingVolitionApplyRider(_ card.GameEngine, l card.Logger, self *card.Ca
 }
 
 // consumingVolitionOnHit fires the "When this hits a hero, they discard a card" rider
-// when ArcaneDamageDealt is set. Top-level so registration stays alloc-free.
+// when ArcaneDamageDealt is set.
 func consumingVolitionOnHit(g card.GameEngine, l card.Logger, self *card.CardState, _ *card.OnHitHandler) {
 	if !g.ArcaneDamageDealt() {
 		return

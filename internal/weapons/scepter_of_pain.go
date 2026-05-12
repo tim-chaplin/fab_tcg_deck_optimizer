@@ -19,7 +19,6 @@ func (ScepterOfPain) Types() card.TypeSet { return scepterOfPainTypes }
 func (ScepterOfPain) Hands() int          { return 1 }
 func (ScepterOfPain) Ability() card.Card  { return scepterOfPainAbility }
 
-// Cached at package init — see nebula_blade.go for the alloc-free rationale.
 var scepterOfPainAbility card.Card = ScepterOfPainAbility{}
 
 var scepterOfPainAbilityTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeWeapon, card.TypeScepter, card.TypeOneHand, card.TypeAttack)

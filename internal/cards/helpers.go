@@ -1,6 +1,4 @@
-// Shared helpers used across multiple card implementations. Each card's own .go file
-// contains only that card's structs and its dedicated *Play / *IsTarget code; anything
-// reused across cards lives here.
+// Shared helpers used across multiple card implementations.
 
 package cards
 
@@ -11,12 +9,9 @@ import (
 // --- Aura helpers ---
 
 // banishAuraFromGraveyard banishes the first aura-typed card in the graveyard and, on
-// success, deals 1 arcane damage from source via g.DealArcaneDamage — which credits
-// value, flips ArcaneDamageDealt when the hit lands, and logs the "Dealt 1 arcane damage"
-// rider under source. Returns true when an aura was banished, false when graveyard had
-// no aura. Callers that also destroy the source card (e.g. Sigil of Silphidae's leave
-// trigger) should run this scan BEFORE AddToGraveyard'ing the source so the printed
-// "another aura" restriction is satisfied naturally.
+// success, deals 1 arcane damage from source. Returns true when an aura was banished.
+// Callers that also destroy the source card must run this BEFORE adding the source to
+// the graveyard so the printed "another aura" restriction is satisfied naturally.
 func banishAuraFromGraveyard(g card.GameEngine, l card.Logger, source string) bool {
 	if _, ok := g.BanishFromGraveyard(func(c card.Card) bool {
 		return c.Types(nil).Has(card.TypeAura)
@@ -33,9 +28,8 @@ func banishAuraFromGraveyard(g card.GameEngine, l card.Logger, source string) bo
 // so its worth collapses to 0 in partitions where we don't block all incoming damage —
 // unless we pop the aura ourselves same turn by landing an attack.
 
-// fragileAuraPlay emits the chain step for a fragile-aura card and writes the expected
-// payoff as a sub-line under self when fragileAuraValue is non-zero. Auras have Attack=0,
-// so LogPlay carries the chain entry; the rider line carries the predicted value.
+// fragileAuraPlay writes the expected payoff as a sub-line under self when
+// fragileAuraValue is non-zero.
 func fragileAuraPlay(g card.GameEngine, l card.Logger, self *card.CardState, n int, attackActionOnly bool) {
 	v := fragileAuraValue(g, n, attackActionOnly)
 	if v <= 0 {
@@ -62,15 +56,12 @@ func fragileAuraValue(g card.GameEngine, n int, attackActionOnly bool) int {
 }
 
 // popsThisTurn reports whether any subsequent attacker in the chain is likely to hit — via
-// its own attack power, or via the Runechants that'll fire with the first attack after us.
-// The first attack/weapon after our play consumes every live Runechant (playSequence zeroes
-// them after it fires), so we credit the current Runechant count only to that first slot;
-// later attackers see zero in this approximation.
+// its own attack power, or via Runechants that'll fire with the first attack after us. Only
+// the first attack/weapon after our play sees live Runechants (it consumes them); later
+// attackers see zero in this approximation.
 //
-// The runechants check passes dominate=false because Runechant damage is ambient arcane
-// damage from aura tokens, not a card attack — Dominate is an attack-keyword and doesn't
-// apply. The attacker-power check threads pc.EffectiveDominate() so a target with printed
-// (or granted) Dominate clears the 5+ bar.
+// The runechants check passes dominate=false because Runechant damage is ambient arcane,
+// not a card attack.
 func popsThisTurn(g card.GameEngine, attackActionOnly bool) bool {
 	firstAttacker := true
 	for _, pc := range g.CardsRemaining() {
@@ -111,8 +102,7 @@ func markOpponentOnHit(g card.GameEngine, l card.Logger, self *card.CardState, _
 // CardsRemaining for which match returns true, then stops. Lands "your next attack" /
 // "the next attack action card with X" riders on the buffed card itself so its
 // EffectiveAttack folds the bonus into LikelyToHit. Fizzles silently when no qualifying
-// target follows. Pass match as a top-level function value to keep the call alloc-free —
-// closures capturing s would escape to the heap.
+// target follows.
 func GrantNextCardBonusAttack(g card.GameEngine, n int, match func(card.GameEngine, *card.CardState) bool) {
 	for _, pc := range g.CardsRemaining() {
 		if match(g, pc) {
@@ -136,8 +126,7 @@ func IsAttackAction(_ card.GameEngine, pc *card.CardState) bool {
 
 // IsRunebladeAttack matches scheduled Runeblade attacks (action or weapon) for
 // "your next Runeblade attack" wording. Engine threaded through so Universal cards
-// fold the active hero's class into their Types — Wage Gold under Viserai then
-// matches TypeRuneblade.
+// fold the active hero's class into their Types.
 func IsRunebladeAttack(g card.GameEngine, pc *card.CardState) bool {
 	return pc.Card.Types(g).IsRunebladeAttack()
 }

@@ -2,9 +2,9 @@
 //
 // Text: "If you've played or created an aura this turn, this gets **overpower**."
 //
-// Flips self.GrantedOverpower when an aura has been created this turn. The flag is the
-// rules-text record; the engine doesn't currently fold Overpower into a per-step bonus
-// (block-allocation is accounted for at the partition level).
+// Flips self.GrantedOverpower when an aura has been created this turn. The engine doesn't
+// currently fold Overpower into a per-step bonus — block allocation is accounted for at the
+// partition level.
 
 package cards
 

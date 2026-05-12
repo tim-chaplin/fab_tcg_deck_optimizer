@@ -3,9 +3,8 @@
 // Text: "When Deathly Duet attacks, if an attack action card was pitched to play it, it gains
 // +2{p}. If a 'non-attack' action card was pitched to play it, create 2 Runechant tokens."
 //
-// Both riders read self.PitchedToPlay (the cards the chain runner attributed to funding
-// THIS copy's cost) — they fire independently when those exact cards include an attack
-// action / non-attack action respectively.
+// Both riders read self.PitchedToPlay independently — one fires per role in the pitched
+// cards.
 
 package cards
 
@@ -25,13 +24,7 @@ func (DeathlyDuetBlue) Play(g card.GameEngine, l card.Logger, self *card.CardSta
 	deathlyDuetApplyRiders(g, l, self)
 }
 
-// deathlyDuetApplyRiders folds Deathly Duet's two pitch-conditional riders into self and
-// state, then emits the chain step:
-//   - Attack-action attributed → +2{p} power buff lands on self.BonusAttack so EffectiveAttack
-//     and LikelyToHit see the buffed power, and the chain step's (+N) reflects it directly.
-//   - Non-attack-action attributed → 2 Runechants enter during Deathly Duet's own attack
-//     resolution; the rider lands as a "Created 2 runechants" sub-line under self.
-//
+// deathlyDuetApplyRiders folds the two pitch-conditional riders into self and state.
 // Both riders can stack when self.PitchedToPlay contains both roles.
 func deathlyDuetApplyRiders(g card.GameEngine, l card.Logger, self *card.CardState) {
 	var attackPitched, nonAttackActionPitched bool

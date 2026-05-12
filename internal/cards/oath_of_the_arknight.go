@@ -21,10 +21,7 @@ func (OathOfTheArknightBlue) Play(g card.GameEngine, l card.Logger, self *card.C
 	oathPlay(g, l, self, 1)
 }
 
-// oathPlay grants +n to the first scheduled Runeblade attack via pc.BonusAttack so the
-// buffed attack's EffectiveAttack folds the bonus into LikelyToHit and the chain credit
-// lands on the target's slot, not Oath'g. Always creates a Runechant token, which IS
-// Oath's own contribution and lands as a sub-line under self's chain entry.
+// oathPlay grants +n to the first scheduled Runeblade attack, then creates one Runechant.
 func oathPlay(g card.GameEngine, l card.Logger, self *card.CardState, bonus int) {
 	GrantNextCardBonusAttack(g, bonus, IsRunebladeAttack)
 	g.CreateRunechants(1)

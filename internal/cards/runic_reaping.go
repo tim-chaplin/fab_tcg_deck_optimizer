@@ -14,8 +14,6 @@ import (
 )
 
 // runicReapingTargetMatches accepts Runeblade attack action cards (weapons don't qualify).
-// Engine threaded through so Universal cards fold the active hero's class into their Types
-// — Wage Gold under Viserai then matches TypeRuneblade.
 func runicReapingTargetMatches(g card.GameEngine, target *card.CardState) bool {
 	t := target.Card.Types(g)
 	return t.Has(card.TypeRuneblade) && t.IsAttackAction()

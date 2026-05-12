@@ -6,9 +6,8 @@
 // (Red N=3, Yellow N=2, Blue N=1.)
 //
 // Mode 1's on-hit go-again rider is modelled eagerly: when g.LikelyToHit on the post-buff
-// target returns true, the AR grants 1 AP at Play time. That mirrors the chain runner's
-// existing LikelyToHit-based on-hit gate (used by Runechant arcane and OnHit handlers) and
-// makes the AP available for the next chain step's gate.
+// target returns true, the AR grants 1 AP at Play time so the AP is available for the next
+// chain step's gate.
 
 package cards
 
@@ -16,10 +15,8 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
-// razorReflexAccepts is the per-mode target predicate. Mode 0 gates on sword weapon
-// attack; mode 1 gates on cost-≤1 attack action. The chain runner runs this for the
-// chosen Mode and rejects the permutation when it returns false, so razorReflexPlay can
-// apply the buff unconditionally.
+// razorReflexAccepts is the per-mode target predicate. Mode 0 gates on sword weapon attack;
+// mode 1 gates on cost-≤1 attack action.
 func razorReflexAccepts(g card.GameEngine, c card.Card, mode int8) bool {
 	t := c.Types(nil)
 	switch mode {
@@ -31,9 +28,8 @@ func razorReflexAccepts(g card.GameEngine, c card.Card, mode int8) bool {
 	return false
 }
 
-// razorReflexPlay applies the chosen mode's effect. The chain runner already validated
-// the target via razorReflexAccepts, so the buff lands directly. Mode 1 additionally
-// fires the on-hit go-again rider eagerly when the post-buff target is likely to hit.
+// razorReflexPlay applies the chosen mode's effect. Mode 1 additionally fires the on-hit
+// go-again rider eagerly when the post-buff target is likely to hit.
 func razorReflexPlay(g card.GameEngine, l card.Logger, self *card.CardState, n int) {
 	target := g.AttackReactionTarget()
 	if target == nil {

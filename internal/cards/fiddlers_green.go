@@ -4,9 +4,9 @@
 // Text: "When this is put into your graveyard from anywhere, gain N{h}." (N is the printed
 // variant value above.)
 //
-// Modelling: using this card to defend sends it to the graveyard, so the N{h} gain fires on
-// the DR Play path — credited as +N damage equivalent. Pitched copies go to the bottom of the
-// deck instead, so they don't trigger the rider.
+// Modelling: blocking with this card sends it to the graveyard, firing the N{h} gain
+// (credited as +N damage equivalent). Pitched copies bypass the rider — they go to the
+// bottom of the deck.
 
 package cards
 
@@ -14,8 +14,7 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
-// fiddlersGreenPlay emits the chain step then writes the printed N{h} as a "Gained N
-// health (graveyard trigger)" sub-line under self. Health is valued 1-to-1 with damage.
+// fiddlersGreenPlay credits N{h} as a sub-line under self (health valued 1-to-1 with damage).
 func fiddlersGreenPlay(g card.GameEngine, l card.Logger, self *card.CardState, heal int) {
 	g.AddValue(heal)
 	l.AppendPostTriggerf(self.Card.DisplayName(), heal, "Gained %d health (graveyard trigger)", heal)
