@@ -19,7 +19,7 @@ func (SpringLoadRed) Pitch() int                         { return 1 }
 func (SpringLoadRed) Attack() int                        { return 2 }
 func (SpringLoadRed) Defense() int                       { return 2 }
 func (SpringLoadRed) Types(card.GameEngine) card.TypeSet { return springLoadTypes }
-func (SpringLoadRed) GoAgain() bool                      { return false }
+func (SpringLoadRed) GoAgain(card.GameEngine) bool       { return false }
 
 type SpringLoadYellow struct{}
 
@@ -31,7 +31,7 @@ func (SpringLoadYellow) Pitch() int                         { return 2 }
 func (SpringLoadYellow) Attack() int                        { return 2 }
 func (SpringLoadYellow) Defense() int                       { return 2 }
 func (SpringLoadYellow) Types(card.GameEngine) card.TypeSet { return springLoadTypes }
-func (SpringLoadYellow) GoAgain() bool                      { return false }
+func (SpringLoadYellow) GoAgain(card.GameEngine) bool       { return false }
 
 type SpringLoadBlue struct{}
 
@@ -43,4 +43,4 @@ func (SpringLoadBlue) Pitch() int                         { return 3 }
 func (SpringLoadBlue) Attack() int                        { return 2 }
 func (SpringLoadBlue) Defense() int                       { return 2 }
 func (SpringLoadBlue) Types(card.GameEngine) card.TypeSet { return springLoadTypes }
-func (SpringLoadBlue) GoAgain() bool                      { return false }
+func (SpringLoadBlue) GoAgain(card.GameEngine) bool       { return false }

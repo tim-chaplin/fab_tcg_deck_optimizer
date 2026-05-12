@@ -21,7 +21,7 @@ func (FreewheelingRenegadesRed) Defense() int             { return 2 }
 func (FreewheelingRenegadesRed) Types(card.GameEngine) card.TypeSet {
 	return freewheelingRenegadesTypes
 }
-func (FreewheelingRenegadesRed) GoAgain() bool { return false }
+func (FreewheelingRenegadesRed) GoAgain(card.GameEngine) bool { return false }
 
 type FreewheelingRenegadesYellow struct{}
 
@@ -35,7 +35,7 @@ func (FreewheelingRenegadesYellow) Defense() int             { return 2 }
 func (FreewheelingRenegadesYellow) Types(card.GameEngine) card.TypeSet {
 	return freewheelingRenegadesTypes
 }
-func (FreewheelingRenegadesYellow) GoAgain() bool { return false }
+func (FreewheelingRenegadesYellow) GoAgain(card.GameEngine) bool { return false }
 
 type FreewheelingRenegadesBlue struct{}
 
@@ -49,4 +49,4 @@ func (FreewheelingRenegadesBlue) Defense() int             { return 2 }
 func (FreewheelingRenegadesBlue) Types(card.GameEngine) card.TypeSet {
 	return freewheelingRenegadesTypes
 }
-func (FreewheelingRenegadesBlue) GoAgain() bool { return false }
+func (FreewheelingRenegadesBlue) GoAgain(card.GameEngine) bool { return false }

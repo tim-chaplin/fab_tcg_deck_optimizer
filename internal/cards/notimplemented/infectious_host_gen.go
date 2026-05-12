@@ -19,7 +19,7 @@ func (InfectiousHostRed) Pitch() int                         { return 1 }
 func (InfectiousHostRed) Attack() int                        { return 4 }
 func (InfectiousHostRed) Defense() int                       { return 2 }
 func (InfectiousHostRed) Types(card.GameEngine) card.TypeSet { return infectiousHostTypes }
-func (InfectiousHostRed) GoAgain() bool                      { return false }
+func (InfectiousHostRed) GoAgain(card.GameEngine) bool       { return false }
 func (InfectiousHostRed) NotImplemented()                    {}
 
 type InfectiousHostYellow struct{}
@@ -32,7 +32,7 @@ func (InfectiousHostYellow) Pitch() int                         { return 2 }
 func (InfectiousHostYellow) Attack() int                        { return 3 }
 func (InfectiousHostYellow) Defense() int                       { return 2 }
 func (InfectiousHostYellow) Types(card.GameEngine) card.TypeSet { return infectiousHostTypes }
-func (InfectiousHostYellow) GoAgain() bool                      { return false }
+func (InfectiousHostYellow) GoAgain(card.GameEngine) bool       { return false }
 func (InfectiousHostYellow) NotImplemented()                    {}
 
 type InfectiousHostBlue struct{}
@@ -45,5 +45,5 @@ func (InfectiousHostBlue) Pitch() int                         { return 3 }
 func (InfectiousHostBlue) Attack() int                        { return 2 }
 func (InfectiousHostBlue) Defense() int                       { return 2 }
 func (InfectiousHostBlue) Types(card.GameEngine) card.TypeSet { return infectiousHostTypes }
-func (InfectiousHostBlue) GoAgain() bool                      { return false }
+func (InfectiousHostBlue) GoAgain(card.GameEngine) bool       { return false }
 func (InfectiousHostBlue) NotImplemented()                    {}

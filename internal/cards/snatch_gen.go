@@ -19,7 +19,7 @@ func (SnatchRed) Pitch() int                         { return 1 }
 func (SnatchRed) Attack() int                        { return 4 }
 func (SnatchRed) Defense() int                       { return 2 }
 func (SnatchRed) Types(card.GameEngine) card.TypeSet { return snatchTypes }
-func (SnatchRed) GoAgain() bool                      { return false }
+func (SnatchRed) GoAgain(card.GameEngine) bool       { return false }
 
 type SnatchYellow struct{}
 
@@ -31,7 +31,7 @@ func (SnatchYellow) Pitch() int                         { return 2 }
 func (SnatchYellow) Attack() int                        { return 3 }
 func (SnatchYellow) Defense() int                       { return 2 }
 func (SnatchYellow) Types(card.GameEngine) card.TypeSet { return snatchTypes }
-func (SnatchYellow) GoAgain() bool                      { return false }
+func (SnatchYellow) GoAgain(card.GameEngine) bool       { return false }
 
 type SnatchBlue struct{}
 
@@ -43,4 +43,4 @@ func (SnatchBlue) Pitch() int                         { return 3 }
 func (SnatchBlue) Attack() int                        { return 2 }
 func (SnatchBlue) Defense() int                       { return 2 }
 func (SnatchBlue) Types(card.GameEngine) card.TypeSet { return snatchTypes }
-func (SnatchBlue) GoAgain() bool                      { return false }
+func (SnatchBlue) GoAgain(card.GameEngine) bool       { return false }

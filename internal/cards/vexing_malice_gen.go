@@ -19,7 +19,7 @@ func (VexingMaliceRed) Pitch() int                         { return 1 }
 func (VexingMaliceRed) Attack() int                        { return 3 }
 func (VexingMaliceRed) Defense() int                       { return 3 }
 func (VexingMaliceRed) Types(card.GameEngine) card.TypeSet { return vexingMaliceTypes }
-func (VexingMaliceRed) GoAgain() bool                      { return false }
+func (VexingMaliceRed) GoAgain(card.GameEngine) bool       { return false }
 
 type VexingMaliceYellow struct{}
 
@@ -31,7 +31,7 @@ func (VexingMaliceYellow) Pitch() int                         { return 2 }
 func (VexingMaliceYellow) Attack() int                        { return 2 }
 func (VexingMaliceYellow) Defense() int                       { return 3 }
 func (VexingMaliceYellow) Types(card.GameEngine) card.TypeSet { return vexingMaliceTypes }
-func (VexingMaliceYellow) GoAgain() bool                      { return false }
+func (VexingMaliceYellow) GoAgain(card.GameEngine) bool       { return false }
 
 type VexingMaliceBlue struct{}
 
@@ -43,4 +43,4 @@ func (VexingMaliceBlue) Pitch() int                         { return 3 }
 func (VexingMaliceBlue) Attack() int                        { return 1 }
 func (VexingMaliceBlue) Defense() int                       { return 3 }
 func (VexingMaliceBlue) Types(card.GameEngine) card.TypeSet { return vexingMaliceTypes }
-func (VexingMaliceBlue) GoAgain() bool                      { return false }
+func (VexingMaliceBlue) GoAgain(card.GameEngine) bool       { return false }

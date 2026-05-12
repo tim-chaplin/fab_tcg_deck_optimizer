@@ -19,7 +19,7 @@ func (DragDownRed) Pitch() int                         { return 1 }
 func (DragDownRed) Attack() int                        { return 0 }
 func (DragDownRed) Defense() int                       { return 3 }
 func (DragDownRed) Types(card.GameEngine) card.TypeSet { return dragDownTypes }
-func (DragDownRed) GoAgain() bool                      { return false }
+func (DragDownRed) GoAgain(card.GameEngine) bool       { return false }
 
 type DragDownYellow struct{}
 
@@ -31,7 +31,7 @@ func (DragDownYellow) Pitch() int                         { return 2 }
 func (DragDownYellow) Attack() int                        { return 0 }
 func (DragDownYellow) Defense() int                       { return 2 }
 func (DragDownYellow) Types(card.GameEngine) card.TypeSet { return dragDownTypes }
-func (DragDownYellow) GoAgain() bool                      { return false }
+func (DragDownYellow) GoAgain(card.GameEngine) bool       { return false }
 
 type DragDownBlue struct{}
 
@@ -43,4 +43,4 @@ func (DragDownBlue) Pitch() int                         { return 3 }
 func (DragDownBlue) Attack() int                        { return 0 }
 func (DragDownBlue) Defense() int                       { return 1 }
 func (DragDownBlue) Types(card.GameEngine) card.TypeSet { return dragDownTypes }
-func (DragDownBlue) GoAgain() bool                      { return false }
+func (DragDownBlue) GoAgain(card.GameEngine) bool       { return false }

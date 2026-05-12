@@ -19,5 +19,5 @@ func (TongueTiedRed) Pitch() int                         { return 1 }
 func (TongueTiedRed) Attack() int                        { return 7 }
 func (TongueTiedRed) Defense() int                       { return 2 }
 func (TongueTiedRed) Types(card.GameEngine) card.TypeSet { return tongueTiedTypes }
-func (TongueTiedRed) GoAgain() bool                      { return false }
+func (TongueTiedRed) GoAgain(card.GameEngine) bool       { return false }
 func (TongueTiedRed) NotImplemented()                    {}

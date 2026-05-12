@@ -19,4 +19,4 @@ func (DodgeBlue) Pitch() int                         { return 3 }
 func (DodgeBlue) Attack() int                        { return 0 }
 func (DodgeBlue) Defense() int                       { return 2 }
 func (DodgeBlue) Types(card.GameEngine) card.TypeSet { return dodgeTypes }
-func (DodgeBlue) GoAgain() bool                      { return false }
+func (DodgeBlue) GoAgain(card.GameEngine) bool       { return false }

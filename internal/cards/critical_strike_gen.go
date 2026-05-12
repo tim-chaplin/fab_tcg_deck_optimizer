@@ -19,7 +19,7 @@ func (CriticalStrikeRed) Pitch() int                         { return 1 }
 func (CriticalStrikeRed) Attack() int                        { return 5 }
 func (CriticalStrikeRed) Defense() int                       { return 3 }
 func (CriticalStrikeRed) Types(card.GameEngine) card.TypeSet { return criticalStrikeTypes }
-func (CriticalStrikeRed) GoAgain() bool                      { return false }
+func (CriticalStrikeRed) GoAgain(card.GameEngine) bool       { return false }
 
 type CriticalStrikeYellow struct{}
 
@@ -31,7 +31,7 @@ func (CriticalStrikeYellow) Pitch() int                         { return 2 }
 func (CriticalStrikeYellow) Attack() int                        { return 4 }
 func (CriticalStrikeYellow) Defense() int                       { return 3 }
 func (CriticalStrikeYellow) Types(card.GameEngine) card.TypeSet { return criticalStrikeTypes }
-func (CriticalStrikeYellow) GoAgain() bool                      { return false }
+func (CriticalStrikeYellow) GoAgain(card.GameEngine) bool       { return false }
 
 type CriticalStrikeBlue struct{}
 
@@ -43,4 +43,4 @@ func (CriticalStrikeBlue) Pitch() int                         { return 3 }
 func (CriticalStrikeBlue) Attack() int                        { return 3 }
 func (CriticalStrikeBlue) Defense() int                       { return 3 }
 func (CriticalStrikeBlue) Types(card.GameEngine) card.TypeSet { return criticalStrikeTypes }
-func (CriticalStrikeBlue) GoAgain() bool                      { return false }
+func (CriticalStrikeBlue) GoAgain(card.GameEngine) bool       { return false }

@@ -19,7 +19,7 @@ func (BrothersInArmsRed) Pitch() int                         { return 1 }
 func (BrothersInArmsRed) Attack() int                        { return 6 }
 func (BrothersInArmsRed) Defense() int                       { return 2 }
 func (BrothersInArmsRed) Types(card.GameEngine) card.TypeSet { return brothersInArmsTypes }
-func (BrothersInArmsRed) GoAgain() bool                      { return false }
+func (BrothersInArmsRed) GoAgain(card.GameEngine) bool       { return false }
 
 type BrothersInArmsYellow struct{}
 
@@ -31,7 +31,7 @@ func (BrothersInArmsYellow) Pitch() int                         { return 2 }
 func (BrothersInArmsYellow) Attack() int                        { return 5 }
 func (BrothersInArmsYellow) Defense() int                       { return 2 }
 func (BrothersInArmsYellow) Types(card.GameEngine) card.TypeSet { return brothersInArmsTypes }
-func (BrothersInArmsYellow) GoAgain() bool                      { return false }
+func (BrothersInArmsYellow) GoAgain(card.GameEngine) bool       { return false }
 
 type BrothersInArmsBlue struct{}
 
@@ -43,4 +43,4 @@ func (BrothersInArmsBlue) Pitch() int                         { return 3 }
 func (BrothersInArmsBlue) Attack() int                        { return 4 }
 func (BrothersInArmsBlue) Defense() int                       { return 2 }
 func (BrothersInArmsBlue) Types(card.GameEngine) card.TypeSet { return brothersInArmsTypes }
-func (BrothersInArmsBlue) GoAgain() bool                      { return false }
+func (BrothersInArmsBlue) GoAgain(card.GameEngine) bool       { return false }

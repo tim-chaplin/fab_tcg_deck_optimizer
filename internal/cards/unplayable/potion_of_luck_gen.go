@@ -19,5 +19,5 @@ func (PotionOfLuckBlue) Pitch() int                         { return 3 }
 func (PotionOfLuckBlue) Attack() int                        { return 0 }
 func (PotionOfLuckBlue) Defense() int                       { return 0 }
 func (PotionOfLuckBlue) Types(card.GameEngine) card.TypeSet { return potionOfLuckTypes }
-func (PotionOfLuckBlue) GoAgain() bool                      { return false }
+func (PotionOfLuckBlue) GoAgain(card.GameEngine) bool       { return false }
 func (PotionOfLuckBlue) Unplayable()                        {}

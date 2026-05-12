@@ -19,4 +19,4 @@ func (CrackedBaubleYellow) Pitch() int                         { return 2 }
 func (CrackedBaubleYellow) Attack() int                        { return 0 }
 func (CrackedBaubleYellow) Defense() int                       { return 0 }
 func (CrackedBaubleYellow) Types(card.GameEngine) card.TypeSet { return crackedBaubleTypes }
-func (CrackedBaubleYellow) GoAgain() bool                      { return false }
+func (CrackedBaubleYellow) GoAgain(card.GameEngine) bool       { return false }

@@ -19,7 +19,7 @@ func (PromiseOfPlentyRed) Pitch() int                         { return 1 }
 func (PromiseOfPlentyRed) Attack() int                        { return 3 }
 func (PromiseOfPlentyRed) Defense() int                       { return 2 }
 func (PromiseOfPlentyRed) Types(card.GameEngine) card.TypeSet { return promiseOfPlentyTypes }
-func (PromiseOfPlentyRed) GoAgain() bool                      { return false }
+func (PromiseOfPlentyRed) GoAgain(card.GameEngine) bool       { return false }
 func (PromiseOfPlentyRed) NotImplemented()                    {}
 
 type PromiseOfPlentyYellow struct{}
@@ -32,7 +32,7 @@ func (PromiseOfPlentyYellow) Pitch() int                         { return 2 }
 func (PromiseOfPlentyYellow) Attack() int                        { return 2 }
 func (PromiseOfPlentyYellow) Defense() int                       { return 2 }
 func (PromiseOfPlentyYellow) Types(card.GameEngine) card.TypeSet { return promiseOfPlentyTypes }
-func (PromiseOfPlentyYellow) GoAgain() bool                      { return false }
+func (PromiseOfPlentyYellow) GoAgain(card.GameEngine) bool       { return false }
 func (PromiseOfPlentyYellow) NotImplemented()                    {}
 
 type PromiseOfPlentyBlue struct{}
@@ -45,5 +45,5 @@ func (PromiseOfPlentyBlue) Pitch() int                         { return 3 }
 func (PromiseOfPlentyBlue) Attack() int                        { return 1 }
 func (PromiseOfPlentyBlue) Defense() int                       { return 2 }
 func (PromiseOfPlentyBlue) Types(card.GameEngine) card.TypeSet { return promiseOfPlentyTypes }
-func (PromiseOfPlentyBlue) GoAgain() bool                      { return false }
+func (PromiseOfPlentyBlue) GoAgain(card.GameEngine) bool       { return false }
 func (PromiseOfPlentyBlue) NotImplemented()                    {}

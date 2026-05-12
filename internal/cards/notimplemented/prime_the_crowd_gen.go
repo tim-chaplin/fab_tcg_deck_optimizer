@@ -19,7 +19,7 @@ func (PrimeTheCrowdRed) Pitch() int                         { return 1 }
 func (PrimeTheCrowdRed) Attack() int                        { return 0 }
 func (PrimeTheCrowdRed) Defense() int                       { return 2 }
 func (PrimeTheCrowdRed) Types(card.GameEngine) card.TypeSet { return primeTheCrowdTypes }
-func (PrimeTheCrowdRed) GoAgain() bool                      { return true }
+func (PrimeTheCrowdRed) GoAgain(card.GameEngine) bool       { return true }
 func (PrimeTheCrowdRed) NotImplemented()                    {}
 
 type PrimeTheCrowdYellow struct{}
@@ -32,7 +32,7 @@ func (PrimeTheCrowdYellow) Pitch() int                         { return 2 }
 func (PrimeTheCrowdYellow) Attack() int                        { return 0 }
 func (PrimeTheCrowdYellow) Defense() int                       { return 2 }
 func (PrimeTheCrowdYellow) Types(card.GameEngine) card.TypeSet { return primeTheCrowdTypes }
-func (PrimeTheCrowdYellow) GoAgain() bool                      { return true }
+func (PrimeTheCrowdYellow) GoAgain(card.GameEngine) bool       { return true }
 func (PrimeTheCrowdYellow) NotImplemented()                    {}
 
 type PrimeTheCrowdBlue struct{}
@@ -45,5 +45,5 @@ func (PrimeTheCrowdBlue) Pitch() int                         { return 3 }
 func (PrimeTheCrowdBlue) Attack() int                        { return 0 }
 func (PrimeTheCrowdBlue) Defense() int                       { return 2 }
 func (PrimeTheCrowdBlue) Types(card.GameEngine) card.TypeSet { return primeTheCrowdTypes }
-func (PrimeTheCrowdBlue) GoAgain() bool                      { return true }
+func (PrimeTheCrowdBlue) GoAgain(card.GameEngine) bool       { return true }
 func (PrimeTheCrowdBlue) NotImplemented()                    {}

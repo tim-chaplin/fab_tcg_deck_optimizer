@@ -19,5 +19,5 @@ func (PilferTheTombBlue) Pitch() int                         { return 3 }
 func (PilferTheTombBlue) Attack() int                        { return 0 }
 func (PilferTheTombBlue) Defense() int                       { return 0 }
 func (PilferTheTombBlue) Types(card.GameEngine) card.TypeSet { return pilferTheTombTypes }
-func (PilferTheTombBlue) GoAgain() bool                      { return false }
+func (PilferTheTombBlue) GoAgain(card.GameEngine) bool       { return false }
 func (PilferTheTombBlue) Unplayable()                        {}

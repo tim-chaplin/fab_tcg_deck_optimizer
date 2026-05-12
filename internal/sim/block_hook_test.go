@@ -21,7 +21,7 @@ func (soloBlocker) Defense() int             { return 2 }
 func (soloBlocker) Types(card.GameEngine) card.TypeSet {
 	return card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 }
-func (soloBlocker) GoAgain() bool                                      { return false }
+func (soloBlocker) GoAgain(card.GameEngine) bool                       { return false }
 func (soloBlocker) Play(card.GameEngine, card.Logger, *card.CardState) {}
 func (soloBlocker) Block(s card.GameEngine, l card.Logger, self *card.CardState) {
 	plainCount := 0
@@ -51,7 +51,7 @@ func (togetherBlocker) Defense() int             { return 2 }
 func (togetherBlocker) Types(card.GameEngine) card.TypeSet {
 	return card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 }
-func (togetherBlocker) GoAgain() bool                                      { return false }
+func (togetherBlocker) GoAgain(card.GameEngine) bool                       { return false }
 func (togetherBlocker) Play(card.GameEngine, card.Logger, *card.CardState) {}
 func (togetherBlocker) Block(s card.GameEngine, l card.Logger, self *card.CardState) {
 	plainCount := 0
@@ -80,7 +80,7 @@ func (plainBlocker) Defense() int             { return 2 }
 func (plainBlocker) Types(card.GameEngine) card.TypeSet {
 	return card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 }
-func (plainBlocker) GoAgain() bool                                      { return false }
+func (plainBlocker) GoAgain(card.GameEngine) bool                       { return false }
 func (plainBlocker) Play(card.GameEngine, card.Logger, *card.CardState) {}
 
 // blockOneDR is a 1-defense Defense Reaction. Used to verify DRs alongside a plain blocker
@@ -97,7 +97,7 @@ func (blockOneDR) Defense() int             { return 1 }
 func (blockOneDR) Types(card.GameEngine) card.TypeSet {
 	return card.NewTypeSet(card.TypeGeneric, card.TypeDefenseReaction)
 }
-func (blockOneDR) GoAgain() bool { return false }
+func (blockOneDR) GoAgain(card.GameEngine) bool { return false }
 func (blockOneDR) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 }
 

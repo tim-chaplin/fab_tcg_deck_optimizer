@@ -19,7 +19,7 @@ func (CutDownToSizeRed) Pitch() int                         { return 1 }
 func (CutDownToSizeRed) Attack() int                        { return 6 }
 func (CutDownToSizeRed) Defense() int                       { return 2 }
 func (CutDownToSizeRed) Types(card.GameEngine) card.TypeSet { return cutDownToSizeTypes }
-func (CutDownToSizeRed) GoAgain() bool                      { return false }
+func (CutDownToSizeRed) GoAgain(card.GameEngine) bool       { return false }
 
 type CutDownToSizeYellow struct{}
 
@@ -31,7 +31,7 @@ func (CutDownToSizeYellow) Pitch() int                         { return 2 }
 func (CutDownToSizeYellow) Attack() int                        { return 5 }
 func (CutDownToSizeYellow) Defense() int                       { return 2 }
 func (CutDownToSizeYellow) Types(card.GameEngine) card.TypeSet { return cutDownToSizeTypes }
-func (CutDownToSizeYellow) GoAgain() bool                      { return false }
+func (CutDownToSizeYellow) GoAgain(card.GameEngine) bool       { return false }
 
 type CutDownToSizeBlue struct{}
 
@@ -43,4 +43,4 @@ func (CutDownToSizeBlue) Pitch() int                         { return 3 }
 func (CutDownToSizeBlue) Attack() int                        { return 4 }
 func (CutDownToSizeBlue) Defense() int                       { return 2 }
 func (CutDownToSizeBlue) Types(card.GameEngine) card.TypeSet { return cutDownToSizeTypes }
-func (CutDownToSizeBlue) GoAgain() bool                      { return false }
+func (CutDownToSizeBlue) GoAgain(card.GameEngine) bool       { return false }

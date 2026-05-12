@@ -19,5 +19,5 @@ func (AmuletOfHavencallBlue) Pitch() int                         { return 3 }
 func (AmuletOfHavencallBlue) Attack() int                        { return 0 }
 func (AmuletOfHavencallBlue) Defense() int                       { return 0 }
 func (AmuletOfHavencallBlue) Types(card.GameEngine) card.TypeSet { return amuletOfHavencallTypes }
-func (AmuletOfHavencallBlue) GoAgain() bool                      { return true }
+func (AmuletOfHavencallBlue) GoAgain(card.GameEngine) bool       { return true }
 func (AmuletOfHavencallBlue) Unplayable()                        {}

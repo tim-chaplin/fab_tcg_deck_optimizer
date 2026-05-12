@@ -19,4 +19,4 @@ func (CalmingBreezeRed) Pitch() int                         { return 1 }
 func (CalmingBreezeRed) Attack() int                        { return 0 }
 func (CalmingBreezeRed) Defense() int                       { return 3 }
 func (CalmingBreezeRed) Types(card.GameEngine) card.TypeSet { return calmingBreezeTypes }
-func (CalmingBreezeRed) GoAgain() bool                      { return false }
+func (CalmingBreezeRed) GoAgain(card.GameEngine) bool       { return false }

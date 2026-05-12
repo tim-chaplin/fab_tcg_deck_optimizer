@@ -19,7 +19,7 @@ func (RightBehindYouRed) Pitch() int                         { return 1 }
 func (RightBehindYouRed) Attack() int                        { return 7 }
 func (RightBehindYouRed) Defense() int                       { return 2 }
 func (RightBehindYouRed) Types(card.GameEngine) card.TypeSet { return rightBehindYouTypes }
-func (RightBehindYouRed) GoAgain() bool                      { return false }
+func (RightBehindYouRed) GoAgain(card.GameEngine) bool       { return false }
 
 type RightBehindYouYellow struct{}
 
@@ -31,7 +31,7 @@ func (RightBehindYouYellow) Pitch() int                         { return 2 }
 func (RightBehindYouYellow) Attack() int                        { return 6 }
 func (RightBehindYouYellow) Defense() int                       { return 2 }
 func (RightBehindYouYellow) Types(card.GameEngine) card.TypeSet { return rightBehindYouTypes }
-func (RightBehindYouYellow) GoAgain() bool                      { return false }
+func (RightBehindYouYellow) GoAgain(card.GameEngine) bool       { return false }
 
 type RightBehindYouBlue struct{}
 
@@ -43,4 +43,4 @@ func (RightBehindYouBlue) Pitch() int                         { return 3 }
 func (RightBehindYouBlue) Attack() int                        { return 5 }
 func (RightBehindYouBlue) Defense() int                       { return 2 }
 func (RightBehindYouBlue) Types(card.GameEngine) card.TypeSet { return rightBehindYouTypes }
-func (RightBehindYouBlue) GoAgain() bool                      { return false }
+func (RightBehindYouBlue) GoAgain(card.GameEngine) bool       { return false }

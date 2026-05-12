@@ -19,5 +19,5 @@ func (AmuletOfOblationBlue) Pitch() int                         { return 3 }
 func (AmuletOfOblationBlue) Attack() int                        { return 0 }
 func (AmuletOfOblationBlue) Defense() int                       { return 0 }
 func (AmuletOfOblationBlue) Types(card.GameEngine) card.TypeSet { return amuletOfOblationTypes }
-func (AmuletOfOblationBlue) GoAgain() bool                      { return true }
+func (AmuletOfOblationBlue) GoAgain(card.GameEngine) bool       { return true }
 func (AmuletOfOblationBlue) Unplayable()                        {}

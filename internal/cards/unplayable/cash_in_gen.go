@@ -19,6 +19,6 @@ func (CashInYellow) Pitch() int                         { return 2 }
 func (CashInYellow) Attack() int                        { return 0 }
 func (CashInYellow) Defense() int                       { return 2 }
 func (CashInYellow) Types(card.GameEngine) card.TypeSet { return cashInTypes }
-func (CashInYellow) GoAgain() bool                      { return true }
+func (CashInYellow) GoAgain(card.GameEngine) bool       { return true }
 func (CashInYellow) NotSilverAgeLegal()                 {}
 func (CashInYellow) Unplayable()                        {}

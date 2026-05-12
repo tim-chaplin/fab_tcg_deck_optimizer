@@ -21,5 +21,5 @@ func (TalismanOfRecompenseYellow) Defense() int             { return 0 }
 func (TalismanOfRecompenseYellow) Types(card.GameEngine) card.TypeSet {
 	return talismanOfRecompenseTypes
 }
-func (TalismanOfRecompenseYellow) GoAgain() bool   { return true }
-func (TalismanOfRecompenseYellow) NotImplemented() {}
+func (TalismanOfRecompenseYellow) GoAgain(card.GameEngine) bool { return true }
+func (TalismanOfRecompenseYellow) NotImplemented()              {}

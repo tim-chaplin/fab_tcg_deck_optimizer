@@ -19,5 +19,5 @@ func (ClearwaterElixirRed) Pitch() int                         { return 1 }
 func (ClearwaterElixirRed) Attack() int                        { return 0 }
 func (ClearwaterElixirRed) Defense() int                       { return 3 }
 func (ClearwaterElixirRed) Types(card.GameEngine) card.TypeSet { return clearwaterElixirTypes }
-func (ClearwaterElixirRed) GoAgain() bool                      { return true }
+func (ClearwaterElixirRed) GoAgain(card.GameEngine) bool       { return true }
 func (ClearwaterElixirRed) NotImplemented()                    {}

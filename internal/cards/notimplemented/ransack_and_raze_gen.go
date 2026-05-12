@@ -19,5 +19,5 @@ func (RansackAndRazeBlue) Pitch() int                         { return 3 }
 func (RansackAndRazeBlue) Attack() int                        { return 0 }
 func (RansackAndRazeBlue) Defense() int                       { return 3 }
 func (RansackAndRazeBlue) Types(card.GameEngine) card.TypeSet { return ransackAndRazeTypes }
-func (RansackAndRazeBlue) GoAgain() bool                      { return true }
+func (RansackAndRazeBlue) GoAgain(card.GameEngine) bool       { return true }
 func (RansackAndRazeBlue) NotImplemented()                    {}

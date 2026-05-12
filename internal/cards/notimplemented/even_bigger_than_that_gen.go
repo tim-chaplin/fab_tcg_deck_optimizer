@@ -19,7 +19,7 @@ func (EvenBiggerThanThatRed) Pitch() int                         { return 1 }
 func (EvenBiggerThanThatRed) Attack() int                        { return 0 }
 func (EvenBiggerThanThatRed) Defense() int                       { return 0 }
 func (EvenBiggerThanThatRed) Types(card.GameEngine) card.TypeSet { return evenBiggerThanThatTypes }
-func (EvenBiggerThanThatRed) GoAgain() bool                      { return false }
+func (EvenBiggerThanThatRed) GoAgain(card.GameEngine) bool       { return false }
 func (EvenBiggerThanThatRed) NotImplemented()                    {}
 
 type EvenBiggerThanThatYellow struct{}
@@ -32,7 +32,7 @@ func (EvenBiggerThanThatYellow) Pitch() int                         { return 2 }
 func (EvenBiggerThanThatYellow) Attack() int                        { return 0 }
 func (EvenBiggerThanThatYellow) Defense() int                       { return 0 }
 func (EvenBiggerThanThatYellow) Types(card.GameEngine) card.TypeSet { return evenBiggerThanThatTypes }
-func (EvenBiggerThanThatYellow) GoAgain() bool                      { return false }
+func (EvenBiggerThanThatYellow) GoAgain(card.GameEngine) bool       { return false }
 func (EvenBiggerThanThatYellow) NotImplemented()                    {}
 
 type EvenBiggerThanThatBlue struct{}
@@ -45,5 +45,5 @@ func (EvenBiggerThanThatBlue) Pitch() int                         { return 3 }
 func (EvenBiggerThanThatBlue) Attack() int                        { return 0 }
 func (EvenBiggerThanThatBlue) Defense() int                       { return 0 }
 func (EvenBiggerThanThatBlue) Types(card.GameEngine) card.TypeSet { return evenBiggerThanThatTypes }
-func (EvenBiggerThanThatBlue) GoAgain() bool                      { return false }
+func (EvenBiggerThanThatBlue) GoAgain(card.GameEngine) bool       { return false }
 func (EvenBiggerThanThatBlue) NotImplemented()                    {}

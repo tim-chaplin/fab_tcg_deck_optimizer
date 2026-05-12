@@ -19,4 +19,4 @@ func (OutedRed) Pitch() int                         { return 1 }
 func (OutedRed) Attack() int                        { return 3 }
 func (OutedRed) Defense() int                       { return 0 }
 func (OutedRed) Types(card.GameEngine) card.TypeSet { return outedTypes }
-func (OutedRed) GoAgain() bool                      { return true }
+func (OutedRed) GoAgain(card.GameEngine) bool       { return true }

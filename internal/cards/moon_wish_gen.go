@@ -18,7 +18,7 @@ func (MoonWishRed) Pitch() int                         { return 1 }
 func (MoonWishRed) Attack() int                        { return 5 }
 func (MoonWishRed) Defense() int                       { return 2 }
 func (MoonWishRed) Types(card.GameEngine) card.TypeSet { return moonWishTypes }
-func (MoonWishRed) GoAgain() bool                      { return false }
+func (MoonWishRed) GoAgain(card.GameEngine) bool       { return false }
 
 type MoonWishYellow struct{}
 
@@ -29,7 +29,7 @@ func (MoonWishYellow) Pitch() int                         { return 2 }
 func (MoonWishYellow) Attack() int                        { return 4 }
 func (MoonWishYellow) Defense() int                       { return 2 }
 func (MoonWishYellow) Types(card.GameEngine) card.TypeSet { return moonWishTypes }
-func (MoonWishYellow) GoAgain() bool                      { return false }
+func (MoonWishYellow) GoAgain(card.GameEngine) bool       { return false }
 
 type MoonWishBlue struct{}
 
@@ -40,4 +40,4 @@ func (MoonWishBlue) Pitch() int                         { return 3 }
 func (MoonWishBlue) Attack() int                        { return 3 }
 func (MoonWishBlue) Defense() int                       { return 2 }
 func (MoonWishBlue) Types(card.GameEngine) card.TypeSet { return moonWishTypes }
-func (MoonWishBlue) GoAgain() bool                      { return false }
+func (MoonWishBlue) GoAgain(card.GameEngine) bool       { return false }

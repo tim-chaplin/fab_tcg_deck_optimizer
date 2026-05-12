@@ -19,7 +19,7 @@ func (CadaverousContrabandRed) Pitch() int                         { return 1 }
 func (CadaverousContrabandRed) Attack() int                        { return 6 }
 func (CadaverousContrabandRed) Defense() int                       { return 2 }
 func (CadaverousContrabandRed) Types(card.GameEngine) card.TypeSet { return cadaverousContrabandTypes }
-func (CadaverousContrabandRed) GoAgain() bool                      { return false }
+func (CadaverousContrabandRed) GoAgain(card.GameEngine) bool       { return false }
 
 type CadaverousContrabandYellow struct{}
 
@@ -33,7 +33,7 @@ func (CadaverousContrabandYellow) Defense() int             { return 2 }
 func (CadaverousContrabandYellow) Types(card.GameEngine) card.TypeSet {
 	return cadaverousContrabandTypes
 }
-func (CadaverousContrabandYellow) GoAgain() bool { return false }
+func (CadaverousContrabandYellow) GoAgain(card.GameEngine) bool { return false }
 
 type CadaverousContrabandBlue struct{}
 
@@ -45,4 +45,4 @@ func (CadaverousContrabandBlue) Pitch() int                         { return 3 }
 func (CadaverousContrabandBlue) Attack() int                        { return 4 }
 func (CadaverousContrabandBlue) Defense() int                       { return 2 }
 func (CadaverousContrabandBlue) Types(card.GameEngine) card.TypeSet { return cadaverousContrabandTypes }
-func (CadaverousContrabandBlue) GoAgain() bool                      { return false }
+func (CadaverousContrabandBlue) GoAgain(card.GameEngine) bool       { return false }

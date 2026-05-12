@@ -19,7 +19,7 @@ func (RunicReapingRed) Pitch() int                         { return 1 }
 func (RunicReapingRed) Attack() int                        { return 0 }
 func (RunicReapingRed) Defense() int                       { return 2 }
 func (RunicReapingRed) Types(card.GameEngine) card.TypeSet { return runicReapingTypes }
-func (RunicReapingRed) GoAgain() bool                      { return true }
+func (RunicReapingRed) GoAgain(card.GameEngine) bool       { return true }
 
 type RunicReapingYellow struct{}
 
@@ -31,7 +31,7 @@ func (RunicReapingYellow) Pitch() int                         { return 2 }
 func (RunicReapingYellow) Attack() int                        { return 0 }
 func (RunicReapingYellow) Defense() int                       { return 2 }
 func (RunicReapingYellow) Types(card.GameEngine) card.TypeSet { return runicReapingTypes }
-func (RunicReapingYellow) GoAgain() bool                      { return true }
+func (RunicReapingYellow) GoAgain(card.GameEngine) bool       { return true }
 
 type RunicReapingBlue struct{}
 
@@ -43,4 +43,4 @@ func (RunicReapingBlue) Pitch() int                         { return 3 }
 func (RunicReapingBlue) Attack() int                        { return 0 }
 func (RunicReapingBlue) Defense() int                       { return 2 }
 func (RunicReapingBlue) Types(card.GameEngine) card.TypeSet { return runicReapingTypes }
-func (RunicReapingBlue) GoAgain() bool                      { return true }
+func (RunicReapingBlue) GoAgain(card.GameEngine) bool       { return true }

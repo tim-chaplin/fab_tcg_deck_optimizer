@@ -19,4 +19,4 @@ func (ThrustRed) Pitch() int                         { return 1 }
 func (ThrustRed) Attack() int                        { return 0 }
 func (ThrustRed) Defense() int                       { return 2 }
 func (ThrustRed) Types(card.GameEngine) card.TypeSet { return thrustTypes }
-func (ThrustRed) GoAgain() bool                      { return false }
+func (ThrustRed) GoAgain(card.GameEngine) bool       { return false }

@@ -19,5 +19,5 @@ func (LayLowYellow) Pitch() int                         { return 2 }
 func (LayLowYellow) Attack() int                        { return 0 }
 func (LayLowYellow) Defense() int                       { return 3 }
 func (LayLowYellow) Types(card.GameEngine) card.TypeSet { return layLowTypes }
-func (LayLowYellow) GoAgain() bool                      { return false }
+func (LayLowYellow) GoAgain(card.GameEngine) bool       { return false }
 func (LayLowYellow) NotImplemented()                    {}

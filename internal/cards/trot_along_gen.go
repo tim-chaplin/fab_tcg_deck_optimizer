@@ -19,4 +19,4 @@ func (TrotAlongBlue) Pitch() int                         { return 3 }
 func (TrotAlongBlue) Attack() int                        { return 0 }
 func (TrotAlongBlue) Defense() int                       { return 3 }
 func (TrotAlongBlue) Types(card.GameEngine) card.TypeSet { return trotAlongTypes }
-func (TrotAlongBlue) GoAgain() bool                      { return true }
+func (TrotAlongBlue) GoAgain(card.GameEngine) bool       { return true }

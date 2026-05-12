@@ -23,7 +23,7 @@ func (stubRuneAttack) Defense() int             { return 0 }
 func (stubRuneAttack) Types(card.GameEngine) card.TypeSet {
 	return card.NewTypeSet(card.TypeRuneblade, card.TypeAction, card.TypeAttack)
 }
-func (stubRuneAttack) GoAgain() bool                                      { return true }
+func (stubRuneAttack) GoAgain(card.GameEngine) bool                       { return true }
 func (stubRuneAttack) Play(card.GameEngine, card.Logger, *card.CardState) {}
 
 // stubRuneAura is a minimal Runeblade non-attack action (an Aura).
@@ -39,7 +39,7 @@ func (stubRuneAura) Defense() int             { return 0 }
 func (stubRuneAura) Types(card.GameEngine) card.TypeSet {
 	return card.NewTypeSet(card.TypeRuneblade, card.TypeAction, card.TypeAura)
 }
-func (stubRuneAura) GoAgain() bool                                      { return true }
+func (stubRuneAura) GoAgain(card.GameEngine) bool                       { return true }
 func (stubRuneAura) Play(card.GameEngine, card.Logger, *card.CardState) {}
 
 // stubNonRuneblade is an Action-Attack with no Runeblade type — should never trigger Viserai.
@@ -55,7 +55,7 @@ func (stubNonRuneblade) Defense() int             { return 0 }
 func (stubNonRuneblade) Types(card.GameEngine) card.TypeSet {
 	return card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 }
-func (stubNonRuneblade) GoAgain() bool                                      { return true }
+func (stubNonRuneblade) GoAgain(card.GameEngine) bool                       { return true }
 func (stubNonRuneblade) Play(card.GameEngine, card.Logger, *card.CardState) {}
 func TestViserai_RunebladeAfterNonAttackActionTriggers(t *testing.T) {
 	// Non-attack action played first, then a Runeblade attack. Viserai's OnCardPlayed creates a
@@ -103,7 +103,7 @@ func (stubRuneWeapon) Defense() int             { return 0 }
 func (stubRuneWeapon) Types(card.GameEngine) card.TypeSet {
 	return card.NewTypeSet(card.TypeRuneblade, card.TypeWeapon, card.TypeAttack)
 }
-func (stubRuneWeapon) GoAgain() bool                                      { return true }
+func (stubRuneWeapon) GoAgain(card.GameEngine) bool                       { return true }
 func (stubRuneWeapon) Play(card.GameEngine, card.Logger, *card.CardState) {}
 func TestViserai_WeaponSwingDoesNotTrigger(t *testing.T) {
 	// Even with a prior non-attack action in CardsPlayed, swinging a Runeblade weapon isn't "playing a

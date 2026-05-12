@@ -19,4 +19,4 @@ func (RelentlessPursuitBlue) Pitch() int                         { return 3 }
 func (RelentlessPursuitBlue) Attack() int                        { return 0 }
 func (RelentlessPursuitBlue) Defense() int                       { return 3 }
 func (RelentlessPursuitBlue) Types(card.GameEngine) card.TypeSet { return relentlessPursuitTypes }
-func (RelentlessPursuitBlue) GoAgain() bool                      { return true }
+func (RelentlessPursuitBlue) GoAgain(card.GameEngine) bool       { return true }

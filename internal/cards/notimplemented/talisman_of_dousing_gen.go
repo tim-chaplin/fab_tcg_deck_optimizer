@@ -19,5 +19,5 @@ func (TalismanOfDousingYellow) Pitch() int                         { return 2 }
 func (TalismanOfDousingYellow) Attack() int                        { return 0 }
 func (TalismanOfDousingYellow) Defense() int                       { return 0 }
 func (TalismanOfDousingYellow) Types(card.GameEngine) card.TypeSet { return talismanOfDousingTypes }
-func (TalismanOfDousingYellow) GoAgain() bool                      { return true }
+func (TalismanOfDousingYellow) GoAgain(card.GameEngine) bool       { return true }
 func (TalismanOfDousingYellow) NotImplemented()                    {}

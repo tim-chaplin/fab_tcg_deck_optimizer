@@ -19,7 +19,7 @@ func (FiddlersGreenRed) Pitch() int                         { return 1 }
 func (FiddlersGreenRed) Attack() int                        { return 0 }
 func (FiddlersGreenRed) Defense() int                       { return 1 }
 func (FiddlersGreenRed) Types(card.GameEngine) card.TypeSet { return fiddlerSGreenTypes }
-func (FiddlersGreenRed) GoAgain() bool                      { return false }
+func (FiddlersGreenRed) GoAgain(card.GameEngine) bool       { return false }
 func (FiddlersGreenRed) NotSilverAgeLegal()                 {}
 
 type FiddlersGreenYellow struct{}
@@ -32,7 +32,7 @@ func (FiddlersGreenYellow) Pitch() int                         { return 2 }
 func (FiddlersGreenYellow) Attack() int                        { return 0 }
 func (FiddlersGreenYellow) Defense() int                       { return 1 }
 func (FiddlersGreenYellow) Types(card.GameEngine) card.TypeSet { return fiddlerSGreenTypes }
-func (FiddlersGreenYellow) GoAgain() bool                      { return false }
+func (FiddlersGreenYellow) GoAgain(card.GameEngine) bool       { return false }
 func (FiddlersGreenYellow) NotSilverAgeLegal()                 {}
 
 type FiddlersGreenBlue struct{}
@@ -45,5 +45,5 @@ func (FiddlersGreenBlue) Pitch() int                         { return 3 }
 func (FiddlersGreenBlue) Attack() int                        { return 0 }
 func (FiddlersGreenBlue) Defense() int                       { return 1 }
 func (FiddlersGreenBlue) Types(card.GameEngine) card.TypeSet { return fiddlerSGreenTypes }
-func (FiddlersGreenBlue) GoAgain() bool                      { return false }
+func (FiddlersGreenBlue) GoAgain(card.GameEngine) bool       { return false }
 func (FiddlersGreenBlue) NotSilverAgeLegal()                 {}

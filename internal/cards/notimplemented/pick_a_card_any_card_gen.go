@@ -19,7 +19,7 @@ func (PickACardAnyCardRed) Pitch() int                         { return 1 }
 func (PickACardAnyCardRed) Attack() int                        { return 0 }
 func (PickACardAnyCardRed) Defense() int                       { return 2 }
 func (PickACardAnyCardRed) Types(card.GameEngine) card.TypeSet { return pickACardAnyCardTypes }
-func (PickACardAnyCardRed) GoAgain() bool                      { return true }
+func (PickACardAnyCardRed) GoAgain(card.GameEngine) bool       { return true }
 func (PickACardAnyCardRed) NotImplemented()                    {}
 
 type PickACardAnyCardYellow struct{}
@@ -32,7 +32,7 @@ func (PickACardAnyCardYellow) Pitch() int                         { return 2 }
 func (PickACardAnyCardYellow) Attack() int                        { return 0 }
 func (PickACardAnyCardYellow) Defense() int                       { return 2 }
 func (PickACardAnyCardYellow) Types(card.GameEngine) card.TypeSet { return pickACardAnyCardTypes }
-func (PickACardAnyCardYellow) GoAgain() bool                      { return true }
+func (PickACardAnyCardYellow) GoAgain(card.GameEngine) bool       { return true }
 func (PickACardAnyCardYellow) NotImplemented()                    {}
 
 type PickACardAnyCardBlue struct{}
@@ -45,5 +45,5 @@ func (PickACardAnyCardBlue) Pitch() int                         { return 3 }
 func (PickACardAnyCardBlue) Attack() int                        { return 0 }
 func (PickACardAnyCardBlue) Defense() int                       { return 2 }
 func (PickACardAnyCardBlue) Types(card.GameEngine) card.TypeSet { return pickACardAnyCardTypes }
-func (PickACardAnyCardBlue) GoAgain() bool                      { return true }
+func (PickACardAnyCardBlue) GoAgain(card.GameEngine) bool       { return true }
 func (PickACardAnyCardBlue) NotImplemented()                    {}

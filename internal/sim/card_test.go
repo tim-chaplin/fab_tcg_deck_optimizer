@@ -26,7 +26,7 @@ func TestCardState_EffectiveGoAgain(t *testing.T) {
 			base = base.WithGoAgain()
 		}
 		p := &card.CardState{Card: base, GrantedGoAgain: tc.granted}
-		if got := p.EffectiveGoAgain(); got != tc.want {
+		if got := p.EffectiveGoAgain(nil); got != tc.want {
 			t.Errorf("%s: EffectiveGoAgain() = %v, want %v", tc.name, got, tc.want)
 		}
 	}

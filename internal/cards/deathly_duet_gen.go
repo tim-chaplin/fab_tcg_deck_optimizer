@@ -19,7 +19,7 @@ func (DeathlyDuetRed) Pitch() int                         { return 1 }
 func (DeathlyDuetRed) Attack() int                        { return 4 }
 func (DeathlyDuetRed) Defense() int                       { return 3 }
 func (DeathlyDuetRed) Types(card.GameEngine) card.TypeSet { return deathlyDuetTypes }
-func (DeathlyDuetRed) GoAgain() bool                      { return false }
+func (DeathlyDuetRed) GoAgain(card.GameEngine) bool       { return false }
 
 type DeathlyDuetYellow struct{}
 
@@ -31,7 +31,7 @@ func (DeathlyDuetYellow) Pitch() int                         { return 2 }
 func (DeathlyDuetYellow) Attack() int                        { return 3 }
 func (DeathlyDuetYellow) Defense() int                       { return 3 }
 func (DeathlyDuetYellow) Types(card.GameEngine) card.TypeSet { return deathlyDuetTypes }
-func (DeathlyDuetYellow) GoAgain() bool                      { return false }
+func (DeathlyDuetYellow) GoAgain(card.GameEngine) bool       { return false }
 
 type DeathlyDuetBlue struct{}
 
@@ -43,4 +43,4 @@ func (DeathlyDuetBlue) Pitch() int                         { return 3 }
 func (DeathlyDuetBlue) Attack() int                        { return 2 }
 func (DeathlyDuetBlue) Defense() int                       { return 3 }
 func (DeathlyDuetBlue) Types(card.GameEngine) card.TypeSet { return deathlyDuetTypes }
-func (DeathlyDuetBlue) GoAgain() bool                      { return false }
+func (DeathlyDuetBlue) GoAgain(card.GameEngine) bool       { return false }

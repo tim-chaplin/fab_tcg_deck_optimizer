@@ -19,7 +19,7 @@ func (ShrillOfSkullformRed) Pitch() int                         { return 1 }
 func (ShrillOfSkullformRed) Attack() int                        { return 4 }
 func (ShrillOfSkullformRed) Defense() int                       { return 3 }
 func (ShrillOfSkullformRed) Types(card.GameEngine) card.TypeSet { return shrillOfSkullformTypes }
-func (ShrillOfSkullformRed) GoAgain() bool                      { return false }
+func (ShrillOfSkullformRed) GoAgain(card.GameEngine) bool       { return false }
 
 type ShrillOfSkullformYellow struct{}
 
@@ -31,7 +31,7 @@ func (ShrillOfSkullformYellow) Pitch() int                         { return 2 }
 func (ShrillOfSkullformYellow) Attack() int                        { return 3 }
 func (ShrillOfSkullformYellow) Defense() int                       { return 3 }
 func (ShrillOfSkullformYellow) Types(card.GameEngine) card.TypeSet { return shrillOfSkullformTypes }
-func (ShrillOfSkullformYellow) GoAgain() bool                      { return false }
+func (ShrillOfSkullformYellow) GoAgain(card.GameEngine) bool       { return false }
 
 type ShrillOfSkullformBlue struct{}
 
@@ -43,4 +43,4 @@ func (ShrillOfSkullformBlue) Pitch() int                         { return 3 }
 func (ShrillOfSkullformBlue) Attack() int                        { return 2 }
 func (ShrillOfSkullformBlue) Defense() int                       { return 3 }
 func (ShrillOfSkullformBlue) Types(card.GameEngine) card.TypeSet { return shrillOfSkullformTypes }
-func (ShrillOfSkullformBlue) GoAgain() bool                      { return false }
+func (ShrillOfSkullformBlue) GoAgain(card.GameEngine) bool       { return false }

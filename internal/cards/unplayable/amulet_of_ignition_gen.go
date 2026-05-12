@@ -19,5 +19,5 @@ func (AmuletOfIgnitionYellow) Pitch() int                         { return 2 }
 func (AmuletOfIgnitionYellow) Attack() int                        { return 0 }
 func (AmuletOfIgnitionYellow) Defense() int                       { return 0 }
 func (AmuletOfIgnitionYellow) Types(card.GameEngine) card.TypeSet { return amuletOfIgnitionTypes }
-func (AmuletOfIgnitionYellow) GoAgain() bool                      { return true }
+func (AmuletOfIgnitionYellow) GoAgain(card.GameEngine) bool       { return true }
 func (AmuletOfIgnitionYellow) Unplayable()                        {}

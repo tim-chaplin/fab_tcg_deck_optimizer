@@ -19,5 +19,5 @@ func (RegainComposureBlue) Pitch() int                         { return 3 }
 func (RegainComposureBlue) Attack() int                        { return 0 }
 func (RegainComposureBlue) Defense() int                       { return 2 }
 func (RegainComposureBlue) Types(card.GameEngine) card.TypeSet { return regainComposureTypes }
-func (RegainComposureBlue) GoAgain() bool                      { return true }
+func (RegainComposureBlue) GoAgain(card.GameEngine) bool       { return true }
 func (RegainComposureBlue) NotImplemented()                    {}

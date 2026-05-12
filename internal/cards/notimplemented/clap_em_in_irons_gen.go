@@ -19,5 +19,5 @@ func (ClapEmInIronsBlue) Pitch() int                         { return 3 }
 func (ClapEmInIronsBlue) Attack() int                        { return 0 }
 func (ClapEmInIronsBlue) Defense() int                       { return 0 }
 func (ClapEmInIronsBlue) Types(card.GameEngine) card.TypeSet { return clapEmInIronsTypes }
-func (ClapEmInIronsBlue) GoAgain() bool                      { return true }
+func (ClapEmInIronsBlue) GoAgain(card.GameEngine) bool       { return true }
 func (ClapEmInIronsBlue) NotImplemented()                    {}

@@ -19,4 +19,4 @@ func (NipAtTheHeelsBlue) Pitch() int                         { return 3 }
 func (NipAtTheHeelsBlue) Attack() int                        { return 0 }
 func (NipAtTheHeelsBlue) Defense() int                       { return 3 }
 func (NipAtTheHeelsBlue) Types(card.GameEngine) card.TypeSet { return nipAtTheHeelsTypes }
-func (NipAtTheHeelsBlue) GoAgain() bool                      { return false }
+func (NipAtTheHeelsBlue) GoAgain(card.GameEngine) bool       { return false }

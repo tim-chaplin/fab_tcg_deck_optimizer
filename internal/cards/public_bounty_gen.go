@@ -19,7 +19,7 @@ func (PublicBountyRed) Pitch() int                         { return 1 }
 func (PublicBountyRed) Attack() int                        { return 0 }
 func (PublicBountyRed) Defense() int                       { return 2 }
 func (PublicBountyRed) Types(card.GameEngine) card.TypeSet { return publicBountyTypes }
-func (PublicBountyRed) GoAgain() bool                      { return true }
+func (PublicBountyRed) GoAgain(card.GameEngine) bool       { return true }
 
 type PublicBountyYellow struct{}
 
@@ -31,7 +31,7 @@ func (PublicBountyYellow) Pitch() int                         { return 2 }
 func (PublicBountyYellow) Attack() int                        { return 0 }
 func (PublicBountyYellow) Defense() int                       { return 2 }
 func (PublicBountyYellow) Types(card.GameEngine) card.TypeSet { return publicBountyTypes }
-func (PublicBountyYellow) GoAgain() bool                      { return true }
+func (PublicBountyYellow) GoAgain(card.GameEngine) bool       { return true }
 
 type PublicBountyBlue struct{}
 
@@ -43,4 +43,4 @@ func (PublicBountyBlue) Pitch() int                         { return 3 }
 func (PublicBountyBlue) Attack() int                        { return 0 }
 func (PublicBountyBlue) Defense() int                       { return 2 }
 func (PublicBountyBlue) Types(card.GameEngine) card.TypeSet { return publicBountyTypes }
-func (PublicBountyBlue) GoAgain() bool                      { return true }
+func (PublicBountyBlue) GoAgain(card.GameEngine) bool       { return true }

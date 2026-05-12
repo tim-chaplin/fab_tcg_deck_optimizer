@@ -40,8 +40,10 @@ type Card interface {
 	// cards ignore g.
 	Types(g GameEngine) TypeSet
 	// GoAgain reports whether playing this card grants an additional action point.
-	// Cards printed with "Go again" return true.
-	GoAgain() bool
+	// Cards printed with "Go again" return true. Hero-conditional cards (Life for a
+	// Life, Blow for a Blow, Scar for a Scar) read g.HeroWantsLowerHealth() and return
+	// true only when the active hero opts in.
+	GoAgain(g GameEngine) bool
 	// Play is called when the card resolves — as an attack or as a defense reaction.
 	// Cards own card-specific behaviour only: conditional self-buffs (flip
 	// self.BonusAttack / self.BonusDefense), riders (l.AppendPostTrigger sub-lines),

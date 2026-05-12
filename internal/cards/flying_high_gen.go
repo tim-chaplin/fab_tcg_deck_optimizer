@@ -19,7 +19,7 @@ func (FlyingHighRed) Pitch() int                         { return 1 }
 func (FlyingHighRed) Attack() int                        { return 0 }
 func (FlyingHighRed) Defense() int                       { return 2 }
 func (FlyingHighRed) Types(card.GameEngine) card.TypeSet { return flyingHighTypes }
-func (FlyingHighRed) GoAgain() bool                      { return true }
+func (FlyingHighRed) GoAgain(card.GameEngine) bool       { return true }
 
 type FlyingHighYellow struct{}
 
@@ -31,7 +31,7 @@ func (FlyingHighYellow) Pitch() int                         { return 2 }
 func (FlyingHighYellow) Attack() int                        { return 0 }
 func (FlyingHighYellow) Defense() int                       { return 2 }
 func (FlyingHighYellow) Types(card.GameEngine) card.TypeSet { return flyingHighTypes }
-func (FlyingHighYellow) GoAgain() bool                      { return true }
+func (FlyingHighYellow) GoAgain(card.GameEngine) bool       { return true }
 
 type FlyingHighBlue struct{}
 
@@ -43,4 +43,4 @@ func (FlyingHighBlue) Pitch() int                         { return 3 }
 func (FlyingHighBlue) Attack() int                        { return 0 }
 func (FlyingHighBlue) Defense() int                       { return 2 }
 func (FlyingHighBlue) Types(card.GameEngine) card.TypeSet { return flyingHighTypes }
-func (FlyingHighBlue) GoAgain() bool                      { return true }
+func (FlyingHighBlue) GoAgain(card.GameEngine) bool       { return true }

@@ -37,7 +37,7 @@ func (NebulaBladeAbility) Pitch() int                         { return 0 }
 func (NebulaBladeAbility) Attack() int                        { return 1 }
 func (NebulaBladeAbility) Defense() int                       { return 0 }
 func (NebulaBladeAbility) Types(card.GameEngine) card.TypeSet { return nebulaBladeAbilityTypes }
-func (NebulaBladeAbility) GoAgain() bool                      { return false }
+func (NebulaBladeAbility) GoAgain(card.GameEngine) bool       { return false }
 func (NebulaBladeAbility) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 	if s.NonAttackActionPlayed() {
 		self.BonusAttack += 3

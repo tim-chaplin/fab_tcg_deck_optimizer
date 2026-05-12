@@ -19,7 +19,7 @@ func (FerventForerunnerRed) Pitch() int                         { return 1 }
 func (FerventForerunnerRed) Attack() int                        { return 3 }
 func (FerventForerunnerRed) Defense() int                       { return 2 }
 func (FerventForerunnerRed) Types(card.GameEngine) card.TypeSet { return ferventForerunnerTypes }
-func (FerventForerunnerRed) GoAgain() bool                      { return false }
+func (FerventForerunnerRed) GoAgain(card.GameEngine) bool       { return false }
 
 type FerventForerunnerYellow struct{}
 
@@ -31,7 +31,7 @@ func (FerventForerunnerYellow) Pitch() int                         { return 2 }
 func (FerventForerunnerYellow) Attack() int                        { return 2 }
 func (FerventForerunnerYellow) Defense() int                       { return 2 }
 func (FerventForerunnerYellow) Types(card.GameEngine) card.TypeSet { return ferventForerunnerTypes }
-func (FerventForerunnerYellow) GoAgain() bool                      { return false }
+func (FerventForerunnerYellow) GoAgain(card.GameEngine) bool       { return false }
 
 type FerventForerunnerBlue struct{}
 
@@ -43,4 +43,4 @@ func (FerventForerunnerBlue) Pitch() int                         { return 3 }
 func (FerventForerunnerBlue) Attack() int                        { return 1 }
 func (FerventForerunnerBlue) Defense() int                       { return 2 }
 func (FerventForerunnerBlue) Types(card.GameEngine) card.TypeSet { return ferventForerunnerTypes }
-func (FerventForerunnerBlue) GoAgain() bool                      { return false }
+func (FerventForerunnerBlue) GoAgain(card.GameEngine) bool       { return false }

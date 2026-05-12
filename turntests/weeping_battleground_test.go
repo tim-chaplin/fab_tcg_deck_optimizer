@@ -24,7 +24,7 @@ func (zeroDefenseAura) Pitch() int                                         { ret
 func (zeroDefenseAura) Attack() int                                        { return 0 }
 func (zeroDefenseAura) Defense() int                                       { return 0 }
 func (zeroDefenseAura) Types(card.GameEngine) card.TypeSet                 { return card.NewTypeSet(card.TypeAura) }
-func (zeroDefenseAura) GoAgain() bool                                      { return false }
+func (zeroDefenseAura) GoAgain(card.GameEngine) bool                       { return false }
 func (zeroDefenseAura) Play(card.GameEngine, card.Logger, *card.CardState) {}
 
 // Tests that Weeping Battleground banishes a same-turn-blocked aura from the graveyard

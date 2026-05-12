@@ -19,4 +19,4 @@ func (ChestPuffRed) Pitch() int                         { return 1 }
 func (ChestPuffRed) Attack() int                        { return 7 }
 func (ChestPuffRed) Defense() int                       { return 3 }
 func (ChestPuffRed) Types(card.GameEngine) card.TypeSet { return chestPuffTypes }
-func (ChestPuffRed) GoAgain() bool                      { return false }
+func (ChestPuffRed) GoAgain(card.GameEngine) bool       { return false }

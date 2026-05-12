@@ -19,7 +19,7 @@ func (EnchantingMelodyRed) Pitch() int                         { return 1 }
 func (EnchantingMelodyRed) Attack() int                        { return 0 }
 func (EnchantingMelodyRed) Defense() int                       { return 2 }
 func (EnchantingMelodyRed) Types(card.GameEngine) card.TypeSet { return enchantingMelodyTypes }
-func (EnchantingMelodyRed) GoAgain() bool                      { return true }
+func (EnchantingMelodyRed) GoAgain(card.GameEngine) bool       { return true }
 func (EnchantingMelodyRed) NotImplemented()                    {}
 
 type EnchantingMelodyYellow struct{}
@@ -32,7 +32,7 @@ func (EnchantingMelodyYellow) Pitch() int                         { return 2 }
 func (EnchantingMelodyYellow) Attack() int                        { return 0 }
 func (EnchantingMelodyYellow) Defense() int                       { return 2 }
 func (EnchantingMelodyYellow) Types(card.GameEngine) card.TypeSet { return enchantingMelodyTypes }
-func (EnchantingMelodyYellow) GoAgain() bool                      { return true }
+func (EnchantingMelodyYellow) GoAgain(card.GameEngine) bool       { return true }
 func (EnchantingMelodyYellow) NotImplemented()                    {}
 
 type EnchantingMelodyBlue struct{}
@@ -45,5 +45,5 @@ func (EnchantingMelodyBlue) Pitch() int                         { return 3 }
 func (EnchantingMelodyBlue) Attack() int                        { return 0 }
 func (EnchantingMelodyBlue) Defense() int                       { return 2 }
 func (EnchantingMelodyBlue) Types(card.GameEngine) card.TypeSet { return enchantingMelodyTypes }
-func (EnchantingMelodyBlue) GoAgain() bool                      { return true }
+func (EnchantingMelodyBlue) GoAgain(card.GameEngine) bool       { return true }
 func (EnchantingMelodyBlue) NotImplemented()                    {}

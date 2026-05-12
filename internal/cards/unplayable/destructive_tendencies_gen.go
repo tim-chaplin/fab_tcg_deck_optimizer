@@ -21,5 +21,5 @@ func (DestructiveTendenciesBlue) Defense() int             { return 0 }
 func (DestructiveTendenciesBlue) Types(card.GameEngine) card.TypeSet {
 	return destructiveTendenciesTypes
 }
-func (DestructiveTendenciesBlue) GoAgain() bool { return false }
-func (DestructiveTendenciesBlue) Unplayable()   {}
+func (DestructiveTendenciesBlue) GoAgain(card.GameEngine) bool { return false }
+func (DestructiveTendenciesBlue) Unplayable()                  {}

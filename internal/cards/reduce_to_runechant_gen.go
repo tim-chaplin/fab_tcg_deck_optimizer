@@ -18,7 +18,7 @@ func (ReduceToRunechantRed) Pitch() int                         { return 1 }
 func (ReduceToRunechantRed) Attack() int                        { return 0 }
 func (ReduceToRunechantRed) Defense() int                       { return 4 }
 func (ReduceToRunechantRed) Types(card.GameEngine) card.TypeSet { return reduceToRunechantTypes }
-func (ReduceToRunechantRed) GoAgain() bool                      { return false }
+func (ReduceToRunechantRed) GoAgain(card.GameEngine) bool       { return false }
 
 type ReduceToRunechantYellow struct{}
 
@@ -29,7 +29,7 @@ func (ReduceToRunechantYellow) Pitch() int                         { return 2 }
 func (ReduceToRunechantYellow) Attack() int                        { return 0 }
 func (ReduceToRunechantYellow) Defense() int                       { return 3 }
 func (ReduceToRunechantYellow) Types(card.GameEngine) card.TypeSet { return reduceToRunechantTypes }
-func (ReduceToRunechantYellow) GoAgain() bool                      { return false }
+func (ReduceToRunechantYellow) GoAgain(card.GameEngine) bool       { return false }
 
 type ReduceToRunechantBlue struct{}
 
@@ -40,4 +40,4 @@ func (ReduceToRunechantBlue) Pitch() int                         { return 3 }
 func (ReduceToRunechantBlue) Attack() int                        { return 0 }
 func (ReduceToRunechantBlue) Defense() int                       { return 2 }
 func (ReduceToRunechantBlue) Types(card.GameEngine) card.TypeSet { return reduceToRunechantTypes }
-func (ReduceToRunechantBlue) GoAgain() bool                      { return false }
+func (ReduceToRunechantBlue) GoAgain(card.GameEngine) bool       { return false }

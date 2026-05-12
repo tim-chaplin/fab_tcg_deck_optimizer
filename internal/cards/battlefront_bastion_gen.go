@@ -19,7 +19,7 @@ func (BattlefrontBastionRed) Pitch() int                         { return 1 }
 func (BattlefrontBastionRed) Attack() int                        { return 7 }
 func (BattlefrontBastionRed) Defense() int                       { return 2 }
 func (BattlefrontBastionRed) Types(card.GameEngine) card.TypeSet { return battlefrontBastionTypes }
-func (BattlefrontBastionRed) GoAgain() bool                      { return false }
+func (BattlefrontBastionRed) GoAgain(card.GameEngine) bool       { return false }
 
 type BattlefrontBastionYellow struct{}
 
@@ -31,7 +31,7 @@ func (BattlefrontBastionYellow) Pitch() int                         { return 2 }
 func (BattlefrontBastionYellow) Attack() int                        { return 6 }
 func (BattlefrontBastionYellow) Defense() int                       { return 2 }
 func (BattlefrontBastionYellow) Types(card.GameEngine) card.TypeSet { return battlefrontBastionTypes }
-func (BattlefrontBastionYellow) GoAgain() bool                      { return false }
+func (BattlefrontBastionYellow) GoAgain(card.GameEngine) bool       { return false }
 
 type BattlefrontBastionBlue struct{}
 
@@ -43,4 +43,4 @@ func (BattlefrontBastionBlue) Pitch() int                         { return 3 }
 func (BattlefrontBastionBlue) Attack() int                        { return 5 }
 func (BattlefrontBastionBlue) Defense() int                       { return 2 }
 func (BattlefrontBastionBlue) Types(card.GameEngine) card.TypeSet { return battlefrontBastionTypes }
-func (BattlefrontBastionBlue) GoAgain() bool                      { return false }
+func (BattlefrontBastionBlue) GoAgain(card.GameEngine) bool       { return false }

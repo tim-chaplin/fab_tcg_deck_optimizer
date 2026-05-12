@@ -981,7 +981,7 @@ func (ctx *sequenceContext) playSequenceWithMeta(n int) (damage int, futureValue
 			state.cardsPlayed = append(state.cardsPlayed, pc.Card)
 			state.graveyard = append(state.graveyard, pc.Card)
 			// Go again is not printed on ARs but honour the flag if granted.
-			if pc.EffectiveGoAgain() {
+			if pc.EffectiveGoAgain(state) {
 				state.actionPoints++
 			}
 			continue
@@ -1044,7 +1044,7 @@ func (ctx *sequenceContext) playSequenceWithMeta(n int) (damage int, futureValue
 		// Go again grants 1 AP after the card resolves. EffectiveGoAgain folds in both
 		// printed Go again and mid-chain conditional grants — by the time we get here the
 		// card's Play has had a chance to flip GrantedGoAgain on itself.
-		if pc.EffectiveGoAgain() {
+		if pc.EffectiveGoAgain(state) {
 			state.actionPoints++
 		}
 	}

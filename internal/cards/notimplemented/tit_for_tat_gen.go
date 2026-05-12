@@ -19,5 +19,5 @@ func (TitForTatBlue) Pitch() int                         { return 3 }
 func (TitForTatBlue) Attack() int                        { return 0 }
 func (TitForTatBlue) Defense() int                       { return 2 }
 func (TitForTatBlue) Types(card.GameEngine) card.TypeSet { return titForTatTypes }
-func (TitForTatBlue) GoAgain() bool                      { return true }
+func (TitForTatBlue) GoAgain(card.GameEngine) bool       { return true }
 func (TitForTatBlue) NotImplemented()                    {}

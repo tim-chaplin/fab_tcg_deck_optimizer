@@ -19,7 +19,7 @@ func (SloggismRed) Pitch() int                         { return 1 }
 func (SloggismRed) Attack() int                        { return 0 }
 func (SloggismRed) Defense() int                       { return 2 }
 func (SloggismRed) Types(card.GameEngine) card.TypeSet { return sloggismTypes }
-func (SloggismRed) GoAgain() bool                      { return true }
+func (SloggismRed) GoAgain(card.GameEngine) bool       { return true }
 
 type SloggismYellow struct{}
 
@@ -31,7 +31,7 @@ func (SloggismYellow) Pitch() int                         { return 2 }
 func (SloggismYellow) Attack() int                        { return 0 }
 func (SloggismYellow) Defense() int                       { return 2 }
 func (SloggismYellow) Types(card.GameEngine) card.TypeSet { return sloggismTypes }
-func (SloggismYellow) GoAgain() bool                      { return true }
+func (SloggismYellow) GoAgain(card.GameEngine) bool       { return true }
 
 type SloggismBlue struct{}
 
@@ -43,4 +43,4 @@ func (SloggismBlue) Pitch() int                         { return 3 }
 func (SloggismBlue) Attack() int                        { return 0 }
 func (SloggismBlue) Defense() int                       { return 2 }
 func (SloggismBlue) Types(card.GameEngine) card.TypeSet { return sloggismTypes }
-func (SloggismBlue) GoAgain() bool                      { return true }
+func (SloggismBlue) GoAgain(card.GameEngine) bool       { return true }

@@ -19,7 +19,7 @@ func (DrowningDireRed) Pitch() int                         { return 1 }
 func (DrowningDireRed) Attack() int                        { return 5 }
 func (DrowningDireRed) Defense() int                       { return 3 }
 func (DrowningDireRed) Types(card.GameEngine) card.TypeSet { return drowningDireTypes }
-func (DrowningDireRed) GoAgain() bool                      { return false }
+func (DrowningDireRed) GoAgain(card.GameEngine) bool       { return false }
 
 type DrowningDireYellow struct{}
 
@@ -31,7 +31,7 @@ func (DrowningDireYellow) Pitch() int                         { return 2 }
 func (DrowningDireYellow) Attack() int                        { return 4 }
 func (DrowningDireYellow) Defense() int                       { return 3 }
 func (DrowningDireYellow) Types(card.GameEngine) card.TypeSet { return drowningDireTypes }
-func (DrowningDireYellow) GoAgain() bool                      { return false }
+func (DrowningDireYellow) GoAgain(card.GameEngine) bool       { return false }
 
 type DrowningDireBlue struct{}
 
@@ -43,4 +43,4 @@ func (DrowningDireBlue) Pitch() int                         { return 3 }
 func (DrowningDireBlue) Attack() int                        { return 3 }
 func (DrowningDireBlue) Defense() int                       { return 3 }
 func (DrowningDireBlue) Types(card.GameEngine) card.TypeSet { return drowningDireTypes }
-func (DrowningDireBlue) GoAgain() bool                      { return false }
+func (DrowningDireBlue) GoAgain(card.GameEngine) bool       { return false }

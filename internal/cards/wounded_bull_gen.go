@@ -19,7 +19,7 @@ func (WoundedBullRed) Pitch() int                         { return 1 }
 func (WoundedBullRed) Attack() int                        { return 7 }
 func (WoundedBullRed) Defense() int                       { return 2 }
 func (WoundedBullRed) Types(card.GameEngine) card.TypeSet { return woundedBullTypes }
-func (WoundedBullRed) GoAgain() bool                      { return false }
+func (WoundedBullRed) GoAgain(card.GameEngine) bool       { return false }
 
 type WoundedBullYellow struct{}
 
@@ -31,7 +31,7 @@ func (WoundedBullYellow) Pitch() int                         { return 2 }
 func (WoundedBullYellow) Attack() int                        { return 6 }
 func (WoundedBullYellow) Defense() int                       { return 2 }
 func (WoundedBullYellow) Types(card.GameEngine) card.TypeSet { return woundedBullTypes }
-func (WoundedBullYellow) GoAgain() bool                      { return false }
+func (WoundedBullYellow) GoAgain(card.GameEngine) bool       { return false }
 
 type WoundedBullBlue struct{}
 
@@ -43,4 +43,4 @@ func (WoundedBullBlue) Pitch() int                         { return 3 }
 func (WoundedBullBlue) Attack() int                        { return 5 }
 func (WoundedBullBlue) Defense() int                       { return 2 }
 func (WoundedBullBlue) Types(card.GameEngine) card.TypeSet { return woundedBullTypes }
-func (WoundedBullBlue) GoAgain() bool                      { return false }
+func (WoundedBullBlue) GoAgain(card.GameEngine) bool       { return false }

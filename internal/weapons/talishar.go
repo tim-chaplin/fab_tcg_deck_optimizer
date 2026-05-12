@@ -39,6 +39,6 @@ func (TalisharAbility) Pitch() int                         { return 0 }
 func (TalisharAbility) Attack() int                        { return 4 }
 func (TalisharAbility) Defense() int                       { return 0 }
 func (TalisharAbility) Types(card.GameEngine) card.TypeSet { return talisharAbilityTypes }
-func (TalisharAbility) GoAgain() bool                      { return false }
+func (TalisharAbility) GoAgain(card.GameEngine) bool       { return false }
 func (TalisharAbility) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 }

@@ -19,7 +19,7 @@ func (ComeToFightRed) Pitch() int                         { return 1 }
 func (ComeToFightRed) Attack() int                        { return 0 }
 func (ComeToFightRed) Defense() int                       { return 3 }
 func (ComeToFightRed) Types(card.GameEngine) card.TypeSet { return comeToFightTypes }
-func (ComeToFightRed) GoAgain() bool                      { return true }
+func (ComeToFightRed) GoAgain(card.GameEngine) bool       { return true }
 
 type ComeToFightYellow struct{}
 
@@ -31,7 +31,7 @@ func (ComeToFightYellow) Pitch() int                         { return 2 }
 func (ComeToFightYellow) Attack() int                        { return 0 }
 func (ComeToFightYellow) Defense() int                       { return 3 }
 func (ComeToFightYellow) Types(card.GameEngine) card.TypeSet { return comeToFightTypes }
-func (ComeToFightYellow) GoAgain() bool                      { return true }
+func (ComeToFightYellow) GoAgain(card.GameEngine) bool       { return true }
 
 type ComeToFightBlue struct{}
 
@@ -43,4 +43,4 @@ func (ComeToFightBlue) Pitch() int                         { return 3 }
 func (ComeToFightBlue) Attack() int                        { return 0 }
 func (ComeToFightBlue) Defense() int                       { return 3 }
 func (ComeToFightBlue) Types(card.GameEngine) card.TypeSet { return comeToFightTypes }
-func (ComeToFightBlue) GoAgain() bool                      { return true }
+func (ComeToFightBlue) GoAgain(card.GameEngine) bool       { return true }

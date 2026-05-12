@@ -19,7 +19,7 @@ func (BrushOffRed) Pitch() int                         { return 1 }
 func (BrushOffRed) Attack() int                        { return 0 }
 func (BrushOffRed) Defense() int                       { return 3 }
 func (BrushOffRed) Types(card.GameEngine) card.TypeSet { return brushOffTypes }
-func (BrushOffRed) GoAgain() bool                      { return false }
+func (BrushOffRed) GoAgain(card.GameEngine) bool       { return false }
 
 type BrushOffYellow struct{}
 
@@ -31,7 +31,7 @@ func (BrushOffYellow) Pitch() int                         { return 2 }
 func (BrushOffYellow) Attack() int                        { return 0 }
 func (BrushOffYellow) Defense() int                       { return 2 }
 func (BrushOffYellow) Types(card.GameEngine) card.TypeSet { return brushOffTypes }
-func (BrushOffYellow) GoAgain() bool                      { return false }
+func (BrushOffYellow) GoAgain(card.GameEngine) bool       { return false }
 
 type BrushOffBlue struct{}
 
@@ -43,4 +43,4 @@ func (BrushOffBlue) Pitch() int                         { return 3 }
 func (BrushOffBlue) Attack() int                        { return 0 }
 func (BrushOffBlue) Defense() int                       { return 1 }
 func (BrushOffBlue) Types(card.GameEngine) card.TypeSet { return brushOffTypes }
-func (BrushOffBlue) GoAgain() bool                      { return false }
+func (BrushOffBlue) GoAgain(card.GameEngine) bool       { return false }

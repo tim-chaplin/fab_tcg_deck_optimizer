@@ -19,7 +19,7 @@ func (WarmongersRecitalRed) Pitch() int                         { return 1 }
 func (WarmongersRecitalRed) Attack() int                        { return 0 }
 func (WarmongersRecitalRed) Defense() int                       { return 2 }
 func (WarmongersRecitalRed) Types(card.GameEngine) card.TypeSet { return warmongerSRecitalTypes }
-func (WarmongersRecitalRed) GoAgain() bool                      { return true }
+func (WarmongersRecitalRed) GoAgain(card.GameEngine) bool       { return true }
 
 type WarmongersRecitalYellow struct{}
 
@@ -31,7 +31,7 @@ func (WarmongersRecitalYellow) Pitch() int                         { return 2 }
 func (WarmongersRecitalYellow) Attack() int                        { return 0 }
 func (WarmongersRecitalYellow) Defense() int                       { return 2 }
 func (WarmongersRecitalYellow) Types(card.GameEngine) card.TypeSet { return warmongerSRecitalTypes }
-func (WarmongersRecitalYellow) GoAgain() bool                      { return true }
+func (WarmongersRecitalYellow) GoAgain(card.GameEngine) bool       { return true }
 
 type WarmongersRecitalBlue struct{}
 
@@ -43,4 +43,4 @@ func (WarmongersRecitalBlue) Pitch() int                         { return 3 }
 func (WarmongersRecitalBlue) Attack() int                        { return 0 }
 func (WarmongersRecitalBlue) Defense() int                       { return 2 }
 func (WarmongersRecitalBlue) Types(card.GameEngine) card.TypeSet { return warmongerSRecitalTypes }
-func (WarmongersRecitalBlue) GoAgain() bool                      { return true }
+func (WarmongersRecitalBlue) GoAgain(card.GameEngine) bool       { return true }

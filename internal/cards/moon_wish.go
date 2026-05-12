@@ -68,7 +68,7 @@ func moonWishOnHit(s card.GameEngine, l card.Logger, self *card.CardState, _ *ca
 		return
 	}
 
-	if !self.EffectiveGoAgain() {
+	if !self.EffectiveGoAgain(s) {
 		// Tutor lands the card in hand for next turn.
 		s.AppendHand(sk)
 		l.AppendPostTriggerf(name, 0, "%s tutored %s", name, sk.DisplayName())

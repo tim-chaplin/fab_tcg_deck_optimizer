@@ -5,12 +5,11 @@
 // When this hits, gain 1{h}."
 //
 // 1{h} gain is modelled as +1 damage-equivalent. The "less {h}" go-again clause routes
-// through sim.HeroWantsLowerHealth — fires for heroes implementing card.LowerHealthWanter.
+// through g.HeroWantsLowerHealth — fires for heroes implementing card.LowerHealthWanter.
 
 package cards
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
@@ -24,17 +23,27 @@ func lifeForALifeOnHit(s card.GameEngine, l card.Logger, self *card.CardState, _
 	l.AppendPostTrigger(self.Card.DisplayName(), "On-hit gained 1 health", lifeForALifeHealValue)
 }
 
-func (LifeForALifeRed) GoAgain() bool { return sim.HeroWantsLowerHealth() }
+// lifeForALifeGoAgain returns the printed "less {h}" go-again rider when the active hero
+// opts into LowerHealthWanter. nil-g (Opt-time / cardmeta lookups before a hero is set)
+// reads as false — printed default.
+func lifeForALifeGoAgain(g card.GameEngine) bool {
+	if g == nil {
+		return false
+	}
+	return g.HeroWantsLowerHealth()
+}
+
+func (LifeForALifeRed) GoAgain(g card.GameEngine) bool { return lifeForALifeGoAgain(g) }
 func (LifeForALifeRed) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 	self.RegisterOnHit(lifeForALifeOnHit)
 }
 
-func (LifeForALifeYellow) GoAgain() bool { return sim.HeroWantsLowerHealth() }
+func (LifeForALifeYellow) GoAgain(g card.GameEngine) bool { return lifeForALifeGoAgain(g) }
 func (LifeForALifeYellow) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 	self.RegisterOnHit(lifeForALifeOnHit)
 }
 
-func (LifeForALifeBlue) GoAgain() bool { return sim.HeroWantsLowerHealth() }
+func (LifeForALifeBlue) GoAgain(g card.GameEngine) bool { return lifeForALifeGoAgain(g) }
 func (LifeForALifeBlue) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 	self.RegisterOnHit(lifeForALifeOnHit)
 }

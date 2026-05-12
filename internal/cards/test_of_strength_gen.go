@@ -19,4 +19,4 @@ func (TestOfStrengthRed) Pitch() int                         { return 1 }
 func (TestOfStrengthRed) Attack() int                        { return 0 }
 func (TestOfStrengthRed) Defense() int                       { return 4 }
 func (TestOfStrengthRed) Types(card.GameEngine) card.TypeSet { return testOfStrengthTypes }
-func (TestOfStrengthRed) GoAgain() bool                      { return false }
+func (TestOfStrengthRed) GoAgain(card.GameEngine) bool       { return false }

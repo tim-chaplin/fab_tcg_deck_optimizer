@@ -19,7 +19,7 @@ func (RagingOnslaughtRed) Pitch() int                         { return 1 }
 func (RagingOnslaughtRed) Attack() int                        { return 7 }
 func (RagingOnslaughtRed) Defense() int                       { return 3 }
 func (RagingOnslaughtRed) Types(card.GameEngine) card.TypeSet { return ragingOnslaughtTypes }
-func (RagingOnslaughtRed) GoAgain() bool                      { return false }
+func (RagingOnslaughtRed) GoAgain(card.GameEngine) bool       { return false }
 
 type RagingOnslaughtYellow struct{}
 
@@ -31,7 +31,7 @@ func (RagingOnslaughtYellow) Pitch() int                         { return 2 }
 func (RagingOnslaughtYellow) Attack() int                        { return 6 }
 func (RagingOnslaughtYellow) Defense() int                       { return 3 }
 func (RagingOnslaughtYellow) Types(card.GameEngine) card.TypeSet { return ragingOnslaughtTypes }
-func (RagingOnslaughtYellow) GoAgain() bool                      { return false }
+func (RagingOnslaughtYellow) GoAgain(card.GameEngine) bool       { return false }
 
 type RagingOnslaughtBlue struct{}
 
@@ -43,4 +43,4 @@ func (RagingOnslaughtBlue) Pitch() int                         { return 3 }
 func (RagingOnslaughtBlue) Attack() int                        { return 5 }
 func (RagingOnslaughtBlue) Defense() int                       { return 3 }
 func (RagingOnslaughtBlue) Types(card.GameEngine) card.TypeSet { return ragingOnslaughtTypes }
-func (RagingOnslaughtBlue) GoAgain() bool                      { return false }
+func (RagingOnslaughtBlue) GoAgain(card.GameEngine) bool       { return false }

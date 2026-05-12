@@ -19,7 +19,7 @@ func (FeistyLocalsRed) Pitch() int                         { return 1 }
 func (FeistyLocalsRed) Attack() int                        { return 3 }
 func (FeistyLocalsRed) Defense() int                       { return 2 }
 func (FeistyLocalsRed) Types(card.GameEngine) card.TypeSet { return feistyLocalsTypes }
-func (FeistyLocalsRed) GoAgain() bool                      { return false }
+func (FeistyLocalsRed) GoAgain(card.GameEngine) bool       { return false }
 
 type FeistyLocalsYellow struct{}
 
@@ -31,7 +31,7 @@ func (FeistyLocalsYellow) Pitch() int                         { return 2 }
 func (FeistyLocalsYellow) Attack() int                        { return 2 }
 func (FeistyLocalsYellow) Defense() int                       { return 2 }
 func (FeistyLocalsYellow) Types(card.GameEngine) card.TypeSet { return feistyLocalsTypes }
-func (FeistyLocalsYellow) GoAgain() bool                      { return false }
+func (FeistyLocalsYellow) GoAgain(card.GameEngine) bool       { return false }
 
 type FeistyLocalsBlue struct{}
 
@@ -43,4 +43,4 @@ func (FeistyLocalsBlue) Pitch() int                         { return 3 }
 func (FeistyLocalsBlue) Attack() int                        { return 1 }
 func (FeistyLocalsBlue) Defense() int                       { return 2 }
 func (FeistyLocalsBlue) Types(card.GameEngine) card.TypeSet { return feistyLocalsTypes }
-func (FeistyLocalsBlue) GoAgain() bool                      { return false }
+func (FeistyLocalsBlue) GoAgain(card.GameEngine) bool       { return false }

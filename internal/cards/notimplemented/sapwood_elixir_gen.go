@@ -19,5 +19,5 @@ func (SapwoodElixirRed) Pitch() int                         { return 1 }
 func (SapwoodElixirRed) Attack() int                        { return 0 }
 func (SapwoodElixirRed) Defense() int                       { return 3 }
 func (SapwoodElixirRed) Types(card.GameEngine) card.TypeSet { return sapwoodElixirTypes }
-func (SapwoodElixirRed) GoAgain() bool                      { return true }
+func (SapwoodElixirRed) GoAgain(card.GameEngine) bool       { return true }
 func (SapwoodElixirRed) NotImplemented()                    {}

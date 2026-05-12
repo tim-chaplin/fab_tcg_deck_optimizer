@@ -19,7 +19,7 @@ func (BlanchRed) Pitch() int                         { return 1 }
 func (BlanchRed) Attack() int                        { return 7 }
 func (BlanchRed) Defense() int                       { return 2 }
 func (BlanchRed) Types(card.GameEngine) card.TypeSet { return blanchTypes }
-func (BlanchRed) GoAgain() bool                      { return false }
+func (BlanchRed) GoAgain(card.GameEngine) bool       { return false }
 func (BlanchRed) NotImplemented()                    {}
 
 type BlanchYellow struct{}
@@ -32,7 +32,7 @@ func (BlanchYellow) Pitch() int                         { return 2 }
 func (BlanchYellow) Attack() int                        { return 6 }
 func (BlanchYellow) Defense() int                       { return 2 }
 func (BlanchYellow) Types(card.GameEngine) card.TypeSet { return blanchTypes }
-func (BlanchYellow) GoAgain() bool                      { return false }
+func (BlanchYellow) GoAgain(card.GameEngine) bool       { return false }
 func (BlanchYellow) NotImplemented()                    {}
 
 type BlanchBlue struct{}
@@ -45,5 +45,5 @@ func (BlanchBlue) Pitch() int                         { return 3 }
 func (BlanchBlue) Attack() int                        { return 5 }
 func (BlanchBlue) Defense() int                       { return 2 }
 func (BlanchBlue) Types(card.GameEngine) card.TypeSet { return blanchTypes }
-func (BlanchBlue) GoAgain() bool                      { return false }
+func (BlanchBlue) GoAgain(card.GameEngine) bool       { return false }
 func (BlanchBlue) NotImplemented()                    {}

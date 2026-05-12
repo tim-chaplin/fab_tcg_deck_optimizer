@@ -19,7 +19,7 @@ func (BloodspillInvocationRed) Pitch() int                         { return 1 }
 func (BloodspillInvocationRed) Attack() int                        { return 0 }
 func (BloodspillInvocationRed) Defense() int                       { return 2 }
 func (BloodspillInvocationRed) Types(card.GameEngine) card.TypeSet { return bloodspillInvocationTypes }
-func (BloodspillInvocationRed) GoAgain() bool                      { return true }
+func (BloodspillInvocationRed) GoAgain(card.GameEngine) bool       { return true }
 
 type BloodspillInvocationYellow struct{}
 
@@ -33,7 +33,7 @@ func (BloodspillInvocationYellow) Defense() int             { return 2 }
 func (BloodspillInvocationYellow) Types(card.GameEngine) card.TypeSet {
 	return bloodspillInvocationTypes
 }
-func (BloodspillInvocationYellow) GoAgain() bool { return true }
+func (BloodspillInvocationYellow) GoAgain(card.GameEngine) bool { return true }
 
 type BloodspillInvocationBlue struct{}
 
@@ -45,4 +45,4 @@ func (BloodspillInvocationBlue) Pitch() int                         { return 3 }
 func (BloodspillInvocationBlue) Attack() int                        { return 0 }
 func (BloodspillInvocationBlue) Defense() int                       { return 2 }
 func (BloodspillInvocationBlue) Types(card.GameEngine) card.TypeSet { return bloodspillInvocationTypes }
-func (BloodspillInvocationBlue) GoAgain() bool                      { return true }
+func (BloodspillInvocationBlue) GoAgain(card.GameEngine) bool       { return true }

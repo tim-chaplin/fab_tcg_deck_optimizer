@@ -19,7 +19,7 @@ func (HocusPocusRed) Pitch() int                         { return 1 }
 func (HocusPocusRed) Attack() int                        { return 3 }
 func (HocusPocusRed) Defense() int                       { return 3 }
 func (HocusPocusRed) Types(card.GameEngine) card.TypeSet { return hocusPocusTypes }
-func (HocusPocusRed) GoAgain() bool                      { return false }
+func (HocusPocusRed) GoAgain(card.GameEngine) bool       { return false }
 
 type HocusPocusYellow struct{}
 
@@ -31,7 +31,7 @@ func (HocusPocusYellow) Pitch() int                         { return 2 }
 func (HocusPocusYellow) Attack() int                        { return 2 }
 func (HocusPocusYellow) Defense() int                       { return 3 }
 func (HocusPocusYellow) Types(card.GameEngine) card.TypeSet { return hocusPocusTypes }
-func (HocusPocusYellow) GoAgain() bool                      { return false }
+func (HocusPocusYellow) GoAgain(card.GameEngine) bool       { return false }
 
 type HocusPocusBlue struct{}
 
@@ -43,4 +43,4 @@ func (HocusPocusBlue) Pitch() int                         { return 3 }
 func (HocusPocusBlue) Attack() int                        { return 1 }
 func (HocusPocusBlue) Defense() int                       { return 3 }
 func (HocusPocusBlue) Types(card.GameEngine) card.TypeSet { return hocusPocusTypes }
-func (HocusPocusBlue) GoAgain() bool                      { return false }
+func (HocusPocusBlue) GoAgain(card.GameEngine) bool       { return false }

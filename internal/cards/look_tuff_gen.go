@@ -19,4 +19,4 @@ func (LookTuffRed) Pitch() int                         { return 1 }
 func (LookTuffRed) Attack() int                        { return 8 }
 func (LookTuffRed) Defense() int                       { return 3 }
 func (LookTuffRed) Types(card.GameEngine) card.TypeSet { return lookTuffTypes }
-func (LookTuffRed) GoAgain() bool                      { return false }
+func (LookTuffRed) GoAgain(card.GameEngine) bool       { return false }

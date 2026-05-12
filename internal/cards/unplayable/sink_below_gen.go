@@ -19,7 +19,7 @@ func (SinkBelowRed) Pitch() int                         { return 1 }
 func (SinkBelowRed) Attack() int                        { return 0 }
 func (SinkBelowRed) Defense() int                       { return 4 }
 func (SinkBelowRed) Types(card.GameEngine) card.TypeSet { return sinkBelowTypes }
-func (SinkBelowRed) GoAgain() bool                      { return false }
+func (SinkBelowRed) GoAgain(card.GameEngine) bool       { return false }
 func (SinkBelowRed) NotSilverAgeLegal()                 {}
 func (SinkBelowRed) Unplayable()                        {}
 
@@ -33,7 +33,7 @@ func (SinkBelowYellow) Pitch() int                         { return 2 }
 func (SinkBelowYellow) Attack() int                        { return 0 }
 func (SinkBelowYellow) Defense() int                       { return 3 }
 func (SinkBelowYellow) Types(card.GameEngine) card.TypeSet { return sinkBelowTypes }
-func (SinkBelowYellow) GoAgain() bool                      { return false }
+func (SinkBelowYellow) GoAgain(card.GameEngine) bool       { return false }
 func (SinkBelowYellow) NotSilverAgeLegal()                 {}
 func (SinkBelowYellow) Unplayable()                        {}
 
@@ -47,6 +47,6 @@ func (SinkBelowBlue) Pitch() int                         { return 3 }
 func (SinkBelowBlue) Attack() int                        { return 0 }
 func (SinkBelowBlue) Defense() int                       { return 2 }
 func (SinkBelowBlue) Types(card.GameEngine) card.TypeSet { return sinkBelowTypes }
-func (SinkBelowBlue) GoAgain() bool                      { return false }
+func (SinkBelowBlue) GoAgain(card.GameEngine) bool       { return false }
 func (SinkBelowBlue) NotSilverAgeLegal()                 {}
 func (SinkBelowBlue) Unplayable()                        {}

@@ -19,7 +19,7 @@ func (ZealousBeltingRed) Pitch() int                         { return 1 }
 func (ZealousBeltingRed) Attack() int                        { return 5 }
 func (ZealousBeltingRed) Defense() int                       { return 2 }
 func (ZealousBeltingRed) Types(card.GameEngine) card.TypeSet { return zealousBeltingTypes }
-func (ZealousBeltingRed) GoAgain() bool                      { return false }
+func (ZealousBeltingRed) GoAgain(card.GameEngine) bool       { return false }
 
 type ZealousBeltingYellow struct{}
 
@@ -31,7 +31,7 @@ func (ZealousBeltingYellow) Pitch() int                         { return 2 }
 func (ZealousBeltingYellow) Attack() int                        { return 4 }
 func (ZealousBeltingYellow) Defense() int                       { return 2 }
 func (ZealousBeltingYellow) Types(card.GameEngine) card.TypeSet { return zealousBeltingTypes }
-func (ZealousBeltingYellow) GoAgain() bool                      { return false }
+func (ZealousBeltingYellow) GoAgain(card.GameEngine) bool       { return false }
 
 type ZealousBeltingBlue struct{}
 
@@ -43,4 +43,4 @@ func (ZealousBeltingBlue) Pitch() int                         { return 3 }
 func (ZealousBeltingBlue) Attack() int                        { return 3 }
 func (ZealousBeltingBlue) Defense() int                       { return 2 }
 func (ZealousBeltingBlue) Types(card.GameEngine) card.TypeSet { return zealousBeltingTypes }
-func (ZealousBeltingBlue) GoAgain() bool                      { return false }
+func (ZealousBeltingBlue) GoAgain(card.GameEngine) bool       { return false }

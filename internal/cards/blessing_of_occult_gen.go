@@ -19,7 +19,7 @@ func (BlessingOfOccultRed) Pitch() int                         { return 1 }
 func (BlessingOfOccultRed) Attack() int                        { return 0 }
 func (BlessingOfOccultRed) Defense() int                       { return 2 }
 func (BlessingOfOccultRed) Types(card.GameEngine) card.TypeSet { return blessingOfOccultTypes }
-func (BlessingOfOccultRed) GoAgain() bool                      { return false }
+func (BlessingOfOccultRed) GoAgain(card.GameEngine) bool       { return false }
 
 type BlessingOfOccultYellow struct{}
 
@@ -31,7 +31,7 @@ func (BlessingOfOccultYellow) Pitch() int                         { return 2 }
 func (BlessingOfOccultYellow) Attack() int                        { return 0 }
 func (BlessingOfOccultYellow) Defense() int                       { return 2 }
 func (BlessingOfOccultYellow) Types(card.GameEngine) card.TypeSet { return blessingOfOccultTypes }
-func (BlessingOfOccultYellow) GoAgain() bool                      { return false }
+func (BlessingOfOccultYellow) GoAgain(card.GameEngine) bool       { return false }
 
 type BlessingOfOccultBlue struct{}
 
@@ -43,4 +43,4 @@ func (BlessingOfOccultBlue) Pitch() int                         { return 3 }
 func (BlessingOfOccultBlue) Attack() int                        { return 0 }
 func (BlessingOfOccultBlue) Defense() int                       { return 2 }
 func (BlessingOfOccultBlue) Types(card.GameEngine) card.TypeSet { return blessingOfOccultTypes }
-func (BlessingOfOccultBlue) GoAgain() bool                      { return false }
+func (BlessingOfOccultBlue) GoAgain(card.GameEngine) bool       { return false }

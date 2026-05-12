@@ -19,5 +19,5 @@ func (TimesnapPotionBlue) Pitch() int                         { return 3 }
 func (TimesnapPotionBlue) Attack() int                        { return 0 }
 func (TimesnapPotionBlue) Defense() int                       { return 0 }
 func (TimesnapPotionBlue) Types(card.GameEngine) card.TypeSet { return timesnapPotionTypes }
-func (TimesnapPotionBlue) GoAgain() bool                      { return false }
+func (TimesnapPotionBlue) GoAgain(card.GameEngine) bool       { return false }
 func (TimesnapPotionBlue) Unplayable()                        {}

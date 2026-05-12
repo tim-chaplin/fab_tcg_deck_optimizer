@@ -19,7 +19,7 @@ func (ScoutThePeripheryRed) Pitch() int                         { return 1 }
 func (ScoutThePeripheryRed) Attack() int                        { return 0 }
 func (ScoutThePeripheryRed) Defense() int                       { return 2 }
 func (ScoutThePeripheryRed) Types(card.GameEngine) card.TypeSet { return scoutThePeripheryTypes }
-func (ScoutThePeripheryRed) GoAgain() bool                      { return true }
+func (ScoutThePeripheryRed) GoAgain(card.GameEngine) bool       { return true }
 
 type ScoutThePeripheryYellow struct{}
 
@@ -31,7 +31,7 @@ func (ScoutThePeripheryYellow) Pitch() int                         { return 2 }
 func (ScoutThePeripheryYellow) Attack() int                        { return 0 }
 func (ScoutThePeripheryYellow) Defense() int                       { return 2 }
 func (ScoutThePeripheryYellow) Types(card.GameEngine) card.TypeSet { return scoutThePeripheryTypes }
-func (ScoutThePeripheryYellow) GoAgain() bool                      { return true }
+func (ScoutThePeripheryYellow) GoAgain(card.GameEngine) bool       { return true }
 
 type ScoutThePeripheryBlue struct{}
 
@@ -43,4 +43,4 @@ func (ScoutThePeripheryBlue) Pitch() int                         { return 3 }
 func (ScoutThePeripheryBlue) Attack() int                        { return 0 }
 func (ScoutThePeripheryBlue) Defense() int                       { return 2 }
 func (ScoutThePeripheryBlue) Types(card.GameEngine) card.TypeSet { return scoutThePeripheryTypes }
-func (ScoutThePeripheryBlue) GoAgain() bool                      { return true }
+func (ScoutThePeripheryBlue) GoAgain(card.GameEngine) bool       { return true }

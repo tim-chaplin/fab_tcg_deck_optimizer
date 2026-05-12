@@ -41,6 +41,6 @@ func (AnnalsOfSutcliffeAbility) Defense() int             { return 0 }
 func (AnnalsOfSutcliffeAbility) Types(card.GameEngine) card.TypeSet {
 	return annalsOfSutcliffeAbilityTypes
 }
-func (AnnalsOfSutcliffeAbility) GoAgain() bool { return false }
+func (AnnalsOfSutcliffeAbility) GoAgain(card.GameEngine) bool { return false }
 func (AnnalsOfSutcliffeAbility) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 }

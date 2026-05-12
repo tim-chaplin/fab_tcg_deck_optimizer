@@ -19,7 +19,7 @@ func (RunicFellingsongRed) Pitch() int                         { return 1 }
 func (RunicFellingsongRed) Attack() int                        { return 7 }
 func (RunicFellingsongRed) Defense() int                       { return 3 }
 func (RunicFellingsongRed) Types(card.GameEngine) card.TypeSet { return runicFellingsongTypes }
-func (RunicFellingsongRed) GoAgain() bool                      { return false }
+func (RunicFellingsongRed) GoAgain(card.GameEngine) bool       { return false }
 
 type RunicFellingsongYellow struct{}
 
@@ -31,7 +31,7 @@ func (RunicFellingsongYellow) Pitch() int                         { return 2 }
 func (RunicFellingsongYellow) Attack() int                        { return 6 }
 func (RunicFellingsongYellow) Defense() int                       { return 3 }
 func (RunicFellingsongYellow) Types(card.GameEngine) card.TypeSet { return runicFellingsongTypes }
-func (RunicFellingsongYellow) GoAgain() bool                      { return false }
+func (RunicFellingsongYellow) GoAgain(card.GameEngine) bool       { return false }
 
 type RunicFellingsongBlue struct{}
 
@@ -43,4 +43,4 @@ func (RunicFellingsongBlue) Pitch() int                         { return 3 }
 func (RunicFellingsongBlue) Attack() int                        { return 5 }
 func (RunicFellingsongBlue) Defense() int                       { return 3 }
 func (RunicFellingsongBlue) Types(card.GameEngine) card.TypeSet { return runicFellingsongTypes }
-func (RunicFellingsongBlue) GoAgain() bool                      { return false }
+func (RunicFellingsongBlue) GoAgain(card.GameEngine) bool       { return false }

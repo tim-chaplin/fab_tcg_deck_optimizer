@@ -41,7 +41,7 @@ func (c FakeCard) Pitch() int                                       { return c.p
 func (c FakeCard) Attack() int                                      { return c.attack }
 func (c FakeCard) Defense() int                                     { return c.defense }
 func (c FakeCard) Types(card.GameEngine) card.TypeSet               { return c.types }
-func (c FakeCard) GoAgain() bool                                    { return c.goAgain }
+func (c FakeCard) GoAgain(card.GameEngine) bool                     { return c.goAgain }
 func (FakeCard) Play(card.GameEngine, card.Logger, *card.CardState) {}
 
 // FakeRedAttack is a fixed-stat-line attack: 1-cost, 1-pitch, 3-power, 1-defense, no
@@ -59,7 +59,7 @@ func (FakeRedAttack) Defense() int             { return 1 }
 func (FakeRedAttack) Types(card.GameEngine) card.TypeSet {
 	return card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 }
-func (FakeRedAttack) GoAgain() bool                                      { return false }
+func (FakeRedAttack) GoAgain(card.GameEngine) bool                       { return false }
 func (FakeRedAttack) Play(card.GameEngine, card.Logger, *card.CardState) {}
 
 // DominatingFakeCard embeds FakeCard and adds the Dominator marker — exercises the

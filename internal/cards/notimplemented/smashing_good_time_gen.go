@@ -19,7 +19,7 @@ func (SmashingGoodTimeRed) Pitch() int                         { return 1 }
 func (SmashingGoodTimeRed) Attack() int                        { return 0 }
 func (SmashingGoodTimeRed) Defense() int                       { return 2 }
 func (SmashingGoodTimeRed) Types(card.GameEngine) card.TypeSet { return smashingGoodTimeTypes }
-func (SmashingGoodTimeRed) GoAgain() bool                      { return true }
+func (SmashingGoodTimeRed) GoAgain(card.GameEngine) bool       { return true }
 func (SmashingGoodTimeRed) NotImplemented()                    {}
 
 type SmashingGoodTimeYellow struct{}
@@ -32,7 +32,7 @@ func (SmashingGoodTimeYellow) Pitch() int                         { return 2 }
 func (SmashingGoodTimeYellow) Attack() int                        { return 0 }
 func (SmashingGoodTimeYellow) Defense() int                       { return 2 }
 func (SmashingGoodTimeYellow) Types(card.GameEngine) card.TypeSet { return smashingGoodTimeTypes }
-func (SmashingGoodTimeYellow) GoAgain() bool                      { return true }
+func (SmashingGoodTimeYellow) GoAgain(card.GameEngine) bool       { return true }
 func (SmashingGoodTimeYellow) NotImplemented()                    {}
 
 type SmashingGoodTimeBlue struct{}
@@ -45,5 +45,5 @@ func (SmashingGoodTimeBlue) Pitch() int                         { return 3 }
 func (SmashingGoodTimeBlue) Attack() int                        { return 0 }
 func (SmashingGoodTimeBlue) Defense() int                       { return 2 }
 func (SmashingGoodTimeBlue) Types(card.GameEngine) card.TypeSet { return smashingGoodTimeTypes }
-func (SmashingGoodTimeBlue) GoAgain() bool                      { return true }
+func (SmashingGoodTimeBlue) GoAgain(card.GameEngine) bool       { return true }
 func (SmashingGoodTimeBlue) NotImplemented()                    {}

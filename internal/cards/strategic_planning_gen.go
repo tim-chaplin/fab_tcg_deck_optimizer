@@ -19,7 +19,7 @@ func (StrategicPlanningRed) Pitch() int                         { return 1 }
 func (StrategicPlanningRed) Attack() int                        { return 0 }
 func (StrategicPlanningRed) Defense() int                       { return 2 }
 func (StrategicPlanningRed) Types(card.GameEngine) card.TypeSet { return strategicPlanningTypes }
-func (StrategicPlanningRed) GoAgain() bool                      { return true }
+func (StrategicPlanningRed) GoAgain(card.GameEngine) bool       { return true }
 
 type StrategicPlanningYellow struct{}
 
@@ -31,7 +31,7 @@ func (StrategicPlanningYellow) Pitch() int                         { return 2 }
 func (StrategicPlanningYellow) Attack() int                        { return 0 }
 func (StrategicPlanningYellow) Defense() int                       { return 2 }
 func (StrategicPlanningYellow) Types(card.GameEngine) card.TypeSet { return strategicPlanningTypes }
-func (StrategicPlanningYellow) GoAgain() bool                      { return true }
+func (StrategicPlanningYellow) GoAgain(card.GameEngine) bool       { return true }
 
 type StrategicPlanningBlue struct{}
 
@@ -43,4 +43,4 @@ func (StrategicPlanningBlue) Pitch() int                         { return 3 }
 func (StrategicPlanningBlue) Attack() int                        { return 0 }
 func (StrategicPlanningBlue) Defense() int                       { return 2 }
 func (StrategicPlanningBlue) Types(card.GameEngine) card.TypeSet { return strategicPlanningTypes }
-func (StrategicPlanningBlue) GoAgain() bool                      { return true }
+func (StrategicPlanningBlue) GoAgain(card.GameEngine) bool       { return true }

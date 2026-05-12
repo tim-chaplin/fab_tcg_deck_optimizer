@@ -12,7 +12,7 @@ import (
 // chain-legality when the non-attack-action condition hasn't fired.
 func TestVigorRush_BaseGoAgainFalse(t *testing.T) {
 	for _, c := range []card.Card{VigorRushRed{}, VigorRushYellow{}, VigorRushBlue{}} {
-		if c.GoAgain() {
+		if c.GoAgain(nil) {
 			t.Errorf("%s: GoAgain() = true, want false (gated on non-attack-action pitch)", c.Name())
 		}
 	}

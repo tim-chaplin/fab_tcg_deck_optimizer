@@ -19,7 +19,7 @@ func (HumbleRed) Pitch() int                         { return 1 }
 func (HumbleRed) Attack() int                        { return 6 }
 func (HumbleRed) Defense() int                       { return 2 }
 func (HumbleRed) Types(card.GameEngine) card.TypeSet { return humbleTypes }
-func (HumbleRed) GoAgain() bool                      { return false }
+func (HumbleRed) GoAgain(card.GameEngine) bool       { return false }
 func (HumbleRed) NotImplemented()                    {}
 
 type HumbleYellow struct{}
@@ -32,7 +32,7 @@ func (HumbleYellow) Pitch() int                         { return 2 }
 func (HumbleYellow) Attack() int                        { return 5 }
 func (HumbleYellow) Defense() int                       { return 2 }
 func (HumbleYellow) Types(card.GameEngine) card.TypeSet { return humbleTypes }
-func (HumbleYellow) GoAgain() bool                      { return false }
+func (HumbleYellow) GoAgain(card.GameEngine) bool       { return false }
 func (HumbleYellow) NotImplemented()                    {}
 
 type HumbleBlue struct{}
@@ -45,5 +45,5 @@ func (HumbleBlue) Pitch() int                         { return 3 }
 func (HumbleBlue) Attack() int                        { return 4 }
 func (HumbleBlue) Defense() int                       { return 2 }
 func (HumbleBlue) Types(card.GameEngine) card.TypeSet { return humbleTypes }
-func (HumbleBlue) GoAgain() bool                      { return false }
+func (HumbleBlue) GoAgain(card.GameEngine) bool       { return false }
 func (HumbleBlue) NotImplemented()                    {}

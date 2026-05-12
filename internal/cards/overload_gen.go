@@ -19,7 +19,7 @@ func (OverloadRed) Pitch() int                         { return 1 }
 func (OverloadRed) Attack() int                        { return 3 }
 func (OverloadRed) Defense() int                       { return 2 }
 func (OverloadRed) Types(card.GameEngine) card.TypeSet { return overloadTypes }
-func (OverloadRed) GoAgain() bool                      { return false }
+func (OverloadRed) GoAgain(card.GameEngine) bool       { return false }
 
 type OverloadYellow struct{}
 
@@ -31,7 +31,7 @@ func (OverloadYellow) Pitch() int                         { return 2 }
 func (OverloadYellow) Attack() int                        { return 2 }
 func (OverloadYellow) Defense() int                       { return 2 }
 func (OverloadYellow) Types(card.GameEngine) card.TypeSet { return overloadTypes }
-func (OverloadYellow) GoAgain() bool                      { return false }
+func (OverloadYellow) GoAgain(card.GameEngine) bool       { return false }
 
 type OverloadBlue struct{}
 
@@ -43,4 +43,4 @@ func (OverloadBlue) Pitch() int                         { return 3 }
 func (OverloadBlue) Attack() int                        { return 1 }
 func (OverloadBlue) Defense() int                       { return 2 }
 func (OverloadBlue) Types(card.GameEngine) card.TypeSet { return overloadTypes }
-func (OverloadBlue) GoAgain() bool                      { return false }
+func (OverloadBlue) GoAgain(card.GameEngine) bool       { return false }

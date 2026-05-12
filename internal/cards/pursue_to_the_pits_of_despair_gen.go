@@ -21,4 +21,4 @@ func (PursueToThePitsOfDespairRed) Defense() int             { return 3 }
 func (PursueToThePitsOfDespairRed) Types(card.GameEngine) card.TypeSet {
 	return pursueToThePitsOfDespairTypes
 }
-func (PursueToThePitsOfDespairRed) GoAgain() bool { return false }
+func (PursueToThePitsOfDespairRed) GoAgain(card.GameEngine) bool { return false }

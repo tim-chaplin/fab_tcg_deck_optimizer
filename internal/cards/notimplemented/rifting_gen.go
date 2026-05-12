@@ -19,7 +19,7 @@ func (RiftingRed) Pitch() int                         { return 1 }
 func (RiftingRed) Attack() int                        { return 6 }
 func (RiftingRed) Defense() int                       { return 2 }
 func (RiftingRed) Types(card.GameEngine) card.TypeSet { return riftingTypes }
-func (RiftingRed) GoAgain() bool                      { return false }
+func (RiftingRed) GoAgain(card.GameEngine) bool       { return false }
 func (RiftingRed) NotImplemented()                    {}
 
 type RiftingYellow struct{}
@@ -32,7 +32,7 @@ func (RiftingYellow) Pitch() int                         { return 2 }
 func (RiftingYellow) Attack() int                        { return 5 }
 func (RiftingYellow) Defense() int                       { return 2 }
 func (RiftingYellow) Types(card.GameEngine) card.TypeSet { return riftingTypes }
-func (RiftingYellow) GoAgain() bool                      { return false }
+func (RiftingYellow) GoAgain(card.GameEngine) bool       { return false }
 func (RiftingYellow) NotImplemented()                    {}
 
 type RiftingBlue struct{}
@@ -45,5 +45,5 @@ func (RiftingBlue) Pitch() int                         { return 3 }
 func (RiftingBlue) Attack() int                        { return 4 }
 func (RiftingBlue) Defense() int                       { return 2 }
 func (RiftingBlue) Types(card.GameEngine) card.TypeSet { return riftingTypes }
-func (RiftingBlue) GoAgain() bool                      { return false }
+func (RiftingBlue) GoAgain(card.GameEngine) bool       { return false }
 func (RiftingBlue) NotImplemented()                    {}

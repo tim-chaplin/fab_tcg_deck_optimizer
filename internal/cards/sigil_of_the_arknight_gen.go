@@ -19,4 +19,4 @@ func (SigilOfTheArknightBlue) Pitch() int                         { return 3 }
 func (SigilOfTheArknightBlue) Attack() int                        { return 0 }
 func (SigilOfTheArknightBlue) Defense() int                       { return 2 }
 func (SigilOfTheArknightBlue) Types(card.GameEngine) card.TypeSet { return sigilOfTheArknightTypes }
-func (SigilOfTheArknightBlue) GoAgain() bool                      { return true }
+func (SigilOfTheArknightBlue) GoAgain(card.GameEngine) bool       { return true }

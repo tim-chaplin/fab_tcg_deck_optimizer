@@ -19,5 +19,5 @@ func (PotionOfIronhideBlue) Pitch() int                         { return 3 }
 func (PotionOfIronhideBlue) Attack() int                        { return 0 }
 func (PotionOfIronhideBlue) Defense() int                       { return 0 }
 func (PotionOfIronhideBlue) Types(card.GameEngine) card.TypeSet { return potionOfIronhideTypes }
-func (PotionOfIronhideBlue) GoAgain() bool                      { return false }
+func (PotionOfIronhideBlue) GoAgain(card.GameEngine) bool       { return false }
 func (PotionOfIronhideBlue) Unplayable()                        {}

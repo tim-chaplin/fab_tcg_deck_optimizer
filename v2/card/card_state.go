@@ -89,9 +89,11 @@ func (p *CardState) RegisterOnHit(fire func(g GameEngine, l Logger, self *CardSt
 }
 
 // EffectiveGoAgain reports whether this card has Go again this turn — from printed
-// text or a grant by a prior card's effect.
-func (p *CardState) EffectiveGoAgain() bool {
-	return p.Card.GoAgain() || p.GrantedGoAgain
+// text or a grant by a prior card's effect. The engine handle is forwarded to
+// Card.GoAgain so hero-conditional cards (Life for a Life, Blow for a Blow, Scar for
+// a Scar) can read g.HeroWantsLowerHealth.
+func (p *CardState) EffectiveGoAgain(g GameEngine) bool {
+	return p.Card.GoAgain(g) || p.GrantedGoAgain
 }
 
 // GrantGoAgainIfFromArsenal flips p.GrantedGoAgain when this copy came from the

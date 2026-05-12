@@ -19,4 +19,4 @@ func (TitaniumBaubleBlue) Pitch() int                         { return 3 }
 func (TitaniumBaubleBlue) Attack() int                        { return 0 }
 func (TitaniumBaubleBlue) Defense() int                       { return 3 }
 func (TitaniumBaubleBlue) Types(card.GameEngine) card.TypeSet { return titaniumBaubleTypes }
-func (TitaniumBaubleBlue) GoAgain() bool                      { return false }
+func (TitaniumBaubleBlue) GoAgain(card.GameEngine) bool       { return false }

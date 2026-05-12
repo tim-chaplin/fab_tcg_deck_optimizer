@@ -19,5 +19,5 @@ func (ClarityPotionBlue) Pitch() int                         { return 3 }
 func (ClarityPotionBlue) Attack() int                        { return 0 }
 func (ClarityPotionBlue) Defense() int                       { return 0 }
 func (ClarityPotionBlue) Types(card.GameEngine) card.TypeSet { return clarityPotionTypes }
-func (ClarityPotionBlue) GoAgain() bool                      { return false }
+func (ClarityPotionBlue) GoAgain(card.GameEngine) bool       { return false }
 func (ClarityPotionBlue) Unplayable()                        {}

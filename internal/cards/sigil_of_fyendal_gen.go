@@ -19,4 +19,4 @@ func (SigilOfFyendalBlue) Pitch() int                         { return 3 }
 func (SigilOfFyendalBlue) Attack() int                        { return 0 }
 func (SigilOfFyendalBlue) Defense() int                       { return 2 }
 func (SigilOfFyendalBlue) Types(card.GameEngine) card.TypeSet { return sigilOfFyendalTypes }
-func (SigilOfFyendalBlue) GoAgain() bool                      { return true }
+func (SigilOfFyendalBlue) GoAgain(card.GameEngine) bool       { return true }

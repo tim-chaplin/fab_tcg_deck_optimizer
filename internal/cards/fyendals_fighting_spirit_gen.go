@@ -21,7 +21,7 @@ func (FyendalsFightingSpiritRed) Defense() int             { return 2 }
 func (FyendalsFightingSpiritRed) Types(card.GameEngine) card.TypeSet {
 	return fyendalSFightingSpiritTypes
 }
-func (FyendalsFightingSpiritRed) GoAgain() bool { return false }
+func (FyendalsFightingSpiritRed) GoAgain(card.GameEngine) bool { return false }
 
 type FyendalsFightingSpiritYellow struct{}
 
@@ -35,7 +35,7 @@ func (FyendalsFightingSpiritYellow) Defense() int             { return 2 }
 func (FyendalsFightingSpiritYellow) Types(card.GameEngine) card.TypeSet {
 	return fyendalSFightingSpiritTypes
 }
-func (FyendalsFightingSpiritYellow) GoAgain() bool { return false }
+func (FyendalsFightingSpiritYellow) GoAgain(card.GameEngine) bool { return false }
 
 type FyendalsFightingSpiritBlue struct{}
 
@@ -49,4 +49,4 @@ func (FyendalsFightingSpiritBlue) Defense() int             { return 2 }
 func (FyendalsFightingSpiritBlue) Types(card.GameEngine) card.TypeSet {
 	return fyendalSFightingSpiritTypes
 }
-func (FyendalsFightingSpiritBlue) GoAgain() bool { return false }
+func (FyendalsFightingSpiritBlue) GoAgain(card.GameEngine) bool { return false }

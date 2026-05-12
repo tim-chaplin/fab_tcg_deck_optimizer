@@ -19,7 +19,7 @@ func (RuneragerSwarmRed) Pitch() int                         { return 1 }
 func (RuneragerSwarmRed) Attack() int                        { return 3 }
 func (RuneragerSwarmRed) Defense() int                       { return 3 }
 func (RuneragerSwarmRed) Types(card.GameEngine) card.TypeSet { return runeragerSwarmTypes }
-func (RuneragerSwarmRed) GoAgain() bool                      { return false }
+func (RuneragerSwarmRed) GoAgain(card.GameEngine) bool       { return false }
 
 type RuneragerSwarmYellow struct{}
 
@@ -31,7 +31,7 @@ func (RuneragerSwarmYellow) Pitch() int                         { return 2 }
 func (RuneragerSwarmYellow) Attack() int                        { return 2 }
 func (RuneragerSwarmYellow) Defense() int                       { return 3 }
 func (RuneragerSwarmYellow) Types(card.GameEngine) card.TypeSet { return runeragerSwarmTypes }
-func (RuneragerSwarmYellow) GoAgain() bool                      { return false }
+func (RuneragerSwarmYellow) GoAgain(card.GameEngine) bool       { return false }
 
 type RuneragerSwarmBlue struct{}
 
@@ -43,4 +43,4 @@ func (RuneragerSwarmBlue) Pitch() int                         { return 3 }
 func (RuneragerSwarmBlue) Attack() int                        { return 1 }
 func (RuneragerSwarmBlue) Defense() int                       { return 3 }
 func (RuneragerSwarmBlue) Types(card.GameEngine) card.TypeSet { return runeragerSwarmTypes }
-func (RuneragerSwarmBlue) GoAgain() bool                      { return false }
+func (RuneragerSwarmBlue) GoAgain(card.GameEngine) bool       { return false }

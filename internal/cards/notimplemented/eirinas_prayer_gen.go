@@ -19,7 +19,7 @@ func (EirinasPrayerRed) Pitch() int                         { return 1 }
 func (EirinasPrayerRed) Attack() int                        { return 0 }
 func (EirinasPrayerRed) Defense() int                       { return 0 }
 func (EirinasPrayerRed) Types(card.GameEngine) card.TypeSet { return eirinaSPrayerTypes }
-func (EirinasPrayerRed) GoAgain() bool                      { return false }
+func (EirinasPrayerRed) GoAgain(card.GameEngine) bool       { return false }
 func (EirinasPrayerRed) NotImplemented()                    {}
 
 type EirinasPrayerYellow struct{}
@@ -32,7 +32,7 @@ func (EirinasPrayerYellow) Pitch() int                         { return 2 }
 func (EirinasPrayerYellow) Attack() int                        { return 0 }
 func (EirinasPrayerYellow) Defense() int                       { return 0 }
 func (EirinasPrayerYellow) Types(card.GameEngine) card.TypeSet { return eirinaSPrayerTypes }
-func (EirinasPrayerYellow) GoAgain() bool                      { return false }
+func (EirinasPrayerYellow) GoAgain(card.GameEngine) bool       { return false }
 func (EirinasPrayerYellow) NotImplemented()                    {}
 
 type EirinasPrayerBlue struct{}
@@ -45,5 +45,5 @@ func (EirinasPrayerBlue) Pitch() int                         { return 3 }
 func (EirinasPrayerBlue) Attack() int                        { return 0 }
 func (EirinasPrayerBlue) Defense() int                       { return 0 }
 func (EirinasPrayerBlue) Types(card.GameEngine) card.TypeSet { return eirinaSPrayerTypes }
-func (EirinasPrayerBlue) GoAgain() bool                      { return false }
+func (EirinasPrayerBlue) GoAgain(card.GameEngine) bool       { return false }
 func (EirinasPrayerBlue) NotImplemented()                    {}

@@ -19,5 +19,5 @@ func (EmissaryOfTidesRed) Pitch() int                         { return 1 }
 func (EmissaryOfTidesRed) Attack() int                        { return 4 }
 func (EmissaryOfTidesRed) Defense() int                       { return 2 }
 func (EmissaryOfTidesRed) Types(card.GameEngine) card.TypeSet { return emissaryOfTidesTypes }
-func (EmissaryOfTidesRed) GoAgain() bool                      { return false }
+func (EmissaryOfTidesRed) GoAgain(card.GameEngine) bool       { return false }
 func (EmissaryOfTidesRed) NotImplemented()                    {}

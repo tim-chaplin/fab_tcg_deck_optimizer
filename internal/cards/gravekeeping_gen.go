@@ -19,7 +19,7 @@ func (GravekeepingRed) Pitch() int                         { return 1 }
 func (GravekeepingRed) Attack() int                        { return 5 }
 func (GravekeepingRed) Defense() int                       { return 2 }
 func (GravekeepingRed) Types(card.GameEngine) card.TypeSet { return gravekeepingTypes }
-func (GravekeepingRed) GoAgain() bool                      { return false }
+func (GravekeepingRed) GoAgain(card.GameEngine) bool       { return false }
 
 type GravekeepingYellow struct{}
 
@@ -31,7 +31,7 @@ func (GravekeepingYellow) Pitch() int                         { return 2 }
 func (GravekeepingYellow) Attack() int                        { return 4 }
 func (GravekeepingYellow) Defense() int                       { return 2 }
 func (GravekeepingYellow) Types(card.GameEngine) card.TypeSet { return gravekeepingTypes }
-func (GravekeepingYellow) GoAgain() bool                      { return false }
+func (GravekeepingYellow) GoAgain(card.GameEngine) bool       { return false }
 
 type GravekeepingBlue struct{}
 
@@ -43,4 +43,4 @@ func (GravekeepingBlue) Pitch() int                         { return 3 }
 func (GravekeepingBlue) Attack() int                        { return 3 }
 func (GravekeepingBlue) Defense() int                       { return 2 }
 func (GravekeepingBlue) Types(card.GameEngine) card.TypeSet { return gravekeepingTypes }
-func (GravekeepingBlue) GoAgain() bool                      { return false }
+func (GravekeepingBlue) GoAgain(card.GameEngine) bool       { return false }

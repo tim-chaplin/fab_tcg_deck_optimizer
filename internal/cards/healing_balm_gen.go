@@ -19,7 +19,7 @@ func (HealingBalmRed) Pitch() int                         { return 1 }
 func (HealingBalmRed) Attack() int                        { return 0 }
 func (HealingBalmRed) Defense() int                       { return 2 }
 func (HealingBalmRed) Types(card.GameEngine) card.TypeSet { return healingBalmTypes }
-func (HealingBalmRed) GoAgain() bool                      { return false }
+func (HealingBalmRed) GoAgain(card.GameEngine) bool       { return false }
 
 type HealingBalmYellow struct{}
 
@@ -31,7 +31,7 @@ func (HealingBalmYellow) Pitch() int                         { return 2 }
 func (HealingBalmYellow) Attack() int                        { return 0 }
 func (HealingBalmYellow) Defense() int                       { return 2 }
 func (HealingBalmYellow) Types(card.GameEngine) card.TypeSet { return healingBalmTypes }
-func (HealingBalmYellow) GoAgain() bool                      { return false }
+func (HealingBalmYellow) GoAgain(card.GameEngine) bool       { return false }
 
 type HealingBalmBlue struct{}
 
@@ -43,4 +43,4 @@ func (HealingBalmBlue) Pitch() int                         { return 3 }
 func (HealingBalmBlue) Attack() int                        { return 0 }
 func (HealingBalmBlue) Defense() int                       { return 2 }
 func (HealingBalmBlue) Types(card.GameEngine) card.TypeSet { return healingBalmTypes }
-func (HealingBalmBlue) GoAgain() bool                      { return false }
+func (HealingBalmBlue) GoAgain(card.GameEngine) bool       { return false }

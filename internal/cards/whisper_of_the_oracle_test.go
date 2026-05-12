@@ -42,7 +42,7 @@ func TestWhisperOfTheOracle_PlayCallsOpt4(t *testing.T) {
 // Tests that every variant carries Go again so the chain runner can keep playing.
 func TestWhisperOfTheOracle_GoAgain(t *testing.T) {
 	for _, c := range whisperOfTheOracleVariants {
-		if !c.GoAgain() {
+		if !c.GoAgain(nil) {
 			t.Errorf("%s: GoAgain() = false, want true", c.Name())
 		}
 	}

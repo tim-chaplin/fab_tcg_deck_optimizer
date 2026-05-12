@@ -18,7 +18,7 @@ func (AmplifyTheArknightRed) Pitch() int                         { return 1 }
 func (AmplifyTheArknightRed) Attack() int                        { return 6 }
 func (AmplifyTheArknightRed) Defense() int                       { return 3 }
 func (AmplifyTheArknightRed) Types(card.GameEngine) card.TypeSet { return amplifyTheArknightTypes }
-func (AmplifyTheArknightRed) GoAgain() bool                      { return false }
+func (AmplifyTheArknightRed) GoAgain(card.GameEngine) bool       { return false }
 
 type AmplifyTheArknightYellow struct{}
 
@@ -29,7 +29,7 @@ func (AmplifyTheArknightYellow) Pitch() int                         { return 2 }
 func (AmplifyTheArknightYellow) Attack() int                        { return 5 }
 func (AmplifyTheArknightYellow) Defense() int                       { return 3 }
 func (AmplifyTheArknightYellow) Types(card.GameEngine) card.TypeSet { return amplifyTheArknightTypes }
-func (AmplifyTheArknightYellow) GoAgain() bool                      { return false }
+func (AmplifyTheArknightYellow) GoAgain(card.GameEngine) bool       { return false }
 
 type AmplifyTheArknightBlue struct{}
 
@@ -40,4 +40,4 @@ func (AmplifyTheArknightBlue) Pitch() int                         { return 3 }
 func (AmplifyTheArknightBlue) Attack() int                        { return 4 }
 func (AmplifyTheArknightBlue) Defense() int                       { return 3 }
 func (AmplifyTheArknightBlue) Types(card.GameEngine) card.TypeSet { return amplifyTheArknightTypes }
-func (AmplifyTheArknightBlue) GoAgain() bool                      { return false }
+func (AmplifyTheArknightBlue) GoAgain(card.GameEngine) bool       { return false }

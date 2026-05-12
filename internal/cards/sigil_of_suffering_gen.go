@@ -19,7 +19,7 @@ func (SigilOfSufferingRed) Pitch() int                         { return 1 }
 func (SigilOfSufferingRed) Attack() int                        { return 0 }
 func (SigilOfSufferingRed) Defense() int                       { return 3 }
 func (SigilOfSufferingRed) Types(card.GameEngine) card.TypeSet { return sigilOfSufferingTypes }
-func (SigilOfSufferingRed) GoAgain() bool                      { return false }
+func (SigilOfSufferingRed) GoAgain(card.GameEngine) bool       { return false }
 
 type SigilOfSufferingYellow struct{}
 
@@ -31,7 +31,7 @@ func (SigilOfSufferingYellow) Pitch() int                         { return 2 }
 func (SigilOfSufferingYellow) Attack() int                        { return 0 }
 func (SigilOfSufferingYellow) Defense() int                       { return 2 }
 func (SigilOfSufferingYellow) Types(card.GameEngine) card.TypeSet { return sigilOfSufferingTypes }
-func (SigilOfSufferingYellow) GoAgain() bool                      { return false }
+func (SigilOfSufferingYellow) GoAgain(card.GameEngine) bool       { return false }
 
 type SigilOfSufferingBlue struct{}
 
@@ -43,4 +43,4 @@ func (SigilOfSufferingBlue) Pitch() int                         { return 3 }
 func (SigilOfSufferingBlue) Attack() int                        { return 0 }
 func (SigilOfSufferingBlue) Defense() int                       { return 1 }
 func (SigilOfSufferingBlue) Types(card.GameEngine) card.TypeSet { return sigilOfSufferingTypes }
-func (SigilOfSufferingBlue) GoAgain() bool                      { return false }
+func (SigilOfSufferingBlue) GoAgain(card.GameEngine) bool       { return false }

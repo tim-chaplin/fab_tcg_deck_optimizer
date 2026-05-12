@@ -19,7 +19,7 @@ func (ArcanicCrackleRed) Pitch() int                         { return 1 }
 func (ArcanicCrackleRed) Attack() int                        { return 3 }
 func (ArcanicCrackleRed) Defense() int                       { return 3 }
 func (ArcanicCrackleRed) Types(card.GameEngine) card.TypeSet { return arcanicCrackleTypes }
-func (ArcanicCrackleRed) GoAgain() bool                      { return false }
+func (ArcanicCrackleRed) GoAgain(card.GameEngine) bool       { return false }
 
 type ArcanicCrackleYellow struct{}
 
@@ -31,7 +31,7 @@ func (ArcanicCrackleYellow) Pitch() int                         { return 2 }
 func (ArcanicCrackleYellow) Attack() int                        { return 2 }
 func (ArcanicCrackleYellow) Defense() int                       { return 3 }
 func (ArcanicCrackleYellow) Types(card.GameEngine) card.TypeSet { return arcanicCrackleTypes }
-func (ArcanicCrackleYellow) GoAgain() bool                      { return false }
+func (ArcanicCrackleYellow) GoAgain(card.GameEngine) bool       { return false }
 
 type ArcanicCrackleBlue struct{}
 
@@ -43,4 +43,4 @@ func (ArcanicCrackleBlue) Pitch() int                         { return 3 }
 func (ArcanicCrackleBlue) Attack() int                        { return 1 }
 func (ArcanicCrackleBlue) Defense() int                       { return 3 }
 func (ArcanicCrackleBlue) Types(card.GameEngine) card.TypeSet { return arcanicCrackleTypes }
-func (ArcanicCrackleBlue) GoAgain() bool                      { return false }
+func (ArcanicCrackleBlue) GoAgain(card.GameEngine) bool       { return false }

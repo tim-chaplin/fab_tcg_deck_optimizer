@@ -21,7 +21,7 @@ func (SutcliffesResearchNotesRed) Defense() int             { return 2 }
 func (SutcliffesResearchNotesRed) Types(card.GameEngine) card.TypeSet {
 	return sutcliffeSResearchNotesTypes
 }
-func (SutcliffesResearchNotesRed) GoAgain() bool { return true }
+func (SutcliffesResearchNotesRed) GoAgain(card.GameEngine) bool { return true }
 
 type SutcliffesResearchNotesYellow struct{}
 
@@ -35,7 +35,7 @@ func (SutcliffesResearchNotesYellow) Defense() int             { return 2 }
 func (SutcliffesResearchNotesYellow) Types(card.GameEngine) card.TypeSet {
 	return sutcliffeSResearchNotesTypes
 }
-func (SutcliffesResearchNotesYellow) GoAgain() bool { return true }
+func (SutcliffesResearchNotesYellow) GoAgain(card.GameEngine) bool { return true }
 
 type SutcliffesResearchNotesBlue struct{}
 
@@ -49,4 +49,4 @@ func (SutcliffesResearchNotesBlue) Defense() int             { return 2 }
 func (SutcliffesResearchNotesBlue) Types(card.GameEngine) card.TypeSet {
 	return sutcliffeSResearchNotesTypes
 }
-func (SutcliffesResearchNotesBlue) GoAgain() bool { return true }
+func (SutcliffesResearchNotesBlue) GoAgain(card.GameEngine) bool { return true }

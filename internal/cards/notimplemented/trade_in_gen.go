@@ -19,7 +19,7 @@ func (TradeInRed) Pitch() int                         { return 1 }
 func (TradeInRed) Attack() int                        { return 3 }
 func (TradeInRed) Defense() int                       { return 2 }
 func (TradeInRed) Types(card.GameEngine) card.TypeSet { return tradeInTypes }
-func (TradeInRed) GoAgain() bool                      { return false }
+func (TradeInRed) GoAgain(card.GameEngine) bool       { return false }
 func (TradeInRed) NotImplemented()                    {}
 
 type TradeInYellow struct{}
@@ -32,7 +32,7 @@ func (TradeInYellow) Pitch() int                         { return 2 }
 func (TradeInYellow) Attack() int                        { return 2 }
 func (TradeInYellow) Defense() int                       { return 2 }
 func (TradeInYellow) Types(card.GameEngine) card.TypeSet { return tradeInTypes }
-func (TradeInYellow) GoAgain() bool                      { return false }
+func (TradeInYellow) GoAgain(card.GameEngine) bool       { return false }
 func (TradeInYellow) NotImplemented()                    {}
 
 type TradeInBlue struct{}
@@ -45,5 +45,5 @@ func (TradeInBlue) Pitch() int                         { return 3 }
 func (TradeInBlue) Attack() int                        { return 1 }
 func (TradeInBlue) Defense() int                       { return 2 }
 func (TradeInBlue) Types(card.GameEngine) card.TypeSet { return tradeInTypes }
-func (TradeInBlue) GoAgain() bool                      { return false }
+func (TradeInBlue) GoAgain(card.GameEngine) bool       { return false }
 func (TradeInBlue) NotImplemented()                    {}

@@ -19,4 +19,4 @@ func (MuscleMuttYellow) Pitch() int                         { return 2 }
 func (MuscleMuttYellow) Attack() int                        { return 6 }
 func (MuscleMuttYellow) Defense() int                       { return 2 }
 func (MuscleMuttYellow) Types(card.GameEngine) card.TypeSet { return muscleMuttTypes }
-func (MuscleMuttYellow) GoAgain() bool                      { return false }
+func (MuscleMuttYellow) GoAgain(card.GameEngine) bool       { return false }

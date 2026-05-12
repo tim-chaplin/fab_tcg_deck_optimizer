@@ -19,7 +19,7 @@ func (PerformanceBonusRed) Pitch() int                         { return 1 }
 func (PerformanceBonusRed) Attack() int                        { return 3 }
 func (PerformanceBonusRed) Defense() int                       { return 2 }
 func (PerformanceBonusRed) Types(card.GameEngine) card.TypeSet { return performanceBonusTypes }
-func (PerformanceBonusRed) GoAgain() bool                      { return false }
+func (PerformanceBonusRed) GoAgain(card.GameEngine) bool       { return false }
 
 type PerformanceBonusYellow struct{}
 
@@ -31,7 +31,7 @@ func (PerformanceBonusYellow) Pitch() int                         { return 2 }
 func (PerformanceBonusYellow) Attack() int                        { return 2 }
 func (PerformanceBonusYellow) Defense() int                       { return 2 }
 func (PerformanceBonusYellow) Types(card.GameEngine) card.TypeSet { return performanceBonusTypes }
-func (PerformanceBonusYellow) GoAgain() bool                      { return false }
+func (PerformanceBonusYellow) GoAgain(card.GameEngine) bool       { return false }
 
 type PerformanceBonusBlue struct{}
 
@@ -43,4 +43,4 @@ func (PerformanceBonusBlue) Pitch() int                         { return 3 }
 func (PerformanceBonusBlue) Attack() int                        { return 1 }
 func (PerformanceBonusBlue) Defense() int                       { return 2 }
 func (PerformanceBonusBlue) Types(card.GameEngine) card.TypeSet { return performanceBonusTypes }
-func (PerformanceBonusBlue) GoAgain() bool                      { return false }
+func (PerformanceBonusBlue) GoAgain(card.GameEngine) bool       { return false }

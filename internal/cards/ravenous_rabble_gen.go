@@ -19,7 +19,7 @@ func (RavenousRabbleRed) Pitch() int                         { return 1 }
 func (RavenousRabbleRed) Attack() int                        { return 5 }
 func (RavenousRabbleRed) Defense() int                       { return 2 }
 func (RavenousRabbleRed) Types(card.GameEngine) card.TypeSet { return ravenousRabbleTypes }
-func (RavenousRabbleRed) GoAgain() bool                      { return true }
+func (RavenousRabbleRed) GoAgain(card.GameEngine) bool       { return true }
 
 type RavenousRabbleYellow struct{}
 
@@ -31,7 +31,7 @@ func (RavenousRabbleYellow) Pitch() int                         { return 2 }
 func (RavenousRabbleYellow) Attack() int                        { return 4 }
 func (RavenousRabbleYellow) Defense() int                       { return 2 }
 func (RavenousRabbleYellow) Types(card.GameEngine) card.TypeSet { return ravenousRabbleTypes }
-func (RavenousRabbleYellow) GoAgain() bool                      { return true }
+func (RavenousRabbleYellow) GoAgain(card.GameEngine) bool       { return true }
 
 type RavenousRabbleBlue struct{}
 
@@ -43,4 +43,4 @@ func (RavenousRabbleBlue) Pitch() int                         { return 3 }
 func (RavenousRabbleBlue) Attack() int                        { return 3 }
 func (RavenousRabbleBlue) Defense() int                       { return 2 }
 func (RavenousRabbleBlue) Types(card.GameEngine) card.TypeSet { return ravenousRabbleTypes }
-func (RavenousRabbleBlue) GoAgain() bool                      { return true }
+func (RavenousRabbleBlue) GoAgain(card.GameEngine) bool       { return true }

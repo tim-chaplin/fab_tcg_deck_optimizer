@@ -19,5 +19,5 @@ func (ShatterSorceryBlue) Pitch() int                         { return 3 }
 func (ShatterSorceryBlue) Attack() int                        { return 0 }
 func (ShatterSorceryBlue) Defense() int                       { return 0 }
 func (ShatterSorceryBlue) Types(card.GameEngine) card.TypeSet { return shatterSorceryTypes }
-func (ShatterSorceryBlue) GoAgain() bool                      { return false }
+func (ShatterSorceryBlue) GoAgain(card.GameEngine) bool       { return false }
 func (ShatterSorceryBlue) Unplayable()                        {}

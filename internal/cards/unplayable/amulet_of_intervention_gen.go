@@ -19,5 +19,5 @@ func (AmuletOfInterventionBlue) Pitch() int                         { return 3 }
 func (AmuletOfInterventionBlue) Attack() int                        { return 0 }
 func (AmuletOfInterventionBlue) Defense() int                       { return 0 }
 func (AmuletOfInterventionBlue) Types(card.GameEngine) card.TypeSet { return amuletOfInterventionTypes }
-func (AmuletOfInterventionBlue) GoAgain() bool                      { return true }
+func (AmuletOfInterventionBlue) GoAgain(card.GameEngine) bool       { return true }
 func (AmuletOfInterventionBlue) Unplayable()                        {}

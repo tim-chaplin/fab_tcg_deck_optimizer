@@ -19,7 +19,7 @@ func (WhisperOfTheOracleRed) Pitch() int                         { return 1 }
 func (WhisperOfTheOracleRed) Attack() int                        { return 0 }
 func (WhisperOfTheOracleRed) Defense() int                       { return 3 }
 func (WhisperOfTheOracleRed) Types(card.GameEngine) card.TypeSet { return whisperOfTheOracleTypes }
-func (WhisperOfTheOracleRed) GoAgain() bool                      { return true }
+func (WhisperOfTheOracleRed) GoAgain(card.GameEngine) bool       { return true }
 
 type WhisperOfTheOracleYellow struct{}
 
@@ -31,7 +31,7 @@ func (WhisperOfTheOracleYellow) Pitch() int                         { return 2 }
 func (WhisperOfTheOracleYellow) Attack() int                        { return 0 }
 func (WhisperOfTheOracleYellow) Defense() int                       { return 3 }
 func (WhisperOfTheOracleYellow) Types(card.GameEngine) card.TypeSet { return whisperOfTheOracleTypes }
-func (WhisperOfTheOracleYellow) GoAgain() bool                      { return true }
+func (WhisperOfTheOracleYellow) GoAgain(card.GameEngine) bool       { return true }
 
 type WhisperOfTheOracleBlue struct{}
 
@@ -43,4 +43,4 @@ func (WhisperOfTheOracleBlue) Pitch() int                         { return 3 }
 func (WhisperOfTheOracleBlue) Attack() int                        { return 0 }
 func (WhisperOfTheOracleBlue) Defense() int                       { return 3 }
 func (WhisperOfTheOracleBlue) Types(card.GameEngine) card.TypeSet { return whisperOfTheOracleTypes }
-func (WhisperOfTheOracleBlue) GoAgain() bool                      { return true }
+func (WhisperOfTheOracleBlue) GoAgain(card.GameEngine) bool       { return true }

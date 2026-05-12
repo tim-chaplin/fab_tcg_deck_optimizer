@@ -19,7 +19,7 @@ func (PunchAboveYourWeightRed) Pitch() int                         { return 1 }
 func (PunchAboveYourWeightRed) Attack() int                        { return 2 }
 func (PunchAboveYourWeightRed) Defense() int                       { return 2 }
 func (PunchAboveYourWeightRed) Types(card.GameEngine) card.TypeSet { return punchAboveYourWeightTypes }
-func (PunchAboveYourWeightRed) GoAgain() bool                      { return false }
+func (PunchAboveYourWeightRed) GoAgain(card.GameEngine) bool       { return false }
 func (PunchAboveYourWeightRed) NotImplemented()                    {}
 
 type PunchAboveYourWeightYellow struct{}
@@ -34,8 +34,8 @@ func (PunchAboveYourWeightYellow) Defense() int             { return 2 }
 func (PunchAboveYourWeightYellow) Types(card.GameEngine) card.TypeSet {
 	return punchAboveYourWeightTypes
 }
-func (PunchAboveYourWeightYellow) GoAgain() bool   { return false }
-func (PunchAboveYourWeightYellow) NotImplemented() {}
+func (PunchAboveYourWeightYellow) GoAgain(card.GameEngine) bool { return false }
+func (PunchAboveYourWeightYellow) NotImplemented()              {}
 
 type PunchAboveYourWeightBlue struct{}
 
@@ -47,5 +47,5 @@ func (PunchAboveYourWeightBlue) Pitch() int                         { return 3 }
 func (PunchAboveYourWeightBlue) Attack() int                        { return 2 }
 func (PunchAboveYourWeightBlue) Defense() int                       { return 2 }
 func (PunchAboveYourWeightBlue) Types(card.GameEngine) card.TypeSet { return punchAboveYourWeightTypes }
-func (PunchAboveYourWeightBlue) GoAgain() bool                      { return false }
+func (PunchAboveYourWeightBlue) GoAgain(card.GameEngine) bool       { return false }
 func (PunchAboveYourWeightBlue) NotImplemented()                    {}

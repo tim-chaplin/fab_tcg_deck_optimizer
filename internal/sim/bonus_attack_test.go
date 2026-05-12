@@ -28,7 +28,7 @@ func (pitchOnlyRed) Defense() int             { return 0 }
 func (pitchOnlyRed) Types(card.GameEngine) card.TypeSet {
 	return card.NewTypeSet(card.TypeGeneric, card.TypeAction)
 }
-func (pitchOnlyRed) GoAgain() bool                                      { return false }
+func (pitchOnlyRed) GoAgain(card.GameEngine) bool                       { return false }
 func (pitchOnlyRed) Play(card.GameEngine, card.Logger, *card.CardState) {}
 
 // grantBonusAttack is a test-only non-attack action card that scans CardsRemaining and adds n
@@ -47,7 +47,7 @@ func (grantBonusAttack) Defense() int             { return 0 }
 func (grantBonusAttack) Types(card.GameEngine) card.TypeSet {
 	return card.NewTypeSet(card.TypeGeneric, card.TypeAction)
 }
-func (grantBonusAttack) GoAgain() bool { return true }
+func (grantBonusAttack) GoAgain(card.GameEngine) bool { return true }
 func (g grantBonusAttack) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 	for _, pc := range s.CardsRemaining() {
 		if pc.Card.Types(nil).IsAttackAction() {
@@ -73,7 +73,7 @@ func (grantBonusAttackWeapon) Defense() int             { return 0 }
 func (grantBonusAttackWeapon) Types(card.GameEngine) card.TypeSet {
 	return card.NewTypeSet(card.TypeGeneric, card.TypeAction)
 }
-func (grantBonusAttackWeapon) GoAgain() bool { return true }
+func (grantBonusAttackWeapon) GoAgain(card.GameEngine) bool { return true }
 func (g grantBonusAttackWeapon) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 	for _, pc := range s.CardsRemaining() {
 		if pc.Card.Types(nil).IsWeaponAttack() {

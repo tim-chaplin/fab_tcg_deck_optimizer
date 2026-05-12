@@ -19,7 +19,7 @@ func (OathOfTheArknightRed) Pitch() int                         { return 1 }
 func (OathOfTheArknightRed) Attack() int                        { return 0 }
 func (OathOfTheArknightRed) Defense() int                       { return 3 }
 func (OathOfTheArknightRed) Types(card.GameEngine) card.TypeSet { return oathOfTheArknightTypes }
-func (OathOfTheArknightRed) GoAgain() bool                      { return true }
+func (OathOfTheArknightRed) GoAgain(card.GameEngine) bool       { return true }
 
 type OathOfTheArknightYellow struct{}
 
@@ -31,7 +31,7 @@ func (OathOfTheArknightYellow) Pitch() int                         { return 2 }
 func (OathOfTheArknightYellow) Attack() int                        { return 0 }
 func (OathOfTheArknightYellow) Defense() int                       { return 3 }
 func (OathOfTheArknightYellow) Types(card.GameEngine) card.TypeSet { return oathOfTheArknightTypes }
-func (OathOfTheArknightYellow) GoAgain() bool                      { return true }
+func (OathOfTheArknightYellow) GoAgain(card.GameEngine) bool       { return true }
 
 type OathOfTheArknightBlue struct{}
 
@@ -43,4 +43,4 @@ func (OathOfTheArknightBlue) Pitch() int                         { return 3 }
 func (OathOfTheArknightBlue) Attack() int                        { return 0 }
 func (OathOfTheArknightBlue) Defense() int                       { return 3 }
 func (OathOfTheArknightBlue) Types(card.GameEngine) card.TypeSet { return oathOfTheArknightTypes }
-func (OathOfTheArknightBlue) GoAgain() bool                      { return true }
+func (OathOfTheArknightBlue) GoAgain(card.GameEngine) bool       { return true }

@@ -19,7 +19,7 @@ func (CondemnToSlaughterRed) Pitch() int                         { return 1 }
 func (CondemnToSlaughterRed) Attack() int                        { return 0 }
 func (CondemnToSlaughterRed) Defense() int                       { return 3 }
 func (CondemnToSlaughterRed) Types(card.GameEngine) card.TypeSet { return condemnToSlaughterTypes }
-func (CondemnToSlaughterRed) GoAgain() bool                      { return true }
+func (CondemnToSlaughterRed) GoAgain(card.GameEngine) bool       { return true }
 func (CondemnToSlaughterRed) NotImplemented()                    {}
 
 type CondemnToSlaughterYellow struct{}
@@ -32,7 +32,7 @@ func (CondemnToSlaughterYellow) Pitch() int                         { return 2 }
 func (CondemnToSlaughterYellow) Attack() int                        { return 0 }
 func (CondemnToSlaughterYellow) Defense() int                       { return 3 }
 func (CondemnToSlaughterYellow) Types(card.GameEngine) card.TypeSet { return condemnToSlaughterTypes }
-func (CondemnToSlaughterYellow) GoAgain() bool                      { return true }
+func (CondemnToSlaughterYellow) GoAgain(card.GameEngine) bool       { return true }
 func (CondemnToSlaughterYellow) NotImplemented()                    {}
 
 type CondemnToSlaughterBlue struct{}
@@ -45,5 +45,5 @@ func (CondemnToSlaughterBlue) Pitch() int                         { return 3 }
 func (CondemnToSlaughterBlue) Attack() int                        { return 0 }
 func (CondemnToSlaughterBlue) Defense() int                       { return 3 }
 func (CondemnToSlaughterBlue) Types(card.GameEngine) card.TypeSet { return condemnToSlaughterTypes }
-func (CondemnToSlaughterBlue) GoAgain() bool                      { return true }
+func (CondemnToSlaughterBlue) GoAgain(card.GameEngine) bool       { return true }
 func (CondemnToSlaughterBlue) NotImplemented()                    {}

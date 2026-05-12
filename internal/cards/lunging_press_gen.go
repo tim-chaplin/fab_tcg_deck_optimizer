@@ -19,4 +19,4 @@ func (LungingPressBlue) Pitch() int                         { return 3 }
 func (LungingPressBlue) Attack() int                        { return 0 }
 func (LungingPressBlue) Defense() int                       { return 2 }
 func (LungingPressBlue) Types(card.GameEngine) card.TypeSet { return lungingPressTypes }
-func (LungingPressBlue) GoAgain() bool                      { return false }
+func (LungingPressBlue) GoAgain(card.GameEngine) bool       { return false }

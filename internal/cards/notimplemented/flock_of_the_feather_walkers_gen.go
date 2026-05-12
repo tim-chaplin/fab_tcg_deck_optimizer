@@ -21,8 +21,8 @@ func (FlockOfTheFeatherWalkersRed) Defense() int             { return 2 }
 func (FlockOfTheFeatherWalkersRed) Types(card.GameEngine) card.TypeSet {
 	return flockOfTheFeatherWalkersTypes
 }
-func (FlockOfTheFeatherWalkersRed) GoAgain() bool   { return false }
-func (FlockOfTheFeatherWalkersRed) NotImplemented() {}
+func (FlockOfTheFeatherWalkersRed) GoAgain(card.GameEngine) bool { return false }
+func (FlockOfTheFeatherWalkersRed) NotImplemented()              {}
 
 type FlockOfTheFeatherWalkersYellow struct{}
 
@@ -36,8 +36,8 @@ func (FlockOfTheFeatherWalkersYellow) Defense() int             { return 2 }
 func (FlockOfTheFeatherWalkersYellow) Types(card.GameEngine) card.TypeSet {
 	return flockOfTheFeatherWalkersTypes
 }
-func (FlockOfTheFeatherWalkersYellow) GoAgain() bool   { return false }
-func (FlockOfTheFeatherWalkersYellow) NotImplemented() {}
+func (FlockOfTheFeatherWalkersYellow) GoAgain(card.GameEngine) bool { return false }
+func (FlockOfTheFeatherWalkersYellow) NotImplemented()              {}
 
 type FlockOfTheFeatherWalkersBlue struct{}
 
@@ -51,5 +51,5 @@ func (FlockOfTheFeatherWalkersBlue) Defense() int             { return 2 }
 func (FlockOfTheFeatherWalkersBlue) Types(card.GameEngine) card.TypeSet {
 	return flockOfTheFeatherWalkersTypes
 }
-func (FlockOfTheFeatherWalkersBlue) GoAgain() bool   { return false }
-func (FlockOfTheFeatherWalkersBlue) NotImplemented() {}
+func (FlockOfTheFeatherWalkersBlue) GoAgain(card.GameEngine) bool { return false }
+func (FlockOfTheFeatherWalkersBlue) NotImplemented()              {}

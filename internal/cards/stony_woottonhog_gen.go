@@ -19,7 +19,7 @@ func (StonyWoottonhogRed) Pitch() int                         { return 1 }
 func (StonyWoottonhogRed) Attack() int                        { return 6 }
 func (StonyWoottonhogRed) Defense() int                       { return 2 }
 func (StonyWoottonhogRed) Types(card.GameEngine) card.TypeSet { return stonyWoottonhogTypes }
-func (StonyWoottonhogRed) GoAgain() bool                      { return false }
+func (StonyWoottonhogRed) GoAgain(card.GameEngine) bool       { return false }
 
 type StonyWoottonhogYellow struct{}
 
@@ -31,7 +31,7 @@ func (StonyWoottonhogYellow) Pitch() int                         { return 2 }
 func (StonyWoottonhogYellow) Attack() int                        { return 5 }
 func (StonyWoottonhogYellow) Defense() int                       { return 2 }
 func (StonyWoottonhogYellow) Types(card.GameEngine) card.TypeSet { return stonyWoottonhogTypes }
-func (StonyWoottonhogYellow) GoAgain() bool                      { return false }
+func (StonyWoottonhogYellow) GoAgain(card.GameEngine) bool       { return false }
 
 type StonyWoottonhogBlue struct{}
 
@@ -43,4 +43,4 @@ func (StonyWoottonhogBlue) Pitch() int                         { return 3 }
 func (StonyWoottonhogBlue) Attack() int                        { return 4 }
 func (StonyWoottonhogBlue) Defense() int                       { return 2 }
 func (StonyWoottonhogBlue) Types(card.GameEngine) card.TypeSet { return stonyWoottonhogTypes }
-func (StonyWoottonhogBlue) GoAgain() bool                      { return false }
+func (StonyWoottonhogBlue) GoAgain(card.GameEngine) bool       { return false }

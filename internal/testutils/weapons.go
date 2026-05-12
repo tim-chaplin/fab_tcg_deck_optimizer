@@ -37,7 +37,7 @@ func (ClubWeaponAbility) Pitch() int                         { return 0 }
 func (ClubWeaponAbility) Attack() int                        { return 1 }
 func (ClubWeaponAbility) Defense() int                       { return 0 }
 func (ClubWeaponAbility) Types(card.GameEngine) card.TypeSet { return clubWeaponAbilityTypes }
-func (ClubWeaponAbility) GoAgain() bool                      { return false }
+func (ClubWeaponAbility) GoAgain(card.GameEngine) bool       { return false }
 func (ClubWeaponAbility) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 }
 
@@ -56,6 +56,6 @@ func (HammerWeaponAbility) Pitch() int                         { return 0 }
 func (HammerWeaponAbility) Attack() int                        { return 1 }
 func (HammerWeaponAbility) Defense() int                       { return 0 }
 func (HammerWeaponAbility) Types(card.GameEngine) card.TypeSet { return hammerWeaponAbilityTypes }
-func (HammerWeaponAbility) GoAgain() bool                      { return false }
+func (HammerWeaponAbility) GoAgain(card.GameEngine) bool       { return false }
 func (HammerWeaponAbility) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 }

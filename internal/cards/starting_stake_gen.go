@@ -19,4 +19,4 @@ func (StartingStakeYellow) Pitch() int                         { return 2 }
 func (StartingStakeYellow) Attack() int                        { return 0 }
 func (StartingStakeYellow) Defense() int                       { return 3 }
 func (StartingStakeYellow) Types(card.GameEngine) card.TypeSet { return startingStakeTypes }
-func (StartingStakeYellow) GoAgain() bool                      { return false }
+func (StartingStakeYellow) GoAgain(card.GameEngine) bool       { return false }

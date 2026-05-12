@@ -19,7 +19,7 @@ func (TremorOfIArathaelRed) Pitch() int                         { return 1 }
 func (TremorOfIArathaelRed) Attack() int                        { return 4 }
 func (TremorOfIArathaelRed) Defense() int                       { return 2 }
 func (TremorOfIArathaelRed) Types(card.GameEngine) card.TypeSet { return tremorOfArathaelTypes }
-func (TremorOfIArathaelRed) GoAgain() bool                      { return false }
+func (TremorOfIArathaelRed) GoAgain(card.GameEngine) bool       { return false }
 
 type TremorOfIArathaelYellow struct{}
 
@@ -31,7 +31,7 @@ func (TremorOfIArathaelYellow) Pitch() int                         { return 2 }
 func (TremorOfIArathaelYellow) Attack() int                        { return 3 }
 func (TremorOfIArathaelYellow) Defense() int                       { return 2 }
 func (TremorOfIArathaelYellow) Types(card.GameEngine) card.TypeSet { return tremorOfArathaelTypes }
-func (TremorOfIArathaelYellow) GoAgain() bool                      { return false }
+func (TremorOfIArathaelYellow) GoAgain(card.GameEngine) bool       { return false }
 
 type TremorOfIArathaelBlue struct{}
 
@@ -43,4 +43,4 @@ func (TremorOfIArathaelBlue) Pitch() int                         { return 3 }
 func (TremorOfIArathaelBlue) Attack() int                        { return 2 }
 func (TremorOfIArathaelBlue) Defense() int                       { return 2 }
 func (TremorOfIArathaelBlue) Types(card.GameEngine) card.TypeSet { return tremorOfArathaelTypes }
-func (TremorOfIArathaelBlue) GoAgain() bool                      { return false }
+func (TremorOfIArathaelBlue) GoAgain(card.GameEngine) bool       { return false }

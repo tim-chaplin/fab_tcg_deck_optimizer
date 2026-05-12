@@ -19,7 +19,7 @@ func (SigilOfProtectionRed) Pitch() int                         { return 1 }
 func (SigilOfProtectionRed) Attack() int                        { return 0 }
 func (SigilOfProtectionRed) Defense() int                       { return 2 }
 func (SigilOfProtectionRed) Types(card.GameEngine) card.TypeSet { return sigilOfProtectionTypes }
-func (SigilOfProtectionRed) GoAgain() bool                      { return false }
+func (SigilOfProtectionRed) GoAgain(card.GameEngine) bool       { return false }
 func (SigilOfProtectionRed) NotImplemented()                    {}
 
 type SigilOfProtectionYellow struct{}
@@ -32,7 +32,7 @@ func (SigilOfProtectionYellow) Pitch() int                         { return 2 }
 func (SigilOfProtectionYellow) Attack() int                        { return 0 }
 func (SigilOfProtectionYellow) Defense() int                       { return 2 }
 func (SigilOfProtectionYellow) Types(card.GameEngine) card.TypeSet { return sigilOfProtectionTypes }
-func (SigilOfProtectionYellow) GoAgain() bool                      { return false }
+func (SigilOfProtectionYellow) GoAgain(card.GameEngine) bool       { return false }
 func (SigilOfProtectionYellow) NotImplemented()                    {}
 
 type SigilOfProtectionBlue struct{}
@@ -45,5 +45,5 @@ func (SigilOfProtectionBlue) Pitch() int                         { return 3 }
 func (SigilOfProtectionBlue) Attack() int                        { return 0 }
 func (SigilOfProtectionBlue) Defense() int                       { return 2 }
 func (SigilOfProtectionBlue) Types(card.GameEngine) card.TypeSet { return sigilOfProtectionTypes }
-func (SigilOfProtectionBlue) GoAgain() bool                      { return false }
+func (SigilOfProtectionBlue) GoAgain(card.GameEngine) bool       { return false }
 func (SigilOfProtectionBlue) NotImplemented()                    {}

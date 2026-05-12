@@ -19,7 +19,7 @@ func (WalkThePlankRed) Pitch() int                         { return 1 }
 func (WalkThePlankRed) Attack() int                        { return 7 }
 func (WalkThePlankRed) Defense() int                       { return 2 }
 func (WalkThePlankRed) Types(card.GameEngine) card.TypeSet { return walkThePlankTypes }
-func (WalkThePlankRed) GoAgain() bool                      { return false }
+func (WalkThePlankRed) GoAgain(card.GameEngine) bool       { return false }
 func (WalkThePlankRed) NotImplemented()                    {}
 
 type WalkThePlankYellow struct{}
@@ -32,7 +32,7 @@ func (WalkThePlankYellow) Pitch() int                         { return 2 }
 func (WalkThePlankYellow) Attack() int                        { return 6 }
 func (WalkThePlankYellow) Defense() int                       { return 2 }
 func (WalkThePlankYellow) Types(card.GameEngine) card.TypeSet { return walkThePlankTypes }
-func (WalkThePlankYellow) GoAgain() bool                      { return false }
+func (WalkThePlankYellow) GoAgain(card.GameEngine) bool       { return false }
 func (WalkThePlankYellow) NotImplemented()                    {}
 
 type WalkThePlankBlue struct{}
@@ -45,5 +45,5 @@ func (WalkThePlankBlue) Pitch() int                         { return 3 }
 func (WalkThePlankBlue) Attack() int                        { return 5 }
 func (WalkThePlankBlue) Defense() int                       { return 2 }
 func (WalkThePlankBlue) Types(card.GameEngine) card.TypeSet { return walkThePlankTypes }
-func (WalkThePlankBlue) GoAgain() bool                      { return false }
+func (WalkThePlankBlue) GoAgain(card.GameEngine) bool       { return false }
 func (WalkThePlankBlue) NotImplemented()                    {}

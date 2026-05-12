@@ -19,7 +19,7 @@ func (RunebloodIncantationRed) Pitch() int                         { return 1 }
 func (RunebloodIncantationRed) Attack() int                        { return 0 }
 func (RunebloodIncantationRed) Defense() int                       { return 2 }
 func (RunebloodIncantationRed) Types(card.GameEngine) card.TypeSet { return runebloodIncantationTypes }
-func (RunebloodIncantationRed) GoAgain() bool                      { return true }
+func (RunebloodIncantationRed) GoAgain(card.GameEngine) bool       { return true }
 
 type RunebloodIncantationYellow struct{}
 
@@ -33,7 +33,7 @@ func (RunebloodIncantationYellow) Defense() int             { return 2 }
 func (RunebloodIncantationYellow) Types(card.GameEngine) card.TypeSet {
 	return runebloodIncantationTypes
 }
-func (RunebloodIncantationYellow) GoAgain() bool { return true }
+func (RunebloodIncantationYellow) GoAgain(card.GameEngine) bool { return true }
 
 type RunebloodIncantationBlue struct{}
 
@@ -45,4 +45,4 @@ func (RunebloodIncantationBlue) Pitch() int                         { return 3 }
 func (RunebloodIncantationBlue) Attack() int                        { return 0 }
 func (RunebloodIncantationBlue) Defense() int                       { return 2 }
 func (RunebloodIncantationBlue) Types(card.GameEngine) card.TypeSet { return runebloodIncantationTypes }
-func (RunebloodIncantationBlue) GoAgain() bool                      { return true }
+func (RunebloodIncantationBlue) GoAgain(card.GameEngine) bool       { return true }

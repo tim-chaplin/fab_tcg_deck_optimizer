@@ -19,7 +19,7 @@ func (ReadTheRunesRed) Pitch() int                         { return 1 }
 func (ReadTheRunesRed) Attack() int                        { return 0 }
 func (ReadTheRunesRed) Defense() int                       { return 2 }
 func (ReadTheRunesRed) Types(card.GameEngine) card.TypeSet { return readTheRunesTypes }
-func (ReadTheRunesRed) GoAgain() bool                      { return false }
+func (ReadTheRunesRed) GoAgain(card.GameEngine) bool       { return false }
 
 type ReadTheRunesYellow struct{}
 
@@ -31,7 +31,7 @@ func (ReadTheRunesYellow) Pitch() int                         { return 2 }
 func (ReadTheRunesYellow) Attack() int                        { return 0 }
 func (ReadTheRunesYellow) Defense() int                       { return 2 }
 func (ReadTheRunesYellow) Types(card.GameEngine) card.TypeSet { return readTheRunesTypes }
-func (ReadTheRunesYellow) GoAgain() bool                      { return false }
+func (ReadTheRunesYellow) GoAgain(card.GameEngine) bool       { return false }
 
 type ReadTheRunesBlue struct{}
 
@@ -43,4 +43,4 @@ func (ReadTheRunesBlue) Pitch() int                         { return 3 }
 func (ReadTheRunesBlue) Attack() int                        { return 0 }
 func (ReadTheRunesBlue) Defense() int                       { return 2 }
 func (ReadTheRunesBlue) Types(card.GameEngine) card.TypeSet { return readTheRunesTypes }
-func (ReadTheRunesBlue) GoAgain() bool                      { return false }
+func (ReadTheRunesBlue) GoAgain(card.GameEngine) bool       { return false }
