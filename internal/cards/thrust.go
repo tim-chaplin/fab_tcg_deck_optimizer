@@ -8,8 +8,6 @@ package cards
 
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
-
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
 
 func (ThrustRed) ARTargetAllowed(c card.Card, _ int8) bool {
@@ -17,5 +15,5 @@ func (ThrustRed) ARTargetAllowed(c card.Card, _ int8) bool {
 	return t.Has(card.TypeSword) && t.IsAttack()
 }
 func (ThrustRed) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
-	sim.GrantAttackReactionBuff(s, l, self, 3)
+	card.GrantAttackReactionBuff(s, l, self, 3)
 }

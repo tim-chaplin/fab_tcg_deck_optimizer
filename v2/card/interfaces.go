@@ -81,11 +81,22 @@ type GameEngine interface {
 	SetValue(int)
 	DealArcaneDamage(Logger, *CardState, int)
 
-	// AP / Overpower (chain-step controls cards read or grant).
+	// Hit / damage heuristics. The card says "I attack for N"; the engine decides
+	// whether the attack lands (LikelyToHit / LikelyDamageHits).
+	LikelyToHit(self *CardState) bool
+	LikelyDamageHits(n int, dominate bool) bool
+
+	// Tempo verbs. Cards say "this card does X" (force a discard, grant Overpower);
+	// the engine decides how much that's worth in damage-equivalent Value and
+	// credits it. Each verb returns the value it credited so cards can attribute
+	// the line in their own log rider.
+	OpponentDiscard(n int) int
+	GrantOverpower(self *CardState) int
+
+	// AP (chain-step controls cards read or grant).
 	ActionPoints() int
 	AddActionPoints(int)
 	Overpower() bool
-	SetOverpower(bool)
 
 	// Sticky flags cards read to gate their effects (and flip when their effects fire).
 	ArcaneDamageDealt() bool

@@ -9,7 +9,6 @@
 package cards
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
@@ -25,8 +24,8 @@ func consumingVolitionOnHit(s card.GameEngine, l card.Logger, self *card.CardSta
 	if !s.ArcaneDamageDealt() {
 		return
 	}
-	s.AddValue(sim.DiscardValue)
-	l.AppendPostTrigger(self.Card.DisplayName(), "On-hit discarded a card", sim.DiscardValue)
+	v := s.OpponentDiscard(1)
+	l.AppendPostTrigger(self.Card.DisplayName(), "On-hit discarded a card", v)
 }
 
 func (ConsumingVolitionRed) Play(s card.GameEngine, l card.Logger, self *card.CardState) {

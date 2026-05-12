@@ -2,13 +2,12 @@
 //
 // Text: "If you've played or created an aura this turn, this gets **overpower**."
 //
-// Credits sim.OverpowerValue (0) for the granted Overpower; flag still flips on s.Overpower()
+// Calls g.GrantOverpower which flips the Overpower flag and credits the engine's Overpower
 // for any future consumer.
 
 package cards
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
@@ -16,8 +15,7 @@ import (
 // emits the chain step.
 func vantagePointPlay(s card.GameEngine, l card.Logger, self *card.CardState) {
 	if s.HasPlayedOrCreatedAura() {
-		s.SetOverpower(true)
-		s.AddValue(sim.OverpowerValue)
+		s.GrantOverpower(self)
 	}
 }
 

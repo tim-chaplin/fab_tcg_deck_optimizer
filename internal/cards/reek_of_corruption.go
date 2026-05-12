@@ -9,7 +9,6 @@
 package cards
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
@@ -25,8 +24,8 @@ func reekOfCorruptionApplyRider(s card.GameEngine, l card.Logger, self *card.Car
 // reekOfCorruptionOnHit fires the conditional "When this hits a hero, they discard a card"
 // rider. Top-level so registration stays alloc-free.
 func reekOfCorruptionOnHit(s card.GameEngine, l card.Logger, self *card.CardState, _ *card.OnHitHandler) {
-	s.AddValue(sim.DiscardValue)
-	l.AppendPostTrigger(self.Card.DisplayName(), "On-hit discarded a card", sim.DiscardValue)
+	v := s.OpponentDiscard(1)
+	l.AppendPostTrigger(self.Card.DisplayName(), "On-hit discarded a card", v)
 }
 
 func (ReekOfCorruptionRed) Play(s card.GameEngine, l card.Logger, self *card.CardState) {

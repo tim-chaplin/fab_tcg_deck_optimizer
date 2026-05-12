@@ -1,17 +1,12 @@
 // Core tuning assumptions of the model. Damage-equivalent values for non-damage riders ("draw
 // a card", "create a Gold token", "opponent discards a card") and heuristics for when an attack
-// is likely to land past the opponent's blocks. Any card that needs one of these should call
-// through here rather than hardcoding — if we ever re-tune the model, the revision lands in
-// one place.
-//
-// Core stats (damage, health, block) intentionally aren't factored out: they're 1-to-1 with
-// damage by convention and threading them through named constants would just be noise.
+// is likely to land past the opponent's blocks. The engine owns these — cards reach them
+// through GameEngine accessors so the model's tuning lives in one place and stays out of
+// card-side code.
 
 package sim
 
-import (
-	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
-)
+import "github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 
 // DiscardValue is the damage-equivalent credited when the opponent is forced to discard one
 // card — one card they won't get to play. A typical FaB card is worth ~3 points of tempo.
@@ -31,8 +26,7 @@ const OverpowerValue = 0
 // LikelyToHit reports whether self's attack is likely to land past the opponent's blocks.
 // Folds self.EffectiveAttack() (printed Card.Attack() + any granted BonusAttack, clamped at
 // 0) and self.EffectiveDominate() (printed Dominator marker OR a granted Dominate flag) into
-// the underlying threshold check. Card "if this hits" riders should call this on their own
-// CardState — the bonus / Dominate plumbing is automatic.
+// the underlying threshold check. Cards reach this through GameEngine.LikelyToHit.
 func LikelyToHit(self *card.CardState) bool {
 	return LikelyDamageHits(self.EffectiveAttack(), self.EffectiveDominate())
 }
@@ -45,9 +39,9 @@ func LikelyToHit(self *card.CardState) bool {
 // defender is capped at one blocking card, so any attack of 5+ power slips at least 2 damage
 // past that single block. The "if this hits" clause fires — we credit the rider.
 //
-// Most cards should use LikelyToHit(self) instead. This raw form is for callers that probe a
-// hypothetical damage value without a CardState — e.g. a fragile-aura helper asking "if N
-// runechants fired at once, would they hit?".
+// Most cards should use GameEngine.LikelyToHit instead. This raw form is for callers that
+// probe a hypothetical damage value without a CardState (e.g. a fragile-aura helper asking
+// "if N runechants fired at once, would they hit?").
 func LikelyDamageHits(n int, dominate bool) bool {
 	if dominate && n >= 5 {
 		return true

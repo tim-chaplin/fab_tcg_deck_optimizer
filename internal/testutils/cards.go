@@ -9,7 +9,6 @@ package testutils
 
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
 )
@@ -511,7 +510,7 @@ func CardNamesSim(cs []card.Card) []string {
 // chain runner does at finalize-active-attack time. Unit tests that call Card.Play
 // directly use this to exercise on-hit riders without driving the full chain runner.
 func FireOnHitIfLikely(s card.GameEngine, l card.Logger, self *card.CardState) {
-	if !sim.LikelyToHit(self) {
+	if !s.LikelyToHit(self) {
 		return
 	}
 	for i := range self.OnHit {

@@ -292,8 +292,31 @@ func (s *TurnState) SetOpponentMarked(v bool) { s.opponentMarked = v }
 // Overpower reports whether the chain step currently in flight has Overpower.
 func (s *TurnState) Overpower() bool { return s.overpower }
 
-// SetOverpower toggles the Overpower flag for the current chain step.
-func (s *TurnState) SetOverpower(v bool) { s.overpower = v }
+// GrantOverpower flips the Overpower flag on the current chain step and credits the
+// engine's per-Overpower-grant value. Returns the credited value so the calling card
+// can attribute the rider in its own log line.
+func (s *TurnState) GrantOverpower(self *card.CardState) int {
+	s.overpower = true
+	s.AddValue(OverpowerValue)
+	return OverpowerValue
+}
+
+// OpponentDiscard credits n cards' worth of damage-equivalent value for forcing the
+// opponent to discard. Returns the credited value for log attribution.
+func (s *TurnState) OpponentDiscard(n int) int {
+	v := n * DiscardValue
+	s.AddValue(v)
+	return v
+}
+
+// LikelyToHit reports whether self's attack is likely to land past the opponent's
+// blocks — engine-side delegation to the package heuristic.
+func (s *TurnState) LikelyToHit(self *card.CardState) bool { return LikelyToHit(self) }
+
+// LikelyDamageHits is the raw-integer threshold check behind LikelyToHit.
+func (s *TurnState) LikelyDamageHits(n int, dominate bool) bool {
+	return LikelyDamageHits(n, dominate)
+}
 
 // Pitched returns the cards pitched this turn for resources.
 func (s *TurnState) Pitched() []card.Card { return s.pitched }
@@ -910,13 +933,13 @@ func (s *TurnState) ConsumeItem(t TokenType, n int) {
 }
 
 // DealArcaneDamage credits n arcane damage to Value, writes a "Dealt n arcane damage" rider
-// line under self's chain entry, and flips ArcaneDamageDealt when LikelyDamageHits(n, false)
+// line under self's chain entry, and flips ArcaneDamageDealt when s.LikelyDamageHits(n, false)
 // approves so same-turn triggers reading "if you've dealt arcane damage this turn" fire.
 // Routes through dealtArcaneText[n] so the hot path avoids per-call fmt.Sprintf and
 // variadic-int boxing.
 func (s *TurnState) DealArcaneDamage(l card.Logger, self *card.CardState, n int) {
 	s.AddValue(n)
-	if LikelyDamageHits(n, false) {
+	if s.LikelyDamageHits(n, false) {
 		s.arcaneDamageDealt = true
 	}
 	if n >= 0 && n < len(dealtArcaneText) {
