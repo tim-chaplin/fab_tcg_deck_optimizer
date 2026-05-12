@@ -17,7 +17,7 @@ import (
 func TestDefensiveInstant_BrushOffRedAlone(t *testing.T) {
 	d := deck.New(heroes.Viserai{}, nil, fillerDeck())
 	hand := []deck.Card{cards.BrushOffRed{}}
-	if got := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 5}, sim.TurnState{}, hand).Value; got != 3 {
+	if got := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 5}, sim.Prior{}, hand).Value; got != 3 {
 		t.Fatalf("Value = %d, want 3 (Brush Off Red prevents 3 of 5)", got)
 	}
 }
@@ -25,10 +25,10 @@ func TestDefensiveInstant_BrushOffRedAlone(t *testing.T) {
 // Tests the Yellow / Blue printings cap at their lower thresholds.
 func TestDefensiveInstant_BrushOffYellowAndBlueAlone(t *testing.T) {
 	d := deck.New(heroes.Viserai{}, nil, fillerDeck())
-	if got := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 5}, sim.TurnState{}, []deck.Card{cards.BrushOffYellow{}}).Value; got != 2 {
+	if got := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 5}, sim.Prior{}, []deck.Card{cards.BrushOffYellow{}}).Value; got != 2 {
 		t.Fatalf("Yellow Value = %d, want 2", got)
 	}
-	if got := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 5}, sim.TurnState{}, []deck.Card{cards.BrushOffBlue{}}).Value; got != 1 {
+	if got := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 5}, sim.Prior{}, []deck.Card{cards.BrushOffBlue{}}).Value; got != 1 {
 		t.Fatalf("Blue Value = %d, want 1", got)
 	}
 }
@@ -38,7 +38,7 @@ func TestDefensiveInstant_BrushOffYellowAndBlueAlone(t *testing.T) {
 func TestDefensiveInstant_CalmingBreezeAlone(t *testing.T) {
 	d := deck.New(heroes.Viserai{}, nil, fillerDeck())
 	hand := []deck.Card{cards.CalmingBreezeRed{}}
-	if got := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 5}, sim.TurnState{}, hand).Value; got != 3 {
+	if got := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 5}, sim.Prior{}, hand).Value; got != 3 {
 		t.Fatalf("Value = %d, want 3 (Calming Breeze 3 prevention)", got)
 	}
 }
@@ -48,7 +48,7 @@ func TestDefensiveInstant_CalmingBreezeAlone(t *testing.T) {
 func TestDefensiveInstant_PreventionCapsAtIncoming(t *testing.T) {
 	d := deck.New(heroes.Viserai{}, nil, fillerDeck())
 	hand := []deck.Card{cards.OasisRespiteRed{}, testutils.BluePitch{}}
-	if got := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 1}, sim.TurnState{}, hand).Value; got != 1 {
+	if got := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 1}, sim.Prior{}, hand).Value; got != 1 {
 		t.Fatalf("Value = %d, want 1 (Oasis Respite caps at IncomingDamage=1)", got)
 	}
 }
@@ -58,7 +58,7 @@ func TestDefensiveInstant_PreventionCapsAtIncoming(t *testing.T) {
 func TestDefensiveInstant_PeaceOfMindWithCost(t *testing.T) {
 	d := deck.New(heroes.Viserai{}, nil, fillerDeck())
 	hand := []deck.Card{cards.PeaceOfMindRed{}, testutils.BluePitch{}, cards.CriticalStrikeBlue{}}
-	if got := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 4}, sim.TurnState{}, hand).Value; got != 4 {
+	if got := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 4}, sim.Prior{}, hand).Value; got != 4 {
 		t.Fatalf("Value = %d, want 4 (PoM 4; pitch can't fund both phases)", got)
 	}
 }
@@ -68,7 +68,7 @@ func TestDefensiveInstant_PeaceOfMindWithCost(t *testing.T) {
 func TestDefensiveInstant_StacksWithDR(t *testing.T) {
 	d := deck.New(heroes.Viserai{}, nil, fillerDeck())
 	hand := []deck.Card{cards.BrushOffRed{}, cards.DodgeBlue{}}
-	if got := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 5}, sim.TurnState{}, hand).Value; got != 5 {
+	if got := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 5}, sim.Prior{}, hand).Value; got != 5 {
 		t.Fatalf("Value = %d, want 5 (Brush Off 3 + Dodge 2 fully prevent 5 incoming)", got)
 	}
 }
@@ -77,7 +77,7 @@ func TestDefensiveInstant_StacksWithDR(t *testing.T) {
 func TestDefensiveInstant_DefendsFromArsenal(t *testing.T) {
 	d := deck.New(heroes.Viserai{}, nil, fillerDeck())
 	hand := []deck.Card{testutils.BluePitch{}}
-	if got := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 3}, sim.NewTurnStateFromSpec(sim.TurnStateSpec{Arsenal: cards.BrushOffRed{}}), hand).Value; got != 3 {
+	if got := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 3}, sim.Prior{Arsenal: cards.BrushOffRed{}}, hand).Value; got != 3 {
 		t.Fatalf("Value = %d, want 3 (Brush Off plays from arsenal as defender)", got)
 	}
 }
@@ -93,7 +93,7 @@ func TestPonder_PeaceOfMindFillsEmptyArsenalNextTurn(t *testing.T) {
 	}
 	d := deck.New(heroes.Viserai{}, nil, deckCards)
 	hand := []deck.Card{cards.PeaceOfMindRed{}, testutils.BluePitch{}}
-	state := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 4}, sim.TurnState{}, hand)
+	state := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 4}, sim.Prior{}, hand)
 	if state.StartOfNextTurnArsenal != beacon {
 		t.Errorf("turn 2 arsenal = %v, want %v (Ponder draw should fill empty arsenal from deck top)",
 			state.StartOfNextTurnArsenal, beacon)

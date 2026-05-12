@@ -1,12 +1,13 @@
 package turntests
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
 	"testing"
 
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
+
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/gameengine"
 )
 
 // TestVigorRush_BaseGoAgainFalse pins GoAgain() = false so EffectiveGoAgain short-circuits
@@ -24,12 +25,12 @@ func TestVigorRush_BaseGoAgainFalse(t *testing.T) {
 func TestVigorRush_NoNonAttackActionNoGoAgain(t *testing.T) {
 	cases := []card.Card{cards.VigorRushRed{}, cards.VigorRushYellow{}, cards.VigorRushBlue{}}
 	for _, c := range cases {
-		s := sim.NewTurnStateFromSpec(sim.TurnStateSpec{
+		s := gameengine.NewFromSpec(gameengine.Spec{
 			CardsPlayed:           []card.Card{testutils.GenericAttack(0, 0)}, // attack, not non-attack
 			NonAttackActionPlayed: false,
 		})
 		self := &card.CardState{Card: c}
-		sim.ResolveChainStep(&s, s.Logger(), self)
+		s.ResolveChainStep(s.Logger(), self)
 		if got := s.Value(); got != c.Attack() {
 			t.Errorf("%s: Play() = %d, want %d (base power)", c.Name(), got, c.Attack())
 		}
@@ -44,12 +45,12 @@ func TestVigorRush_NoNonAttackActionNoGoAgain(t *testing.T) {
 func TestVigorRush_NonAttackActionGrantsGoAgain(t *testing.T) {
 	cases := []card.Card{cards.VigorRushRed{}, cards.VigorRushYellow{}, cards.VigorRushBlue{}}
 	for _, c := range cases {
-		s := sim.NewTurnStateFromSpec(sim.TurnStateSpec{
+		s := gameengine.NewFromSpec(gameengine.Spec{
 			CardsPlayed:           []card.Card{testutils.GenericAction()},
 			NonAttackActionPlayed: true,
 		})
 		self := &card.CardState{Card: c}
-		sim.ResolveChainStep(&s, s.Logger(), self)
+		s.ResolveChainStep(s.Logger(), self)
 		if !self.GrantedGoAgain {
 			t.Errorf("%s: GrantedGoAgain = false, want true (non-attack action → go again)", c.Name())
 		}

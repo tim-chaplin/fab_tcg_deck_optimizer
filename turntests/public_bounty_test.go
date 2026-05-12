@@ -1,19 +1,20 @@
 package turntests
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
 	"testing"
 
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
+
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/gameengine"
 )
 
 // Tests that Public Bounty marks the opposing hero on Play.
 func TestPublicBounty_MarksOpponent(t *testing.T) {
 	for _, c := range []card.Card{cards.PublicBountyRed{}, cards.PublicBountyYellow{}, cards.PublicBountyBlue{}} {
-		s := sim.TurnState{}
-		sim.ResolveChainStep(&s, s.Logger(), &card.CardState{Card: c})
+		s := gameengine.New()
+		s.ResolveChainStep(s.Logger(), &card.CardState{Card: c})
 		if !s.OpponentMarked() {
 			t.Errorf("%s: OpponentMarked = false after Play, want true", c.Name())
 		}
@@ -32,8 +33,8 @@ func TestPublicBounty_GrantsBonusToNextAttack(t *testing.T) {
 	}
 	for _, tc := range cases {
 		target := &card.CardState{Card: testutils.GenericAttack(0, 0)}
-		s := sim.NewTurnStateFromSpec(sim.TurnStateSpec{CardsRemaining: []*card.CardState{target}})
-		sim.ResolveChainStep(&s, s.Logger(), &card.CardState{Card: tc.c})
+		s := gameengine.NewFromSpec(gameengine.Spec{CardsRemaining: []*card.CardState{target}})
+		s.ResolveChainStep(s.Logger(), &card.CardState{Card: tc.c})
 		if target.BonusAttack != tc.want {
 			t.Errorf("%s: target BonusAttack = %d, want %d", tc.c.Name(), target.BonusAttack, tc.want)
 		}

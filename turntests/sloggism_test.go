@@ -1,19 +1,20 @@
 package turntests
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
 	"testing"
 
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
+
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/gameengine"
 )
 
 // TestSloggism_NoAttackReturnsZero: no qualifying next attack card → +6 rider fizzles.
 func TestSloggism_NoAttackReturnsZero(t *testing.T) {
-	s := sim.TurnState{}
+	s := gameengine.New()
 	for _, c := range []card.Card{cards.SloggismRed{}, cards.SloggismYellow{}, cards.SloggismBlue{}} {
-		sim.ResolveChainStep(&s, s.Logger(), &card.CardState{Card: c})
+		s.ResolveChainStep(s.Logger(), &card.CardState{Card: c})
 		if got := s.Value(); got != 0 {
 			t.Errorf("%s: Play() = %d, want 0", c.Name(), got)
 		}
@@ -22,8 +23,8 @@ func TestSloggism_NoAttackReturnsZero(t *testing.T) {
 
 // TestSloggism_LowCostFilteredOut: a cost-1 attack is seen but the cost>=2 filter rejects it.
 func TestSloggism_LowCostFilteredOut(t *testing.T) {
-	s := sim.NewTurnStateFromSpec(sim.TurnStateSpec{CardsRemaining: []*card.CardState{{Card: testutils.GenericAttack(1, 0)}}})
-	sim.ResolveChainStep(&s, s.Logger(), &card.CardState{Card: cards.SloggismRed{}})
+	s := gameengine.NewFromSpec(gameengine.Spec{CardsRemaining: []*card.CardState{{Card: testutils.GenericAttack(1, 0)}}})
+	s.ResolveChainStep(s.Logger(), &card.CardState{Card: cards.SloggismRed{}})
 	if got := s.Value(); got != 0 {
 		t.Errorf("Play() = %d, want 0 (cost 1 < 2)", got)
 	}
@@ -42,8 +43,8 @@ func TestSloggism_HighCostReturnsBonus(t *testing.T) {
 	}
 	for _, tc := range cases {
 		target := &card.CardState{Card: testutils.GenericAttack(2, 0)}
-		s := sim.NewTurnStateFromSpec(sim.TurnStateSpec{CardsRemaining: []*card.CardState{target}})
-		sim.ResolveChainStep(&s, s.Logger(), &card.CardState{Card: tc.c})
+		s := gameengine.NewFromSpec(gameengine.Spec{CardsRemaining: []*card.CardState{target}})
+		s.ResolveChainStep(s.Logger(), &card.CardState{Card: tc.c})
 		if got := s.Value(); got != 0 {
 			t.Errorf("%s: Play() = %d, want 0 (granter returns 0; +N rides on target's BonusAttack)", tc.c.Name(), got)
 		}

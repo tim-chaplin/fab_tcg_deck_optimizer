@@ -11,30 +11,31 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/gameengine"
 )
 
 // Tests post-hoc Arsenal promotion of a Held card when the slot is empty.
 func TestBest_EmptyArsenalClaimsHeldCard(t *testing.T) {
 	h := []card.Card{cards.ToughenUpBlue{}}
-	got := Best(testutils.Hero{Intel: 4}, nil, h, Matchup{IncomingDamage: 4}, nil, TurnState{})
+	got := Best(nil, h, Matchup{IncomingDamage: 4}, nil, Prior{Hero: testutils.Hero{Intel: 4}})
 	if got.BestLine[0].Role != Arsenal {
 		t.Errorf("Roles[0] = %s, want ARSENAL", got.BestLine[0].Role)
 	}
-	if got.State.Arsenal == nil || got.State.Arsenal.ID() != ids.ToughenUpBlue {
-		t.Errorf("ArsenalCard = %v, want Toughen Up Blue", got.State.Arsenal)
+	if got.State.Arsenal() == nil || got.State.Arsenal().ID() != ids.ToughenUpBlue {
+		t.Errorf("ArsenalCard = %v, want Toughen Up Blue", got.State.Arsenal())
 	}
 }
 
 // Tests an arsenal-in DR being played (funded by a hand pitch) and vacating the slot.
 func TestBest_ArsenalInPlayDR(t *testing.T) {
 	h := []card.Card{cards.MaleficIncantationBlue{}}
-	got := Best(testutils.Hero{Intel: 4}, nil, h, Matchup{IncomingDamage: 4}, nil, NewTurnStateFromSpec(TurnStateSpec{Arsenal: cards.ToughenUpBlue{}}))
+	got := Best(nil, h, Matchup{IncomingDamage: 4}, nil, Prior{Hero: testutils.Hero{Intel: 4}, Arsenal: cards.ToughenUpBlue{}})
 	if got.Value != 4 {
 		t.Fatalf("Value = %d, want 4 (Malefic pitches to pay arsenal DR, prevents 4). Roles=[%s]",
 			got.Value, FormatBestLine(got.BestLine))
 	}
-	if got.State.Arsenal != nil {
-		t.Errorf("ArsenalCard = %v, want nil (slot was vacated, no Held card to promote)", got.State.Arsenal)
+	if got.State.Arsenal() != nil {
+		t.Errorf("ArsenalCard = %v, want nil (slot was vacated, no Held card to promote)", got.State.Arsenal())
 	}
 	// ArsenalIn surfaces the arsenal-in assignment so callers (the best-hand printout) can flag
 	// that this card wasn't in hand this turn.
@@ -50,45 +51,45 @@ func TestBest_ArsenalInPlayDR(t *testing.T) {
 // Tests that an occupied arsenal slot blocks Held → Arsenal post-hoc promotion.
 func TestBest_ArsenalInStayBlocksNewArsenal(t *testing.T) {
 	h := []card.Card{cards.ToughenUpBlue{}}
-	got := Best(testutils.Hero{Intel: 4}, nil, h, Matchup{IncomingDamage: 0}, nil, NewTurnStateFromSpec(TurnStateSpec{Arsenal: cards.ToughenUpBlue{}}))
+	got := Best(nil, h, Matchup{IncomingDamage: 0}, nil, Prior{Hero: testutils.Hero{Intel: 4}, Arsenal: cards.ToughenUpBlue{}})
 	if got.BestLine[0].Role != Held {
 		t.Errorf("Roles[0] = %s, want HELD (slot occupied by arsenal-in, can't promote)", got.BestLine[0].Role)
 	}
-	if got.State.Arsenal == nil || got.State.Arsenal.ID() != ids.ToughenUpBlue {
-		t.Errorf("ArsenalCard = %v, want Toughen Up Blue (the staying arsenal-in card)", got.State.Arsenal)
+	if got.State.Arsenal() == nil || got.State.Arsenal().ID() != ids.ToughenUpBlue {
+		t.Errorf("ArsenalCard = %v, want Toughen Up Blue (the staying arsenal-in card)", got.State.Arsenal())
 	}
 }
 
 // Tests the arsenal-card-played-as-attack branch (arsenal Red funded by pitching hand Red).
 func TestBest_ArsenalInPlayAttack(t *testing.T) {
 	h := []card.Card{testutils.RedAttack{}}
-	got := Best(testutils.Hero{Intel: 4}, nil, h, Matchup{IncomingDamage: 0}, nil, NewTurnStateFromSpec(TurnStateSpec{Arsenal: testutils.RedAttack{}}))
+	got := Best(nil, h, Matchup{IncomingDamage: 0}, nil, Prior{Hero: testutils.Hero{Intel: 4}, Arsenal: testutils.RedAttack{}})
 	if got.Value != 3 {
 		t.Fatalf("Value = %d, want 3 (arsenal Red played, hand Red pitched to fund it). Roles=[%s]",
 			got.Value, FormatBestLine(got.BestLine))
 	}
-	if got.State.Arsenal != nil {
-		t.Errorf("ArsenalCard = %v, want nil (slot vacated, no Held to promote)", got.State.Arsenal)
+	if got.State.Arsenal() != nil {
+		t.Errorf("ArsenalCard = %v, want nil (slot vacated, no Held to promote)", got.State.Arsenal())
 	}
 }
 
 // Tests that a non-Attack action card in arsenal is playable.
 func TestBest_ArsenalInNonAttackActionPlays(t *testing.T) {
 	h := []card.Card{cards.MaleficIncantationBlue{}}
-	got := Best(testutils.Hero{Intel: 4}, nil, h, Matchup{IncomingDamage: 0}, nil, NewTurnStateFromSpec(TurnStateSpec{Arsenal: cards.ArcaneCussingRed{}}))
+	got := Best(nil, h, Matchup{IncomingDamage: 0}, nil, Prior{Hero: testutils.Hero{Intel: 4}, Arsenal: cards.ArcaneCussingRed{}})
 	if got.Value != 3 {
 		t.Fatalf("Value = %d, want 3 (Malefic pitched, arsenal Cussing played for 3). Roles=[%s]",
 			got.Value, FormatBestLine(got.BestLine))
 	}
-	if got.State.Arsenal != nil {
-		t.Errorf("ArsenalCard = %v, want nil (Cussing played out of arsenal)", got.State.Arsenal)
+	if got.State.Arsenal() != nil {
+		t.Errorf("ArsenalCard = %v, want nil (Cussing played out of arsenal)", got.State.Arsenal())
 	}
 }
 
 // Tests that Unmovable's +1{d} arsenal-defense rider fires when played from arsenal.
 func TestBest_ArsenalInUnmovableGrantsDefenseBonus(t *testing.T) {
 	h := []card.Card{cards.MaleficIncantationBlue{}}
-	got := Best(testutils.Hero{Intel: 4}, nil, h, Matchup{IncomingDamage: 8}, nil, NewTurnStateFromSpec(TurnStateSpec{Arsenal: cards.UnmovableRed{}}))
+	got := Best(nil, h, Matchup{IncomingDamage: 8}, nil, Prior{Hero: testutils.Hero{Intel: 4}, Arsenal: cards.UnmovableRed{}})
 	if got.Value != 8 {
 		t.Fatalf("Value = %d, want 8 (Unmovable from arsenal blocks 7+1). Roles=[%s]",
 			got.Value, FormatBestLine(got.BestLine))
@@ -98,7 +99,7 @@ func TestBest_ArsenalInUnmovableGrantsDefenseBonus(t *testing.T) {
 // Tests that Unmovable's arsenal-defense rider does NOT fire when played from hand.
 func TestBest_HandUnmovableNoDefenseBonus(t *testing.T) {
 	h := []card.Card{cards.MaleficIncantationBlue{}, cards.UnmovableRed{}}
-	got := Best(testutils.Hero{Intel: 4}, nil, h, Matchup{IncomingDamage: 8}, nil, TurnState{})
+	got := Best(nil, h, Matchup{IncomingDamage: 8}, nil, Prior{Hero: testutils.Hero{Intel: 4}})
 	if got.Value != 7 {
 		t.Fatalf("Value = %d, want 7 (hand-played Unmovable: no rider). Roles=[%s]",
 			got.Value, FormatBestLine(got.BestLine))
@@ -111,7 +112,7 @@ func TestBest_ArsenalInSmashingGoodTimeGatesOnlyArsenalCopy(t *testing.T) {
 		notimpl.SmashingGoodTimeRed{},
 		cards.HocusPocusRed{},
 	}
-	got := Best(heroes.Viserai{}, nil, h, Matchup{IncomingDamage: 0}, nil, NewTurnStateFromSpec(TurnStateSpec{Arsenal: notimpl.SmashingGoodTimeRed{}}))
+	got := Best(nil, h, Matchup{IncomingDamage: 0}, nil, Prior{Hero: heroes.Viserai{}, Arsenal: notimpl.SmashingGoodTimeRed{}})
 	if got.Value != 8 {
 		t.Fatalf("Value = %d, want 8 (only arsenal SGT grants +3). Roles=[%s]",
 			got.Value, FormatBestLine(got.BestLine))
@@ -141,13 +142,13 @@ func TestPromoteRandomHandCardToArsenal_SpreadsAcrossHands(t *testing.T) {
 		}
 		best := TurnSummary{
 			BestLine: line,
-			State:    CarryState{Hand: append([]card.Card(nil), handCopy...)},
+			State:    EngineWithHand(append([]card.Card(nil), handCopy...)),
 		}
 		PromoteRandomHandCardToArsenal(&best, handCopy, nil)
-		if best.State.Arsenal == nil {
+		if best.State.Arsenal() == nil {
 			t.Fatalf("hand %v: State.Arsenal nil after promotion", h)
 		}
-		picks[best.State.Arsenal.ID()]++
+		picks[best.State.Arsenal().ID()]++
 	}
 	if len(picks) < 2 {
 		t.Errorf("arsenal promotion only ever landed on card %v across %d hands; expected spread", picks, len(hands))
@@ -170,13 +171,13 @@ func TestPromoteRandomHandCardToArsenal_DeterministicPerHand(t *testing.T) {
 		}
 		best := TurnSummary{
 			BestLine: line,
-			State:    CarryState{Hand: append([]card.Card(nil), hand...)},
+			State:    EngineWithHand(append([]card.Card(nil), hand...)),
 		}
 		PromoteRandomHandCardToArsenal(&best, hand, nil)
-		if best.State.Arsenal == nil {
+		if best.State.Arsenal() == nil {
 			t.Fatalf("run %d: State.Arsenal nil", run)
 		}
-		got := best.State.Arsenal.ID()
+		got := best.State.Arsenal().ID()
 		if run == 0 {
 			firstID = got
 			continue
@@ -196,14 +197,14 @@ func TestPromoteRandomHandCardToArsenal_SingleCandidateAlwaysPicked(t *testing.T
 	}
 	best := TurnSummary{
 		BestLine: line,
-		State:    CarryState{Hand: []card.Card{hand[1]}},
+		State:    EngineWithHand([]card.Card{hand[1]}),
 	}
 	PromoteRandomHandCardToArsenal(&best, hand, nil)
 	if best.BestLine[1].Role != Arsenal {
 		t.Errorf("Role[1] = %s, want Arsenal (only candidate)", best.BestLine[1].Role)
 	}
-	if best.State.Arsenal == nil || best.State.Arsenal.ID() != hand[1].ID() {
-		t.Errorf("State.Arsenal = %v, want %s", best.State.Arsenal, hand[1].Name())
+	if best.State.Arsenal() == nil || best.State.Arsenal().ID() != hand[1].ID() {
+		t.Errorf("State.Arsenal = %v, want %s", best.State.Arsenal(), hand[1].Name())
 	}
 }
 
@@ -214,15 +215,15 @@ func TestPromoteRandomHandCardToArsenal_EmptyHandIsNoop(t *testing.T) {
 		{Card: hand[0], Role: Attack},
 		{Card: hand[1], Role: Pitch},
 	}
-	best := TurnSummary{BestLine: line, State: CarryState{}}
+	best := TurnSummary{BestLine: line, State: gameengine.New()}
 	PromoteRandomHandCardToArsenal(&best, hand, nil)
 	for i, a := range best.BestLine {
 		if a.Role == Arsenal {
 			t.Errorf("BestLine[%d].Role = Arsenal, want unchanged (no candidates)", i)
 		}
 	}
-	if best.State.Arsenal != nil {
-		t.Errorf("State.Arsenal = %v, want nil (no promotion possible)", best.State.Arsenal)
+	if best.State.Arsenal() != nil {
+		t.Errorf("State.Arsenal = %v, want nil (no promotion possible)", best.State.Arsenal())
 	}
 }
 

@@ -1,20 +1,21 @@
 package turntests
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
 	"testing"
 
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
+
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/gameengine"
 )
 
 // Tests that mode 0 grants +2{p} to the next cost-≤N attack action card.
 func TestCaptainsCall_Mode0BuffsBonusAttack(t *testing.T) {
 	target := &card.CardState{Card: testutils.GenericAttack(1, 4)}
-	s := sim.NewTurnStateFromSpec(sim.TurnStateSpec{CardsRemaining: []*card.CardState{target}})
+	s := gameengine.NewFromSpec(gameengine.Spec{CardsRemaining: []*card.CardState{target}})
 	self := &card.CardState{Card: cards.CaptainsCallRed{}, Mode: 0}
-	sim.ResolveChainStep(&s, s.Logger(), self)
+	s.ResolveChainStep(s.Logger(), self)
 	if target.BonusAttack != 2 {
 		t.Errorf("target.BonusAttack = %d, want 2 (mode 0 grants +2{p})", target.BonusAttack)
 	}
@@ -26,9 +27,9 @@ func TestCaptainsCall_Mode0BuffsBonusAttack(t *testing.T) {
 // Tests that mode 1 grants go again to the next cost-≤N attack action card.
 func TestCaptainsCall_Mode1GrantsGoAgain(t *testing.T) {
 	target := &card.CardState{Card: testutils.GenericAttack(1, 4)}
-	s := sim.NewTurnStateFromSpec(sim.TurnStateSpec{CardsRemaining: []*card.CardState{target}})
+	s := gameengine.NewFromSpec(gameengine.Spec{CardsRemaining: []*card.CardState{target}})
 	self := &card.CardState{Card: cards.CaptainsCallRed{}, Mode: 1}
-	sim.ResolveChainStep(&s, s.Logger(), self)
+	s.ResolveChainStep(s.Logger(), self)
 	if !target.GrantedGoAgain {
 		t.Errorf("target.GrantedGoAgain = false; mode 1 should grant go again")
 	}
@@ -40,9 +41,9 @@ func TestCaptainsCall_Mode1GrantsGoAgain(t *testing.T) {
 // Tests that the cost cap rejects too-expensive attack action cards.
 func TestCaptainsCall_BlueRejectsCostAboveZero(t *testing.T) {
 	target := &card.CardState{Card: testutils.GenericAttack(1, 4)}
-	s := sim.NewTurnStateFromSpec(sim.TurnStateSpec{CardsRemaining: []*card.CardState{target}})
+	s := gameengine.NewFromSpec(gameengine.Spec{CardsRemaining: []*card.CardState{target}})
 	self := &card.CardState{Card: cards.CaptainsCallBlue{}, Mode: 0}
-	sim.ResolveChainStep(&s, s.Logger(), self)
+	s.ResolveChainStep(s.Logger(), self)
 	if target.BonusAttack != 0 {
 		t.Errorf("Blue (cost cap 0) buffed a cost-1 attack; got BonusAttack = %d, want 0",
 			target.BonusAttack)

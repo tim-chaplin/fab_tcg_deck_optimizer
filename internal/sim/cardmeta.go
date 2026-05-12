@@ -11,6 +11,7 @@ import (
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/gameengine"
 )
 
 // attackerMeta caches the scalar card attributes playSequence reads on every permutation. With
@@ -60,7 +61,7 @@ type attackerMeta struct {
 // ModalCost cards dispatch on the mode index; static cards return the cached value
 // directly; VariableCost cards defer to Cost(s) so every game-state-dependent costing rule
 // lives inside the card, not the solver.
-func (m *attackerMeta) costAt(s *TurnState, mode int8) int {
+func (m *attackerMeta) costAt(s *gameengine.GameEngine, mode int8) int {
 	if m.isModalCost {
 		return m.card.(card.ModalCost).ModalCost(mode)
 	}
@@ -171,7 +172,7 @@ func buildAttackerMeta(c card.Card) attackerMeta {
 		m.isVariable = m.minCost != m.maxCost
 	} else {
 		// Static cost: any TurnState probe returns the same value.
-		fixed := c.Cost(&TurnState{})
+		fixed := c.Cost(gameengine.New())
 		m.minCost = fixed
 		m.maxCost = fixed
 	}

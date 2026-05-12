@@ -1,11 +1,12 @@
 package turntests
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
 	"testing"
 
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
+
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/gameengine"
 )
 
 // TestLifegainPerVariant guards against a regression where all three colour variants of a
@@ -28,8 +29,8 @@ func TestLifegainPerVariant(t *testing.T) {
 		{"FiddlersGreenBlue", cards.FiddlersGreenBlue{}, 1},
 	}
 	for _, tc := range cases {
-		var s sim.TurnState
-		sim.ResolveChainStep(&s, s.Logger(), &card.CardState{Card: tc.card})
+		s := gameengine.New()
+		s.ResolveChainStep(s.Logger(), &card.CardState{Card: tc.card})
 		if got := s.Value(); got != tc.want {
 			t.Errorf("%s: Play() = %d, want %d", tc.name, got, tc.want)
 		}

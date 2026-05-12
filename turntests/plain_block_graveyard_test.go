@@ -13,7 +13,7 @@ import (
 func TestPlainBlock_LandsInGraveyard(t *testing.T) {
 	d := deck.New(heroes.Viserai{}, nil, fillerDeck())
 	hand := []deck.Card{cards.OnTheHorizonRed{}}
-	state := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 4}, sim.TurnState{}, hand)
+	state := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 4}, sim.Prior{}, hand)
 	if state.Value != 4 {
 		t.Fatalf("Value = %d, want 4 (On the Horizon Red blocks 4)", state.Value)
 	}

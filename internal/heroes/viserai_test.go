@@ -5,9 +5,10 @@ import (
 	"testing"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	_ "github.com/tim-chaplin/fab-deck-optimizer/internal/sim" // register sim's gameengine builders
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/gameengine"
 )
 
 // stubRuneAttack is a minimal Runeblade attack-action card.
@@ -63,7 +64,7 @@ func TestViserai_RunebladeAfterNonAttackActionTriggers(t *testing.T) {
 	// token on state.RunechantCount() for downstream consume or carryover. NonAttackActionPlayed is
 	// maintained by the attack-chain driver as non-attack actions resolve; callers must set it
 	// when seeding a TurnState for trigger checks.
-	s := sim.NewTurnStateFromSpec(sim.TurnStateSpec{CardsPlayed: []card.Card{stubRuneAura{}}, NonAttackActionPlayed: true})
+	s := *gameengine.NewFromSpec(gameengine.Spec{CardsPlayed: []card.Card{stubRuneAura{}}, NonAttackActionPlayed: true})
 	if got := (Viserai{}).OnCardPlayed(stubRuneAttack{}, &s, s.Logger()); got != 1 {
 		t.Fatalf("expected +1 damage from OnCardPlayed, got %d", got)
 	}
@@ -74,7 +75,7 @@ func TestViserai_RunebladeAfterNonAttackActionTriggers(t *testing.T) {
 
 func TestViserai_NoPriorNonAttackAction(t *testing.T) {
 	// Runeblade card, but the only prior play was an attack — no trigger.
-	s := sim.NewTurnStateFromSpec(sim.TurnStateSpec{CardsPlayed: []card.Card{stubRuneAttack{}}})
+	s := *gameengine.NewFromSpec(gameengine.Spec{CardsPlayed: []card.Card{stubRuneAttack{}}})
 	if got := (Viserai{}).OnCardPlayed(stubRuneAttack{}, &s, s.Logger()); got != 0 {
 		t.Fatalf("expected 0 (no non-attack action in CardsPlayed), got %d", got)
 	}
@@ -83,7 +84,7 @@ func TestViserai_NoPriorNonAttackAction(t *testing.T) {
 func TestViserai_CardStateNotRuneblade(t *testing.T) {
 	// Played card isn't Runeblade — Viserai's ability doesn't trigger even if a non-attack
 	// action was played earlier.
-	s := sim.NewTurnStateFromSpec(sim.TurnStateSpec{CardsPlayed: []card.Card{stubRuneAura{}}, NonAttackActionPlayed: true})
+	s := *gameengine.NewFromSpec(gameengine.Spec{CardsPlayed: []card.Card{stubRuneAura{}}, NonAttackActionPlayed: true})
 	if got := (Viserai{}).OnCardPlayed(stubNonRuneblade{}, &s, s.Logger()); got != 0 {
 		t.Fatalf("expected 0 (non-Runeblade played), got %d", got)
 	}
@@ -108,7 +109,7 @@ func (stubRuneWeapon) Play(card.GameEngine, card.Logger, *card.CardState) {}
 func TestViserai_WeaponSwingDoesNotTrigger(t *testing.T) {
 	// Even with a prior non-attack action in CardsPlayed, swinging a Runeblade weapon isn't "playing a
 	// card" and must not trigger.
-	s := sim.NewTurnStateFromSpec(sim.TurnStateSpec{CardsPlayed: []card.Card{stubRuneAura{}}, NonAttackActionPlayed: true})
+	s := *gameengine.NewFromSpec(gameengine.Spec{CardsPlayed: []card.Card{stubRuneAura{}}, NonAttackActionPlayed: true})
 	if got := (Viserai{}).OnCardPlayed(stubRuneWeapon{}, &s, s.Logger()); got != 0 {
 		t.Fatalf("expected 0 for weapon swing, got %d", got)
 	}
@@ -116,7 +117,7 @@ func TestViserai_WeaponSwingDoesNotTrigger(t *testing.T) {
 
 func TestViserai_EmptyTurn(t *testing.T) {
 	// First card of the turn: no prior plays, nothing to trigger on.
-	var s sim.TurnState
+	var s gameengine.GameEngine
 	if got := (Viserai{}).OnCardPlayed(stubRuneAura{}, &s, s.Logger()); got != 0 {
 		t.Fatalf("expected 0 on empty turn, got %d", got)
 	}

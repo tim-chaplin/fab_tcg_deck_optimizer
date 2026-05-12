@@ -8,6 +8,8 @@ import (
 	"strings"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/gameengine"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/turnlogger"
 )
 
 // BuildTurnLog converts a TurnSummary into the four-section TurnLog shape.
@@ -15,15 +17,15 @@ import (
 // token counts get pulled from them for the StartOfTurn "Auras: ..." / "Items: ..."
 // lines. MyTurn's chain content comes from t.State.Log; pitches and defense lines come
 // from BestLine; ending zone state comes from t.State.
-func BuildTurnLog(t TurnSummary, startingAuras []Aura, startingItems []Item) TurnLog {
+func BuildTurnLog(t TurnSummary, startingAuras []*Aura, startingItems []*Item) TurnLog {
 	var log TurnLog
 	parts := partitionBestLineForDisplay(t.BestLine)
 	defensePitches, attackPitches := splitPitchesByPhase(parts.pitched, parts.drCost)
-	startingRunechants := tokenCountIn(startingAuras, TokenTypeRunechant)
-	startingPonders := tokenCountIn(startingAuras, TokenTypePonder)
-	startingGold := itemCountIn(startingItems, TokenTypeGold)
-	startingSilver := itemCountIn(startingItems, TokenTypeSilver)
-	startingCopper := itemCountIn(startingItems, TokenTypeCopper)
+	startingRunechants := auraCountByName(startingAuras, "Runechant")
+	startingPonders := auraCountByName(startingAuras, "Ponder")
+	startingGold := itemCountByName(startingItems, "Gold")
+	startingSilver := itemCountByName(startingItems, "Silver")
+	startingCopper := itemCountByName(startingItems, "Copper")
 
 	// Start of turn: dealt hand, arsenal-in card, auras / tokens in play. Carryover
 	// Aura fires (Sigil reveals, +N damage credits) belong to MyTurn — they're
@@ -56,7 +58,9 @@ func BuildTurnLog(t TurnSummary, startingAuras []Aura, startingItems []Item) Tur
 	// once-per-best-turn assembly step. appendGroupedChainEntries clusters trigger lines
 	// underneath the chain line of the card that fired them so the printout reads as a tree
 	// instead of a strict chronological sequence.
-	log.MyTurn = appendGroupedChainEntries(log.MyTurn, t.State.Log)
+	if t.State != nil {
+		log.MyTurn = appendGroupedChainEntries(log.MyTurn, t.State.LogEntries())
+	}
 
 	// Opponent's turn: defense pitches, plain blocks, then Defense Reactions.
 	for _, p := range defensePitches {
@@ -72,17 +76,25 @@ func BuildTurnLog(t TurnSummary, startingAuras []Aura, startingItems []Item) Tur
 	}
 
 	// End of turn: surviving hand cards, arsenal slot's contents, auras still in play.
-	if line := endingHandLine(t.State.Hand); line != "" {
-		log.EndOfTurn = append(log.EndOfTurn, line)
+	if t.State != nil {
+		if line := endingHandLine(t.State.HandRaw()); line != "" {
+			log.EndOfTurn = append(log.EndOfTurn, line)
+		}
 	}
 	if line := endingArsenalLine(parts.arsenal); line != "" {
 		log.EndOfTurn = append(log.EndOfTurn, line)
 	}
-	if line := endingAurasLine(t.State.Auras, t.State.RunechantCount(), t.State.PonderCount()); line != "" {
-		log.EndOfTurn = append(log.EndOfTurn, line)
-	}
-	if line := itemsLine(t.State.GoldCount(), t.State.SilverCount(), t.State.CopperCount()); line != "" {
-		log.EndOfTurn = append(log.EndOfTurn, line)
+	if t.State != nil {
+		endingAuras := make([]*Aura, 0, len(t.State.Auras()))
+		for _, a := range t.State.Auras() {
+			endingAuras = append(endingAuras, a.(*Aura))
+		}
+		if line := endingAurasLine(endingAuras, auraCountByNameInEngine(t.State, "Runechant"), auraCountByNameInEngine(t.State, "Ponder")); line != "" {
+			log.EndOfTurn = append(log.EndOfTurn, line)
+		}
+		if line := itemsLine(itemCountByNameInEngine(t.State, "Gold"), itemCountByNameInEngine(t.State, "Silver"), itemCountByNameInEngine(t.State, "Copper")); line != "" {
+			log.EndOfTurn = append(log.EndOfTurn, line)
+		}
 	}
 
 	return log
@@ -178,11 +190,11 @@ func formatBlockLine(a CardAssignment) string {
 // appendGroupedChainEntries. Returns the updated remaining-incoming counter so the caller
 // can thread it into the next DR.
 func appendDefenseReactionLines(out []string, a CardAssignment, defenders []card.Card, remaining int) ([]string, int) {
-	state := NewTurnState(nil, append([]card.Card(nil), defenders...))
-	state.incomingDamage = remaining
+	state := gameengine.NewFromCards(nil, append([]card.Card(nil), defenders...))
+	state.SetIncomingDamage(remaining)
 	cs := card.CardState{Card: a.Card, FromArsenal: a.FromArsenal}
-	ResolveChainStep(state, state.logger, &cs)
-	return appendGroupedChainEntries(out, state.LogEntries()), state.incomingDamage
+	state.ResolveChainStep(state.Logger(), &cs)
+	return appendGroupedChainEntries(out, state.LogEntries()), state.IncomingDamage()
 }
 
 // defendersFromParts collects every card committed to defense — Defense Reactions and plain
@@ -239,13 +251,13 @@ func endingArsenalLine(arsenal []CardAssignment) string {
 // re-rendered as count phrases so pluralisation lives in one place. Card-aura names
 // sort alphabetically; token phrases append last in declaration order. Returns "" when
 // nothing survived.
-func endingAurasLine(triggers []Aura, runechants, ponders int) string {
+func endingAurasLine(triggers []*Aura, runechants, ponders int) string {
 	var items []string
 	for _, t := range triggers {
-		if t.Self.IsToken() {
-			continue // collapsed into the token phrases below
+		if t.SourceCard() == nil {
+			continue // token auras collapse into the token phrases below
 		}
-		items = append(items, t.Self.DisplayName())
+		items = append(items, t.CardName())
 	}
 	sort.Strings(items)
 	if runechants > 0 {
@@ -327,16 +339,16 @@ const childEntryPrefix = "  "
 // line falls through as a plain top-level entry via FormatLogEntry, keeping the
 // "(from <source>)" tail visible so the data isn't silently dropped if a producer
 // ever emits a trigger with no parent.
-func appendGroupedChainEntries(out []string, log []LogEntry) []string {
-	var pendingPre, pendingPost []LogEntry
+func appendGroupedChainEntries(out []string, log []turnlogger.LogEntry) []string {
+	var pendingPre, pendingPost []turnlogger.LogEntry
 	i := 0
 	for i < len(log) {
 		e := log[i]
 		switch e.Kind {
-		case LogEntryPreTrigger:
+		case turnlogger.LogEntryPreTrigger:
 			pendingPre = append(pendingPre, e)
 			i++
-		case LogEntryPostTrigger:
+		case turnlogger.LogEntryPostTrigger:
 			pendingPost = append(pendingPost, e)
 			i++
 		default:
@@ -351,7 +363,7 @@ func appendGroupedChainEntries(out []string, log []LogEntry) []string {
 			// step. Covers manually-built test streams and any producer that appends
 			// rider lines after emitting its own chain step.
 			j := i + 1
-			for j < len(log) && log[j].Kind == LogEntryPostTrigger && log[j].Source == parentName {
+			for j < len(log) && log[j].Kind == turnlogger.LogEntryPostTrigger && log[j].Source == parentName {
 				out = append(out, childEntryPrefix+formatTextWithDelta(log[j]))
 				j++
 			}
@@ -371,8 +383,8 @@ func appendGroupedChainEntries(out []string, log []LogEntry) []string {
 // as indented children of the chain step) and entries that don't (returned for a later
 // chain step to consume). The split preserves arrival order within each bucket so
 // pre/post-triggers render in the order their producers fired.
-func drainMatchingTriggers(pending []LogEntry, name string, out []string) ([]LogEntry, []string) {
-	var remaining []LogEntry
+func drainMatchingTriggers(pending []turnlogger.LogEntry, name string, out []string) ([]turnlogger.LogEntry, []string) {
+	var remaining []turnlogger.LogEntry
 	for _, t := range pending {
 		if t.Source == name {
 			out = append(out, childEntryPrefix+formatTextWithDelta(t))
@@ -387,7 +399,7 @@ func drainMatchingTriggers(pending []LogEntry, name string, out []string) ([]Log
 // suitable for both chain parents (Source=="") and grouped trigger children where the
 // indentation already conveys the source. Drops "(+0)" for zero-value entries. Orphan
 // triggers go through FormatLogEntry instead so they keep the "(from <source>)" tail.
-func formatTextWithDelta(e LogEntry) string {
+func formatTextWithDelta(e turnlogger.LogEntry) string {
 	if e.N == 0 {
 		return e.Text
 	}

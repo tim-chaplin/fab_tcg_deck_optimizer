@@ -1,22 +1,24 @@
 package turntests
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
 	"testing"
 
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
+
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/gameengine"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/triggertype"
 )
 
 // Tests that Strategic Planning queues a TriggerEndOfTurn keyed to itself, not a Ponder.
 func TestStrategicPlanning_QueuesEndOfTurnTrigger(t *testing.T) {
 	for _, c := range []card.Card{cards.StrategicPlanningRed{}, cards.StrategicPlanningYellow{}, cards.StrategicPlanningBlue{}} {
-		s := sim.NewTurnStateFromCards(nil, nil)
-		sim.ResolveChainStep(s, s.Logger(), &card.CardState{Card: c})
+		s := gameengine.NewFromCards(nil, nil)
+		s.ResolveChainStep(s.Logger(), &card.CardState{Card: c})
 		matching := 0
 		for _, tr := range s.Triggers() {
-			if tr.TriggerType == sim.TriggerEndOfTurn && tr.Source == c {
+			if tr.TriggerType() == triggertype.EndOfTurn && tr.CardName() == c.DisplayName() {
 				matching++
 			}
 		}
@@ -33,8 +35,8 @@ func TestStrategicPlanning_QueuesEndOfTurnTrigger(t *testing.T) {
 func TestStrategicPlanning_RecyclesEligibleActionToBottom(t *testing.T) {
 	target := testutils.GenericAction()
 	deck := []card.Card{testutils.BlueAttack{}}
-	s := sim.NewTurnStateFromCards(deck, []card.Card{target})
-	sim.ResolveChainStep(s, s.Logger(), &card.CardState{Card: cards.StrategicPlanningRed{}})
+	s := gameengine.NewFromCards(deck, []card.Card{target})
+	s.ResolveChainStep(s.Logger(), &card.CardState{Card: cards.StrategicPlanningRed{}})
 	if got := s.Deck().Size(); got != 2 {
 		t.Errorf("deck size after recycle = %d, want 2 (target appended to bottom)", got)
 	}

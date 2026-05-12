@@ -1,35 +1,40 @@
 package sim
 
 import (
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/gameengine"
 )
 
-// Item is a permanent in play with an activated ability the player chooses to play during
-// their turn. Each turn the chain runner enqueues the Ability() Card as a playable option
-// (1 AP, pays the printed activation cost; the Ability's Play decrements Count and removes
-// the entry when Count reaches zero).
-//
-// Invariant: at most one Item per TokenType per TurnState; helpers bump Count on the
-// existing entry rather than appending duplicates.
+// Item is the sim concrete impl of gameengine.Item. Sim's token-item factories
+// (NewGoldItem, NewSilverItem, NewCopperItem) build one via NewTokenItem and seed the
+// engine's item list.
 type Item struct {
-	// Self identifies the item — a card or a token type.
-	Self CardOrTokenType
-	// Count is the number of copies / charges in play. The activated ability decrements
-	// this each time it consumes one.
-	Count int
-	// Ability is the activated-ability Card the chain runner enqueues each turn. The
-	// ability's Play calls back into TurnState (e.g. ConsumeItem) to decrement Count and
-	// destroy this entry when Count reaches zero. Token items don't head to the graveyard
-	// on destroy.
-	Ability card.Card
+	tokenName string // "Gold" / "Silver" / "Copper" — only token items today
+	tokenID   ids.CardID
+	ability   card.Card
+	count     int
 }
 
-// itemCountIn returns the Count of the item entry matching token type t, or zero.
-func itemCountIn(items []Item, t TokenType) int {
-	for i := range items {
-		if items[i].Self.TokenType == t {
-			return items[i].Count
-		}
+// NewTokenItem builds a token item with the supplied name, identifier, activated-ability
+// card, and initial count.
+func NewTokenItem(name string, tokenID ids.CardID, ability card.Card, count int) *Item {
+	return &Item{
+		tokenName: name,
+		tokenID:   tokenID,
+		ability:   ability,
+		count:     count,
 	}
-	return 0
+}
+
+func (i *Item) CardName() string   { return i.tokenName }
+func (i *Item) CardID() ids.CardID { return i.tokenID }
+func (i *Item) Count() int         { return i.count }
+func (i *Item) SetCount(n int)     { i.count = n }
+func (i *Item) Ability() card.Card { return i.ability }
+
+// Copy returns a deep copy of this item.
+func (i *Item) Copy() gameengine.Item {
+	out := *i
+	return &out
 }

@@ -1,11 +1,13 @@
 package turntests
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
 	"testing"
 
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
+
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/gameengine"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/triggertype"
 )
 
 // TestRunebloodIncantation_PlayRegistersStartOfTurnTriggerWithCountN: Play flips AuraCreated
@@ -21,8 +23,8 @@ func TestRunebloodIncantation_PlayRegistersStartOfTurnTriggerWithCountN(t *testi
 		{cards.RunebloodIncantationBlue{}, 1},
 	}
 	for _, tc := range cases {
-		var s sim.TurnState
-		sim.ResolveChainStep(&s, s.Logger(), &card.CardState{Card: tc.c})
+		s := gameengine.New()
+		s.ResolveChainStep(s.Logger(), &card.CardState{Card: tc.c})
 		if got := s.Value(); got != 0 {
 			t.Errorf("%s: Play() = %d, want 0 (every rune fires on a future turn)", tc.c.Name(), got)
 		}
@@ -36,11 +38,11 @@ func TestRunebloodIncantation_PlayRegistersStartOfTurnTriggerWithCountN(t *testi
 			t.Fatalf("%s: Auras len = %d, want 1", tc.c.Name(), len(s.Auras()))
 		}
 		tr := s.Auras()[0]
-		if tr.TriggerType != sim.TriggerStartOfTurn {
-			t.Errorf("%s: trigger Type = %d, want TriggerStartOfTurn", tc.c.Name(), tr.TriggerType)
+		if tr.TriggerType() != triggertype.StartOfTurn {
+			t.Errorf("%s: trigger Type = %d, want TriggerStartOfTurn", tc.c.Name(), tr.TriggerType())
 		}
-		if tr.Count != tc.n {
-			t.Errorf("%s: Count = %d, want %d (one per verse counter)", tc.c.Name(), tr.Count, tc.n)
+		if tr.Count() != tc.n {
+			t.Errorf("%s: Count = %d, want %d (one per verse counter)", tc.c.Name(), tr.Count(), tc.n)
 		}
 	}
 }
@@ -50,12 +52,11 @@ func TestRunebloodIncantation_PlayRegistersStartOfTurnTriggerWithCountN(t *testi
 // Count, not from the handler doing more work each call.
 func TestRunebloodIncantation_HandlerCreatesOneRunechantPerFire(t *testing.T) {
 	for _, c := range []card.Card{cards.RunebloodIncantationRed{}, cards.RunebloodIncantationYellow{}, cards.RunebloodIncantationBlue{}} {
-		var play sim.TurnState
-		sim.ResolveChainStep(&play, play.Logger(), &card.CardState{Card: c})
-		fire := sim.NewTurnStateFromCards(nil, nil)
-		fire.SetAuras(append(fire.Auras(), play.Auras()[0]))
-		fire.SetCurrentAuraIdxForTesting(0)
-		fire.FireAuraForTesting(0)
+		play := gameengine.New()
+		play.ResolveChainStep(play.Logger(), &card.CardState{Card: c})
+		fire := gameengine.NewFromCards(nil, nil)
+		fire.CreateAura(play.Auras()[0])
+		fire.FireStartOfTurn(nil)
 		if fire.Value() != 1 {
 			t.Errorf("%s: handler Value = %d, want 1", c.Name(), fire.Value())
 		}

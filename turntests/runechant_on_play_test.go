@@ -1,11 +1,12 @@
 package turntests
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
 	"testing"
 
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
+
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/gameengine"
 )
 
 // Tests that the on-play "create N Runechant tokens" rider raises s.RunechantCount() by N,
@@ -29,8 +30,8 @@ func TestRunechantOnPlay_CreatesNTokens(t *testing.T) {
 		{cards.SpellbladeStrikeBlue{}, 1},
 	}
 	for _, tc := range cases {
-		var s sim.TurnState
-		sim.ResolveChainStep(&s, s.Logger(), &card.CardState{Card: tc.c})
+		s := gameengine.New()
+		s.ResolveChainStep(s.Logger(), &card.CardState{Card: tc.c})
 		if s.RunechantCount() != tc.n {
 			t.Errorf("%s: Runechants = %d, want %d", tc.c.Name(), s.RunechantCount(), tc.n)
 		}

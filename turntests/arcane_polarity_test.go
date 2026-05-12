@@ -1,11 +1,12 @@
 package turntests
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
 	"testing"
 
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
+
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/gameengine"
 )
 
 // Tests that with no arcane incoming the default branch credits 1{h}.
@@ -16,8 +17,8 @@ func TestArcanePolarity_NoArcaneIncomingCreditsOne(t *testing.T) {
 		cards.ArcanePolarityBlue{},
 	}
 	for _, c := range cases {
-		var s sim.TurnState
-		sim.ResolveChainStep(&s, s.Logger(), &card.CardState{Card: c})
+		s := gameengine.New()
+		s.ResolveChainStep(s.Logger(), &card.CardState{Card: c})
 		if s.Value() != 1 {
 			t.Errorf("%s: Value = %d, want 1", c.Name(), s.Value())
 		}
@@ -35,8 +36,8 @@ func TestArcanePolarity_ArcaneIncomingCreditsLargeGain(t *testing.T) {
 		{cards.ArcanePolarityBlue{}, 2},
 	}
 	for _, tc := range cases {
-		s := sim.NewTurnStateFromSpec(sim.TurnStateSpec{ArcaneIncomingDamage: 1})
-		sim.ResolveChainStep(&s, s.Logger(), &card.CardState{Card: tc.c})
+		s := gameengine.NewFromSpec(gameengine.Spec{ArcaneIncomingDamage: 1})
+		s.ResolveChainStep(s.Logger(), &card.CardState{Card: tc.c})
 		if s.Value() != tc.gain {
 			t.Errorf("%s: Value = %d, want %d", tc.c.Name(), s.Value(), tc.gain)
 		}

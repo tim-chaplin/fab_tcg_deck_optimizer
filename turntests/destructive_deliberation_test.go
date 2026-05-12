@@ -1,11 +1,12 @@
 package turntests
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
 	"testing"
 
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
+
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/gameengine"
 )
 
 func TestDestructiveDeliberation_PlayCreditsAttack(t *testing.T) {
@@ -18,9 +19,9 @@ func TestDestructiveDeliberation_PlayCreditsAttack(t *testing.T) {
 		{cards.DestructiveDeliberationBlue{}, 3},
 	}
 	for _, tc := range cases {
-		s := sim.TurnState{}
+		s := gameengine.New()
 		self := &card.CardState{Card: tc.c}
-		sim.ResolveChainStep(&s, s.Logger(), self)
+		s.ResolveChainStep(s.Logger(), self)
 		if s.Value() != tc.want {
 			t.Errorf("%s: Value = %d, want %d", tc.c.Name(), s.Value(), tc.want)
 		}
@@ -36,10 +37,10 @@ func TestDestructiveDeliberation_OnHitCreatesPonder(t *testing.T) {
 		cards.DestructiveDeliberationYellow{},
 		cards.DestructiveDeliberationBlue{},
 	} {
-		s := sim.TurnState{}
+		s := gameengine.New()
 		self := &card.CardState{Card: c}
-		sim.ResolveChainStep(&s, s.Logger(), self)
-		self.OnHit[0].Fire(&s, s.Logger(), self, &self.OnHit[0])
+		s.ResolveChainStep(s.Logger(), self)
+		self.OnHit[0].Fire(s, s.Logger(), self, &self.OnHit[0])
 		if got := s.PonderCount(); got != 1 {
 			t.Errorf("%s: Ponders = %d, want 1", c.Name(), got)
 		}

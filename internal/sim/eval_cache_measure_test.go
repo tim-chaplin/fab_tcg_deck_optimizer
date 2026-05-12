@@ -137,14 +137,14 @@ func TestEvalCache_ResetCache(t *testing.T) {
 	hand := []card.Card{cards.MaleficIncantationBlue{}, cards.MaleficIncantationBlue{}}
 
 	// First call populates the cache (miss + store).
-	ev.Best(heroes.Viserai{}, nil, hand, Matchup{IncomingDamage: 0}, nil, TurnState{})
+	ev.Best(nil, hand, Matchup{IncomingDamage: 0}, nil, Prior{Hero: heroes.Viserai{}})
 	preStats := ev.CacheStats()
 	if preStats.Entries == 0 {
 		t.Fatalf("expected cache to have an entry after first Best call")
 	}
 
 	// Second call hits the cache.
-	ev.Best(heroes.Viserai{}, nil, hand, Matchup{IncomingDamage: 0}, nil, TurnState{})
+	ev.Best(nil, hand, Matchup{IncomingDamage: 0}, nil, Prior{Hero: heroes.Viserai{}})
 	if got := ev.CacheStats().Hits; got != preStats.Hits+1 {
 		t.Errorf("hits = %d, want %d (one new hit on second call)", got, preStats.Hits+1)
 	}
@@ -161,7 +161,7 @@ func TestEvalCache_ResetCache(t *testing.T) {
 
 	// Same hand after reset is now a miss — confirms entries are actually gone, not just
 	// the count reading wrong.
-	ev.Best(heroes.Viserai{}, nil, hand, Matchup{IncomingDamage: 0}, nil, TurnState{})
+	ev.Best(nil, hand, Matchup{IncomingDamage: 0}, nil, Prior{Hero: heroes.Viserai{}})
 	if got := ev.CacheStats().Misses; got != post.Misses+1 {
 		t.Errorf("missed = %d, want %d (one new miss after reset)", got, post.Misses+1)
 	}
@@ -180,8 +180,8 @@ func TestEvalCache_PerHandEquivalence(t *testing.T) {
 	for _, h := range hands {
 		// Run twice to exercise cache hit on the second invocation.
 		for i := 0; i < 2; i++ {
-			cached := cachedEv.Best(heroes.Viserai{}, nil, h, Matchup{IncomingDamage: 0}, deck, TurnState{})
-			fresh := freshEv.Best(heroes.Viserai{}, nil, h, Matchup{IncomingDamage: 0}, deck, TurnState{})
+			cached := cachedEv.Best(nil, h, Matchup{IncomingDamage: 0}, deck, Prior{Hero: heroes.Viserai{}})
+			fresh := freshEv.Best(nil, h, Matchup{IncomingDamage: 0}, deck, Prior{Hero: heroes.Viserai{}})
 			if cached.Value != fresh.Value {
 				t.Errorf("hand=%v iter=%d: cached.Value=%d fresh.Value=%d", h, i, cached.Value, fresh.Value)
 			}

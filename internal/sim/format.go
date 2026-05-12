@@ -8,6 +8,8 @@ import (
 	"fmt"
 	"sort"
 	"strings"
+
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/gameengine"
 )
 
 // formatContribution renders a contribution/damage value for the best-turn printout. Integers
@@ -92,7 +94,7 @@ func splitPitchesByPhase(pitched []CardAssignment, drCost int) (defensePitches, 
 // FormatBestTurn renders a TurnSummary's best-turn printout in one call, equivalent to
 // FormatTurnLog(BuildTurnLog(t, startingAuras, startingItems)). Convenient for one-shot
 // callers (tests, ad-hoc tools) that don't need to retain the TurnLog separately.
-func FormatBestTurn(t TurnSummary, startingAuras []Aura, startingItems []Item) string {
+func FormatBestTurn(t TurnSummary, startingAuras []*Aura, startingItems []*Item) string {
 	return FormatTurnLog(BuildTurnLog(t, startingAuras, startingItems))
 }
 
@@ -114,7 +116,7 @@ type bestLineDisplayParts struct {
 // and their cost contributes to the defense-phase pitch target.
 func partitionBestLineForDisplay(line []CardAssignment) bestLineDisplayParts {
 	var parts bestLineDisplayParts
-	zeroState := &TurnState{}
+	zeroState := gameengine.New()
 	for _, a := range line {
 		switch a.Role {
 		case Pitch:

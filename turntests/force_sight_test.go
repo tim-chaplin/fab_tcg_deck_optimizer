@@ -1,19 +1,20 @@
 package turntests
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
 	"testing"
 
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
+
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/gameengine"
 )
 
 // TestForceSight_NoAttackReturnsZero: no qualifying next attack card → +3 rider fizzles.
 func TestForceSight_NoAttackReturnsZero(t *testing.T) {
-	s := sim.TurnState{}
+	s := gameengine.New()
 	for _, c := range []card.Card{cards.ForceSightRed{}, cards.ForceSightYellow{}, cards.ForceSightBlue{}} {
-		sim.ResolveChainStep(&s, s.Logger(), &card.CardState{Card: c})
+		s.ResolveChainStep(s.Logger(), &card.CardState{Card: c})
 		if got := s.Value(); got != 0 {
 			t.Errorf("%s: Play() = %d, want 0", c.Name(), got)
 		}
@@ -22,8 +23,8 @@ func TestForceSight_NoAttackReturnsZero(t *testing.T) {
 
 // TestForceSight_NonAttackInRemainingFizzles: non-attack action fails the predicate.
 func TestForceSight_NonAttackInRemainingFizzles(t *testing.T) {
-	s := sim.NewTurnStateFromSpec(sim.TurnStateSpec{CardsRemaining: []*card.CardState{{Card: testutils.GenericAction()}}})
-	sim.ResolveChainStep(&s, s.Logger(), &card.CardState{Card: cards.ForceSightRed{}})
+	s := gameengine.NewFromSpec(gameengine.Spec{CardsRemaining: []*card.CardState{{Card: testutils.GenericAction()}}})
+	s.ResolveChainStep(s.Logger(), &card.CardState{Card: cards.ForceSightRed{}})
 	if got := s.Value(); got != 0 {
 		t.Errorf("Play() = %d, want 0 (non-attack skipped)", got)
 	}
@@ -42,8 +43,8 @@ func TestForceSight_NextAttackReturnsBonus(t *testing.T) {
 	}
 	for _, tc := range cases {
 		target := &card.CardState{Card: testutils.GenericAttack(0, 0)}
-		s := sim.NewTurnStateFromSpec(sim.TurnStateSpec{CardsRemaining: []*card.CardState{target}})
-		sim.ResolveChainStep(&s, s.Logger(), &card.CardState{Card: tc.c})
+		s := gameengine.NewFromSpec(gameengine.Spec{CardsRemaining: []*card.CardState{target}})
+		s.ResolveChainStep(s.Logger(), &card.CardState{Card: tc.c})
 		if got := s.Value(); got != 0 {
 			t.Errorf("%s: Play() = %d, want 0 (granter returns 0; +N rides on target's BonusAttack)", tc.c.Name(), got)
 		}
@@ -55,12 +56,11 @@ func TestForceSight_NextAttackReturnsBonus(t *testing.T) {
 
 // Tests that Force Sight played from hand skips the arsenal-gated Opt.
 func TestForceSight_HandPlaySkipsOpt(t *testing.T) {
-	defer testutils.SwapCurrentHero(testutils.Hero{})()
 
 	a, b := testutils.NewStubCard("a"), testutils.NewStubCard("b")
 	for _, c := range []card.Card{cards.ForceSightRed{}, cards.ForceSightYellow{}, cards.ForceSightBlue{}} {
-		s := sim.NewTurnStateFromCards([]card.Card{a, b}, nil)
-		sim.ResolveChainStep(s, s.Logger(), &card.CardState{Card: c})
+		s := gameengine.NewFromCards([]card.Card{a, b}, nil)
+		s.ResolveChainStep(s.Logger(), &card.CardState{Card: c})
 		if s.Value() != 0 {
 			t.Errorf("%s: Play() from hand Value = %d, want 0", c.Name(), s.Value())
 		}
@@ -74,12 +74,11 @@ func TestForceSight_HandPlaySkipsOpt(t *testing.T) {
 
 // Tests that Force Sight played from arsenal emits an Opt 2 log entry after LogPlay.
 func TestForceSight_ArsenalPlayCallsOpt2(t *testing.T) {
-	defer testutils.SwapCurrentHero(testutils.Hero{})()
 
 	a, b := testutils.NewStubCard("a"), testutils.NewStubCard("b")
 	for _, c := range []card.Card{cards.ForceSightRed{}, cards.ForceSightYellow{}, cards.ForceSightBlue{}} {
-		s := sim.NewTurnStateFromCards([]card.Card{a, b}, nil)
-		sim.ResolveChainStep(s, s.Logger(), &card.CardState{Card: c, FromArsenal: true})
+		s := gameengine.NewFromCards([]card.Card{a, b}, nil)
+		s.ResolveChainStep(s.Logger(), &card.CardState{Card: c, FromArsenal: true})
 		if s.Value() != 0 {
 			t.Errorf("%s: Play() from arsenal Value = %d, want 0", c.Name(), s.Value())
 		}

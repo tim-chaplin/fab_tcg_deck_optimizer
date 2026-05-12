@@ -37,10 +37,3 @@ const (
 	ScepterOfPainAbilityID
 	TalisharAbilityID
 )
-
-// Token ability IDs.
-const (
-	GoldTokenAbilityID CardID = TalisharAbilityID + iota + 1
-	SilverTokenAbilityID
-	CopperTokenAbilityID
-)

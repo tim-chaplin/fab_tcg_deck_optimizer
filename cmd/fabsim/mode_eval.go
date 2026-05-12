@@ -9,6 +9,7 @@ import (
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/gameengine"
 )
 
 // runEvalCmd parses eval's flags and dispatches to runEval. eval always operates on an
@@ -36,7 +37,7 @@ func runEvalCmd(args []string) {
 	if !*printOnly {
 		requireFlag(fs, "eval", "incoming")
 	}
-	sim.OptDebug = *debug
+	gameengine.OptDebug = *debug
 	runEval(resolveDeckPath(fs.Arg(0)), *shuffles, *precision, sim.Matchup{IncomingDamage: *incoming, ArcaneIncomingDamage: *arcaneIncoming}, *seed, *printOnly, *brief, *debug)
 }
 

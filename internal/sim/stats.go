@@ -45,10 +45,10 @@ type BestTurn struct {
 	Summary TurnSummary
 	// StartingAuras is the carryover aura set entering this turn — sigils, incantations,
 	// and token auras in play when the hand was dealt.
-	StartingAuras []Aura
+	StartingAuras []*Aura
 	// StartingItems is the carryover item set entering this turn — Gold tokens (and
 	// future card items) in play when the hand was dealt.
-	StartingItems []Item
+	StartingItems []*Item
 	// Log is the four-section structured record (StartOfTurn / MyTurn / OpponentTurn /
 	// EndOfTurn) of the best turn's printout. Each entry is content-only; the formatter
 	// owns indentation, section headers, and chain numbering. Evaluate populates it

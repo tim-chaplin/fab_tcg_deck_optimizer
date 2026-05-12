@@ -1,21 +1,22 @@
 package turntests
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
 	"testing"
 
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
+
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/gameengine"
 )
 
 // Plunder Run from hand registers the on-hit-draw trigger and skips the +N{p} grant.
 func TestPlunderRun_FromHandQueuesTriggerNoBonus(t *testing.T) {
 	target := &card.CardState{Card: testutils.GenericAttack(0, 4)}
-	s := sim.NewTurnStateFromSpec(sim.TurnStateSpec{CardsRemaining: []*card.CardState{target}})
+	s := gameengine.NewFromSpec(gameengine.Spec{CardsRemaining: []*card.CardState{target}})
 	self := &card.CardState{Card: cards.PlunderRunRed{}}
-	sim.ResolveChainStep(&s, s.Logger(), self)
-	if got := triggerHitCount(&s); got != 1 {
+	s.ResolveChainStep(s.Logger(), self)
+	if got := triggerHitCount(s); got != 1 {
 		t.Errorf("queued triggers = %d, want 1", got)
 	}
 	if target.BonusAttack != 0 {
@@ -36,10 +37,10 @@ func TestPlunderRun_FromArsenalAddsBonusAttack(t *testing.T) {
 	}
 	for _, tc := range cases {
 		target := &card.CardState{Card: testutils.GenericAttack(0, 4)}
-		s := sim.NewTurnStateFromSpec(sim.TurnStateSpec{CardsRemaining: []*card.CardState{target}})
+		s := gameengine.NewFromSpec(gameengine.Spec{CardsRemaining: []*card.CardState{target}})
 		self := &card.CardState{Card: tc.c, FromArsenal: true}
-		sim.ResolveChainStep(&s, s.Logger(), self)
-		if got := triggerHitCount(&s); got != 1 {
+		s.ResolveChainStep(s.Logger(), self)
+		if got := triggerHitCount(s); got != 1 {
 			t.Errorf("%s: queued triggers = %d, want 1", tc.c.Name(), got)
 		}
 		if target.BonusAttack != tc.wantBoon {
@@ -50,10 +51,10 @@ func TestPlunderRun_FromArsenalAddsBonusAttack(t *testing.T) {
 
 // Multiple Plunder Runs queue independent triggers — they all fire on the same hit.
 func TestPlunderRun_TriggersStack(t *testing.T) {
-	s := sim.TurnState{}
-	sim.ResolveChainStep(&s, s.Logger(), &card.CardState{Card: cards.PlunderRunRed{}})
-	sim.ResolveChainStep(&s, s.Logger(), &card.CardState{Card: cards.PlunderRunBlue{}})
-	if got := triggerHitCount(&s); got != 2 {
+	s := gameengine.New()
+	s.ResolveChainStep(s.Logger(), &card.CardState{Card: cards.PlunderRunRed{}})
+	s.ResolveChainStep(s.Logger(), &card.CardState{Card: cards.PlunderRunBlue{}})
+	if got := triggerHitCount(s); got != 2 {
 		t.Errorf("queued triggers = %d, want 2 (two independent listeners)", got)
 	}
 }

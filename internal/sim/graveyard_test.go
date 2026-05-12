@@ -5,6 +5,7 @@ import (
 
 	. "github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/gameengine"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
@@ -19,7 +20,7 @@ func TestGraveyard_AttackChainAppends(t *testing.T) {
 	if _, _, _, legal := ctx.PlaySequence(order); !legal {
 		t.Fatalf("playSequence rejected the chain")
 	}
-	got := ctx.Bufs().State().Graveyard()
+	got := ctx.PermEngine().Graveyard()
 	if len(got) != len(order) {
 		t.Fatalf("graveyard len = %d, want %d", len(got), len(order))
 	}
@@ -41,7 +42,7 @@ func TestGraveyard_WeaponSwingDoesNotEnterGraveyard(t *testing.T) {
 	if _, _, _, legal := ctx.PlaySequence(order); !legal {
 		t.Fatalf("playSequence rejected attack → weapon")
 	}
-	got := ctx.Bufs().State().Graveyard()
+	got := ctx.PermEngine().Graveyard()
 	if len(got) != 1 {
 		t.Fatalf("graveyard len = %d, want 1 (attack only, weapon doesn't enter)", len(got))
 	}
@@ -66,7 +67,7 @@ func (gravSpyDR) Types(card.GameEngine) card.TypeSet {
 }
 func (gravSpyDR) GoAgain(card.GameEngine) bool { return false }
 func (gs gravSpyDR) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
-	*gs.saw = append((*gs.saw)[:0], g.(*TurnState).Graveyard()...)
+	*gs.saw = append((*gs.saw)[:0], g.(*gameengine.GameEngine).Graveyard()...)
 }
 
 // auraDefender is a test-only card whose type line is Aura — a persistent type that normally
@@ -126,14 +127,14 @@ func TestGraveyard_PermutationReset(t *testing.T) {
 	if _, _, _, legal := ctx.PlaySequence(first); !legal {
 		t.Fatalf("first playSequence rejected")
 	}
-	if got := len(ctx.Bufs().State().Graveyard()); got != len(first) {
+	if got := len(ctx.PermEngine().Graveyard()); got != len(first) {
 		t.Fatalf("after first run, graveyard len = %d, want %d", got, len(first))
 	}
 
 	if _, _, _, legal := ctx.PlaySequence(second); !legal {
 		t.Fatalf("second playSequence rejected")
 	}
-	if got := len(ctx.Bufs().State().Graveyard()); got != len(second) {
+	if got := len(ctx.PermEngine().Graveyard()); got != len(second) {
 		t.Fatalf("after second run, graveyard len = %d, want %d (leaked from first?)",
 			got, len(second))
 	}

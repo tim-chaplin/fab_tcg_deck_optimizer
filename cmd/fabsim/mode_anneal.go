@@ -17,6 +17,7 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/mydecks"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/gameengine"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/registry"
 )
 
@@ -102,7 +103,7 @@ func runAnnealCmd(args []string) {
 		die("%v", err)
 	}
 
-	sim.OptDebug = *debug
+	gameengine.OptDebug = *debug
 
 	// -finalize bundles the high-precision overrides — pinned shuffle count plus a tighter
 	// noise floor so sub-0.1 wins land that the default 0.1 -min-improvement gate would reject.

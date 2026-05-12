@@ -1,18 +1,19 @@
 package turntests
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
 	"testing"
 
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
+
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/gameengine"
 )
 
 // Tests that with no Nimblism in the graveyard the rider stays off.
 func TestJackBeQuick_NoNimblismRiderOff(t *testing.T) {
 	self := &card.CardState{Card: cards.JackBeQuickRed{}}
-	s := sim.NewTurnStateFromCards(nil, nil)
-	sim.ResolveChainStep(s, s.Logger(), self)
+	s := gameengine.NewFromCards(nil, nil)
+	s.ResolveChainStep(s.Logger(), self)
 	if self.GrantedGoAgain {
 		t.Errorf("GrantedGoAgain = true with empty graveyard, want false")
 	}
@@ -24,9 +25,9 @@ func TestJackBeQuick_NoNimblismRiderOff(t *testing.T) {
 // Tests that a Nimblism in the graveyard lets Jack Be Quick banish for the +1{p} /
 // go-again rider.
 func TestJackBeQuick_BanishesNimblismForBonus(t *testing.T) {
-	s := sim.NewTurnStateFromCards(nil, []card.Card{cards.NimblismRed{}})
+	s := gameengine.NewFromCards(nil, []card.Card{cards.NimblismRed{}})
 	self := &card.CardState{Card: cards.JackBeQuickRed{}}
-	sim.ResolveChainStep(s, s.Logger(), self)
+	s.ResolveChainStep(s.Logger(), self)
 	if !self.GrantedGoAgain {
 		t.Errorf("GrantedGoAgain = false after banish, want true")
 	}

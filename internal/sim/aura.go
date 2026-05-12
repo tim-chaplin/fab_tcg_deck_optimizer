@@ -3,112 +3,106 @@ package sim
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/gameengine"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/triggertype"
 )
 
-// Aura is a persistent hook attached to a card or a token in play. The sim walks each
-// TurnState's Auras list on every Trigger condition and fires the matching handlers;
-// lifecycle (when to decrement Count, when to send Self to the graveyard, when to
-// deregister) belongs to the handler. Auras compose a Trigger by embed: an Aura is a
-// Trigger plus persistent-instance state. Standalone (one-shot) Triggers live on
-// TurnState.Triggers and are removed by the sim after firing — see trigger.go.
-
-// TriggerType categorises when a Trigger / Aura's Handler fires.
-type TriggerType int
-
-const (
-	// TriggerStartOfTurn fires at the start of the owning player's action phase, before the
-	// best-line search. The classic upkeep trigger for "at the beginning of your action phase
-	// …" auras.
-	TriggerStartOfTurn TriggerType = iota
-	// TriggerAttackAction fires each time an attack action card resolves during the attack
-	// chain. Auras that set OncePerTurn cap themselves at one fire per turn regardless of
-	// how many attack actions resolve ("once per turn, when you play an attack action card
-	// …" clauses).
-	TriggerAttackAction
-	// TriggerAttack fires when ANY attack resolves — attack action card or weapon swing.
-	// The runechant aura uses this so each attack consumes the runechants in play.
-	TriggerAttack
-	// TriggerEndOfTurn fires after the chain finishes, before the carry-state snapshot
-	// and the post-hoc arsenal-promotion step. Ponder uses this to draw a card into the
-	// held cards so the existing arsenal-promotion logic fills an otherwise-empty slot.
-	TriggerEndOfTurn
-	// TriggerHit fires when an attack hits (s.LikelyToHit on the post-AR-buff EffectiveAttack).
-	// Used by "the next time an X you control hits this turn, do Y" printed text (Plunder
-	// Run, High Striker). Trigger.TypeFilter narrows qualifying hits to a card-type
-	// predicate. Standalone-trigger only — auras don't currently use this trigger type.
-	TriggerHit
-)
-
-// CardOrTokenType identifies what an Aura belongs to: a specific card in play, or an
-// aura token. Exactly one of Card / TokenType is set; the other carries its zero value.
-type CardOrTokenType struct {
-	// Card is the originating card for non-token auras. nil for token auras.
-	Card card.Card
-	// TokenType identifies the token kind for token auras. TokenTypeNone for card auras.
-	TokenType TokenType
-}
-
-// IsToken reports whether this Aura belongs to a token (no originating card).
-func (c CardOrTokenType) IsToken() bool { return c.TokenType != TokenTypeNone }
-
-// CardID returns the originating card's ID when this is a card aura, or ids.InvalidCard
-// for tokens. Tokens are distinguished in cache keys by their TokenType, not by CardID.
-func (c CardOrTokenType) CardID() ids.CardID {
-	if c.Card != nil {
-		return c.Card.ID()
-	}
-	return ids.InvalidCard
-}
-
-// DisplayName returns the human-readable name — the card's DisplayName for card auras,
-// or the token's printed name (e.g. "Runechant") for token auras.
-func (c CardOrTokenType) DisplayName() string {
-	if c.Card != nil {
-		return c.Card.DisplayName()
-	}
-	return tokenDisplayName(c.TokenType)
-}
-
-// Aura is one persistent hook attached to a card or a token in play. Each time
-// TriggerType's condition fires — and, when OncePerTurn is set, at most once per turn
-// — the sim invokes Handler. The Aura survives until its handler calls Destroy
-// (via the card.Aura context the engine threads in).
+// Aura is the sim concrete impl of gameengine.Aura. Card-driven Create*Aura methods on
+// *gameengine.GameEngine build one of these via sim's registered builders; sim's token-aura
+// factories (NewRunechantAura, NewPonderAura, …) build via NewTokenAura. Both flavours
+// satisfy gameengine.Aura.
 type Aura struct {
-	// Source is the originating card for log attribution. Token auras leave Source nil.
-	Source card.Card
-	// TriggerType matches the firing site (TriggerStartOfTurn, TriggerAttack, …).
-	TriggerType TriggerType
-	// Handler runs when TriggerType matches.
-	Handler card.AuraHandler
-	// Self identifies what this Aura belongs to — a card or a token type. Surfaced in
-	// per-turn summaries via CardOrTokenType.DisplayName.
-	Self CardOrTokenType
-	// Count is a per-aura counter the handler defines: Malefic / Runeblood read it as
-	// fires remaining and decrement themselves; Runechant / Ponder read it as a stack
-	// count; Blessing reads it as runes to create on the only fire. The partition
-	// tiebreak (pendingFutureValue) also sums Count across all live auras as an
-	// estimate of unrealised next-turn value, so even single-fire auras with no
-	// counter semantics set Count: 1 to advertise their pending payoff.
-	Count int
-	// OncePerTurn caps the Handler at a single fire per turn regardless of how many matching
-	// events occur. The sim sets FiredThisTurn the first time Handler runs each turn and
-	// clears it at the next turn boundary.
-	OncePerTurn bool
-	// FiredThisTurn is sim-managed bookkeeping for OncePerTurn. Cards must not set it.
-	FiredThisTurn bool
+	triggerType   triggertype.Type
+	handler       card.AuraHandler
+	source        card.Card // nil for token auras
+	tokenName     string    // "Runechant" / "Ponder" / "" for card auras
+	tokenID       ids.CardID
+	count         int
+	oncePerTurn   bool
+	firedThisTurn bool
 }
 
-// auraCtx adapts *Aura + *TurnState to card.Aura — the engine threads one of these
-// into each handler call so cards never touch the underlying struct.
+// NewCardAura builds a card-backed aura — source is self.Card. CardName / CardID surface
+// self.Card's DisplayName / ID. On destroy with addToGraveyard=true the source card lands
+// in the graveyard.
+func NewCardAura(self *card.CardState, tt triggertype.Type, handler card.AuraHandler, count int, oncePerTurn bool) *Aura {
+	return &Aura{
+		triggerType: tt,
+		handler:     handler,
+		source:      self.Card,
+		count:       count,
+		oncePerTurn: oncePerTurn,
+	}
+}
+
+// NewTokenAura builds a token aura — there is no underlying card. CardName returns the
+// supplied name (e.g. "Runechant"); CardID returns the supplied tokenID so cache keys
+// distinguish each token kind without an extra discriminator. On destroy the aura no-ops
+// in the graveyard pass (tokens don't head to graveyard).
+func NewTokenAura(name string, tokenID ids.CardID, tt triggertype.Type, handler card.AuraHandler, count int) *Aura {
+	return &Aura{
+		triggerType: tt,
+		handler:     handler,
+		tokenName:   name,
+		tokenID:     tokenID,
+		count:       count,
+	}
+}
+
+func (a *Aura) TriggerType() triggertype.Type { return a.triggerType }
+func (a *Aura) OncePerTurn() bool             { return a.oncePerTurn }
+func (a *Aura) FiredThisTurn() bool           { return a.firedThisTurn }
+func (a *Aura) SetFiredThisTurn(v bool)       { a.firedThisTurn = v }
+
+func (a *Aura) CardName() string {
+	if a.source != nil {
+		return a.source.DisplayName()
+	}
+	return a.tokenName
+}
+
+func (a *Aura) CardID() ids.CardID {
+	if a.source != nil {
+		return a.source.ID()
+	}
+	return a.tokenID
+}
+
+func (a *Aura) SourceCard() card.Card { return a.source }
+func (a *Aura) Count() int            { return a.count }
+func (a *Aura) SetCount(n int)        { a.count = n }
+func (a *Aura) DecrementCount() int   { a.count--; return a.count }
+
+func (a *Aura) Fire(g *gameengine.GameEngine, l card.Logger) {
+	ctx := &auraCtx{a: a, g: g}
+	a.handler(g, l, ctx)
+}
+
+func (a *Aura) OnDestroy(g *gameengine.GameEngine) {
+	if a.source != nil {
+		g.AppendGraveyard(a.source)
+	}
+}
+
+// Copy returns a deep copy of this aura. GameEngine.Copy walks the aura list so each
+// permutation's Count / FiredThisTurn mutations stay isolated.
+func (a *Aura) Copy() gameengine.Aura {
+	out := *a
+	return &out
+}
+
+// auraCtx is the adapter handed to each aura handler — satisfies card.Aura so cards
+// interact with the firing aura through a stable surface regardless of the underlying
+// entry's storage.
 type auraCtx struct {
 	a *Aura
-	s *TurnState
+	g *gameengine.GameEngine
 }
 
-func (c *auraCtx) Count() int          { return c.a.Count }
-func (c *auraCtx) DecrementCount() int { c.a.Count--; return c.a.Count }
-func (c *auraCtx) CardName() string    { return c.a.Self.DisplayName() }
-func (c *auraCtx) CardID() ids.CardID  { return c.a.Self.CardID() }
+func (c *auraCtx) Count() int          { return c.a.count }
+func (c *auraCtx) DecrementCount() int { c.a.count--; return c.a.count }
+func (c *auraCtx) CardName() string    { return c.a.CardName() }
+func (c *auraCtx) CardID() ids.CardID  { return c.a.CardID() }
 func (c *auraCtx) Destroy(addToGraveyard bool) {
-	c.s.destroyAura(c.a, addToGraveyard)
+	c.g.DestroyAura(addToGraveyard)
 }

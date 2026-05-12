@@ -15,7 +15,7 @@ import (
 func TestResource_TitaniumBaubleBlocks(t *testing.T) {
 	d := deck.New(heroes.Viserai{}, nil, fillerDeck())
 	hand := []deck.Card{cards.TitaniumBaubleBlue{}}
-	got := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 5}, sim.TurnState{}, hand).Value
+	got := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 5}, sim.Prior{}, hand).Value
 	if got != 3 {
 		t.Fatalf("Value = %d, want 3 (Titanium blocks 3 of 5 incoming)", got)
 	}
@@ -25,7 +25,7 @@ func TestResource_TitaniumBaubleBlocks(t *testing.T) {
 func TestResource_DoesNotPromoteToArsenal(t *testing.T) {
 	d := deck.New(heroes.Viserai{}, nil, fillerDeck())
 	hand := []deck.Card{cards.TitaniumBaubleBlue{}}
-	got := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, sim.TurnState{}, hand)
+	got := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, sim.Prior{}, hand)
 	if got.StartOfNextTurnArsenal != nil {
 		t.Fatalf("Arsenal = %v, want nil (Resource cards skip post-hoc promotion)", got.StartOfNextTurnArsenal)
 	}
@@ -37,7 +37,7 @@ func TestResource_DoesNotPromoteToArsenal(t *testing.T) {
 func TestArsenalPromotion_SkipsPureBlock(t *testing.T) {
 	d := deck.New(heroes.Viserai{}, nil, fillerDeck())
 	hand := []deck.Card{cards.OnTheHorizonRed{}}
-	got := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, sim.TurnState{}, hand)
+	got := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, sim.Prior{}, hand)
 	if got.StartOfNextTurnArsenal != nil {
 		t.Fatalf("Arsenal = %v, want nil (pure Block cards skip post-hoc promotion)", got.StartOfNextTurnArsenal)
 	}

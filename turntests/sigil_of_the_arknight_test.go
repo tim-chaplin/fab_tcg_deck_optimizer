@@ -1,27 +1,29 @@
 package turntests
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
 	"testing"
 
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
+
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/gameengine"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/triggertype"
 )
 
 // TestSigilOfTheArknight_PlayOnlySetsAuraCreated verifies Play defers the reveal effect — it
 // flips AuraCreated, registers a TriggerStartOfTurn entry, and returns 0. The deck peek
 // happens when the sim fires the trigger next turn.
 func TestSigilOfTheArknight_PlayOnlySetsAuraCreated(t *testing.T) {
-	s := sim.NewTurnStateFromCards([]card.Card{testutils.RunebladeAttack{}}, nil)
-	sim.ResolveChainStep(s, s.Logger(), &card.CardState{Card: cards.SigilOfTheArknightBlue{}})
+	s := gameengine.NewFromCards([]card.Card{testutils.RunebladeAttack{}}, nil)
+	s.ResolveChainStep(s.Logger(), &card.CardState{Card: cards.SigilOfTheArknightBlue{}})
 	if got := s.Value(); got != 0 {
 		t.Errorf("Play() = %d, want 0 (reveal deferred to trigger)", got)
 	}
 	if !s.AuraCreated() {
 		t.Error("AuraCreated = false, want true")
 	}
-	if len(s.Auras()) != 1 || s.Auras()[0].TriggerType != sim.TriggerStartOfTurn {
+	if len(s.Auras()) != 1 || s.Auras()[0].TriggerType() != triggertype.StartOfTurn {
 		t.Errorf("Auras = %+v, want one TriggerStartOfTurn entry", s.Auras())
 	}
 }
@@ -30,12 +32,12 @@ func TestSigilOfTheArknight_PlayOnlySetsAuraCreated(t *testing.T) {
 // is an attack action → the handler draws it into the hand and pops the deck. Damage
 // stays 0 (tempo is captured by the extra card, not a flat credit).
 func TestSigilOfTheArknight_TriggerRevealsAttackActionIntoHand(t *testing.T) {
-	var play sim.TurnState
-	sim.ResolveChainStep(&play, play.Logger(), &card.CardState{Card: cards.SigilOfTheArknightBlue{}})
+	var play gameengine.GameEngine
+	play.ResolveChainStep(play.Logger(), &card.CardState{Card: cards.SigilOfTheArknightBlue{}})
 	top := testutils.RunebladeAttack{}
-	next := sim.NewTurnStateFromCards([]card.Card{top, testutils.NonAttack{}}, nil)
-	next.SetAuras(append(next.Auras(), play.Auras()[0]))
-	next.FireAuraForTesting(0)
+	next := gameengine.NewFromCards([]card.Card{top, testutils.NonAttack{}}, nil)
+	next.CreateAura(play.Auras()[0])
+	next.FireStartOfTurn(nil)
 	if next.Value() != 0 {
 		t.Errorf("handler Value = %d, want 0 (tempo credited via the draw, not damage)", next.Value())
 	}
@@ -50,11 +52,11 @@ func TestSigilOfTheArknight_TriggerRevealsAttackActionIntoHand(t *testing.T) {
 // TestSigilOfTheArknight_TriggerRevealsNonAttack: top card is non-attack → Hand stays
 // empty and Deck is untouched (the card stays on top of the deck in the real game).
 func TestSigilOfTheArknight_TriggerRevealsNonAttack(t *testing.T) {
-	var play sim.TurnState
-	sim.ResolveChainStep(&play, play.Logger(), &card.CardState{Card: cards.SigilOfTheArknightBlue{}})
-	next := sim.NewTurnStateFromCards([]card.Card{testutils.Aura{}, testutils.RunebladeAttack{}}, nil)
-	next.SetAuras(append(next.Auras(), play.Auras()[0]))
-	next.FireAuraForTesting(0)
+	var play gameengine.GameEngine
+	play.ResolveChainStep(play.Logger(), &card.CardState{Card: cards.SigilOfTheArknightBlue{}})
+	next := gameengine.NewFromCards([]card.Card{testutils.Aura{}, testutils.RunebladeAttack{}}, nil)
+	next.CreateAura(play.Auras()[0])
+	next.FireStartOfTurn(nil)
 	if next.Value() != 0 {
 		t.Errorf("handler Value = %d, want 0", next.Value())
 	}
@@ -68,11 +70,11 @@ func TestSigilOfTheArknight_TriggerRevealsNonAttack(t *testing.T) {
 
 // TestSigilOfTheArknight_TriggerEmptyDeck: nothing to reveal → zero result, Hand stays empty.
 func TestSigilOfTheArknight_TriggerEmptyDeck(t *testing.T) {
-	var play sim.TurnState
-	sim.ResolveChainStep(&play, play.Logger(), &card.CardState{Card: cards.SigilOfTheArknightBlue{}})
-	next := sim.NewTurnStateFromCards(nil, nil)
-	next.SetAuras(append(next.Auras(), play.Auras()[0]))
-	next.FireAuraForTesting(0)
+	var play gameengine.GameEngine
+	play.ResolveChainStep(play.Logger(), &card.CardState{Card: cards.SigilOfTheArknightBlue{}})
+	next := gameengine.NewFromCards(nil, nil)
+	next.CreateAura(play.Auras()[0])
+	next.FireStartOfTurn(nil)
 	if next.Value() != 0 {
 		t.Errorf("handler Value = %d, want 0", next.Value())
 	}

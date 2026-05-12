@@ -1,18 +1,19 @@
 package turntests
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards/notimplemented"
 	"testing"
 
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards/notimplemented"
+
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/gameengine"
 )
 
 // TestClearwaterElixir_NoAttackReturnsZero: no qualifying next attack card → +3 rider fizzles.
 func TestClearwaterElixir_NoAttackReturnsZero(t *testing.T) {
-	s := sim.TurnState{}
-	sim.ResolveChainStep(&s, s.Logger(), &card.CardState{Card: notimplemented.ClearwaterElixirRed{}})
+	s := gameengine.New()
+	s.ResolveChainStep(s.Logger(), &card.CardState{Card: notimplemented.ClearwaterElixirRed{}})
 	if got := s.Value(); got != 0 {
 		t.Errorf("Play() = %d, want 0", got)
 	}
@@ -20,8 +21,8 @@ func TestClearwaterElixir_NoAttackReturnsZero(t *testing.T) {
 
 // TestClearwaterElixir_NonAttackInRemainingFizzles: non-attack action fails the predicate.
 func TestClearwaterElixir_NonAttackInRemainingFizzles(t *testing.T) {
-	s := sim.NewTurnStateFromSpec(sim.TurnStateSpec{CardsRemaining: []*card.CardState{{Card: testutils.GenericAction()}}})
-	sim.ResolveChainStep(&s, s.Logger(), &card.CardState{Card: notimplemented.ClearwaterElixirRed{}})
+	s := gameengine.NewFromSpec(gameengine.Spec{CardsRemaining: []*card.CardState{{Card: testutils.GenericAction()}}})
+	s.ResolveChainStep(s.Logger(), &card.CardState{Card: notimplemented.ClearwaterElixirRed{}})
 	if got := s.Value(); got != 0 {
 		t.Errorf("Play() = %d, want 0 (non-attack skipped)", got)
 	}
@@ -32,8 +33,8 @@ func TestClearwaterElixir_NonAttackInRemainingFizzles(t *testing.T) {
 // to the buffed attack's chain slot. Granter returns 0 — the +3 attributes to the target.
 func TestClearwaterElixir_NextAttackGrantsBonusAttack(t *testing.T) {
 	target := &card.CardState{Card: testutils.GenericAttack(0, 0)}
-	s := sim.NewTurnStateFromSpec(sim.TurnStateSpec{CardsRemaining: []*card.CardState{target}})
-	sim.ResolveChainStep(&s, s.Logger(), &card.CardState{Card: notimplemented.ClearwaterElixirRed{}})
+	s := gameengine.NewFromSpec(gameengine.Spec{CardsRemaining: []*card.CardState{target}})
+	s.ResolveChainStep(s.Logger(), &card.CardState{Card: notimplemented.ClearwaterElixirRed{}})
 	if got := s.Value(); got != 0 {
 		t.Errorf("Play() = %d, want 0 (granter returns 0; +N rides on target's BonusAttack)", got)
 	}

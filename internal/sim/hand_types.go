@@ -2,13 +2,12 @@ package sim
 
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
-	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/gameengine"
 )
 
-// Turn-summary data shapes returned by Best: Role, CardAssignment, TurnSummary, plus the
-// CarryState snapshot that captures the winning permutation's end-of-chain TurnState. The
-// deck loop adopts CarryState wholesale into the next turn's seed — no per-field
-// reconstruction.
+// Turn-summary data shapes returned by Best: Role, CardAssignment, TurnSummary. Cross-turn
+// state lives on TurnSummary.State (*gameengine.GameEngine) — the deck loop adopts the
+// winning permutation's engine directly into next turn's seed.
 
 // Role is what a card did on a given turn cycle.
 type Role uint8
@@ -18,9 +17,7 @@ const (
 	Attack
 	Defend
 	Held
-	// Arsenal marks the card placed into the arsenal slot at end of turn. Contributes
-	// nothing to this turn's Value (it scores on the future turn it's played) and carries
-	// across via TurnSummary.State.Arsenal.
+	// Arsenal marks the card placed into the arsenal slot at end of turn.
 	Arsenal
 )
 
@@ -32,116 +29,25 @@ type CardAssignment struct {
 	FromArsenal bool
 }
 
-// CarryState is the slice of TurnState that carries across the turn boundary — the winning
-// permutation's end-of-chain snapshot. The deck loop adopts CarryState directly into next
-// turn's TurnState seed; no per-field "diff" interpretation. Cards that mutate state during
-// Play write through to whichever slice ends up here.
-type CarryState struct {
-	// Hand is the cards in hand at end of chain — partition Held cards plus anything
-	// tutored or drawn that didn't get played. Becomes next turn's Held prefix.
-	Hand []card.Card
-	// Deck is the deck at end of chain. Reflects every mid-chain mutation (DrawOne pops,
-	// tutor removals, alt-cost prepends). The eval loop adopts this directly as next
-	// turn's deck (`d = play.State.Deck`); each chain-runner call returns a fresh
-	// *deck.Deck so the caller can mutate it freely.
-	Deck *deck.Deck
-	// Arsenal is the arsenal slot at end of chain. Set by the partition (arsenal-in stayed),
-	// or filled post-hoc by promoting a Hand card when the slot is empty.
-	Arsenal card.Card
-	// Graveyard is every card that landed in the graveyard this turn — played hand cards,
-	// tutored-and-played cards, Auras that destroyed themselves.
-	Graveyard []card.Card
-	// Banish is cards moved into the banished zone this turn.
-	Banish []card.Card
-	// Auras is the surviving Aura set at end of chain — including the Runechant token aura
-	// when one is live. Carries across.
-	Auras []Aura
-	// Items is the surviving Item set at end of chain — what the player owns going into
-	// the next turn. Carries across.
-	Items []Item
-	// CardsDrawn counts cards drawn during the chain — read by the partition tiebreaker
-	// to prefer chains that drew more cards. Doesn't carry semantically (each turn
-	// starts fresh) but rides on CarryState's snapshot mechanism for free.
-	CardsDrawn int
-	// OpponentMarked snapshots the end-of-chain TurnState.OpponentMarked. Carries across
-	// turns: the deck loop feeds it back into next turn's seed so a Mark applied this
-	// turn survives until next turn's first attack action / weapon swing strips it.
-	OpponentMarked bool
-	// Log is the per-event chain trace of the winning permutation — one entry per Play, hero
-	// trigger, aura trigger, OnHit, weapon swing. Stored as raw LogEntry
-	// structs to defer fmt.Sprintf cost until BuildTurnLog runs at end of Evaluate,
-	// keeping the snapshot path allocation-light (only the winning permutation's log gets
-	// formatted, and only when the deck-level Best actually changes). Doesn't carry across
-	// turns semantically but rides on CarryState's snapshot mechanism for free.
-	Log []LogEntry
-}
-
-// Runechants returns the carried Runechant token count, or zero when none are in play.
-func (c *CarryState) RunechantCount() int { return tokenCountIn(c.Auras, TokenTypeRunechant) }
-
-// Ponders returns the carried Ponder token count, or zero when none are in play.
-func (c *CarryState) PonderCount() int { return tokenCountIn(c.Auras, TokenTypePonder) }
-
-// Gold returns the carried Gold token count, or zero when none are in play.
-func (c *CarryState) GoldCount() int { return itemCountIn(c.Items, TokenTypeGold) }
-
-// Silver returns the carried Silver token count, or zero when none are in play.
-func (c *CarryState) SilverCount() int { return itemCountIn(c.Items, TokenTypeSilver) }
-
-// Copper returns the carried Copper token count, or zero when none are in play.
-func (c *CarryState) CopperCount() int { return itemCountIn(c.Items, TokenTypeCopper) }
-
 // TurnSummary is the result of running Best on a hand: the winning card-role assignments
-// plus the CarryState snapshot the next turn inherits.
+// plus the post-chain *GameEngine the next turn inherits. State carries hand / deck /
+// arsenal / graveyard / banished / auras / items / log entries.
 type TurnSummary struct {
-	// BestLine is the winning partition. Hand cards come first in canonical (post-sort)
-	// order; the previous-turn arsenal card, if any, is the last entry with FromArsenal=true.
-	BestLine []CardAssignment
-	// SwungWeapons names the weapons swung this turn in the winning permutation. Weapons
-	// resolve through the dispatcher and log "WEAPON ATTACK" lines into State.Log, so the
-	// numbered printout reads weapon swings from there. SwungWeapons stays on the summary
-	// for the deckio JSON round-trip — Marshal serialises it under "weapons" so a reloaded
-	// best turn still names the swung weapons even when State.Log is absent.
-	SwungWeapons []string
-	// Value is the turn's total score (damage dealt + damage prevented).
-	Value int
-	// State is the winning permutation's end-of-chain CarryState. The deck loop copies
-	// every field into next turn's seed.
-	State CarryState
-	// TriggersFromLastTurn records the Auras whose start-of-turn handlers fired at
-	// the top of this turn, each with the damage-equivalent it credited.
+	BestLine             []CardAssignment
+	SwungWeapons         []string
+	Value                int
+	State                *gameengine.GameEngine
 	TriggersFromLastTurn []TriggerContribution
-	// StartOfTurnAuras lists the aura cards that were in play at the top of this turn — one
-	// entry per Aura carried in from the previous turn.
-	StartOfTurnAuras []card.Card
-	// DealtHand is the hand the deck loop snapshotted right after the draw step, before
-	// processAurasAtStartOfTurn appended any reveal-handler outputs (Sigil of the
-	// Arknight). Solver-internal call paths leave this nil; the deck loop populates it so
-	// the printout's "Start of turn → Hand:" line reflects the dealt cards only, with
-	// reveals showing up under MyTurn where they actually resolve.
-	DealtHand []card.Card
-	// IncomingDamage is the opponent damage the partition was scored against. Surfaced on
-	// the summary so format-time helpers (DR (+N) recompute) can reseed a fresh TurnState
-	// with the same value the simulator used.
-	IncomingDamage int
-	// Cacheable reports whether the chain that produced this summary did not depend on any
-	// hidden state — i.e. no card in the winning chain (or any sibling chain explored
-	// during the search) read or mutated deck / graveyard via TurnState.Deck() / Graveyard()
-	// / PopDeckTop / PrependToDeck / TutorFromDeck / BanishFromGraveyard. Aggregated across
-	// every partition leaf and DR run: if any path during the search touched hidden state,
-	// Cacheable is false. Currently informational — a future hand-eval cache stores results
-	// only when this is true. Defaults to true on the seed TurnSummary so the no-feasible-
-	// line fallback (everything Held, post-hoc arsenal promotion) reports cacheable
-	// trivially: no chain ran, no hidden state was read.
-	Cacheable bool
+	StartOfTurnAuras     []card.Card
+	DealtHand            []card.Card
+	IncomingDamage       int
+	Cacheable            bool
 }
 
-// TriggerContribution is one start-of-turn Aura fire: the aura that fired plus the
-// Damage it credited (folded into Value) and the card (if any) the handler revealed onto
-// the hand. Text is the card-authored display line — when set, the format layer renders
-// it verbatim and skips the inferred "drew X into hand" / "START OF ACTION PHASE (+N)"
-// suffix synthesis. Handlers populate Text by calling state.AddPostTriggerLogEntry on
-// the trigger's TurnState, which processAurasAtStartOfTurn captures.
+// TriggerContribution is one start-of-turn Aura fire: the aura that fired plus the Damage
+// it credited (folded into Value) and the card (if any) the handler revealed onto the hand.
+// Text is the card-authored display line — when set, the format layer renders it verbatim
+// and skips the inferred "drew X into hand" / "START OF ACTION PHASE (+N)" synthesis.
 type TriggerContribution struct {
 	Card     card.Card
 	Damage   int
@@ -150,41 +56,22 @@ type TriggerContribution struct {
 }
 
 // TurnLog is the structured record of a turn's printout, broken into four sections matching
-// the natural turn boundaries. Each entry is content-only — "Hocus Pocus [B]: PITCH" —
-// so the formatter owns indentation, section headers, numbering of chain events, and
-// join. JSON serializes the struct directly so the on-disk shape is browsable / diffable
-// per section.
+// the natural turn boundaries. Each entry is content-only; the formatter owns indentation,
+// section headers, numbering of chain events, and join.
 type TurnLog struct {
-	// StartOfTurn captures the turn's starting state: dealt hand, arsenal-in card, auras /
-	// runechants in play. Informational only ("Hand: A, B, C, D", "Auras: X, 1 Runechant");
-	// the formatter renders entries unnumbered. Carryover Aura fires belong to
-	// MyTurn — they're top-of-action-phase actions, not pre-existing state.
-	StartOfTurn []string `json:"start_of_turn,omitempty"`
-	// MyTurn is the numbered entries for the "My turn:" section: any carryover Aura
-	// fires (Sigil reveals, +N damage credits) at the top of the action phase, then
-	// attack-phase pitches, then the chain (Play / hero trigger / aura trigger / OnHit /
-	// weapon swing lines, in resolution order).
-	MyTurn []string `json:"my_turn,omitempty"`
-	// OpponentTurn is the numbered entries for the "Opponent's turn:" section: defense-phase
-	// pitches, plain blocks, and Defense Reactions, in that order.
+	StartOfTurn  []string `json:"start_of_turn,omitempty"`
+	MyTurn       []string `json:"my_turn,omitempty"`
 	OpponentTurn []string `json:"opponent_turn,omitempty"`
-	// EndOfTurn captures the turn's ending state: the cards in hand, the arsenal slot's
-	// contents, and the auras / runechants surviving into the next turn. Mirrors
-	// StartOfTurn's mixed-informational format ("Hand: A, B", "Arsenal: X (stayed)",
-	// "Auras: Y, 1 Runechant"); the formatter renders unnumbered.
-	EndOfTurn []string `json:"end_of_turn,omitempty"`
+	EndOfTurn    []string `json:"end_of_turn,omitempty"`
 }
 
-// IsEmpty reports whether all four sections are empty — true for an unscored deck or a
-// hand where Best returned without a winning line. Marshal / Unmarshal / printBestTurn use
-// this to short-circuit the best-turn block.
+// IsEmpty reports whether all four sections are empty.
 func (l TurnLog) IsEmpty() bool {
 	return len(l.StartOfTurn) == 0 && len(l.MyTurn) == 0 &&
 		len(l.OpponentTurn) == 0 && len(l.EndOfTurn) == 0
 }
 
-// ArsenalIn returns the assignment for the card that started the turn in the arsenal, if
-// any.
+// ArsenalIn returns the assignment for the card that started the turn in the arsenal.
 func (t TurnSummary) ArsenalIn() (CardAssignment, bool) {
 	for _, a := range t.BestLine {
 		if a.FromArsenal {
@@ -209,4 +96,52 @@ func (r Role) String() string {
 		return "ARSENAL"
 	}
 	return "UNKNOWN"
+}
+
+// auraCountByNameInEngine scans the engine's aura list for a token aura with the given
+// display name and returns its Count, or zero if no matching entry is present.
+func auraCountByNameInEngine(g *gameengine.GameEngine, name string) int {
+	if g == nil {
+		return 0
+	}
+	for _, a := range g.Auras() {
+		if a.CardName() == name {
+			return a.Count()
+		}
+	}
+	return 0
+}
+
+// itemCountByNameInEngine is the items counterpart of auraCountByNameInEngine.
+func itemCountByNameInEngine(g *gameengine.GameEngine, name string) int {
+	if g == nil {
+		return 0
+	}
+	for _, i := range g.Items() {
+		if i.CardName() == name {
+			return i.Count()
+		}
+	}
+	return 0
+}
+
+// auraCountByName scans a sim-concrete aura slice for a token aura by display name.
+// Used by the cross-turn bookkeeping in deck_eval.go to size the runechant carryover.
+func auraCountByName(auras []*Aura, name string) int {
+	for _, a := range auras {
+		if a.CardName() == name {
+			return a.Count()
+		}
+	}
+	return 0
+}
+
+// itemCountByName scans a sim-concrete item slice for a token item by display name.
+func itemCountByName(items []*Item, name string) int {
+	for _, i := range items {
+		if i.CardName() == name {
+			return i.Count()
+		}
+	}
+	return 0
 }

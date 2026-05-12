@@ -1,19 +1,20 @@
 package turntests
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
 	"testing"
 
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
+
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/gameengine"
 )
 
 // Tests that Regurgitating Slog with no Sloggism in the graveyard does not gain Dominate.
 func TestRegurgitatingSlog_NoSloggismNoDominate(t *testing.T) {
 	for _, c := range []card.Card{cards.RegurgitatingSlogRed{}, cards.RegurgitatingSlogYellow{}, cards.RegurgitatingSlogBlue{}} {
-		s := sim.NewTurnStateFromCards(nil, nil)
+		s := gameengine.NewFromCards(nil, nil)
 		self := &card.CardState{Card: c}
-		sim.ResolveChainStep(s, s.Logger(), self)
+		s.ResolveChainStep(s.Logger(), self)
 		if self.GrantedDominate {
 			t.Errorf("%s [%d{p}]: GrantedDominate = true with no Sloggism, want false", c.Name(), c.Pitch())
 		}
@@ -24,9 +25,9 @@ func TestRegurgitatingSlog_NoSloggismNoDominate(t *testing.T) {
 // Dominate.
 func TestRegurgitatingSlog_BanishesSloggismForDominate(t *testing.T) {
 	for _, c := range []card.Card{cards.RegurgitatingSlogRed{}, cards.RegurgitatingSlogYellow{}, cards.RegurgitatingSlogBlue{}} {
-		s := sim.NewTurnStateFromCards(nil, []card.Card{cards.SloggismRed{}})
+		s := gameengine.NewFromCards(nil, []card.Card{cards.SloggismRed{}})
 		self := &card.CardState{Card: c}
-		sim.ResolveChainStep(s, s.Logger(), self)
+		s.ResolveChainStep(s.Logger(), self)
 		if !self.GrantedDominate {
 			t.Errorf("%s [%d{p}]: GrantedDominate = false after banish, want true", c.Name(), c.Pitch())
 		}

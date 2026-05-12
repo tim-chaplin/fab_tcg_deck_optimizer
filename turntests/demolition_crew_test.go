@@ -1,20 +1,21 @@
 package turntests
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
 	"testing"
 
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
+
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/gameengine"
 )
 
 // Tests that PlayPrecondition passes when a cost-2-or-greater card sits in hand.
 func TestDemolitionCrew_PreconditionPassesWithEligibleReveal(t *testing.T) {
 	for _, c := range []card.Card{cards.DemolitionCrewRed{}, cards.DemolitionCrewYellow{}, cards.DemolitionCrewBlue{}} {
-		var s sim.TurnState
-		s.SetHandForTesting([]card.Card{testutils.GenericAttack(2, 0)})
-		if ok := c.(card.PlayPrecondition).PlayPrecondition(&s, &card.CardState{Card: c}); !ok {
+		s := gameengine.New()
+		s.SetHand([]card.Card{testutils.GenericAttack(2, 0)})
+		if ok := c.(card.PlayPrecondition).PlayPrecondition(s, &card.CardState{Card: c}); !ok {
 			t.Errorf("%s: PlayPrecondition with cost-2 card in hand returned false, want true", c.Name())
 		}
 	}
@@ -23,9 +24,9 @@ func TestDemolitionCrew_PreconditionPassesWithEligibleReveal(t *testing.T) {
 // Tests that PlayPrecondition fails when only sub-cost-2 cards sit in hand.
 func TestDemolitionCrew_PreconditionFailsWithoutEligibleReveal(t *testing.T) {
 	for _, c := range []card.Card{cards.DemolitionCrewRed{}, cards.DemolitionCrewYellow{}, cards.DemolitionCrewBlue{}} {
-		var s sim.TurnState
-		s.SetHandForTesting([]card.Card{testutils.GenericAttack(1, 0)})
-		if ok := c.(card.PlayPrecondition).PlayPrecondition(&s, &card.CardState{Card: c}); ok {
+		s := gameengine.New()
+		s.SetHand([]card.Card{testutils.GenericAttack(1, 0)})
+		if ok := c.(card.PlayPrecondition).PlayPrecondition(s, &card.CardState{Card: c}); ok {
 			t.Errorf("%s: PlayPrecondition with no cost-2 card returned true, want false", c.Name())
 		}
 	}
@@ -33,8 +34,8 @@ func TestDemolitionCrew_PreconditionFailsWithoutEligibleReveal(t *testing.T) {
 
 // Tests that an empty hand fails the additional-cost check.
 func TestDemolitionCrew_PreconditionFailsOnEmptyHand(t *testing.T) {
-	var s sim.TurnState
-	if ok := (cards.DemolitionCrewRed{}).PlayPrecondition(&s, &card.CardState{Card: cards.DemolitionCrewRed{}}); ok {
+	s := gameengine.New()
+	if ok := (cards.DemolitionCrewRed{}).PlayPrecondition(s, &card.CardState{Card: cards.DemolitionCrewRed{}}); ok {
 		t.Errorf("PlayPrecondition with empty hand returned true, want false")
 	}
 }
@@ -50,8 +51,8 @@ func TestDemolitionCrew_PlayAttacksForPrintedPower(t *testing.T) {
 		{cards.DemolitionCrewBlue{}, 4},
 	}
 	for _, tc := range cases {
-		var s sim.TurnState
-		sim.ResolveChainStep(&s, s.Logger(), &card.CardState{Card: tc.c})
+		s := gameengine.New()
+		s.ResolveChainStep(s.Logger(), &card.CardState{Card: tc.c})
 		if got := s.Value(); got != tc.want {
 			t.Errorf("%s: Play() = %d, want %d", tc.c.Name(), got, tc.want)
 		}

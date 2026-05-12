@@ -1,19 +1,20 @@
 package turntests
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
 	"testing"
 
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
+
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/gameengine"
 )
 
 // TestTrotAlong_NoAttackReturnsZero covers the miss branch: no qualifying next attack → grant
 // fizzles.
 func TestTrotAlong_NoAttackReturnsZero(t *testing.T) {
-	s := sim.TurnState{}
-	sim.ResolveChainStep(&s, s.Logger(), &card.CardState{Card: cards.TrotAlongBlue{}})
+	s := gameengine.New()
+	s.ResolveChainStep(s.Logger(), &card.CardState{Card: cards.TrotAlongBlue{}})
 	if got := s.Value(); got != 0 {
 		t.Errorf("Play() = %d, want 0", got)
 	}
@@ -23,8 +24,8 @@ func TestTrotAlong_NoAttackReturnsZero(t *testing.T) {
 // CardsRemaining is seen but doesn't pass the predicate, so the grant doesn't fire.
 func TestTrotAlong_HighPowerAttackDoesNotFire(t *testing.T) {
 	target := &card.CardState{Card: testutils.GenericAttack(0, 4)}
-	s := sim.NewTurnStateFromSpec(sim.TurnStateSpec{CardsRemaining: []*card.CardState{target}})
-	sim.ResolveChainStep(&s, s.Logger(), &card.CardState{Card: cards.TrotAlongBlue{}})
+	s := gameengine.NewFromSpec(gameengine.Spec{CardsRemaining: []*card.CardState{target}})
+	s.ResolveChainStep(s.Logger(), &card.CardState{Card: cards.TrotAlongBlue{}})
 	if got := s.Value(); got != 0 {
 		t.Errorf("Play() = %d, want 0 (power 4 > 3)", got)
 	}
@@ -36,8 +37,8 @@ func TestTrotAlong_HighPowerAttackDoesNotFire(t *testing.T) {
 // TestTrotAlong_LowPowerAttackGrantsGoAgain exercises the hit branch: a power-3 attack qualifies.
 func TestTrotAlong_LowPowerAttackGrantsGoAgain(t *testing.T) {
 	target := &card.CardState{Card: testutils.GenericAttack(0, 3)}
-	s := sim.NewTurnStateFromSpec(sim.TurnStateSpec{CardsRemaining: []*card.CardState{target}})
-	sim.ResolveChainStep(&s, s.Logger(), &card.CardState{Card: cards.TrotAlongBlue{}})
+	s := gameengine.NewFromSpec(gameengine.Spec{CardsRemaining: []*card.CardState{target}})
+	s.ResolveChainStep(s.Logger(), &card.CardState{Card: cards.TrotAlongBlue{}})
 	if got := s.Value(); got != 0 {
 		t.Errorf("Play() = %d, want 0 (Trot Along grants go again, not damage)", got)
 	}
@@ -51,8 +52,8 @@ func TestTrotAlong_LowPowerAttackGrantsGoAgain(t *testing.T) {
 // Attack() is 0 so the power gate trivially passes.
 func TestTrotAlong_GrantsGoAgainToWeaponSwing(t *testing.T) {
 	target := &card.CardState{Card: testutils.RunebladeWeapon{}}
-	s := sim.NewTurnStateFromSpec(sim.TurnStateSpec{CardsRemaining: []*card.CardState{target}})
-	sim.ResolveChainStep(&s, s.Logger(), &card.CardState{Card: cards.TrotAlongBlue{}})
+	s := gameengine.NewFromSpec(gameengine.Spec{CardsRemaining: []*card.CardState{target}})
+	s.ResolveChainStep(s.Logger(), &card.CardState{Card: cards.TrotAlongBlue{}})
 	if !target.GrantedGoAgain {
 		t.Error("weapon swing should get go again ('your next attack' has no 'action card' qualifier)")
 	}

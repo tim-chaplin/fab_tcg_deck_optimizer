@@ -1,19 +1,21 @@
 package turntests
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
 	"testing"
 
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
+
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/gameengine"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/triggertype"
 )
 
 // TestSigilOfSilphidae_PlayFizzlesWithoutAura: no aura in s.Graveyard means the enter trigger
 // can't banish anything and Play returns 0. AuraCreated still fires (Silphidae IS an aura)
 // and a start-of-turn Aura is registered for the "destroy this" clause.
 func TestSigilOfSilphidae_PlayFizzlesWithoutAura(t *testing.T) {
-	var s sim.TurnState
-	sim.ResolveChainStep(&s, s.Logger(), &card.CardState{Card: cards.SigilOfSilphidaeBlue{}})
+	s := gameengine.New()
+	s.ResolveChainStep(s.Logger(), &card.CardState{Card: cards.SigilOfSilphidaeBlue{}})
 	if got := s.Value(); got != 0 {
 		t.Errorf("Play() = %d, want 0 (empty graveyard)", got)
 	}
@@ -23,7 +25,7 @@ func TestSigilOfSilphidae_PlayFizzlesWithoutAura(t *testing.T) {
 	if s.ArcaneDamageDealt() {
 		t.Errorf("ArcaneDamageDealt should stay false when banish fizzles")
 	}
-	if len(s.Auras()) != 1 || s.Auras()[0].TriggerType != sim.TriggerStartOfTurn {
+	if len(s.Auras()) != 1 || s.Auras()[0].TriggerType() != triggertype.StartOfTurn {
 		t.Errorf("Auras = %+v, want one TriggerStartOfTurn entry", s.Auras())
 	}
 }
@@ -32,8 +34,8 @@ func TestSigilOfSilphidae_PlayFizzlesWithoutAura(t *testing.T) {
 // enter banish — the aura moves to Banish, Play returns 1, and ArcaneDamageDealt flips.
 func TestSigilOfSilphidae_PlayBanishesAuraForOneArcane(t *testing.T) {
 	aura := cards.BlessingOfOccultRed{}
-	s := sim.NewTurnStateFromCards(nil, []card.Card{aura})
-	sim.ResolveChainStep(s, s.Logger(), &card.CardState{Card: cards.SigilOfSilphidaeBlue{}})
+	s := gameengine.NewFromCards(nil, []card.Card{aura})
+	s.ResolveChainStep(s.Logger(), &card.CardState{Card: cards.SigilOfSilphidaeBlue{}})
 	if got := s.Value(); got != 1 {
 		t.Errorf("Play() = %d, want 1", got)
 	}
@@ -49,12 +51,11 @@ func TestSigilOfSilphidae_PlayBanishesAuraForOneArcane(t *testing.T) {
 // start-of-turn graveyard, the leave trigger has no OTHER aura to banish — handler returns
 // 0 damage.
 func TestSigilOfSilphidae_StartOfTurnHandlerFizzlesWithoutAnotherAura(t *testing.T) {
-	var play sim.TurnState
-	sim.ResolveChainStep(&play, play.Logger(), &card.CardState{Card: cards.SigilOfSilphidaeBlue{}})
-	next := sim.NewTurnStateFromCards(nil, nil)
-	next.SetAuras(append(next.Auras(), play.Auras()[0]))
-	next.SetCurrentAuraIdxForTesting(0)
-	next.FireAuraForTesting(0)
+	var play gameengine.GameEngine
+	play.ResolveChainStep(play.Logger(), &card.CardState{Card: cards.SigilOfSilphidaeBlue{}})
+	next := gameengine.NewFromCards(nil, nil)
+	next.CreateAura(play.Auras()[0])
+	next.FireStartOfTurn(nil)
 	if next.Value() != 0 {
 		t.Errorf("handler Value = %d, want 0 (no other aura to banish)", next.Value())
 	}
@@ -63,13 +64,12 @@ func TestSigilOfSilphidae_StartOfTurnHandlerFizzlesWithoutAnotherAura(t *testing
 // TestSigilOfSilphidae_StartOfTurnHandlerBanishesAnotherAura: with another aura already in
 // the start-of-turn graveyard, the leave trigger banishes it for 1 arcane.
 func TestSigilOfSilphidae_StartOfTurnHandlerBanishesAnotherAura(t *testing.T) {
-	var play sim.TurnState
-	sim.ResolveChainStep(&play, play.Logger(), &card.CardState{Card: cards.SigilOfSilphidaeBlue{}})
+	var play gameengine.GameEngine
+	play.ResolveChainStep(play.Logger(), &card.CardState{Card: cards.SigilOfSilphidaeBlue{}})
 	other := cards.BlessingOfOccultRed{}
-	next := sim.NewTurnStateFromCards(nil, []card.Card{other})
-	next.SetAuras(append(next.Auras(), play.Auras()[0]))
-	next.SetCurrentAuraIdxForTesting(0)
-	next.FireAuraForTesting(0)
+	next := gameengine.NewFromCards(nil, []card.Card{other})
+	next.CreateAura(play.Auras()[0])
+	next.FireStartOfTurn(nil)
 	if next.Value() != 1 {
 		t.Errorf("handler Value = %d, want 1 (banished another aura)", next.Value())
 	}

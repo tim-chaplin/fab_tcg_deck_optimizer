@@ -25,7 +25,7 @@ func TestBest_ViseraiMaleficShrillCombo(t *testing.T) {
 		cards.MaleficIncantationRed{},
 		cards.ShrillOfSkullformRed{},
 	}
-	got := Best(heroes.Viserai{}, nil, h, Matchup{IncomingDamage: 4}, nil, TurnState{})
+	got := Best(nil, h, Matchup{IncomingDamage: 4}, nil, Prior{Hero: heroes.Viserai{}})
 	if got.Value != 11 {
 		t.Fatalf("want value 11, got %d (roles=[%s])",
 			got.Value, FormatBestLine(got.BestLine))
@@ -45,7 +45,7 @@ func TestBest_ViseraiReapingBladeBlueMalefics(t *testing.T) {
 		cards.MaleficIncantationBlue{},
 	}
 	weapons := []Weapon{weapons.ReapingBlade{}}
-	got := Best(heroes.Viserai{}, weapons, h, Matchup{IncomingDamage: 0}, nil, TurnState{})
+	got := Best(weapons, h, Matchup{IncomingDamage: 0}, nil, Prior{Hero: heroes.Viserai{}})
 	if got.Value != 5 {
 		t.Fatalf("want value 5, got %d (roles=[%s])",
 			got.Value, FormatBestLine(got.BestLine))
@@ -63,7 +63,7 @@ func TestBest_ViseraiReapingBladeMaleficsPlusShrill(t *testing.T) {
 		cards.ShrillOfSkullformRed{},
 	}
 	weapons := []Weapon{weapons.ReapingBlade{}}
-	got := Best(heroes.Viserai{}, weapons, h, Matchup{IncomingDamage: 0}, nil, TurnState{})
+	got := Best(weapons, h, Matchup{IncomingDamage: 0}, nil, Prior{Hero: heroes.Viserai{}})
 	if got.Value != 11 {
 		t.Fatalf("want value 11, got %d (roles=[%s])",
 			got.Value, FormatBestLine(got.BestLine))
@@ -82,7 +82,7 @@ func TestBest_ViseraiOathBlueHocusRedMalefic(t *testing.T) {
 		cards.MaleficIncantationRed{},
 	}
 	weapons := []Weapon{weapons.ReapingBlade{}}
-	got := Best(heroes.Viserai{}, weapons, h, Matchup{IncomingDamage: 0}, nil, TurnState{})
+	got := Best(weapons, h, Matchup{IncomingDamage: 0}, nil, Prior{Hero: heroes.Viserai{}})
 	if got.Value != 8 {
 		t.Fatalf("want value 8, got %d (roles=[%s])",
 			got.Value, FormatBestLine(got.BestLine))
@@ -106,7 +106,7 @@ func TestBest_RunicReapingPrefersAttackPitch(t *testing.T) {
 		cards.RunicReapingRed{},
 		cards.ShrillOfSkullformRed{},
 	}
-	got := Best(heroes.Viserai{}, nil, h, Matchup{IncomingDamage: 0}, nil, TurnState{})
+	got := Best(nil, h, Matchup{IncomingDamage: 0}, nil, Prior{Hero: heroes.Viserai{}})
 	if got.Value != 11 {
 		t.Fatalf("want value 11, got %d (roles=[%s])",
 			got.Value, FormatBestLine(got.BestLine))
@@ -127,7 +127,7 @@ func TestBest_ViseraiMauvrionGrantsGoAgainToShrill(t *testing.T) {
 		cards.ShrillOfSkullformRed{},
 	}
 	weapons := []Weapon{weapons.ReapingBlade{}}
-	got := Best(heroes.Viserai{}, weapons, h, Matchup{IncomingDamage: 0}, nil, TurnState{})
+	got := Best(weapons, h, Matchup{IncomingDamage: 0}, nil, Prior{Hero: heroes.Viserai{}})
 	if got.Value != 16 {
 		t.Fatalf("want value 16, got %d (roles=[%s])",
 			got.Value, FormatBestLine(got.BestLine))
@@ -142,7 +142,7 @@ func TestBest_ViseraiMauvrionPredictsDrowningDireDominate(t *testing.T) {
 		cards.DrowningDireRed{},
 		testutils.YellowAttack{},
 	}
-	got := Best(heroes.Viserai{}, nil, h, Matchup{IncomingDamage: 0}, nil, TurnState{})
+	got := Best(nil, h, Matchup{IncomingDamage: 0}, nil, Prior{Hero: heroes.Viserai{}})
 	if got.Value != 9 {
 		t.Fatalf("want value 9, got %d (roles=[%s])",
 			got.Value, FormatBestLine(got.BestLine))
@@ -177,7 +177,7 @@ func TestBest_ViseraiMauvrionChainsShrillIntoRuneragerIntoWeapon(t *testing.T) {
 		cards.ShrillOfSkullformRed{},
 	}
 	weapons := []Weapon{weapons.ReapingBlade{}}
-	got := Best(heroes.Viserai{}, weapons, h, Matchup{IncomingDamage: 0}, nil, TurnState{})
+	got := Best(weapons, h, Matchup{IncomingDamage: 0}, nil, Prior{Hero: heroes.Viserai{}})
 	if got.Value != 18 {
 		t.Fatalf("want value 18, got %d (roles=[%s])",
 			got.Value, FormatBestLine(got.BestLine))
@@ -187,7 +187,7 @@ func TestBest_ViseraiMauvrionChainsShrillIntoRuneragerIntoWeapon(t *testing.T) {
 // Tests that state.Value equals the summed Play returns (no double-counting or drops).
 func TestBest_StateValueMatchesSummedReturns(t *testing.T) {
 	h := []card.Card{testutils.BlueAttack{}, testutils.BlueAttack{}, testutils.RedAttack{}, testutils.RedAttack{}}
-	got := Best(testutils.Hero{Intel: 4}, nil, h, Matchup{IncomingDamage: 0}, nil, TurnState{})
+	got := Best(nil, h, Matchup{IncomingDamage: 0}, nil, Prior{Hero: testutils.Hero{Intel: 4}})
 	if got.Value != 7 {
 		t.Errorf("Value = %d, want 7 (Blue 1 + Red 3 + Red 3 chain off one Blue pitch). Roles=[%s]",
 			got.Value, FormatBestLine(got.BestLine))
