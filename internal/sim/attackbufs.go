@@ -85,7 +85,7 @@ type permBufs struct {
 	// defenderAurasScratch holds the post-defense-aura set captured after defendersDamage
 	// runs. Aliased by sequenceContext.defenderAuras; the next permutation feeds it into
 	// seed.Auras for engine.Reset.
-	defenderAurasScratch []gameengine.Aura
+	defenderAurasScratch []*Aura
 }
 
 // carryWinnerBufs holds the running-winner CarryState scratches — one per nesting level
@@ -108,7 +108,7 @@ type attackBufs struct {
 	drScratch *gameengine.GameEngine
 	// drScratchAuras seeds drScratch with the runechant aura entry when leftover
 	// runechants > 0, so DR Cost reads RunechantCount() off this aura.
-	drScratchAuras []gameengine.Aura
+	drScratchAuras []*Aura
 	// drCardStateScratch is a pooled *CardState handed to DR Card.Play calls.
 	drCardStateScratch card.CardState
 }
@@ -171,7 +171,7 @@ func newAttackBufs(handSize, weaponCount int, weapons []Weapon) *attackBufs {
 		permBufs: permBufs{
 			logBacking:           make([]turnlogger.LogEntry, 0, logBackingCap),
 			logger:               turnlogger.New(),
-			defenderAurasScratch: make([]gameengine.Aura, 0, handSize+1),
+			defenderAurasScratch: make([]*Aura, 0, handSize+1),
 		},
 		drScratch: gameengine.New(),
 	}

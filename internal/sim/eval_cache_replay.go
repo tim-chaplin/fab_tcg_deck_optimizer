@@ -28,7 +28,7 @@ import (
 // on the BestLine afterward.
 func (e *Evaluator) replayBest(
 	entry evalCacheEntry,
-	hero gameengine.Hero, weapons []Weapon, hand []card.Card,
+	hero Hero, weapons []Weapon, hand []card.Card,
 	mp Matchup, d *deck.Deck,
 	prior gameengine.Spec, skipLog bool,
 ) TurnSummary {

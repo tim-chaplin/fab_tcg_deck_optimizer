@@ -17,12 +17,12 @@ import (
 // token counts get pulled from them for the StartOfTurn "Auras: ..." / "Items: ..."
 // lines. MyTurn's chain content comes from t.State.Log; pitches and defense lines come
 // from BestLine; ending zone state comes from t.State.
-func BuildTurnLog(t TurnSummary, startingAuras []gameengine.Aura, startingItems []gameengine.Item) TurnLog {
+func BuildTurnLog(t TurnSummary, startingAuras []*Aura, startingItems []*Item) TurnLog {
 	var log TurnLog
 	parts := partitionBestLineForDisplay(t.BestLine)
 	defensePitches, attackPitches := splitPitchesByPhase(parts.pitched, parts.drCost)
-	startingRunechants := countByName(startingAuras, "Runechant")
-	startingPonders := countByName(startingAuras, "Ponder")
+	startingRunechants := auraCountByName(startingAuras, "Runechant")
+	startingPonders := auraCountByName(startingAuras, "Ponder")
 	startingGold := itemCountByName(startingItems, "Gold")
 	startingSilver := itemCountByName(startingItems, "Silver")
 	startingCopper := itemCountByName(startingItems, "Copper")
@@ -241,7 +241,7 @@ func endingArsenalLine(arsenal []CardAssignment) string {
 // re-rendered as count phrases so pluralisation lives in one place. Card-aura names
 // sort alphabetically; token phrases append last in declaration order. Returns "" when
 // nothing survived.
-func endingAurasLine(triggers []gameengine.Aura, runechants, ponders int) string {
+func endingAurasLine(triggers []*Aura, runechants, ponders int) string {
 	var items []string
 	for _, t := range triggers {
 		if t.SourceCard() == nil {

@@ -20,8 +20,8 @@ type TurnStartState struct {
 	StartOfNextTurnHand          []deck.Card
 	StartOfNextTurnArsenal       deck.Card
 	StartOfNextTurnDeck          *deck.Deck
-	StartOfNextTurnAuras         []gameengine.Aura
-	StartOfNextTurnItems         []gameengine.Item
+	StartOfNextTurnAuras         []*Aura
+	StartOfNextTurnItems         []*Item
 	CardsDrawn                   int
 	OpponentMarked               bool
 	StartOfNextTurnTriggerDamage int
@@ -30,12 +30,12 @@ type TurnStartState struct {
 
 // RunechantCount returns the live Runechant token count at the start of the next turn.
 func (t TurnStartState) RunechantCount() int {
-	return countByName(t.StartOfNextTurnAuras, "Runechant")
+	return auraCountByName(t.StartOfNextTurnAuras, "Runechant")
 }
 
 // PonderCount returns the live Ponder token count at the start of the next turn.
 func (t TurnStartState) PonderCount() int {
-	return countByName(t.StartOfNextTurnAuras, "Ponder")
+	return auraCountByName(t.StartOfNextTurnAuras, "Ponder")
 }
 
 // GoldCount returns the live Gold token count at the start of the next turn.
@@ -54,17 +54,14 @@ func (t TurnStartState) CopperCount() int {
 }
 
 // EvalOneTurnForTesting runs one turn against the deck in source order (no shuffle) and
-// returns the tested turn's outcome plus the start-of-next-turn state. initial seeds the
-// start-of-turn state — Hero, Arsenal, Auras, Items — modelling carryover from a
-// hypothetical previous turn. initialHand sets turn 1's starting hand; nil draws the hand
-// off the top of the deck.
+// returns the tested turn's outcome plus the start-of-next-turn state.
 func EvalOneTurnForTesting(master *deck.Deck, mp Matchup, initial gameengine.Spec, initialHand []deck.Card) TurnStartState {
 	d := master.Copy()
-	hero := d.Hero.(gameengine.Hero)
+	hero := d.Hero.(Hero)
 	if initial.Hero == nil {
 		initial.Hero = hero
 	} else {
-		hero = initial.Hero
+		hero = initial.Hero.(Hero)
 	}
 	handSize := hero.Intelligence()
 	if handSize <= 0 {
@@ -103,8 +100,8 @@ func EvalOneTurnForTesting(master *deck.Deck, mp Matchup, initial gameengine.Spe
 	}
 	d.PutBottom(recycled)
 
-	auraQueue := append([]gameengine.Aura(nil), play.State.Auras...)
-	itemQueue := append([]gameengine.Item(nil), play.State.Items...)
+	auraQueue := append([]*Aura(nil), play.State.Auras...)
+	itemQueue := append([]*Item(nil), play.State.Items...)
 
 	held := append([]card.Card(nil), play.State.Hand...)
 	graveyardOut := make([]deck.Card, len(play.State.Graveyard))
@@ -118,8 +115,8 @@ func EvalOneTurnForTesting(master *deck.Deck, mp Matchup, initial gameengine.Spe
 			Graveyard:              graveyardOut,
 			StartOfNextTurnArsenal: play.State.Arsenal,
 			StartOfNextTurnDeck:    d.Copy(),
-			StartOfNextTurnAuras:   append([]gameengine.Aura(nil), play.State.Auras...),
-			StartOfNextTurnItems:   append([]gameengine.Item(nil), play.State.Items...),
+			StartOfNextTurnAuras:   append([]*Aura(nil), play.State.Auras...),
+			StartOfNextTurnItems:   append([]*Item(nil), play.State.Items...),
 			CardsDrawn:             play.State.CardsDrawn,
 			OpponentMarked:         play.State.OpponentMarked,
 		}
@@ -148,8 +145,8 @@ func EvalOneTurnForTesting(master *deck.Deck, mp Matchup, initial gameengine.Spe
 		StartOfNextTurnHand:          handOut,
 		StartOfNextTurnArsenal:       play.State.Arsenal,
 		StartOfNextTurnDeck:          d.Copy(),
-		StartOfNextTurnAuras:         append([]gameengine.Aura(nil), survivors...),
-		StartOfNextTurnItems:         append([]gameengine.Item(nil), itemQueue...),
+		StartOfNextTurnAuras:         append([]*Aura(nil), survivors...),
+		StartOfNextTurnItems:         append([]*Item(nil), itemQueue...),
 		CardsDrawn:                   play.State.CardsDrawn,
 		OpponentMarked:               play.State.OpponentMarked,
 		StartOfNextTurnTriggerDamage: trigDamage,

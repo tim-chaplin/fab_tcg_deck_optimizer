@@ -16,7 +16,7 @@ type Trigger struct {
 
 // NewCardTrigger builds a one-shot trigger whose source is self.Card. typeFilter narrows
 // the firing site (currently used only by TriggerHit); pass nil for no filter.
-func NewCardTrigger(self *card.CardState, tt gameengine.TriggerType, handler card.TriggerHandler, typeFilter func(card.TypeSet) bool) gameengine.Trigger {
+func NewCardTrigger(self *card.CardState, tt gameengine.TriggerType, handler card.TriggerHandler, typeFilter func(card.TypeSet) bool) *Trigger {
 	return &Trigger{
 		triggerType: tt,
 		handler:     handler,

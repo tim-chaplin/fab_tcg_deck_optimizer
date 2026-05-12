@@ -536,7 +536,7 @@ func TestFormatBestTurn_StartOfTurnAurasWithRunechants(t *testing.T) {
 	summary := TurnSummary{
 		StartOfTurnAuras: []card.Card{cards.MaleficIncantationRed{}},
 	}
-	out := FormatBestTurn(summary, []gameengine.Aura{NewRunechantAura(3)}, nil)
+	out := FormatBestTurn(summary, []*Aura{NewRunechantAura(3)}, nil)
 	want := "Auras: Malefic Incantation [R], 3 Runechants"
 	if !strings.Contains(out, want) {
 		t.Errorf("missing %q in:\n%s", want, out)
@@ -547,13 +547,13 @@ func TestFormatBestTurn_StartOfTurnAurasWithRunechants(t *testing.T) {
 // into the Auras entry even when no auras are in play, using singular "Runechant" when the
 // count is 1.
 func TestFormatBestTurn_StartOfTurnRunechantsOnly(t *testing.T) {
-	out := FormatBestTurn(TurnSummary{}, []gameengine.Aura{NewRunechantAura(1)}, nil)
+	out := FormatBestTurn(TurnSummary{}, []*Aura{NewRunechantAura(1)}, nil)
 	want := "Auras: 1 Runechant"
 	if !strings.Contains(out, want) {
 		t.Errorf("missing %q in:\n%s", want, out)
 	}
 	// Plural noun when count > 1.
-	out2 := FormatBestTurn(TurnSummary{}, []gameengine.Aura{NewRunechantAura(2)}, nil)
+	out2 := FormatBestTurn(TurnSummary{}, []*Aura{NewRunechantAura(2)}, nil)
 	if !strings.Contains(out2, "2 Runechants") {
 		t.Errorf("want plural 'Runechants' at count 2, got:\n%s", out2)
 	}
@@ -562,7 +562,7 @@ func TestFormatBestTurn_StartOfTurnRunechantsOnly(t *testing.T) {
 // TestFormatBestTurn_StartOfTurnGoldItems surfaces a Gold token carryover as an
 // "Items: N Gold" line in the Start of turn section.
 func TestFormatBestTurn_StartOfTurnGoldItems(t *testing.T) {
-	out := FormatBestTurn(TurnSummary{}, nil, []gameengine.Item{NewGoldItem(2)})
+	out := FormatBestTurn(TurnSummary{}, nil, []*Item{NewGoldItem(2)})
 	want := "Items: 2 Gold"
 	if !strings.Contains(out, want) {
 		t.Errorf("missing %q in:\n%s", want, out)
@@ -573,7 +573,7 @@ func TestFormatBestTurn_StartOfTurnGoldItems(t *testing.T) {
 // as an "Items: N Gold" line in the End of turn section.
 func TestFormatBestTurn_EndOfTurnGoldItems(t *testing.T) {
 	summary := TurnSummary{
-		State: CarryState{Items: []gameengine.Item{NewGoldItem(1)}},
+		State: CarryState{Items: []*Item{NewGoldItem(1)}},
 	}
 	out := FormatBestTurn(summary, nil, nil)
 	want := "Items: 1 Gold"
@@ -602,7 +602,7 @@ func TestFormatBestTurn_EndOfTurnHandLine(t *testing.T) {
 func TestFormatBestTurn_EndOfTurnAurasWithRunechants(t *testing.T) {
 	summary := TurnSummary{
 		State: CarryState{
-			Auras: []gameengine.Aura{
+			Auras: []*Aura{
 				NewCardAura(
 					&card.CardState{Card: cards.MaleficIncantationRed{}},
 					gameengine.TriggerStartOfTurn,

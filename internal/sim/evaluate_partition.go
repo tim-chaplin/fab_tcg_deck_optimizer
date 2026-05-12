@@ -23,7 +23,7 @@ import (
 // Mutates the bufs scratch slices (pitchedBuf, attackersBuf, defendersBuf, heldBuf) in
 // place; both callers feed pooled scratch through bufs and tolerate the rewrite.
 func (e *Evaluator) evaluatePartition(
-	hero gameengine.Hero, weapons []Weapon, hand []card.Card,
+	hero Hero, weapons []Weapon, hand []card.Card,
 	d *deck.Deck,
 	rolesBuf []Role, n int, bufs *attackBufs,
 	mp Matchup, defenseSum int,

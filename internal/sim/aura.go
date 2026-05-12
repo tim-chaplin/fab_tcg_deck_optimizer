@@ -24,7 +24,7 @@ type Aura struct {
 // NewCardAura builds a card-backed aura — source is self.Card. CardName / CardID surface
 // self.Card's DisplayName / ID. On destroy with addToGraveyard=true the source card lands
 // in the graveyard.
-func NewCardAura(self *card.CardState, tt gameengine.TriggerType, handler card.AuraHandler, count int, oncePerTurn bool) gameengine.Aura {
+func NewCardAura(self *card.CardState, tt gameengine.TriggerType, handler card.AuraHandler, count int, oncePerTurn bool) *Aura {
 	return &Aura{
 		triggerType: tt,
 		handler:     handler,
@@ -38,7 +38,7 @@ func NewCardAura(self *card.CardState, tt gameengine.TriggerType, handler card.A
 // supplied name (e.g. "Runechant"); CardID returns the supplied tokenID so cache keys
 // distinguish each token kind without an extra discriminator. On destroy the aura no-ops
 // in the graveyard pass (tokens don't head to graveyard).
-func NewTokenAura(name string, tokenID ids.CardID, tt gameengine.TriggerType, handler card.AuraHandler, count int) gameengine.Aura {
+func NewTokenAura(name string, tokenID ids.CardID, tt gameengine.TriggerType, handler card.AuraHandler, count int) *Aura {
 	return &Aura{
 		triggerType: tt,
 		handler:     handler,
@@ -46,6 +46,34 @@ func NewTokenAura(name string, tokenID ids.CardID, tt gameengine.TriggerType, ha
 		tokenID:     tokenID,
 		count:       count,
 	}
+}
+
+// auraSliceAsEngine converts a []*Aura to []gameengine.Aura for engine-API call sites
+// (PermutationSeed.Auras, Spec.Auras). The underlying entries are unchanged — each *Aura
+// satisfies gameengine.Aura — so this is just a per-element box.
+func auraSliceAsEngine(src []*Aura) []gameengine.Aura {
+	if len(src) == 0 {
+		return nil
+	}
+	out := make([]gameengine.Aura, len(src))
+	for i, a := range src {
+		out[i] = a
+	}
+	return out
+}
+
+// auraSliceFromEngine type-asserts every entry of an engine-returned []gameengine.Aura
+// back to *Aura. Sim's runtime is the only registered Aura impl, so each assertion is
+// guaranteed to succeed in production.
+func auraSliceFromEngine(src []gameengine.Aura) []*Aura {
+	if len(src) == 0 {
+		return nil
+	}
+	out := make([]*Aura, len(src))
+	for i, a := range src {
+		out[i] = a.(*Aura)
+	}
+	return out
 }
 
 func (a *Aura) TriggerType() gameengine.TriggerType { return a.triggerType }

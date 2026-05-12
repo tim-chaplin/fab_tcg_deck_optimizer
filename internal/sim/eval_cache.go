@@ -146,7 +146,7 @@ func newEvalCache() *evalCache {
 // swung-weapon names would drift, so we just preserve the input order. Matchup is
 // omitted — see evalCacheKey doc.
 func makeCacheKey(
-	hero gameengine.Hero, weapons []Weapon, hand []card.Card,
+	hero Hero, weapons []Weapon, hand []card.Card,
 	prior gameengine.Spec,
 ) (evalCacheKey, bool) {
 	if len(hand) > maxCachedHandSize ||

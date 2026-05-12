@@ -27,13 +27,13 @@ import (
 // Package-private so external packages can't bypass EvalOneTurnForTesting — the turntests
 // convention is to drive the chain runner through that deck-level entry point so every test
 // exercises the same per-turn pipeline production runs through Evaluate.
-func best(hero gameengine.Hero, weapons []Weapon, hand []card.Card, mp Matchup, d *deck.Deck, prior gameengine.Spec) TurnSummary {
+func best(hero Hero, weapons []Weapon, hand []card.Card, mp Matchup, d *deck.Deck, prior gameengine.Spec) TurnSummary {
 	return sharedEvaluator.Best(hero, weapons, hand, mp, d, prior)
 }
 
 // Best is the method form of the package-level Best. Returns a TurnSummary with
 // State.Log fully populated.
-func (e *Evaluator) Best(hero gameengine.Hero, weapons []Weapon, hand []card.Card, mp Matchup, d *deck.Deck, prior gameengine.Spec) TurnSummary {
+func (e *Evaluator) Best(hero Hero, weapons []Weapon, hand []card.Card, mp Matchup, d *deck.Deck, prior gameengine.Spec) TurnSummary {
 	return e.findBest(hero, weapons, hand, mp, d, prior, false)
 }
 
@@ -41,7 +41,7 @@ func (e *Evaluator) Best(hero gameengine.Hero, weapons []Weapon, hand []card.Car
 // fields; State.Log comes back empty. The deck-eval loop uses this for every turn to skip
 // the per-chain Log slice copy that dominates allocation bytes; only turns that become the
 // new deck-best are replayed via Best to recover Log.
-func (e *Evaluator) BestSkipLog(hero gameengine.Hero, weapons []Weapon, hand []card.Card, mp Matchup, d *deck.Deck, prior gameengine.Spec) TurnSummary {
+func (e *Evaluator) BestSkipLog(hero Hero, weapons []Weapon, hand []card.Card, mp Matchup, d *deck.Deck, prior gameengine.Spec) TurnSummary {
 	return e.findBest(hero, weapons, hand, mp, d, prior, true)
 }
 

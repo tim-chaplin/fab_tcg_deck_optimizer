@@ -3,13 +3,12 @@ package sim
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
-	"github.com/tim-chaplin/fab-deck-optimizer/v2/gameengine"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/turnlogger"
 )
 
 // Turn-summary data shapes returned by Best: Role, CardAssignment, TurnSummary, plus the
-// CarryState snapshot that captures the winning permutation's end-of-chain GameEngine state.
-// The deck loop adopts CarryState wholesale into the next turn's seed — no per-field
+// CarryState snapshot that captures the winning permutation's end-of-chain state. The
+// deck loop adopts CarryState wholesale into the next turn's seed — no per-field
 // reconstruction.
 
 // Role is what a card did on a given turn cycle.
@@ -32,28 +31,28 @@ type CardAssignment struct {
 	FromArsenal bool
 }
 
-// CarryState is the slice of GameEngine that carries across the turn boundary — the winning
-// permutation's end-of-chain snapshot. The deck loop adopts CarryState directly into the
-// next turn's seed; no per-field "diff" interpretation. Cards that mutate state during Play
-// write through to whichever slice ends up here.
+// CarryState is sim's snapshot of the winning permutation's end-of-chain state. The deck
+// loop adopts it directly into next turn's seed — no per-field "diff" interpretation.
+// Auras / Items are stored as sim's concrete pointer types; the engine boundary converts
+// to gameengine.Aura / gameengine.Item when seeding the next turn's Spec.
 type CarryState struct {
 	Hand           []card.Card
 	Deck           *deck.Deck
 	Arsenal        card.Card
 	Graveyard      []card.Card
 	Banish         []card.Card
-	Auras          []gameengine.Aura
-	Items          []gameengine.Item
+	Auras          []*Aura
+	Items          []*Item
 	CardsDrawn     int
 	OpponentMarked bool
 	Log            []turnlogger.LogEntry
 }
 
 // RunechantCount returns the carried Runechant token count, or zero when none are in play.
-func (c *CarryState) RunechantCount() int { return countByName(c.Auras, "Runechant") }
+func (c *CarryState) RunechantCount() int { return auraCountByName(c.Auras, "Runechant") }
 
 // PonderCount returns the carried Ponder token count, or zero when none are in play.
-func (c *CarryState) PonderCount() int { return countByName(c.Auras, "Ponder") }
+func (c *CarryState) PonderCount() int { return auraCountByName(c.Auras, "Ponder") }
 
 // GoldCount returns the carried Gold token count, or zero when none are in play.
 func (c *CarryState) GoldCount() int { return itemCountByName(c.Items, "Gold") }
@@ -64,9 +63,8 @@ func (c *CarryState) SilverCount() int { return itemCountByName(c.Items, "Silver
 // CopperCount returns the carried Copper token count, or zero when none are in play.
 func (c *CarryState) CopperCount() int { return itemCountByName(c.Items, "Copper") }
 
-// countByName scans auras for a token aura by display name. Mirrors gameengine's
-// internal helper for CarryState's snapshot use.
-func countByName(auras []gameengine.Aura, name string) int {
+// auraCountByName scans a sim-concrete aura slice for a token aura by display name.
+func auraCountByName(auras []*Aura, name string) int {
 	for _, a := range auras {
 		if a.CardName() == name {
 			return a.Count()
@@ -75,8 +73,8 @@ func countByName(auras []gameengine.Aura, name string) int {
 	return 0
 }
 
-// itemCountByName scans items for a token item by display name.
-func itemCountByName(items []gameengine.Item, name string) int {
+// itemCountByName scans a sim-concrete item slice for a token item by display name.
+func itemCountByName(items []*Item, name string) int {
 	for _, i := range items {
 		if i.CardName() == name {
 			return i.Count()

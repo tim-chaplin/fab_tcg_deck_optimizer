@@ -12,7 +12,7 @@ import (
 // Test-only exports. Visible to package sim_test files in this directory only.
 
 // Best re-exports the package-private best for sim_test consumers.
-func Best(hero gameengine.Hero, weapons []Weapon, hand []card.Card, mp Matchup, d *deck.Deck, prior gameengine.Spec) TurnSummary {
+func Best(hero Hero, weapons []Weapon, hand []card.Card, mp Matchup, d *deck.Deck, prior gameengine.Spec) TurnSummary {
 	return best(hero, weapons, hand, mp, d, prior)
 }
 
@@ -31,7 +31,7 @@ type SequenceContextForTest struct{ ctx *sequenceContext }
 
 // NewSequenceContextForTest builds a sequenceContext with the same shape as the in-package
 // newSequenceContextForTest helper.
-func NewSequenceContextForTest(h gameengine.Hero, pitched, deck []card.Card, resourceBudget, runechantCarryover, chainLen int) *SequenceContextForTest {
+func NewSequenceContextForTest(h Hero, pitched, deck []card.Card, resourceBudget, runechantCarryover, chainLen int) *SequenceContextForTest {
 	return &SequenceContextForTest{ctx: newSequenceContextForTest(h, pitched, deck, resourceBudget, runechantCarryover, chainLen)}
 }
 
@@ -116,7 +116,9 @@ func MakeAdaptiveStop(targetSE float64) func(stats *DeckStats, runs int) bool {
 // MeanStandardError re-exports meanStandardError.
 func MeanStandardError(stats *DeckStats) float64 { return meanStandardError(stats) }
 
-// ProcessAurasAtStartOfTurn re-exports processAurasAtStartOfTurn.
+// ProcessAurasAtStartOfTurn re-exports processAurasAtStartOfTurn. Takes / returns
+// gameengine.Aura at the boundary so sim_test callers (in package sim_test, outside
+// sim's concrete-type namespace) keep working through the engine interface.
 func ProcessAurasAtStartOfTurn(queued []gameengine.Aura, d *deck.Deck) (
 	survivors []gameengine.Aura,
 	contribs []TriggerContribution,
@@ -124,5 +126,6 @@ func ProcessAurasAtStartOfTurn(queued []gameengine.Aura, d *deck.Deck) (
 	revealed []card.Card,
 	graveyarded []card.Card,
 ) {
-	return processAurasAtStartOfTurn(queued, d)
+	s, c, dmg, rev, gv := processAurasAtStartOfTurn(auraSliceFromEngine(queued), d)
+	return auraSliceAsEngine(s), c, dmg, rev, gv
 }

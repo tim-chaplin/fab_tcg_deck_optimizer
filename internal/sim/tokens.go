@@ -22,13 +22,13 @@ const (
 // g.CreateRunechants instead — it bumps an existing aura and credits +n damage. This
 // factory is for tests / Spec seeding that need to add a runechant aura without the
 // damage credit.
-func NewRunechantAura(n int) gameengine.Aura {
+func NewRunechantAura(n int) *Aura {
 	return NewTokenAura(tokenNameRunechant, ids.RunechantTokenID, gameengine.TriggerAttack, runechantAuraHandler, n)
 }
 
 // NewPonderAura returns a ponder token aura at count n. Production code calls
 // g.CreatePonder instead; this factory is for tests / Spec seeding.
-func NewPonderAura(n int) gameengine.Aura {
+func NewPonderAura(n int) *Aura {
 	return NewTokenAura(tokenNamePonder, ids.PonderTokenID, gameengine.TriggerEndOfTurn, ponderAuraHandler, n)
 }
 
@@ -61,13 +61,13 @@ func ponderAuraHandler(g card.GameEngine, _ card.Logger, a card.Aura) {
 
 // NewGoldItem / NewSilverItem / NewCopperItem return fresh token items at count n.
 // Production code calls g.CreateGold / CreateSilver / CreateCopper instead.
-func NewGoldItem(n int) gameengine.Item {
+func NewGoldItem(n int) *Item {
 	return NewTokenItem(tokenNameGold, ids.GoldTokenID, GoldTokenAbility{}, n)
 }
-func NewSilverItem(n int) gameengine.Item {
+func NewSilverItem(n int) *Item {
 	return NewTokenItem(tokenNameSilver, ids.SilverTokenID, SilverTokenAbility{}, n)
 }
-func NewCopperItem(n int) gameengine.Item {
+func NewCopperItem(n int) *Item {
 	return NewTokenItem(tokenNameCopper, ids.CopperTokenID, CopperTokenAbility{}, n)
 }
 

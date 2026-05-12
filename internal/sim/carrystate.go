@@ -23,6 +23,10 @@ import (
 // storage that the next permutation overwrites, so the copy is necessary. Deck gets a
 // fresh Copy() so subsequent permutations' deck mutations don't reach back into the
 // snapshot.
+//
+// Auras / Items returned by the engine arrive as gameengine.Aura / gameengine.Item; the
+// snapshot type-asserts each entry back to sim's concrete *Aura / *Item — sim's runtime
+// is the only registered Aura / Item impl so the assertion is guaranteed in production.
 func (c *CarryState) SnapshotFromTurn(g *gameengine.GameEngine) {
 	snap := g.Snapshot()
 	c.Hand = append(c.Hand[:0], snap.Hand...)
@@ -30,8 +34,8 @@ func (c *CarryState) SnapshotFromTurn(g *gameengine.GameEngine) {
 	c.Arsenal = snap.Arsenal
 	c.Graveyard = append(c.Graveyard[:0], snap.Graveyard...)
 	c.Banish = append(c.Banish[:0], snap.Banished...)
-	c.Auras = append(c.Auras[:0], snap.Auras...)
-	c.Items = append(c.Items[:0], snap.Items...)
+	c.Auras = append(c.Auras[:0], auraSliceFromEngine(snap.Auras)...)
+	c.Items = append(c.Items[:0], itemSliceFromEngine(snap.Items)...)
 	c.CardsDrawn = snap.CardsDrawn
 	c.OpponentMarked = snap.OpponentMarked
 	c.Log = append(c.Log[:0], snap.LogEntries...)
@@ -90,10 +94,10 @@ func (c CarryState) Clone() CarryState {
 		out.Banish = append([]card.Card(nil), c.Banish...)
 	}
 	if len(c.Auras) > 0 {
-		out.Auras = append([]gameengine.Aura(nil), c.Auras...)
+		out.Auras = append([]*Aura(nil), c.Auras...)
 	}
 	if len(c.Items) > 0 {
-		out.Items = append([]gameengine.Item(nil), c.Items...)
+		out.Items = append([]*Item(nil), c.Items...)
 	}
 	if len(c.Log) > 0 {
 		out.Log = append([]turnlogger.LogEntry(nil), c.Log...)

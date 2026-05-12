@@ -18,13 +18,37 @@ type Item struct {
 
 // NewTokenItem builds a token item with the supplied name, identifier, activated-ability
 // card, and initial count.
-func NewTokenItem(name string, tokenID ids.CardID, ability card.Card, count int) gameengine.Item {
+func NewTokenItem(name string, tokenID ids.CardID, ability card.Card, count int) *Item {
 	return &Item{
 		tokenName: name,
 		tokenID:   tokenID,
 		ability:   ability,
 		count:     count,
 	}
+}
+
+// itemSliceAsEngine converts []*Item to []gameengine.Item for engine-API call sites.
+func itemSliceAsEngine(src []*Item) []gameengine.Item {
+	if len(src) == 0 {
+		return nil
+	}
+	out := make([]gameengine.Item, len(src))
+	for i, it := range src {
+		out[i] = it
+	}
+	return out
+}
+
+// itemSliceFromEngine type-asserts engine-returned []gameengine.Item back to []*Item.
+func itemSliceFromEngine(src []gameengine.Item) []*Item {
+	if len(src) == 0 {
+		return nil
+	}
+	out := make([]*Item, len(src))
+	for i, it := range src {
+		out[i] = it.(*Item)
+	}
+	return out
 }
 
 func (i *Item) CardName() string   { return i.tokenName }

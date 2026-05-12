@@ -11,7 +11,7 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/gameengine"
 )
 
-func (e *Evaluator) findBest(hero gameengine.Hero, weapons []Weapon, hand []card.Card, mp Matchup, d *deck.Deck, prior gameengine.Spec, skipLog bool) TurnSummary {
+func (e *Evaluator) findBest(hero Hero, weapons []Weapon, hand []card.Card, mp Matchup, d *deck.Deck, prior gameengine.Spec, skipLog bool) TurnSummary {
 	// Install the hero on the scratch engine so cards' g.CurrentHeroClass /
 	// g.HeroWantsLowerHealth reads return the right value across every permutation
 	// the upcoming search drives through the engine.
@@ -50,8 +50,8 @@ func (e *Evaluator) findBest(hero gameengine.Hero, weapons []Weapon, hand []card
 			Hand:    append([]card.Card(nil), hand...),
 			Deck:    d.Copy(),
 			Arsenal: arsenalCardIn,
-			Auras:   append([]gameengine.Aura(nil), prior.Auras...),
-			Items:   append([]gameengine.Item(nil), prior.Items...),
+			Auras:   auraSliceFromEngine(prior.Auras),
+			Items:   itemSliceFromEngine(prior.Items),
 		},
 	}
 	cacheable := true
