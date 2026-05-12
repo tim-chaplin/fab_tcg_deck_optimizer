@@ -830,7 +830,10 @@ func (ctx *sequenceContext) playSequenceWithMeta(n int) (damage int, futureValue
 	meta := ctx.bufs.permMeta[:n]
 	for i := 0; i < n; i++ {
 		pcBuf[i].GrantedGoAgain = false
+		pcBuf[i].GrantedDominate = false
+		pcBuf[i].GrantedOverpower = false
 		pcBuf[i].BonusAttack = 0
+		pcBuf[i].BonusDefense = 0
 		pcBuf[i].PitchedToPlay = nil
 		pcBuf[i].OnHit = pcBuf[i].OnHit[:0]
 	}
