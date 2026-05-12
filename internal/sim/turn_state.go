@@ -237,6 +237,22 @@ func (s *TurnState) SetArcaneDamageDealt(v bool) { s.arcaneDamageDealt = v }
 // ArcaneIncomingDamage returns the opponent's arcane damage this turn.
 func (s *TurnState) ArcaneIncomingDamage() int { return s.arcaneIncomingDamage }
 
+// HeroWantsLowerHealth reports whether the current hero opts into the LowerHealthWanter
+// marker. Reads CurrentHero directly so v2/card stays state-free.
+func (s *TurnState) HeroWantsLowerHealth() bool {
+	_, ok := CurrentHero.(card.LowerHealthWanter)
+	return ok
+}
+
+// CurrentHeroClass returns the active hero's primary class (e.g. card.TypeThief) so
+// "if you are a <class>" riders can gate on it. Zero when no hero is set.
+func (s *TurnState) CurrentHeroClass() card.CardType {
+	if CurrentHero == nil {
+		return 0
+	}
+	return CurrentHero.Class()
+}
+
 // AuraCreated reports whether a card or ability has created an aura this turn.
 func (s *TurnState) AuraCreated() bool { return s.auraCreated }
 
@@ -782,9 +798,11 @@ func (s *TurnState) DrawOne() {
 }
 
 // HasPlayedType reports whether any card played this turn has the given type in its Types() set.
+// Passing s (the GameEngine) folds the active hero's class into Universal cards' Types — so
+// Wage Gold under Viserai counts as a Runeblade card here.
 func (s *TurnState) HasPlayedType(t card.CardType) bool {
 	for _, c := range s.cardsPlayed {
-		if c.Types().Has(t) {
+		if c.Types(s).Has(t) {
 			return true
 		}
 	}

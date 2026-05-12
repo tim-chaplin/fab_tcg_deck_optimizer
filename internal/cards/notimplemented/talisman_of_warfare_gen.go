@@ -11,13 +11,13 @@ var talismanOfWarfareTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, 
 
 type TalismanOfWarfareYellow struct{}
 
-func (TalismanOfWarfareYellow) ID() ids.CardID           { return ids.TalismanOfWarfareYellow }
-func (TalismanOfWarfareYellow) Name() string             { return "Talisman of Warfare" }
-func (TalismanOfWarfareYellow) DisplayName() string      { return "Talisman of Warfare [Y]" }
-func (TalismanOfWarfareYellow) Cost(card.GameEngine) int { return 0 }
-func (TalismanOfWarfareYellow) Pitch() int               { return 2 }
-func (TalismanOfWarfareYellow) Attack() int              { return 0 }
-func (TalismanOfWarfareYellow) Defense() int             { return 0 }
-func (TalismanOfWarfareYellow) Types() card.TypeSet      { return talismanOfWarfareTypes }
-func (TalismanOfWarfareYellow) GoAgain() bool            { return true }
-func (TalismanOfWarfareYellow) NotImplemented()          {}
+func (TalismanOfWarfareYellow) ID() ids.CardID                     { return ids.TalismanOfWarfareYellow }
+func (TalismanOfWarfareYellow) Name() string                       { return "Talisman of Warfare" }
+func (TalismanOfWarfareYellow) DisplayName() string                { return "Talisman of Warfare [Y]" }
+func (TalismanOfWarfareYellow) Cost(card.GameEngine) int           { return 0 }
+func (TalismanOfWarfareYellow) Pitch() int                         { return 2 }
+func (TalismanOfWarfareYellow) Attack() int                        { return 0 }
+func (TalismanOfWarfareYellow) Defense() int                       { return 0 }
+func (TalismanOfWarfareYellow) Types(card.GameEngine) card.TypeSet { return talismanOfWarfareTypes }
+func (TalismanOfWarfareYellow) GoAgain() bool                      { return true }
+func (TalismanOfWarfareYellow) NotImplemented()                    {}

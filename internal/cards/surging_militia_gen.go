@@ -11,36 +11,36 @@ var surgingMilitiaTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, car
 
 type SurgingMilitiaRed struct{}
 
-func (SurgingMilitiaRed) ID() ids.CardID           { return ids.SurgingMilitiaRed }
-func (SurgingMilitiaRed) Name() string             { return "Surging Militia" }
-func (SurgingMilitiaRed) DisplayName() string      { return "Surging Militia [R]" }
-func (SurgingMilitiaRed) Cost(card.GameEngine) int { return 2 }
-func (SurgingMilitiaRed) Pitch() int               { return 1 }
-func (SurgingMilitiaRed) Attack() int              { return 5 }
-func (SurgingMilitiaRed) Defense() int             { return 2 }
-func (SurgingMilitiaRed) Types() card.TypeSet      { return surgingMilitiaTypes }
-func (SurgingMilitiaRed) GoAgain() bool            { return false }
+func (SurgingMilitiaRed) ID() ids.CardID                     { return ids.SurgingMilitiaRed }
+func (SurgingMilitiaRed) Name() string                       { return "Surging Militia" }
+func (SurgingMilitiaRed) DisplayName() string                { return "Surging Militia [R]" }
+func (SurgingMilitiaRed) Cost(card.GameEngine) int           { return 2 }
+func (SurgingMilitiaRed) Pitch() int                         { return 1 }
+func (SurgingMilitiaRed) Attack() int                        { return 5 }
+func (SurgingMilitiaRed) Defense() int                       { return 2 }
+func (SurgingMilitiaRed) Types(card.GameEngine) card.TypeSet { return surgingMilitiaTypes }
+func (SurgingMilitiaRed) GoAgain() bool                      { return false }
 
 type SurgingMilitiaYellow struct{}
 
-func (SurgingMilitiaYellow) ID() ids.CardID           { return ids.SurgingMilitiaYellow }
-func (SurgingMilitiaYellow) Name() string             { return "Surging Militia" }
-func (SurgingMilitiaYellow) DisplayName() string      { return "Surging Militia [Y]" }
-func (SurgingMilitiaYellow) Cost(card.GameEngine) int { return 2 }
-func (SurgingMilitiaYellow) Pitch() int               { return 2 }
-func (SurgingMilitiaYellow) Attack() int              { return 4 }
-func (SurgingMilitiaYellow) Defense() int             { return 2 }
-func (SurgingMilitiaYellow) Types() card.TypeSet      { return surgingMilitiaTypes }
-func (SurgingMilitiaYellow) GoAgain() bool            { return false }
+func (SurgingMilitiaYellow) ID() ids.CardID                     { return ids.SurgingMilitiaYellow }
+func (SurgingMilitiaYellow) Name() string                       { return "Surging Militia" }
+func (SurgingMilitiaYellow) DisplayName() string                { return "Surging Militia [Y]" }
+func (SurgingMilitiaYellow) Cost(card.GameEngine) int           { return 2 }
+func (SurgingMilitiaYellow) Pitch() int                         { return 2 }
+func (SurgingMilitiaYellow) Attack() int                        { return 4 }
+func (SurgingMilitiaYellow) Defense() int                       { return 2 }
+func (SurgingMilitiaYellow) Types(card.GameEngine) card.TypeSet { return surgingMilitiaTypes }
+func (SurgingMilitiaYellow) GoAgain() bool                      { return false }
 
 type SurgingMilitiaBlue struct{}
 
-func (SurgingMilitiaBlue) ID() ids.CardID           { return ids.SurgingMilitiaBlue }
-func (SurgingMilitiaBlue) Name() string             { return "Surging Militia" }
-func (SurgingMilitiaBlue) DisplayName() string      { return "Surging Militia [B]" }
-func (SurgingMilitiaBlue) Cost(card.GameEngine) int { return 2 }
-func (SurgingMilitiaBlue) Pitch() int               { return 3 }
-func (SurgingMilitiaBlue) Attack() int              { return 3 }
-func (SurgingMilitiaBlue) Defense() int             { return 2 }
-func (SurgingMilitiaBlue) Types() card.TypeSet      { return surgingMilitiaTypes }
-func (SurgingMilitiaBlue) GoAgain() bool            { return false }
+func (SurgingMilitiaBlue) ID() ids.CardID                     { return ids.SurgingMilitiaBlue }
+func (SurgingMilitiaBlue) Name() string                       { return "Surging Militia" }
+func (SurgingMilitiaBlue) DisplayName() string                { return "Surging Militia [B]" }
+func (SurgingMilitiaBlue) Cost(card.GameEngine) int           { return 2 }
+func (SurgingMilitiaBlue) Pitch() int                         { return 3 }
+func (SurgingMilitiaBlue) Attack() int                        { return 3 }
+func (SurgingMilitiaBlue) Defense() int                       { return 2 }
+func (SurgingMilitiaBlue) Types(card.GameEngine) card.TypeSet { return surgingMilitiaTypes }
+func (SurgingMilitiaBlue) GoAgain() bool                      { return false }

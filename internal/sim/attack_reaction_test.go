@@ -18,7 +18,7 @@ func (stubAR) Cost(card.GameEngine) int { return 0 }
 func (stubAR) Pitch() int               { return 3 }
 func (stubAR) Attack() int              { return 0 }
 func (stubAR) Defense() int             { return 0 }
-func (stubAR) Types() card.TypeSet {
+func (stubAR) Types(card.GameEngine) card.TypeSet {
 	return card.NewTypeSet(card.TypeGeneric, card.TypeAttackReaction)
 }
 func (stubAR) GoAgain() bool                                      { return false }
@@ -35,7 +35,7 @@ func (stubAttack) Cost(card.GameEngine) int { return 0 }
 func (stubAttack) Pitch() int               { return 1 }
 func (stubAttack) Attack() int              { return 1 }
 func (stubAttack) Defense() int             { return 0 }
-func (stubAttack) Types() card.TypeSet {
+func (stubAttack) Types(card.GameEngine) card.TypeSet {
 	return card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 }
 func (stubAttack) GoAgain() bool                                      { return true }

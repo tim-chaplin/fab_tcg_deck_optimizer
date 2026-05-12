@@ -16,7 +16,7 @@ import (
 // waterTheSeedsIsTarget gates the rider on attacks (action cards or weapon swings — "your
 // next attack") with base power 1 or less.
 func waterTheSeedsIsTarget(_ card.GameEngine, pc *card.CardState) bool {
-	return pc.Card.Types().IsAttack() && pc.Card.Attack() <= 1
+	return pc.Card.Types(nil).IsAttack() && pc.Card.Attack() <= 1
 }
 
 func (WaterTheSeedsRed) Play(s card.GameEngine, l card.Logger, self *card.CardState) {

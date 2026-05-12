@@ -10,7 +10,7 @@ import (
 )
 
 func (ExposedBlue) ARTargetAllowed(c card.Card, _ int8) bool {
-	return c.Types().IsAttack()
+	return c.Types(nil).IsAttack()
 }
 func (ExposedBlue) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 	card.GrantAttackReactionBuff(s, l, self, 1)

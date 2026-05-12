@@ -18,6 +18,8 @@ func (AmuletOfAssertivenessYellow) Cost(card.GameEngine) int { return 0 }
 func (AmuletOfAssertivenessYellow) Pitch() int               { return 2 }
 func (AmuletOfAssertivenessYellow) Attack() int              { return 0 }
 func (AmuletOfAssertivenessYellow) Defense() int             { return 0 }
-func (AmuletOfAssertivenessYellow) Types() card.TypeSet      { return amuletOfAssertivenessTypes }
-func (AmuletOfAssertivenessYellow) GoAgain() bool            { return true }
-func (AmuletOfAssertivenessYellow) Unplayable()              {}
+func (AmuletOfAssertivenessYellow) Types(card.GameEngine) card.TypeSet {
+	return amuletOfAssertivenessTypes
+}
+func (AmuletOfAssertivenessYellow) GoAgain() bool { return true }
+func (AmuletOfAssertivenessYellow) Unplayable()   {}

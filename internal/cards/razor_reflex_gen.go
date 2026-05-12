@@ -11,36 +11,36 @@ var razorReflexTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAttackReaction
 
 type RazorReflexRed struct{}
 
-func (RazorReflexRed) ID() ids.CardID           { return ids.RazorReflexRed }
-func (RazorReflexRed) Name() string             { return "Razor Reflex" }
-func (RazorReflexRed) DisplayName() string      { return "Razor Reflex [R]" }
-func (RazorReflexRed) Cost(card.GameEngine) int { return 1 }
-func (RazorReflexRed) Pitch() int               { return 1 }
-func (RazorReflexRed) Attack() int              { return 0 }
-func (RazorReflexRed) Defense() int             { return 2 }
-func (RazorReflexRed) Types() card.TypeSet      { return razorReflexTypes }
-func (RazorReflexRed) GoAgain() bool            { return false }
+func (RazorReflexRed) ID() ids.CardID                     { return ids.RazorReflexRed }
+func (RazorReflexRed) Name() string                       { return "Razor Reflex" }
+func (RazorReflexRed) DisplayName() string                { return "Razor Reflex [R]" }
+func (RazorReflexRed) Cost(card.GameEngine) int           { return 1 }
+func (RazorReflexRed) Pitch() int                         { return 1 }
+func (RazorReflexRed) Attack() int                        { return 0 }
+func (RazorReflexRed) Defense() int                       { return 2 }
+func (RazorReflexRed) Types(card.GameEngine) card.TypeSet { return razorReflexTypes }
+func (RazorReflexRed) GoAgain() bool                      { return false }
 
 type RazorReflexYellow struct{}
 
-func (RazorReflexYellow) ID() ids.CardID           { return ids.RazorReflexYellow }
-func (RazorReflexYellow) Name() string             { return "Razor Reflex" }
-func (RazorReflexYellow) DisplayName() string      { return "Razor Reflex [Y]" }
-func (RazorReflexYellow) Cost(card.GameEngine) int { return 1 }
-func (RazorReflexYellow) Pitch() int               { return 2 }
-func (RazorReflexYellow) Attack() int              { return 0 }
-func (RazorReflexYellow) Defense() int             { return 2 }
-func (RazorReflexYellow) Types() card.TypeSet      { return razorReflexTypes }
-func (RazorReflexYellow) GoAgain() bool            { return false }
+func (RazorReflexYellow) ID() ids.CardID                     { return ids.RazorReflexYellow }
+func (RazorReflexYellow) Name() string                       { return "Razor Reflex" }
+func (RazorReflexYellow) DisplayName() string                { return "Razor Reflex [Y]" }
+func (RazorReflexYellow) Cost(card.GameEngine) int           { return 1 }
+func (RazorReflexYellow) Pitch() int                         { return 2 }
+func (RazorReflexYellow) Attack() int                        { return 0 }
+func (RazorReflexYellow) Defense() int                       { return 2 }
+func (RazorReflexYellow) Types(card.GameEngine) card.TypeSet { return razorReflexTypes }
+func (RazorReflexYellow) GoAgain() bool                      { return false }
 
 type RazorReflexBlue struct{}
 
-func (RazorReflexBlue) ID() ids.CardID           { return ids.RazorReflexBlue }
-func (RazorReflexBlue) Name() string             { return "Razor Reflex" }
-func (RazorReflexBlue) DisplayName() string      { return "Razor Reflex [B]" }
-func (RazorReflexBlue) Cost(card.GameEngine) int { return 1 }
-func (RazorReflexBlue) Pitch() int               { return 3 }
-func (RazorReflexBlue) Attack() int              { return 0 }
-func (RazorReflexBlue) Defense() int             { return 2 }
-func (RazorReflexBlue) Types() card.TypeSet      { return razorReflexTypes }
-func (RazorReflexBlue) GoAgain() bool            { return false }
+func (RazorReflexBlue) ID() ids.CardID                     { return ids.RazorReflexBlue }
+func (RazorReflexBlue) Name() string                       { return "Razor Reflex" }
+func (RazorReflexBlue) DisplayName() string                { return "Razor Reflex [B]" }
+func (RazorReflexBlue) Cost(card.GameEngine) int           { return 1 }
+func (RazorReflexBlue) Pitch() int                         { return 3 }
+func (RazorReflexBlue) Attack() int                        { return 0 }
+func (RazorReflexBlue) Defense() int                       { return 2 }
+func (RazorReflexBlue) Types(card.GameEngine) card.TypeSet { return razorReflexTypes }
+func (RazorReflexBlue) GoAgain() bool                      { return false }

@@ -26,7 +26,9 @@ func (Viserai) Class() card.CardType { return card.TypeRuneblade }
 // non-attack action (Action without Attack) has been played this turn, create a Runechant
 // token.
 func (Viserai) OnCardPlayed(played card.Card, s *sim.TurnState, l card.Logger) int {
-	t := played.Types()
+	// Universal cards fold the active hero's class into their Types(s) so Viserai's
+	// Runeblade trigger fires on them too.
+	t := played.Types(s)
 	// Weapon swings aren't "playing a card" and don't trigger Viserai.
 	if !t.Has(card.TypeRuneblade) || t.Has(card.TypeWeapon) {
 		return 0
@@ -112,7 +114,10 @@ func (s viseraiOptSlots) union(other viseraiOptSlots) viseraiOptSlots {
 
 // viseraiSlotsFor classifies c into Viserai's Opt-heuristic slots.
 func viseraiSlotsFor(c card.Card) viseraiOptSlots {
-	t := c.Types()
+	// Opt-time heuristic uses printed types only (IsNonAttackAction / IsDefenseReaction /
+	// IsAttack are class-independent); Universal cards' class fold doesn't change the
+	// outcome, so we pass nil here.
+	t := c.Types(nil)
 	return viseraiOptSlots{
 		nonAttackEnabler: t.IsNonAttackAction(),
 		nonGoAgainAction: t.Has(card.TypeAction) && !c.GoAgain(),

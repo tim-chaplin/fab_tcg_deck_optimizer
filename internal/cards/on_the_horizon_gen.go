@@ -11,36 +11,36 @@ var onTheHorizonTypes = card.NewTypeSet(card.TypeGeneric, card.TypeBlock)
 
 type OnTheHorizonRed struct{}
 
-func (OnTheHorizonRed) ID() ids.CardID           { return ids.OnTheHorizonRed }
-func (OnTheHorizonRed) Name() string             { return "On the Horizon" }
-func (OnTheHorizonRed) DisplayName() string      { return "On the Horizon [R]" }
-func (OnTheHorizonRed) Cost(card.GameEngine) int { return 0 }
-func (OnTheHorizonRed) Pitch() int               { return 1 }
-func (OnTheHorizonRed) Attack() int              { return 0 }
-func (OnTheHorizonRed) Defense() int             { return 4 }
-func (OnTheHorizonRed) Types() card.TypeSet      { return onTheHorizonTypes }
-func (OnTheHorizonRed) GoAgain() bool            { return false }
+func (OnTheHorizonRed) ID() ids.CardID                     { return ids.OnTheHorizonRed }
+func (OnTheHorizonRed) Name() string                       { return "On the Horizon" }
+func (OnTheHorizonRed) DisplayName() string                { return "On the Horizon [R]" }
+func (OnTheHorizonRed) Cost(card.GameEngine) int           { return 0 }
+func (OnTheHorizonRed) Pitch() int                         { return 1 }
+func (OnTheHorizonRed) Attack() int                        { return 0 }
+func (OnTheHorizonRed) Defense() int                       { return 4 }
+func (OnTheHorizonRed) Types(card.GameEngine) card.TypeSet { return onTheHorizonTypes }
+func (OnTheHorizonRed) GoAgain() bool                      { return false }
 
 type OnTheHorizonYellow struct{}
 
-func (OnTheHorizonYellow) ID() ids.CardID           { return ids.OnTheHorizonYellow }
-func (OnTheHorizonYellow) Name() string             { return "On the Horizon" }
-func (OnTheHorizonYellow) DisplayName() string      { return "On the Horizon [Y]" }
-func (OnTheHorizonYellow) Cost(card.GameEngine) int { return 0 }
-func (OnTheHorizonYellow) Pitch() int               { return 2 }
-func (OnTheHorizonYellow) Attack() int              { return 0 }
-func (OnTheHorizonYellow) Defense() int             { return 3 }
-func (OnTheHorizonYellow) Types() card.TypeSet      { return onTheHorizonTypes }
-func (OnTheHorizonYellow) GoAgain() bool            { return false }
+func (OnTheHorizonYellow) ID() ids.CardID                     { return ids.OnTheHorizonYellow }
+func (OnTheHorizonYellow) Name() string                       { return "On the Horizon" }
+func (OnTheHorizonYellow) DisplayName() string                { return "On the Horizon [Y]" }
+func (OnTheHorizonYellow) Cost(card.GameEngine) int           { return 0 }
+func (OnTheHorizonYellow) Pitch() int                         { return 2 }
+func (OnTheHorizonYellow) Attack() int                        { return 0 }
+func (OnTheHorizonYellow) Defense() int                       { return 3 }
+func (OnTheHorizonYellow) Types(card.GameEngine) card.TypeSet { return onTheHorizonTypes }
+func (OnTheHorizonYellow) GoAgain() bool                      { return false }
 
 type OnTheHorizonBlue struct{}
 
-func (OnTheHorizonBlue) ID() ids.CardID           { return ids.OnTheHorizonBlue }
-func (OnTheHorizonBlue) Name() string             { return "On the Horizon" }
-func (OnTheHorizonBlue) DisplayName() string      { return "On the Horizon [B]" }
-func (OnTheHorizonBlue) Cost(card.GameEngine) int { return 0 }
-func (OnTheHorizonBlue) Pitch() int               { return 3 }
-func (OnTheHorizonBlue) Attack() int              { return 0 }
-func (OnTheHorizonBlue) Defense() int             { return 2 }
-func (OnTheHorizonBlue) Types() card.TypeSet      { return onTheHorizonTypes }
-func (OnTheHorizonBlue) GoAgain() bool            { return false }
+func (OnTheHorizonBlue) ID() ids.CardID                     { return ids.OnTheHorizonBlue }
+func (OnTheHorizonBlue) Name() string                       { return "On the Horizon" }
+func (OnTheHorizonBlue) DisplayName() string                { return "On the Horizon [B]" }
+func (OnTheHorizonBlue) Cost(card.GameEngine) int           { return 0 }
+func (OnTheHorizonBlue) Pitch() int                         { return 3 }
+func (OnTheHorizonBlue) Attack() int                        { return 0 }
+func (OnTheHorizonBlue) Defense() int                       { return 2 }
+func (OnTheHorizonBlue) Types(card.GameEngine) card.TypeSet { return onTheHorizonTypes }
+func (OnTheHorizonBlue) GoAgain() bool                      { return false }

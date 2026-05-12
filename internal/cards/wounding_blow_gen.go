@@ -11,36 +11,36 @@ var woundingBlowTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.
 
 type WoundingBlowRed struct{}
 
-func (WoundingBlowRed) ID() ids.CardID           { return ids.WoundingBlowRed }
-func (WoundingBlowRed) Name() string             { return "Wounding Blow" }
-func (WoundingBlowRed) DisplayName() string      { return "Wounding Blow [R]" }
-func (WoundingBlowRed) Cost(card.GameEngine) int { return 0 }
-func (WoundingBlowRed) Pitch() int               { return 1 }
-func (WoundingBlowRed) Attack() int              { return 4 }
-func (WoundingBlowRed) Defense() int             { return 3 }
-func (WoundingBlowRed) Types() card.TypeSet      { return woundingBlowTypes }
-func (WoundingBlowRed) GoAgain() bool            { return false }
+func (WoundingBlowRed) ID() ids.CardID                     { return ids.WoundingBlowRed }
+func (WoundingBlowRed) Name() string                       { return "Wounding Blow" }
+func (WoundingBlowRed) DisplayName() string                { return "Wounding Blow [R]" }
+func (WoundingBlowRed) Cost(card.GameEngine) int           { return 0 }
+func (WoundingBlowRed) Pitch() int                         { return 1 }
+func (WoundingBlowRed) Attack() int                        { return 4 }
+func (WoundingBlowRed) Defense() int                       { return 3 }
+func (WoundingBlowRed) Types(card.GameEngine) card.TypeSet { return woundingBlowTypes }
+func (WoundingBlowRed) GoAgain() bool                      { return false }
 
 type WoundingBlowYellow struct{}
 
-func (WoundingBlowYellow) ID() ids.CardID           { return ids.WoundingBlowYellow }
-func (WoundingBlowYellow) Name() string             { return "Wounding Blow" }
-func (WoundingBlowYellow) DisplayName() string      { return "Wounding Blow [Y]" }
-func (WoundingBlowYellow) Cost(card.GameEngine) int { return 0 }
-func (WoundingBlowYellow) Pitch() int               { return 2 }
-func (WoundingBlowYellow) Attack() int              { return 3 }
-func (WoundingBlowYellow) Defense() int             { return 3 }
-func (WoundingBlowYellow) Types() card.TypeSet      { return woundingBlowTypes }
-func (WoundingBlowYellow) GoAgain() bool            { return false }
+func (WoundingBlowYellow) ID() ids.CardID                     { return ids.WoundingBlowYellow }
+func (WoundingBlowYellow) Name() string                       { return "Wounding Blow" }
+func (WoundingBlowYellow) DisplayName() string                { return "Wounding Blow [Y]" }
+func (WoundingBlowYellow) Cost(card.GameEngine) int           { return 0 }
+func (WoundingBlowYellow) Pitch() int                         { return 2 }
+func (WoundingBlowYellow) Attack() int                        { return 3 }
+func (WoundingBlowYellow) Defense() int                       { return 3 }
+func (WoundingBlowYellow) Types(card.GameEngine) card.TypeSet { return woundingBlowTypes }
+func (WoundingBlowYellow) GoAgain() bool                      { return false }
 
 type WoundingBlowBlue struct{}
 
-func (WoundingBlowBlue) ID() ids.CardID           { return ids.WoundingBlowBlue }
-func (WoundingBlowBlue) Name() string             { return "Wounding Blow" }
-func (WoundingBlowBlue) DisplayName() string      { return "Wounding Blow [B]" }
-func (WoundingBlowBlue) Cost(card.GameEngine) int { return 0 }
-func (WoundingBlowBlue) Pitch() int               { return 3 }
-func (WoundingBlowBlue) Attack() int              { return 2 }
-func (WoundingBlowBlue) Defense() int             { return 3 }
-func (WoundingBlowBlue) Types() card.TypeSet      { return woundingBlowTypes }
-func (WoundingBlowBlue) GoAgain() bool            { return false }
+func (WoundingBlowBlue) ID() ids.CardID                     { return ids.WoundingBlowBlue }
+func (WoundingBlowBlue) Name() string                       { return "Wounding Blow" }
+func (WoundingBlowBlue) DisplayName() string                { return "Wounding Blow [B]" }
+func (WoundingBlowBlue) Cost(card.GameEngine) int           { return 0 }
+func (WoundingBlowBlue) Pitch() int                         { return 3 }
+func (WoundingBlowBlue) Attack() int                        { return 2 }
+func (WoundingBlowBlue) Defense() int                       { return 3 }
+func (WoundingBlowBlue) Types(card.GameEngine) card.TypeSet { return woundingBlowTypes }
+func (WoundingBlowBlue) GoAgain() bool                      { return false }

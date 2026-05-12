@@ -11,13 +11,13 @@ var sapwoodElixirTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction)
 
 type SapwoodElixirRed struct{}
 
-func (SapwoodElixirRed) ID() ids.CardID           { return ids.SapwoodElixirRed }
-func (SapwoodElixirRed) Name() string             { return "Sapwood Elixir" }
-func (SapwoodElixirRed) DisplayName() string      { return "Sapwood Elixir [R]" }
-func (SapwoodElixirRed) Cost(card.GameEngine) int { return 1 }
-func (SapwoodElixirRed) Pitch() int               { return 1 }
-func (SapwoodElixirRed) Attack() int              { return 0 }
-func (SapwoodElixirRed) Defense() int             { return 3 }
-func (SapwoodElixirRed) Types() card.TypeSet      { return sapwoodElixirTypes }
-func (SapwoodElixirRed) GoAgain() bool            { return true }
-func (SapwoodElixirRed) NotImplemented()          {}
+func (SapwoodElixirRed) ID() ids.CardID                     { return ids.SapwoodElixirRed }
+func (SapwoodElixirRed) Name() string                       { return "Sapwood Elixir" }
+func (SapwoodElixirRed) DisplayName() string                { return "Sapwood Elixir [R]" }
+func (SapwoodElixirRed) Cost(card.GameEngine) int           { return 1 }
+func (SapwoodElixirRed) Pitch() int                         { return 1 }
+func (SapwoodElixirRed) Attack() int                        { return 0 }
+func (SapwoodElixirRed) Defense() int                       { return 3 }
+func (SapwoodElixirRed) Types(card.GameEngine) card.TypeSet { return sapwoodElixirTypes }
+func (SapwoodElixirRed) GoAgain() bool                      { return true }
+func (SapwoodElixirRed) NotImplemented()                    {}

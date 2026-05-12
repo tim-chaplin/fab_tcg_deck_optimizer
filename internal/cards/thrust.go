@@ -11,7 +11,7 @@ import (
 )
 
 func (ThrustRed) ARTargetAllowed(c card.Card, _ int8) bool {
-	t := c.Types()
+	t := c.Types(nil)
 	return t.Has(card.TypeSword) && t.IsAttack()
 }
 func (ThrustRed) Play(s card.GameEngine, l card.Logger, self *card.CardState) {

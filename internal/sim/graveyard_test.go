@@ -61,7 +61,7 @@ func (gravSpyDR) Cost(card.GameEngine) int { return 0 }
 func (gravSpyDR) Pitch() int               { return 0 }
 func (gravSpyDR) Attack() int              { return 0 }
 func (gravSpyDR) Defense() int             { return 1 }
-func (gravSpyDR) Types() card.TypeSet {
+func (gravSpyDR) Types(card.GameEngine) card.TypeSet {
 	return card.NewTypeSet(card.TypeGeneric, card.TypeDefenseReaction)
 }
 func (gravSpyDR) GoAgain() bool { return false }
@@ -82,7 +82,7 @@ func (auraDefender) Cost(card.GameEngine) int                           { return
 func (auraDefender) Pitch() int                                         { return 0 }
 func (auraDefender) Attack() int                                        { return 0 }
 func (auraDefender) Defense() int                                       { return 3 }
-func (auraDefender) Types() card.TypeSet                                { return card.NewTypeSet(card.TypeAura) }
+func (auraDefender) Types(card.GameEngine) card.TypeSet                 { return card.NewTypeSet(card.TypeAura) }
 func (auraDefender) GoAgain() bool                                      { return false }
 func (auraDefender) Play(card.GameEngine, card.Logger, *card.CardState) {}
 
@@ -90,7 +90,7 @@ func (auraDefender) Play(card.GameEngine, card.Logger, *card.CardState) {}
 // DR snapshotting state.Graveyard sees the blocker.
 func TestGraveyard_PlainBlockEntersGraveyardRegardlessOfType(t *testing.T) {
 	blocker := auraDefender{}
-	if !blocker.Types().PersistsInPlay() {
+	if !blocker.Types(nil).PersistsInPlay() {
 		t.Fatal("auraDefender's type mask should set PersistsInPlay; otherwise the test " +
 			"isn't isolating the plain-block path")
 	}

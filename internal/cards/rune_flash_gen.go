@@ -11,33 +11,33 @@ var runeFlashTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeAction, card.T
 
 type RuneFlashRed struct{}
 
-func (RuneFlashRed) ID() ids.CardID      { return ids.RuneFlashRed }
-func (RuneFlashRed) Name() string        { return "Rune Flash" }
-func (RuneFlashRed) DisplayName() string { return "Rune Flash [R]" }
-func (RuneFlashRed) Pitch() int          { return 1 }
-func (RuneFlashRed) Attack() int         { return 4 }
-func (RuneFlashRed) Defense() int        { return 3 }
-func (RuneFlashRed) Types() card.TypeSet { return runeFlashTypes }
-func (RuneFlashRed) GoAgain() bool       { return true }
+func (RuneFlashRed) ID() ids.CardID                     { return ids.RuneFlashRed }
+func (RuneFlashRed) Name() string                       { return "Rune Flash" }
+func (RuneFlashRed) DisplayName() string                { return "Rune Flash [R]" }
+func (RuneFlashRed) Pitch() int                         { return 1 }
+func (RuneFlashRed) Attack() int                        { return 4 }
+func (RuneFlashRed) Defense() int                       { return 3 }
+func (RuneFlashRed) Types(card.GameEngine) card.TypeSet { return runeFlashTypes }
+func (RuneFlashRed) GoAgain() bool                      { return true }
 
 type RuneFlashYellow struct{}
 
-func (RuneFlashYellow) ID() ids.CardID      { return ids.RuneFlashYellow }
-func (RuneFlashYellow) Name() string        { return "Rune Flash" }
-func (RuneFlashYellow) DisplayName() string { return "Rune Flash [Y]" }
-func (RuneFlashYellow) Pitch() int          { return 2 }
-func (RuneFlashYellow) Attack() int         { return 3 }
-func (RuneFlashYellow) Defense() int        { return 3 }
-func (RuneFlashYellow) Types() card.TypeSet { return runeFlashTypes }
-func (RuneFlashYellow) GoAgain() bool       { return true }
+func (RuneFlashYellow) ID() ids.CardID                     { return ids.RuneFlashYellow }
+func (RuneFlashYellow) Name() string                       { return "Rune Flash" }
+func (RuneFlashYellow) DisplayName() string                { return "Rune Flash [Y]" }
+func (RuneFlashYellow) Pitch() int                         { return 2 }
+func (RuneFlashYellow) Attack() int                        { return 3 }
+func (RuneFlashYellow) Defense() int                       { return 3 }
+func (RuneFlashYellow) Types(card.GameEngine) card.TypeSet { return runeFlashTypes }
+func (RuneFlashYellow) GoAgain() bool                      { return true }
 
 type RuneFlashBlue struct{}
 
-func (RuneFlashBlue) ID() ids.CardID      { return ids.RuneFlashBlue }
-func (RuneFlashBlue) Name() string        { return "Rune Flash" }
-func (RuneFlashBlue) DisplayName() string { return "Rune Flash [B]" }
-func (RuneFlashBlue) Pitch() int          { return 3 }
-func (RuneFlashBlue) Attack() int         { return 2 }
-func (RuneFlashBlue) Defense() int        { return 3 }
-func (RuneFlashBlue) Types() card.TypeSet { return runeFlashTypes }
-func (RuneFlashBlue) GoAgain() bool       { return true }
+func (RuneFlashBlue) ID() ids.CardID                     { return ids.RuneFlashBlue }
+func (RuneFlashBlue) Name() string                       { return "Rune Flash" }
+func (RuneFlashBlue) DisplayName() string                { return "Rune Flash [B]" }
+func (RuneFlashBlue) Pitch() int                         { return 3 }
+func (RuneFlashBlue) Attack() int                        { return 2 }
+func (RuneFlashBlue) Defense() int                       { return 3 }
+func (RuneFlashBlue) Types(card.GameEngine) card.TypeSet { return runeFlashTypes }
+func (RuneFlashBlue) GoAgain() bool                      { return true }

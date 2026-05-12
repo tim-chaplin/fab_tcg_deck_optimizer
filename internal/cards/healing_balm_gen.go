@@ -11,36 +11,36 @@ var healingBalmTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction)
 
 type HealingBalmRed struct{}
 
-func (HealingBalmRed) ID() ids.CardID           { return ids.HealingBalmRed }
-func (HealingBalmRed) Name() string             { return "Healing Balm" }
-func (HealingBalmRed) DisplayName() string      { return "Healing Balm [R]" }
-func (HealingBalmRed) Cost(card.GameEngine) int { return 0 }
-func (HealingBalmRed) Pitch() int               { return 1 }
-func (HealingBalmRed) Attack() int              { return 0 }
-func (HealingBalmRed) Defense() int             { return 2 }
-func (HealingBalmRed) Types() card.TypeSet      { return healingBalmTypes }
-func (HealingBalmRed) GoAgain() bool            { return false }
+func (HealingBalmRed) ID() ids.CardID                     { return ids.HealingBalmRed }
+func (HealingBalmRed) Name() string                       { return "Healing Balm" }
+func (HealingBalmRed) DisplayName() string                { return "Healing Balm [R]" }
+func (HealingBalmRed) Cost(card.GameEngine) int           { return 0 }
+func (HealingBalmRed) Pitch() int                         { return 1 }
+func (HealingBalmRed) Attack() int                        { return 0 }
+func (HealingBalmRed) Defense() int                       { return 2 }
+func (HealingBalmRed) Types(card.GameEngine) card.TypeSet { return healingBalmTypes }
+func (HealingBalmRed) GoAgain() bool                      { return false }
 
 type HealingBalmYellow struct{}
 
-func (HealingBalmYellow) ID() ids.CardID           { return ids.HealingBalmYellow }
-func (HealingBalmYellow) Name() string             { return "Healing Balm" }
-func (HealingBalmYellow) DisplayName() string      { return "Healing Balm [Y]" }
-func (HealingBalmYellow) Cost(card.GameEngine) int { return 0 }
-func (HealingBalmYellow) Pitch() int               { return 2 }
-func (HealingBalmYellow) Attack() int              { return 0 }
-func (HealingBalmYellow) Defense() int             { return 2 }
-func (HealingBalmYellow) Types() card.TypeSet      { return healingBalmTypes }
-func (HealingBalmYellow) GoAgain() bool            { return false }
+func (HealingBalmYellow) ID() ids.CardID                     { return ids.HealingBalmYellow }
+func (HealingBalmYellow) Name() string                       { return "Healing Balm" }
+func (HealingBalmYellow) DisplayName() string                { return "Healing Balm [Y]" }
+func (HealingBalmYellow) Cost(card.GameEngine) int           { return 0 }
+func (HealingBalmYellow) Pitch() int                         { return 2 }
+func (HealingBalmYellow) Attack() int                        { return 0 }
+func (HealingBalmYellow) Defense() int                       { return 2 }
+func (HealingBalmYellow) Types(card.GameEngine) card.TypeSet { return healingBalmTypes }
+func (HealingBalmYellow) GoAgain() bool                      { return false }
 
 type HealingBalmBlue struct{}
 
-func (HealingBalmBlue) ID() ids.CardID           { return ids.HealingBalmBlue }
-func (HealingBalmBlue) Name() string             { return "Healing Balm" }
-func (HealingBalmBlue) DisplayName() string      { return "Healing Balm [B]" }
-func (HealingBalmBlue) Cost(card.GameEngine) int { return 0 }
-func (HealingBalmBlue) Pitch() int               { return 3 }
-func (HealingBalmBlue) Attack() int              { return 0 }
-func (HealingBalmBlue) Defense() int             { return 2 }
-func (HealingBalmBlue) Types() card.TypeSet      { return healingBalmTypes }
-func (HealingBalmBlue) GoAgain() bool            { return false }
+func (HealingBalmBlue) ID() ids.CardID                     { return ids.HealingBalmBlue }
+func (HealingBalmBlue) Name() string                       { return "Healing Balm" }
+func (HealingBalmBlue) DisplayName() string                { return "Healing Balm [B]" }
+func (HealingBalmBlue) Cost(card.GameEngine) int           { return 0 }
+func (HealingBalmBlue) Pitch() int                         { return 3 }
+func (HealingBalmBlue) Attack() int                        { return 0 }
+func (HealingBalmBlue) Defense() int                       { return 2 }
+func (HealingBalmBlue) Types(card.GameEngine) card.TypeSet { return healingBalmTypes }
+func (HealingBalmBlue) GoAgain() bool                      { return false }

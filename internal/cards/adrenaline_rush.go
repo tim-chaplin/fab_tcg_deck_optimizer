@@ -6,27 +6,26 @@
 package cards
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 // adrenalineRushBonus returns the +3{p} rider when the current hero opts into
 // LowerHealthWanter, else 0.
-func adrenalineRushBonus() int {
-	if sim.HeroWantsLowerHealth() {
+func adrenalineRushBonus(s card.GameEngine) int {
+	if s.HeroWantsLowerHealth() {
 		return 3
 	}
 	return 0
 }
 
 func (AdrenalineRushRed) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
-	self.BonusAttack += adrenalineRushBonus()
+	self.BonusAttack += adrenalineRushBonus(s)
 }
 
 func (AdrenalineRushYellow) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
-	self.BonusAttack += adrenalineRushBonus()
+	self.BonusAttack += adrenalineRushBonus(s)
 }
 
 func (AdrenalineRushBlue) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
-	self.BonusAttack += adrenalineRushBonus()
+	self.BonusAttack += adrenalineRushBonus(s)
 }

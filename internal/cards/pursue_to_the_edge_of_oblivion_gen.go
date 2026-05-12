@@ -18,5 +18,7 @@ func (PursueToTheEdgeOfOblivionRed) Cost(card.GameEngine) int { return 0 }
 func (PursueToTheEdgeOfOblivionRed) Pitch() int               { return 1 }
 func (PursueToTheEdgeOfOblivionRed) Attack() int              { return 4 }
 func (PursueToTheEdgeOfOblivionRed) Defense() int             { return 3 }
-func (PursueToTheEdgeOfOblivionRed) Types() card.TypeSet      { return pursueToTheEdgeOfOblivionTypes }
-func (PursueToTheEdgeOfOblivionRed) GoAgain() bool            { return false }
+func (PursueToTheEdgeOfOblivionRed) Types(card.GameEngine) card.TypeSet {
+	return pursueToTheEdgeOfOblivionTypes
+}
+func (PursueToTheEdgeOfOblivionRed) GoAgain() bool { return false }

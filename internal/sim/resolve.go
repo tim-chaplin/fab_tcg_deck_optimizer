@@ -33,7 +33,7 @@ func ResolveChainStep(g card.GameEngine, l card.Logger, self *card.CardState) {
 // chainStepDelta computes the chain step's display delta and applies the standard
 // damage / block side effects. Returns the (+N) value for the log line.
 func chainStepDelta(s *TurnState, self *card.CardState) int {
-	types := self.Card.Types()
+	types := self.Card.Types(nil)
 	switch {
 	case types.IsAttackAction() || types.IsWeaponAttack():
 		n := self.EffectiveAttack()

@@ -11,36 +11,36 @@ var highStrikerTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction)
 
 type HighStrikerRed struct{}
 
-func (HighStrikerRed) ID() ids.CardID           { return ids.HighStrikerRed }
-func (HighStrikerRed) Name() string             { return "High Striker" }
-func (HighStrikerRed) DisplayName() string      { return "High Striker [R]" }
-func (HighStrikerRed) Cost(card.GameEngine) int { return 0 }
-func (HighStrikerRed) Pitch() int               { return 1 }
-func (HighStrikerRed) Attack() int              { return 0 }
-func (HighStrikerRed) Defense() int             { return 2 }
-func (HighStrikerRed) Types() card.TypeSet      { return highStrikerTypes }
-func (HighStrikerRed) GoAgain() bool            { return true }
+func (HighStrikerRed) ID() ids.CardID                     { return ids.HighStrikerRed }
+func (HighStrikerRed) Name() string                       { return "High Striker" }
+func (HighStrikerRed) DisplayName() string                { return "High Striker [R]" }
+func (HighStrikerRed) Cost(card.GameEngine) int           { return 0 }
+func (HighStrikerRed) Pitch() int                         { return 1 }
+func (HighStrikerRed) Attack() int                        { return 0 }
+func (HighStrikerRed) Defense() int                       { return 2 }
+func (HighStrikerRed) Types(card.GameEngine) card.TypeSet { return highStrikerTypes }
+func (HighStrikerRed) GoAgain() bool                      { return true }
 
 type HighStrikerYellow struct{}
 
-func (HighStrikerYellow) ID() ids.CardID           { return ids.HighStrikerYellow }
-func (HighStrikerYellow) Name() string             { return "High Striker" }
-func (HighStrikerYellow) DisplayName() string      { return "High Striker [Y]" }
-func (HighStrikerYellow) Cost(card.GameEngine) int { return 0 }
-func (HighStrikerYellow) Pitch() int               { return 2 }
-func (HighStrikerYellow) Attack() int              { return 0 }
-func (HighStrikerYellow) Defense() int             { return 2 }
-func (HighStrikerYellow) Types() card.TypeSet      { return highStrikerTypes }
-func (HighStrikerYellow) GoAgain() bool            { return true }
+func (HighStrikerYellow) ID() ids.CardID                     { return ids.HighStrikerYellow }
+func (HighStrikerYellow) Name() string                       { return "High Striker" }
+func (HighStrikerYellow) DisplayName() string                { return "High Striker [Y]" }
+func (HighStrikerYellow) Cost(card.GameEngine) int           { return 0 }
+func (HighStrikerYellow) Pitch() int                         { return 2 }
+func (HighStrikerYellow) Attack() int                        { return 0 }
+func (HighStrikerYellow) Defense() int                       { return 2 }
+func (HighStrikerYellow) Types(card.GameEngine) card.TypeSet { return highStrikerTypes }
+func (HighStrikerYellow) GoAgain() bool                      { return true }
 
 type HighStrikerBlue struct{}
 
-func (HighStrikerBlue) ID() ids.CardID           { return ids.HighStrikerBlue }
-func (HighStrikerBlue) Name() string             { return "High Striker" }
-func (HighStrikerBlue) DisplayName() string      { return "High Striker [B]" }
-func (HighStrikerBlue) Cost(card.GameEngine) int { return 0 }
-func (HighStrikerBlue) Pitch() int               { return 3 }
-func (HighStrikerBlue) Attack() int              { return 0 }
-func (HighStrikerBlue) Defense() int             { return 2 }
-func (HighStrikerBlue) Types() card.TypeSet      { return highStrikerTypes }
-func (HighStrikerBlue) GoAgain() bool            { return true }
+func (HighStrikerBlue) ID() ids.CardID                     { return ids.HighStrikerBlue }
+func (HighStrikerBlue) Name() string                       { return "High Striker" }
+func (HighStrikerBlue) DisplayName() string                { return "High Striker [B]" }
+func (HighStrikerBlue) Cost(card.GameEngine) int           { return 0 }
+func (HighStrikerBlue) Pitch() int                         { return 3 }
+func (HighStrikerBlue) Attack() int                        { return 0 }
+func (HighStrikerBlue) Defense() int                       { return 2 }
+func (HighStrikerBlue) Types(card.GameEngine) card.TypeSet { return highStrikerTypes }
+func (HighStrikerBlue) GoAgain() bool                      { return true }

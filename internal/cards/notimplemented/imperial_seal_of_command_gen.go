@@ -18,6 +18,8 @@ func (ImperialSealOfCommandRed) Cost(card.GameEngine) int { return 0 }
 func (ImperialSealOfCommandRed) Pitch() int               { return 1 }
 func (ImperialSealOfCommandRed) Attack() int              { return 0 }
 func (ImperialSealOfCommandRed) Defense() int             { return 0 }
-func (ImperialSealOfCommandRed) Types() card.TypeSet      { return imperialSealOfCommandTypes }
-func (ImperialSealOfCommandRed) GoAgain() bool            { return false }
-func (ImperialSealOfCommandRed) NotImplemented()          {}
+func (ImperialSealOfCommandRed) Types(card.GameEngine) card.TypeSet {
+	return imperialSealOfCommandTypes
+}
+func (ImperialSealOfCommandRed) GoAgain() bool   { return false }
+func (ImperialSealOfCommandRed) NotImplemented() {}

@@ -11,12 +11,12 @@ var sigilOfTheArknightTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeActio
 
 type SigilOfTheArknightBlue struct{}
 
-func (SigilOfTheArknightBlue) ID() ids.CardID           { return ids.SigilOfTheArknightBlue }
-func (SigilOfTheArknightBlue) Name() string             { return "Sigil of the Arknight" }
-func (SigilOfTheArknightBlue) DisplayName() string      { return "Sigil of the Arknight [B]" }
-func (SigilOfTheArknightBlue) Cost(card.GameEngine) int { return 0 }
-func (SigilOfTheArknightBlue) Pitch() int               { return 3 }
-func (SigilOfTheArknightBlue) Attack() int              { return 0 }
-func (SigilOfTheArknightBlue) Defense() int             { return 2 }
-func (SigilOfTheArknightBlue) Types() card.TypeSet      { return sigilOfTheArknightTypes }
-func (SigilOfTheArknightBlue) GoAgain() bool            { return true }
+func (SigilOfTheArknightBlue) ID() ids.CardID                     { return ids.SigilOfTheArknightBlue }
+func (SigilOfTheArknightBlue) Name() string                       { return "Sigil of the Arknight" }
+func (SigilOfTheArknightBlue) DisplayName() string                { return "Sigil of the Arknight [B]" }
+func (SigilOfTheArknightBlue) Cost(card.GameEngine) int           { return 0 }
+func (SigilOfTheArknightBlue) Pitch() int                         { return 3 }
+func (SigilOfTheArknightBlue) Attack() int                        { return 0 }
+func (SigilOfTheArknightBlue) Defense() int                       { return 2 }
+func (SigilOfTheArknightBlue) Types(card.GameEngine) card.TypeSet { return sigilOfTheArknightTypes }
+func (SigilOfTheArknightBlue) GoAgain() bool                      { return true }

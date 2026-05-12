@@ -12,7 +12,7 @@ import (
 func TestOnTheHorizon_TypedAsBlock(t *testing.T) {
 	cases := []card.Card{OnTheHorizonRed{}, OnTheHorizonYellow{}, OnTheHorizonBlue{}}
 	for _, c := range cases {
-		ts := c.Types()
+		ts := c.Types(nil)
 		if !ts.Has(card.TypeBlock) {
 			t.Errorf("%s: missing TypeBlock", c.Name())
 		}

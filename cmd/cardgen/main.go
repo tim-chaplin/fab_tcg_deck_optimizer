@@ -58,7 +58,7 @@ import (
 type CardGroup struct {
 	Name           string    `yaml:"name"`
 	Types          []string  `yaml:"types"`
-	Universal      bool      `yaml:"universal,omitempty"` // OR sim.Universal() into Types()
+	Universal      bool      `yaml:"universal,omitempty"` // OR the current hero's class into Types()
 	Cost           any       `yaml:"cost"`                // int (constant) or "variable" or nil (variable)
 	GoAgain        bool      `yaml:"goAgain,omitempty"`
 	DynamicGoAgain bool      `yaml:"dynamicGoAgain,omitempty"` // skip GoAgain in gen; hand file owns it
@@ -138,9 +138,6 @@ func emitGroup(dir, pkg, basename string, g CardGroup) error {
 
 	fmt.Fprintf(&buf, "import (\n")
 	fmt.Fprintf(&buf, "\t\"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids\"\n")
-	if g.Universal {
-		fmt.Fprintf(&buf, "\t\"github.com/tim-chaplin/fab-deck-optimizer/internal/sim\"\n")
-	}
 	fmt.Fprintf(&buf, "\t\"github.com/tim-chaplin/fab-deck-optimizer/v2/card\"\n")
 	fmt.Fprintf(&buf, ")\n\n")
 
@@ -163,11 +160,18 @@ func emitGroup(dir, pkg, basename string, g CardGroup) error {
 		fmt.Fprintf(&buf, "func (%s) Pitch() int          { return %d }\n", v.ID, v.Pitch)
 		fmt.Fprintf(&buf, "func (%s) Attack() int         { return %d }\n", v.ID, v.Attack)
 		fmt.Fprintf(&buf, "func (%s) Defense() int        { return %d }\n", v.ID, v.Defense)
-		typesBody := tvar
 		if g.Universal {
-			typesBody = tvar + " | sim.Universal()"
+			// Universal cards fold the active hero's class into their type-line. Passing
+			// nil (e.g. cardmeta lookups before a hero is set) returns the printed types
+			// only — class-independent predicates (IsAttack, IsAttackAction, …) still work.
+			fmt.Fprintf(&buf, "func (%s) Types(g card.GameEngine) card.TypeSet {\n", v.ID)
+			fmt.Fprintf(&buf, "\tif g == nil {\n\t\treturn %s\n\t}\n", tvar)
+			fmt.Fprintf(&buf, "\treturn %s | card.NewTypeSet(g.CurrentHeroClass())\n", tvar)
+			fmt.Fprintf(&buf, "}\n")
+			fmt.Fprintf(&buf, "func (%s) Universal()           {}\n", v.ID)
+		} else {
+			fmt.Fprintf(&buf, "func (%s) Types(card.GameEngine) card.TypeSet { return %s }\n", v.ID, tvar)
 		}
-		fmt.Fprintf(&buf, "func (%s) Types() card.TypeSet { return %s }\n", v.ID, typesBody)
 		if !g.DynamicGoAgain {
 			fmt.Fprintf(&buf, "func (%s) GoAgain() bool       { return %v }\n", v.ID, g.GoAgain)
 		}

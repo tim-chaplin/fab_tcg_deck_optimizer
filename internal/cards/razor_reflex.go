@@ -26,7 +26,7 @@ import (
 // Reads Cost against an empty TurnState; no variable-cost cost-≤1 attack actions exist
 // in the pool.
 func razorReflexAccepts(c card.Card, mode int8) bool {
-	t := c.Types()
+	t := c.Types(nil)
 	switch mode {
 	case 0:
 		return t.Has(card.TypeSword) && t.IsWeaponAttack()

@@ -16,7 +16,7 @@ func cadaverousContrabandOnHitRecycle(s card.GameEngine, l card.Logger, self *ca
 	}
 }
 
-func isNonAttackAction(c card.Card) bool { return c.Types().IsNonAttackAction() }
+func isNonAttackAction(c card.Card) bool { return c.Types(nil).IsNonAttackAction() }
 
 func cadaverousContrabandPlay(s card.GameEngine, l card.Logger, self *card.CardState) {
 	self.RegisterOnHit(cadaverousContrabandOnHitRecycle)

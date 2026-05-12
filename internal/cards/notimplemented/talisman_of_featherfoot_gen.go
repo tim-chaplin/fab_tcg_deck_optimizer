@@ -18,6 +18,8 @@ func (TalismanOfFeatherfootYellow) Cost(card.GameEngine) int { return 0 }
 func (TalismanOfFeatherfootYellow) Pitch() int               { return 2 }
 func (TalismanOfFeatherfootYellow) Attack() int              { return 0 }
 func (TalismanOfFeatherfootYellow) Defense() int             { return 0 }
-func (TalismanOfFeatherfootYellow) Types() card.TypeSet      { return talismanOfFeatherfootTypes }
-func (TalismanOfFeatherfootYellow) GoAgain() bool            { return true }
-func (TalismanOfFeatherfootYellow) NotImplemented()          {}
+func (TalismanOfFeatherfootYellow) Types(card.GameEngine) card.TypeSet {
+	return talismanOfFeatherfootTypes
+}
+func (TalismanOfFeatherfootYellow) GoAgain() bool   { return true }
+func (TalismanOfFeatherfootYellow) NotImplemented() {}

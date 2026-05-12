@@ -14,8 +14,10 @@ import (
 )
 
 // runicReapingTargetMatches accepts Runeblade attack action cards (weapons don't qualify).
-func runicReapingTargetMatches(target *card.CardState) bool {
-	t := target.Card.Types()
+// Engine threaded through so Universal cards fold the active hero's class into their Types
+// — Wage Gold under Viserai then matches TypeRuneblade.
+func runicReapingTargetMatches(s card.GameEngine, target *card.CardState) bool {
+	t := target.Card.Types(s)
 	return t.Has(card.TypeRuneblade) && t.IsAttackAction()
 }
 
@@ -36,7 +38,7 @@ func (c RunicReapingBlue) Play(s card.GameEngine, l card.Logger, self *card.Card
 func runicReapingPlay(s card.GameEngine, l card.Logger, selfState *card.CardState, source card.Card, n int) {
 	var target *card.CardState
 	for _, pc := range s.CardsRemaining() {
-		if runicReapingTargetMatches(pc) {
+		if runicReapingTargetMatches(s, pc) {
 			target = pc
 			break
 		}
@@ -45,7 +47,7 @@ func runicReapingPlay(s card.GameEngine, l card.Logger, selfState *card.CardStat
 		return
 	}
 	for _, p := range selfState.PitchedToPlay {
-		if p.Types().Has(card.TypeAttack) {
+		if p.Types(nil).Has(card.TypeAttack) {
 			target.BonusAttack++
 			break
 		}

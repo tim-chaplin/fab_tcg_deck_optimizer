@@ -11,13 +11,13 @@ var smashUpTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeA
 
 type SmashUpRed struct{}
 
-func (SmashUpRed) ID() ids.CardID           { return ids.SmashUpRed }
-func (SmashUpRed) Name() string             { return "Smash Up" }
-func (SmashUpRed) DisplayName() string      { return "Smash Up [R]" }
-func (SmashUpRed) Cost(card.GameEngine) int { return 1 }
-func (SmashUpRed) Pitch() int               { return 1 }
-func (SmashUpRed) Attack() int              { return 5 }
-func (SmashUpRed) Defense() int             { return 2 }
-func (SmashUpRed) Types() card.TypeSet      { return smashUpTypes }
-func (SmashUpRed) GoAgain() bool            { return false }
-func (SmashUpRed) NotImplemented()          {}
+func (SmashUpRed) ID() ids.CardID                     { return ids.SmashUpRed }
+func (SmashUpRed) Name() string                       { return "Smash Up" }
+func (SmashUpRed) DisplayName() string                { return "Smash Up [R]" }
+func (SmashUpRed) Cost(card.GameEngine) int           { return 1 }
+func (SmashUpRed) Pitch() int                         { return 1 }
+func (SmashUpRed) Attack() int                        { return 5 }
+func (SmashUpRed) Defense() int                       { return 2 }
+func (SmashUpRed) Types(card.GameEngine) card.TypeSet { return smashUpTypes }
+func (SmashUpRed) GoAgain() bool                      { return false }
+func (SmashUpRed) NotImplemented()                    {}

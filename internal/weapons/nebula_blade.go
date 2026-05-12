@@ -29,15 +29,15 @@ var nebulaBladeAbilityTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeWeapo
 
 type NebulaBladeAbility struct{}
 
-func (NebulaBladeAbility) ID() ids.CardID           { return ids.NebulaBladeAbilityID }
-func (NebulaBladeAbility) Name() string             { return "Nebula Blade" }
-func (NebulaBladeAbility) DisplayName() string      { return "Nebula Blade" }
-func (NebulaBladeAbility) Cost(card.GameEngine) int { return 2 }
-func (NebulaBladeAbility) Pitch() int               { return 0 }
-func (NebulaBladeAbility) Attack() int              { return 1 }
-func (NebulaBladeAbility) Defense() int             { return 0 }
-func (NebulaBladeAbility) Types() card.TypeSet      { return nebulaBladeAbilityTypes }
-func (NebulaBladeAbility) GoAgain() bool            { return false }
+func (NebulaBladeAbility) ID() ids.CardID                     { return ids.NebulaBladeAbilityID }
+func (NebulaBladeAbility) Name() string                       { return "Nebula Blade" }
+func (NebulaBladeAbility) DisplayName() string                { return "Nebula Blade" }
+func (NebulaBladeAbility) Cost(card.GameEngine) int           { return 2 }
+func (NebulaBladeAbility) Pitch() int                         { return 0 }
+func (NebulaBladeAbility) Attack() int                        { return 1 }
+func (NebulaBladeAbility) Defense() int                       { return 0 }
+func (NebulaBladeAbility) Types(card.GameEngine) card.TypeSet { return nebulaBladeAbilityTypes }
+func (NebulaBladeAbility) GoAgain() bool                      { return false }
 func (NebulaBladeAbility) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 	if s.NonAttackActionPlayed() {
 		self.BonusAttack += 3

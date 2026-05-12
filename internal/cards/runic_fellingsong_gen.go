@@ -11,36 +11,36 @@ var runicFellingsongTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeAction,
 
 type RunicFellingsongRed struct{}
 
-func (RunicFellingsongRed) ID() ids.CardID           { return ids.RunicFellingsongRed }
-func (RunicFellingsongRed) Name() string             { return "Runic Fellingsong" }
-func (RunicFellingsongRed) DisplayName() string      { return "Runic Fellingsong [R]" }
-func (RunicFellingsongRed) Cost(card.GameEngine) int { return 3 }
-func (RunicFellingsongRed) Pitch() int               { return 1 }
-func (RunicFellingsongRed) Attack() int              { return 7 }
-func (RunicFellingsongRed) Defense() int             { return 3 }
-func (RunicFellingsongRed) Types() card.TypeSet      { return runicFellingsongTypes }
-func (RunicFellingsongRed) GoAgain() bool            { return false }
+func (RunicFellingsongRed) ID() ids.CardID                     { return ids.RunicFellingsongRed }
+func (RunicFellingsongRed) Name() string                       { return "Runic Fellingsong" }
+func (RunicFellingsongRed) DisplayName() string                { return "Runic Fellingsong [R]" }
+func (RunicFellingsongRed) Cost(card.GameEngine) int           { return 3 }
+func (RunicFellingsongRed) Pitch() int                         { return 1 }
+func (RunicFellingsongRed) Attack() int                        { return 7 }
+func (RunicFellingsongRed) Defense() int                       { return 3 }
+func (RunicFellingsongRed) Types(card.GameEngine) card.TypeSet { return runicFellingsongTypes }
+func (RunicFellingsongRed) GoAgain() bool                      { return false }
 
 type RunicFellingsongYellow struct{}
 
-func (RunicFellingsongYellow) ID() ids.CardID           { return ids.RunicFellingsongYellow }
-func (RunicFellingsongYellow) Name() string             { return "Runic Fellingsong" }
-func (RunicFellingsongYellow) DisplayName() string      { return "Runic Fellingsong [Y]" }
-func (RunicFellingsongYellow) Cost(card.GameEngine) int { return 3 }
-func (RunicFellingsongYellow) Pitch() int               { return 2 }
-func (RunicFellingsongYellow) Attack() int              { return 6 }
-func (RunicFellingsongYellow) Defense() int             { return 3 }
-func (RunicFellingsongYellow) Types() card.TypeSet      { return runicFellingsongTypes }
-func (RunicFellingsongYellow) GoAgain() bool            { return false }
+func (RunicFellingsongYellow) ID() ids.CardID                     { return ids.RunicFellingsongYellow }
+func (RunicFellingsongYellow) Name() string                       { return "Runic Fellingsong" }
+func (RunicFellingsongYellow) DisplayName() string                { return "Runic Fellingsong [Y]" }
+func (RunicFellingsongYellow) Cost(card.GameEngine) int           { return 3 }
+func (RunicFellingsongYellow) Pitch() int                         { return 2 }
+func (RunicFellingsongYellow) Attack() int                        { return 6 }
+func (RunicFellingsongYellow) Defense() int                       { return 3 }
+func (RunicFellingsongYellow) Types(card.GameEngine) card.TypeSet { return runicFellingsongTypes }
+func (RunicFellingsongYellow) GoAgain() bool                      { return false }
 
 type RunicFellingsongBlue struct{}
 
-func (RunicFellingsongBlue) ID() ids.CardID           { return ids.RunicFellingsongBlue }
-func (RunicFellingsongBlue) Name() string             { return "Runic Fellingsong" }
-func (RunicFellingsongBlue) DisplayName() string      { return "Runic Fellingsong [B]" }
-func (RunicFellingsongBlue) Cost(card.GameEngine) int { return 3 }
-func (RunicFellingsongBlue) Pitch() int               { return 3 }
-func (RunicFellingsongBlue) Attack() int              { return 5 }
-func (RunicFellingsongBlue) Defense() int             { return 3 }
-func (RunicFellingsongBlue) Types() card.TypeSet      { return runicFellingsongTypes }
-func (RunicFellingsongBlue) GoAgain() bool            { return false }
+func (RunicFellingsongBlue) ID() ids.CardID                     { return ids.RunicFellingsongBlue }
+func (RunicFellingsongBlue) Name() string                       { return "Runic Fellingsong" }
+func (RunicFellingsongBlue) DisplayName() string                { return "Runic Fellingsong [B]" }
+func (RunicFellingsongBlue) Cost(card.GameEngine) int           { return 3 }
+func (RunicFellingsongBlue) Pitch() int                         { return 3 }
+func (RunicFellingsongBlue) Attack() int                        { return 5 }
+func (RunicFellingsongBlue) Defense() int                       { return 3 }
+func (RunicFellingsongBlue) Types(card.GameEngine) card.TypeSet { return runicFellingsongTypes }
+func (RunicFellingsongBlue) GoAgain() bool                      { return false }

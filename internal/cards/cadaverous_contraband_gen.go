@@ -11,15 +11,15 @@ var cadaverousContrabandTypes = card.NewTypeSet(card.TypeGeneric, card.TypeActio
 
 type CadaverousContrabandRed struct{}
 
-func (CadaverousContrabandRed) ID() ids.CardID           { return ids.CadaverousContrabandRed }
-func (CadaverousContrabandRed) Name() string             { return "Cadaverous Contraband" }
-func (CadaverousContrabandRed) DisplayName() string      { return "Cadaverous Contraband [R]" }
-func (CadaverousContrabandRed) Cost(card.GameEngine) int { return 2 }
-func (CadaverousContrabandRed) Pitch() int               { return 1 }
-func (CadaverousContrabandRed) Attack() int              { return 6 }
-func (CadaverousContrabandRed) Defense() int             { return 2 }
-func (CadaverousContrabandRed) Types() card.TypeSet      { return cadaverousContrabandTypes }
-func (CadaverousContrabandRed) GoAgain() bool            { return false }
+func (CadaverousContrabandRed) ID() ids.CardID                     { return ids.CadaverousContrabandRed }
+func (CadaverousContrabandRed) Name() string                       { return "Cadaverous Contraband" }
+func (CadaverousContrabandRed) DisplayName() string                { return "Cadaverous Contraband [R]" }
+func (CadaverousContrabandRed) Cost(card.GameEngine) int           { return 2 }
+func (CadaverousContrabandRed) Pitch() int                         { return 1 }
+func (CadaverousContrabandRed) Attack() int                        { return 6 }
+func (CadaverousContrabandRed) Defense() int                       { return 2 }
+func (CadaverousContrabandRed) Types(card.GameEngine) card.TypeSet { return cadaverousContrabandTypes }
+func (CadaverousContrabandRed) GoAgain() bool                      { return false }
 
 type CadaverousContrabandYellow struct{}
 
@@ -30,17 +30,19 @@ func (CadaverousContrabandYellow) Cost(card.GameEngine) int { return 2 }
 func (CadaverousContrabandYellow) Pitch() int               { return 2 }
 func (CadaverousContrabandYellow) Attack() int              { return 5 }
 func (CadaverousContrabandYellow) Defense() int             { return 2 }
-func (CadaverousContrabandYellow) Types() card.TypeSet      { return cadaverousContrabandTypes }
-func (CadaverousContrabandYellow) GoAgain() bool            { return false }
+func (CadaverousContrabandYellow) Types(card.GameEngine) card.TypeSet {
+	return cadaverousContrabandTypes
+}
+func (CadaverousContrabandYellow) GoAgain() bool { return false }
 
 type CadaverousContrabandBlue struct{}
 
-func (CadaverousContrabandBlue) ID() ids.CardID           { return ids.CadaverousContrabandBlue }
-func (CadaverousContrabandBlue) Name() string             { return "Cadaverous Contraband" }
-func (CadaverousContrabandBlue) DisplayName() string      { return "Cadaverous Contraband [B]" }
-func (CadaverousContrabandBlue) Cost(card.GameEngine) int { return 2 }
-func (CadaverousContrabandBlue) Pitch() int               { return 3 }
-func (CadaverousContrabandBlue) Attack() int              { return 4 }
-func (CadaverousContrabandBlue) Defense() int             { return 2 }
-func (CadaverousContrabandBlue) Types() card.TypeSet      { return cadaverousContrabandTypes }
-func (CadaverousContrabandBlue) GoAgain() bool            { return false }
+func (CadaverousContrabandBlue) ID() ids.CardID                     { return ids.CadaverousContrabandBlue }
+func (CadaverousContrabandBlue) Name() string                       { return "Cadaverous Contraband" }
+func (CadaverousContrabandBlue) DisplayName() string                { return "Cadaverous Contraband [B]" }
+func (CadaverousContrabandBlue) Cost(card.GameEngine) int           { return 2 }
+func (CadaverousContrabandBlue) Pitch() int                         { return 3 }
+func (CadaverousContrabandBlue) Attack() int                        { return 4 }
+func (CadaverousContrabandBlue) Defense() int                       { return 2 }
+func (CadaverousContrabandBlue) Types(card.GameEngine) card.TypeSet { return cadaverousContrabandTypes }
+func (CadaverousContrabandBlue) GoAgain() bool                      { return false }

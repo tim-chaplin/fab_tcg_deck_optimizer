@@ -11,15 +11,15 @@ var bloodspillInvocationTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeAct
 
 type BloodspillInvocationRed struct{}
 
-func (BloodspillInvocationRed) ID() ids.CardID           { return ids.BloodspillInvocationRed }
-func (BloodspillInvocationRed) Name() string             { return "Bloodspill Invocation" }
-func (BloodspillInvocationRed) DisplayName() string      { return "Bloodspill Invocation [R]" }
-func (BloodspillInvocationRed) Cost(card.GameEngine) int { return 1 }
-func (BloodspillInvocationRed) Pitch() int               { return 1 }
-func (BloodspillInvocationRed) Attack() int              { return 0 }
-func (BloodspillInvocationRed) Defense() int             { return 2 }
-func (BloodspillInvocationRed) Types() card.TypeSet      { return bloodspillInvocationTypes }
-func (BloodspillInvocationRed) GoAgain() bool            { return true }
+func (BloodspillInvocationRed) ID() ids.CardID                     { return ids.BloodspillInvocationRed }
+func (BloodspillInvocationRed) Name() string                       { return "Bloodspill Invocation" }
+func (BloodspillInvocationRed) DisplayName() string                { return "Bloodspill Invocation [R]" }
+func (BloodspillInvocationRed) Cost(card.GameEngine) int           { return 1 }
+func (BloodspillInvocationRed) Pitch() int                         { return 1 }
+func (BloodspillInvocationRed) Attack() int                        { return 0 }
+func (BloodspillInvocationRed) Defense() int                       { return 2 }
+func (BloodspillInvocationRed) Types(card.GameEngine) card.TypeSet { return bloodspillInvocationTypes }
+func (BloodspillInvocationRed) GoAgain() bool                      { return true }
 
 type BloodspillInvocationYellow struct{}
 
@@ -30,17 +30,19 @@ func (BloodspillInvocationYellow) Cost(card.GameEngine) int { return 1 }
 func (BloodspillInvocationYellow) Pitch() int               { return 2 }
 func (BloodspillInvocationYellow) Attack() int              { return 0 }
 func (BloodspillInvocationYellow) Defense() int             { return 2 }
-func (BloodspillInvocationYellow) Types() card.TypeSet      { return bloodspillInvocationTypes }
-func (BloodspillInvocationYellow) GoAgain() bool            { return true }
+func (BloodspillInvocationYellow) Types(card.GameEngine) card.TypeSet {
+	return bloodspillInvocationTypes
+}
+func (BloodspillInvocationYellow) GoAgain() bool { return true }
 
 type BloodspillInvocationBlue struct{}
 
-func (BloodspillInvocationBlue) ID() ids.CardID           { return ids.BloodspillInvocationBlue }
-func (BloodspillInvocationBlue) Name() string             { return "Bloodspill Invocation" }
-func (BloodspillInvocationBlue) DisplayName() string      { return "Bloodspill Invocation [B]" }
-func (BloodspillInvocationBlue) Cost(card.GameEngine) int { return 1 }
-func (BloodspillInvocationBlue) Pitch() int               { return 3 }
-func (BloodspillInvocationBlue) Attack() int              { return 0 }
-func (BloodspillInvocationBlue) Defense() int             { return 2 }
-func (BloodspillInvocationBlue) Types() card.TypeSet      { return bloodspillInvocationTypes }
-func (BloodspillInvocationBlue) GoAgain() bool            { return true }
+func (BloodspillInvocationBlue) ID() ids.CardID                     { return ids.BloodspillInvocationBlue }
+func (BloodspillInvocationBlue) Name() string                       { return "Bloodspill Invocation" }
+func (BloodspillInvocationBlue) DisplayName() string                { return "Bloodspill Invocation [B]" }
+func (BloodspillInvocationBlue) Cost(card.GameEngine) int           { return 1 }
+func (BloodspillInvocationBlue) Pitch() int                         { return 3 }
+func (BloodspillInvocationBlue) Attack() int                        { return 0 }
+func (BloodspillInvocationBlue) Defense() int                       { return 2 }
+func (BloodspillInvocationBlue) Types(card.GameEngine) card.TypeSet { return bloodspillInvocationTypes }
+func (BloodspillInvocationBlue) GoAgain() bool                      { return true }

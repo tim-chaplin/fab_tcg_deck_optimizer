@@ -11,39 +11,39 @@ var primeTheCrowdTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction)
 
 type PrimeTheCrowdRed struct{}
 
-func (PrimeTheCrowdRed) ID() ids.CardID           { return ids.PrimeTheCrowdRed }
-func (PrimeTheCrowdRed) Name() string             { return "Prime the Crowd" }
-func (PrimeTheCrowdRed) DisplayName() string      { return "Prime the Crowd [R]" }
-func (PrimeTheCrowdRed) Cost(card.GameEngine) int { return 2 }
-func (PrimeTheCrowdRed) Pitch() int               { return 1 }
-func (PrimeTheCrowdRed) Attack() int              { return 0 }
-func (PrimeTheCrowdRed) Defense() int             { return 2 }
-func (PrimeTheCrowdRed) Types() card.TypeSet      { return primeTheCrowdTypes }
-func (PrimeTheCrowdRed) GoAgain() bool            { return true }
-func (PrimeTheCrowdRed) NotImplemented()          {}
+func (PrimeTheCrowdRed) ID() ids.CardID                     { return ids.PrimeTheCrowdRed }
+func (PrimeTheCrowdRed) Name() string                       { return "Prime the Crowd" }
+func (PrimeTheCrowdRed) DisplayName() string                { return "Prime the Crowd [R]" }
+func (PrimeTheCrowdRed) Cost(card.GameEngine) int           { return 2 }
+func (PrimeTheCrowdRed) Pitch() int                         { return 1 }
+func (PrimeTheCrowdRed) Attack() int                        { return 0 }
+func (PrimeTheCrowdRed) Defense() int                       { return 2 }
+func (PrimeTheCrowdRed) Types(card.GameEngine) card.TypeSet { return primeTheCrowdTypes }
+func (PrimeTheCrowdRed) GoAgain() bool                      { return true }
+func (PrimeTheCrowdRed) NotImplemented()                    {}
 
 type PrimeTheCrowdYellow struct{}
 
-func (PrimeTheCrowdYellow) ID() ids.CardID           { return ids.PrimeTheCrowdYellow }
-func (PrimeTheCrowdYellow) Name() string             { return "Prime the Crowd" }
-func (PrimeTheCrowdYellow) DisplayName() string      { return "Prime the Crowd [Y]" }
-func (PrimeTheCrowdYellow) Cost(card.GameEngine) int { return 2 }
-func (PrimeTheCrowdYellow) Pitch() int               { return 2 }
-func (PrimeTheCrowdYellow) Attack() int              { return 0 }
-func (PrimeTheCrowdYellow) Defense() int             { return 2 }
-func (PrimeTheCrowdYellow) Types() card.TypeSet      { return primeTheCrowdTypes }
-func (PrimeTheCrowdYellow) GoAgain() bool            { return true }
-func (PrimeTheCrowdYellow) NotImplemented()          {}
+func (PrimeTheCrowdYellow) ID() ids.CardID                     { return ids.PrimeTheCrowdYellow }
+func (PrimeTheCrowdYellow) Name() string                       { return "Prime the Crowd" }
+func (PrimeTheCrowdYellow) DisplayName() string                { return "Prime the Crowd [Y]" }
+func (PrimeTheCrowdYellow) Cost(card.GameEngine) int           { return 2 }
+func (PrimeTheCrowdYellow) Pitch() int                         { return 2 }
+func (PrimeTheCrowdYellow) Attack() int                        { return 0 }
+func (PrimeTheCrowdYellow) Defense() int                       { return 2 }
+func (PrimeTheCrowdYellow) Types(card.GameEngine) card.TypeSet { return primeTheCrowdTypes }
+func (PrimeTheCrowdYellow) GoAgain() bool                      { return true }
+func (PrimeTheCrowdYellow) NotImplemented()                    {}
 
 type PrimeTheCrowdBlue struct{}
 
-func (PrimeTheCrowdBlue) ID() ids.CardID           { return ids.PrimeTheCrowdBlue }
-func (PrimeTheCrowdBlue) Name() string             { return "Prime the Crowd" }
-func (PrimeTheCrowdBlue) DisplayName() string      { return "Prime the Crowd [B]" }
-func (PrimeTheCrowdBlue) Cost(card.GameEngine) int { return 2 }
-func (PrimeTheCrowdBlue) Pitch() int               { return 3 }
-func (PrimeTheCrowdBlue) Attack() int              { return 0 }
-func (PrimeTheCrowdBlue) Defense() int             { return 2 }
-func (PrimeTheCrowdBlue) Types() card.TypeSet      { return primeTheCrowdTypes }
-func (PrimeTheCrowdBlue) GoAgain() bool            { return true }
-func (PrimeTheCrowdBlue) NotImplemented()          {}
+func (PrimeTheCrowdBlue) ID() ids.CardID                     { return ids.PrimeTheCrowdBlue }
+func (PrimeTheCrowdBlue) Name() string                       { return "Prime the Crowd" }
+func (PrimeTheCrowdBlue) DisplayName() string                { return "Prime the Crowd [B]" }
+func (PrimeTheCrowdBlue) Cost(card.GameEngine) int           { return 2 }
+func (PrimeTheCrowdBlue) Pitch() int                         { return 3 }
+func (PrimeTheCrowdBlue) Attack() int                        { return 0 }
+func (PrimeTheCrowdBlue) Defense() int                       { return 2 }
+func (PrimeTheCrowdBlue) Types(card.GameEngine) card.TypeSet { return primeTheCrowdTypes }
+func (PrimeTheCrowdBlue) GoAgain() bool                      { return true }
+func (PrimeTheCrowdBlue) NotImplemented()                    {}

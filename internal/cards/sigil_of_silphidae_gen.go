@@ -11,12 +11,12 @@ var sigilOfSilphidaeTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeAction,
 
 type SigilOfSilphidaeBlue struct{}
 
-func (SigilOfSilphidaeBlue) ID() ids.CardID           { return ids.SigilOfSilphidaeBlue }
-func (SigilOfSilphidaeBlue) Name() string             { return "Sigil of Silphidae" }
-func (SigilOfSilphidaeBlue) DisplayName() string      { return "Sigil of Silphidae [B]" }
-func (SigilOfSilphidaeBlue) Cost(card.GameEngine) int { return 0 }
-func (SigilOfSilphidaeBlue) Pitch() int               { return 3 }
-func (SigilOfSilphidaeBlue) Attack() int              { return 0 }
-func (SigilOfSilphidaeBlue) Defense() int             { return 3 }
-func (SigilOfSilphidaeBlue) Types() card.TypeSet      { return sigilOfSilphidaeTypes }
-func (SigilOfSilphidaeBlue) GoAgain() bool            { return true }
+func (SigilOfSilphidaeBlue) ID() ids.CardID                     { return ids.SigilOfSilphidaeBlue }
+func (SigilOfSilphidaeBlue) Name() string                       { return "Sigil of Silphidae" }
+func (SigilOfSilphidaeBlue) DisplayName() string                { return "Sigil of Silphidae [B]" }
+func (SigilOfSilphidaeBlue) Cost(card.GameEngine) int           { return 0 }
+func (SigilOfSilphidaeBlue) Pitch() int                         { return 3 }
+func (SigilOfSilphidaeBlue) Attack() int                        { return 0 }
+func (SigilOfSilphidaeBlue) Defense() int                       { return 3 }
+func (SigilOfSilphidaeBlue) Types(card.GameEngine) card.TypeSet { return sigilOfSilphidaeTypes }
+func (SigilOfSilphidaeBlue) GoAgain() bool                      { return true }

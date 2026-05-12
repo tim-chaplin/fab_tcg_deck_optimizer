@@ -11,36 +11,36 @@ var pummelTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAttackReaction)
 
 type PummelRed struct{}
 
-func (PummelRed) ID() ids.CardID           { return ids.PummelRed }
-func (PummelRed) Name() string             { return "Pummel" }
-func (PummelRed) DisplayName() string      { return "Pummel [R]" }
-func (PummelRed) Cost(card.GameEngine) int { return 2 }
-func (PummelRed) Pitch() int               { return 1 }
-func (PummelRed) Attack() int              { return 0 }
-func (PummelRed) Defense() int             { return 2 }
-func (PummelRed) Types() card.TypeSet      { return pummelTypes }
-func (PummelRed) GoAgain() bool            { return false }
+func (PummelRed) ID() ids.CardID                     { return ids.PummelRed }
+func (PummelRed) Name() string                       { return "Pummel" }
+func (PummelRed) DisplayName() string                { return "Pummel [R]" }
+func (PummelRed) Cost(card.GameEngine) int           { return 2 }
+func (PummelRed) Pitch() int                         { return 1 }
+func (PummelRed) Attack() int                        { return 0 }
+func (PummelRed) Defense() int                       { return 2 }
+func (PummelRed) Types(card.GameEngine) card.TypeSet { return pummelTypes }
+func (PummelRed) GoAgain() bool                      { return false }
 
 type PummelYellow struct{}
 
-func (PummelYellow) ID() ids.CardID           { return ids.PummelYellow }
-func (PummelYellow) Name() string             { return "Pummel" }
-func (PummelYellow) DisplayName() string      { return "Pummel [Y]" }
-func (PummelYellow) Cost(card.GameEngine) int { return 2 }
-func (PummelYellow) Pitch() int               { return 2 }
-func (PummelYellow) Attack() int              { return 0 }
-func (PummelYellow) Defense() int             { return 2 }
-func (PummelYellow) Types() card.TypeSet      { return pummelTypes }
-func (PummelYellow) GoAgain() bool            { return false }
+func (PummelYellow) ID() ids.CardID                     { return ids.PummelYellow }
+func (PummelYellow) Name() string                       { return "Pummel" }
+func (PummelYellow) DisplayName() string                { return "Pummel [Y]" }
+func (PummelYellow) Cost(card.GameEngine) int           { return 2 }
+func (PummelYellow) Pitch() int                         { return 2 }
+func (PummelYellow) Attack() int                        { return 0 }
+func (PummelYellow) Defense() int                       { return 2 }
+func (PummelYellow) Types(card.GameEngine) card.TypeSet { return pummelTypes }
+func (PummelYellow) GoAgain() bool                      { return false }
 
 type PummelBlue struct{}
 
-func (PummelBlue) ID() ids.CardID           { return ids.PummelBlue }
-func (PummelBlue) Name() string             { return "Pummel" }
-func (PummelBlue) DisplayName() string      { return "Pummel [B]" }
-func (PummelBlue) Cost(card.GameEngine) int { return 2 }
-func (PummelBlue) Pitch() int               { return 3 }
-func (PummelBlue) Attack() int              { return 0 }
-func (PummelBlue) Defense() int             { return 2 }
-func (PummelBlue) Types() card.TypeSet      { return pummelTypes }
-func (PummelBlue) GoAgain() bool            { return false }
+func (PummelBlue) ID() ids.CardID                     { return ids.PummelBlue }
+func (PummelBlue) Name() string                       { return "Pummel" }
+func (PummelBlue) DisplayName() string                { return "Pummel [B]" }
+func (PummelBlue) Cost(card.GameEngine) int           { return 2 }
+func (PummelBlue) Pitch() int                         { return 3 }
+func (PummelBlue) Attack() int                        { return 0 }
+func (PummelBlue) Defense() int                       { return 2 }
+func (PummelBlue) Types(card.GameEngine) card.TypeSet { return pummelTypes }
+func (PummelBlue) GoAgain() bool                      { return false }

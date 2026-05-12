@@ -18,8 +18,10 @@ func (FyendalsFightingSpiritRed) Cost(card.GameEngine) int { return 3 }
 func (FyendalsFightingSpiritRed) Pitch() int               { return 1 }
 func (FyendalsFightingSpiritRed) Attack() int              { return 7 }
 func (FyendalsFightingSpiritRed) Defense() int             { return 2 }
-func (FyendalsFightingSpiritRed) Types() card.TypeSet      { return fyendalSFightingSpiritTypes }
-func (FyendalsFightingSpiritRed) GoAgain() bool            { return false }
+func (FyendalsFightingSpiritRed) Types(card.GameEngine) card.TypeSet {
+	return fyendalSFightingSpiritTypes
+}
+func (FyendalsFightingSpiritRed) GoAgain() bool { return false }
 
 type FyendalsFightingSpiritYellow struct{}
 
@@ -30,8 +32,10 @@ func (FyendalsFightingSpiritYellow) Cost(card.GameEngine) int { return 3 }
 func (FyendalsFightingSpiritYellow) Pitch() int               { return 2 }
 func (FyendalsFightingSpiritYellow) Attack() int              { return 6 }
 func (FyendalsFightingSpiritYellow) Defense() int             { return 2 }
-func (FyendalsFightingSpiritYellow) Types() card.TypeSet      { return fyendalSFightingSpiritTypes }
-func (FyendalsFightingSpiritYellow) GoAgain() bool            { return false }
+func (FyendalsFightingSpiritYellow) Types(card.GameEngine) card.TypeSet {
+	return fyendalSFightingSpiritTypes
+}
+func (FyendalsFightingSpiritYellow) GoAgain() bool { return false }
 
 type FyendalsFightingSpiritBlue struct{}
 
@@ -42,5 +46,7 @@ func (FyendalsFightingSpiritBlue) Cost(card.GameEngine) int { return 3 }
 func (FyendalsFightingSpiritBlue) Pitch() int               { return 3 }
 func (FyendalsFightingSpiritBlue) Attack() int              { return 5 }
 func (FyendalsFightingSpiritBlue) Defense() int             { return 2 }
-func (FyendalsFightingSpiritBlue) Types() card.TypeSet      { return fyendalSFightingSpiritTypes }
-func (FyendalsFightingSpiritBlue) GoAgain() bool            { return false }
+func (FyendalsFightingSpiritBlue) Types(card.GameEngine) card.TypeSet {
+	return fyendalSFightingSpiritTypes
+}
+func (FyendalsFightingSpiritBlue) GoAgain() bool { return false }

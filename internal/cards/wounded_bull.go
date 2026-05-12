@@ -6,27 +6,26 @@
 package cards
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 // woundedBullBonus returns the +1{p} power buff when the current hero opts into
 // LowerHealthWanter, else 0.
-func woundedBullBonus() int {
-	if sim.HeroWantsLowerHealth() {
+func woundedBullBonus(s card.GameEngine) int {
+	if s.HeroWantsLowerHealth() {
 		return 1
 	}
 	return 0
 }
 
 func (WoundedBullRed) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
-	self.BonusAttack += woundedBullBonus()
+	self.BonusAttack += woundedBullBonus(s)
 }
 
 func (WoundedBullYellow) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
-	self.BonusAttack += woundedBullBonus()
+	self.BonusAttack += woundedBullBonus(s)
 }
 
 func (WoundedBullBlue) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
-	self.BonusAttack += woundedBullBonus()
+	self.BonusAttack += woundedBullBonus(s)
 }

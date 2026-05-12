@@ -23,7 +23,7 @@ func (zeroDefenseAura) Cost(card.GameEngine) int                           { ret
 func (zeroDefenseAura) Pitch() int                                         { return 0 }
 func (zeroDefenseAura) Attack() int                                        { return 0 }
 func (zeroDefenseAura) Defense() int                                       { return 0 }
-func (zeroDefenseAura) Types() card.TypeSet                                { return card.NewTypeSet(card.TypeAura) }
+func (zeroDefenseAura) Types(card.GameEngine) card.TypeSet                 { return card.NewTypeSet(card.TypeAura) }
 func (zeroDefenseAura) GoAgain() bool                                      { return false }
 func (zeroDefenseAura) Play(card.GameEngine, card.Logger, *card.CardState) {}
 

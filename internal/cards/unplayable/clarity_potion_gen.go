@@ -11,13 +11,13 @@ var clarityPotionTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card
 
 type ClarityPotionBlue struct{}
 
-func (ClarityPotionBlue) ID() ids.CardID           { return ids.ClarityPotionBlue }
-func (ClarityPotionBlue) Name() string             { return "Clarity Potion" }
-func (ClarityPotionBlue) DisplayName() string      { return "Clarity Potion [B]" }
-func (ClarityPotionBlue) Cost(card.GameEngine) int { return 0 }
-func (ClarityPotionBlue) Pitch() int               { return 3 }
-func (ClarityPotionBlue) Attack() int              { return 0 }
-func (ClarityPotionBlue) Defense() int             { return 0 }
-func (ClarityPotionBlue) Types() card.TypeSet      { return clarityPotionTypes }
-func (ClarityPotionBlue) GoAgain() bool            { return false }
-func (ClarityPotionBlue) Unplayable()              {}
+func (ClarityPotionBlue) ID() ids.CardID                     { return ids.ClarityPotionBlue }
+func (ClarityPotionBlue) Name() string                       { return "Clarity Potion" }
+func (ClarityPotionBlue) DisplayName() string                { return "Clarity Potion [B]" }
+func (ClarityPotionBlue) Cost(card.GameEngine) int           { return 0 }
+func (ClarityPotionBlue) Pitch() int                         { return 3 }
+func (ClarityPotionBlue) Attack() int                        { return 0 }
+func (ClarityPotionBlue) Defense() int                       { return 0 }
+func (ClarityPotionBlue) Types(card.GameEngine) card.TypeSet { return clarityPotionTypes }
+func (ClarityPotionBlue) GoAgain() bool                      { return false }
+func (ClarityPotionBlue) Unplayable()                        {}

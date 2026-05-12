@@ -11,12 +11,12 @@ var dodgeTypes = card.NewTypeSet(card.TypeGeneric, card.TypeDefenseReaction)
 
 type DodgeBlue struct{}
 
-func (DodgeBlue) ID() ids.CardID           { return ids.DodgeBlue }
-func (DodgeBlue) Name() string             { return "Dodge" }
-func (DodgeBlue) DisplayName() string      { return "Dodge [B]" }
-func (DodgeBlue) Cost(card.GameEngine) int { return 0 }
-func (DodgeBlue) Pitch() int               { return 3 }
-func (DodgeBlue) Attack() int              { return 0 }
-func (DodgeBlue) Defense() int             { return 2 }
-func (DodgeBlue) Types() card.TypeSet      { return dodgeTypes }
-func (DodgeBlue) GoAgain() bool            { return false }
+func (DodgeBlue) ID() ids.CardID                     { return ids.DodgeBlue }
+func (DodgeBlue) Name() string                       { return "Dodge" }
+func (DodgeBlue) DisplayName() string                { return "Dodge [B]" }
+func (DodgeBlue) Cost(card.GameEngine) int           { return 0 }
+func (DodgeBlue) Pitch() int                         { return 3 }
+func (DodgeBlue) Attack() int                        { return 0 }
+func (DodgeBlue) Defense() int                       { return 2 }
+func (DodgeBlue) Types(card.GameEngine) card.TypeSet { return dodgeTypes }
+func (DodgeBlue) GoAgain() bool                      { return false }

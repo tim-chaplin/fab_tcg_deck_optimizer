@@ -40,7 +40,7 @@ func (FakeCard) Cost(card.GameEngine) int                           { return 0 }
 func (c FakeCard) Pitch() int                                       { return c.pitch }
 func (c FakeCard) Attack() int                                      { return c.attack }
 func (c FakeCard) Defense() int                                     { return c.defense }
-func (c FakeCard) Types() card.TypeSet                              { return c.types }
+func (c FakeCard) Types(card.GameEngine) card.TypeSet               { return c.types }
 func (c FakeCard) GoAgain() bool                                    { return c.goAgain }
 func (FakeCard) Play(card.GameEngine, card.Logger, *card.CardState) {}
 
@@ -56,7 +56,7 @@ func (FakeRedAttack) Cost(card.GameEngine) int { return 1 }
 func (FakeRedAttack) Pitch() int               { return 1 }
 func (FakeRedAttack) Attack() int              { return 3 }
 func (FakeRedAttack) Defense() int             { return 1 }
-func (FakeRedAttack) Types() card.TypeSet {
+func (FakeRedAttack) Types(card.GameEngine) card.TypeSet {
 	return card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 }
 func (FakeRedAttack) GoAgain() bool                                      { return false }

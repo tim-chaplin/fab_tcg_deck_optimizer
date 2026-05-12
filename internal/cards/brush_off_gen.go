@@ -11,36 +11,36 @@ var brushOffTypes = card.NewTypeSet(card.TypeGeneric, card.TypeInstant)
 
 type BrushOffRed struct{}
 
-func (BrushOffRed) ID() ids.CardID           { return ids.BrushOffRed }
-func (BrushOffRed) Name() string             { return "Brush Off" }
-func (BrushOffRed) DisplayName() string      { return "Brush Off [R]" }
-func (BrushOffRed) Cost(card.GameEngine) int { return 0 }
-func (BrushOffRed) Pitch() int               { return 1 }
-func (BrushOffRed) Attack() int              { return 0 }
-func (BrushOffRed) Defense() int             { return 3 }
-func (BrushOffRed) Types() card.TypeSet      { return brushOffTypes }
-func (BrushOffRed) GoAgain() bool            { return false }
+func (BrushOffRed) ID() ids.CardID                     { return ids.BrushOffRed }
+func (BrushOffRed) Name() string                       { return "Brush Off" }
+func (BrushOffRed) DisplayName() string                { return "Brush Off [R]" }
+func (BrushOffRed) Cost(card.GameEngine) int           { return 0 }
+func (BrushOffRed) Pitch() int                         { return 1 }
+func (BrushOffRed) Attack() int                        { return 0 }
+func (BrushOffRed) Defense() int                       { return 3 }
+func (BrushOffRed) Types(card.GameEngine) card.TypeSet { return brushOffTypes }
+func (BrushOffRed) GoAgain() bool                      { return false }
 
 type BrushOffYellow struct{}
 
-func (BrushOffYellow) ID() ids.CardID           { return ids.BrushOffYellow }
-func (BrushOffYellow) Name() string             { return "Brush Off" }
-func (BrushOffYellow) DisplayName() string      { return "Brush Off [Y]" }
-func (BrushOffYellow) Cost(card.GameEngine) int { return 0 }
-func (BrushOffYellow) Pitch() int               { return 2 }
-func (BrushOffYellow) Attack() int              { return 0 }
-func (BrushOffYellow) Defense() int             { return 2 }
-func (BrushOffYellow) Types() card.TypeSet      { return brushOffTypes }
-func (BrushOffYellow) GoAgain() bool            { return false }
+func (BrushOffYellow) ID() ids.CardID                     { return ids.BrushOffYellow }
+func (BrushOffYellow) Name() string                       { return "Brush Off" }
+func (BrushOffYellow) DisplayName() string                { return "Brush Off [Y]" }
+func (BrushOffYellow) Cost(card.GameEngine) int           { return 0 }
+func (BrushOffYellow) Pitch() int                         { return 2 }
+func (BrushOffYellow) Attack() int                        { return 0 }
+func (BrushOffYellow) Defense() int                       { return 2 }
+func (BrushOffYellow) Types(card.GameEngine) card.TypeSet { return brushOffTypes }
+func (BrushOffYellow) GoAgain() bool                      { return false }
 
 type BrushOffBlue struct{}
 
-func (BrushOffBlue) ID() ids.CardID           { return ids.BrushOffBlue }
-func (BrushOffBlue) Name() string             { return "Brush Off" }
-func (BrushOffBlue) DisplayName() string      { return "Brush Off [B]" }
-func (BrushOffBlue) Cost(card.GameEngine) int { return 0 }
-func (BrushOffBlue) Pitch() int               { return 3 }
-func (BrushOffBlue) Attack() int              { return 0 }
-func (BrushOffBlue) Defense() int             { return 1 }
-func (BrushOffBlue) Types() card.TypeSet      { return brushOffTypes }
-func (BrushOffBlue) GoAgain() bool            { return false }
+func (BrushOffBlue) ID() ids.CardID                     { return ids.BrushOffBlue }
+func (BrushOffBlue) Name() string                       { return "Brush Off" }
+func (BrushOffBlue) DisplayName() string                { return "Brush Off [B]" }
+func (BrushOffBlue) Cost(card.GameEngine) int           { return 0 }
+func (BrushOffBlue) Pitch() int                         { return 3 }
+func (BrushOffBlue) Attack() int                        { return 0 }
+func (BrushOffBlue) Defense() int                       { return 1 }
+func (BrushOffBlue) Types(card.GameEngine) card.TypeSet { return brushOffTypes }
+func (BrushOffBlue) GoAgain() bool                      { return false }

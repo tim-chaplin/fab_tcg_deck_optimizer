@@ -11,39 +11,39 @@ var pushThePointTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.
 
 type PushThePointRed struct{}
 
-func (PushThePointRed) ID() ids.CardID           { return ids.PushThePointRed }
-func (PushThePointRed) Name() string             { return "Push the Point" }
-func (PushThePointRed) DisplayName() string      { return "Push the Point [R]" }
-func (PushThePointRed) Cost(card.GameEngine) int { return 1 }
-func (PushThePointRed) Pitch() int               { return 1 }
-func (PushThePointRed) Attack() int              { return 4 }
-func (PushThePointRed) Defense() int             { return 2 }
-func (PushThePointRed) Types() card.TypeSet      { return pushThePointTypes }
-func (PushThePointRed) GoAgain() bool            { return false }
-func (PushThePointRed) NotImplemented()          {}
+func (PushThePointRed) ID() ids.CardID                     { return ids.PushThePointRed }
+func (PushThePointRed) Name() string                       { return "Push the Point" }
+func (PushThePointRed) DisplayName() string                { return "Push the Point [R]" }
+func (PushThePointRed) Cost(card.GameEngine) int           { return 1 }
+func (PushThePointRed) Pitch() int                         { return 1 }
+func (PushThePointRed) Attack() int                        { return 4 }
+func (PushThePointRed) Defense() int                       { return 2 }
+func (PushThePointRed) Types(card.GameEngine) card.TypeSet { return pushThePointTypes }
+func (PushThePointRed) GoAgain() bool                      { return false }
+func (PushThePointRed) NotImplemented()                    {}
 
 type PushThePointYellow struct{}
 
-func (PushThePointYellow) ID() ids.CardID           { return ids.PushThePointYellow }
-func (PushThePointYellow) Name() string             { return "Push the Point" }
-func (PushThePointYellow) DisplayName() string      { return "Push the Point [Y]" }
-func (PushThePointYellow) Cost(card.GameEngine) int { return 1 }
-func (PushThePointYellow) Pitch() int               { return 2 }
-func (PushThePointYellow) Attack() int              { return 3 }
-func (PushThePointYellow) Defense() int             { return 2 }
-func (PushThePointYellow) Types() card.TypeSet      { return pushThePointTypes }
-func (PushThePointYellow) GoAgain() bool            { return false }
-func (PushThePointYellow) NotImplemented()          {}
+func (PushThePointYellow) ID() ids.CardID                     { return ids.PushThePointYellow }
+func (PushThePointYellow) Name() string                       { return "Push the Point" }
+func (PushThePointYellow) DisplayName() string                { return "Push the Point [Y]" }
+func (PushThePointYellow) Cost(card.GameEngine) int           { return 1 }
+func (PushThePointYellow) Pitch() int                         { return 2 }
+func (PushThePointYellow) Attack() int                        { return 3 }
+func (PushThePointYellow) Defense() int                       { return 2 }
+func (PushThePointYellow) Types(card.GameEngine) card.TypeSet { return pushThePointTypes }
+func (PushThePointYellow) GoAgain() bool                      { return false }
+func (PushThePointYellow) NotImplemented()                    {}
 
 type PushThePointBlue struct{}
 
-func (PushThePointBlue) ID() ids.CardID           { return ids.PushThePointBlue }
-func (PushThePointBlue) Name() string             { return "Push the Point" }
-func (PushThePointBlue) DisplayName() string      { return "Push the Point [B]" }
-func (PushThePointBlue) Cost(card.GameEngine) int { return 1 }
-func (PushThePointBlue) Pitch() int               { return 3 }
-func (PushThePointBlue) Attack() int              { return 2 }
-func (PushThePointBlue) Defense() int             { return 2 }
-func (PushThePointBlue) Types() card.TypeSet      { return pushThePointTypes }
-func (PushThePointBlue) GoAgain() bool            { return false }
-func (PushThePointBlue) NotImplemented()          {}
+func (PushThePointBlue) ID() ids.CardID                     { return ids.PushThePointBlue }
+func (PushThePointBlue) Name() string                       { return "Push the Point" }
+func (PushThePointBlue) DisplayName() string                { return "Push the Point [B]" }
+func (PushThePointBlue) Cost(card.GameEngine) int           { return 1 }
+func (PushThePointBlue) Pitch() int                         { return 3 }
+func (PushThePointBlue) Attack() int                        { return 2 }
+func (PushThePointBlue) Defense() int                       { return 2 }
+func (PushThePointBlue) Types(card.GameEngine) card.TypeSet { return pushThePointTypes }
+func (PushThePointBlue) GoAgain() bool                      { return false }
+func (PushThePointBlue) NotImplemented()                    {}

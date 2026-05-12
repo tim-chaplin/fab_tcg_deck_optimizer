@@ -126,15 +126,15 @@ var goldTokenAbilityTypes = card.NewTypeSet(card.TypeGeneric, card.TypeItem)
 // in alongside an attack. Token items don't head to the graveyard on destroy.
 type GoldTokenAbility struct{}
 
-func (GoldTokenAbility) ID() ids.CardID           { return ids.GoldTokenAbilityID }
-func (GoldTokenAbility) Name() string             { return "Gold" }
-func (GoldTokenAbility) DisplayName() string      { return "Gold" }
-func (GoldTokenAbility) Cost(card.GameEngine) int { return 2 }
-func (GoldTokenAbility) Pitch() int               { return 0 }
-func (GoldTokenAbility) Attack() int              { return 0 }
-func (GoldTokenAbility) Defense() int             { return 0 }
-func (GoldTokenAbility) Types() card.TypeSet      { return goldTokenAbilityTypes }
-func (GoldTokenAbility) GoAgain() bool            { return true }
+func (GoldTokenAbility) ID() ids.CardID                     { return ids.GoldTokenAbilityID }
+func (GoldTokenAbility) Name() string                       { return "Gold" }
+func (GoldTokenAbility) DisplayName() string                { return "Gold" }
+func (GoldTokenAbility) Cost(card.GameEngine) int           { return 2 }
+func (GoldTokenAbility) Pitch() int                         { return 0 }
+func (GoldTokenAbility) Attack() int                        { return 0 }
+func (GoldTokenAbility) Defense() int                       { return 0 }
+func (GoldTokenAbility) Types(card.GameEngine) card.TypeSet { return goldTokenAbilityTypes }
+func (GoldTokenAbility) GoAgain() bool                      { return true }
 
 // PlayPrecondition gates the activated ability on having a Gold token to spend. Rejects
 // permutations that order the ability before the card / OnHit that creates the token —
@@ -167,15 +167,15 @@ var silverTokenAbilityTypes = card.NewTypeSet(card.TypeGeneric, card.TypeItem)
 // to the graveyard on destroy.
 type SilverTokenAbility struct{}
 
-func (SilverTokenAbility) ID() ids.CardID           { return ids.SilverTokenAbilityID }
-func (SilverTokenAbility) Name() string             { return "Silver" }
-func (SilverTokenAbility) DisplayName() string      { return "Silver" }
-func (SilverTokenAbility) Cost(card.GameEngine) int { return 3 }
-func (SilverTokenAbility) Pitch() int               { return 0 }
-func (SilverTokenAbility) Attack() int              { return 0 }
-func (SilverTokenAbility) Defense() int             { return 0 }
-func (SilverTokenAbility) Types() card.TypeSet      { return silverTokenAbilityTypes }
-func (SilverTokenAbility) GoAgain() bool            { return true }
+func (SilverTokenAbility) ID() ids.CardID                     { return ids.SilverTokenAbilityID }
+func (SilverTokenAbility) Name() string                       { return "Silver" }
+func (SilverTokenAbility) DisplayName() string                { return "Silver" }
+func (SilverTokenAbility) Cost(card.GameEngine) int           { return 3 }
+func (SilverTokenAbility) Pitch() int                         { return 0 }
+func (SilverTokenAbility) Attack() int                        { return 0 }
+func (SilverTokenAbility) Defense() int                       { return 0 }
+func (SilverTokenAbility) Types(card.GameEngine) card.TypeSet { return silverTokenAbilityTypes }
+func (SilverTokenAbility) GoAgain() bool                      { return true }
 
 // PlayPrecondition gates the activated ability on having a Silver token to spend.
 func (SilverTokenAbility) PlayPrecondition(s card.GameEngine, self *card.CardState) bool {
@@ -206,15 +206,15 @@ var copperTokenAbilityTypes = card.NewTypeSet(card.TypeGeneric, card.TypeItem)
 // to the graveyard on destroy.
 type CopperTokenAbility struct{}
 
-func (CopperTokenAbility) ID() ids.CardID           { return ids.CopperTokenAbilityID }
-func (CopperTokenAbility) Name() string             { return "Copper" }
-func (CopperTokenAbility) DisplayName() string      { return "Copper" }
-func (CopperTokenAbility) Cost(card.GameEngine) int { return 4 }
-func (CopperTokenAbility) Pitch() int               { return 0 }
-func (CopperTokenAbility) Attack() int              { return 0 }
-func (CopperTokenAbility) Defense() int             { return 0 }
-func (CopperTokenAbility) Types() card.TypeSet      { return copperTokenAbilityTypes }
-func (CopperTokenAbility) GoAgain() bool            { return true }
+func (CopperTokenAbility) ID() ids.CardID                     { return ids.CopperTokenAbilityID }
+func (CopperTokenAbility) Name() string                       { return "Copper" }
+func (CopperTokenAbility) DisplayName() string                { return "Copper" }
+func (CopperTokenAbility) Cost(card.GameEngine) int           { return 4 }
+func (CopperTokenAbility) Pitch() int                         { return 0 }
+func (CopperTokenAbility) Attack() int                        { return 0 }
+func (CopperTokenAbility) Defense() int                       { return 0 }
+func (CopperTokenAbility) Types(card.GameEngine) card.TypeSet { return copperTokenAbilityTypes }
+func (CopperTokenAbility) GoAgain() bool                      { return true }
 
 // PlayPrecondition gates the activated ability on having a Copper token to spend.
 func (CopperTokenAbility) PlayPrecondition(s card.GameEngine, self *card.CardState) bool {

@@ -11,39 +11,39 @@ var seekHorizonTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.T
 
 type SeekHorizonRed struct{}
 
-func (SeekHorizonRed) ID() ids.CardID           { return ids.SeekHorizonRed }
-func (SeekHorizonRed) Name() string             { return "Seek Horizon" }
-func (SeekHorizonRed) DisplayName() string      { return "Seek Horizon [R]" }
-func (SeekHorizonRed) Cost(card.GameEngine) int { return 0 }
-func (SeekHorizonRed) Pitch() int               { return 1 }
-func (SeekHorizonRed) Attack() int              { return 4 }
-func (SeekHorizonRed) Defense() int             { return 2 }
-func (SeekHorizonRed) Types() card.TypeSet      { return seekHorizonTypes }
-func (SeekHorizonRed) GoAgain() bool            { return false }
-func (SeekHorizonRed) NotImplemented()          {}
+func (SeekHorizonRed) ID() ids.CardID                     { return ids.SeekHorizonRed }
+func (SeekHorizonRed) Name() string                       { return "Seek Horizon" }
+func (SeekHorizonRed) DisplayName() string                { return "Seek Horizon [R]" }
+func (SeekHorizonRed) Cost(card.GameEngine) int           { return 0 }
+func (SeekHorizonRed) Pitch() int                         { return 1 }
+func (SeekHorizonRed) Attack() int                        { return 4 }
+func (SeekHorizonRed) Defense() int                       { return 2 }
+func (SeekHorizonRed) Types(card.GameEngine) card.TypeSet { return seekHorizonTypes }
+func (SeekHorizonRed) GoAgain() bool                      { return false }
+func (SeekHorizonRed) NotImplemented()                    {}
 
 type SeekHorizonYellow struct{}
 
-func (SeekHorizonYellow) ID() ids.CardID           { return ids.SeekHorizonYellow }
-func (SeekHorizonYellow) Name() string             { return "Seek Horizon" }
-func (SeekHorizonYellow) DisplayName() string      { return "Seek Horizon [Y]" }
-func (SeekHorizonYellow) Cost(card.GameEngine) int { return 0 }
-func (SeekHorizonYellow) Pitch() int               { return 2 }
-func (SeekHorizonYellow) Attack() int              { return 3 }
-func (SeekHorizonYellow) Defense() int             { return 2 }
-func (SeekHorizonYellow) Types() card.TypeSet      { return seekHorizonTypes }
-func (SeekHorizonYellow) GoAgain() bool            { return false }
-func (SeekHorizonYellow) NotImplemented()          {}
+func (SeekHorizonYellow) ID() ids.CardID                     { return ids.SeekHorizonYellow }
+func (SeekHorizonYellow) Name() string                       { return "Seek Horizon" }
+func (SeekHorizonYellow) DisplayName() string                { return "Seek Horizon [Y]" }
+func (SeekHorizonYellow) Cost(card.GameEngine) int           { return 0 }
+func (SeekHorizonYellow) Pitch() int                         { return 2 }
+func (SeekHorizonYellow) Attack() int                        { return 3 }
+func (SeekHorizonYellow) Defense() int                       { return 2 }
+func (SeekHorizonYellow) Types(card.GameEngine) card.TypeSet { return seekHorizonTypes }
+func (SeekHorizonYellow) GoAgain() bool                      { return false }
+func (SeekHorizonYellow) NotImplemented()                    {}
 
 type SeekHorizonBlue struct{}
 
-func (SeekHorizonBlue) ID() ids.CardID           { return ids.SeekHorizonBlue }
-func (SeekHorizonBlue) Name() string             { return "Seek Horizon" }
-func (SeekHorizonBlue) DisplayName() string      { return "Seek Horizon [B]" }
-func (SeekHorizonBlue) Cost(card.GameEngine) int { return 0 }
-func (SeekHorizonBlue) Pitch() int               { return 3 }
-func (SeekHorizonBlue) Attack() int              { return 2 }
-func (SeekHorizonBlue) Defense() int             { return 2 }
-func (SeekHorizonBlue) Types() card.TypeSet      { return seekHorizonTypes }
-func (SeekHorizonBlue) GoAgain() bool            { return false }
-func (SeekHorizonBlue) NotImplemented()          {}
+func (SeekHorizonBlue) ID() ids.CardID                     { return ids.SeekHorizonBlue }
+func (SeekHorizonBlue) Name() string                       { return "Seek Horizon" }
+func (SeekHorizonBlue) DisplayName() string                { return "Seek Horizon [B]" }
+func (SeekHorizonBlue) Cost(card.GameEngine) int           { return 0 }
+func (SeekHorizonBlue) Pitch() int                         { return 3 }
+func (SeekHorizonBlue) Attack() int                        { return 2 }
+func (SeekHorizonBlue) Defense() int                       { return 2 }
+func (SeekHorizonBlue) Types(card.GameEngine) card.TypeSet { return seekHorizonTypes }
+func (SeekHorizonBlue) GoAgain() bool                      { return false }
+func (SeekHorizonBlue) NotImplemented()                    {}

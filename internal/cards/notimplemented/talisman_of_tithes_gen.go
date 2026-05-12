@@ -11,13 +11,13 @@ var talismanOfTithesTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, c
 
 type TalismanOfTithesBlue struct{}
 
-func (TalismanOfTithesBlue) ID() ids.CardID           { return ids.TalismanOfTithesBlue }
-func (TalismanOfTithesBlue) Name() string             { return "Talisman of Tithes" }
-func (TalismanOfTithesBlue) DisplayName() string      { return "Talisman of Tithes [B]" }
-func (TalismanOfTithesBlue) Cost(card.GameEngine) int { return 0 }
-func (TalismanOfTithesBlue) Pitch() int               { return 3 }
-func (TalismanOfTithesBlue) Attack() int              { return 0 }
-func (TalismanOfTithesBlue) Defense() int             { return 0 }
-func (TalismanOfTithesBlue) Types() card.TypeSet      { return talismanOfTithesTypes }
-func (TalismanOfTithesBlue) GoAgain() bool            { return true }
-func (TalismanOfTithesBlue) NotImplemented()          {}
+func (TalismanOfTithesBlue) ID() ids.CardID                     { return ids.TalismanOfTithesBlue }
+func (TalismanOfTithesBlue) Name() string                       { return "Talisman of Tithes" }
+func (TalismanOfTithesBlue) DisplayName() string                { return "Talisman of Tithes [B]" }
+func (TalismanOfTithesBlue) Cost(card.GameEngine) int           { return 0 }
+func (TalismanOfTithesBlue) Pitch() int                         { return 3 }
+func (TalismanOfTithesBlue) Attack() int                        { return 0 }
+func (TalismanOfTithesBlue) Defense() int                       { return 0 }
+func (TalismanOfTithesBlue) Types(card.GameEngine) card.TypeSet { return talismanOfTithesTypes }
+func (TalismanOfTithesBlue) GoAgain() bool                      { return true }
+func (TalismanOfTithesBlue) NotImplemented()                    {}

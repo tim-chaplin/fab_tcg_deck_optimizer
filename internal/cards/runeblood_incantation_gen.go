@@ -11,15 +11,15 @@ var runebloodIncantationTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeAct
 
 type RunebloodIncantationRed struct{}
 
-func (RunebloodIncantationRed) ID() ids.CardID           { return ids.RunebloodIncantationRed }
-func (RunebloodIncantationRed) Name() string             { return "Runeblood Incantation" }
-func (RunebloodIncantationRed) DisplayName() string      { return "Runeblood Incantation [R]" }
-func (RunebloodIncantationRed) Cost(card.GameEngine) int { return 1 }
-func (RunebloodIncantationRed) Pitch() int               { return 1 }
-func (RunebloodIncantationRed) Attack() int              { return 0 }
-func (RunebloodIncantationRed) Defense() int             { return 2 }
-func (RunebloodIncantationRed) Types() card.TypeSet      { return runebloodIncantationTypes }
-func (RunebloodIncantationRed) GoAgain() bool            { return true }
+func (RunebloodIncantationRed) ID() ids.CardID                     { return ids.RunebloodIncantationRed }
+func (RunebloodIncantationRed) Name() string                       { return "Runeblood Incantation" }
+func (RunebloodIncantationRed) DisplayName() string                { return "Runeblood Incantation [R]" }
+func (RunebloodIncantationRed) Cost(card.GameEngine) int           { return 1 }
+func (RunebloodIncantationRed) Pitch() int                         { return 1 }
+func (RunebloodIncantationRed) Attack() int                        { return 0 }
+func (RunebloodIncantationRed) Defense() int                       { return 2 }
+func (RunebloodIncantationRed) Types(card.GameEngine) card.TypeSet { return runebloodIncantationTypes }
+func (RunebloodIncantationRed) GoAgain() bool                      { return true }
 
 type RunebloodIncantationYellow struct{}
 
@@ -30,17 +30,19 @@ func (RunebloodIncantationYellow) Cost(card.GameEngine) int { return 1 }
 func (RunebloodIncantationYellow) Pitch() int               { return 2 }
 func (RunebloodIncantationYellow) Attack() int              { return 0 }
 func (RunebloodIncantationYellow) Defense() int             { return 2 }
-func (RunebloodIncantationYellow) Types() card.TypeSet      { return runebloodIncantationTypes }
-func (RunebloodIncantationYellow) GoAgain() bool            { return true }
+func (RunebloodIncantationYellow) Types(card.GameEngine) card.TypeSet {
+	return runebloodIncantationTypes
+}
+func (RunebloodIncantationYellow) GoAgain() bool { return true }
 
 type RunebloodIncantationBlue struct{}
 
-func (RunebloodIncantationBlue) ID() ids.CardID           { return ids.RunebloodIncantationBlue }
-func (RunebloodIncantationBlue) Name() string             { return "Runeblood Incantation" }
-func (RunebloodIncantationBlue) DisplayName() string      { return "Runeblood Incantation [B]" }
-func (RunebloodIncantationBlue) Cost(card.GameEngine) int { return 1 }
-func (RunebloodIncantationBlue) Pitch() int               { return 3 }
-func (RunebloodIncantationBlue) Attack() int              { return 0 }
-func (RunebloodIncantationBlue) Defense() int             { return 2 }
-func (RunebloodIncantationBlue) Types() card.TypeSet      { return runebloodIncantationTypes }
-func (RunebloodIncantationBlue) GoAgain() bool            { return true }
+func (RunebloodIncantationBlue) ID() ids.CardID                     { return ids.RunebloodIncantationBlue }
+func (RunebloodIncantationBlue) Name() string                       { return "Runeblood Incantation" }
+func (RunebloodIncantationBlue) DisplayName() string                { return "Runeblood Incantation [B]" }
+func (RunebloodIncantationBlue) Cost(card.GameEngine) int           { return 1 }
+func (RunebloodIncantationBlue) Pitch() int                         { return 3 }
+func (RunebloodIncantationBlue) Attack() int                        { return 0 }
+func (RunebloodIncantationBlue) Defense() int                       { return 2 }
+func (RunebloodIncantationBlue) Types(card.GameEngine) card.TypeSet { return runebloodIncantationTypes }
+func (RunebloodIncantationBlue) GoAgain() bool                      { return true }

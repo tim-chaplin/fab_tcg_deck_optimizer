@@ -18,7 +18,7 @@ func drawOneAtEndOfTurn(s card.GameEngine, l card.Logger, _ card.Trigger) {
 
 func strategicPlanningPlay(s card.GameEngine, l card.Logger, self *card.CardState) {
 	if _, ok := s.RecycleFromGraveyardToBottom(func(c card.Card) bool {
-		return c.Types().Has(card.TypeAction) && c.Cost(s) <= 2
+		return c.Types(nil).Has(card.TypeAction) && c.Cost(s) <= 2
 	}); ok {
 		l.AppendPostTrigger(self.Card.DisplayName(), "Recycled an action card to bottom of deck", 0)
 	}

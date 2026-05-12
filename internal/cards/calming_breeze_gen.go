@@ -11,12 +11,12 @@ var calmingBreezeTypes = card.NewTypeSet(card.TypeGeneric, card.TypeInstant)
 
 type CalmingBreezeRed struct{}
 
-func (CalmingBreezeRed) ID() ids.CardID           { return ids.CalmingBreezeRed }
-func (CalmingBreezeRed) Name() string             { return "Calming Breeze" }
-func (CalmingBreezeRed) DisplayName() string      { return "Calming Breeze [R]" }
-func (CalmingBreezeRed) Cost(card.GameEngine) int { return 0 }
-func (CalmingBreezeRed) Pitch() int               { return 1 }
-func (CalmingBreezeRed) Attack() int              { return 0 }
-func (CalmingBreezeRed) Defense() int             { return 3 }
-func (CalmingBreezeRed) Types() card.TypeSet      { return calmingBreezeTypes }
-func (CalmingBreezeRed) GoAgain() bool            { return false }
+func (CalmingBreezeRed) ID() ids.CardID                     { return ids.CalmingBreezeRed }
+func (CalmingBreezeRed) Name() string                       { return "Calming Breeze" }
+func (CalmingBreezeRed) DisplayName() string                { return "Calming Breeze [R]" }
+func (CalmingBreezeRed) Cost(card.GameEngine) int           { return 0 }
+func (CalmingBreezeRed) Pitch() int                         { return 1 }
+func (CalmingBreezeRed) Attack() int                        { return 0 }
+func (CalmingBreezeRed) Defense() int                       { return 3 }
+func (CalmingBreezeRed) Types(card.GameEngine) card.TypeSet { return calmingBreezeTypes }
+func (CalmingBreezeRed) GoAgain() bool                      { return false }

@@ -11,12 +11,12 @@ var trotAlongTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction)
 
 type TrotAlongBlue struct{}
 
-func (TrotAlongBlue) ID() ids.CardID           { return ids.TrotAlongBlue }
-func (TrotAlongBlue) Name() string             { return "Trot Along" }
-func (TrotAlongBlue) DisplayName() string      { return "Trot Along [B]" }
-func (TrotAlongBlue) Cost(card.GameEngine) int { return 0 }
-func (TrotAlongBlue) Pitch() int               { return 3 }
-func (TrotAlongBlue) Attack() int              { return 0 }
-func (TrotAlongBlue) Defense() int             { return 3 }
-func (TrotAlongBlue) Types() card.TypeSet      { return trotAlongTypes }
-func (TrotAlongBlue) GoAgain() bool            { return true }
+func (TrotAlongBlue) ID() ids.CardID                     { return ids.TrotAlongBlue }
+func (TrotAlongBlue) Name() string                       { return "Trot Along" }
+func (TrotAlongBlue) DisplayName() string                { return "Trot Along [B]" }
+func (TrotAlongBlue) Cost(card.GameEngine) int           { return 0 }
+func (TrotAlongBlue) Pitch() int                         { return 3 }
+func (TrotAlongBlue) Attack() int                        { return 0 }
+func (TrotAlongBlue) Defense() int                       { return 3 }
+func (TrotAlongBlue) Types(card.GameEngine) card.TypeSet { return trotAlongTypes }
+func (TrotAlongBlue) GoAgain() bool                      { return true }

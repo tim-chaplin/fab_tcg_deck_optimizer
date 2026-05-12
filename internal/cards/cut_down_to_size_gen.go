@@ -11,36 +11,36 @@ var cutDownToSizeTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card
 
 type CutDownToSizeRed struct{}
 
-func (CutDownToSizeRed) ID() ids.CardID           { return ids.CutDownToSizeRed }
-func (CutDownToSizeRed) Name() string             { return "Cut Down to Size" }
-func (CutDownToSizeRed) DisplayName() string      { return "Cut Down to Size [R]" }
-func (CutDownToSizeRed) Cost(card.GameEngine) int { return 2 }
-func (CutDownToSizeRed) Pitch() int               { return 1 }
-func (CutDownToSizeRed) Attack() int              { return 6 }
-func (CutDownToSizeRed) Defense() int             { return 2 }
-func (CutDownToSizeRed) Types() card.TypeSet      { return cutDownToSizeTypes }
-func (CutDownToSizeRed) GoAgain() bool            { return false }
+func (CutDownToSizeRed) ID() ids.CardID                     { return ids.CutDownToSizeRed }
+func (CutDownToSizeRed) Name() string                       { return "Cut Down to Size" }
+func (CutDownToSizeRed) DisplayName() string                { return "Cut Down to Size [R]" }
+func (CutDownToSizeRed) Cost(card.GameEngine) int           { return 2 }
+func (CutDownToSizeRed) Pitch() int                         { return 1 }
+func (CutDownToSizeRed) Attack() int                        { return 6 }
+func (CutDownToSizeRed) Defense() int                       { return 2 }
+func (CutDownToSizeRed) Types(card.GameEngine) card.TypeSet { return cutDownToSizeTypes }
+func (CutDownToSizeRed) GoAgain() bool                      { return false }
 
 type CutDownToSizeYellow struct{}
 
-func (CutDownToSizeYellow) ID() ids.CardID           { return ids.CutDownToSizeYellow }
-func (CutDownToSizeYellow) Name() string             { return "Cut Down to Size" }
-func (CutDownToSizeYellow) DisplayName() string      { return "Cut Down to Size [Y]" }
-func (CutDownToSizeYellow) Cost(card.GameEngine) int { return 2 }
-func (CutDownToSizeYellow) Pitch() int               { return 2 }
-func (CutDownToSizeYellow) Attack() int              { return 5 }
-func (CutDownToSizeYellow) Defense() int             { return 2 }
-func (CutDownToSizeYellow) Types() card.TypeSet      { return cutDownToSizeTypes }
-func (CutDownToSizeYellow) GoAgain() bool            { return false }
+func (CutDownToSizeYellow) ID() ids.CardID                     { return ids.CutDownToSizeYellow }
+func (CutDownToSizeYellow) Name() string                       { return "Cut Down to Size" }
+func (CutDownToSizeYellow) DisplayName() string                { return "Cut Down to Size [Y]" }
+func (CutDownToSizeYellow) Cost(card.GameEngine) int           { return 2 }
+func (CutDownToSizeYellow) Pitch() int                         { return 2 }
+func (CutDownToSizeYellow) Attack() int                        { return 5 }
+func (CutDownToSizeYellow) Defense() int                       { return 2 }
+func (CutDownToSizeYellow) Types(card.GameEngine) card.TypeSet { return cutDownToSizeTypes }
+func (CutDownToSizeYellow) GoAgain() bool                      { return false }
 
 type CutDownToSizeBlue struct{}
 
-func (CutDownToSizeBlue) ID() ids.CardID           { return ids.CutDownToSizeBlue }
-func (CutDownToSizeBlue) Name() string             { return "Cut Down to Size" }
-func (CutDownToSizeBlue) DisplayName() string      { return "Cut Down to Size [B]" }
-func (CutDownToSizeBlue) Cost(card.GameEngine) int { return 2 }
-func (CutDownToSizeBlue) Pitch() int               { return 3 }
-func (CutDownToSizeBlue) Attack() int              { return 4 }
-func (CutDownToSizeBlue) Defense() int             { return 2 }
-func (CutDownToSizeBlue) Types() card.TypeSet      { return cutDownToSizeTypes }
-func (CutDownToSizeBlue) GoAgain() bool            { return false }
+func (CutDownToSizeBlue) ID() ids.CardID                     { return ids.CutDownToSizeBlue }
+func (CutDownToSizeBlue) Name() string                       { return "Cut Down to Size" }
+func (CutDownToSizeBlue) DisplayName() string                { return "Cut Down to Size [B]" }
+func (CutDownToSizeBlue) Cost(card.GameEngine) int           { return 2 }
+func (CutDownToSizeBlue) Pitch() int                         { return 3 }
+func (CutDownToSizeBlue) Attack() int                        { return 4 }
+func (CutDownToSizeBlue) Defense() int                       { return 2 }
+func (CutDownToSizeBlue) Types(card.GameEngine) card.TypeSet { return cutDownToSizeTypes }
+func (CutDownToSizeBlue) GoAgain() bool                      { return false }

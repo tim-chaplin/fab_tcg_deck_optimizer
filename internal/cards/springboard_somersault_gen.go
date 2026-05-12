@@ -18,5 +18,7 @@ func (SpringboardSomersaultYellow) Cost(card.GameEngine) int { return 0 }
 func (SpringboardSomersaultYellow) Pitch() int               { return 2 }
 func (SpringboardSomersaultYellow) Attack() int              { return 0 }
 func (SpringboardSomersaultYellow) Defense() int             { return 2 }
-func (SpringboardSomersaultYellow) Types() card.TypeSet      { return springboardSomersaultTypes }
-func (SpringboardSomersaultYellow) GoAgain() bool            { return false }
+func (SpringboardSomersaultYellow) Types(card.GameEngine) card.TypeSet {
+	return springboardSomersaultTypes
+}
+func (SpringboardSomersaultYellow) GoAgain() bool { return false }

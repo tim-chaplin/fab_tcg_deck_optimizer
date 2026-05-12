@@ -18,8 +18,10 @@ func (FreewheelingRenegadesRed) Cost(card.GameEngine) int { return 1 }
 func (FreewheelingRenegadesRed) Pitch() int               { return 1 }
 func (FreewheelingRenegadesRed) Attack() int              { return 6 }
 func (FreewheelingRenegadesRed) Defense() int             { return 2 }
-func (FreewheelingRenegadesRed) Types() card.TypeSet      { return freewheelingRenegadesTypes }
-func (FreewheelingRenegadesRed) GoAgain() bool            { return false }
+func (FreewheelingRenegadesRed) Types(card.GameEngine) card.TypeSet {
+	return freewheelingRenegadesTypes
+}
+func (FreewheelingRenegadesRed) GoAgain() bool { return false }
 
 type FreewheelingRenegadesYellow struct{}
 
@@ -30,8 +32,10 @@ func (FreewheelingRenegadesYellow) Cost(card.GameEngine) int { return 1 }
 func (FreewheelingRenegadesYellow) Pitch() int               { return 2 }
 func (FreewheelingRenegadesYellow) Attack() int              { return 5 }
 func (FreewheelingRenegadesYellow) Defense() int             { return 2 }
-func (FreewheelingRenegadesYellow) Types() card.TypeSet      { return freewheelingRenegadesTypes }
-func (FreewheelingRenegadesYellow) GoAgain() bool            { return false }
+func (FreewheelingRenegadesYellow) Types(card.GameEngine) card.TypeSet {
+	return freewheelingRenegadesTypes
+}
+func (FreewheelingRenegadesYellow) GoAgain() bool { return false }
 
 type FreewheelingRenegadesBlue struct{}
 
@@ -42,5 +46,7 @@ func (FreewheelingRenegadesBlue) Cost(card.GameEngine) int { return 1 }
 func (FreewheelingRenegadesBlue) Pitch() int               { return 3 }
 func (FreewheelingRenegadesBlue) Attack() int              { return 4 }
 func (FreewheelingRenegadesBlue) Defense() int             { return 2 }
-func (FreewheelingRenegadesBlue) Types() card.TypeSet      { return freewheelingRenegadesTypes }
-func (FreewheelingRenegadesBlue) GoAgain() bool            { return false }
+func (FreewheelingRenegadesBlue) Types(card.GameEngine) card.TypeSet {
+	return freewheelingRenegadesTypes
+}
+func (FreewheelingRenegadesBlue) GoAgain() bool { return false }

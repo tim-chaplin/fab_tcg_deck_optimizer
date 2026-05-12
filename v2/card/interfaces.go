@@ -115,6 +115,14 @@ type GameEngine interface {
 	Defenders() []Card
 	Pitched() []Card
 
+	// Hero info. HeroWantsLowerHealth reports whether the current hero opts into the
+	// LowerHealthWanter marker (proxy for "less {h} than the opponent" riders).
+	// CurrentHeroClass returns the hero's primary class (e.g. TypeThief); Universal
+	// cards fold this into their own Types(g) so class-gated triggers (Viserai's
+	// Runeblade trigger) see the right type-line.
+	HeroWantsLowerHealth() bool
+	CurrentHeroClass() CardType
+
 	// Chain queries
 	HasPlayedOrCreatedAura() bool
 	HasPlayedType(CardType) bool
@@ -199,6 +207,16 @@ type Aura interface {
 // trigger. Today only SourceName is needed; expand as more triggers appear.
 type Trigger interface {
 	SourceName() string
+}
+
+// Hero is the narrow view of the active hero v2/card needs. Sim's richer Hero
+// interface (Health, Intelligence, OnCardPlayed, Opt, …) satisfies it; this
+// package only reads Class / Types so card-side helpers can answer "what's
+// the current hero's class?" / "is the current hero a Thief?" without importing
+// sim. CurrentHero (in hero.go) holds the active value; sim wires it at run start.
+type Hero interface {
+	Class() CardType
+	Types() TypeSet
 }
 
 // AuraHandler is the card-facing aura handler signature. Cards write functions of

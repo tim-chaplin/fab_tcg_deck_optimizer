@@ -20,7 +20,7 @@ import (
 // because the printed wording differs ("Banished an aura, dealt 1 arcane damage").
 func banishAuraFromGraveyard(s card.GameEngine) int {
 	if _, ok := s.BanishFromGraveyard(func(c card.Card) bool {
-		return c.Types().Has(card.TypeAura)
+		return c.Types(nil).Has(card.TypeAura)
 	}); !ok {
 		return 0
 	}
@@ -93,7 +93,7 @@ func popsThisTurn(s card.GameEngine, attackActionOnly bool) bool {
 }
 
 func qualifiesAsAttacker(c card.Card, attackActionOnly bool) bool {
-	ts := c.Types()
+	ts := c.Types(nil)
 	if attackActionOnly {
 		return ts.IsAttackAction()
 	}
@@ -128,17 +128,19 @@ func GrantNextCardBonusAttack(s card.GameEngine, n int, match func(card.GameEngi
 // IsAttack matches any scheduled attack — action card OR weapon swing — for
 // "your next attack" wording.
 func IsAttack(_ card.GameEngine, pc *card.CardState) bool {
-	return pc.Card.Types().IsAttack()
+	return pc.Card.Types(nil).IsAttack()
 }
 
 // IsAttackAction matches scheduled attack action cards (excludes weapon swings)
 // for "the next attack action card" wording.
 func IsAttackAction(_ card.GameEngine, pc *card.CardState) bool {
-	return pc.Card.Types().IsAttackAction()
+	return pc.Card.Types(nil).IsAttackAction()
 }
 
 // IsRunebladeAttack matches scheduled Runeblade attacks (action or weapon) for
-// "your next Runeblade attack" wording.
-func IsRunebladeAttack(_ card.GameEngine, pc *card.CardState) bool {
-	return pc.Card.Types().IsRunebladeAttack()
+// "your next Runeblade attack" wording. Engine threaded through so Universal cards
+// fold the active hero's class into their Types — Wage Gold under Viserai then
+// matches TypeRuneblade.
+func IsRunebladeAttack(s card.GameEngine, pc *card.CardState) bool {
+	return pc.Card.Types(s).IsRunebladeAttack()
 }

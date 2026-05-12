@@ -38,7 +38,9 @@ func (AnnalsOfSutcliffeAbility) Cost(card.GameEngine) int { return 3 }
 func (AnnalsOfSutcliffeAbility) Pitch() int               { return 0 }
 func (AnnalsOfSutcliffeAbility) Attack() int              { return 0 }
 func (AnnalsOfSutcliffeAbility) Defense() int             { return 0 }
-func (AnnalsOfSutcliffeAbility) Types() card.TypeSet      { return annalsOfSutcliffeAbilityTypes }
-func (AnnalsOfSutcliffeAbility) GoAgain() bool            { return false }
+func (AnnalsOfSutcliffeAbility) Types(card.GameEngine) card.TypeSet {
+	return annalsOfSutcliffeAbilityTypes
+}
+func (AnnalsOfSutcliffeAbility) GoAgain() bool { return false }
 func (AnnalsOfSutcliffeAbility) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 }

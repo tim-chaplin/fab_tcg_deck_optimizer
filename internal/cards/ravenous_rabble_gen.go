@@ -11,36 +11,36 @@ var ravenousRabbleTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, car
 
 type RavenousRabbleRed struct{}
 
-func (RavenousRabbleRed) ID() ids.CardID           { return ids.RavenousRabbleRed }
-func (RavenousRabbleRed) Name() string             { return "Ravenous Rabble" }
-func (RavenousRabbleRed) DisplayName() string      { return "Ravenous Rabble [R]" }
-func (RavenousRabbleRed) Cost(card.GameEngine) int { return 0 }
-func (RavenousRabbleRed) Pitch() int               { return 1 }
-func (RavenousRabbleRed) Attack() int              { return 5 }
-func (RavenousRabbleRed) Defense() int             { return 2 }
-func (RavenousRabbleRed) Types() card.TypeSet      { return ravenousRabbleTypes }
-func (RavenousRabbleRed) GoAgain() bool            { return true }
+func (RavenousRabbleRed) ID() ids.CardID                     { return ids.RavenousRabbleRed }
+func (RavenousRabbleRed) Name() string                       { return "Ravenous Rabble" }
+func (RavenousRabbleRed) DisplayName() string                { return "Ravenous Rabble [R]" }
+func (RavenousRabbleRed) Cost(card.GameEngine) int           { return 0 }
+func (RavenousRabbleRed) Pitch() int                         { return 1 }
+func (RavenousRabbleRed) Attack() int                        { return 5 }
+func (RavenousRabbleRed) Defense() int                       { return 2 }
+func (RavenousRabbleRed) Types(card.GameEngine) card.TypeSet { return ravenousRabbleTypes }
+func (RavenousRabbleRed) GoAgain() bool                      { return true }
 
 type RavenousRabbleYellow struct{}
 
-func (RavenousRabbleYellow) ID() ids.CardID           { return ids.RavenousRabbleYellow }
-func (RavenousRabbleYellow) Name() string             { return "Ravenous Rabble" }
-func (RavenousRabbleYellow) DisplayName() string      { return "Ravenous Rabble [Y]" }
-func (RavenousRabbleYellow) Cost(card.GameEngine) int { return 0 }
-func (RavenousRabbleYellow) Pitch() int               { return 2 }
-func (RavenousRabbleYellow) Attack() int              { return 4 }
-func (RavenousRabbleYellow) Defense() int             { return 2 }
-func (RavenousRabbleYellow) Types() card.TypeSet      { return ravenousRabbleTypes }
-func (RavenousRabbleYellow) GoAgain() bool            { return true }
+func (RavenousRabbleYellow) ID() ids.CardID                     { return ids.RavenousRabbleYellow }
+func (RavenousRabbleYellow) Name() string                       { return "Ravenous Rabble" }
+func (RavenousRabbleYellow) DisplayName() string                { return "Ravenous Rabble [Y]" }
+func (RavenousRabbleYellow) Cost(card.GameEngine) int           { return 0 }
+func (RavenousRabbleYellow) Pitch() int                         { return 2 }
+func (RavenousRabbleYellow) Attack() int                        { return 4 }
+func (RavenousRabbleYellow) Defense() int                       { return 2 }
+func (RavenousRabbleYellow) Types(card.GameEngine) card.TypeSet { return ravenousRabbleTypes }
+func (RavenousRabbleYellow) GoAgain() bool                      { return true }
 
 type RavenousRabbleBlue struct{}
 
-func (RavenousRabbleBlue) ID() ids.CardID           { return ids.RavenousRabbleBlue }
-func (RavenousRabbleBlue) Name() string             { return "Ravenous Rabble" }
-func (RavenousRabbleBlue) DisplayName() string      { return "Ravenous Rabble [B]" }
-func (RavenousRabbleBlue) Cost(card.GameEngine) int { return 0 }
-func (RavenousRabbleBlue) Pitch() int               { return 3 }
-func (RavenousRabbleBlue) Attack() int              { return 3 }
-func (RavenousRabbleBlue) Defense() int             { return 2 }
-func (RavenousRabbleBlue) Types() card.TypeSet      { return ravenousRabbleTypes }
-func (RavenousRabbleBlue) GoAgain() bool            { return true }
+func (RavenousRabbleBlue) ID() ids.CardID                     { return ids.RavenousRabbleBlue }
+func (RavenousRabbleBlue) Name() string                       { return "Ravenous Rabble" }
+func (RavenousRabbleBlue) DisplayName() string                { return "Ravenous Rabble [B]" }
+func (RavenousRabbleBlue) Cost(card.GameEngine) int           { return 0 }
+func (RavenousRabbleBlue) Pitch() int                         { return 3 }
+func (RavenousRabbleBlue) Attack() int                        { return 3 }
+func (RavenousRabbleBlue) Defense() int                       { return 2 }
+func (RavenousRabbleBlue) Types(card.GameEngine) card.TypeSet { return ravenousRabbleTypes }
+func (RavenousRabbleBlue) GoAgain() bool                      { return true }

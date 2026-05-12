@@ -11,39 +11,39 @@ var enchantingMelodyTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, c
 
 type EnchantingMelodyRed struct{}
 
-func (EnchantingMelodyRed) ID() ids.CardID           { return ids.EnchantingMelodyRed }
-func (EnchantingMelodyRed) Name() string             { return "Enchanting Melody" }
-func (EnchantingMelodyRed) DisplayName() string      { return "Enchanting Melody [R]" }
-func (EnchantingMelodyRed) Cost(card.GameEngine) int { return 2 }
-func (EnchantingMelodyRed) Pitch() int               { return 1 }
-func (EnchantingMelodyRed) Attack() int              { return 0 }
-func (EnchantingMelodyRed) Defense() int             { return 2 }
-func (EnchantingMelodyRed) Types() card.TypeSet      { return enchantingMelodyTypes }
-func (EnchantingMelodyRed) GoAgain() bool            { return true }
-func (EnchantingMelodyRed) NotImplemented()          {}
+func (EnchantingMelodyRed) ID() ids.CardID                     { return ids.EnchantingMelodyRed }
+func (EnchantingMelodyRed) Name() string                       { return "Enchanting Melody" }
+func (EnchantingMelodyRed) DisplayName() string                { return "Enchanting Melody [R]" }
+func (EnchantingMelodyRed) Cost(card.GameEngine) int           { return 2 }
+func (EnchantingMelodyRed) Pitch() int                         { return 1 }
+func (EnchantingMelodyRed) Attack() int                        { return 0 }
+func (EnchantingMelodyRed) Defense() int                       { return 2 }
+func (EnchantingMelodyRed) Types(card.GameEngine) card.TypeSet { return enchantingMelodyTypes }
+func (EnchantingMelodyRed) GoAgain() bool                      { return true }
+func (EnchantingMelodyRed) NotImplemented()                    {}
 
 type EnchantingMelodyYellow struct{}
 
-func (EnchantingMelodyYellow) ID() ids.CardID           { return ids.EnchantingMelodyYellow }
-func (EnchantingMelodyYellow) Name() string             { return "Enchanting Melody" }
-func (EnchantingMelodyYellow) DisplayName() string      { return "Enchanting Melody [Y]" }
-func (EnchantingMelodyYellow) Cost(card.GameEngine) int { return 2 }
-func (EnchantingMelodyYellow) Pitch() int               { return 2 }
-func (EnchantingMelodyYellow) Attack() int              { return 0 }
-func (EnchantingMelodyYellow) Defense() int             { return 2 }
-func (EnchantingMelodyYellow) Types() card.TypeSet      { return enchantingMelodyTypes }
-func (EnchantingMelodyYellow) GoAgain() bool            { return true }
-func (EnchantingMelodyYellow) NotImplemented()          {}
+func (EnchantingMelodyYellow) ID() ids.CardID                     { return ids.EnchantingMelodyYellow }
+func (EnchantingMelodyYellow) Name() string                       { return "Enchanting Melody" }
+func (EnchantingMelodyYellow) DisplayName() string                { return "Enchanting Melody [Y]" }
+func (EnchantingMelodyYellow) Cost(card.GameEngine) int           { return 2 }
+func (EnchantingMelodyYellow) Pitch() int                         { return 2 }
+func (EnchantingMelodyYellow) Attack() int                        { return 0 }
+func (EnchantingMelodyYellow) Defense() int                       { return 2 }
+func (EnchantingMelodyYellow) Types(card.GameEngine) card.TypeSet { return enchantingMelodyTypes }
+func (EnchantingMelodyYellow) GoAgain() bool                      { return true }
+func (EnchantingMelodyYellow) NotImplemented()                    {}
 
 type EnchantingMelodyBlue struct{}
 
-func (EnchantingMelodyBlue) ID() ids.CardID           { return ids.EnchantingMelodyBlue }
-func (EnchantingMelodyBlue) Name() string             { return "Enchanting Melody" }
-func (EnchantingMelodyBlue) DisplayName() string      { return "Enchanting Melody [B]" }
-func (EnchantingMelodyBlue) Cost(card.GameEngine) int { return 2 }
-func (EnchantingMelodyBlue) Pitch() int               { return 3 }
-func (EnchantingMelodyBlue) Attack() int              { return 0 }
-func (EnchantingMelodyBlue) Defense() int             { return 2 }
-func (EnchantingMelodyBlue) Types() card.TypeSet      { return enchantingMelodyTypes }
-func (EnchantingMelodyBlue) GoAgain() bool            { return true }
-func (EnchantingMelodyBlue) NotImplemented()          {}
+func (EnchantingMelodyBlue) ID() ids.CardID                     { return ids.EnchantingMelodyBlue }
+func (EnchantingMelodyBlue) Name() string                       { return "Enchanting Melody" }
+func (EnchantingMelodyBlue) DisplayName() string                { return "Enchanting Melody [B]" }
+func (EnchantingMelodyBlue) Cost(card.GameEngine) int           { return 2 }
+func (EnchantingMelodyBlue) Pitch() int                         { return 3 }
+func (EnchantingMelodyBlue) Attack() int                        { return 0 }
+func (EnchantingMelodyBlue) Defense() int                       { return 2 }
+func (EnchantingMelodyBlue) Types(card.GameEngine) card.TypeSet { return enchantingMelodyTypes }
+func (EnchantingMelodyBlue) GoAgain() bool                      { return true }
+func (EnchantingMelodyBlue) NotImplemented()                    {}

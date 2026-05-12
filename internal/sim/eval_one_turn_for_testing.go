@@ -89,7 +89,7 @@ func (t TurnStartState) Copper() int {
 func EvalOneTurnForTesting(master *deck.Deck, mp Matchup, initial TurnState, initialHand []deck.Card) TurnStartState {
 	d := master.Copy()
 	hero := d.Hero.(Hero)
-	CurrentHero = hero
+	SetCurrentHero(hero)
 	handSize := hero.Intelligence()
 	if handSize <= 0 {
 		return TurnStartState{}

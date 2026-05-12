@@ -23,7 +23,7 @@ func warmongersRecitalRecycleOnHit(s card.GameEngine, l card.Logger, self *card.
 // Fizzles silently if no attack action follows in CardsRemaining.
 func warmongersRecitalPlay(s card.GameEngine, l card.Logger, self *card.CardState, source card.Card, n int) {
 	for _, pc := range s.CardsRemaining() {
-		if pc.Card.Types().IsAttackAction() {
+		if pc.Card.Types(nil).IsAttackAction() {
 			pc.BonusAttack += n
 			pc.OnHit = append(pc.OnHit, card.OnHitHandler{
 				Fire:   warmongersRecitalRecycleOnHit,

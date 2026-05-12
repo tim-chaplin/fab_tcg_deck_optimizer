@@ -11,12 +11,12 @@ var exposedTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAttackReaction)
 
 type ExposedBlue struct{}
 
-func (ExposedBlue) ID() ids.CardID           { return ids.ExposedBlue }
-func (ExposedBlue) Name() string             { return "Exposed" }
-func (ExposedBlue) DisplayName() string      { return "Exposed [B]" }
-func (ExposedBlue) Cost(card.GameEngine) int { return 0 }
-func (ExposedBlue) Pitch() int               { return 3 }
-func (ExposedBlue) Attack() int              { return 0 }
-func (ExposedBlue) Defense() int             { return 0 }
-func (ExposedBlue) Types() card.TypeSet      { return exposedTypes }
-func (ExposedBlue) GoAgain() bool            { return false }
+func (ExposedBlue) ID() ids.CardID                     { return ids.ExposedBlue }
+func (ExposedBlue) Name() string                       { return "Exposed" }
+func (ExposedBlue) DisplayName() string                { return "Exposed [B]" }
+func (ExposedBlue) Cost(card.GameEngine) int           { return 0 }
+func (ExposedBlue) Pitch() int                         { return 3 }
+func (ExposedBlue) Attack() int                        { return 0 }
+func (ExposedBlue) Defense() int                       { return 0 }
+func (ExposedBlue) Types(card.GameEngine) card.TypeSet { return exposedTypes }
+func (ExposedBlue) GoAgain() bool                      { return false }

@@ -18,8 +18,10 @@ func (SutcliffesResearchNotesRed) Cost(card.GameEngine) int { return 1 }
 func (SutcliffesResearchNotesRed) Pitch() int               { return 1 }
 func (SutcliffesResearchNotesRed) Attack() int              { return 0 }
 func (SutcliffesResearchNotesRed) Defense() int             { return 2 }
-func (SutcliffesResearchNotesRed) Types() card.TypeSet      { return sutcliffeSResearchNotesTypes }
-func (SutcliffesResearchNotesRed) GoAgain() bool            { return true }
+func (SutcliffesResearchNotesRed) Types(card.GameEngine) card.TypeSet {
+	return sutcliffeSResearchNotesTypes
+}
+func (SutcliffesResearchNotesRed) GoAgain() bool { return true }
 
 type SutcliffesResearchNotesYellow struct{}
 
@@ -30,8 +32,10 @@ func (SutcliffesResearchNotesYellow) Cost(card.GameEngine) int { return 1 }
 func (SutcliffesResearchNotesYellow) Pitch() int               { return 2 }
 func (SutcliffesResearchNotesYellow) Attack() int              { return 0 }
 func (SutcliffesResearchNotesYellow) Defense() int             { return 2 }
-func (SutcliffesResearchNotesYellow) Types() card.TypeSet      { return sutcliffeSResearchNotesTypes }
-func (SutcliffesResearchNotesYellow) GoAgain() bool            { return true }
+func (SutcliffesResearchNotesYellow) Types(card.GameEngine) card.TypeSet {
+	return sutcliffeSResearchNotesTypes
+}
+func (SutcliffesResearchNotesYellow) GoAgain() bool { return true }
 
 type SutcliffesResearchNotesBlue struct{}
 
@@ -42,5 +46,7 @@ func (SutcliffesResearchNotesBlue) Cost(card.GameEngine) int { return 1 }
 func (SutcliffesResearchNotesBlue) Pitch() int               { return 3 }
 func (SutcliffesResearchNotesBlue) Attack() int              { return 0 }
 func (SutcliffesResearchNotesBlue) Defense() int             { return 2 }
-func (SutcliffesResearchNotesBlue) Types() card.TypeSet      { return sutcliffeSResearchNotesTypes }
-func (SutcliffesResearchNotesBlue) GoAgain() bool            { return true }
+func (SutcliffesResearchNotesBlue) Types(card.GameEngine) card.TypeSet {
+	return sutcliffeSResearchNotesTypes
+}
+func (SutcliffesResearchNotesBlue) GoAgain() bool { return true }

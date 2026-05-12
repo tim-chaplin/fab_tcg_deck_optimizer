@@ -11,13 +11,13 @@ var potionOfIronhideTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, c
 
 type PotionOfIronhideBlue struct{}
 
-func (PotionOfIronhideBlue) ID() ids.CardID           { return ids.PotionOfIronhideBlue }
-func (PotionOfIronhideBlue) Name() string             { return "Potion of Ironhide" }
-func (PotionOfIronhideBlue) DisplayName() string      { return "Potion of Ironhide [B]" }
-func (PotionOfIronhideBlue) Cost(card.GameEngine) int { return 0 }
-func (PotionOfIronhideBlue) Pitch() int               { return 3 }
-func (PotionOfIronhideBlue) Attack() int              { return 0 }
-func (PotionOfIronhideBlue) Defense() int             { return 0 }
-func (PotionOfIronhideBlue) Types() card.TypeSet      { return potionOfIronhideTypes }
-func (PotionOfIronhideBlue) GoAgain() bool            { return false }
-func (PotionOfIronhideBlue) Unplayable()              {}
+func (PotionOfIronhideBlue) ID() ids.CardID                     { return ids.PotionOfIronhideBlue }
+func (PotionOfIronhideBlue) Name() string                       { return "Potion of Ironhide" }
+func (PotionOfIronhideBlue) DisplayName() string                { return "Potion of Ironhide [B]" }
+func (PotionOfIronhideBlue) Cost(card.GameEngine) int           { return 0 }
+func (PotionOfIronhideBlue) Pitch() int                         { return 3 }
+func (PotionOfIronhideBlue) Attack() int                        { return 0 }
+func (PotionOfIronhideBlue) Defense() int                       { return 0 }
+func (PotionOfIronhideBlue) Types(card.GameEngine) card.TypeSet { return potionOfIronhideTypes }
+func (PotionOfIronhideBlue) GoAgain() bool                      { return false }
+func (PotionOfIronhideBlue) Unplayable()                        {}

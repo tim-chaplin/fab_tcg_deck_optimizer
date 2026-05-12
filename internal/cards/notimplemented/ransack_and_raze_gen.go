@@ -11,13 +11,13 @@ var ransackAndRazeTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction)
 
 type RansackAndRazeBlue struct{}
 
-func (RansackAndRazeBlue) ID() ids.CardID           { return ids.RansackAndRazeBlue }
-func (RansackAndRazeBlue) Name() string             { return "Ransack and Raze" }
-func (RansackAndRazeBlue) DisplayName() string      { return "Ransack and Raze [B]" }
-func (RansackAndRazeBlue) Cost(card.GameEngine) int { return 0 }
-func (RansackAndRazeBlue) Pitch() int               { return 3 }
-func (RansackAndRazeBlue) Attack() int              { return 0 }
-func (RansackAndRazeBlue) Defense() int             { return 3 }
-func (RansackAndRazeBlue) Types() card.TypeSet      { return ransackAndRazeTypes }
-func (RansackAndRazeBlue) GoAgain() bool            { return true }
-func (RansackAndRazeBlue) NotImplemented()          {}
+func (RansackAndRazeBlue) ID() ids.CardID                     { return ids.RansackAndRazeBlue }
+func (RansackAndRazeBlue) Name() string                       { return "Ransack and Raze" }
+func (RansackAndRazeBlue) DisplayName() string                { return "Ransack and Raze [B]" }
+func (RansackAndRazeBlue) Cost(card.GameEngine) int           { return 0 }
+func (RansackAndRazeBlue) Pitch() int                         { return 3 }
+func (RansackAndRazeBlue) Attack() int                        { return 0 }
+func (RansackAndRazeBlue) Defense() int                       { return 3 }
+func (RansackAndRazeBlue) Types(card.GameEngine) card.TypeSet { return ransackAndRazeTypes }
+func (RansackAndRazeBlue) GoAgain() bool                      { return true }
+func (RansackAndRazeBlue) NotImplemented()                    {}

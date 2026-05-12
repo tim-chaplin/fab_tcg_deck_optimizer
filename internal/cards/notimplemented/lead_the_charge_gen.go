@@ -11,39 +11,39 @@ var leadTheChargeTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction)
 
 type LeadTheChargeRed struct{}
 
-func (LeadTheChargeRed) ID() ids.CardID           { return ids.LeadTheChargeRed }
-func (LeadTheChargeRed) Name() string             { return "Lead the Charge" }
-func (LeadTheChargeRed) DisplayName() string      { return "Lead the Charge [R]" }
-func (LeadTheChargeRed) Cost(card.GameEngine) int { return 0 }
-func (LeadTheChargeRed) Pitch() int               { return 1 }
-func (LeadTheChargeRed) Attack() int              { return 0 }
-func (LeadTheChargeRed) Defense() int             { return 2 }
-func (LeadTheChargeRed) Types() card.TypeSet      { return leadTheChargeTypes }
-func (LeadTheChargeRed) GoAgain() bool            { return true }
-func (LeadTheChargeRed) NotImplemented()          {}
+func (LeadTheChargeRed) ID() ids.CardID                     { return ids.LeadTheChargeRed }
+func (LeadTheChargeRed) Name() string                       { return "Lead the Charge" }
+func (LeadTheChargeRed) DisplayName() string                { return "Lead the Charge [R]" }
+func (LeadTheChargeRed) Cost(card.GameEngine) int           { return 0 }
+func (LeadTheChargeRed) Pitch() int                         { return 1 }
+func (LeadTheChargeRed) Attack() int                        { return 0 }
+func (LeadTheChargeRed) Defense() int                       { return 2 }
+func (LeadTheChargeRed) Types(card.GameEngine) card.TypeSet { return leadTheChargeTypes }
+func (LeadTheChargeRed) GoAgain() bool                      { return true }
+func (LeadTheChargeRed) NotImplemented()                    {}
 
 type LeadTheChargeYellow struct{}
 
-func (LeadTheChargeYellow) ID() ids.CardID           { return ids.LeadTheChargeYellow }
-func (LeadTheChargeYellow) Name() string             { return "Lead the Charge" }
-func (LeadTheChargeYellow) DisplayName() string      { return "Lead the Charge [Y]" }
-func (LeadTheChargeYellow) Cost(card.GameEngine) int { return 0 }
-func (LeadTheChargeYellow) Pitch() int               { return 2 }
-func (LeadTheChargeYellow) Attack() int              { return 0 }
-func (LeadTheChargeYellow) Defense() int             { return 2 }
-func (LeadTheChargeYellow) Types() card.TypeSet      { return leadTheChargeTypes }
-func (LeadTheChargeYellow) GoAgain() bool            { return true }
-func (LeadTheChargeYellow) NotImplemented()          {}
+func (LeadTheChargeYellow) ID() ids.CardID                     { return ids.LeadTheChargeYellow }
+func (LeadTheChargeYellow) Name() string                       { return "Lead the Charge" }
+func (LeadTheChargeYellow) DisplayName() string                { return "Lead the Charge [Y]" }
+func (LeadTheChargeYellow) Cost(card.GameEngine) int           { return 0 }
+func (LeadTheChargeYellow) Pitch() int                         { return 2 }
+func (LeadTheChargeYellow) Attack() int                        { return 0 }
+func (LeadTheChargeYellow) Defense() int                       { return 2 }
+func (LeadTheChargeYellow) Types(card.GameEngine) card.TypeSet { return leadTheChargeTypes }
+func (LeadTheChargeYellow) GoAgain() bool                      { return true }
+func (LeadTheChargeYellow) NotImplemented()                    {}
 
 type LeadTheChargeBlue struct{}
 
-func (LeadTheChargeBlue) ID() ids.CardID           { return ids.LeadTheChargeBlue }
-func (LeadTheChargeBlue) Name() string             { return "Lead the Charge" }
-func (LeadTheChargeBlue) DisplayName() string      { return "Lead the Charge [B]" }
-func (LeadTheChargeBlue) Cost(card.GameEngine) int { return 0 }
-func (LeadTheChargeBlue) Pitch() int               { return 3 }
-func (LeadTheChargeBlue) Attack() int              { return 0 }
-func (LeadTheChargeBlue) Defense() int             { return 2 }
-func (LeadTheChargeBlue) Types() card.TypeSet      { return leadTheChargeTypes }
-func (LeadTheChargeBlue) GoAgain() bool            { return true }
-func (LeadTheChargeBlue) NotImplemented()          {}
+func (LeadTheChargeBlue) ID() ids.CardID                     { return ids.LeadTheChargeBlue }
+func (LeadTheChargeBlue) Name() string                       { return "Lead the Charge" }
+func (LeadTheChargeBlue) DisplayName() string                { return "Lead the Charge [B]" }
+func (LeadTheChargeBlue) Cost(card.GameEngine) int           { return 0 }
+func (LeadTheChargeBlue) Pitch() int                         { return 3 }
+func (LeadTheChargeBlue) Attack() int                        { return 0 }
+func (LeadTheChargeBlue) Defense() int                       { return 2 }
+func (LeadTheChargeBlue) Types(card.GameEngine) card.TypeSet { return leadTheChargeTypes }
+func (LeadTheChargeBlue) GoAgain() bool                      { return true }
+func (LeadTheChargeBlue) NotImplemented()                    {}

@@ -11,12 +11,12 @@ var muscleMuttTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.Ty
 
 type MuscleMuttYellow struct{}
 
-func (MuscleMuttYellow) ID() ids.CardID           { return ids.MuscleMuttYellow }
-func (MuscleMuttYellow) Name() string             { return "Muscle Mutt" }
-func (MuscleMuttYellow) DisplayName() string      { return "Muscle Mutt [Y]" }
-func (MuscleMuttYellow) Cost(card.GameEngine) int { return 3 }
-func (MuscleMuttYellow) Pitch() int               { return 2 }
-func (MuscleMuttYellow) Attack() int              { return 6 }
-func (MuscleMuttYellow) Defense() int             { return 2 }
-func (MuscleMuttYellow) Types() card.TypeSet      { return muscleMuttTypes }
-func (MuscleMuttYellow) GoAgain() bool            { return false }
+func (MuscleMuttYellow) ID() ids.CardID                     { return ids.MuscleMuttYellow }
+func (MuscleMuttYellow) Name() string                       { return "Muscle Mutt" }
+func (MuscleMuttYellow) DisplayName() string                { return "Muscle Mutt [Y]" }
+func (MuscleMuttYellow) Cost(card.GameEngine) int           { return 3 }
+func (MuscleMuttYellow) Pitch() int                         { return 2 }
+func (MuscleMuttYellow) Attack() int                        { return 6 }
+func (MuscleMuttYellow) Defense() int                       { return 2 }
+func (MuscleMuttYellow) Types(card.GameEngine) card.TypeSet { return muscleMuttTypes }
+func (MuscleMuttYellow) GoAgain() bool                      { return false }

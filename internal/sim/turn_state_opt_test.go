@@ -13,7 +13,7 @@ import (
 func withOptHero(t *testing.T, h FakeHero, fn func()) {
 	t.Helper()
 	prev := CurrentHero
-	CurrentHero = h
+	SetCurrentHero(h)
 	defer func() { CurrentHero = prev }()
 	fn()
 }

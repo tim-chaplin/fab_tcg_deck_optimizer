@@ -24,7 +24,7 @@ import (
 // Reads Cost against an empty TurnState; variable-cost cards aren't expected in mode 1's
 // gate range.
 func pummelAccepts(c card.Card, mode int8) bool {
-	t := c.Types()
+	t := c.Types(nil)
 	switch mode {
 	case 0:
 		return (t.Has(card.TypeClub) || t.Has(card.TypeHammer)) && t.IsWeaponAttack()

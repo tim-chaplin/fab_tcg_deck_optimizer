@@ -899,7 +899,7 @@ func (ctx *sequenceContext) playSequenceWithMeta(n int) (damage int, futureValue
 			// Triggers that don't match stay queued for a later qualifying hit. The
 			// firing handler reads state.triggeringCard for attack identity.
 			if len(state.triggers) > 0 {
-				types := activeAttack.Card.Types()
+				types := activeAttack.Card.Types(nil)
 				prevTriggering := state.triggeringCard
 				state.triggeringCard = activeAttack.Card
 				kept := state.triggers[:0]

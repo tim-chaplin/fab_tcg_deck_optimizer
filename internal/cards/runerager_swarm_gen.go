@@ -11,36 +11,36 @@ var runeragerSwarmTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeAction, c
 
 type RuneragerSwarmRed struct{}
 
-func (RuneragerSwarmRed) ID() ids.CardID           { return ids.RuneragerSwarmRed }
-func (RuneragerSwarmRed) Name() string             { return "Runerager Swarm" }
-func (RuneragerSwarmRed) DisplayName() string      { return "Runerager Swarm [R]" }
-func (RuneragerSwarmRed) Cost(card.GameEngine) int { return 0 }
-func (RuneragerSwarmRed) Pitch() int               { return 1 }
-func (RuneragerSwarmRed) Attack() int              { return 3 }
-func (RuneragerSwarmRed) Defense() int             { return 3 }
-func (RuneragerSwarmRed) Types() card.TypeSet      { return runeragerSwarmTypes }
-func (RuneragerSwarmRed) GoAgain() bool            { return false }
+func (RuneragerSwarmRed) ID() ids.CardID                     { return ids.RuneragerSwarmRed }
+func (RuneragerSwarmRed) Name() string                       { return "Runerager Swarm" }
+func (RuneragerSwarmRed) DisplayName() string                { return "Runerager Swarm [R]" }
+func (RuneragerSwarmRed) Cost(card.GameEngine) int           { return 0 }
+func (RuneragerSwarmRed) Pitch() int                         { return 1 }
+func (RuneragerSwarmRed) Attack() int                        { return 3 }
+func (RuneragerSwarmRed) Defense() int                       { return 3 }
+func (RuneragerSwarmRed) Types(card.GameEngine) card.TypeSet { return runeragerSwarmTypes }
+func (RuneragerSwarmRed) GoAgain() bool                      { return false }
 
 type RuneragerSwarmYellow struct{}
 
-func (RuneragerSwarmYellow) ID() ids.CardID           { return ids.RuneragerSwarmYellow }
-func (RuneragerSwarmYellow) Name() string             { return "Runerager Swarm" }
-func (RuneragerSwarmYellow) DisplayName() string      { return "Runerager Swarm [Y]" }
-func (RuneragerSwarmYellow) Cost(card.GameEngine) int { return 0 }
-func (RuneragerSwarmYellow) Pitch() int               { return 2 }
-func (RuneragerSwarmYellow) Attack() int              { return 2 }
-func (RuneragerSwarmYellow) Defense() int             { return 3 }
-func (RuneragerSwarmYellow) Types() card.TypeSet      { return runeragerSwarmTypes }
-func (RuneragerSwarmYellow) GoAgain() bool            { return false }
+func (RuneragerSwarmYellow) ID() ids.CardID                     { return ids.RuneragerSwarmYellow }
+func (RuneragerSwarmYellow) Name() string                       { return "Runerager Swarm" }
+func (RuneragerSwarmYellow) DisplayName() string                { return "Runerager Swarm [Y]" }
+func (RuneragerSwarmYellow) Cost(card.GameEngine) int           { return 0 }
+func (RuneragerSwarmYellow) Pitch() int                         { return 2 }
+func (RuneragerSwarmYellow) Attack() int                        { return 2 }
+func (RuneragerSwarmYellow) Defense() int                       { return 3 }
+func (RuneragerSwarmYellow) Types(card.GameEngine) card.TypeSet { return runeragerSwarmTypes }
+func (RuneragerSwarmYellow) GoAgain() bool                      { return false }
 
 type RuneragerSwarmBlue struct{}
 
-func (RuneragerSwarmBlue) ID() ids.CardID           { return ids.RuneragerSwarmBlue }
-func (RuneragerSwarmBlue) Name() string             { return "Runerager Swarm" }
-func (RuneragerSwarmBlue) DisplayName() string      { return "Runerager Swarm [B]" }
-func (RuneragerSwarmBlue) Cost(card.GameEngine) int { return 0 }
-func (RuneragerSwarmBlue) Pitch() int               { return 3 }
-func (RuneragerSwarmBlue) Attack() int              { return 1 }
-func (RuneragerSwarmBlue) Defense() int             { return 3 }
-func (RuneragerSwarmBlue) Types() card.TypeSet      { return runeragerSwarmTypes }
-func (RuneragerSwarmBlue) GoAgain() bool            { return false }
+func (RuneragerSwarmBlue) ID() ids.CardID                     { return ids.RuneragerSwarmBlue }
+func (RuneragerSwarmBlue) Name() string                       { return "Runerager Swarm" }
+func (RuneragerSwarmBlue) DisplayName() string                { return "Runerager Swarm [B]" }
+func (RuneragerSwarmBlue) Cost(card.GameEngine) int           { return 0 }
+func (RuneragerSwarmBlue) Pitch() int                         { return 3 }
+func (RuneragerSwarmBlue) Attack() int                        { return 1 }
+func (RuneragerSwarmBlue) Defense() int                       { return 3 }
+func (RuneragerSwarmBlue) Types(card.GameEngine) card.TypeSet { return runeragerSwarmTypes }
+func (RuneragerSwarmBlue) GoAgain() bool                      { return false }

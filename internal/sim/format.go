@@ -125,7 +125,7 @@ func partitionBestLineForDisplay(line []CardAssignment) bestLineDisplayParts {
 			// damage credit rather than cost.
 			_ = a.Card.Cost(zeroState)
 		case Defend:
-			if a.Card.Types().IsDefenseReaction() {
+			if a.Card.Types(nil).IsDefenseReaction() {
 				parts.drCost += a.Card.Cost(zeroState)
 				parts.defenseReactions = append(parts.defenseReactions, a)
 			} else {

@@ -11,36 +11,36 @@ var shrillOfSkullformTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeAction
 
 type ShrillOfSkullformRed struct{}
 
-func (ShrillOfSkullformRed) ID() ids.CardID           { return ids.ShrillOfSkullformRed }
-func (ShrillOfSkullformRed) Name() string             { return "Shrill of Skullform" }
-func (ShrillOfSkullformRed) DisplayName() string      { return "Shrill of Skullform [R]" }
-func (ShrillOfSkullformRed) Cost(card.GameEngine) int { return 2 }
-func (ShrillOfSkullformRed) Pitch() int               { return 1 }
-func (ShrillOfSkullformRed) Attack() int              { return 4 }
-func (ShrillOfSkullformRed) Defense() int             { return 3 }
-func (ShrillOfSkullformRed) Types() card.TypeSet      { return shrillOfSkullformTypes }
-func (ShrillOfSkullformRed) GoAgain() bool            { return false }
+func (ShrillOfSkullformRed) ID() ids.CardID                     { return ids.ShrillOfSkullformRed }
+func (ShrillOfSkullformRed) Name() string                       { return "Shrill of Skullform" }
+func (ShrillOfSkullformRed) DisplayName() string                { return "Shrill of Skullform [R]" }
+func (ShrillOfSkullformRed) Cost(card.GameEngine) int           { return 2 }
+func (ShrillOfSkullformRed) Pitch() int                         { return 1 }
+func (ShrillOfSkullformRed) Attack() int                        { return 4 }
+func (ShrillOfSkullformRed) Defense() int                       { return 3 }
+func (ShrillOfSkullformRed) Types(card.GameEngine) card.TypeSet { return shrillOfSkullformTypes }
+func (ShrillOfSkullformRed) GoAgain() bool                      { return false }
 
 type ShrillOfSkullformYellow struct{}
 
-func (ShrillOfSkullformYellow) ID() ids.CardID           { return ids.ShrillOfSkullformYellow }
-func (ShrillOfSkullformYellow) Name() string             { return "Shrill of Skullform" }
-func (ShrillOfSkullformYellow) DisplayName() string      { return "Shrill of Skullform [Y]" }
-func (ShrillOfSkullformYellow) Cost(card.GameEngine) int { return 2 }
-func (ShrillOfSkullformYellow) Pitch() int               { return 2 }
-func (ShrillOfSkullformYellow) Attack() int              { return 3 }
-func (ShrillOfSkullformYellow) Defense() int             { return 3 }
-func (ShrillOfSkullformYellow) Types() card.TypeSet      { return shrillOfSkullformTypes }
-func (ShrillOfSkullformYellow) GoAgain() bool            { return false }
+func (ShrillOfSkullformYellow) ID() ids.CardID                     { return ids.ShrillOfSkullformYellow }
+func (ShrillOfSkullformYellow) Name() string                       { return "Shrill of Skullform" }
+func (ShrillOfSkullformYellow) DisplayName() string                { return "Shrill of Skullform [Y]" }
+func (ShrillOfSkullformYellow) Cost(card.GameEngine) int           { return 2 }
+func (ShrillOfSkullformYellow) Pitch() int                         { return 2 }
+func (ShrillOfSkullformYellow) Attack() int                        { return 3 }
+func (ShrillOfSkullformYellow) Defense() int                       { return 3 }
+func (ShrillOfSkullformYellow) Types(card.GameEngine) card.TypeSet { return shrillOfSkullformTypes }
+func (ShrillOfSkullformYellow) GoAgain() bool                      { return false }
 
 type ShrillOfSkullformBlue struct{}
 
-func (ShrillOfSkullformBlue) ID() ids.CardID           { return ids.ShrillOfSkullformBlue }
-func (ShrillOfSkullformBlue) Name() string             { return "Shrill of Skullform" }
-func (ShrillOfSkullformBlue) DisplayName() string      { return "Shrill of Skullform [B]" }
-func (ShrillOfSkullformBlue) Cost(card.GameEngine) int { return 2 }
-func (ShrillOfSkullformBlue) Pitch() int               { return 3 }
-func (ShrillOfSkullformBlue) Attack() int              { return 2 }
-func (ShrillOfSkullformBlue) Defense() int             { return 3 }
-func (ShrillOfSkullformBlue) Types() card.TypeSet      { return shrillOfSkullformTypes }
-func (ShrillOfSkullformBlue) GoAgain() bool            { return false }
+func (ShrillOfSkullformBlue) ID() ids.CardID                     { return ids.ShrillOfSkullformBlue }
+func (ShrillOfSkullformBlue) Name() string                       { return "Shrill of Skullform" }
+func (ShrillOfSkullformBlue) DisplayName() string                { return "Shrill of Skullform [B]" }
+func (ShrillOfSkullformBlue) Cost(card.GameEngine) int           { return 2 }
+func (ShrillOfSkullformBlue) Pitch() int                         { return 3 }
+func (ShrillOfSkullformBlue) Attack() int                        { return 2 }
+func (ShrillOfSkullformBlue) Defense() int                       { return 3 }
+func (ShrillOfSkullformBlue) Types(card.GameEngine) card.TypeSet { return shrillOfSkullformTypes }
+func (ShrillOfSkullformBlue) GoAgain() bool                      { return false }

@@ -28,7 +28,7 @@ func (AetherSlashBlue) Play(s card.GameEngine, l card.Logger, self *card.CardSta
 // is among the pitched cards the runner attributed to paying for this Aether Slash.
 func aetherSlashApplyRider(s card.GameEngine, l card.Logger, self *card.CardState) {
 	for _, p := range self.PitchedToPlay {
-		if p.Types().IsNonAttackAction() {
+		if p.Types(nil).IsNonAttackAction() {
 			s.DealArcaneDamage(l, self, 1)
 			return
 		}

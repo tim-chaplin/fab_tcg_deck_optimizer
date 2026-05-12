@@ -11,13 +11,13 @@ var layLowTypes = card.NewTypeSet()
 
 type LayLowYellow struct{}
 
-func (LayLowYellow) ID() ids.CardID           { return ids.LayLowYellow }
-func (LayLowYellow) Name() string             { return "Lay Low" }
-func (LayLowYellow) DisplayName() string      { return "Lay Low [Y]" }
-func (LayLowYellow) Cost(card.GameEngine) int { return 0 }
-func (LayLowYellow) Pitch() int               { return 2 }
-func (LayLowYellow) Attack() int              { return 0 }
-func (LayLowYellow) Defense() int             { return 3 }
-func (LayLowYellow) Types() card.TypeSet      { return layLowTypes }
-func (LayLowYellow) GoAgain() bool            { return false }
-func (LayLowYellow) NotImplemented()          {}
+func (LayLowYellow) ID() ids.CardID                     { return ids.LayLowYellow }
+func (LayLowYellow) Name() string                       { return "Lay Low" }
+func (LayLowYellow) DisplayName() string                { return "Lay Low [Y]" }
+func (LayLowYellow) Cost(card.GameEngine) int           { return 0 }
+func (LayLowYellow) Pitch() int                         { return 2 }
+func (LayLowYellow) Attack() int                        { return 0 }
+func (LayLowYellow) Defense() int                       { return 3 }
+func (LayLowYellow) Types(card.GameEngine) card.TypeSet { return layLowTypes }
+func (LayLowYellow) GoAgain() bool                      { return false }
+func (LayLowYellow) NotImplemented()                    {}

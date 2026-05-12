@@ -11,12 +11,12 @@ var blusterBuffTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.T
 
 type BlusterBuffRed struct{}
 
-func (BlusterBuffRed) ID() ids.CardID           { return ids.BlusterBuffRed }
-func (BlusterBuffRed) Name() string             { return "Bluster Buff" }
-func (BlusterBuffRed) DisplayName() string      { return "Bluster Buff [R]" }
-func (BlusterBuffRed) Cost(card.GameEngine) int { return 1 }
-func (BlusterBuffRed) Pitch() int               { return 1 }
-func (BlusterBuffRed) Attack() int              { return 6 }
-func (BlusterBuffRed) Defense() int             { return 3 }
-func (BlusterBuffRed) Types() card.TypeSet      { return blusterBuffTypes }
-func (BlusterBuffRed) GoAgain() bool            { return false }
+func (BlusterBuffRed) ID() ids.CardID                     { return ids.BlusterBuffRed }
+func (BlusterBuffRed) Name() string                       { return "Bluster Buff" }
+func (BlusterBuffRed) DisplayName() string                { return "Bluster Buff [R]" }
+func (BlusterBuffRed) Cost(card.GameEngine) int           { return 1 }
+func (BlusterBuffRed) Pitch() int                         { return 1 }
+func (BlusterBuffRed) Attack() int                        { return 6 }
+func (BlusterBuffRed) Defense() int                       { return 3 }
+func (BlusterBuffRed) Types(card.GameEngine) card.TypeSet { return blusterBuffTypes }
+func (BlusterBuffRed) GoAgain() bool                      { return false }

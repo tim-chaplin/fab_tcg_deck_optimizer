@@ -53,20 +53,20 @@ func TestLowerHealthWanter_DamageRiders(t *testing.T) {
 		{"FyendalsFightingSpiritBlue +1h", FyendalsFightingSpiritBlue{}, 5, 5 + 1},
 	}
 	for _, tc := range cases {
-		sim.CurrentHero = stubLowHeroOff{}
+		sim.SetCurrentHero(stubLowHeroOff{})
 		var sOff sim.TurnState
 		sim.ResolveChainStep(&sOff, sOff.Logger(), &card.CardState{Card: tc.card})
 		if got := sOff.Value(); got != tc.wantOff {
 			t.Errorf("%s: Play() off = %d, want %d (hero does not opt in)", tc.name, got, tc.wantOff)
 		}
-		sim.CurrentHero = stubLowHeroOn{}
+		sim.SetCurrentHero(stubLowHeroOn{})
 		var sOn sim.TurnState
 		sim.ResolveChainStep(&sOn, sOn.Logger(), &card.CardState{Card: tc.card})
 		if got := sOn.Value(); got != tc.wantOn {
 			t.Errorf("%s: Play() on = %d, want %d (hero opts in)", tc.name, got, tc.wantOn)
 		}
 	}
-	sim.CurrentHero = nil
+	sim.SetCurrentHero(nil)
 }
 
 // TestLowerHealthWanter_GoAgainRiders checks the conditional go-again flips iff the current hero
@@ -77,25 +77,25 @@ func TestLowerHealthWanter_GoAgainRiders(t *testing.T) {
 		BlowForABlowRed{},
 		LifeForALifeRed{}, LifeForALifeYellow{}, LifeForALifeBlue{},
 	}
-	sim.CurrentHero = stubLowHeroOff{}
+	sim.SetCurrentHero(stubLowHeroOff{})
 	for _, c := range cards {
 		if c.GoAgain() {
 			t.Errorf("%s: GoAgain() = true with hero off, want false", c.Name())
 		}
 	}
-	sim.CurrentHero = stubLowHeroOn{}
+	sim.SetCurrentHero(stubLowHeroOn{})
 	for _, c := range cards {
 		if !c.GoAgain() {
 			t.Errorf("%s: GoAgain() = false with hero on, want true", c.Name())
 		}
 	}
-	sim.CurrentHero = nil
+	sim.SetCurrentHero(nil)
 }
 
 // TestLowerHealthWanter_NilHeroIsOff guards the startup / unset-hero case: with no hero, the rider
 // must not fire.
 func TestLowerHealthWanter_NilHeroIsOff(t *testing.T) {
-	sim.CurrentHero = nil
+	sim.SetCurrentHero(nil)
 	var s sim.TurnState
 	sim.ResolveChainStep(&s, s.Logger(), &card.CardState{Card: AdrenalineRushRed{}})
 	if got := s.Value(); got != 4 {
@@ -111,7 +111,7 @@ func TestLowerHealthWanter_NilHeroIsOff(t *testing.T) {
 func TestLowerHealthWanter_PoundForPoundDominateGrant(t *testing.T) {
 	cards := []card.Card{PoundForPoundRed{}, PoundForPoundYellow{}, PoundForPoundBlue{}}
 
-	sim.CurrentHero = stubLowHeroOff{}
+	sim.SetCurrentHero(stubLowHeroOff{})
 	for _, c := range cards {
 		self := &card.CardState{Card: c}
 		s := sim.NewTurnState(nil, nil)
@@ -124,7 +124,7 @@ func TestLowerHealthWanter_PoundForPoundDominateGrant(t *testing.T) {
 		}
 	}
 
-	sim.CurrentHero = stubLowHeroOn{}
+	sim.SetCurrentHero(stubLowHeroOn{})
 	for _, c := range cards {
 		self := &card.CardState{Card: c}
 		s := sim.NewTurnState(nil, nil)
@@ -136,5 +136,5 @@ func TestLowerHealthWanter_PoundForPoundDominateGrant(t *testing.T) {
 			t.Errorf("%s: EffectiveDominate = false with hero on, want true", c.Name())
 		}
 	}
-	sim.CurrentHero = nil
+	sim.SetCurrentHero(nil)
 }

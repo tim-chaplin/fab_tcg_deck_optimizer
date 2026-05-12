@@ -11,14 +11,14 @@ var cashInTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction)
 
 type CashInYellow struct{}
 
-func (CashInYellow) ID() ids.CardID           { return ids.CashInYellow }
-func (CashInYellow) Name() string             { return "Cash In" }
-func (CashInYellow) DisplayName() string      { return "Cash In [Y]" }
-func (CashInYellow) Cost(card.GameEngine) int { return 4 }
-func (CashInYellow) Pitch() int               { return 2 }
-func (CashInYellow) Attack() int              { return 0 }
-func (CashInYellow) Defense() int             { return 2 }
-func (CashInYellow) Types() card.TypeSet      { return cashInTypes }
-func (CashInYellow) GoAgain() bool            { return true }
-func (CashInYellow) NotSilverAgeLegal()       {}
-func (CashInYellow) Unplayable()              {}
+func (CashInYellow) ID() ids.CardID                     { return ids.CashInYellow }
+func (CashInYellow) Name() string                       { return "Cash In" }
+func (CashInYellow) DisplayName() string                { return "Cash In [Y]" }
+func (CashInYellow) Cost(card.GameEngine) int           { return 4 }
+func (CashInYellow) Pitch() int                         { return 2 }
+func (CashInYellow) Attack() int                        { return 0 }
+func (CashInYellow) Defense() int                       { return 2 }
+func (CashInYellow) Types(card.GameEngine) card.TypeSet { return cashInTypes }
+func (CashInYellow) GoAgain() bool                      { return true }
+func (CashInYellow) NotSilverAgeLegal()                 {}
+func (CashInYellow) Unplayable()                        {}

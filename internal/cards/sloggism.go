@@ -11,7 +11,7 @@ import (
 
 // sloggismIsTarget gates the rider on attack action cards whose cost is 2 or more.
 func sloggismIsTarget(s card.GameEngine, pc *card.CardState) bool {
-	return pc.Card.Types().IsAttackAction() && pc.Card.Cost(s) >= 2
+	return pc.Card.Types(nil).IsAttackAction() && pc.Card.Cost(s) >= 2
 }
 
 func (SloggismRed) Play(s card.GameEngine, l card.Logger, self *card.CardState) {

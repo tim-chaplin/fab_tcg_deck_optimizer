@@ -11,36 +11,36 @@ var performanceBonusTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, c
 
 type PerformanceBonusRed struct{}
 
-func (PerformanceBonusRed) ID() ids.CardID           { return ids.PerformanceBonusRed }
-func (PerformanceBonusRed) Name() string             { return "Performance Bonus" }
-func (PerformanceBonusRed) DisplayName() string      { return "Performance Bonus [R]" }
-func (PerformanceBonusRed) Cost(card.GameEngine) int { return 0 }
-func (PerformanceBonusRed) Pitch() int               { return 1 }
-func (PerformanceBonusRed) Attack() int              { return 3 }
-func (PerformanceBonusRed) Defense() int             { return 2 }
-func (PerformanceBonusRed) Types() card.TypeSet      { return performanceBonusTypes }
-func (PerformanceBonusRed) GoAgain() bool            { return false }
+func (PerformanceBonusRed) ID() ids.CardID                     { return ids.PerformanceBonusRed }
+func (PerformanceBonusRed) Name() string                       { return "Performance Bonus" }
+func (PerformanceBonusRed) DisplayName() string                { return "Performance Bonus [R]" }
+func (PerformanceBonusRed) Cost(card.GameEngine) int           { return 0 }
+func (PerformanceBonusRed) Pitch() int                         { return 1 }
+func (PerformanceBonusRed) Attack() int                        { return 3 }
+func (PerformanceBonusRed) Defense() int                       { return 2 }
+func (PerformanceBonusRed) Types(card.GameEngine) card.TypeSet { return performanceBonusTypes }
+func (PerformanceBonusRed) GoAgain() bool                      { return false }
 
 type PerformanceBonusYellow struct{}
 
-func (PerformanceBonusYellow) ID() ids.CardID           { return ids.PerformanceBonusYellow }
-func (PerformanceBonusYellow) Name() string             { return "Performance Bonus" }
-func (PerformanceBonusYellow) DisplayName() string      { return "Performance Bonus [Y]" }
-func (PerformanceBonusYellow) Cost(card.GameEngine) int { return 0 }
-func (PerformanceBonusYellow) Pitch() int               { return 2 }
-func (PerformanceBonusYellow) Attack() int              { return 2 }
-func (PerformanceBonusYellow) Defense() int             { return 2 }
-func (PerformanceBonusYellow) Types() card.TypeSet      { return performanceBonusTypes }
-func (PerformanceBonusYellow) GoAgain() bool            { return false }
+func (PerformanceBonusYellow) ID() ids.CardID                     { return ids.PerformanceBonusYellow }
+func (PerformanceBonusYellow) Name() string                       { return "Performance Bonus" }
+func (PerformanceBonusYellow) DisplayName() string                { return "Performance Bonus [Y]" }
+func (PerformanceBonusYellow) Cost(card.GameEngine) int           { return 0 }
+func (PerformanceBonusYellow) Pitch() int                         { return 2 }
+func (PerformanceBonusYellow) Attack() int                        { return 2 }
+func (PerformanceBonusYellow) Defense() int                       { return 2 }
+func (PerformanceBonusYellow) Types(card.GameEngine) card.TypeSet { return performanceBonusTypes }
+func (PerformanceBonusYellow) GoAgain() bool                      { return false }
 
 type PerformanceBonusBlue struct{}
 
-func (PerformanceBonusBlue) ID() ids.CardID           { return ids.PerformanceBonusBlue }
-func (PerformanceBonusBlue) Name() string             { return "Performance Bonus" }
-func (PerformanceBonusBlue) DisplayName() string      { return "Performance Bonus [B]" }
-func (PerformanceBonusBlue) Cost(card.GameEngine) int { return 0 }
-func (PerformanceBonusBlue) Pitch() int               { return 3 }
-func (PerformanceBonusBlue) Attack() int              { return 1 }
-func (PerformanceBonusBlue) Defense() int             { return 2 }
-func (PerformanceBonusBlue) Types() card.TypeSet      { return performanceBonusTypes }
-func (PerformanceBonusBlue) GoAgain() bool            { return false }
+func (PerformanceBonusBlue) ID() ids.CardID                     { return ids.PerformanceBonusBlue }
+func (PerformanceBonusBlue) Name() string                       { return "Performance Bonus" }
+func (PerformanceBonusBlue) DisplayName() string                { return "Performance Bonus [B]" }
+func (PerformanceBonusBlue) Cost(card.GameEngine) int           { return 0 }
+func (PerformanceBonusBlue) Pitch() int                         { return 3 }
+func (PerformanceBonusBlue) Attack() int                        { return 1 }
+func (PerformanceBonusBlue) Defense() int                       { return 2 }
+func (PerformanceBonusBlue) Types(card.GameEngine) card.TypeSet { return performanceBonusTypes }
+func (PerformanceBonusBlue) GoAgain() bool                      { return false }

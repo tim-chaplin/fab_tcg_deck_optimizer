@@ -11,7 +11,7 @@ import (
 // out of the arsenal slot. Declared as a var so optimizations can swap in a memoised
 // per-(CardID, FromArsenal) implementation at init.
 var ChainStepText = func(self *card.CardState) string {
-	types := self.Card.Types()
+	types := self.Card.Types(nil)
 	var verb string
 	switch {
 	case types.IsWeaponAttack():
