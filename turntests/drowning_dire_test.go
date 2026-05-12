@@ -1,12 +1,13 @@
 package turntests
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
 	"testing"
 
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
+
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/gameengine"
 )
 
 // Tests that Drowning Dire's Play does not flip GrantedDominate when no aura was played or
@@ -14,8 +15,8 @@ import (
 func TestDrowningDire_NoAuraNoDominate(t *testing.T) {
 	for _, c := range []card.Card{cards.DrowningDireRed{}, cards.DrowningDireYellow{}, cards.DrowningDireBlue{}} {
 		self := &card.CardState{Card: c}
-		s := sim.NewTurnStateFromCards(nil, nil)
-		sim.ResolveChainStep(s, s.Logger(), self)
+		s := gameengine.NewFromCards(nil, nil)
+		s.ResolveChainStep(s.Logger(), self)
 		if self.GrantedDominate {
 			t.Errorf("%s [%d{p}]: GrantedDominate = true without prior aura, want false", c.Name(), c.Pitch())
 		}
@@ -25,10 +26,9 @@ func TestDrowningDire_NoAuraNoDominate(t *testing.T) {
 // Tests that an aura played earlier this turn flips GrantedDominate via AuraCreated.
 func TestDrowningDire_AuraGrantsDominate(t *testing.T) {
 	for _, c := range []card.Card{cards.DrowningDireRed{}, cards.DrowningDireYellow{}, cards.DrowningDireBlue{}} {
-		spec := sim.TurnStateSpec{CardsPlayed: []card.Card{testutils.Aura{}}, AuraCreated: true}
-		s := sim.NewTurnStateFromSpec(spec)
+		s := gameengine.NewFromSpec(gameengine.Spec{CardsPlayed: []card.Card{testutils.Aura{}}, AuraCreated: true})
 		self := &card.CardState{Card: c}
-		sim.ResolveChainStep(&s, s.Logger(), self)
+		s.ResolveChainStep(s.Logger(), self)
 		if !self.GrantedDominate {
 			t.Errorf("%s [%d{p}]: GrantedDominate = false after aura, want true", c.Name(), c.Pitch())
 		}
@@ -39,9 +39,9 @@ func TestDrowningDire_AuraGrantsDominate(t *testing.T) {
 func TestDrowningDire_OnHitRecyclesNonAttackToBottom(t *testing.T) {
 	non := testutils.GenericAction()
 	deck := []card.Card{testutils.RedAttack{}}
-	s := sim.NewTurnStateFromCards(deck, []card.Card{non})
+	s := gameengine.NewFromCards(deck, []card.Card{non})
 	self := &card.CardState{Card: cards.DrowningDireRed{}}
-	sim.ResolveChainStep(s, s.Logger(), self)
+	s.ResolveChainStep(s.Logger(), self)
 	self.BonusAttack = 2
 	testutils.FireOnHitIfLikely(s, s.Logger(), self)
 	if got := s.Deck().Size(); got != 2 {

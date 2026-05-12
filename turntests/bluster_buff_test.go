@@ -1,18 +1,19 @@
 package turntests
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
 	"testing"
 
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
+
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/gameengine"
 )
 
 // Tests that mode 0 fires the -1{p} self-debuff before crediting attack damage.
 func TestBlusterBuff_Mode0DebuffsByOne(t *testing.T) {
-	s := sim.TurnState{}
+	s := gameengine.New()
 	self := &card.CardState{Card: cards.BlusterBuffRed{}}
-	sim.ResolveChainStep(&s, s.Logger(), self)
+	s.ResolveChainStep(s.Logger(), self)
 	if s.Value() != 5 {
 		t.Errorf("mode 0 Value = %d, want 5 (printed 6 - 1)", s.Value())
 	}
@@ -20,9 +21,9 @@ func TestBlusterBuff_Mode0DebuffsByOne(t *testing.T) {
 
 // Tests that mode 1 keeps the printed power.
 func TestBlusterBuff_Mode1KeepsPrintedPower(t *testing.T) {
-	s := sim.TurnState{}
+	s := gameengine.New()
 	self := &card.CardState{Card: cards.BlusterBuffRed{}, Mode: 1}
-	sim.ResolveChainStep(&s, s.Logger(), self)
+	s.ResolveChainStep(s.Logger(), self)
 	if s.Value() != 6 {
 		t.Errorf("mode 1 Value = %d, want 6 (printed)", s.Value())
 	}

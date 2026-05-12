@@ -4,17 +4,20 @@ import (
 	"testing"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/gameengine"
 )
 
 // Tests that an end-of-turn Trigger fires once and is removed.
 func TestFireEndOfTurn_FiresOnceAndRemoves(t *testing.T) {
-	s := NewTurnState(nil, nil)
+	s := gameengine.New()
 	calls := 0
-	s.triggers = append(s.triggers, Trigger{
-		TriggerType: TriggerEndOfTurn,
-		Handler:     func(_ card.GameEngine, _ card.Logger, _ card.Trigger) { calls++ },
-	})
-	FireEndOfTurn(s)
+	s.AppendTrigger(gameengine.NewCardTrigger(
+		&card.CardState{Card: FakeRedAttack{}},
+		gameengine.TriggerEndOfTurn,
+		func(_ card.GameEngine, _ card.Logger, _ card.Trigger) { calls++ },
+		nil,
+	))
+	s.FireEndOfTurn()
 	if calls != 1 {
 		t.Fatalf("handler calls = %d, want 1", calls)
 	}
@@ -25,13 +28,15 @@ func TestFireEndOfTurn_FiresOnceAndRemoves(t *testing.T) {
 
 // Tests that a non-matching TriggerType stays queued when end-of-turn fires.
 func TestFireEndOfTurn_LeavesNonMatchingType(t *testing.T) {
-	s := NewTurnState(nil, nil)
+	s := gameengine.New()
 	calls := 0
-	s.triggers = append(s.triggers, Trigger{
-		TriggerType: TriggerAttack,
-		Handler:     func(_ card.GameEngine, _ card.Logger, _ card.Trigger) { calls++ },
-	})
-	FireEndOfTurn(s)
+	s.AppendTrigger(gameengine.NewCardTrigger(
+		&card.CardState{Card: FakeRedAttack{}},
+		gameengine.TriggerAttack,
+		func(_ card.GameEngine, _ card.Logger, _ card.Trigger) { calls++ },
+		nil,
+	))
+	s.FireEndOfTurn()
 	if calls != 0 {
 		t.Fatalf("handler calls = %d, want 0 (TriggerAttack should not fire from end-of-turn walk)", calls)
 	}
@@ -40,30 +45,34 @@ func TestFireEndOfTurn_LeavesNonMatchingType(t *testing.T) {
 	}
 }
 
-// Tests that a handler appending a new trigger during fire queues it for a future
-// fire walk rather than firing it on the current pass.
+// Tests that a handler appending a new trigger during fire queues it for a future fire
+// walk rather than firing it on the current pass.
 func TestFireEndOfTurn_HandlerAddTriggerSafeReentry(t *testing.T) {
-	s := NewTurnState(nil, nil)
+	s := gameengine.New()
 	calls := 0
-	s.triggers = append(s.triggers, Trigger{
-		TriggerType: TriggerEndOfTurn,
-		Handler: func(g card.GameEngine, _ card.Logger, _ card.Trigger) {
+	s.AppendTrigger(gameengine.NewCardTrigger(
+		&card.CardState{Card: FakeRedAttack{}},
+		gameengine.TriggerEndOfTurn,
+		func(g card.GameEngine, _ card.Logger, _ card.Trigger) {
 			calls++
-			ts := g.(*TurnState)
-			ts.triggers = append(ts.triggers, Trigger{
-				TriggerType: TriggerEndOfTurn,
-				Handler:     func(_ card.GameEngine, _ card.Logger, _ card.Trigger) { calls++ },
-			})
+			ts := g.(*gameengine.GameEngine)
+			ts.AppendTrigger(gameengine.NewCardTrigger(
+				&card.CardState{Card: FakeRedAttack{}},
+				gameengine.TriggerEndOfTurn,
+				func(_ card.GameEngine, _ card.Logger, _ card.Trigger) { calls++ },
+				nil,
+			))
 		},
-	})
-	FireEndOfTurn(s)
+		nil,
+	))
+	s.FireEndOfTurn()
 	if calls != 1 {
 		t.Fatalf("handler calls during first walk = %d, want 1 (handler-added trigger should not fire on the same pass)", calls)
 	}
 	if len(s.Triggers()) != 1 {
 		t.Fatalf("triggers after fire = %d, want 1 (handler-added trigger preserved)", len(s.Triggers()))
 	}
-	FireEndOfTurn(s)
+	s.FireEndOfTurn()
 	if calls != 2 {
 		t.Fatalf("handler calls after second walk = %d, want 2 (queued trigger fires on next pass)", calls)
 	}

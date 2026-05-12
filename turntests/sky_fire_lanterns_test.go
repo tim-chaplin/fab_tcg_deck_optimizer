@@ -1,16 +1,17 @@
 package turntests
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
 	"testing"
 
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
+
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/gameengine"
 )
 
 func TestSkyFireLanterns_EmptyDeck(t *testing.T) {
-	s := &sim.TurnState{}
-	sim.ResolveChainStep(s, s.Logger(), &card.CardState{Card: cards.SkyFireLanternsRed{}})
+	s := gameengine.New()
+	s.ResolveChainStep(s.Logger(), &card.CardState{Card: cards.SkyFireLanternsRed{}})
 	if got := s.Value(); got != 0 {
 		t.Errorf("Play() = %d, want 0 (empty deck)", got)
 	}
@@ -18,8 +19,8 @@ func TestSkyFireLanterns_EmptyDeck(t *testing.T) {
 
 func TestSkyFireLanterns_MatchingTopCard(t *testing.T) {
 	// Red variant (pitch 1) matches a top card with pitch 1.
-	s := sim.NewTurnStateFromCards([]card.Card{cards.HocusPocusRed{}}, nil)
-	sim.ResolveChainStep(s, s.Logger(), &card.CardState{Card: cards.SkyFireLanternsRed{}})
+	s := gameengine.NewFromCards([]card.Card{cards.HocusPocusRed{}}, nil)
+	s.ResolveChainStep(s.Logger(), &card.CardState{Card: cards.SkyFireLanternsRed{}})
 	if got := s.Value(); got != 1 {
 		t.Errorf("Red with Red top: Play() = %d, want 1 (pitch match → create Runechant)", got)
 	}
@@ -30,8 +31,8 @@ func TestSkyFireLanterns_MatchingTopCard(t *testing.T) {
 
 func TestSkyFireLanterns_MismatchingTopCard(t *testing.T) {
 	// Red variant (pitch 1) doesn't match a Blue top card (pitch 3).
-	s := sim.NewTurnStateFromCards([]card.Card{cards.HocusPocusBlue{}}, nil)
-	sim.ResolveChainStep(s, s.Logger(), &card.CardState{Card: cards.SkyFireLanternsRed{}})
+	s := gameengine.NewFromCards([]card.Card{cards.HocusPocusBlue{}}, nil)
+	s.ResolveChainStep(s.Logger(), &card.CardState{Card: cards.SkyFireLanternsRed{}})
 	if got := s.Value(); got != 0 {
 		t.Errorf("Red with Blue top: Play() = %d, want 0 (pitch mismatch)", got)
 	}
@@ -47,8 +48,8 @@ func TestSkyFireLanterns_AllVariantsMatchOwnColor(t *testing.T) {
 		{cards.SkyFireLanternsBlue{}, cards.HocusPocusBlue{}},
 	}
 	for _, tc := range cases {
-		s := sim.NewTurnStateFromCards([]card.Card{tc.top}, nil)
-		sim.ResolveChainStep(s, s.Logger(), &card.CardState{Card: tc.lantern})
+		s := gameengine.NewFromCards([]card.Card{tc.top}, nil)
+		s.ResolveChainStep(s.Logger(), &card.CardState{Card: tc.lantern})
 		if got := s.Value(); got != 1 {
 			t.Errorf("%s: Play() = %d, want 1 (same-color top card)", tc.lantern.Name(), got)
 		}

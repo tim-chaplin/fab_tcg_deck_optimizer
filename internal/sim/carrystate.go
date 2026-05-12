@@ -2,6 +2,8 @@ package sim
 
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/gameengine"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/turnlogger"
 )
 
 // CarryState's reuse / clone helpers. CarryState owns its slice fields, so the methods
@@ -14,35 +16,29 @@ import (
 //     existing slice backings via append([:0], src...) or [:0] re-slice. Allocation-free
 //     after the first sizing.
 //   - Clone (returns a fresh CarryState): allocates new slices so the result owns
-//     independent backing arrays. Used at ownership-transfer points where the caller
-//     needs the value to outlive the next reuse-helper call against the same source.
-//
-// The aliasing rule for reuse helpers: the receiver's slices are SHARED across calls,
-// so any value that needs to outlive the next call must Clone first.
+//     independent backing arrays.
 
-// SnapshotFromTurn copies every persistent TurnState field into c. Slice fields reuse c's
-// backings via append([:0], src...) — mid-chain state.* slices alias attackBufs scratch
+// SnapshotFromTurn captures every persistent GameEngine field into c. Slice fields reuse
+// c's backings via append([:0], src...) — mid-chain engine slices alias per-engine scratch
 // storage that the next permutation overwrites, so the copy is necessary. Deck gets a
 // fresh Copy() so subsequent permutations' deck mutations don't reach back into the
-// snapshot. Reads s.deck / s.graveyard directly so the snapshot itself doesn't poison
-// cacheable.
-func (c *CarryState) SnapshotFromTurn(s *TurnState) {
-	c.Hand = append(c.Hand[:0], s.hand...)
-	c.Deck = s.deck.Copy()
-	c.Arsenal = s.Arsenal
-	c.Graveyard = append(c.Graveyard[:0], s.graveyard...)
-	c.Banish = append(c.Banish[:0], s.banished...)
-	c.Auras = append(c.Auras[:0], s.auras...)
-	c.Items = append(c.Items[:0], s.Items...)
-	c.CardsDrawn = s.CardsDrawn
-	c.OpponentMarked = s.opponentMarked
-	c.Log = append(c.Log[:0], s.logger.Entries()...)
+// snapshot.
+func (c *CarryState) SnapshotFromTurn(g *gameengine.GameEngine) {
+	snap := g.Snapshot()
+	c.Hand = append(c.Hand[:0], snap.Hand...)
+	c.Deck = snap.Deck
+	c.Arsenal = snap.Arsenal
+	c.Graveyard = append(c.Graveyard[:0], snap.Graveyard...)
+	c.Banish = append(c.Banish[:0], snap.Banished...)
+	c.Auras = append(c.Auras[:0], snap.Auras...)
+	c.Items = append(c.Items[:0], snap.Items...)
+	c.CardsDrawn = snap.CardsDrawn
+	c.OpponentMarked = snap.OpponentMarked
+	c.Log = append(c.Log[:0], snap.LogEntries...)
 }
 
 // CopyFrom copies every field of src into c. Slice fields reuse c's backings via
-// append([:0], ...); Deck gets a fresh Copy(). Callers that promote one already-built
-// CarryState into a different destination avoid the per-promotion allocation a fresh
-// value-assign would pay (except for the deck Copy, which always allocates).
+// append([:0], ...); Deck gets a fresh Copy().
 func (c *CarryState) CopyFrom(src *CarryState) {
 	c.Hand = append(c.Hand[:0], src.Hand...)
 	if src.Deck != nil {
@@ -60,10 +56,7 @@ func (c *CarryState) CopyFrom(src *CarryState) {
 	c.Log = append(c.Log[:0], src.Log...)
 }
 
-// Reset zeros every field of c while preserving slice backing arrays. Slice lengths
-// drop to 0 (backing array kept for reuse via the next append([:0], ...)); scalar /
-// pointer fields zero out. Called at the top of an iteration so a stale value from a
-// previous run can't leak through when no candidate is promoted.
+// Reset zeros every field of c while preserving slice backing arrays.
 func (c *CarryState) Reset() {
 	c.Hand = c.Hand[:0]
 	c.Deck = nil
@@ -78,9 +71,6 @@ func (c *CarryState) Reset() {
 }
 
 // Clone returns a fresh CarryState whose slice / deck fields own independent backing.
-// Used at ownership-transfer points (e.g. the final TurnSummary returned by findBest)
-// so the result survives subsequent reuse-helper calls. Empty slices stay nil to keep
-// trivial CarryStates allocation-free.
 func (c CarryState) Clone() CarryState {
 	out := CarryState{
 		Arsenal:        c.Arsenal,
@@ -100,13 +90,13 @@ func (c CarryState) Clone() CarryState {
 		out.Banish = append([]card.Card(nil), c.Banish...)
 	}
 	if len(c.Auras) > 0 {
-		out.Auras = append([]Aura(nil), c.Auras...)
+		out.Auras = append([]gameengine.Aura(nil), c.Auras...)
 	}
 	if len(c.Items) > 0 {
-		out.Items = append([]Item(nil), c.Items...)
+		out.Items = append([]gameengine.Item(nil), c.Items...)
 	}
 	if len(c.Log) > 0 {
-		out.Log = append([]LogEntry(nil), c.Log...)
+		out.Log = append([]turnlogger.LogEntry(nil), c.Log...)
 	}
 	return out
 }

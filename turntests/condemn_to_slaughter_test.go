@@ -1,18 +1,19 @@
 package turntests
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards/notimplemented"
 	"testing"
 
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards/notimplemented"
+
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/gameengine"
 )
 
 func TestCondemnToSlaughter_NoNextAttackReturnsZero(t *testing.T) {
 	// No Runeblade attack follows → rider doesn't fire, Play returns 0.
-	var s sim.TurnState
-	sim.ResolveChainStep(&s, s.Logger(), &card.CardState{Card: notimplemented.CondemnToSlaughterRed{}})
+	s := gameengine.New()
+	s.ResolveChainStep(s.Logger(), &card.CardState{Card: notimplemented.CondemnToSlaughterRed{}})
 	if got := s.Value(); got != 0 {
 		t.Errorf("Play() = %d, want 0 when CardsRemaining is empty", got)
 	}
@@ -31,8 +32,8 @@ func TestCondemnToSlaughter_NextAttackActionTriggers(t *testing.T) {
 	}
 	for _, tc := range cases {
 		target := &card.CardState{Card: testutils.RunebladeAttack{}}
-		s := sim.NewTurnStateFromSpec(sim.TurnStateSpec{CardsRemaining: []*card.CardState{target}})
-		sim.ResolveChainStep(&s, s.Logger(), &card.CardState{Card: tc.c})
+		s := gameengine.NewFromSpec(gameengine.Spec{CardsRemaining: []*card.CardState{target}})
+		s.ResolveChainStep(s.Logger(), &card.CardState{Card: tc.c})
 		if got := s.Value(); got != 0 {
 			t.Errorf("%s: Play() = %d, want 0 (granter returns 0; +N rides on target's BonusAttack)", tc.c.Name(), got)
 		}
@@ -45,8 +46,8 @@ func TestCondemnToSlaughter_NextAttackActionTriggers(t *testing.T) {
 func TestCondemnToSlaughter_WeaponCountsAsNextAttack(t *testing.T) {
 	// Unlike Runic Reaping, Condemn's rider accepts weapon swings as the "next attack."
 	target := &card.CardState{Card: testutils.RunebladeWeapon{}}
-	s := sim.NewTurnStateFromSpec(sim.TurnStateSpec{CardsRemaining: []*card.CardState{target}})
-	sim.ResolveChainStep(&s, s.Logger(), &card.CardState{Card: notimplemented.CondemnToSlaughterRed{}})
+	s := gameengine.NewFromSpec(gameengine.Spec{CardsRemaining: []*card.CardState{target}})
+	s.ResolveChainStep(s.Logger(), &card.CardState{Card: notimplemented.CondemnToSlaughterRed{}})
 	if got := s.Value(); got != 0 {
 		t.Errorf("Play() = %d, want 0 (granter returns 0; +N rides on target's BonusAttack)", got)
 	}
@@ -57,8 +58,8 @@ func TestCondemnToSlaughter_WeaponCountsAsNextAttack(t *testing.T) {
 
 func TestCondemnToSlaughter_NonRunebladeAttackDoesNotQualify(t *testing.T) {
 	// A Generic attack-action card later in the chain doesn't satisfy the Runeblade-only rider.
-	s := sim.NewTurnStateFromSpec(sim.TurnStateSpec{CardsRemaining: []*card.CardState{{Card: testutils.NonRunebladeAttack{}}}})
-	sim.ResolveChainStep(&s, s.Logger(), &card.CardState{Card: notimplemented.CondemnToSlaughterRed{}})
+	s := gameengine.NewFromSpec(gameengine.Spec{CardsRemaining: []*card.CardState{{Card: testutils.NonRunebladeAttack{}}}})
+	s.ResolveChainStep(s.Logger(), &card.CardState{Card: notimplemented.CondemnToSlaughterRed{}})
 	if got := s.Value(); got != 0 {
 		t.Errorf("Play() = %d, want 0 (non-Runeblade attack shouldn't qualify)", got)
 	}

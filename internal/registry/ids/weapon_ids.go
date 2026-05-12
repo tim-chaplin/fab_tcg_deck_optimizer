@@ -44,3 +44,14 @@ const (
 	SilverTokenAbilityID
 	CopperTokenAbilityID
 )
+
+// Token aura / item IDs. The token itself (not its activated ability) carries this ID
+// so cache keys distinguish "Runechant aura" from "Ponder aura" without a separate
+// TokenKind field.
+const (
+	RunechantTokenID CardID = CopperTokenAbilityID + iota + 1
+	PonderTokenID
+	GoldTokenID
+	SilverTokenID
+	CopperTokenID
+)

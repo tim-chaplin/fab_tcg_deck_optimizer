@@ -5,6 +5,7 @@ import (
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/gameengine"
 )
 
 // Each card-type branch of ResolveChainStep gets one assertion so the standard
@@ -84,9 +85,9 @@ func (selfBuffStub) Play(g card.GameEngine, l card.Logger, self *card.CardState)
 }
 
 func TestResolveChainStep_AttackCreditsEffectiveAttack(t *testing.T) {
-	s := NewTurnStatePtr(TurnStateSpec{})
+	s := gameengine.NewFromSpec(gameengine.Spec{})
 	self := &card.CardState{Card: attackStub{}}
-	ResolveChainStep(s, s.logger, self)
+	s.ResolveChainStep(s.Logger(), self)
 	if s.Value() != 3 {
 		t.Errorf("Value = %d, want 3 (printed attack)", s.Value())
 	}
@@ -96,9 +97,9 @@ func TestResolveChainStep_AttackCreditsEffectiveAttack(t *testing.T) {
 }
 
 func TestResolveChainStep_DefenseReactionCapsToIncomingDamage(t *testing.T) {
-	s := NewTurnStatePtr(TurnStateSpec{IncomingDamage: 2})
+	s := gameengine.NewFromSpec(gameengine.Spec{IncomingDamage: 2})
 	self := &card.CardState{Card: drStub{}}
-	ResolveChainStep(s, s.logger, self)
+	s.ResolveChainStep(s.Logger(), self)
 	if s.Value() != 2 {
 		t.Errorf("Value = %d, want 2 (capped at IncomingDamage)", s.Value())
 	}
@@ -111,9 +112,9 @@ func TestResolveChainStep_DefenseReactionCapsToIncomingDamage(t *testing.T) {
 }
 
 func TestResolveChainStep_DefenseReactionUncappedWhenIncomingExceedsDefense(t *testing.T) {
-	s := NewTurnStatePtr(TurnStateSpec{IncomingDamage: 10})
+	s := gameengine.NewFromSpec(gameengine.Spec{IncomingDamage: 10})
 	self := &card.CardState{Card: drStub{}}
-	ResolveChainStep(s, s.logger, self)
+	s.ResolveChainStep(s.Logger(), self)
 	if s.Value() != 4 {
 		t.Errorf("Value = %d, want 4 (printed defense, uncapped)", s.Value())
 	}
@@ -124,9 +125,9 @@ func TestResolveChainStep_DefenseReactionUncappedWhenIncomingExceedsDefense(t *t
 
 func TestResolveChainStep_NonAttackContributesZero(t *testing.T) {
 	played := false
-	s := NewTurnStatePtr(TurnStateSpec{})
+	s := gameengine.NewFromSpec(gameengine.Spec{})
 	self := &card.CardState{Card: nonAttackStub{played: &played}}
-	ResolveChainStep(s, s.logger, self)
+	s.ResolveChainStep(s.Logger(), self)
 	if !played {
 		t.Error("non-attack Play body did not run")
 	}
@@ -139,9 +140,9 @@ func TestResolveChainStep_NonAttackContributesZero(t *testing.T) {
 }
 
 func TestResolveChainStep_SelfBuffInPlayAppliesBeforeCredit(t *testing.T) {
-	s := NewTurnStatePtr(TurnStateSpec{})
+	s := gameengine.NewFromSpec(gameengine.Spec{})
 	self := &card.CardState{Card: selfBuffStub{}}
-	ResolveChainStep(s, s.logger, self)
+	s.ResolveChainStep(s.Logger(), self)
 	if s.Value() != 3 {
 		t.Errorf("Value = %d, want 3 (printed 2 + Play's +1 BonusAttack)", s.Value())
 	}

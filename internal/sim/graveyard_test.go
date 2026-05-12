@@ -5,6 +5,7 @@ import (
 
 	. "github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/gameengine"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
@@ -66,7 +67,7 @@ func (gravSpyDR) Types(card.GameEngine) card.TypeSet {
 }
 func (gravSpyDR) GoAgain(card.GameEngine) bool { return false }
 func (gs gravSpyDR) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
-	*gs.saw = append((*gs.saw)[:0], g.(*TurnState).Graveyard()...)
+	*gs.saw = append((*gs.saw)[:0], g.(*gameengine.GameEngine).Graveyard()...)
 }
 
 // auraDefender is a test-only card whose type line is Aura — a persistent type that normally

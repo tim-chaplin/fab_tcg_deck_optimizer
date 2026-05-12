@@ -1,11 +1,12 @@
 package turntests
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
 	"testing"
 
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
+
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/gameengine"
 )
 
 // Tests that with enough IncomingDamage Value sums printed Defense + +1{d} boost + 1 arcane.
@@ -19,8 +20,8 @@ func TestSigilOfSuffering_FullCreditWhenIncomingAbsorbsBoost(t *testing.T) {
 		{cards.SigilOfSufferingBlue{}, 3},   // 1 block + 1 boost + 1 arcane
 	}
 	for _, tc := range cases {
-		s := sim.NewTurnStateFromSpec(sim.TurnStateSpec{IncomingDamage: 10})
-		sim.ResolveChainStep(&s, s.Logger(), &card.CardState{Card: tc.c})
+		s := gameengine.NewFromSpec(gameengine.Spec{IncomingDamage: 10})
+		s.ResolveChainStep(s.Logger(), &card.CardState{Card: tc.c})
 		if got := s.Value(); got != tc.want {
 			t.Errorf("%s: Play(IncomingDamage=10) Value = %d, want %d (block + boost + arcane)",
 				tc.c.DisplayName(), got, tc.want)
@@ -41,8 +42,8 @@ func TestSigilOfSuffering_BoostWastedWhenIncomingMatchesDefense(t *testing.T) {
 		{cards.SigilOfSufferingBlue{}, 1, 2},   // 1 block + 1 arcane
 	}
 	for _, tc := range cases {
-		s := sim.NewTurnStateFromSpec(sim.TurnStateSpec{IncomingDamage: tc.incoming})
-		sim.ResolveChainStep(&s, s.Logger(), &card.CardState{Card: tc.c})
+		s := gameengine.NewFromSpec(gameengine.Spec{IncomingDamage: tc.incoming})
+		s.ResolveChainStep(s.Logger(), &card.CardState{Card: tc.c})
 		if got := s.Value(); got != tc.want {
 			t.Errorf("%s: Play(IncomingDamage=%d) Value = %d, want %d (block at cap + arcane only)",
 				tc.c.DisplayName(), tc.incoming, got, tc.want)

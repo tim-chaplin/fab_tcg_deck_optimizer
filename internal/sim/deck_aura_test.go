@@ -12,33 +12,31 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/gameengine"
 )
 
 // damageTrigger returns a StartOfTurn Aura crediting the given damage and destroying
-// itself on the first fire. calls is bumped each time the handler runs so tests can assert
-// firing counts.
-func damageTrigger(self card.Card, damage int, calls *int) Aura {
-	return Aura{
-
-		TriggerType: TriggerStartOfTurn,
-		Handler: func(g card.GameEngine, _ card.Logger, a card.Aura) {
+// itself on the first fire.
+func damageTrigger(self card.Card, damage int, calls *int) gameengine.Aura {
+	return gameengine.NewCardAura(
+		&card.CardState{Card: self},
+		gameengine.TriggerStartOfTurn,
+		func(g card.GameEngine, _ card.Logger, a card.Aura) {
 			*calls++
 			g.AddValue(damage)
 			a.Destroy(true)
-
 		},
-		Self:  CardOrTokenType{Card: self},
-		Count: 1,
-	}
+		1,
+		false,
+	)
 }
 
-// TestProcessAurasAtStartOfTurn_FiresEachQueuedTriggerOnce verifies every queued start-of-turn
-// trigger's handler is invoked exactly once per pass, contributions are reported, and a
-// trigger whose Count hits zero drops out of survivors.
+// TestProcessAurasAtStartOfTurn_FiresEachQueuedTriggerOnce verifies every queued
+// start-of-turn trigger's handler is invoked exactly once per pass.
 func TestProcessAurasAtStartOfTurn_FiresEachQueuedTriggerOnce(t *testing.T) {
 	aura := testutils.RedAttack{}
 	var callsA, callsB int
-	queue := []Aura{damageTrigger(aura, 2, &callsA), damageTrigger(aura, 3, &callsB)}
+	queue := []gameengine.Aura{damageTrigger(aura, 2, &callsA), damageTrigger(aura, 3, &callsB)}
 	survivors, contribs, total, _, _ := ProcessAurasAtStartOfTurn(queue, DeckOf())
 	if total != 5 {
 		t.Errorf("total = %d, want 5 (2+3)", total)
@@ -54,7 +52,7 @@ func TestProcessAurasAtStartOfTurn_FiresEachQueuedTriggerOnce(t *testing.T) {
 	}
 }
 
-// TestProcessAurasAtStartOfTurn_EmptyQueue short-circuits: no contribs, no alloc, zero total.
+// TestProcessAurasAtStartOfTurn_EmptyQueue short-circuits.
 func TestProcessAurasAtStartOfTurn_EmptyQueue(t *testing.T) {
 	survivors, contribs, total, _, _ := ProcessAurasAtStartOfTurn(nil, DeckOf())
 	if total != 0 {
@@ -66,57 +64,49 @@ func TestProcessAurasAtStartOfTurn_EmptyQueue(t *testing.T) {
 	}
 }
 
-// TestProcessAurasAtStartOfTurn_GraveyardsExhaustedAura: a handler that calls DestroyAura
-// lands Self in the turn-state graveyard before subsequent handlers run, so a follow-up
-// aura with a graveyard-banish rider sees it.
+// TestProcessAurasAtStartOfTurn_GraveyardsExhaustedAura: a handler that calls Destroy
+// lands Self in the graveyard before subsequent handlers run.
 func TestProcessAurasAtStartOfTurn_GraveyardsExhaustedAura(t *testing.T) {
 	aura := testutils.RedAttack{}
 	var seen []card.Card
-	// Second trigger's handler records what's currently in the graveyard so we can check the
-	// first trigger's destroy happened BEFORE the second fires.
-	watcher := Aura{
-
-		TriggerType: TriggerStartOfTurn,
-		Handler: func(g card.GameEngine, _ card.Logger, _ card.Aura) {
-			seen = append([]card.Card(nil), g.(*TurnState).Graveyard()...)
-
+	watcher := gameengine.NewCardAura(
+		&card.CardState{Card: testutils.YellowAttack{}},
+		gameengine.TriggerStartOfTurn,
+		func(g card.GameEngine, _ card.Logger, _ card.Aura) {
+			eng := g.(*gameengine.GameEngine)
+			seen = append([]card.Card(nil), eng.GraveyardRaw()...)
 		},
-		Self:  CardOrTokenType{Card: testutils.YellowAttack{}},
-		Count: 1,
-	}
-	_, _, _, _, _ = ProcessAurasAtStartOfTurn([]Aura{
-		{
-			TriggerType: TriggerStartOfTurn, Handler: func(g card.GameEngine, _ card.Logger, a card.Aura) {
-				a.Destroy(true)
-			},
-			Self:  CardOrTokenType{Card: aura},
-			Count: 1,
+		1,
+		false,
+	)
+	first := gameengine.NewCardAura(
+		&card.CardState{Card: aura},
+		gameengine.TriggerStartOfTurn,
+		func(_ card.GameEngine, _ card.Logger, a card.Aura) {
+			a.Destroy(true)
 		},
-		watcher,
-	}, DeckOf())
+		1,
+		false,
+	)
+	_, _, _, _, _ = ProcessAurasAtStartOfTurn([]gameengine.Aura{first, watcher}, DeckOf())
 	if len(seen) != 1 || seen[0] != aura {
-		t.Errorf("second handler saw Graveyard = %v, want [%v] (first trigger's Self graveyarded first)",
-			seen, aura)
+		t.Errorf("second handler saw Graveyard = %v, want [%v]", seen, aura)
 	}
 }
 
-// TestProcessAurasAtStartOfTurn_IgnoresPonder: Ponder fires at end-of-turn (not
-// start), so a carried-in Ponder is left untouched by the start-of-turn pass — no
-// other framework piece should accidentally drain it.
+// TestProcessAurasAtStartOfTurn_IgnoresPonder: Ponder fires at end-of-turn (not start).
 func TestProcessAurasAtStartOfTurn_IgnoresPonder(t *testing.T) {
-	survivors, _, _, _, _ := ProcessAurasAtStartOfTurn([]Aura{NewPonderAura(1)}, DeckOf())
-	if len(survivors) != 1 || survivors[0].Self.TokenType != TokenTypePonder {
+	survivors, _, _, _, _ := ProcessAurasAtStartOfTurn([]gameengine.Aura{gameengine.NewPonderAura(1)}, DeckOf())
+	if len(survivors) != 1 || survivors[0].CardName() != "Ponder" {
 		t.Errorf("survivors = %+v, want one Ponder aura intact", survivors)
 	}
 }
 
-// TestFireEndOfTurn_PonderPopsDeckTopIntoHand: the end-of-turn fire pops one card
-// per Ponder count, appends each to s.hand, and removes the aura. The drawn card lets
-// the post-hoc arsenal-promotion step fill an empty arsenal.
+// TestFireEndOfTurn_PonderPopsDeckTopIntoHand.
 func TestFireEndOfTurn_PonderPopsDeckTopIntoHand(t *testing.T) {
 	a, b, c := testutils.NewStubCard("a"), testutils.NewStubCard("b"), testutils.NewStubCard("c")
-	s := NewTurnStateFromCards([]card.Card{a, b, c}, nil)
-	s.SetAuras(append(s.Auras(), NewPonderAura(2)))
+	s := gameengine.NewFromCards([]card.Card{a, b, c}, nil)
+	s.AppendAura(gameengine.NewPonderAura(2))
 	FireEndOfTurn(s)
 
 	h := s.Hand()
@@ -131,13 +121,11 @@ func TestFireEndOfTurn_PonderPopsDeckTopIntoHand(t *testing.T) {
 	}
 }
 
-// TestFireEndOfTurn_PonderEmptyDeckIsNoOp: the handler skips the draw step
-// silently when the deck is empty — destruction still happens.
+// TestFireEndOfTurn_PonderEmptyDeckIsNoOp.
 func TestFireEndOfTurn_PonderEmptyDeckIsNoOp(t *testing.T) {
-	s := NewTurnState(nil, nil)
-	s.SetAuras(append(s.Auras(), NewPonderAura(1)))
+	s := gameengine.NewFromCards(nil, nil)
+	s.AppendAura(gameengine.NewPonderAura(1))
 	FireEndOfTurn(s)
-
 	if h := s.Hand(); len(h) != 0 {
 		t.Errorf("Hand = %v, want empty (no deck to draw from)", h)
 	}
@@ -146,10 +134,10 @@ func TestFireEndOfTurn_PonderEmptyDeckIsNoOp(t *testing.T) {
 	}
 }
 
-// Tests that Sigil of the Arknight's handler reveals an attack action into ts.Revealed.
+// Tests that Sigil of the Arknight's handler reveals an attack action.
 func TestProcessAurasAtStartOfTurn_RevealsAttackActionIntoHand(t *testing.T) {
-	var play TurnState
-	ResolveChainStep(&play, play.Logger(), &card.CardState{Card: cards.SigilOfTheArknightBlue{}})
+	play := gameengine.New()
+	play.ResolveChainStep(play.Logger(), &card.CardState{Card: cards.SigilOfTheArknightBlue{}})
 	slash := cards.AetherSlashRed{}
 	_, contribs, total, revealed, _ := ProcessAurasAtStartOfTurn(play.Auras(), DeckOf(slash))
 	if total != 0 {
@@ -163,11 +151,10 @@ func TestProcessAurasAtStartOfTurn_RevealsAttackActionIntoHand(t *testing.T) {
 	}
 }
 
-// Tests that the TriggerContribution carries the revealed card so the printout can attribute
-// "drew X into hand" to the specific aura.
+// Tests that the TriggerContribution carries the revealed card.
 func TestProcessAurasAtStartOfTurn_AttributesRevealedToContribution(t *testing.T) {
-	var play TurnState
-	ResolveChainStep(&play, play.Logger(), &card.CardState{Card: cards.SigilOfTheArknightBlue{}})
+	play := gameengine.New()
+	play.ResolveChainStep(play.Logger(), &card.CardState{Card: cards.SigilOfTheArknightBlue{}})
 	slash := cards.AetherSlashRed{}
 	_, contribs, _, _, _ := ProcessAurasAtStartOfTurn(play.Auras(), DeckOf(slash))
 	if len(contribs) != 1 {
@@ -178,12 +165,11 @@ func TestProcessAurasAtStartOfTurn_AttributesRevealedToContribution(t *testing.T
 	}
 }
 
-// TestProcessAurasAtStartOfTurn_CascadingReveals: two Arknight sigil triggers in a row each
-// reveal the current top, so the second sees the NEW top after the first pops its card.
+// TestProcessAurasAtStartOfTurn_CascadingReveals.
 func TestProcessAurasAtStartOfTurn_CascadingReveals(t *testing.T) {
-	var play TurnState
-	ResolveChainStep(&play, play.Logger(), &card.CardState{Card: cards.SigilOfTheArknightBlue{}})
-	ResolveChainStep(&play, play.Logger(), &card.CardState{Card: cards.SigilOfTheArknightBlue{}})
+	play := gameengine.New()
+	play.ResolveChainStep(play.Logger(), &card.CardState{Card: cards.SigilOfTheArknightBlue{}})
+	play.ResolveChainStep(play.Logger(), &card.CardState{Card: cards.SigilOfTheArknightBlue{}})
 	first := cards.AetherSlashRed{}
 	second := cards.ConsumingVolitionRed{}
 	_, _, _, revealed, _ := ProcessAurasAtStartOfTurn(play.Auras(), DeckOf(first, second))
@@ -195,13 +181,11 @@ func TestProcessAurasAtStartOfTurn_CascadingReveals(t *testing.T) {
 	}
 }
 
-// TestProcessAurasAtStartOfTurn_NonAttackActionTopSkipsReveal: the sigil handler peeks a
-// non-attack top → no reveal. The top stays on the deck in the real game.
+// TestProcessAurasAtStartOfTurn_NonAttackActionTopSkipsReveal.
 func TestProcessAurasAtStartOfTurn_NonAttackActionTopSkipsReveal(t *testing.T) {
-	var play TurnState
+	play := gameengine.New()
 	sigil := cards.SigilOfTheArknightBlue{}
-	ResolveChainStep(&play, play.Logger(), &card.CardState{Card: sigil})
-	// Sigil itself is an Aura (non-attack action) — use it as a convenient non-attack top.
+	play.ResolveChainStep(play.Logger(), &card.CardState{Card: sigil})
 	_, _, total, revealed, _ := ProcessAurasAtStartOfTurn(play.Auras(), DeckOf(sigil))
 	if total != 0 {
 		t.Errorf("total = %d, want 0 (non-attack top, no credit)", total)
@@ -211,13 +195,11 @@ func TestProcessAurasAtStartOfTurn_NonAttackActionTopSkipsReveal(t *testing.T) {
 	}
 }
 
-// TestProcessAurasAtStartOfTurn_SigilHitAuthorsLogText: Sigil's handler authors a
-// "drew X into hand" Text on its TriggerContribution, captured from the trigger's
-// TurnState.Log so the format layer can render the line verbatim.
+// TestProcessAurasAtStartOfTurn_SigilHitAuthorsLogText.
 func TestProcessAurasAtStartOfTurn_SigilHitAuthorsLogText(t *testing.T) {
-	var play TurnState
+	play := gameengine.New()
 	sigil := cards.SigilOfTheArknightBlue{}
-	ResolveChainStep(&play, play.Logger(), &card.CardState{Card: sigil})
+	play.ResolveChainStep(play.Logger(), &card.CardState{Card: sigil})
 	_, contribs, _, _, _ := ProcessAurasAtStartOfTurn(play.Auras(), DeckOf(cards.AetherSlashRed{}))
 	if len(contribs) != 1 {
 		t.Fatalf("contribs = %+v, want one entry", contribs)
@@ -228,14 +210,11 @@ func TestProcessAurasAtStartOfTurn_SigilHitAuthorsLogText(t *testing.T) {
 	}
 }
 
-// TestProcessAurasAtStartOfTurn_SigilWhiffStillLogs: the whiff path (top is a non-attack
-// action) authors a "revealed X but didn't draw it" Text so the printout names the card
-// the player saw on top of the deck, not just the hits.
+// TestProcessAurasAtStartOfTurn_SigilWhiffStillLogs.
 func TestProcessAurasAtStartOfTurn_SigilWhiffStillLogs(t *testing.T) {
-	var play TurnState
+	play := gameengine.New()
 	sigil := cards.SigilOfTheArknightBlue{}
-	ResolveChainStep(&play, play.Logger(), &card.CardState{Card: sigil})
-	// Sigil itself is a non-attack action — convenient whiff top.
+	play.ResolveChainStep(play.Logger(), &card.CardState{Card: sigil})
 	_, contribs, _, _, _ := ProcessAurasAtStartOfTurn(play.Auras(), DeckOf(sigil))
 	if len(contribs) != 1 {
 		t.Fatalf("contribs = %+v, want one entry", contribs)
@@ -247,7 +226,7 @@ func TestProcessAurasAtStartOfTurn_SigilWhiffStillLogs(t *testing.T) {
 }
 
 // Tests that Evaluate surfaces a start-of-turn trigger as a TriggersFromLastTurn entry on
-// the best-scoring hand and lists the source aura under StartOfTurnAuras.
+// the best-scoring hand.
 func TestEvaluate_TriggersFromLastTurnSurfacesInBest(t *testing.T) {
 	blessing := cards.BlessingOfOccultRed{}
 	slash := cards.AetherSlashRed{}
@@ -269,9 +248,6 @@ func TestEvaluate_TriggersFromLastTurnSurfacesInBest(t *testing.T) {
 		t.Errorf("Stats.Best.Summary.TriggersFromLastTurn is empty; Best.Value=%d",
 			stats.Best.Summary.Value)
 	}
-	// The best-turn snapshot must also list Blessing under StartOfTurnAuras — Blessing
-	// registers a carryover Aura on the turn it's played, and the best-scoring turn
-	// is the one where that trigger fires, so the aura has to be in play at the top.
 	foundBlessing := false
 	for _, a := range stats.Best.Summary.StartOfTurnAuras {
 		if a.ID() == ids.BlessingOfOccultRed {
@@ -285,28 +261,25 @@ func TestEvaluate_TriggersFromLastTurnSurfacesInBest(t *testing.T) {
 	}
 }
 
-// Tests that the OncePerTurn FiredThisTurn flag is cleared at every turn boundary so the
-// trigger can fire again next turn (no Count tick during re-arm).
+// Tests that the OncePerTurn FiredThisTurn flag is cleared at every turn boundary.
 func TestProcessAurasAtStartOfTurn_ReArmsOncePerTurnGate(t *testing.T) {
 	aura := testutils.RedAttack{}
-	exhausted := Aura{
-
-		TriggerType: TriggerAttackAction,
-		Handler: func(card.GameEngine, card.Logger, card.Aura) {
-		},
-		Self:          CardOrTokenType{Card: aura},
-		Count:         2,
-		OncePerTurn:   true,
-		FiredThisTurn: true,
-	}
-	survivors, _, _, _, _ := ProcessAurasAtStartOfTurn([]Aura{exhausted}, DeckOf())
+	exhausted := gameengine.NewCardAura(
+		&card.CardState{Card: aura},
+		gameengine.TriggerAttackAction,
+		func(card.GameEngine, card.Logger, card.Aura) {},
+		2,
+		true,
+	)
+	exhausted.SetFiredThisTurn(true)
+	survivors, _, _, _, _ := ProcessAurasAtStartOfTurn([]gameengine.Aura{exhausted}, DeckOf())
 	if len(survivors) != 1 {
 		t.Fatalf("survivors len = %d, want 1 (AttackAction trigger passes through)", len(survivors))
 	}
-	if survivors[0].FiredThisTurn {
+	if survivors[0].FiredThisTurn() {
 		t.Errorf("FiredThisTurn = true, want false (turn-boundary reset)")
 	}
-	if survivors[0].Count != 2 {
-		t.Errorf("Count = %d, want 2 (only re-arm; don't tick)", survivors[0].Count)
+	if survivors[0].Count() != 2 {
+		t.Errorf("Count = %d, want 2 (only re-arm; don't tick)", survivors[0].Count())
 	}
 }

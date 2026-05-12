@@ -1,12 +1,13 @@
 package turntests
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
 	"testing"
 
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
+
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/gameengine"
 )
 
 // TestSunKiss_SoloIsHealOnly: with no Moon Wish in CardsPlayed the printed health-gain
@@ -22,9 +23,9 @@ func TestSunKiss_SoloIsHealOnly(t *testing.T) {
 		{cards.SunKissBlue{}, 1},
 	}
 	for _, tc := range cases {
-		s := sim.NewTurnStateFromCards([]card.Card{testutils.GenericAttack(0, 0)}, nil)
+		s := gameengine.NewFromCards([]card.Card{testutils.GenericAttack(0, 0)}, nil)
 		self := &card.CardState{Card: tc.c}
-		sim.ResolveChainStep(s, s.Logger(), self)
+		s.ResolveChainStep(s.Logger(), self)
 		got := s.Value()
 		if got != tc.heal {
 			t.Errorf("%s: solo Play() = %d, want %d", tc.c.Name(), got, tc.heal)
@@ -51,10 +52,10 @@ func TestSunKiss_SynergyFiresOnPriorMoonWish(t *testing.T) {
 			{cards.SunKissYellow{}, 2},
 			{cards.SunKissBlue{}, 1},
 		} {
-			s := sim.NewTurnStateFromCards([]card.Card{testutils.GenericAttack(0, 0)}, nil)
+			s := gameengine.NewFromCards([]card.Card{testutils.GenericAttack(0, 0)}, nil)
 			s.SetCardsPlayed([]card.Card{mw})
 			self := &card.CardState{Card: sk.c}
-			sim.ResolveChainStep(s, s.Logger(), self)
+			s.ResolveChainStep(s.Logger(), self)
 			got := s.Value()
 			if got != sk.heal {
 				t.Errorf("%s after %s: Play() = %d, want %d (synergy still credits printed heal)",
@@ -74,10 +75,10 @@ func TestSunKiss_SynergyFiresOnPriorMoonWish(t *testing.T) {
 // Tests that the Sun Kiss synergy only fires on a Moon Wish printing, not any prior attack.
 func TestSunKiss_SynergyDoesNotFireOnUnrelatedAttacks(t *testing.T) {
 	notMoonWish := testutils.GenericAttackPitch(0, 0, 1)
-	s := sim.NewTurnStateFromCards([]card.Card{testutils.GenericAttack(0, 0)}, nil)
+	s := gameengine.NewFromCards([]card.Card{testutils.GenericAttack(0, 0)}, nil)
 	s.SetCardsPlayed([]card.Card{notMoonWish})
 	self := &card.CardState{Card: cards.SunKissRed{}}
-	sim.ResolveChainStep(s, s.Logger(), self)
+	s.ResolveChainStep(s.Logger(), self)
 	got := s.Value()
 	if got != 3 {
 		t.Errorf("Play() = %d, want 3 (printed heal only)", got)
@@ -94,12 +95,12 @@ func TestSunKiss_SynergyDoesNotFireOnUnrelatedAttacks(t *testing.T) {
 // resolves, the synergy still grants go-again but the draw silently no-ops (DrawOne contract).
 // Guards against a future regression that panics on Deck[0] read with no top.
 func TestSunKiss_SynergyHandlesEmptyDeck(t *testing.T) {
-	s := sim.NewTurnStatePtr(sim.TurnStateSpec{
+	s := gameengine.NewFromSpec(gameengine.Spec{
 		CardsPlayed: []card.Card{cards.MoonWishRed{}},
 		// Deck intentionally nil.
 	})
 	self := &card.CardState{Card: cards.SunKissRed{}}
-	sim.ResolveChainStep(s, s.Logger(), self)
+	s.ResolveChainStep(s.Logger(), self)
 	got := s.Value()
 	if got != 3 {
 		t.Errorf("Play() = %d, want 3", got)

@@ -1,12 +1,13 @@
 package turntests
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
 	"testing"
 
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
+
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/gameengine"
 )
 
 var ferventForerunnerVariants = []card.Card{
@@ -26,7 +27,6 @@ func TestFerventForerunner_BaseGoAgainFalse(t *testing.T) {
 
 // Tests that the on-hit Opt 2 fires only when EffectiveAttack lands in the 1/4/7 window.
 func TestFerventForerunner_OnHitOptFiresOnlyWhenInHitWindow(t *testing.T) {
-	defer testutils.SwapCurrentHero(testutils.Hero{})()
 
 	a, b := testutils.NewStubCard("a"), testutils.NewStubCard("b")
 	cases := []struct {
@@ -39,9 +39,9 @@ func TestFerventForerunner_OnHitOptFiresOnlyWhenInHitWindow(t *testing.T) {
 		{cards.FerventForerunnerBlue{}, true, 1},
 	}
 	for _, tc := range cases {
-		s := sim.NewTurnStateFromCards([]card.Card{a, b}, nil)
+		s := gameengine.NewFromCards([]card.Card{a, b}, nil)
 		cs := &card.CardState{Card: tc.c}
-		sim.ResolveChainStep(s, s.Logger(), cs)
+		s.ResolveChainStep(s.Logger(), cs)
 		testutils.FireOnHitIfLikely(s, s.Logger(), cs)
 		if s.Value() != tc.printed {
 			t.Errorf("%s: Play() Value = %d, want %d (printed power)",
@@ -67,13 +67,12 @@ func TestFerventForerunner_OnHitOptFiresOnlyWhenInHitWindow(t *testing.T) {
 // Tests that a +1{p} grant bumps Red's effective power into the 1/4/7 hit window, firing
 // the on-hit Opt 2.
 func TestFerventForerunner_OnHitOptFiresWithBonusAttackInWindow(t *testing.T) {
-	defer testutils.SwapCurrentHero(testutils.Hero{})()
 
 	a, b := testutils.NewStubCard("a"), testutils.NewStubCard("b")
 	c := cards.FerventForerunnerRed{}
-	s := sim.NewTurnStateFromCards([]card.Card{a, b}, nil)
+	s := gameengine.NewFromCards([]card.Card{a, b}, nil)
 	cs := &card.CardState{Card: c, BonusAttack: 1}
-	sim.ResolveChainStep(s, s.Logger(), cs)
+	s.ResolveChainStep(s.Logger(), cs)
 	testutils.FireOnHitIfLikely(s, s.Logger(), cs)
 	want := 3 + 1
 	if s.Value() != want {

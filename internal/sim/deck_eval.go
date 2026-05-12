@@ -15,6 +15,8 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/gameengine"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/turnlogger"
 )
 
 // Evaluate simulates `runs` shuffles of d. Each run assembles successive hands of
@@ -91,8 +93,7 @@ func meanStandardError(stats *DeckStats) float64 {
 }
 
 func (ev *Evaluator) evaluateImpl(d *deck.Deck, maxRuns int, mp Matchup, rng *rand.Rand, stop shuffleStopper) DeckStats {
-	SetCurrentHero(d.Hero.(Hero))
-	handSize := d.Hero.(Hero).Intelligence()
+	handSize := d.Hero.(gameengine.Hero).Intelligence()
 	deckSize := d.Size()
 	if handSize <= 0 || deckSize < handSize {
 		return DeckStats{}
@@ -211,8 +212,8 @@ type shuffleScratch struct {
 	weaponsBuf                      []Weapon
 	handBuf                         []card.Card
 	heldBuf, nextHeld               []card.Card
-	auraTriggerBuf, nextAuraTrigger []Aura
-	itemBuf, nextItem               []Item
+	auraTriggerBuf, nextAuraTrigger []gameengine.Aura
+	itemBuf, nextItem               []gameengine.Item
 	banishBuf, nextBanish           []card.Card
 	graveyardBuf, nextGraveyard     []card.Card
 	presentBuf                      []bool
@@ -229,10 +230,10 @@ func newShuffleScratch(weaponCount, deckSize, handSize, numUniqueIDs int) *shuff
 		handBuf:         make([]card.Card, handSize, handSize+startOfTurnRevealRoom),
 		heldBuf:         make([]card.Card, 0, handSize),
 		nextHeld:        make([]card.Card, 0, handSize),
-		auraTriggerBuf:  make([]Aura, 0, handSize),
-		nextAuraTrigger: make([]Aura, 0, handSize),
-		itemBuf:         make([]Item, 0, 4),
-		nextItem:        make([]Item, 0, 4),
+		auraTriggerBuf:  make([]gameengine.Aura, 0, handSize),
+		nextAuraTrigger: make([]gameengine.Aura, 0, handSize),
+		itemBuf:         make([]gameengine.Item, 0, 4),
+		nextItem:        make([]gameengine.Item, 0, 4),
 		banishBuf:       make([]card.Card, 0, 4),
 		nextBanish:      make([]card.Card, 0, 4),
 		graveyardBuf:    make([]card.Card, 0, deckSize),
@@ -254,7 +255,7 @@ func runOneShuffle(master *deck.Deck, scratch *shuffleScratch, stats *DeckStats,
 	d := master.Copy()
 	d.Shuffle(rng)
 
-	hero := d.Hero.(Hero)
+	hero := d.Hero.(gameengine.Hero)
 	weapons := scratch.weaponsBuf
 	for i, w := range d.Weapons {
 		weapons[i] = w.(Weapon)
@@ -287,8 +288,8 @@ func runOneShuffle(master *deck.Deck, scratch *shuffleScratch, stats *DeckStats,
 		for i, c := range drawn {
 			h[len(heldBuf)+i] = c.(card.Card)
 		}
-		startingAuras := append([]Aura(nil), auraTriggerBuf...)
-		startingItems := append([]Item(nil), itemBuf...)
+		startingAuras := append([]gameengine.Aura(nil), auraTriggerBuf...)
+		startingItems := append([]gameengine.Item(nil), itemBuf...)
 		startOfTurnAuras := snapshotStartOfTurnAuras(auraTriggerBuf)
 		dealtHand := append([]card.Card(nil), h...)
 		// processAurasAtStartOfTurn drives the deck through PopDeckTop on reveal-handling
@@ -303,7 +304,15 @@ func runOneShuffle(master *deck.Deck, scratch *shuffleScratch, stats *DeckStats,
 		}
 		arsenalIn := arsenalCard
 		sortHandByID(h)
-		play := runBestForTurn(hero, weapons, h, mp, d, TurnState{Arsenal: arsenalCard, auras: auraTriggerBuf, Items: itemBuf, banished: banishBuf, graveyard: graveyardBuf, opponentMarked: opponentMarked}, ev)
+		play := runBestForTurn(hero, weapons, h, mp, d, gameengine.Spec{
+			Hero:           hero,
+			Arsenal:        arsenalCard,
+			Auras:          auraTriggerBuf,
+			Items:          itemBuf,
+			Banished:       banishBuf,
+			Graveyard:      graveyardBuf,
+			OpponentMarked: opponentMarked,
+		}, ev)
 		arsenalCard = play.State.Arsenal
 		play.Value += trigDamage
 		play.TriggersFromLastTurn = trigContribs
@@ -311,7 +320,15 @@ func runOneShuffle(master *deck.Deck, scratch *shuffleScratch, stats *DeckStats,
 		play.DealtHand = dealtHand
 
 		if recordTurnStats(stats, play, handIdx, handsPerCycle) {
-			replay := replayBestForTurnWithLog(hero, weapons, h, mp, d, TurnState{Arsenal: arsenalIn, auras: auraTriggerBuf, Items: itemBuf, banished: banishBuf, graveyard: graveyardBuf, opponentMarked: opponentMarked}, ev)
+			replay := replayBestForTurnWithLog(hero, weapons, h, mp, d, gameengine.Spec{
+				Hero:           hero,
+				Arsenal:        arsenalIn,
+				Auras:          auraTriggerBuf,
+				Items:          itemBuf,
+				Banished:       banishBuf,
+				Graveyard:      graveyardBuf,
+				OpponentMarked: opponentMarked,
+			}, ev)
 			replay.Value = play.Value
 			replay.TriggersFromLastTurn = trigContribs
 			replay.StartOfTurnAuras = startOfTurnAuras
@@ -389,14 +406,14 @@ func finalizeBestTurnLog(stats *DeckStats) {
 // processAurasAtStartOfTurn fires and potentially destroys any. Token-style auras
 // (Runechants, …) are skipped: the formatter renders them separately. Returns nil when
 // the queue holds no card auras.
-func snapshotStartOfTurnAuras(queued []Aura) []card.Card {
+func snapshotStartOfTurnAuras(queued []gameengine.Aura) []card.Card {
 	if len(queued) == 0 {
 		return nil
 	}
 	var out []card.Card
 	for _, t := range queued {
-		if t.Self.Card != nil {
-			out = append(out, t.Self.Card)
+		if c := t.SourceCard(); c != nil {
+			out = append(out, c)
 		}
 	}
 	return out
@@ -406,12 +423,12 @@ func snapshotStartOfTurnAuras(queued []Aura) []card.Card {
 // returned TurnSummary has State.Log empty; replayBestForTurnWithLog re-runs with full
 // Log materialisation when a turn becomes the new deck-best.
 func runBestForTurn(
-	hero Hero,
+	hero gameengine.Hero,
 	weapons []Weapon,
 	h []card.Card,
 	mp Matchup,
 	d *deck.Deck,
-	prior TurnState,
+	prior gameengine.Spec,
 	ev *Evaluator,
 ) TurnSummary {
 	return ev.BestSkipLog(hero, weapons, h, mp, d, prior)
@@ -423,12 +440,12 @@ func runBestForTurn(
 // run, plus a fully populated State.Log. Used only when a turn becomes the new deck-best,
 // so the replay cost amortises across the bulk of turns that don't.
 func replayBestForTurnWithLog(
-	hero Hero,
+	hero gameengine.Hero,
 	weapons []Weapon,
 	h []card.Card,
 	mp Matchup,
 	d *deck.Deck,
-	prior TurnState,
+	prior gameengine.Spec,
 	ev *Evaluator,
 ) TurnSummary {
 	return ev.Best(hero, weapons, h, mp, d, prior)
@@ -485,8 +502,8 @@ const startOfTurnRevealRoom = 8
 //
 // Cascading reveals: a handler that pops s.Deck shrinks the view for the next handler, so
 // two reveal-capable auras see distinct tops.
-func processAurasAtStartOfTurn(queued []Aura, d *deck.Deck) (
-	survivors []Aura,
+func processAurasAtStartOfTurn(queued []gameengine.Aura, d *deck.Deck) (
+	survivors []gameengine.Aura,
 	contribs []TriggerContribution,
 	damage int,
 	revealed []card.Card,
@@ -495,57 +512,45 @@ func processAurasAtStartOfTurn(queued []Aura, d *deck.Deck) (
 	if len(queued) == 0 {
 		return queued[:0], nil, 0, nil, nil
 	}
-	// Start-of-turn trigger seed starts cacheable; reveal handlers like Sigil of the
-	// Arknight will flip it via PopDeckTop, which mutates the eval-loop deck d directly.
-	// The cacheable result isn't currently consumed (callers don't read ts.IsCacheable)
-	// but routing through NewTurnState keeps the per-state semantics consistent with
-	// the rest of the framework. Adopting queued onto ts.auras lets handlers'
-	// s.DestroyAura splice the live list directly.
-	ts := NewTurnState(d, nil)
-	ts.auras = queued
-	for i := 0; i < len(ts.auras); {
-		a := &ts.auras[i]
-		// Re-arm the OncePerTurn gate before the start-of-turn fire so handlers that read
-		// FiredThisTurn see the cleared state.
-		a.FiredThisTurn = false
-		if a.TriggerType != TriggerStartOfTurn {
-			i++
-			continue
-		}
-		self := a.Self.Card
-		preHand := len(ts.hand)
-		preLog := len(ts.logger.Entries())
-		preValue := ts.value
-		ts.currentAuraIdx = i
-		ts.currentAuraDestroyed = false
-		ctx := auraCtx{a: a, s: ts}
-		a.Handler(ts, ts.logger, &ctx)
-		ts.currentAuraIdx = -1
-		d := ts.value - preValue
-		damage += d
-		// Attribute any newly-drawn card to this trigger so the best-turn printout can
-		// show what the handler drew (e.g. Sigil of the Arknight: "drew X into hand"). Taking
-		// ts.hand[preHand] instead of counting from the end handles cascading draws where
-		// a later handler also draws — each trigger sees its own first-drawn card.
-		var rev card.Card
-		if len(ts.hand) > preHand {
-			rev = ts.hand[preHand]
-		}
-		// Capture the handler's first authored log line, if any — Text takes precedence
-		// over the inferred "drew X into hand" / "START OF ACTION PHASE" suffix at format
-		// time so cards can fully own their printout wording.
-		var text string
-		if entries := ts.logger.Entries(); len(entries) > preLog {
-			text = entries[preLog].Text
-		}
-		contribs = append(contribs, TriggerContribution{Card: self, Damage: d, Revealed: rev, Text: text})
-		// Advance the cursor unless the handler destroyed its own aura. When it did, the
-		// next entry shifted into position i, so the cursor stays put.
-		if !ts.currentAuraDestroyed {
-			i++
+	// Drive a fresh engine over the queued aura list. Reveal handlers (Sigil of the
+	// Arknight) read the deck via PopDeckTop, which mutates d in place. Adopting queued
+	// onto the engine's aura list lets handlers' Destroy splice the live list directly.
+	g := gameengine.New()
+	g.Reset(gameengine.PermutationSeed{
+		Deck:   d,
+		Auras:  queued,
+		Logger: g.Logger(),
+	})
+	// Walk queued in lockstep with FireStartOfTurn's callback: FireStartOfTurn visits
+	// auras in g.auras order, firing each TriggerStartOfTurn entry. We pre-capture each
+	// firing aura's SourceCard so the contribution carries source identity even after
+	// the aura destroys itself (and disappears from g.auras).
+	sourceByFireIdx := make([]card.Card, 0, len(queued))
+	for _, a := range queued {
+		if a.TriggerType() == gameengine.TriggerStartOfTurn {
+			sourceByFireIdx = append(sourceByFireIdx, a.SourceCard())
 		}
 	}
-	return ts.auras, contribs, damage, ts.hand, ts.graveyard
+	fireIdx := 0
+	g.FireStartOfTurn(func(_, dmg int, drawn card.Card, newEntries []turnlogger.LogEntry) {
+		var text string
+		if len(newEntries) > 0 {
+			text = newEntries[0].Text
+		}
+		var src card.Card
+		if fireIdx < len(sourceByFireIdx) {
+			src = sourceByFireIdx[fireIdx]
+		}
+		contribs = append(contribs, TriggerContribution{
+			Card:     src,
+			Damage:   dmg,
+			Revealed: drawn,
+			Text:     text,
+		})
+		damage += dmg
+		fireIdx++
+	})
+	return g.Auras(), contribs, damage, g.HandRaw(), append([]card.Card(nil), g.GraveyardRaw()...)
 }
 
 // pitchedFromBestLine returns the cards in BestLine assigned the Pitch role (excluding the
@@ -597,7 +602,7 @@ func sortHandByID(hand []card.Card) {
 // the next call, so retaining them directly would let a later evaluation mutate the saved
 // peak. Nil-length slices skip the clone so the captured TurnSummary holds nil rather
 // than a zero-length allocation.
-func recordBestTurn(stats *DeckStats, play TurnSummary, startingAuras []Aura, startingItems []Item) {
+func recordBestTurn(stats *DeckStats, play TurnSummary, startingAuras []gameengine.Aura, startingItems []gameengine.Item) {
 	lineCopy := make([]CardAssignment, len(play.BestLine))
 	copy(lineCopy, play.BestLine)
 	var swungCopy []string

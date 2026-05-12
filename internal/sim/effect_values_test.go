@@ -4,18 +4,19 @@ import (
 	"testing"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/gameengine"
 )
 
 // Tests that without Dominate only 1/4/7 damage are treated as likely-to-hit.
 func TestLikelyDamageHits_OnlyAwkwardAmounts(t *testing.T) {
 	for _, n := range []int{1, 4, 7} {
-		if !LikelyDamageHits(n, false) {
-			t.Errorf("LikelyDamageHits(%d, false) = false, want true (awkward amount)", n)
+		if !gameengine.LikelyDamageHits(n, false) {
+			t.Errorf("gameengine.LikelyDamageHits(%d, false) = false, want true (awkward amount)", n)
 		}
 	}
 	for _, n := range []int{0, 2, 3, 5, 6, 8, 10} {
-		if LikelyDamageHits(n, false) {
-			t.Errorf("LikelyDamageHits(%d, false) = true, want false", n)
+		if gameengine.LikelyDamageHits(n, false) {
+			t.Errorf("gameengine.LikelyDamageHits(%d, false) = true, want false", n)
 		}
 	}
 }
@@ -23,14 +24,14 @@ func TestLikelyDamageHits_OnlyAwkwardAmounts(t *testing.T) {
 // Tests that Dominate makes 5+ power likely-to-hit; 0/2/3 stay blockable.
 func TestLikelyDamageHits_DominateClearsFive(t *testing.T) {
 	for _, n := range []int{5, 6, 8, 10} {
-		if !LikelyDamageHits(n, true) {
-			t.Errorf("LikelyDamageHits(%d, true) = false, want true (dominate 5+)", n)
+		if !gameengine.LikelyDamageHits(n, true) {
+			t.Errorf("gameengine.LikelyDamageHits(%d, true) = false, want true (dominate 5+)", n)
 		}
 	}
 	// Still-blockable amounts under Dominate: 2 and 3 don't clear a single 3-block.
 	for _, n := range []int{0, 2, 3} {
-		if LikelyDamageHits(n, true) {
-			t.Errorf("LikelyDamageHits(%d, true) = true, want false", n)
+		if gameengine.LikelyDamageHits(n, true) {
+			t.Errorf("gameengine.LikelyDamageHits(%d, true) = true, want false", n)
 		}
 	}
 }
@@ -61,8 +62,8 @@ func TestLikelyToHit_FoldsEffectiveAttackAndDominate(t *testing.T) {
 			c = DominatingFakeCard{FakeCard: base}
 		}
 		p := &card.CardState{Card: c, BonusAttack: tc.bonusAttack, GrantedDominate: tc.grantedDom}
-		if got := LikelyToHit(p); got != tc.want {
-			t.Errorf("%s: LikelyToHit() = %v, want %v", tc.name, got, tc.want)
+		if got := gameengine.LikelyToHit(p); got != tc.want {
+			t.Errorf("%s: gameengine.LikelyToHit() = %v, want %v", tc.name, got, tc.want)
 		}
 	}
 }

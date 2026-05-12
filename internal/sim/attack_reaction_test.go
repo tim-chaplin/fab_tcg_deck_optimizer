@@ -5,10 +5,11 @@ import (
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/gameengine"
 )
 
 // stubAR is a minimal Card + AttackReaction stub. The unit tests exercise
-// CardState.GrantAttackReactionBuff's bookkeeping; ARTargetAllowed is consulted by the chain runner.
+// CardState.GrantAttackReactionBuff's bookkeeping.
 type stubAR struct{}
 
 func (stubAR) ID() ids.CardID           { return ids.InvalidCard }
@@ -43,8 +44,8 @@ func (stubAttack) Play(card.GameEngine, card.Logger, *card.CardState) {}
 
 // Tests that GrantAttackReactionBuff is a no-op when no target is set.
 func TestGrantAttackReactionBuff_NoTargetIsNoOp(t *testing.T) {
-	s := TurnState{}
-	(&card.CardState{Card: stubAR{}}).GrantAttackReactionBuff(&s, s.Logger(), 5)
+	s := gameengine.New()
+	(&card.CardState{Card: stubAR{}}).GrantAttackReactionBuff(s, s.Logger(), 5)
 	if s.Value() != 0 {
 		t.Errorf("Value = %d, want 0", s.Value())
 	}
@@ -54,9 +55,9 @@ func TestGrantAttackReactionBuff_NoTargetIsNoOp(t *testing.T) {
 // target's chain-step log delta.
 func TestGrantAttackReactionBuff_AppliesBuffAndCreditsValue(t *testing.T) {
 	target := &card.CardState{Card: stubAttack{}}
-	s := NewTurnStateFromSpec(TurnStateSpec{AttackReactionTarget: target})
-	s.logger.AppendChainStep("stubAttack: ATTACK", 1)
-	(&card.CardState{Card: stubAR{}}).GrantAttackReactionBuff(&s, s.Logger(), 3)
+	s := gameengine.NewFromSpec(gameengine.Spec{AttackReactionTarget: target})
+	s.Logger().AppendChainStep("stubAttack: ATTACK", 1)
+	(&card.CardState{Card: stubAR{}}).GrantAttackReactionBuff(s, s.Logger(), 3)
 	if target.BonusAttack != 3 {
 		t.Errorf("target BonusAttack = %d, want 3", target.BonusAttack)
 	}
@@ -71,9 +72,9 @@ func TestGrantAttackReactionBuff_AppliesBuffAndCreditsValue(t *testing.T) {
 // Tests that AmendLastChainStepN skips non-chain-step entries to find the most recent
 // chain-step.
 func TestAmendLastChainStepN_SkipsNonChainEntries(t *testing.T) {
-	s := NewTurnStateFromSpec(TurnStateSpec{})
-	s.logger.AppendChainStep("first", 2)
-	s.logger.AppendPostTrigger("first", "rider", 0)
+	s := gameengine.New()
+	s.Logger().AppendChainStep("first", 2)
+	s.Logger().AppendPostTrigger("first", "rider", 0)
 	s.Logger().AmendLastChainStepN(5)
 	entries := s.LogEntries()
 	if got := entries[0].N; got != 7 {

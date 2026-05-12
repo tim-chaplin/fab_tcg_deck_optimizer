@@ -1,11 +1,12 @@
 package turntests
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
 	"testing"
 
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
+
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/gameengine"
 )
 
 // LikelyDamageHits is true at 1/4/7 or 5+ with dominate. Of printed powers (Red 3, Yellow 2,
@@ -21,9 +22,9 @@ func TestOverload_OnHitGoAgainEagerByLikelyToHit(t *testing.T) {
 		{cards.OverloadBlue{}, 1, true},
 	}
 	for _, tc := range cases {
-		s := sim.TurnState{}
+		s := gameengine.New()
 		self := &card.CardState{Card: tc.c}
-		sim.ResolveChainStep(&s, s.Logger(), self)
+		s.ResolveChainStep(s.Logger(), self)
 		if got := s.Value(); got != tc.wantDmg {
 			t.Errorf("%s: Play() Value = %d, want %d", tc.c.Name(), got, tc.wantDmg)
 		}
@@ -46,9 +47,9 @@ func TestOverload_BonusAttackPushesIntoHitWindow(t *testing.T) {
 		{2}, // Red 3 + 2 = 5 with dominate → hit window
 	}
 	for _, tc := range cases {
-		s := sim.TurnState{}
+		s := gameengine.New()
 		self := &card.CardState{Card: cards.OverloadRed{}, BonusAttack: tc.bonus}
-		sim.ResolveChainStep(&s, s.Logger(), self)
+		s.ResolveChainStep(s.Logger(), self)
 		if !self.GrantedGoAgain {
 			t.Errorf("Red + BonusAttack %d: GrantedGoAgain = false, want true", tc.bonus)
 		}

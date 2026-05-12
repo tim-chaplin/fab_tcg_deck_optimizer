@@ -1,18 +1,19 @@
 package turntests
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
 	"testing"
 
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
+
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/gameengine"
 )
 
 // Tests that Memorial Ground with no eligible card in the graveyard leaves the deck empty.
 func TestMemorialGround_NoEligibleNoOp(t *testing.T) {
-	s := sim.NewTurnStateFromCards(nil, nil)
-	sim.ResolveChainStep(s, s.Logger(), &card.CardState{Card: cards.MemorialGroundRed{}})
+	s := gameengine.NewFromCards(nil, nil)
+	s.ResolveChainStep(s.Logger(), &card.CardState{Card: cards.MemorialGroundRed{}})
 	if s.Deck().Size() != 0 {
 		t.Errorf("deck size = %d, want 0 (no eligible recycle target)", s.Deck().Size())
 	}
@@ -23,8 +24,8 @@ func TestMemorialGround_NoEligibleNoOp(t *testing.T) {
 func TestMemorialGround_RecyclesEligibleAttackActionToTop(t *testing.T) {
 	target := testutils.GenericAttack(2, 4)
 	deck := []card.Card{testutils.BlueAttack{}}
-	s := sim.NewTurnStateFromCards(deck, []card.Card{target})
-	sim.ResolveChainStep(s, s.Logger(), &card.CardState{Card: cards.MemorialGroundRed{}})
+	s := gameengine.NewFromCards(deck, []card.Card{target})
+	s.ResolveChainStep(s.Logger(), &card.CardState{Card: cards.MemorialGroundRed{}})
 	if got := s.Deck().Size(); got != 2 {
 		t.Errorf("deck size after recycle = %d, want 2 (target moved onto the existing top)", got)
 	}
@@ -39,8 +40,8 @@ func TestMemorialGround_RecyclesEligibleAttackActionToTop(t *testing.T) {
 // Tests that a graveyard with only an over-cost or non-attack-action card leaves Memorial
 // Ground unable to recycle.
 func TestMemorialGround_IgnoresIneligibleCards(t *testing.T) {
-	s := sim.NewTurnStateFromCards(nil, []card.Card{testutils.GenericAttack(3, 5), testutils.GenericAction()})
-	sim.ResolveChainStep(s, s.Logger(), &card.CardState{Card: cards.MemorialGroundRed{}})
+	s := gameengine.NewFromCards(nil, []card.Card{testutils.GenericAttack(3, 5), testutils.GenericAction()})
+	s.ResolveChainStep(s.Logger(), &card.CardState{Card: cards.MemorialGroundRed{}})
 	if s.Deck().Size() != 0 {
 		t.Errorf("deck size = %d, want 0 (no eligible target)", s.Deck().Size())
 	}

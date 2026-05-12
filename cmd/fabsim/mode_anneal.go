@@ -17,6 +17,7 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/mydecks"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/gameengine"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/registry"
 )
 
@@ -64,7 +65,7 @@ func (c annealConfig) legalFilter() func(deck.Card) bool {
 // defaultDeckNameFor returns the deck name when -deck isn't supplied, keyed by hero, format, and
 // -incoming. Different regimes produce different optimal decks, so each gets its own file to
 // avoid hill-climbing one regime's best under another regime's objective.
-func defaultDeckNameFor(h sim.Hero, f deckformat.Format, incoming int) string {
+func defaultDeckNameFor(h gameengine.Hero, f deckformat.Format, incoming int) string {
 	return fmt.Sprintf("%s_%s_%d_incoming", strings.ToLower(h.Name()), f, incoming)
 }
 
@@ -102,7 +103,7 @@ func runAnnealCmd(args []string) {
 		die("%v", err)
 	}
 
-	sim.OptDebug = *debug
+	gameengine.OptDebug = *debug
 
 	// -finalize bundles the high-precision overrides — pinned shuffle count plus a tighter
 	// noise floor so sub-0.1 wins land that the default 0.1 -min-improvement gate would reject.

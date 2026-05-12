@@ -1,18 +1,19 @@
 package turntests
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
 	"testing"
 
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
+
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/gameengine"
 )
 
 // Tests that Runic Reaping with no following attack-action target lands no riders.
 func TestRunicReaping_NoNextAttackReturnsZero(t *testing.T) {
-	var s sim.TurnState
-	(cards.RunicReapingRed{}).Play(&s, s.Logger(), &card.CardState{
+	s := gameengine.New()
+	(cards.RunicReapingRed{}).Play(s, s.Logger(), &card.CardState{
 		Card:          cards.RunicReapingRed{},
 		PitchedToPlay: []card.Card{testutils.AttackWithPower{Power: 4}},
 	})
@@ -27,8 +28,8 @@ func TestRunicReaping_NoNextAttackReturnsZero(t *testing.T) {
 // Tests that a Runeblade weapon as the next attack does not satisfy either rider.
 func TestRunicReaping_WeaponNextDoesNotQualify(t *testing.T) {
 	target := &card.CardState{Card: testutils.RunebladeWeapon{}}
-	s := sim.NewTurnStateFromSpec(sim.TurnStateSpec{CardsRemaining: []*card.CardState{target}})
-	sim.ResolveChainStep(&s, s.Logger(), &card.CardState{Card: cards.RunicReapingRed{}})
+	s := gameengine.NewFromSpec(gameengine.Spec{CardsRemaining: []*card.CardState{target}})
+	s.ResolveChainStep(s.Logger(), &card.CardState{Card: cards.RunicReapingRed{}})
 	if got := s.Value(); got != 0 {
 		t.Fatalf("Play() = %d, want 0", got)
 	}
@@ -44,8 +45,8 @@ func TestRunicReaping_WeaponNextDoesNotQualify(t *testing.T) {
 // on-hit trigger.
 func TestRunicReaping_RegistersTriggerAndGrantsPitchedAttackBonus(t *testing.T) {
 	target := &card.CardState{Card: testutils.AttackWithPower{Power: 3}}
-	s := sim.NewTurnStateFromSpec(sim.TurnStateSpec{CardsRemaining: []*card.CardState{target}})
-	(cards.RunicReapingRed{}).Play(&s, s.Logger(), &card.CardState{
+	s := gameengine.NewFromSpec(gameengine.Spec{CardsRemaining: []*card.CardState{target}})
+	(cards.RunicReapingRed{}).Play(s, s.Logger(), &card.CardState{
 		Card:          cards.RunicReapingRed{},
 		PitchedToPlay: []card.Card{testutils.RunebladeAttack{}},
 	})
@@ -64,8 +65,8 @@ func TestRunicReaping_RegistersTriggerAndGrantsPitchedAttackBonus(t *testing.T) 
 // still registers.
 func TestRunicReaping_NoPitchedAttackSkipsBonusButRegistersTrigger(t *testing.T) {
 	target := &card.CardState{Card: testutils.AttackWithPower{Power: 4}}
-	s := sim.NewTurnStateFromSpec(sim.TurnStateSpec{CardsRemaining: []*card.CardState{target}})
-	(cards.RunicReapingRed{}).Play(&s, s.Logger(), &card.CardState{
+	s := gameengine.NewFromSpec(gameengine.Spec{CardsRemaining: []*card.CardState{target}})
+	(cards.RunicReapingRed{}).Play(s, s.Logger(), &card.CardState{
 		Card:          cards.RunicReapingRed{},
 		PitchedToPlay: []card.Card{testutils.NonAttack{}},
 	})

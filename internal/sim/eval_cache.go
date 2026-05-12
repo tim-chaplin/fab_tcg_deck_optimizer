@@ -21,6 +21,7 @@ import (
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/gameengine"
 )
 
 // maxCachedHandSize caps how big a hand the cache will fingerprint. Adult heroes deal up
@@ -47,18 +48,15 @@ const maxCachedItems = 8
 
 // persistentCacheKey is one fingerprinted entry for a persistent-in-play permanent —
 // shared by both Aura and Item entries since they have the same identifying surface.
-// Card-based entries fingerprint via SelfID (Handler / Ability behaviour is fully
-// determined by the originating card type, since Go-closure values aren't comparable).
-// Token entries carry SelfID = ids.InvalidCard and identify via TokenType. Count is
-// the per-entry counter (token copies, charges, fires remaining).
+// CardID identifies the originating card (or token kind — token IDs come from the
+// engine's reserved range, see ids.RunechantTokenID etc.). Count is the per-entry
+// counter (token copies, charges, fires remaining).
 //
 // Aura's TriggerType / OncePerTurn / FiredThisTurn aren't captured: no production card
-// registers multiple triggers from the same Self with different types or gates. Extend
-// the key here if a future card needs to disambiguate.
+// registers multiple triggers from the same source with different types or gates.
 type persistentCacheKey struct {
-	SelfID    ids.CardID
-	TokenType TokenType
-	Count     int
+	CardID ids.CardID
+	Count  int
 }
 
 // evalCacheKey is the comparable map key for the hand-eval cache. Fixed-size arrays are
@@ -148,12 +146,12 @@ func newEvalCache() *evalCache {
 // swung-weapon names would drift, so we just preserve the input order. Matchup is
 // omitted — see evalCacheKey doc.
 func makeCacheKey(
-	hero Hero, weapons []Weapon, hand []card.Card,
-	prior TurnState,
+	hero gameengine.Hero, weapons []Weapon, hand []card.Card,
+	prior gameengine.Spec,
 ) (evalCacheKey, bool) {
 	if len(hand) > maxCachedHandSize ||
 		len(weapons) > maxCachedWeapons ||
-		len(prior.auras) > maxCachedAuras ||
+		len(prior.Auras) > maxCachedAuras ||
 		len(prior.Items) > maxCachedItems {
 		return evalCacheKey{}, false
 	}
@@ -166,20 +164,20 @@ func makeCacheKey(
 	for i, w := range weapons {
 		key.weaponIDs[i] = w.ID()
 	}
-	// Persistent-in-play entries get insertion-sorted by (SelfID, TokenType, Count)
-	// into the fixed-size key arrays so the cache key stays multiset-invariant across
-	// registration order. Both aura and item sets are small in practice (typically 0-3
-	// each) so the O(n²) cost is negligible.
-	key.auraLen = len(prior.auras)
-	for i, t := range prior.auras {
+	// Persistent-in-play entries get insertion-sorted by (CardID, Count) so the cache key
+	// stays multiset-invariant across registration order. Token kinds are distinguished
+	// via their reserved CardID range (RunechantTokenID, PonderTokenID, …) so no separate
+	// TokenType discriminator is needed.
+	key.auraLen = len(prior.Auras)
+	for i, t := range prior.Auras {
 		insertPersistentEntry(key.auras[:i+1], persistentCacheKey{
-			SelfID: t.Self.CardID(), TokenType: t.Self.TokenType, Count: t.Count,
+			CardID: t.CardID(), Count: t.Count(),
 		})
 	}
 	key.itemLen = len(prior.Items)
 	for i, it := range prior.Items {
 		insertPersistentEntry(key.items[:i+1], persistentCacheKey{
-			SelfID: it.Self.CardID(), TokenType: it.Self.TokenType, Count: it.Count,
+			CardID: it.CardID(), Count: it.Count(),
 		})
 	}
 	if hero != nil {
@@ -188,7 +186,7 @@ func makeCacheKey(
 	if prior.Arsenal != nil {
 		key.arsenalID = prior.Arsenal.ID()
 	}
-	key.opponentMarked = prior.opponentMarked
+	key.opponentMarked = prior.OpponentMarked
 	return key, true
 }
 
@@ -206,14 +204,11 @@ func insertPersistentEntry(dst []persistentCacheKey, entry persistentCacheKey) {
 	dst[j] = entry
 }
 
-// persistentEntryLess orders persistentCacheKey entries by SelfID, then TokenType, then
-// Count. Used by makeCacheKey's insertion sort.
+// persistentEntryLess orders persistentCacheKey entries by CardID, then Count. Used by
+// makeCacheKey's insertion sort.
 func persistentEntryLess(a, b persistentCacheKey) bool {
-	if a.SelfID != b.SelfID {
-		return a.SelfID < b.SelfID
-	}
-	if a.TokenType != b.TokenType {
-		return a.TokenType < b.TokenType
+	if a.CardID != b.CardID {
+		return a.CardID < b.CardID
 	}
 	return a.Count < b.Count
 }

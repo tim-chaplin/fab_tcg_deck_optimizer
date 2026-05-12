@@ -3,6 +3,7 @@ package sim
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/gameengine"
 )
 
 // Test-only entry point: drives one turn against a fixed deck order so tests can assert
@@ -13,90 +14,62 @@ import (
 // BestLine, Graveyard) plus the start-of-next-turn state (StartOfNextTurn*) so cross-turn
 // effects can be asserted without simulating the next turn.
 type TurnStartState struct {
-	// Value is the tested turn's TurnSummary.Value (damage dealt + damage prevented).
-	Value int
-	// BestLine is the winning role assignment from the tested turn.
-	BestLine []CardAssignment
-	// Graveyard is the cards in the graveyard at end of the tested turn, in landing order.
-	// Distinguishes "in graveyard" from "absent from next-turn surfaces".
-	Graveyard []deck.Card
-	// StartOfNextTurnHand is the hand dealt for the turn after the tested turn.
-	StartOfNextTurnHand []deck.Card
-	// StartOfNextTurnArsenal is the card in the arsenal slot at the start of the next turn.
-	StartOfNextTurnArsenal deck.Card
-	// StartOfNextTurnDeck is the remaining deck at the start of the next turn — a
-	// fresh *deck.Deck the caller can drive through Draw / PeekTop / Size.
-	StartOfNextTurnDeck *deck.Deck
-	// StartOfNextTurnAuras is the live aura set at the start of the next turn: survivors
-	// of this turn's chain plus any token bumps made by next-turn start-of-turn handlers.
-	// Tests query specific token counts via Runechants and friends.
-	StartOfNextTurnAuras []Aura
-	// StartOfNextTurnItems is the live item set at the start of the next turn — items
-	// carried over from this turn's chain.
-	StartOfNextTurnItems []Item
-	// CardsDrawn is the count of mid-chain card draws that resolved during the tested
-	// turn (DrawOne calls). Surfaced for tests that want to assert on draw behaviour
-	// directly without inferring it from arsenal / hand carryover.
-	CardsDrawn int
-	// OpponentMarked is the end-of-chain Mark state on the opposing hero — true when
-	// the winning chain landed (and didn't subsequently strip) a Mark.
-	OpponentMarked bool
-	// StartOfNextTurnTriggerDamage is the damage credited by the next turn's start-of-turn
-	// Aura handlers (triggers registered this turn that fired at the top of next).
-	// Zero when no trigger survived. Production folds this into next turn's Value.
+	Value                        int
+	BestLine                     []CardAssignment
+	Graveyard                    []deck.Card
+	StartOfNextTurnHand          []deck.Card
+	StartOfNextTurnArsenal       deck.Card
+	StartOfNextTurnDeck          *deck.Deck
+	StartOfNextTurnAuras         []gameengine.Aura
+	StartOfNextTurnItems         []gameengine.Item
+	CardsDrawn                   int
+	OpponentMarked               bool
 	StartOfNextTurnTriggerDamage int
-	// StartOfNextTurnGraveyard is the auras destroyed during the next turn's start-of-turn
-	// Aura pass, in destroy order.
-	StartOfNextTurnGraveyard []deck.Card
+	StartOfNextTurnGraveyard     []deck.Card
 }
 
-// Runechants returns the live Runechant token count at the start of the next turn.
+// RunechantCount returns the live Runechant token count at the start of the next turn.
 func (t TurnStartState) RunechantCount() int {
-	return tokenCountIn(t.StartOfNextTurnAuras, TokenTypeRunechant)
+	return auraCountByName(t.StartOfNextTurnAuras, "Runechant")
 }
 
-// Ponders returns the live Ponder token count at the start of the next turn.
+// PonderCount returns the live Ponder token count at the start of the next turn.
 func (t TurnStartState) PonderCount() int {
-	return tokenCountIn(t.StartOfNextTurnAuras, TokenTypePonder)
+	return auraCountByName(t.StartOfNextTurnAuras, "Ponder")
 }
 
-// Gold returns the live Gold token count at the start of the next turn.
+// GoldCount returns the live Gold token count at the start of the next turn.
 func (t TurnStartState) GoldCount() int {
-	return itemCountIn(t.StartOfNextTurnItems, TokenTypeGold)
+	return itemCountByName(t.StartOfNextTurnItems, "Gold")
 }
 
-// Silver returns the live Silver token count at the start of the next turn.
+// SilverCount returns the live Silver token count at the start of the next turn.
 func (t TurnStartState) SilverCount() int {
-	return itemCountIn(t.StartOfNextTurnItems, TokenTypeSilver)
+	return itemCountByName(t.StartOfNextTurnItems, "Silver")
 }
 
-// Copper returns the live Copper token count at the start of the next turn.
+// CopperCount returns the live Copper token count at the start of the next turn.
 func (t TurnStartState) CopperCount() int {
-	return itemCountIn(t.StartOfNextTurnItems, TokenTypeCopper)
+	return itemCountByName(t.StartOfNextTurnItems, "Copper")
 }
 
-// EvalOneTurnForTesting runs one turn against the deck in source order (no shuffle) and returns
-// the tested turn's outcome plus the start-of-next-turn state. initial seeds the start-of-turn
-// state — Arsenal, Auras, Items — modelling carryover from a hypothetical previous turn; the
-// other TurnState fields are ignored (transient mid-chain state, hand / deck / graveyard which
-// are seeded from this function's own inputs). External tests build initial via
-// NewTurnStateFromSpec(TurnStateSpec{...}). initialHand sets turn 1's starting hand; nil draws
-// the hand off the top of the deck, non-nil uses the slice directly (may be shorter than
-// handSize) and leaves the deck untouched. Test-only — production callers use Evaluate.
-//
-// Free function (not a method) because deck.Deck lives in another package; Go disallows
-// methods on imported types.
-func EvalOneTurnForTesting(master *deck.Deck, mp Matchup, initial TurnState, initialHand []deck.Card) TurnStartState {
+// EvalOneTurnForTesting runs one turn against the deck in source order (no shuffle) and
+// returns the tested turn's outcome plus the start-of-next-turn state. initial seeds the
+// start-of-turn state — Hero, Arsenal, Auras, Items — modelling carryover from a
+// hypothetical previous turn. initialHand sets turn 1's starting hand; nil draws the hand
+// off the top of the deck.
+func EvalOneTurnForTesting(master *deck.Deck, mp Matchup, initial gameengine.Spec, initialHand []deck.Card) TurnStartState {
 	d := master.Copy()
-	hero := d.Hero.(Hero)
-	SetCurrentHero(hero)
+	hero := d.Hero.(gameengine.Hero)
+	if initial.Hero == nil {
+		initial.Hero = hero
+	} else {
+		hero = initial.Hero
+	}
 	handSize := hero.Intelligence()
 	if handSize <= 0 {
 		return TurnStartState{}
 	}
-
-	// Build turn 1's hand. Caller-supplied initialHand is used verbatim and the deck stays
-	// untouched; otherwise draw handSize cards off the top.
 	if initialHand == nil && d.Size() < handSize {
 		return TurnStartState{}
 	}
@@ -122,7 +95,6 @@ func EvalOneTurnForTesting(master *deck.Deck, mp Matchup, initial TurnState, ini
 		weapons[i] = w.(Weapon)
 	}
 	play := best(hero, weapons, h, mp, d, initial)
-	// Adopt the chain's post-mutation deck and recycle pitched cards onto the bottom.
 	d = play.State.Deck
 	pitched := pitchedFromBestLine(play.BestLine)
 	recycled := make([]deck.Card, len(pitched))
@@ -131,11 +103,9 @@ func EvalOneTurnForTesting(master *deck.Deck, mp Matchup, initial TurnState, ini
 	}
 	d.PutBottom(recycled)
 
-	auraQueue := append([]Aura(nil), play.State.Auras...)
-	itemQueue := append([]Item(nil), play.State.Items...)
+	auraQueue := append([]gameengine.Aura(nil), play.State.Auras...)
+	itemQueue := append([]gameengine.Item(nil), play.State.Items...)
 
-	// Deal turn 2's hand off the top, with the chain's leftover hand as the held prefix.
-	// Stop short of running Best — the caller wants the pre-Best state.
 	held := append([]card.Card(nil), play.State.Hand...)
 	graveyardOut := make([]deck.Card, len(play.State.Graveyard))
 	for i, c := range play.State.Graveyard {
@@ -148,8 +118,8 @@ func EvalOneTurnForTesting(master *deck.Deck, mp Matchup, initial TurnState, ini
 			Graveyard:              graveyardOut,
 			StartOfNextTurnArsenal: play.State.Arsenal,
 			StartOfNextTurnDeck:    d.Copy(),
-			StartOfNextTurnAuras:   append([]Aura(nil), play.State.Auras...),
-			StartOfNextTurnItems:   append([]Item(nil), play.State.Items...),
+			StartOfNextTurnAuras:   append([]gameengine.Aura(nil), play.State.Auras...),
+			StartOfNextTurnItems:   append([]gameengine.Item(nil), play.State.Items...),
 			CardsDrawn:             play.State.CardsDrawn,
 			OpponentMarked:         play.State.OpponentMarked,
 		}
@@ -158,10 +128,6 @@ func EvalOneTurnForTesting(master *deck.Deck, mp Matchup, initial TurnState, ini
 	for _, c := range d.Draw(handSize - len(held)) {
 		turn2Hand = append(turn2Hand, c.(card.Card))
 	}
-	// Process turn-1 Auras at the turn-2 boundary the same way Evaluate does:
-	// fire start-of-turn handlers, re-arm OncePerTurn gates, drop exhausted entries.
-	// Reveals into the hand are consumed here so the returned turn-2 Hand matches what
-	// Best would see.
 	survivors, _, trigDamage, trigRevealed, trigGraveyarded := processAurasAtStartOfTurn(auraQueue, d)
 	for _, c := range trigRevealed {
 		turn2Hand = append(turn2Hand, c)
@@ -182,8 +148,8 @@ func EvalOneTurnForTesting(master *deck.Deck, mp Matchup, initial TurnState, ini
 		StartOfNextTurnHand:          handOut,
 		StartOfNextTurnArsenal:       play.State.Arsenal,
 		StartOfNextTurnDeck:          d.Copy(),
-		StartOfNextTurnAuras:         append([]Aura(nil), survivors...),
-		StartOfNextTurnItems:         append([]Item(nil), itemQueue...),
+		StartOfNextTurnAuras:         append([]gameengine.Aura(nil), survivors...),
+		StartOfNextTurnItems:         append([]gameengine.Item(nil), itemQueue...),
 		CardsDrawn:                   play.State.CardsDrawn,
 		OpponentMarked:               play.State.OpponentMarked,
 		StartOfNextTurnTriggerDamage: trigDamage,

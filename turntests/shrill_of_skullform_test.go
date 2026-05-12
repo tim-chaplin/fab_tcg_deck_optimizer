@@ -1,12 +1,13 @@
 package turntests
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
 	"testing"
 
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
+
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/gameengine"
 )
 
 func TestShrillOfSkullform_BaseDamage(t *testing.T) {
@@ -20,8 +21,8 @@ func TestShrillOfSkullform_BaseDamage(t *testing.T) {
 		{cards.ShrillOfSkullformBlue{}, 2},
 	}
 	for _, tc := range cases {
-		var s sim.TurnState
-		sim.ResolveChainStep(&s, s.Logger(), &card.CardState{Card: tc.c})
+		s := gameengine.New()
+		s.ResolveChainStep(s.Logger(), &card.CardState{Card: tc.c})
 		got := s.Value()
 		if got != tc.want {
 			t.Errorf("%s: Play() = %d, want %d", tc.c.Name(), got, tc.want)
@@ -40,8 +41,8 @@ func TestShrillOfSkullform_AuraBonus(t *testing.T) {
 		{cards.ShrillOfSkullformBlue{}, 5},
 	}
 	for _, tc := range cases {
-		s := sim.NewTurnStateFromSpec(sim.TurnStateSpec{CardsPlayed: []card.Card{testutils.Aura{}}, AuraCreated: true})
-		sim.ResolveChainStep(&s, s.Logger(), &card.CardState{Card: tc.c})
+		s := gameengine.NewFromSpec(gameengine.Spec{CardsPlayed: []card.Card{testutils.Aura{}}, AuraCreated: true})
+		s.ResolveChainStep(s.Logger(), &card.CardState{Card: tc.c})
 		got := s.Value()
 		if got != tc.want {
 			t.Errorf("%s with aura: Play() = %d, want %d", tc.c.Name(), got, tc.want)

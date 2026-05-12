@@ -1,41 +1,47 @@
 package turntests
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
 	"testing"
 
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/gameengine"
 )
 
-// stubLowHeroOn implements sim.LowerHealthWanter — used to exercise the "hero opts in" branch.
+// stubLowHeroOn implements gameengine.LowerHealthWanter — used to exercise the "hero opts
+// in" branch.
 type stubLowHeroOn struct{}
 
-func (stubLowHeroOn) ID() ids.HeroID                                          { return ids.InvalidHero }
-func (stubLowHeroOn) Name() string                                            { return "stubLowHeroOn" }
-func (stubLowHeroOn) Health() int                                             { return 20 }
-func (stubLowHeroOn) Intelligence() int                                       { return 4 }
-func (stubLowHeroOn) Types() card.TypeSet                                     { return 0 }
-func (stubLowHeroOn) Class() card.CardType                                    { return 0 }
-func (stubLowHeroOn) OnCardPlayed(card.Card, *sim.TurnState, card.Logger) int { return 0 }
-func (stubLowHeroOn) Opt(cards []card.Card) (top, bottom []card.Card)         { return cards, nil }
-func (stubLowHeroOn) WantsLowerHealth()                                       {}
+func (stubLowHeroOn) ID() ids.HeroID                                                  { return ids.InvalidHero }
+func (stubLowHeroOn) Name() string                                                    { return "stubLowHeroOn" }
+func (stubLowHeroOn) Intelligence() int                                               { return 4 }
+func (stubLowHeroOn) Types() card.TypeSet                                             { return 0 }
+func (stubLowHeroOn) Class() card.CardType                                            { return 0 }
+func (stubLowHeroOn) OnCardPlayed(card.Card, *gameengine.GameEngine, card.Logger) int { return 0 }
+func (stubLowHeroOn) Opt(cards []card.Card) (top, bottom []card.Card)                 { return cards, nil }
+func (stubLowHeroOn) WantsLowerHealth()                                               {}
 
-// stubLowHeroOff does NOT implement sim.LowerHealthWanter — the default-hero branch.
+// stubLowHeroOff does NOT implement gameengine.LowerHealthWanter — the default branch.
 type stubLowHeroOff struct{}
 
-func (stubLowHeroOff) ID() ids.HeroID                                          { return ids.InvalidHero }
-func (stubLowHeroOff) Name() string                                            { return "stubLowHeroOff" }
-func (stubLowHeroOff) Health() int                                             { return 20 }
-func (stubLowHeroOff) Intelligence() int                                       { return 4 }
-func (stubLowHeroOff) Types() card.TypeSet                                     { return 0 }
-func (stubLowHeroOff) Class() card.CardType                                    { return 0 }
-func (stubLowHeroOff) OnCardPlayed(card.Card, *sim.TurnState, card.Logger) int { return 0 }
-func (stubLowHeroOff) Opt(cards []card.Card) (top, bottom []card.Card)         { return cards, nil }
+func (stubLowHeroOff) ID() ids.HeroID                                                  { return ids.InvalidHero }
+func (stubLowHeroOff) Name() string                                                    { return "stubLowHeroOff" }
+func (stubLowHeroOff) Intelligence() int                                               { return 4 }
+func (stubLowHeroOff) Types() card.TypeSet                                             { return 0 }
+func (stubLowHeroOff) Class() card.CardType                                            { return 0 }
+func (stubLowHeroOff) OnCardPlayed(card.Card, *gameengine.GameEngine, card.Logger) int { return 0 }
+func (stubLowHeroOff) Opt(cards []card.Card) (top, bottom []card.Card)                 { return cards, nil }
 
-// TestLowerHealthWanter_DamageRiders checks the +3{p} / +1{p} / +1{h} damage riders fire iff the
-// current hero opts into sim.LowerHealthWanter.
+// engineWithHero returns a fresh empty engine with hero installed.
+func engineWithHero(h gameengine.Hero) *gameengine.GameEngine {
+	g := gameengine.New()
+	g.SetHero(h)
+	return g
+}
+
+// TestLowerHealthWanter_DamageRiders checks the +3{p} / +1{p} / +1{h} damage riders fire
+// iff the current hero opts into gameengine.LowerHealthWanter.
 func TestLowerHealthWanter_DamageRiders(t *testing.T) {
 	cases := []struct {
 		name    string
@@ -54,70 +60,62 @@ func TestLowerHealthWanter_DamageRiders(t *testing.T) {
 		{"FyendalsFightingSpiritBlue +1h", cards.FyendalsFightingSpiritBlue{}, 5, 5 + 1},
 	}
 	for _, tc := range cases {
-		sim.SetCurrentHero(stubLowHeroOff{})
-		var sOff sim.TurnState
-		sim.ResolveChainStep(&sOff, sOff.Logger(), &card.CardState{Card: tc.card})
+		sOff := engineWithHero(stubLowHeroOff{})
+		sOff.ResolveChainStep(sOff.Logger(), &card.CardState{Card: tc.card})
 		if got := sOff.Value(); got != tc.wantOff {
 			t.Errorf("%s: Play() off = %d, want %d (hero does not opt in)", tc.name, got, tc.wantOff)
 		}
-		sim.SetCurrentHero(stubLowHeroOn{})
-		var sOn sim.TurnState
-		sim.ResolveChainStep(&sOn, sOn.Logger(), &card.CardState{Card: tc.card})
+		sOn := engineWithHero(stubLowHeroOn{})
+		sOn.ResolveChainStep(sOn.Logger(), &card.CardState{Card: tc.card})
 		if got := sOn.Value(); got != tc.wantOn {
 			t.Errorf("%s: Play() on = %d, want %d (hero opts in)", tc.name, got, tc.wantOn)
 		}
 	}
-	sim.SetCurrentHero(nil)
 }
 
-// TestLowerHealthWanter_GoAgainRiders checks the conditional go-again flips iff the current hero
-// opts into sim.LowerHealthWanter.
+// TestLowerHealthWanter_GoAgainRiders checks the conditional go-again flips iff the
+// current hero opts into gameengine.LowerHealthWanter.
 func TestLowerHealthWanter_GoAgainRiders(t *testing.T) {
 	cards := []card.Card{
 		cards.ScarForAScarRed{}, cards.ScarForAScarYellow{}, cards.ScarForAScarBlue{},
 		cards.BlowForABlowRed{},
 		cards.LifeForALifeRed{}, cards.LifeForALifeYellow{}, cards.LifeForALifeBlue{},
 	}
-	var g sim.TurnState
-	sim.SetCurrentHero(stubLowHeroOff{})
+	gOff := engineWithHero(stubLowHeroOff{})
 	for _, c := range cards {
-		if c.GoAgain(&g) {
+		if c.GoAgain(gOff) {
 			t.Errorf("%s: GoAgain() = true with hero off, want false", c.Name())
 		}
 	}
-	sim.SetCurrentHero(stubLowHeroOn{})
+	gOn := engineWithHero(stubLowHeroOn{})
 	for _, c := range cards {
-		if !c.GoAgain(&g) {
+		if !c.GoAgain(gOn) {
 			t.Errorf("%s: GoAgain() = false with hero on, want true", c.Name())
 		}
 	}
-	sim.SetCurrentHero(nil)
 }
 
-// TestLowerHealthWanter_NilHeroIsOff guards the startup / unset-hero case: with no hero, the rider
-// must not fire.
+// TestLowerHealthWanter_NilHeroIsOff guards the startup / unset-hero case.
 func TestLowerHealthWanter_NilHeroIsOff(t *testing.T) {
-	sim.SetCurrentHero(nil)
-	var s sim.TurnState
-	sim.ResolveChainStep(&s, s.Logger(), &card.CardState{Card: cards.AdrenalineRushRed{}})
+	s := gameengine.New()
+	s.ResolveChainStep(s.Logger(), &card.CardState{Card: cards.AdrenalineRushRed{}})
 	if got := s.Value(); got != 4 {
 		t.Errorf("AdrenalineRushRed nil-hero Play() = %d, want 4", got)
 	}
-	if (cards.ScarForAScarRed{}).GoAgain(&s) {
+	if (cards.ScarForAScarRed{}).GoAgain(s) {
 		t.Errorf("ScarForAScarRed nil-hero GoAgain() = true, want false")
 	}
 }
 
 // Tests that Pound for Pound flips self.GrantedDominate iff the current hero opts into
-// LowerHealthWanter (no damage change).
+// LowerHealthWanter.
 func TestLowerHealthWanter_PoundForPoundDominateGrant(t *testing.T) {
 	cards := []card.Card{cards.PoundForPoundRed{}, cards.PoundForPoundYellow{}, cards.PoundForPoundBlue{}}
 
-	sim.SetCurrentHero(stubLowHeroOff{})
 	for _, c := range cards {
 		self := &card.CardState{Card: c}
-		s := sim.NewTurnState(nil, nil)
-		sim.ResolveChainStep(s, s.Logger(), self)
+		s := engineWithHero(stubLowHeroOff{})
+		s.ResolveChainStep(s.Logger(), self)
 		if self.GrantedDominate {
 			t.Errorf("%s: GrantedDominate = true with hero off, want false", c.Name())
 		}
@@ -125,12 +123,10 @@ func TestLowerHealthWanter_PoundForPoundDominateGrant(t *testing.T) {
 			t.Errorf("%s: EffectiveDominate = true with hero off, want false", c.Name())
 		}
 	}
-
-	sim.SetCurrentHero(stubLowHeroOn{})
 	for _, c := range cards {
 		self := &card.CardState{Card: c}
-		s := sim.NewTurnState(nil, nil)
-		sim.ResolveChainStep(s, s.Logger(), self)
+		s := engineWithHero(stubLowHeroOn{})
+		s.ResolveChainStep(s.Logger(), self)
 		if !self.GrantedDominate {
 			t.Errorf("%s: GrantedDominate = false with hero on, want true", c.Name())
 		}
@@ -138,5 +134,4 @@ func TestLowerHealthWanter_PoundForPoundDominateGrant(t *testing.T) {
 			t.Errorf("%s: EffectiveDominate = false with hero on, want true", c.Name())
 		}
 	}
-	sim.SetCurrentHero(nil)
 }

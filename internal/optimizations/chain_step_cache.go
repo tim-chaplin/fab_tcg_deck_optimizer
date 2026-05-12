@@ -4,19 +4,19 @@ import (
 	"sync/atomic"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/gameengine"
 )
 
-// bareChainStepText is the uncached sim.ChainStepText captured before init swaps in the
+// bareChainStepText is the uncached gameengine.ChainStepText captured before init swaps in the
 // memoised version. The slow path delegates to it.
-var bareChainStepText = sim.ChainStepText
+var bareChainStepText = gameengine.ChainStepText
 
 func init() {
-	sim.ChainStepText = cachedChainStepText
+	gameengine.ChainStepText = cachedChainStepText
 }
 
-// cachedChainStepText is the memoised ChainStepText installed over sim.ChainStepText at
+// cachedChainStepText is the memoised ChainStepText installed over gameengine.ChainStepText at
 // init. The text depends only on (Card.ID, FromArsenal) — DisplayName, types, and the
 // verb selection are all static — so results live in a pre-warmed table; the per-Play
 // string concat / DisplayName allocation disappears on the hot path.

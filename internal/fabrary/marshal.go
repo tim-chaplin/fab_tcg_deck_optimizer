@@ -9,8 +9,8 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/gameengine"
 )
 
 // defaultFormat is emitted in the Format: header. Update when a new format comes online.
@@ -28,7 +28,7 @@ const defaultFormat = "Silver Age"
 // persisted .txt always carries the full loadout.
 func Marshal(d *deck.Deck) string {
 	var b strings.Builder
-	name := d.Hero.(sim.Hero).Name()
+	name := d.Hero.(gameengine.Hero).Name()
 	fmt.Fprintf(&b, "Name: %s\n", name)
 	fmt.Fprintf(&b, "Hero: %s\n", name)
 	fmt.Fprintf(&b, "Format: %s\n\n", defaultFormat)

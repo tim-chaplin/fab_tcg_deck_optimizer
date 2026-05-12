@@ -1,11 +1,12 @@
 package turntests
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
 	"testing"
 
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
+
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/gameengine"
 )
 
 // Compile-time: all three Reduce variants must implement card.VariableCost.
@@ -22,8 +23,8 @@ func TestReduceToRunechant_PlayCreditsCreatedToken(t *testing.T) {
 		cards.ReduceToRunechantBlue{},
 	}
 	for _, c := range cases {
-		s := &sim.TurnState{}
-		sim.ResolveChainStep(s, s.Logger(), &card.CardState{Card: c})
+		s := gameengine.New()
+		s.ResolveChainStep(s.Logger(), &card.CardState{Card: c})
 		got := s.Value()
 		if got != 1 {
 			t.Errorf("%s: Play() = %d, want 1 (created Runechant credits +1)", c.Name(), got)

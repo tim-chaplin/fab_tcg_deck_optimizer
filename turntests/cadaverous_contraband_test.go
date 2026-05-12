@@ -1,20 +1,21 @@
 package turntests
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
 	"testing"
 
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
+
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/gameengine"
 )
 
 // Tests that Cadaverous Contraband's Play registers an OnHit handler.
 func TestCadaverousContraband_RegistersOnHit(t *testing.T) {
 	for _, c := range []card.Card{cards.CadaverousContrabandRed{}, cards.CadaverousContrabandYellow{}, cards.CadaverousContrabandBlue{}} {
 		self := &card.CardState{Card: c}
-		s := sim.NewTurnStateFromCards(nil, nil)
-		sim.ResolveChainStep(s, s.Logger(), self)
+		s := gameengine.NewFromCards(nil, nil)
+		s.ResolveChainStep(s.Logger(), self)
 		if len(self.OnHit) != 1 {
 			t.Errorf("%s [%d{p}]: OnHit handlers = %d, want 1", c.Name(), c.Pitch(), len(self.OnHit))
 		}
@@ -25,9 +26,9 @@ func TestCadaverousContraband_RegistersOnHit(t *testing.T) {
 func TestCadaverousContraband_OnHitRecyclesNonAttackToTop(t *testing.T) {
 	non := testutils.GenericAction()
 	deck := []card.Card{testutils.RedAttack{}}
-	s := sim.NewTurnStateFromCards(deck, []card.Card{non})
+	s := gameengine.NewFromCards(deck, []card.Card{non})
 	self := &card.CardState{Card: cards.CadaverousContrabandRed{}}
-	sim.ResolveChainStep(s, s.Logger(), self)
+	s.ResolveChainStep(s.Logger(), self)
 	self.BonusAttack = 1
 	testutils.FireOnHitIfLikely(s, s.Logger(), self)
 	if got := s.Deck().Size(); got != 2 {
@@ -44,9 +45,9 @@ func TestCadaverousContraband_OnHitRecyclesNonAttackToTop(t *testing.T) {
 // Tests that with no non-attack action card in the graveyard, the on-hit recycle leaves the
 // graveyard and deck untouched.
 func TestCadaverousContraband_OnHitNoEligibleCardNoOp(t *testing.T) {
-	s := sim.NewTurnStateFromCards(nil, []card.Card{testutils.RedAttack{}})
+	s := gameengine.NewFromCards(nil, []card.Card{testutils.RedAttack{}})
 	self := &card.CardState{Card: cards.CadaverousContrabandRed{}}
-	sim.ResolveChainStep(s, s.Logger(), self)
+	s.ResolveChainStep(s.Logger(), self)
 	testutils.FireOnHitIfLikely(s, s.Logger(), self)
 	if len(s.Graveyard()) != 1 {
 		t.Errorf("graveyard size = %d, want 1 (no eligible target, no recycle)", len(s.Graveyard()))

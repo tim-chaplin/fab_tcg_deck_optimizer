@@ -1,11 +1,12 @@
 package turntests
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
 	"testing"
 
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
+
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/gameengine"
 )
 
 // Compile-time: the Drawn to the Dark Dimension variants must implement card.VariableCost.
@@ -32,11 +33,11 @@ func TestDrawnToTheDarkDimension_CostBounds(t *testing.T) {
 		if vc.MinCost() != 0 {
 			t.Errorf("%s: MinCost() = %d, want 0", c.Name(), vc.MinCost())
 		}
-		if c.Cost(&sim.TurnState{}) != 2 {
-			t.Errorf("%s: Cost(zeroState) = %d, want 2", c.Name(), c.Cost(&sim.TurnState{}))
+		if c.Cost(gameengine.New()) != 2 {
+			t.Errorf("%s: Cost(zeroState) = %d, want 2", c.Name(), c.Cost(gameengine.New()))
 		}
-		if c.Cost(sim.NewTurnStatePtr(sim.TurnStateSpec{Auras: []sim.Aura{sim.NewRunechantAura(5)}})) != 0 {
-			t.Errorf("%s: Cost(Runechants=5) = %d, want 0", c.Name(), c.Cost(sim.NewTurnStatePtr(sim.TurnStateSpec{Auras: []sim.Aura{sim.NewRunechantAura(5)}})))
+		if c.Cost(gameengine.NewFromSpec(gameengine.Spec{Auras: []gameengine.Aura{gameengine.NewRunechantAura(5)}})) != 0 {
+			t.Errorf("%s: Cost(Runechants=5) = %d, want 0", c.Name(), c.Cost(gameengine.NewFromSpec(gameengine.Spec{Auras: []gameengine.Aura{gameengine.NewRunechantAura(5)}})))
 		}
 	}
 }

@@ -1,17 +1,18 @@
 package turntests
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
 	"testing"
 
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
+
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/gameengine"
 )
 
 func TestOathOfTheArknight_NoRemainingCards(t *testing.T) {
-	s := &sim.TurnState{}
-	sim.ResolveChainStep(s, s.Logger(), &card.CardState{Card: cards.OathOfTheArknightRed{}})
+	s := gameengine.New()
+	s.ResolveChainStep(s.Logger(), &card.CardState{Card: cards.OathOfTheArknightRed{}})
 	if got := s.Value(); got != 1 {
 		t.Errorf("Play() = %d, want 1 (Runechant only, no attack to buff)", got)
 	}
@@ -31,8 +32,8 @@ func TestOathOfTheArknight_RunebladeAttackInRemaining(t *testing.T) {
 	}
 	for _, tc := range cases {
 		target := &card.CardState{Card: testutils.RunebladeAttack{}}
-		s := sim.NewTurnStatePtr(sim.TurnStateSpec{CardsRemaining: []*card.CardState{target}})
-		sim.ResolveChainStep(s, s.Logger(), &card.CardState{Card: tc.c})
+		s := gameengine.NewFromSpec(gameengine.Spec{CardsRemaining: []*card.CardState{target}})
+		s.ResolveChainStep(s.Logger(), &card.CardState{Card: tc.c})
 		if got := s.Value(); got != 1 {
 			t.Errorf("%s: Play() = %d, want 1 (Runechant only; +N rides on target's BonusAttack)", tc.c.Name(), got)
 		}
@@ -44,8 +45,8 @@ func TestOathOfTheArknight_RunebladeAttackInRemaining(t *testing.T) {
 
 func TestOathOfTheArknight_WeaponCountsAsAttack(t *testing.T) {
 	target := &card.CardState{Card: testutils.RunebladeWeapon{}}
-	s := sim.NewTurnStatePtr(sim.TurnStateSpec{CardsRemaining: []*card.CardState{target}})
-	sim.ResolveChainStep(s, s.Logger(), &card.CardState{Card: cards.OathOfTheArknightRed{}})
+	s := gameengine.NewFromSpec(gameengine.Spec{CardsRemaining: []*card.CardState{target}})
+	s.ResolveChainStep(s.Logger(), &card.CardState{Card: cards.OathOfTheArknightRed{}})
 	if got := s.Value(); got != 1 {
 		t.Errorf("Play() = %d, want 1 (Runechant only; +3 rides on weapon's BonusAttack)", got)
 	}
@@ -55,8 +56,8 @@ func TestOathOfTheArknight_WeaponCountsAsAttack(t *testing.T) {
 }
 
 func TestOathOfTheArknight_NonRunebladeAttackDoesNotQualify(t *testing.T) {
-	s := sim.NewTurnStatePtr(sim.TurnStateSpec{CardsRemaining: []*card.CardState{{Card: testutils.NonRunebladeAttack{}}}})
-	sim.ResolveChainStep(s, s.Logger(), &card.CardState{Card: cards.OathOfTheArknightRed{}})
+	s := gameengine.NewFromSpec(gameengine.Spec{CardsRemaining: []*card.CardState{{Card: testutils.NonRunebladeAttack{}}}})
+	s.ResolveChainStep(s.Logger(), &card.CardState{Card: cards.OathOfTheArknightRed{}})
 	if got := s.Value(); got != 1 {
 		t.Errorf("Play() = %d, want 1 (non-Runeblade attack shouldn't trigger bonus)", got)
 	}
@@ -64,8 +65,8 @@ func TestOathOfTheArknight_NonRunebladeAttackDoesNotQualify(t *testing.T) {
 
 func TestOathOfTheArknight_RunebladeNonAttackDoesNotQualify(t *testing.T) {
 	// Read the Runes is Runeblade + Action but NOT Attack or Weapon.
-	s := sim.NewTurnStatePtr(sim.TurnStateSpec{CardsRemaining: []*card.CardState{{Card: testutils.NonAttack{}}}})
-	sim.ResolveChainStep(s, s.Logger(), &card.CardState{Card: cards.OathOfTheArknightRed{}})
+	s := gameengine.NewFromSpec(gameengine.Spec{CardsRemaining: []*card.CardState{{Card: testutils.NonAttack{}}}})
+	s.ResolveChainStep(s.Logger(), &card.CardState{Card: cards.OathOfTheArknightRed{}})
 	if got := s.Value(); got != 1 {
 		t.Errorf("Play() = %d, want 1 (non-attack Runeblade card shouldn't trigger bonus)", got)
 	}

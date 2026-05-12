@@ -1,12 +1,13 @@
 package turntests
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
 	"testing"
 
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
+
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/gameengine"
 )
 
 var whisperOfTheOracleVariants = []card.Card{
@@ -19,11 +20,10 @@ var whisperOfTheOracleVariants = []card.Card{
 func TestWhisperOfTheOracle_PlayCallsOpt4(t *testing.T) {
 	a, b, c, d := testutils.NewStubCard("a"), testutils.NewStubCard("b"),
 		testutils.NewStubCard("c"), testutils.NewStubCard("d")
-	defer testutils.SwapCurrentHero(testutils.Hero{})()
 
 	for _, variant := range whisperOfTheOracleVariants {
-		s := sim.NewTurnStateFromCards([]card.Card{a, b, c, d}, nil)
-		sim.ResolveChainStep(s, s.Logger(), &card.CardState{Card: variant})
+		s := gameengine.NewFromCards([]card.Card{a, b, c, d}, nil)
+		s.ResolveChainStep(s.Logger(), &card.CardState{Card: variant})
 		if s.Value() != 0 {
 			t.Errorf("%s: Play() Value = %d, want 0", variant.Name(), s.Value())
 		}

@@ -3,6 +3,7 @@ package sim
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/gameengine"
 )
 
 // evaluatePartition is the shared "given a fixed role assignment, score it" body used by
@@ -22,11 +23,11 @@ import (
 // Mutates the bufs scratch slices (pitchedBuf, attackersBuf, defendersBuf, heldBuf) in
 // place; both callers feed pooled scratch through bufs and tolerate the rewrite.
 func (e *Evaluator) evaluatePartition(
-	hero Hero, weapons []Weapon, hand []card.Card,
+	hero gameengine.Hero, weapons []Weapon, hand []card.Card,
 	d *deck.Deck,
 	rolesBuf []Role, n int, bufs *attackBufs,
 	mp Matchup, defenseSum int,
-	prior TurnState, skipLog bool,
+	prior gameengine.Spec, skipLog bool,
 ) (
 	attackDealt, defenseDealt int,
 	swung []string, carry CarryState,

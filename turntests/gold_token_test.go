@@ -8,6 +8,7 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapons"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/gameengine"
 )
 
 func TestGoldAbility_SpendsToFillArsenalAndSwings(t *testing.T) {
@@ -18,8 +19,8 @@ func TestGoldAbility_SpendsToFillArsenalAndSwings(t *testing.T) {
 	}
 	d := deck.New(heroes.Viserai{}, []deck.Weapon{weapons.ReapingBlade{}}, cards)
 	hand := []deck.Card{testutils.BluePitch{}}
-	priorItems := []sim.Item{sim.NewGoldItem(1)}
-	got := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, sim.NewTurnStateFromSpec(sim.TurnStateSpec{Items: priorItems}), hand)
+	priorItems := []gameengine.Item{gameengine.NewGoldItem(1)}
+	got := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, gameengine.Spec{Items: priorItems}, hand)
 	if got.Value != 3 {
 		t.Fatalf("Value = %d, want 3 (Reaping Blade swing power 3)", got.Value)
 	}
@@ -32,8 +33,8 @@ func TestGoldAbility_SpendsToFillArsenalAndSwings(t *testing.T) {
 	if got.StartOfNextTurnArsenal == nil {
 		t.Fatalf("StartOfNextTurnArsenal = nil, want the drawn card promoted into the slot")
 	}
-	if len(got.StartOfNextTurnHand) != d.Hero.(sim.Hero).Intelligence() {
+	if len(got.StartOfNextTurnHand) != d.Hero.(gameengine.Hero).Intelligence() {
 		t.Fatalf("StartOfNextTurnHand size = %d, want %d (Gold-spend draw should leave enough deck for next turn's full deal)",
-			len(got.StartOfNextTurnHand), d.Hero.(sim.Hero).Intelligence())
+			len(got.StartOfNextTurnHand), d.Hero.(gameengine.Hero).Intelligence())
 	}
 }

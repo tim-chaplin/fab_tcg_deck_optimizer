@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/gameengine"
 )
 
 // captureStdout redirects os.Stdout into a pipe for the duration of fn and returns whatever
@@ -32,13 +33,13 @@ func captureStdout(t *testing.T, fn func()) string {
 	return <-done
 }
 
-// Tests that OptDebug=true makes Opt print a one-line summary of the outcome to stdout,
-// and OptDebug=false stays quiet.
+// Tests that gameengine.OptDebug=true makes Opt print a one-line summary of the outcome to stdout,
+// and gameengine.OptDebug=false stays quiet.
 func TestOptDebug_PrintsOnlyWhenSet(t *testing.T) {
 	a := NewFakeCard("a")
 	b := NewFakeCard("b")
-	prev := OptDebug
-	defer func() { OptDebug = prev }()
+	prev := gameengine.OptDebug
+	defer func() { gameengine.OptDebug = prev }()
 
 	withOptHero(t, FakeHero{
 		OptStrategy: func(cards []card.Card) (top, bottom []card.Card) {
@@ -46,23 +47,23 @@ func TestOptDebug_PrintsOnlyWhenSet(t *testing.T) {
 		},
 	}, func() {
 		// Off by default: no output.
-		OptDebug = false
+		gameengine.OptDebug = false
 		out := captureStdout(t, func() {
-			s := NewTurnStateFromCards([]card.Card{a, b}, nil)
+			s := gameengine.NewFromCards([]card.Card{a, b}, nil)
 			s.Opt(s.Logger(), 2)
 		})
 		if out != "" {
-			t.Errorf("OptDebug=false produced stdout: %q", out)
+			t.Errorf("gameengine.OptDebug=false produced stdout: %q", out)
 		}
 
 		// On: a single line naming inputs, top, and bottom.
-		OptDebug = true
+		gameengine.OptDebug = true
 		out = captureStdout(t, func() {
-			s := NewTurnStateFromCards([]card.Card{a, b}, nil)
+			s := gameengine.NewFromCards([]card.Card{a, b}, nil)
 			s.Opt(s.Logger(), 2)
 		})
 		if !strings.Contains(out, "Opt(2)") || !strings.Contains(out, "top=") || !strings.Contains(out, "bottom=") {
-			t.Errorf("OptDebug=true output missing expected fragments: %q", out)
+			t.Errorf("gameengine.OptDebug=true output missing expected fragments: %q", out)
 		}
 	})
 }

@@ -1,14 +1,15 @@
 package turntests
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
 	"strings"
 	"testing"
 
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
+
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/gameengine"
 )
 
 // Tests that Cost is 0 when a hand card can pay the alt cost, else printed 2; static
@@ -16,13 +17,13 @@ import (
 func TestMoonWish_VariableCost(t *testing.T) {
 	cases := []card.Card{cards.MoonWishRed{}, cards.MoonWishYellow{}, cards.MoonWishBlue{}}
 	for _, c := range cases {
-		var held sim.TurnState
-		held.SetHandForTesting([]card.Card{testutils.GenericAttack(0, 0)})
-		if got := c.Cost(&held); got != 0 {
+		held := gameengine.New()
+		held.SetHand([]card.Card{testutils.GenericAttack(0, 0)})
+		if got := c.Cost(held); got != 0 {
 			t.Errorf("%s: Cost(Hand) = %d, want 0", c.Name(), got)
 		}
-		empty := sim.TurnState{}
-		if got := c.Cost(&empty); got != 2 {
+		empty := gameengine.New()
+		if got := c.Cost(empty); got != 2 {
 			t.Errorf("%s: Cost(empty) = %d, want 2", c.Name(), got)
 		}
 		vc, ok := c.(card.VariableCost)
@@ -41,10 +42,10 @@ func TestMoonWish_VariableCost(t *testing.T) {
 func TestMoonWish_AltCostMovesHandCardToDeckTop(t *testing.T) {
 	dr := testutils.GenericAttack(0, 0).WithName("dr")
 	other := testutils.GenericAttack(0, 0).WithName("deckTop")
-	s := sim.NewTurnStateFromCards([]card.Card{other}, nil)
-	s.SetHandForTesting([]card.Card{dr})
+	s := gameengine.NewFromCards([]card.Card{other}, nil)
+	s.SetHand([]card.Card{dr})
 	self := &card.CardState{Card: cards.MoonWishYellow{}}
-	sim.ResolveChainStep(s, s.Logger(), self)
+	s.ResolveChainStep(s.Logger(), self)
 	testutils.FireOnHitIfLikely(s, s.Logger(), self)
 	if h := s.Hand(); len(h) != 0 {
 		t.Errorf("Hand = %d entries, want 0 (alt cost should pop the only hand card)", len(h))
@@ -82,9 +83,9 @@ func TestMoonWish_TutorPrefersRedSunKissThenYellowThenBlue(t *testing.T) {
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
-			s := sim.NewTurnStateFromCards(append([]card.Card(nil), tc.deck...), nil)
+			s := gameengine.NewFromCards(append([]card.Card(nil), tc.deck...), nil)
 			self := &card.CardState{Card: cards.MoonWishYellow{}}
-			sim.ResolveChainStep(s, s.Logger(), self)
+			s.ResolveChainStep(s.Logger(), self)
 			testutils.FireOnHitIfLikely(s, s.Logger(), self)
 			h := s.Hand()
 			if len(h) != 1 || h[0].ID() != tc.want {
@@ -98,9 +99,9 @@ func TestMoonWish_TutorPrefersRedSunKissThenYellowThenBlue(t *testing.T) {
 // leaves the deck intact.
 func TestMoonWish_TutorRequiresHit(t *testing.T) {
 	{
-		s := sim.NewTurnStateFromCards([]card.Card{cards.SunKissRed{}}, nil)
+		s := gameengine.NewFromCards([]card.Card{cards.SunKissRed{}}, nil)
 		self := &card.CardState{Card: cards.MoonWishYellow{}}
-		sim.ResolveChainStep(s, s.Logger(), self)
+		s.ResolveChainStep(s.Logger(), self)
 		testutils.FireOnHitIfLikely(s, s.Logger(), self)
 		h := s.Hand()
 		if len(h) != 1 || h[0].ID() != ids.SunKissRed {
@@ -111,10 +112,10 @@ func TestMoonWish_TutorRequiresHit(t *testing.T) {
 		}
 	}
 	{
-		s := sim.NewTurnStateFromCards([]card.Card{cards.SunKissRed{}}, nil)
+		s := gameengine.NewFromCards([]card.Card{cards.SunKissRed{}}, nil)
 		// Drive EffectiveAttack down so LikelyToHit fails (4 - 4 = 0, clamped, not in window).
 		self := &card.CardState{Card: cards.MoonWishYellow{}, BonusAttack: -4}
-		sim.ResolveChainStep(s, s.Logger(), self)
+		s.ResolveChainStep(s.Logger(), self)
 		if h := s.Hand(); len(h) != 0 {
 			t.Errorf("dampened: Hand = %v, want [] (no hit, no tutor)", h)
 		}
@@ -127,9 +128,9 @@ func TestMoonWish_TutorRequiresHit(t *testing.T) {
 // Tests that Sun Kiss plays immediately when self has go-again, otherwise lands in hand.
 func TestMoonWish_GoAgainPlaysSunKissImmediately(t *testing.T) {
 	{
-		s := sim.NewTurnStateFromCards([]card.Card{cards.SunKissRed{}}, nil)
+		s := gameengine.NewFromCards([]card.Card{cards.SunKissRed{}}, nil)
 		self := &card.CardState{Card: cards.MoonWishYellow{}, GrantedGoAgain: true}
-		sim.ResolveChainStep(s, s.Logger(), self)
+		s.ResolveChainStep(s.Logger(), self)
 		testutils.FireOnHitIfLikely(s, s.Logger(), self)
 		dmg := s.Value()
 		if dmg != 4+3 {
@@ -144,9 +145,9 @@ func TestMoonWish_GoAgainPlaysSunKissImmediately(t *testing.T) {
 		}
 	}
 	{
-		s := sim.NewTurnStateFromCards([]card.Card{cards.SunKissRed{}}, nil)
+		s := gameengine.NewFromCards([]card.Card{cards.SunKissRed{}}, nil)
 		self := &card.CardState{Card: cards.MoonWishYellow{}}
-		sim.ResolveChainStep(s, s.Logger(), self)
+		s.ResolveChainStep(s.Logger(), self)
 		testutils.FireOnHitIfLikely(s, s.Logger(), self)
 		dmg := s.Value()
 		if dmg != 4 {

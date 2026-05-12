@@ -1,12 +1,13 @@
 package turntests
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
 	"testing"
 
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
+
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/gameengine"
 )
 
 // Tests that Exposed accepts attack action cards as targets.
@@ -32,8 +33,8 @@ func TestExposed_RejectsNonAttack(t *testing.T) {
 
 // Tests that Exposed's Play marks the opposing hero.
 func TestExposed_PlayMarksOpponent(t *testing.T) {
-	s := sim.TurnState{}
-	sim.ResolveChainStep(&s, s.Logger(), &card.CardState{Card: cards.ExposedBlue{}})
+	s := gameengine.New()
+	s.ResolveChainStep(s.Logger(), &card.CardState{Card: cards.ExposedBlue{}})
 	if !s.OpponentMarked() {
 		t.Error("OpponentMarked = false after Play, want true")
 	}
