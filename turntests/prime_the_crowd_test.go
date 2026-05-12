@@ -1,0 +1,54 @@
+package turntests
+
+import (
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards/notimplemented"
+	"testing"
+
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
+)
+
+// TestPrimeTheCrowd_NoAttackReturnsZero: no qualifying next attack card → +4 rider fizzles.
+func TestPrimeTheCrowd_NoAttackReturnsZero(t *testing.T) {
+	s := sim.TurnState{}
+	for _, c := range []card.Card{notimplemented.PrimeTheCrowdRed{}, notimplemented.PrimeTheCrowdYellow{}, notimplemented.PrimeTheCrowdBlue{}} {
+		sim.ResolveChainStep(&s, s.Logger(), &card.CardState{Card: c})
+		if got := s.Value(); got != 0 {
+			t.Errorf("%s: Play() = %d, want 0", c.Name(), got)
+		}
+	}
+}
+
+// TestPrimeTheCrowd_NonAttackInRemainingFizzles: non-attack action fails the predicate.
+func TestPrimeTheCrowd_NonAttackInRemainingFizzles(t *testing.T) {
+	s := sim.NewTurnStateFromSpec(sim.TurnStateSpec{CardsRemaining: []*card.CardState{{Card: testutils.GenericAction()}}})
+	sim.ResolveChainStep(&s, s.Logger(), &card.CardState{Card: notimplemented.PrimeTheCrowdRed{}})
+	if got := s.Value(); got != 0 {
+		t.Errorf("Play() = %d, want 0 (non-attack skipped)", got)
+	}
+}
+
+// TestPrimeTheCrowd_NextAttackReturnsBonus: first attack-action triggers the per-variant bonus
+// (Red +4, Yellow +3, Blue +2).
+func TestPrimeTheCrowd_NextAttackReturnsBonus(t *testing.T) {
+	cases := []struct {
+		c    card.Card
+		want int
+	}{
+		{notimplemented.PrimeTheCrowdRed{}, 4},
+		{notimplemented.PrimeTheCrowdYellow{}, 3},
+		{notimplemented.PrimeTheCrowdBlue{}, 2},
+	}
+	for _, tc := range cases {
+		target := &card.CardState{Card: testutils.GenericAttack(0, 0)}
+		s := sim.NewTurnStateFromSpec(sim.TurnStateSpec{CardsRemaining: []*card.CardState{target}})
+		sim.ResolveChainStep(&s, s.Logger(), &card.CardState{Card: tc.c})
+		if got := s.Value(); got != 0 {
+			t.Errorf("%s: Play() = %d, want 0 (granter returns 0; +N rides on target's BonusAttack)", tc.c.Name(), got)
+		}
+		if target.BonusAttack != tc.want {
+			t.Errorf("%s: target BonusAttack = %d, want %d", tc.c.Name(), target.BonusAttack, tc.want)
+		}
+	}
+}
