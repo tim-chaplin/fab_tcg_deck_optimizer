@@ -53,7 +53,7 @@ func TestSigilOfSilphidae_StartOfTurnHandlerFizzlesWithoutAnotherAura(t *testing
 	var play gameengine.GameEngine
 	play.ResolveChainStep(play.Logger(), &card.CardState{Card: cards.SigilOfSilphidaeBlue{}})
 	next := gameengine.NewFromCards(nil, nil)
-	next.SetAuras(append(next.Auras(), play.Auras()[0]))
+	next.CreateAura(play.Auras()[0])
 	next.FireStartOfTurn(nil)
 	if next.Value() != 0 {
 		t.Errorf("handler Value = %d, want 0 (no other aura to banish)", next.Value())
@@ -67,7 +67,7 @@ func TestSigilOfSilphidae_StartOfTurnHandlerBanishesAnotherAura(t *testing.T) {
 	play.ResolveChainStep(play.Logger(), &card.CardState{Card: cards.SigilOfSilphidaeBlue{}})
 	other := cards.BlessingOfOccultRed{}
 	next := gameengine.NewFromCards(nil, []card.Card{other})
-	next.SetAuras(append(next.Auras(), play.Auras()[0]))
+	next.CreateAura(play.Auras()[0])
 	next.FireStartOfTurn(nil)
 	if next.Value() != 1 {
 		t.Errorf("handler Value = %d, want 1 (banished another aura)", next.Value())

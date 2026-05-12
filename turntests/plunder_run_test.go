@@ -8,7 +8,6 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
-	"github.com/tim-chaplin/fab-deck-optimizer/v2/gameengine"
 )
 
 // Tests that Plunder Run's "next time an attack action card hits" trigger waits across a
@@ -21,7 +20,7 @@ func TestPlunderRun_TriggerWaitsAcrossMissAndFiresOnHit(t *testing.T) {
 		cards.RuneragerSwarmRed{},
 		cards.CriticalStrikeYellow{},
 	}
-	state := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, gameengine.Spec{}, hand)
+	state := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, sim.Prior{}, hand)
 	if state.Value != 8 {
 		t.Fatalf("Value = %d, want 8 (Runerager 3 + Viserai runechant 1 + CS 4)\nBestLine: %s",
 			state.Value, formatBestLine(state.BestLine))

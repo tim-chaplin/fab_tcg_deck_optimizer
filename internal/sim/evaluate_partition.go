@@ -11,8 +11,9 @@ import (
 // replayBest (the cached partition replayed without searching). It groups hand cards into
 // pitched/attackers/defenders/held, folds the arsenal-in card into the right bucket per
 // rolesBuf[n], computes the arsenal indices, and forwards everything to
-// bestAttackWithWeapons. The output tuple is bestAttackWithWeapons's tuple plus the
-// computed arsenalAtChainStart so callers wiring up TurnSummary don't recompute it.
+// bestAttackWithWeapons. The winning *GameEngine for this partition's chain is returned
+// for the caller to keep — discarding losers requires no explicit work since the only
+// reference to them was inside this leaf.
 //
 // rolesBuf must be in sync with hand (rolesBuf[i] is the role assigned to hand[i]) and
 // must use only Pitch/Attack/Defend/Held in hand-card slots — hand cards never have
@@ -23,14 +24,15 @@ import (
 // Mutates the bufs scratch slices (pitchedBuf, attackersBuf, defendersBuf, heldBuf) in
 // place; both callers feed pooled scratch through bufs and tolerate the rewrite.
 func (e *Evaluator) evaluatePartition(
-	hero Hero, weapons []Weapon, hand []card.Card,
+	masterEngine *gameengine.GameEngine,
+	weapons []Weapon, hand []card.Card,
 	d *deck.Deck,
 	rolesBuf []Role, n int, bufs *attackBufs,
 	mp Matchup, defenseSum int,
-	prior gameengine.Spec, skipLog bool,
+	prior Prior, skipLog bool,
 ) (
 	attackDealt, defenseDealt int,
-	swung []string, carry CarryState,
+	swung []string, winner *gameengine.GameEngine,
 	ok, cacheable bool,
 	arsenalAtChainStart card.Card,
 ) {
@@ -49,9 +51,6 @@ func (e *Evaluator) evaluatePartition(
 			defs = append(defs, arsenalCardIn)
 		}
 	}
-	// Arsenal-in is appended last to a / d above, so its index is len(slice)-1 when
-	// present. -1 means no arsenal-in card in that bucket (either no arsenal-in card at
-	// all, or it took a different role).
 	arsenalInIdx := -1
 	if arsenalCardIn != nil && rolesBuf[n] == Attack {
 		arsenalInIdx = len(a) - 1
@@ -60,16 +59,11 @@ func (e *Evaluator) evaluatePartition(
 	if arsenalCardIn != nil && rolesBuf[n] == Defend {
 		arsenalDefenderIdx = len(defs) - 1
 	}
-	// Held cards (hand cards left without a Pitch / Attack / Defend role) thread through
-	// to TurnState.Hand so alt-cost effects (e.g. Moon Wish's "use a hand card") can read
-	// len > 0. Arsenal-in can never be Held (roleAllowed bars it).
 	h := gatherHeldCards(hand, rolesBuf[:n], bufs.heldBuf[:0])
 	arsenalAtChainStart = findArsenalCard(rolesBuf, arsenalCardIn, n)
 
-	// Hand off to the chain dispatcher — same call shape both callers used inline before
-	// the extraction.
-	attackDealt, defenseDealt, _, swung, carry, ok, cacheable = bestAttackWithWeapons(
-		hero, weapons, a, defs, p, h, d, bufs,
+	attackDealt, defenseDealt, _, swung, winner, ok, cacheable = bestAttackWithWeapons(
+		masterEngine, weapons, a, defs, p, h, d, bufs,
 		mp, defenseSum,
 		arsenalInIdx, arsenalDefenderIdx, arsenalAtChainStart,
 		prior, skipLog,

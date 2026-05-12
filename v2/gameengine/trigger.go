@@ -9,11 +9,11 @@ import "github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 // AddHitTrigger registers a one-shot TriggerHit listener. filter narrows the qualifying
 // hits to a card-type predicate; nil = any hit qualifies.
 func (g *GameEngine) AddHitTrigger(self *card.CardState, handler card.TriggerHandler, filter func(card.TypeSet) bool) {
-	g.AppendTrigger(BuildCardTrigger(self, TriggerHit, handler, filter))
+	g.CreateTrigger(BuildCardTrigger(self, TriggerHit, handler, filter))
 }
 
 // AddEndOfTurnTrigger registers a one-shot TriggerEndOfTurn listener — fires after the
 // chain finishes resolving but before the carry-state snapshot.
 func (g *GameEngine) AddEndOfTurnTrigger(self *card.CardState, handler card.TriggerHandler) {
-	g.AppendTrigger(BuildCardTrigger(self, TriggerEndOfTurn, handler, nil))
+	g.CreateTrigger(BuildCardTrigger(self, TriggerEndOfTurn, handler, nil))
 }

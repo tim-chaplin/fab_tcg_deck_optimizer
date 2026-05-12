@@ -8,7 +8,6 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
-	"github.com/tim-chaplin/fab-deck-optimizer/v2/gameengine"
 )
 
 // Tests that Wage Gold's on-hit rider creates a Gold token when the attack hits.
@@ -20,7 +19,7 @@ func TestWageGold_OnHitCreatesGoldToken(t *testing.T) {
 		testutils.BluePitch{},
 		testutils.BluePitch{},
 	}
-	state := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, gameengine.Spec{}, hand)
+	state := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, sim.Prior{}, hand)
 	if state.Value != 7 {
 		t.Fatalf("Value = %d, want 7 (Wage Gold Red 7 power)\nBestLine: %s",
 			state.Value, formatBestLine(state.BestLine))
@@ -39,7 +38,7 @@ func TestWageGold_BlockableMissDoesNotCreateGold(t *testing.T) {
 		testutils.BluePitch{},
 		testutils.BluePitch{},
 	}
-	state := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, gameengine.Spec{}, hand)
+	state := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, sim.Prior{}, hand)
 	if state.Value != 5 {
 		t.Fatalf("Value = %d, want 5 (Wage Gold Blue 5 power)\nBestLine: %s",
 			state.Value, formatBestLine(state.BestLine))

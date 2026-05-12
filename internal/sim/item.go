@@ -27,37 +27,14 @@ func NewTokenItem(name string, tokenID ids.CardID, ability card.Card, count int)
 	}
 }
 
-// itemSliceAsEngine converts []*Item to []gameengine.Item for engine-API call sites.
-func itemSliceAsEngine(src []*Item) []gameengine.Item {
-	if len(src) == 0 {
-		return nil
-	}
-	out := make([]gameengine.Item, len(src))
-	for i, it := range src {
-		out[i] = it
-	}
-	return out
-}
-
-// itemSliceFromEngine type-asserts engine-returned []gameengine.Item back to []*Item.
-func itemSliceFromEngine(src []gameengine.Item) []*Item {
-	if len(src) == 0 {
-		return nil
-	}
-	out := make([]*Item, len(src))
-	for i, it := range src {
-		out[i] = it.(*Item)
-	}
-	return out
-}
-
 func (i *Item) CardName() string   { return i.tokenName }
 func (i *Item) CardID() ids.CardID { return i.tokenID }
 func (i *Item) Count() int         { return i.count }
 func (i *Item) SetCount(n int)     { i.count = n }
 func (i *Item) Ability() card.Card { return i.ability }
 
-func (i *Item) Clone() gameengine.Item {
+// Copy returns a deep copy of this item.
+func (i *Item) Copy() gameengine.Item {
 	out := *i
 	return &out
 }

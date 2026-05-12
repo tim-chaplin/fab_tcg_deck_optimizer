@@ -54,10 +54,9 @@ type Aura interface {
 	// Card-backed auras push their source card into the graveyard via g.AppendGraveyard;
 	// token auras no-op.
 	OnDestroy(g *GameEngine)
-	// Clone returns a deep copy of this aura. The engine clones every aura on Reset so
-	// per-permutation Count / FiredThisTurn mutations don't leak across the shared
-	// priorAuras slice the seed carries.
-	Clone() Aura
+	// Copy returns a deep copy. GameEngine.Copy walks the aura list and stores the
+	// result so per-permutation Count / FiredThisTurn mutations don't leak across copies.
+	Copy() Aura
 }
 
 // Trigger is the engine's view of a one-shot deferred handler.
@@ -70,9 +69,6 @@ type Trigger interface {
 	Matches(types card.TypeSet) bool
 	// Fire invokes the trigger's handler with a card.Trigger context built by the engine.
 	Fire(g *GameEngine, l card.Logger)
-	// Clone returns a deep copy of this trigger. Same per-permutation isolation rationale
-	// as Aura.Clone.
-	Clone() Trigger
 }
 
 // Item is the engine's view of an in-play permanent with an activated ability.
@@ -83,9 +79,9 @@ type Item interface {
 	SetCount(int)
 	// Ability is the activated-ability card the chain runner enqueues each turn.
 	Ability() card.Card
-	// Clone returns a deep copy of this item. Same per-permutation isolation rationale
-	// as Aura.Clone.
-	Clone() Item
+	// Copy returns a deep copy. GameEngine.Copy walks the item list and stores the
+	// result so per-permutation Count mutations don't leak across copies.
+	Copy() Item
 }
 
 // Hero is the engine's view of the active hero. Concrete heroes (e.g. internal/heroes/*)

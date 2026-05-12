@@ -19,8 +19,8 @@ func TestGoldAbility_SpendsToFillArsenalAndSwings(t *testing.T) {
 	}
 	d := deck.New(heroes.Viserai{}, []deck.Weapon{weapons.ReapingBlade{}}, cards)
 	hand := []deck.Card{testutils.BluePitch{}}
-	priorItems := []gameengine.Item{sim.NewGoldItem(1)}
-	got := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, gameengine.Spec{Items: priorItems}, hand)
+	priorItems := []*sim.Item{sim.NewGoldItem(1)}
+	got := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, sim.Prior{Items: priorItems}, hand)
 	if got.Value != 3 {
 		t.Fatalf("Value = %d, want 3 (Reaping Blade swing power 3)", got.Value)
 	}

@@ -20,7 +20,7 @@ func TestGraveyard_AttackChainAppends(t *testing.T) {
 	if _, _, _, legal := ctx.PlaySequence(order); !legal {
 		t.Fatalf("playSequence rejected the chain")
 	}
-	got := ctx.Bufs().State().Graveyard()
+	got := ctx.PermEngine().Graveyard()
 	if len(got) != len(order) {
 		t.Fatalf("graveyard len = %d, want %d", len(got), len(order))
 	}
@@ -42,7 +42,7 @@ func TestGraveyard_WeaponSwingDoesNotEnterGraveyard(t *testing.T) {
 	if _, _, _, legal := ctx.PlaySequence(order); !legal {
 		t.Fatalf("playSequence rejected attack → weapon")
 	}
-	got := ctx.Bufs().State().Graveyard()
+	got := ctx.PermEngine().Graveyard()
 	if len(got) != 1 {
 		t.Fatalf("graveyard len = %d, want 1 (attack only, weapon doesn't enter)", len(got))
 	}
@@ -127,14 +127,14 @@ func TestGraveyard_PermutationReset(t *testing.T) {
 	if _, _, _, legal := ctx.PlaySequence(first); !legal {
 		t.Fatalf("first playSequence rejected")
 	}
-	if got := len(ctx.Bufs().State().Graveyard()); got != len(first) {
+	if got := len(ctx.PermEngine().Graveyard()); got != len(first) {
 		t.Fatalf("after first run, graveyard len = %d, want %d", got, len(first))
 	}
 
 	if _, _, _, legal := ctx.PlaySequence(second); !legal {
 		t.Fatalf("second playSequence rejected")
 	}
-	if got := len(ctx.Bufs().State().Graveyard()); got != len(second) {
+	if got := len(ctx.PermEngine().Graveyard()); got != len(second) {
 		t.Fatalf("after second run, graveyard len = %d, want %d (leaked from first?)",
 			got, len(second))
 	}

@@ -10,7 +10,6 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
-	"github.com/tim-chaplin/fab-deck-optimizer/v2/gameengine"
 )
 
 // Tests that state.deck and state.hand are reset between permutations so a draw in one
@@ -22,10 +21,10 @@ func TestPlaySequence_DrawDoesNotPoisonSubsequentPermutations(t *testing.T) {
 
 	// First permutation: Snatch fires, DrawOne pops the top of the deck into Hand.
 	_, _, _, _ = ctx.PlaySequence([]card.Card{cards.SnatchRed{}})
-	if h := ctx.Bufs().State().Hand(); len(h) != 1 || h[0] != top {
+	if h := ctx.PermEngine().Hand(); len(h) != 1 || h[0] != top {
 		t.Fatalf("after first permutation: Hand = %v, want [top]", h)
 	}
-	if got := ctx.Bufs().State().Deck().Size(); got != len(deck)-1 {
+	if got := ctx.PermEngine().Deck().Size(); got != len(deck)-1 {
 		t.Fatalf("after first permutation: Deck size = %d, want %d (top consumed)",
 			got, len(deck)-1)
 	}
@@ -33,10 +32,10 @@ func TestPlaySequence_DrawDoesNotPoisonSubsequentPermutations(t *testing.T) {
 	// Second permutation: plain attack, no draw. The reset at the top of playSequenceWithMeta
 	// must restore state.deck to the original and clear state.hand before this call runs.
 	_, _, _, _ = ctx.PlaySequence([]card.Card{testutils.RedAttack{}})
-	if h := ctx.Bufs().State().Hand(); len(h) != 0 {
+	if h := ctx.PermEngine().Hand(); len(h) != 0 {
 		t.Errorf("after second permutation: Hand = %v, want empty (reset lost)", h)
 	}
-	if got := ctx.Bufs().State().Deck().Size(); got != len(deck) {
+	if got := ctx.PermEngine().Deck().Size(); got != len(deck) {
 		t.Errorf("after second permutation: Deck size = %d, want %d (reset lost)",
 			got, len(deck))
 	}
@@ -50,8 +49,8 @@ func TestBest_DrawRiderSeesActualDeck(t *testing.T) {
 	deckA := DeckOf(testutils.RedAttack{})
 	deckB := DeckOf(testutils.BlueAttack{})
 
-	resA := Best(heroes.Viserai{}, nil, h, Matchup{IncomingDamage: 0}, deckA, gameengine.Spec{})
-	resB := Best(heroes.Viserai{}, nil, h, Matchup{IncomingDamage: 0}, deckB, gameengine.Spec{})
+	resA := Best(nil, h, Matchup{IncomingDamage: 0}, deckA, Prior{Hero: heroes.Viserai{}})
+	resB := Best(nil, h, Matchup{IncomingDamage: 0}, deckB, Prior{Hero: heroes.Viserai{}})
 
 	containsID := func(cs []card.Card, id ids.CardID) bool {
 		for _, c := range cs {
@@ -61,13 +60,13 @@ func TestBest_DrawRiderSeesActualDeck(t *testing.T) {
 		}
 		return false
 	}
-	if !containsID(resA.State.Hand, (testutils.RedAttack{}).ID()) && resA.State.Arsenal == nil {
+	if !containsID(resA.State.HandRaw(), (testutils.RedAttack{}).ID()) && resA.State.Arsenal() == nil {
 		t.Errorf("deck A: drawn RedAttack didn't surface in State.Hand or State.Arsenal: hand=%v arsenal=%v",
-			resA.State.Hand, resA.State.Arsenal)
+			resA.State.HandRaw(), resA.State.Arsenal())
 	}
-	if !containsID(resB.State.Hand, (testutils.BlueAttack{}).ID()) && resB.State.Arsenal == nil {
+	if !containsID(resB.State.HandRaw(), (testutils.BlueAttack{}).ID()) && resB.State.Arsenal() == nil {
 		t.Errorf("deck B: drawn BlueAttack didn't surface in State.Hand or State.Arsenal: hand=%v arsenal=%v",
-			resB.State.Hand, resB.State.Arsenal)
+			resB.State.HandRaw(), resB.State.Arsenal())
 	}
 }
 
@@ -86,8 +85,8 @@ func TestBest_DeckOrderDoesNotAffectHandRoles(t *testing.T) {
 		return m
 	}
 
-	resA := Best(testutils.Hero{Intel: 4}, nil, h, Matchup{IncomingDamage: 0}, deckA, gameengine.Spec{})
-	resB := Best(testutils.Hero{Intel: 4}, nil, h, Matchup{IncomingDamage: 0}, deckB, gameengine.Spec{})
+	resA := Best(nil, h, Matchup{IncomingDamage: 0}, deckA, Prior{Hero: testutils.Hero{Intel: 4}})
+	resB := Best(nil, h, Matchup{IncomingDamage: 0}, deckB, Prior{Hero: testutils.Hero{Intel: 4}})
 
 	rolesA := rolesFor(resA)
 	rolesB := rolesFor(resB)

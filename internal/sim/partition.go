@@ -11,18 +11,14 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/gameengine"
 )
 
-func (e *Evaluator) findBest(hero Hero, weapons []Weapon, hand []card.Card, mp Matchup, d *deck.Deck, prior gameengine.Spec, skipLog bool) TurnSummary {
-	// Install the hero on the scratch engine so cards' g.CurrentHeroClass /
-	// g.HeroWantsLowerHealth reads return the right value across every permutation
-	// the upcoming search drives through the engine.
-	bufs := e.getAttackBufs(len(hand), weapons)
-	bufs.state.SetHero(hero)
-	bufs.drScratch.SetHero(hero)
+func (e *Evaluator) findBest(weapons []Weapon, hand []card.Card, mp Matchup, d *deck.Deck, prior Prior, skipLog bool) TurnSummary {
+	masterEngine := newTurnMasterEngine(prior, mp, d)
+
 	var cacheKey evalCacheKey
 	cacheUsable := e.cache != nil
 	if cacheUsable {
 		var keyOK bool
-		cacheKey, keyOK = makeCacheKey(hero, weapons, hand, prior)
+		cacheKey, keyOK = makeCacheKey(weapons, hand, prior)
 		if !keyOK {
 			cacheUsable = false
 		}
@@ -30,11 +26,12 @@ func (e *Evaluator) findBest(hero Hero, weapons []Weapon, hand []card.Card, mp M
 	if cacheUsable {
 		if entry, ok := e.cache.lookup(cacheKey); ok {
 			e.cache.hits.Add(1)
-			return e.replayBest(entry, hero, weapons, hand, mp, d, prior, skipLog)
+			return e.replayBest(entry, weapons, hand, mp, d, prior, masterEngine, skipLog)
 		}
 		e.cache.misses.Add(1)
 	}
 
+	bufs := e.getAttackBufs(len(hand), weapons)
 	arsenalCardIn := prior.Arsenal
 	n := len(hand)
 	totalN := n
@@ -46,25 +43,18 @@ func (e *Evaluator) findBest(hero Hero, weapons []Weapon, hand []card.Card, mp M
 		BestLine:       make([]CardAssignment, totalN),
 		IncomingDamage: mp.IncomingDamage,
 		Cacheable:      true,
-		State: CarryState{
-			Hand:    append([]card.Card(nil), hand...),
-			Deck:    d.Copy(),
-			Arsenal: arsenalCardIn,
-			Auras:   auraSliceFromEngine(prior.Auras),
-			Items:   itemSliceFromEngine(prior.Items),
-		},
 	}
-	cacheable := true
-	var bestSwung []string
 	for i := 0; i < n; i++ {
 		best.BestLine[i] = CardAssignment{Card: hand[i], Role: Held}
 	}
 	if arsenalCardIn != nil {
 		best.BestLine[n] = CardAssignment{Card: arsenalCardIn, Role: Arsenal, FromArsenal: true}
 	}
-
+	cacheable := true
+	var bestSwung []string
 	var runningSeen bool
 	var runningFutureValue int
+
 	rolesBuf := bufs.rolesBuf[:totalN]
 	pvals := bufs.pitchVals[:totalN]
 	dvals := bufs.defenseVals[:totalN]
@@ -76,8 +66,8 @@ func (e *Evaluator) findBest(hero Hero, weapons []Weapon, hand []card.Card, mp M
 	var recurse func(i, pitchSum, defenseSum int)
 	recurse = func(i, pitchSum, defenseSum int) {
 		if i == totalN {
-			attackDealt, defenseDealt, swung, carry, ok, leafCacheable, arsenalAtChainStart := e.evaluatePartition(
-				hero, weapons, hand, d,
+			attackDealt, defenseDealt, swung, winner, ok, leafCacheable, arsenalAtChainStart := e.evaluatePartition(
+				masterEngine, weapons, hand, d,
 				rolesBuf, n, bufs,
 				mp, defenseSum,
 				prior, skipLog,
@@ -90,24 +80,23 @@ func (e *Evaluator) findBest(hero Hero, weapons []Weapon, hand []card.Card, mp M
 			}
 
 			v := attackDealt + defenseDealt
-			arsenalCard := arsenalAtChainStart
-			futureValuePlayed := pendingFutureValue(carry.Auras, carry.Items)
+			futureValuePlayed := pendingFutureValueFromEngine(winner)
 			if runningSeen {
-				cmp := chainScoreCmp(v, carry.CardsDrawn, futureValuePlayed,
-					best.Value, best.State.CardsDrawn, runningFutureValue)
+				cmp := chainScoreCmp(v, winner.CardsDrawn(), futureValuePlayed,
+					best.Value, best.State.CardsDrawn(), runningFutureValue)
 				if cmp < 0 {
 					return
 				}
 				if cmp == 0 {
-					willOccupy := arsenalCard != nil || len(carry.Hand) > 0
-					runningWillOccupy := best.State.Arsenal != nil || len(best.State.Hand) > 0
+					willOccupy := arsenalAtChainStart != nil || len(winner.HandRaw()) > 0
+					runningWillOccupy := best.State.Arsenal() != nil || len(best.State.HandRaw()) > 0
 					if !willOccupy || runningWillOccupy {
 						return
 					}
 				}
 			}
-			best.State.CopyFrom(&carry)
-			best.State.Arsenal = arsenalCard
+			winner.SetArsenal(arsenalAtChainStart)
+			best.State = winner
 			best.Value = v
 			runningFutureValue = futureValuePlayed
 			runningSeen = true
@@ -143,7 +132,16 @@ func (e *Evaluator) findBest(hero Hero, weapons []Weapon, hand []card.Card, mp M
 	recurse(0, 0, 0)
 	best.SwungWeapons = bestSwung
 	best.Cacheable = cacheable
-	if best.State.Arsenal == nil {
+	if best.State == nil {
+		// No feasible partition was found — synthesise an "untouched" trailing engine that
+		// holds the starting hand and prior state. Callers (deck_eval) still need a non-nil
+		// State to read end-of-turn fields.
+		fallback := masterEngine.Copy()
+		fallback.SetHand(append([]card.Card(nil), hand...))
+		fallback.SetArsenal(arsenalCardIn)
+		best.State = fallback
+	}
+	if best.State.Arsenal() == nil {
 		promoteRandomHandCardToArsenal(&best, hand, arsenalCardIn)
 	}
 	if cacheUsable {
@@ -159,14 +157,16 @@ func (e *Evaluator) findBest(hero Hero, weapons []Weapon, hand []card.Card, mp M
 	return best
 }
 
-// promoteRandomHandCardToArsenal picks one card from best.State.Hand and moves it into
-// best.State.Arsenal, removing it from State.Hand. Deterministic per-hand pick.
+// promoteRandomHandCardToArsenal picks one card from best.State.HandRaw() and moves it
+// into best.State's arsenal slot, removing it from the engine's hand. Deterministic
+// per-hand pick.
 func promoteRandomHandCardToArsenal(best *TurnSummary, startingHand []card.Card, arsenalCardIn card.Card) {
-	if len(best.State.Hand) == 0 {
+	handState := best.State.HandRaw()
+	if len(handState) == 0 {
 		return
 	}
-	eligible := make([]int, 0, len(best.State.Hand))
-	for i, c := range best.State.Hand {
+	eligible := make([]int, 0, len(handState))
+	for i, c := range handState {
 		t := c.Types(nil)
 		if t.Has(card.TypeBlock) || t.IsResource() {
 			continue
@@ -176,10 +176,11 @@ func promoteRandomHandCardToArsenal(best *TurnSummary, startingHand []card.Card,
 	if len(eligible) == 0 {
 		return
 	}
-	pick := eligible[int(arsenalPromotionHash(startingHand, best.State.Hand, arsenalCardIn)%uint64(len(eligible)))]
-	chosen := best.State.Hand[pick]
-	best.State.Arsenal = chosen
-	best.State.Hand = append(best.State.Hand[:pick:pick], best.State.Hand[pick+1:]...)
+	pick := eligible[int(arsenalPromotionHash(startingHand, handState, arsenalCardIn)%uint64(len(eligible)))]
+	chosen := handState[pick]
+	best.State.SetArsenal(chosen)
+	newHand := append(handState[:pick:pick], handState[pick+1:]...)
+	best.State.SetHand(newHand)
 	for i := range best.BestLine {
 		if best.BestLine[i].Role == Held && best.BestLine[i].Card.ID() == chosen.ID() {
 			best.BestLine[i].Role = Arsenal
@@ -262,12 +263,11 @@ func roleAllowed(r Role, isArsenalSlot, isDefenseReaction, canAttack bool) bool 
 	return r != Attack || canAttack
 }
 
-// defendersDamage tallies the total Value contribution of the partition's defense phase.
-// DRs resolve first via Play (their ApplyAndLogEffectiveDefense decrements
-// state.incomingDamage and credits the block); plain blocks then consume whatever incoming
-// damage is left, capped per card. The engine is caller-provided (from attackBufs) and
-// reset per DR via a PermutationSeed scoped to this DR's view (pitched, deckPile copy,
-// defenders-as-graveyard, running incoming damage).
+// defendersDamage tallies the total Value contribution of the partition's defense phase
+// against the caller-supplied state engine. DRs resolve first; plain blocks then consume
+// whatever incoming damage is left, capped per card. The engine is mutated in place: each
+// DR's resolution updates the running aura set and the engine's IncomingDamage; the chain
+// phase will read the post-defense graveyard via the engine's left-behind state.
 //
 // blockBudget is the remaining defense-phase pitch supply after the caller has subtracted
 // DR costs. Modal blockers enumerate their modes within blockBudget and pick the one
@@ -279,25 +279,18 @@ func defendersDamage(defenders, pitched []card.Card, deckPile *deck.Deck, state 
 	total := 0
 	remaining := incomingDamage
 	cacheable := true
+	state.SetDeck(deckPile)
 	for i, def := range defenders {
 		if !attackerMetaPtrFor(def).actsAsDR {
 			continue
 		}
 		gravBuf = append(gravBuf[:0], defenders...)
-		// Preserve the running aura set and logger across the per-DR reset so chain-created
-		// auras persist for the caller and the recording / find-best logger choice carries
-		// through.
-		preservedAuras := state.Auras()
-		preservedLogger := state.Logger()
-		state.Reset(gameengine.PermutationSeed{
-			Deck:           deckPile,
-			Graveyard:      gravBuf,
-			Auras:          preservedAuras,
-			Pitched:        pitched,
-			Defenders:      defenders,
-			IncomingDamage: remaining,
-			Logger:         preservedLogger,
-		})
+		state.SetGraveyard(gravBuf)
+		state.SetPitched(pitched)
+		state.SetDefenders(defenders)
+		state.SetValue(0)
+		state.SetIncomingDamage(remaining)
+		state.SetCacheable(true)
 		*cs = card.CardState{Card: def, FromArsenal: i == arsenalDefenderIdx}
 		state.ResolveChainStep(state.Logger(), cs)
 		total += state.Value()

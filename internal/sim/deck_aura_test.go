@@ -106,7 +106,7 @@ func TestProcessAurasAtStartOfTurn_IgnoresPonder(t *testing.T) {
 func TestFireEndOfTurn_PonderPopsDeckTopIntoHand(t *testing.T) {
 	a, b, c := testutils.NewStubCard("a"), testutils.NewStubCard("b"), testutils.NewStubCard("c")
 	s := gameengine.NewFromCards([]card.Card{a, b, c}, nil)
-	s.AppendAura(NewPonderAura(2))
+	s.CreateAura(NewPonderAura(2))
 	FireEndOfTurn(s)
 
 	h := s.Hand()
@@ -124,7 +124,7 @@ func TestFireEndOfTurn_PonderPopsDeckTopIntoHand(t *testing.T) {
 // TestFireEndOfTurn_PonderEmptyDeckIsNoOp.
 func TestFireEndOfTurn_PonderEmptyDeckIsNoOp(t *testing.T) {
 	s := gameengine.NewFromCards(nil, nil)
-	s.AppendAura(NewPonderAura(1))
+	s.CreateAura(NewPonderAura(1))
 	FireEndOfTurn(s)
 	if h := s.Hand(); len(h) != 0 {
 		t.Errorf("Hand = %v, want empty (no deck to draw from)", h)

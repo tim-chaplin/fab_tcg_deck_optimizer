@@ -78,6 +78,53 @@ func (g *GameEngine) SetHero(h Hero) { g.hero = h }
 // stores results only when this is true at chain end.
 func (g *GameEngine) IsCacheable() bool { return g.cacheable }
 
+// SetCacheable resets the per-chain cacheable flag. Sim calls this to fresh-start the
+// flag per permutation when the chain runner reuses the engine across runs.
+func (g *GameEngine) SetCacheable(v bool) { g.cacheable = v }
+
+// Arsenal returns the card sitting in the arsenal slot at chain start, or nil when the
+// slot is empty.
+func (g *GameEngine) Arsenal() card.Card { return g.arsenal }
+
+// SetArsenal installs c into the arsenal slot. Sim's post-chain arsenal promotion uses it
+// to move a leftover hand card into next turn's arsenal.
+func (g *GameEngine) SetArsenal(c card.Card) { g.arsenal = c }
+
+// SetPitched replaces the pitched-this-turn slice.
+func (g *GameEngine) SetPitched(p []card.Card) { g.pitched = p }
+
+// SetGraveyard replaces the graveyard slice. Sim re-seeds the running graveyard per
+// defense-reaction inside the chain dispatcher's per-DR sandbox.
+func (g *GameEngine) SetGraveyard(gv []card.Card) { g.graveyard = gv }
+
+// SetValue replaces the running chain value. Sim uses it to zero out value at per-DR
+// boundaries (so each DR's contribution can be read individually) and at chain start.
+func (g *GameEngine) SetValue(v int) { g.value = v }
+
+// SetActionPoints replaces the running action-point pool.
+func (g *GameEngine) SetActionPoints(n int) { g.actionPoints = n }
+
+// SetArcaneIncomingDamage replaces the matchup's arcane-incoming-damage tally.
+func (g *GameEngine) SetArcaneIncomingDamage(n int) { g.arcaneIncomingDamage = n }
+
+// SetBlockTotal replaces the partition's uncapped defense sum.
+func (g *GameEngine) SetBlockTotal(n int) { g.blockTotal = n }
+
+// SetOpponentMarked sets the Mark token state on the opposing hero.
+func (g *GameEngine) SetOpponentMarked(v bool) { g.opponentMarked = v }
+
+// SetCardsDrawn replaces the mid-chain draw counter.
+func (g *GameEngine) SetCardsDrawn(n int) { g.cardsDrawn = n }
+
+// SetAuraCreated overrides the "an aura was created this turn" sticky flag.
+func (g *GameEngine) SetAuraCreated(v bool) { g.auraCreated = v }
+
+// SetCardBanished overrides the "a card was banished this turn" sticky flag.
+func (g *GameEngine) SetCardBanished(v bool) { g.cardBanished = v }
+
+// SetBanished replaces the banished-zone slice.
+func (g *GameEngine) SetBanished(b []card.Card) { g.banished = b }
+
 // AttackReactionTarget returns the buff target for the currently-resolving AR, or nil when
 // no AR is resolving.
 func (g *GameEngine) AttackReactionTarget() *card.CardState { return g.attackReactionTarget }
@@ -525,6 +572,10 @@ func (g *GameEngine) GraveyardRaw() []card.Card { return g.graveyard }
 // Framework-internal.
 func (g *GameEngine) DeckRaw() *deck.Deck { return g.deck }
 
+// SetDeck replaces the engine's scratch *deck.Deck. Framework-internal: sim installs the
+// per-turn deck (or a fresh copy of the master's deck) at chain start.
+func (g *GameEngine) SetDeck(d *deck.Deck) { g.deck = d }
+
 // DrawOne models a mid-turn draw: pop the top of the deck and append it to Hand. No-op on
 // an empty deck. Bumps CardsDrawn so the partition tiebreaker can prefer chains with more
 // draws. Inherits the IsCacheable flip via PopDeckTop.
@@ -579,9 +630,15 @@ func (g *GameEngine) Clash(win, lose func()) {
 // Auras returns the live aura set. Read-only.
 func (g *GameEngine) Auras() []Aura { return g.auras }
 
-// SetAuras replaces the aura set wholesale. Used by tests that seed a prior-turn aura
-// carryover; production code uses CreateXxxAura, which also flips AuraCreated.
-func (g *GameEngine) SetAuras(a []Aura) { g.auras = a }
+// ClearAuras drops every live aura. Sim's per-permutation reset and per-DR-probe seed call
+// this before re-seeding via CreateAura.
+func (g *GameEngine) ClearAuras() { g.auras = nil }
+
+// ClearTriggers drops every queued one-shot trigger.
+func (g *GameEngine) ClearTriggers() { g.triggers = nil }
+
+// ClearItems drops every live item.
+func (g *GameEngine) ClearItems() { g.items = nil }
 
 // AuraCount returns the count of live auras. Used by gates like Yinti Yanti's "while you
 // control an aura" rider.

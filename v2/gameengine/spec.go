@@ -6,15 +6,17 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/turnlogger"
 )
 
-// Spec is the test-friendly engine constructor input. Mirrors the persistent + transient
-// fields of GameEngine in exported form so callers outside the package don't have to chain
-// per-field setters after construction. Build via NewFromSpec.
+// Spec is the test-friendly engine constructor input. Mirrors the scalar / card-typed
+// fields of GameEngine in exported form so callers outside the package don't have to
+// chain per-field setters after construction. Build via NewFromSpec.
+//
+// Spec carries no Auras / Triggers / Items list: callers seed those individually after
+// NewFromSpec via CreateAura / CreateTrigger / CreateItem. That shape lets each entry be
+// passed as its concrete struct without a slice-conversion helper — Go boxes the value to
+// the engine's Aura interface at the single-arg call site.
 type Spec struct {
 	Hero                  Hero
 	Arsenal               card.Card
-	Auras                 []Aura
-	Triggers              []Trigger
-	Items                 []Item
 	Banished              []card.Card
 	Graveyard             []card.Card
 	Pitched               []card.Card
@@ -48,27 +50,12 @@ func New() *GameEngine {
 
 // NewFromSpec builds a *GameEngine from a Spec, sealing the unexported fields inside the
 // package. Use when an external caller — turntest, hero test, EvalOneTurnForTesting — needs
-// to construct a prior-turn state. Production code that already has the cross-turn buffers
-// in hand uses New + Reset.
+// to construct a prior-turn state. Auras / Triggers / Items aren't on Spec; callers chain
+// CreateAura / CreateTrigger / CreateItem after NewFromSpec.
 func NewFromSpec(spec Spec) *GameEngine {
-	auras := make([]Aura, 0, len(spec.Auras))
-	for _, a := range spec.Auras {
-		auras = append(auras, a.Clone())
-	}
-	triggers := make([]Trigger, 0, len(spec.Triggers))
-	for _, t := range spec.Triggers {
-		triggers = append(triggers, t.Clone())
-	}
-	items := make([]Item, 0, len(spec.Items))
-	for _, i := range spec.Items {
-		items = append(items, i.Clone())
-	}
 	g := &GameEngine{
 		hero:                  spec.Hero,
 		arsenal:               spec.Arsenal,
-		auras:                 auras,
-		triggers:              triggers,
-		items:                 items,
 		banished:              spec.Banished,
 		graveyard:             spec.Graveyard,
 		pitched:               spec.Pitched,

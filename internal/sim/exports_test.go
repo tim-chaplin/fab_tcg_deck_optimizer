@@ -12,8 +12,8 @@ import (
 // Test-only exports. Visible to package sim_test files in this directory only.
 
 // Best re-exports the package-private best for sim_test consumers.
-func Best(hero Hero, weapons []Weapon, hand []card.Card, mp Matchup, d *deck.Deck, prior gameengine.Spec) TurnSummary {
-	return best(hero, weapons, hand, mp, d, prior)
+func Best(weapons []Weapon, hand []card.Card, mp Matchup, d *deck.Deck, prior Prior) TurnSummary {
+	return best(weapons, hand, mp, d, prior)
 }
 
 // DeckOf builds a *deck.Deck from a list of cards.
@@ -40,9 +40,17 @@ func (s *SequenceContextForTest) PlaySequence(order []card.Card) (damage int, fu
 	return s.ctx.playSequence(order)
 }
 
-// BestSequence wraps (*sequenceContext).bestSequence.
+// PermEngine returns the *GameEngine the most recent PlaySequence call ran the chain
+// against. Tests assert state on this engine (Graveyard, Hand, …) after PlaySequence.
+func (s *SequenceContextForTest) PermEngine() *gameengine.GameEngine {
+	return s.ctx.permEngine
+}
+
+// BestSequence wraps (*sequenceContext).bestSequence. Drops the returned winning engine
+// pointer — sim_test consumers care only about the damage / future-value / legal triplet.
 func (s *SequenceContextForTest) BestSequence(attackers []card.Card) (int, int, bool) {
-	return s.ctx.bestSequence(attackers)
+	d, fv, _, ok := s.ctx.bestSequence(attackers)
+	return d, fv, ok
 }
 
 // FireEndOfTurn re-exports the engine's end-of-turn fire for sim_test consumers.
@@ -92,10 +100,54 @@ func NewAttackBufs(handSize, weaponCount int, weapons []Weapon) *AttackBufs {
 // Bufs returns the wrapped sequenceContext's pooled scratch buffers.
 func (s *SequenceContextForTest) Bufs() *AttackBufs { return s.ctx.bufs }
 
-// State / DefenseGravScratch / DRCardStateScratch expose the unexported attackBufs fields.
-func (b *attackBufs) State() *gameengine.GameEngine       { return b.state }
+// DefenseGravScratch / DRCardStateScratch expose the unexported attackBufs fields. The
+// engine itself is no longer pooled on attackBufs (per-permutation Copy means each chain
+// run owns its own); tests that need a chain-runner engine call State() — each call
+// returns a fresh engine.
 func (b *attackBufs) DefenseGravScratch() []card.Card     { return b.defenseGravScratch }
 func (b *attackBufs) DRCardStateScratch() *card.CardState { return &b.drCardStateScratch }
+func (b *attackBufs) State() *gameengine.GameEngine       { return gameengine.New() }
+
+// EngineWithHand returns a fresh engine seeded with hand h. Tests that build a
+// TurnSummary by hand use this to populate the State *GameEngine without going through
+// the full chain runner.
+func EngineWithHand(h []card.Card) *gameengine.GameEngine {
+	g := gameengine.New()
+	g.SetHand(h)
+	return g
+}
+
+// EngineWithItems returns a fresh engine with the supplied items installed.
+func EngineWithItems(items []*Item) *gameengine.GameEngine {
+	g := gameengine.New()
+	for _, it := range items {
+		g.CreateItem(it)
+	}
+	return g
+}
+
+// EngineWith returns a fresh engine with hand, items, and log entries installed. log can
+// be nil to skip log seeding.
+func EngineWith(h []card.Card, items []*Item, log []turnlogger.LogEntry) *gameengine.GameEngine {
+	g := gameengine.New()
+	g.SetHand(h)
+	for _, it := range items {
+		g.CreateItem(it)
+	}
+	if len(log) > 0 {
+		for _, e := range log {
+			switch e.Kind {
+			case turnlogger.LogEntryChainStep:
+				g.Logger().AppendChainStep(e.Text, e.N)
+			case turnlogger.LogEntryPostTrigger:
+				g.Logger().AppendPostTrigger(e.Source, e.Text, e.N)
+			case turnlogger.LogEntryPreTrigger:
+				g.Logger().AppendPreTrigger(e.Source, e.Text, e.N)
+			}
+		}
+	}
+	return g
+}
 
 // EvaluateImplForTest re-exports the unexported (*Evaluator).evaluateImpl.
 func (ev *Evaluator) EvaluateImplForTest(d *deck.Deck, maxRuns int, mp Matchup, rng *rand.Rand, stop func(stats *DeckStats, runs int) bool) DeckStats {
@@ -126,6 +178,14 @@ func ProcessAurasAtStartOfTurn(queued []gameengine.Aura, d *deck.Deck) (
 	revealed []card.Card,
 	graveyarded []card.Card,
 ) {
-	s, c, dmg, rev, gv := processAurasAtStartOfTurn(auraSliceFromEngine(queued), d)
-	return auraSliceAsEngine(s), c, dmg, rev, gv
+	inAuras := make([]*Aura, 0, len(queued))
+	for _, a := range queued {
+		inAuras = append(inAuras, a.(*Aura))
+	}
+	s, c, dmg, rev, gv := processAurasAtStartOfTurn(inAuras, d)
+	out := make([]gameengine.Aura, 0, len(s))
+	for _, a := range s {
+		out = append(out, a)
+	}
+	return out, c, dmg, rev, gv
 }

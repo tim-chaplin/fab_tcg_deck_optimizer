@@ -9,7 +9,6 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapons"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
-	"github.com/tim-chaplin/fab-deck-optimizer/v2/gameengine"
 )
 
 // Tests that Lunging Press's +1{p} buff lands on a paired attack action card.
@@ -19,7 +18,7 @@ func TestAttackReaction_BuffLandsOnTarget(t *testing.T) {
 		cards.ArcanicCrackleRed{},
 		cards.LungingPressBlue{},
 	}
-	got := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, gameengine.Spec{}, hand).Value
+	got := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, sim.Prior{}, hand).Value
 	if got != 5 {
 		t.Fatalf("Value = %d, want 5 (Arcanic Crackle 3 + Lunging Press +1 buff + 1 arcane)", got)
 	}
@@ -29,7 +28,7 @@ func TestAttackReaction_BuffLandsOnTarget(t *testing.T) {
 func TestAttackReaction_NoTargetAtAllNothingHappens(t *testing.T) {
 	d := deck.New(heroes.Viserai{}, nil, fillerDeck())
 	hand := []deck.Card{cards.LungingPressBlue{}}
-	got := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, gameengine.Spec{}, hand).Value
+	got := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, sim.Prior{}, hand).Value
 	if got != 0 {
 		t.Fatalf("Value = %d, want 0 (no target, AR can't play)", got)
 	}
@@ -39,7 +38,7 @@ func TestAttackReaction_NoTargetAtAllNothingHappens(t *testing.T) {
 func TestAttackReaction_CantTargetAnotherAR(t *testing.T) {
 	d := deck.New(heroes.Viserai{}, nil, fillerDeck())
 	hand := []deck.Card{cards.LungingPressBlue{}, cards.LungingPressBlue{}}
-	got := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, gameengine.Spec{}, hand).Value
+	got := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, sim.Prior{}, hand).Value
 	if got != 0 {
 		t.Fatalf("Value = %d, want 0 (ARs can't target each other)", got)
 	}
@@ -50,7 +49,7 @@ func TestAttackReaction_CantTargetAnotherAR(t *testing.T) {
 func TestAttackReaction_ReactionsComeAfterAttacks(t *testing.T) {
 	d := deck.New(heroes.Viserai{}, nil, fillerDeck())
 	hand := []deck.Card{cards.LungingPressBlue{}, cards.HocusPocusRed{}}
-	got := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, gameengine.Spec{}, hand).Value
+	got := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, sim.Prior{}, hand).Value
 	if got != 5 {
 		t.Fatalf("Value = %d, want 5 (HP 3 + LP +1 buff + HP runechant 1; Viserai must not fire)", got)
 	}
@@ -64,7 +63,7 @@ func TestAttackReaction_PitchedAttackIsNotATarget(t *testing.T) {
 		cards.LungingPressBlue{},
 		testutils.GenericAttack(1, 0),
 	}
-	got := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, gameengine.Spec{}, hand).Value
+	got := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, sim.Prior{}, hand).Value
 	if got != 0 {
 		t.Fatalf("Value = %d, want 0 (attack pitched ⇒ AR has nothing to buff)", got)
 	}
@@ -77,7 +76,7 @@ func TestAttackReaction_ThrustBuffsSwingingSwordWeapon(t *testing.T) {
 		cards.ThrustRed{},
 		cards.ToughenUpBlue{},
 	}
-	got := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, gameengine.Spec{}, hand).Value
+	got := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, sim.Prior{}, hand).Value
 	if got != 5 {
 		t.Fatalf("Value = %d, want 5 (Nebula Blade 1 + Thrust +3 buff + runechant 1)", got)
 	}
@@ -91,7 +90,7 @@ func TestAttackReaction_BladeFlashGoAgainExtendsChain(t *testing.T) {
 		cards.ToughenUpBlue{},
 		testutils.NoGoAgainAttackStub{},
 	}
-	got := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, gameengine.Spec{}, hand).Value
+	got := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, sim.Prior{}, hand).Value
 	if got != 3 {
 		t.Fatalf("Value = %d, want 3 (Nebula 1 + runechant 1 + chained 1-power attack)", got)
 	}
@@ -104,7 +103,7 @@ func TestAttackReaction_NebulaSwingWithoutBladeFlashCantChain(t *testing.T) {
 		cards.ToughenUpBlue{},
 		testutils.NoGoAgainAttackStub{},
 	}
-	got := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, gameengine.Spec{}, hand).Value
+	got := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, sim.Prior{}, hand).Value
 	if got != 2 {
 		t.Fatalf("Value = %d, want 2 (Nebula 1 + runechant 1; no AP for the follow-up)", got)
 	}

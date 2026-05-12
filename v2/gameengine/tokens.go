@@ -26,7 +26,7 @@ func (g *GameEngine) CreateRunechants(n int) {
 		return
 	}
 	g.AddValue(n)
-	g.bumpOrAppendAura(tokenNameRunechant, BuildRunechantAura, n)
+	g.bumpOrCreateAura(tokenNameRunechant, BuildRunechantAura, n)
 }
 
 // CreatePonder creates n Ponder tokens. No Value credit — Ponder pays out at end of turn
@@ -35,7 +35,7 @@ func (g *GameEngine) CreatePonder(n int) {
 	if n <= 0 {
 		return
 	}
-	g.bumpOrAppendAura(tokenNamePonder, BuildPonderAura, n)
+	g.bumpOrCreateAura(tokenNamePonder, BuildPonderAura, n)
 }
 
 // CreateGold / CreateSilver / CreateCopper create the matching token items. No Value
@@ -44,19 +44,19 @@ func (g *GameEngine) CreateGold(n int) {
 	if n <= 0 {
 		return
 	}
-	g.bumpOrAppendItem(tokenNameGold, BuildGoldItem, n)
+	g.bumpOrCreateItem(tokenNameGold, BuildGoldItem, n)
 }
 func (g *GameEngine) CreateSilver(n int) {
 	if n <= 0 {
 		return
 	}
-	g.bumpOrAppendItem(tokenNameSilver, BuildSilverItem, n)
+	g.bumpOrCreateItem(tokenNameSilver, BuildSilverItem, n)
 }
 func (g *GameEngine) CreateCopper(n int) {
 	if n <= 0 {
 		return
 	}
-	g.bumpOrAppendItem(tokenNameCopper, BuildCopperItem, n)
+	g.bumpOrCreateItem(tokenNameCopper, BuildCopperItem, n)
 }
 
 // RunechantCount / PonderCount / GoldCount / SilverCount / CopperCount return the live
@@ -67,9 +67,9 @@ func (g *GameEngine) GoldCount() int      { return itemCountByName(g.items, toke
 func (g *GameEngine) SilverCount() int    { return itemCountByName(g.items, tokenNameSilver) }
 func (g *GameEngine) CopperCount() int    { return itemCountByName(g.items, tokenNameCopper) }
 
-// bumpOrAppendAura increments an existing aura entry matching name, or appends a fresh
+// bumpOrCreateAura increments an existing aura entry matching name, or appends a fresh
 // one built by build(n). Flips auraCreated.
-func (g *GameEngine) bumpOrAppendAura(name string, build func(int) Aura, n int) {
+func (g *GameEngine) bumpOrCreateAura(name string, build func(int) Aura, n int) {
 	g.auraCreated = true
 	for i := range g.auras {
 		if g.auras[i].CardName() == name {
@@ -80,9 +80,9 @@ func (g *GameEngine) bumpOrAppendAura(name string, build func(int) Aura, n int) 
 	g.auras = append(g.auras, build(n))
 }
 
-// bumpOrAppendItem increments an existing item entry matching name, or appends a fresh
+// bumpOrCreateItem increments an existing item entry matching name, or appends a fresh
 // one built by build(n). Items don't flip auraCreated.
-func (g *GameEngine) bumpOrAppendItem(name string, build func(int) Item, n int) {
+func (g *GameEngine) bumpOrCreateItem(name string, build func(int) Item, n int) {
 	for i := range g.items {
 		if g.items[i].CardName() == name {
 			g.items[i].SetCount(g.items[i].Count() + n)

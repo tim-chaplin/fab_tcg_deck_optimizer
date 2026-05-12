@@ -77,7 +77,8 @@ func TestReekOfCorruption_BlockableBaseSuppressesDiscard(t *testing.T) {
 // Tests that co-firing runechants don't rescue a blockable variant — "this hits" reads only
 // this card's own damage.
 func TestReekOfCorruption_RunechantsDontRescue(t *testing.T) {
-	s := gameengine.NewFromSpec(gameengine.Spec{AuraCreated: true, Auras: []gameengine.Aura{sim.NewRunechantAura(1)}})
+	s := gameengine.NewFromSpec(gameengine.Spec{AuraCreated: true})
+	s.CreateAura(sim.NewRunechantAura(1))
 	c := cards.ReekOfCorruptionYellow{}
 	s.ResolveChainStep(s.Logger(), &card.CardState{Card: c})
 	if got := s.Value(); got != 3 {

@@ -55,7 +55,7 @@ func TestFormatBestLine_Compact(t *testing.T) {
 // Tests that pitches and the attack chain both render under the "My turn:" section header.
 func TestFormatBestTurn_AttackAndPitch(t *testing.T) {
 	h := []card.Card{testutils.BlueAttack{}, testutils.BlueAttack{}, testutils.RedAttack{}, testutils.RedAttack{}}
-	got := Best(testutils.Hero{Intel: 4}, nil, h, Matchup{IncomingDamage: 0}, nil, gameengine.Spec{})
+	got := Best(nil, h, Matchup{IncomingDamage: 0}, nil, Prior{Hero: testutils.Hero{Intel: 4}})
 	out := FormatBestTurn(got, nil, nil)
 	if !strings.Contains(out, "  My turn:") {
 		t.Errorf("want 'My turn:' section header, got:\n%s", out)
@@ -79,7 +79,7 @@ func TestFormatBestTurn_AttackAndPitch(t *testing.T) {
 // label so the reader can distinguish damage-dealing chain steps from resource/setup plays.
 func TestFormatBestTurn_NonAttackCardUsesPlayLabel(t *testing.T) {
 	h := []card.Card{cards.MauvrionSkiesRed{}, cards.ShrillOfSkullformRed{}, cards.MaleficIncantationBlue{}}
-	got := Best(heroes.Viserai{}, nil, h, Matchup{IncomingDamage: 0}, nil, gameengine.Spec{})
+	got := Best(nil, h, Matchup{IncomingDamage: 0}, nil, Prior{Hero: heroes.Viserai{}})
 	out := FormatBestTurn(got, nil, nil)
 	if !strings.Contains(out, "Mauvrion Skies [R]: PLAY") {
 		t.Errorf("want Mauvrion (non-attack action) labelled PLAY, got:\n%s", out)
@@ -98,8 +98,11 @@ func TestFormatBestTurn_LogAttributesEachTriggerSeparately(t *testing.T) {
 	// state.TriggeringCard).
 	bootstrap := gameengine.NewFromCards(nil, nil)
 	bootstrap.ResolveChainStep(bootstrap.Logger(), &card.CardState{Card: cards.MaleficIncantationRed{}})
-	prior := bootstrap.Auras()
-	got := Best(heroes.Viserai{}, nil, h, Matchup{}, nil, gameengine.Spec{Auras: prior})
+	priorAuras := make([]*Aura, 0, len(bootstrap.Auras()))
+	for _, a := range bootstrap.Auras() {
+		priorAuras = append(priorAuras, a.(*Aura))
+	}
+	got := Best(nil, h, Matchup{}, nil, Prior{Hero: heroes.Viserai{}, Auras: priorAuras})
 	out := FormatBestTurn(got, nil, nil)
 	// Trigger lines render indented (9 spaces) with no "(from <source>)" suffix — the
 	// indentation under the parent chain entry conveys attribution. Each line carries
@@ -133,7 +136,7 @@ func TestFormatBestTurn_LogAttributesEachTriggerSeparately(t *testing.T) {
 // render, trigger lines only render on positive contribution.
 func TestFormatBestTurn_LogSuppressesZeroTriggers(t *testing.T) {
 	h := []card.Card{testutils.RedAttack{}}
-	got := Best(heroes.Viserai{}, nil, h, Matchup{IncomingDamage: 0}, nil, gameengine.Spec{})
+	got := Best(nil, h, Matchup{IncomingDamage: 0}, nil, Prior{Hero: heroes.Viserai{}})
 	if strings.Contains(FormatBestTurn(got, nil, nil), "Viserai created") {
 		t.Errorf("hero trigger line shouldn't render when Viserai contributed 0; got:\n%s",
 			FormatBestTurn(got, nil, nil))
@@ -145,7 +148,7 @@ func TestFormatBestTurn_LogSuppressesZeroTriggers(t *testing.T) {
 func TestFormatBestTurn_MoonWishTutorAndPlayLogsAsPostTrigger(t *testing.T) {
 	h := []card.Card{cards.FlyingHighRed{}, cards.MoonWishYellow{}, testutils.BlueAttack{}}
 	deck := DeckOf(cards.SunKissRed{})
-	got := Best(testutils.Hero{Intel: 4}, nil, h, Matchup{IncomingDamage: 0}, deck, gameengine.Spec{})
+	got := Best(nil, h, Matchup{IncomingDamage: 0}, deck, Prior{Hero: testutils.Hero{Intel: 4}})
 	out := FormatBestTurn(got, nil, nil)
 	wants := []string{
 		"Moon Wish [Y]: ATTACK (+4)",
@@ -173,7 +176,7 @@ func TestFormatBestTurn_MoonWishTutorAndPlayLogsAsPostTrigger(t *testing.T) {
 func TestFormatBestTurn_MoonWishTutorOnlyLogsAsPostTrigger(t *testing.T) {
 	h := []card.Card{cards.MoonWishYellow{}, testutils.BlueAttack{}}
 	deck := DeckOf(cards.SunKissRed{})
-	got := Best(testutils.Hero{Intel: 4}, nil, h, Matchup{IncomingDamage: 0}, deck, gameengine.Spec{})
+	got := Best(nil, h, Matchup{IncomingDamage: 0}, deck, Prior{Hero: testutils.Hero{Intel: 4}})
 	out := FormatBestTurn(got, nil, nil)
 	wants := []string{
 		"Moon Wish [Y]: ATTACK (+4)",
@@ -193,7 +196,7 @@ func TestFormatBestTurn_MoonWishTutorOnlyLogsAsPostTrigger(t *testing.T) {
 // "DEFENSE REACTION from arsenal".
 func TestFormatBestTurn_ArsenalInPlayedAsDR(t *testing.T) {
 	h := []card.Card{cards.MaleficIncantationBlue{}}
-	got := Best(testutils.Hero{Intel: 4}, nil, h, Matchup{IncomingDamage: 4}, nil, gameengine.Spec{Arsenal: cards.ToughenUpBlue{}})
+	got := Best(nil, h, Matchup{IncomingDamage: 4}, nil, Prior{Hero: testutils.Hero{Intel: 4}, Arsenal: cards.ToughenUpBlue{}})
 	out := FormatBestTurn(got, nil, nil)
 	if !strings.Contains(out, "  Opponent's turn:") {
 		t.Errorf("want 'Opponent's turn:' section header, got:\n%s", out)
@@ -233,7 +236,7 @@ func TestFormatBestTurn_DefenseReactionLinesAndRiders(t *testing.T) {
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
-			got := Best(testutils.Hero{Intel: 4}, nil, tc.hand, Matchup{IncomingDamage: tc.incoming}, nil, gameengine.Spec{})
+			got := Best(nil, tc.hand, Matchup{IncomingDamage: tc.incoming}, nil, Prior{Hero: testutils.Hero{Intel: 4}})
 			out := FormatBestTurn(got, nil, nil)
 			for _, w := range tc.wants {
 				if !strings.Contains(out, w) {
@@ -248,7 +251,7 @@ func TestFormatBestTurn_DefenseReactionLinesAndRiders(t *testing.T) {
 // (role tag, not card-name tag).
 func TestFormatBestTurn_ArsenalInPlayedOnChain(t *testing.T) {
 	h := []card.Card{testutils.BlueAttack{}}
-	got := Best(testutils.Hero{Intel: 4}, nil, h, Matchup{IncomingDamage: 0}, nil, gameengine.Spec{Arsenal: testutils.RedAttack{}})
+	got := Best(nil, h, Matchup{IncomingDamage: 0}, nil, Prior{Hero: testutils.Hero{Intel: 4}, Arsenal: testutils.RedAttack{}})
 	out := FormatBestTurn(got, nil, nil)
 	if !strings.Contains(out, "  My turn:") {
 		t.Errorf("want 'My turn:' section header, got:\n%s", out)
@@ -267,27 +270,27 @@ func TestFormatBestTurn_ArsenalInPlayedOnChain(t *testing.T) {
 func TestFormatBestTurn_WeaponSwingInChain(t *testing.T) {
 	h := []card.Card{testutils.RedAttack{}}
 	weapons := []Weapon{weapons.ReapingBlade{}}
-	got := Best(testutils.Hero{Intel: 4}, weapons, h, Matchup{IncomingDamage: 0}, nil, gameengine.Spec{})
+	got := Best(weapons, h, Matchup{IncomingDamage: 0}, nil, Prior{Hero: testutils.Hero{Intel: 4}})
 	out := FormatBestTurn(got, nil, nil)
 	if !strings.Contains(out, "Reaping Blade: WEAPON ATTACK") {
 		t.Errorf("want the weapon in the chain, got:\n%s", out)
 	}
 	var sawWeaponLog bool
-	for _, e := range got.State.Log {
+	for _, e := range got.State.LogEntries() {
 		if strings.Contains(e.Text, "Reaping Blade: WEAPON ATTACK") {
 			sawWeaponLog = true
 			break
 		}
 	}
 	if !sawWeaponLog {
-		t.Errorf("State.Log missing the weapon swing entry; format-layer match was a fluke. Log=%v", got.State.Log)
+		t.Errorf("State.Log missing the weapon swing entry; format-layer match was a fluke. Log=%v", got.State.LogEntries())
 	}
 }
 
 // Tests that the End of turn section tags a post-hoc-promoted Held → Arsenal card as "(new)".
 func TestFormatBestTurn_EndOfTurnArsenalNew(t *testing.T) {
 	h := []card.Card{cards.ToughenUpBlue{}}
-	got := Best(testutils.Hero{Intel: 4}, nil, h, Matchup{IncomingDamage: 4}, nil, gameengine.Spec{})
+	got := Best(nil, h, Matchup{IncomingDamage: 4}, nil, Prior{Hero: testutils.Hero{Intel: 4}})
 	out := FormatBestTurn(got, nil, nil)
 	if !strings.Contains(out, "Arsenal: Toughen Up [B] (new)") {
 		t.Errorf("want an end-of-turn arsenal entry tagged '(new)', got:\n%s", out)
@@ -300,7 +303,7 @@ func TestFormatBestTurn_EndOfTurnArsenalStayed(t *testing.T) {
 	// Hand with no attacks / no pitches to pay for the arsenal DR at incoming=0 (defense is
 	// wasted anyway). Arsenal-in Toughen Up sits.
 	h := []card.Card{cards.ToughenUpBlue{}}
-	got := Best(testutils.Hero{Intel: 4}, nil, h, Matchup{IncomingDamage: 0}, nil, gameengine.Spec{Arsenal: cards.ToughenUpBlue{}})
+	got := Best(nil, h, Matchup{IncomingDamage: 0}, nil, Prior{Hero: testutils.Hero{Intel: 4}, Arsenal: cards.ToughenUpBlue{}})
 	out := FormatBestTurn(got, nil, nil)
 	if !strings.Contains(out, "(stayed)") {
 		t.Errorf("want the arsenal-in card tagged '(stayed)', got:\n%s", out)
@@ -573,7 +576,7 @@ func TestFormatBestTurn_StartOfTurnGoldItems(t *testing.T) {
 // as an "Items: N Gold" line in the End of turn section.
 func TestFormatBestTurn_EndOfTurnGoldItems(t *testing.T) {
 	summary := TurnSummary{
-		State: CarryState{Items: []*Item{NewGoldItem(1)}},
+		State: EngineWithItems([]*Item{NewGoldItem(1)}),
 	}
 	out := FormatBestTurn(summary, nil, nil)
 	want := "Items: 1 Gold"
@@ -587,7 +590,7 @@ func TestFormatBestTurn_EndOfTurnGoldItems(t *testing.T) {
 // started the turn in hand or got drawn / tutored mid-chain.
 func TestFormatBestTurn_EndOfTurnHandLine(t *testing.T) {
 	summary := TurnSummary{
-		State: CarryState{Hand: []card.Card{testutils.RedAttack{}}},
+		State: EngineWithHand([]card.Card{testutils.RedAttack{}}),
 	}
 	out := FormatBestTurn(summary, nil, nil)
 	want := "Hand: cardtest.RedAttack [R]"
@@ -600,18 +603,14 @@ func TestFormatBestTurn_EndOfTurnHandLine(t *testing.T) {
 // surviving Auras + the live Runechant count render as one comma-separated line,
 // mirroring the start-of-turn formatting.
 func TestFormatBestTurn_EndOfTurnAurasWithRunechants(t *testing.T) {
-	summary := TurnSummary{
-		State: CarryState{
-			Auras: []*Aura{
-				NewCardAura(
-					&card.CardState{Card: cards.MaleficIncantationRed{}},
-					gameengine.TriggerStartOfTurn,
-					nil, 1, false,
-				),
-				NewRunechantAura(2),
-			},
-		},
-	}
+	state := gameengine.New()
+	state.CreateAura(NewCardAura(
+		&card.CardState{Card: cards.MaleficIncantationRed{}},
+		gameengine.TriggerStartOfTurn,
+		nil, 1, false,
+	))
+	state.CreateAura(NewRunechantAura(2))
+	summary := TurnSummary{State: state}
 	out := FormatBestTurn(summary, nil, nil)
 	want := "Auras: Malefic Incantation [R], 2 Runechants"
 	if !strings.Contains(out, want) {

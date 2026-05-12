@@ -58,7 +58,9 @@ func BuildTurnLog(t TurnSummary, startingAuras []*Aura, startingItems []*Item) T
 	// once-per-best-turn assembly step. appendGroupedChainEntries clusters trigger lines
 	// underneath the chain line of the card that fired them so the printout reads as a tree
 	// instead of a strict chronological sequence.
-	log.MyTurn = appendGroupedChainEntries(log.MyTurn, t.State.Log)
+	if t.State != nil {
+		log.MyTurn = appendGroupedChainEntries(log.MyTurn, t.State.LogEntries())
+	}
 
 	// Opponent's turn: defense pitches, plain blocks, then Defense Reactions.
 	for _, p := range defensePitches {
@@ -74,17 +76,25 @@ func BuildTurnLog(t TurnSummary, startingAuras []*Aura, startingItems []*Item) T
 	}
 
 	// End of turn: surviving hand cards, arsenal slot's contents, auras still in play.
-	if line := endingHandLine(t.State.Hand); line != "" {
-		log.EndOfTurn = append(log.EndOfTurn, line)
+	if t.State != nil {
+		if line := endingHandLine(t.State.HandRaw()); line != "" {
+			log.EndOfTurn = append(log.EndOfTurn, line)
+		}
 	}
 	if line := endingArsenalLine(parts.arsenal); line != "" {
 		log.EndOfTurn = append(log.EndOfTurn, line)
 	}
-	if line := endingAurasLine(t.State.Auras, t.State.RunechantCount(), t.State.PonderCount()); line != "" {
-		log.EndOfTurn = append(log.EndOfTurn, line)
-	}
-	if line := itemsLine(t.State.GoldCount(), t.State.SilverCount(), t.State.CopperCount()); line != "" {
-		log.EndOfTurn = append(log.EndOfTurn, line)
+	if t.State != nil {
+		endingAuras := make([]*Aura, 0, len(t.State.Auras()))
+		for _, a := range t.State.Auras() {
+			endingAuras = append(endingAuras, a.(*Aura))
+		}
+		if line := endingAurasLine(endingAuras, auraCountByNameInEngine(t.State, "Runechant"), auraCountByNameInEngine(t.State, "Ponder")); line != "" {
+			log.EndOfTurn = append(log.EndOfTurn, line)
+		}
+		if line := itemsLine(itemCountByNameInEngine(t.State, "Gold"), itemCountByNameInEngine(t.State, "Silver"), itemCountByNameInEngine(t.State, "Copper")); line != "" {
+			log.EndOfTurn = append(log.EndOfTurn, line)
+		}
 	}
 
 	return log

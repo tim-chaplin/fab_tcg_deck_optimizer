@@ -2,48 +2,32 @@ package gameengine
 
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
-	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/turnlogger"
 )
 
-// Reset rewrites every GameEngine field to its per-permutation starting value derived from
-// seed. The engine reuses its own internal slice backings via append([:0], src...) so
-// repeated Reset calls don't allocate after the first sizing — only mid-chain growth past
-// the current cap forces a fresh backing.
+// Reset rewrites every GameEngine field to its per-permutation starting value derived
+// from seed. Aura / Trigger / Item lists are cleared; the caller follows up with
+// CreateAura / CreateTrigger / CreateItem per entry that should carry into this
+// permutation.
 //
-// Deck handling: the engine owns a scratch *deck.Deck; the first Reset copies seed.Deck via
-// Copy(), subsequent Resets refill via CopyFrom so the cards / weapons backing arrays stay
-// reused. seed.Deck nil leaves the scratch in place (zero-sized).
+// Deck: seed.Deck nil collapses to a fresh empty deck (deck.Copy on a nil pointer
+// returns &Deck{}); otherwise a fresh copy is made.
 //
-// Logger: nil seed.Logger leaves g.logger nil — the find-best pass's short-circuit signal.
-// A non-nil logger gets installed verbatim; callers are expected to point it at the right
-// per-permutation backing buffer themselves before passing.
+// Logger: nil seed.Logger leaves g.logger nil — the find-best pass's short-circuit
+// signal. A non-nil logger gets installed verbatim.
 //
-// Cacheable: starts true. The first card-driven deck / graveyard read in this permutation
-// flips it false via the appropriate accessor's contract.
+// Cacheable: starts true. The first card-driven deck / graveyard read in this
+// permutation flips it false via the appropriate accessor's contract.
 func (g *GameEngine) Reset(seed PermutationSeed) {
-	g.hand = append(g.hand[:0], seed.Hand...)
-	if g.deck == nil {
-		// Always allocate a scratch deck so card-driven mutations (PrependToDeck, Opt, …)
-		// don't panic on nil. seed.Deck nil is treated as an empty source: deck.Copy on a
-		// nil pointer returns a fresh empty deck.
-		g.deck = seed.Deck.Copy()
-	} else {
-		g.deck.CopyFrom(seed.Deck)
-	}
+	g.hand = append([]card.Card(nil), seed.Hand...)
+	g.deck = seed.Deck.Copy()
 	g.arsenal = seed.Arsenal
-	g.graveyard = append(g.graveyard[:0], seed.Graveyard...)
-	g.banished = append(g.banished[:0], seed.Banished...)
-	g.auras = g.auras[:0]
-	for _, a := range seed.Auras {
-		g.auras = append(g.auras, a.Clone())
-	}
-	g.triggers = g.triggers[:0]
-	g.items = g.items[:0]
-	for _, i := range seed.Items {
-		g.items = append(g.items, i.Clone())
-	}
-	g.cardsPlayed = g.cardsPlayed[:0]
+	g.graveyard = append([]card.Card(nil), seed.Graveyard...)
+	g.banished = append([]card.Card(nil), seed.Banished...)
+	g.auras = nil
+	g.triggers = nil
+	g.items = nil
+	g.cardsPlayed = nil
 	g.cardsRemaining = nil
 	g.pitched = seed.Pitched
 	g.defenders = seed.Defenders
@@ -70,27 +54,82 @@ func (g *GameEngine) Reset(seed PermutationSeed) {
 	g.cacheable = true
 }
 
-// Snapshot returns the engine's persistent state — the values that carry into next turn.
-// Sim's CarryState.SnapshotFromTurn copies fields out of the returned PersistentSnapshot.
-// Deck gets a fresh Copy() so subsequent permutations' deck mutations don't reach back
-// into the snapshot.
-func (g *GameEngine) Snapshot() PersistentSnapshot {
-	var d *deck.Deck
+// Copy returns a deep copy of the engine. Slice and *deck.Deck fields get fresh
+// backing storage; Aura / Item entries are deep-copied via their Copy() methods so
+// per-permutation Count / FiredThisTurn mutations stay isolated. Triggers are
+// effectively immutable after construction, so only the slice header is duplicated.
+// Logger is reset to nil — the caller installs a fresh per-clone logger when
+// recording, leaving find-best clones allocation-free.
+//
+// Cards / sim drive every persistent mutation through this method when they want a
+// fresh sandbox: the chain runner copies the start-of-turn engine per permutation,
+// plays out, compares Value, and keeps the winning copy as next turn's master.
+func (g *GameEngine) Copy() *GameEngine {
+	out := *g
+	out.hand = appendCopy(nil, g.hand)
 	if g.deck != nil {
-		d = g.deck.Copy()
+		out.deck = g.deck.Copy()
 	}
-	return PersistentSnapshot{
-		Hand:           appendCopy(nil, g.hand),
-		Deck:           d,
-		Arsenal:        g.arsenal,
-		Graveyard:      appendCopy(nil, g.graveyard),
-		Banished:       appendCopy(nil, g.banished),
-		Auras:          appendAuraCopy(nil, g.auras),
-		Items:          appendItemCopy(nil, g.items),
-		CardsDrawn:     g.cardsDrawn,
-		OpponentMarked: g.opponentMarked,
-		LogEntries:     appendLogCopy(nil, g.logger.Entries()),
+	out.graveyard = appendCopy(nil, g.graveyard)
+	out.banished = appendCopy(nil, g.banished)
+	out.pitched = appendCopy(nil, g.pitched)
+	out.defenders = appendCopy(nil, g.defenders)
+	out.cardsPlayed = appendCopy(nil, g.cardsPlayed)
+	if len(g.cardsRemaining) > 0 {
+		out.cardsRemaining = append([]*card.CardState(nil), g.cardsRemaining...)
+	} else {
+		out.cardsRemaining = nil
 	}
+	if len(g.auras) > 0 {
+		out.auras = make([]Aura, len(g.auras))
+		for i, a := range g.auras {
+			out.auras[i] = a.Copy()
+		}
+	} else {
+		out.auras = nil
+	}
+	if len(g.triggers) > 0 {
+		out.triggers = append([]Trigger(nil), g.triggers...)
+	} else {
+		out.triggers = nil
+	}
+	if len(g.items) > 0 {
+		out.items = make([]Item, len(g.items))
+		for i, it := range g.items {
+			out.items[i] = it.Copy()
+		}
+	} else {
+		out.items = nil
+	}
+	out.logger = nil
+	return &out
+}
+
+// BeginPermutation resets per-chain locals on the engine in preparation for a fresh
+// permutation's chain run. Auras, items, banished, graveyard, deck, arsenal, pitched,
+// hero, and OpponentMarked carry over from the caller-side Copy() — they represent the
+// leaf's pre-chain state. logger is installed verbatim (pass nil for the find-best path,
+// a fresh logger for the recording path).
+func (g *GameEngine) BeginPermutation(hand []card.Card, incomingDamage int, logger *turnlogger.TurnLogger) {
+	g.hand = hand
+	g.cardsPlayed = nil
+	g.cardsRemaining = nil
+	g.triggers = nil
+	g.triggeringCard = nil
+	g.attackReactionTarget = nil
+	g.actionPoints = 1
+	g.value = 0
+	g.cardsDrawn = 0
+	g.incomingDamage = incomingDamage
+	g.cardBanished = false
+	g.arcaneDamageDealt = false
+	g.nonAttackActionPlayed = false
+	g.currentAuraDestroyed = false
+	g.currentStepRerouted = false
+	g.currentAuraIdx = -1
+	g.cacheable = true
+	g.logger = logger
+	g.auraCreated = len(g.auras) > 0
 }
 
 // FireAttack walks the trigger entries (today, aura entries; in the future, other
@@ -272,23 +311,23 @@ func (g *GameEngine) DestroyAura(addToGraveyard bool) {
 	g.currentAuraDestroyed = true
 }
 
-// AppendAura appends a to the engine's aura list. Used by sim's card-aura constructors
+// CreateAura appends a to the engine's aura list. Used by sim's card-aura constructors
 // (CreateStartOfTurnAura, CreateAttackActionAura, …) which build the typed entry in sim
 // and hand it to the engine. Flips AuraCreated so same-turn "if you've played or created
 // an aura" riders see the entry.
-func (g *GameEngine) AppendAura(a Aura) {
+func (g *GameEngine) CreateAura(a Aura) {
 	g.auras = append(g.auras, a)
 	g.auraCreated = true
 }
 
-// AppendTrigger appends t to the engine's one-shot trigger queue.
-func (g *GameEngine) AppendTrigger(t Trigger) {
+// CreateTrigger appends t to the engine's one-shot trigger queue.
+func (g *GameEngine) CreateTrigger(t Trigger) {
 	g.triggers = append(g.triggers, t)
 }
 
-// AppendItem appends i to the engine's item list. Used by sim's token-item helpers; the
+// CreateItem appends i to the engine's item list. Used by sim's token-item helpers; the
 // chain runner enqueues each item's Ability as a playable activated ability each turn.
-func (g *GameEngine) AppendItem(i Item) {
+func (g *GameEngine) CreateItem(i Item) {
 	g.items = append(g.items, i)
 }
 
@@ -300,27 +339,6 @@ func (g *GameEngine) SetArcaneDamageDealt(v bool) { g.arcaneDamageDealt = v }
 // === Helpers internal to the engine ===
 
 func appendCopy(dst []card.Card, src []card.Card) []card.Card {
-	if len(src) == 0 {
-		return dst
-	}
-	return append(dst, src...)
-}
-
-func appendAuraCopy(dst []Aura, src []Aura) []Aura {
-	if len(src) == 0 {
-		return dst
-	}
-	return append(dst, src...)
-}
-
-func appendItemCopy(dst []Item, src []Item) []Item {
-	if len(src) == 0 {
-		return dst
-	}
-	return append(dst, src...)
-}
-
-func appendLogCopy(dst []turnlogger.LogEntry, src []turnlogger.LogEntry) []turnlogger.LogEntry {
 	if len(src) == 0 {
 		return dst
 	}

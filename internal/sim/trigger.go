@@ -44,11 +44,6 @@ func (t *Trigger) Fire(g *gameengine.GameEngine, l card.Logger) {
 	t.handler(g, l, ctx)
 }
 
-func (t *Trigger) Clone() gameengine.Trigger {
-	out := *t
-	return &out
-}
-
 // triggerCtx is the adapter handed to each trigger handler — satisfies card.Trigger.
 type triggerCtx struct {
 	t *Trigger

@@ -8,7 +8,6 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
-	"github.com/tim-chaplin/fab-deck-optimizer/v2/gameengine"
 )
 
 // Tests that Wage Gold's Universal keyword triggers Viserai's Runeblade hero ability.
@@ -20,7 +19,7 @@ func TestWageGold_UniversalTriggersViseraiOnPlay(t *testing.T) {
 		testutils.BluePitch{},
 		testutils.BluePitch{},
 	}
-	state := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, gameengine.Spec{}, hand)
+	state := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, sim.Prior{}, hand)
 	if state.Value != 8 {
 		t.Fatalf("Value = %d, want 8 (Wage Gold 7 + Viserai-via-Universal runechant +1)\nBestLine: %s",
 			state.Value, formatBestLine(state.BestLine))

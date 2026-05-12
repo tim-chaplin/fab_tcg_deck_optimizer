@@ -51,10 +51,10 @@ func TestRunebloodIncantation_PlayRegistersStartOfTurnTriggerWithCountN(t *testi
 // Count, not from the handler doing more work each call.
 func TestRunebloodIncantation_HandlerCreatesOneRunechantPerFire(t *testing.T) {
 	for _, c := range []card.Card{cards.RunebloodIncantationRed{}, cards.RunebloodIncantationYellow{}, cards.RunebloodIncantationBlue{}} {
-		var play gameengine.GameEngine
+		play := gameengine.New()
 		play.ResolveChainStep(play.Logger(), &card.CardState{Card: c})
 		fire := gameengine.NewFromCards(nil, nil)
-		fire.SetAuras(append(fire.Auras(), play.Auras()[0]))
+		fire.CreateAura(play.Auras()[0])
 		fire.FireStartOfTurn(nil)
 		if fire.Value() != 1 {
 			t.Errorf("%s: handler Value = %d, want 1", c.Name(), fire.Value())

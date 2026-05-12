@@ -78,9 +78,9 @@ func TestArcaneCussing_SameTurnPopByWeaponSwing(t *testing.T) {
 	s := gameengine.NewFromSpec(gameengine.Spec{
 		IncomingDamage: 3,
 		BlockTotal:     0,
-		Auras:          []gameengine.Aura{sim.NewRunechantAura(1)},
 		CardsRemaining: []*card.CardState{{Card: testutils.RunebladeWeapon{}}},
 	})
+	s.CreateAura(sim.NewRunechantAura(1))
 	s.ResolveChainStep(s.Logger(), &card.CardState{Card: cards.ArcaneCussingRed{}})
 	if got := s.Value(); got != 3 {
 		t.Errorf("Play() = %d, want 3 (1 Runechant fires with weapon, likely to hit)", got)
@@ -93,9 +93,9 @@ func TestArcaneCussing_SameTurnPopByRunechantAlone(t *testing.T) {
 	s := gameengine.NewFromSpec(gameengine.Spec{
 		IncomingDamage: 3,
 		BlockTotal:     0,
-		Auras:          []gameengine.Aura{sim.NewRunechantAura(1)},
 		CardsRemaining: []*card.CardState{{Card: testutils.AttackWithPower{Power: 6}}},
 	})
+	s.CreateAura(sim.NewRunechantAura(1))
 	s.ResolveChainStep(s.Logger(), &card.CardState{Card: cards.ArcaneCussingRed{}})
 	if got := s.Value(); got != 3 {
 		t.Errorf("Play() = %d, want 3 (Attack=6 blockable, but 1 Runechant likely to slip through)", got)

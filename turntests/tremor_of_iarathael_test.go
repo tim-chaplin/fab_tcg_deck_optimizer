@@ -8,7 +8,6 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
-	"github.com/tim-chaplin/fab-deck-optimizer/v2/gameengine"
 )
 
 // Tests that a same-turn banish (Jack Be Quick consuming a graveyard Nimblism) flips
@@ -22,7 +21,7 @@ func TestTremorOfIArathael_SameTurnBanishActivatesBonus(t *testing.T) {
 		cards.JackBeQuickRed{},
 		cards.TitaniumBaubleBlue{},
 	}
-	initial := gameengine.Spec{
+	initial := sim.Prior{
 		Graveyard: []card.Card{cards.NimblismRed{}},
 	}
 	got := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, initial, hand).Value
@@ -37,7 +36,7 @@ func TestTremorOfIArathael_SameTurnBanishActivatesBonus(t *testing.T) {
 func TestTremorOfIArathael_PriorTurnBanishedZoneDoesNotActivate(t *testing.T) {
 	d := deck.New(heroes.Viserai{}, nil, fillerDeck())
 	hand := []deck.Card{cards.TremorOfIArathaelRed{}, cards.TitaniumBaubleBlue{}}
-	initial := gameengine.Spec{
+	initial := sim.Prior{
 		Banished: []card.Card{cards.NimblismRed{}},
 	}
 	got := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, initial, hand).Value

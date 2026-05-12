@@ -48,34 +48,6 @@ func NewTokenAura(name string, tokenID ids.CardID, tt gameengine.TriggerType, ha
 	}
 }
 
-// auraSliceAsEngine converts a []*Aura to []gameengine.Aura for engine-API call sites
-// (PermutationSeed.Auras, Spec.Auras). The underlying entries are unchanged — each *Aura
-// satisfies gameengine.Aura — so this is just a per-element box.
-func auraSliceAsEngine(src []*Aura) []gameengine.Aura {
-	if len(src) == 0 {
-		return nil
-	}
-	out := make([]gameengine.Aura, len(src))
-	for i, a := range src {
-		out[i] = a
-	}
-	return out
-}
-
-// auraSliceFromEngine type-asserts every entry of an engine-returned []gameengine.Aura
-// back to *Aura. Sim's runtime is the only registered Aura impl, so each assertion is
-// guaranteed to succeed in production.
-func auraSliceFromEngine(src []gameengine.Aura) []*Aura {
-	if len(src) == 0 {
-		return nil
-	}
-	out := make([]*Aura, len(src))
-	for i, a := range src {
-		out[i] = a.(*Aura)
-	}
-	return out
-}
-
 func (a *Aura) TriggerType() gameengine.TriggerType { return a.triggerType }
 func (a *Aura) OncePerTurn() bool                   { return a.oncePerTurn }
 func (a *Aura) FiredThisTurn() bool                 { return a.firedThisTurn }
@@ -111,7 +83,9 @@ func (a *Aura) OnDestroy(g *gameengine.GameEngine) {
 	}
 }
 
-func (a *Aura) Clone() gameengine.Aura {
+// Copy returns a deep copy of this aura. GameEngine.Copy walks the aura list so each
+// permutation's Count / FiredThisTurn mutations stay isolated.
+func (a *Aura) Copy() gameengine.Aura {
 	out := *a
 	return &out
 }

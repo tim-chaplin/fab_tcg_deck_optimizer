@@ -7,14 +7,13 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/heroes"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
-	"github.com/tim-chaplin/fab-deck-optimizer/v2/gameengine"
 )
 
 // Tests that Pursue to the Edge of Oblivion's on-hit rider marks the opposing hero.
 func TestPursueToTheEdgeOfOblivion_MarksOpponentOnHit(t *testing.T) {
 	d := deck.New(heroes.Viserai{}, nil, fillerDeck())
 	hand := []deck.Card{cards.PursueToTheEdgeOfOblivionRed{}}
-	state := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, gameengine.Spec{}, hand)
+	state := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, sim.Prior{}, hand)
 	if !state.OpponentMarked {
 		t.Fatalf("OpponentMarked = false after Pursue resolved, want true")
 	}
@@ -25,7 +24,7 @@ func TestPursueToTheEdgeOfOblivion_MarksOpponentOnHit(t *testing.T) {
 func TestPursueToTheEdgeOfOblivion_PreservesMarkWhenOpponentAlreadyMarked(t *testing.T) {
 	d := deck.New(heroes.Viserai{}, nil, fillerDeck())
 	hand := []deck.Card{cards.PursueToTheEdgeOfOblivionRed{}}
-	state := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, gameengine.Spec{OpponentMarked: true}, hand)
+	state := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, sim.Prior{OpponentMarked: true}, hand)
 	if !state.OpponentMarked {
 		t.Fatalf("OpponentMarked = false after Pursue resolved against pre-marked opponent, want true")
 	}
@@ -35,7 +34,7 @@ func TestPursueToTheEdgeOfOblivion_PreservesMarkWhenOpponentAlreadyMarked(t *tes
 func TestOuted_NoBonusWhenOpponentUnmarked(t *testing.T) {
 	d := deck.New(heroes.Viserai{}, nil, fillerDeck())
 	hand := []deck.Card{cards.OutedRed{}}
-	state := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, gameengine.Spec{}, hand)
+	state := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, sim.Prior{}, hand)
 	if state.Value != 3 {
 		t.Fatalf("Value = %d, want 3 (Outed printed 3{p}, no marked-defender bonus)", state.Value)
 	}
@@ -46,7 +45,7 @@ func TestOuted_NoBonusWhenOpponentUnmarked(t *testing.T) {
 func TestOuted_BonusWhenOpponentAlreadyMarked(t *testing.T) {
 	d := deck.New(heroes.Viserai{}, nil, fillerDeck())
 	hand := []deck.Card{cards.OutedRed{}}
-	state := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, gameengine.Spec{OpponentMarked: true}, hand)
+	state := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, sim.Prior{OpponentMarked: true}, hand)
 	if state.Value != 4 {
 		t.Fatalf("Value = %d, want 4 (Outed printed 3{p} + 1 marked-defender)", state.Value)
 	}

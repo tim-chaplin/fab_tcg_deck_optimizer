@@ -35,7 +35,7 @@ func TestSigilOfTheArknight_TriggerRevealsAttackActionIntoHand(t *testing.T) {
 	play.ResolveChainStep(play.Logger(), &card.CardState{Card: cards.SigilOfTheArknightBlue{}})
 	top := testutils.RunebladeAttack{}
 	next := gameengine.NewFromCards([]card.Card{top, testutils.NonAttack{}}, nil)
-	next.SetAuras(append(next.Auras(), play.Auras()[0]))
+	next.CreateAura(play.Auras()[0])
 	next.FireStartOfTurn(nil)
 	if next.Value() != 0 {
 		t.Errorf("handler Value = %d, want 0 (tempo credited via the draw, not damage)", next.Value())
@@ -54,7 +54,7 @@ func TestSigilOfTheArknight_TriggerRevealsNonAttack(t *testing.T) {
 	var play gameengine.GameEngine
 	play.ResolveChainStep(play.Logger(), &card.CardState{Card: cards.SigilOfTheArknightBlue{}})
 	next := gameengine.NewFromCards([]card.Card{testutils.Aura{}, testutils.RunebladeAttack{}}, nil)
-	next.SetAuras(append(next.Auras(), play.Auras()[0]))
+	next.CreateAura(play.Auras()[0])
 	next.FireStartOfTurn(nil)
 	if next.Value() != 0 {
 		t.Errorf("handler Value = %d, want 0", next.Value())
@@ -72,7 +72,7 @@ func TestSigilOfTheArknight_TriggerEmptyDeck(t *testing.T) {
 	var play gameengine.GameEngine
 	play.ResolveChainStep(play.Logger(), &card.CardState{Card: cards.SigilOfTheArknightBlue{}})
 	next := gameengine.NewFromCards(nil, nil)
-	next.SetAuras(append(next.Auras(), play.Auras()[0]))
+	next.CreateAura(play.Auras()[0])
 	next.FireStartOfTurn(nil)
 	if next.Value() != 0 {
 		t.Errorf("handler Value = %d, want 0", next.Value())

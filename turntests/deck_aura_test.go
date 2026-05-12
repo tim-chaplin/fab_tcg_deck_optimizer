@@ -13,7 +13,6 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
-	"github.com/tim-chaplin/fab-deck-optimizer/v2/gameengine"
 )
 
 // Tests that Sigil of Fyendal plays turn 1 and its start-of-turn trigger fires on turn 2 —
@@ -27,7 +26,7 @@ func TestEvalOneTurn_SigilOfFyendalQueuesTrigger(t *testing.T) {
 		testutils.BlueAttack{},
 	}
 	d := deck.New(heroes.Viserai{}, nil, deckCards)
-	state := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, gameengine.Spec{}, []deck.Card{sigil})
+	state := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, sim.Prior{}, []deck.Card{sigil})
 
 	sigilPlayed := false
 	for _, a := range state.BestLine {
@@ -65,7 +64,7 @@ func TestEvalOneTurn_SigilOfTheArknightRevealsIntoHand(t *testing.T) {
 		testutils.BlueAttack{},
 	}
 	d := deck.New(heroes.Viserai{}, nil, deckCards)
-	state := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, gameengine.Spec{}, []deck.Card{sigil})
+	state := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, sim.Prior{}, []deck.Card{sigil})
 
 	sigilPlayed := false
 	for _, a := range state.BestLine {
@@ -113,7 +112,7 @@ func TestEvalOneTurn_BlessingOfOccultCreatesRunesAtStartOfNextTurn(t *testing.T)
 		testutils.BlueAttack{},
 	}
 	d := deck.New(heroes.Viserai{}, nil, deckCards)
-	state := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, gameengine.Spec{}, []deck.Card{blessing, pitch})
+	state := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, sim.Prior{}, []deck.Card{blessing, pitch})
 
 	if state.Value != 0 {
 		t.Errorf("Value = %d, want 0 (Blessing's rune credit is deferred)", state.Value)
@@ -153,7 +152,7 @@ func TestEvalOneTurn_MaleficIncantationOncePerTurnLimitsToOneRune(t *testing.T) 
 		testutils.BlueAttack{},
 	}
 	d := deck.New(heroes.Viserai{}, nil, deckCards)
-	state := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, gameengine.Spec{}, []deck.Card{malefic, hocus})
+	state := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, sim.Prior{}, []deck.Card{malefic, hocus})
 
 	maleficPlayed, hocusPlayed := false, false
 	for _, a := range state.BestLine {
@@ -198,7 +197,7 @@ func TestEvalOneTurn_RunebloodIncantationTicksAcrossTurns(t *testing.T) {
 		testutils.BlueAttack{},
 	}
 	d := deck.New(heroes.Viserai{}, nil, deckCards)
-	state := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, gameengine.Spec{}, []deck.Card{runeblood, pitch})
+	state := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, sim.Prior{}, []deck.Card{runeblood, pitch})
 
 	runebloodPlayed := false
 	for _, a := range state.BestLine {

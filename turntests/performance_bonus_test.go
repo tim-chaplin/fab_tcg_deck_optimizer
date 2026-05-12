@@ -8,7 +8,6 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
-	"github.com/tim-chaplin/fab-deck-optimizer/v2/gameengine"
 )
 
 // Tests that Performance Bonus's on-hit Gold-create rider lands a Gold token via the
@@ -17,7 +16,7 @@ import (
 func TestPerformanceBonus_OnHitCreatesGold(t *testing.T) {
 	d := deck.New(heroes.Viserai{}, nil, fillerDeck())
 	hand := []deck.Card{cards.PerformanceBonusBlue{}}
-	state := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, gameengine.Spec{}, hand)
+	state := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, sim.Prior{}, hand)
 	if state.Value != 1 {
 		t.Fatalf("Value = %d, want 1 (PB Blue power 1 hits)\nBestLine: %s",
 			state.Value, formatBestLine(state.BestLine))

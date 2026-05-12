@@ -9,7 +9,6 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapons"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
-	"github.com/tim-chaplin/fab-deck-optimizer/v2/gameengine"
 )
 
 // Tests that Captain's Call picks the go-again mode when a follow-up attack can extend the
@@ -21,7 +20,7 @@ func TestModal_CaptainsCallPicksGoAgainOverBuffWhenChainExtends(t *testing.T) {
 		cards.SnatchRed{},
 		cards.SnatchRed{},
 	}
-	got := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, gameengine.Spec{}, hand).Value
+	got := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, sim.Prior{}, hand).Value
 	if got != 8 {
 		t.Fatalf("Value = %d, want 8 (mode 1 grants go-again so both Snatches chain)", got)
 	}
@@ -35,7 +34,7 @@ func TestModal_CaptainsCallPicksBuffWhenChainCantExtend(t *testing.T) {
 		cards.CaptainsCallRed{},
 		cards.SnatchRed{},
 	}
-	got := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, gameengine.Spec{}, hand).Value
+	got := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, sim.Prior{}, hand).Value
 	if got != 6 {
 		t.Fatalf("Value = %d, want 6 (mode 0 +2{p} since no second attack to extend into)", got)
 	}
@@ -48,7 +47,7 @@ func TestModal_RazorReflexMode0BuffsSwordWeapon(t *testing.T) {
 		cards.RazorReflexRed{},
 		cards.ToughenUpBlue{},
 	}
-	got := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, gameengine.Spec{}, hand).Value
+	got := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, sim.Prior{}, hand).Value
 	if got != 5 {
 		t.Fatalf("Value = %d, want 5 (NebulaBlade 1 + Razor Reflex mode 0 +3 + runechant 1)", got)
 	}
@@ -65,7 +64,7 @@ func TestModal_RazorReflexMode1BuffAndOnHitGoAgainExtendChain(t *testing.T) {
 		cards.SnatchRed{},
 		testutils.BlueAttack{},
 	}
-	got := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, gameengine.Spec{}, hand).Value
+	got := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, sim.Prior{}, hand).Value
 	if got != 11 {
 		t.Fatalf("Value = %d, want 11 (Snatch1 4 + Razor Reflex +3 + Snatch2 4 via on-hit go-again)", got)
 	}
@@ -81,7 +80,7 @@ func TestModal_PummelMode1BuffsAndDiscardsOnHit(t *testing.T) {
 		testutils.BlueAttack{},
 		testutils.BlueAttack{},
 	}
-	got := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, gameengine.Spec{}, hand).Value
+	got := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, sim.Prior{}, hand).Value
 	if got != 7 {
 		t.Fatalf("Value = %d, want 7 (AdrenalineRush 2 + Pummel +2 + on-hit discard 3)", got)
 	}
@@ -94,7 +93,7 @@ func TestModal_PummelMode0BuffsClubWeapon(t *testing.T) {
 		cards.PummelRed{},
 		cards.ToughenUpBlue{},
 	}
-	got := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, gameengine.Spec{}, hand).Value
+	got := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, sim.Prior{}, hand).Value
 	if got != 5 {
 		t.Fatalf("Value = %d, want 5 (Club 1 + Pummel mode 0 +4)", got)
 	}
