@@ -508,11 +508,3 @@ func AllCards() []CardID {
 	}
 	return out
 }
-
-// DeckableCards returns every registered card ID that's legal to put in a real deck.
-// Freshly allocated; safe to mutate. Test-only synthetic IDs live in the testutils package
-// and aren't registered here, so the result currently matches AllCards(); the distinct name
-// keeps caller intent ("deck-legal cards") readable.
-func DeckableCards() []CardID {
-	return AllCards()
-}

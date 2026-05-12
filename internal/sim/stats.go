@@ -1,14 +1,10 @@
 package sim
 
 // Aggregate statistics accumulated while simulating a deck: total / per-cycle / per-card tallies,
-// the single best turn ever seen, and a histogram of hand values that supports Min / Max /
-// Median without retaining every individual hand.
+// the single best turn ever seen, and a histogram of hand values that supports Min / Max without
+// retaining every individual hand.
 
-import (
-	"sort"
-
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
-)
+import "github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
 
 // DeckStats holds aggregate hand-value statistics across all simulated runs of a Deck.
 type DeckStats struct {
@@ -35,7 +31,7 @@ type DeckStats struct {
 	// presence vectors would credit such effects more cleanly.
 	PerCardMarginal map[ids.CardID]CardMarginalStats
 	// Histogram counts hands seen at each integer Value. Keyed by TurnSummary.Value so Min /
-	// Median can be derived without retaining every hand's value. Nil until the first hand is
+	// Max can be derived without retaining every hand's value. Nil until the first hand is
 	// evaluated.
 	Histogram map[int]int
 }
@@ -148,36 +144,4 @@ func (s DeckStats) Max() int {
 		}
 	}
 	return m
-}
-
-// Median returns the median hand value. With an even number of hands it's the mean of the two
-// middle values (so it can be fractional). Zero when no hands have been seen.
-func (s DeckStats) Median() float64 {
-	if s.Hands == 0 || len(s.Histogram) == 0 {
-		return 0
-	}
-	keys := make([]int, 0, len(s.Histogram))
-	for v := range s.Histogram {
-		keys = append(keys, v)
-	}
-	sort.Ints(keys)
-	// Walk the sorted values in order, counting cumulative hands until we pass the median
-	// rank(s). lower = rank s.Hands/2 (0-indexed); upper = rank (s.Hands-1)/2 for even Hands.
-	lowerRank := (s.Hands - 1) / 2
-	upperRank := s.Hands / 2
-	var lower, upper int
-	cum := 0
-	foundLower := false
-	for _, v := range keys {
-		cum += s.Histogram[v]
-		if !foundLower && cum > lowerRank {
-			lower = v
-			foundLower = true
-		}
-		if cum > upperRank {
-			upper = v
-			break
-		}
-	}
-	return float64(lower+upper) / 2
 }

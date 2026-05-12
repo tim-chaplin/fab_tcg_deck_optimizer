@@ -382,24 +382,6 @@ func (c StubCard) Types(card.GameEngine) card.TypeSet               { return c.t
 func (c StubCard) GoAgain(card.GameEngine) bool                     { return c.goAgain }
 func (StubCard) Play(card.GameEngine, card.Logger, *card.CardState) {}
 
-// DominatingStubCard embeds StubCard and adds the card.Dominator marker — exercises the
-// printed-Dominate branch of EffectiveDominate / HasDominate.
-type DominatingStubCard struct{ StubCard }
-
-func (DominatingStubCard) Dominate() {}
-
-// NotImplementedStubCard embeds StubCard and adds the registry.NotImplemented marker —
-// exercises the type assertion the registry's legal-pool filter keys on.
-type NotImplementedStubCard struct{ StubCard }
-
-func (NotImplementedStubCard) NotImplemented() {}
-
-// UnplayableStubCard embeds StubCard and adds the registry.Unplayable marker — exercises
-// the second pool-exclusion path the registry's legal-pool filter keys on.
-type UnplayableStubCard struct{ StubCard }
-
-func (UnplayableStubCard) Unplayable() {}
-
 // InstantStub is a 0-cost, 0-power Generic Action - Instant card with no Go again.
 // Tests chain-runner behaviour around the Action Point debit: an Instant after a
 // non-Go-again card should still resolve because Instants cost 0 AP.
