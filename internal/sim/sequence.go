@@ -548,8 +548,11 @@ func fireAttackAuras(state *TurnState, triggeringCard card.Card) {
 // slices before the next permutation overwrites these buffers; mid-chain growth past the
 // pre-sized cap is the only path that allocates a new backing array.
 //
-// deck is a fresh Copy of ctx.deck per permutation so card-driven mutations
-// (PrependToDeck, TutorFromDeck, Opt, PopDeckTop) stay scoped to this permutation.
+// deck is the pooled bufs.deckScratch, refilled from ctx.deck via Deck.ResetTo so
+// card-driven mutations (PrependToDeck, TutorFromDeck, Opt, PopDeckTop) stay scoped
+// to this permutation without re-allocating the cards / Weapons backing arrays each
+// time. The first call allocates the scratch via ctx.deck.Copy(); subsequent calls
+// reuse it.
 func (ctx *sequenceContext) resetStateForPermutation() {
 	s := ctx.bufs.state
 	bufs := ctx.bufs
@@ -559,7 +562,12 @@ func (ctx *sequenceContext) resetStateForPermutation() {
 	// NonAttackActionPlayed, ArcaneDamageDealt, Revealed, TriggeringCard) are assigned
 	// explicitly so any leftover state from a previous permutation gets cleared.
 	s.hand = append(bufs.handBacking[:0], ctx.handStart...)
-	s.deck = ctx.deck.Copy()
+	if bufs.deckScratch == nil {
+		bufs.deckScratch = ctx.deck.Copy()
+	} else {
+		bufs.deckScratch.ResetTo(ctx.deck)
+	}
+	s.deck = bufs.deckScratch
 	s.Arsenal = ctx.arsenalAtChainStart
 	s.graveyard = append(bufs.graveBacking[:0], ctx.priorGraveyard...)
 	s.graveyard = append(s.graveyard, ctx.defenders...)

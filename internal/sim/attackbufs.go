@@ -2,6 +2,7 @@ package sim
 
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/turnlogger"
 )
 
@@ -119,6 +120,12 @@ type permBufs struct {
 	// triggersBacking backs TurnState.Triggers. Sized small — Triggers are one-shot, so
 	// the typical queue depth is one or two riders.
 	triggersBacking []Trigger
+	// deckScratch is the per-permutation runtime deck. resetStateForPermutation refills it
+	// from ctx.deck via Deck.ResetTo, reusing the cards / Weapons backing arrays so chain
+	// mutations (Shuffle, Draw, PutBottom, PutTop, Tutor) work on a private *Deck without
+	// allocating fresh slices for the dominant unmutated case. Allocated on first call to
+	// avoid sizing it before we know the deck length.
+	deckScratch *deck.Deck
 }
 
 // carryWinnerBufs holds the running-winner CarryState scratches — one per nesting level
