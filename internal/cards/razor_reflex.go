@@ -14,24 +14,19 @@ package cards
 
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
-
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
 
 // razorReflexAccepts is the per-mode target predicate. Mode 0 gates on sword weapon
 // attack; mode 1 gates on cost-≤1 attack action. The chain runner runs this for the
 // chosen Mode and rejects the permutation when it returns false, so razorReflexPlay can
 // apply the buff unconditionally.
-//
-// Reads Cost against an empty TurnState; no variable-cost cost-≤1 attack actions exist
-// in the pool.
-func razorReflexAccepts(c card.Card, mode int8) bool {
+func razorReflexAccepts(s card.GameEngine, c card.Card, mode int8) bool {
 	t := c.Types(nil)
 	switch mode {
 	case 0:
 		return t.Has(card.TypeSword) && t.IsWeaponAttack()
 	case 1:
-		return t.IsAttackAction() && c.Cost(&sim.TurnState{}) <= 1
+		return t.IsAttackAction() && c.Cost(s) <= 1
 	}
 	return false
 }
@@ -51,24 +46,24 @@ func razorReflexPlay(s card.GameEngine, l card.Logger, self *card.CardState, n i
 }
 
 func (RazorReflexRed) Modes() int { return 2 }
-func (RazorReflexRed) ARTargetAllowed(c card.Card, mode int8) bool {
-	return razorReflexAccepts(c, mode)
+func (RazorReflexRed) ARTargetAllowed(s card.GameEngine, c card.Card, mode int8) bool {
+	return razorReflexAccepts(s, c, mode)
 }
 func (RazorReflexRed) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 	razorReflexPlay(s, l, self, 3)
 }
 
 func (RazorReflexYellow) Modes() int { return 2 }
-func (RazorReflexYellow) ARTargetAllowed(c card.Card, mode int8) bool {
-	return razorReflexAccepts(c, mode)
+func (RazorReflexYellow) ARTargetAllowed(s card.GameEngine, c card.Card, mode int8) bool {
+	return razorReflexAccepts(s, c, mode)
 }
 func (RazorReflexYellow) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 	razorReflexPlay(s, l, self, 2)
 }
 
 func (RazorReflexBlue) Modes() int { return 2 }
-func (RazorReflexBlue) ARTargetAllowed(c card.Card, mode int8) bool {
-	return razorReflexAccepts(c, mode)
+func (RazorReflexBlue) ARTargetAllowed(s card.GameEngine, c card.Card, mode int8) bool {
+	return razorReflexAccepts(s, c, mode)
 }
 func (RazorReflexBlue) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 	razorReflexPlay(s, l, self, 1)

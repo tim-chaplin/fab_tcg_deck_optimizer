@@ -12,24 +12,19 @@ package cards
 
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
-
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
 
 // pummelAccepts is the per-mode target predicate. Mode 0 gates on club/hammer weapon
 // attack; mode 1 gates on cost-≥2 attack action. The chain runner runs this for the
 // chosen Mode and rejects the permutation when it returns false, so pummelPlay can apply
 // the buff unconditionally.
-//
-// Reads Cost against an empty TurnState; variable-cost cards aren't expected in mode 1's
-// gate range.
-func pummelAccepts(c card.Card, mode int8) bool {
+func pummelAccepts(s card.GameEngine, c card.Card, mode int8) bool {
 	t := c.Types(nil)
 	switch mode {
 	case 0:
 		return (t.Has(card.TypeClub) || t.Has(card.TypeHammer)) && t.IsWeaponAttack()
 	case 1:
-		return t.IsAttackAction() && c.Cost(&sim.TurnState{}) >= 2
+		return t.IsAttackAction() && c.Cost(s) >= 2
 	}
 	return false
 }
@@ -59,24 +54,24 @@ func pummelPlay(s card.GameEngine, l card.Logger, self *card.CardState, n int) {
 }
 
 func (PummelRed) Modes() int { return 2 }
-func (PummelRed) ARTargetAllowed(c card.Card, mode int8) bool {
-	return pummelAccepts(c, mode)
+func (PummelRed) ARTargetAllowed(s card.GameEngine, c card.Card, mode int8) bool {
+	return pummelAccepts(s, c, mode)
 }
 func (PummelRed) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 	pummelPlay(s, l, self, 4)
 }
 
 func (PummelYellow) Modes() int { return 2 }
-func (PummelYellow) ARTargetAllowed(c card.Card, mode int8) bool {
-	return pummelAccepts(c, mode)
+func (PummelYellow) ARTargetAllowed(s card.GameEngine, c card.Card, mode int8) bool {
+	return pummelAccepts(s, c, mode)
 }
 func (PummelYellow) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 	pummelPlay(s, l, self, 3)
 }
 
 func (PummelBlue) Modes() int { return 2 }
-func (PummelBlue) ARTargetAllowed(c card.Card, mode int8) bool {
-	return pummelAccepts(c, mode)
+func (PummelBlue) ARTargetAllowed(s card.GameEngine, c card.Card, mode int8) bool {
+	return pummelAccepts(s, c, mode)
 }
 func (PummelBlue) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 	pummelPlay(s, l, self, 2)
