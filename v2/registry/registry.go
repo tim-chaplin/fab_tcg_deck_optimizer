@@ -27,7 +27,7 @@ func (Registry) LegalCards() []deck.Card {
 func (Registry) LegalWeapons() []deck.Weapon {
 	out := make([]deck.Weapon, 0, len(AllWeapons))
 	for _, w := range AllWeapons {
-		if isExcludedWeaponFromPool(w) {
+		if isExcludedFromPool(w) {
 			continue
 		}
 		out = append(out, w.(deck.Weapon))
@@ -35,30 +35,18 @@ func (Registry) LegalWeapons() []deck.Weapon {
 	return out
 }
 
-// isExcludedFromPool / isExcludedWeaponFromPool gate cards and weapons out of the deck-
-// construction pool via the optional marker interfaces NotImplemented, Unplayable, and
-// NotSilverAgeLegal.
-func isExcludedFromPool(c Card) bool {
-	if _, ok := c.(NotImplemented); ok {
+// isExcludedFromPool gates a card or weapon out of the deck-construction pool via the
+// optional marker interfaces NotImplemented, Unplayable, and NotSilverAgeLegal. The
+// markers are method-set tags with no type relation to Card / Weapon, so a single any-typed
+// scan handles both inputs.
+func isExcludedFromPool(x any) bool {
+	if _, ok := x.(NotImplemented); ok {
 		return true
 	}
-	if _, ok := c.(Unplayable); ok {
+	if _, ok := x.(Unplayable); ok {
 		return true
 	}
-	if _, ok := c.(NotSilverAgeLegal); ok {
-		return true
-	}
-	return false
-}
-
-func isExcludedWeaponFromPool(w Weapon) bool {
-	if _, ok := w.(NotImplemented); ok {
-		return true
-	}
-	if _, ok := w.(Unplayable); ok {
-		return true
-	}
-	if _, ok := w.(NotSilverAgeLegal); ok {
+	if _, ok := x.(NotSilverAgeLegal); ok {
 		return true
 	}
 	return false

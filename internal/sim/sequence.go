@@ -423,14 +423,19 @@ func (ctx *sequenceContext) runDefense(defenders, pitched []card.Card, deckPile 
 // publishes the triggering card via state.triggeringCard before each handler runs and
 // clears it after; handlers read it through s.AddPreTriggerLogEntry to attribute their
 // log line back to the triggering card.
-//
-// Iterates state.auras with a cursor that handles handler-side splicing: a handler
-// calling s.DestroyAura mutates state.auras in place (shifting the next entry down to
-// the cursor's index), so the loop only advances when the slice length didn't change.
 func fireAttackActionAuras(state *TurnState, triggeringCard card.Card) {
+	fireAurasForAttack(state, triggeringCard, TriggerAttackAction)
+}
+
+// fireAurasForAttack is the shared body of fireAttackActionAuras / fireAttackAuras: walk
+// state.auras, fire every entry matching trigger whose OncePerTurn gate is open, and
+// publish triggeringCard for log attribution. Iterates with a cursor so handler-side
+// splicing (s.DestroyAura mutates state.auras in place, shifting the next entry down to
+// the cursor's index) advances only when the slice length didn't change.
+func fireAurasForAttack(state *TurnState, triggeringCard card.Card, trigger TriggerType) {
 	for i := 0; i < len(state.auras); {
 		a := &state.auras[i]
-		if a.TriggerType != TriggerAttackAction || (a.OncePerTurn && a.FiredThisTurn) {
+		if a.TriggerType != trigger || (a.OncePerTurn && a.FiredThisTurn) {
 			i++
 			continue
 		}
@@ -512,27 +517,9 @@ func fireEndOfTurn(state *TurnState) {
 
 // fireAttackAuras is the TriggerAttack counterpart to fireAttackActionAuras: walks
 // state.auras when ANY attack resolves (attack action OR weapon swing) and invokes every
-// TriggerAttack entry. The runechant token aura uses this trigger. Same cursor / splice
-// semantics as fireAttackActionAuras.
+// TriggerAttack entry. The runechant token aura uses this trigger.
 func fireAttackAuras(state *TurnState, triggeringCard card.Card) {
-	for i := 0; i < len(state.auras); {
-		a := &state.auras[i]
-		if a.TriggerType != TriggerAttack || (a.OncePerTurn && a.FiredThisTurn) {
-			i++
-			continue
-		}
-		state.triggeringCard = triggeringCard
-		state.currentAuraIdx = i
-		state.currentAuraDestroyed = false
-		ctx := auraCtx{a: a, s: state}
-		a.Handler(state, state.logger, &ctx)
-		state.currentAuraIdx = -1
-		state.triggeringCard = nil
-		if !state.currentAuraDestroyed {
-			state.auras[i].FiredThisTurn = true
-			i++
-		}
-	}
+	fireAurasForAttack(state, triggeringCard, TriggerAttack)
 }
 
 // resetStateForPermutation rewrites every TurnState field to its per-permutation starting
@@ -641,20 +628,7 @@ func (ctx *sequenceContext) bestSequence(attackers []card.Card) (int, int, bool)
 	permMeta := ctx.bufs.permMeta[:n]
 	for idx, c := range attackers {
 		permMeta[idx] = attackerMetaPtrFor(c)
-		// Field-by-field assignment preserves pcBuf[idx].OnHit's backing array across
-		// Best calls — a struct-literal assignment would drop it and force every Play
-		// that registers an OnHit to allocate a fresh slice on the hot anneal path.
-		// Other sliced fields (PitchedToPlay) get reset by playSequenceWithMeta.
-		pcBuf[idx].Card = c
-		pcBuf[idx].FromArsenal = idx == ctx.arsenalInIdx
-		pcBuf[idx].GrantedGoAgain = false
-		pcBuf[idx].GrantedDominate = false
-		pcBuf[idx].GrantedOverpower = false
-		pcBuf[idx].BonusAttack = 0
-		pcBuf[idx].BonusDefense = 0
-		pcBuf[idx].PitchedToPlay = nil
-		pcBuf[idx].OnHit = pcBuf[idx].OnHit[:0]
-		pcBuf[idx].Mode = 0
+		ctx.seedChainEntry(&pcBuf[idx], c, idx)
 	}
 
 	best := 0
@@ -808,19 +782,28 @@ func (ctx *sequenceContext) playSequence(order []card.Card) (damage int, futureV
 	meta := ctx.bufs.permMeta[:n]
 	for i, c := range order {
 		meta[i] = attackerMetaPtrFor(c)
-		// Field-by-field — preserve pcBuf[i].OnHit backing across calls (see bestSequence).
-		pcBuf[i].Card = c
-		pcBuf[i].FromArsenal = i == ctx.arsenalInIdx
-		pcBuf[i].GrantedGoAgain = false
-		pcBuf[i].GrantedDominate = false
-		pcBuf[i].GrantedOverpower = false
-		pcBuf[i].BonusAttack = 0
-		pcBuf[i].BonusDefense = 0
-		pcBuf[i].PitchedToPlay = nil
-		pcBuf[i].OnHit = pcBuf[i].OnHit[:0]
-		pcBuf[i].Mode = 0
+		ctx.seedChainEntry(&pcBuf[i], c, i)
 	}
 	return ctx.playSequenceWithMeta(n)
+}
+
+// seedChainEntry initialises one pcBuf slot for a fresh chain pass: writes Card and the
+// per-permutation reset of every CardState flag a prior Play could have flipped. Field-
+// by-field assignment preserves pc.OnHit's backing array across Best calls — a struct-
+// literal assignment would drop it and force every Play registering an OnHit to allocate
+// a fresh slice on the hot anneal path. PitchedToPlay's nil reset is conservative;
+// playSequenceWithMeta rewrites it once the pitch pool pays each step.
+func (ctx *sequenceContext) seedChainEntry(pc *card.CardState, c card.Card, idx int) {
+	pc.Card = c
+	pc.FromArsenal = idx == ctx.arsenalInIdx
+	pc.GrantedGoAgain = false
+	pc.GrantedDominate = false
+	pc.GrantedOverpower = false
+	pc.BonusAttack = 0
+	pc.BonusDefense = 0
+	pc.PitchedToPlay = nil
+	pc.OnHit = pc.OnHit[:0]
+	pc.Mode = 0
 }
 
 // playSequenceWithMeta runs the permutation currently held in ctx.bufs.pcBuf[:n] with
