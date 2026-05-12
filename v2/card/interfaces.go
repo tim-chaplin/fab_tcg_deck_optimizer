@@ -147,6 +147,12 @@ type GameEngine interface {
 	// Clash (top-of-deck power compare)
 	Clash(win, lose func())
 
+	// PlayCard runs Card.Play on self and emits the chain step. Cards that resolve
+	// another card mid-handler (Moon Wish tutoring Sun Kiss into play on go-again)
+	// call this; the engine credits the step's value and emits the log line just like
+	// a top-level chain step. self.Card supplies the Play handler.
+	PlayCard(Logger, *CardState)
+
 	// Attack reaction target accessor.
 	// TODO: evaluate if we actually need this. It leaks an engine implementation
 	// detail (that the engine has to remember which attack is on the stack while

@@ -18,7 +18,6 @@ package cards
 
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
@@ -81,7 +80,7 @@ func moonWishOnHit(s card.GameEngine, l card.Logger, self *card.CardState, _ *ca
 	l.AppendPostTriggerf(name, 0, "%s tutored %s and played it", name, sk.DisplayName())
 	s.SetCardsPlayed(append(s.CardsPlayed(), c))
 	skSelf := &card.CardState{Card: sk}
-	sim.ResolveChainStep(s, l, skSelf)
+	s.PlayCard(l, skSelf)
 	s.SetCardsPlayed(s.CardsPlayed()[:len(s.CardsPlayed())-1])
 	s.AddToGraveyard(sk)
 }
