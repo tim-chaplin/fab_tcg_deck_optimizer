@@ -38,7 +38,7 @@ func FormatLogEntry(e turnlogger.LogEntry) string {
 // bestAttackWithWeapons enumerates phase / weapon masks for one partition leaf and returns
 // the best (damage, futureValue, budget, swungWeapons, carryState, legal, cacheable) tuple.
 func bestAttackWithWeapons(hero gameengine.Hero, weapons []Weapon, attackers, defenders, pitched, held []card.Card, d *deck.Deck, bufs *attackBufs, mp Matchup, blockTotal, arsenalInIdx, arsenalDefenderIdx int, arsenalAtChainStart card.Card, prior gameengine.Spec, skipLog bool) (int, int, chainBudget, []string, CarryState, bool, bool) {
-	runechantCarryover := auraCountByName(prior.Auras, "Runechant")
+	runechantCarryover := countByName(prior.Auras, "Runechant")
 	ctx := &sequenceContext{
 		hero:                hero,
 		pitched:             pitched,
@@ -160,7 +160,7 @@ func bestAttackWithWeapons(hero gameengine.Hero, weapons []Weapon, attackers, de
 			// DRs read RunechantCount() off this aura.
 			drScratchAuras := bufs.drScratchAuras[:0]
 			if ctx.runechantCarryover > 0 {
-				drScratchAuras = append(drScratchAuras, gameengine.NewRunechantAura(ctx.runechantCarryover))
+				drScratchAuras = append(drScratchAuras, NewRunechantAura(ctx.runechantCarryover))
 			}
 			bufs.drScratchAuras = drScratchAuras
 			bufs.drScratch.Reset(gameengine.PermutationSeed{Auras: drScratchAuras})

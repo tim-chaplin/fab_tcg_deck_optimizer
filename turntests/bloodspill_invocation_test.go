@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
@@ -68,7 +69,7 @@ func TestBloodspillInvocation_WeaponDoesNotPop(t *testing.T) {
 	s := gameengine.NewFromSpec(gameengine.Spec{
 		IncomingDamage: 3,
 		BlockTotal:     0,
-		Auras:          []gameengine.Aura{gameengine.NewRunechantAura(1)},
+		Auras:          []gameengine.Aura{sim.NewRunechantAura(1)},
 		CardsRemaining: []*card.CardState{{Card: testutils.RunebladeWeapon{}}},
 	})
 	s.ResolveChainStep(s.Logger(), &card.CardState{Card: cards.BloodspillInvocationRed{}})
@@ -83,7 +84,7 @@ func TestBloodspillInvocation_SameTurnPopByRunechant(t *testing.T) {
 	s := gameengine.NewFromSpec(gameengine.Spec{
 		IncomingDamage: 3,
 		BlockTotal:     0,
-		Auras:          []gameengine.Aura{gameengine.NewRunechantAura(1)},
+		Auras:          []gameengine.Aura{sim.NewRunechantAura(1)},
 		CardsRemaining: []*card.CardState{{Card: testutils.AttackWithPower{Power: 6}}},
 	})
 	s.ResolveChainStep(s.Logger(), &card.CardState{Card: cards.BloodspillInvocationRed{}})

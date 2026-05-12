@@ -108,7 +108,7 @@ func withRunechants(n int) []gameengine.Aura {
 	if n <= 0 {
 		return nil
 	}
-	return []gameengine.Aura{gameengine.NewRunechantAura(n)}
+	return []gameengine.Aura{NewRunechantAura(n)}
 }
 
 // Tests carryover bookkeeping end-to-end with no starting runechants — every created token

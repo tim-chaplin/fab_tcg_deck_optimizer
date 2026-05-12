@@ -593,43 +593,6 @@ func (g *GameEngine) Triggers() []Trigger { return g.triggers }
 // Items returns the live item set. Read-only.
 func (g *GameEngine) Items() []Item { return g.items }
 
-// RunechantCount returns the live Runechant token count, or zero when none are in play.
-func (g *GameEngine) RunechantCount() int { return auraCountByName(g.auras, "Runechant") }
-
-// PonderCount returns the live Ponder token count, or zero when none are in play.
-func (g *GameEngine) PonderCount() int { return auraCountByName(g.auras, "Ponder") }
-
-// GoldCount returns the live Gold token count, or zero when none are in play.
-func (g *GameEngine) GoldCount() int { return itemCountByName(g.items, "Gold") }
-
-// SilverCount returns the live Silver token count, or zero when none are in play.
-func (g *GameEngine) SilverCount() int { return itemCountByName(g.items, "Silver") }
-
-// CopperCount returns the live Copper token count, or zero when none are in play.
-func (g *GameEngine) CopperCount() int { return itemCountByName(g.items, "Copper") }
-
-// auraCountByName scans g.auras for a token aura with the given display name. Tokens are
-// looked up by name because the engine doesn't know about specific token IDs (those live
-// in sim).
-func auraCountByName(auras []Aura, name string) int {
-	for _, a := range auras {
-		if a.CardName() == name {
-			return a.Count()
-		}
-	}
-	return 0
-}
-
-// itemCountByName scans g.items for a token item with the given display name.
-func itemCountByName(items []Item, name string) int {
-	for _, i := range items {
-		if i.CardName() == name {
-			return i.Count()
-		}
-	}
-	return 0
-}
-
 // LogEntries returns the per-event chain trace accumulated by the Log family.
 func (g *GameEngine) LogEntries() []turnlogger.LogEntry { return g.logger.Entries() }
 

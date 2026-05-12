@@ -11,7 +11,7 @@ import (
 func TestFireEndOfTurn_FiresOnceAndRemoves(t *testing.T) {
 	s := gameengine.New()
 	calls := 0
-	s.AppendTrigger(gameengine.NewCardTrigger(
+	s.AppendTrigger(NewCardTrigger(
 		&card.CardState{Card: FakeRedAttack{}},
 		gameengine.TriggerEndOfTurn,
 		func(_ card.GameEngine, _ card.Logger, _ card.Trigger) { calls++ },
@@ -30,7 +30,7 @@ func TestFireEndOfTurn_FiresOnceAndRemoves(t *testing.T) {
 func TestFireEndOfTurn_LeavesNonMatchingType(t *testing.T) {
 	s := gameengine.New()
 	calls := 0
-	s.AppendTrigger(gameengine.NewCardTrigger(
+	s.AppendTrigger(NewCardTrigger(
 		&card.CardState{Card: FakeRedAttack{}},
 		gameengine.TriggerAttack,
 		func(_ card.GameEngine, _ card.Logger, _ card.Trigger) { calls++ },
@@ -50,13 +50,13 @@ func TestFireEndOfTurn_LeavesNonMatchingType(t *testing.T) {
 func TestFireEndOfTurn_HandlerAddTriggerSafeReentry(t *testing.T) {
 	s := gameengine.New()
 	calls := 0
-	s.AppendTrigger(gameengine.NewCardTrigger(
+	s.AppendTrigger(NewCardTrigger(
 		&card.CardState{Card: FakeRedAttack{}},
 		gameengine.TriggerEndOfTurn,
 		func(g card.GameEngine, _ card.Logger, _ card.Trigger) {
 			calls++
 			ts := g.(*gameengine.GameEngine)
-			ts.AppendTrigger(gameengine.NewCardTrigger(
+			ts.AppendTrigger(NewCardTrigger(
 				&card.CardState{Card: FakeRedAttack{}},
 				gameengine.TriggerEndOfTurn,
 				func(_ card.GameEngine, _ card.Logger, _ card.Trigger) { calls++ },

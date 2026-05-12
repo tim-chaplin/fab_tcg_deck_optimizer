@@ -11,7 +11,6 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
-	"github.com/tim-chaplin/fab-deck-optimizer/v2/gameengine"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/registry"
 )
 
@@ -30,7 +29,7 @@ func toJSON(d *deck.Deck, stats sim.DeckStats) *DeckJSON {
 	sort.Strings(cardNames)
 	red, yellow, blue := d.PitchCounts()
 	return &DeckJSON{
-		Hero:      d.Hero.(gameengine.Hero).Name(),
+		Hero:      d.Hero.(sim.Hero).Name(),
 		Weapons:   weapons,
 		Cards:     cardNames,
 		Sideboard: sortedStrings(d.Sideboard),

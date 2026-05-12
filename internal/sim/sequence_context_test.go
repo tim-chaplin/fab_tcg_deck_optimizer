@@ -13,7 +13,7 @@ func newSequenceContextForTest(h gameengine.Hero, pitched, deckCards []card.Card
 	bufs := newAttackBufs(chainLen, 0, nil)
 	var priorAuras []gameengine.Aura
 	if runechantCarryover > 0 {
-		priorAuras = []gameengine.Aura{gameengine.NewRunechantAura(runechantCarryover)}
+		priorAuras = []gameengine.Aura{NewRunechantAura(runechantCarryover)}
 	}
 	dc := make([]deck.Card, len(deckCards))
 	for i, c := range deckCards {

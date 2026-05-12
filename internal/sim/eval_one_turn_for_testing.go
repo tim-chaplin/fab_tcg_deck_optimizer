@@ -30,12 +30,12 @@ type TurnStartState struct {
 
 // RunechantCount returns the live Runechant token count at the start of the next turn.
 func (t TurnStartState) RunechantCount() int {
-	return auraCountByName(t.StartOfNextTurnAuras, "Runechant")
+	return countByName(t.StartOfNextTurnAuras, "Runechant")
 }
 
 // PonderCount returns the live Ponder token count at the start of the next turn.
 func (t TurnStartState) PonderCount() int {
-	return auraCountByName(t.StartOfNextTurnAuras, "Ponder")
+	return countByName(t.StartOfNextTurnAuras, "Ponder")
 }
 
 // GoldCount returns the live Gold token count at the start of the next turn.

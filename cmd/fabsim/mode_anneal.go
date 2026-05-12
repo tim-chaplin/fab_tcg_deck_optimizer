@@ -65,7 +65,7 @@ func (c annealConfig) legalFilter() func(deck.Card) bool {
 // defaultDeckNameFor returns the deck name when -deck isn't supplied, keyed by hero, format, and
 // -incoming. Different regimes produce different optimal decks, so each gets its own file to
 // avoid hill-climbing one regime's best under another regime's objective.
-func defaultDeckNameFor(h gameengine.Hero, f deckformat.Format, incoming int) string {
+func defaultDeckNameFor(h sim.Hero, f deckformat.Format, incoming int) string {
 	return fmt.Sprintf("%s_%s_%d_incoming", strings.ToLower(h.Name()), f, incoming)
 }
 

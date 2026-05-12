@@ -11,7 +11,7 @@ import (
 func TestRunechantAuraHandler_LeavesOpponentMarked(t *testing.T) {
 	s := gameengine.NewFromSpec(gameengine.Spec{
 		OpponentMarked: true,
-		Auras:          []gameengine.Aura{gameengine.NewRunechantAura(1)},
+		Auras:          []gameengine.Aura{NewRunechantAura(1)},
 	})
 	// Fire the runechant aura via the engine's TriggerAttack fire walk (the runechant aura
 	// is registered as TriggerAttack); pass a nil triggering card since the runechant

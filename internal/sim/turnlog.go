@@ -21,8 +21,8 @@ func BuildTurnLog(t TurnSummary, startingAuras []gameengine.Aura, startingItems 
 	var log TurnLog
 	parts := partitionBestLineForDisplay(t.BestLine)
 	defensePitches, attackPitches := splitPitchesByPhase(parts.pitched, parts.drCost)
-	startingRunechants := auraCountByName(startingAuras, "Runechant")
-	startingPonders := auraCountByName(startingAuras, "Ponder")
+	startingRunechants := countByName(startingAuras, "Runechant")
+	startingPonders := countByName(startingAuras, "Ponder")
 	startingGold := itemCountByName(startingItems, "Gold")
 	startingSilver := itemCountByName(startingItems, "Silver")
 	startingCopper := itemCountByName(startingItems, "Copper")

@@ -18,7 +18,7 @@ import (
 // damageTrigger returns a StartOfTurn Aura crediting the given damage and destroying
 // itself on the first fire.
 func damageTrigger(self card.Card, damage int, calls *int) gameengine.Aura {
-	return gameengine.NewCardAura(
+	return NewCardAura(
 		&card.CardState{Card: self},
 		gameengine.TriggerStartOfTurn,
 		func(g card.GameEngine, _ card.Logger, a card.Aura) {
@@ -69,7 +69,7 @@ func TestProcessAurasAtStartOfTurn_EmptyQueue(t *testing.T) {
 func TestProcessAurasAtStartOfTurn_GraveyardsExhaustedAura(t *testing.T) {
 	aura := testutils.RedAttack{}
 	var seen []card.Card
-	watcher := gameengine.NewCardAura(
+	watcher := NewCardAura(
 		&card.CardState{Card: testutils.YellowAttack{}},
 		gameengine.TriggerStartOfTurn,
 		func(g card.GameEngine, _ card.Logger, _ card.Aura) {
@@ -79,7 +79,7 @@ func TestProcessAurasAtStartOfTurn_GraveyardsExhaustedAura(t *testing.T) {
 		1,
 		false,
 	)
-	first := gameengine.NewCardAura(
+	first := NewCardAura(
 		&card.CardState{Card: aura},
 		gameengine.TriggerStartOfTurn,
 		func(_ card.GameEngine, _ card.Logger, a card.Aura) {
@@ -96,7 +96,7 @@ func TestProcessAurasAtStartOfTurn_GraveyardsExhaustedAura(t *testing.T) {
 
 // TestProcessAurasAtStartOfTurn_IgnoresPonder: Ponder fires at end-of-turn (not start).
 func TestProcessAurasAtStartOfTurn_IgnoresPonder(t *testing.T) {
-	survivors, _, _, _, _ := ProcessAurasAtStartOfTurn([]gameengine.Aura{gameengine.NewPonderAura(1)}, DeckOf())
+	survivors, _, _, _, _ := ProcessAurasAtStartOfTurn([]gameengine.Aura{NewPonderAura(1)}, DeckOf())
 	if len(survivors) != 1 || survivors[0].CardName() != "Ponder" {
 		t.Errorf("survivors = %+v, want one Ponder aura intact", survivors)
 	}
@@ -106,7 +106,7 @@ func TestProcessAurasAtStartOfTurn_IgnoresPonder(t *testing.T) {
 func TestFireEndOfTurn_PonderPopsDeckTopIntoHand(t *testing.T) {
 	a, b, c := testutils.NewStubCard("a"), testutils.NewStubCard("b"), testutils.NewStubCard("c")
 	s := gameengine.NewFromCards([]card.Card{a, b, c}, nil)
-	s.AppendAura(gameengine.NewPonderAura(2))
+	s.AppendAura(NewPonderAura(2))
 	FireEndOfTurn(s)
 
 	h := s.Hand()
@@ -124,7 +124,7 @@ func TestFireEndOfTurn_PonderPopsDeckTopIntoHand(t *testing.T) {
 // TestFireEndOfTurn_PonderEmptyDeckIsNoOp.
 func TestFireEndOfTurn_PonderEmptyDeckIsNoOp(t *testing.T) {
 	s := gameengine.NewFromCards(nil, nil)
-	s.AppendAura(gameengine.NewPonderAura(1))
+	s.AppendAura(NewPonderAura(1))
 	FireEndOfTurn(s)
 	if h := s.Hand(); len(h) != 0 {
 		t.Errorf("Hand = %v, want empty (no deck to draw from)", h)
@@ -264,7 +264,7 @@ func TestEvaluate_TriggersFromLastTurnSurfacesInBest(t *testing.T) {
 // Tests that the OncePerTurn FiredThisTurn flag is cleared at every turn boundary.
 func TestProcessAurasAtStartOfTurn_ReArmsOncePerTurnGate(t *testing.T) {
 	aura := testutils.RedAttack{}
-	exhausted := gameengine.NewCardAura(
+	exhausted := NewCardAura(
 		&card.CardState{Card: aura},
 		gameengine.TriggerAttackAction,
 		func(card.GameEngine, card.Logger, card.Aura) {},

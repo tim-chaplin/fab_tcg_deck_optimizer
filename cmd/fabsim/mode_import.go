@@ -15,7 +15,6 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/mydecks"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
-	"github.com/tim-chaplin/fab-deck-optimizer/v2/gameengine"
 )
 
 // runImport interactively pastes a fabrary.net plain-text deck from stdin, asks for a deck
@@ -93,7 +92,7 @@ func summarizeImportedDeck(d *deck.Deck) {
 	for i, w := range d.Weapons {
 		weapons[i] = w.Name()
 	}
-	fmt.Fprintf(os.Stderr, "  hero: %s, weapons: %v, cards: %d", d.Hero.(gameengine.Hero).Name(), weapons, d.Size())
+	fmt.Fprintf(os.Stderr, "  hero: %s, weapons: %v, cards: %d", d.Hero.(sim.Hero).Name(), weapons, d.Size())
 	if len(d.Sideboard) > 0 {
 		fmt.Fprintf(os.Stderr, ", sideboard: %d", len(d.Sideboard))
 	}

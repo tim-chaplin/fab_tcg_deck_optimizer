@@ -50,10 +50,10 @@ type CarryState struct {
 }
 
 // RunechantCount returns the carried Runechant token count, or zero when none are in play.
-func (c *CarryState) RunechantCount() int { return auraCountByName(c.Auras, "Runechant") }
+func (c *CarryState) RunechantCount() int { return countByName(c.Auras, "Runechant") }
 
 // PonderCount returns the carried Ponder token count, or zero when none are in play.
-func (c *CarryState) PonderCount() int { return auraCountByName(c.Auras, "Ponder") }
+func (c *CarryState) PonderCount() int { return countByName(c.Auras, "Ponder") }
 
 // GoldCount returns the carried Gold token count, or zero when none are in play.
 func (c *CarryState) GoldCount() int { return itemCountByName(c.Items, "Gold") }
@@ -64,8 +64,9 @@ func (c *CarryState) SilverCount() int { return itemCountByName(c.Items, "Silver
 // CopperCount returns the carried Copper token count, or zero when none are in play.
 func (c *CarryState) CopperCount() int { return itemCountByName(c.Items, "Copper") }
 
-// auraCountByName scans auras for a token aura by display name.
-func auraCountByName(auras []gameengine.Aura, name string) int {
+// countByName scans auras for a token aura by display name. Mirrors gameengine's
+// internal helper for CarryState's snapshot use.
+func countByName(auras []gameengine.Aura, name string) int {
 	for _, a := range auras {
 		if a.CardName() == name {
 			return a.Count()
