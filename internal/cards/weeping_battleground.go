@@ -3,7 +3,7 @@
 // Text: "You may banish an aura from your graveyard. If you do, deal 1 arcane damage to target
 // hero."
 //
-// Play routes through banishAuraFromGraveyard: if s.Graveyard has an aura, banish it for 1
+// Play routes through banishAuraFromGraveyard: if g.Graveyard has an aura, banish it for 1
 // arcane and flip ArcaneDamageDealt. No aura means the banish clause fails and Play returns
 // 0 — the printed 3 block still applies via Defense().
 
@@ -13,23 +13,21 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
-// weepingBattlegroundPlay emits the chain step then writes the banish-for-arcane rider as
-// a sub-line under self when an aura was successfully banished from the graveyard.
-func weepingBattlegroundPlay(s card.GameEngine, l card.Logger, self *card.CardState) {
-	if n := banishAuraFromGraveyard(s); n > 0 {
-		s.AddValue(n)
-		l.AppendPostTrigger(self.Card.DisplayName(), "Banished an aura, dealt 1 arcane damage", n)
-	}
+// weepingBattlegroundPlay emits the chain step then routes through banishAuraFromGraveyard
+// for the banish-and-1-arcane rider (the helper handles value, log, and ArcaneDamageDealt).
+// No-op when the graveyard has no aura.
+func weepingBattlegroundPlay(g card.GameEngine, l card.Logger, self *card.CardState) {
+	banishAuraFromGraveyard(g, l, self.Card.DisplayName())
 }
 
-func (WeepingBattlegroundRed) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
-	weepingBattlegroundPlay(s, l, self)
+func (WeepingBattlegroundRed) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+	weepingBattlegroundPlay(g, l, self)
 }
 
-func (WeepingBattlegroundYellow) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
-	weepingBattlegroundPlay(s, l, self)
+func (WeepingBattlegroundYellow) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+	weepingBattlegroundPlay(g, l, self)
 }
 
-func (WeepingBattlegroundBlue) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
-	weepingBattlegroundPlay(s, l, self)
+func (WeepingBattlegroundBlue) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+	weepingBattlegroundPlay(g, l, self)
 }

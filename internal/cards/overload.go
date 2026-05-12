@@ -9,23 +9,23 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
-func overloadPlay(s card.GameEngine, l card.Logger, self *card.CardState) {
-	if s.LikelyToHit(self) {
+func overloadPlay(g card.GameEngine, l card.Logger, self *card.CardState) {
+	if g.LikelyToHit(self) {
 		self.GrantedGoAgain = true
 	}
 }
 
 func (OverloadRed) Dominate() {}
-func (OverloadRed) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
-	overloadPlay(s, l, self)
+func (OverloadRed) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+	overloadPlay(g, l, self)
 }
 
 func (OverloadYellow) Dominate() {}
-func (OverloadYellow) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
-	overloadPlay(s, l, self)
+func (OverloadYellow) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+	overloadPlay(g, l, self)
 }
 
 func (OverloadBlue) Dominate() {}
-func (OverloadBlue) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
-	overloadPlay(s, l, self)
+func (OverloadBlue) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+	overloadPlay(g, l, self)
 }

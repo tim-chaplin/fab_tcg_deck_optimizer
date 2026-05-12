@@ -23,9 +23,9 @@ func (soloBlocker) Types(card.GameEngine) card.TypeSet {
 }
 func (soloBlocker) GoAgain(card.GameEngine) bool                       { return false }
 func (soloBlocker) Play(card.GameEngine, card.Logger, *card.CardState) {}
-func (soloBlocker) Block(s card.GameEngine, l card.Logger, self *card.CardState) {
+func (soloBlocker) Block(g card.GameEngine, l card.Logger, self *card.CardState) {
 	plainCount := 0
-	for _, d := range s.Defenders() {
+	for _, d := range g.Defenders() {
 		if d.Types(nil).IsDefenseReaction() {
 			continue
 		}
@@ -53,9 +53,9 @@ func (togetherBlocker) Types(card.GameEngine) card.TypeSet {
 }
 func (togetherBlocker) GoAgain(card.GameEngine) bool                       { return false }
 func (togetherBlocker) Play(card.GameEngine, card.Logger, *card.CardState) {}
-func (togetherBlocker) Block(s card.GameEngine, l card.Logger, self *card.CardState) {
+func (togetherBlocker) Block(g card.GameEngine, l card.Logger, self *card.CardState) {
 	plainCount := 0
-	for _, d := range s.Defenders() {
+	for _, d := range g.Defenders() {
 		if d.Types(nil).IsDefenseReaction() {
 			continue
 		}
@@ -98,7 +98,7 @@ func (blockOneDR) Types(card.GameEngine) card.TypeSet {
 	return card.NewTypeSet(card.TypeGeneric, card.TypeDefenseReaction)
 }
 func (blockOneDR) GoAgain(card.GameEngine) bool { return false }
-func (blockOneDR) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
+func (blockOneDR) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
 }
 
 // Tests that defendersDamage folds the alone-style Block hook's BonusDefense into the

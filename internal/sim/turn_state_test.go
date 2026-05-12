@@ -52,8 +52,8 @@ func TestAddAura_FlipsAuraCreatedAndAppends(t *testing.T) {
 	if s.AuraCreated() {
 		t.Fatal("pre: AuraCreated should be false")
 	}
-	s.AddStartOfTurnAura(cs, nil, 2)
-	s.AddStartOfTurnAura(cs, nil, 1)
+	s.CreateStartOfTurnAura(cs, nil, 2)
+	s.CreateStartOfTurnAura(cs, nil, 1)
 	if !s.AuraCreated() {
 		t.Error("AuraCreated = false, want true")
 	}
@@ -92,31 +92,24 @@ func TestHasPlayedType_ScansCardsPlayed(t *testing.T) {
 	}
 }
 
-// TestHasPlayedOrCreatedAura_FlagOrScan: fires on either the AuraCreated flag (Runechant
-// creation, token-only auras) OR a played Aura-typed card; returns false when neither.
-func TestHasPlayedOrCreatedAura_FlagOrScan(t *testing.T) {
+// TestAuraCreated_FlagOnly: AuraCreated reflects the sticky flag set as a side effect of
+// Create*Aura calls and by ResolveChainStep when an Aura-typed card resolves.
+func TestAuraCreated_FlagOnly(t *testing.T) {
 	var empty TurnState
-	if empty.HasPlayedOrCreatedAura() {
+	if empty.AuraCreated() {
 		t.Error("no aura, no flag → should be false")
 	}
 
 	flagged := NewTurnStateFromSpec(TurnStateSpec{AuraCreated: true})
-	if !flagged.HasPlayedOrCreatedAura() {
+	if !flagged.AuraCreated() {
 		t.Error("AuraCreated=true → should be true")
-	}
-
-	playedAura := NewTurnStateFromSpec(TurnStateSpec{
-		CardsPlayed: []card.Card{NewFakeCard("aura").WithTypes(card.NewTypeSet(card.TypeAura))},
-	})
-	if !playedAura.HasPlayedOrCreatedAura() {
-		t.Error("played aura card → should be true")
 	}
 }
 
-// TestAddValue_ClampsNonPositive: the helper sums positive credits into Value and is a
-// no-op for n <= 0. Negative grants (debuffs) and zero (no-effect Plays) must not subtract
-// from the running total.
-func TestAddValue_ClampsNonPositive(t *testing.T) {
+// TestAddValue_SumsBothDirections: AddValue sums positive and negative credits into Value.
+// Negative grants (Test of Strength's clash-loss conceding value to opponent) move the
+// total down; zero is a no-op.
+func TestAddValue_SumsBothDirections(t *testing.T) {
 	cases := []struct {
 		name string
 		bump int
@@ -124,7 +117,7 @@ func TestAddValue_ClampsNonPositive(t *testing.T) {
 	}{
 		{"positive accumulates", 3, 3},
 		{"zero is no-op", 0, 0},
-		{"negative is no-op", -5, 0},
+		{"negative subtracts", -5, -5},
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
@@ -135,14 +128,14 @@ func TestAddValue_ClampsNonPositive(t *testing.T) {
 			}
 		})
 	}
-	// Mixed sequence: positives accumulate, non-positives pass through.
+	// Mixed sequence: every credit moves the total.
 	var s TurnState
 	s.AddValue(2)
 	s.AddValue(-10)
 	s.AddValue(0)
 	s.AddValue(5)
-	if s.Value() != 7 {
-		t.Errorf("after mixed sequence Value = %d, want 7 (2+5; -10/0 clamped)", s.Value())
+	if s.Value() != -3 {
+		t.Errorf("after mixed sequence Value = %d, want -3 (2-10+0+5)", s.Value())
 	}
 }
 
@@ -154,8 +147,8 @@ func TestCreateRunechants_CountAndFlag(t *testing.T) {
 	if s.AuraCreated() {
 		t.Error("AuraCreated should stay false for n=0")
 	}
-	if s.Runechants() != 0 {
-		t.Errorf("Runechants = %d, want 0", s.Runechants())
+	if s.RunechantCount() != 0 {
+		t.Errorf("Runechants = %d, want 0", s.RunechantCount())
 	}
 	if s.Value() != 0 {
 		t.Errorf("Value = %d, want 0 (n=0 credits nothing)", s.Value())
@@ -165,8 +158,8 @@ func TestCreateRunechants_CountAndFlag(t *testing.T) {
 	if !s.AuraCreated() {
 		t.Error("AuraCreated should flip to true")
 	}
-	if s.Runechants() != 3 {
-		t.Errorf("Runechants = %d, want 3", s.Runechants())
+	if s.RunechantCount() != 3 {
+		t.Errorf("Runechants = %d, want 3", s.RunechantCount())
 	}
 	if s.Value() != 3 {
 		t.Errorf("Value = %d, want 3 (creator credits +n)", s.Value())
@@ -174,8 +167,8 @@ func TestCreateRunechants_CountAndFlag(t *testing.T) {
 
 	// Second call accumulates rather than replacing.
 	s.CreateRunechants(2)
-	if s.Runechants() != 5 {
-		t.Errorf("Runechants after second call = %d, want 5", s.Runechants())
+	if s.RunechantCount() != 5 {
+		t.Errorf("Runechants after second call = %d, want 5", s.RunechantCount())
 	}
 	if s.Value() != 5 {
 		t.Errorf("Value after second call = %d, want 5", s.Value())
@@ -186,8 +179,8 @@ func TestCreateRunechants_CountAndFlag(t *testing.T) {
 func TestCreateRunechants_OneToken(t *testing.T) {
 	var s TurnState
 	s.CreateRunechants(1)
-	if s.Runechants() != 1 {
-		t.Errorf("Runechants = %d, want 1", s.Runechants())
+	if s.RunechantCount() != 1 {
+		t.Errorf("Runechants = %d, want 1", s.RunechantCount())
 	}
 	if !s.AuraCreated() {
 		t.Error("AuraCreated should be true after CreateRunechants(1)")
@@ -205,16 +198,16 @@ func TestCreatePonder_BumpsCountAndFlag(t *testing.T) {
 	if s.AuraCreated() {
 		t.Error("AuraCreated should stay false for n=0")
 	}
-	if s.Ponders() != 0 {
-		t.Errorf("Ponders = %d, want 0", s.Ponders())
+	if s.PonderCount() != 0 {
+		t.Errorf("Ponders = %d, want 0", s.PonderCount())
 	}
 
 	s.CreatePonder(2)
 	if !s.AuraCreated() {
 		t.Error("AuraCreated should flip to true")
 	}
-	if s.Ponders() != 2 {
-		t.Errorf("Ponders = %d, want 2", s.Ponders())
+	if s.PonderCount() != 2 {
+		t.Errorf("Ponders = %d, want 2", s.PonderCount())
 	}
 	if s.Value() != 0 {
 		t.Errorf("Value = %d, want 0 (Ponder is zero-value at creation)", s.Value())
@@ -222,8 +215,8 @@ func TestCreatePonder_BumpsCountAndFlag(t *testing.T) {
 
 	// Second call accumulates rather than replacing.
 	s.CreatePonder(3)
-	if s.Ponders() != 5 {
-		t.Errorf("Ponders after second call = %d, want 5", s.Ponders())
+	if s.PonderCount() != 5 {
+		t.Errorf("Ponders after second call = %d, want 5", s.PonderCount())
 	}
 }
 

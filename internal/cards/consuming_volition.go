@@ -20,22 +20,22 @@ func consumingVolitionApplyRider(_ card.GameEngine, l card.Logger, self *card.Ca
 
 // consumingVolitionOnHit fires the "When this hits a hero, they discard a card" rider
 // when ArcaneDamageDealt is set. Top-level so registration stays alloc-free.
-func consumingVolitionOnHit(s card.GameEngine, l card.Logger, self *card.CardState, _ *card.OnHitHandler) {
-	if !s.ArcaneDamageDealt() {
+func consumingVolitionOnHit(g card.GameEngine, l card.Logger, self *card.CardState, _ *card.OnHitHandler) {
+	if !g.ArcaneDamageDealt() {
 		return
 	}
-	v := s.OpponentDiscard(1)
+	v := g.OpponentDiscard(1)
 	l.AppendPostTrigger(self.Card.DisplayName(), "On-hit discarded a card", v)
 }
 
-func (ConsumingVolitionRed) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
-	consumingVolitionApplyRider(s, l, self)
+func (ConsumingVolitionRed) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+	consumingVolitionApplyRider(g, l, self)
 }
 
-func (ConsumingVolitionYellow) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
-	consumingVolitionApplyRider(s, l, self)
+func (ConsumingVolitionYellow) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+	consumingVolitionApplyRider(g, l, self)
 }
 
-func (ConsumingVolitionBlue) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
-	consumingVolitionApplyRider(s, l, self)
+func (ConsumingVolitionBlue) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+	consumingVolitionApplyRider(g, l, self)
 }

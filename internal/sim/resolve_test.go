@@ -26,7 +26,7 @@ func (attackStub) Types(card.GameEngine) card.TypeSet {
 	return card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 }
 func (attackStub) GoAgain(card.GameEngine) bool                                { return false }
-func (attackStub) Play(s card.GameEngine, l card.Logger, self *card.CardState) {}
+func (attackStub) Play(g card.GameEngine, l card.Logger, self *card.CardState) {}
 
 // drStub is a vanilla defense-reaction card with printed defense 4.
 type drStub struct{}
@@ -42,7 +42,7 @@ func (drStub) Types(card.GameEngine) card.TypeSet {
 	return card.NewTypeSet(card.TypeGeneric, card.TypeDefenseReaction)
 }
 func (drStub) GoAgain(card.GameEngine) bool                                { return false }
-func (drStub) Play(s card.GameEngine, l card.Logger, self *card.CardState) {}
+func (drStub) Play(g card.GameEngine, l card.Logger, self *card.CardState) {}
 
 // nonAttackStub is a non-attack action that flips a flag from Play (used to
 // confirm the Play body still runs even though the sim contributes no n).
@@ -59,7 +59,7 @@ func (nonAttackStub) Types(card.GameEngine) card.TypeSet {
 	return card.NewTypeSet(card.TypeGeneric, card.TypeAction)
 }
 func (nonAttackStub) GoAgain(card.GameEngine) bool { return false }
-func (n nonAttackStub) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
+func (n nonAttackStub) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
 	*n.played = true
 }
 
@@ -79,7 +79,7 @@ func (selfBuffStub) Types(card.GameEngine) card.TypeSet {
 	return card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 }
 func (selfBuffStub) GoAgain(card.GameEngine) bool { return false }
-func (selfBuffStub) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
+func (selfBuffStub) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
 	self.BonusAttack += 1
 }
 

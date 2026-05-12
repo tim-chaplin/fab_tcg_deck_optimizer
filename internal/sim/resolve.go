@@ -26,7 +26,11 @@ import (
 // "chain step, then indented riders" as before.
 func ResolveChainStep(g card.GameEngine, l card.Logger, self *card.CardState) {
 	self.Card.Play(g, l, self)
-	n := chainStepDelta(g.(*TurnState), self)
+	state := g.(*TurnState)
+	if self.Card.Types(nil).Has(card.TypeAura) {
+		state.auraCreated = true
+	}
+	n := chainStepDelta(state, self)
 	l.AppendChainStep(ChainStepText(self), n)
 }
 

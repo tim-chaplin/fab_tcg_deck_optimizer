@@ -44,7 +44,7 @@ func TestReekOfCorruption_LikelyToHitWithAuraCreatedTriggersDiscard(t *testing.T
 
 // Tests that an aura earlier in CardsPlayed satisfies the rider precondition.
 func TestReekOfCorruption_AuraPlayedTriggersDiscard(t *testing.T) {
-	s := sim.NewTurnStateFromSpec(sim.TurnStateSpec{CardsPlayed: []card.Card{testutils.Aura{}}})
+	s := sim.NewTurnStateFromSpec(sim.TurnStateSpec{CardsPlayed: []card.Card{testutils.Aura{}}, AuraCreated: true})
 	c := cards.ReekOfCorruptionRed{}
 	cs := &card.CardState{Card: c}
 	sim.ResolveChainStep(&s, s.Logger(), cs)

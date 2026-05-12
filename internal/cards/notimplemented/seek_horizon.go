@@ -12,15 +12,15 @@ import (
 
 // not implemented: hand-on-top alt cost and conditional go-again rider
 
-func (c SeekHorizonRed) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
+func (c SeekHorizonRed) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
 }
 
 // not implemented: hand-on-top alt cost and conditional go-again rider
 
-func (c SeekHorizonYellow) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
+func (c SeekHorizonYellow) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
 }
 
 // not implemented: hand-on-top alt cost and conditional go-again rider
 
-func (c SeekHorizonBlue) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
+func (c SeekHorizonBlue) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
 }

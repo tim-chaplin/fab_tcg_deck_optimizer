@@ -13,17 +13,17 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
-func (SirensOfSafeHarborRed) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
-	s.AddValue(1)
+func (SirensOfSafeHarborRed) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+	g.AddValue(1)
 	l.AppendPostTrigger(self.Card.DisplayName(), "Gained 1 health (graveyard trigger)", 1)
 }
 
-func (SirensOfSafeHarborYellow) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
-	s.AddValue(1)
+func (SirensOfSafeHarborYellow) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+	g.AddValue(1)
 	l.AppendPostTrigger(self.Card.DisplayName(), "Gained 1 health (graveyard trigger)", 1)
 }
 
-func (SirensOfSafeHarborBlue) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
-	s.AddValue(1)
+func (SirensOfSafeHarborBlue) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+	g.AddValue(1)
 	l.AppendPostTrigger(self.Card.DisplayName(), "Gained 1 health (graveyard trigger)", 1)
 }

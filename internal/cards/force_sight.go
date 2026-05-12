@@ -14,21 +14,21 @@ import (
 // forceSightPlay grants the next attack action +bonus{p}, logs the chain step (Force
 // Sight is a non-attack action — no Attack() to apply), and resolves the arsenal-gated
 // Opt 2.
-func forceSightPlay(s card.GameEngine, l card.Logger, self *card.CardState, bonus int) {
-	GrantNextCardBonusAttack(s, bonus, IsAttackAction)
+func forceSightPlay(g card.GameEngine, l card.Logger, self *card.CardState, bonus int) {
+	GrantNextCardBonusAttack(g, bonus, IsAttackAction)
 	if self.FromArsenal {
-		s.Opt(l, 2)
+		g.Opt(l, 2)
 	}
 }
 
-func (ForceSightRed) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
-	forceSightPlay(s, l, self, 3)
+func (ForceSightRed) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+	forceSightPlay(g, l, self, 3)
 }
 
-func (ForceSightYellow) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
-	forceSightPlay(s, l, self, 2)
+func (ForceSightYellow) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+	forceSightPlay(g, l, self, 2)
 }
 
-func (ForceSightBlue) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
-	forceSightPlay(s, l, self, 1)
+func (ForceSightBlue) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+	forceSightPlay(g, l, self, 1)
 }

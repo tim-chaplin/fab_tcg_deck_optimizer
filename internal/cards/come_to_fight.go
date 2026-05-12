@@ -10,14 +10,14 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
-func (ComeToFightRed) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
-	GrantNextCardBonusAttack(s, 3, IsAttackAction)
+func (ComeToFightRed) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+	GrantNextCardBonusAttack(g, 3, IsAttackAction)
 }
 
-func (ComeToFightYellow) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
-	GrantNextCardBonusAttack(s, 2, IsAttackAction)
+func (ComeToFightYellow) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+	GrantNextCardBonusAttack(g, 2, IsAttackAction)
 }
 
-func (ComeToFightBlue) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
-	GrantNextCardBonusAttack(s, 1, IsAttackAction)
+func (ComeToFightBlue) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+	GrantNextCardBonusAttack(g, 1, IsAttackAction)
 }

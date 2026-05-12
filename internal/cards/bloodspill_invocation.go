@@ -13,14 +13,14 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
-func (BloodspillInvocationRed) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
-	fragileAuraPlay(s, l, self, 3, true)
+func (BloodspillInvocationRed) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+	fragileAuraPlay(g, l, self, 3, true)
 }
 
-func (BloodspillInvocationYellow) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
-	fragileAuraPlay(s, l, self, 2, true)
+func (BloodspillInvocationYellow) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+	fragileAuraPlay(g, l, self, 2, true)
 }
 
-func (BloodspillInvocationBlue) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
-	fragileAuraPlay(s, l, self, 1, true)
+func (BloodspillInvocationBlue) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+	fragileAuraPlay(g, l, self, 1, true)
 }

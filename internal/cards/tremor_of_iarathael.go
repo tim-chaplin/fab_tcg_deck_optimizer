@@ -6,7 +6,7 @@
 //
 // Snapshot at Play: only banishes earlier in the chain trigger the +2{p}; later banishes
 // don't retroactively buff this attack (matches the past-tense "has been put"). Reads the
-// CardBanished flag rather than len(s.Banished()) so prior-turn entries that carry
+// CardBanished flag rather than len(g.Banished()) so prior-turn entries that carry
 // through the snapshot path don't pollute the check.
 
 package cards
@@ -15,20 +15,20 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
-func tremorOfIArathaelPlay(s card.GameEngine, l card.Logger, self *card.CardState) {
-	if s.CardBanished() {
+func tremorOfIArathaelPlay(g card.GameEngine, l card.Logger, self *card.CardState) {
+	if g.CardBanished() {
 		self.BonusAttack += 2
 	}
 }
 
-func (TremorOfIArathaelRed) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
-	tremorOfIArathaelPlay(s, l, self)
+func (TremorOfIArathaelRed) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+	tremorOfIArathaelPlay(g, l, self)
 }
 
-func (TremorOfIArathaelYellow) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
-	tremorOfIArathaelPlay(s, l, self)
+func (TremorOfIArathaelYellow) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+	tremorOfIArathaelPlay(g, l, self)
 }
 
-func (TremorOfIArathaelBlue) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
-	tremorOfIArathaelPlay(s, l, self)
+func (TremorOfIArathaelBlue) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+	tremorOfIArathaelPlay(g, l, self)
 }

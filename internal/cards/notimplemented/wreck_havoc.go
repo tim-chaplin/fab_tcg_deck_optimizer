@@ -12,15 +12,15 @@ import (
 
 // not implemented: defense-reaction lockout, on-hit arsenal banish
 
-func (WreckHavocRed) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
+func (WreckHavocRed) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
 }
 
 // not implemented: defense-reaction lockout, on-hit arsenal banish
 
-func (WreckHavocYellow) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
+func (WreckHavocYellow) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
 }
 
 // not implemented: defense-reaction lockout, on-hit arsenal banish
 
-func (WreckHavocBlue) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
+func (WreckHavocBlue) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
 }

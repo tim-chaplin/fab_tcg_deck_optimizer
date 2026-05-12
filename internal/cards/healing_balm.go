@@ -14,19 +14,19 @@ import (
 
 // healingBalmPlay emits the chain step then writes the printed N{h} as a "Gained N health"
 // sub-line under self. Health is valued 1-to-1 with damage.
-func healingBalmPlay(s card.GameEngine, l card.Logger, self *card.CardState, heal int) {
-	s.AddValue(heal)
+func healingBalmPlay(g card.GameEngine, l card.Logger, self *card.CardState, heal int) {
+	g.AddValue(heal)
 	l.AppendPostTriggerf(self.Card.DisplayName(), heal, "Gained %d health", heal)
 }
 
-func (HealingBalmRed) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
-	healingBalmPlay(s, l, self, 3)
+func (HealingBalmRed) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+	healingBalmPlay(g, l, self, 3)
 }
 
-func (HealingBalmYellow) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
-	healingBalmPlay(s, l, self, 2)
+func (HealingBalmYellow) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+	healingBalmPlay(g, l, self, 2)
 }
 
-func (HealingBalmBlue) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
-	healingBalmPlay(s, l, self, 1)
+func (HealingBalmBlue) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+	healingBalmPlay(g, l, self, 1)
 }

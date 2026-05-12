@@ -11,12 +11,12 @@ import (
 
 // not implemented: hand cycling
 
-func (SiftRed) Play(s card.GameEngine, l card.Logger, self *card.CardState) {}
+func (SiftRed) Play(g card.GameEngine, l card.Logger, self *card.CardState) {}
 
 // not implemented: hand cycling
 
-func (SiftYellow) Play(s card.GameEngine, l card.Logger, self *card.CardState) {}
+func (SiftYellow) Play(g card.GameEngine, l card.Logger, self *card.CardState) {}
 
 // not implemented: hand cycling
 
-func (SiftBlue) Play(s card.GameEngine, l card.Logger, self *card.CardState) {}
+func (SiftBlue) Play(g card.GameEngine, l card.Logger, self *card.CardState) {}

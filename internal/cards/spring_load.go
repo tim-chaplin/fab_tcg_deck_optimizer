@@ -10,20 +10,20 @@ import (
 )
 
 // springLoadPlay applies the +3{p} 'no cards in hand' rider, then emits the chain step.
-func springLoadPlay(s card.GameEngine, l card.Logger, self *card.CardState) {
-	if len(s.Hand()) == 0 {
+func springLoadPlay(g card.GameEngine, l card.Logger, self *card.CardState) {
+	if len(g.Hand()) == 0 {
 		self.BonusAttack += 3
 	}
 }
 
-func (SpringLoadRed) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
-	springLoadPlay(s, l, self)
+func (SpringLoadRed) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+	springLoadPlay(g, l, self)
 }
 
-func (SpringLoadYellow) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
-	springLoadPlay(s, l, self)
+func (SpringLoadYellow) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+	springLoadPlay(g, l, self)
 }
 
-func (SpringLoadBlue) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
-	springLoadPlay(s, l, self)
+func (SpringLoadBlue) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+	springLoadPlay(g, l, self)
 }

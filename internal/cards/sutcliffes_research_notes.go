@@ -4,7 +4,7 @@
 // action card revealed this way, then put the cards on top of your deck in any order." (N = 3
 // Red / 2 Yellow / 1 Blue.)
 //
-// Scan the top N cards of s.Deck; credit +1 per Runeblade attack action card revealed. The
+// Scan the top N cards of g.Deck; credit +1 per Runeblade attack action card revealed. The
 // post-reveal reorder isn't modelled.
 
 package cards
@@ -17,26 +17,26 @@ import (
 // runechant per Runeblade attack action card found, emitting the rider sub-line under self
 // when any are created. Reads the top via PeekTopN so the cacheable bit flips — the
 // runechant count produced depends on shuffle order.
-func sutcliffesResearchNotesPlay(s card.GameEngine, l card.Logger, self *card.CardState, revealCount int) {
+func sutcliffesResearchNotesPlay(g card.GameEngine, l card.Logger, self *card.CardState, revealCount int) {
 	count := 0
-	for _, c := range s.PeekTopN(revealCount) {
+	for _, c := range g.PeekTopN(revealCount) {
 		t := c.Types(nil)
 		if t.Has(card.TypeRuneblade) && t.IsAttackAction() {
 			count++
 		}
 	}
-	s.CreateRunechants(count)
+	g.CreateRunechants(count)
 	l.AppendPostTriggerf(self.Card.DisplayName(), count, "Created %d runechants", count)
 }
 
-func (SutcliffesResearchNotesRed) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
-	sutcliffesResearchNotesPlay(s, l, self, 3)
+func (SutcliffesResearchNotesRed) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+	sutcliffesResearchNotesPlay(g, l, self, 3)
 }
 
-func (SutcliffesResearchNotesYellow) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
-	sutcliffesResearchNotesPlay(s, l, self, 2)
+func (SutcliffesResearchNotesYellow) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+	sutcliffesResearchNotesPlay(g, l, self, 2)
 }
 
-func (SutcliffesResearchNotesBlue) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
-	sutcliffesResearchNotesPlay(s, l, self, 1)
+func (SutcliffesResearchNotesBlue) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+	sutcliffesResearchNotesPlay(g, l, self, 1)
 }

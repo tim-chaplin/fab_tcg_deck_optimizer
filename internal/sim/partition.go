@@ -45,7 +45,7 @@ func (e *Evaluator) findBest(hero Hero, weapons []Weapon, hand []card.Card, mp M
 		totalN = n + 1
 	}
 
-	// Seed best.State.Runechants() with the carryover: partitions with no attacks don't reduce
+	// Seed best.State.RunechantCount() with the carryover: partitions with no attacks don't reduce
 	// it, so carryover is the baseline to beat. BestLine starts with every hand card Held and
 	// the arsenal-in card (if any) staying in the slot, so a hand with no Value-adding
 	// partition still reports sensible "nothing played, nothing pitched" assignments.
@@ -343,7 +343,7 @@ func roleAllowed(r Role, isArsenalSlot, isDefenseReaction, canAttack bool) bool 
 // list in graveyard so DRs that scan for banish targets see the same shape across iterations.
 //
 // blockBudget is the remaining defense-phase pitch supply after the caller has subtracted DR
-// costs. Modal blockers (Blocker + ModalCard + BlockCost) enumerate their modes within
+// costs. Modal blockers (Blocker + Modal + BlockCost) enumerate their modes within
 // blockBudget and pick the one yielding the highest BonusDefense; non-modal Blockers run
 // their hook unchanged. Pass MaxInt to disable the budget check entirely (no modal blockers
 // in the partition).
@@ -428,7 +428,7 @@ func defendersDamage(defenders, pitched []card.Card, deckPile *deck.Deck, state 
 // running Block on the cs scratch with the candidate mode, observing the resulting
 // BonusDefense; the caller re-runs Block with the chosen mode for the actual contribution.
 func pickBlockerMode(d card.Card, state *TurnState, cs *card.CardState, blockBudget int) (int8, int) {
-	mc, ok := d.(card.ModalCard)
+	mc, ok := d.(card.Modal)
 	if !ok {
 		return 0, 0
 	}
@@ -516,7 +516,7 @@ func containsDefenseReaction(cards []card.Card) bool {
 }
 
 // containsModalBlocker reports whether any card in cards is a modal blocker — Blocker
-// implementations whose mode count varies via ModalCard and whose mode cost varies via
+// implementations whose mode count varies via Modal and whose mode cost varies via
 // BlockCost. Partitions with at least one modal blocker recompute defendersDamage per
 // (pmask, wmask) so each candidate's spare defense budget gates the mode pick; partitions
 // without one keep the once-per-leaf defendersDamage shortcut. Defenders are short
@@ -527,7 +527,7 @@ func containsModalBlocker(cards []card.Card) bool {
 		if _, ok := c.(card.BlockCost); !ok {
 			continue
 		}
-		if mc, ok := c.(card.ModalCard); ok && mc.Modes() > 1 {
+		if mc, ok := c.(card.Modal); ok && mc.Modes() > 1 {
 			if _, ok := c.(card.Blocker); ok {
 				return true
 			}

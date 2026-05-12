@@ -12,14 +12,14 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
-func moneyWhereYaMouthIsWagerOnHit(s card.GameEngine, l card.Logger, target *card.CardState, h *card.OnHitHandler) {
-	s.CreateGold(1)
+func moneyWhereYaMouthIsWagerOnHit(g card.GameEngine, l card.Logger, target *card.CardState, h *card.OnHitHandler) {
+	g.CreateGold(1)
 	l.AppendPostTriggerf(target.Card.DisplayName(), 0, "%s won wager", h.Source.DisplayName())
 }
 
-func moneyWhereYaMouthIsPlay(s card.GameEngine, l card.Logger, self *card.CardState, source card.Card, n int) {
-	GrantNextCardBonusAttack(s, n, IsAttack)
-	for _, pc := range s.CardsRemaining() {
+func moneyWhereYaMouthIsPlay(g card.GameEngine, l card.Logger, self *card.CardState, source card.Card, n int) {
+	GrantNextCardBonusAttack(g, n, IsAttack)
+	for _, pc := range g.CardsRemaining() {
 		if pc.Card.Types(nil).IsAttack() {
 			pc.OnHit = append(pc.OnHit, card.OnHitHandler{
 				Fire:   moneyWhereYaMouthIsWagerOnHit,
@@ -30,14 +30,14 @@ func moneyWhereYaMouthIsPlay(s card.GameEngine, l card.Logger, self *card.CardSt
 	}
 }
 
-func (c MoneyWhereYaMouthIsRed) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
-	moneyWhereYaMouthIsPlay(s, l, self, c, 3)
+func (c MoneyWhereYaMouthIsRed) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+	moneyWhereYaMouthIsPlay(g, l, self, c, 3)
 }
 
-func (c MoneyWhereYaMouthIsYellow) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
-	moneyWhereYaMouthIsPlay(s, l, self, c, 2)
+func (c MoneyWhereYaMouthIsYellow) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+	moneyWhereYaMouthIsPlay(g, l, self, c, 2)
 }
 
-func (c MoneyWhereYaMouthIsBlue) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
-	moneyWhereYaMouthIsPlay(s, l, self, c, 1)
+func (c MoneyWhereYaMouthIsBlue) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+	moneyWhereYaMouthIsPlay(g, l, self, c, 1)
 }

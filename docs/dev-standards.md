@@ -39,10 +39,10 @@ Card data (name, cost, pitch, attack, defense, type line, printed text) is trans
 
 Defined in `internal/sim/aura.go`. For cards that "create an aura that fires later":
 
-- `Play` calls `s.AddAura(sim.Aura{...})` with `Self`, `TriggerType`, `Count`, `Handler`. `AddAura` sets `s.AuraCreated = true` for same-turn aura-readers.
-- Sim walks `s.Auras` per matching `TriggerType` and invokes every matching `Handler`. `OncePerTurn` caps an Aura at one fire per turn.
-- **Lifecycle is the handler's job.** When done, the handler calls `s.DestroyAura(a, addToGraveyard)` to splice itself out of `s.Auras` and (when `addToGraveyard`) land `Self` in the graveyard. Counter-based auras decrement `a.Count` and call `DestroyAura` at zero. The sim never mutates `Count` or graveyards on its own.
-- Handlers parallel `Card.Play` — `func(s *sim.TurnState, t *sim.Trigger, a *sim.Aura)`, no return. Aura fires pass the firing aura as `a`; standalone trigger fires pass `nil`. Credit damage / life via `s.AddValue(n)`; emit log via `s.LogPostTrigger`.
+- `Play` calls `g.AddAura(sim.Aura{...})` with `Self`, `TriggerType`, `Count`, `Handler`. `AddAura` sets `g.AuraCreated = true` for same-turn aura-readers.
+- Sim walks `g.Auras` per matching `TriggerType` and invokes every matching `Handler`. `OncePerTurn` caps an Aura at one fire per turn.
+- **Lifecycle is the handler's job.** When done, the handler calls `g.DestroyAura(a, addToGraveyard)` to splice itself out of `g.Auras` and (when `addToGraveyard`) land `Self` in the graveyard. Counter-based auras decrement `a.Count` and call `DestroyAura` at zero. The sim never mutates `Count` or graveyards on its own.
+- Handlers parallel `Card.Play` — `func(s *sim.TurnState, t *sim.Trigger, a *sim.Aura)`, no return. Aura fires pass the firing aura as `a`; standalone trigger fires pass `nil`. Credit damage / life via `g.AddValue(n)`; emit log via `g.LogPostTrigger`.
 
 **Handlers must be top-level functions, not inline closures.** Closures assigned to `Aura.Handler` escape to the heap (`go build -gcflags='-m'` shows `func literal escapes to heap`), allocating one per Play; top-level handlers are static function pointers. Per-variant payloads (R/Y/B rune counts) thread through `Aura.Count` so the handler stays shared:
 
@@ -52,9 +52,8 @@ func mySigilAuraHandler(s *sim.TurnState, _ *sim.Trigger, a *sim.Aura) {
     s.DestroyAura(a, true)
 }
 
-func (c MySigil) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
-    s.AddAura(sim.Aura{Self: c, TriggerType: sim.TriggerStartOfTurn, Count: 1, Handler: mySigilAuraHandler})
-    s.Log(self, 0)
+func (c MySigil) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+    g.CreateStartOfTurnAura(self, mySigilAuraHandler, 1)
 }
 ```
 
@@ -75,21 +74,21 @@ The plumbing below is uniform; card docstrings call out the printed rider and an
 
 - **Played-from-arsenal go-again** (Fervent Forerunner, Frontline Scout, Performance Bonus, Promise of Plenty, Scour the Battlescape, …): `self.GrantGoAgainIfFromArsenal()` at top of Play. Flips `GrantedGoAgain` only when this copy came from the arsenal slot.
 - **+N{d} on arsenal-played defense reactions** (Springboard Somersault, Unmovable, …): implement `card.ArsenalDefenseBonus` returning `N`; `CardState.EffectiveDefense` folds it in for the arsenal-in copy.
-- **Plain-block bonuses** (Battlefront Bastion, Right Behind You, …): implement `card.Blocker.Block(s, self)`. Chain runner calls `Block` on every plain blocker that opts in, with `s.Defenders` set to the partition's full defender slice (DRs + plain blocks). Implementations scan `Defenders` and flip `self.BonusDefense` for conditional buffs ("+1{d} when defending alone", "+1{d} together with another card", …); `defendersDamage` folds printed Defense + `BonusDefense`, capped by remaining incoming.
+- **Plain-block bonuses** (Battlefront Bastion, Right Behind You, …): implement `card.Blocker.Block(g, self)`. Chain runner calls `Block` on every plain blocker that opts in, with `g.Defenders` set to the partition's full defender slice (DRs + plain blocks). Implementations scan `Defenders` and flip `self.BonusDefense` for conditional buffs ("+1{d} when defending alone", "+1{d} together with another card", …); `defendersDamage` folds printed Defense + `BonusDefense`, capped by remaining incoming.
 - **Conditional go-again / dominate grants**: flip `self.GrantedGoAgain` / `self.GrantedDominate`; `EffectiveGoAgain` / `EffectiveDominate` honour them. Card docstrings call out the *condition*, not the flag.
-- **`card.VariableCost`** (Amplify the Arknight, Rune Flash, …): `Cost(s)` reads TurnState; the marker exposes `MinCost` / `MaxCost` for the solver pre-screen. Note the printed cost formula.
-- **Attack Reactions**: implement `sim.AttackReaction.ARTargetAllowed(s, c, mode) bool` matching the printed target wording. Most ARs read only the printed type-line (`c.Types(nil)`) and can ignore `s`; thread `s` through when the predicate calls `c.Cost(s)` or other engine-aware methods. Chain runner validates the chosen `Mode`; failures abort the permutation. The AR's `Play` calls `sim.GrantAttackReactionBuff(s, self, n)` — reads `s.AttackReactionTarget()` (set by the runner before `Play`), adds `n` to target's `BonusAttack`, credits `n` to `s.Value`, amends the buffed attack's chain-step delta, emits the rider line. ARs cost 0 AP (handled by the free-step gate). Modal ARs combine with `card.ModalCard.Modes()` — predicate dispatches per mode; `Play` applies the buff unconditionally because the runner already validated. Non-modal ARs ignore `mode` (always 0). Card docstrings call out the printed predicate (esp. when wording distinguishes "attack" / "attack action card" / "weapon attack" — TypeSet helpers are `IsAttack` / `IsAttackAction` / `IsWeaponAttack`) and any modelling fudge.
+- **`card.VariableCost`** (Amplify the Arknight, Rune Flash, …): `Cost(g)` reads TurnState; the marker exposes `MinCost` / `MaxCost` for the solver pre-screen. Note the printed cost formula.
+- **Attack Reactions**: implement `sim.AttackReaction.ARTargetAllowed(g, c, mode) bool` matching the printed target wording. Most ARs read only the printed type-line (`c.Types(nil)`) and can ignore `g`; thread `g` through when the predicate calls `c.Cost(g)` or other engine-aware methods. Chain runner validates the chosen `Mode`; failures abort the permutation. The AR's `Play` calls `sim.GrantAttackReactionBuff(g, self, n)` — reads `g.AttackReactionTarget()` (set by the runner before `Play`), adds `n` to target's `BonusAttack`, credits `n` to `g.Value`, amends the buffed attack's chain-step delta, emits the rider line. ARs cost 0 AP (handled by the free-step gate). Modal ARs combine with `card.Modal.Modes()` — predicate dispatches per mode; `Play` applies the buff unconditionally because the runner already validated. Non-modal ARs ignore `mode` (always 0). Card docstrings call out the printed predicate (esp. when wording distinguishes "attack" / "attack action card" / "weapon attack" — TypeSet helpers are `IsAttack` / `IsAttackAction` / `IsWeaponAttack`) and any modelling fudge.
 - **`OnHit` registrations**: attack cards with "if this hits, do X" append a handler to `self.OnHit` inside `Play` (the handler takes `card.GameEngine`, `card.Logger`, `*card.CardState`, `*card.OnHitHandler`). Chain runner finalizes each attack post-AR-buff: when `LikelyToHit(self)` is true on post-buff `EffectiveAttack`, every closure in `self.OnHit` runs. Cards adding an on-hit rider to a DIFFERENT card (Mauvrion Skies, Runic Reaping) append to the target's `OnHit`. **Do NOT call `LikelyToHit` directly from `Play`** — chain runner owns the gate so AR buffs propagate. Use a top-level handler (not an inline closure) so registration stays allocation-free — closures assigned to `OnHit.Fire` escape to the heap.
-- **`NextHit` triggers** (Plunder Run, High Striker, …): cards whose printed text reads "the next time an X you control hits this turn, do Y" register via `s.RegisterNextHit(...)`. Each trigger carries a `TypeFilter func(card.TypeSet) bool` narrowing the qualifying hits — `card.TypeSet.IsAttackAction` for "attack action card" wording (Plunder Run), `card.TypeSet.IsAttack` for the broader "attack" wording that includes weapon swings (High Striker). Chain runner drains matching triggers inside `finalizeActiveAttack` on each `LikelyToHit` attack; non-matching triggers stay queued. Use this — not `OnHit` on a specific `CardState` — when the rider must wait across misses for the FIRST qualifying hit.
+- **`NextHit` triggers** (Plunder Run, High Striker, …): cards whose printed text reads "the next time an X you control hits this turn, do Y" register via `g.RegisterNextHit(...)`. Each trigger carries a `TypeFilter func(card.TypeSet) bool` narrowing the qualifying hits — `card.TypeSet.IsAttackAction` for "attack action card" wording (Plunder Run), `card.TypeSet.IsAttack` for the broader "attack" wording that includes weapon swings (High Striker). Chain runner drains matching triggers inside `finalizeActiveAttack` on each `LikelyToHit` attack; non-matching triggers stay queued. Use this — not `OnHit` on a specific `CardState` — when the rider must wait across misses for the FIRST qualifying hit.
 - **Self-granting on-hit go-again** (Overload, Razor Reflex mode 1): "if this hits, it gains go again" → flip `self.GrantedGoAgain = true` inside `Play` when `sim.LikelyToHit(self)` returns true.
-- **Modal "Choose 1" cards** (Captain's Call, …): implement `card.ModalCard.Modes() int` and dispatch on `self.Mode` inside `Play`. Chain runner enumerates the cartesian product of modes across modal cards and picks the highest-Value tuple. Modes that are no-ops should resolve as zero-Value no-ops. Card docstrings call out each mode's effect.
+- **Modal "Choose 1" cards** (Captain's Call, …): implement `card.Modal.Modes() int` and dispatch on `self.Mode` inside `Play`. Chain runner enumerates the cartesian product of modes across modal cards and picks the highest-Value tuple. Modes that are no-ops should resolve as zero-Value no-ops. Card docstrings call out each mode's effect.
 - **Modal cost** (Bluster Buff / Chest Puff / Look Tuff cycle): ModalCards whose resource cost varies by mode implement `card.ModalCost.ModalCost(mode int8) int`. Attacker meta cache folds per-mode min/max into the partition pre-screen; chain runner reads the mode's cost via `costAt(state, self.Mode)`. Card docstrings call out each (cost, effect) pair.
-- **Modal blockers** (Brothers in Arms, …): plain blockers with mode-dependent block-time cost implement `card.ModalCard.Modes()` + `card.Blocker.Block(s, self)` + `card.BlockCost(mode int8) int`. `defendersDamage` enumerates modes within spare defense budget (`phase.defendBudget − drCost`) and picks the highest-`BonusDefense` mode that fits. Mode 0 is conventionally the printed default (cost 0, no extra effect). Card docstrings call out each (cost, effect) pair.
+- **Modal blockers** (Brothers in Arms, …): plain blockers with mode-dependent block-time cost implement `card.Modal.Modes()` + `card.Blocker.Block(g, self)` + `card.BlockCost(mode int8) int`. `defendersDamage` enumerates modes within spare defense budget (`phase.defendBudget − drCost`) and picks the highest-`BonusDefense` mode that fits. Mode 0 is conventionally the printed default (cost 0, no extra effect). Card docstrings call out each (cost, effect) pair.
 - **`DefensiveInstant`** (Brush Off, Calming Breeze, Oasis Respite, Peace of Mind, …): `TypeInstant` cards whose printed effect prevents damage opt in via `card.DefensiveInstant`. Partition treats them as defenders; `Cost()` is summed against the defense budget; `sim.ResolveChainStep` caps `EffectiveDefense` at `IncomingDamage` and decrements — vanilla prevention covers `Play` with an empty body. Damage prevention collapses against the single `IncomingDamage` bucket: "the next N damage" and "the next K times … prevent 1 each" both reduce to `Defense() = N`; "next damage of M or less" credits `min(M, IncomingDamage)`. Conditional riders that modify the prevented amount (e.g. Oasis Respite's life-gain) bump `self.BonusDefense` so the sim's resolver folds them into the capped `(+N)`. Card docstrings note the printed prevention amount and any rider that's dropped.
 - **Optional additional costs** (Looking for a Scrap, Nimble Strike, Regurgitating Slog, …): "you may pay X" gates where the cost spends graveyard residency (or other state the sim doesn't otherwise value) for a strictly-upside buff are paid unconditionally; the sim doesn't enumerate the skip branch. Card docstrings note the printed gate; no per-card rationale for "always tries".
 ## Logging idioms
 
-Cards' `Play` body does **not** emit the chain step itself. `sim.ResolveChainStep` runs the card's `Play`, then credits `s.Value` and appends the canonical `<Card>: <VERB> (+N)` chain-step entry — `EffectiveAttack` for attacks and weapon-swings, capped `EffectiveDefense` (with `IncomingDamage` decrement) for defense-reactions and `DefensiveInstant` cards, 0 otherwise. Vanilla attack / DR / non-attack cards have an empty `Play` body.
+Cards' `Play` body does **not** emit the chain step itself. `sim.ResolveChainStep` runs the card's `Play`, then credits `g.Value` and appends the canonical `<Card>: <VERB> (+N)` chain-step entry — `EffectiveAttack` for attacks and weapon-swings, capped `EffectiveDefense` (with `IncomingDamage` decrement) for defense-reactions and `DefensiveInstant` cards, 0 otherwise. Vanilla attack / DR / non-attack cards have an empty `Play` body.
 
 Cards' `Play` body emits **rider sub-lines only** — post-triggers attributed to `self.Card.DisplayName()` for self-riders, or to a different source for cross-card riders (e.g. an `OnHit` attached to a target card). The framework threads a `card.Logger` into every Card-shaped hook (`Play`, `Block`, `OnHitHandler.Fire`, `TriggerHandler`, `Hero.OnCardPlayed`). Logger's method set matches `*turnlogger.TurnLogger`: `AppendChainStep` / `AppendChainStepf` / `AppendPostTrigger` / `AppendPostTriggerf` / `AppendPreTrigger` / `AppendPreTriggerf` / `AmendLastChainStepN`. A nil-pointer Logger (the find-best skip pass) silently elides every call — cards never gate manually.
 
@@ -110,17 +109,17 @@ Conditional self-buffs go before the chain step gets logged — they live in the
 
 ```go
 // Bluster Buff (mode 1): +2{p} for paying {r}.
-func blusterBuffPlay(s card.GameEngine, l card.Logger, self *card.CardState) {
+func blusterBuffPlay(g card.GameEngine, l card.Logger, self *card.CardState) {
     if self.Mode == 1 {
         self.BonusAttack += 2
     }
 }
 
 // Aether Slash: deal 1 arcane if a non-attack action was pitched to play it.
-func aetherSlashApplyRider(s card.GameEngine, l card.Logger, self *card.CardState) {
+func aetherSlashApplyRider(g card.GameEngine, l card.Logger, self *card.CardState) {
     for _, p := range self.PitchedToPlay {
-        if p.Types().IsNonAttackAction() {
-            s.DealArcaneDamage(l, self, 1)
+        if p.Types(nil).IsNonAttackAction() {
+            g.DealArcaneDamage(l, self.Card.DisplayName(), 1)
             return
         }
     }
@@ -144,7 +143,7 @@ Card-attack predicates (`internal/card/types.go`) gate purely on `TypeAttack` (a
 
 Items mirror the Weapon split: a `sim.Item` permanent (Self / Count / Ability) lives in `TurnState.Items`, and a `card.Card` activated ability (e.g. `GoldTokenAbility`) is what the chain runner enqueues each turn. The Ability carries the parent's `card.TypeSet` (so `TypeItem` keeps `PersistsInPlay` true and the chain step never hits the graveyard) plus any subtype the printed text uses; activated abilities that don't attack omit `TypeAttack`.
 
-Token items consolidate by `TokenType`: at most one `Item` per `TokenType` per `TurnState`. The per-token `Create` helper (`s.CreateGold(n)`) bumps an existing entry or appends a new one. `s.ConsumeItem(t, n)` decrements `Count` and removes the entry at zero — the standard "ability paid one charge" path. Token items don't head to the graveyard on destroy.
+Token items consolidate by `TokenType`: at most one `Item` per `TokenType` per `TurnState`. The per-token `Create` helper (`g.CreateGold(n)`) bumps an existing entry or appends a new one. `g.ConsumeItem(t, n)` decrements `Count` and removes the entry at zero — the standard "ability paid one charge" path. Token items don't head to the graveyard on destroy.
 
 The chain runner builds `ctx.itemAbilities` by replicating each Item's `Ability` up to `perItemAbilityCap` times so the wmask can pick "play it 0..N times this turn"; the cap (`internal/sim/sequence.go`) bounds the 2^k mask explosion.
 

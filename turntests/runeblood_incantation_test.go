@@ -29,8 +29,8 @@ func TestRunebloodIncantation_PlayRegistersStartOfTurnTriggerWithCountN(t *testi
 		if !s.AuraCreated() {
 			t.Errorf("%s: AuraCreated should be set", tc.c.Name())
 		}
-		if s.Runechants() != 0 {
-			t.Errorf("%s: Runechants = %d, want 0 (no same-turn rune)", tc.c.Name(), s.Runechants())
+		if s.RunechantCount() != 0 {
+			t.Errorf("%s: Runechants = %d, want 0 (no same-turn rune)", tc.c.Name(), s.RunechantCount())
 		}
 		if len(s.Auras()) != 1 {
 			t.Fatalf("%s: Auras len = %d, want 1", tc.c.Name(), len(s.Auras()))
@@ -59,8 +59,8 @@ func TestRunebloodIncantation_HandlerCreatesOneRunechantPerFire(t *testing.T) {
 		if fire.Value() != 1 {
 			t.Errorf("%s: handler Value = %d, want 1", c.Name(), fire.Value())
 		}
-		if fire.Runechants() != 1 {
-			t.Errorf("%s: Runechants = %d, want 1 (one rune per fire)", c.Name(), fire.Runechants())
+		if fire.RunechantCount() != 1 {
+			t.Errorf("%s: Runechants = %d, want 1 (one rune per fire)", c.Name(), fire.RunechantCount())
 		}
 	}
 }

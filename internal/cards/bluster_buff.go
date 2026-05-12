@@ -2,7 +2,7 @@
 //
 // Text: "When this attacks, it gets -1{p} unless you pay {r}."
 //
-// Two modes via card.ModalCard + card.ModalCost: mode 0 pays the printed 1{r} for 5{p};
+// Two modes via card.Modal + card.ModalCost: mode 0 pays the printed 1{r} for 5{p};
 // mode 1 spends an extra {r} for the full 6{p}. The chain runner enumerates both and
 // picks the higher-Value tuple per partition.
 
@@ -12,7 +12,7 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
-func blusterBuffPlay(s card.GameEngine, l card.Logger, self *card.CardState) {
+func blusterBuffPlay(g card.GameEngine, l card.Logger, self *card.CardState) {
 	if self.Mode == 0 {
 		self.BonusAttack -= 1
 	}
@@ -20,6 +20,6 @@ func blusterBuffPlay(s card.GameEngine, l card.Logger, self *card.CardState) {
 
 func (BlusterBuffRed) Modes() int              { return 2 }
 func (BlusterBuffRed) ModalCost(mode int8) int { return 1 + int(mode) }
-func (BlusterBuffRed) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
-	blusterBuffPlay(s, l, self)
+func (BlusterBuffRed) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+	blusterBuffPlay(g, l, self)
 }

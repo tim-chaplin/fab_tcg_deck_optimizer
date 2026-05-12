@@ -30,7 +30,7 @@ func TestHitTheHighNotes_NoAuraReturnsBase(t *testing.T) {
 
 func TestHitTheHighNotes_AuraPlayedTriggersBonus(t *testing.T) {
 	// An Aura-typed card earlier in the turn's CardsPlayed → +2 power.
-	s := sim.NewTurnStateFromSpec(sim.TurnStateSpec{CardsPlayed: []card.Card{testutils.Aura{}}})
+	s := sim.NewTurnStateFromSpec(sim.TurnStateSpec{CardsPlayed: []card.Card{testutils.Aura{}}, AuraCreated: true})
 	sim.ResolveChainStep(&s, s.Logger(), &card.CardState{Card: cards.HitTheHighNotesRed{}})
 	if got := s.Value(); got != 6 {
 		t.Errorf("Play() = %d, want 6 (base 4 + 2 aura bonus)", got)

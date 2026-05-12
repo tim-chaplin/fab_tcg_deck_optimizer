@@ -12,9 +12,9 @@ import (
 
 // zealousBeltingPlay grants go again when any pitched card this turn has base power greater
 // than the card's own base power, then emits the chain step.
-func zealousBeltingPlay(s card.GameEngine, l card.Logger, self *card.CardState) {
+func zealousBeltingPlay(g card.GameEngine, l card.Logger, self *card.CardState) {
 	base := self.Card.Attack()
-	for _, p := range s.Pitched() {
+	for _, p := range g.Pitched() {
 		if p.Attack() > base {
 			self.GrantedGoAgain = true
 			break
@@ -22,14 +22,14 @@ func zealousBeltingPlay(s card.GameEngine, l card.Logger, self *card.CardState) 
 	}
 }
 
-func (ZealousBeltingRed) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
-	zealousBeltingPlay(s, l, self)
+func (ZealousBeltingRed) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+	zealousBeltingPlay(g, l, self)
 }
 
-func (ZealousBeltingYellow) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
-	zealousBeltingPlay(s, l, self)
+func (ZealousBeltingYellow) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+	zealousBeltingPlay(g, l, self)
 }
 
-func (ZealousBeltingBlue) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
-	zealousBeltingPlay(s, l, self)
+func (ZealousBeltingBlue) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+	zealousBeltingPlay(g, l, self)
 }

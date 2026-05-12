@@ -15,8 +15,8 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
-func (SigilOfTheArknightBlue) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
-	s.AddStartOfTurnAura(self, sigilOfTheArknightReveal, 1)
+func (SigilOfTheArknightBlue) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+	g.CreateStartOfTurnAura(self, sigilOfTheArknightReveal, 1)
 }
 
 // sigilOfTheArknightReveal implements the handler described in the file docstring. Logs
@@ -24,15 +24,15 @@ func (SigilOfTheArknightBlue) Play(s card.GameEngine, l card.Logger, self *card.
 // it" on a whiff — so the printout makes the random reveal visible either way. Empty deck
 // is the silent edge case (no card to name). PeekDeck flips the cacheable bit either way
 // since the reveal outcome depends on shuffle order.
-func sigilOfTheArknightReveal(s card.GameEngine, l card.Logger, a card.Aura) {
+func sigilOfTheArknightReveal(g card.GameEngine, l card.Logger, a card.Aura) {
 	a.Destroy(true)
-	top, ok := s.PeekDeck()
+	top, ok := g.PeekDeck()
 	if !ok {
 		return
 	}
 	self := SigilOfTheArknightBlue{}.DisplayName()
 	if top.Types(nil).IsAttackAction() {
-		s.DrawOne()
+		g.DrawOne()
 		l.AppendPostTriggerf(self, 0, "%s drew %s into hand", self, top.DisplayName())
 		return
 	}

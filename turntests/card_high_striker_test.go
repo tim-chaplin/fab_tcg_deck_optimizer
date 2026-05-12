@@ -12,22 +12,22 @@ import (
 // Copper tokens. Per-pitch Copper count (6/4/2 for R/Y/B) is covered by turntests since
 // it requires the chain runner to actually fire.
 func TestHighStriker_QueuesTriggerHit(t *testing.T) {
-	s := sim.NewTurnStateFromCards(nil, nil)
-	sim.ResolveChainStep(s, s.Logger(), &card.CardState{Card: cards.HighStrikerRed{}})
-	if got := triggerHitCount(s); got != 1 {
+	g := sim.NewTurnStateFromCards(nil, nil)
+	sim.ResolveChainStep(g, g.Logger(), &card.CardState{Card: cards.HighStrikerRed{}})
+	if got := triggerHitCount(g); got != 1 {
 		t.Fatalf("TriggerHit triggers = %d, want 1 (registered the rider)", got)
 	}
-	if s.Copper() != 0 {
-		t.Fatalf("Copper = %d before any attack hits, want 0", s.Copper())
+	if g.CopperCount() != 0 {
+		t.Fatalf("Copper = %d before any attack hits, want 0", g.CopperCount())
 	}
 }
 
-// triggerHitCount returns the number of queued TriggerHit triggers on s. Reaches
+// triggerHitCount returns the number of queued TriggerHit triggers on g. Reaches
 // past GameEngine to the concrete *sim.TurnState — Triggers is sim-owned and the
 // engine interface stays sim-free.
-func triggerHitCount(s card.GameEngine) int {
+func triggerHitCount(g card.GameEngine) int {
 	n := 0
-	for _, t := range s.(*sim.TurnState).Triggers() {
+	for _, t := range g.(*sim.TurnState).Triggers() {
 		if t.TriggerType == sim.TriggerHit {
 			n++
 		}

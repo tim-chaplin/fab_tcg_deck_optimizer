@@ -11,23 +11,23 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
-func wageGoldOnHit(s card.GameEngine, l card.Logger, self *card.CardState, _ *card.OnHitHandler) {
-	s.CreateGold(1)
+func wageGoldOnHit(g card.GameEngine, l card.Logger, self *card.CardState, _ *card.OnHitHandler) {
+	g.CreateGold(1)
 	l.AppendPostTrigger(self.Card.DisplayName(), "On-hit won wager", 0)
 }
 
-func wageGoldPlay(s card.GameEngine, l card.Logger, self *card.CardState) {
+func wageGoldPlay(g card.GameEngine, l card.Logger, self *card.CardState) {
 	self.RegisterOnHit(wageGoldOnHit)
 }
 
-func (WageGoldRed) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
-	wageGoldPlay(s, l, self)
+func (WageGoldRed) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+	wageGoldPlay(g, l, self)
 }
 
-func (WageGoldYellow) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
-	wageGoldPlay(s, l, self)
+func (WageGoldYellow) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+	wageGoldPlay(g, l, self)
 }
 
-func (WageGoldBlue) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
-	wageGoldPlay(s, l, self)
+func (WageGoldBlue) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+	wageGoldPlay(g, l, self)
 }

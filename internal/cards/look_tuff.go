@@ -11,7 +11,7 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
-func lookTuffPlay(s card.GameEngine, l card.Logger, self *card.CardState) {
+func lookTuffPlay(g card.GameEngine, l card.Logger, self *card.CardState) {
 	if self.Mode == 0 {
 		self.BonusAttack -= 1
 	}
@@ -19,6 +19,6 @@ func lookTuffPlay(s card.GameEngine, l card.Logger, self *card.CardState) {
 
 func (LookTuffRed) Modes() int              { return 2 }
 func (LookTuffRed) ModalCost(mode int8) int { return 3 + int(mode) }
-func (LookTuffRed) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
-	lookTuffPlay(s, l, self)
+func (LookTuffRed) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+	lookTuffPlay(g, l, self)
 }

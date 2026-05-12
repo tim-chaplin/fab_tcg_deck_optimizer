@@ -12,8 +12,8 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
-func (FeistyLocalsRed) Play(s card.GameEngine, l card.Logger, self *card.CardState) {}
+func (FeistyLocalsRed) Play(g card.GameEngine, l card.Logger, self *card.CardState) {}
 
-func (FeistyLocalsYellow) Play(s card.GameEngine, l card.Logger, self *card.CardState) {}
+func (FeistyLocalsYellow) Play(g card.GameEngine, l card.Logger, self *card.CardState) {}
 
-func (FeistyLocalsBlue) Play(s card.GameEngine, l card.Logger, self *card.CardState) {}
+func (FeistyLocalsBlue) Play(g card.GameEngine, l card.Logger, self *card.CardState) {}

@@ -11,7 +11,7 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
-func chestPuffPlay(s card.GameEngine, l card.Logger, self *card.CardState) {
+func chestPuffPlay(g card.GameEngine, l card.Logger, self *card.CardState) {
 	if self.Mode == 0 {
 		self.BonusAttack -= 1
 	}
@@ -19,6 +19,6 @@ func chestPuffPlay(s card.GameEngine, l card.Logger, self *card.CardState) {
 
 func (ChestPuffRed) Modes() int              { return 2 }
 func (ChestPuffRed) ModalCost(mode int8) int { return 2 + int(mode) }
-func (ChestPuffRed) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
-	chestPuffPlay(s, l, self)
+func (ChestPuffRed) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+	chestPuffPlay(g, l, self)
 }

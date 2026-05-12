@@ -12,5 +12,5 @@ import (
 
 // not implemented: on-hit opponent-arsenal manipulation rider
 
-func (HandBehindThePenRed) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
+func (HandBehindThePenRed) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
 }

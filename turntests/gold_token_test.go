@@ -23,8 +23,8 @@ func TestGoldAbility_SpendsToFillArsenalAndSwings(t *testing.T) {
 	if got.Value != 3 {
 		t.Fatalf("Value = %d, want 3 (Reaping Blade swing power 3)", got.Value)
 	}
-	if got.Gold() != 0 {
-		t.Fatalf("Gold after turn = %d, want 0 (the only token spent)", got.Gold())
+	if got.GoldCount() != 0 {
+		t.Fatalf("Gold after turn = %d, want 0 (the only token spent)", got.GoldCount())
 	}
 	if got.CardsDrawn != 1 {
 		t.Fatalf("CardsDrawn = %d, want 1 (Gold ability draws one card)", got.CardsDrawn)

@@ -9,4 +9,4 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
-func (CashInYellow) Play(s card.GameEngine, l card.Logger, self *card.CardState) {}
+func (CashInYellow) Play(g card.GameEngine, l card.Logger, self *card.CardState) {}

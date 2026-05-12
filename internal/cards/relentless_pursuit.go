@@ -9,11 +9,11 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
-func (RelentlessPursuitBlue) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
-	s.SetOpponentMarked(true)
-	recycled := s.HasPlayedType(card.TypeAttack)
+func (RelentlessPursuitBlue) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+	g.MarkOpponent()
+	recycled := g.HasPlayedType(card.TypeAttack)
 	if recycled {
-		s.RecycleToDeckBottom(self)
+		g.RecycleToDeckBottom(self)
 	}
 	if recycled {
 		l.AppendPostTrigger(self.Card.DisplayName(), "Recycled to bottom of deck", 0)

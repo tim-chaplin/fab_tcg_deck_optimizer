@@ -8,7 +8,7 @@ import (
 )
 
 // stubAR is a minimal Card + AttackReaction stub. The unit tests exercise
-// card.GrantAttackReactionBuff's bookkeeping; ARTargetAllowed is consulted by the chain runner.
+// CardState.GrantAttackReactionBuff's bookkeeping; ARTargetAllowed is consulted by the chain runner.
 type stubAR struct{}
 
 func (stubAR) ID() ids.CardID           { return ids.InvalidCard }
@@ -41,22 +41,22 @@ func (stubAttack) Types(card.GameEngine) card.TypeSet {
 func (stubAttack) GoAgain(card.GameEngine) bool                       { return true }
 func (stubAttack) Play(card.GameEngine, card.Logger, *card.CardState) {}
 
-// Tests that card.GrantAttackReactionBuff is a no-op when no target is set.
+// Tests that GrantAttackReactionBuff is a no-op when no target is set.
 func TestGrantAttackReactionBuff_NoTargetIsNoOp(t *testing.T) {
 	s := TurnState{}
-	card.GrantAttackReactionBuff(&s, s.Logger(), &card.CardState{Card: stubAR{}}, 5)
+	(&card.CardState{Card: stubAR{}}).GrantAttackReactionBuff(&s, s.Logger(), 5)
 	if s.Value() != 0 {
 		t.Errorf("Value = %d, want 0", s.Value())
 	}
 }
 
-// Tests that card.GrantAttackReactionBuff buffs BonusAttack, credits Value, and amends the
+// Tests that GrantAttackReactionBuff buffs BonusAttack, credits Value, and amends the
 // target's chain-step log delta.
 func TestGrantAttackReactionBuff_AppliesBuffAndCreditsValue(t *testing.T) {
 	target := &card.CardState{Card: stubAttack{}}
 	s := NewTurnStateFromSpec(TurnStateSpec{AttackReactionTarget: target})
 	s.logger.AppendChainStep("stubAttack: ATTACK", 1)
-	card.GrantAttackReactionBuff(&s, s.Logger(), &card.CardState{Card: stubAR{}}, 3)
+	(&card.CardState{Card: stubAR{}}).GrantAttackReactionBuff(&s, s.Logger(), 3)
 	if target.BonusAttack != 3 {
 		t.Errorf("target BonusAttack = %d, want 3", target.BonusAttack)
 	}

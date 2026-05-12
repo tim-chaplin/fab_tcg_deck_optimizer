@@ -18,16 +18,16 @@ import (
 // mauvrionTargetMatches accepts Runeblade attack action cards (weapons don't qualify).
 // The engine is threaded through so Universal cards fold the active hero's class into
 // their Types — Wage Gold under Viserai then matches TypeRuneblade.
-func mauvrionTargetMatches(s card.GameEngine, target *card.CardState) bool {
-	t := target.Card.Types(s)
+func mauvrionTargetMatches(g card.GameEngine, target *card.CardState) bool {
+	t := target.Card.Types(g)
 	return t.Has(card.TypeRuneblade) && t.IsAttackAction()
 }
 
 // mauvrionSkiesPlay grants the next matching attack go-again and an on-hit n-runechant
 // rider.
-func mauvrionSkiesPlay(s card.GameEngine, l card.Logger, selfState *card.CardState, source card.Card, n int) {
-	for _, pc := range s.CardsRemaining() {
-		if mauvrionTargetMatches(s, pc) {
+func mauvrionSkiesPlay(g card.GameEngine, l card.Logger, selfState *card.CardState, source card.Card, n int) {
+	for _, pc := range g.CardsRemaining() {
+		if mauvrionTargetMatches(g, pc) {
 			pc.GrantedGoAgain = true
 			text := onHitRunechantText[source.ID()]
 			pc.OnHit = append(pc.OnHit, card.OnHitHandler{
@@ -45,8 +45,8 @@ func mauvrionSkiesPlay(s card.GameEngine, l card.Logger, selfState *card.CardSta
 // targeted attack by Mauvrion Skies / Runic Reaping. Reads N and the precomputed log
 // line off the handler so registration stays alloc-free; self is the targeted attack
 // (whose name credits the trigger line).
-func onHitCreateRunechants(s card.GameEngine, l card.Logger, self *card.CardState, h *card.OnHitHandler) {
-	s.CreateRunechants(h.N)
+func onHitCreateRunechants(g card.GameEngine, l card.Logger, self *card.CardState, h *card.OnHitHandler) {
+	g.CreateRunechants(h.N)
 	l.AppendPostTrigger(self.Card.DisplayName(), h.LogText, h.N)
 }
 
@@ -70,14 +70,14 @@ var onHitRunechantText = func() map[ids.CardID]string {
 	return out
 }()
 
-func (c MauvrionSkiesRed) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
-	mauvrionSkiesPlay(s, l, self, c, 3)
+func (c MauvrionSkiesRed) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+	mauvrionSkiesPlay(g, l, self, c, 3)
 }
 
-func (c MauvrionSkiesYellow) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
-	mauvrionSkiesPlay(s, l, self, c, 2)
+func (c MauvrionSkiesYellow) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+	mauvrionSkiesPlay(g, l, self, c, 2)
 }
 
-func (c MauvrionSkiesBlue) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
-	mauvrionSkiesPlay(s, l, self, c, 1)
+func (c MauvrionSkiesBlue) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+	mauvrionSkiesPlay(g, l, self, c, 1)
 }

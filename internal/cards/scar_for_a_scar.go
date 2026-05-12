@@ -20,13 +20,13 @@ func scarForAScarGoAgain(g card.GameEngine) bool {
 }
 
 func (ScarForAScarRed) GoAgain(g card.GameEngine) bool { return scarForAScarGoAgain(g) }
-func (c ScarForAScarRed) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
+func (c ScarForAScarRed) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
 }
 
 func (ScarForAScarYellow) GoAgain(g card.GameEngine) bool { return scarForAScarGoAgain(g) }
-func (c ScarForAScarYellow) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
+func (c ScarForAScarYellow) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
 }
 
 func (ScarForAScarBlue) GoAgain(g card.GameEngine) bool { return scarForAScarGoAgain(g) }
-func (c ScarForAScarBlue) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
+func (c ScarForAScarBlue) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
 }

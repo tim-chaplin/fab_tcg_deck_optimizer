@@ -11,19 +11,19 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
-func (RuneragerSwarmRed) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
-	runeragerSwarmPlay(s, l, self)
+func (RuneragerSwarmRed) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+	runeragerSwarmPlay(g, l, self)
 }
 
-func (RuneragerSwarmYellow) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
-	runeragerSwarmPlay(s, l, self)
+func (RuneragerSwarmYellow) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+	runeragerSwarmPlay(g, l, self)
 }
 
-func (RuneragerSwarmBlue) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
-	runeragerSwarmPlay(s, l, self)
+func (RuneragerSwarmBlue) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+	runeragerSwarmPlay(g, l, self)
 }
-func runeragerSwarmPlay(s card.GameEngine, l card.Logger, self *card.CardState) {
-	if s.HasPlayedOrCreatedAura() {
+func runeragerSwarmPlay(g card.GameEngine, l card.Logger, self *card.CardState) {
+	if g.AuraCreated() {
 		self.GrantedGoAgain = true
 	}
 }

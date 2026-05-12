@@ -13,15 +13,15 @@ import (
 
 // not implemented: health/equipment/token comparison, agility/might/vigor tokens, overpower
 
-func (DownButNotOutRed) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
+func (DownButNotOutRed) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
 }
 
 // not implemented: health/equipment/token comparison, agility/might/vigor tokens, overpower
 
-func (DownButNotOutYellow) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
+func (DownButNotOutYellow) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
 }
 
 // not implemented: health/equipment/token comparison, agility/might/vigor tokens, overpower
 
-func (DownButNotOutBlue) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
+func (DownButNotOutBlue) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
 }

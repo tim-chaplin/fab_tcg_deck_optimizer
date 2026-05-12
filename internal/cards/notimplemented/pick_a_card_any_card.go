@@ -13,13 +13,13 @@ import (
 
 // not implemented: silver tokens, opponent hand inspection
 
-func (PickACardAnyCardRed) Play(s card.GameEngine, l card.Logger, self *card.CardState) {}
+func (PickACardAnyCardRed) Play(g card.GameEngine, l card.Logger, self *card.CardState) {}
 
 // not implemented: silver tokens, opponent hand inspection
 
-func (PickACardAnyCardYellow) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
+func (PickACardAnyCardYellow) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
 }
 
 // not implemented: silver tokens, opponent hand inspection
 
-func (PickACardAnyCardBlue) Play(s card.GameEngine, l card.Logger, self *card.CardState) {}
+func (PickACardAnyCardBlue) Play(g card.GameEngine, l card.Logger, self *card.CardState) {}

@@ -65,8 +65,8 @@ func (gravSpyDR) Types(card.GameEngine) card.TypeSet {
 	return card.NewTypeSet(card.TypeGeneric, card.TypeDefenseReaction)
 }
 func (gravSpyDR) GoAgain(card.GameEngine) bool { return false }
-func (g gravSpyDR) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
-	*g.saw = append((*g.saw)[:0], s.Graveyard()...)
+func (gs gravSpyDR) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+	*gs.saw = append((*gs.saw)[:0], g.(*TurnState).Graveyard()...)
 }
 
 // auraDefender is a test-only card whose type line is Aura — a persistent type that normally

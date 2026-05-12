@@ -25,13 +25,13 @@ func (BlowForABlowRed) GoAgain(g card.GameEngine) bool {
 	}
 	return g.HeroWantsLowerHealth()
 }
-func (BlowForABlowRed) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
+func (BlowForABlowRed) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
 	self.RegisterOnHit(blowForABlowOnHit)
 }
 
 // blowForABlowOnHit fires the printed "When this hits, deal 1 damage" rider. Top-level so
 // registration doesn't allocate a closure on the hot anneal path.
-func blowForABlowOnHit(s card.GameEngine, l card.Logger, self *card.CardState, _ *card.OnHitHandler) {
-	s.AddValue(blowForABlowPingValue)
+func blowForABlowOnHit(g card.GameEngine, l card.Logger, self *card.CardState, _ *card.OnHitHandler) {
+	g.AddValue(blowForABlowPingValue)
 	l.AppendPostTrigger(self.Card.DisplayName(), "On-hit dealt 1 damage", blowForABlowPingValue)
 }

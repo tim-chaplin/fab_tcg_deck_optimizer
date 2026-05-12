@@ -3,7 +3,7 @@
 //
 // Text: "When this defends, you may pay {r}. If you do, it gets +2{d}."
 //
-// Two block-time modes via card.ModalCard + card.BlockCost: mode 0 spends nothing for the
+// Two block-time modes via card.Modal + card.BlockCost: mode 0 spends nothing for the
 // printed 2{d}; mode 1 spends 1{r} for 4{d}. The chain runner enumerates both and picks
 // the higher-defense mode that fits the partition's spare defense budget.
 
@@ -23,21 +23,21 @@ func brothersInArmsBlock(_ card.GameEngine, l card.Logger, self *card.CardState)
 
 func (BrothersInArmsRed) Modes() int              { return 2 }
 func (BrothersInArmsRed) BlockCost(mode int8) int { return int(mode) }
-func (BrothersInArmsRed) Block(s card.GameEngine, l card.Logger, self *card.CardState) {
-	brothersInArmsBlock(s, l, self)
+func (BrothersInArmsRed) Block(g card.GameEngine, l card.Logger, self *card.CardState) {
+	brothersInArmsBlock(g, l, self)
 }
-func (BrothersInArmsRed) Play(s card.GameEngine, l card.Logger, self *card.CardState) {}
+func (BrothersInArmsRed) Play(g card.GameEngine, l card.Logger, self *card.CardState) {}
 
 func (BrothersInArmsYellow) Modes() int              { return 2 }
 func (BrothersInArmsYellow) BlockCost(mode int8) int { return int(mode) }
-func (BrothersInArmsYellow) Block(s card.GameEngine, l card.Logger, self *card.CardState) {
-	brothersInArmsBlock(s, l, self)
+func (BrothersInArmsYellow) Block(g card.GameEngine, l card.Logger, self *card.CardState) {
+	brothersInArmsBlock(g, l, self)
 }
-func (BrothersInArmsYellow) Play(s card.GameEngine, l card.Logger, self *card.CardState) {}
+func (BrothersInArmsYellow) Play(g card.GameEngine, l card.Logger, self *card.CardState) {}
 
 func (BrothersInArmsBlue) Modes() int              { return 2 }
 func (BrothersInArmsBlue) BlockCost(mode int8) int { return int(mode) }
-func (BrothersInArmsBlue) Block(s card.GameEngine, l card.Logger, self *card.CardState) {
-	brothersInArmsBlock(s, l, self)
+func (BrothersInArmsBlue) Block(g card.GameEngine, l card.Logger, self *card.CardState) {
+	brothersInArmsBlock(g, l, self)
 }
-func (BrothersInArmsBlue) Play(s card.GameEngine, l card.Logger, self *card.CardState) {}
+func (BrothersInArmsBlue) Play(g card.GameEngine, l card.Logger, self *card.CardState) {}

@@ -14,16 +14,16 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
-func (MaleficIncantationRed) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
-	s.AddOncePerTurnAttackActionAura(self, maleficAuraHandler, 3)
+func (MaleficIncantationRed) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+	g.CreateOncePerTurnAttackActionAura(self, maleficAuraHandler, 3)
 }
 
-func (MaleficIncantationYellow) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
-	s.AddOncePerTurnAttackActionAura(self, maleficAuraHandler, 2)
+func (MaleficIncantationYellow) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+	g.CreateOncePerTurnAttackActionAura(self, maleficAuraHandler, 2)
 }
 
-func (MaleficIncantationBlue) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
-	s.AddOncePerTurnAttackActionAura(self, maleficAuraHandler, 1)
+func (MaleficIncantationBlue) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+	g.CreateOncePerTurnAttackActionAura(self, maleficAuraHandler, 1)
 }
 
 // maleficCreatedRunechantText is the precomputed rider line for each Malefic Incantation
@@ -43,13 +43,13 @@ var maleficCreatedRunechantText = func() map[ids.CardID]string {
 
 // maleficAuraHandler is the once-per-turn attack-action trigger handler shared across
 // Malefic Incantation variants. Per-variant rider text is read off the table by
-// aura.SelfCardID() so the hot fire path runs zero string allocations. Decrements the
+// aura.CardID() so the hot fire path runs zero string allocations. Decrements the
 // verse counter and destroys the aura when the last verse fires.
-func maleficAuraHandler(s card.GameEngine, l card.Logger, a card.Aura) {
-	cardID := a.SelfCardID()
+func maleficAuraHandler(g card.GameEngine, l card.Logger, a card.Aura) {
+	cardID := a.CardID()
 	lastVerse := a.DecrementCount() <= 0
-	s.CreateRunechants(1)
-	l.AppendPostTrigger(s.TriggeringCard().DisplayName(), maleficCreatedRunechantText[cardID], 1)
+	g.CreateRunechants(1)
+	l.AppendPostTrigger(g.TriggeringCard().DisplayName(), maleficCreatedRunechantText[cardID], 1)
 	if lastVerse {
 		a.Destroy(true)
 	}

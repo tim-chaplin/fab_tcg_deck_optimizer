@@ -11,5 +11,5 @@ import (
 
 // not implemented: self-destroys + wipes all arsenals on a 2-damage hit
 
-func (TalismanOfWarfareYellow) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
+func (TalismanOfWarfareYellow) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
 }

@@ -13,5 +13,5 @@ import (
 
 // not implemented: opponent hand reveal, defense-reaction deck search
 
-func (c SoundTheAlarmRed) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
+func (c SoundTheAlarmRed) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
 }

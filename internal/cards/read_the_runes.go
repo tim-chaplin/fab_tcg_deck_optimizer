@@ -10,17 +10,17 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
-func (ReadTheRunesRed) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
-	s.CreateRunechants(3)
+func (ReadTheRunesRed) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+	g.CreateRunechants(3)
 	l.AppendPostTrigger(self.Card.DisplayName(), "Created 3 runechants", 3)
 }
 
-func (ReadTheRunesYellow) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
-	s.CreateRunechants(2)
+func (ReadTheRunesYellow) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+	g.CreateRunechants(2)
 	l.AppendPostTrigger(self.Card.DisplayName(), "Created 2 runechants", 2)
 }
 
-func (ReadTheRunesBlue) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
-	s.CreateRunechants(1)
+func (ReadTheRunesBlue) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+	g.CreateRunechants(1)
 	l.AppendPostTrigger(self.Card.DisplayName(), "Created a runechant", 1)
 }

@@ -6,23 +6,23 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
-func destructiveDeliberationPlay(s card.GameEngine, l card.Logger, self *card.CardState) {
+func destructiveDeliberationPlay(g card.GameEngine, l card.Logger, self *card.CardState) {
 	self.RegisterOnHit(destructiveDeliberationOnHit)
 }
 
-func destructiveDeliberationOnHit(s card.GameEngine, l card.Logger, self *card.CardState, _ *card.OnHitHandler) {
-	s.CreatePonder(1)
+func destructiveDeliberationOnHit(g card.GameEngine, l card.Logger, self *card.CardState, _ *card.OnHitHandler) {
+	g.CreatePonder(1)
 	l.AppendPostTrigger(self.Card.DisplayName(), "On-hit created a ponder", 0)
 }
 
-func (DestructiveDeliberationRed) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
-	destructiveDeliberationPlay(s, l, self)
+func (DestructiveDeliberationRed) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+	destructiveDeliberationPlay(g, l, self)
 }
 
-func (DestructiveDeliberationYellow) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
-	destructiveDeliberationPlay(s, l, self)
+func (DestructiveDeliberationYellow) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+	destructiveDeliberationPlay(g, l, self)
 }
 
-func (DestructiveDeliberationBlue) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
-	destructiveDeliberationPlay(s, l, self)
+func (DestructiveDeliberationBlue) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+	destructiveDeliberationPlay(g, l, self)
 }

@@ -11,5 +11,5 @@ import (
 
 // not implemented: on-hit opponent-arsenal manipulation rider
 
-func (TongueTiedRed) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
+func (TongueTiedRed) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
 }

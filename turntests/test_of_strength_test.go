@@ -15,8 +15,8 @@ func TestTestOfStrength_WinCreatesGold(t *testing.T) {
 	for _, power := range []int{6, 7} {
 		s := sim.NewTurnStateFromCards([]card.Card{testutils.GenericAttack(0, power)}, nil)
 		sim.ResolveChainStep(s, s.Logger(), &card.CardState{Card: cards.TestOfStrengthRed{}})
-		if s.Gold() != 1 {
-			t.Errorf("top power %d: Gold = %d, want 1 (clash win)", power, s.Gold())
+		if s.GoldCount() != 1 {
+			t.Errorf("top power %d: Gold = %d, want 1 (clash win)", power, s.GoldCount())
 		}
 	}
 }
@@ -25,8 +25,8 @@ func TestTestOfStrength_WinCreatesGold(t *testing.T) {
 func TestTestOfStrength_TieNoGold(t *testing.T) {
 	s := sim.NewTurnStateFromCards([]card.Card{testutils.GenericAttack(0, 5)}, nil)
 	sim.ResolveChainStep(s, s.Logger(), &card.CardState{Card: cards.TestOfStrengthRed{}})
-	if s.Gold() != 0 {
-		t.Errorf("top power 5: Gold = %d, want 0 (tie)", s.Gold())
+	if s.GoldCount() != 0 {
+		t.Errorf("top power 5: Gold = %d, want 0 (tie)", s.GoldCount())
 	}
 }
 
@@ -37,8 +37,8 @@ func TestTestOfStrength_LossNoGoldAndDocksValue(t *testing.T) {
 		s := sim.NewTurnStateFromCards([]card.Card{testutils.GenericAttack(0, power)}, nil)
 		valueBefore := s.Value()
 		sim.ResolveChainStep(s, s.Logger(), &card.CardState{Card: cards.TestOfStrengthRed{}})
-		if s.Gold() != 0 {
-			t.Errorf("top power %d: Gold = %d, want 0 (clash loss)", power, s.Gold())
+		if s.GoldCount() != 0 {
+			t.Errorf("top power %d: Gold = %d, want 0 (clash loss)", power, s.GoldCount())
 		}
 		if s.Value()-valueBefore != -1 {
 			t.Errorf("top power %d: Value delta = %d, want -1 (Clash loss costs 1)",
@@ -51,7 +51,7 @@ func TestTestOfStrength_LossNoGoldAndDocksValue(t *testing.T) {
 func TestTestOfStrength_EmptyDeckNoGold(t *testing.T) {
 	s := sim.NewTurnStateFromCards(nil, nil)
 	sim.ResolveChainStep(s, s.Logger(), &card.CardState{Card: cards.TestOfStrengthRed{}})
-	if s.Gold() != 0 {
-		t.Errorf("empty deck: Gold = %d, want 0 (clash fails)", s.Gold())
+	if s.GoldCount() != 0 {
+		t.Errorf("empty deck: Gold = %d, want 0 (clash fails)", s.GoldCount())
 	}
 }

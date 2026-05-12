@@ -10,5 +10,5 @@ import (
 
 // not implemented: next-sword-attack +1{p} grant (weapon chain not peeked)
 
-func (VisitTheBlacksmithBlue) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
+func (VisitTheBlacksmithBlue) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
 }

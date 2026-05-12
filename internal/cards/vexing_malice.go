@@ -11,14 +11,14 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
-func (VexingMaliceRed) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
-	s.DealArcaneDamage(l, self, 2)
+func (VexingMaliceRed) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+	g.DealArcaneDamage(l, self.Card.DisplayName(), 2)
 }
 
-func (VexingMaliceYellow) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
-	s.DealArcaneDamage(l, self, 2)
+func (VexingMaliceYellow) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+	g.DealArcaneDamage(l, self.Card.DisplayName(), 2)
 }
 
-func (VexingMaliceBlue) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
-	s.DealArcaneDamage(l, self, 2)
+func (VexingMaliceBlue) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+	g.DealArcaneDamage(l, self.Card.DisplayName(), 2)
 }

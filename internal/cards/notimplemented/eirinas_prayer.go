@@ -11,12 +11,12 @@ import (
 
 // not implemented: Instant prevent X arcane to your hero; X scaled by revealed top-card pitch
 
-func (EirinasPrayerRed) Play(s card.GameEngine, l card.Logger, self *card.CardState) {}
+func (EirinasPrayerRed) Play(g card.GameEngine, l card.Logger, self *card.CardState) {}
 
 // not implemented: Instant prevent X arcane to your hero; X scaled by revealed top-card pitch
 
-func (EirinasPrayerYellow) Play(s card.GameEngine, l card.Logger, self *card.CardState) {}
+func (EirinasPrayerYellow) Play(g card.GameEngine, l card.Logger, self *card.CardState) {}
 
 // not implemented: Instant prevent X arcane to your hero; X scaled by revealed top-card pitch
 
-func (EirinasPrayerBlue) Play(s card.GameEngine, l card.Logger, self *card.CardState) {}
+func (EirinasPrayerBlue) Play(g card.GameEngine, l card.Logger, self *card.CardState) {}

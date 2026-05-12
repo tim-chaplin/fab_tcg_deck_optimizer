@@ -4,7 +4,7 @@
 // Text: "Reduce to Runechant costs {r} less to play for each Runechant you control. Create a
 // Runechant token."
 //
-// Cost returns max(0, printed - s.Runechants()) at play time (card.VariableCost bounds [0, 1]).
+// Cost returns max(0, printed - g.RunechantCount()) at play time (card.VariableCost bounds [0, 1]).
 // Play creates one Runechant, crediting +1 at creation. Defense-reaction state is reset
 // between reactions so the token itself doesn't carry into next turn's carryover — only its
 // damage credit lands.
@@ -17,37 +17,37 @@ import (
 
 const reduceToRunechantPrintedCost = 1
 
-func reduceToRunechantCost(s card.GameEngine) int {
-	eff := reduceToRunechantPrintedCost - s.Runechants()
+func reduceToRunechantCost(g card.GameEngine) int {
+	eff := reduceToRunechantPrintedCost - g.RunechantCount()
 	if eff < 0 {
 		return 0
 	}
 	return eff
 }
 
-func (ReduceToRunechantRed) Cost(s card.GameEngine) int { return reduceToRunechantCost(s) }
+func (ReduceToRunechantRed) Cost(g card.GameEngine) int { return reduceToRunechantCost(g) }
 func (ReduceToRunechantRed) MinCost() int               { return 0 }
 func (ReduceToRunechantRed) MaxCost() int               { return reduceToRunechantPrintedCost }
 
-func (ReduceToRunechantRed) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
-	s.CreateRunechants(1)
+func (ReduceToRunechantRed) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+	g.CreateRunechants(1)
 	l.AppendPostTrigger(self.Card.DisplayName(), "Created a runechant", 1)
 }
 
-func (ReduceToRunechantYellow) Cost(s card.GameEngine) int { return reduceToRunechantCost(s) }
+func (ReduceToRunechantYellow) Cost(g card.GameEngine) int { return reduceToRunechantCost(g) }
 func (ReduceToRunechantYellow) MinCost() int               { return 0 }
 func (ReduceToRunechantYellow) MaxCost() int               { return reduceToRunechantPrintedCost }
 
-func (ReduceToRunechantYellow) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
-	s.CreateRunechants(1)
+func (ReduceToRunechantYellow) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+	g.CreateRunechants(1)
 	l.AppendPostTrigger(self.Card.DisplayName(), "Created a runechant", 1)
 }
 
-func (ReduceToRunechantBlue) Cost(s card.GameEngine) int { return reduceToRunechantCost(s) }
+func (ReduceToRunechantBlue) Cost(g card.GameEngine) int { return reduceToRunechantCost(g) }
 func (ReduceToRunechantBlue) MinCost() int               { return 0 }
 func (ReduceToRunechantBlue) MaxCost() int               { return reduceToRunechantPrintedCost }
 
-func (ReduceToRunechantBlue) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
-	s.CreateRunechants(1)
+func (ReduceToRunechantBlue) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+	g.CreateRunechants(1)
 	l.AppendPostTrigger(self.Card.DisplayName(), "Created a runechant", 1)
 }

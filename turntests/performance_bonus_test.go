@@ -21,8 +21,8 @@ func TestPerformanceBonus_OnHitCreatesGold(t *testing.T) {
 		t.Fatalf("Value = %d, want 1 (PB Blue power 1 hits)\nBestLine: %s",
 			state.Value, formatBestLine(state.BestLine))
 	}
-	if state.Gold() != 1 {
-		t.Fatalf("Gold = %d, want 1 (on-hit token)", state.Gold())
+	if state.GoldCount() != 1 {
+		t.Fatalf("Gold = %d, want 1 (on-hit token)", state.GoldCount())
 	}
 	_ = testutils.RedAttack{}
 }

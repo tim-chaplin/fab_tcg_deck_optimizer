@@ -9,18 +9,18 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
-func fateForeseenPlay(s card.GameEngine, l card.Logger, self *card.CardState) {
-	s.Opt(l, 1)
+func fateForeseenPlay(g card.GameEngine, l card.Logger, self *card.CardState) {
+	g.Opt(l, 1)
 }
 
-func (FateForeseenRed) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
-	fateForeseenPlay(s, l, self)
+func (FateForeseenRed) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+	fateForeseenPlay(g, l, self)
 }
 
-func (FateForeseenYellow) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
-	fateForeseenPlay(s, l, self)
+func (FateForeseenYellow) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+	fateForeseenPlay(g, l, self)
 }
 
-func (FateForeseenBlue) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
-	fateForeseenPlay(s, l, self)
+func (FateForeseenBlue) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+	fateForeseenPlay(g, l, self)
 }

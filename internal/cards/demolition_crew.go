@@ -19,9 +19,9 @@ import (
 // variants. The chain runner's hand snapshot has already removed the playing card and
 // popped this card's pitches by the time PlayPrecondition runs, so the scan only sees
 // cards that genuinely remain in hand.
-func demolitionCrewPrecondition(s card.GameEngine) bool {
-	for _, c := range s.Hand() {
-		if c.Cost(s) >= 2 {
+func demolitionCrewPrecondition(g card.GameEngine) bool {
+	for _, c := range g.Hand() {
+		if c.Cost(g) >= 2 {
 			return true
 		}
 	}
@@ -29,22 +29,22 @@ func demolitionCrewPrecondition(s card.GameEngine) bool {
 }
 
 func (DemolitionCrewRed) Dominate() {}
-func (DemolitionCrewRed) PlayPrecondition(s card.GameEngine, _ *card.CardState) bool {
-	return demolitionCrewPrecondition(s)
+func (DemolitionCrewRed) PlayPrecondition(g card.GameEngine, _ *card.CardState) bool {
+	return demolitionCrewPrecondition(g)
 }
-func (c DemolitionCrewRed) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
+func (c DemolitionCrewRed) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
 }
 
 func (DemolitionCrewYellow) Dominate() {}
-func (DemolitionCrewYellow) PlayPrecondition(s card.GameEngine, _ *card.CardState) bool {
-	return demolitionCrewPrecondition(s)
+func (DemolitionCrewYellow) PlayPrecondition(g card.GameEngine, _ *card.CardState) bool {
+	return demolitionCrewPrecondition(g)
 }
-func (c DemolitionCrewYellow) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
+func (c DemolitionCrewYellow) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
 }
 
 func (DemolitionCrewBlue) Dominate() {}
-func (DemolitionCrewBlue) PlayPrecondition(s card.GameEngine, _ *card.CardState) bool {
-	return demolitionCrewPrecondition(s)
+func (DemolitionCrewBlue) PlayPrecondition(g card.GameEngine, _ *card.CardState) bool {
+	return demolitionCrewPrecondition(g)
 }
-func (c DemolitionCrewBlue) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
+func (c DemolitionCrewBlue) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
 }

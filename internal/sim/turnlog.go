@@ -78,10 +78,10 @@ func BuildTurnLog(t TurnSummary, startingAuras []Aura, startingItems []Item) Tur
 	if line := endingArsenalLine(parts.arsenal); line != "" {
 		log.EndOfTurn = append(log.EndOfTurn, line)
 	}
-	if line := endingAurasLine(t.State.Auras, t.State.Runechants(), t.State.Ponders()); line != "" {
+	if line := endingAurasLine(t.State.Auras, t.State.RunechantCount(), t.State.PonderCount()); line != "" {
 		log.EndOfTurn = append(log.EndOfTurn, line)
 	}
-	if line := itemsLine(t.State.Gold(), t.State.Silver(), t.State.Copper()); line != "" {
+	if line := itemsLine(t.State.GoldCount(), t.State.SilverCount(), t.State.CopperCount()); line != "" {
 		log.EndOfTurn = append(log.EndOfTurn, line)
 	}
 

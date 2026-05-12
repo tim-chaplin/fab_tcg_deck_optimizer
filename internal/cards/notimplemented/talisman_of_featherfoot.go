@@ -12,5 +12,5 @@ import (
 // not implemented: self-destroys when an attack gains exactly +1{p} in the reaction step →
 // grants go again
 
-func (TalismanOfFeatherfootYellow) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
+func (TalismanOfFeatherfootYellow) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
 }

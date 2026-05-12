@@ -118,9 +118,9 @@ func TestBest_MauvrionReadNoCarryover(t *testing.T) {
 	if got.Value != 4 {
 		t.Errorf("Value = %d, want 4 (3 Read tokens + 1 Viserai token)", got.Value)
 	}
-	if got.State.Runechants() != 4 {
+	if got.State.RunechantCount() != 4 {
 		t.Errorf("leftover Runechants = %d, want 4 (non-attack action; no consumption)",
-			got.State.Runechants())
+			got.State.RunechantCount())
 	}
 }
 
@@ -130,8 +130,8 @@ func TestBest_MauvrionReadNoCarryover(t *testing.T) {
 func TestBest_MauvrionReadWithCarryover(t *testing.T) {
 	h := []card.Card{cards.MauvrionSkiesRed{}, cards.ReadTheRunesRed{}}
 	got := Best(heroes.Viserai{}, nil, h, Matchup{IncomingDamage: 0}, nil, NewTurnStateFromSpec(TurnStateSpec{Auras: withRunechants(1)}))
-	if got.State.Runechants() != 5 {
-		t.Errorf("leftover Runechants = %d, want 5 (1 carryover + 4 created)", got.State.Runechants())
+	if got.State.RunechantCount() != 5 {
+		t.Errorf("leftover Runechants = %d, want 5 (1 carryover + 4 created)", got.State.RunechantCount())
 	}
 }
 
@@ -143,8 +143,8 @@ func TestBest_AetherSlashAloneConsumesCarryover(t *testing.T) {
 	if got.Value != 3 {
 		t.Errorf("Value = %d, want 3 (Reaping Blade attack; carryover consumed without credit)", got.Value)
 	}
-	if got.State.Runechants() != 0 {
-		t.Errorf("leftover Runechants = %d, want 0 (weapon swing consumed the carryover)", got.State.Runechants())
+	if got.State.RunechantCount() != 0 {
+		t.Errorf("leftover Runechants = %d, want 0 (weapon swing consumed the carryover)", got.State.RunechantCount())
 	}
 }
 
@@ -158,9 +158,9 @@ func TestBest_BlessingOfOccultTokensDoNotAffectSameTurnChain(t *testing.T) {
 	if got.Value != 0 {
 		t.Errorf("Value = %d, want 0 (Malefic needs an attack action to fire; Blessing is deferred)", got.Value)
 	}
-	if got.State.Runechants() != 0 {
+	if got.State.RunechantCount() != 0 {
 		t.Errorf("leftover Runechants = %d, want 0 (Blessing's runes materialise via start-of-turn trigger, not carryover)",
-			got.State.Runechants())
+			got.State.RunechantCount())
 	}
 }
 
@@ -227,7 +227,7 @@ func TestBest_CarryoverFeedsDiscount(t *testing.T) {
 	if got.Value != 6 {
 		t.Errorf("carryover=3: Value = %d, want 6 (Attack only; carryover tokens don't re-credit)", got.Value)
 	}
-	if got.State.Runechants() != 0 {
-		t.Errorf("carryover=3: leftover Runechants = %d, want 0 (attack consumes tokens)", got.State.Runechants())
+	if got.State.RunechantCount() != 0 {
+		t.Errorf("carryover=3: leftover Runechants = %d, want 0 (attack consumes tokens)", got.State.RunechantCount())
 	}
 }

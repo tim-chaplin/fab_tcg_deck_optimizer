@@ -10,19 +10,19 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
-func publicBountyPlay(s card.GameEngine, l card.Logger, self *card.CardState, n int) {
-	s.SetOpponentMarked(true)
-	GrantNextCardBonusAttack(s, n, IsAttack)
+func publicBountyPlay(g card.GameEngine, l card.Logger, self *card.CardState, n int) {
+	g.MarkOpponent()
+	GrantNextCardBonusAttack(g, n, IsAttack)
 }
 
-func (PublicBountyRed) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
-	publicBountyPlay(s, l, self, 3)
+func (PublicBountyRed) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+	publicBountyPlay(g, l, self, 3)
 }
 
-func (PublicBountyYellow) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
-	publicBountyPlay(s, l, self, 2)
+func (PublicBountyYellow) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+	publicBountyPlay(g, l, self, 2)
 }
 
-func (PublicBountyBlue) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
-	publicBountyPlay(s, l, self, 1)
+func (PublicBountyBlue) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+	publicBountyPlay(g, l, self, 1)
 }

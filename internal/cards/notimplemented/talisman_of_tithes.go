@@ -12,4 +12,4 @@ import (
 // not implemented: self-destroys on an opposing draw during your action phase → opponent draws
 // minus 1
 
-func (TalismanOfTithesBlue) Play(s card.GameEngine, l card.Logger, self *card.CardState) {}
+func (TalismanOfTithesBlue) Play(g card.GameEngine, l card.Logger, self *card.CardState) {}

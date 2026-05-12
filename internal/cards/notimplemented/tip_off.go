@@ -11,15 +11,15 @@ import (
 
 // not implemented: instant discard-to-mark activation
 
-func (c TipOffRed) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
+func (c TipOffRed) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
 }
 
 // not implemented: instant discard-to-mark activation
 
-func (c TipOffYellow) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
+func (c TipOffYellow) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
 }
 
 // not implemented: instant discard-to-mark activation
 
-func (c TipOffBlue) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
+func (c TipOffBlue) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
 }

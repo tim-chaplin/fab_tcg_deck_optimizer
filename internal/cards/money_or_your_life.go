@@ -12,27 +12,27 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
-func moneyOrYourLifeOnHit(s card.GameEngine, l card.Logger, self *card.CardState, _ *card.OnHitHandler) {
+func moneyOrYourLifeOnHit(g card.GameEngine, l card.Logger, self *card.CardState, _ *card.OnHitHandler) {
 	n := 2
-	if s.CurrentHeroClass() == card.TypeThief {
+	if g.CurrentHeroClass() == card.TypeThief {
 		n = 4
 	}
-	s.AddValue(n)
+	g.AddValue(n)
 	l.AppendPostTriggerf(self.Card.DisplayName(), n, "On-hit dealt %d (opponent surrendered no Gold)", n)
 }
 
-func moneyOrYourLifePlay(s card.GameEngine, l card.Logger, self *card.CardState) {
+func moneyOrYourLifePlay(g card.GameEngine, l card.Logger, self *card.CardState) {
 	self.RegisterOnHit(moneyOrYourLifeOnHit)
 }
 
-func (MoneyOrYourLifeRed) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
-	moneyOrYourLifePlay(s, l, self)
+func (MoneyOrYourLifeRed) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+	moneyOrYourLifePlay(g, l, self)
 }
 
-func (MoneyOrYourLifeYellow) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
-	moneyOrYourLifePlay(s, l, self)
+func (MoneyOrYourLifeYellow) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+	moneyOrYourLifePlay(g, l, self)
 }
 
-func (MoneyOrYourLifeBlue) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
-	moneyOrYourLifePlay(s, l, self)
+func (MoneyOrYourLifeBlue) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+	moneyOrYourLifePlay(g, l, self)
 }

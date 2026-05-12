@@ -10,24 +10,21 @@ import (
 
 // --- Aura helpers ---
 
-// banishAuraFromGraveyard banishes the first aura-typed card in the graveyard, flips
-// ArcaneDamageDealt, and returns 1. Returns 0 when no aura is found. Callers that also
-// destroy the source card (e.g. Sigil of Silphidae's leave trigger) should run this scan
-// BEFORE AddToGraveyard'ing the source so the printed "another aura" restriction is
-// satisfied naturally. Routes through s.BanishFromGraveyard so the cacheable bit flips —
-// reading the graveyard contents (which may include cards from prior turns) makes the
-// chain output depend on hidden state. Each caller owns its own AddValue + LogRider
-// because the printed wording differs ("Banished an aura, dealt 1 arcane damage").
-func banishAuraFromGraveyard(s card.GameEngine) int {
-	if _, ok := s.BanishFromGraveyard(func(c card.Card) bool {
+// banishAuraFromGraveyard banishes the first aura-typed card in the graveyard and, on
+// success, deals 1 arcane damage from source via g.DealArcaneDamage — which credits
+// value, flips ArcaneDamageDealt when the hit lands, and logs the "Dealt 1 arcane damage"
+// rider under source. Returns true when an aura was banished, false when graveyard had
+// no aura. Callers that also destroy the source card (e.g. Sigil of Silphidae's leave
+// trigger) should run this scan BEFORE AddToGraveyard'ing the source so the printed
+// "another aura" restriction is satisfied naturally.
+func banishAuraFromGraveyard(g card.GameEngine, l card.Logger, source string) bool {
+	if _, ok := g.BanishFromGraveyard(func(c card.Card) bool {
 		return c.Types(nil).Has(card.TypeAura)
 	}); !ok {
-		return 0
+		return false
 	}
-	if s.LikelyDamageHits(1, false) {
-		s.SetArcaneDamageDealt(true)
-	}
-	return 1
+	g.DealArcaneDamage(l, source, 1)
+	return true
 }
 
 // --- Fragile-aura helpers ---
@@ -39,12 +36,12 @@ func banishAuraFromGraveyard(s card.GameEngine) int {
 // fragileAuraPlay emits the chain step for a fragile-aura card and writes the expected
 // payoff as a sub-line under self when fragileAuraValue is non-zero. Auras have Attack=0,
 // so LogPlay carries the chain entry; the rider line carries the predicted value.
-func fragileAuraPlay(s card.GameEngine, l card.Logger, self *card.CardState, n int, attackActionOnly bool) {
-	v := fragileAuraValue(s, n, attackActionOnly)
+func fragileAuraPlay(g card.GameEngine, l card.Logger, self *card.CardState, n int, attackActionOnly bool) {
+	v := fragileAuraValue(g, n, attackActionOnly)
 	if v <= 0 {
 		return
 	}
-	s.AddValue(v)
+	g.AddValue(v)
 	l.AppendPostTriggerf(self.Card.DisplayName(), v, "Aura expected to pay %d runechants", v)
 }
 
@@ -54,11 +51,11 @@ func fragileAuraPlay(s card.GameEngine, l card.Logger, self *card.CardState, n i
 //
 // attackActionOnly gates the same-turn-pop check. Triggers restricted to "attack action
 // card" pass true (weapon swings don't qualify); triggers off any damage source pass false.
-func fragileAuraValue(s card.GameEngine, n int, attackActionOnly bool) int {
-	if popsThisTurn(s, attackActionOnly) {
+func fragileAuraValue(g card.GameEngine, n int, attackActionOnly bool) int {
+	if popsThisTurn(g, attackActionOnly) {
 		return n
 	}
-	if s.BlockTotal() >= s.IncomingDamage() {
+	if g.BlockTotal() >= g.IncomingDamage() {
 		return n
 	}
 	return 0
@@ -74,18 +71,18 @@ func fragileAuraValue(s card.GameEngine, n int, attackActionOnly bool) int {
 // damage from aura tokens, not a card attack — Dominate is an attack-keyword and doesn't
 // apply. The attacker-power check threads pc.EffectiveDominate() so a target with printed
 // (or granted) Dominate clears the 5+ bar.
-func popsThisTurn(s card.GameEngine, attackActionOnly bool) bool {
+func popsThisTurn(g card.GameEngine, attackActionOnly bool) bool {
 	firstAttacker := true
-	for _, pc := range s.CardsRemaining() {
+	for _, pc := range g.CardsRemaining() {
 		if !qualifiesAsAttacker(pc.Card, attackActionOnly) {
 			continue
 		}
 		runechants := 0
 		if firstAttacker {
-			runechants = s.Runechants()
+			runechants = g.RunechantCount()
 			firstAttacker = false
 		}
-		if s.LikelyToHit(pc) || s.LikelyDamageHits(runechants, false) {
+		if g.LikelyToHit(pc) || g.LikelyDamageHits(runechants, false) {
 			return true
 		}
 	}
@@ -103,8 +100,8 @@ func qualifiesAsAttacker(c card.Card, attackActionOnly bool) bool {
 // --- Mark helpers ---
 
 // markOpponentOnHit fires the printed "When this hits a hero, mark them" rider.
-func markOpponentOnHit(s card.GameEngine, l card.Logger, self *card.CardState, _ *card.OnHitHandler) {
-	s.SetOpponentMarked(true)
+func markOpponentOnHit(g card.GameEngine, l card.Logger, self *card.CardState, _ *card.OnHitHandler) {
+	g.MarkOpponent()
 	l.AppendPostTrigger(self.Card.DisplayName(), "Marked the opposing hero", 0)
 }
 
@@ -116,9 +113,9 @@ func markOpponentOnHit(s card.GameEngine, l card.Logger, self *card.CardState, _
 // EffectiveAttack folds the bonus into LikelyToHit. Fizzles silently when no qualifying
 // target follows. Pass match as a top-level function value to keep the call alloc-free —
 // closures capturing s would escape to the heap.
-func GrantNextCardBonusAttack(s card.GameEngine, n int, match func(card.GameEngine, *card.CardState) bool) {
-	for _, pc := range s.CardsRemaining() {
-		if match(s, pc) {
+func GrantNextCardBonusAttack(g card.GameEngine, n int, match func(card.GameEngine, *card.CardState) bool) {
+	for _, pc := range g.CardsRemaining() {
+		if match(g, pc) {
 			pc.BonusAttack += n
 			return
 		}
@@ -141,6 +138,6 @@ func IsAttackAction(_ card.GameEngine, pc *card.CardState) bool {
 // "your next Runeblade attack" wording. Engine threaded through so Universal cards
 // fold the active hero's class into their Types — Wage Gold under Viserai then
 // matches TypeRuneblade.
-func IsRunebladeAttack(s card.GameEngine, pc *card.CardState) bool {
-	return pc.Card.Types(s).IsRunebladeAttack()
+func IsRunebladeAttack(g card.GameEngine, pc *card.CardState) bool {
+	return pc.Card.Types(g).IsRunebladeAttack()
 }

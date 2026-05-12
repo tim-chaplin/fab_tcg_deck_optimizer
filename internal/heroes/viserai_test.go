@@ -60,15 +60,15 @@ func (stubNonRuneblade) Play(card.GameEngine, card.Logger, *card.CardState) {}
 func TestViserai_RunebladeAfterNonAttackActionTriggers(t *testing.T) {
 	// Non-attack action played first, then a Runeblade attack. Viserai's OnCardPlayed creates a
 	// Runechant token: returns +1 damage (each token credited +1 at creation) and leaves a
-	// token on state.Runechants() for downstream consume or carryover. NonAttackActionPlayed is
+	// token on state.RunechantCount() for downstream consume or carryover. NonAttackActionPlayed is
 	// maintained by the attack-chain driver as non-attack actions resolve; callers must set it
 	// when seeding a TurnState for trigger checks.
 	s := sim.NewTurnStateFromSpec(sim.TurnStateSpec{CardsPlayed: []card.Card{stubRuneAura{}}, NonAttackActionPlayed: true})
 	if got := (Viserai{}).OnCardPlayed(stubRuneAttack{}, &s, s.Logger()); got != 1 {
 		t.Fatalf("expected +1 damage from OnCardPlayed, got %d", got)
 	}
-	if s.Runechants() != 1 {
-		t.Fatalf("expected 1 Runechant on state, got %d", s.Runechants())
+	if s.RunechantCount() != 1 {
+		t.Fatalf("expected 1 Runechant on state, got %d", s.RunechantCount())
 	}
 }
 

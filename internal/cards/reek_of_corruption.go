@@ -14,8 +14,8 @@ import (
 
 // reekOfCorruptionApplyRider registers the on-hit discard rider when the aura
 // precondition is satisfied.
-func reekOfCorruptionApplyRider(s card.GameEngine, l card.Logger, self *card.CardState) {
-	if !s.HasPlayedOrCreatedAura() {
+func reekOfCorruptionApplyRider(g card.GameEngine, l card.Logger, self *card.CardState) {
+	if !g.AuraCreated() {
 		return
 	}
 	self.RegisterOnHit(reekOfCorruptionOnHit)
@@ -23,19 +23,19 @@ func reekOfCorruptionApplyRider(s card.GameEngine, l card.Logger, self *card.Car
 
 // reekOfCorruptionOnHit fires the conditional "When this hits a hero, they discard a card"
 // rider. Top-level so registration stays alloc-free.
-func reekOfCorruptionOnHit(s card.GameEngine, l card.Logger, self *card.CardState, _ *card.OnHitHandler) {
-	v := s.OpponentDiscard(1)
+func reekOfCorruptionOnHit(g card.GameEngine, l card.Logger, self *card.CardState, _ *card.OnHitHandler) {
+	v := g.OpponentDiscard(1)
 	l.AppendPostTrigger(self.Card.DisplayName(), "On-hit discarded a card", v)
 }
 
-func (ReekOfCorruptionRed) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
-	reekOfCorruptionApplyRider(s, l, self)
+func (ReekOfCorruptionRed) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+	reekOfCorruptionApplyRider(g, l, self)
 }
 
-func (ReekOfCorruptionYellow) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
-	reekOfCorruptionApplyRider(s, l, self)
+func (ReekOfCorruptionYellow) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+	reekOfCorruptionApplyRider(g, l, self)
 }
 
-func (ReekOfCorruptionBlue) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
-	reekOfCorruptionApplyRider(s, l, self)
+func (ReekOfCorruptionBlue) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+	reekOfCorruptionApplyRider(g, l, self)
 }

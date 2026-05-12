@@ -10,4 +10,4 @@ import (
 
 // not implemented: freeze/unfreeze
 
-func (TitForTatBlue) Play(s card.GameEngine, l card.Logger, self *card.CardState) {}
+func (TitForTatBlue) Play(g card.GameEngine, l card.Logger, self *card.CardState) {}

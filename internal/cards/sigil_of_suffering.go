@@ -16,21 +16,21 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
-func sigilOfSufferingPlay(s card.GameEngine, l card.Logger, self *card.CardState) {
-	if s.ArcaneDamageDealt() || s.LikelyDamageHits(1, false) {
+func sigilOfSufferingPlay(g card.GameEngine, l card.Logger, self *card.CardState) {
+	if g.ArcaneDamageDealt() || g.LikelyDamageHits(1, false) {
 		self.BonusDefense++
 	}
-	s.DealArcaneDamage(l, self, 1)
+	g.DealArcaneDamage(l, self.Card.DisplayName(), 1)
 }
 
-func (SigilOfSufferingRed) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
-	sigilOfSufferingPlay(s, l, self)
+func (SigilOfSufferingRed) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+	sigilOfSufferingPlay(g, l, self)
 }
 
-func (SigilOfSufferingYellow) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
-	sigilOfSufferingPlay(s, l, self)
+func (SigilOfSufferingYellow) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+	sigilOfSufferingPlay(g, l, self)
 }
 
-func (SigilOfSufferingBlue) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
-	sigilOfSufferingPlay(s, l, self)
+func (SigilOfSufferingBlue) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+	sigilOfSufferingPlay(g, l, self)
 }
