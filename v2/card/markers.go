@@ -15,20 +15,20 @@ type VariableCost interface {
 	MaxCost() int
 }
 
-// ModalCard is the marker for "Choose 1" cards. Modes returns the number of exclusive
+// Modal is the marker for "Choose 1" cards. Modes returns the number of exclusive
 // modes (typically 2); the chain runner enumerates 0..Modes()-1 per ordering and cards
 // dispatch on self.Mode inside Play. Modes that are no-ops for the current state should
 // resolve as zero-Value no-ops so the runner picks a sibling mode that contributes
 // more. See docs/dev-standards.md `Modal "Choose 1" cards` for the wiring contract.
-type ModalCard interface {
+type Modal interface {
 	Modes() int
 }
 
-// ModalCost is an optional add-on to ModalCard for cards whose resource cost varies
+// ModalCost is an optional add-on to Modal for cards whose resource cost varies
 // by mode (Bluster Buff: "this gets -1{p} unless you pay {r}" — mode 0 is the printed
 // cost, mode 1 spends one more {r}). Implementers return the cost paid when self.Mode
 // equals the given mode index. The chain runner reads ModalCost in place of
-// Card.Cost(g) when the card declares both ModalCard and ModalCost, and folds min/max
+// Card.Cost(g) when the card declares both Modal and ModalCost, and folds min/max
 // of the per-mode costs into the partition pre-screen via VariableCost.
 type ModalCost interface {
 	ModalCost(mode int8) int
@@ -45,15 +45,6 @@ type PlayPrecondition interface {
 	PlayPrecondition(g GameEngine, self *CardState) bool
 }
 
-// LowerHealthWanter is a Hero marker. Heroes whose strategy revolves around staying at
-// lower {h} than their opponent (deck building, sandbagging, self-damage) opt in. Cards
-// with a "less {h} than an opposing hero" rider assume the clause always fires for these
-// heroes and never fires for anyone else — a coarse proxy that skips per-turn life
-// tracking.
-type LowerHealthWanter interface {
-	WantsLowerHealth()
-}
-
 // Blocker is an optional interface for plain-block cards that need to react to other
 // defenders before contributing their block. The chain runner calls Block on every plain
 // blocker that implements it, with g.Defenders() populated with the partition's full
@@ -65,7 +56,7 @@ type Blocker interface {
 	Block(g GameEngine, l Logger, self *CardState)
 }
 
-// BlockCost is an optional add-on for ModalCard Blockers whose block-time bonus comes
+// BlockCost is an optional add-on for Modal Blockers whose block-time bonus comes
 // with a per-mode resource cost (Brothers in Arms: "may pay {r} for +2{d}"). The chain
 // runner enumerates each modal blocker's modes whose cost fits the partition's spare
 // defense budget (defendBudget − drCost) and picks the one that yields the highest
@@ -85,4 +76,27 @@ type BlockCost interface {
 // docs/dev-standards.md: DefensiveInstant markers.
 type DefensiveInstant interface {
 	DefensiveInstant()
+}
+
+// Dominator is the marker the Dominate keyword maps to. CardState.EffectiveDominate
+// ORs it with GrantedDominate to decide whether the attack credits the "can't over-block"
+// bump.
+type Dominator interface {
+	Dominate()
+}
+
+// ArsenalDefenseBonus is the marker CardState.EffectiveDefense consults when this copy
+// came from the arsenal slot. Returns the additional defense added to Defense() in that
+// case. Defense() itself stays the printed value so the hand-played path is unaffected.
+type ArsenalDefenseBonus interface {
+	ArsenalDefenseBonus() int
+}
+
+// Universal is the marker for cards whose printed type-line is "extended" by the active
+// hero's class — Wage Gold's "Universal" keyword reads as "this counts as the hero's
+// class for class-gated triggers" (Viserai's Runeblade trigger fires on a Universal
+// Wage Gold). Universal cards ask the engine for the active hero's class inside their
+// own Types(g) body.
+type Universal interface {
+	Universal()
 }

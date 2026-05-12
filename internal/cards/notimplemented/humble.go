@@ -12,15 +12,15 @@ import (
 
 // not implemented: hero-ability suppression rider
 
-func (HumbleRed) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
+func (HumbleRed) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
 }
 
 // not implemented: hero-ability suppression rider
 
-func (HumbleYellow) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
+func (HumbleYellow) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
 }
 
 // not implemented: hero-ability suppression rider
 
-func (HumbleBlue) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
+func (HumbleBlue) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
 }

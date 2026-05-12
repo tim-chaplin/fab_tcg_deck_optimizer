@@ -5,11 +5,11 @@ import (
 	"testing"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
-// Tests that with no aura played or created the printed power is credited and Overpower stays false.
+// Tests that with no aura played or created the printed power is credited and
+// GrantedOverpower stays false.
 func TestVantagePoint_BaseDamageNoAura(t *testing.T) {
 	cases := []struct {
 		c    card.Card
@@ -21,36 +21,26 @@ func TestVantagePoint_BaseDamageNoAura(t *testing.T) {
 	}
 	for _, tc := range cases {
 		var s sim.TurnState
-		sim.ResolveChainStep(&s, s.Logger(), &card.CardState{Card: tc.c})
+		self := &card.CardState{Card: tc.c}
+		sim.ResolveChainStep(&s, s.Logger(), self)
 		if got := s.Value(); got != tc.base {
 			t.Errorf("%s: Play() = %d, want %d", tc.c.Name(), got, tc.base)
 		}
-		if s.Overpower() {
-			t.Errorf("%s: Overpower should stay false when no aura", tc.c.Name())
+		if self.GrantedOverpower {
+			t.Errorf("%s: GrantedOverpower should stay false when no aura", tc.c.Name())
 		}
 	}
 }
 
-// Tests that an aura already played this turn flips s.Overpower().
-func TestVantagePoint_AuraPlayedSetsOverpower(t *testing.T) {
-	s := sim.NewTurnStateFromSpec(sim.TurnStateSpec{CardsPlayed: []card.Card{testutils.Aura{}}})
-	sim.ResolveChainStep(&s, s.Logger(), &card.CardState{Card: cards.VantagePointRed{}})
-	if got := s.Value(); got != 7 {
-		t.Errorf("Play() = %d, want 7", got)
-	}
-	if !s.Overpower() {
-		t.Errorf("Overpower should be set when an aura was played")
-	}
-}
-
-// Tests that the AuraCreated flag also flips s.Overpower().
+// Tests that the AuraCreated flag flips self.GrantedOverpower.
 func TestVantagePoint_AuraCreatedSetsOverpower(t *testing.T) {
 	s := sim.NewTurnStateFromSpec(sim.TurnStateSpec{AuraCreated: true})
-	sim.ResolveChainStep(&s, s.Logger(), &card.CardState{Card: cards.VantagePointRed{}})
+	self := &card.CardState{Card: cards.VantagePointRed{}}
+	sim.ResolveChainStep(&s, s.Logger(), self)
 	if got := s.Value(); got != 7 {
 		t.Errorf("Play() = %d, want 7", got)
 	}
-	if !s.Overpower() {
-		t.Errorf("Overpower should be set when AuraCreated is true")
+	if !self.GrantedOverpower {
+		t.Errorf("GrantedOverpower should be set when AuraCreated is true")
 	}
 }

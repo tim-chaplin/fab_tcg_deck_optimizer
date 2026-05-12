@@ -8,8 +8,8 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
-func (SigilOfSolaceRed) Play(s card.GameEngine, l card.Logger, self *card.CardState) {}
+func (SigilOfSolaceRed) Play(g card.GameEngine, l card.Logger, self *card.CardState) {}
 
-func (SigilOfSolaceYellow) Play(s card.GameEngine, l card.Logger, self *card.CardState) {}
+func (SigilOfSolaceYellow) Play(g card.GameEngine, l card.Logger, self *card.CardState) {}
 
-func (SigilOfSolaceBlue) Play(s card.GameEngine, l card.Logger, self *card.CardState) {}
+func (SigilOfSolaceBlue) Play(g card.GameEngine, l card.Logger, self *card.CardState) {}

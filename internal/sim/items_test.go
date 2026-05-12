@@ -12,8 +12,8 @@ func TestGoldAbility_PlaysDecrementsAndDestroys(t *testing.T) {
 	s := NewTurnStateFromCards([]card.Card{FakeRedAttack{}}, nil)
 	s.Items = []Item{NewGoldItem(1)}
 	ResolveChainStep(s, s.Logger(), &card.CardState{Card: GoldTokenAbility{}})
-	if s.Gold() != 0 {
-		t.Fatalf("Gold = %d after spending the only token, want 0", s.Gold())
+	if s.GoldCount() != 0 {
+		t.Fatalf("Gold = %d after spending the only token, want 0", s.GoldCount())
 	}
 	if len(s.Items) != 0 {
 		t.Fatalf("Items still has %d entries after destroy, want 0", len(s.Items))
@@ -28,8 +28,8 @@ func TestGoldAbility_PlayDecrementsCountWhenMultiple(t *testing.T) {
 	s := NewTurnStateFromCards([]card.Card{FakeRedAttack{}}, nil)
 	s.Items = []Item{NewGoldItem(3)}
 	ResolveChainStep(s, s.Logger(), &card.CardState{Card: GoldTokenAbility{}})
-	if s.Gold() != 2 {
-		t.Fatalf("Gold = %d after spending 1 of 3, want 2", s.Gold())
+	if s.GoldCount() != 2 {
+		t.Fatalf("Gold = %d after spending 1 of 3, want 2", s.GoldCount())
 	}
 }
 
@@ -38,8 +38,8 @@ func TestSilverAbility_PlaysDecrementsAndDestroys(t *testing.T) {
 	s := NewTurnStateFromCards([]card.Card{FakeRedAttack{}}, nil)
 	s.Items = []Item{NewSilverItem(1)}
 	ResolveChainStep(s, s.Logger(), &card.CardState{Card: SilverTokenAbility{}})
-	if s.Silver() != 0 {
-		t.Fatalf("Silver = %d after spending the only token, want 0", s.Silver())
+	if s.SilverCount() != 0 {
+		t.Fatalf("Silver = %d after spending the only token, want 0", s.SilverCount())
 	}
 	if len(s.Items) != 0 {
 		t.Fatalf("Items still has %d entries after destroy, want 0", len(s.Items))
@@ -54,8 +54,8 @@ func TestCopperAbility_PlaysDecrementsAndDestroys(t *testing.T) {
 	s := NewTurnStateFromCards([]card.Card{FakeRedAttack{}}, nil)
 	s.Items = []Item{NewCopperItem(1)}
 	ResolveChainStep(s, s.Logger(), &card.CardState{Card: CopperTokenAbility{}})
-	if s.Copper() != 0 {
-		t.Fatalf("Copper = %d after spending the only token, want 0", s.Copper())
+	if s.CopperCount() != 0 {
+		t.Fatalf("Copper = %d after spending the only token, want 0", s.CopperCount())
 	}
 	if len(s.Items) != 0 {
 		t.Fatalf("Items still has %d entries after destroy, want 0", len(s.Items))
@@ -71,11 +71,11 @@ func TestCreateSilverCopper_BumpsExistingEntry(t *testing.T) {
 	s.CreateSilver(2)
 	s.CreateSilver(1)
 	s.CreateCopper(1)
-	if s.Silver() != 3 {
-		t.Errorf("Silver = %d, want 3 (2 + 1 consolidated)", s.Silver())
+	if s.SilverCount() != 3 {
+		t.Errorf("Silver = %d, want 3 (2 + 1 consolidated)", s.SilverCount())
 	}
-	if s.Copper() != 1 {
-		t.Errorf("Copper = %d, want 1", s.Copper())
+	if s.CopperCount() != 1 {
+		t.Errorf("Copper = %d, want 1", s.CopperCount())
 	}
 	if got := len(s.Items); got != 2 {
 		t.Errorf("Items entries = %d, want 2 (one Silver + one Copper)", got)

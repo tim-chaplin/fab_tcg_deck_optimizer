@@ -6,4 +6,4 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
-func (TitaniumBaubleBlue) Play(s card.GameEngine, l card.Logger, self *card.CardState) {}
+func (TitaniumBaubleBlue) Play(g card.GameEngine, l card.Logger, self *card.CardState) {}

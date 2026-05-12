@@ -40,7 +40,7 @@ func TestShrillOfSkullform_AuraBonus(t *testing.T) {
 		{cards.ShrillOfSkullformBlue{}, 5},
 	}
 	for _, tc := range cases {
-		s := sim.NewTurnStateFromSpec(sim.TurnStateSpec{CardsPlayed: []card.Card{testutils.Aura{}}})
+		s := sim.NewTurnStateFromSpec(sim.TurnStateSpec{CardsPlayed: []card.Card{testutils.Aura{}}, AuraCreated: true})
 		sim.ResolveChainStep(&s, s.Logger(), &card.CardState{Card: tc.c})
 		got := s.Value()
 		if got != tc.want {

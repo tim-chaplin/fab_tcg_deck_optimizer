@@ -9,5 +9,5 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
-func (ShatterSorceryBlue) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
+func (ShatterSorceryBlue) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
 }

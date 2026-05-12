@@ -35,7 +35,7 @@ func TestRuneragerSwarm_NoAuraNoGoAgain(t *testing.T) {
 func TestRuneragerSwarm_AuraPlayedGrantsGoAgain(t *testing.T) {
 	// An aura in CardsPlayed satisfies the "played an aura this turn" condition.
 	for _, c := range []card.Card{cards.RuneragerSwarmRed{}, cards.RuneragerSwarmYellow{}, cards.RuneragerSwarmBlue{}} {
-		s := sim.NewTurnStateFromSpec(sim.TurnStateSpec{CardsPlayed: []card.Card{testutils.Aura{}}})
+		s := sim.NewTurnStateFromSpec(sim.TurnStateSpec{CardsPlayed: []card.Card{testutils.Aura{}}, AuraCreated: true})
 		self := &card.CardState{Card: c}
 		sim.ResolveChainStep(&s, s.Logger(), self)
 		if !self.GrantedGoAgain {

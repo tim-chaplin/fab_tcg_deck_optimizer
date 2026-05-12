@@ -28,8 +28,8 @@ func TestMaleficIncantation_PlayRegistersAttackActionTrigger(t *testing.T) {
 		if !s.AuraCreated() {
 			t.Errorf("%s: AuraCreated should be set", tc.c.Name())
 		}
-		if s.Runechants() != 0 {
-			t.Errorf("%s: Runechants = %d, want 0 (trigger not yet fired)", tc.c.Name(), s.Runechants())
+		if s.RunechantCount() != 0 {
+			t.Errorf("%s: Runechants = %d, want 0 (trigger not yet fired)", tc.c.Name(), s.RunechantCount())
 		}
 		if len(s.Auras()) != 1 {
 			t.Fatalf("%s: Auras len = %d, want 1", tc.c.Name(), len(s.Auras()))
@@ -60,8 +60,8 @@ func TestMaleficIncantation_HandlerCreatesOneRunechantPerFire(t *testing.T) {
 		if chain.Value() != 1 {
 			t.Errorf("%s: handler Value = %d, want 1", c.Name(), chain.Value())
 		}
-		if chain.Runechants() != 1 {
-			t.Errorf("%s: Runechants = %d, want 1 (handler creates one live rune)", c.Name(), chain.Runechants())
+		if chain.RunechantCount() != 1 {
+			t.Errorf("%s: Runechants = %d, want 1 (handler creates one live rune)", c.Name(), chain.RunechantCount())
 		}
 	}
 }

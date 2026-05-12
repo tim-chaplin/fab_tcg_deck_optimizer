@@ -27,7 +27,7 @@ type triggerCtx struct {
 	t *Trigger
 }
 
-func (c *triggerCtx) SourceName() string {
+func (c *triggerCtx) CardName() string {
 	if c.t.Source != nil {
 		return c.t.Source.DisplayName()
 	}

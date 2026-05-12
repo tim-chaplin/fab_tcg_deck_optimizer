@@ -12,28 +12,28 @@ import (
 
 // drawOneAtEndOfTurn is the end-of-turn TriggerHandler that fires Strategic Planning's
 // deferred draw. Top-level so the registration stays alloc-free.
-func drawOneAtEndOfTurn(s card.GameEngine, l card.Logger, _ card.Trigger) {
-	s.DrawOne()
+func drawOneAtEndOfTurn(g card.GameEngine, l card.Logger, _ card.Trigger) {
+	g.DrawOne()
 }
 
-func strategicPlanningPlay(s card.GameEngine, l card.Logger, self *card.CardState) {
-	if _, ok := s.RecycleFromGraveyardToBottom(func(c card.Card) bool {
-		return c.Types(nil).Has(card.TypeAction) && c.Cost(s) <= 2
+func strategicPlanningPlay(g card.GameEngine, l card.Logger, self *card.CardState) {
+	if _, ok := g.RecycleFromGraveyardToBottom(func(c card.Card) bool {
+		return c.Types(nil).Has(card.TypeAction) && c.Cost(g) <= 2
 	}); ok {
 		l.AppendPostTrigger(self.Card.DisplayName(), "Recycled an action card to bottom of deck", 0)
 	}
-	s.AddEndOfTurnTrigger(self, drawOneAtEndOfTurn)
+	g.AddEndOfTurnTrigger(self, drawOneAtEndOfTurn)
 	l.AppendPostTrigger(self.Card.DisplayName(), "End-phase draw queued", 0)
 }
 
-func (StrategicPlanningRed) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
-	strategicPlanningPlay(s, l, self)
+func (StrategicPlanningRed) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+	strategicPlanningPlay(g, l, self)
 }
 
-func (StrategicPlanningYellow) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
-	strategicPlanningPlay(s, l, self)
+func (StrategicPlanningYellow) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+	strategicPlanningPlay(g, l, self)
 }
 
-func (StrategicPlanningBlue) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
-	strategicPlanningPlay(s, l, self)
+func (StrategicPlanningBlue) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+	strategicPlanningPlay(g, l, self)
 }

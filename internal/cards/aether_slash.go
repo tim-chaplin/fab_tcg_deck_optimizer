@@ -12,24 +12,24 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
-func (AetherSlashRed) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
-	aetherSlashApplyRider(s, l, self)
+func (AetherSlashRed) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+	aetherSlashApplyRider(g, l, self)
 }
 
-func (AetherSlashYellow) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
-	aetherSlashApplyRider(s, l, self)
+func (AetherSlashYellow) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+	aetherSlashApplyRider(g, l, self)
 }
 
-func (AetherSlashBlue) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
-	aetherSlashApplyRider(s, l, self)
+func (AetherSlashBlue) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+	aetherSlashApplyRider(g, l, self)
 }
 
 // aetherSlashApplyRider deals 1 arcane and emits the rider sub-line when a non-attack action
 // is among the pitched cards the runner attributed to paying for this Aether Slash.
-func aetherSlashApplyRider(s card.GameEngine, l card.Logger, self *card.CardState) {
+func aetherSlashApplyRider(g card.GameEngine, l card.Logger, self *card.CardState) {
 	for _, p := range self.PitchedToPlay {
 		if p.Types(nil).IsNonAttackAction() {
-			s.DealArcaneDamage(l, self, 1)
+			g.DealArcaneDamage(l, self.Card.DisplayName(), 1)
 			return
 		}
 	}

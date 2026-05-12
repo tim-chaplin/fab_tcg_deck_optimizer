@@ -4,7 +4,7 @@
 // Text: "When this defends together with another card from hand, this gets +1{d} and you may look
 // at the top card of your deck. You may put it on the bottom."
 //
-// Block scans s.Defenders() for a second plain blocker; if at least one is present (DRs
+// Block scans g.Defenders() for a second plain blocker; if at least one is present (DRs
 // alongside don't count), the +1{d} fires by bumping self.BonusDefense. The deck-top
 // peek/bottom rider is dropped — the optimizer would never bottom a card it'd rather
 // draw next.
@@ -17,9 +17,9 @@ import (
 
 // rightBehindYouBlock fires the +1{d} together-bonus when at least two plain blockers
 // share the defenders slot. Short-circuits on the second non-DR sighting.
-func rightBehindYouBlock(s card.GameEngine, l card.Logger, self *card.CardState) {
+func rightBehindYouBlock(g card.GameEngine, l card.Logger, self *card.CardState) {
 	plainCount := 0
-	for _, d := range s.Defenders() {
+	for _, d := range g.Defenders() {
 		if d.Types(nil).IsDefenseReaction() {
 			continue
 		}
@@ -31,17 +31,17 @@ func rightBehindYouBlock(s card.GameEngine, l card.Logger, self *card.CardState)
 	}
 }
 
-func (RightBehindYouRed) Block(s card.GameEngine, l card.Logger, self *card.CardState) {
-	rightBehindYouBlock(s, l, self)
+func (RightBehindYouRed) Block(g card.GameEngine, l card.Logger, self *card.CardState) {
+	rightBehindYouBlock(g, l, self)
 }
-func (RightBehindYouRed) Play(s card.GameEngine, l card.Logger, self *card.CardState) {}
+func (RightBehindYouRed) Play(g card.GameEngine, l card.Logger, self *card.CardState) {}
 
-func (RightBehindYouYellow) Block(s card.GameEngine, l card.Logger, self *card.CardState) {
-	rightBehindYouBlock(s, l, self)
+func (RightBehindYouYellow) Block(g card.GameEngine, l card.Logger, self *card.CardState) {
+	rightBehindYouBlock(g, l, self)
 }
-func (RightBehindYouYellow) Play(s card.GameEngine, l card.Logger, self *card.CardState) {}
+func (RightBehindYouYellow) Play(g card.GameEngine, l card.Logger, self *card.CardState) {}
 
-func (RightBehindYouBlue) Block(s card.GameEngine, l card.Logger, self *card.CardState) {
-	rightBehindYouBlock(s, l, self)
+func (RightBehindYouBlue) Block(g card.GameEngine, l card.Logger, self *card.CardState) {
+	rightBehindYouBlock(g, l, self)
 }
-func (RightBehindYouBlue) Play(s card.GameEngine, l card.Logger, self *card.CardState) {}
+func (RightBehindYouBlue) Play(g card.GameEngine, l card.Logger, self *card.CardState) {}

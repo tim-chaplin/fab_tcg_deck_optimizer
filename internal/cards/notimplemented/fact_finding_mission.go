@@ -12,15 +12,15 @@ import (
 
 // not implemented: on-hit opponent-arsenal/equipment peek
 
-func (FactFindingMissionRed) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
+func (FactFindingMissionRed) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
 }
 
 // not implemented: on-hit opponent-arsenal/equipment peek
 
-func (FactFindingMissionYellow) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
+func (FactFindingMissionYellow) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
 }
 
 // not implemented: on-hit opponent-arsenal/equipment peek
 
-func (FactFindingMissionBlue) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
+func (FactFindingMissionBlue) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
 }

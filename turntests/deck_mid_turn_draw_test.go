@@ -46,8 +46,8 @@ func TestEvalOneTurn_MidTurnDrawArsenalsWhenSlotEmpty(t *testing.T) {
 		t.Errorf("turn 2 arsenal = %v, want %v (drawn card should take the empty arsenal slot)", state.StartOfNextTurnArsenal, beacon)
 	}
 
-	if state.Runechants() != 0 {
-		t.Errorf("turn 2 runechants = %d, want 0 (nothing on turn 1 creates runechants)", state.Runechants())
+	if state.RunechantCount() != 0 {
+		t.Errorf("turn 2 runechants = %d, want 0 (nothing on turn 1 creates runechants)", state.RunechantCount())
 	}
 }
 
@@ -86,8 +86,8 @@ func TestEvalOneTurn_TwoMidTurnDraws_OneArsenalsOneHeld(t *testing.T) {
 		t.Errorf("turn 2 arsenal = %v, want %v (one of the two drawn beacons should fill the empty slot)", state.StartOfNextTurnArsenal, beacon)
 	}
 
-	if state.Runechants() != 0 {
-		t.Errorf("turn 2 runechants = %d, want 0 (nothing on turn 1 creates runechants)", state.Runechants())
+	if state.RunechantCount() != 0 {
+		t.Errorf("turn 2 runechants = %d, want 0 (nothing on turn 1 creates runechants)", state.RunechantCount())
 	}
 }
 
@@ -125,8 +125,8 @@ func TestEvalOneTurn_ThreeMidTurnDraws_ArsenalFromDrawnPool(t *testing.T) {
 		t.Errorf("turn 2 arsenal = %v, want %v (one of the three drawn beacons should fill the slot vacated by arsenal-in Snatch)", state.StartOfNextTurnArsenal, beacon)
 	}
 
-	if state.Runechants() != 0 {
-		t.Errorf("turn 2 runechants = %d, want 0 (nothing on turn 1 creates runechants)", state.Runechants())
+	if state.RunechantCount() != 0 {
+		t.Errorf("turn 2 runechants = %d, want 0 (nothing on turn 1 creates runechants)", state.RunechantCount())
 	}
 }
 
@@ -163,8 +163,8 @@ func TestEvalOneTurn_MidTurnDrawHeldWhenArsenalFull(t *testing.T) {
 		t.Errorf("turn 2 arsenal = %v, want %v (arsenal-in should remain untouched when no better candidate beats it)", state.StartOfNextTurnArsenal, arsenalIn)
 	}
 
-	if state.Runechants() != 0 {
-		t.Errorf("turn 2 runechants = %d, want 0 (nothing on turn 1 creates runechants)", state.Runechants())
+	if state.RunechantCount() != 0 {
+		t.Errorf("turn 2 runechants = %d, want 0 (nothing on turn 1 creates runechants)", state.RunechantCount())
 	}
 }
 
@@ -222,8 +222,8 @@ func TestEvalOneTurn_MidTurnDrawSansGoAgainStaysHeld(t *testing.T) {
 		t.Errorf("turn 2 deck = %v, want empty", state.StartOfNextTurnDeck)
 	}
 
-	if state.Runechants() != 0 {
-		t.Errorf("turn 2 runechants = %d, want 0", state.Runechants())
+	if state.RunechantCount() != 0 {
+		t.Errorf("turn 2 runechants = %d, want 0", state.RunechantCount())
 	}
 }
 
@@ -245,7 +245,7 @@ func TestEvalOneTurn_DrawOneOnEmptyDeckIsNoop(t *testing.T) {
 	if state.StartOfNextTurnArsenal != nil {
 		t.Errorf("turn 2 arsenal = %v, want nil (nothing Held to promote)", state.StartOfNextTurnArsenal)
 	}
-	if state.Runechants() != 0 {
-		t.Errorf("turn 2 runechants = %d, want 0", state.Runechants())
+	if state.RunechantCount() != 0 {
+		t.Errorf("turn 2 runechants = %d, want 0", state.RunechantCount())
 	}
 }

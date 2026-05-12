@@ -9,18 +9,18 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
-func whisperOfTheOraclePlay(s card.GameEngine, l card.Logger, self *card.CardState) {
-	s.Opt(l, 4)
+func whisperOfTheOraclePlay(g card.GameEngine, l card.Logger, self *card.CardState) {
+	g.Opt(l, 4)
 }
 
-func (WhisperOfTheOracleRed) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
-	whisperOfTheOraclePlay(s, l, self)
+func (WhisperOfTheOracleRed) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+	whisperOfTheOraclePlay(g, l, self)
 }
 
-func (WhisperOfTheOracleYellow) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
-	whisperOfTheOraclePlay(s, l, self)
+func (WhisperOfTheOracleYellow) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+	whisperOfTheOraclePlay(g, l, self)
 }
 
-func (WhisperOfTheOracleBlue) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
-	whisperOfTheOraclePlay(s, l, self)
+func (WhisperOfTheOracleBlue) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+	whisperOfTheOraclePlay(g, l, self)
 }

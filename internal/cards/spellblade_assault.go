@@ -8,17 +8,17 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
-func (SpellbladeAssaultRed) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
-	s.CreateRunechants(2)
+func (SpellbladeAssaultRed) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+	g.CreateRunechants(2)
 	l.AppendPostTrigger(self.Card.DisplayName(), "Created 2 runechants", 2)
 }
 
-func (SpellbladeAssaultYellow) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
-	s.CreateRunechants(2)
+func (SpellbladeAssaultYellow) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+	g.CreateRunechants(2)
 	l.AppendPostTrigger(self.Card.DisplayName(), "Created 2 runechants", 2)
 }
 
-func (SpellbladeAssaultBlue) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
-	s.CreateRunechants(2)
+func (SpellbladeAssaultBlue) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+	g.CreateRunechants(2)
 	l.AppendPostTrigger(self.Card.DisplayName(), "Created 2 runechants", 2)
 }

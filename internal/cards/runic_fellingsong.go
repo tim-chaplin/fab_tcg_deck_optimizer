@@ -14,25 +14,21 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
-// runicFellingsongPlay emits the chain step at printed power, then writes the banish-for-
-// arcane rider as a sub-line under self when an aura was successfully banished from the
-// graveyard. banishAuraFromGraveyard flips ArcaneDamageDealt internally as part of its
-// arcane-damage payload.
-func runicFellingsongPlay(s card.GameEngine, l card.Logger, self *card.CardState) {
-	if n := banishAuraFromGraveyard(s); n > 0 {
-		s.AddValue(n)
-		l.AppendPostTrigger(self.Card.DisplayName(), "Banished an aura, dealt 1 arcane damage", n)
-	}
+// runicFellingsongPlay emits the chain step at printed power, then routes through
+// banishAuraFromGraveyard for the banish-and-1-arcane rider (the helper handles value,
+// log, and ArcaneDamageDealt). No-op when the graveyard has no aura.
+func runicFellingsongPlay(g card.GameEngine, l card.Logger, self *card.CardState) {
+	banishAuraFromGraveyard(g, l, self.Card.DisplayName())
 }
 
-func (RunicFellingsongRed) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
-	runicFellingsongPlay(s, l, self)
+func (RunicFellingsongRed) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+	runicFellingsongPlay(g, l, self)
 }
 
-func (RunicFellingsongYellow) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
-	runicFellingsongPlay(s, l, self)
+func (RunicFellingsongYellow) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+	runicFellingsongPlay(g, l, self)
 }
 
-func (RunicFellingsongBlue) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
-	runicFellingsongPlay(s, l, self)
+func (RunicFellingsongBlue) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+	runicFellingsongPlay(g, l, self)
 }

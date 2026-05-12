@@ -13,7 +13,6 @@ package card
 
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
-	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
 )
 
 // GameEngine is the cards-facing rules-engine handle the sim threads through every
@@ -38,24 +37,16 @@ type GameEngine interface {
 	Hand() []Card
 	AppendHand(Card)
 	PopHandAt(int) Card
-	Deck() *deck.Deck
 	PeekDeck() (Card, bool)
 	PeekTopN(int) []Card
 	PrependToDeck(Card)
-	RecycleToDeckBottom(*CardState)
-	Graveyard() []Card
 	AddToGraveyard(Card)
-	BanishFromGraveyard(func(Card) bool) (Card, bool)
-	Banished() []Card
 
 	// Auras: per-trigger-type registration. The engine builds the underlying aura
 	// internally; cards supply only the handler and an initial count. Source is
 	// derived from self.Card.
-	AddStartOfTurnAura(self *CardState, handler AuraHandler, count int)
-	AddAttackActionAura(self *CardState, handler AuraHandler, count int)
-	AddOncePerTurnAttackActionAura(self *CardState, handler AuraHandler, count int)
-	AddAttackAura(self *CardState, handler AuraHandler, count int)
-	AddEndOfTurnAura(self *CardState, handler AuraHandler, count int)
+	CreateStartOfTurnAura(self *CardState, handler AuraHandler, count int)
+	CreateOncePerTurnAttackActionAura(self *CardState, handler AuraHandler, count int)
 
 	// Triggers: one-shot, per-trigger-type. AddHitTrigger's filter narrows the
 	// firing event to a card-type predicate (typically TypeSet.IsAttack or
@@ -67,46 +58,44 @@ type GameEngine interface {
 	CreateRunechants(int)
 	CreatePonder(int)
 	CreateGold(int)
-	CreateSilver(int)
 	CreateCopper(int)
-	Runechants() int
-	Ponders() int
-	Gold() int
-	Silver() int
-	Copper() int
+	RunechantCount() int
+	GoldCount() int
+	SilverCount() int
+	CopperCount() int
 
-	// Value crediting and arcane damage
-	Value() int
+	// Value crediting and arcane damage. AddValue accepts negatives — Test of Strength's
+	// clash-loss concedes value to the opponent.
 	AddValue(int)
-	SetValue(int)
-	DealArcaneDamage(Logger, *CardState, int)
+	// DealArcaneDamage credits n arcane damage from the named source: adds to Value,
+	// flips ArcaneDamageDealt when the hit lands, and logs the rider under source.
+	// Pass self.Card.DisplayName() from a card's Play body, or a.CardName() from an
+	// aura handler.
+	DealArcaneDamage(l Logger, source string, n int)
 
 	// Hit / damage heuristics. The card says "I attack for N"; the engine decides
 	// whether the attack lands (LikelyToHit / LikelyDamageHits).
 	LikelyToHit(self *CardState) bool
 	LikelyDamageHits(n int, dominate bool) bool
 
-	// Tempo verbs. Cards say "this card does X" (force a discard, grant Overpower);
-	// the engine decides how much that's worth in damage-equivalent Value and
-	// credits it. Each verb returns the value it credited so cards can attribute
-	// the line in their own log rider.
+	// Tempo verbs. Cards say "this card does X" (force a discard); the engine decides
+	// how much that's worth in damage-equivalent Value and credits it. The verb returns
+	// the value it credited so cards can attribute the line in their own log rider.
 	OpponentDiscard(n int) int
-	GrantOverpower(self *CardState) int
 
-	// AP (chain-step controls cards read or grant).
-	ActionPoints() int
+	// AP (chain-step controls cards grant).
 	AddActionPoints(int)
-	Overpower() bool
 
-	// Sticky flags cards read to gate their effects (and flip when their effects fire).
+	// Sticky flags cards read to gate their effects. The corresponding setters are
+	// implicit side effects of the engine verb that produces them: DealArcaneDamage
+	// flips ArcaneDamageDealt; Create*Aura flips AuraCreated; MarkOpponent flips
+	// OpponentMarked. NonAttackActionPlayed and CardBanished are sim-side bookkeeping.
 	ArcaneDamageDealt() bool
-	SetArcaneDamageDealt(bool)
 	AuraCreated() bool
-	SetAuraCreated(bool)
 	CardBanished() bool
 	NonAttackActionPlayed() bool
 	OpponentMarked() bool
-	SetOpponentMarked(bool)
+	MarkOpponent()
 
 	// Partition / matchup state.
 	IncomingDamage() int
@@ -124,7 +113,6 @@ type GameEngine interface {
 	CurrentHeroClass() CardType
 
 	// Chain queries
-	HasPlayedOrCreatedAura() bool
 	HasPlayedType(CardType) bool
 	CardsPlayed() []Card
 	SetCardsPlayed([]Card)
@@ -135,11 +123,13 @@ type GameEngine interface {
 	// owns the live aura set.
 	AuraCount() int
 
-	// Mid-chain draw / tutoring / recycling
+	// Mid-chain draw / tutoring / recycling — cards moving to different zones.
 	DrawOne()
 	TutorFromDeck(func(Card) int) (Card, bool)
+	RecycleToDeckBottom(*CardState)
 	RecycleFromGraveyardToTop(func(Card) bool) (Card, bool)
 	RecycleFromGraveyardToBottom(func(Card) bool) (Card, bool)
+	BanishFromGraveyard(func(Card) bool) (Card, bool)
 
 	// Opt (hero-driven top-of-deck reshape)
 	Opt(Logger, int)
@@ -171,7 +161,7 @@ type GameEngine interface {
 // runechant"), AppendPreTrigger for hero or aura attack-action triggers. The
 // AppendChainStep / AppendChainStepf / AmendLastChainStepN trio is sim-internal —
 // ResolveChainStep emits the chain step after Play returns, the Opt helper emits its
-// own free-form chain entry, and GrantAttackReactionBuff amends the buffed attack's
+// own free-form chain entry, and CardState.GrantAttackReactionBuff amends the buffed attack's
 // delta — but the methods sit on Logger so the same value can flow through both
 // card-side and sim-side call sites.
 type Logger interface {
@@ -186,8 +176,8 @@ type Logger interface {
 
 // Aura is the minimal view cards' aura handlers see of the firing aura. The engine
 // constructs and tracks the full concrete representation internally; the handler
-// reads counts / self-identity through this interface and ends the aura's life via
-// Destroy.
+// reads counts / source-card identity through this interface and ends the aura's
+// life via Destroy.
 type Aura interface {
 	// Count returns the aura's current count. Handlers that fire-then-destroy read
 	// it as a payload (e.g. Blessing of Occult's runechant count); multi-fire auras
@@ -197,22 +187,22 @@ type Aura interface {
 	// aura handlers (Malefic / Runeblood pattern) call this and Destroy when the
 	// result reaches 0.
 	DecrementCount() int
-	// SelfName is the originating card or token's display name — used for log
+	// CardName is the originating card or token's display name — used for log
 	// attribution from inside the handler.
-	SelfName() string
-	// SelfCardID is the originating card's registry ID, or ids.InvalidCard when the
+	CardName() string
+	// CardID is the originating card's registry ID, or ids.InvalidCard when the
 	// aura belongs to a token. Handlers that match against a specific source card
 	// (e.g. Sigil of Silphidae's "destroy a different aura") gate on this.
-	SelfCardID() ids.CardID
+	CardID() ids.CardID
 	// Destroy ends the aura's life. addToGraveyard sends the originating card to
 	// the graveyard (token auras with no originating card skip the append).
 	Destroy(addToGraveyard bool)
 }
 
 // Trigger is the minimal view cards' one-shot trigger handlers see of the firing
-// trigger. Today only SourceName is needed; expand as more triggers appear.
+// trigger. Today only CardName is needed; expand as more triggers appear.
 type Trigger interface {
-	SourceName() string
+	CardName() string
 }
 
 // Hero is the narrow view of the active hero v2/card needs. Sim's richer Hero

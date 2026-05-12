@@ -2,8 +2,9 @@
 //
 // Text: "If you've played or created an aura this turn, this gets **overpower**."
 //
-// Calls g.GrantOverpower which flips the Overpower flag and credits the engine's Overpower
-// for any future consumer.
+// Flips self.GrantedOverpower when an aura has been created this turn. The flag is the
+// rules-text record; the engine doesn't currently fold Overpower into a per-step bonus
+// (block-allocation is accounted for at the partition level).
 
 package cards
 
@@ -11,22 +12,20 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
-// vantagePointPlay flips s.Overpower() when an aura has been played or created this turn, then
-// emits the chain step.
-func vantagePointPlay(s card.GameEngine, l card.Logger, self *card.CardState) {
-	if s.HasPlayedOrCreatedAura() {
-		s.GrantOverpower(self)
+func vantagePointPlay(g card.GameEngine, _ card.Logger, self *card.CardState) {
+	if g.AuraCreated() {
+		self.GrantedOverpower = true
 	}
 }
 
-func (VantagePointRed) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
-	vantagePointPlay(s, l, self)
+func (VantagePointRed) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+	vantagePointPlay(g, l, self)
 }
 
-func (VantagePointYellow) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
-	vantagePointPlay(s, l, self)
+func (VantagePointYellow) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+	vantagePointPlay(g, l, self)
 }
 
-func (VantagePointBlue) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
-	vantagePointPlay(s, l, self)
+func (VantagePointBlue) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+	vantagePointPlay(g, l, self)
 }

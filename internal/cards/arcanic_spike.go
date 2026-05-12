@@ -16,21 +16,21 @@ import (
 const arcaneDamageBonus = 2
 
 // arcanicSpikeBonus returns the +2{p} power buff when ArcaneDamageDealt is set, else 0.
-func arcanicSpikeBonus(s card.GameEngine) int {
-	if s != nil && s.ArcaneDamageDealt() {
+func arcanicSpikeBonus(g card.GameEngine) int {
+	if g != nil && g.ArcaneDamageDealt() {
 		return arcaneDamageBonus
 	}
 	return 0
 }
 
-func (ArcanicSpikeRed) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
-	self.BonusAttack += arcanicSpikeBonus(s)
+func (ArcanicSpikeRed) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+	self.BonusAttack += arcanicSpikeBonus(g)
 }
 
-func (ArcanicSpikeYellow) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
-	self.BonusAttack += arcanicSpikeBonus(s)
+func (ArcanicSpikeYellow) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+	self.BonusAttack += arcanicSpikeBonus(g)
 }
 
-func (ArcanicSpikeBlue) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
-	self.BonusAttack += arcanicSpikeBonus(s)
+func (ArcanicSpikeBlue) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+	self.BonusAttack += arcanicSpikeBonus(g)
 }

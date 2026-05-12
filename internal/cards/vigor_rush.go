@@ -3,7 +3,7 @@
 //
 // Text: "If you have played a 'non-attack' action card this turn, Vigor Rush gains **go again**."
 //
-// Conditional go-again gated on s.NonAttackActionPlayed() (an O(1) flag the sim maintains as it
+// Conditional go-again gated on g.NonAttackActionPlayed() (an O(1) flag the sim maintains as it
 // walks the chain).
 
 package cards
@@ -12,20 +12,20 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
-func vigorRushPlay(s card.GameEngine, l card.Logger, self *card.CardState) {
-	if s.NonAttackActionPlayed() {
+func vigorRushPlay(g card.GameEngine, l card.Logger, self *card.CardState) {
+	if g.NonAttackActionPlayed() {
 		self.GrantedGoAgain = true
 	}
 }
 
-func (VigorRushRed) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
-	vigorRushPlay(s, l, self)
+func (VigorRushRed) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+	vigorRushPlay(g, l, self)
 }
 
-func (VigorRushYellow) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
-	vigorRushPlay(s, l, self)
+func (VigorRushYellow) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+	vigorRushPlay(g, l, self)
 }
 
-func (VigorRushBlue) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
-	vigorRushPlay(s, l, self)
+func (VigorRushBlue) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+	vigorRushPlay(g, l, self)
 }

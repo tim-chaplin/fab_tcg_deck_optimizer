@@ -24,7 +24,7 @@ func TestStrikeGold_OnHitCreatesGoldToken(t *testing.T) {
 		t.Fatalf("Value = %d, want 4 (Strike Gold Red 4 power)\nBestLine: %s",
 			state.Value, formatBestLine(state.BestLine))
 	}
-	if got := state.Gold(); got != 1 {
+	if got := state.GoldCount(); got != 1 {
 		t.Fatalf("Gold count at start of next turn = %d, want 1 (on-hit token)", got)
 	}
 }
@@ -43,7 +43,7 @@ func TestStrikeGold_BlockableMissDoesNotCreateGold(t *testing.T) {
 		t.Fatalf("Value = %d, want 3 (Strike Gold Yellow 3 power)\nBestLine: %s",
 			state.Value, formatBestLine(state.BestLine))
 	}
-	if got := state.Gold(); got != 0 {
+	if got := state.GoldCount(); got != 0 {
 		t.Fatalf("Gold count = %d, want 0 (power-3 attack misses LikelyToHit window)", got)
 	}
 }
@@ -67,7 +67,7 @@ func TestStrikeGold_GoldAbilityPlayableNextTurn(t *testing.T) {
 	}
 	d := deck.New(heroes.Viserai{}, nil, deckCards)
 	state := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, sim.TurnState{}, nil)
-	if state.Gold() != 1 {
-		t.Fatalf("after turn 1: Gold = %d, want 1 (Strike Gold Red on-hit)", state.Gold())
+	if state.GoldCount() != 1 {
+		t.Fatalf("after turn 1: Gold = %d, want 1 (Strike Gold Red on-hit)", state.GoldCount())
 	}
 }

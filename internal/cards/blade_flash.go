@@ -15,9 +15,9 @@ func (BladeFlashBlue) ARTargetAllowed(_ card.GameEngine, c card.Card, _ int8) bo
 	t := c.Types(nil)
 	return t.Has(card.TypeSword) && t.IsAttack()
 }
-func (BladeFlashBlue) Play(s card.GameEngine, l card.Logger, _ *card.CardState) {
-	if s.AttackReactionTarget() == nil {
+func (BladeFlashBlue) Play(g card.GameEngine, l card.Logger, _ *card.CardState) {
+	if g.AttackReactionTarget() == nil {
 		return
 	}
-	s.AddActionPoints(1)
+	g.AddActionPoints(1)
 }

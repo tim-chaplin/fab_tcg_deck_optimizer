@@ -105,10 +105,10 @@ type auraCtx struct {
 	s *TurnState
 }
 
-func (c *auraCtx) Count() int             { return c.a.Count }
-func (c *auraCtx) DecrementCount() int    { c.a.Count--; return c.a.Count }
-func (c *auraCtx) SelfName() string       { return c.a.Self.DisplayName() }
-func (c *auraCtx) SelfCardID() ids.CardID { return c.a.Self.CardID() }
+func (c *auraCtx) Count() int          { return c.a.Count }
+func (c *auraCtx) DecrementCount() int { c.a.Count--; return c.a.Count }
+func (c *auraCtx) CardName() string    { return c.a.Self.DisplayName() }
+func (c *auraCtx) CardID() ids.CardID  { return c.a.Self.CardID() }
 func (c *auraCtx) Destroy(addToGraveyard bool) {
 	c.s.destroyAura(c.a, addToGraveyard)
 }

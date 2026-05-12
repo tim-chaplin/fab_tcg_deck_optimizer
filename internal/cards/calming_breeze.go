@@ -10,5 +10,5 @@ import (
 )
 
 func (CalmingBreezeRed) DefensiveInstant() {}
-func (CalmingBreezeRed) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
+func (CalmingBreezeRed) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
 }

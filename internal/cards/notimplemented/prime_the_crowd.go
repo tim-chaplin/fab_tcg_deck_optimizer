@@ -15,18 +15,18 @@ import (
 
 // not implemented: Crowd cheers / Crowd boos keywords dropped
 
-func (PrimeTheCrowdRed) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
-	cards.GrantNextCardBonusAttack(s, 4, cards.IsAttackAction)
+func (PrimeTheCrowdRed) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+	cards.GrantNextCardBonusAttack(g, 4, cards.IsAttackAction)
 }
 
 // not implemented: Crowd cheers / Crowd boos keywords dropped
 
-func (PrimeTheCrowdYellow) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
-	cards.GrantNextCardBonusAttack(s, 3, cards.IsAttackAction)
+func (PrimeTheCrowdYellow) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+	cards.GrantNextCardBonusAttack(g, 3, cards.IsAttackAction)
 }
 
 // not implemented: Crowd cheers / Crowd boos keywords dropped
 
-func (PrimeTheCrowdBlue) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
-	cards.GrantNextCardBonusAttack(s, 2, cards.IsAttackAction)
+func (PrimeTheCrowdBlue) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+	cards.GrantNextCardBonusAttack(g, 2, cards.IsAttackAction)
 }

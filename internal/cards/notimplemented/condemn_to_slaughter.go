@@ -13,31 +13,31 @@ import (
 // not implemented: aura-trade rider and opponent-aura destruction clause; only same-turn
 // Runeblade-attack +N{p} is modelled
 
-func (CondemnToSlaughterRed) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
-	condemnToSlaughterApplySideEffect(s, 3)
+func (CondemnToSlaughterRed) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+	condemnToSlaughterApplySideEffect(g, 3)
 }
 
 // not implemented: aura-trade rider and opponent-aura destruction clause; only same-turn
 // Runeblade-attack +N{p} is modelled
 
-func (CondemnToSlaughterYellow) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
-	condemnToSlaughterApplySideEffect(s, 2)
+func (CondemnToSlaughterYellow) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+	condemnToSlaughterApplySideEffect(g, 2)
 }
 
 // not implemented: aura-trade rider and opponent-aura destruction clause; only same-turn
 // Runeblade-attack +N{p} is modelled
 
-func (CondemnToSlaughterBlue) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
-	condemnToSlaughterApplySideEffect(s, 1)
+func (CondemnToSlaughterBlue) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+	condemnToSlaughterApplySideEffect(g, 1)
 }
 
 // condemnToSlaughterApplySideEffect grants +n to the first scheduled Runeblade attack (attack
 // action card or weapon swing) via pc.BonusAttack so the buffed attack's EffectiveAttack folds
 // the bonus into LikelyToHit and the chain credit lands on the target's slot. Condemn's own
 // contribution is zero.
-func condemnToSlaughterApplySideEffect(s card.GameEngine, n int) {
-	for _, pc := range s.CardsRemaining() {
-		if pc.Card.Types(s).IsRunebladeAttack() {
+func condemnToSlaughterApplySideEffect(g card.GameEngine, n int) {
+	for _, pc := range g.CardsRemaining() {
+		if pc.Card.Types(g).IsRunebladeAttack() {
 			pc.BonusAttack += n
 			return
 		}

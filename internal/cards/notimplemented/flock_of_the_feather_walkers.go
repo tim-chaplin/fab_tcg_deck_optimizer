@@ -12,15 +12,15 @@ import (
 
 // not implemented: additional reveal cost, quicken tokens
 
-func (c FlockOfTheFeatherWalkersRed) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
+func (c FlockOfTheFeatherWalkersRed) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
 }
 
 // not implemented: additional reveal cost, quicken tokens
 
-func (c FlockOfTheFeatherWalkersYellow) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
+func (c FlockOfTheFeatherWalkersYellow) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
 }
 
 // not implemented: additional reveal cost, quicken tokens
 
-func (c FlockOfTheFeatherWalkersBlue) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
+func (c FlockOfTheFeatherWalkersBlue) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
 }

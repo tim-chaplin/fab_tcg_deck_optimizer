@@ -11,21 +11,21 @@ import (
 
 // woundedBullBonus returns the +1{p} power buff when the current hero opts into
 // LowerHealthWanter, else 0.
-func woundedBullBonus(s card.GameEngine) int {
-	if s.HeroWantsLowerHealth() {
+func woundedBullBonus(g card.GameEngine) int {
+	if g.HeroWantsLowerHealth() {
 		return 1
 	}
 	return 0
 }
 
-func (WoundedBullRed) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
-	self.BonusAttack += woundedBullBonus(s)
+func (WoundedBullRed) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+	self.BonusAttack += woundedBullBonus(g)
 }
 
-func (WoundedBullYellow) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
-	self.BonusAttack += woundedBullBonus(s)
+func (WoundedBullYellow) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+	self.BonusAttack += woundedBullBonus(g)
 }
 
-func (WoundedBullBlue) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
-	self.BonusAttack += woundedBullBonus(s)
+func (WoundedBullBlue) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+	self.BonusAttack += woundedBullBonus(g)
 }

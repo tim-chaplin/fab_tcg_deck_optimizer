@@ -7,11 +7,11 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
-func (c BrutalAssaultRed) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
+func (c BrutalAssaultRed) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
 }
 
-func (c BrutalAssaultYellow) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
+func (c BrutalAssaultYellow) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
 }
 
-func (c BrutalAssaultBlue) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
+func (c BrutalAssaultBlue) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
 }

@@ -98,7 +98,7 @@ func TestPonder_PeaceOfMindFillsEmptyArsenalNextTurn(t *testing.T) {
 		t.Errorf("turn 2 arsenal = %v, want %v (Ponder draw should fill empty arsenal from deck top)",
 			state.StartOfNextTurnArsenal, beacon)
 	}
-	if state.Ponders() != 0 {
-		t.Errorf("Ponders carryover = %d, want 0 (Ponder destroys at end of turn 1)", state.Ponders())
+	if state.PonderCount() != 0 {
+		t.Errorf("Ponders carryover = %d, want 0 (Ponder destroys at end of turn 1)", state.PonderCount())
 	}
 }

@@ -9,7 +9,7 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
-// stubLowHeroOn implements card.LowerHealthWanter — used to exercise the "hero opts in" branch.
+// stubLowHeroOn implements sim.LowerHealthWanter — used to exercise the "hero opts in" branch.
 type stubLowHeroOn struct{}
 
 func (stubLowHeroOn) ID() ids.HeroID                                          { return ids.InvalidHero }
@@ -22,7 +22,7 @@ func (stubLowHeroOn) OnCardPlayed(card.Card, *sim.TurnState, card.Logger) int { 
 func (stubLowHeroOn) Opt(cards []card.Card) (top, bottom []card.Card)         { return cards, nil }
 func (stubLowHeroOn) WantsLowerHealth()                                       {}
 
-// stubLowHeroOff does NOT implement card.LowerHealthWanter — the default-hero branch.
+// stubLowHeroOff does NOT implement sim.LowerHealthWanter — the default-hero branch.
 type stubLowHeroOff struct{}
 
 func (stubLowHeroOff) ID() ids.HeroID                                          { return ids.InvalidHero }
@@ -35,7 +35,7 @@ func (stubLowHeroOff) OnCardPlayed(card.Card, *sim.TurnState, card.Logger) int {
 func (stubLowHeroOff) Opt(cards []card.Card) (top, bottom []card.Card)         { return cards, nil }
 
 // TestLowerHealthWanter_DamageRiders checks the +3{p} / +1{p} / +1{h} damage riders fire iff the
-// current hero opts into card.LowerHealthWanter.
+// current hero opts into sim.LowerHealthWanter.
 func TestLowerHealthWanter_DamageRiders(t *testing.T) {
 	cases := []struct {
 		name    string
@@ -71,7 +71,7 @@ func TestLowerHealthWanter_DamageRiders(t *testing.T) {
 }
 
 // TestLowerHealthWanter_GoAgainRiders checks the conditional go-again flips iff the current hero
-// opts into card.LowerHealthWanter.
+// opts into sim.LowerHealthWanter.
 func TestLowerHealthWanter_GoAgainRiders(t *testing.T) {
 	cards := []card.Card{
 		cards.ScarForAScarRed{}, cards.ScarForAScarYellow{}, cards.ScarForAScarBlue{},

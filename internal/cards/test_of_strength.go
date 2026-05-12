@@ -11,16 +11,14 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
-func (TestOfStrengthRed) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
-	s.Clash(
+func (TestOfStrengthRed) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+	g.Clash(
 		func() {
-			s.CreateGold(1)
+			g.CreateGold(1)
 			l.AppendPostTrigger(self.Card.DisplayName(), "Clash win created a gold token", 0)
 		},
 		func() {
-			// AddValue clamps negatives, so write directly: opponent gains the Gold token,
-			// netting us roughly one resource of opposing tempo.
-			s.SetValue(s.Value() - 1)
+			g.AddValue(-1)
 			l.AppendPostTrigger(self.Card.DisplayName(), "Clash loss conceded gold to opponent", -1)
 		},
 	)

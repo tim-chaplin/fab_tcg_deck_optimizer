@@ -8,23 +8,23 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
-func (ShrillOfSkullformRed) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
-	shrillPlay(s, l, self)
+func (ShrillOfSkullformRed) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+	shrillPlay(g, l, self)
 }
 
-func (ShrillOfSkullformYellow) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
-	shrillPlay(s, l, self)
+func (ShrillOfSkullformYellow) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+	shrillPlay(g, l, self)
 }
 
-func (ShrillOfSkullformBlue) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
-	shrillPlay(s, l, self)
+func (ShrillOfSkullformBlue) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+	shrillPlay(g, l, self)
 }
 
 // shrillPlay routes the +3{p} aura-in-play buff through self.BonusAttack so EffectiveAttack
 // and LikelyToHit see the buffed power, then emits the chain step at the buffed value. No
 // rider sub-line — this is a power buff, not a separable effect.
-func shrillPlay(s card.GameEngine, l card.Logger, self *card.CardState) {
-	if s.HasPlayedOrCreatedAura() {
+func shrillPlay(g card.GameEngine, l card.Logger, self *card.CardState) {
+	if g.AuraCreated() {
 		self.BonusAttack += 3
 	}
 }

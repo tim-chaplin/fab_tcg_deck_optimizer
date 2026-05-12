@@ -12,18 +12,18 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
-func freewheelingRenegadesPlay(s card.GameEngine, l card.Logger, self *card.CardState) {
+func freewheelingRenegadesPlay(g card.GameEngine, l card.Logger, self *card.CardState) {
 	self.BonusAttack -= 2
 }
 
-func (FreewheelingRenegadesRed) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
-	freewheelingRenegadesPlay(s, l, self)
+func (FreewheelingRenegadesRed) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+	freewheelingRenegadesPlay(g, l, self)
 }
 
-func (FreewheelingRenegadesYellow) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
-	freewheelingRenegadesPlay(s, l, self)
+func (FreewheelingRenegadesYellow) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+	freewheelingRenegadesPlay(g, l, self)
 }
 
-func (FreewheelingRenegadesBlue) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
-	freewheelingRenegadesPlay(s, l, self)
+func (FreewheelingRenegadesBlue) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+	freewheelingRenegadesPlay(g, l, self)
 }

@@ -12,5 +12,5 @@ import (
 
 // not implemented: end-phase arsenal-fill from top of deck if behind on arsenal count
 
-func (TalismanOfBalanceBlue) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
+func (TalismanOfBalanceBlue) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
 }

@@ -160,10 +160,6 @@ type TurnState struct {
 	// Pitched is the cards pitched this turn for resources. Populated by the sim before any
 	// Play. Effects that check "if an attack card was pitched" scan this list.
 	pitched []card.Card
-	// Overpower is set when an attack with the Overpower keyword is being played. Not yet
-	// consumed by the sim — blocked damage should eventually be forwarded to the hero when
-	// Overpower is true.
-	overpower bool
 	// NonAttackActionPlayed is set true once any non-attack action card has been appended to
 	// CardsPlayed this turn. Maintained by the chain runner so hero triggers that ask "was a
 	// non-attack action played earlier?" can answer in O(1).
@@ -205,6 +201,11 @@ type TurnState struct {
 	// cacheable; a zero-value `var s TurnState{}` defaults to false (uncacheable) — the more
 	// conservative default that surfaces missing initialization rather than hiding it.
 	cacheable bool
+	// currentStepRerouted is the per-step flag the chain dispatcher reads after Play to
+	// decide whether to skip the "non-persistent → graveyard" append. Set by
+	// RecycleToDeckBottom (Relentless Pursuit's "put this on the bottom of its owner's
+	// deck"); the dispatcher clears it before each step.
+	currentStepRerouted bool
 }
 
 // IsCacheable reports whether the chain so far has not depended on hidden state — i.e. no
@@ -229,10 +230,8 @@ func (s *TurnState) ActionPoints() int { return s.actionPoints }
 func (s *TurnState) AddActionPoints(n int) { s.actionPoints += n }
 
 // ArcaneDamageDealt reports whether any arcane damage source has fired this turn.
+// Set as a side effect of DealArcaneDamage when the hit lands.
 func (s *TurnState) ArcaneDamageDealt() bool { return s.arcaneDamageDealt }
-
-// SetArcaneDamageDealt flips the sticky arcane-damage-dealt flag.
-func (s *TurnState) SetArcaneDamageDealt(v bool) { s.arcaneDamageDealt = v }
 
 // ArcaneIncomingDamage returns the opponent's arcane damage this turn.
 func (s *TurnState) ArcaneIncomingDamage() int { return s.arcaneIncomingDamage }
@@ -240,7 +239,7 @@ func (s *TurnState) ArcaneIncomingDamage() int { return s.arcaneIncomingDamage }
 // HeroWantsLowerHealth reports whether the current hero opts into the LowerHealthWanter
 // marker. Reads CurrentHero directly so v2/card stays state-free.
 func (s *TurnState) HeroWantsLowerHealth() bool {
-	_, ok := CurrentHero.(card.LowerHealthWanter)
+	_, ok := CurrentHero.(LowerHealthWanter)
 	return ok
 }
 
@@ -254,10 +253,8 @@ func (s *TurnState) CurrentHeroClass() card.CardType {
 }
 
 // AuraCreated reports whether a card or ability has created an aura this turn.
+// Set as a side effect of every Create*Aura call.
 func (s *TurnState) AuraCreated() bool { return s.auraCreated }
-
-// SetAuraCreated flips the aura-created-this-turn flag.
-func (s *TurnState) SetAuraCreated(v bool) { s.auraCreated = v }
 
 // Auras returns the live aura set.
 func (s *TurnState) Auras() []Aura { return s.auras }
@@ -302,20 +299,9 @@ func (s *TurnState) NonAttackActionPlayed() bool { return s.nonAttackActionPlaye
 // OpponentMarked reports whether the opposing hero currently carries the Mark token.
 func (s *TurnState) OpponentMarked() bool { return s.opponentMarked }
 
-// SetOpponentMarked flips the opposing hero's Mark.
-func (s *TurnState) SetOpponentMarked(v bool) { s.opponentMarked = v }
-
-// Overpower reports whether the chain step currently in flight has Overpower.
-func (s *TurnState) Overpower() bool { return s.overpower }
-
-// GrantOverpower flips the Overpower flag on the current chain step and credits the
-// engine's per-Overpower-grant value. Returns the credited value so the calling card
-// can attribute the rider in its own log line.
-func (s *TurnState) GrantOverpower(self *card.CardState) int {
-	s.overpower = true
-	s.AddValue(OverpowerValue)
-	return OverpowerValue
-}
+// MarkOpponent puts the Mark token on the opposing hero. The next attack action card /
+// weapon swing clears it.
+func (s *TurnState) MarkOpponent() { s.opponentMarked = true }
 
 // OpponentDiscard credits n cards' worth of damage-equivalent value for forcing the
 // opponent to discard. Returns the credited value for log attribution.
@@ -350,11 +336,6 @@ func (s *TurnState) Triggers() []Trigger { return s.triggers }
 
 // Value returns the running damage-equivalent total for this chain.
 func (s *TurnState) Value() int { return s.value }
-
-// SetValue replaces the running damage-equivalent total. Prefer AddValue for the usual
-// "credit n" case; this exists for the rare decrement (e.g. Test of Strength's clash
-// loss concedes a Gold token).
-func (s *TurnState) SetValue(n int) { s.value = n }
 
 // AmendLastChainStepN adds n to the most recent ChainStep entry's N field. ARs use this to
 // fold their +{p} buff into the buffed attack's display delta. No-op when the logger is
@@ -438,7 +419,6 @@ type TurnStateSpec struct {
 	ArcaneDamageDealt     bool
 	AuraCreated           bool
 	CardBanished          bool
-	Overpower             bool
 	NonAttackActionPlayed bool
 	ActionPoints          int
 	IncomingDamage        int
@@ -485,7 +465,6 @@ func NewTurnStateFromSpec(spec TurnStateSpec) TurnState {
 		arcaneDamageDealt:     spec.ArcaneDamageDealt,
 		auraCreated:           spec.AuraCreated,
 		cardBanished:          spec.CardBanished,
-		overpower:             spec.Overpower,
 		nonAttackActionPlayed: spec.NonAttackActionPlayed,
 		actionPoints:          spec.ActionPoints,
 		incomingDamage:        spec.IncomingDamage,
@@ -552,14 +531,14 @@ func (s *TurnState) PrependToDeck(c card.Card) {
 	s.deck.PutTop([]deck.Card{c})
 }
 
-// RecycleToDeckBottom appends self.Card to the bottom of the deck and flips
-// self.SkipGraveyard so the chain dispatcher skips the usual non-persistent → graveyard
-// append. Models the FaB clause "put this on the bottom of its owner's deck"
-// (Relentless Pursuit). Flips IsCacheable to false.
+// RecycleToDeckBottom appends self.Card to the bottom of the deck and flags the
+// chain dispatcher to skip the usual non-persistent → graveyard append. Models the
+// FaB clause "put this on the bottom of its owner's deck" (Relentless Pursuit).
+// Flips IsCacheable to false.
 func (s *TurnState) RecycleToDeckBottom(self *card.CardState) {
 	s.cacheable = false
 	s.deck.PutBottom([]deck.Card{self.Card})
-	self.SkipGraveyard = true
+	s.currentStepRerouted = true
 }
 
 // Opt resolves the FaB "Opt N" keyword: pops up to n cards from the top of the deck and
@@ -763,14 +742,10 @@ func NewTurnStateFromCards(deckCards, graveyard []card.Card) *TurnState {
 
 // AddValue credits n to s.value, clamped at 0. Pair with a Log helper when you also want a
 // log line; call alone for silent value (an aura that pays out without surfacing in the
-// printout). Negative n is a no-op (FaB damage / prevention can't drive the running total
-// negative). The convention is to put AddValue on its own line, separate from any Log call,
-// so a line beginning with Log( has no side effects.
-func (s *TurnState) AddValue(n int) {
-	if n > 0 {
-		s.value += n
-	}
-}
+// printout). Negative n is allowed for "this card gives the opponent value" effects
+// (Test of Strength's clash-loss). The convention is to put AddValue on its own line,
+// separate from any Log call, so a line beginning with Log( has no side effects.
+func (s *TurnState) AddValue(n int) { s.value += n }
 
 // LogEntries returns the per-event chain trace accumulated by the Log family. External
 // readers (tests, format layer) use this; package-internal code reads the underlying
@@ -807,13 +782,6 @@ func (s *TurnState) HasPlayedType(t card.CardType) bool {
 		}
 	}
 	return false
-}
-
-// HasPlayedOrCreatedAura reports whether an aura was played or created this turn — the
-// condition behind "if you've played or created an aura this turn" riders. The aura need
-// not still be on the battlefield; the flag is sticky for the rest of the turn.
-func (s *TurnState) HasPlayedOrCreatedAura() bool {
-	return s.auraCreated || s.HasPlayedType(card.TypeAura)
 }
 
 // Clash models a clash (rule 8.5.45): we and the opponent reveal the top card of our decks
@@ -876,10 +844,10 @@ func (s *TurnState) CreatePonder(n int) {
 }
 
 // Runechants returns the current Runechant token count, or zero when none are in play.
-func (s *TurnState) Runechants() int { return tokenCountIn(s.auras, TokenTypeRunechant) }
+func (s *TurnState) RunechantCount() int { return tokenCountIn(s.auras, TokenTypeRunechant) }
 
 // Ponders returns the current Ponder token count, or zero when none are in play.
-func (s *TurnState) Ponders() int { return tokenCountIn(s.auras, TokenTypePonder) }
+func (s *TurnState) PonderCount() int { return tokenCountIn(s.auras, TokenTypePonder) }
 
 // CreateGold creates n Gold tokens, bumping the existing item entry's Count or adding a
 // new one. No Value credit — Gold only pays out when the player spends one via
@@ -898,7 +866,7 @@ func (s *TurnState) CreateGold(n int) {
 }
 
 // Gold returns the current Gold token count, or zero when none are in play.
-func (s *TurnState) Gold() int { return itemCountIn(s.Items, TokenTypeGold) }
+func (s *TurnState) GoldCount() int { return itemCountIn(s.Items, TokenTypeGold) }
 
 // CreateSilver creates n Silver tokens, same shape as CreateGold.
 func (s *TurnState) CreateSilver(n int) {
@@ -915,7 +883,7 @@ func (s *TurnState) CreateSilver(n int) {
 }
 
 // Silver returns the current Silver token count, or zero when none are in play.
-func (s *TurnState) Silver() int { return itemCountIn(s.Items, TokenTypeSilver) }
+func (s *TurnState) SilverCount() int { return itemCountIn(s.Items, TokenTypeSilver) }
 
 // CreateCopper creates n Copper tokens, same shape as CreateGold.
 func (s *TurnState) CreateCopper(n int) {
@@ -932,7 +900,7 @@ func (s *TurnState) CreateCopper(n int) {
 }
 
 // Copper returns the current Copper token count, or zero when none are in play.
-func (s *TurnState) Copper() int { return itemCountIn(s.Items, TokenTypeCopper) }
+func (s *TurnState) CopperCount() int { return itemCountIn(s.Items, TokenTypeCopper) }
 
 // ConsumeItem decrements the matching item's Count by n and removes the entry when
 // Count reaches zero. Token items don't head to the graveyard on destroy. No-op when
@@ -955,16 +923,16 @@ func (s *TurnState) ConsumeItem(t TokenType, n int) {
 // approves so same-turn triggers reading "if you've dealt arcane damage this turn" fire.
 // Routes through dealtArcaneText[n] so the hot path avoids per-call fmt.Sprintf and
 // variadic-int boxing.
-func (s *TurnState) DealArcaneDamage(l card.Logger, self *card.CardState, n int) {
+func (s *TurnState) DealArcaneDamage(l card.Logger, source string, n int) {
 	s.AddValue(n)
 	if s.LikelyDamageHits(n, false) {
 		s.arcaneDamageDealt = true
 	}
 	if n >= 0 && n < len(dealtArcaneText) {
-		l.AppendPostTrigger(self.Card.DisplayName(), dealtArcaneText[n], n)
+		l.AppendPostTrigger(source, dealtArcaneText[n], n)
 		return
 	}
-	l.AppendPostTriggerf(self.Card.DisplayName(), n, "Dealt %d arcane damage", n)
+	l.AppendPostTriggerf(source, n, "Dealt %d arcane damage", n)
 }
 
 // dealtArcaneText is the pre-built rider-line cache indexed by arcane-damage count, keeping
@@ -989,34 +957,34 @@ func (s *TurnState) AddToGraveyard(c card.Card) {
 	s.graveyard = append(s.graveyard, c)
 }
 
-// AddStartOfTurnAura registers a TriggerStartOfTurn aura: the handler fires at the
+// CreateStartOfTurnAura registers a TriggerStartOfTurn aura: the handler fires at the
 // start of each subsequent turn. Source and Self.Card both come from self.Card.
-func (s *TurnState) AddStartOfTurnAura(self *card.CardState, handler card.AuraHandler, count int) {
+func (s *TurnState) CreateStartOfTurnAura(self *card.CardState, handler card.AuraHandler, count int) {
 	s.appendCardAura(self, TriggerStartOfTurn, handler, count, false)
 }
 
-// AddAttackActionAura registers a TriggerAttackAction aura: the handler fires once
-// per attack action card that resolves. See AddOncePerTurnAttackActionAura for the
+// CreateAttackActionAura registers a TriggerAttackAction aura: the handler fires once
+// per attack action card that resolves. See CreateOncePerTurnAttackActionAura for the
 // OncePerTurn variant.
-func (s *TurnState) AddAttackActionAura(self *card.CardState, handler card.AuraHandler, count int) {
+func (s *TurnState) CreateAttackActionAura(self *card.CardState, handler card.AuraHandler, count int) {
 	s.appendCardAura(self, TriggerAttackAction, handler, count, false)
 }
 
-// AddOncePerTurnAttackActionAura is the OncePerTurn variant of AddAttackActionAura —
+// CreateOncePerTurnAttackActionAura is the OncePerTurn variant of CreateAttackActionAura —
 // fires at most once per turn regardless of how many attack actions resolve.
-func (s *TurnState) AddOncePerTurnAttackActionAura(self *card.CardState, handler card.AuraHandler, count int) {
+func (s *TurnState) CreateOncePerTurnAttackActionAura(self *card.CardState, handler card.AuraHandler, count int) {
 	s.appendCardAura(self, TriggerAttackAction, handler, count, true)
 }
 
-// AddAttackAura registers a TriggerAttack aura: the handler fires each time any
+// CreateAttackAura registers a TriggerAttack aura: the handler fires each time any
 // attack (attack action card or weapon swing) resolves.
-func (s *TurnState) AddAttackAura(self *card.CardState, handler card.AuraHandler, count int) {
+func (s *TurnState) CreateAttackAura(self *card.CardState, handler card.AuraHandler, count int) {
 	s.appendCardAura(self, TriggerAttack, handler, count, false)
 }
 
-// AddEndOfTurnAura registers a TriggerEndOfTurn aura: the handler fires after the
+// CreateEndOfTurnAura registers a TriggerEndOfTurn aura: the handler fires after the
 // chain finishes resolving, before the carry-state snapshot.
-func (s *TurnState) AddEndOfTurnAura(self *card.CardState, handler card.AuraHandler, count int) {
+func (s *TurnState) CreateEndOfTurnAura(self *card.CardState, handler card.AuraHandler, count int) {
 	s.appendCardAura(self, TriggerEndOfTurn, handler, count, false)
 }
 

@@ -27,8 +27,8 @@ const moonWishPrintedCost = 2
 // moonWishCost returns 0 when there's any card left in hand to spend on the alt cost,
 // else the printed cost. Shared across all three pitch variants since the alt cost is
 // identical.
-func moonWishCost(s card.GameEngine) int {
-	if s != nil && len(s.Hand()) > 0 {
+func moonWishCost(g card.GameEngine) int {
+	if g != nil && len(g.Hand()) > 0 {
 		return 0
 	}
 	return moonWishPrintedCost
@@ -37,13 +37,13 @@ func moonWishCost(s card.GameEngine) int {
 // moonWishPlay pays the alt cost (when a hand card is available), emits the chain step,
 // and registers an OnHit that tutors Sun Kiss. Tutored Sun Kiss plays immediately when
 // self has go-again granted; otherwise it lands in hand for next turn.
-func moonWishPlay(c card.Card, s card.GameEngine, l card.Logger, self *card.CardState) {
+func moonWishPlay(c card.Card, g card.GameEngine, l card.Logger, self *card.CardState) {
 	name := c.DisplayName()
 	// Alt cost: pop a hand card and prepend it to the deck (PrependToDeck flips cacheable).
 	var returned card.Card
-	if len(s.Hand()) > 0 {
-		returned = s.PopHandAt(0)
-		s.PrependToDeck(returned)
+	if len(g.Hand()) > 0 {
+		returned = g.PopHandAt(0)
+		g.PrependToDeck(returned)
 	}
 
 	// Emit Moon Wish's chain step first so the alt-cost / tutor lines follow it in order.
@@ -59,18 +59,18 @@ func moonWishPlay(c card.Card, s card.GameEngine, l card.Logger, self *card.Card
 // registration stays alloc-free; reads the Moon Wish printing off self.Card so we don't
 // need a captured copy or a Source-field detour (self IS the Moon Wish that registered
 // the handler).
-func moonWishOnHit(s card.GameEngine, l card.Logger, self *card.CardState, _ *card.OnHitHandler) {
+func moonWishOnHit(g card.GameEngine, l card.Logger, self *card.CardState, _ *card.OnHitHandler) {
 	c := self.Card
 	name := c.DisplayName()
-	sk, ok := s.TutorFromDeck(sunKissTutorPriority)
+	sk, ok := g.TutorFromDeck(sunKissTutorPriority)
 	if !ok {
 		l.AppendPostTriggerf(name, 0, "%s found no Sun Kiss to tutor", name)
 		return
 	}
 
-	if !self.EffectiveGoAgain(s) {
+	if !self.EffectiveGoAgain(g) {
 		// Tutor lands the card in hand for next turn.
-		s.AppendHand(sk)
+		g.AppendHand(sk)
 		l.AppendPostTriggerf(name, 0, "%s tutored %s", name, sk.DisplayName())
 		return
 	}
@@ -78,11 +78,11 @@ func moonWishOnHit(s card.GameEngine, l card.Logger, self *card.CardState, _ *ca
 	// Kiss's "if you've played Moon Wish" synergy fires; pop after so the sim's normal
 	// post-Play append doesn't double-add.
 	l.AppendPostTriggerf(name, 0, "%s tutored %s and played it", name, sk.DisplayName())
-	s.SetCardsPlayed(append(s.CardsPlayed(), c))
+	g.SetCardsPlayed(append(g.CardsPlayed(), c))
 	skSelf := &card.CardState{Card: sk}
-	s.PlayCard(l, skSelf)
-	s.SetCardsPlayed(s.CardsPlayed()[:len(s.CardsPlayed())-1])
-	s.AddToGraveyard(sk)
+	g.PlayCard(l, skSelf)
+	g.SetCardsPlayed(g.CardsPlayed()[:len(g.CardsPlayed())-1])
+	g.AddToGraveyard(sk)
 }
 
 // sunKissTutorPriority picks the highest-priority Sun Kiss printing in the deck. Red >
@@ -100,26 +100,26 @@ func sunKissTutorPriority(c card.Card) int {
 	}
 }
 
-func (MoonWishRed) Cost(s card.GameEngine) int { return moonWishCost(s) }
+func (MoonWishRed) Cost(g card.GameEngine) int { return moonWishCost(g) }
 func (MoonWishRed) MinCost() int               { return 0 }
 func (MoonWishRed) MaxCost() int               { return moonWishPrintedCost }
 
-func (c MoonWishRed) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
-	moonWishPlay(c, s, l, self)
+func (c MoonWishRed) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+	moonWishPlay(c, g, l, self)
 }
 
-func (MoonWishYellow) Cost(s card.GameEngine) int { return moonWishCost(s) }
+func (MoonWishYellow) Cost(g card.GameEngine) int { return moonWishCost(g) }
 func (MoonWishYellow) MinCost() int               { return 0 }
 func (MoonWishYellow) MaxCost() int               { return moonWishPrintedCost }
 
-func (c MoonWishYellow) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
-	moonWishPlay(c, s, l, self)
+func (c MoonWishYellow) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+	moonWishPlay(c, g, l, self)
 }
 
-func (MoonWishBlue) Cost(s card.GameEngine) int { return moonWishCost(s) }
+func (MoonWishBlue) Cost(g card.GameEngine) int { return moonWishCost(g) }
 func (MoonWishBlue) MinCost() int               { return 0 }
 func (MoonWishBlue) MaxCost() int               { return moonWishPrintedCost }
 
-func (c MoonWishBlue) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
-	moonWishPlay(c, s, l, self)
+func (c MoonWishBlue) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+	moonWishPlay(c, g, l, self)
 }

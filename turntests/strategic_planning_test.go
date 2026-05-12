@@ -23,8 +23,8 @@ func TestStrategicPlanning_QueuesEndOfTurnTrigger(t *testing.T) {
 		if matching != 1 {
 			t.Errorf("%s [%d{p}]: end-of-turn triggers keyed to self = %d, want 1", c.Name(), c.Pitch(), matching)
 		}
-		if s.Ponders() != 0 {
-			t.Errorf("%s [%d{p}]: Ponders = %d, want 0 (trigger is standalone, not a Ponder token)", c.Name(), c.Pitch(), s.Ponders())
+		if s.PonderCount() != 0 {
+			t.Errorf("%s [%d{p}]: Ponders = %d, want 0 (trigger is standalone, not a Ponder token)", c.Name(), c.Pitch(), s.PonderCount())
 		}
 	}
 }

@@ -18,8 +18,8 @@ const lifeForALifeHealValue = 1
 
 // lifeForALifeOnHit fires the printed "When this hits, gain 1{h}" rider. Top-level so
 // registration stays alloc-free.
-func lifeForALifeOnHit(s card.GameEngine, l card.Logger, self *card.CardState, _ *card.OnHitHandler) {
-	s.AddValue(lifeForALifeHealValue)
+func lifeForALifeOnHit(g card.GameEngine, l card.Logger, self *card.CardState, _ *card.OnHitHandler) {
+	g.AddValue(lifeForALifeHealValue)
 	l.AppendPostTrigger(self.Card.DisplayName(), "On-hit gained 1 health", lifeForALifeHealValue)
 }
 
@@ -34,16 +34,16 @@ func lifeForALifeGoAgain(g card.GameEngine) bool {
 }
 
 func (LifeForALifeRed) GoAgain(g card.GameEngine) bool { return lifeForALifeGoAgain(g) }
-func (LifeForALifeRed) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
+func (LifeForALifeRed) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
 	self.RegisterOnHit(lifeForALifeOnHit)
 }
 
 func (LifeForALifeYellow) GoAgain(g card.GameEngine) bool { return lifeForALifeGoAgain(g) }
-func (LifeForALifeYellow) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
+func (LifeForALifeYellow) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
 	self.RegisterOnHit(lifeForALifeOnHit)
 }
 
 func (LifeForALifeBlue) GoAgain(g card.GameEngine) bool { return lifeForALifeGoAgain(g) }
-func (LifeForALifeBlue) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
+func (LifeForALifeBlue) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
 	self.RegisterOnHit(lifeForALifeOnHit)
 }

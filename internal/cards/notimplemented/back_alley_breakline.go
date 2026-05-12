@@ -12,15 +12,15 @@ import (
 
 // not implemented: face-up-from-deck action point grant
 
-func (c BackAlleyBreaklineRed) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
+func (c BackAlleyBreaklineRed) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
 }
 
 // not implemented: face-up-from-deck action point grant
 
-func (c BackAlleyBreaklineYellow) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
+func (c BackAlleyBreaklineYellow) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
 }
 
 // not implemented: face-up-from-deck action point grant
 
-func (c BackAlleyBreaklineBlue) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
+func (c BackAlleyBreaklineBlue) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
 }

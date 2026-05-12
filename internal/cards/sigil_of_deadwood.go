@@ -11,14 +11,14 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
-func (SigilOfDeadwoodBlue) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
-	s.AddStartOfTurnAura(self, sigilOfDeadwoodAuraHandler, 1)
+func (SigilOfDeadwoodBlue) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+	g.CreateStartOfTurnAura(self, sigilOfDeadwoodAuraHandler, 1)
 }
 
 // sigilOfDeadwoodAuraHandler creates 1 runechant on the next-turn fire and destroys the
 // aura. Top-level so the Aura.Handler assignment doesn't allocate a closure.
-func sigilOfDeadwoodAuraHandler(s card.GameEngine, l card.Logger, a card.Aura) {
-	s.CreateRunechants(1)
-	l.AppendPostTrigger(a.SelfName(), "Created a runechant", 1)
+func sigilOfDeadwoodAuraHandler(g card.GameEngine, l card.Logger, a card.Aura) {
+	g.CreateRunechants(1)
+	l.AppendPostTrigger(a.CardName(), "Created a runechant", 1)
 	a.Destroy(true)
 }

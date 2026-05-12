@@ -12,8 +12,8 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
-func (StonyWoottonhogRed) Play(s card.GameEngine, l card.Logger, self *card.CardState) {}
+func (StonyWoottonhogRed) Play(g card.GameEngine, l card.Logger, self *card.CardState) {}
 
-func (StonyWoottonhogYellow) Play(s card.GameEngine, l card.Logger, self *card.CardState) {}
+func (StonyWoottonhogYellow) Play(g card.GameEngine, l card.Logger, self *card.CardState) {}
 
-func (StonyWoottonhogBlue) Play(s card.GameEngine, l card.Logger, self *card.CardState) {}
+func (StonyWoottonhogBlue) Play(g card.GameEngine, l card.Logger, self *card.CardState) {}

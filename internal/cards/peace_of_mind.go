@@ -9,21 +9,21 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
-func peaceOfMindPlay(s card.GameEngine, l card.Logger, self *card.CardState) {
-	s.CreatePonder(1)
+func peaceOfMindPlay(g card.GameEngine, l card.Logger, self *card.CardState) {
+	g.CreatePonder(1)
 }
 
 func (PeaceOfMindRed) DefensiveInstant() {}
-func (PeaceOfMindRed) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
-	peaceOfMindPlay(s, l, self)
+func (PeaceOfMindRed) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+	peaceOfMindPlay(g, l, self)
 }
 
 func (PeaceOfMindYellow) DefensiveInstant() {}
-func (PeaceOfMindYellow) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
-	peaceOfMindPlay(s, l, self)
+func (PeaceOfMindYellow) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+	peaceOfMindPlay(g, l, self)
 }
 
 func (PeaceOfMindBlue) DefensiveInstant() {}
-func (PeaceOfMindBlue) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
-	peaceOfMindPlay(s, l, self)
+func (PeaceOfMindBlue) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+	peaceOfMindPlay(g, l, self)
 }

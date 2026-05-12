@@ -18,9 +18,9 @@ func TestStartingStake_CreatesGoldViaChain(t *testing.T) {
 	d := deck.New(heroes.Viserai{}, nil, fillerDeck())
 	hand := []deck.Card{cards.StartingStakeYellow{}}
 	state := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, sim.TurnState{}, hand)
-	if state.Gold() != 1 {
+	if state.GoldCount() != 1 {
 		t.Fatalf("Gold = %d, want 1 (Starting Stake creates one)\nBestLine: %s",
-			state.Gold(), formatBestLine(state.BestLine))
+			state.GoldCount(), formatBestLine(state.BestLine))
 	}
 }
 
@@ -30,8 +30,8 @@ func TestStartingStake_NoOpWhenGoldInPlay(t *testing.T) {
 	s := sim.NewTurnStateFromCards(nil, nil)
 	s.CreateGold(2)
 	sim.ResolveChainStep(s, s.Logger(), &card.CardState{Card: cards.StartingStakeYellow{}})
-	if s.Gold() != 2 {
-		t.Fatalf("Gold = %d, want 2 (already had Gold, Starting Stake is a no-op)", s.Gold())
+	if s.GoldCount() != 2 {
+		t.Fatalf("Gold = %d, want 2 (already had Gold, Starting Stake is a no-op)", s.GoldCount())
 	}
 	_ = testutils.RedAttack{}
 }

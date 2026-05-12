@@ -42,14 +42,14 @@ type attackerMeta struct {
 	// instead of the static maxCost / Cost(s) paths.
 	isModalCost bool
 	// isModalBlocker is set when the card has a per-mode block-time cost (Blocker +
-	// ModalCard + BlockCost). Cached so containsModalBlocker / defendersDamage's mode-pick
+	// Modal + BlockCost). Cached so containsModalBlocker / defendersDamage's mode-pick
 	// fast paths avoid per-leaf type assertions.
 	isModalBlocker bool
 	// actsAsDR is true for printed Defense Reactions and DefensiveInstant-marked Instants.
 	// Cached so per-leaf hot-path defender checks fold the type-assertion into the
 	// once-per-ID slow path.
 	actsAsDR bool
-	// modes is the mode count for a ModalCard, 1 for non-modal cards. Sized int8 so it
+	// modes is the mode count for a Modal, 1 for non-modal cards. Sized int8 so it
 	// packs into the bool block's padding without growing attackerMeta — every chain step
 	// reads permMeta[i] in the inner loop, and every extra cache line through that table
 	// shows up in the anneal bench.
@@ -130,14 +130,14 @@ func buildAttackerMeta(c card.Card) attackerMeta {
 		actsAsDR:        t.IsDefenseReaction() || isDefensiveInstant,
 		modes:           1,
 	}
-	if mc, ok := c.(card.ModalCard); ok {
-		// A ModalCard must expose at least two modes — the marker exists to enumerate
+	if mc, ok := c.(card.Modal); ok {
+		// A Modal must expose at least two modes — the marker exists to enumerate
 		// across them. Returning 0 would silently zero the chain (outer loop runs zero
 		// iterations); returning 1 makes the marker pointless. Panic so the bug surfaces
 		// at first encounter rather than corrupting solver output.
 		n := mc.Modes()
 		if n < 2 {
-			panic(fmt.Sprintf("ModalCard %s: Modes() = %d, want >= 2", c.Name(), n))
+			panic(fmt.Sprintf("Modal %s: Modes() = %d, want >= 2", c.Name(), n))
 		}
 		m.modes = int8(n)
 		// Modal blockers (also Blocker + BlockCost) get a flag for the defendersDamage

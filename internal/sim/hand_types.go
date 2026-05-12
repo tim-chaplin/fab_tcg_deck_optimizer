@@ -77,19 +77,19 @@ type CarryState struct {
 }
 
 // Runechants returns the carried Runechant token count, or zero when none are in play.
-func (c *CarryState) Runechants() int { return tokenCountIn(c.Auras, TokenTypeRunechant) }
+func (c *CarryState) RunechantCount() int { return tokenCountIn(c.Auras, TokenTypeRunechant) }
 
 // Ponders returns the carried Ponder token count, or zero when none are in play.
-func (c *CarryState) Ponders() int { return tokenCountIn(c.Auras, TokenTypePonder) }
+func (c *CarryState) PonderCount() int { return tokenCountIn(c.Auras, TokenTypePonder) }
 
 // Gold returns the carried Gold token count, or zero when none are in play.
-func (c *CarryState) Gold() int { return itemCountIn(c.Items, TokenTypeGold) }
+func (c *CarryState) GoldCount() int { return itemCountIn(c.Items, TokenTypeGold) }
 
 // Silver returns the carried Silver token count, or zero when none are in play.
-func (c *CarryState) Silver() int { return itemCountIn(c.Items, TokenTypeSilver) }
+func (c *CarryState) SilverCount() int { return itemCountIn(c.Items, TokenTypeSilver) }
 
 // Copper returns the carried Copper token count, or zero when none are in play.
-func (c *CarryState) Copper() int { return itemCountIn(c.Items, TokenTypeCopper) }
+func (c *CarryState) CopperCount() int { return itemCountIn(c.Items, TokenTypeCopper) }
 
 // TurnSummary is the result of running Best on a hand: the winning card-role assignments
 // plus the CarryState snapshot the next turn inherits.

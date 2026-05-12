@@ -20,8 +20,8 @@ func TestCopperAbility_NotEnoughResourceSkipsSpend(t *testing.T) {
 	hand := []deck.Card{testutils.BluePitch{}}
 	priorItems := []sim.Item{sim.NewCopperItem(1)}
 	got := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, sim.NewTurnStateFromSpec(sim.TurnStateSpec{Items: priorItems}), hand)
-	if got.Copper() != 1 {
-		t.Fatalf("Copper after turn = %d, want 1 (single blue pitch can't fund {4})", got.Copper())
+	if got.CopperCount() != 1 {
+		t.Fatalf("Copper after turn = %d, want 1 (single blue pitch can't fund {4})", got.CopperCount())
 	}
 }
 
@@ -40,8 +40,8 @@ func TestCopperAbility_SpendsAndSwings(t *testing.T) {
 	if got.Value != 3 {
 		t.Fatalf("Value = %d, want 3 (Reaping Blade swing power 3)", got.Value)
 	}
-	if got.Copper() != 0 {
-		t.Fatalf("Copper after turn = %d, want 0 (the only token spent)", got.Copper())
+	if got.CopperCount() != 0 {
+		t.Fatalf("Copper after turn = %d, want 0 (the only token spent)", got.CopperCount())
 	}
 	if got.CardsDrawn != 1 {
 		t.Fatalf("CardsDrawn = %d, want 1 (Copper ability draws one card)", got.CardsDrawn)

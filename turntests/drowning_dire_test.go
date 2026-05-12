@@ -22,13 +22,13 @@ func TestDrowningDire_NoAuraNoDominate(t *testing.T) {
 	}
 }
 
-// Tests that an aura played earlier this turn flips GrantedDominate via HasPlayedOrCreatedAura.
+// Tests that an aura played earlier this turn flips GrantedDominate via AuraCreated.
 func TestDrowningDire_AuraGrantsDominate(t *testing.T) {
 	for _, c := range []card.Card{cards.DrowningDireRed{}, cards.DrowningDireYellow{}, cards.DrowningDireBlue{}} {
-		s := sim.NewTurnStateFromCards(nil, nil)
-		s.SetCardsPlayed([]card.Card{testutils.Aura{}})
+		spec := sim.TurnStateSpec{CardsPlayed: []card.Card{testutils.Aura{}}, AuraCreated: true}
+		s := sim.NewTurnStateFromSpec(spec)
 		self := &card.CardState{Card: c}
-		sim.ResolveChainStep(s, s.Logger(), self)
+		sim.ResolveChainStep(&s, s.Logger(), self)
 		if !self.GrantedDominate {
 			t.Errorf("%s [%d{p}]: GrantedDominate = false after aura, want true", c.Name(), c.Pitch())
 		}

@@ -35,7 +35,7 @@ func (ScepterOfPainAbility) Attack() int                        { return 1 }
 func (ScepterOfPainAbility) Defense() int                       { return 0 }
 func (ScepterOfPainAbility) Types(card.GameEngine) card.TypeSet { return scepterOfPainAbilityTypes }
 func (ScepterOfPainAbility) GoAgain(card.GameEngine) bool       { return false }
-func (ScepterOfPainAbility) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
-	s.CreateRunechants(1)
+func (ScepterOfPainAbility) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+	g.CreateRunechants(1)
 	l.AppendPostTrigger(self.Card.DisplayName(), "Created a runechant", 1)
 }

@@ -24,8 +24,8 @@ func TestSilverAbility_SpendsToFillArsenal(t *testing.T) {
 	if got.Value != 0 {
 		t.Fatalf("Value = %d, want 0 (Silver ability has no damage)", got.Value)
 	}
-	if got.Silver() != 0 {
-		t.Fatalf("Silver after turn = %d, want 0 (the only token spent)", got.Silver())
+	if got.SilverCount() != 0 {
+		t.Fatalf("Silver after turn = %d, want 0 (the only token spent)", got.SilverCount())
 	}
 	if got.CardsDrawn != 1 {
 		t.Fatalf("CardsDrawn = %d, want 1 (Silver ability draws one card)", got.CardsDrawn)
@@ -53,8 +53,8 @@ func TestSilverAbility_SpendsAndSwings(t *testing.T) {
 	if got.Value != 3 {
 		t.Fatalf("Value = %d, want 3 (Reaping Blade swing power 3)", got.Value)
 	}
-	if got.Silver() != 0 {
-		t.Fatalf("Silver after turn = %d, want 0 (the only token spent)", got.Silver())
+	if got.SilverCount() != 0 {
+		t.Fatalf("Silver after turn = %d, want 0 (the only token spent)", got.SilverCount())
 	}
 	if got.CardsDrawn != 1 {
 		t.Fatalf("CardsDrawn = %d, want 1 (Silver ability draws one card)", got.CardsDrawn)

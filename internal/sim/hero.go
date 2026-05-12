@@ -35,3 +35,12 @@ type Hero interface {
 	// panics. Both lists may be empty (skip bottoming any cards or skip keeping any on top).
 	Opt(cards []card.Card) (top, bottom []card.Card)
 }
+
+// LowerHealthWanter is a Hero marker. Heroes whose strategy revolves around staying at
+// lower {h} than their opponent (deck building, sandbagging, self-damage) opt in. Cards
+// with a "less {h} than an opposing hero" rider assume the clause always fires for these
+// heroes and never fires for anyone else — a coarse proxy that skips per-turn life
+// tracking.
+type LowerHealthWanter interface {
+	WantsLowerHealth()
+}

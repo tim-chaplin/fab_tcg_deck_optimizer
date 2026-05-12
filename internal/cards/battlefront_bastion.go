@@ -3,7 +3,7 @@
 //
 // Text: "When this defends alone, prevent the next 1 damage that would be dealt to you this turn."
 //
-// Block scans s.Defenders() for a second plain blocker; if none is present (DRs alongside
+// Block scans g.Defenders() for a second plain blocker; if none is present (DRs alongside
 // don't count), the +1 prevention fires by bumping self.BonusDefense.
 
 package cards
@@ -15,9 +15,9 @@ import (
 // battlefrontBastionBlock fires the +1 alone-bonus when this is the only plain blocker.
 // Iterates Defenders and short-circuits on the second non-DR sighting so the typical
 // partition pays at most a few comparisons.
-func battlefrontBastionBlock(s card.GameEngine, l card.Logger, self *card.CardState) {
+func battlefrontBastionBlock(g card.GameEngine, l card.Logger, self *card.CardState) {
 	plainCount := 0
-	for _, d := range s.Defenders() {
+	for _, d := range g.Defenders() {
 		if d.Types(nil).IsDefenseReaction() {
 			continue
 		}
@@ -29,17 +29,17 @@ func battlefrontBastionBlock(s card.GameEngine, l card.Logger, self *card.CardSt
 	self.BonusDefense += 1
 }
 
-func (BattlefrontBastionRed) Block(s card.GameEngine, l card.Logger, self *card.CardState) {
-	battlefrontBastionBlock(s, l, self)
+func (BattlefrontBastionRed) Block(g card.GameEngine, l card.Logger, self *card.CardState) {
+	battlefrontBastionBlock(g, l, self)
 }
-func (BattlefrontBastionRed) Play(s card.GameEngine, l card.Logger, self *card.CardState) {}
+func (BattlefrontBastionRed) Play(g card.GameEngine, l card.Logger, self *card.CardState) {}
 
-func (BattlefrontBastionYellow) Block(s card.GameEngine, l card.Logger, self *card.CardState) {
-	battlefrontBastionBlock(s, l, self)
+func (BattlefrontBastionYellow) Block(g card.GameEngine, l card.Logger, self *card.CardState) {
+	battlefrontBastionBlock(g, l, self)
 }
-func (BattlefrontBastionYellow) Play(s card.GameEngine, l card.Logger, self *card.CardState) {}
+func (BattlefrontBastionYellow) Play(g card.GameEngine, l card.Logger, self *card.CardState) {}
 
-func (BattlefrontBastionBlue) Block(s card.GameEngine, l card.Logger, self *card.CardState) {
-	battlefrontBastionBlock(s, l, self)
+func (BattlefrontBastionBlue) Block(g card.GameEngine, l card.Logger, self *card.CardState) {
+	battlefrontBastionBlock(g, l, self)
 }
-func (BattlefrontBastionBlue) Play(s card.GameEngine, l card.Logger, self *card.CardState) {}
+func (BattlefrontBastionBlue) Play(g card.GameEngine, l card.Logger, self *card.CardState) {}

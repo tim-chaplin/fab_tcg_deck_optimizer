@@ -10,22 +10,22 @@ import (
 )
 
 // Cost predicate reads s so variable-cost targets are gated on their current cost.
-func memorialGroundPlay(s card.GameEngine, l card.Logger, self *card.CardState) {
-	if _, ok := s.RecycleFromGraveyardToTop(func(c card.Card) bool {
-		return c.Types(nil).IsAttackAction() && c.Cost(s) <= 2
+func memorialGroundPlay(g card.GameEngine, l card.Logger, self *card.CardState) {
+	if _, ok := g.RecycleFromGraveyardToTop(func(c card.Card) bool {
+		return c.Types(nil).IsAttackAction() && c.Cost(g) <= 2
 	}); ok {
 		l.AppendPostTrigger(self.Card.DisplayName(), "Recycled an attack action card to top of deck", 0)
 	}
 }
 
-func (MemorialGroundRed) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
-	memorialGroundPlay(s, l, self)
+func (MemorialGroundRed) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+	memorialGroundPlay(g, l, self)
 }
 
-func (MemorialGroundYellow) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
-	memorialGroundPlay(s, l, self)
+func (MemorialGroundYellow) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+	memorialGroundPlay(g, l, self)
 }
 
-func (MemorialGroundBlue) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
-	memorialGroundPlay(s, l, self)
+func (MemorialGroundBlue) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+	memorialGroundPlay(g, l, self)
 }

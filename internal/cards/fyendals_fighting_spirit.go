@@ -11,22 +11,22 @@ import (
 
 // fyendalsFightingSpiritApplyRider emits the 1{h} gain as a sub-line under self when the
 // current hero opts into LowerHealthWanter.
-func fyendalsFightingSpiritApplyRider(s card.GameEngine, l card.Logger, self *card.CardState) {
-	if !s.HeroWantsLowerHealth() {
+func fyendalsFightingSpiritApplyRider(g card.GameEngine, l card.Logger, self *card.CardState) {
+	if !g.HeroWantsLowerHealth() {
 		return
 	}
-	s.AddValue(1)
+	g.AddValue(1)
 	l.AppendPostTrigger(self.Card.DisplayName(), "Gained 1 health (lower health than opposing hero)", 1)
 }
 
-func (FyendalsFightingSpiritRed) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
-	fyendalsFightingSpiritApplyRider(s, l, self)
+func (FyendalsFightingSpiritRed) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+	fyendalsFightingSpiritApplyRider(g, l, self)
 }
 
-func (FyendalsFightingSpiritYellow) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
-	fyendalsFightingSpiritApplyRider(s, l, self)
+func (FyendalsFightingSpiritYellow) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+	fyendalsFightingSpiritApplyRider(g, l, self)
 }
 
-func (FyendalsFightingSpiritBlue) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
-	fyendalsFightingSpiritApplyRider(s, l, self)
+func (FyendalsFightingSpiritBlue) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+	fyendalsFightingSpiritApplyRider(g, l, self)
 }

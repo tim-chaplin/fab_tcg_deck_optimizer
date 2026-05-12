@@ -139,8 +139,8 @@ func (GoldTokenAbility) GoAgain(card.GameEngine) bool       { return true }
 // PlayPrecondition gates the activated ability on having a Gold token to spend. Rejects
 // permutations that order the ability before the card / OnHit that creates the token —
 // the chain runner finds the legal ordering (token created first) via Heap's algorithm.
-func (GoldTokenAbility) PlayPrecondition(s card.GameEngine, self *card.CardState) bool {
-	return s.Gold() > 0
+func (GoldTokenAbility) PlayPrecondition(g card.GameEngine, self *card.CardState) bool {
+	return g.GoldCount() > 0
 }
 
 func (GoldTokenAbility) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
@@ -178,8 +178,8 @@ func (SilverTokenAbility) Types(card.GameEngine) card.TypeSet { return silverTok
 func (SilverTokenAbility) GoAgain(card.GameEngine) bool       { return true }
 
 // PlayPrecondition gates the activated ability on having a Silver token to spend.
-func (SilverTokenAbility) PlayPrecondition(s card.GameEngine, self *card.CardState) bool {
-	return s.Silver() > 0
+func (SilverTokenAbility) PlayPrecondition(g card.GameEngine, self *card.CardState) bool {
+	return g.SilverCount() > 0
 }
 
 func (SilverTokenAbility) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
@@ -217,8 +217,8 @@ func (CopperTokenAbility) Types(card.GameEngine) card.TypeSet { return copperTok
 func (CopperTokenAbility) GoAgain(card.GameEngine) bool       { return true }
 
 // PlayPrecondition gates the activated ability on having a Copper token to spend.
-func (CopperTokenAbility) PlayPrecondition(s card.GameEngine, self *card.CardState) bool {
-	return s.Copper() > 0
+func (CopperTokenAbility) PlayPrecondition(g card.GameEngine, self *card.CardState) bool {
+	return g.CopperCount() > 0
 }
 
 func (CopperTokenAbility) Play(g card.GameEngine, l card.Logger, self *card.CardState) {

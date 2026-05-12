@@ -3,7 +3,7 @@
 // Text (Red): "Prevent the next 4 damage that would be dealt to target hero this turn by
 // a source of your choice. If they have less life than each other hero, they may gain
 // 1{h}." Yellow caps at 3, Blue at 2. The 1{h} life-gain rider fires for heroes opting
-// into card.LowerHealthWanter via s.HeroWantsLowerHealth — life gain is folded into
+// into card.LowerHealthWanter via g.HeroWantsLowerHealth — life gain is folded into
 // the chain-step "(+N)" by bumping self.BonusDefense, which the sim's resolver then
 // caps against IncomingDamage alongside the printed prevention.
 
@@ -13,8 +13,8 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
-func oasisRespitePlay(s card.GameEngine, l card.Logger, self *card.CardState) {
-	if s.HeroWantsLowerHealth() {
+func oasisRespitePlay(g card.GameEngine, l card.Logger, self *card.CardState) {
+	if g.HeroWantsLowerHealth() {
 		// Flip BonusDefense so the sim's chain-step resolver folds the +1{h} into the
 		// "(+N)" delta when it credits EffectiveDefense after Play returns.
 		self.BonusDefense += 1
@@ -22,16 +22,16 @@ func oasisRespitePlay(s card.GameEngine, l card.Logger, self *card.CardState) {
 }
 
 func (OasisRespiteRed) DefensiveInstant() {}
-func (OasisRespiteRed) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
-	oasisRespitePlay(s, l, self)
+func (OasisRespiteRed) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+	oasisRespitePlay(g, l, self)
 }
 
 func (OasisRespiteYellow) DefensiveInstant() {}
-func (OasisRespiteYellow) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
-	oasisRespitePlay(s, l, self)
+func (OasisRespiteYellow) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+	oasisRespitePlay(g, l, self)
 }
 
 func (OasisRespiteBlue) DefensiveInstant() {}
-func (OasisRespiteBlue) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
-	oasisRespitePlay(s, l, self)
+func (OasisRespiteBlue) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+	oasisRespitePlay(g, l, self)
 }

@@ -51,27 +51,27 @@ type TurnStartState struct {
 }
 
 // Runechants returns the live Runechant token count at the start of the next turn.
-func (t TurnStartState) Runechants() int {
+func (t TurnStartState) RunechantCount() int {
 	return tokenCountIn(t.StartOfNextTurnAuras, TokenTypeRunechant)
 }
 
 // Ponders returns the live Ponder token count at the start of the next turn.
-func (t TurnStartState) Ponders() int {
+func (t TurnStartState) PonderCount() int {
 	return tokenCountIn(t.StartOfNextTurnAuras, TokenTypePonder)
 }
 
 // Gold returns the live Gold token count at the start of the next turn.
-func (t TurnStartState) Gold() int {
+func (t TurnStartState) GoldCount() int {
 	return itemCountIn(t.StartOfNextTurnItems, TokenTypeGold)
 }
 
 // Silver returns the live Silver token count at the start of the next turn.
-func (t TurnStartState) Silver() int {
+func (t TurnStartState) SilverCount() int {
 	return itemCountIn(t.StartOfNextTurnItems, TokenTypeSilver)
 }
 
 // Copper returns the live Copper token count at the start of the next turn.
-func (t TurnStartState) Copper() int {
+func (t TurnStartState) CopperCount() int {
 	return itemCountIn(t.StartOfNextTurnItems, TokenTypeCopper)
 }
 

@@ -40,7 +40,7 @@ func TestDestructiveDeliberation_OnHitCreatesPonder(t *testing.T) {
 		self := &card.CardState{Card: c}
 		sim.ResolveChainStep(&s, s.Logger(), self)
 		self.OnHit[0].Fire(&s, s.Logger(), self, &self.OnHit[0])
-		if got := s.Ponders(); got != 1 {
+		if got := s.PonderCount(); got != 1 {
 			t.Errorf("%s: Ponders = %d, want 1", c.Name(), got)
 		}
 		if !s.AuraCreated() {

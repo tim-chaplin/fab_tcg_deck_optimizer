@@ -13,8 +13,8 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
-func (GravekeepingRed) Play(s card.GameEngine, l card.Logger, self *card.CardState) {}
+func (GravekeepingRed) Play(g card.GameEngine, l card.Logger, self *card.CardState) {}
 
-func (GravekeepingYellow) Play(s card.GameEngine, l card.Logger, self *card.CardState) {}
+func (GravekeepingYellow) Play(g card.GameEngine, l card.Logger, self *card.CardState) {}
 
-func (GravekeepingBlue) Play(s card.GameEngine, l card.Logger, self *card.CardState) {}
+func (GravekeepingBlue) Play(g card.GameEngine, l card.Logger, self *card.CardState) {}

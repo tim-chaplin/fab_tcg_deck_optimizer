@@ -8,19 +8,19 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
-func (HitTheHighNotesRed) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
-	self.BonusAttack += hitTheHighNotesBonus(s)
+func (HitTheHighNotesRed) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+	self.BonusAttack += hitTheHighNotesBonus(g)
 }
 
-func (HitTheHighNotesYellow) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
-	self.BonusAttack += hitTheHighNotesBonus(s)
+func (HitTheHighNotesYellow) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+	self.BonusAttack += hitTheHighNotesBonus(g)
 }
 
-func (HitTheHighNotesBlue) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
-	self.BonusAttack += hitTheHighNotesBonus(s)
+func (HitTheHighNotesBlue) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+	self.BonusAttack += hitTheHighNotesBonus(g)
 }
-func hitTheHighNotesBonus(s card.GameEngine) int {
-	if s.HasPlayedOrCreatedAura() {
+func hitTheHighNotesBonus(g card.GameEngine) int {
+	if g.AuraCreated() {
 		return 2
 	}
 	return 0

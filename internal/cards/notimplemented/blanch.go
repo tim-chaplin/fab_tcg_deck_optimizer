@@ -11,15 +11,15 @@ import (
 
 // not implemented: opponent 'lose all colors' debuff
 
-func (BlanchRed) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
+func (BlanchRed) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
 }
 
 // not implemented: opponent 'lose all colors' debuff
 
-func (BlanchYellow) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
+func (BlanchYellow) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
 }
 
 // not implemented: opponent 'lose all colors' debuff
 
-func (BlanchBlue) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
+func (BlanchBlue) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
 }

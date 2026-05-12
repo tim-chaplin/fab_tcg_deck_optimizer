@@ -13,9 +13,9 @@ func TestFireAttackActionAuras_FiresOnceWhenGated(t *testing.T) {
 	calls := 0
 	state := NewTurnStatePtr(TurnStateSpec{Auras: []Aura{{
 		TriggerType: TriggerAttackAction,
-		Handler: func(s card.GameEngine, l card.Logger, _ card.Aura) {
+		Handler: func(g card.GameEngine, l card.Logger, _ card.Aura) {
 			calls++
-			s.AddValue(1)
+			g.AddValue(1)
 			l.AppendPreTriggerf("TestCard", 1, "test trigger fired")
 		},
 		Self:        CardOrTokenType{Card: aura},
@@ -48,8 +48,8 @@ func TestFireAttackActionAuras_GraveyardsExhaustedAura(t *testing.T) {
 	aura := FakeRedAttack{}
 	state := NewTurnStatePtr(TurnStateSpec{Auras: []Aura{{
 		TriggerType: TriggerAttackAction,
-		Handler: func(s card.GameEngine, _ card.Logger, a card.Aura) {
-			s.AddValue(1)
+		Handler: func(g card.GameEngine, _ card.Logger, a card.Aura) {
+			g.AddValue(1)
 			a.Destroy(true)
 		},
 		Self:  CardOrTokenType{Card: aura},

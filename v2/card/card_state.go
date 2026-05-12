@@ -17,12 +17,20 @@ type CardState struct {
 	// card's Dominator marker (HasDominate) to decide whether to credit the "can't
 	// over-block" bump.
 	GrantedDominate bool
+	// GrantedOverpower flags an attack that has gained the Overpower keyword this
+	// turn — set by Play when a conditional clause fires (Vantage Point's "if you've
+	// played or created an aura this turn, this gets overpower"). The engine doesn't
+	// currently consume Overpower (it's accounted for in the partition's incoming-
+	// damage / block model rather than a per-step bonus), so the flag's role is
+	// purely the rules-text record; cards that read "this has Overpower" reach for
+	// p.GrantedOverpower.
+	GrantedOverpower bool
 	// FromArsenal flags the single CardState whose Card came from the arsenal slot
 	// at start of turn. The solver sets it before the chain runs; CardStates for
 	// hand cards and mid-turn extensions stay false. Cards gate "if this is played
 	// from arsenal" riders on self.FromArsenal.
 	FromArsenal bool
-	// Mode is the chosen mode for a ModalCard ("Choose 1" cards), set by the chain
+	// Mode is the chosen mode for a Modal ("Choose 1" cards), set by the chain
 	// runner before Play. Always 0 for non-modal cards. Sized int8 so it packs into
 	// the bool block's padding without growing the CardState — every chain step
 	// reads pcBuf[i], so a wider Mode would push more cache lines through the inner
@@ -51,7 +59,7 @@ type CardState struct {
 	// the active pitch ordering (carrying over any excess to fund subsequent cards)
 	// and the popped slice is exposed here. Cards whose printed text gates on "if X
 	// was pitched to play this" iterate this slice instead of the unordered
-	// s.Pitched bag — the same pitched bag still lives on TurnState for cards that
+	// g.Pitched bag — the same pitched bag still lives on TurnState for cards that
 	// read it as a multiset. Empty for cards whose cost was fully paid by carry from
 	// a prior pitch.
 	PitchedToPlay []Card
@@ -60,12 +68,6 @@ type CardState struct {
 	// anneal path doesn't allocate per registration. See docs/dev-standards.md
 	// "OnHit registrations" for the wiring contract.
 	OnHit []OnHitHandler
-	// SkipGraveyard is set by Play helpers that route this card to a non-graveyard
-	// zone — e.g. GameEngine.RecycleToDeckBottom for Relentless Pursuit's "put this on the
-	// bottom of its owner's deck" clause. The chain dispatcher's "non-persistent →
-	// graveyard" append checks this flag and skips the append when set, so the
-	// helper that moved the card owns its destination zone fully.
-	SkipGraveyard bool
 }
 
 // OnHitHandler is one registered on-hit rider on a CardState. The chain runner fires
@@ -86,6 +88,21 @@ type OnHitHandler struct {
 // append an OnHitHandler literal directly.
 func (p *CardState) RegisterOnHit(fire func(g GameEngine, l Logger, self *CardState, h *OnHitHandler)) {
 	p.OnHit = append(p.OnHit, OnHitHandler{Fire: fire})
+}
+
+// GrantAttackReactionBuff buffs the active attack target by n: adds to BonusAttack,
+// credits g's value, amends the target's chain-step delta, and logs the rider under
+// the target's entry. ARs call this from Play; the chain runner has already validated
+// the target. p is the Attack Reaction card granting the buff.
+func (p *CardState) GrantAttackReactionBuff(g GameEngine, l Logger, n int) {
+	target := g.AttackReactionTarget()
+	if target == nil {
+		return
+	}
+	target.BonusAttack += n
+	g.AddValue(n)
+	l.AmendLastChainStepN(n)
+	l.AppendPostTriggerf(target.Card.DisplayName(), 0, "%s buffed +%d{p}", p.Card.DisplayName(), n)
 }
 
 // EffectiveGoAgain reports whether this card has Go again this turn — from printed
@@ -153,24 +170,6 @@ func (p *CardState) EffectiveDominate() bool {
 func HasDominate(c Card) bool {
 	_, ok := c.(Dominator)
 	return ok
-}
-
-// Dominator is the marker the Dominate keyword maps to. Defined here (alongside the
-// HasDominate helper that consumes it) rather than in card.go because every other
-// optional marker — VariableCost, ArsenalDefenseBonus, Blocker, etc. — lives in
-// sim alongside the chain-runner code that consults it; Dominator is the exception
-// that v2/card needs to interpret directly via the EffectiveDominate helper, so it
-// stays close to its only reader.
-type Dominator interface {
-	Dominate()
-}
-
-// ArsenalDefenseBonus is the marker EffectiveDefense consults when this copy came
-// from the arsenal slot. Returns the additional defense added to Defense() in that
-// case. Defense() itself stays the printed value so the hand-played path is
-// unaffected.
-type ArsenalDefenseBonus interface {
-	ArsenalDefenseBonus() int
 }
 
 // arsenalDefenseBonusOf returns c's ArsenalDefenseBonus contribution, or 0 when c

@@ -48,10 +48,10 @@ func (grantBonusAttack) Types(card.GameEngine) card.TypeSet {
 	return card.NewTypeSet(card.TypeGeneric, card.TypeAction)
 }
 func (grantBonusAttack) GoAgain(card.GameEngine) bool { return true }
-func (g grantBonusAttack) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
-	for _, pc := range s.CardsRemaining() {
+func (c grantBonusAttack) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+	for _, pc := range g.CardsRemaining() {
 		if pc.Card.Types(nil).IsAttackAction() {
-			pc.BonusAttack += g.n
+			pc.BonusAttack += c.n
 			break
 		}
 	}
@@ -74,10 +74,10 @@ func (grantBonusAttackWeapon) Types(card.GameEngine) card.TypeSet {
 	return card.NewTypeSet(card.TypeGeneric, card.TypeAction)
 }
 func (grantBonusAttackWeapon) GoAgain(card.GameEngine) bool { return true }
-func (g grantBonusAttackWeapon) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
-	for _, pc := range s.CardsRemaining() {
+func (c grantBonusAttackWeapon) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+	for _, pc := range g.CardsRemaining() {
 		if pc.Card.Types(nil).IsWeaponAttack() {
-			pc.BonusAttack += g.n
+			pc.BonusAttack += c.n
 			break
 		}
 	}

@@ -12,4 +12,4 @@ import (
 
 // not implemented: gold tokens, landmarks
 
-func (RansackAndRazeBlue) Play(s card.GameEngine, l card.Logger, self *card.CardState) {}
+func (RansackAndRazeBlue) Play(g card.GameEngine, l card.Logger, self *card.CardState) {}

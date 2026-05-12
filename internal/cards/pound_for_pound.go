@@ -6,7 +6,7 @@
 //
 // Modelling: the "less {h} than an opposing hero" clause is treated as a hero attribute — the
 // Dominate grant fires for heroes that implement card.LowerHealthWanter (via
-// s.HeroWantsLowerHealth) and never fires otherwise, a coarse proxy that skips per-turn
+// g.HeroWantsLowerHealth) and never fires otherwise, a coarse proxy that skips per-turn
 // life tracking. Standard self.GrantedDominate wiring (docs/dev-standards.md).
 
 package cards
@@ -17,20 +17,20 @@ import (
 
 // poundForPoundPlay grants self Dominate when the current hero opts into LowerHealthWanter,
 // then emits the chain step.
-func poundForPoundPlay(s card.GameEngine, l card.Logger, self *card.CardState) {
-	if s.HeroWantsLowerHealth() {
+func poundForPoundPlay(g card.GameEngine, l card.Logger, self *card.CardState) {
+	if g.HeroWantsLowerHealth() {
 		self.GrantedDominate = true
 	}
 }
 
-func (PoundForPoundRed) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
-	poundForPoundPlay(s, l, self)
+func (PoundForPoundRed) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+	poundForPoundPlay(g, l, self)
 }
 
-func (PoundForPoundYellow) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
-	poundForPoundPlay(s, l, self)
+func (PoundForPoundYellow) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+	poundForPoundPlay(g, l, self)
 }
 
-func (PoundForPoundBlue) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
-	poundForPoundPlay(s, l, self)
+func (PoundForPoundBlue) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+	poundForPoundPlay(g, l, self)
 }

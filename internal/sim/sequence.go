@@ -102,7 +102,7 @@ func bestAttackWithWeapons(hero Hero, weapons []Weapon, attackers, defenders, pi
 	ctx.activatedAbilityCosts = abilityCosts
 	// Non-modal defender contribution is constant across phase / weapon masks — DRs through
 	// Play, plain blocks as raw block credit — so we compute it once at the top. Modal
-	// blockers (Blocker + ModalCard + BlockCost) need a per-pmask budget to pick their
+	// blockers (Blocker + Modal + BlockCost) need a per-pmask budget to pick their
 	// mode, so partitions with any modal blocker recompute defendersDamage per (pmask,
 	// wmask) below; the once-per-leaf shortcut applies to the common no-modal-blocker case.
 	hasDRs := containsDefenseReaction(defenders)
@@ -208,7 +208,7 @@ func bestAttackWithWeapons(hero Hero, weapons []Weapon, attackers, defenders, pi
 			}
 			// Cost the DRs against the prior-turn runechant carryover (cost is paid
 			// before the card resolves, so DRs can't fund themselves with auras they
-			// create). Variable-cost DRs read s.Runechants() inside their Cost; static
+			// create). Variable-cost DRs read s.RunechantCount() inside their Cost; static
 			// DRs return a constant. bufs.drScratch is reused per mask iteration — the
 			// interface call boxes the pointer, so a stack allocation would escape.
 			bufs.drScratch = TurnState{}
@@ -596,7 +596,6 @@ func (ctx *sequenceContext) resetStateForPermutation() {
 	s.auraCreated = false
 	s.cardsRemaining = nil
 	s.pitched = ctx.pitched
-	s.overpower = false
 	s.nonAttackActionPlayed = false
 	s.incomingDamage = ctx.matchup.IncomingDamage
 	s.arcaneIncomingDamage = ctx.matchup.ArcaneIncomingDamage
@@ -650,11 +649,11 @@ func (ctx *sequenceContext) bestSequence(attackers []card.Card) (int, int, bool)
 		pcBuf[idx].FromArsenal = idx == ctx.arsenalInIdx
 		pcBuf[idx].GrantedGoAgain = false
 		pcBuf[idx].GrantedDominate = false
+		pcBuf[idx].GrantedOverpower = false
 		pcBuf[idx].BonusAttack = 0
 		pcBuf[idx].BonusDefense = 0
 		pcBuf[idx].PitchedToPlay = nil
 		pcBuf[idx].OnHit = pcBuf[idx].OnHit[:0]
-		pcBuf[idx].SkipGraveyard = false
 		pcBuf[idx].Mode = 0
 	}
 
@@ -687,7 +686,7 @@ func (ctx *sequenceContext) bestSequence(attackers []card.Card) (int, int, bool)
 	// permutations because PlayPrecondition can reject in some orderings (Gold ability
 	// fires only when the order resolves a token-creator first); ranking by it makes
 	// the chain runner prefer a perm that drew over one that didn't at equal damage.
-	// Modal chains additionally enumerate the cartesian product of ModalCard mode
+	// Modal chains additionally enumerate the cartesian product of Modal mode
 	// indices via a mixed-radix decode of `tuple` over permMeta[i].modes. The per-perm
 	// resolve+fold body is inlined into both branches: hoisting into a closure spills
 	// the capture set to the heap on every call inside Heap's permutation loop.
@@ -791,7 +790,7 @@ func (ctx *sequenceContext) bestSequence(attackers []card.Card) (int, int, bool)
 // Buffers are mutated in place; the caller must not read them concurrently.
 //
 // Runechant flow:
-//   - state.Runechants() starts at ctx.runechantCarryover.
+//   - state.RunechantCount() starts at ctx.runechantCarryover.
 //   - CreateRunechants bumps the count and credits +n damage at creation time.
 //   - Each Attack / Weapon resolution fires all current tokens and destroys them; no
 //     re-credit (tokens were credited at creation).
@@ -814,12 +813,12 @@ func (ctx *sequenceContext) playSequence(order []card.Card) (damage int, futureV
 		pcBuf[i].FromArsenal = i == ctx.arsenalInIdx
 		pcBuf[i].GrantedGoAgain = false
 		pcBuf[i].GrantedDominate = false
+		pcBuf[i].GrantedOverpower = false
 		pcBuf[i].BonusAttack = 0
 		pcBuf[i].BonusDefense = 0
 		pcBuf[i].PitchedToPlay = nil
 		pcBuf[i].OnHit = pcBuf[i].OnHit[:0]
 		pcBuf[i].Mode = 0
-		pcBuf[i].SkipGraveyard = false
 	}
 	return ctx.playSequenceWithMeta(n)
 }
@@ -851,7 +850,6 @@ func (ctx *sequenceContext) playSequenceWithMeta(n int) (damage int, futureValue
 		pcBuf[i].BonusAttack = 0
 		pcBuf[i].PitchedToPlay = nil
 		pcBuf[i].OnHit = pcBuf[i].OnHit[:0]
-		pcBuf[i].SkipGraveyard = false
 	}
 	played := ptrBuf[:n]
 	// Per-permutation reset: full-state rewrite. Hand and Deck are deep-copied so cards can
@@ -1012,6 +1010,7 @@ func (ctx *sequenceContext) playSequenceWithMeta(n int) (damage int, futureValue
 		// fireAttackAuras runs after Play so continuous "while you control an aura"
 		// modifiers (Yinti Yanti +1{p}) see live token auras before TriggerAttack
 		// handlers consume them.
+		state.currentStepRerouted = false
 		ResolveChainStep(state, state.logger, pc)
 		if m.isAttack {
 			fireAttackAuras(state, pc.Card)
@@ -1033,11 +1032,11 @@ func (ctx *sequenceContext) playSequenceWithMeta(n int) (damage int, futureValue
 		// Weapons and persistent card types (Auras, Items) stay in their zone when they
 		// resolve; any destroy event that should send them to the graveyard is a separate
 		// trigger. Everything else — Actions, Attack Reactions, Defense Reactions, Blocks,
-		// Instants — heads to the graveyard immediately, unless the card's Play set
-		// pc.SkipGraveyard (e.g. RecycleToDeckBottom routed it elsewhere). Direct field
-		// write — the framework driving the chain isn't a card-driven content read, so no
-		// cacheable flip.
-		if !m.types.PersistsInPlay() && !pc.SkipGraveyard {
+		// Instants — heads to the graveyard immediately, unless the card's Play routed it
+		// elsewhere via RecycleToDeckBottom (which sets state.currentStepRerouted).
+		// Direct field write — the framework driving the chain isn't a card-driven content
+		// read, so no cacheable flip.
+		if !m.types.PersistsInPlay() && !state.currentStepRerouted {
 			state.graveyard = append(state.graveyard, pc.Card)
 		}
 

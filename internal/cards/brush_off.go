@@ -11,10 +11,10 @@ import (
 )
 
 func (BrushOffRed) DefensiveInstant()                                           {}
-func (BrushOffRed) Play(s card.GameEngine, l card.Logger, self *card.CardState) {}
+func (BrushOffRed) Play(g card.GameEngine, l card.Logger, self *card.CardState) {}
 
 func (BrushOffYellow) DefensiveInstant()                                           {}
-func (BrushOffYellow) Play(s card.GameEngine, l card.Logger, self *card.CardState) {}
+func (BrushOffYellow) Play(g card.GameEngine, l card.Logger, self *card.CardState) {}
 
 func (BrushOffBlue) DefensiveInstant()                                           {}
-func (BrushOffBlue) Play(s card.GameEngine, l card.Logger, self *card.CardState) {}
+func (BrushOffBlue) Play(g card.GameEngine, l card.Logger, self *card.CardState) {}
