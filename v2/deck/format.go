@@ -6,7 +6,6 @@ package deck
 
 import (
 	"fmt"
-	"sort"
 	"strings"
 )
 
@@ -102,22 +101,4 @@ func displayPitchSuffix(name string) string {
 		return ""
 	}
 	return string(name[len(name)-2])
-}
-
-// SortedNameCounts returns m's keys in lexical order paired with their counts, ready for
-// "Nx Name" line emission. Centralised here so fabrary / printing share the same ordering.
-func SortedNameCounts(m map[string]int) []NameCount {
-	out := make([]NameCount, 0, len(m))
-	for name, n := range m {
-		out = append(out, NameCount{Name: name, Count: n})
-	}
-	sort.Slice(out, func(i, j int) bool { return out[i].Name < out[j].Name })
-	return out
-}
-
-// NameCount is a (Name, Count) pair surfaced by SortedNameCounts so callers don't have to
-// re-sort or re-pair when emitting "Nx Name" lines.
-type NameCount struct {
-	Name  string
-	Count int
 }

@@ -52,11 +52,6 @@ func (s *SequenceContextForTest) BestSequence(attackers []card.Card) (int, int, 
 	return s.ctx.bestSequence(attackers)
 }
 
-// FireAttackActionAuras re-exports fireAttackActionAuras for sim_test consumers.
-func FireAttackActionAuras(state *TurnState, triggeringCard card.Card) {
-	fireAttackActionAuras(state, triggeringCard)
-}
-
 // FireEndOfTurn re-exports fireEndOfTurn for sim_test consumers.
 func FireEndOfTurn(state *TurnState) { fireEndOfTurn(state) }
 
