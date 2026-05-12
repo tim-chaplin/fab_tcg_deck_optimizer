@@ -1,0 +1,21 @@
+package turntests
+
+import (
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards/notimplemented"
+	"testing"
+
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
+)
+
+// TestSigilOfCycles_SetsAuraCreated verifies the Blue-only variant flips AuraCreated and returns 0.
+func TestSigilOfCycles_SetsAuraCreated(t *testing.T) {
+	s := sim.TurnState{}
+	sim.ResolveChainStep(&s, s.Logger(), &card.CardState{Card: notimplemented.SigilOfCyclesBlue{}})
+	if got := s.Value(); got != 0 {
+		t.Errorf("Play() = %d, want 0", got)
+	}
+	if !s.AuraCreated() {
+		t.Error("AuraCreated = false, want true")
+	}
+}
