@@ -383,9 +383,10 @@ func defendersDamage(defenders, pitched []card.Card, deckPile *deck.Deck, state 
 		// drop replay entries or force find-best DR sub-lines through fmt.Sprintf /
 		// DisplayName / append.
 		preservedLogger := state.logger
-		// Copy the deck per DR so a DR's mid-Play deck mutations stay scoped — the next
-		// DR sees the original pre-DR deck order.
-		*state = TurnState{pitched: pitched, deck: deckPile.Copy(), graveyard: gravBuf, incomingDamage: remaining, cacheable: true, defenders: defenders, auras: preservedAuras, logger: preservedLogger}
+		// ShallowCopy the deck per DR so a DR's mid-Play deck mutations stay scoped — the
+		// next DR sees the original pre-DR deck order. Safe because nothing in a DR Play
+		// path shuffles, and PutTop / PutBottom / Tutor always allocate fresh backing.
+		*state = TurnState{pitched: pitched, deck: deckPile.ShallowCopy(), graveyard: gravBuf, incomingDamage: remaining, cacheable: true, defenders: defenders, auras: preservedAuras, logger: preservedLogger}
 		*cs = card.CardState{Card: def, FromArsenal: i == arsenalDefenderIdx}
 		ResolveChainStep(state, state.logger, cs)
 		total += state.value

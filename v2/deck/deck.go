@@ -105,6 +105,36 @@ func (d *Deck) Fingerprint() string {
 	return b.String()
 }
 
+// ShallowCopy returns a fresh Deck whose slices share backing with the receiver. Draw /
+// PeekTop never write to the backing array (they re-slice the header on the returned Deck
+// only); PutTop / PutBottom / Tutor always allocate a new backing array. Shuffle mutates
+// the backing in place — callers that may Shuffle must use Copy instead.
+//
+// The 3-arg slice form caps each shared slice's capacity at its length so any append
+// allocates fresh backing instead of writing past the shared region. Used per-permutation
+// inside the chain dispatcher (resetStateForPermutation), where every permutation reads
+// the same deck order and never shuffles, so the per-permutation full Copy is wasted
+// allocation.
+func (d *Deck) ShallowCopy() *Deck {
+	if d == nil {
+		return &Deck{}
+	}
+	out := &Deck{Hero: d.Hero}
+	if len(d.Weapons) > 0 {
+		out.Weapons = d.Weapons[:len(d.Weapons):len(d.Weapons)]
+	}
+	if len(d.cards) > 0 {
+		out.cards = d.cards[:len(d.cards):len(d.cards)]
+	}
+	if len(d.Sideboard) > 0 {
+		out.Sideboard = d.Sideboard[:len(d.Sideboard):len(d.Sideboard)]
+	}
+	if len(d.Equipment) > 0 {
+		out.Equipment = d.Equipment[:len(d.Equipment):len(d.Equipment)]
+	}
+	return out
+}
+
 // Copy returns a fresh Deck with independent backing slices for Weapons, Cards, Sideboard,
 // and Equipment. Hero is shared (heroes are stateless concrete types). Used by the parallel
 // evaluator: each worker calls master.Copy() before its trial so Shuffle / Draw / Reset /

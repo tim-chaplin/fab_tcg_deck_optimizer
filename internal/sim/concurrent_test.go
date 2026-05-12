@@ -163,9 +163,10 @@ func TestIterateParallel_TerminatesWithNoImprovement(t *testing.T) {
 	if idx != -1 {
 		t.Errorf("idx=%d; want -1", idx)
 	}
-	// Threshold loosened to 90s while the per-permutation deck.Copy() in the chain runner is
-	// in flight; tightens back to 30s once the follow-up perf pass amortizes the extra copy.
-	if elapsed > 90*time.Second {
-		t.Errorf("IterateParallel returned after %s for 40 mutations; want under 90s", elapsed)
+	// 30s upper bound: full-list drain of 40 mutations against an unreachable baseline
+	// is the parallel pool's steady-state throughput case. Slack tolerates CI scheduler
+	// noise without masking a hang regression.
+	if elapsed > 30*time.Second {
+		t.Errorf("IterateParallel returned after %s for 40 mutations; want under 30s", elapsed)
 	}
 }

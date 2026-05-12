@@ -290,8 +290,11 @@ func bestAttackWithWeapons(hero Hero, weapons []Weapon, attackers, defenders, pi
 type sequenceContext struct {
 	hero    Hero
 	pitched []card.Card
-	// deck is the per-leaf starting deck. resetStateForPermutation copies it via
-	// d.Copy() so each permutation runs against a fresh, isolated *deck.Deck.
+	// deck is the per-leaf starting deck. resetStateForPermutation gives each
+	// permutation a fresh *deck.Deck wrapper via ShallowCopy — the slice headers are
+	// per-permutation so Draw advances independently, while the read-only backing
+	// array stays shared (no permutation Shuffles, and the mutating PutTop /
+	// PutBottom / Tutor methods always allocate fresh backing).
 	deck *deck.Deck
 	// handStart is the partition's Held-role hand cards — what state.Hand starts as before
 	// the chain runs. Cards mutating state.Hand mid-chain (DrawOne, Moon Wish tutor) work
@@ -559,7 +562,11 @@ func (ctx *sequenceContext) resetStateForPermutation() {
 	// NonAttackActionPlayed, ArcaneDamageDealt, Revealed, TriggeringCard) are assigned
 	// explicitly so any leftover state from a previous permutation gets cleared.
 	s.hand = append(bufs.handBacking[:0], ctx.handStart...)
-	s.deck = ctx.deck.Copy()
+	// ShallowCopy shares the backing array with ctx.deck; safe because no permutation
+	// path Shuffles (only Draw / PeekTop, which re-slice the header on this Deck only)
+	// and PutTop / PutBottom / Tutor always allocate fresh backing. Cuts the per-
+	// permutation deck.Copy slice allocation that dominated the CPU profile.
+	s.deck = ctx.deck.ShallowCopy()
 	s.Arsenal = ctx.arsenalAtChainStart
 	s.graveyard = append(bufs.graveBacking[:0], ctx.priorGraveyard...)
 	s.graveyard = append(s.graveyard, ctx.defenders...)
