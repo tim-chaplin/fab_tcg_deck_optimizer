@@ -12,8 +12,12 @@ import (
 // target text becomes its own predicate leg, and the chain runner rejects the permutation
 // when the chosen mode doesn't accept the active attack.
 //
+// The engine handle is threaded through so predicates that read variable cost (c.Cost(s))
+// or class-aware types (c.Types(s)) don't have to fabricate a zero TurnState. Most ARs
+// look only at printed type-line predicates and ignore s.
+//
 // card.GrantAttackReactionBuff (the helper most ARs call from Play) lives in v2/card —
 // it's pure GameEngine / Logger / CardState plumbing.
 type AttackReaction interface {
-	ARTargetAllowed(c card.Card, mode int8) bool
+	ARTargetAllowed(s card.GameEngine, c card.Card, mode int8) bool
 }

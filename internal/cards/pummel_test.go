@@ -10,17 +10,17 @@ import (
 // Tests that mode 0 accepts Club and Hammer weapon attacks (probed via the activated-
 // ability Cards the chain runner enqueues for the swing).
 func TestPummel_Mode0AcceptsClubAndHammer(t *testing.T) {
-	if !(PummelRed{}).ARTargetAllowed(testutils.ClubWeaponAbility{}, 0) {
+	if !(PummelRed{}).ARTargetAllowed(nil, testutils.ClubWeaponAbility{}, 0) {
 		t.Error("mode 0 should accept a Club weapon ability")
 	}
-	if !(PummelRed{}).ARTargetAllowed(testutils.HammerWeaponAbility{}, 0) {
+	if !(PummelRed{}).ARTargetAllowed(nil, testutils.HammerWeaponAbility{}, 0) {
 		t.Error("mode 0 should accept a Hammer weapon ability")
 	}
 }
 
 // Tests that mode 0 rejects a non-club/hammer target.
 func TestPummel_Mode0RejectsOtherTargets(t *testing.T) {
-	if (PummelRed{}).ARTargetAllowed(testutils.GenericAttack(2, 4), 0) {
+	if (PummelRed{}).ARTargetAllowed(nil, testutils.GenericAttack(2, 4), 0) {
 		t.Error("mode 0 should reject a non-club/hammer attack")
 	}
 }
@@ -30,24 +30,24 @@ func TestPummel_Mode0RejectsOtherTargets(t *testing.T) {
 func TestPummel_Mode0RejectsClubAttackActionCard(t *testing.T) {
 	clubAction := testutils.NewStubCard("club action").
 		WithTypes(card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack, card.TypeClub))
-	if (PummelRed{}).ARTargetAllowed(clubAction, 0) {
+	if (PummelRed{}).ARTargetAllowed(nil, clubAction, 0) {
 		t.Error("mode 0 should reject a club attack action card (only weapon attacks qualify)")
 	}
 }
 
 // Tests that mode 1 accepts a cost-≥2 attack action.
 func TestPummel_Mode1AcceptsCostTwoAttackAction(t *testing.T) {
-	if !(PummelRed{}).ARTargetAllowed(testutils.GenericAttack(2, 4), 1) {
+	if !(PummelRed{}).ARTargetAllowed(nil, testutils.GenericAttack(2, 4), 1) {
 		t.Error("mode 1 should accept a cost-2 attack action")
 	}
 }
 
 // Tests that mode 1 rejects cost-1 attack actions and non-attacks.
 func TestPummel_Mode1RejectsCostOneAndNonAttacks(t *testing.T) {
-	if (PummelRed{}).ARTargetAllowed(testutils.GenericAttack(1, 4), 1) {
+	if (PummelRed{}).ARTargetAllowed(nil, testutils.GenericAttack(1, 4), 1) {
 		t.Error("mode 1 should reject a cost-1 attack action")
 	}
-	if (PummelRed{}).ARTargetAllowed(testutils.GenericAction(), 1) {
+	if (PummelRed{}).ARTargetAllowed(nil, testutils.GenericAction(), 1) {
 		t.Error("mode 1 should reject a non-attack action")
 	}
 }

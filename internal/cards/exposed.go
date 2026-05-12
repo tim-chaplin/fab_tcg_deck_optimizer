@@ -9,7 +9,7 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
-func (ExposedBlue) ARTargetAllowed(c card.Card, _ int8) bool {
+func (ExposedBlue) ARTargetAllowed(_ card.GameEngine, c card.Card, _ int8) bool {
 	return c.Types(nil).IsAttack()
 }
 func (ExposedBlue) Play(s card.GameEngine, l card.Logger, self *card.CardState) {

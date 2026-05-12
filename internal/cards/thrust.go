@@ -10,7 +10,7 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
-func (ThrustRed) ARTargetAllowed(c card.Card, _ int8) bool {
+func (ThrustRed) ARTargetAllowed(_ card.GameEngine, c card.Card, _ int8) bool {
 	t := c.Types(nil)
 	return t.Has(card.TypeSword) && t.IsAttack()
 }

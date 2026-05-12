@@ -11,7 +11,7 @@ import (
 func TestBladeFlash_AcceptsSwordAttackAction(t *testing.T) {
 	swordAction := testutils.NewStubCard("SwordAction").
 		WithTypes(card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack, card.TypeSword))
-	if !(BladeFlashBlue{}).ARTargetAllowed(swordAction, 0) {
+	if !(BladeFlashBlue{}).ARTargetAllowed(nil, swordAction, 0) {
 		t.Error("sword action card should be a legal target")
 	}
 }
@@ -20,14 +20,14 @@ func TestBladeFlash_AcceptsSwordAttackAction(t *testing.T) {
 func TestBladeFlash_AcceptsSwordWeapon(t *testing.T) {
 	swordSwing := testutils.NewStubCard("SwordWeaponAbility").
 		WithTypes(card.NewTypeSet(card.TypeGeneric, card.TypeWeapon, card.TypeSword, card.TypeAttack))
-	if !(BladeFlashBlue{}).ARTargetAllowed(swordSwing, 0) {
+	if !(BladeFlashBlue{}).ARTargetAllowed(nil, swordSwing, 0) {
 		t.Error("sword weapon swing should be a legal target")
 	}
 }
 
 // Tests that a non-Sword attack is rejected.
 func TestBladeFlash_RejectsNonSwordAttack(t *testing.T) {
-	if (BladeFlashBlue{}).ARTargetAllowed(testutils.GenericAttack(0, 0), 0) {
+	if (BladeFlashBlue{}).ARTargetAllowed(nil, testutils.GenericAttack(0, 0), 0) {
 		t.Error("non-sword attack action should be rejected")
 	}
 }
@@ -36,7 +36,7 @@ func TestBladeFlash_RejectsNonSwordAttack(t *testing.T) {
 func TestBladeFlash_RejectsNonAttackSword(t *testing.T) {
 	swordEquipment := testutils.NewStubCard("SwordEquipment").
 		WithTypes(card.NewTypeSet(card.TypeGeneric, card.TypeSword))
-	if (BladeFlashBlue{}).ARTargetAllowed(swordEquipment, 0) {
+	if (BladeFlashBlue{}).ARTargetAllowed(nil, swordEquipment, 0) {
 		t.Error("non-attack sword should be rejected")
 	}
 }

@@ -21,9 +21,9 @@ func (stubAR) Defense() int             { return 0 }
 func (stubAR) Types(card.GameEngine) card.TypeSet {
 	return card.NewTypeSet(card.TypeGeneric, card.TypeAttackReaction)
 }
-func (stubAR) GoAgain() bool                                      { return false }
-func (stubAR) ARTargetAllowed(c card.Card, _ int8) bool           { return true }
-func (stubAR) Play(card.GameEngine, card.Logger, *card.CardState) {}
+func (stubAR) GoAgain() bool                                         { return false }
+func (stubAR) ARTargetAllowed(card.GameEngine, card.Card, int8) bool { return true }
+func (stubAR) Play(card.GameEngine, card.Logger, *card.CardState)    {}
 
 // stubAttack is a Generic Action - Attack target candidate.
 type stubAttack struct{}

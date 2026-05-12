@@ -11,7 +11,7 @@ import (
 func TestThrust_AcceptsSwordAttackAction(t *testing.T) {
 	swordAction := testutils.NewStubCard("SwordAction").
 		WithTypes(card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack, card.TypeSword))
-	if !(ThrustRed{}).ARTargetAllowed(swordAction, 0) {
+	if !(ThrustRed{}).ARTargetAllowed(nil, swordAction, 0) {
 		t.Error("sword action card should be a legal target")
 	}
 }
@@ -20,14 +20,14 @@ func TestThrust_AcceptsSwordAttackAction(t *testing.T) {
 func TestThrust_AcceptsSwordWeapon(t *testing.T) {
 	swordSwing := testutils.NewStubCard("SwordWeaponAbility").
 		WithTypes(card.NewTypeSet(card.TypeGeneric, card.TypeWeapon, card.TypeSword, card.TypeAttack))
-	if !(ThrustRed{}).ARTargetAllowed(swordSwing, 0) {
+	if !(ThrustRed{}).ARTargetAllowed(nil, swordSwing, 0) {
 		t.Error("sword weapon swing should be a legal target")
 	}
 }
 
 // Tests that a non-Sword attack is rejected.
 func TestThrust_RejectsNonSwordAttack(t *testing.T) {
-	if (ThrustRed{}).ARTargetAllowed(testutils.GenericAttack(0, 0), 0) {
+	if (ThrustRed{}).ARTargetAllowed(nil, testutils.GenericAttack(0, 0), 0) {
 		t.Error("non-sword attack action should be rejected")
 	}
 }

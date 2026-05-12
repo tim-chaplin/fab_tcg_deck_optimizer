@@ -971,7 +971,7 @@ func (ctx *sequenceContext) playSequenceWithMeta(n int) (damage int, futureValue
 				}
 			}
 			ar, ok := pc.Card.(AttackReaction)
-			if !ok || activeAttack == nil || !ar.ARTargetAllowed(activeAttack.Card, pc.Mode) {
+			if !ok || activeAttack == nil || !ar.ARTargetAllowed(state, activeAttack.Card, pc.Mode) {
 				return 0, 0, 0, false
 			}
 			ctx.hero.OnCardPlayed(pc.Card, state, state.logger)
