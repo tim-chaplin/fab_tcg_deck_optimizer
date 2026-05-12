@@ -19,7 +19,7 @@ func (SeekHorizonRed) Pitch() int                         { return 1 }
 func (SeekHorizonRed) Attack() int                        { return 4 }
 func (SeekHorizonRed) Defense() int                       { return 2 }
 func (SeekHorizonRed) Types(card.GameEngine) card.TypeSet { return seekHorizonTypes }
-func (SeekHorizonRed) GoAgain() bool                      { return false }
+func (SeekHorizonRed) GoAgain(card.GameEngine) bool       { return false }
 func (SeekHorizonRed) NotImplemented()                    {}
 
 type SeekHorizonYellow struct{}
@@ -32,7 +32,7 @@ func (SeekHorizonYellow) Pitch() int                         { return 2 }
 func (SeekHorizonYellow) Attack() int                        { return 3 }
 func (SeekHorizonYellow) Defense() int                       { return 2 }
 func (SeekHorizonYellow) Types(card.GameEngine) card.TypeSet { return seekHorizonTypes }
-func (SeekHorizonYellow) GoAgain() bool                      { return false }
+func (SeekHorizonYellow) GoAgain(card.GameEngine) bool       { return false }
 func (SeekHorizonYellow) NotImplemented()                    {}
 
 type SeekHorizonBlue struct{}
@@ -45,5 +45,5 @@ func (SeekHorizonBlue) Pitch() int                         { return 3 }
 func (SeekHorizonBlue) Attack() int                        { return 2 }
 func (SeekHorizonBlue) Defense() int                       { return 2 }
 func (SeekHorizonBlue) Types(card.GameEngine) card.TypeSet { return seekHorizonTypes }
-func (SeekHorizonBlue) GoAgain() bool                      { return false }
+func (SeekHorizonBlue) GoAgain(card.GameEngine) bool       { return false }
 func (SeekHorizonBlue) NotImplemented()                    {}

@@ -173,7 +173,7 @@ func emitGroup(dir, pkg, basename string, g CardGroup) error {
 			fmt.Fprintf(&buf, "func (%s) Types(card.GameEngine) card.TypeSet { return %s }\n", v.ID, tvar)
 		}
 		if !g.DynamicGoAgain {
-			fmt.Fprintf(&buf, "func (%s) GoAgain() bool       { return %v }\n", v.ID, g.GoAgain)
+			fmt.Fprintf(&buf, "func (%s) GoAgain(card.GameEngine) bool { return %v }\n", v.ID, g.GoAgain)
 		}
 		for _, m := range g.Markers {
 			fmt.Fprintf(&buf, "func (%s) %s()                {}\n", v.ID, m)

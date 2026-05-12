@@ -19,4 +19,4 @@ func (ToughenUpBlue) Pitch() int                         { return 3 }
 func (ToughenUpBlue) Attack() int                        { return 0 }
 func (ToughenUpBlue) Defense() int                       { return 4 }
 func (ToughenUpBlue) Types(card.GameEngine) card.TypeSet { return toughenUpTypes }
-func (ToughenUpBlue) GoAgain() bool                      { return false }
+func (ToughenUpBlue) GoAgain(card.GameEngine) bool       { return false }

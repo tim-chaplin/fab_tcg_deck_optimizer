@@ -20,7 +20,7 @@ func (DrawnToTheDarkDimensionRed) Defense() int        { return 3 }
 func (DrawnToTheDarkDimensionRed) Types(card.GameEngine) card.TypeSet {
 	return drawnToTheDarkDimensionTypes
 }
-func (DrawnToTheDarkDimensionRed) GoAgain() bool { return false }
+func (DrawnToTheDarkDimensionRed) GoAgain(card.GameEngine) bool { return false }
 
 type DrawnToTheDarkDimensionYellow struct{}
 
@@ -33,7 +33,7 @@ func (DrawnToTheDarkDimensionYellow) Defense() int        { return 3 }
 func (DrawnToTheDarkDimensionYellow) Types(card.GameEngine) card.TypeSet {
 	return drawnToTheDarkDimensionTypes
 }
-func (DrawnToTheDarkDimensionYellow) GoAgain() bool { return false }
+func (DrawnToTheDarkDimensionYellow) GoAgain(card.GameEngine) bool { return false }
 
 type DrawnToTheDarkDimensionBlue struct{}
 
@@ -46,4 +46,4 @@ func (DrawnToTheDarkDimensionBlue) Defense() int        { return 3 }
 func (DrawnToTheDarkDimensionBlue) Types(card.GameEngine) card.TypeSet {
 	return drawnToTheDarkDimensionTypes
 }
-func (DrawnToTheDarkDimensionBlue) GoAgain() bool { return false }
+func (DrawnToTheDarkDimensionBlue) GoAgain(card.GameEngine) bool { return false }

@@ -19,7 +19,7 @@ func (AetherSlashRed) Pitch() int                         { return 1 }
 func (AetherSlashRed) Attack() int                        { return 4 }
 func (AetherSlashRed) Defense() int                       { return 3 }
 func (AetherSlashRed) Types(card.GameEngine) card.TypeSet { return aetherSlashTypes }
-func (AetherSlashRed) GoAgain() bool                      { return false }
+func (AetherSlashRed) GoAgain(card.GameEngine) bool       { return false }
 
 type AetherSlashYellow struct{}
 
@@ -31,7 +31,7 @@ func (AetherSlashYellow) Pitch() int                         { return 2 }
 func (AetherSlashYellow) Attack() int                        { return 3 }
 func (AetherSlashYellow) Defense() int                       { return 3 }
 func (AetherSlashYellow) Types(card.GameEngine) card.TypeSet { return aetherSlashTypes }
-func (AetherSlashYellow) GoAgain() bool                      { return false }
+func (AetherSlashYellow) GoAgain(card.GameEngine) bool       { return false }
 
 type AetherSlashBlue struct{}
 
@@ -43,4 +43,4 @@ func (AetherSlashBlue) Pitch() int                         { return 3 }
 func (AetherSlashBlue) Attack() int                        { return 2 }
 func (AetherSlashBlue) Defense() int                       { return 3 }
 func (AetherSlashBlue) Types(card.GameEngine) card.TypeSet { return aetherSlashTypes }
-func (AetherSlashBlue) GoAgain() bool                      { return false }
+func (AetherSlashBlue) GoAgain(card.GameEngine) bool       { return false }

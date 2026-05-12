@@ -19,7 +19,7 @@ func (OnTheHorizonRed) Pitch() int                         { return 1 }
 func (OnTheHorizonRed) Attack() int                        { return 0 }
 func (OnTheHorizonRed) Defense() int                       { return 4 }
 func (OnTheHorizonRed) Types(card.GameEngine) card.TypeSet { return onTheHorizonTypes }
-func (OnTheHorizonRed) GoAgain() bool                      { return false }
+func (OnTheHorizonRed) GoAgain(card.GameEngine) bool       { return false }
 
 type OnTheHorizonYellow struct{}
 
@@ -31,7 +31,7 @@ func (OnTheHorizonYellow) Pitch() int                         { return 2 }
 func (OnTheHorizonYellow) Attack() int                        { return 0 }
 func (OnTheHorizonYellow) Defense() int                       { return 3 }
 func (OnTheHorizonYellow) Types(card.GameEngine) card.TypeSet { return onTheHorizonTypes }
-func (OnTheHorizonYellow) GoAgain() bool                      { return false }
+func (OnTheHorizonYellow) GoAgain(card.GameEngine) bool       { return false }
 
 type OnTheHorizonBlue struct{}
 
@@ -43,4 +43,4 @@ func (OnTheHorizonBlue) Pitch() int                         { return 3 }
 func (OnTheHorizonBlue) Attack() int                        { return 0 }
 func (OnTheHorizonBlue) Defense() int                       { return 2 }
 func (OnTheHorizonBlue) Types(card.GameEngine) card.TypeSet { return onTheHorizonTypes }
-func (OnTheHorizonBlue) GoAgain() bool                      { return false }
+func (OnTheHorizonBlue) GoAgain(card.GameEngine) bool       { return false }

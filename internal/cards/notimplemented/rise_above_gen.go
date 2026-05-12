@@ -19,7 +19,7 @@ func (RiseAboveRed) Pitch() int                         { return 1 }
 func (RiseAboveRed) Attack() int                        { return 0 }
 func (RiseAboveRed) Defense() int                       { return 4 }
 func (RiseAboveRed) Types(card.GameEngine) card.TypeSet { return riseAboveTypes }
-func (RiseAboveRed) GoAgain() bool                      { return false }
+func (RiseAboveRed) GoAgain(card.GameEngine) bool       { return false }
 func (RiseAboveRed) NotImplemented()                    {}
 
 type RiseAboveYellow struct{}
@@ -32,7 +32,7 @@ func (RiseAboveYellow) Pitch() int                         { return 2 }
 func (RiseAboveYellow) Attack() int                        { return 0 }
 func (RiseAboveYellow) Defense() int                       { return 3 }
 func (RiseAboveYellow) Types(card.GameEngine) card.TypeSet { return riseAboveTypes }
-func (RiseAboveYellow) GoAgain() bool                      { return false }
+func (RiseAboveYellow) GoAgain(card.GameEngine) bool       { return false }
 func (RiseAboveYellow) NotImplemented()                    {}
 
 type RiseAboveBlue struct{}
@@ -45,5 +45,5 @@ func (RiseAboveBlue) Pitch() int                         { return 3 }
 func (RiseAboveBlue) Attack() int                        { return 0 }
 func (RiseAboveBlue) Defense() int                       { return 2 }
 func (RiseAboveBlue) Types(card.GameEngine) card.TypeSet { return riseAboveTypes }
-func (RiseAboveBlue) GoAgain() bool                      { return false }
+func (RiseAboveBlue) GoAgain(card.GameEngine) bool       { return false }
 func (RiseAboveBlue) NotImplemented()                    {}

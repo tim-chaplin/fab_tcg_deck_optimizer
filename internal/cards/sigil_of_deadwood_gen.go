@@ -19,4 +19,4 @@ func (SigilOfDeadwoodBlue) Pitch() int                         { return 3 }
 func (SigilOfDeadwoodBlue) Attack() int                        { return 0 }
 func (SigilOfDeadwoodBlue) Defense() int                       { return 2 }
 func (SigilOfDeadwoodBlue) Types(card.GameEngine) card.TypeSet { return sigilOfDeadwoodTypes }
-func (SigilOfDeadwoodBlue) GoAgain() bool                      { return true }
+func (SigilOfDeadwoodBlue) GoAgain(card.GameEngine) bool       { return true }

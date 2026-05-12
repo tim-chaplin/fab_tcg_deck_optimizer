@@ -19,7 +19,7 @@ func (RegurgitatingSlogRed) Pitch() int                         { return 1 }
 func (RegurgitatingSlogRed) Attack() int                        { return 6 }
 func (RegurgitatingSlogRed) Defense() int                       { return 2 }
 func (RegurgitatingSlogRed) Types(card.GameEngine) card.TypeSet { return regurgitatingSlogTypes }
-func (RegurgitatingSlogRed) GoAgain() bool                      { return false }
+func (RegurgitatingSlogRed) GoAgain(card.GameEngine) bool       { return false }
 
 type RegurgitatingSlogYellow struct{}
 
@@ -31,7 +31,7 @@ func (RegurgitatingSlogYellow) Pitch() int                         { return 2 }
 func (RegurgitatingSlogYellow) Attack() int                        { return 5 }
 func (RegurgitatingSlogYellow) Defense() int                       { return 2 }
 func (RegurgitatingSlogYellow) Types(card.GameEngine) card.TypeSet { return regurgitatingSlogTypes }
-func (RegurgitatingSlogYellow) GoAgain() bool                      { return false }
+func (RegurgitatingSlogYellow) GoAgain(card.GameEngine) bool       { return false }
 
 type RegurgitatingSlogBlue struct{}
 
@@ -43,4 +43,4 @@ func (RegurgitatingSlogBlue) Pitch() int                         { return 3 }
 func (RegurgitatingSlogBlue) Attack() int                        { return 4 }
 func (RegurgitatingSlogBlue) Defense() int                       { return 2 }
 func (RegurgitatingSlogBlue) Types(card.GameEngine) card.TypeSet { return regurgitatingSlogTypes }
-func (RegurgitatingSlogBlue) GoAgain() bool                      { return false }
+func (RegurgitatingSlogBlue) GoAgain(card.GameEngine) bool       { return false }

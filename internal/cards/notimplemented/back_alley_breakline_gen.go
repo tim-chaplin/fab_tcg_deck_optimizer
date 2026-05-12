@@ -19,7 +19,7 @@ func (BackAlleyBreaklineRed) Pitch() int                         { return 1 }
 func (BackAlleyBreaklineRed) Attack() int                        { return 5 }
 func (BackAlleyBreaklineRed) Defense() int                       { return 2 }
 func (BackAlleyBreaklineRed) Types(card.GameEngine) card.TypeSet { return backAlleyBreaklineTypes }
-func (BackAlleyBreaklineRed) GoAgain() bool                      { return false }
+func (BackAlleyBreaklineRed) GoAgain(card.GameEngine) bool       { return false }
 func (BackAlleyBreaklineRed) NotImplemented()                    {}
 
 type BackAlleyBreaklineYellow struct{}
@@ -32,7 +32,7 @@ func (BackAlleyBreaklineYellow) Pitch() int                         { return 2 }
 func (BackAlleyBreaklineYellow) Attack() int                        { return 4 }
 func (BackAlleyBreaklineYellow) Defense() int                       { return 2 }
 func (BackAlleyBreaklineYellow) Types(card.GameEngine) card.TypeSet { return backAlleyBreaklineTypes }
-func (BackAlleyBreaklineYellow) GoAgain() bool                      { return false }
+func (BackAlleyBreaklineYellow) GoAgain(card.GameEngine) bool       { return false }
 func (BackAlleyBreaklineYellow) NotImplemented()                    {}
 
 type BackAlleyBreaklineBlue struct{}
@@ -45,5 +45,5 @@ func (BackAlleyBreaklineBlue) Pitch() int                         { return 3 }
 func (BackAlleyBreaklineBlue) Attack() int                        { return 3 }
 func (BackAlleyBreaklineBlue) Defense() int                       { return 2 }
 func (BackAlleyBreaklineBlue) Types(card.GameEngine) card.TypeSet { return backAlleyBreaklineTypes }
-func (BackAlleyBreaklineBlue) GoAgain() bool                      { return false }
+func (BackAlleyBreaklineBlue) GoAgain(card.GameEngine) bool       { return false }
 func (BackAlleyBreaklineBlue) NotImplemented()                    {}

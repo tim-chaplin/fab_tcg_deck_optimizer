@@ -19,5 +19,5 @@ func (TalismanOfCremationBlue) Pitch() int                         { return 3 }
 func (TalismanOfCremationBlue) Attack() int                        { return 0 }
 func (TalismanOfCremationBlue) Defense() int                       { return 0 }
 func (TalismanOfCremationBlue) Types(card.GameEngine) card.TypeSet { return talismanOfCremationTypes }
-func (TalismanOfCremationBlue) GoAgain() bool                      { return true }
+func (TalismanOfCremationBlue) GoAgain(card.GameEngine) bool       { return true }
 func (TalismanOfCremationBlue) NotImplemented()                    {}

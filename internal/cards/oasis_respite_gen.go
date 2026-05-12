@@ -19,7 +19,7 @@ func (OasisRespiteRed) Pitch() int                         { return 1 }
 func (OasisRespiteRed) Attack() int                        { return 0 }
 func (OasisRespiteRed) Defense() int                       { return 4 }
 func (OasisRespiteRed) Types(card.GameEngine) card.TypeSet { return oasisRespiteTypes }
-func (OasisRespiteRed) GoAgain() bool                      { return false }
+func (OasisRespiteRed) GoAgain(card.GameEngine) bool       { return false }
 
 type OasisRespiteYellow struct{}
 
@@ -31,7 +31,7 @@ func (OasisRespiteYellow) Pitch() int                         { return 2 }
 func (OasisRespiteYellow) Attack() int                        { return 0 }
 func (OasisRespiteYellow) Defense() int                       { return 3 }
 func (OasisRespiteYellow) Types(card.GameEngine) card.TypeSet { return oasisRespiteTypes }
-func (OasisRespiteYellow) GoAgain() bool                      { return false }
+func (OasisRespiteYellow) GoAgain(card.GameEngine) bool       { return false }
 
 type OasisRespiteBlue struct{}
 
@@ -43,4 +43,4 @@ func (OasisRespiteBlue) Pitch() int                         { return 3 }
 func (OasisRespiteBlue) Attack() int                        { return 0 }
 func (OasisRespiteBlue) Defense() int                       { return 2 }
 func (OasisRespiteBlue) Types(card.GameEngine) card.TypeSet { return oasisRespiteTypes }
-func (OasisRespiteBlue) GoAgain() bool                      { return false }
+func (OasisRespiteBlue) GoAgain(card.GameEngine) bool       { return false }

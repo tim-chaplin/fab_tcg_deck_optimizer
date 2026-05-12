@@ -19,7 +19,7 @@ func (BarragingBrawnhideRed) Pitch() int                         { return 1 }
 func (BarragingBrawnhideRed) Attack() int                        { return 7 }
 func (BarragingBrawnhideRed) Defense() int                       { return 2 }
 func (BarragingBrawnhideRed) Types(card.GameEngine) card.TypeSet { return barragingBrawnhideTypes }
-func (BarragingBrawnhideRed) GoAgain() bool                      { return false }
+func (BarragingBrawnhideRed) GoAgain(card.GameEngine) bool       { return false }
 
 type BarragingBrawnhideYellow struct{}
 
@@ -31,7 +31,7 @@ func (BarragingBrawnhideYellow) Pitch() int                         { return 2 }
 func (BarragingBrawnhideYellow) Attack() int                        { return 6 }
 func (BarragingBrawnhideYellow) Defense() int                       { return 2 }
 func (BarragingBrawnhideYellow) Types(card.GameEngine) card.TypeSet { return barragingBrawnhideTypes }
-func (BarragingBrawnhideYellow) GoAgain() bool                      { return false }
+func (BarragingBrawnhideYellow) GoAgain(card.GameEngine) bool       { return false }
 
 type BarragingBrawnhideBlue struct{}
 
@@ -43,4 +43,4 @@ func (BarragingBrawnhideBlue) Pitch() int                         { return 3 }
 func (BarragingBrawnhideBlue) Attack() int                        { return 5 }
 func (BarragingBrawnhideBlue) Defense() int                       { return 2 }
 func (BarragingBrawnhideBlue) Types(card.GameEngine) card.TypeSet { return barragingBrawnhideTypes }
-func (BarragingBrawnhideBlue) GoAgain() bool                      { return false }
+func (BarragingBrawnhideBlue) GoAgain(card.GameEngine) bool       { return false }

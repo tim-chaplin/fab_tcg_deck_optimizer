@@ -77,15 +77,16 @@ func TestLowerHealthWanter_GoAgainRiders(t *testing.T) {
 		BlowForABlowRed{},
 		LifeForALifeRed{}, LifeForALifeYellow{}, LifeForALifeBlue{},
 	}
+	var g sim.TurnState
 	sim.SetCurrentHero(stubLowHeroOff{})
 	for _, c := range cards {
-		if c.GoAgain() {
+		if c.GoAgain(&g) {
 			t.Errorf("%s: GoAgain() = true with hero off, want false", c.Name())
 		}
 	}
 	sim.SetCurrentHero(stubLowHeroOn{})
 	for _, c := range cards {
-		if !c.GoAgain() {
+		if !c.GoAgain(&g) {
 			t.Errorf("%s: GoAgain() = false with hero on, want true", c.Name())
 		}
 	}
@@ -101,7 +102,7 @@ func TestLowerHealthWanter_NilHeroIsOff(t *testing.T) {
 	if got := s.Value(); got != 4 {
 		t.Errorf("AdrenalineRushRed nil-hero Play() = %d, want 4", got)
 	}
-	if (ScarForAScarRed{}).GoAgain() {
+	if (ScarForAScarRed{}).GoAgain(&s) {
 		t.Errorf("ScarForAScarRed nil-hero GoAgain() = true, want false")
 	}
 }

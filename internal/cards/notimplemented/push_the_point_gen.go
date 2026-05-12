@@ -19,7 +19,7 @@ func (PushThePointRed) Pitch() int                         { return 1 }
 func (PushThePointRed) Attack() int                        { return 4 }
 func (PushThePointRed) Defense() int                       { return 2 }
 func (PushThePointRed) Types(card.GameEngine) card.TypeSet { return pushThePointTypes }
-func (PushThePointRed) GoAgain() bool                      { return false }
+func (PushThePointRed) GoAgain(card.GameEngine) bool       { return false }
 func (PushThePointRed) NotImplemented()                    {}
 
 type PushThePointYellow struct{}
@@ -32,7 +32,7 @@ func (PushThePointYellow) Pitch() int                         { return 2 }
 func (PushThePointYellow) Attack() int                        { return 3 }
 func (PushThePointYellow) Defense() int                       { return 2 }
 func (PushThePointYellow) Types(card.GameEngine) card.TypeSet { return pushThePointTypes }
-func (PushThePointYellow) GoAgain() bool                      { return false }
+func (PushThePointYellow) GoAgain(card.GameEngine) bool       { return false }
 func (PushThePointYellow) NotImplemented()                    {}
 
 type PushThePointBlue struct{}
@@ -45,5 +45,5 @@ func (PushThePointBlue) Pitch() int                         { return 3 }
 func (PushThePointBlue) Attack() int                        { return 2 }
 func (PushThePointBlue) Defense() int                       { return 2 }
 func (PushThePointBlue) Types(card.GameEngine) card.TypeSet { return pushThePointTypes }
-func (PushThePointBlue) GoAgain() bool                      { return false }
+func (PushThePointBlue) GoAgain(card.GameEngine) bool       { return false }
 func (PushThePointBlue) NotImplemented()                    {}

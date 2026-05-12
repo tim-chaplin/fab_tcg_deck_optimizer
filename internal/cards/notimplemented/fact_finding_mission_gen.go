@@ -19,7 +19,7 @@ func (FactFindingMissionRed) Pitch() int                         { return 1 }
 func (FactFindingMissionRed) Attack() int                        { return 6 }
 func (FactFindingMissionRed) Defense() int                       { return 2 }
 func (FactFindingMissionRed) Types(card.GameEngine) card.TypeSet { return factFindingMissionTypes }
-func (FactFindingMissionRed) GoAgain() bool                      { return false }
+func (FactFindingMissionRed) GoAgain(card.GameEngine) bool       { return false }
 func (FactFindingMissionRed) NotImplemented()                    {}
 
 type FactFindingMissionYellow struct{}
@@ -32,7 +32,7 @@ func (FactFindingMissionYellow) Pitch() int                         { return 2 }
 func (FactFindingMissionYellow) Attack() int                        { return 5 }
 func (FactFindingMissionYellow) Defense() int                       { return 2 }
 func (FactFindingMissionYellow) Types(card.GameEngine) card.TypeSet { return factFindingMissionTypes }
-func (FactFindingMissionYellow) GoAgain() bool                      { return false }
+func (FactFindingMissionYellow) GoAgain(card.GameEngine) bool       { return false }
 func (FactFindingMissionYellow) NotImplemented()                    {}
 
 type FactFindingMissionBlue struct{}
@@ -45,5 +45,5 @@ func (FactFindingMissionBlue) Pitch() int                         { return 3 }
 func (FactFindingMissionBlue) Attack() int                        { return 4 }
 func (FactFindingMissionBlue) Defense() int                       { return 2 }
 func (FactFindingMissionBlue) Types(card.GameEngine) card.TypeSet { return factFindingMissionTypes }
-func (FactFindingMissionBlue) GoAgain() bool                      { return false }
+func (FactFindingMissionBlue) GoAgain(card.GameEngine) bool       { return false }
 func (FactFindingMissionBlue) NotImplemented()                    {}

@@ -6,18 +6,27 @@
 package cards
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
-func (ScarForAScarRed) GoAgain() bool { return sim.HeroWantsLowerHealth() }
+// scarForAScarGoAgain returns the printed "less {h}" go-again rider when the active hero
+// opts into LowerHealthWanter. nil-g (Opt-time / cardmeta lookups before a hero is set)
+// reads as false — printed default.
+func scarForAScarGoAgain(g card.GameEngine) bool {
+	if g == nil {
+		return false
+	}
+	return g.HeroWantsLowerHealth()
+}
+
+func (ScarForAScarRed) GoAgain(g card.GameEngine) bool { return scarForAScarGoAgain(g) }
 func (c ScarForAScarRed) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 }
 
-func (ScarForAScarYellow) GoAgain() bool { return sim.HeroWantsLowerHealth() }
+func (ScarForAScarYellow) GoAgain(g card.GameEngine) bool { return scarForAScarGoAgain(g) }
 func (c ScarForAScarYellow) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 }
 
-func (ScarForAScarBlue) GoAgain() bool { return sim.HeroWantsLowerHealth() }
+func (ScarForAScarBlue) GoAgain(g card.GameEngine) bool { return scarForAScarGoAgain(g) }
 func (c ScarForAScarBlue) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 }

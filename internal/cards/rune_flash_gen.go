@@ -18,7 +18,7 @@ func (RuneFlashRed) Pitch() int                         { return 1 }
 func (RuneFlashRed) Attack() int                        { return 4 }
 func (RuneFlashRed) Defense() int                       { return 3 }
 func (RuneFlashRed) Types(card.GameEngine) card.TypeSet { return runeFlashTypes }
-func (RuneFlashRed) GoAgain() bool                      { return true }
+func (RuneFlashRed) GoAgain(card.GameEngine) bool       { return true }
 
 type RuneFlashYellow struct{}
 
@@ -29,7 +29,7 @@ func (RuneFlashYellow) Pitch() int                         { return 2 }
 func (RuneFlashYellow) Attack() int                        { return 3 }
 func (RuneFlashYellow) Defense() int                       { return 3 }
 func (RuneFlashYellow) Types(card.GameEngine) card.TypeSet { return runeFlashTypes }
-func (RuneFlashYellow) GoAgain() bool                      { return true }
+func (RuneFlashYellow) GoAgain(card.GameEngine) bool       { return true }
 
 type RuneFlashBlue struct{}
 
@@ -40,4 +40,4 @@ func (RuneFlashBlue) Pitch() int                         { return 3 }
 func (RuneFlashBlue) Attack() int                        { return 2 }
 func (RuneFlashBlue) Defense() int                       { return 3 }
 func (RuneFlashBlue) Types(card.GameEngine) card.TypeSet { return runeFlashTypes }
-func (RuneFlashBlue) GoAgain() bool                      { return true }
+func (RuneFlashBlue) GoAgain(card.GameEngine) bool       { return true }

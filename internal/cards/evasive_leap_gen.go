@@ -19,7 +19,7 @@ func (EvasiveLeapRed) Pitch() int                         { return 1 }
 func (EvasiveLeapRed) Attack() int                        { return 0 }
 func (EvasiveLeapRed) Defense() int                       { return 3 }
 func (EvasiveLeapRed) Types(card.GameEngine) card.TypeSet { return evasiveLeapTypes }
-func (EvasiveLeapRed) GoAgain() bool                      { return false }
+func (EvasiveLeapRed) GoAgain(card.GameEngine) bool       { return false }
 
 type EvasiveLeapYellow struct{}
 
@@ -31,7 +31,7 @@ func (EvasiveLeapYellow) Pitch() int                         { return 2 }
 func (EvasiveLeapYellow) Attack() int                        { return 0 }
 func (EvasiveLeapYellow) Defense() int                       { return 2 }
 func (EvasiveLeapYellow) Types(card.GameEngine) card.TypeSet { return evasiveLeapTypes }
-func (EvasiveLeapYellow) GoAgain() bool                      { return false }
+func (EvasiveLeapYellow) GoAgain(card.GameEngine) bool       { return false }
 
 type EvasiveLeapBlue struct{}
 
@@ -43,4 +43,4 @@ func (EvasiveLeapBlue) Pitch() int                         { return 3 }
 func (EvasiveLeapBlue) Attack() int                        { return 0 }
 func (EvasiveLeapBlue) Defense() int                       { return 1 }
 func (EvasiveLeapBlue) Types(card.GameEngine) card.TypeSet { return evasiveLeapTypes }
-func (EvasiveLeapBlue) GoAgain() bool                      { return false }
+func (EvasiveLeapBlue) GoAgain(card.GameEngine) bool       { return false }

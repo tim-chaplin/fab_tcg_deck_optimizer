@@ -19,4 +19,4 @@ func (BladeFlashBlue) Pitch() int                         { return 3 }
 func (BladeFlashBlue) Attack() int                        { return 0 }
 func (BladeFlashBlue) Defense() int                       { return 2 }
 func (BladeFlashBlue) Types(card.GameEngine) card.TypeSet { return bladeFlashTypes }
-func (BladeFlashBlue) GoAgain() bool                      { return false }
+func (BladeFlashBlue) GoAgain(card.GameEngine) bool       { return false }

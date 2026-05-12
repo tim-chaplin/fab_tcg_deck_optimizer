@@ -19,5 +19,5 @@ func (HandBehindThePenRed) Pitch() int                         { return 1 }
 func (HandBehindThePenRed) Attack() int                        { return 6 }
 func (HandBehindThePenRed) Defense() int                       { return 2 }
 func (HandBehindThePenRed) Types(card.GameEngine) card.TypeSet { return handBehindThePenTypes }
-func (HandBehindThePenRed) GoAgain() bool                      { return false }
+func (HandBehindThePenRed) GoAgain(card.GameEngine) bool       { return false }
 func (HandBehindThePenRed) NotImplemented()                    {}

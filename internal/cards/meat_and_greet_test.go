@@ -30,7 +30,7 @@ func TestMeatAndGreet_OnHitRunechantGatedByLikelyToHit(t *testing.T) {
 			t.Errorf("%s: GrantedGoAgain = true, want false (no prior arcane damage → no go again)", tc.c.Name())
 		}
 		// Card's printed GoAgain must also be false — the rider is the only source.
-		if tc.c.GoAgain() {
+		if tc.c.GoAgain(nil) {
 			t.Errorf("%s: GoAgain() = true, want false (rider is conditional, not printed)", tc.c.Name())
 		}
 	}

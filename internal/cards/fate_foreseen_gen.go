@@ -19,7 +19,7 @@ func (FateForeseenRed) Pitch() int                         { return 1 }
 func (FateForeseenRed) Attack() int                        { return 0 }
 func (FateForeseenRed) Defense() int                       { return 4 }
 func (FateForeseenRed) Types(card.GameEngine) card.TypeSet { return fateForeseenTypes }
-func (FateForeseenRed) GoAgain() bool                      { return false }
+func (FateForeseenRed) GoAgain(card.GameEngine) bool       { return false }
 func (FateForeseenRed) NotSilverAgeLegal()                 {}
 
 type FateForeseenYellow struct{}
@@ -32,7 +32,7 @@ func (FateForeseenYellow) Pitch() int                         { return 2 }
 func (FateForeseenYellow) Attack() int                        { return 0 }
 func (FateForeseenYellow) Defense() int                       { return 3 }
 func (FateForeseenYellow) Types(card.GameEngine) card.TypeSet { return fateForeseenTypes }
-func (FateForeseenYellow) GoAgain() bool                      { return false }
+func (FateForeseenYellow) GoAgain(card.GameEngine) bool       { return false }
 func (FateForeseenYellow) NotSilverAgeLegal()                 {}
 
 type FateForeseenBlue struct{}
@@ -45,5 +45,5 @@ func (FateForeseenBlue) Pitch() int                         { return 3 }
 func (FateForeseenBlue) Attack() int                        { return 0 }
 func (FateForeseenBlue) Defense() int                       { return 2 }
 func (FateForeseenBlue) Types(card.GameEngine) card.TypeSet { return fateForeseenTypes }
-func (FateForeseenBlue) GoAgain() bool                      { return false }
+func (FateForeseenBlue) GoAgain(card.GameEngine) bool       { return false }
 func (FateForeseenBlue) NotSilverAgeLegal()                 {}

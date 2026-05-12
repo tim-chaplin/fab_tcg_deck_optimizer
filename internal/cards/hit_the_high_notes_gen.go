@@ -19,7 +19,7 @@ func (HitTheHighNotesRed) Pitch() int                         { return 1 }
 func (HitTheHighNotesRed) Attack() int                        { return 4 }
 func (HitTheHighNotesRed) Defense() int                       { return 3 }
 func (HitTheHighNotesRed) Types(card.GameEngine) card.TypeSet { return hitTheHighNotesTypes }
-func (HitTheHighNotesRed) GoAgain() bool                      { return false }
+func (HitTheHighNotesRed) GoAgain(card.GameEngine) bool       { return false }
 
 type HitTheHighNotesYellow struct{}
 
@@ -31,7 +31,7 @@ func (HitTheHighNotesYellow) Pitch() int                         { return 2 }
 func (HitTheHighNotesYellow) Attack() int                        { return 3 }
 func (HitTheHighNotesYellow) Defense() int                       { return 3 }
 func (HitTheHighNotesYellow) Types(card.GameEngine) card.TypeSet { return hitTheHighNotesTypes }
-func (HitTheHighNotesYellow) GoAgain() bool                      { return false }
+func (HitTheHighNotesYellow) GoAgain(card.GameEngine) bool       { return false }
 
 type HitTheHighNotesBlue struct{}
 
@@ -43,4 +43,4 @@ func (HitTheHighNotesBlue) Pitch() int                         { return 3 }
 func (HitTheHighNotesBlue) Attack() int                        { return 2 }
 func (HitTheHighNotesBlue) Defense() int                       { return 3 }
 func (HitTheHighNotesBlue) Types(card.GameEngine) card.TypeSet { return hitTheHighNotesTypes }
-func (HitTheHighNotesBlue) GoAgain() bool                      { return false }
+func (HitTheHighNotesBlue) GoAgain(card.GameEngine) bool       { return false }

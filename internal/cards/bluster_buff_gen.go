@@ -19,4 +19,4 @@ func (BlusterBuffRed) Pitch() int                         { return 1 }
 func (BlusterBuffRed) Attack() int                        { return 6 }
 func (BlusterBuffRed) Defense() int                       { return 3 }
 func (BlusterBuffRed) Types(card.GameEngine) card.TypeSet { return blusterBuffTypes }
-func (BlusterBuffRed) GoAgain() bool                      { return false }
+func (BlusterBuffRed) GoAgain(card.GameEngine) bool       { return false }

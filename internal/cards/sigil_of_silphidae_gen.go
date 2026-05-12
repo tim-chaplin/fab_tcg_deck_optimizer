@@ -19,4 +19,4 @@ func (SigilOfSilphidaeBlue) Pitch() int                         { return 3 }
 func (SigilOfSilphidaeBlue) Attack() int                        { return 0 }
 func (SigilOfSilphidaeBlue) Defense() int                       { return 3 }
 func (SigilOfSilphidaeBlue) Types(card.GameEngine) card.TypeSet { return sigilOfSilphidaeTypes }
-func (SigilOfSilphidaeBlue) GoAgain() bool                      { return true }
+func (SigilOfSilphidaeBlue) GoAgain(card.GameEngine) bool       { return true }

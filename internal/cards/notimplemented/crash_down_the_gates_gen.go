@@ -19,7 +19,7 @@ func (CrashDownTheGatesRed) Pitch() int                         { return 1 }
 func (CrashDownTheGatesRed) Attack() int                        { return 6 }
 func (CrashDownTheGatesRed) Defense() int                       { return 2 }
 func (CrashDownTheGatesRed) Types(card.GameEngine) card.TypeSet { return crashDownTheGatesTypes }
-func (CrashDownTheGatesRed) GoAgain() bool                      { return false }
+func (CrashDownTheGatesRed) GoAgain(card.GameEngine) bool       { return false }
 func (CrashDownTheGatesRed) NotImplemented()                    {}
 
 type CrashDownTheGatesYellow struct{}
@@ -32,7 +32,7 @@ func (CrashDownTheGatesYellow) Pitch() int                         { return 2 }
 func (CrashDownTheGatesYellow) Attack() int                        { return 5 }
 func (CrashDownTheGatesYellow) Defense() int                       { return 2 }
 func (CrashDownTheGatesYellow) Types(card.GameEngine) card.TypeSet { return crashDownTheGatesTypes }
-func (CrashDownTheGatesYellow) GoAgain() bool                      { return false }
+func (CrashDownTheGatesYellow) GoAgain(card.GameEngine) bool       { return false }
 func (CrashDownTheGatesYellow) NotImplemented()                    {}
 
 type CrashDownTheGatesBlue struct{}
@@ -45,5 +45,5 @@ func (CrashDownTheGatesBlue) Pitch() int                         { return 3 }
 func (CrashDownTheGatesBlue) Attack() int                        { return 4 }
 func (CrashDownTheGatesBlue) Defense() int                       { return 2 }
 func (CrashDownTheGatesBlue) Types(card.GameEngine) card.TypeSet { return crashDownTheGatesTypes }
-func (CrashDownTheGatesBlue) GoAgain() bool                      { return false }
+func (CrashDownTheGatesBlue) GoAgain(card.GameEngine) bool       { return false }
 func (CrashDownTheGatesBlue) NotImplemented()                    {}

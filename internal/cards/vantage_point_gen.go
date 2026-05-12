@@ -19,7 +19,7 @@ func (VantagePointRed) Pitch() int                         { return 1 }
 func (VantagePointRed) Attack() int                        { return 7 }
 func (VantagePointRed) Defense() int                       { return 3 }
 func (VantagePointRed) Types(card.GameEngine) card.TypeSet { return vantagePointTypes }
-func (VantagePointRed) GoAgain() bool                      { return false }
+func (VantagePointRed) GoAgain(card.GameEngine) bool       { return false }
 
 type VantagePointYellow struct{}
 
@@ -31,7 +31,7 @@ func (VantagePointYellow) Pitch() int                         { return 2 }
 func (VantagePointYellow) Attack() int                        { return 6 }
 func (VantagePointYellow) Defense() int                       { return 3 }
 func (VantagePointYellow) Types(card.GameEngine) card.TypeSet { return vantagePointTypes }
-func (VantagePointYellow) GoAgain() bool                      { return false }
+func (VantagePointYellow) GoAgain(card.GameEngine) bool       { return false }
 
 type VantagePointBlue struct{}
 
@@ -43,4 +43,4 @@ func (VantagePointBlue) Pitch() int                         { return 3 }
 func (VantagePointBlue) Attack() int                        { return 5 }
 func (VantagePointBlue) Defense() int                       { return 3 }
 func (VantagePointBlue) Types(card.GameEngine) card.TypeSet { return vantagePointTypes }
-func (VantagePointBlue) GoAgain() bool                      { return false }
+func (VantagePointBlue) GoAgain(card.GameEngine) bool       { return false }

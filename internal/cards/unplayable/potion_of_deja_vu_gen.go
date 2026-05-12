@@ -19,5 +19,5 @@ func (PotionOfDejaVuBlue) Pitch() int                         { return 3 }
 func (PotionOfDejaVuBlue) Attack() int                        { return 0 }
 func (PotionOfDejaVuBlue) Defense() int                       { return 0 }
 func (PotionOfDejaVuBlue) Types(card.GameEngine) card.TypeSet { return potionOfDJVuTypes }
-func (PotionOfDejaVuBlue) GoAgain() bool                      { return false }
+func (PotionOfDejaVuBlue) GoAgain(card.GameEngine) bool       { return false }
 func (PotionOfDejaVuBlue) Unplayable()                        {}

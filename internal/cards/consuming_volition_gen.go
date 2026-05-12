@@ -19,7 +19,7 @@ func (ConsumingVolitionRed) Pitch() int                         { return 1 }
 func (ConsumingVolitionRed) Attack() int                        { return 4 }
 func (ConsumingVolitionRed) Defense() int                       { return 3 }
 func (ConsumingVolitionRed) Types(card.GameEngine) card.TypeSet { return consumingVolitionTypes }
-func (ConsumingVolitionRed) GoAgain() bool                      { return false }
+func (ConsumingVolitionRed) GoAgain(card.GameEngine) bool       { return false }
 
 type ConsumingVolitionYellow struct{}
 
@@ -31,7 +31,7 @@ func (ConsumingVolitionYellow) Pitch() int                         { return 2 }
 func (ConsumingVolitionYellow) Attack() int                        { return 3 }
 func (ConsumingVolitionYellow) Defense() int                       { return 3 }
 func (ConsumingVolitionYellow) Types(card.GameEngine) card.TypeSet { return consumingVolitionTypes }
-func (ConsumingVolitionYellow) GoAgain() bool                      { return false }
+func (ConsumingVolitionYellow) GoAgain(card.GameEngine) bool       { return false }
 
 type ConsumingVolitionBlue struct{}
 
@@ -43,4 +43,4 @@ func (ConsumingVolitionBlue) Pitch() int                         { return 3 }
 func (ConsumingVolitionBlue) Attack() int                        { return 2 }
 func (ConsumingVolitionBlue) Defense() int                       { return 3 }
 func (ConsumingVolitionBlue) Types(card.GameEngine) card.TypeSet { return consumingVolitionTypes }
-func (ConsumingVolitionBlue) GoAgain() bool                      { return false }
+func (ConsumingVolitionBlue) GoAgain(card.GameEngine) bool       { return false }

@@ -19,7 +19,7 @@ func (DownButNotOutRed) Pitch() int                         { return 1 }
 func (DownButNotOutRed) Attack() int                        { return 5 }
 func (DownButNotOutRed) Defense() int                       { return 3 }
 func (DownButNotOutRed) Types(card.GameEngine) card.TypeSet { return downButNotOutTypes }
-func (DownButNotOutRed) GoAgain() bool                      { return false }
+func (DownButNotOutRed) GoAgain(card.GameEngine) bool       { return false }
 func (DownButNotOutRed) NotImplemented()                    {}
 
 type DownButNotOutYellow struct{}
@@ -32,7 +32,7 @@ func (DownButNotOutYellow) Pitch() int                         { return 2 }
 func (DownButNotOutYellow) Attack() int                        { return 4 }
 func (DownButNotOutYellow) Defense() int                       { return 3 }
 func (DownButNotOutYellow) Types(card.GameEngine) card.TypeSet { return downButNotOutTypes }
-func (DownButNotOutYellow) GoAgain() bool                      { return false }
+func (DownButNotOutYellow) GoAgain(card.GameEngine) bool       { return false }
 func (DownButNotOutYellow) NotImplemented()                    {}
 
 type DownButNotOutBlue struct{}
@@ -45,5 +45,5 @@ func (DownButNotOutBlue) Pitch() int                         { return 3 }
 func (DownButNotOutBlue) Attack() int                        { return 3 }
 func (DownButNotOutBlue) Defense() int                       { return 3 }
 func (DownButNotOutBlue) Types(card.GameEngine) card.TypeSet { return downButNotOutTypes }
-func (DownButNotOutBlue) GoAgain() bool                      { return false }
+func (DownButNotOutBlue) GoAgain(card.GameEngine) bool       { return false }
 func (DownButNotOutBlue) NotImplemented()                    {}

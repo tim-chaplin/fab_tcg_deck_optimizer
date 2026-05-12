@@ -17,7 +17,7 @@ var ferventForerunnerVariants = []card.Card{
 // Tests that printed GoAgain() is false; the only grant is the arsenal-gated rider.
 func TestFerventForerunner_BaseGoAgainFalse(t *testing.T) {
 	for _, c := range ferventForerunnerVariants {
-		if c.GoAgain() {
+		if c.GoAgain(nil) {
 			t.Errorf("%s: GoAgain() = true, want false (arsenal-only go-again not modelled)", c.Name())
 		}
 	}

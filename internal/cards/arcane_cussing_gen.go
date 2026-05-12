@@ -19,7 +19,7 @@ func (ArcaneCussingRed) Pitch() int                         { return 1 }
 func (ArcaneCussingRed) Attack() int                        { return 0 }
 func (ArcaneCussingRed) Defense() int                       { return 2 }
 func (ArcaneCussingRed) Types(card.GameEngine) card.TypeSet { return arcaneCussingTypes }
-func (ArcaneCussingRed) GoAgain() bool                      { return true }
+func (ArcaneCussingRed) GoAgain(card.GameEngine) bool       { return true }
 
 type ArcaneCussingYellow struct{}
 
@@ -31,7 +31,7 @@ func (ArcaneCussingYellow) Pitch() int                         { return 2 }
 func (ArcaneCussingYellow) Attack() int                        { return 0 }
 func (ArcaneCussingYellow) Defense() int                       { return 2 }
 func (ArcaneCussingYellow) Types(card.GameEngine) card.TypeSet { return arcaneCussingTypes }
-func (ArcaneCussingYellow) GoAgain() bool                      { return true }
+func (ArcaneCussingYellow) GoAgain(card.GameEngine) bool       { return true }
 
 type ArcaneCussingBlue struct{}
 
@@ -43,4 +43,4 @@ func (ArcaneCussingBlue) Pitch() int                         { return 3 }
 func (ArcaneCussingBlue) Attack() int                        { return 0 }
 func (ArcaneCussingBlue) Defense() int                       { return 2 }
 func (ArcaneCussingBlue) Types(card.GameEngine) card.TypeSet { return arcaneCussingTypes }
-func (ArcaneCussingBlue) GoAgain() bool                      { return true }
+func (ArcaneCussingBlue) GoAgain(card.GameEngine) bool       { return true }

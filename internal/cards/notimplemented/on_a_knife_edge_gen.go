@@ -19,5 +19,5 @@ func (OnAKnifeEdgeYellow) Pitch() int                         { return 2 }
 func (OnAKnifeEdgeYellow) Attack() int                        { return 0 }
 func (OnAKnifeEdgeYellow) Defense() int                       { return 2 }
 func (OnAKnifeEdgeYellow) Types(card.GameEngine) card.TypeSet { return onAKnifeEdgeTypes }
-func (OnAKnifeEdgeYellow) GoAgain() bool                      { return true }
+func (OnAKnifeEdgeYellow) GoAgain(card.GameEngine) bool       { return true }
 func (OnAKnifeEdgeYellow) NotImplemented()                    {}

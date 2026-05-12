@@ -19,7 +19,7 @@ func (BrutalAssaultRed) Pitch() int                         { return 1 }
 func (BrutalAssaultRed) Attack() int                        { return 6 }
 func (BrutalAssaultRed) Defense() int                       { return 3 }
 func (BrutalAssaultRed) Types(card.GameEngine) card.TypeSet { return brutalAssaultTypes }
-func (BrutalAssaultRed) GoAgain() bool                      { return false }
+func (BrutalAssaultRed) GoAgain(card.GameEngine) bool       { return false }
 
 type BrutalAssaultYellow struct{}
 
@@ -31,7 +31,7 @@ func (BrutalAssaultYellow) Pitch() int                         { return 2 }
 func (BrutalAssaultYellow) Attack() int                        { return 5 }
 func (BrutalAssaultYellow) Defense() int                       { return 3 }
 func (BrutalAssaultYellow) Types(card.GameEngine) card.TypeSet { return brutalAssaultTypes }
-func (BrutalAssaultYellow) GoAgain() bool                      { return false }
+func (BrutalAssaultYellow) GoAgain(card.GameEngine) bool       { return false }
 
 type BrutalAssaultBlue struct{}
 
@@ -43,4 +43,4 @@ func (BrutalAssaultBlue) Pitch() int                         { return 3 }
 func (BrutalAssaultBlue) Attack() int                        { return 4 }
 func (BrutalAssaultBlue) Defense() int                       { return 3 }
 func (BrutalAssaultBlue) Types(card.GameEngine) card.TypeSet { return brutalAssaultTypes }
-func (BrutalAssaultBlue) GoAgain() bool                      { return false }
+func (BrutalAssaultBlue) GoAgain(card.GameEngine) bool       { return false }

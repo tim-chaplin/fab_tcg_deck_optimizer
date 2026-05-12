@@ -19,7 +19,7 @@ func (WeepingBattlegroundRed) Pitch() int                         { return 1 }
 func (WeepingBattlegroundRed) Attack() int                        { return 0 }
 func (WeepingBattlegroundRed) Defense() int                       { return 3 }
 func (WeepingBattlegroundRed) Types(card.GameEngine) card.TypeSet { return weepingBattlegroundTypes }
-func (WeepingBattlegroundRed) GoAgain() bool                      { return false }
+func (WeepingBattlegroundRed) GoAgain(card.GameEngine) bool       { return false }
 
 type WeepingBattlegroundYellow struct{}
 
@@ -31,7 +31,7 @@ func (WeepingBattlegroundYellow) Pitch() int                         { return 2 
 func (WeepingBattlegroundYellow) Attack() int                        { return 0 }
 func (WeepingBattlegroundYellow) Defense() int                       { return 3 }
 func (WeepingBattlegroundYellow) Types(card.GameEngine) card.TypeSet { return weepingBattlegroundTypes }
-func (WeepingBattlegroundYellow) GoAgain() bool                      { return false }
+func (WeepingBattlegroundYellow) GoAgain(card.GameEngine) bool       { return false }
 
 type WeepingBattlegroundBlue struct{}
 
@@ -43,4 +43,4 @@ func (WeepingBattlegroundBlue) Pitch() int                         { return 3 }
 func (WeepingBattlegroundBlue) Attack() int                        { return 0 }
 func (WeepingBattlegroundBlue) Defense() int                       { return 3 }
 func (WeepingBattlegroundBlue) Types(card.GameEngine) card.TypeSet { return weepingBattlegroundTypes }
-func (WeepingBattlegroundBlue) GoAgain() bool                      { return false }
+func (WeepingBattlegroundBlue) GoAgain(card.GameEngine) bool       { return false }

@@ -19,7 +19,7 @@ func (FrontlineScoutRed) Pitch() int                         { return 1 }
 func (FrontlineScoutRed) Attack() int                        { return 3 }
 func (FrontlineScoutRed) Defense() int                       { return 2 }
 func (FrontlineScoutRed) Types(card.GameEngine) card.TypeSet { return frontlineScoutTypes }
-func (FrontlineScoutRed) GoAgain() bool                      { return false }
+func (FrontlineScoutRed) GoAgain(card.GameEngine) bool       { return false }
 func (FrontlineScoutRed) NotImplemented()                    {}
 
 type FrontlineScoutYellow struct{}
@@ -32,7 +32,7 @@ func (FrontlineScoutYellow) Pitch() int                         { return 2 }
 func (FrontlineScoutYellow) Attack() int                        { return 2 }
 func (FrontlineScoutYellow) Defense() int                       { return 2 }
 func (FrontlineScoutYellow) Types(card.GameEngine) card.TypeSet { return frontlineScoutTypes }
-func (FrontlineScoutYellow) GoAgain() bool                      { return false }
+func (FrontlineScoutYellow) GoAgain(card.GameEngine) bool       { return false }
 func (FrontlineScoutYellow) NotImplemented()                    {}
 
 type FrontlineScoutBlue struct{}
@@ -45,5 +45,5 @@ func (FrontlineScoutBlue) Pitch() int                         { return 3 }
 func (FrontlineScoutBlue) Attack() int                        { return 1 }
 func (FrontlineScoutBlue) Defense() int                       { return 2 }
 func (FrontlineScoutBlue) Types(card.GameEngine) card.TypeSet { return frontlineScoutTypes }
-func (FrontlineScoutBlue) GoAgain() bool                      { return false }
+func (FrontlineScoutBlue) GoAgain(card.GameEngine) bool       { return false }
 func (FrontlineScoutBlue) NotImplemented()                    {}

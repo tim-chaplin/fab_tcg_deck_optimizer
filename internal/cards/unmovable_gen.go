@@ -19,7 +19,7 @@ func (UnmovableRed) Pitch() int                         { return 1 }
 func (UnmovableRed) Attack() int                        { return 0 }
 func (UnmovableRed) Defense() int                       { return 7 }
 func (UnmovableRed) Types(card.GameEngine) card.TypeSet { return unmovableTypes }
-func (UnmovableRed) GoAgain() bool                      { return false }
+func (UnmovableRed) GoAgain(card.GameEngine) bool       { return false }
 
 type UnmovableYellow struct{}
 
@@ -31,7 +31,7 @@ func (UnmovableYellow) Pitch() int                         { return 2 }
 func (UnmovableYellow) Attack() int                        { return 0 }
 func (UnmovableYellow) Defense() int                       { return 6 }
 func (UnmovableYellow) Types(card.GameEngine) card.TypeSet { return unmovableTypes }
-func (UnmovableYellow) GoAgain() bool                      { return false }
+func (UnmovableYellow) GoAgain(card.GameEngine) bool       { return false }
 
 type UnmovableBlue struct{}
 
@@ -43,4 +43,4 @@ func (UnmovableBlue) Pitch() int                         { return 3 }
 func (UnmovableBlue) Attack() int                        { return 0 }
 func (UnmovableBlue) Defense() int                       { return 5 }
 func (UnmovableBlue) Types(card.GameEngine) card.TypeSet { return unmovableTypes }
-func (UnmovableBlue) GoAgain() bool                      { return false }
+func (UnmovableBlue) GoAgain(card.GameEngine) bool       { return false }

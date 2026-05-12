@@ -19,7 +19,7 @@ func (MinnowismRed) Pitch() int                         { return 1 }
 func (MinnowismRed) Attack() int                        { return 0 }
 func (MinnowismRed) Defense() int                       { return 2 }
 func (MinnowismRed) Types(card.GameEngine) card.TypeSet { return minnowismTypes }
-func (MinnowismRed) GoAgain() bool                      { return true }
+func (MinnowismRed) GoAgain(card.GameEngine) bool       { return true }
 
 type MinnowismYellow struct{}
 
@@ -31,7 +31,7 @@ func (MinnowismYellow) Pitch() int                         { return 2 }
 func (MinnowismYellow) Attack() int                        { return 0 }
 func (MinnowismYellow) Defense() int                       { return 2 }
 func (MinnowismYellow) Types(card.GameEngine) card.TypeSet { return minnowismTypes }
-func (MinnowismYellow) GoAgain() bool                      { return true }
+func (MinnowismYellow) GoAgain(card.GameEngine) bool       { return true }
 
 type MinnowismBlue struct{}
 
@@ -43,4 +43,4 @@ func (MinnowismBlue) Pitch() int                         { return 3 }
 func (MinnowismBlue) Attack() int                        { return 0 }
 func (MinnowismBlue) Defense() int                       { return 2 }
 func (MinnowismBlue) Types(card.GameEngine) card.TypeSet { return minnowismTypes }
-func (MinnowismBlue) GoAgain() bool                      { return true }
+func (MinnowismBlue) GoAgain(card.GameEngine) bool       { return true }

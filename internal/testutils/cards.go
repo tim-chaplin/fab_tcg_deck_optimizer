@@ -37,7 +37,7 @@ func (s Card) Pitch() int                                       { return s.pitch
 func (s Card) Attack() int                                      { return s.power }
 func (s Card) Defense() int                                     { return 0 }
 func (s Card) Types(card.GameEngine) card.TypeSet               { return s.types }
-func (s Card) GoAgain() bool                                    { return false }
+func (s Card) GoAgain(card.GameEngine) bool                     { return false }
 func (Card) Play(card.GameEngine, card.Logger, *card.CardState) {}
 
 // GenericAttack returns a Generic Action - Attack stub with the given cost and base power.
@@ -86,7 +86,7 @@ func (RunebladeAttack) Defense() int             { return 0 }
 func (RunebladeAttack) Types(card.GameEngine) card.TypeSet {
 	return card.NewTypeSet(card.TypeRuneblade, card.TypeAction, card.TypeAttack)
 }
-func (RunebladeAttack) GoAgain() bool                                      { return true }
+func (RunebladeAttack) GoAgain(card.GameEngine) bool                       { return true }
 func (RunebladeAttack) Play(card.GameEngine, card.Logger, *card.CardState) {}
 
 // RunebladeWeapon is a Runeblade weapon — satisfies "next Runeblade attack" lookaheads
@@ -103,7 +103,7 @@ func (RunebladeWeapon) Defense() int             { return 0 }
 func (RunebladeWeapon) Types(card.GameEngine) card.TypeSet {
 	return card.NewTypeSet(card.TypeRuneblade, card.TypeWeapon, card.TypeAttack)
 }
-func (RunebladeWeapon) GoAgain() bool                                      { return false }
+func (RunebladeWeapon) GoAgain(card.GameEngine) bool                       { return false }
 func (RunebladeWeapon) Play(card.GameEngine, card.Logger, *card.CardState) {}
 
 // NonAttack is a non-attack card — covers "attack-typed predicate should reject
@@ -118,7 +118,7 @@ func (NonAttack) Pitch() int                                         { return 0 
 func (NonAttack) Attack() int                                        { return 0 }
 func (NonAttack) Defense() int                                       { return 0 }
 func (NonAttack) Types(card.GameEngine) card.TypeSet                 { return card.NewTypeSet(card.TypeAction) }
-func (NonAttack) GoAgain() bool                                      { return false }
+func (NonAttack) GoAgain(card.GameEngine) bool                       { return false }
 func (NonAttack) Play(card.GameEngine, card.Logger, *card.CardState) {}
 
 // NonRunebladeAttack is a Generic Action-Attack — covers Runeblade-gated lookaheads
@@ -135,7 +135,7 @@ func (NonRunebladeAttack) Defense() int             { return 0 }
 func (NonRunebladeAttack) Types(card.GameEngine) card.TypeSet {
 	return card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 }
-func (NonRunebladeAttack) GoAgain() bool                                      { return true }
+func (NonRunebladeAttack) GoAgain(card.GameEngine) bool                       { return true }
 func (NonRunebladeAttack) Play(card.GameEngine, card.Logger, *card.CardState) {}
 
 // AttackWithPower is a Runeblade attack-action card with a configurable printed Attack()
@@ -154,7 +154,7 @@ func (AttackWithPower) Defense() int             { return 0 }
 func (AttackWithPower) Types(card.GameEngine) card.TypeSet {
 	return card.NewTypeSet(card.TypeRuneblade, card.TypeAction, card.TypeAttack)
 }
-func (AttackWithPower) GoAgain() bool                                      { return true }
+func (AttackWithPower) GoAgain(card.GameEngine) bool                       { return true }
 func (AttackWithPower) Play(card.GameEngine, card.Logger, *card.CardState) {}
 
 // Aura is a minimal Aura-typed card — exercises "aura played this turn" checks.
@@ -168,7 +168,7 @@ func (Aura) Pitch() int                                         { return 0 }
 func (Aura) Attack() int                                        { return 0 }
 func (Aura) Defense() int                                       { return 0 }
 func (Aura) Types(card.GameEngine) card.TypeSet                 { return card.NewTypeSet(card.TypeAura) }
-func (Aura) GoAgain() bool                                      { return true }
+func (Aura) GoAgain(card.GameEngine) bool                       { return true }
 func (Aura) Play(card.GameEngine, card.Logger, *card.CardState) {}
 
 // genericAttackTypes is the type line shared by every attack-action fake below.
@@ -189,7 +189,7 @@ func (RedPitch) Defense() int             { return 0 }
 func (RedPitch) Types(card.GameEngine) card.TypeSet {
 	return card.NewTypeSet(card.TypeGeneric, card.TypeAction)
 }
-func (RedPitch) GoAgain() bool                                               { return false }
+func (RedPitch) GoAgain(card.GameEngine) bool                                { return false }
 func (RedPitch) Play(s card.GameEngine, l card.Logger, self *card.CardState) {}
 
 // BluePitch is a pure-pitch generic non-attack action: pitches 3, no attack, no defense,
@@ -209,7 +209,7 @@ func (BluePitch) Defense() int             { return 0 }
 func (BluePitch) Types(card.GameEngine) card.TypeSet {
 	return card.NewTypeSet(card.TypeGeneric, card.TypeAction)
 }
-func (BluePitch) GoAgain() bool                                               { return false }
+func (BluePitch) GoAgain(card.GameEngine) bool                                { return false }
 func (BluePitch) Play(s card.GameEngine, l card.Logger, self *card.CardState) {}
 
 // BlueAttack is a generic blue attack action: pitches 3, defends 3, attacks 1, costs 1.
@@ -223,7 +223,7 @@ func (BlueAttack) Pitch() int                         { return 3 }
 func (BlueAttack) Attack() int                        { return 1 }
 func (BlueAttack) Defense() int                       { return 3 }
 func (BlueAttack) Types(card.GameEngine) card.TypeSet { return genericAttackTypes }
-func (BlueAttack) GoAgain() bool                      { return true }
+func (BlueAttack) GoAgain(card.GameEngine) bool       { return true }
 func (BlueAttack) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 }
 
@@ -238,7 +238,7 @@ func (RedAttack) Pitch() int                         { return 1 }
 func (RedAttack) Attack() int                        { return 3 }
 func (RedAttack) Defense() int                       { return 1 }
 func (RedAttack) Types(card.GameEngine) card.TypeSet { return genericAttackTypes }
-func (RedAttack) GoAgain() bool                      { return true }
+func (RedAttack) GoAgain(card.GameEngine) bool       { return true }
 func (RedAttack) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 }
 
@@ -253,7 +253,7 @@ func (YellowAttack) Pitch() int                         { return 2 }
 func (YellowAttack) Attack() int                        { return 2 }
 func (YellowAttack) Defense() int                       { return 2 }
 func (YellowAttack) Types(card.GameEngine) card.TypeSet { return genericAttackTypes }
-func (YellowAttack) GoAgain() bool                      { return true }
+func (YellowAttack) GoAgain(card.GameEngine) bool       { return true }
 func (YellowAttack) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 }
 
@@ -275,7 +275,7 @@ func (CostlyDraw) Pitch() int                         { return 1 }
 func (CostlyDraw) Attack() int                        { return 0 }
 func (CostlyDraw) Defense() int                       { return 0 }
 func (CostlyDraw) Types(card.GameEngine) card.TypeSet { return genericActionTypes }
-func (CostlyDraw) GoAgain() bool                      { return true }
+func (CostlyDraw) GoAgain(card.GameEngine) bool       { return true }
 func (CostlyDraw) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 	s.DrawOne()
 }
@@ -292,7 +292,7 @@ func (CostlyAttack) Pitch() int                         { return 1 }
 func (CostlyAttack) Attack() int                        { return 3 }
 func (CostlyAttack) Defense() int                       { return 0 }
 func (CostlyAttack) Types(card.GameEngine) card.TypeSet { return genericAttackTypes }
-func (CostlyAttack) GoAgain() bool                      { return false }
+func (CostlyAttack) GoAgain(card.GameEngine) bool       { return false }
 func (CostlyAttack) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 }
 
@@ -310,7 +310,7 @@ func (PitchOneDR) Pitch() int                         { return 1 }
 func (PitchOneDR) Attack() int                        { return 0 }
 func (PitchOneDR) Defense() int                       { return 3 }
 func (PitchOneDR) Types(card.GameEngine) card.TypeSet { return genericDefenseReactionTypes }
-func (PitchOneDR) GoAgain() bool                      { return false }
+func (PitchOneDR) GoAgain(card.GameEngine) bool       { return false }
 func (PitchOneDR) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 }
 
@@ -330,7 +330,7 @@ func (HugeAttack) Pitch() int                         { return 1 }
 func (HugeAttack) Attack() int                        { return hugeAttackDamage }
 func (HugeAttack) Defense() int                       { return 0 }
 func (HugeAttack) Types(card.GameEngine) card.TypeSet { return genericAttackTypes }
-func (HugeAttack) GoAgain() bool                      { return false }
+func (HugeAttack) GoAgain(card.GameEngine) bool       { return false }
 func (HugeAttack) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 }
 
@@ -379,7 +379,7 @@ func (c StubCard) Pitch() int                                       { return c.p
 func (c StubCard) Attack() int                                      { return c.attack }
 func (c StubCard) Defense() int                                     { return c.defense }
 func (c StubCard) Types(card.GameEngine) card.TypeSet               { return c.types }
-func (c StubCard) GoAgain() bool                                    { return c.goAgain }
+func (c StubCard) GoAgain(card.GameEngine) bool                     { return c.goAgain }
 func (StubCard) Play(card.GameEngine, card.Logger, *card.CardState) {}
 
 // DominatingStubCard embeds StubCard and adds the card.Dominator marker — exercises the
@@ -415,7 +415,7 @@ func (InstantStub) Defense() int             { return 0 }
 func (InstantStub) Types(card.GameEngine) card.TypeSet {
 	return card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeInstant)
 }
-func (InstantStub) GoAgain() bool                                               { return false }
+func (InstantStub) GoAgain(card.GameEngine) bool                                { return false }
 func (InstantStub) Play(s card.GameEngine, l card.Logger, self *card.CardState) {}
 
 // NoGoAgainAttackStub is a 0-cost, 1-power Generic Action - Attack card with no Go again.
@@ -431,7 +431,7 @@ func (NoGoAgainAttackStub) Pitch() int                         { return 0 }
 func (NoGoAgainAttackStub) Attack() int                        { return 1 }
 func (NoGoAgainAttackStub) Defense() int                       { return 0 }
 func (NoGoAgainAttackStub) Types(card.GameEngine) card.TypeSet { return genericAttackTypes }
-func (NoGoAgainAttackStub) GoAgain() bool                      { return false }
+func (NoGoAgainAttackStub) GoAgain(card.GameEngine) bool       { return false }
 func (NoGoAgainAttackStub) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 }
 
@@ -451,7 +451,7 @@ func (GrantAll) Defense() int             { return 0 }
 func (GrantAll) Types(card.GameEngine) card.TypeSet {
 	return card.NewTypeSet(card.TypeRuneblade, card.TypeAction, card.TypeAttack)
 }
-func (GrantAll) GoAgain() bool { return true }
+func (GrantAll) GoAgain(card.GameEngine) bool { return true }
 func (GrantAll) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 	for _, pc := range s.CardsRemaining() {
 		pc.GrantedGoAgain = true
@@ -475,7 +475,7 @@ func (GrantSpy) Defense() int             { return 0 }
 func (GrantSpy) Types(card.GameEngine) card.TypeSet {
 	return card.NewTypeSet(card.TypeRuneblade, card.TypeAction, card.TypeAttack)
 }
-func (GrantSpy) GoAgain() bool { return true }
+func (GrantSpy) GoAgain(card.GameEngine) bool { return true }
 func (g GrantSpy) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 	if len(s.CardsPlayed()) != 0 {
 		return

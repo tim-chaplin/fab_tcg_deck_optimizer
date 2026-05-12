@@ -19,7 +19,7 @@ func (MoneyWhereYaMouthIsRed) Pitch() int                         { return 1 }
 func (MoneyWhereYaMouthIsRed) Attack() int                        { return 0 }
 func (MoneyWhereYaMouthIsRed) Defense() int                       { return 2 }
 func (MoneyWhereYaMouthIsRed) Types(card.GameEngine) card.TypeSet { return moneyWhereYaMouthIsTypes }
-func (MoneyWhereYaMouthIsRed) GoAgain() bool                      { return true }
+func (MoneyWhereYaMouthIsRed) GoAgain(card.GameEngine) bool       { return true }
 
 type MoneyWhereYaMouthIsYellow struct{}
 
@@ -31,7 +31,7 @@ func (MoneyWhereYaMouthIsYellow) Pitch() int                         { return 2 
 func (MoneyWhereYaMouthIsYellow) Attack() int                        { return 0 }
 func (MoneyWhereYaMouthIsYellow) Defense() int                       { return 2 }
 func (MoneyWhereYaMouthIsYellow) Types(card.GameEngine) card.TypeSet { return moneyWhereYaMouthIsTypes }
-func (MoneyWhereYaMouthIsYellow) GoAgain() bool                      { return true }
+func (MoneyWhereYaMouthIsYellow) GoAgain(card.GameEngine) bool       { return true }
 
 type MoneyWhereYaMouthIsBlue struct{}
 
@@ -43,4 +43,4 @@ func (MoneyWhereYaMouthIsBlue) Pitch() int                         { return 3 }
 func (MoneyWhereYaMouthIsBlue) Attack() int                        { return 0 }
 func (MoneyWhereYaMouthIsBlue) Defense() int                       { return 2 }
 func (MoneyWhereYaMouthIsBlue) Types(card.GameEngine) card.TypeSet { return moneyWhereYaMouthIsTypes }
-func (MoneyWhereYaMouthIsBlue) GoAgain() bool                      { return true }
+func (MoneyWhereYaMouthIsBlue) GoAgain(card.GameEngine) bool       { return true }

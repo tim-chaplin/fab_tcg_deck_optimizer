@@ -19,7 +19,7 @@ func (DroneOfBrutalityRed) Pitch() int                         { return 1 }
 func (DroneOfBrutalityRed) Attack() int                        { return 6 }
 func (DroneOfBrutalityRed) Defense() int                       { return 2 }
 func (DroneOfBrutalityRed) Types(card.GameEngine) card.TypeSet { return droneOfBrutalityTypes }
-func (DroneOfBrutalityRed) GoAgain() bool                      { return false }
+func (DroneOfBrutalityRed) GoAgain(card.GameEngine) bool       { return false }
 func (DroneOfBrutalityRed) NotSilverAgeLegal()                 {}
 func (DroneOfBrutalityRed) Unplayable()                        {}
 
@@ -33,7 +33,7 @@ func (DroneOfBrutalityYellow) Pitch() int                         { return 2 }
 func (DroneOfBrutalityYellow) Attack() int                        { return 5 }
 func (DroneOfBrutalityYellow) Defense() int                       { return 2 }
 func (DroneOfBrutalityYellow) Types(card.GameEngine) card.TypeSet { return droneOfBrutalityTypes }
-func (DroneOfBrutalityYellow) GoAgain() bool                      { return false }
+func (DroneOfBrutalityYellow) GoAgain(card.GameEngine) bool       { return false }
 func (DroneOfBrutalityYellow) NotSilverAgeLegal()                 {}
 func (DroneOfBrutalityYellow) Unplayable()                        {}
 
@@ -47,6 +47,6 @@ func (DroneOfBrutalityBlue) Pitch() int                         { return 3 }
 func (DroneOfBrutalityBlue) Attack() int                        { return 4 }
 func (DroneOfBrutalityBlue) Defense() int                       { return 2 }
 func (DroneOfBrutalityBlue) Types(card.GameEngine) card.TypeSet { return droneOfBrutalityTypes }
-func (DroneOfBrutalityBlue) GoAgain() bool                      { return false }
+func (DroneOfBrutalityBlue) GoAgain(card.GameEngine) bool       { return false }
 func (DroneOfBrutalityBlue) NotSilverAgeLegal()                 {}
 func (DroneOfBrutalityBlue) Unplayable()                        {}

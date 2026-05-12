@@ -19,7 +19,7 @@ func (SingeingSteelbladeRed) Pitch() int                         { return 1 }
 func (SingeingSteelbladeRed) Attack() int                        { return 4 }
 func (SingeingSteelbladeRed) Defense() int                       { return 3 }
 func (SingeingSteelbladeRed) Types(card.GameEngine) card.TypeSet { return singeingSteelbladeTypes }
-func (SingeingSteelbladeRed) GoAgain() bool                      { return false }
+func (SingeingSteelbladeRed) GoAgain(card.GameEngine) bool       { return false }
 
 type SingeingSteelbladeYellow struct{}
 
@@ -31,7 +31,7 @@ func (SingeingSteelbladeYellow) Pitch() int                         { return 2 }
 func (SingeingSteelbladeYellow) Attack() int                        { return 3 }
 func (SingeingSteelbladeYellow) Defense() int                       { return 3 }
 func (SingeingSteelbladeYellow) Types(card.GameEngine) card.TypeSet { return singeingSteelbladeTypes }
-func (SingeingSteelbladeYellow) GoAgain() bool                      { return false }
+func (SingeingSteelbladeYellow) GoAgain(card.GameEngine) bool       { return false }
 
 type SingeingSteelbladeBlue struct{}
 
@@ -43,4 +43,4 @@ func (SingeingSteelbladeBlue) Pitch() int                         { return 3 }
 func (SingeingSteelbladeBlue) Attack() int                        { return 2 }
 func (SingeingSteelbladeBlue) Defense() int                       { return 3 }
 func (SingeingSteelbladeBlue) Types(card.GameEngine) card.TypeSet { return singeingSteelbladeTypes }
-func (SingeingSteelbladeBlue) GoAgain() bool                      { return false }
+func (SingeingSteelbladeBlue) GoAgain(card.GameEngine) bool       { return false }

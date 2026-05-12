@@ -19,7 +19,7 @@ func (WaterTheSeedsRed) Pitch() int                         { return 1 }
 func (WaterTheSeedsRed) Attack() int                        { return 3 }
 func (WaterTheSeedsRed) Defense() int                       { return 2 }
 func (WaterTheSeedsRed) Types(card.GameEngine) card.TypeSet { return waterTheSeedsTypes }
-func (WaterTheSeedsRed) GoAgain() bool                      { return true }
+func (WaterTheSeedsRed) GoAgain(card.GameEngine) bool       { return true }
 
 type WaterTheSeedsYellow struct{}
 
@@ -31,7 +31,7 @@ func (WaterTheSeedsYellow) Pitch() int                         { return 2 }
 func (WaterTheSeedsYellow) Attack() int                        { return 2 }
 func (WaterTheSeedsYellow) Defense() int                       { return 2 }
 func (WaterTheSeedsYellow) Types(card.GameEngine) card.TypeSet { return waterTheSeedsTypes }
-func (WaterTheSeedsYellow) GoAgain() bool                      { return true }
+func (WaterTheSeedsYellow) GoAgain(card.GameEngine) bool       { return true }
 
 type WaterTheSeedsBlue struct{}
 
@@ -43,4 +43,4 @@ func (WaterTheSeedsBlue) Pitch() int                         { return 3 }
 func (WaterTheSeedsBlue) Attack() int                        { return 1 }
 func (WaterTheSeedsBlue) Defense() int                       { return 2 }
 func (WaterTheSeedsBlue) Types(card.GameEngine) card.TypeSet { return waterTheSeedsTypes }
-func (WaterTheSeedsBlue) GoAgain() bool                      { return true }
+func (WaterTheSeedsBlue) GoAgain(card.GameEngine) bool       { return true }

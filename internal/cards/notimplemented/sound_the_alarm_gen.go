@@ -19,5 +19,5 @@ func (SoundTheAlarmRed) Pitch() int                         { return 1 }
 func (SoundTheAlarmRed) Attack() int                        { return 5 }
 func (SoundTheAlarmRed) Defense() int                       { return 3 }
 func (SoundTheAlarmRed) Types(card.GameEngine) card.TypeSet { return soundTheAlarmTypes }
-func (SoundTheAlarmRed) GoAgain() bool                      { return false }
+func (SoundTheAlarmRed) GoAgain(card.GameEngine) bool       { return false }
 func (SoundTheAlarmRed) NotImplemented()                    {}

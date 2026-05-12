@@ -19,7 +19,7 @@ func (ArcanePolarityRed) Pitch() int                         { return 1 }
 func (ArcanePolarityRed) Attack() int                        { return 0 }
 func (ArcanePolarityRed) Defense() int                       { return 0 }
 func (ArcanePolarityRed) Types(card.GameEngine) card.TypeSet { return arcanePolarityTypes }
-func (ArcanePolarityRed) GoAgain() bool                      { return false }
+func (ArcanePolarityRed) GoAgain(card.GameEngine) bool       { return false }
 
 type ArcanePolarityYellow struct{}
 
@@ -31,7 +31,7 @@ func (ArcanePolarityYellow) Pitch() int                         { return 2 }
 func (ArcanePolarityYellow) Attack() int                        { return 0 }
 func (ArcanePolarityYellow) Defense() int                       { return 0 }
 func (ArcanePolarityYellow) Types(card.GameEngine) card.TypeSet { return arcanePolarityTypes }
-func (ArcanePolarityYellow) GoAgain() bool                      { return false }
+func (ArcanePolarityYellow) GoAgain(card.GameEngine) bool       { return false }
 
 type ArcanePolarityBlue struct{}
 
@@ -43,4 +43,4 @@ func (ArcanePolarityBlue) Pitch() int                         { return 3 }
 func (ArcanePolarityBlue) Attack() int                        { return 0 }
 func (ArcanePolarityBlue) Defense() int                       { return 0 }
 func (ArcanePolarityBlue) Types(card.GameEngine) card.TypeSet { return arcanePolarityTypes }
-func (ArcanePolarityBlue) GoAgain() bool                      { return false }
+func (ArcanePolarityBlue) GoAgain(card.GameEngine) bool       { return false }

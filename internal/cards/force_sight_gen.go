@@ -19,7 +19,7 @@ func (ForceSightRed) Pitch() int                         { return 1 }
 func (ForceSightRed) Attack() int                        { return 0 }
 func (ForceSightRed) Defense() int                       { return 2 }
 func (ForceSightRed) Types(card.GameEngine) card.TypeSet { return forceSightTypes }
-func (ForceSightRed) GoAgain() bool                      { return true }
+func (ForceSightRed) GoAgain(card.GameEngine) bool       { return true }
 
 type ForceSightYellow struct{}
 
@@ -31,7 +31,7 @@ func (ForceSightYellow) Pitch() int                         { return 2 }
 func (ForceSightYellow) Attack() int                        { return 0 }
 func (ForceSightYellow) Defense() int                       { return 2 }
 func (ForceSightYellow) Types(card.GameEngine) card.TypeSet { return forceSightTypes }
-func (ForceSightYellow) GoAgain() bool                      { return true }
+func (ForceSightYellow) GoAgain(card.GameEngine) bool       { return true }
 
 type ForceSightBlue struct{}
 
@@ -43,4 +43,4 @@ func (ForceSightBlue) Pitch() int                         { return 3 }
 func (ForceSightBlue) Attack() int                        { return 0 }
 func (ForceSightBlue) Defense() int                       { return 2 }
 func (ForceSightBlue) Types(card.GameEngine) card.TypeSet { return forceSightTypes }
-func (ForceSightBlue) GoAgain() bool                      { return true }
+func (ForceSightBlue) GoAgain(card.GameEngine) bool       { return true }

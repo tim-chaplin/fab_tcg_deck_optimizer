@@ -19,7 +19,7 @@ func (YintiYantiRed) Pitch() int                         { return 1 }
 func (YintiYantiRed) Attack() int                        { return 3 }
 func (YintiYantiRed) Defense() int                       { return 2 }
 func (YintiYantiRed) Types(card.GameEngine) card.TypeSet { return yintiYantiTypes }
-func (YintiYantiRed) GoAgain() bool                      { return false }
+func (YintiYantiRed) GoAgain(card.GameEngine) bool       { return false }
 
 type YintiYantiYellow struct{}
 
@@ -31,7 +31,7 @@ func (YintiYantiYellow) Pitch() int                         { return 2 }
 func (YintiYantiYellow) Attack() int                        { return 2 }
 func (YintiYantiYellow) Defense() int                       { return 2 }
 func (YintiYantiYellow) Types(card.GameEngine) card.TypeSet { return yintiYantiTypes }
-func (YintiYantiYellow) GoAgain() bool                      { return false }
+func (YintiYantiYellow) GoAgain(card.GameEngine) bool       { return false }
 
 type YintiYantiBlue struct{}
 
@@ -43,4 +43,4 @@ func (YintiYantiBlue) Pitch() int                         { return 3 }
 func (YintiYantiBlue) Attack() int                        { return 1 }
 func (YintiYantiBlue) Defense() int                       { return 2 }
 func (YintiYantiBlue) Types(card.GameEngine) card.TypeSet { return yintiYantiTypes }
-func (YintiYantiBlue) GoAgain() bool                      { return false }
+func (YintiYantiBlue) GoAgain(card.GameEngine) bool       { return false }

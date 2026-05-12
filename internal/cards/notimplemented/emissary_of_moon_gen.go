@@ -19,5 +19,5 @@ func (EmissaryOfMoonRed) Pitch() int                         { return 1 }
 func (EmissaryOfMoonRed) Attack() int                        { return 4 }
 func (EmissaryOfMoonRed) Defense() int                       { return 2 }
 func (EmissaryOfMoonRed) Types(card.GameEngine) card.TypeSet { return emissaryOfMoonTypes }
-func (EmissaryOfMoonRed) GoAgain() bool                      { return false }
+func (EmissaryOfMoonRed) GoAgain(card.GameEngine) bool       { return false }
 func (EmissaryOfMoonRed) NotImplemented()                    {}

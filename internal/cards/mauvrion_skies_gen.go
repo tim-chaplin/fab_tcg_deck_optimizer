@@ -19,7 +19,7 @@ func (MauvrionSkiesRed) Pitch() int                         { return 1 }
 func (MauvrionSkiesRed) Attack() int                        { return 0 }
 func (MauvrionSkiesRed) Defense() int                       { return 2 }
 func (MauvrionSkiesRed) Types(card.GameEngine) card.TypeSet { return mauvrionSkiesTypes }
-func (MauvrionSkiesRed) GoAgain() bool                      { return true }
+func (MauvrionSkiesRed) GoAgain(card.GameEngine) bool       { return true }
 
 type MauvrionSkiesYellow struct{}
 
@@ -31,7 +31,7 @@ func (MauvrionSkiesYellow) Pitch() int                         { return 2 }
 func (MauvrionSkiesYellow) Attack() int                        { return 0 }
 func (MauvrionSkiesYellow) Defense() int                       { return 2 }
 func (MauvrionSkiesYellow) Types(card.GameEngine) card.TypeSet { return mauvrionSkiesTypes }
-func (MauvrionSkiesYellow) GoAgain() bool                      { return true }
+func (MauvrionSkiesYellow) GoAgain(card.GameEngine) bool       { return true }
 
 type MauvrionSkiesBlue struct{}
 
@@ -43,4 +43,4 @@ func (MauvrionSkiesBlue) Pitch() int                         { return 3 }
 func (MauvrionSkiesBlue) Attack() int                        { return 0 }
 func (MauvrionSkiesBlue) Defense() int                       { return 2 }
 func (MauvrionSkiesBlue) Types(card.GameEngine) card.TypeSet { return mauvrionSkiesTypes }
-func (MauvrionSkiesBlue) GoAgain() bool                      { return true }
+func (MauvrionSkiesBlue) GoAgain(card.GameEngine) bool       { return true }

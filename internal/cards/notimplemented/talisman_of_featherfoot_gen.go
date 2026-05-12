@@ -21,5 +21,5 @@ func (TalismanOfFeatherfootYellow) Defense() int             { return 0 }
 func (TalismanOfFeatherfootYellow) Types(card.GameEngine) card.TypeSet {
 	return talismanOfFeatherfootTypes
 }
-func (TalismanOfFeatherfootYellow) GoAgain() bool   { return true }
-func (TalismanOfFeatherfootYellow) NotImplemented() {}
+func (TalismanOfFeatherfootYellow) GoAgain(card.GameEngine) bool { return true }
+func (TalismanOfFeatherfootYellow) NotImplemented()              {}

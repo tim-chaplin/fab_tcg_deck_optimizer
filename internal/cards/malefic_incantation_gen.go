@@ -19,7 +19,7 @@ func (MaleficIncantationRed) Pitch() int                         { return 1 }
 func (MaleficIncantationRed) Attack() int                        { return 0 }
 func (MaleficIncantationRed) Defense() int                       { return 2 }
 func (MaleficIncantationRed) Types(card.GameEngine) card.TypeSet { return maleficIncantationTypes }
-func (MaleficIncantationRed) GoAgain() bool                      { return true }
+func (MaleficIncantationRed) GoAgain(card.GameEngine) bool       { return true }
 
 type MaleficIncantationYellow struct{}
 
@@ -31,7 +31,7 @@ func (MaleficIncantationYellow) Pitch() int                         { return 2 }
 func (MaleficIncantationYellow) Attack() int                        { return 0 }
 func (MaleficIncantationYellow) Defense() int                       { return 2 }
 func (MaleficIncantationYellow) Types(card.GameEngine) card.TypeSet { return maleficIncantationTypes }
-func (MaleficIncantationYellow) GoAgain() bool                      { return true }
+func (MaleficIncantationYellow) GoAgain(card.GameEngine) bool       { return true }
 
 type MaleficIncantationBlue struct{}
 
@@ -43,4 +43,4 @@ func (MaleficIncantationBlue) Pitch() int                         { return 3 }
 func (MaleficIncantationBlue) Attack() int                        { return 0 }
 func (MaleficIncantationBlue) Defense() int                       { return 2 }
 func (MaleficIncantationBlue) Types(card.GameEngine) card.TypeSet { return maleficIncantationTypes }
-func (MaleficIncantationBlue) GoAgain() bool                      { return true }
+func (MaleficIncantationBlue) GoAgain(card.GameEngine) bool       { return true }

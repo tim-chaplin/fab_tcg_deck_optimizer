@@ -19,7 +19,7 @@ func (ReekOfCorruptionRed) Pitch() int                         { return 1 }
 func (ReekOfCorruptionRed) Attack() int                        { return 4 }
 func (ReekOfCorruptionRed) Defense() int                       { return 3 }
 func (ReekOfCorruptionRed) Types(card.GameEngine) card.TypeSet { return reekOfCorruptionTypes }
-func (ReekOfCorruptionRed) GoAgain() bool                      { return false }
+func (ReekOfCorruptionRed) GoAgain(card.GameEngine) bool       { return false }
 
 type ReekOfCorruptionYellow struct{}
 
@@ -31,7 +31,7 @@ func (ReekOfCorruptionYellow) Pitch() int                         { return 2 }
 func (ReekOfCorruptionYellow) Attack() int                        { return 3 }
 func (ReekOfCorruptionYellow) Defense() int                       { return 3 }
 func (ReekOfCorruptionYellow) Types(card.GameEngine) card.TypeSet { return reekOfCorruptionTypes }
-func (ReekOfCorruptionYellow) GoAgain() bool                      { return false }
+func (ReekOfCorruptionYellow) GoAgain(card.GameEngine) bool       { return false }
 
 type ReekOfCorruptionBlue struct{}
 
@@ -43,4 +43,4 @@ func (ReekOfCorruptionBlue) Pitch() int                         { return 3 }
 func (ReekOfCorruptionBlue) Attack() int                        { return 2 }
 func (ReekOfCorruptionBlue) Defense() int                       { return 3 }
 func (ReekOfCorruptionBlue) Types(card.GameEngine) card.TypeSet { return reekOfCorruptionTypes }
-func (ReekOfCorruptionBlue) GoAgain() bool                      { return false }
+func (ReekOfCorruptionBlue) GoAgain(card.GameEngine) bool       { return false }

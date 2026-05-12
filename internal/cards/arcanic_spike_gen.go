@@ -19,7 +19,7 @@ func (ArcanicSpikeRed) Pitch() int                         { return 1 }
 func (ArcanicSpikeRed) Attack() int                        { return 5 }
 func (ArcanicSpikeRed) Defense() int                       { return 3 }
 func (ArcanicSpikeRed) Types(card.GameEngine) card.TypeSet { return arcanicSpikeTypes }
-func (ArcanicSpikeRed) GoAgain() bool                      { return false }
+func (ArcanicSpikeRed) GoAgain(card.GameEngine) bool       { return false }
 
 type ArcanicSpikeYellow struct{}
 
@@ -31,7 +31,7 @@ func (ArcanicSpikeYellow) Pitch() int                         { return 2 }
 func (ArcanicSpikeYellow) Attack() int                        { return 4 }
 func (ArcanicSpikeYellow) Defense() int                       { return 3 }
 func (ArcanicSpikeYellow) Types(card.GameEngine) card.TypeSet { return arcanicSpikeTypes }
-func (ArcanicSpikeYellow) GoAgain() bool                      { return false }
+func (ArcanicSpikeYellow) GoAgain(card.GameEngine) bool       { return false }
 
 type ArcanicSpikeBlue struct{}
 
@@ -43,4 +43,4 @@ func (ArcanicSpikeBlue) Pitch() int                         { return 3 }
 func (ArcanicSpikeBlue) Attack() int                        { return 3 }
 func (ArcanicSpikeBlue) Defense() int                       { return 3 }
 func (ArcanicSpikeBlue) Types(card.GameEngine) card.TypeSet { return arcanicSpikeTypes }
-func (ArcanicSpikeBlue) GoAgain() bool                      { return false }
+func (ArcanicSpikeBlue) GoAgain(card.GameEngine) bool       { return false }

@@ -29,7 +29,7 @@ func TestOverload_OnHitGoAgainEagerByLikelyToHit(t *testing.T) {
 		if self.GrantedGoAgain != tc.wantGA {
 			t.Errorf("%s: GrantedGoAgain = %v, want %v", tc.c.Name(), self.GrantedGoAgain, tc.wantGA)
 		}
-		if tc.c.GoAgain() {
+		if tc.c.GoAgain(nil) {
 			t.Errorf("%s: GoAgain() = true, want false (rider is conditional, not printed)", tc.c.Name())
 		}
 	}

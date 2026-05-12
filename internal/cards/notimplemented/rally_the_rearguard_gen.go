@@ -19,7 +19,7 @@ func (RallyTheRearguardRed) Pitch() int                         { return 1 }
 func (RallyTheRearguardRed) Attack() int                        { return 6 }
 func (RallyTheRearguardRed) Defense() int                       { return 2 }
 func (RallyTheRearguardRed) Types(card.GameEngine) card.TypeSet { return rallyTheRearguardTypes }
-func (RallyTheRearguardRed) GoAgain() bool                      { return false }
+func (RallyTheRearguardRed) GoAgain(card.GameEngine) bool       { return false }
 func (RallyTheRearguardRed) NotImplemented()                    {}
 
 type RallyTheRearguardYellow struct{}
@@ -32,7 +32,7 @@ func (RallyTheRearguardYellow) Pitch() int                         { return 2 }
 func (RallyTheRearguardYellow) Attack() int                        { return 5 }
 func (RallyTheRearguardYellow) Defense() int                       { return 2 }
 func (RallyTheRearguardYellow) Types(card.GameEngine) card.TypeSet { return rallyTheRearguardTypes }
-func (RallyTheRearguardYellow) GoAgain() bool                      { return false }
+func (RallyTheRearguardYellow) GoAgain(card.GameEngine) bool       { return false }
 func (RallyTheRearguardYellow) NotImplemented()                    {}
 
 type RallyTheRearguardBlue struct{}
@@ -45,5 +45,5 @@ func (RallyTheRearguardBlue) Pitch() int                         { return 3 }
 func (RallyTheRearguardBlue) Attack() int                        { return 4 }
 func (RallyTheRearguardBlue) Defense() int                       { return 2 }
 func (RallyTheRearguardBlue) Types(card.GameEngine) card.TypeSet { return rallyTheRearguardTypes }
-func (RallyTheRearguardBlue) GoAgain() bool                      { return false }
+func (RallyTheRearguardBlue) GoAgain(card.GameEngine) bool       { return false }
 func (RallyTheRearguardBlue) NotImplemented()                    {}

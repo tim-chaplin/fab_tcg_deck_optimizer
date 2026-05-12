@@ -19,7 +19,7 @@ func (SiftRed) Pitch() int                         { return 1 }
 func (SiftRed) Attack() int                        { return 0 }
 func (SiftRed) Defense() int                       { return 3 }
 func (SiftRed) Types(card.GameEngine) card.TypeSet { return siftTypes }
-func (SiftRed) GoAgain() bool                      { return true }
+func (SiftRed) GoAgain(card.GameEngine) bool       { return true }
 func (SiftRed) NotImplemented()                    {}
 
 type SiftYellow struct{}
@@ -32,7 +32,7 @@ func (SiftYellow) Pitch() int                         { return 2 }
 func (SiftYellow) Attack() int                        { return 0 }
 func (SiftYellow) Defense() int                       { return 3 }
 func (SiftYellow) Types(card.GameEngine) card.TypeSet { return siftTypes }
-func (SiftYellow) GoAgain() bool                      { return true }
+func (SiftYellow) GoAgain(card.GameEngine) bool       { return true }
 func (SiftYellow) NotImplemented()                    {}
 
 type SiftBlue struct{}
@@ -45,5 +45,5 @@ func (SiftBlue) Pitch() int                         { return 3 }
 func (SiftBlue) Attack() int                        { return 0 }
 func (SiftBlue) Defense() int                       { return 3 }
 func (SiftBlue) Types(card.GameEngine) card.TypeSet { return siftTypes }
-func (SiftBlue) GoAgain() bool                      { return true }
+func (SiftBlue) GoAgain(card.GameEngine) bool       { return true }
 func (SiftBlue) NotImplemented()                    {}

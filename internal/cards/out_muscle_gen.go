@@ -19,7 +19,7 @@ func (OutMuscleRed) Pitch() int                         { return 1 }
 func (OutMuscleRed) Attack() int                        { return 6 }
 func (OutMuscleRed) Defense() int                       { return 2 }
 func (OutMuscleRed) Types(card.GameEngine) card.TypeSet { return outMuscleTypes }
-func (OutMuscleRed) GoAgain() bool                      { return false }
+func (OutMuscleRed) GoAgain(card.GameEngine) bool       { return false }
 
 type OutMuscleYellow struct{}
 
@@ -31,7 +31,7 @@ func (OutMuscleYellow) Pitch() int                         { return 2 }
 func (OutMuscleYellow) Attack() int                        { return 5 }
 func (OutMuscleYellow) Defense() int                       { return 2 }
 func (OutMuscleYellow) Types(card.GameEngine) card.TypeSet { return outMuscleTypes }
-func (OutMuscleYellow) GoAgain() bool                      { return false }
+func (OutMuscleYellow) GoAgain(card.GameEngine) bool       { return false }
 
 type OutMuscleBlue struct{}
 
@@ -43,4 +43,4 @@ func (OutMuscleBlue) Pitch() int                         { return 3 }
 func (OutMuscleBlue) Attack() int                        { return 4 }
 func (OutMuscleBlue) Defense() int                       { return 2 }
 func (OutMuscleBlue) Types(card.GameEngine) card.TypeSet { return outMuscleTypes }
-func (OutMuscleBlue) GoAgain() bool                      { return false }
+func (OutMuscleBlue) GoAgain(card.GameEngine) bool       { return false }

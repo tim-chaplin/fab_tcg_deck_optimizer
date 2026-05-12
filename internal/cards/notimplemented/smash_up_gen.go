@@ -19,5 +19,5 @@ func (SmashUpRed) Pitch() int                         { return 1 }
 func (SmashUpRed) Attack() int                        { return 5 }
 func (SmashUpRed) Defense() int                       { return 2 }
 func (SmashUpRed) Types(card.GameEngine) card.TypeSet { return smashUpTypes }
-func (SmashUpRed) GoAgain() bool                      { return false }
+func (SmashUpRed) GoAgain(card.GameEngine) bool       { return false }
 func (SmashUpRed) NotImplemented()                    {}

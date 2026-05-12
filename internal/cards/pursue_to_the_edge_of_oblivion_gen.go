@@ -21,4 +21,4 @@ func (PursueToTheEdgeOfOblivionRed) Defense() int             { return 3 }
 func (PursueToTheEdgeOfOblivionRed) Types(card.GameEngine) card.TypeSet {
 	return pursueToTheEdgeOfOblivionTypes
 }
-func (PursueToTheEdgeOfOblivionRed) GoAgain() bool { return false }
+func (PursueToTheEdgeOfOblivionRed) GoAgain(card.GameEngine) bool { return false }

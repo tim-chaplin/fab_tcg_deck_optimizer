@@ -19,7 +19,7 @@ func (SunKissRed) Pitch() int                         { return 1 }
 func (SunKissRed) Attack() int                        { return 0 }
 func (SunKissRed) Defense() int                       { return 2 }
 func (SunKissRed) Types(card.GameEngine) card.TypeSet { return sunKissTypes }
-func (SunKissRed) GoAgain() bool                      { return false }
+func (SunKissRed) GoAgain(card.GameEngine) bool       { return false }
 
 type SunKissYellow struct{}
 
@@ -31,7 +31,7 @@ func (SunKissYellow) Pitch() int                         { return 2 }
 func (SunKissYellow) Attack() int                        { return 0 }
 func (SunKissYellow) Defense() int                       { return 2 }
 func (SunKissYellow) Types(card.GameEngine) card.TypeSet { return sunKissTypes }
-func (SunKissYellow) GoAgain() bool                      { return false }
+func (SunKissYellow) GoAgain(card.GameEngine) bool       { return false }
 
 type SunKissBlue struct{}
 
@@ -43,4 +43,4 @@ func (SunKissBlue) Pitch() int                         { return 3 }
 func (SunKissBlue) Attack() int                        { return 0 }
 func (SunKissBlue) Defense() int                       { return 2 }
 func (SunKissBlue) Types(card.GameEngine) card.TypeSet { return sunKissTypes }
-func (SunKissBlue) GoAgain() bool                      { return false }
+func (SunKissBlue) GoAgain(card.GameEngine) bool       { return false }

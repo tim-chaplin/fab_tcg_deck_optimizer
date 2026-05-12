@@ -19,5 +19,5 @@ func (FoolsGoldYellow) Pitch() int                         { return 2 }
 func (FoolsGoldYellow) Attack() int                        { return 0 }
 func (FoolsGoldYellow) Defense() int                       { return 0 }
 func (FoolsGoldYellow) Types(card.GameEngine) card.TypeSet { return foolSGoldTypes }
-func (FoolsGoldYellow) GoAgain() bool                      { return false }
+func (FoolsGoldYellow) GoAgain(card.GameEngine) bool       { return false }
 func (FoolsGoldYellow) NotImplemented()                    {}

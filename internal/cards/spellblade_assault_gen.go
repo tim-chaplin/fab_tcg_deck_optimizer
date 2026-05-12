@@ -19,7 +19,7 @@ func (SpellbladeAssaultRed) Pitch() int                         { return 1 }
 func (SpellbladeAssaultRed) Attack() int                        { return 4 }
 func (SpellbladeAssaultRed) Defense() int                       { return 3 }
 func (SpellbladeAssaultRed) Types(card.GameEngine) card.TypeSet { return spellbladeAssaultTypes }
-func (SpellbladeAssaultRed) GoAgain() bool                      { return false }
+func (SpellbladeAssaultRed) GoAgain(card.GameEngine) bool       { return false }
 
 type SpellbladeAssaultYellow struct{}
 
@@ -31,7 +31,7 @@ func (SpellbladeAssaultYellow) Pitch() int                         { return 2 }
 func (SpellbladeAssaultYellow) Attack() int                        { return 3 }
 func (SpellbladeAssaultYellow) Defense() int                       { return 3 }
 func (SpellbladeAssaultYellow) Types(card.GameEngine) card.TypeSet { return spellbladeAssaultTypes }
-func (SpellbladeAssaultYellow) GoAgain() bool                      { return false }
+func (SpellbladeAssaultYellow) GoAgain(card.GameEngine) bool       { return false }
 
 type SpellbladeAssaultBlue struct{}
 
@@ -43,4 +43,4 @@ func (SpellbladeAssaultBlue) Pitch() int                         { return 3 }
 func (SpellbladeAssaultBlue) Attack() int                        { return 2 }
 func (SpellbladeAssaultBlue) Defense() int                       { return 3 }
 func (SpellbladeAssaultBlue) Types(card.GameEngine) card.TypeSet { return spellbladeAssaultTypes }
-func (SpellbladeAssaultBlue) GoAgain() bool                      { return false }
+func (SpellbladeAssaultBlue) GoAgain(card.GameEngine) bool       { return false }

@@ -19,7 +19,7 @@ func (SurgingMilitiaRed) Pitch() int                         { return 1 }
 func (SurgingMilitiaRed) Attack() int                        { return 5 }
 func (SurgingMilitiaRed) Defense() int                       { return 2 }
 func (SurgingMilitiaRed) Types(card.GameEngine) card.TypeSet { return surgingMilitiaTypes }
-func (SurgingMilitiaRed) GoAgain() bool                      { return false }
+func (SurgingMilitiaRed) GoAgain(card.GameEngine) bool       { return false }
 
 type SurgingMilitiaYellow struct{}
 
@@ -31,7 +31,7 @@ func (SurgingMilitiaYellow) Pitch() int                         { return 2 }
 func (SurgingMilitiaYellow) Attack() int                        { return 4 }
 func (SurgingMilitiaYellow) Defense() int                       { return 2 }
 func (SurgingMilitiaYellow) Types(card.GameEngine) card.TypeSet { return surgingMilitiaTypes }
-func (SurgingMilitiaYellow) GoAgain() bool                      { return false }
+func (SurgingMilitiaYellow) GoAgain(card.GameEngine) bool       { return false }
 
 type SurgingMilitiaBlue struct{}
 
@@ -43,4 +43,4 @@ func (SurgingMilitiaBlue) Pitch() int                         { return 3 }
 func (SurgingMilitiaBlue) Attack() int                        { return 3 }
 func (SurgingMilitiaBlue) Defense() int                       { return 2 }
 func (SurgingMilitiaBlue) Types(card.GameEngine) card.TypeSet { return surgingMilitiaTypes }
-func (SurgingMilitiaBlue) GoAgain() bool                      { return false }
+func (SurgingMilitiaBlue) GoAgain(card.GameEngine) bool       { return false }

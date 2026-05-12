@@ -19,5 +19,5 @@ func (EnergyPotionBlue) Pitch() int                         { return 3 }
 func (EnergyPotionBlue) Attack() int                        { return 0 }
 func (EnergyPotionBlue) Defense() int                       { return 0 }
 func (EnergyPotionBlue) Types(card.GameEngine) card.TypeSet { return energyPotionTypes }
-func (EnergyPotionBlue) GoAgain() bool                      { return false }
+func (EnergyPotionBlue) GoAgain(card.GameEngine) bool       { return false }
 func (EnergyPotionBlue) Unplayable()                        {}

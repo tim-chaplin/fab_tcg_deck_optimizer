@@ -19,7 +19,7 @@ func (TipOffRed) Pitch() int                         { return 1 }
 func (TipOffRed) Attack() int                        { return 5 }
 func (TipOffRed) Defense() int                       { return 2 }
 func (TipOffRed) Types(card.GameEngine) card.TypeSet { return tipOffTypes }
-func (TipOffRed) GoAgain() bool                      { return false }
+func (TipOffRed) GoAgain(card.GameEngine) bool       { return false }
 func (TipOffRed) NotImplemented()                    {}
 
 type TipOffYellow struct{}
@@ -32,7 +32,7 @@ func (TipOffYellow) Pitch() int                         { return 2 }
 func (TipOffYellow) Attack() int                        { return 4 }
 func (TipOffYellow) Defense() int                       { return 2 }
 func (TipOffYellow) Types(card.GameEngine) card.TypeSet { return tipOffTypes }
-func (TipOffYellow) GoAgain() bool                      { return false }
+func (TipOffYellow) GoAgain(card.GameEngine) bool       { return false }
 func (TipOffYellow) NotImplemented()                    {}
 
 type TipOffBlue struct{}
@@ -45,5 +45,5 @@ func (TipOffBlue) Pitch() int                         { return 3 }
 func (TipOffBlue) Attack() int                        { return 3 }
 func (TipOffBlue) Defense() int                       { return 2 }
 func (TipOffBlue) Types(card.GameEngine) card.TypeSet { return tipOffTypes }
-func (TipOffBlue) GoAgain() bool                      { return false }
+func (TipOffBlue) GoAgain(card.GameEngine) bool       { return false }
 func (TipOffBlue) NotImplemented()                    {}

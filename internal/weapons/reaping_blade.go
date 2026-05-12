@@ -38,6 +38,6 @@ func (ReapingBladeAbility) Pitch() int                         { return 0 }
 func (ReapingBladeAbility) Attack() int                        { return 3 }
 func (ReapingBladeAbility) Defense() int                       { return 0 }
 func (ReapingBladeAbility) Types(card.GameEngine) card.TypeSet { return reapingBladeAbilityTypes }
-func (ReapingBladeAbility) GoAgain() bool                      { return false }
+func (ReapingBladeAbility) GoAgain(card.GameEngine) bool       { return false }
 func (ReapingBladeAbility) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 }

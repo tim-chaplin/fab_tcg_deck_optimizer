@@ -19,7 +19,7 @@ func (ScourTheBattlescapeRed) Pitch() int                         { return 1 }
 func (ScourTheBattlescapeRed) Attack() int                        { return 3 }
 func (ScourTheBattlescapeRed) Defense() int                       { return 2 }
 func (ScourTheBattlescapeRed) Types(card.GameEngine) card.TypeSet { return scourTheBattlescapeTypes }
-func (ScourTheBattlescapeRed) GoAgain() bool                      { return false }
+func (ScourTheBattlescapeRed) GoAgain(card.GameEngine) bool       { return false }
 func (ScourTheBattlescapeRed) NotImplemented()                    {}
 
 type ScourTheBattlescapeYellow struct{}
@@ -32,7 +32,7 @@ func (ScourTheBattlescapeYellow) Pitch() int                         { return 2 
 func (ScourTheBattlescapeYellow) Attack() int                        { return 2 }
 func (ScourTheBattlescapeYellow) Defense() int                       { return 2 }
 func (ScourTheBattlescapeYellow) Types(card.GameEngine) card.TypeSet { return scourTheBattlescapeTypes }
-func (ScourTheBattlescapeYellow) GoAgain() bool                      { return false }
+func (ScourTheBattlescapeYellow) GoAgain(card.GameEngine) bool       { return false }
 func (ScourTheBattlescapeYellow) NotImplemented()                    {}
 
 type ScourTheBattlescapeBlue struct{}
@@ -45,5 +45,5 @@ func (ScourTheBattlescapeBlue) Pitch() int                         { return 3 }
 func (ScourTheBattlescapeBlue) Attack() int                        { return 1 }
 func (ScourTheBattlescapeBlue) Defense() int                       { return 2 }
 func (ScourTheBattlescapeBlue) Types(card.GameEngine) card.TypeSet { return scourTheBattlescapeTypes }
-func (ScourTheBattlescapeBlue) GoAgain() bool                      { return false }
+func (ScourTheBattlescapeBlue) GoAgain(card.GameEngine) bool       { return false }
 func (ScourTheBattlescapeBlue) NotImplemented()                    {}

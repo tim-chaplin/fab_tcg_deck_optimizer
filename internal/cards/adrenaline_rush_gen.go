@@ -19,7 +19,7 @@ func (AdrenalineRushRed) Pitch() int                         { return 1 }
 func (AdrenalineRushRed) Attack() int                        { return 4 }
 func (AdrenalineRushRed) Defense() int                       { return 2 }
 func (AdrenalineRushRed) Types(card.GameEngine) card.TypeSet { return adrenalineRushTypes }
-func (AdrenalineRushRed) GoAgain() bool                      { return false }
+func (AdrenalineRushRed) GoAgain(card.GameEngine) bool       { return false }
 
 type AdrenalineRushYellow struct{}
 
@@ -31,7 +31,7 @@ func (AdrenalineRushYellow) Pitch() int                         { return 2 }
 func (AdrenalineRushYellow) Attack() int                        { return 3 }
 func (AdrenalineRushYellow) Defense() int                       { return 2 }
 func (AdrenalineRushYellow) Types(card.GameEngine) card.TypeSet { return adrenalineRushTypes }
-func (AdrenalineRushYellow) GoAgain() bool                      { return false }
+func (AdrenalineRushYellow) GoAgain(card.GameEngine) bool       { return false }
 
 type AdrenalineRushBlue struct{}
 
@@ -43,4 +43,4 @@ func (AdrenalineRushBlue) Pitch() int                         { return 3 }
 func (AdrenalineRushBlue) Attack() int                        { return 2 }
 func (AdrenalineRushBlue) Defense() int                       { return 2 }
 func (AdrenalineRushBlue) Types(card.GameEngine) card.TypeSet { return adrenalineRushTypes }
-func (AdrenalineRushBlue) GoAgain() bool                      { return false }
+func (AdrenalineRushBlue) GoAgain(card.GameEngine) bool       { return false }

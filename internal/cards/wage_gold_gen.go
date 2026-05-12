@@ -24,8 +24,8 @@ func (WageGoldRed) Types(g card.GameEngine) card.TypeSet {
 	}
 	return wageGoldTypes | card.NewTypeSet(g.CurrentHeroClass())
 }
-func (WageGoldRed) Universal()    {}
-func (WageGoldRed) GoAgain() bool { return false }
+func (WageGoldRed) Universal()                   {}
+func (WageGoldRed) GoAgain(card.GameEngine) bool { return false }
 
 type WageGoldYellow struct{}
 
@@ -42,8 +42,8 @@ func (WageGoldYellow) Types(g card.GameEngine) card.TypeSet {
 	}
 	return wageGoldTypes | card.NewTypeSet(g.CurrentHeroClass())
 }
-func (WageGoldYellow) Universal()    {}
-func (WageGoldYellow) GoAgain() bool { return false }
+func (WageGoldYellow) Universal()                   {}
+func (WageGoldYellow) GoAgain(card.GameEngine) bool { return false }
 
 type WageGoldBlue struct{}
 
@@ -60,5 +60,5 @@ func (WageGoldBlue) Types(g card.GameEngine) card.TypeSet {
 	}
 	return wageGoldTypes | card.NewTypeSet(g.CurrentHeroClass())
 }
-func (WageGoldBlue) Universal()    {}
-func (WageGoldBlue) GoAgain() bool { return false }
+func (WageGoldBlue) Universal()                   {}
+func (WageGoldBlue) GoAgain(card.GameEngine) bool { return false }

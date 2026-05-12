@@ -19,7 +19,7 @@ func (SigilOfSolaceRed) Pitch() int                         { return 1 }
 func (SigilOfSolaceRed) Attack() int                        { return 0 }
 func (SigilOfSolaceRed) Defense() int                       { return 0 }
 func (SigilOfSolaceRed) Types(card.GameEngine) card.TypeSet { return sigilOfSolaceTypes }
-func (SigilOfSolaceRed) GoAgain() bool                      { return false }
+func (SigilOfSolaceRed) GoAgain(card.GameEngine) bool       { return false }
 func (SigilOfSolaceRed) NotSilverAgeLegal()                 {}
 func (SigilOfSolaceRed) Unplayable()                        {}
 
@@ -33,7 +33,7 @@ func (SigilOfSolaceYellow) Pitch() int                         { return 2 }
 func (SigilOfSolaceYellow) Attack() int                        { return 0 }
 func (SigilOfSolaceYellow) Defense() int                       { return 0 }
 func (SigilOfSolaceYellow) Types(card.GameEngine) card.TypeSet { return sigilOfSolaceTypes }
-func (SigilOfSolaceYellow) GoAgain() bool                      { return false }
+func (SigilOfSolaceYellow) GoAgain(card.GameEngine) bool       { return false }
 func (SigilOfSolaceYellow) NotSilverAgeLegal()                 {}
 func (SigilOfSolaceYellow) Unplayable()                        {}
 
@@ -47,6 +47,6 @@ func (SigilOfSolaceBlue) Pitch() int                         { return 3 }
 func (SigilOfSolaceBlue) Attack() int                        { return 0 }
 func (SigilOfSolaceBlue) Defense() int                       { return 0 }
 func (SigilOfSolaceBlue) Types(card.GameEngine) card.TypeSet { return sigilOfSolaceTypes }
-func (SigilOfSolaceBlue) GoAgain() bool                      { return false }
+func (SigilOfSolaceBlue) GoAgain(card.GameEngine) bool       { return false }
 func (SigilOfSolaceBlue) NotSilverAgeLegal()                 {}
 func (SigilOfSolaceBlue) Unplayable()                        {}

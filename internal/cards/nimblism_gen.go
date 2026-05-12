@@ -19,7 +19,7 @@ func (NimblismRed) Pitch() int                         { return 1 }
 func (NimblismRed) Attack() int                        { return 0 }
 func (NimblismRed) Defense() int                       { return 2 }
 func (NimblismRed) Types(card.GameEngine) card.TypeSet { return nimblismTypes }
-func (NimblismRed) GoAgain() bool                      { return true }
+func (NimblismRed) GoAgain(card.GameEngine) bool       { return true }
 
 type NimblismYellow struct{}
 
@@ -31,7 +31,7 @@ func (NimblismYellow) Pitch() int                         { return 2 }
 func (NimblismYellow) Attack() int                        { return 0 }
 func (NimblismYellow) Defense() int                       { return 2 }
 func (NimblismYellow) Types(card.GameEngine) card.TypeSet { return nimblismTypes }
-func (NimblismYellow) GoAgain() bool                      { return true }
+func (NimblismYellow) GoAgain(card.GameEngine) bool       { return true }
 
 type NimblismBlue struct{}
 
@@ -43,4 +43,4 @@ func (NimblismBlue) Pitch() int                         { return 3 }
 func (NimblismBlue) Attack() int                        { return 0 }
 func (NimblismBlue) Defense() int                       { return 2 }
 func (NimblismBlue) Types(card.GameEngine) card.TypeSet { return nimblismTypes }
-func (NimblismBlue) GoAgain() bool                      { return true }
+func (NimblismBlue) GoAgain(card.GameEngine) bool       { return true }

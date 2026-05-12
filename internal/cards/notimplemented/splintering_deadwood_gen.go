@@ -19,7 +19,7 @@ func (SplinteringDeadwoodRed) Pitch() int                         { return 1 }
 func (SplinteringDeadwoodRed) Attack() int                        { return 7 }
 func (SplinteringDeadwoodRed) Defense() int                       { return 3 }
 func (SplinteringDeadwoodRed) Types(card.GameEngine) card.TypeSet { return splinteringDeadwoodTypes }
-func (SplinteringDeadwoodRed) GoAgain() bool                      { return false }
+func (SplinteringDeadwoodRed) GoAgain(card.GameEngine) bool       { return false }
 func (SplinteringDeadwoodRed) NotImplemented()                    {}
 
 type SplinteringDeadwoodYellow struct{}
@@ -32,7 +32,7 @@ func (SplinteringDeadwoodYellow) Pitch() int                         { return 2 
 func (SplinteringDeadwoodYellow) Attack() int                        { return 6 }
 func (SplinteringDeadwoodYellow) Defense() int                       { return 3 }
 func (SplinteringDeadwoodYellow) Types(card.GameEngine) card.TypeSet { return splinteringDeadwoodTypes }
-func (SplinteringDeadwoodYellow) GoAgain() bool                      { return false }
+func (SplinteringDeadwoodYellow) GoAgain(card.GameEngine) bool       { return false }
 func (SplinteringDeadwoodYellow) NotImplemented()                    {}
 
 type SplinteringDeadwoodBlue struct{}
@@ -45,5 +45,5 @@ func (SplinteringDeadwoodBlue) Pitch() int                         { return 3 }
 func (SplinteringDeadwoodBlue) Attack() int                        { return 5 }
 func (SplinteringDeadwoodBlue) Defense() int                       { return 3 }
 func (SplinteringDeadwoodBlue) Types(card.GameEngine) card.TypeSet { return splinteringDeadwoodTypes }
-func (SplinteringDeadwoodBlue) GoAgain() bool                      { return false }
+func (SplinteringDeadwoodBlue) GoAgain(card.GameEngine) bool       { return false }
 func (SplinteringDeadwoodBlue) NotImplemented()                    {}

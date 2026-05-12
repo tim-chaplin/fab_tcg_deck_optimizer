@@ -114,13 +114,14 @@ func (s viseraiOptSlots) union(other viseraiOptSlots) viseraiOptSlots {
 
 // viseraiSlotsFor classifies c into Viserai's Opt-heuristic slots.
 func viseraiSlotsFor(c card.Card) viseraiOptSlots {
-	// Opt-time heuristic uses printed types only (IsNonAttackAction / IsDefenseReaction /
-	// IsAttack are class-independent); Universal cards' class fold doesn't change the
-	// outcome, so we pass nil here.
+	// Opt-time heuristic reads printed values only. Types(nil) skips the Universal class
+	// fold (class-independent predicates here). GoAgain(nil) returns the printed bool —
+	// hero-conditional cards (Life for a Life / Blow for a Blow / Scar for a Scar) fall
+	// back to "no go-again" since Viserai isn't a LowerHealthWanter anyway.
 	t := c.Types(nil)
 	return viseraiOptSlots{
 		nonAttackEnabler: t.IsNonAttackAction(),
-		nonGoAgainAction: t.Has(card.TypeAction) && !c.GoAgain(),
+		nonGoAgainAction: t.Has(card.TypeAction) && !c.GoAgain(nil),
 		defender:         t.IsDefenseReaction() || t.Has(card.TypeBlock),
 		bluePitch:        c.Pitch() == 3,
 	}

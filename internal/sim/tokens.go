@@ -134,7 +134,7 @@ func (GoldTokenAbility) Pitch() int                         { return 0 }
 func (GoldTokenAbility) Attack() int                        { return 0 }
 func (GoldTokenAbility) Defense() int                       { return 0 }
 func (GoldTokenAbility) Types(card.GameEngine) card.TypeSet { return goldTokenAbilityTypes }
-func (GoldTokenAbility) GoAgain() bool                      { return true }
+func (GoldTokenAbility) GoAgain(card.GameEngine) bool       { return true }
 
 // PlayPrecondition gates the activated ability on having a Gold token to spend. Rejects
 // permutations that order the ability before the card / OnHit that creates the token —
@@ -175,7 +175,7 @@ func (SilverTokenAbility) Pitch() int                         { return 0 }
 func (SilverTokenAbility) Attack() int                        { return 0 }
 func (SilverTokenAbility) Defense() int                       { return 0 }
 func (SilverTokenAbility) Types(card.GameEngine) card.TypeSet { return silverTokenAbilityTypes }
-func (SilverTokenAbility) GoAgain() bool                      { return true }
+func (SilverTokenAbility) GoAgain(card.GameEngine) bool       { return true }
 
 // PlayPrecondition gates the activated ability on having a Silver token to spend.
 func (SilverTokenAbility) PlayPrecondition(s card.GameEngine, self *card.CardState) bool {
@@ -214,7 +214,7 @@ func (CopperTokenAbility) Pitch() int                         { return 0 }
 func (CopperTokenAbility) Attack() int                        { return 0 }
 func (CopperTokenAbility) Defense() int                       { return 0 }
 func (CopperTokenAbility) Types(card.GameEngine) card.TypeSet { return copperTokenAbilityTypes }
-func (CopperTokenAbility) GoAgain() bool                      { return true }
+func (CopperTokenAbility) GoAgain(card.GameEngine) bool       { return true }
 
 // PlayPrecondition gates the activated ability on having a Copper token to spend.
 func (CopperTokenAbility) PlayPrecondition(s card.GameEngine, self *card.CardState) bool {

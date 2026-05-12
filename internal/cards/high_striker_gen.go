@@ -19,7 +19,7 @@ func (HighStrikerRed) Pitch() int                         { return 1 }
 func (HighStrikerRed) Attack() int                        { return 0 }
 func (HighStrikerRed) Defense() int                       { return 2 }
 func (HighStrikerRed) Types(card.GameEngine) card.TypeSet { return highStrikerTypes }
-func (HighStrikerRed) GoAgain() bool                      { return true }
+func (HighStrikerRed) GoAgain(card.GameEngine) bool       { return true }
 
 type HighStrikerYellow struct{}
 
@@ -31,7 +31,7 @@ func (HighStrikerYellow) Pitch() int                         { return 2 }
 func (HighStrikerYellow) Attack() int                        { return 0 }
 func (HighStrikerYellow) Defense() int                       { return 2 }
 func (HighStrikerYellow) Types(card.GameEngine) card.TypeSet { return highStrikerTypes }
-func (HighStrikerYellow) GoAgain() bool                      { return true }
+func (HighStrikerYellow) GoAgain(card.GameEngine) bool       { return true }
 
 type HighStrikerBlue struct{}
 
@@ -43,4 +43,4 @@ func (HighStrikerBlue) Pitch() int                         { return 3 }
 func (HighStrikerBlue) Attack() int                        { return 0 }
 func (HighStrikerBlue) Defense() int                       { return 2 }
 func (HighStrikerBlue) Types(card.GameEngine) card.TypeSet { return highStrikerTypes }
-func (HighStrikerBlue) GoAgain() bool                      { return true }
+func (HighStrikerBlue) GoAgain(card.GameEngine) bool       { return true }

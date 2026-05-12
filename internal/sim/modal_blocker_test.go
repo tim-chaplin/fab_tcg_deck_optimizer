@@ -21,7 +21,7 @@ func (modalBlocker) Defense() int             { return 2 }
 func (modalBlocker) Types(card.GameEngine) card.TypeSet {
 	return card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 }
-func (modalBlocker) GoAgain() bool                                      { return false }
+func (modalBlocker) GoAgain(card.GameEngine) bool                       { return false }
 func (modalBlocker) Modes() int                                         { return 2 }
 func (modalBlocker) BlockCost(mode int8) int                            { return int(mode) }
 func (modalBlocker) Play(card.GameEngine, card.Logger, *card.CardState) {}

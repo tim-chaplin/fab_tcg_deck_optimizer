@@ -19,5 +19,5 @@ func (TalismanOfTithesBlue) Pitch() int                         { return 3 }
 func (TalismanOfTithesBlue) Attack() int                        { return 0 }
 func (TalismanOfTithesBlue) Defense() int                       { return 0 }
 func (TalismanOfTithesBlue) Types(card.GameEngine) card.TypeSet { return talismanOfTithesTypes }
-func (TalismanOfTithesBlue) GoAgain() bool                      { return true }
+func (TalismanOfTithesBlue) GoAgain(card.GameEngine) bool       { return true }
 func (TalismanOfTithesBlue) NotImplemented()                    {}

@@ -19,7 +19,7 @@ func (PoundForPoundRed) Pitch() int                         { return 1 }
 func (PoundForPoundRed) Attack() int                        { return 6 }
 func (PoundForPoundRed) Defense() int                       { return 2 }
 func (PoundForPoundRed) Types(card.GameEngine) card.TypeSet { return poundForPoundTypes }
-func (PoundForPoundRed) GoAgain() bool                      { return false }
+func (PoundForPoundRed) GoAgain(card.GameEngine) bool       { return false }
 
 type PoundForPoundYellow struct{}
 
@@ -31,7 +31,7 @@ func (PoundForPoundYellow) Pitch() int                         { return 2 }
 func (PoundForPoundYellow) Attack() int                        { return 5 }
 func (PoundForPoundYellow) Defense() int                       { return 2 }
 func (PoundForPoundYellow) Types(card.GameEngine) card.TypeSet { return poundForPoundTypes }
-func (PoundForPoundYellow) GoAgain() bool                      { return false }
+func (PoundForPoundYellow) GoAgain(card.GameEngine) bool       { return false }
 
 type PoundForPoundBlue struct{}
 
@@ -43,4 +43,4 @@ func (PoundForPoundBlue) Pitch() int                         { return 3 }
 func (PoundForPoundBlue) Attack() int                        { return 4 }
 func (PoundForPoundBlue) Defense() int                       { return 2 }
 func (PoundForPoundBlue) Types(card.GameEngine) card.TypeSet { return poundForPoundTypes }
-func (PoundForPoundBlue) GoAgain() bool                      { return false }
+func (PoundForPoundBlue) GoAgain(card.GameEngine) bool       { return false }

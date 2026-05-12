@@ -19,4 +19,4 @@ func (ExposedBlue) Pitch() int                         { return 3 }
 func (ExposedBlue) Attack() int                        { return 0 }
 func (ExposedBlue) Defense() int                       { return 0 }
 func (ExposedBlue) Types(card.GameEngine) card.TypeSet { return exposedTypes }
-func (ExposedBlue) GoAgain() bool                      { return false }
+func (ExposedBlue) GoAgain(card.GameEngine) bool       { return false }

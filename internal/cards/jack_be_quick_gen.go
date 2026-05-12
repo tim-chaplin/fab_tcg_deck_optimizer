@@ -19,4 +19,4 @@ func (JackBeQuickRed) Pitch() int                         { return 1 }
 func (JackBeQuickRed) Attack() int                        { return 3 }
 func (JackBeQuickRed) Defense() int                       { return 3 }
 func (JackBeQuickRed) Types(card.GameEngine) card.TypeSet { return jackBeQuickTypes }
-func (JackBeQuickRed) GoAgain() bool                      { return false }
+func (JackBeQuickRed) GoAgain(card.GameEngine) bool       { return false }

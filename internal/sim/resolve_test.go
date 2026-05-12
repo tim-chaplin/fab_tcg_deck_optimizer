@@ -25,7 +25,7 @@ func (attackStub) Defense() int             { return 0 }
 func (attackStub) Types(card.GameEngine) card.TypeSet {
 	return card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 }
-func (attackStub) GoAgain() bool                                               { return false }
+func (attackStub) GoAgain(card.GameEngine) bool                                { return false }
 func (attackStub) Play(s card.GameEngine, l card.Logger, self *card.CardState) {}
 
 // drStub is a vanilla defense-reaction card with printed defense 4.
@@ -41,7 +41,7 @@ func (drStub) Defense() int             { return 4 }
 func (drStub) Types(card.GameEngine) card.TypeSet {
 	return card.NewTypeSet(card.TypeGeneric, card.TypeDefenseReaction)
 }
-func (drStub) GoAgain() bool                                               { return false }
+func (drStub) GoAgain(card.GameEngine) bool                                { return false }
 func (drStub) Play(s card.GameEngine, l card.Logger, self *card.CardState) {}
 
 // nonAttackStub is a non-attack action that flips a flag from Play (used to
@@ -58,7 +58,7 @@ func (nonAttackStub) Defense() int             { return 0 }
 func (nonAttackStub) Types(card.GameEngine) card.TypeSet {
 	return card.NewTypeSet(card.TypeGeneric, card.TypeAction)
 }
-func (nonAttackStub) GoAgain() bool { return false }
+func (nonAttackStub) GoAgain(card.GameEngine) bool { return false }
 func (n nonAttackStub) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 	*n.played = true
 }
@@ -78,7 +78,7 @@ func (selfBuffStub) Defense() int             { return 0 }
 func (selfBuffStub) Types(card.GameEngine) card.TypeSet {
 	return card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 }
-func (selfBuffStub) GoAgain() bool { return false }
+func (selfBuffStub) GoAgain(card.GameEngine) bool { return false }
 func (selfBuffStub) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 	self.BonusAttack += 1
 }

@@ -19,5 +19,5 @@ func (SigilOfCyclesBlue) Pitch() int                         { return 3 }
 func (SigilOfCyclesBlue) Attack() int                        { return 0 }
 func (SigilOfCyclesBlue) Defense() int                       { return 2 }
 func (SigilOfCyclesBlue) Types(card.GameEngine) card.TypeSet { return sigilOfCyclesTypes }
-func (SigilOfCyclesBlue) GoAgain() bool                      { return true }
+func (SigilOfCyclesBlue) GoAgain(card.GameEngine) bool       { return true }
 func (SigilOfCyclesBlue) NotImplemented()                    {}

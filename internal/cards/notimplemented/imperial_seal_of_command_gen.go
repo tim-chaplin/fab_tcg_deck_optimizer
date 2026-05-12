@@ -21,5 +21,5 @@ func (ImperialSealOfCommandRed) Defense() int             { return 0 }
 func (ImperialSealOfCommandRed) Types(card.GameEngine) card.TypeSet {
 	return imperialSealOfCommandTypes
 }
-func (ImperialSealOfCommandRed) GoAgain() bool   { return false }
-func (ImperialSealOfCommandRed) NotImplemented() {}
+func (ImperialSealOfCommandRed) GoAgain(card.GameEngine) bool { return false }
+func (ImperialSealOfCommandRed) NotImplemented()              {}

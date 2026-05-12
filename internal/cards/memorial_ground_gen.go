@@ -19,7 +19,7 @@ func (MemorialGroundRed) Pitch() int                         { return 1 }
 func (MemorialGroundRed) Attack() int                        { return 0 }
 func (MemorialGroundRed) Defense() int                       { return 0 }
 func (MemorialGroundRed) Types(card.GameEngine) card.TypeSet { return memorialGroundTypes }
-func (MemorialGroundRed) GoAgain() bool                      { return false }
+func (MemorialGroundRed) GoAgain(card.GameEngine) bool       { return false }
 
 type MemorialGroundYellow struct{}
 
@@ -31,7 +31,7 @@ func (MemorialGroundYellow) Pitch() int                         { return 2 }
 func (MemorialGroundYellow) Attack() int                        { return 0 }
 func (MemorialGroundYellow) Defense() int                       { return 0 }
 func (MemorialGroundYellow) Types(card.GameEngine) card.TypeSet { return memorialGroundTypes }
-func (MemorialGroundYellow) GoAgain() bool                      { return false }
+func (MemorialGroundYellow) GoAgain(card.GameEngine) bool       { return false }
 
 type MemorialGroundBlue struct{}
 
@@ -43,4 +43,4 @@ func (MemorialGroundBlue) Pitch() int                         { return 3 }
 func (MemorialGroundBlue) Attack() int                        { return 0 }
 func (MemorialGroundBlue) Defense() int                       { return 0 }
 func (MemorialGroundBlue) Types(card.GameEngine) card.TypeSet { return memorialGroundTypes }
-func (MemorialGroundBlue) GoAgain() bool                      { return false }
+func (MemorialGroundBlue) GoAgain(card.GameEngine) bool       { return false }

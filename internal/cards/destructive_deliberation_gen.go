@@ -21,7 +21,7 @@ func (DestructiveDeliberationRed) Defense() int             { return 2 }
 func (DestructiveDeliberationRed) Types(card.GameEngine) card.TypeSet {
 	return destructiveDeliberationTypes
 }
-func (DestructiveDeliberationRed) GoAgain() bool { return false }
+func (DestructiveDeliberationRed) GoAgain(card.GameEngine) bool { return false }
 
 type DestructiveDeliberationYellow struct{}
 
@@ -35,7 +35,7 @@ func (DestructiveDeliberationYellow) Defense() int             { return 2 }
 func (DestructiveDeliberationYellow) Types(card.GameEngine) card.TypeSet {
 	return destructiveDeliberationTypes
 }
-func (DestructiveDeliberationYellow) GoAgain() bool { return false }
+func (DestructiveDeliberationYellow) GoAgain(card.GameEngine) bool { return false }
 
 type DestructiveDeliberationBlue struct{}
 
@@ -49,4 +49,4 @@ func (DestructiveDeliberationBlue) Defense() int             { return 2 }
 func (DestructiveDeliberationBlue) Types(card.GameEngine) card.TypeSet {
 	return destructiveDeliberationTypes
 }
-func (DestructiveDeliberationBlue) GoAgain() bool { return false }
+func (DestructiveDeliberationBlue) GoAgain(card.GameEngine) bool { return false }

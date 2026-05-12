@@ -64,7 +64,7 @@ func (gravSpyDR) Defense() int             { return 1 }
 func (gravSpyDR) Types(card.GameEngine) card.TypeSet {
 	return card.NewTypeSet(card.TypeGeneric, card.TypeDefenseReaction)
 }
-func (gravSpyDR) GoAgain() bool { return false }
+func (gravSpyDR) GoAgain(card.GameEngine) bool { return false }
 func (g gravSpyDR) Play(s card.GameEngine, l card.Logger, self *card.CardState) {
 	*g.saw = append((*g.saw)[:0], s.Graveyard()...)
 }
@@ -83,7 +83,7 @@ func (auraDefender) Pitch() int                                         { return
 func (auraDefender) Attack() int                                        { return 0 }
 func (auraDefender) Defense() int                                       { return 3 }
 func (auraDefender) Types(card.GameEngine) card.TypeSet                 { return card.NewTypeSet(card.TypeAura) }
-func (auraDefender) GoAgain() bool                                      { return false }
+func (auraDefender) GoAgain(card.GameEngine) bool                       { return false }
 func (auraDefender) Play(card.GameEngine, card.Logger, *card.CardState) {}
 
 // Tests that a plain blocker enters the graveyard regardless of PersistsInPlay — a paired

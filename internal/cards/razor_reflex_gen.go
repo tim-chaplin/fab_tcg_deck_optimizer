@@ -19,7 +19,7 @@ func (RazorReflexRed) Pitch() int                         { return 1 }
 func (RazorReflexRed) Attack() int                        { return 0 }
 func (RazorReflexRed) Defense() int                       { return 2 }
 func (RazorReflexRed) Types(card.GameEngine) card.TypeSet { return razorReflexTypes }
-func (RazorReflexRed) GoAgain() bool                      { return false }
+func (RazorReflexRed) GoAgain(card.GameEngine) bool       { return false }
 
 type RazorReflexYellow struct{}
 
@@ -31,7 +31,7 @@ func (RazorReflexYellow) Pitch() int                         { return 2 }
 func (RazorReflexYellow) Attack() int                        { return 0 }
 func (RazorReflexYellow) Defense() int                       { return 2 }
 func (RazorReflexYellow) Types(card.GameEngine) card.TypeSet { return razorReflexTypes }
-func (RazorReflexYellow) GoAgain() bool                      { return false }
+func (RazorReflexYellow) GoAgain(card.GameEngine) bool       { return false }
 
 type RazorReflexBlue struct{}
 
@@ -43,4 +43,4 @@ func (RazorReflexBlue) Pitch() int                         { return 3 }
 func (RazorReflexBlue) Attack() int                        { return 0 }
 func (RazorReflexBlue) Defense() int                       { return 2 }
 func (RazorReflexBlue) Types(card.GameEngine) card.TypeSet { return razorReflexTypes }
-func (RazorReflexBlue) GoAgain() bool                      { return false }
+func (RazorReflexBlue) GoAgain(card.GameEngine) bool       { return false }

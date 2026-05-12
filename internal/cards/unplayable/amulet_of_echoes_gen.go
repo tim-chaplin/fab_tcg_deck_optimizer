@@ -19,5 +19,5 @@ func (AmuletOfEchoesBlue) Pitch() int                         { return 3 }
 func (AmuletOfEchoesBlue) Attack() int                        { return 0 }
 func (AmuletOfEchoesBlue) Defense() int                       { return 0 }
 func (AmuletOfEchoesBlue) Types(card.GameEngine) card.TypeSet { return amuletOfEchoesTypes }
-func (AmuletOfEchoesBlue) GoAgain() bool                      { return true }
+func (AmuletOfEchoesBlue) GoAgain(card.GameEngine) bool       { return true }
 func (AmuletOfEchoesBlue) Unplayable()                        {}

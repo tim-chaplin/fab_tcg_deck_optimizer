@@ -19,7 +19,7 @@ func (SkyFireLanternsRed) Pitch() int                         { return 1 }
 func (SkyFireLanternsRed) Attack() int                        { return 0 }
 func (SkyFireLanternsRed) Defense() int                       { return 2 }
 func (SkyFireLanternsRed) Types(card.GameEngine) card.TypeSet { return skyFireLanternsTypes }
-func (SkyFireLanternsRed) GoAgain() bool                      { return true }
+func (SkyFireLanternsRed) GoAgain(card.GameEngine) bool       { return true }
 
 type SkyFireLanternsYellow struct{}
 
@@ -31,7 +31,7 @@ func (SkyFireLanternsYellow) Pitch() int                         { return 2 }
 func (SkyFireLanternsYellow) Attack() int                        { return 0 }
 func (SkyFireLanternsYellow) Defense() int                       { return 2 }
 func (SkyFireLanternsYellow) Types(card.GameEngine) card.TypeSet { return skyFireLanternsTypes }
-func (SkyFireLanternsYellow) GoAgain() bool                      { return true }
+func (SkyFireLanternsYellow) GoAgain(card.GameEngine) bool       { return true }
 
 type SkyFireLanternsBlue struct{}
 
@@ -43,4 +43,4 @@ func (SkyFireLanternsBlue) Pitch() int                         { return 3 }
 func (SkyFireLanternsBlue) Attack() int                        { return 0 }
 func (SkyFireLanternsBlue) Defense() int                       { return 2 }
 func (SkyFireLanternsBlue) Types(card.GameEngine) card.TypeSet { return skyFireLanternsTypes }
-func (SkyFireLanternsBlue) GoAgain() bool                      { return true }
+func (SkyFireLanternsBlue) GoAgain(card.GameEngine) bool       { return true }

@@ -19,5 +19,5 @@ func (HealingPotionBlue) Pitch() int                         { return 3 }
 func (HealingPotionBlue) Attack() int                        { return 0 }
 func (HealingPotionBlue) Defense() int                       { return 0 }
 func (HealingPotionBlue) Types(card.GameEngine) card.TypeSet { return healingPotionTypes }
-func (HealingPotionBlue) GoAgain() bool                      { return false }
+func (HealingPotionBlue) GoAgain(card.GameEngine) bool       { return false }
 func (HealingPotionBlue) Unplayable()                        {}

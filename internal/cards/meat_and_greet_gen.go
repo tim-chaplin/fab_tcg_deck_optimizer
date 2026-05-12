@@ -19,7 +19,7 @@ func (MeatAndGreetRed) Pitch() int                         { return 1 }
 func (MeatAndGreetRed) Attack() int                        { return 4 }
 func (MeatAndGreetRed) Defense() int                       { return 3 }
 func (MeatAndGreetRed) Types(card.GameEngine) card.TypeSet { return meatAndGreetTypes }
-func (MeatAndGreetRed) GoAgain() bool                      { return false }
+func (MeatAndGreetRed) GoAgain(card.GameEngine) bool       { return false }
 
 type MeatAndGreetYellow struct{}
 
@@ -31,7 +31,7 @@ func (MeatAndGreetYellow) Pitch() int                         { return 2 }
 func (MeatAndGreetYellow) Attack() int                        { return 3 }
 func (MeatAndGreetYellow) Defense() int                       { return 3 }
 func (MeatAndGreetYellow) Types(card.GameEngine) card.TypeSet { return meatAndGreetTypes }
-func (MeatAndGreetYellow) GoAgain() bool                      { return false }
+func (MeatAndGreetYellow) GoAgain(card.GameEngine) bool       { return false }
 
 type MeatAndGreetBlue struct{}
 
@@ -43,4 +43,4 @@ func (MeatAndGreetBlue) Pitch() int                         { return 3 }
 func (MeatAndGreetBlue) Attack() int                        { return 2 }
 func (MeatAndGreetBlue) Defense() int                       { return 3 }
 func (MeatAndGreetBlue) Types(card.GameEngine) card.TypeSet { return meatAndGreetTypes }
-func (MeatAndGreetBlue) GoAgain() bool                      { return false }
+func (MeatAndGreetBlue) GoAgain(card.GameEngine) bool       { return false }

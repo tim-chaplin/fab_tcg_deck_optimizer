@@ -21,7 +21,7 @@ func (stubAR) Defense() int             { return 0 }
 func (stubAR) Types(card.GameEngine) card.TypeSet {
 	return card.NewTypeSet(card.TypeGeneric, card.TypeAttackReaction)
 }
-func (stubAR) GoAgain() bool                                         { return false }
+func (stubAR) GoAgain(card.GameEngine) bool                          { return false }
 func (stubAR) ARTargetAllowed(card.GameEngine, card.Card, int8) bool { return true }
 func (stubAR) Play(card.GameEngine, card.Logger, *card.CardState)    {}
 
@@ -38,7 +38,7 @@ func (stubAttack) Defense() int             { return 0 }
 func (stubAttack) Types(card.GameEngine) card.TypeSet {
 	return card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 }
-func (stubAttack) GoAgain() bool                                      { return true }
+func (stubAttack) GoAgain(card.GameEngine) bool                       { return true }
 func (stubAttack) Play(card.GameEngine, card.Logger, *card.CardState) {}
 
 // Tests that card.GrantAttackReactionBuff is a no-op when no target is set.

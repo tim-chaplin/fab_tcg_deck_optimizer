@@ -19,5 +19,5 @@ func (TalismanOfWarfareYellow) Pitch() int                         { return 2 }
 func (TalismanOfWarfareYellow) Attack() int                        { return 0 }
 func (TalismanOfWarfareYellow) Defense() int                       { return 0 }
 func (TalismanOfWarfareYellow) Types(card.GameEngine) card.TypeSet { return talismanOfWarfareTypes }
-func (TalismanOfWarfareYellow) GoAgain() bool                      { return true }
+func (TalismanOfWarfareYellow) GoAgain(card.GameEngine) bool       { return true }
 func (TalismanOfWarfareYellow) NotImplemented()                    {}

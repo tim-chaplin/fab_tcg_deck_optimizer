@@ -19,5 +19,5 @@ func (PotionOfSeeingBlue) Pitch() int                         { return 3 }
 func (PotionOfSeeingBlue) Attack() int                        { return 0 }
 func (PotionOfSeeingBlue) Defense() int                       { return 0 }
 func (PotionOfSeeingBlue) Types(card.GameEngine) card.TypeSet { return potionOfSeeingTypes }
-func (PotionOfSeeingBlue) GoAgain() bool                      { return false }
+func (PotionOfSeeingBlue) GoAgain(card.GameEngine) bool       { return false }
 func (PotionOfSeeingBlue) Unplayable()                        {}

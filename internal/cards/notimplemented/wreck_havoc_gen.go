@@ -19,7 +19,7 @@ func (WreckHavocRed) Pitch() int                         { return 1 }
 func (WreckHavocRed) Attack() int                        { return 6 }
 func (WreckHavocRed) Defense() int                       { return 2 }
 func (WreckHavocRed) Types(card.GameEngine) card.TypeSet { return wreckHavocTypes }
-func (WreckHavocRed) GoAgain() bool                      { return false }
+func (WreckHavocRed) GoAgain(card.GameEngine) bool       { return false }
 func (WreckHavocRed) NotImplemented()                    {}
 
 type WreckHavocYellow struct{}
@@ -32,7 +32,7 @@ func (WreckHavocYellow) Pitch() int                         { return 2 }
 func (WreckHavocYellow) Attack() int                        { return 5 }
 func (WreckHavocYellow) Defense() int                       { return 2 }
 func (WreckHavocYellow) Types(card.GameEngine) card.TypeSet { return wreckHavocTypes }
-func (WreckHavocYellow) GoAgain() bool                      { return false }
+func (WreckHavocYellow) GoAgain(card.GameEngine) bool       { return false }
 func (WreckHavocYellow) NotImplemented()                    {}
 
 type WreckHavocBlue struct{}
@@ -45,5 +45,5 @@ func (WreckHavocBlue) Pitch() int                         { return 3 }
 func (WreckHavocBlue) Attack() int                        { return 4 }
 func (WreckHavocBlue) Defense() int                       { return 2 }
 func (WreckHavocBlue) Types(card.GameEngine) card.TypeSet { return wreckHavocTypes }
-func (WreckHavocBlue) GoAgain() bool                      { return false }
+func (WreckHavocBlue) GoAgain(card.GameEngine) bool       { return false }
 func (WreckHavocBlue) NotImplemented()                    {}

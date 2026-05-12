@@ -19,7 +19,7 @@ func (ReinforceTheLineRed) Pitch() int                         { return 1 }
 func (ReinforceTheLineRed) Attack() int                        { return 0 }
 func (ReinforceTheLineRed) Defense() int                       { return 0 }
 func (ReinforceTheLineRed) Types(card.GameEngine) card.TypeSet { return reinforceTheLineTypes }
-func (ReinforceTheLineRed) GoAgain() bool                      { return false }
+func (ReinforceTheLineRed) GoAgain(card.GameEngine) bool       { return false }
 func (ReinforceTheLineRed) NotImplemented()                    {}
 
 type ReinforceTheLineYellow struct{}
@@ -32,7 +32,7 @@ func (ReinforceTheLineYellow) Pitch() int                         { return 2 }
 func (ReinforceTheLineYellow) Attack() int                        { return 0 }
 func (ReinforceTheLineYellow) Defense() int                       { return 0 }
 func (ReinforceTheLineYellow) Types(card.GameEngine) card.TypeSet { return reinforceTheLineTypes }
-func (ReinforceTheLineYellow) GoAgain() bool                      { return false }
+func (ReinforceTheLineYellow) GoAgain(card.GameEngine) bool       { return false }
 func (ReinforceTheLineYellow) NotImplemented()                    {}
 
 type ReinforceTheLineBlue struct{}
@@ -45,5 +45,5 @@ func (ReinforceTheLineBlue) Pitch() int                         { return 3 }
 func (ReinforceTheLineBlue) Attack() int                        { return 0 }
 func (ReinforceTheLineBlue) Defense() int                       { return 0 }
 func (ReinforceTheLineBlue) Types(card.GameEngine) card.TypeSet { return reinforceTheLineTypes }
-func (ReinforceTheLineBlue) GoAgain() bool                      { return false }
+func (ReinforceTheLineBlue) GoAgain(card.GameEngine) bool       { return false }
 func (ReinforceTheLineBlue) NotImplemented()                    {}

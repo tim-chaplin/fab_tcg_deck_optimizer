@@ -19,7 +19,7 @@ func (LeadTheChargeRed) Pitch() int                         { return 1 }
 func (LeadTheChargeRed) Attack() int                        { return 0 }
 func (LeadTheChargeRed) Defense() int                       { return 2 }
 func (LeadTheChargeRed) Types(card.GameEngine) card.TypeSet { return leadTheChargeTypes }
-func (LeadTheChargeRed) GoAgain() bool                      { return true }
+func (LeadTheChargeRed) GoAgain(card.GameEngine) bool       { return true }
 func (LeadTheChargeRed) NotImplemented()                    {}
 
 type LeadTheChargeYellow struct{}
@@ -32,7 +32,7 @@ func (LeadTheChargeYellow) Pitch() int                         { return 2 }
 func (LeadTheChargeYellow) Attack() int                        { return 0 }
 func (LeadTheChargeYellow) Defense() int                       { return 2 }
 func (LeadTheChargeYellow) Types(card.GameEngine) card.TypeSet { return leadTheChargeTypes }
-func (LeadTheChargeYellow) GoAgain() bool                      { return true }
+func (LeadTheChargeYellow) GoAgain(card.GameEngine) bool       { return true }
 func (LeadTheChargeYellow) NotImplemented()                    {}
 
 type LeadTheChargeBlue struct{}
@@ -45,5 +45,5 @@ func (LeadTheChargeBlue) Pitch() int                         { return 3 }
 func (LeadTheChargeBlue) Attack() int                        { return 0 }
 func (LeadTheChargeBlue) Defense() int                       { return 2 }
 func (LeadTheChargeBlue) Types(card.GameEngine) card.TypeSet { return leadTheChargeTypes }
-func (LeadTheChargeBlue) GoAgain() bool                      { return true }
+func (LeadTheChargeBlue) GoAgain(card.GameEngine) bool       { return true }
 func (LeadTheChargeBlue) NotImplemented()                    {}

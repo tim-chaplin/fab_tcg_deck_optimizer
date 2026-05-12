@@ -19,7 +19,7 @@ func (StrikeGoldRed) Pitch() int                         { return 1 }
 func (StrikeGoldRed) Attack() int                        { return 4 }
 func (StrikeGoldRed) Defense() int                       { return 2 }
 func (StrikeGoldRed) Types(card.GameEngine) card.TypeSet { return strikeGoldTypes }
-func (StrikeGoldRed) GoAgain() bool                      { return false }
+func (StrikeGoldRed) GoAgain(card.GameEngine) bool       { return false }
 
 type StrikeGoldYellow struct{}
 
@@ -31,7 +31,7 @@ func (StrikeGoldYellow) Pitch() int                         { return 2 }
 func (StrikeGoldYellow) Attack() int                        { return 3 }
 func (StrikeGoldYellow) Defense() int                       { return 2 }
 func (StrikeGoldYellow) Types(card.GameEngine) card.TypeSet { return strikeGoldTypes }
-func (StrikeGoldYellow) GoAgain() bool                      { return false }
+func (StrikeGoldYellow) GoAgain(card.GameEngine) bool       { return false }
 
 type StrikeGoldBlue struct{}
 
@@ -43,4 +43,4 @@ func (StrikeGoldBlue) Pitch() int                         { return 3 }
 func (StrikeGoldBlue) Attack() int                        { return 2 }
 func (StrikeGoldBlue) Defense() int                       { return 2 }
 func (StrikeGoldBlue) Types(card.GameEngine) card.TypeSet { return strikeGoldTypes }
-func (StrikeGoldBlue) GoAgain() bool                      { return false }
+func (StrikeGoldBlue) GoAgain(card.GameEngine) bool       { return false }

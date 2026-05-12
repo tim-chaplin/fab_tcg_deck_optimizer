@@ -19,7 +19,7 @@ func (DemolitionCrewRed) Pitch() int                         { return 1 }
 func (DemolitionCrewRed) Attack() int                        { return 6 }
 func (DemolitionCrewRed) Defense() int                       { return 2 }
 func (DemolitionCrewRed) Types(card.GameEngine) card.TypeSet { return demolitionCrewTypes }
-func (DemolitionCrewRed) GoAgain() bool                      { return false }
+func (DemolitionCrewRed) GoAgain(card.GameEngine) bool       { return false }
 
 type DemolitionCrewYellow struct{}
 
@@ -31,7 +31,7 @@ func (DemolitionCrewYellow) Pitch() int                         { return 2 }
 func (DemolitionCrewYellow) Attack() int                        { return 5 }
 func (DemolitionCrewYellow) Defense() int                       { return 2 }
 func (DemolitionCrewYellow) Types(card.GameEngine) card.TypeSet { return demolitionCrewTypes }
-func (DemolitionCrewYellow) GoAgain() bool                      { return false }
+func (DemolitionCrewYellow) GoAgain(card.GameEngine) bool       { return false }
 
 type DemolitionCrewBlue struct{}
 
@@ -43,4 +43,4 @@ func (DemolitionCrewBlue) Pitch() int                         { return 3 }
 func (DemolitionCrewBlue) Attack() int                        { return 4 }
 func (DemolitionCrewBlue) Defense() int                       { return 2 }
 func (DemolitionCrewBlue) Types(card.GameEngine) card.TypeSet { return demolitionCrewTypes }
-func (DemolitionCrewBlue) GoAgain() bool                      { return false }
+func (DemolitionCrewBlue) GoAgain(card.GameEngine) bool       { return false }

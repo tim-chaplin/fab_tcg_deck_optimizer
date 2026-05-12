@@ -19,5 +19,5 @@ func (TalismanOfBalanceBlue) Pitch() int                         { return 3 }
 func (TalismanOfBalanceBlue) Attack() int                        { return 0 }
 func (TalismanOfBalanceBlue) Defense() int                       { return 0 }
 func (TalismanOfBalanceBlue) Types(card.GameEngine) card.TypeSet { return talismanOfBalanceTypes }
-func (TalismanOfBalanceBlue) GoAgain() bool                      { return true }
+func (TalismanOfBalanceBlue) GoAgain(card.GameEngine) bool       { return true }
 func (TalismanOfBalanceBlue) NotImplemented()                    {}

@@ -19,5 +19,5 @@ func (RestvineElixirRed) Pitch() int                         { return 1 }
 func (RestvineElixirRed) Attack() int                        { return 0 }
 func (RestvineElixirRed) Defense() int                       { return 3 }
 func (RestvineElixirRed) Types(card.GameEngine) card.TypeSet { return restvineElixirTypes }
-func (RestvineElixirRed) GoAgain() bool                      { return true }
+func (RestvineElixirRed) GoAgain(card.GameEngine) bool       { return true }
 func (RestvineElixirRed) NotImplemented()                    {}

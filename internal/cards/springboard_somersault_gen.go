@@ -21,4 +21,4 @@ func (SpringboardSomersaultYellow) Defense() int             { return 2 }
 func (SpringboardSomersaultYellow) Types(card.GameEngine) card.TypeSet {
 	return springboardSomersaultTypes
 }
-func (SpringboardSomersaultYellow) GoAgain() bool { return false }
+func (SpringboardSomersaultYellow) GoAgain(card.GameEngine) bool { return false }

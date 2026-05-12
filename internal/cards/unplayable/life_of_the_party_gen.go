@@ -19,7 +19,7 @@ func (LifeOfThePartyRed) Pitch() int                         { return 1 }
 func (LifeOfThePartyRed) Attack() int                        { return 4 }
 func (LifeOfThePartyRed) Defense() int                       { return 2 }
 func (LifeOfThePartyRed) Types(card.GameEngine) card.TypeSet { return lifeOfThePartyTypes }
-func (LifeOfThePartyRed) GoAgain() bool                      { return false }
+func (LifeOfThePartyRed) GoAgain(card.GameEngine) bool       { return false }
 func (LifeOfThePartyRed) Unplayable()                        {}
 
 type LifeOfThePartyYellow struct{}
@@ -32,7 +32,7 @@ func (LifeOfThePartyYellow) Pitch() int                         { return 2 }
 func (LifeOfThePartyYellow) Attack() int                        { return 3 }
 func (LifeOfThePartyYellow) Defense() int                       { return 2 }
 func (LifeOfThePartyYellow) Types(card.GameEngine) card.TypeSet { return lifeOfThePartyTypes }
-func (LifeOfThePartyYellow) GoAgain() bool                      { return false }
+func (LifeOfThePartyYellow) GoAgain(card.GameEngine) bool       { return false }
 func (LifeOfThePartyYellow) Unplayable()                        {}
 
 type LifeOfThePartyBlue struct{}
@@ -45,5 +45,5 @@ func (LifeOfThePartyBlue) Pitch() int                         { return 3 }
 func (LifeOfThePartyBlue) Attack() int                        { return 2 }
 func (LifeOfThePartyBlue) Defense() int                       { return 2 }
 func (LifeOfThePartyBlue) Types(card.GameEngine) card.TypeSet { return lifeOfThePartyTypes }
-func (LifeOfThePartyBlue) GoAgain() bool                      { return false }
+func (LifeOfThePartyBlue) GoAgain(card.GameEngine) bool       { return false }
 func (LifeOfThePartyBlue) Unplayable()                        {}

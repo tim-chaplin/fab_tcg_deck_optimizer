@@ -19,7 +19,7 @@ func (LookingForAScrapRed) Pitch() int                         { return 1 }
 func (LookingForAScrapRed) Attack() int                        { return 4 }
 func (LookingForAScrapRed) Defense() int                       { return 2 }
 func (LookingForAScrapRed) Types(card.GameEngine) card.TypeSet { return lookingForAScrapTypes }
-func (LookingForAScrapRed) GoAgain() bool                      { return false }
+func (LookingForAScrapRed) GoAgain(card.GameEngine) bool       { return false }
 
 type LookingForAScrapYellow struct{}
 
@@ -31,7 +31,7 @@ func (LookingForAScrapYellow) Pitch() int                         { return 2 }
 func (LookingForAScrapYellow) Attack() int                        { return 3 }
 func (LookingForAScrapYellow) Defense() int                       { return 2 }
 func (LookingForAScrapYellow) Types(card.GameEngine) card.TypeSet { return lookingForAScrapTypes }
-func (LookingForAScrapYellow) GoAgain() bool                      { return false }
+func (LookingForAScrapYellow) GoAgain(card.GameEngine) bool       { return false }
 
 type LookingForAScrapBlue struct{}
 
@@ -43,4 +43,4 @@ func (LookingForAScrapBlue) Pitch() int                         { return 3 }
 func (LookingForAScrapBlue) Attack() int                        { return 2 }
 func (LookingForAScrapBlue) Defense() int                       { return 2 }
 func (LookingForAScrapBlue) Types(card.GameEngine) card.TypeSet { return lookingForAScrapTypes }
-func (LookingForAScrapBlue) GoAgain() bool                      { return false }
+func (LookingForAScrapBlue) GoAgain(card.GameEngine) bool       { return false }

@@ -19,5 +19,5 @@ func (PutInContextBlue) Pitch() int                         { return 3 }
 func (PutInContextBlue) Attack() int                        { return 0 }
 func (PutInContextBlue) Defense() int                       { return 3 }
 func (PutInContextBlue) Types(card.GameEngine) card.TypeSet { return putInContextTypes }
-func (PutInContextBlue) GoAgain() bool                      { return false }
+func (PutInContextBlue) GoAgain(card.GameEngine) bool       { return false }
 func (PutInContextBlue) NotImplemented()                    {}

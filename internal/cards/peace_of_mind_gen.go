@@ -19,7 +19,7 @@ func (PeaceOfMindRed) Pitch() int                         { return 1 }
 func (PeaceOfMindRed) Attack() int                        { return 0 }
 func (PeaceOfMindRed) Defense() int                       { return 4 }
 func (PeaceOfMindRed) Types(card.GameEngine) card.TypeSet { return peaceOfMindTypes }
-func (PeaceOfMindRed) GoAgain() bool                      { return false }
+func (PeaceOfMindRed) GoAgain(card.GameEngine) bool       { return false }
 
 type PeaceOfMindYellow struct{}
 
@@ -31,7 +31,7 @@ func (PeaceOfMindYellow) Pitch() int                         { return 2 }
 func (PeaceOfMindYellow) Attack() int                        { return 0 }
 func (PeaceOfMindYellow) Defense() int                       { return 3 }
 func (PeaceOfMindYellow) Types(card.GameEngine) card.TypeSet { return peaceOfMindTypes }
-func (PeaceOfMindYellow) GoAgain() bool                      { return false }
+func (PeaceOfMindYellow) GoAgain(card.GameEngine) bool       { return false }
 
 type PeaceOfMindBlue struct{}
 
@@ -43,4 +43,4 @@ func (PeaceOfMindBlue) Pitch() int                         { return 3 }
 func (PeaceOfMindBlue) Attack() int                        { return 0 }
 func (PeaceOfMindBlue) Defense() int                       { return 2 }
 func (PeaceOfMindBlue) Types(card.GameEngine) card.TypeSet { return peaceOfMindTypes }
-func (PeaceOfMindBlue) GoAgain() bool                      { return false }
+func (PeaceOfMindBlue) GoAgain(card.GameEngine) bool       { return false }

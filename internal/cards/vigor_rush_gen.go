@@ -19,7 +19,7 @@ func (VigorRushRed) Pitch() int                         { return 1 }
 func (VigorRushRed) Attack() int                        { return 4 }
 func (VigorRushRed) Defense() int                       { return 2 }
 func (VigorRushRed) Types(card.GameEngine) card.TypeSet { return vigorRushTypes }
-func (VigorRushRed) GoAgain() bool                      { return false }
+func (VigorRushRed) GoAgain(card.GameEngine) bool       { return false }
 
 type VigorRushYellow struct{}
 
@@ -31,7 +31,7 @@ func (VigorRushYellow) Pitch() int                         { return 2 }
 func (VigorRushYellow) Attack() int                        { return 3 }
 func (VigorRushYellow) Defense() int                       { return 2 }
 func (VigorRushYellow) Types(card.GameEngine) card.TypeSet { return vigorRushTypes }
-func (VigorRushYellow) GoAgain() bool                      { return false }
+func (VigorRushYellow) GoAgain(card.GameEngine) bool       { return false }
 
 type VigorRushBlue struct{}
 
@@ -43,4 +43,4 @@ func (VigorRushBlue) Pitch() int                         { return 3 }
 func (VigorRushBlue) Attack() int                        { return 2 }
 func (VigorRushBlue) Defense() int                       { return 2 }
 func (VigorRushBlue) Types(card.GameEngine) card.TypeSet { return vigorRushTypes }
-func (VigorRushBlue) GoAgain() bool                      { return false }
+func (VigorRushBlue) GoAgain(card.GameEngine) bool       { return false }
