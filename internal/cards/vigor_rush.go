@@ -3,8 +3,7 @@
 //
 // Text: "If you have played a 'non-attack' action card this turn, Vigor Rush gains **go again**."
 //
-// Conditional go-again gated on g.NonAttackActionPlayed() (an O(1) flag the sim maintains as it
-// walks the chain).
+// Conditional go-again gated on g.NonAttackActionPlayed().
 
 package cards
 

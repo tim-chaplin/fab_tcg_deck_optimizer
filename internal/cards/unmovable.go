@@ -2,8 +2,6 @@
 // Printed pitch variants: Red 1, Yellow 2, Blue 3.
 // Printed defense: Red 7, Yellow 6, Blue 5.
 // Text: "If Unmovable is played from arsenal, it gains +1{d}."
-//
-// +1{d} when played from arsenal via card.ArsenalDefenseBonus (docs/dev-standards.md).
 
 package cards
 

@@ -11,7 +11,7 @@ import (
 )
 
 // drawOneAtEndOfTurn is the end-of-turn TriggerHandler that fires Strategic Planning's
-// deferred draw. Top-level so the registration stays alloc-free.
+// deferred draw.
 func drawOneAtEndOfTurn(g card.GameEngine, l card.Logger, _ card.Trigger) {
 	g.DrawOne()
 }

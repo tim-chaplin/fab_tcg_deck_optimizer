@@ -2,9 +2,6 @@
 // Printed pitch variants: Red 1, Yellow 2, Blue 3.
 // Printed power: Red 5, Yellow 4, Blue 3.
 // Text: "If you've dealt arcane damage this turn, this gets +2{p}."
-//
-// Rider reads TurnState.ArcaneDamageDealt: when set at Play time, +2{p}; otherwise printed
-// attack alone.
 
 package cards
 

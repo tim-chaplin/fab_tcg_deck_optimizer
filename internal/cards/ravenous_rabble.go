@@ -14,9 +14,7 @@ import (
 )
 
 // ravenousRabbleApplyDebuff routes the -X{p} self-debuff (X = revealed deck-top pitch)
-// through self.BonusAttack so EffectiveAttack and LikelyToHit see the debuffed power; the
-// chain step's (+N) reflects the post-clamp result. No deck top means no penalty. Reads
-// the deck top so the cacheable bit flips — the debuff size depends on hidden shuffle order.
+// through self.BonusAttack. Empty deck means no penalty.
 func ravenousRabbleApplyDebuff(g card.GameEngine, l card.Logger, self *card.CardState) {
 	top, ok := g.PeekDeck()
 	if !ok {

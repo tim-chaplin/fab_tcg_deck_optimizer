@@ -16,9 +16,8 @@ import (
 // blowForABlowPingValue is the damage-equivalent credited when the on-hit 1-damage rider fires.
 const blowForABlowPingValue = 1
 
-// BlowForABlowRed.GoAgain returns the printed "less {h}" go-again rider when the active
-// hero opts into LowerHealthWanter. nil-g (Opt-time / cardmeta lookups before a hero is
-// set) reads as false — printed default.
+// BlowForABlowRed.GoAgain returns true when the active hero opts into LowerHealthWanter.
+// nil-g reads as false (the printed default).
 func (BlowForABlowRed) GoAgain(g card.GameEngine) bool {
 	if g == nil {
 		return false
@@ -29,8 +28,7 @@ func (BlowForABlowRed) Play(g card.GameEngine, l card.Logger, self *card.CardSta
 	self.RegisterOnHit(blowForABlowOnHit)
 }
 
-// blowForABlowOnHit fires the printed "When this hits, deal 1 damage" rider. Top-level so
-// registration doesn't allocate a closure on the hot anneal path.
+// blowForABlowOnHit fires the printed "When this hits, deal 1 damage" rider.
 func blowForABlowOnHit(g card.GameEngine, l card.Logger, self *card.CardState, _ *card.OnHitHandler) {
 	g.AddValue(blowForABlowPingValue)
 	l.AppendPostTrigger(self.Card.DisplayName(), "On-hit dealt 1 damage", blowForABlowPingValue)

@@ -4,10 +4,9 @@
 // Text: "Reduce to Runechant costs {r} less to play for each Runechant you control. Create a
 // Runechant token."
 //
-// Cost returns max(0, printed - g.RunechantCount()) at play time (card.VariableCost bounds [0, 1]).
-// Play creates one Runechant, crediting +1 at creation. Defense-reaction state is reset
-// between reactions so the token itself doesn't carry into next turn's carryover — only its
-// damage credit lands.
+// Cost returns max(0, printed - RunechantCount). The created Runechant credits at creation;
+// since defense-reaction state is reset between reactions, only its damage credit lands —
+// the token itself doesn't carry forward.
 
 package cards
 

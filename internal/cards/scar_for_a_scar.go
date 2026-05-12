@@ -9,9 +9,8 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
-// scarForAScarGoAgain returns the printed "less {h}" go-again rider when the active hero
-// opts into LowerHealthWanter. nil-g (Opt-time / cardmeta lookups before a hero is set)
-// reads as false — printed default.
+// scarForAScarGoAgain returns true when the active hero opts into LowerHealthWanter. nil-g
+// reads as false (the printed default).
 func scarForAScarGoAgain(g card.GameEngine) bool {
 	if g == nil {
 		return false

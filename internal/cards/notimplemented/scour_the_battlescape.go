@@ -4,8 +4,7 @@
 // Text: "You may put a card from your hand on the bottom of your deck. If you do, draw a card. If
 // Scour the Battlescape is played from arsenal, it gains **go again**."
 //
-// Modelling: hand-cycle isn't modelled. Standard played-from-arsenal go-again
-// (docs/dev-standards.md).
+// Modelling: hand-cycle isn't modelled.
 
 package notimplemented
 

@@ -15,8 +15,7 @@ func ferventForerunnerPlay(g card.GameEngine, l card.Logger, self *card.CardStat
 	self.RegisterOnHit(ferventForerunnerOnHit)
 }
 
-// ferventForerunnerOnHit fires the printed "If this hits, opt 2" rider. Top-level so
-// registration stays alloc-free.
+// ferventForerunnerOnHit fires the printed "If this hits, opt 2" rider.
 func ferventForerunnerOnHit(g card.GameEngine, l card.Logger, _ *card.CardState, _ *card.OnHitHandler) {
 	g.Opt(l, 2)
 }

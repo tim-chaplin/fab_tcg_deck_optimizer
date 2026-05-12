@@ -20,9 +20,6 @@ func (NebulaBlade) Types() card.TypeSet { return nebulaBladeTypes }
 func (NebulaBlade) Hands() int          { return 2 }
 func (NebulaBlade) Ability() card.Card  { return nebulaBladeAbility }
 
-// nebulaBladeAbility caches the Ability() return as a package-level card.Card so the
-// chain runner's per-Best-call w.Ability() lookup doesn't re-box the zero-size struct
-// in a fresh interface header on every call (would be 5x allocs per anneal otherwise).
 var nebulaBladeAbility card.Card = NebulaBladeAbility{}
 
 var nebulaBladeAbilityTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeWeapon, card.TypeSword, card.TypeTwoHand, card.TypeAttack)
@@ -45,8 +42,7 @@ func (NebulaBladeAbility) Play(g card.GameEngine, l card.Logger, self *card.Card
 	self.RegisterOnHit(nebulaBladeOnHit)
 }
 
-// nebulaBladeOnHit fires the printed "If Nebula Blade hits, create a Runechant token"
-// rider. Top-level so registration stays alloc-free.
+// nebulaBladeOnHit fires the printed "If Nebula Blade hits, create a Runechant token" rider.
 func nebulaBladeOnHit(g card.GameEngine, l card.Logger, self *card.CardState, _ *card.OnHitHandler) {
 	g.CreateRunechants(1)
 	l.AppendPostTrigger(self.Card.DisplayName(), "On-hit created a runechant", 1)

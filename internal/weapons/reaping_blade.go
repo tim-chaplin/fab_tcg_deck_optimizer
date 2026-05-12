@@ -22,8 +22,6 @@ func (ReapingBlade) Types() card.TypeSet { return reapingBladeTypes }
 func (ReapingBlade) Hands() int          { return 2 }
 func (ReapingBlade) Ability() card.Card  { return reapingBladeAbility }
 
-// Cached at package init so Weapon.Ability() returns a stable interface value (no
-// per-call re-box of the zero-size struct on the chain runner's hot path).
 var reapingBladeAbility card.Card = ReapingBladeAbility{}
 
 var reapingBladeAbilityTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeWeapon, card.TypeSword, card.TypeTwoHand, card.TypeAttack)

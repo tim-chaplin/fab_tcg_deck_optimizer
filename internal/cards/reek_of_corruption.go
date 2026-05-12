@@ -22,7 +22,7 @@ func reekOfCorruptionApplyRider(g card.GameEngine, l card.Logger, self *card.Car
 }
 
 // reekOfCorruptionOnHit fires the conditional "When this hits a hero, they discard a card"
-// rider. Top-level so registration stays alloc-free.
+// rider.
 func reekOfCorruptionOnHit(g card.GameEngine, l card.Logger, self *card.CardState, _ *card.OnHitHandler) {
 	v := g.OpponentDiscard(1)
 	l.AppendPostTrigger(self.Card.DisplayName(), "On-hit discarded a card", v)

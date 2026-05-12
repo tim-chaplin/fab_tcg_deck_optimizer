@@ -3,7 +3,6 @@
 // Text: "When this attacks, it gets -1{p} unless you pay {r}."
 //
 // Mode 0 pays the printed 3{r} for 7{p}; mode 1 spends an extra {r} for the full 8{p}.
-// See Bluster Buff for the modal-cost wiring.
 
 package cards
 

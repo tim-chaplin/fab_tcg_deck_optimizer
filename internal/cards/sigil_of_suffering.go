@@ -4,11 +4,8 @@
 // Text: "Deal 1 arcane damage to the attacking hero. If you have dealt arcane damage this turn,
 // Sigil of Suffering gains +1{d}."
 //
-// Mirrors Hit the High Notes' shape on the defender side: the +1{d} bonus folds into
-// BonusDefense before the chain step fires so the (+N) reflects the buffed block, and the
-// arcane lands as its own post-trigger sub-line. The Sigil's own printed-1 arcane satisfies
-// the conditional via LikelyDamageHits(1, false), so the bonus is credited whenever there's
-// IncomingDamage left to absorb it; ApplyAndLogEffectiveDefense's clamp handles over-block.
+// The Sigil's own printed-1 arcane satisfies the conditional via LikelyDamageHits(1, false),
+// so the +1{d} is credited whenever there's IncomingDamage left to absorb it.
 
 package cards
 

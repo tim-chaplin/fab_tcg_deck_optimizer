@@ -3,9 +3,8 @@
 //
 // Text: "When this is put into your graveyard from anywhere, gain 1{h}."
 //
-// Modelling: the card hits the graveyard after resolving as an attack, so the 1{h} gain fires
-// on every Play — credited as +1 damage equivalent. Pitched copies go to the bottom of the
-// deck instead of the graveyard, so they don't trigger the rider.
+// Modelling: attacking sends this to the graveyard, firing the 1{h} gain (+1 damage
+// equivalent). Pitched copies bypass the rider — they go to the bottom of the deck.
 
 package cards
 

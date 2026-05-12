@@ -11,7 +11,7 @@ import (
 )
 
 // zealousBeltingPlay grants go again when any pitched card this turn has base power greater
-// than the card's own base power, then emits the chain step.
+// than the card's own base power.
 func zealousBeltingPlay(g card.GameEngine, l card.Logger, self *card.CardState) {
 	base := self.Card.Attack()
 	for _, p := range g.Pitched() {

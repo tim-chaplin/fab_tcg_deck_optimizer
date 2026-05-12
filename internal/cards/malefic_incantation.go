@@ -27,8 +27,7 @@ func (MaleficIncantationBlue) Play(g card.GameEngine, l card.Logger, self *card.
 }
 
 // maleficCreatedRunechantText is the precomputed rider line for each Malefic Incantation
-// variant. Built once at init() so neither Play nor the per-fire handler does any string
-// formatting on the hot anneal path.
+// variant.
 var maleficCreatedRunechantText = func() map[ids.CardID]string {
 	out := make(map[ids.CardID]string, 3)
 	for _, c := range []card.Card{
@@ -42,9 +41,8 @@ var maleficCreatedRunechantText = func() map[ids.CardID]string {
 }()
 
 // maleficAuraHandler is the once-per-turn attack-action trigger handler shared across
-// Malefic Incantation variants. Per-variant rider text is read off the table by
-// aura.CardID() so the hot fire path runs zero string allocations. Decrements the
-// verse counter and destroys the aura when the last verse fires.
+// Malefic Incantation variants. Decrements the verse counter and destroys the aura when
+// the last verse fires.
 func maleficAuraHandler(g card.GameEngine, l card.Logger, a card.Aura) {
 	cardID := a.CardID()
 	lastVerse := a.DecrementCount() <= 0

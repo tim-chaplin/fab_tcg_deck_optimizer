@@ -6,7 +6,7 @@
 // gains **go again**."
 //
 // Modelling: the arsenal-placement rider isn't modelled (arsenal/deck content tracking would
-// be required). Standard played-from-arsenal go-again (docs/dev-standards.md).
+// be required).
 
 package notimplemented
 

@@ -13,9 +13,8 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
-// sunKissPlay emits the chain step ("Sun Kiss [R]: PLAY"), writes the heal as a sub-line
-// "Gained N health" under it, and — when Moon Wish has already played this turn — fires
-// an extra mid-turn draw and a go-again grant on self.
+// sunKissPlay credits the heal as a sub-line under self. When Moon Wish has already played
+// this turn, additionally fires an extra mid-turn draw and grants go-again on self.
 func sunKissPlay(heal int, g card.GameEngine, l card.Logger, self *card.CardState) {
 	if playedMoonWishThisTurn(g) {
 		g.DrawOne()
@@ -26,8 +25,7 @@ func sunKissPlay(heal int, g card.GameEngine, l card.Logger, self *card.CardStat
 }
 
 // playedMoonWishThisTurn reports whether any prior card resolved this turn is a Moon Wish
-// printing. Exact-match on Name() works because all three Moon Wish printings share the
-// base name "Moon Wish" — the pitch suffix lives in DisplayName, not Name.
+// printing. Match on Name() so all three pitch printings count.
 func playedMoonWishThisTurn(g card.GameEngine) bool {
 	for _, c := range g.CardsPlayed() {
 		if c.Name() == "Moon Wish" {

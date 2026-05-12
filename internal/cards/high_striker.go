@@ -9,8 +9,7 @@ import (
 )
 
 // highStrikerOnHit{6,4,2} fire on the next hit matching the trigger's TypeFilter (any
-// attack per the printed wording). One top-level function per variant keeps the handler
-// a static function value — no closure allocation per Play.
+// attack per the printed wording). One handler per variant carries N in the function name.
 func highStrikerOnHit6(g card.GameEngine, l card.Logger, t card.Trigger) {
 	highStrikerCreate(g, l, t, 6)
 }

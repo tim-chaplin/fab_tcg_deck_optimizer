@@ -20,7 +20,6 @@ func meatAndGreetPlay(g card.GameEngine, l card.Logger, self *card.CardState) {
 }
 
 // meatAndGreetOnHit fires the printed "When this hits, create a Runechant token" rider.
-// Top-level so registration stays alloc-free.
 func meatAndGreetOnHit(g card.GameEngine, l card.Logger, self *card.CardState, _ *card.OnHitHandler) {
 	g.CreateRunechants(1)
 	l.AppendPostTrigger(self.Card.DisplayName(), "On-hit created a runechant", 1)

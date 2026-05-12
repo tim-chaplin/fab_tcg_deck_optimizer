@@ -12,10 +12,8 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
-// skyFireLanternsPlay emits the chain step then writes a runechant rider sub-line under
-// self when the deck-top card matches this variant's pitch (color). Reads the deck top
-// via PeekDeck so the cacheable bit flips — whether the rider fires depends on shuffle
-// order.
+// skyFireLanternsPlay creates a Runechant when the deck-top card matches this variant's
+// pitch (color).
 func skyFireLanternsPlay(g card.GameEngine, l card.Logger, self *card.CardState, selfPitch int) {
 	top, ok := g.PeekDeck()
 	if !ok || top.Pitch() != selfPitch {

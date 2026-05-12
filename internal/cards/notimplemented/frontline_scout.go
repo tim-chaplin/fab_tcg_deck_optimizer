@@ -4,8 +4,7 @@
 // Text: "You may look at the defending hero's hand. If Frontline Scout is played from arsenal, it
 // gains **go again**."
 //
-// Modelling: hand-peek isn't modelled. Standard played-from-arsenal go-again
-// (docs/dev-standards.md).
+// Modelling: hand-peek isn't modelled.
 
 package notimplemented
 

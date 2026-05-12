@@ -1,37 +1,23 @@
 // Package card defines the Card interface every Flesh and Blood card implements, the
-// per-chain-step CardState wrapper that carries mutable flags between resolution
-// phases, and the narrow GameEngine / Logger / Aura / Trigger interfaces cards
-// consume from the sim.
+// per-chain-step CardState wrapper that carries mutable flags between resolution phases,
+// and the narrow GameEngine / Logger / Aura / Trigger interfaces cards consume from the sim.
 //
 // The package owns the contract; it does NOT import the sim. *sim.TurnState satisfies
-// GameEngine structurally and *turnlogger.TurnLogger satisfies Logger structurally,
-// so the sim hands either through cards via the explicit Play / Block / OnHit / Cost
-// args without any adapter in the middle. Cards interact with the GameEngine /
-// Logger / Aura / Trigger interfaces only, freeing the sim package to evolve its
-// concrete representations without breaking the card contract.
+// GameEngine structurally and *turnlogger.TurnLogger satisfies Logger structurally.
 package card
 
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
 )
 
-// GameEngine is the cards-facing rules-engine handle the sim threads through every
-// Card hook. Every method cards invoke during Card.Play, OnHit handlers, Trigger
-// handlers, Block hooks, and Cost queries is declared here — the surface combines
-// state queries (Hand, Graveyard, Runechants, …) with active-effect operations
-// (DrawOne, CreateRunechants, AddValue, Opt, Clash, …). The sim's *TurnState
+// GameEngine is the cards-facing rules-engine handle the sim threads through every Card
+// hook. The surface combines state queries (Hand, Graveyard, Runechants, …) with active-
+// effect operations (DrawOne, CreateRunechants, AddValue, Opt, Clash, …). *sim.TurnState
 // satisfies it structurally.
 //
-// The interface is intentionally method-only: it exposes no fields. Sim-internal
-// code reads and writes TurnState fields directly; card code that needs raw field
-// access type-asserts the GameEngine value back to *sim.TurnState and lives with
-// the sim import. Cards-side field access is the exception, not the rule — most
-// cards reach only the methods below.
-//
-// Methods taking sim-owned shapes (Aura, Trigger) are typed as `any` so the
-// interface stays sim-free. Cards still import sim to construct the concrete values
-// they pass through; the type assertion happens inside sim.TurnState's
-// implementation. Tightening these to local marker interfaces is a future cleanup.
+// The interface is method-only: it exposes no fields. Card code that needs raw field access
+// type-asserts back to *sim.TurnState and lives with the sim import — the exception, not
+// the rule.
 type GameEngine interface {
 	// Zones
 	Hand() []Card
@@ -42,15 +28,14 @@ type GameEngine interface {
 	PrependToDeck(Card)
 	AddToGraveyard(Card)
 
-	// Auras: per-trigger-type registration. The engine builds the underlying aura
-	// internally; cards supply only the handler and an initial count. Source is
-	// derived from self.Card.
+	// Auras: per-trigger-type registration. Cards supply the handler and initial count;
+	// the engine builds the underlying aura. Source is derived from self.Card.
 	CreateStartOfTurnAura(self *CardState, handler AuraHandler, count int)
 	CreateOncePerTurnAttackActionAura(self *CardState, handler AuraHandler, count int)
 
-	// Triggers: one-shot, per-trigger-type. AddHitTrigger's filter narrows the
-	// firing event to a card-type predicate (typically TypeSet.IsAttack or
-	// TypeSet.IsAttackAction); nil = no filter.
+	// Triggers: one-shot, per-trigger-type. AddHitTrigger's filter narrows the firing event
+	// to a card-type predicate (typically TypeSet.IsAttack or TypeSet.IsAttackAction); nil
+	// = no filter.
 	AddHitTrigger(self *CardState, handler TriggerHandler, filter func(TypeSet) bool)
 	AddEndOfTurnTrigger(self *CardState, handler TriggerHandler)
 
@@ -67,29 +52,28 @@ type GameEngine interface {
 	// Value crediting and arcane damage. AddValue accepts negatives — Test of Strength's
 	// clash-loss concedes value to the opponent.
 	AddValue(int)
-	// DealArcaneDamage credits n arcane damage from the named source: adds to Value,
-	// flips ArcaneDamageDealt when the hit lands, and logs the rider under source.
-	// Pass self.Card.DisplayName() from a card's Play body, or a.CardName() from an
-	// aura handler.
+	// DealArcaneDamage credits n arcane damage from the named source: adds to Value, flips
+	// ArcaneDamageDealt when the hit lands, and logs the rider under source. Pass
+	// self.Card.DisplayName() from Play, or a.CardName() from an aura handler.
 	DealArcaneDamage(l Logger, source string, n int)
 
-	// Hit / damage heuristics. The card says "I attack for N"; the engine decides
-	// whether the attack lands (LikelyToHit / LikelyDamageHits).
+	// Hit / damage heuristics. The card says "I attack for N"; the engine decides whether
+	// the attack lands.
 	LikelyToHit(self *CardState) bool
 	LikelyDamageHits(n int, dominate bool) bool
 
-	// Tempo verbs. Cards say "this card does X" (force a discard); the engine decides
-	// how much that's worth in damage-equivalent Value and credits it. The verb returns
-	// the value it credited so cards can attribute the line in their own log rider.
+	// Tempo verbs. Cards say "this card does X" (force a discard); the engine decides how
+	// much that's worth in damage-equivalent Value and credits it. The verb returns the
+	// value it credited so cards can attribute the rider line.
 	OpponentDiscard(n int) int
 
 	// AP (chain-step controls cards grant).
 	AddActionPoints(int)
 
-	// Sticky flags cards read to gate their effects. The corresponding setters are
-	// implicit side effects of the engine verb that produces them: DealArcaneDamage
-	// flips ArcaneDamageDealt; Create*Aura flips AuraCreated; MarkOpponent flips
-	// OpponentMarked. NonAttackActionPlayed and CardBanished are sim-side bookkeeping.
+	// Sticky flags cards read to gate their effects. Setters are implicit side effects of
+	// engine verbs: DealArcaneDamage flips ArcaneDamageDealt; Create*Aura flips AuraCreated;
+	// MarkOpponent flips OpponentMarked. NonAttackActionPlayed and CardBanished are
+	// sim-side bookkeeping.
 	ArcaneDamageDealt() bool
 	AuraCreated() bool
 	CardBanished() bool
@@ -106,9 +90,8 @@ type GameEngine interface {
 
 	// Hero info. HeroWantsLowerHealth reports whether the current hero opts into the
 	// LowerHealthWanter marker (proxy for "less {h} than the opponent" riders).
-	// CurrentHeroClass returns the hero's primary class (e.g. TypeThief); Universal
-	// cards fold this into their own Types(g) so class-gated triggers (Viserai's
-	// Runeblade trigger) see the right type-line.
+	// CurrentHeroClass returns the hero's primary class; Universal cards fold this into
+	// their own Types(g) so class-gated triggers see the right type-line.
 	HeroWantsLowerHealth() bool
 	CurrentHeroClass() CardType
 
@@ -118,9 +101,8 @@ type GameEngine interface {
 	SetCardsPlayed([]Card)
 	CardsRemaining() []*CardState
 	TriggeringCard() Card
-	// AuraCount is the count of live auras — used by gates like Yinti Yanti's "while
-	// you control an aura" rider. Cards don't get a typed slice view; the engine
-	// owns the live aura set.
+	// AuraCount is the count of live auras — used by "while you control an aura" gates.
+	// Cards don't get a typed slice view; the engine owns the live aura set.
 	AuraCount() int
 
 	// Mid-chain draw / tutoring / recycling — cards moving to different zones.
@@ -137,33 +119,26 @@ type GameEngine interface {
 	// Clash (top-of-deck power compare)
 	Clash(win, lose func())
 
-	// PlayCard runs Card.Play on self and emits the chain step. Cards that resolve
-	// another card mid-handler (Moon Wish tutoring Sun Kiss into play on go-again)
-	// call this; the engine credits the step's value and emits the log line just like
-	// a top-level chain step. self.Card supplies the Play handler.
+	// PlayCard runs Card.Play on self and emits the chain step. Used by cards that resolve
+	// another card mid-handler (Moon Wish tutoring Sun Kiss into play on go-again).
 	PlayCard(Logger, *CardState)
 
 	// Attack reaction target accessor.
-	// TODO: evaluate if we actually need this. It leaks an engine implementation
-	// detail (that the engine has to remember which attack is on the stack while
-	// it's processing attack reactions). A more natural shape would be passing the
-	// target directly into the AttackReaction's Play.
+	// TODO: pass the target directly into the AttackReaction's Play instead of leaking the
+	// "engine remembers the active attack" detail through this accessor.
 	AttackReactionTarget() *CardState
 }
 
-// Logger is the cards-facing log sink the chain runner threads through every Card
-// hook. The method set matches *turnlogger.TurnLogger structurally so the sim hands
-// one of those directly to cards. A typed-nil receiver is the find-best skip sentinel
-// — every method short-circuits inside the implementation, so cards never gate at the
-// call site.
+// Logger is the cards-facing log sink the chain runner threads through every Card hook.
+// Matches *turnlogger.TurnLogger structurally. A typed-nil receiver is the find-best skip
+// sentinel — every method short-circuits inside the implementation, so cards never gate at
+// the call site.
 //
-// Cards reach for AppendPostTrigger / AppendPostTriggerf for self-riders ("Created a
-// runechant"), AppendPreTrigger for hero or aura attack-action triggers. The
-// AppendChainStep / AppendChainStepf / AmendLastChainStepN trio is sim-internal —
-// ResolveChainStep emits the chain step after Play returns, the Opt helper emits its
-// own free-form chain entry, and CardState.GrantAttackReactionBuff amends the buffed attack's
-// delta — but the methods sit on Logger so the same value can flow through both
-// card-side and sim-side call sites.
+// Cards use AppendPostTrigger / AppendPostTriggerf for self-riders ("Created a runechant"),
+// AppendPreTrigger for hero or aura attack-action triggers. The AppendChainStep /
+// AppendChainStepf / AmendLastChainStepN trio is sim-internal — used by ResolveChainStep,
+// the Opt helper, and GrantAttackReactionBuff — but lives on Logger so both call sites
+// share the same value.
 type Logger interface {
 	AppendChainStep(text string, n int)
 	AppendChainStepf(n int, format string, args ...any)
@@ -174,28 +149,22 @@ type Logger interface {
 	AmendLastChainStepN(n int)
 }
 
-// Aura is the minimal view cards' aura handlers see of the firing aura. The engine
-// constructs and tracks the full concrete representation internally; the handler
-// reads counts / source-card identity through this interface and ends the aura's
-// life via Destroy.
+// Aura is the minimal view cards' aura handlers see of the firing aura. The handler reads
+// counts / source-card identity through this interface and ends the aura's life via Destroy.
 type Aura interface {
-	// Count returns the aura's current count. Handlers that fire-then-destroy read
-	// it as a payload (e.g. Blessing of Occult's runechant count); multi-fire auras
-	// read it as fires-remaining.
+	// Count returns the aura's current count. Fire-then-destroy handlers read it as a
+	// payload; multi-fire auras read it as fires-remaining.
 	Count() int
-	// DecrementCount decrements the count by 1 and returns the new value. Multi-fire
-	// aura handlers (Malefic / Runeblood pattern) call this and Destroy when the
-	// result reaches 0.
+	// DecrementCount decrements the count by 1 and returns the new value. Multi-fire aura
+	// handlers call this and Destroy when the result reaches 0.
 	DecrementCount() int
-	// CardName is the originating card or token's display name — used for log
-	// attribution from inside the handler.
+	// CardName is the originating card or token's display name — used for log attribution.
 	CardName() string
-	// CardID is the originating card's registry ID, or ids.InvalidCard when the
-	// aura belongs to a token. Handlers that match against a specific source card
-	// (e.g. Sigil of Silphidae's "destroy a different aura") gate on this.
+	// CardID is the originating card's registry ID, or ids.InvalidCard when the aura
+	// belongs to a token. Handlers that match against a specific source card gate on this.
 	CardID() ids.CardID
-	// Destroy ends the aura's life. addToGraveyard sends the originating card to
-	// the graveyard (token auras with no originating card skip the append).
+	// Destroy ends the aura's life. addToGraveyard sends the originating card to the
+	// graveyard (token auras with no originating card skip the append).
 	Destroy(addToGraveyard bool)
 }
 
@@ -205,21 +174,18 @@ type Trigger interface {
 	CardName() string
 }
 
-// Hero is the narrow view of the active hero v2/card needs. Sim's richer Hero
-// interface (Health, Intelligence, OnCardPlayed, Opt, …) satisfies it; this
-// package only reads Class / Types so card-side helpers can answer "what's
-// the current hero's class?" / "is the current hero a Thief?" without importing
-// sim. CurrentHero (in hero.go) holds the active value; sim wires it at run start.
+// Hero is the narrow view of the active hero v2/card needs. Sim's richer Hero interface
+// satisfies it; this package only reads Class / Types so card-side helpers can answer
+// "what's the current hero's class?" without importing sim. CurrentHero (in hero.go) holds
+// the active value; sim wires it at run start.
 type Hero interface {
 	Class() CardType
 	Types() TypeSet
 }
 
-// AuraHandler is the card-facing aura handler signature. Cards write functions of
-// this type and pass them to GameEngine.AddXxxAura.
+// AuraHandler is the card-facing aura handler signature, passed to GameEngine.AddXxxAura.
 type AuraHandler func(g GameEngine, l Logger, a Aura)
 
-// TriggerHandler is the card-facing one-shot trigger handler signature. Cards write
-// functions of this type and pass them to GameEngine.AddHitTrigger (and any future
-// AddXxxTrigger method).
+// TriggerHandler is the card-facing one-shot trigger handler signature, passed to
+// GameEngine.AddHitTrigger and similar.
 type TriggerHandler func(g GameEngine, l Logger, t Trigger)

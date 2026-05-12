@@ -14,10 +14,8 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
-// pummelAccepts is the per-mode target predicate. Mode 0 gates on club/hammer weapon
-// attack; mode 1 gates on cost-≥2 attack action. The chain runner runs this for the
-// chosen Mode and rejects the permutation when it returns false, so pummelPlay can apply
-// the buff unconditionally.
+// pummelAccepts is the per-mode target predicate. Mode 0 gates on club/hammer weapon attack;
+// mode 1 gates on cost-≥2 attack action.
 func pummelAccepts(g card.GameEngine, c card.Card, mode int8) bool {
 	t := c.Types(nil)
 	switch mode {
@@ -36,9 +34,8 @@ func pummelOnHitDiscard(g card.GameEngine, l card.Logger, self *card.CardState, 
 		"%s forced opponent to discard 1", h.Source.DisplayName())
 }
 
-// pummelPlay applies the chosen mode's effect. The chain runner already validated the
-// target via pummelAccepts, so the buff lands directly. Mode 1 additionally registers the
-// on-hit hero-discard rider on the target.
+// pummelPlay applies the chosen mode's effect. Mode 1 additionally registers the on-hit
+// hero-discard rider on the target.
 func pummelPlay(g card.GameEngine, l card.Logger, self *card.CardState, n int) {
 	target := g.AttackReactionTarget()
 	if target == nil {

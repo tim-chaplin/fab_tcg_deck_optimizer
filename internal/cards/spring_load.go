@@ -9,7 +9,7 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
-// springLoadPlay applies the +3{p} 'no cards in hand' rider, then emits the chain step.
+// springLoadPlay applies the +3{p} 'no cards in hand' rider.
 func springLoadPlay(g card.GameEngine, l card.Logger, self *card.CardState) {
 	if len(g.Hand()) == 0 {
 		self.BonusAttack += 3

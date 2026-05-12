@@ -4,10 +4,7 @@
 // Text: "Drawn to the Dark Dimension costs {r} less to play for each Runechant you control.
 // Draw a card."
 //
-// Cost reads g.RunechantCount() to return max(0, printed - Runechants) at play time; implements
-// card.VariableCost with bounds [0, printed].
-//
-// The "Draw a card" rider fires unconditionally on play.
+// Cost returns max(0, printed - RunechantCount).
 
 package cards
 

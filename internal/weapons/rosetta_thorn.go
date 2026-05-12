@@ -22,7 +22,6 @@ func (RosettaThorn) Types() card.TypeSet { return rosettaThornTypes }
 func (RosettaThorn) Hands() int          { return 2 }
 func (RosettaThorn) Ability() card.Card  { return rosettaThornAbility }
 
-// Cached at package init — see nebula_blade.go for the alloc-free rationale.
 var rosettaThornAbility card.Card = RosettaThornAbility{}
 
 func (RosettaThorn) NotSilverAgeLegal() {}

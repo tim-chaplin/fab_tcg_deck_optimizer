@@ -20,7 +20,6 @@ func (AnnalsOfSutcliffe) Types() card.TypeSet { return annalsOfSutcliffeTypes }
 func (AnnalsOfSutcliffe) Hands() int          { return 2 }
 func (AnnalsOfSutcliffe) Ability() card.Card  { return annalsOfSutcliffeAbility }
 
-// Cached at package init — see nebula_blade.go for the alloc-free rationale.
 var annalsOfSutcliffeAbility card.Card = AnnalsOfSutcliffeAbility{}
 
 // not implemented: draw rider and conditional Runechant rider; activation pays 3 resources

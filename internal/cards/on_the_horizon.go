@@ -3,10 +3,8 @@
 //
 // Text: "When this defends, look at the top card of your deck."
 //
-// Block-typed: only legal roles are pitch and plain block, so Play is never invoked by
-// the chain runner (the partition enumerator forbids Attack via the Action / Weapon
-// gate). The deck-peek defend trigger isn't modelled — it surfaces information for the
-// player, not a state change the solver can credit.
+// Block-typed: only legal roles are pitch and plain block, so Play is never invoked. The
+// deck-peek defend trigger isn't modelled — it surfaces information, not a state change.
 
 package cards
 
