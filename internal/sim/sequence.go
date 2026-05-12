@@ -424,15 +424,18 @@ func (ctx *sequenceContext) runDefense(defenders, pitched []card.Card, deckPile 
 // clears it after; handlers read it through s.AddPreTriggerLogEntry to attribute their
 // log line back to the triggering card.
 func fireAttackActionAuras(state *TurnState, triggeringCard card.Card) {
-	fireAurasForAttack(state, triggeringCard, TriggerAttackAction)
+	fireAurasMatching(state, triggeringCard, TriggerAttackAction)
 }
 
-// fireAurasForAttack is the shared body of fireAttackActionAuras / fireAttackAuras: walk
-// state.auras, fire every entry matching trigger whose OncePerTurn gate is open, and
-// publish triggeringCard for log attribution. Iterates with a cursor so handler-side
-// splicing (s.DestroyAura mutates state.auras in place, shifting the next entry down to
-// the cursor's index) advances only when the slice length didn't change.
-func fireAurasForAttack(state *TurnState, triggeringCard card.Card, trigger TriggerType) {
+// fireAurasMatching walks state.auras and invokes every entry whose TriggerType matches
+// trigger and whose OncePerTurn gate is open. The triggering card is published on
+// state.triggeringCard for each handler so handlers attributing log lines via
+// s.AddPreTriggerLogEntry / s.AddPostTriggerLogEntry pick up the right source; pass nil
+// for triggers that don't have a triggering card (TriggerEndOfTurn). Iterates with a
+// cursor so handler-side splicing (s.DestroyAura mutates state.auras in place, shifting
+// the next entry down to the cursor's index) advances only when the slice length didn't
+// change.
+func fireAurasMatching(state *TurnState, triggeringCard card.Card, trigger TriggerType) {
 	for i := 0; i < len(state.auras); {
 		a := &state.auras[i]
 		if a.TriggerType != trigger || (a.OncePerTurn && a.FiredThisTurn) {
@@ -480,22 +483,7 @@ func hasEndOfTurnFire(state *TurnState) bool {
 //     AddTrigger from firing its newcomer on the same pass — newcomers stay queued for
 //     the next matching event.
 func fireEndOfTurn(state *TurnState) {
-	for i := 0; i < len(state.auras); {
-		a := &state.auras[i]
-		if a.TriggerType != TriggerEndOfTurn || (a.OncePerTurn && a.FiredThisTurn) {
-			i++
-			continue
-		}
-		state.currentAuraIdx = i
-		state.currentAuraDestroyed = false
-		ctx := auraCtx{a: a, s: state}
-		a.Handler(state, state.logger, &ctx)
-		state.currentAuraIdx = -1
-		if !state.currentAuraDestroyed {
-			state.auras[i].FiredThisTurn = true
-			i++
-		}
-	}
+	fireAurasMatching(state, nil, TriggerEndOfTurn)
 	n := len(state.triggers)
 	for i := 0; i < n; i++ {
 		tr := state.triggers[i]
@@ -519,7 +507,7 @@ func fireEndOfTurn(state *TurnState) {
 // state.auras when ANY attack resolves (attack action OR weapon swing) and invokes every
 // TriggerAttack entry. The runechant token aura uses this trigger.
 func fireAttackAuras(state *TurnState, triggeringCard card.Card) {
-	fireAurasForAttack(state, triggeringCard, TriggerAttack)
+	fireAurasMatching(state, triggeringCard, TriggerAttack)
 }
 
 // resetStateForPermutation rewrites every TurnState field to its per-permutation starting
