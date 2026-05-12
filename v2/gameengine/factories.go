@@ -1,6 +1,9 @@
 package gameengine
 
-import "github.com/tim-chaplin/fab-deck-optimizer/v2/card"
+import (
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/triggertype"
+)
 
 // Concrete Aura / Trigger / Item types live outside gameengine (sim today, eventually
 // their own v2/ packages). The engine's card-facing Create*Aura / AddXxxTrigger /
@@ -13,11 +16,11 @@ import "github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 var (
 	// BuildCardAura constructs a card-backed aura whose source is self.Card. Registered
 	// by sim with sim.NewCardAura.
-	BuildCardAura func(self *card.CardState, tt TriggerType, handler card.AuraHandler, count int, oncePerTurn bool) Aura
+	BuildCardAura func(self *card.CardState, tt triggertype.Type, handler card.AuraHandler, count int, oncePerTurn bool) Aura
 
 	// BuildCardTrigger constructs a one-shot trigger whose source is self.Card. Registered
 	// by sim with sim.NewCardTrigger.
-	BuildCardTrigger func(self *card.CardState, tt TriggerType, handler card.TriggerHandler, typeFilter func(card.TypeSet) bool) Trigger
+	BuildCardTrigger func(self *card.CardState, tt triggertype.Type, handler card.TriggerHandler, typeFilter func(card.TypeSet) bool) Trigger
 
 	// BuildRunechantAura returns a runechant token aura at count n. Registered by sim
 	// with sim.NewRunechantAura.

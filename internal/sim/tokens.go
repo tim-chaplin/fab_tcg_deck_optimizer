@@ -4,6 +4,7 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/gameengine"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/triggertype"
 )
 
 // Token aura / item logic. The engine knows about FaB's five built-in token kinds by name
@@ -23,13 +24,13 @@ const (
 // factory is for tests / Spec seeding that need to add a runechant aura without the
 // damage credit.
 func NewRunechantAura(n int) *Aura {
-	return NewTokenAura(tokenNameRunechant, ids.RunechantTokenID, gameengine.TriggerAttack, runechantAuraHandler, n)
+	return NewTokenAura(tokenNameRunechant, ids.RunechantTokenID, triggertype.Attack, runechantAuraHandler, n)
 }
 
 // NewPonderAura returns a ponder token aura at count n. Production code calls
 // g.CreatePonder instead; this factory is for tests / Spec seeding.
 func NewPonderAura(n int) *Aura {
-	return NewTokenAura(tokenNamePonder, ids.PonderTokenID, gameengine.TriggerEndOfTurn, ponderAuraHandler, n)
+	return NewTokenAura(tokenNamePonder, ids.PonderTokenID, triggertype.EndOfTurn, ponderAuraHandler, n)
 }
 
 // runechantAuraHandler is the TriggerAttack handler shared by every Runechant aura.

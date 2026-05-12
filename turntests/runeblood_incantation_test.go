@@ -7,6 +7,7 @@ import (
 
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/gameengine"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/triggertype"
 )
 
 // TestRunebloodIncantation_PlayRegistersStartOfTurnTriggerWithCountN: Play flips AuraCreated
@@ -37,7 +38,7 @@ func TestRunebloodIncantation_PlayRegistersStartOfTurnTriggerWithCountN(t *testi
 			t.Fatalf("%s: Auras len = %d, want 1", tc.c.Name(), len(s.Auras()))
 		}
 		tr := s.Auras()[0]
-		if tr.TriggerType() != gameengine.TriggerStartOfTurn {
+		if tr.TriggerType() != triggertype.StartOfTurn {
 			t.Errorf("%s: trigger Type = %d, want TriggerStartOfTurn", tc.c.Name(), tr.TriggerType())
 		}
 		if tr.Count() != tc.n {

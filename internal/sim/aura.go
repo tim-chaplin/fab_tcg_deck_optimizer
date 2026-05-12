@@ -4,6 +4,7 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/gameengine"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/triggertype"
 )
 
 // Aura is the sim concrete impl of gameengine.Aura. Card-driven Create*Aura methods on
@@ -11,7 +12,7 @@ import (
 // factories (NewRunechantAura, NewPonderAura, …) build via NewTokenAura. Both flavours
 // satisfy gameengine.Aura.
 type Aura struct {
-	triggerType   gameengine.TriggerType
+	triggerType   triggertype.Type
 	handler       card.AuraHandler
 	source        card.Card // nil for token auras
 	tokenName     string    // "Runechant" / "Ponder" / "" for card auras
@@ -24,7 +25,7 @@ type Aura struct {
 // NewCardAura builds a card-backed aura — source is self.Card. CardName / CardID surface
 // self.Card's DisplayName / ID. On destroy with addToGraveyard=true the source card lands
 // in the graveyard.
-func NewCardAura(self *card.CardState, tt gameengine.TriggerType, handler card.AuraHandler, count int, oncePerTurn bool) *Aura {
+func NewCardAura(self *card.CardState, tt triggertype.Type, handler card.AuraHandler, count int, oncePerTurn bool) *Aura {
 	return &Aura{
 		triggerType: tt,
 		handler:     handler,
@@ -38,7 +39,7 @@ func NewCardAura(self *card.CardState, tt gameengine.TriggerType, handler card.A
 // supplied name (e.g. "Runechant"); CardID returns the supplied tokenID so cache keys
 // distinguish each token kind without an extra discriminator. On destroy the aura no-ops
 // in the graveyard pass (tokens don't head to graveyard).
-func NewTokenAura(name string, tokenID ids.CardID, tt gameengine.TriggerType, handler card.AuraHandler, count int) *Aura {
+func NewTokenAura(name string, tokenID ids.CardID, tt triggertype.Type, handler card.AuraHandler, count int) *Aura {
 	return &Aura{
 		triggerType: tt,
 		handler:     handler,
@@ -48,10 +49,10 @@ func NewTokenAura(name string, tokenID ids.CardID, tt gameengine.TriggerType, ha
 	}
 }
 
-func (a *Aura) TriggerType() gameengine.TriggerType { return a.triggerType }
-func (a *Aura) OncePerTurn() bool                   { return a.oncePerTurn }
-func (a *Aura) FiredThisTurn() bool                 { return a.firedThisTurn }
-func (a *Aura) SetFiredThisTurn(v bool)             { a.firedThisTurn = v }
+func (a *Aura) TriggerType() triggertype.Type { return a.triggerType }
+func (a *Aura) OncePerTurn() bool             { return a.oncePerTurn }
+func (a *Aura) FiredThisTurn() bool           { return a.firedThisTurn }
+func (a *Aura) SetFiredThisTurn(v bool)       { a.firedThisTurn = v }
 
 func (a *Aura) CardName() string {
 	if a.source != nil {

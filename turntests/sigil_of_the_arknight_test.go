@@ -8,6 +8,7 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/gameengine"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/triggertype"
 )
 
 // TestSigilOfTheArknight_PlayOnlySetsAuraCreated verifies Play defers the reveal effect — it
@@ -22,7 +23,7 @@ func TestSigilOfTheArknight_PlayOnlySetsAuraCreated(t *testing.T) {
 	if !s.AuraCreated() {
 		t.Error("AuraCreated = false, want true")
 	}
-	if len(s.Auras()) != 1 || s.Auras()[0].TriggerType() != gameengine.TriggerStartOfTurn {
+	if len(s.Auras()) != 1 || s.Auras()[0].TriggerType() != triggertype.StartOfTurn {
 		t.Errorf("Auras = %+v, want one TriggerStartOfTurn entry", s.Auras())
 	}
 }

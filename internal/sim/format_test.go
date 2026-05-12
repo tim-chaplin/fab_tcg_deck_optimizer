@@ -13,6 +13,7 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapons"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/gameengine"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/triggertype"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/turnlogger"
 )
 
@@ -606,7 +607,7 @@ func TestFormatBestTurn_EndOfTurnAurasWithRunechants(t *testing.T) {
 	state := gameengine.New()
 	state.CreateAura(NewCardAura(
 		&card.CardState{Card: cards.MaleficIncantationRed{}},
-		gameengine.TriggerStartOfTurn,
+		triggertype.StartOfTurn,
 		nil, 1, false,
 	))
 	state.CreateAura(NewRunechantAura(2))

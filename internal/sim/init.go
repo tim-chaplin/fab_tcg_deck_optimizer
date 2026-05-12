@@ -3,6 +3,7 @@ package sim
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/gameengine"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/triggertype"
 )
 
 // init wires sim's concrete Aura / Trigger / Item / token builders into gameengine's
@@ -13,10 +14,10 @@ import (
 // interface-return factory signatures — every concrete type satisfies the matching engine
 // interface, so the assignment is a no-op box per call.
 func init() {
-	gameengine.BuildCardAura = func(self *card.CardState, tt gameengine.TriggerType, h card.AuraHandler, count int, oncePerTurn bool) gameengine.Aura {
+	gameengine.BuildCardAura = func(self *card.CardState, tt triggertype.Type, h card.AuraHandler, count int, oncePerTurn bool) gameengine.Aura {
 		return NewCardAura(self, tt, h, count, oncePerTurn)
 	}
-	gameengine.BuildCardTrigger = func(self *card.CardState, tt gameengine.TriggerType, h card.TriggerHandler, filter func(card.TypeSet) bool) gameengine.Trigger {
+	gameengine.BuildCardTrigger = func(self *card.CardState, tt triggertype.Type, h card.TriggerHandler, filter func(card.TypeSet) bool) gameengine.Trigger {
 		return NewCardTrigger(self, tt, h, filter)
 	}
 	gameengine.BuildRunechantAura = func(n int) gameengine.Aura { return NewRunechantAura(n) }

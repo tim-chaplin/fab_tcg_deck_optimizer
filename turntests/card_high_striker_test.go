@@ -7,6 +7,7 @@ import (
 
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/gameengine"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/triggertype"
 )
 
 // Tests that High Striker queues a TriggerHit Trigger so a later attack hit creates
@@ -29,7 +30,7 @@ func TestHighStriker_QueuesTriggerHit(t *testing.T) {
 func triggerHitCount(g card.GameEngine) int {
 	n := 0
 	for _, t := range g.(*gameengine.GameEngine).Triggers() {
-		if t.TriggerType() == gameengine.TriggerHit {
+		if t.TriggerType() == triggertype.Hit {
 			n++
 		}
 	}

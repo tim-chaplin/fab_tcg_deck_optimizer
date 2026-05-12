@@ -13,6 +13,7 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/gameengine"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/triggertype"
 )
 
 // damageTrigger returns a StartOfTurn Aura crediting the given damage and destroying
@@ -20,7 +21,7 @@ import (
 func damageTrigger(self card.Card, damage int, calls *int) gameengine.Aura {
 	return NewCardAura(
 		&card.CardState{Card: self},
-		gameengine.TriggerStartOfTurn,
+		triggertype.StartOfTurn,
 		func(g card.GameEngine, _ card.Logger, a card.Aura) {
 			*calls++
 			g.AddValue(damage)
@@ -71,7 +72,7 @@ func TestProcessAurasAtStartOfTurn_GraveyardsExhaustedAura(t *testing.T) {
 	var seen []card.Card
 	watcher := NewCardAura(
 		&card.CardState{Card: testutils.YellowAttack{}},
-		gameengine.TriggerStartOfTurn,
+		triggertype.StartOfTurn,
 		func(g card.GameEngine, _ card.Logger, _ card.Aura) {
 			eng := g.(*gameengine.GameEngine)
 			seen = append([]card.Card(nil), eng.GraveyardRaw()...)
@@ -81,7 +82,7 @@ func TestProcessAurasAtStartOfTurn_GraveyardsExhaustedAura(t *testing.T) {
 	)
 	first := NewCardAura(
 		&card.CardState{Card: aura},
-		gameengine.TriggerStartOfTurn,
+		triggertype.StartOfTurn,
 		func(_ card.GameEngine, _ card.Logger, a card.Aura) {
 			a.Destroy(true)
 		},
@@ -266,7 +267,7 @@ func TestProcessAurasAtStartOfTurn_ReArmsOncePerTurnGate(t *testing.T) {
 	aura := testutils.RedAttack{}
 	exhausted := NewCardAura(
 		&card.CardState{Card: aura},
-		gameengine.TriggerAttackAction,
+		triggertype.AttackAction,
 		func(card.GameEngine, card.Logger, card.Aura) {},
 		2,
 		true,

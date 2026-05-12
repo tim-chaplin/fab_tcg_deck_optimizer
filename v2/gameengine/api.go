@@ -2,6 +2,7 @@ package gameengine
 
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/triggertype"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/turnlogger"
 )
 
@@ -133,25 +134,25 @@ func (g *GameEngine) BeginPermutation(hand []card.Card, incomingDamage int, logg
 }
 
 // FireAttack walks the trigger entries (today, aura entries; in the future, other
-// engine-level subscribers) with TriggerType()==TriggerAttack and invokes every one whose
+// engine-level subscribers) with TriggerType()==triggertype.Attack and invokes every one whose
 // OncePerTurn gate is open. The triggering card is published on g.triggeringCard so
 // handlers can attribute log lines back to the source. Cursor-based iteration so a
 // handler-side splice (Destroy) advances only when the slice length didn't change.
 func (g *GameEngine) FireAttack(triggeringCard card.Card) {
-	g.fireMatching(triggeringCard, TriggerAttack)
+	g.fireMatching(triggeringCard, triggertype.Attack)
 }
 
-// FireAttackAction is the TriggerAttackAction counterpart to FireAttack: walks the
+// FireAttackAction is the triggertype.AttackAction counterpart to FireAttack: walks the
 // trigger entries matching that type and fires those whose OncePerTurn gate is open.
 func (g *GameEngine) FireAttackAction(triggeringCard card.Card) {
-	g.fireMatching(triggeringCard, TriggerAttackAction)
+	g.fireMatching(triggeringCard, triggertype.AttackAction)
 }
 
 // fireMatching is the shared aura-fire walk for FireAttack / FireAttackAction /
 // FireEndOfTurn. Iterates g.auras with a cursor so handler-side splicing (Destroy mutates
 // g.auras in place, shifting the next entry down to the cursor's index) advances only
 // when the slice length didn't change.
-func (g *GameEngine) fireMatching(triggeringCard card.Card, trigger TriggerType) {
+func (g *GameEngine) fireMatching(triggeringCard card.Card, trigger triggertype.Type) {
 	for i := 0; i < len(g.auras); {
 		a := g.auras[i]
 		if a.TriggerType() != trigger || (a.OncePerTurn() && a.FiredThisTurn()) {
@@ -171,16 +172,16 @@ func (g *GameEngine) fireMatching(triggeringCard card.Card, trigger TriggerType)
 	}
 }
 
-// HasEndOfTurnFire reports whether either Auras or Triggers carries a TriggerEndOfTurn
+// HasEndOfTurnFire reports whether either Auras or Triggers carries a triggertype.EndOfTurn
 // entry. Lets the chain runner skip the end-of-turn walk when nothing would fire.
 func (g *GameEngine) HasEndOfTurnFire() bool {
 	for _, a := range g.auras {
-		if a.TriggerType() == TriggerEndOfTurn {
+		if a.TriggerType() == triggertype.EndOfTurn {
 			return true
 		}
 	}
 	for _, t := range g.triggers {
-		if t.TriggerType() == TriggerEndOfTurn {
+		if t.TriggerType() == triggertype.EndOfTurn {
 			return true
 		}
 	}
@@ -197,18 +198,18 @@ func (g *GameEngine) HasEndOfTurnFire() bool {
 //     len(g.triggers) before iterating keeps a handler that calls AddXxxTrigger from firing
 //     its newcomer on the same pass — newcomers stay queued for the next matching event.
 func (g *GameEngine) FireEndOfTurn() {
-	g.fireMatching(nil, TriggerEndOfTurn)
+	g.fireMatching(nil, triggertype.EndOfTurn)
 	n := len(g.triggers)
 	for i := 0; i < n; i++ {
 		tr := g.triggers[i]
-		if tr.TriggerType() != TriggerEndOfTurn {
+		if tr.TriggerType() != triggertype.EndOfTurn {
 			continue
 		}
 		tr.Fire(g, g.logger)
 	}
 	kept := g.triggers[:0]
 	for i, tr := range g.triggers {
-		if i < n && tr.TriggerType() == TriggerEndOfTurn {
+		if i < n && tr.TriggerType() == triggertype.EndOfTurn {
 			continue
 		}
 		kept = append(kept, tr)
@@ -216,14 +217,14 @@ func (g *GameEngine) FireEndOfTurn() {
 	g.triggers = kept
 }
 
-// FireHit walks the one-shot trigger queue and invokes every TriggerHit entry whose type
+// FireHit walks the one-shot trigger queue and invokes every triggertype.Hit entry whose type
 // filter matches the attacking card's types. Surviving entries (filter mismatch) are kept;
 // fired entries are removed.
 func (g *GameEngine) FireHit(attackerTypes card.TypeSet) {
 	kept := g.triggers[:0]
 	for i := range g.triggers {
 		t := g.triggers[i]
-		if t.TriggerType() != TriggerHit || !t.Matches(attackerTypes) {
+		if t.TriggerType() != triggertype.Hit || !t.Matches(attackerTypes) {
 			kept = append(kept, t)
 			continue
 		}
@@ -232,7 +233,7 @@ func (g *GameEngine) FireHit(attackerTypes card.TypeSet) {
 	g.triggers = kept
 }
 
-// FireStartOfTurn walks g.auras and invokes every TriggerStartOfTurn entry, calling
+// FireStartOfTurn walks g.auras and invokes every triggertype.StartOfTurn entry, calling
 // onFire with each entry's pre-state snapshot so sim can attribute damage / draws /
 // log lines back to the firing aura. Auras that destroy themselves splice out;
 // FiredThisTurn flips reset on each fresh turn boundary (sim calls AdvanceTurnBoundary).
@@ -248,7 +249,7 @@ func (g *GameEngine) FireStartOfTurn(onFire func(idx int, damage int, drawnCard 
 		a := g.auras[i]
 		// Re-arm OncePerTurn at each turn boundary.
 		g.auras[i].SetFiredThisTurn(false)
-		if a.TriggerType() != TriggerStartOfTurn {
+		if a.TriggerType() != triggertype.StartOfTurn {
 			i++
 			continue
 		}

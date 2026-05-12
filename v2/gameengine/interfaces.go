@@ -9,29 +9,13 @@ package gameengine
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
-)
-
-// TriggerType categorises when an Aura or Trigger fires.
-type TriggerType int
-
-const (
-	// TriggerStartOfTurn fires at the start of the owning player's action phase, before the
-	// best-line search.
-	TriggerStartOfTurn TriggerType = iota
-	// TriggerAttackAction fires each time an attack action card resolves during the chain.
-	TriggerAttackAction
-	// TriggerAttack fires when ANY attack resolves — attack action card or weapon swing.
-	TriggerAttack
-	// TriggerEndOfTurn fires after the chain finishes resolving, before the carry snapshot.
-	TriggerEndOfTurn
-	// TriggerHit fires when an attack hits (post-AR-buff EffectiveAttack survives blocks).
-	TriggerHit
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/triggertype"
 )
 
 // Aura is the engine's view of a persistent hook entry. Concrete aura impls expose
 // what the engine needs through these methods directly.
 type Aura interface {
-	TriggerType() TriggerType
+	TriggerType() triggertype.Type
 	OncePerTurn() bool
 	FiredThisTurn() bool
 	SetFiredThisTurn(bool)
@@ -61,10 +45,10 @@ type Aura interface {
 
 // Trigger is the engine's view of a one-shot deferred handler.
 type Trigger interface {
-	TriggerType() TriggerType
+	TriggerType() triggertype.Type
 	// CardName is the source card's display name, used for log attribution.
 	CardName() string
-	// Matches narrows TriggerHit fires to a card-type predicate. Returns true when the
+	// Matches narrows triggertype.Hit fires to a card-type predicate. Returns true when the
 	// trigger has no type filter.
 	Matches(types card.TypeSet) bool
 	// Fire invokes the trigger's handler with a card.Trigger context built by the engine.

@@ -5,6 +5,7 @@ import (
 
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/gameengine"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/triggertype"
 )
 
 // Tests that an OncePerTurn AttackAction aura fires on the first call and is gated by
@@ -15,7 +16,7 @@ func TestFireAttackActionAuras_FiresOnceWhenGated(t *testing.T) {
 	state := gameengine.New()
 	state.CreateAura(NewCardAura(
 		&card.CardState{Card: aura},
-		gameengine.TriggerAttackAction,
+		triggertype.AttackAction,
 		func(g card.GameEngine, l card.Logger, _ card.Aura) {
 			calls++
 			g.AddValue(1)
@@ -51,7 +52,7 @@ func TestFireAttackActionAuras_GraveyardsExhaustedAura(t *testing.T) {
 	state := gameengine.New()
 	state.CreateAura(NewCardAura(
 		&card.CardState{Card: aura},
-		gameengine.TriggerAttackAction,
+		triggertype.AttackAction,
 		func(g card.GameEngine, _ card.Logger, a card.Aura) {
 			g.AddValue(1)
 			a.Destroy(true)
@@ -76,7 +77,7 @@ func TestFireAttackActionAuras_PassesThroughNonAttackActionTriggers(t *testing.T
 	state := gameengine.New()
 	state.CreateAura(NewCardAura(
 		&card.CardState{Card: aura},
-		gameengine.TriggerStartOfTurn,
+		triggertype.StartOfTurn,
 		func(card.GameEngine, card.Logger, card.Aura) { calls++ },
 		1,
 		false,

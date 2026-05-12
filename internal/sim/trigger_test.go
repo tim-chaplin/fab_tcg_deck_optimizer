@@ -5,6 +5,7 @@ import (
 
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/gameengine"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/triggertype"
 )
 
 // Tests that an end-of-turn Trigger fires once and is removed.
@@ -13,7 +14,7 @@ func TestFireEndOfTurn_FiresOnceAndRemoves(t *testing.T) {
 	calls := 0
 	s.CreateTrigger(NewCardTrigger(
 		&card.CardState{Card: FakeRedAttack{}},
-		gameengine.TriggerEndOfTurn,
+		triggertype.EndOfTurn,
 		func(_ card.GameEngine, _ card.Logger, _ card.Trigger) { calls++ },
 		nil,
 	))
@@ -32,7 +33,7 @@ func TestFireEndOfTurn_LeavesNonMatchingType(t *testing.T) {
 	calls := 0
 	s.CreateTrigger(NewCardTrigger(
 		&card.CardState{Card: FakeRedAttack{}},
-		gameengine.TriggerAttack,
+		triggertype.Attack,
 		func(_ card.GameEngine, _ card.Logger, _ card.Trigger) { calls++ },
 		nil,
 	))
@@ -52,13 +53,13 @@ func TestFireEndOfTurn_HandlerAddTriggerSafeReentry(t *testing.T) {
 	calls := 0
 	s.CreateTrigger(NewCardTrigger(
 		&card.CardState{Card: FakeRedAttack{}},
-		gameengine.TriggerEndOfTurn,
+		triggertype.EndOfTurn,
 		func(g card.GameEngine, _ card.Logger, _ card.Trigger) {
 			calls++
 			ts := g.(*gameengine.GameEngine)
 			ts.CreateTrigger(NewCardTrigger(
 				&card.CardState{Card: FakeRedAttack{}},
-				gameengine.TriggerEndOfTurn,
+				triggertype.EndOfTurn,
 				func(_ card.GameEngine, _ card.Logger, _ card.Trigger) { calls++ },
 				nil,
 			))

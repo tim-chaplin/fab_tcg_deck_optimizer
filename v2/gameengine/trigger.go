@@ -1,19 +1,22 @@
 package gameengine
 
-import "github.com/tim-chaplin/fab-deck-optimizer/v2/card"
+import (
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/triggertype"
+)
 
 // Card-facing trigger registration on *GameEngine. Cards call these via
 // v2/card.GameEngine; the methods delegate to the registered BuildCardTrigger factory so
 // the concrete Trigger type lives outside gameengine.
 
-// AddHitTrigger registers a one-shot TriggerHit listener. filter narrows the qualifying
-// hits to a card-type predicate; nil = any hit qualifies.
+// AddHitTrigger registers a one-shot triggertype.Hit listener. filter narrows the
+// qualifying hits to a card-type predicate; nil = any hit qualifies.
 func (g *GameEngine) AddHitTrigger(self *card.CardState, handler card.TriggerHandler, filter func(card.TypeSet) bool) {
-	g.CreateTrigger(BuildCardTrigger(self, TriggerHit, handler, filter))
+	g.CreateTrigger(BuildCardTrigger(self, triggertype.Hit, handler, filter))
 }
 
-// AddEndOfTurnTrigger registers a one-shot TriggerEndOfTurn listener — fires after the
-// chain finishes resolving but before the carry-state snapshot.
+// AddEndOfTurnTrigger registers a one-shot triggertype.EndOfTurn listener — fires after
+// the chain finishes resolving but before the carry-state snapshot.
 func (g *GameEngine) AddEndOfTurnTrigger(self *card.CardState, handler card.TriggerHandler) {
-	g.CreateTrigger(BuildCardTrigger(self, TriggerEndOfTurn, handler, nil))
+	g.CreateTrigger(BuildCardTrigger(self, triggertype.EndOfTurn, handler, nil))
 }

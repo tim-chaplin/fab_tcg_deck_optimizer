@@ -7,6 +7,7 @@ import (
 
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/gameengine"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/triggertype"
 )
 
 // Tests that Play credits 0 immediately and registers an OncePerTurn TriggerAttackAction
@@ -36,7 +37,7 @@ func TestMaleficIncantation_PlayRegistersAttackActionTrigger(t *testing.T) {
 			t.Fatalf("%s: Auras len = %d, want 1", tc.c.Name(), len(s.Auras()))
 		}
 		tr := s.Auras()[0]
-		if tr.TriggerType() != gameengine.TriggerAttackAction {
+		if tr.TriggerType() != triggertype.AttackAction {
 			t.Errorf("%s: trigger Type = %d, want TriggerAttackAction", tc.c.Name(), tr.TriggerType())
 		}
 		if !tr.OncePerTurn() {

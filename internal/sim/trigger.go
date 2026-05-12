@@ -3,12 +3,13 @@ package sim
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/gameengine"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/triggertype"
 )
 
 // Trigger is the sim concrete impl of gameengine.Trigger. Card-driven AddXxxTrigger methods
 // on *gameengine.GameEngine build one of these via the registered builder.
 type Trigger struct {
-	triggerType gameengine.TriggerType
+	triggerType triggertype.Type
 	handler     card.TriggerHandler
 	source      card.Card // nil when no source card (e.g. start-of-turn-style triggers)
 	typeFilter  func(card.TypeSet) bool
@@ -16,7 +17,7 @@ type Trigger struct {
 
 // NewCardTrigger builds a one-shot trigger whose source is self.Card. typeFilter narrows
 // the firing site (currently used only by TriggerHit); pass nil for no filter.
-func NewCardTrigger(self *card.CardState, tt gameengine.TriggerType, handler card.TriggerHandler, typeFilter func(card.TypeSet) bool) *Trigger {
+func NewCardTrigger(self *card.CardState, tt triggertype.Type, handler card.TriggerHandler, typeFilter func(card.TypeSet) bool) *Trigger {
 	return &Trigger{
 		triggerType: tt,
 		handler:     handler,
@@ -25,7 +26,7 @@ func NewCardTrigger(self *card.CardState, tt gameengine.TriggerType, handler car
 	}
 }
 
-func (t *Trigger) TriggerType() gameengine.TriggerType { return t.triggerType }
+func (t *Trigger) TriggerType() triggertype.Type { return t.triggerType }
 func (t *Trigger) CardName() string {
 	if t.source != nil {
 		return t.source.DisplayName()

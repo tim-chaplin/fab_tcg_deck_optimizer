@@ -7,6 +7,7 @@ import (
 
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/gameengine"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/triggertype"
 )
 
 // TestSigilOfSilphidae_PlayFizzlesWithoutAura: no aura in s.Graveyard means the enter trigger
@@ -24,7 +25,7 @@ func TestSigilOfSilphidae_PlayFizzlesWithoutAura(t *testing.T) {
 	if s.ArcaneDamageDealt() {
 		t.Errorf("ArcaneDamageDealt should stay false when banish fizzles")
 	}
-	if len(s.Auras()) != 1 || s.Auras()[0].TriggerType() != gameengine.TriggerStartOfTurn {
+	if len(s.Auras()) != 1 || s.Auras()[0].TriggerType() != triggertype.StartOfTurn {
 		t.Errorf("Auras = %+v, want one TriggerStartOfTurn entry", s.Auras())
 	}
 }

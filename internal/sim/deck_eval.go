@@ -16,6 +16,7 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/gameengine"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/triggertype"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/turnlogger"
 )
 
@@ -530,7 +531,7 @@ func processAurasAtStartOfTurn(queued []*Aura, d *deck.Deck) (
 	// the aura destroys itself (and disappears from g.auras).
 	sourceByFireIdx := make([]card.Card, 0, len(queued))
 	for _, a := range queued {
-		if a.TriggerType() == gameengine.TriggerStartOfTurn {
+		if a.TriggerType() == triggertype.StartOfTurn {
 			sourceByFireIdx = append(sourceByFireIdx, a.SourceCard())
 		}
 	}

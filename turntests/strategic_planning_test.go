@@ -8,6 +8,7 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/gameengine"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/triggertype"
 )
 
 // Tests that Strategic Planning queues a TriggerEndOfTurn keyed to itself, not a Ponder.
@@ -17,7 +18,7 @@ func TestStrategicPlanning_QueuesEndOfTurnTrigger(t *testing.T) {
 		s.ResolveChainStep(s.Logger(), &card.CardState{Card: c})
 		matching := 0
 		for _, tr := range s.Triggers() {
-			if tr.TriggerType() == gameengine.TriggerEndOfTurn && tr.CardName() == c.DisplayName() {
+			if tr.TriggerType() == triggertype.EndOfTurn && tr.CardName() == c.DisplayName() {
 				matching++
 			}
 		}
