@@ -548,7 +548,7 @@ func fireAttackAuras(state *TurnState, triggeringCard card.Card) {
 // slices before the next permutation overwrites these buffers; mid-chain growth past the
 // pre-sized cap is the only path that allocates a new backing array.
 //
-// deck is the pooled bufs.deckScratch, refilled from ctx.deck via Deck.ResetTo so
+// deck is the pooled bufs.deckScratch, refilled from ctx.deck via Deck.CopyFrom so
 // card-driven mutations (PrependToDeck, TutorFromDeck, Opt, PopDeckTop) stay scoped
 // to this permutation without re-allocating the cards / Weapons backing arrays each
 // time. The first call allocates the scratch via ctx.deck.Copy(); subsequent calls
@@ -565,7 +565,7 @@ func (ctx *sequenceContext) resetStateForPermutation() {
 	if bufs.deckScratch == nil {
 		bufs.deckScratch = ctx.deck.Copy()
 	} else {
-		bufs.deckScratch.ResetTo(ctx.deck)
+		bufs.deckScratch.CopyFrom(ctx.deck)
 	}
 	s.deck = bufs.deckScratch
 	s.Arsenal = ctx.arsenalAtChainStart

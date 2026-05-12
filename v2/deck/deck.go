@@ -129,15 +129,14 @@ func (d *Deck) Copy() *Deck {
 	return out
 }
 
-// ResetTo overwrites d's cards / Weapons / Hero from src, reusing d's existing slice backing
-// arrays when they have enough capacity. Sideboard and Equipment are skipped — the chain
-// runner never reads them, and the per-permutation reset path that consumes this method
-// drops millions of slice allocations per Evaluate by keeping the deck's backing arrays
-// pinned on a pooled buffer. Callers that need a full deep copy should keep using Copy.
+// CopyFrom provides a memory-efficient way to copy a Deck by reusing an already-allocated
+// Deck (the receiver) that's no longer needed: d's cards / Weapons / Hero are overwritten
+// from src, reusing d's existing slice backing arrays when they have enough capacity.
+// Sideboard and Equipment are skipped. Callers that need a full deep copy should use Copy.
 //
-// d must be a non-nil pooled receiver. A nil src is treated as an empty deck — d's slice
-// lengths drop to 0 (backings retained) and Hero zeroes.
-func (d *Deck) ResetTo(src *Deck) {
+// d must be a non-nil receiver. A nil src is treated as an empty deck — d's slice lengths
+// drop to 0 (backings retained) and Hero zeroes.
+func (d *Deck) CopyFrom(src *Deck) {
 	if src == nil {
 		d.Hero = nil
 		d.cards = d.cards[:0]

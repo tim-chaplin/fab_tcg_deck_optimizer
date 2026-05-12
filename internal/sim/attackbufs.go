@@ -121,7 +121,7 @@ type permBufs struct {
 	// the typical queue depth is one or two riders.
 	triggersBacking []Trigger
 	// deckScratch is the per-permutation runtime deck. resetStateForPermutation refills it
-	// from ctx.deck via Deck.ResetTo, reusing the cards / Weapons backing arrays so chain
+	// from ctx.deck via Deck.CopyFrom, reusing the cards / Weapons backing arrays so chain
 	// mutations (Shuffle, Draw, PutBottom, PutTop, Tutor) work on a private *Deck without
 	// allocating fresh slices for the dominant unmutated case. Allocated on first call to
 	// avoid sizing it before we know the deck length.
