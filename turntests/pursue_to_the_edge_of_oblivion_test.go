@@ -14,7 +14,7 @@ import (
 // the opposing hero when LikelyToHit fires.
 func TestPursueToTheEdgeOfOblivion_OnHitMarksOpponent(t *testing.T) {
 	self := &card.CardState{Card: cards.PursueToTheEdgeOfOblivionRed{}}
-	s := gameengine.NewFromState(nil)
+	s := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().Build()}
 	s.ResolveChainStep(s.Logger(), self)
 	if len(self.OnHit) != 1 {
 		t.Fatalf("OnHit handlers = %d, want 1", len(self.OnHit))

@@ -23,7 +23,7 @@ func TestSunKiss_SoloIsHealOnly(t *testing.T) {
 		{cards.SunKissBlue{}, 1},
 	}
 	for _, tc := range cases {
-		s := gameengine.NewFromCards([]card.Card{testutils.GenericAttack(0, 0)}, nil)
+		s := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCards([]card.Card{testutils.GenericAttack(0, 0)}).Build()}
 		self := &card.CardState{Card: tc.c}
 		s.ResolveChainStep(s.Logger(), self)
 		got := s.Value()
@@ -52,7 +52,7 @@ func TestSunKiss_SynergyFiresOnPriorMoonWish(t *testing.T) {
 			{cards.SunKissYellow{}, 2},
 			{cards.SunKissBlue{}, 1},
 		} {
-			s := gameengine.NewFromCards([]card.Card{testutils.GenericAttack(0, 0)}, nil)
+			s := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCards([]card.Card{testutils.GenericAttack(0, 0)}).Build()}
 			s.SetCardsPlayed([]card.Card{mw})
 			self := &card.CardState{Card: sk.c}
 			s.ResolveChainStep(s.Logger(), self)
@@ -75,7 +75,7 @@ func TestSunKiss_SynergyFiresOnPriorMoonWish(t *testing.T) {
 // Tests that the Sun Kiss synergy only fires on a Moon Wish printing, not any prior attack.
 func TestSunKiss_SynergyDoesNotFireOnUnrelatedAttacks(t *testing.T) {
 	notMoonWish := testutils.GenericAttackPitch(0, 0, 1)
-	s := gameengine.NewFromCards([]card.Card{testutils.GenericAttack(0, 0)}, nil)
+	s := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCards([]card.Card{testutils.GenericAttack(0, 0)}).Build()}
 	s.SetCardsPlayed([]card.Card{notMoonWish})
 	self := &card.CardState{Card: cards.SunKissRed{}}
 	s.ResolveChainStep(s.Logger(), self)
@@ -95,10 +95,7 @@ func TestSunKiss_SynergyDoesNotFireOnUnrelatedAttacks(t *testing.T) {
 // resolves, the synergy still grants go-again but the draw silently no-ops (DrawOne contract).
 // Guards against a future regression that panics on Deck[0] read with no top.
 func TestSunKiss_SynergyHandlesEmptyDeck(t *testing.T) {
-	s := gameengine.NewFromSpec(gameengine.Spec{
-		CardsPlayed: []card.Card{cards.MoonWishRed{}},
-		// Deck intentionally nil.
-	})
+	s := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCardsPlayed([]card.Card{cards.MoonWishRed{}}).Build()}
 	self := &card.CardState{Card: cards.SunKissRed{}}
 	s.ResolveChainStep(s.Logger(), self)
 	got := s.Value()

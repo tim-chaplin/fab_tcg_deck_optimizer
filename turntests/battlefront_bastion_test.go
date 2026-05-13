@@ -23,7 +23,7 @@ func TestBattlefrontBastion_BlockAloneFiresPrevention(t *testing.T) {
 			t.Errorf("%s: missing card.Blocker hook", c.Name())
 			continue
 		}
-		s := gameengine.NewFromSpec(gameengine.Spec{Defenders: []card.Card{c}})
+		s := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetDefenders([]card.Card{c}).Build()}
 		self := &card.CardState{Card: c}
 		blocker.Block(s, s.Logger(), self)
 		if self.BonusDefense != 1 {
@@ -36,7 +36,7 @@ func TestBattlefrontBastion_BlockAloneFiresPrevention(t *testing.T) {
 // the defenders slot.
 func TestBattlefrontBastion_BlockWithOtherPlainBlockerNoBonus(t *testing.T) {
 	c := cards.BattlefrontBastionRed{}
-	s := gameengine.NewFromSpec(gameengine.Spec{Defenders: []card.Card{c, testutils.GenericAttack(0, 1)}})
+	s := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetDefenders([]card.Card{c, testutils.GenericAttack(0, 1)}).Build()}
 	self := &card.CardState{Card: c}
 	c.Block(s, s.Logger(), self)
 	if self.BonusDefense != 0 {

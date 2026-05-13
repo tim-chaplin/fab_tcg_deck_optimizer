@@ -22,7 +22,7 @@ func TestReekOfCorruption_NoAuraReturnsBaseAttack(t *testing.T) {
 		{cards.ReekOfCorruptionBlue{}, 2},
 	}
 	for _, tc := range cases {
-		s := gameengine.NewFromState(nil)
+		s := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().Build()}
 		cs := &card.CardState{Card: tc.c}
 		s.ResolveChainStep(s.Logger(), cs)
 		testutils.FireOnHitIfLikely(s, s.Logger(), cs)
@@ -34,7 +34,7 @@ func TestReekOfCorruption_NoAuraReturnsBaseAttack(t *testing.T) {
 
 // Tests that the discard rider fires with AuraCreated set on a likely-hit attack.
 func TestReekOfCorruption_LikelyToHitWithAuraCreatedTriggersDiscard(t *testing.T) {
-	s := gameengine.NewFromSpec(gameengine.Spec{AuraCreated: true})
+	s := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetAuraCreated(true).Build()}
 	c := cards.ReekOfCorruptionRed{}
 	cs := &card.CardState{Card: c}
 	s.ResolveChainStep(s.Logger(), cs)
@@ -46,7 +46,7 @@ func TestReekOfCorruption_LikelyToHitWithAuraCreatedTriggersDiscard(t *testing.T
 
 // Tests that an aura earlier in CardsPlayed satisfies the rider precondition.
 func TestReekOfCorruption_AuraPlayedTriggersDiscard(t *testing.T) {
-	s := gameengine.NewFromSpec(gameengine.Spec{CardsPlayed: []card.Card{testutils.Aura{}}, AuraCreated: true})
+	s := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCardsPlayed([]card.Card{testutils.Aura{}}).SetAuraCreated(true).Build()}
 	c := cards.ReekOfCorruptionRed{}
 	cs := &card.CardState{Card: c}
 	s.ResolveChainStep(s.Logger(), cs)
@@ -66,7 +66,7 @@ func TestReekOfCorruption_BlockableBaseSuppressesDiscard(t *testing.T) {
 		{cards.ReekOfCorruptionBlue{}, 2},
 	}
 	for _, tc := range cases {
-		s := gameengine.NewFromSpec(gameengine.Spec{AuraCreated: true})
+		s := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetAuraCreated(true).Build()}
 		s.ResolveChainStep(s.Logger(), &card.CardState{Card: tc.c})
 		if got := s.Value(); got != tc.want {
 			t.Errorf("%s with AuraCreated: Play() = %d, want %d (blockable, no rider)", tc.c.Name(), got, tc.want)
@@ -77,7 +77,7 @@ func TestReekOfCorruption_BlockableBaseSuppressesDiscard(t *testing.T) {
 // Tests that co-firing runechants don't rescue a blockable variant — "this hits" reads only
 // this card's own damage.
 func TestReekOfCorruption_RunechantsDontRescue(t *testing.T) {
-	s := gameengine.NewFromSpec(gameengine.Spec{AuraCreated: true})
+	s := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetAuraCreated(true).Build()}
 	s.CreateAura(sim.NewRunechantAura(1))
 	c := cards.ReekOfCorruptionYellow{}
 	s.ResolveChainStep(s.Logger(), &card.CardState{Card: c})

@@ -19,7 +19,7 @@ func TestTremorOfIArathael_NoBanishReturnsBaseAttack(t *testing.T) {
 		{cards.TremorOfIArathaelBlue{}, 2},
 	}
 	for _, tc := range cases {
-		s := gameengine.NewFromState(nil)
+		s := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().Build()}
 		s.ResolveChainStep(s.Logger(), &card.CardState{Card: tc.c})
 		if s.Value() != tc.base {
 			t.Errorf("%s: Value = %d, want %d (no banish, base attack only)", tc.c.Name(), s.Value(), tc.base)
@@ -38,7 +38,7 @@ func TestTremorOfIArathael_BanishGrantsPlusTwo(t *testing.T) {
 		{cards.TremorOfIArathaelBlue{}, 2},
 	}
 	for _, tc := range cases {
-		s := gameengine.NewFromSpec(gameengine.Spec{CardBanished: true})
+		s := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCardBanished(true).Build()}
 		s.ResolveChainStep(s.Logger(), &card.CardState{Card: tc.c})
 		if want := tc.base + 2; s.Value() != want {
 			t.Errorf("%s: Value = %d, want %d (CardBanished set, +2{p} rider on)", tc.c.Name(), s.Value(), want)

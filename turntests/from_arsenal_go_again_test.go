@@ -21,13 +21,13 @@ func TestFromArsenalGoAgain_GrantsOnArsenalCopyOnly(t *testing.T) {
 	}
 	for _, c := range cards {
 		hand := &card.CardState{Card: c}
-		s := gameengine.NewFromCards(nil, nil)
+		s := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().Build()}
 		s.ResolveChainStep(s.Logger(), hand)
 		if hand.GrantedGoAgain {
 			t.Errorf("%s: GrantedGoAgain = true with FromArsenal=false, want false", c.Name())
 		}
 		arsenal := &card.CardState{Card: c, FromArsenal: true}
-		s2 := gameengine.NewFromCards(nil, nil)
+		s2 := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().Build()}
 		s2.ResolveChainStep(s2.Logger(), arsenal)
 		if !arsenal.GrantedGoAgain {
 			t.Errorf("%s: GrantedGoAgain = false with FromArsenal=true, want true", c.Name())

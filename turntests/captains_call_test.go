@@ -13,7 +13,7 @@ import (
 // Tests that mode 0 grants +2{p} to the next cost-≤N attack action card.
 func TestCaptainsCall_Mode0BuffsBonusAttack(t *testing.T) {
 	target := &card.CardState{Card: testutils.GenericAttack(1, 4)}
-	s := gameengine.NewFromSpec(gameengine.Spec{CardsRemaining: []*card.CardState{target}})
+	s := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCardsRemaining([]*card.CardState{target}).Build()}
 	self := &card.CardState{Card: cards.CaptainsCallRed{}, Mode: 0}
 	s.ResolveChainStep(s.Logger(), self)
 	if target.BonusAttack != 2 {
@@ -27,7 +27,7 @@ func TestCaptainsCall_Mode0BuffsBonusAttack(t *testing.T) {
 // Tests that mode 1 grants go again to the next cost-≤N attack action card.
 func TestCaptainsCall_Mode1GrantsGoAgain(t *testing.T) {
 	target := &card.CardState{Card: testutils.GenericAttack(1, 4)}
-	s := gameengine.NewFromSpec(gameengine.Spec{CardsRemaining: []*card.CardState{target}})
+	s := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCardsRemaining([]*card.CardState{target}).Build()}
 	self := &card.CardState{Card: cards.CaptainsCallRed{}, Mode: 1}
 	s.ResolveChainStep(s.Logger(), self)
 	if !target.GrantedGoAgain {
@@ -41,7 +41,7 @@ func TestCaptainsCall_Mode1GrantsGoAgain(t *testing.T) {
 // Tests that the cost cap rejects too-expensive attack action cards.
 func TestCaptainsCall_BlueRejectsCostAboveZero(t *testing.T) {
 	target := &card.CardState{Card: testutils.GenericAttack(1, 4)}
-	s := gameengine.NewFromSpec(gameengine.Spec{CardsRemaining: []*card.CardState{target}})
+	s := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCardsRemaining([]*card.CardState{target}).Build()}
 	self := &card.CardState{Card: cards.CaptainsCallBlue{}, Mode: 0}
 	s.ResolveChainStep(s.Logger(), self)
 	if target.BonusAttack != 0 {

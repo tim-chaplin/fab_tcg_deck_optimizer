@@ -22,7 +22,7 @@ func TestWhisperOfTheOracle_PlayCallsOpt4(t *testing.T) {
 		testutils.NewStubCard("c"), testutils.NewStubCard("d")
 
 	for _, variant := range whisperOfTheOracleVariants {
-		s := gameengine.NewFromCards([]card.Card{a, b, c, d}, nil)
+		s := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCards([]card.Card{a, b, c, d}).Build()}
 		s.ResolveChainStep(s.Logger(), &card.CardState{Card: variant})
 		if s.Value() != 0 {
 			t.Errorf("%s: Play() Value = %d, want 0", variant.Name(), s.Value())

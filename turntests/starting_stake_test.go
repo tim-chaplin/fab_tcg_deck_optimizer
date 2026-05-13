@@ -28,7 +28,7 @@ func TestStartingStake_CreatesGoldViaChain(t *testing.T) {
 // Tests Starting Stake's "if you control no Gold tokens" gate: with prior Gold in play, Play
 // is a no-op and doesn't stack a second token. Drives Play directly to isolate the gate.
 func TestStartingStake_NoOpWhenGoldInPlay(t *testing.T) {
-	s := gameengine.NewFromCards(nil, nil)
+	s := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().Build()}
 	s.CreateGold(2)
 	s.ResolveChainStep(s.Logger(), &card.CardState{Card: cards.StartingStakeYellow{}})
 	if s.GoldCount() != 2 {

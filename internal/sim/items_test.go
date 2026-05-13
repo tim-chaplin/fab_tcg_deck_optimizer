@@ -9,7 +9,7 @@ import (
 
 // Tests that GoldTokenAbility.Play decrements Count and removes the entry at zero.
 func TestGoldAbility_PlaysDecrementsAndDestroys(t *testing.T) {
-	s := gameengine.NewFromState(nil)
+	s := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().Build()}
 	s.SetDeck(DeckOf(FakeRedAttack{}))
 	s.CreateItem(NewGoldItem(1))
 	s.ResolveChainStep(s.Logger(), &card.CardState{Card: GoldTokenAbility{}})
@@ -26,7 +26,7 @@ func TestGoldAbility_PlaysDecrementsAndDestroys(t *testing.T) {
 
 // Tests that spending one of multiple Gold tokens leaves the entry at decremented Count.
 func TestGoldAbility_PlayDecrementsCountWhenMultiple(t *testing.T) {
-	s := gameengine.NewFromState(nil)
+	s := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().Build()}
 	s.SetDeck(DeckOf(FakeRedAttack{}))
 	s.CreateItem(NewGoldItem(3))
 	s.ResolveChainStep(s.Logger(), &card.CardState{Card: GoldTokenAbility{}})
@@ -37,7 +37,7 @@ func TestGoldAbility_PlayDecrementsCountWhenMultiple(t *testing.T) {
 
 // Tests SilverTokenAbility.Play decrement + draw behaviour.
 func TestSilverAbility_PlaysDecrementsAndDestroys(t *testing.T) {
-	s := gameengine.NewFromState(nil)
+	s := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().Build()}
 	s.SetDeck(DeckOf(FakeRedAttack{}))
 	s.CreateItem(NewSilverItem(1))
 	s.ResolveChainStep(s.Logger(), &card.CardState{Card: SilverTokenAbility{}})
@@ -54,7 +54,7 @@ func TestSilverAbility_PlaysDecrementsAndDestroys(t *testing.T) {
 
 // Tests CopperTokenAbility.Play decrement + draw behaviour.
 func TestCopperAbility_PlaysDecrementsAndDestroys(t *testing.T) {
-	s := gameengine.NewFromState(nil)
+	s := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().Build()}
 	s.SetDeck(DeckOf(FakeRedAttack{}))
 	s.CreateItem(NewCopperItem(1))
 	s.ResolveChainStep(s.Logger(), &card.CardState{Card: CopperTokenAbility{}})
@@ -71,7 +71,7 @@ func TestCopperAbility_PlaysDecrementsAndDestroys(t *testing.T) {
 
 // Tests CreateSilver and CreateCopper consolidate by token type.
 func TestCreateSilverCopper_BumpsExistingEntry(t *testing.T) {
-	s := gameengine.NewFromState(nil)
+	s := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().Build()}
 	s.CreateSilver(2)
 	s.CreateSilver(1)
 	s.CreateCopper(1)

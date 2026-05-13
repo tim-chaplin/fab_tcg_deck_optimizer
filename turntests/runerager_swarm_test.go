@@ -21,7 +21,7 @@ func TestRuneragerSwarm_NoAuraNoGoAgain(t *testing.T) {
 		{cards.RuneragerSwarmBlue{}, 1},
 	}
 	for _, tc := range cases {
-		s := gameengine.NewFromState(nil)
+		s := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().Build()}
 		self := &card.CardState{Card: tc.c}
 		s.ResolveChainStep(s.Logger(), self)
 		if got := s.Value(); got != tc.want {
@@ -36,7 +36,7 @@ func TestRuneragerSwarm_NoAuraNoGoAgain(t *testing.T) {
 func TestRuneragerSwarm_AuraPlayedGrantsGoAgain(t *testing.T) {
 	// An aura in CardsPlayed satisfies the "played an aura this turn" condition.
 	for _, c := range []card.Card{cards.RuneragerSwarmRed{}, cards.RuneragerSwarmYellow{}, cards.RuneragerSwarmBlue{}} {
-		s := gameengine.NewFromSpec(gameengine.Spec{CardsPlayed: []card.Card{testutils.Aura{}}, AuraCreated: true})
+		s := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCardsPlayed([]card.Card{testutils.Aura{}}).SetAuraCreated(true).Build()}
 		self := &card.CardState{Card: c}
 		s.ResolveChainStep(s.Logger(), self)
 		if !self.GrantedGoAgain {
@@ -49,7 +49,7 @@ func TestRuneragerSwarm_AuraCreatedGrantsGoAgain(t *testing.T) {
 	// TurnState.AuraCreated (e.g. from a runechant-creating effect earlier in the chain) also
 	// satisfies the condition.
 	for _, c := range []card.Card{cards.RuneragerSwarmRed{}, cards.RuneragerSwarmYellow{}, cards.RuneragerSwarmBlue{}} {
-		s := gameengine.NewFromSpec(gameengine.Spec{AuraCreated: true})
+		s := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetAuraCreated(true).Build()}
 		self := &card.CardState{Card: c}
 		s.ResolveChainStep(s.Logger(), self)
 		if !self.GrantedGoAgain {

@@ -17,12 +17,12 @@ import (
 func TestMoonWish_VariableCost(t *testing.T) {
 	cases := []card.Card{cards.MoonWishRed{}, cards.MoonWishYellow{}, cards.MoonWishBlue{}}
 	for _, c := range cases {
-		held := gameengine.NewFromState(nil)
+		held := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().Build()}
 		held.SetHand([]card.Card{testutils.GenericAttack(0, 0)})
 		if got := c.Cost(held); got != 0 {
 			t.Errorf("%s: Cost(Hand) = %d, want 0", c.Name(), got)
 		}
-		empty := gameengine.NewFromState(nil)
+		empty := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().Build()}
 		if got := c.Cost(empty); got != 2 {
 			t.Errorf("%s: Cost(empty) = %d, want 2", c.Name(), got)
 		}
@@ -42,7 +42,7 @@ func TestMoonWish_VariableCost(t *testing.T) {
 func TestMoonWish_AltCostMovesHandCardToDeckTop(t *testing.T) {
 	dr := testutils.GenericAttack(0, 0).WithName("dr")
 	other := testutils.GenericAttack(0, 0).WithName("deckTop")
-	s := gameengine.NewFromCards([]card.Card{other}, nil)
+	s := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCards([]card.Card{other}).Build()}
 	s.SetHand([]card.Card{dr})
 	self := &card.CardState{Card: cards.MoonWishYellow{}}
 	s.ResolveChainStep(s.Logger(), self)
@@ -83,7 +83,7 @@ func TestMoonWish_TutorPrefersRedSunKissThenYellowThenBlue(t *testing.T) {
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
-			s := gameengine.NewFromCards(append([]card.Card(nil), tc.deck...), nil)
+			s := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCards(append([]card.Card(nil), tc.deck...)).Build()}
 			self := &card.CardState{Card: cards.MoonWishYellow{}}
 			s.ResolveChainStep(s.Logger(), self)
 			testutils.FireOnHitIfLikely(s, s.Logger(), self)
@@ -99,7 +99,7 @@ func TestMoonWish_TutorPrefersRedSunKissThenYellowThenBlue(t *testing.T) {
 // leaves the deck intact.
 func TestMoonWish_TutorRequiresHit(t *testing.T) {
 	{
-		s := gameengine.NewFromCards([]card.Card{cards.SunKissRed{}}, nil)
+		s := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCards([]card.Card{cards.SunKissRed{}}).Build()}
 		self := &card.CardState{Card: cards.MoonWishYellow{}}
 		s.ResolveChainStep(s.Logger(), self)
 		testutils.FireOnHitIfLikely(s, s.Logger(), self)
@@ -112,7 +112,7 @@ func TestMoonWish_TutorRequiresHit(t *testing.T) {
 		}
 	}
 	{
-		s := gameengine.NewFromCards([]card.Card{cards.SunKissRed{}}, nil)
+		s := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCards([]card.Card{cards.SunKissRed{}}).Build()}
 		// Drive EffectiveAttack down so LikelyToHit fails (4 - 4 = 0, clamped, not in window).
 		self := &card.CardState{Card: cards.MoonWishYellow{}, BonusAttack: -4}
 		s.ResolveChainStep(s.Logger(), self)
@@ -128,7 +128,7 @@ func TestMoonWish_TutorRequiresHit(t *testing.T) {
 // Tests that Sun Kiss plays immediately when self has go-again, otherwise lands in hand.
 func TestMoonWish_GoAgainPlaysSunKissImmediately(t *testing.T) {
 	{
-		s := gameengine.NewFromCards([]card.Card{cards.SunKissRed{}}, nil)
+		s := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCards([]card.Card{cards.SunKissRed{}}).Build()}
 		self := &card.CardState{Card: cards.MoonWishYellow{}, GrantedGoAgain: true}
 		s.ResolveChainStep(s.Logger(), self)
 		testutils.FireOnHitIfLikely(s, s.Logger(), self)
@@ -145,7 +145,7 @@ func TestMoonWish_GoAgainPlaysSunKissImmediately(t *testing.T) {
 		}
 	}
 	{
-		s := gameengine.NewFromCards([]card.Card{cards.SunKissRed{}}, nil)
+		s := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCards([]card.Card{cards.SunKissRed{}}).Build()}
 		self := &card.CardState{Card: cards.MoonWishYellow{}}
 		s.ResolveChainStep(s.Logger(), self)
 		testutils.FireOnHitIfLikely(s, s.Logger(), self)

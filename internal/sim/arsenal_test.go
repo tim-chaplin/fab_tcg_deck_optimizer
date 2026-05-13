@@ -215,7 +215,7 @@ func TestPromoteRandomHandCardToArsenal_EmptyHandIsNoop(t *testing.T) {
 		{Card: hand[0], Role: Attack},
 		{Card: hand[1], Role: Pitch},
 	}
-	best := TurnSummary{BestLine: line, State: gameengine.NewFromState(nil).GameState}
+	best := TurnSummary{BestLine: line, State: gameengine.GameStateBuilder().Build()}
 	PromoteRandomHandCardToArsenal(&best, hand, nil)
 	for i, a := range best.BestLine {
 		if a.Role == Arsenal {

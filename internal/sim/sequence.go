@@ -51,15 +51,7 @@ func FormatLogEntry(e turnlogger.LogEntry) string {
 // (auras / items / banished / graveyard / opponent-marked) and matchup config (incoming
 // damage, arcane). Per-leaf and per-permutation copies branch off via Copy().
 func newTurnMasterState(prior Prior, mp Matchup, d *deck.Deck) *gameengine.GameState {
-	g := gameengine.NewFromSpec(gameengine.Spec{
-		Hero:                 prior.Hero,
-		Arsenal:              prior.Arsenal,
-		Banished:             append([]card.Card(nil), prior.Banished...),
-		Graveyard:            append([]card.Card(nil), prior.Graveyard...),
-		OpponentMarked:       prior.OpponentMarked,
-		IncomingDamage:       mp.IncomingDamage,
-		ArcaneIncomingDamage: mp.ArcaneIncomingDamage,
-	})
+	g := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetHero(prior.Hero).SetArsenal(prior.Arsenal).SetBanished(append([]card.Card(nil), prior.Banished...)).SetGraveyard(append([]card.Card(nil), prior.Graveyard...)).SetOpponentMarked(prior.OpponentMarked).SetIncomingDamage(mp.IncomingDamage).SetArcaneIncomingDamage(mp.ArcaneIncomingDamage).Build()}
 	s := g.GameState
 	s.SetDeck(d.Copy())
 	for _, a := range prior.Auras {
@@ -266,7 +258,7 @@ func bestAttackWithWeapons(
 // (when runechants > 0) for variable-cost DR cost probing. Defense-reactions read
 // RunechantCount() off this engine to decide their Cost; no other state matters.
 func newDRCostProbe(runechants int) *gameengine.GameEngine {
-	g := gameengine.NewFromState(nil)
+	g := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().Build()}
 	if runechants > 0 {
 		g.CreateAura(NewRunechantAura(runechants))
 	}

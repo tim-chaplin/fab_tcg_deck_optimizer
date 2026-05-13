@@ -11,7 +11,7 @@ import (
 
 // TestWarmongersRecital_NoAttackReturnsZero: no qualifying next attack card → +N rider fizzles.
 func TestWarmongersRecital_NoAttackReturnsZero(t *testing.T) {
-	s := gameengine.NewFromState(nil)
+	s := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().Build()}
 	for _, c := range []card.Card{
 		cards.WarmongersRecitalRed{}, cards.WarmongersRecitalYellow{}, cards.WarmongersRecitalBlue{},
 	} {
@@ -24,7 +24,7 @@ func TestWarmongersRecital_NoAttackReturnsZero(t *testing.T) {
 
 // TestWarmongersRecital_NonAttackInRemainingFizzles: non-attack action fails the predicate.
 func TestWarmongersRecital_NonAttackInRemainingFizzles(t *testing.T) {
-	s := gameengine.NewFromSpec(gameengine.Spec{CardsRemaining: []*card.CardState{{Card: testutils.GenericAction()}}})
+	s := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCardsRemaining([]*card.CardState{{Card: testutils.GenericAction()}}).Build()}
 	s.ResolveChainStep(s.Logger(), &card.CardState{Card: cards.WarmongersRecitalRed{}})
 	if s.Value() != 0 {
 		t.Errorf("Play() = %d, want 0 (non-attack skipped)", s.Value())
@@ -44,7 +44,7 @@ func TestWarmongersRecital_NextAttackReceivesBonusAndOnHit(t *testing.T) {
 	}
 	for _, tc := range cases {
 		target := &card.CardState{Card: testutils.GenericAttack(0, 0)}
-		s := gameengine.NewFromSpec(gameengine.Spec{CardsRemaining: []*card.CardState{target}})
+		s := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCardsRemaining([]*card.CardState{target}).Build()}
 		s.ResolveChainStep(s.Logger(), &card.CardState{Card: tc.c})
 		if target.BonusAttack != tc.want {
 			t.Errorf("%s: target BonusAttack = %d, want %d", tc.c.Name(), target.BonusAttack, tc.want)
@@ -61,7 +61,7 @@ func TestWarmongersRecital_OnHitFireRecyclesTargetFromGraveyardToDeckBottom(t *t
 	target := testutils.GenericAttack(0, 5)
 	targetState := &card.CardState{Card: target}
 	deckTop := testutils.GenericAttack(1, 7)
-	s := gameengine.NewFromCards([]card.Card{deckTop}, nil)
+	s := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCards([]card.Card{deckTop}).Build()}
 	s.SetCardsRemaining([]*card.CardState{targetState})
 	s.ResolveChainStep(s.Logger(), &card.CardState{Card: cards.WarmongersRecitalRed{}})
 	if len(targetState.OnHit) != 1 {

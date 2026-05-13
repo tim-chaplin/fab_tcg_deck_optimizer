@@ -34,10 +34,10 @@ func TestDrawnToTheDarkDimension_CostBounds(t *testing.T) {
 		if vc.MinCost() != 0 {
 			t.Errorf("%s: MinCost() = %d, want 0", c.Name(), vc.MinCost())
 		}
-		if c.Cost(gameengine.NewFromState(nil)) != 2 {
-			t.Errorf("%s: Cost(zeroState) = %d, want 2", c.Name(), c.Cost(gameengine.NewFromState(nil)))
+		if c.Cost(&gameengine.GameEngine{GameState: gameengine.GameStateBuilder().Build()}) != 2 {
+			t.Errorf("%s: Cost(zeroState) = %d, want 2", c.Name(), c.Cost(&gameengine.GameEngine{GameState: gameengine.GameStateBuilder().Build()}))
 		}
-		withRune := gameengine.NewFromState(nil)
+		withRune := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().Build()}
 		withRune.CreateAura(sim.NewRunechantAura(5))
 		if c.Cost(withRune) != 0 {
 			t.Errorf("%s: Cost(Runechants=5) = %d, want 0", c.Name(), c.Cost(withRune))

@@ -21,7 +21,7 @@ func TestBrushOff_PreventsCap(t *testing.T) {
 		{cards.BrushOffBlue{}, 1},
 	}
 	for _, tc := range cases {
-		s := gameengine.NewFromSpec(gameengine.Spec{IncomingDamage: 5})
+		s := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetIncomingDamage(5).Build()}
 		self := &card.CardState{Card: tc.card}
 		s.ResolveChainStep(s.Logger(), self)
 		if s.Value() != tc.want {
@@ -35,7 +35,7 @@ func TestBrushOff_PreventsCap(t *testing.T) {
 
 // Tests that prevention caps at IncomingDamage when incoming is less than Defense().
 func TestBrushOff_CapsAtIncoming(t *testing.T) {
-	s := gameengine.NewFromSpec(gameengine.Spec{IncomingDamage: 1})
+	s := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetIncomingDamage(1).Build()}
 	self := &card.CardState{Card: cards.BrushOffRed{}}
 	s.ResolveChainStep(s.Logger(), self)
 	if s.Value() != 1 {

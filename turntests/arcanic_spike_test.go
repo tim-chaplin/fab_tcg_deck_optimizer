@@ -22,7 +22,7 @@ func TestArcanicSpike_ArcaneDamageNotDealtReturnsBaseAttack(t *testing.T) {
 		{cards.ArcanicSpikeBlue{}, 3},
 	}
 	for _, tc := range cases {
-		s := gameengine.NewFromState(nil)
+		s := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().Build()}
 		s.ResolveChainStep(s.Logger(), &card.CardState{Card: tc.c})
 		if got := s.Value(); got != tc.want {
 			t.Errorf("%s: Play() = %d, want %d (base attack, ArcaneDamageDealt=false)", tc.c.Name(), got, tc.want)
@@ -43,7 +43,7 @@ func TestArcanicSpike_ArcaneDamageDealtTriggersBonus(t *testing.T) {
 		{cards.ArcanicSpikeBlue{}, 3 + 2},
 	}
 	for _, tc := range cases {
-		s := gameengine.NewFromSpec(gameengine.Spec{ArcaneDamageDealt: true})
+		s := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetArcaneDamageDealt(true).Build()}
 		s.ResolveChainStep(s.Logger(), &card.CardState{Card: tc.c})
 		if got := s.Value(); got != tc.want {
 			t.Errorf("%s: Play() = %d, want %d (attack + arcane bonus)", tc.c.Name(), got, tc.want)
