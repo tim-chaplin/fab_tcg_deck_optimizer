@@ -10,4 +10,4 @@ import (
 
 // not implemented: next-sword-attack go-again grant (weapon chain not scanned)
 
-func (OnAKnifeEdgeYellow) Play(g card.GameEngine, l card.Logger, self *card.CardState) {}
+func (OnAKnifeEdgeYellow) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {}

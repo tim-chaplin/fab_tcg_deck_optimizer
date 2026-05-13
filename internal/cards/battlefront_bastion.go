@@ -15,9 +15,9 @@ import (
 // battlefrontBastionBlock fires the +1 alone-bonus when this is the only plain blocker.
 // Iterates Defenders and short-circuits on the second non-DR sighting so the typical
 // partition pays at most a few comparisons.
-func battlefrontBastionBlock(g card.GameEngine, l card.Logger, self *card.CardState) {
+func battlefrontBastionBlock(ge card.GameEngine, l card.Logger, self *card.CardState) {
 	plainCount := 0
-	for _, d := range g.Defenders() {
+	for _, d := range ge.Defenders() {
 		if d.Types(nil).IsDefenseReaction() {
 			continue
 		}
@@ -29,17 +29,17 @@ func battlefrontBastionBlock(g card.GameEngine, l card.Logger, self *card.CardSt
 	self.BonusDefense += 1
 }
 
-func (BattlefrontBastionRed) Block(g card.GameEngine, l card.Logger, self *card.CardState) {
-	battlefrontBastionBlock(g, l, self)
+func (BattlefrontBastionRed) Block(ge card.GameEngine, l card.Logger, self *card.CardState) {
+	battlefrontBastionBlock(ge, l, self)
 }
-func (BattlefrontBastionRed) Play(g card.GameEngine, l card.Logger, self *card.CardState) {}
+func (BattlefrontBastionRed) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {}
 
-func (BattlefrontBastionYellow) Block(g card.GameEngine, l card.Logger, self *card.CardState) {
-	battlefrontBastionBlock(g, l, self)
+func (BattlefrontBastionYellow) Block(ge card.GameEngine, l card.Logger, self *card.CardState) {
+	battlefrontBastionBlock(ge, l, self)
 }
-func (BattlefrontBastionYellow) Play(g card.GameEngine, l card.Logger, self *card.CardState) {}
+func (BattlefrontBastionYellow) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {}
 
-func (BattlefrontBastionBlue) Block(g card.GameEngine, l card.Logger, self *card.CardState) {
-	battlefrontBastionBlock(g, l, self)
+func (BattlefrontBastionBlue) Block(ge card.GameEngine, l card.Logger, self *card.CardState) {
+	battlefrontBastionBlock(ge, l, self)
 }
-func (BattlefrontBastionBlue) Play(g card.GameEngine, l card.Logger, self *card.CardState) {}
+func (BattlefrontBastionBlue) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {}

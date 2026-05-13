@@ -8,14 +8,14 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
-func (SingeingSteelbladeRed) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
-	g.DealArcaneDamage(l, self.Card.DisplayName(), 1)
+func (SingeingSteelbladeRed) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
+	ge.DealArcaneDamage(l, self.Card.DisplayName(), 1)
 }
 
-func (SingeingSteelbladeYellow) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
-	g.DealArcaneDamage(l, self.Card.DisplayName(), 1)
+func (SingeingSteelbladeYellow) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
+	ge.DealArcaneDamage(l, self.Card.DisplayName(), 1)
 }
 
-func (SingeingSteelbladeBlue) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
-	g.DealArcaneDamage(l, self.Card.DisplayName(), 1)
+func (SingeingSteelbladeBlue) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
+	ge.DealArcaneDamage(l, self.Card.DisplayName(), 1)
 }

@@ -64,22 +64,22 @@ func TestViserai_RunebladeAfterNonAttackActionTriggers(t *testing.T) {
 	// token on state.RunechantCount() for downstream consume or carryover. NonAttackActionPlayed is
 	// maintained by the attack-chain driver as non-attack actions resolve; callers must set it
 	// when seeding a TurnState for trigger checks.
-	s := *&gameengine.GameEngine{GameState: gameengine.GameStateBuilder().
+	ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().
 		SetCardsPlayed([]card.Card{stubRuneAura{}}).
 		SetNonAttackActionPlayed(true).
 		Build()}
-	if got := (Viserai{}).OnCardPlayed(stubRuneAttack{}, &s, s.Logger()); got != 1 {
+	if got := (Viserai{}).OnCardPlayed(stubRuneAttack{}, ge, ge.Logger()); got != 1 {
 		t.Fatalf("expected +1 damage from OnCardPlayed, got %d", got)
 	}
-	if s.RunechantCount() != 1 {
-		t.Fatalf("expected 1 Runechant on state, got %d", s.RunechantCount())
+	if ge.RunechantCount() != 1 {
+		t.Fatalf("expected 1 Runechant on state, got %d", ge.RunechantCount())
 	}
 }
 
 func TestViserai_NoPriorNonAttackAction(t *testing.T) {
 	// Runeblade card, but the only prior play was an attack — no trigger.
-	s := *&gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCardsPlayed([]card.Card{stubRuneAttack{}}).Build()}
-	if got := (Viserai{}).OnCardPlayed(stubRuneAttack{}, &s, s.Logger()); got != 0 {
+	ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCardsPlayed([]card.Card{stubRuneAttack{}}).Build()}
+	if got := (Viserai{}).OnCardPlayed(stubRuneAttack{}, ge, ge.Logger()); got != 0 {
 		t.Fatalf("expected 0 (no non-attack action in CardsPlayed), got %d", got)
 	}
 }
@@ -87,11 +87,11 @@ func TestViserai_NoPriorNonAttackAction(t *testing.T) {
 func TestViserai_CardStateNotRuneblade(t *testing.T) {
 	// Played card isn't Runeblade — Viserai's ability doesn't trigger even if a non-attack
 	// action was played earlier.
-	s := *&gameengine.GameEngine{GameState: gameengine.GameStateBuilder().
+	ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().
 		SetCardsPlayed([]card.Card{stubRuneAura{}}).
 		SetNonAttackActionPlayed(true).
 		Build()}
-	if got := (Viserai{}).OnCardPlayed(stubNonRuneblade{}, &s, s.Logger()); got != 0 {
+	if got := (Viserai{}).OnCardPlayed(stubNonRuneblade{}, ge, ge.Logger()); got != 0 {
 		t.Fatalf("expected 0 (non-Runeblade played), got %d", got)
 	}
 }
@@ -115,19 +115,19 @@ func (stubRuneWeapon) Play(card.GameEngine, card.Logger, *card.CardState) {}
 func TestViserai_WeaponSwingDoesNotTrigger(t *testing.T) {
 	// Even with a prior non-attack action in CardsPlayed, swinging a Runeblade weapon isn't "playing a
 	// card" and must not trigger.
-	s := *&gameengine.GameEngine{GameState: gameengine.GameStateBuilder().
+	ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().
 		SetCardsPlayed([]card.Card{stubRuneAura{}}).
 		SetNonAttackActionPlayed(true).
 		Build()}
-	if got := (Viserai{}).OnCardPlayed(stubRuneWeapon{}, &s, s.Logger()); got != 0 {
+	if got := (Viserai{}).OnCardPlayed(stubRuneWeapon{}, ge, ge.Logger()); got != 0 {
 		t.Fatalf("expected 0 for weapon swing, got %d", got)
 	}
 }
 
 func TestViserai_EmptyTurn(t *testing.T) {
 	// First card of the turn: no prior plays, nothing to trigger on.
-	s := gameengine.New()
-	if got := (Viserai{}).OnCardPlayed(stubRuneAura{}, s, s.Logger()); got != 0 {
+	ge := gameengine.New()
+	if got := (Viserai{}).OnCardPlayed(stubRuneAura{}, ge, ge.Logger()); got != 0 {
 		t.Fatalf("expected 0 on empty turn, got %d", got)
 	}
 }

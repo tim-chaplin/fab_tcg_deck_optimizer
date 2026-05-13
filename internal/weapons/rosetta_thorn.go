@@ -43,5 +43,5 @@ func (RosettaThornAbility) Attack() int                        { return 2 }
 func (RosettaThornAbility) Defense() int                       { return 0 }
 func (RosettaThornAbility) Types(card.GameEngine) card.TypeSet { return rosettaThornAbilityTypes }
 func (RosettaThornAbility) GoAgain(card.GameEngine) bool       { return false }
-func (RosettaThornAbility) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+func (RosettaThornAbility) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
 }

@@ -13,22 +13,22 @@ import (
 )
 
 // arcanePolarityPlay credits the conditional life gain as the chain step.
-func arcanePolarityPlay(g card.GameEngine, l card.Logger, self *card.CardState, arcaneGain int) {
+func arcanePolarityPlay(ge card.GameEngine, l card.Logger, self *card.CardState, arcaneGain int) {
 	gain := 1
-	if g.ArcaneIncomingDamage() > 0 {
+	if ge.ArcaneIncomingDamage() > 0 {
 		gain = arcaneGain
 	}
-	g.AddValue(gain)
+	ge.AddValue(gain)
 }
 
-func (ArcanePolarityRed) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
-	arcanePolarityPlay(g, l, self, 4)
+func (ArcanePolarityRed) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
+	arcanePolarityPlay(ge, l, self, 4)
 }
 
-func (ArcanePolarityYellow) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
-	arcanePolarityPlay(g, l, self, 3)
+func (ArcanePolarityYellow) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
+	arcanePolarityPlay(ge, l, self, 3)
 }
 
-func (ArcanePolarityBlue) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
-	arcanePolarityPlay(g, l, self, 2)
+func (ArcanePolarityBlue) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
+	arcanePolarityPlay(ge, l, self, 2)
 }

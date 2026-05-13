@@ -12,18 +12,18 @@ import (
 
 // runicFellingsongPlay fires the banish-and-1-arcane rider via banishAuraFromGraveyard.
 // No-op when the graveyard has no aura.
-func runicFellingsongPlay(g card.GameEngine, l card.Logger, self *card.CardState) {
-	banishAuraFromGraveyard(g, l, self.Card.DisplayName())
+func runicFellingsongPlay(ge card.GameEngine, l card.Logger, self *card.CardState) {
+	banishAuraFromGraveyard(ge, l, self.Card.DisplayName())
 }
 
-func (RunicFellingsongRed) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
-	runicFellingsongPlay(g, l, self)
+func (RunicFellingsongRed) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
+	runicFellingsongPlay(ge, l, self)
 }
 
-func (RunicFellingsongYellow) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
-	runicFellingsongPlay(g, l, self)
+func (RunicFellingsongYellow) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
+	runicFellingsongPlay(ge, l, self)
 }
 
-func (RunicFellingsongBlue) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
-	runicFellingsongPlay(g, l, self)
+func (RunicFellingsongBlue) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
+	runicFellingsongPlay(ge, l, self)
 }

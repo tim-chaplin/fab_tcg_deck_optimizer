@@ -11,15 +11,15 @@ import (
 
 // not implemented: pay-{r}{r}-for-+2{p} attack/defence mode
 
-func (c FlexRed) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+func (c FlexRed) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
 }
 
 // not implemented: pay-{r}{r}-for-+2{p} attack/defence mode
 
-func (c FlexYellow) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+func (c FlexYellow) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
 }
 
 // not implemented: pay-{r}{r}-for-+2{p} attack/defence mode
 
-func (c FlexBlue) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+func (c FlexBlue) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
 }

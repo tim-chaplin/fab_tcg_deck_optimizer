@@ -10,8 +10,8 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
-func regurgitatingSlogPlay(g card.GameEngine, l card.Logger, self *card.CardState) {
-	if _, ok := g.BanishFromGraveyard(isSloggism); ok {
+func regurgitatingSlogPlay(ge card.GameEngine, l card.Logger, self *card.CardState) {
+	if _, ok := ge.BanishFromGraveyard(isSloggism); ok {
 		self.GrantedDominate = true
 		l.AppendPostTrigger(self.Card.DisplayName(), "Banished a Sloggism, gained dominate", 0)
 	}
@@ -19,14 +19,14 @@ func regurgitatingSlogPlay(g card.GameEngine, l card.Logger, self *card.CardStat
 
 func isSloggism(c card.Card) bool { return c.Name() == "Sloggism" }
 
-func (RegurgitatingSlogRed) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
-	regurgitatingSlogPlay(g, l, self)
+func (RegurgitatingSlogRed) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
+	regurgitatingSlogPlay(ge, l, self)
 }
 
-func (RegurgitatingSlogYellow) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
-	regurgitatingSlogPlay(g, l, self)
+func (RegurgitatingSlogYellow) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
+	regurgitatingSlogPlay(ge, l, self)
 }
 
-func (RegurgitatingSlogBlue) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
-	regurgitatingSlogPlay(g, l, self)
+func (RegurgitatingSlogBlue) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
+	regurgitatingSlogPlay(ge, l, self)
 }

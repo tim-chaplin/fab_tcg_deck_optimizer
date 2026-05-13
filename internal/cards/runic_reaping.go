@@ -14,29 +14,29 @@ import (
 )
 
 // runicReapingTargetMatches accepts Runeblade attack action cards (weapons don't qualify).
-func runicReapingTargetMatches(g card.GameEngine, target *card.CardState) bool {
-	t := target.Card.Types(g)
+func runicReapingTargetMatches(ge card.GameEngine, target *card.CardState) bool {
+	t := target.Card.Types(ge)
 	return t.Has(card.TypeRuneblade) && t.IsAttackAction()
 }
 
-func (c RunicReapingRed) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
-	runicReapingPlay(g, l, self, c, 3)
+func (c RunicReapingRed) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
+	runicReapingPlay(ge, l, self, c, 3)
 }
 
-func (c RunicReapingYellow) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
-	runicReapingPlay(g, l, self, c, 2)
+func (c RunicReapingYellow) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
+	runicReapingPlay(ge, l, self, c, 2)
 }
 
-func (c RunicReapingBlue) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
-	runicReapingPlay(g, l, self, c, 1)
+func (c RunicReapingBlue) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
+	runicReapingPlay(ge, l, self, c, 1)
 }
 
 // runicReapingPlay buffs the next matching attack +1{p} when an attack card was pitched
 // and appends an on-hit n-runechant rider.
-func runicReapingPlay(g card.GameEngine, l card.Logger, selfState *card.CardState, source card.Card, n int) {
+func runicReapingPlay(ge card.GameEngine, l card.Logger, selfState *card.CardState, source card.Card, n int) {
 	var target *card.CardState
-	for _, pc := range g.CardsRemaining() {
-		if runicReapingTargetMatches(g, pc) {
+	for _, pc := range ge.CardsRemaining() {
+		if runicReapingTargetMatches(ge, pc) {
 			target = pc
 			break
 		}

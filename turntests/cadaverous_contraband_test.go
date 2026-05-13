@@ -14,8 +14,8 @@ import (
 func TestCadaverousContraband_RegistersOnHit(t *testing.T) {
 	for _, c := range []card.Card{cards.CadaverousContrabandRed{}, cards.CadaverousContrabandYellow{}, cards.CadaverousContrabandBlue{}} {
 		self := &card.CardState{Card: c}
-		s := gameengine.New()
-		s.ResolveChainStep(s.Logger(), self)
+		ge := gameengine.New()
+		ge.ResolveChainStep(ge.Logger(), self)
 		if len(self.OnHit) != 1 {
 			t.Errorf("%s [%d{p}]: OnHit handlers = %d, want 1", c.Name(), c.Pitch(), len(self.OnHit))
 		}
@@ -26,33 +26,33 @@ func TestCadaverousContraband_RegistersOnHit(t *testing.T) {
 func TestCadaverousContraband_OnHitRecyclesNonAttackToTop(t *testing.T) {
 	non := testutils.GenericAction()
 	deck := []card.Card{testutils.RedAttack{}}
-	s := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().
+	ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().
 		SetCards(deck).
 		SetGraveyard([]card.Card{non}).
 		Build()}
 	self := &card.CardState{Card: cards.CadaverousContrabandRed{}}
-	s.ResolveChainStep(s.Logger(), self)
+	ge.ResolveChainStep(ge.Logger(), self)
 	self.BonusAttack = 1
-	testutils.FireOnHitIfLikely(s, s.Logger(), self)
-	if got := s.Deck().Size(); got != 2 {
+	testutils.FireOnHitIfLikely(ge, ge.Logger(), self)
+	if got := ge.Deck().Size(); got != 2 {
 		t.Errorf("deck size after recycle = %d, want 2 (graveyard card moved onto the existing top)", got)
 	}
-	if top := s.Deck().PeekTop(); top != card.Card(non) {
+	if top := ge.Deck().PeekTop(); top != card.Card(non) {
 		t.Errorf("deck top after recycle = %v, want %v", top, non)
 	}
-	if len(s.Graveyard()) != 0 {
-		t.Errorf("graveyard after recycle = %v, want empty", s.Graveyard())
+	if len(ge.Graveyard()) != 0 {
+		t.Errorf("graveyard after recycle = %v, want empty", ge.Graveyard())
 	}
 }
 
 // Tests that with no non-attack action card in the graveyard, the on-hit recycle leaves the
 // graveyard and deck untouched.
 func TestCadaverousContraband_OnHitNoEligibleCardNoOp(t *testing.T) {
-	s := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetGraveyard([]card.Card{testutils.RedAttack{}}).Build()}
+	ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetGraveyard([]card.Card{testutils.RedAttack{}}).Build()}
 	self := &card.CardState{Card: cards.CadaverousContrabandRed{}}
-	s.ResolveChainStep(s.Logger(), self)
-	testutils.FireOnHitIfLikely(s, s.Logger(), self)
-	if len(s.Graveyard()) != 1 {
-		t.Errorf("graveyard size = %d, want 1 (no eligible target, no recycle)", len(s.Graveyard()))
+	ge.ResolveChainStep(ge.Logger(), self)
+	testutils.FireOnHitIfLikely(ge, ge.Logger(), self)
+	if len(ge.Graveyard()) != 1 {
+		t.Errorf("graveyard size = %d, want 1 (no eligible target, no recycle)", len(ge.Graveyard()))
 	}
 }

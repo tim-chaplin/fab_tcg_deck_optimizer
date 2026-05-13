@@ -101,11 +101,11 @@ func (r Role) String() string {
 
 // auraCountByNameInState scans the state's aura list for a token aura with the given
 // display name and returns its Count, or zero if no matching entry is present.
-func auraCountByNameInState(s *gameengine.GameState, name string) int {
-	if s == nil {
+func auraCountByNameInState(gs *gameengine.GameState, name string) int {
+	if gs == nil {
 		return 0
 	}
-	for _, a := range s.Auras() {
+	for _, a := range gs.Auras() {
 		if a.CardName() == name {
 			return a.Count()
 		}
@@ -114,11 +114,11 @@ func auraCountByNameInState(s *gameengine.GameState, name string) int {
 }
 
 // itemCountByNameInState is the items counterpart of auraCountByNameInState.
-func itemCountByNameInState(s *gameengine.GameState, name string) int {
-	if s == nil {
+func itemCountByNameInState(gs *gameengine.GameState, name string) int {
+	if gs == nil {
 		return 0
 	}
-	for _, i := range s.Items() {
+	for _, i := range gs.Items() {
 		if i.CardName() == name {
 			return i.Count()
 		}

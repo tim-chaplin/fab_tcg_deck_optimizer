@@ -12,15 +12,15 @@ import (
 
 // not implemented: discard-to-draw rider, arsenal-conditional go again
 
-func (c TradeInRed) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+func (c TradeInRed) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
 }
 
 // not implemented: discard-to-draw rider, arsenal-conditional go again
 
-func (c TradeInYellow) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+func (c TradeInYellow) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
 }
 
 // not implemented: discard-to-draw rider, arsenal-conditional go again
 
-func (c TradeInBlue) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+func (c TradeInBlue) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
 }

@@ -13,20 +13,20 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
-func tremorOfIArathaelPlay(g card.GameEngine, l card.Logger, self *card.CardState) {
-	if g.CardBanished() {
+func tremorOfIArathaelPlay(ge card.GameEngine, l card.Logger, self *card.CardState) {
+	if ge.CardBanished() {
 		self.BonusAttack += 2
 	}
 }
 
-func (TremorOfIArathaelRed) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
-	tremorOfIArathaelPlay(g, l, self)
+func (TremorOfIArathaelRed) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
+	tremorOfIArathaelPlay(ge, l, self)
 }
 
-func (TremorOfIArathaelYellow) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
-	tremorOfIArathaelPlay(g, l, self)
+func (TremorOfIArathaelYellow) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
+	tremorOfIArathaelPlay(ge, l, self)
 }
 
-func (TremorOfIArathaelBlue) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
-	tremorOfIArathaelPlay(g, l, self)
+func (TremorOfIArathaelBlue) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
+	tremorOfIArathaelPlay(ge, l, self)
 }

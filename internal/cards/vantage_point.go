@@ -12,20 +12,20 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
-func vantagePointPlay(g card.GameEngine, _ card.Logger, self *card.CardState) {
-	if g.AuraCreated() {
+func vantagePointPlay(ge card.GameEngine, _ card.Logger, self *card.CardState) {
+	if ge.AuraCreated() {
 		self.GrantedOverpower = true
 	}
 }
 
-func (VantagePointRed) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
-	vantagePointPlay(g, l, self)
+func (VantagePointRed) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
+	vantagePointPlay(ge, l, self)
 }
 
-func (VantagePointYellow) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
-	vantagePointPlay(g, l, self)
+func (VantagePointYellow) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
+	vantagePointPlay(ge, l, self)
 }
 
-func (VantagePointBlue) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
-	vantagePointPlay(g, l, self)
+func (VantagePointBlue) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
+	vantagePointPlay(ge, l, self)
 }

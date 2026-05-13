@@ -20,22 +20,22 @@ func consumingVolitionApplyRider(_ card.GameEngine, l card.Logger, self *card.Ca
 
 // consumingVolitionOnHit fires the "When this hits a hero, they discard a card" rider
 // when ArcaneDamageDealt is set.
-func consumingVolitionOnHit(g card.GameEngine, l card.Logger, self *card.CardState, _ *card.OnHitHandler) {
-	if !g.ArcaneDamageDealt() {
+func consumingVolitionOnHit(ge card.GameEngine, l card.Logger, self *card.CardState, _ *card.OnHitHandler) {
+	if !ge.ArcaneDamageDealt() {
 		return
 	}
-	v := g.OpponentDiscard(1)
+	v := ge.OpponentDiscard(1)
 	l.AppendPostTrigger(self.Card.DisplayName(), "On-hit discarded a card", v)
 }
 
-func (ConsumingVolitionRed) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
-	consumingVolitionApplyRider(g, l, self)
+func (ConsumingVolitionRed) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
+	consumingVolitionApplyRider(ge, l, self)
 }
 
-func (ConsumingVolitionYellow) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
-	consumingVolitionApplyRider(g, l, self)
+func (ConsumingVolitionYellow) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
+	consumingVolitionApplyRider(ge, l, self)
 }
 
-func (ConsumingVolitionBlue) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
-	consumingVolitionApplyRider(g, l, self)
+func (ConsumingVolitionBlue) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
+	consumingVolitionApplyRider(ge, l, self)
 }

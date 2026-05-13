@@ -9,38 +9,38 @@ import (
 )
 
 // yintiYantiBonus returns +1 when any aura is in play, else 0.
-func yintiYantiBonus(g card.GameEngine) int {
-	if g.AuraCount() > 0 {
+func yintiYantiBonus(ge card.GameEngine) int {
+	if ge.AuraCount() > 0 {
 		return 1
 	}
 	return 0
 }
 
-func yintiYantiPlay(g card.GameEngine, l card.Logger, self *card.CardState) {
-	self.BonusAttack += yintiYantiBonus(g)
+func yintiYantiPlay(ge card.GameEngine, l card.Logger, self *card.CardState) {
+	self.BonusAttack += yintiYantiBonus(ge)
 }
 
-func yintiYantiBlock(g card.GameEngine, l card.Logger, self *card.CardState) {
-	self.BonusDefense += yintiYantiBonus(g)
+func yintiYantiBlock(ge card.GameEngine, l card.Logger, self *card.CardState) {
+	self.BonusDefense += yintiYantiBonus(ge)
 }
 
-func (YintiYantiRed) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
-	yintiYantiPlay(g, l, self)
+func (YintiYantiRed) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
+	yintiYantiPlay(ge, l, self)
 }
-func (YintiYantiRed) Block(g card.GameEngine, l card.Logger, self *card.CardState) {
-	yintiYantiBlock(g, l, self)
-}
-
-func (YintiYantiYellow) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
-	yintiYantiPlay(g, l, self)
-}
-func (YintiYantiYellow) Block(g card.GameEngine, l card.Logger, self *card.CardState) {
-	yintiYantiBlock(g, l, self)
+func (YintiYantiRed) Block(ge card.GameEngine, l card.Logger, self *card.CardState) {
+	yintiYantiBlock(ge, l, self)
 }
 
-func (YintiYantiBlue) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
-	yintiYantiPlay(g, l, self)
+func (YintiYantiYellow) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
+	yintiYantiPlay(ge, l, self)
 }
-func (YintiYantiBlue) Block(g card.GameEngine, l card.Logger, self *card.CardState) {
-	yintiYantiBlock(g, l, self)
+func (YintiYantiYellow) Block(ge card.GameEngine, l card.Logger, self *card.CardState) {
+	yintiYantiBlock(ge, l, self)
+}
+
+func (YintiYantiBlue) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
+	yintiYantiPlay(ge, l, self)
+}
+func (YintiYantiBlue) Block(ge card.GameEngine, l card.Logger, self *card.CardState) {
+	yintiYantiBlock(ge, l, self)
 }

@@ -14,18 +14,18 @@ import (
 // hand.
 func TestSnatch_LikelyHitFiresDrawOne(t *testing.T) {
 	top := testutils.GenericAttack(0, 3)
-	s := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCards([]card.Card{top}).Build()}
+	ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCards([]card.Card{top}).Build()}
 	c := cards.SnatchRed{}
 	cs := &card.CardState{Card: c}
-	s.ResolveChainStep(s.Logger(), cs)
-	testutils.FireOnHitIfLikely(s, s.Logger(), cs)
-	if got := s.Value(); got != 4 {
+	ge.ResolveChainStep(ge.Logger(), cs)
+	testutils.FireOnHitIfLikely(ge, ge.Logger(), cs)
+	if got := ge.Value(); got != 4 {
 		t.Errorf("Red: Play() = %d, want 4", got)
 	}
-	if h := s.Hand(); len(h) != 1 || h[0] != top {
+	if h := ge.Hand(); len(h) != 1 || h[0] != top {
 		t.Errorf("Hand = %v, want [top-of-deck]", h)
 	}
-	if d := s.Deck(); d.Size() != 0 {
+	if d := ge.Deck(); d.Size() != 0 {
 		t.Errorf("Deck size = %d, want 0 (top consumed)", d.Size())
 	}
 }
@@ -41,15 +41,15 @@ func TestSnatch_BlockableSuppressesDraw(t *testing.T) {
 	}
 	for _, tc := range cases {
 		top := testutils.GenericAttack(0, 3)
-		s := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCards([]card.Card{top}).Build()}
-		s.ResolveChainStep(s.Logger(), &card.CardState{Card: tc.c})
-		if got := s.Value(); got != tc.want {
+		ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCards([]card.Card{top}).Build()}
+		ge.ResolveChainStep(ge.Logger(), &card.CardState{Card: tc.c})
+		if got := ge.Value(); got != tc.want {
 			t.Errorf("%s: Play() = %d, want %d (blockable, no draw)", tc.c.Name(), got, tc.want)
 		}
-		if h := s.Hand(); len(h) != 0 {
+		if h := ge.Hand(); len(h) != 0 {
 			t.Errorf("%s: Hand = %v, want empty (no draw fired)", tc.c.Name(), h)
 		}
-		if d := s.Deck(); d.Size() != 1 {
+		if d := ge.Deck(); d.Size() != 1 {
 			t.Errorf("%s: Deck size = %d, want 1 (top preserved)", tc.c.Name(), d.Size())
 		}
 	}

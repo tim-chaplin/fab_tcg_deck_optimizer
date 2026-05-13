@@ -12,5 +12,5 @@ import (
 // not implemented: self-destroys on play-from-banished → banish a named card from opposing
 // graveyards
 
-func (TalismanOfCremationBlue) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+func (TalismanOfCremationBlue) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
 }

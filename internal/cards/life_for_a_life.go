@@ -17,31 +17,31 @@ import (
 const lifeForALifeHealValue = 1
 
 // lifeForALifeOnHit fires the printed "When this hits, gain 1{h}" rider.
-func lifeForALifeOnHit(g card.GameEngine, l card.Logger, self *card.CardState, _ *card.OnHitHandler) {
-	g.AddValue(lifeForALifeHealValue)
+func lifeForALifeOnHit(ge card.GameEngine, l card.Logger, self *card.CardState, _ *card.OnHitHandler) {
+	ge.AddValue(lifeForALifeHealValue)
 	l.AppendPostTrigger(self.Card.DisplayName(), "On-hit gained 1 health", lifeForALifeHealValue)
 }
 
 // lifeForALifeGoAgain returns true when the active hero opts into LowerHealthWanter. nil-g
 // reads as false (the printed default).
-func lifeForALifeGoAgain(g card.GameEngine) bool {
-	if g == nil {
+func lifeForALifeGoAgain(ge card.GameEngine) bool {
+	if ge == nil {
 		return false
 	}
-	return g.HeroWantsLowerHealth()
+	return ge.HeroWantsLowerHealth()
 }
 
-func (LifeForALifeRed) GoAgain(g card.GameEngine) bool { return lifeForALifeGoAgain(g) }
-func (LifeForALifeRed) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+func (LifeForALifeRed) GoAgain(ge card.GameEngine) bool { return lifeForALifeGoAgain(ge) }
+func (LifeForALifeRed) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
 	self.RegisterOnHit(lifeForALifeOnHit)
 }
 
-func (LifeForALifeYellow) GoAgain(g card.GameEngine) bool { return lifeForALifeGoAgain(g) }
-func (LifeForALifeYellow) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+func (LifeForALifeYellow) GoAgain(ge card.GameEngine) bool { return lifeForALifeGoAgain(ge) }
+func (LifeForALifeYellow) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
 	self.RegisterOnHit(lifeForALifeOnHit)
 }
 
-func (LifeForALifeBlue) GoAgain(g card.GameEngine) bool { return lifeForALifeGoAgain(g) }
-func (LifeForALifeBlue) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+func (LifeForALifeBlue) GoAgain(ge card.GameEngine) bool { return lifeForALifeGoAgain(ge) }
+func (LifeForALifeBlue) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
 	self.RegisterOnHit(lifeForALifeOnHit)
 }

@@ -12,8 +12,8 @@ import (
 // Tests that with no Nimblism in the graveyard the rider stays off.
 func TestJackBeQuick_NoNimblismRiderOff(t *testing.T) {
 	self := &card.CardState{Card: cards.JackBeQuickRed{}}
-	s := gameengine.New()
-	s.ResolveChainStep(s.Logger(), self)
+	ge := gameengine.New()
+	ge.ResolveChainStep(ge.Logger(), self)
 	if self.GrantedGoAgain {
 		t.Errorf("GrantedGoAgain = true with empty graveyard, want false")
 	}
@@ -25,9 +25,9 @@ func TestJackBeQuick_NoNimblismRiderOff(t *testing.T) {
 // Tests that a Nimblism in the graveyard lets Jack Be Quick banish for the +1{p} /
 // go-again rider.
 func TestJackBeQuick_BanishesNimblismForBonus(t *testing.T) {
-	s := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetGraveyard([]card.Card{cards.NimblismRed{}}).Build()}
+	ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetGraveyard([]card.Card{cards.NimblismRed{}}).Build()}
 	self := &card.CardState{Card: cards.JackBeQuickRed{}}
-	s.ResolveChainStep(s.Logger(), self)
+	ge.ResolveChainStep(ge.Logger(), self)
 	if !self.GrantedGoAgain {
 		t.Errorf("GrantedGoAgain = false after banish, want true")
 	}

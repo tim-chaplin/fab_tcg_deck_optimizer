@@ -8,11 +8,11 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
-func (CountYourBlessingsRed) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+func (CountYourBlessingsRed) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
 }
 
-func (CountYourBlessingsYellow) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+func (CountYourBlessingsYellow) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
 }
 
-func (CountYourBlessingsBlue) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+func (CountYourBlessingsBlue) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
 }

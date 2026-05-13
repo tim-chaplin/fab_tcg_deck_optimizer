@@ -10,8 +10,8 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
-func (NimbyRed) Play(g card.GameEngine, l card.Logger, self *card.CardState) {}
+func (NimbyRed) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {}
 
-func (NimbyYellow) Play(g card.GameEngine, l card.Logger, self *card.CardState) {}
+func (NimbyYellow) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {}
 
-func (NimbyBlue) Play(g card.GameEngine, l card.Logger, self *card.CardState) {}
+func (NimbyBlue) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {}

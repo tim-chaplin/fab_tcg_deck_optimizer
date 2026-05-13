@@ -12,10 +12,10 @@ import (
 // TestRunicFellingsong_NoAuraCreditsPrintedPowerOnly: an empty graveyard fizzles the banish
 // rider, so Play returns just Attack().
 func TestRunicFellingsong_NoAuraCreditsPrintedPowerOnly(t *testing.T) {
-	s := gameengine.New()
+	ge := gameengine.New()
 	c := cards.RunicFellingsongRed{}
-	s.ResolveChainStep(s.Logger(), &card.CardState{Card: c})
-	if got := s.Value(); got != c.Attack() {
+	ge.ResolveChainStep(ge.Logger(), &card.CardState{Card: c})
+	if got := ge.Value(); got != c.Attack() {
 		t.Errorf("Play() = %d, want %d (Attack only; banish fizzles)", got, c.Attack())
 	}
 }
@@ -24,14 +24,14 @@ func TestRunicFellingsong_NoAuraCreditsPrintedPowerOnly(t *testing.T) {
 // Attack() + 1 (the banish rider's arcane).
 func TestRunicFellingsong_AuraInGraveyardFiresBanishRider(t *testing.T) {
 	aura := cards.BlessingOfOccultRed{}
-	s := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetGraveyard([]card.Card{aura}).Build()}
+	ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetGraveyard([]card.Card{aura}).Build()}
 	c := cards.RunicFellingsongRed{}
 	want := c.Attack() + 1
-	s.ResolveChainStep(s.Logger(), &card.CardState{Card: c})
-	if got := s.Value(); got != want {
+	ge.ResolveChainStep(ge.Logger(), &card.CardState{Card: c})
+	if got := ge.Value(); got != want {
 		t.Errorf("Play() = %d, want %d (Attack + banish rider)", got, want)
 	}
-	if len(s.Banished()) != 1 || s.Banished()[0].ID() != aura.ID() {
-		t.Errorf("Banish = %v, want [Blessing]", s.Banished())
+	if len(ge.Banished()) != 1 || ge.Banished()[0].ID() != aura.ID() {
+		t.Errorf("Banish = %v, want [Blessing]", ge.Banished())
 	}
 }

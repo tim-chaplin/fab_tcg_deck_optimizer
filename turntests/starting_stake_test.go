@@ -28,11 +28,11 @@ func TestStartingStake_CreatesGoldViaChain(t *testing.T) {
 // Tests Starting Stake's "if you control no Gold tokens" gate: with prior Gold in play, Play
 // is a no-op and doesn't stack a second token. Drives Play directly to isolate the gate.
 func TestStartingStake_NoOpWhenGoldInPlay(t *testing.T) {
-	s := gameengine.New()
-	s.CreateGold(2)
-	s.ResolveChainStep(s.Logger(), &card.CardState{Card: cards.StartingStakeYellow{}})
-	if s.GoldCount() != 2 {
-		t.Fatalf("Gold = %d, want 2 (already had Gold, Starting Stake is a no-op)", s.GoldCount())
+	ge := gameengine.New()
+	ge.CreateGold(2)
+	ge.ResolveChainStep(ge.Logger(), &card.CardState{Card: cards.StartingStakeYellow{}})
+	if ge.GoldCount() != 2 {
+		t.Fatalf("Gold = %d, want 2 (already had Gold, Starting Stake is a no-op)", ge.GoldCount())
 	}
 	_ = testutils.RedAttack{}
 }

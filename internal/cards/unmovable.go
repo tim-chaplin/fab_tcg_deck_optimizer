@@ -9,14 +9,14 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
-func (UnmovableRed) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+func (UnmovableRed) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
 }
 func (UnmovableRed) ArsenalDefenseBonus() int { return 1 }
 
-func (UnmovableYellow) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+func (UnmovableYellow) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
 }
 func (UnmovableYellow) ArsenalDefenseBonus() int { return 1 }
 
-func (UnmovableBlue) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+func (UnmovableBlue) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
 }
 func (UnmovableBlue) ArsenalDefenseBonus() int { return 1 }

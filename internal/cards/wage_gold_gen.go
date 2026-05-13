@@ -18,11 +18,11 @@ func (WageGoldRed) Cost(card.GameEngine) int { return 3 }
 func (WageGoldRed) Pitch() int               { return 1 }
 func (WageGoldRed) Attack() int              { return 7 }
 func (WageGoldRed) Defense() int             { return 2 }
-func (WageGoldRed) Types(g card.GameEngine) card.TypeSet {
-	if g == nil {
+func (WageGoldRed) Types(ge card.GameEngine) card.TypeSet {
+	if ge == nil {
 		return wageGoldTypes
 	}
-	return wageGoldTypes | card.NewTypeSet(g.CurrentHeroClass())
+	return wageGoldTypes | card.NewTypeSet(ge.CurrentHeroClass())
 }
 func (WageGoldRed) Universal()                   {}
 func (WageGoldRed) GoAgain(card.GameEngine) bool { return false }
@@ -36,11 +36,11 @@ func (WageGoldYellow) Cost(card.GameEngine) int { return 3 }
 func (WageGoldYellow) Pitch() int               { return 2 }
 func (WageGoldYellow) Attack() int              { return 6 }
 func (WageGoldYellow) Defense() int             { return 2 }
-func (WageGoldYellow) Types(g card.GameEngine) card.TypeSet {
-	if g == nil {
+func (WageGoldYellow) Types(ge card.GameEngine) card.TypeSet {
+	if ge == nil {
 		return wageGoldTypes
 	}
-	return wageGoldTypes | card.NewTypeSet(g.CurrentHeroClass())
+	return wageGoldTypes | card.NewTypeSet(ge.CurrentHeroClass())
 }
 func (WageGoldYellow) Universal()                   {}
 func (WageGoldYellow) GoAgain(card.GameEngine) bool { return false }
@@ -54,11 +54,11 @@ func (WageGoldBlue) Cost(card.GameEngine) int { return 3 }
 func (WageGoldBlue) Pitch() int               { return 3 }
 func (WageGoldBlue) Attack() int              { return 5 }
 func (WageGoldBlue) Defense() int             { return 2 }
-func (WageGoldBlue) Types(g card.GameEngine) card.TypeSet {
-	if g == nil {
+func (WageGoldBlue) Types(ge card.GameEngine) card.TypeSet {
+	if ge == nil {
 		return wageGoldTypes
 	}
-	return wageGoldTypes | card.NewTypeSet(g.CurrentHeroClass())
+	return wageGoldTypes | card.NewTypeSet(ge.CurrentHeroClass())
 }
 func (WageGoldBlue) Universal()                   {}
 func (WageGoldBlue) GoAgain(card.GameEngine) bool { return false }

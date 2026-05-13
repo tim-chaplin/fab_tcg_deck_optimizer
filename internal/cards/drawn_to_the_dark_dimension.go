@@ -14,36 +14,40 @@ import (
 
 const drawnToTheDarkDimensionPrintedCost = 2
 
-func drawnToTheDarkDimensionCost(g card.GameEngine) int {
-	eff := drawnToTheDarkDimensionPrintedCost - g.RunechantCount()
+func drawnToTheDarkDimensionCost(ge card.GameEngine) int {
+	eff := drawnToTheDarkDimensionPrintedCost - ge.RunechantCount()
 	if eff < 0 {
 		return 0
 	}
 	return eff
 }
 
-func (DrawnToTheDarkDimensionRed) Cost(g card.GameEngine) int { return drawnToTheDarkDimensionCost(g) }
-func (DrawnToTheDarkDimensionRed) MinCost() int               { return 0 }
-func (DrawnToTheDarkDimensionRed) MaxCost() int               { return drawnToTheDarkDimensionPrintedCost }
+func (DrawnToTheDarkDimensionRed) Cost(ge card.GameEngine) int {
+	return drawnToTheDarkDimensionCost(ge)
+}
+func (DrawnToTheDarkDimensionRed) MinCost() int { return 0 }
+func (DrawnToTheDarkDimensionRed) MaxCost() int { return drawnToTheDarkDimensionPrintedCost }
 
-func (c DrawnToTheDarkDimensionRed) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
-	g.DrawOne()
+func (c DrawnToTheDarkDimensionRed) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
+	ge.DrawOne()
 }
 
-func (DrawnToTheDarkDimensionYellow) Cost(g card.GameEngine) int {
-	return drawnToTheDarkDimensionCost(g)
+func (DrawnToTheDarkDimensionYellow) Cost(ge card.GameEngine) int {
+	return drawnToTheDarkDimensionCost(ge)
 }
 func (DrawnToTheDarkDimensionYellow) MinCost() int { return 0 }
 func (DrawnToTheDarkDimensionYellow) MaxCost() int { return drawnToTheDarkDimensionPrintedCost }
 
-func (c DrawnToTheDarkDimensionYellow) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
-	g.DrawOne()
+func (c DrawnToTheDarkDimensionYellow) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
+	ge.DrawOne()
 }
 
-func (DrawnToTheDarkDimensionBlue) Cost(g card.GameEngine) int { return drawnToTheDarkDimensionCost(g) }
-func (DrawnToTheDarkDimensionBlue) MinCost() int               { return 0 }
-func (DrawnToTheDarkDimensionBlue) MaxCost() int               { return drawnToTheDarkDimensionPrintedCost }
+func (DrawnToTheDarkDimensionBlue) Cost(ge card.GameEngine) int {
+	return drawnToTheDarkDimensionCost(ge)
+}
+func (DrawnToTheDarkDimensionBlue) MinCost() int { return 0 }
+func (DrawnToTheDarkDimensionBlue) MaxCost() int { return drawnToTheDarkDimensionPrintedCost }
 
-func (c DrawnToTheDarkDimensionBlue) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
-	g.DrawOne()
+func (c DrawnToTheDarkDimensionBlue) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
+	ge.DrawOne()
 }

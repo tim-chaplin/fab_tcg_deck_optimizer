@@ -12,8 +12,8 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
-func (OutMuscleRed) Play(g card.GameEngine, l card.Logger, self *card.CardState) {}
+func (OutMuscleRed) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {}
 
-func (OutMuscleYellow) Play(g card.GameEngine, l card.Logger, self *card.CardState) {}
+func (OutMuscleYellow) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {}
 
-func (OutMuscleBlue) Play(g card.GameEngine, l card.Logger, self *card.CardState) {}
+func (OutMuscleBlue) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {}

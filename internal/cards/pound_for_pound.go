@@ -16,20 +16,20 @@ import (
 )
 
 // poundForPoundPlay grants self Dominate when the current hero opts into LowerHealthWanter.
-func poundForPoundPlay(g card.GameEngine, l card.Logger, self *card.CardState) {
-	if g.HeroWantsLowerHealth() {
+func poundForPoundPlay(ge card.GameEngine, l card.Logger, self *card.CardState) {
+	if ge.HeroWantsLowerHealth() {
 		self.GrantedDominate = true
 	}
 }
 
-func (PoundForPoundRed) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
-	poundForPoundPlay(g, l, self)
+func (PoundForPoundRed) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
+	poundForPoundPlay(ge, l, self)
 }
 
-func (PoundForPoundYellow) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
-	poundForPoundPlay(g, l, self)
+func (PoundForPoundYellow) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
+	poundForPoundPlay(ge, l, self)
 }
 
-func (PoundForPoundBlue) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
-	poundForPoundPlay(g, l, self)
+func (PoundForPoundBlue) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
+	poundForPoundPlay(ge, l, self)
 }

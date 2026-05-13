@@ -11,20 +11,20 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
-func vigorRushPlay(g card.GameEngine, l card.Logger, self *card.CardState) {
-	if g.NonAttackActionPlayed() {
+func vigorRushPlay(ge card.GameEngine, l card.Logger, self *card.CardState) {
+	if ge.NonAttackActionPlayed() {
 		self.GrantedGoAgain = true
 	}
 }
 
-func (VigorRushRed) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
-	vigorRushPlay(g, l, self)
+func (VigorRushRed) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
+	vigorRushPlay(ge, l, self)
 }
 
-func (VigorRushYellow) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
-	vigorRushPlay(g, l, self)
+func (VigorRushYellow) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
+	vigorRushPlay(ge, l, self)
 }
 
-func (VigorRushBlue) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
-	vigorRushPlay(g, l, self)
+func (VigorRushBlue) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
+	vigorRushPlay(ge, l, self)
 }

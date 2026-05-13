@@ -25,12 +25,12 @@ var currentOptTestHero FakeHero
 // withOptHero-installed currentOptTestHero attached, mirroring the old TurnState-with-
 // global-hero shape the per-test bodies use.
 func newOptTestEngine(deckCards, graveyard []card.Card) *gameengine.GameEngine {
-	e := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().
+	ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().
 		SetCards(deckCards).
 		SetGraveyard(graveyard).
 		Build()}
-	e.SetHero(currentOptTestHero)
-	return e
+	ge.SetHero(currentOptTestHero)
+	return ge
 }
 
 // Tests that Opt with the default passthrough handler keeps the deck order unchanged —

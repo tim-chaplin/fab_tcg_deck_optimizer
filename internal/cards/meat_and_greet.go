@@ -12,27 +12,27 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
-func meatAndGreetPlay(g card.GameEngine, l card.Logger, self *card.CardState) {
-	if g.ArcaneDamageDealt() {
+func meatAndGreetPlay(ge card.GameEngine, l card.Logger, self *card.CardState) {
+	if ge.ArcaneDamageDealt() {
 		self.GrantedGoAgain = true
 	}
 	self.RegisterOnHit(meatAndGreetOnHit)
 }
 
 // meatAndGreetOnHit fires the printed "When this hits, create a Runechant token" rider.
-func meatAndGreetOnHit(g card.GameEngine, l card.Logger, self *card.CardState, _ *card.OnHitHandler) {
-	g.CreateRunechants(1)
+func meatAndGreetOnHit(ge card.GameEngine, l card.Logger, self *card.CardState, _ *card.OnHitHandler) {
+	ge.CreateRunechants(1)
 	l.AppendPostTrigger(self.Card.DisplayName(), "On-hit created a runechant", 1)
 }
 
-func (MeatAndGreetRed) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
-	meatAndGreetPlay(g, l, self)
+func (MeatAndGreetRed) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
+	meatAndGreetPlay(ge, l, self)
 }
 
-func (MeatAndGreetYellow) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
-	meatAndGreetPlay(g, l, self)
+func (MeatAndGreetYellow) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
+	meatAndGreetPlay(ge, l, self)
 }
 
-func (MeatAndGreetBlue) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
-	meatAndGreetPlay(g, l, self)
+func (MeatAndGreetBlue) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
+	meatAndGreetPlay(ge, l, self)
 }

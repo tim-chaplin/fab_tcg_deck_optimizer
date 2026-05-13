@@ -13,6 +13,6 @@ import (
 
 // not implemented: Inertia health-gain rider dropped (status tokens not tracked)
 
-func (RestvineElixirRed) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
-	cards.GrantNextCardBonusAttack(g, 3, cards.IsAttack)
+func (RestvineElixirRed) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
+	cards.GrantNextCardBonusAttack(ge, 3, cards.IsAttack)
 }

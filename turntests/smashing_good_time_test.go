@@ -12,10 +12,10 @@ import (
 
 // TestSmashingGoodTime_NoAttackReturnsZero: no qualifying next attack card → +3 rider fizzles.
 func TestSmashingGoodTime_NoAttackReturnsZero(t *testing.T) {
-	s := gameengine.New()
+	ge := gameengine.New()
 	for _, c := range []card.Card{notimplemented.SmashingGoodTimeRed{}, notimplemented.SmashingGoodTimeYellow{}, notimplemented.SmashingGoodTimeBlue{}} {
-		s.ResolveChainStep(s.Logger(), &card.CardState{Card: c})
-		if got := s.Value(); got != 0 {
+		ge.ResolveChainStep(ge.Logger(), &card.CardState{Card: c})
+		if got := ge.Value(); got != 0 {
 			t.Errorf("%s: Play() = %d, want 0", c.Name(), got)
 		}
 	}
@@ -23,9 +23,9 @@ func TestSmashingGoodTime_NoAttackReturnsZero(t *testing.T) {
 
 // TestSmashingGoodTime_NonAttackInRemainingFizzles: non-attack action fails the predicate.
 func TestSmashingGoodTime_NonAttackInRemainingFizzles(t *testing.T) {
-	s := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCardsRemaining([]*card.CardState{{Card: testutils.GenericAction()}}).Build()}
-	s.ResolveChainStep(s.Logger(), &card.CardState{Card: notimplemented.SmashingGoodTimeRed{}})
-	if got := s.Value(); got != 0 {
+	ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCardsRemaining([]*card.CardState{{Card: testutils.GenericAction()}}).Build()}
+	ge.ResolveChainStep(ge.Logger(), &card.CardState{Card: notimplemented.SmashingGoodTimeRed{}})
+	if got := ge.Value(); got != 0 {
 		t.Errorf("Play() = %d, want 0 (non-attack skipped)", got)
 	}
 }
@@ -44,11 +44,11 @@ func TestSmashingGoodTime_NextAttackGrantsBonusAttack(t *testing.T) {
 	}
 	for _, tc := range cases {
 		target := &card.CardState{Card: testutils.GenericAttack(0, 0)}
-		s := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCardsRemaining([]*card.CardState{target}).Build()}
+		ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCardsRemaining([]*card.CardState{target}).Build()}
 		self := &card.CardState{Card: tc.c, FromArsenal: true}
-		s.ResolveChainStep(s.Logger(), self)
-		if got := s.Value(); got != 0 {
-			t.Errorf("%s: Play() = %d, want 0 (granter returns 0; +N rides on target's BonusAttack)", tc.c.Name(), got)
+		ge.ResolveChainStep(ge.Logger(), self)
+		if got := ge.Value(); got != 0 {
+			t.Errorf("%s: Play() = %d, want 0 (granter returns 0; +N rides on target'ge BonusAttack)", tc.c.Name(), got)
 		}
 		if target.BonusAttack != tc.want {
 			t.Errorf("%s: target BonusAttack = %d, want %d", tc.c.Name(), target.BonusAttack, tc.want)
@@ -59,10 +59,10 @@ func TestSmashingGoodTime_NextAttackGrantsBonusAttack(t *testing.T) {
 // TestSmashingGoodTime_HandPlayedFizzles: hand-played copy fails the from-arsenal gate.
 func TestSmashingGoodTime_HandPlayedFizzles(t *testing.T) {
 	for _, c := range []card.Card{notimplemented.SmashingGoodTimeRed{}, notimplemented.SmashingGoodTimeYellow{}, notimplemented.SmashingGoodTimeBlue{}} {
-		s := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCardsRemaining([]*card.CardState{{Card: testutils.GenericAttack(0, 0)}}).Build()}
+		ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCardsRemaining([]*card.CardState{{Card: testutils.GenericAttack(0, 0)}}).Build()}
 		self := &card.CardState{Card: c}
-		s.ResolveChainStep(s.Logger(), self)
-		if got := s.Value(); got != 0 {
+		ge.ResolveChainStep(ge.Logger(), self)
+		if got := ge.Value(); got != 0 {
 			t.Errorf("%s: Play() = %d, want 0 (hand-played)", c.Name(), got)
 		}
 	}

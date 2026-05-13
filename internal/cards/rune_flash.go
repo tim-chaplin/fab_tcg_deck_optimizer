@@ -13,31 +13,31 @@ import (
 
 const runeFlashPrintedCost = 3
 
-func runeFlashCost(g card.GameEngine) int {
-	eff := runeFlashPrintedCost - g.RunechantCount()
+func runeFlashCost(ge card.GameEngine) int {
+	eff := runeFlashPrintedCost - ge.RunechantCount()
 	if eff < 0 {
 		return 0
 	}
 	return eff
 }
 
-func (RuneFlashRed) Cost(g card.GameEngine) int { return runeFlashCost(g) }
-func (RuneFlashRed) MinCost() int               { return 0 }
-func (RuneFlashRed) MaxCost() int               { return runeFlashPrintedCost }
+func (RuneFlashRed) Cost(ge card.GameEngine) int { return runeFlashCost(ge) }
+func (RuneFlashRed) MinCost() int                { return 0 }
+func (RuneFlashRed) MaxCost() int                { return runeFlashPrintedCost }
 
-func (RuneFlashRed) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+func (RuneFlashRed) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
 }
 
-func (RuneFlashYellow) Cost(g card.GameEngine) int { return runeFlashCost(g) }
-func (RuneFlashYellow) MinCost() int               { return 0 }
-func (RuneFlashYellow) MaxCost() int               { return runeFlashPrintedCost }
+func (RuneFlashYellow) Cost(ge card.GameEngine) int { return runeFlashCost(ge) }
+func (RuneFlashYellow) MinCost() int                { return 0 }
+func (RuneFlashYellow) MaxCost() int                { return runeFlashPrintedCost }
 
-func (RuneFlashYellow) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+func (RuneFlashYellow) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
 }
 
-func (RuneFlashBlue) Cost(g card.GameEngine) int { return runeFlashCost(g) }
-func (RuneFlashBlue) MinCost() int               { return 0 }
-func (RuneFlashBlue) MaxCost() int               { return runeFlashPrintedCost }
+func (RuneFlashBlue) Cost(ge card.GameEngine) int { return runeFlashCost(ge) }
+func (RuneFlashBlue) MinCost() int                { return 0 }
+func (RuneFlashBlue) MaxCost() int                { return runeFlashPrintedCost }
 
-func (RuneFlashBlue) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+func (RuneFlashBlue) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
 }

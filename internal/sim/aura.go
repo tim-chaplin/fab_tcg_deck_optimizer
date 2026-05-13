@@ -73,14 +73,14 @@ func (a *Aura) Count() int            { return a.count }
 func (a *Aura) SetCount(n int)        { a.count = n }
 func (a *Aura) DecrementCount() int   { a.count--; return a.count }
 
-func (a *Aura) Fire(g *gameengine.GameEngine, l card.Logger) {
-	ctx := &auraCtx{a: a, g: g}
-	a.handler(g, l, ctx)
+func (a *Aura) Fire(ge *gameengine.GameEngine, l card.Logger) {
+	ctx := &auraCtx{a: a, ge: ge}
+	a.handler(ge, l, ctx)
 }
 
-func (a *Aura) OnDestroy(g *gameengine.GameEngine) {
+func (a *Aura) OnDestroy(ge *gameengine.GameEngine) {
 	if a.source != nil {
-		g.AppendGraveyard(a.source)
+		ge.AppendGraveyard(a.source)
 	}
 }
 
@@ -95,8 +95,8 @@ func (a *Aura) Copy() gameengine.Aura {
 // interact with the firing aura through a stable surface regardless of the underlying
 // entry's storage.
 type auraCtx struct {
-	a *Aura
-	g *gameengine.GameEngine
+	a  *Aura
+	ge *gameengine.GameEngine
 }
 
 func (c *auraCtx) Count() int          { return c.a.count }
@@ -104,5 +104,5 @@ func (c *auraCtx) DecrementCount() int { c.a.count--; return c.a.count }
 func (c *auraCtx) CardName() string    { return c.a.CardName() }
 func (c *auraCtx) CardID() ids.CardID  { return c.a.CardID() }
 func (c *auraCtx) Destroy(addToGraveyard bool) {
-	c.g.DestroyAura(addToGraveyard)
+	c.ge.DestroyAura(addToGraveyard)
 }

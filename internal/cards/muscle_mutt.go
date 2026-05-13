@@ -7,5 +7,5 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
-func (c MuscleMuttYellow) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+func (c MuscleMuttYellow) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
 }

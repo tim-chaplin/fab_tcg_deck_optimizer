@@ -9,8 +9,8 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
-func (SinkBelowRed) Play(g card.GameEngine, l card.Logger, self *card.CardState) {}
+func (SinkBelowRed) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {}
 
-func (SinkBelowYellow) Play(g card.GameEngine, l card.Logger, self *card.CardState) {}
+func (SinkBelowYellow) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {}
 
-func (SinkBelowBlue) Play(g card.GameEngine, l card.Logger, self *card.CardState) {}
+func (SinkBelowBlue) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {}

@@ -9,8 +9,8 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
-func (OutedRed) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
-	if g.OpponentMarked() {
+func (OutedRed) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
+	if ge.OpponentMarked() {
 		self.BonusAttack++
 	}
 }

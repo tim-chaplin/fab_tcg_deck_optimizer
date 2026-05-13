@@ -11,18 +11,18 @@ import (
 
 // weepingBattlegroundPlay fires the banish-and-1-arcane rider via banishAuraFromGraveyard.
 // No-op when the graveyard has no aura.
-func weepingBattlegroundPlay(g card.GameEngine, l card.Logger, self *card.CardState) {
-	banishAuraFromGraveyard(g, l, self.Card.DisplayName())
+func weepingBattlegroundPlay(ge card.GameEngine, l card.Logger, self *card.CardState) {
+	banishAuraFromGraveyard(ge, l, self.Card.DisplayName())
 }
 
-func (WeepingBattlegroundRed) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
-	weepingBattlegroundPlay(g, l, self)
+func (WeepingBattlegroundRed) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
+	weepingBattlegroundPlay(ge, l, self)
 }
 
-func (WeepingBattlegroundYellow) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
-	weepingBattlegroundPlay(g, l, self)
+func (WeepingBattlegroundYellow) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
+	weepingBattlegroundPlay(ge, l, self)
 }
 
-func (WeepingBattlegroundBlue) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
-	weepingBattlegroundPlay(g, l, self)
+func (WeepingBattlegroundBlue) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
+	weepingBattlegroundPlay(ge, l, self)
 }

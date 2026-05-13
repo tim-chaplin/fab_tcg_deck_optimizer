@@ -14,6 +14,6 @@ func (ThrustRed) ARTargetAllowed(_ card.GameEngine, c card.Card, _ int8) bool {
 	t := c.Types(nil)
 	return t.Has(card.TypeSword) && t.IsAttack()
 }
-func (ThrustRed) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
-	self.GrantAttackReactionBuff(g, l, 3)
+func (ThrustRed) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
+	self.GrantAttackReactionBuff(ge, l, 3)
 }

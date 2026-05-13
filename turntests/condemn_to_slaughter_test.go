@@ -12,9 +12,9 @@ import (
 
 func TestCondemnToSlaughter_NoNextAttackReturnsZero(t *testing.T) {
 	// No Runeblade attack follows → rider doesn't fire, Play returns 0.
-	s := gameengine.New()
-	s.ResolveChainStep(s.Logger(), &card.CardState{Card: notimplemented.CondemnToSlaughterRed{}})
-	if got := s.Value(); got != 0 {
+	ge := gameengine.New()
+	ge.ResolveChainStep(ge.Logger(), &card.CardState{Card: notimplemented.CondemnToSlaughterRed{}})
+	if got := ge.Value(); got != 0 {
 		t.Errorf("Play() = %d, want 0 when CardsRemaining is empty", got)
 	}
 }
@@ -32,10 +32,10 @@ func TestCondemnToSlaughter_NextAttackActionTriggers(t *testing.T) {
 	}
 	for _, tc := range cases {
 		target := &card.CardState{Card: testutils.RunebladeAttack{}}
-		s := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCardsRemaining([]*card.CardState{target}).Build()}
-		s.ResolveChainStep(s.Logger(), &card.CardState{Card: tc.c})
-		if got := s.Value(); got != 0 {
-			t.Errorf("%s: Play() = %d, want 0 (granter returns 0; +N rides on target's BonusAttack)", tc.c.Name(), got)
+		ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCardsRemaining([]*card.CardState{target}).Build()}
+		ge.ResolveChainStep(ge.Logger(), &card.CardState{Card: tc.c})
+		if got := ge.Value(); got != 0 {
+			t.Errorf("%s: Play() = %d, want 0 (granter returns 0; +N rides on target'ge BonusAttack)", tc.c.Name(), got)
 		}
 		if target.BonusAttack != tc.n {
 			t.Errorf("%s: target BonusAttack = %d, want %d", tc.c.Name(), target.BonusAttack, tc.n)
@@ -44,12 +44,12 @@ func TestCondemnToSlaughter_NextAttackActionTriggers(t *testing.T) {
 }
 
 func TestCondemnToSlaughter_WeaponCountsAsNextAttack(t *testing.T) {
-	// Unlike Runic Reaping, Condemn's rider accepts weapon swings as the "next attack."
+	// Unlike Runic Reaping, Condemn'ge rider accepts weapon swings as the "next attack."
 	target := &card.CardState{Card: testutils.RunebladeWeapon{}}
-	s := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCardsRemaining([]*card.CardState{target}).Build()}
-	s.ResolveChainStep(s.Logger(), &card.CardState{Card: notimplemented.CondemnToSlaughterRed{}})
-	if got := s.Value(); got != 0 {
-		t.Errorf("Play() = %d, want 0 (granter returns 0; +N rides on target's BonusAttack)", got)
+	ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCardsRemaining([]*card.CardState{target}).Build()}
+	ge.ResolveChainStep(ge.Logger(), &card.CardState{Card: notimplemented.CondemnToSlaughterRed{}})
+	if got := ge.Value(); got != 0 {
+		t.Errorf("Play() = %d, want 0 (granter returns 0; +N rides on target'ge BonusAttack)", got)
 	}
 	if target.BonusAttack != 3 {
 		t.Errorf("target BonusAttack = %d, want 3 (weapon should qualify)", target.BonusAttack)
@@ -58,9 +58,9 @@ func TestCondemnToSlaughter_WeaponCountsAsNextAttack(t *testing.T) {
 
 func TestCondemnToSlaughter_NonRunebladeAttackDoesNotQualify(t *testing.T) {
 	// A Generic attack-action card later in the chain doesn't satisfy the Runeblade-only rider.
-	s := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCardsRemaining([]*card.CardState{{Card: testutils.NonRunebladeAttack{}}}).Build()}
-	s.ResolveChainStep(s.Logger(), &card.CardState{Card: notimplemented.CondemnToSlaughterRed{}})
-	if got := s.Value(); got != 0 {
+	ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCardsRemaining([]*card.CardState{{Card: testutils.NonRunebladeAttack{}}}).Build()}
+	ge.ResolveChainStep(ge.Logger(), &card.CardState{Card: notimplemented.CondemnToSlaughterRed{}})
+	if got := ge.Value(); got != 0 {
 		t.Errorf("Play() = %d, want 0 (non-Runeblade attack shouldn't qualify)", got)
 	}
 }

@@ -519,18 +519,18 @@ func processAurasAtStartOfTurn(queued []*Aura, d *deck.Deck) (
 	}
 	// Drive a fresh state + engine over the queued aura list. Reveal handlers (Sigil of
 	// the Arknight) read the deck via PopDeckTop, which mutates d in place. Adopting
-	// queued onto the state's aura list lets handlers' Destroy splice the live list
+	// queued onto the state'gs aura list lets handlers' Destroy splice the live list
 	// directly.
-	s := gameengine.GameStateBuilder().Build()
-	s.SetDeck(d)
+	gs := gameengine.GameStateBuilder().Build()
+	gs.SetDeck(d)
 	for _, a := range queued {
-		s.CreateAura(a)
+		gs.CreateAura(a)
 	}
-	g := s.Engine()
-	// Walk queued in lockstep with FireStartOfTurn's callback: FireStartOfTurn visits
-	// auras in g.auras order, firing each TriggerStartOfTurn entry. We pre-capture each
-	// firing aura's SourceCard so the contribution carries source identity even after
-	// the aura destroys itself (and disappears from g.auras).
+	ge := gs.Engine()
+	// Walk queued in lockstep with FireStartOfTurn'gs callback: FireStartOfTurn visits
+	// auras in ge.auras order, firing each TriggerStartOfTurn entry. We pre-capture each
+	// firing aura'gs SourceCard so the contribution carries source identity even after
+	// the aura destroys itself (and disappears from ge.auras).
 	sourceByFireIdx := make([]card.Card, 0, len(queued))
 	for _, a := range queued {
 		if a.TriggerType() == triggertype.StartOfTurn {
@@ -538,7 +538,7 @@ func processAurasAtStartOfTurn(queued []*Aura, d *deck.Deck) (
 		}
 	}
 	fireIdx := 0
-	g.FireStartOfTurn(func(_, dmg int, drawn card.Card, newEntries []turnlogger.LogEntry) {
+	ge.FireStartOfTurn(func(_, dmg int, drawn card.Card, newEntries []turnlogger.LogEntry) {
 		var text string
 		if len(newEntries) > 0 {
 			text = newEntries[0].Text
@@ -556,11 +556,11 @@ func processAurasAtStartOfTurn(queued []*Aura, d *deck.Deck) (
 		damage += dmg
 		fireIdx++
 	})
-	out := make([]*Aura, 0, len(s.Auras()))
-	for _, a := range s.Auras() {
+	out := make([]*Aura, 0, len(gs.Auras()))
+	for _, a := range gs.Auras() {
 		out = append(out, a.(*Aura))
 	}
-	return out, contribs, damage, s.Hand(), append([]card.Card(nil), s.Graveyard()...)
+	return out, contribs, damage, gs.Hand(), append([]card.Card(nil), gs.Graveyard()...)
 }
 
 // pitchedFromBestLine returns the cards in BestLine assigned the Pitch role (excluding the

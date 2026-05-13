@@ -15,26 +15,26 @@ import (
 
 // sutcliffesResearchNotesPlay scans the top revealCount cards of the deck and creates one
 // runechant per Runeblade attack action card found.
-func sutcliffesResearchNotesPlay(g card.GameEngine, l card.Logger, self *card.CardState, revealCount int) {
+func sutcliffesResearchNotesPlay(ge card.GameEngine, l card.Logger, self *card.CardState, revealCount int) {
 	count := 0
-	for _, c := range g.PeekTopN(revealCount) {
+	for _, c := range ge.PeekTopN(revealCount) {
 		t := c.Types(nil)
 		if t.Has(card.TypeRuneblade) && t.IsAttackAction() {
 			count++
 		}
 	}
-	g.CreateRunechants(count)
+	ge.CreateRunechants(count)
 	l.AppendPostTriggerf(self.Card.DisplayName(), count, "Created %d runechants", count)
 }
 
-func (SutcliffesResearchNotesRed) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
-	sutcliffesResearchNotesPlay(g, l, self, 3)
+func (SutcliffesResearchNotesRed) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
+	sutcliffesResearchNotesPlay(ge, l, self, 3)
 }
 
-func (SutcliffesResearchNotesYellow) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
-	sutcliffesResearchNotesPlay(g, l, self, 2)
+func (SutcliffesResearchNotesYellow) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
+	sutcliffesResearchNotesPlay(ge, l, self, 2)
 }
 
-func (SutcliffesResearchNotesBlue) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
-	sutcliffesResearchNotesPlay(g, l, self, 1)
+func (SutcliffesResearchNotesBlue) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
+	sutcliffesResearchNotesPlay(ge, l, self, 1)
 }

@@ -12,12 +12,12 @@ import (
 
 // not implemented: action point grant
 
-func (LeadTheChargeRed) Play(g card.GameEngine, l card.Logger, self *card.CardState) {}
+func (LeadTheChargeRed) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {}
 
 // not implemented: action point grant
 
-func (LeadTheChargeYellow) Play(g card.GameEngine, l card.Logger, self *card.CardState) {}
+func (LeadTheChargeYellow) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {}
 
 // not implemented: action point grant
 
-func (LeadTheChargeBlue) Play(g card.GameEngine, l card.Logger, self *card.CardState) {}
+func (LeadTheChargeBlue) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {}

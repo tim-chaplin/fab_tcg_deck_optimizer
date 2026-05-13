@@ -11,15 +11,15 @@ import (
 
 // not implemented: next-weapon-attack +1{p} grant (weapon chain not scanned)
 
-func (c BrandishRed) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+func (c BrandishRed) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
 }
 
 // not implemented: next-weapon-attack +1{p} grant (weapon chain not scanned)
 
-func (c BrandishYellow) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+func (c BrandishYellow) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
 }
 
 // not implemented: next-weapon-attack +1{p} grant (weapon chain not scanned)
 
-func (c BrandishBlue) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+func (c BrandishBlue) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
 }

@@ -12,8 +12,8 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
-func (BarragingBrawnhideRed) Play(g card.GameEngine, l card.Logger, self *card.CardState) {}
+func (BarragingBrawnhideRed) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {}
 
-func (BarragingBrawnhideYellow) Play(g card.GameEngine, l card.Logger, self *card.CardState) {}
+func (BarragingBrawnhideYellow) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {}
 
-func (BarragingBrawnhideBlue) Play(g card.GameEngine, l card.Logger, self *card.CardState) {}
+func (BarragingBrawnhideBlue) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {}

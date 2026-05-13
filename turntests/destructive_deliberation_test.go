@@ -19,11 +19,11 @@ func TestDestructiveDeliberation_PlayCreditsAttack(t *testing.T) {
 		{cards.DestructiveDeliberationBlue{}, 3},
 	}
 	for _, tc := range cases {
-		s := gameengine.New()
+		ge := gameengine.New()
 		self := &card.CardState{Card: tc.c}
-		s.ResolveChainStep(s.Logger(), self)
-		if s.Value() != tc.want {
-			t.Errorf("%s: Value = %d, want %d", tc.c.Name(), s.Value(), tc.want)
+		ge.ResolveChainStep(ge.Logger(), self)
+		if ge.Value() != tc.want {
+			t.Errorf("%s: Value = %d, want %d", tc.c.Name(), ge.Value(), tc.want)
 		}
 		if len(self.OnHit) != 1 {
 			t.Errorf("%s: OnHit = %d, want 1 (Ponder rider)", tc.c.Name(), len(self.OnHit))
@@ -37,14 +37,14 @@ func TestDestructiveDeliberation_OnHitCreatesPonder(t *testing.T) {
 		cards.DestructiveDeliberationYellow{},
 		cards.DestructiveDeliberationBlue{},
 	} {
-		s := gameengine.New()
+		ge := gameengine.New()
 		self := &card.CardState{Card: c}
-		s.ResolveChainStep(s.Logger(), self)
-		self.OnHit[0].Fire(s, s.Logger(), self, &self.OnHit[0])
-		if got := s.PonderCount(); got != 1 {
+		ge.ResolveChainStep(ge.Logger(), self)
+		self.OnHit[0].Fire(ge, ge.Logger(), self, &self.OnHit[0])
+		if got := ge.PonderCount(); got != 1 {
 			t.Errorf("%s: Ponders = %d, want 1", c.Name(), got)
 		}
-		if !s.AuraCreated() {
+		if !ge.AuraCreated() {
 			t.Errorf("%s: AuraCreated = false, want true", c.Name())
 		}
 	}

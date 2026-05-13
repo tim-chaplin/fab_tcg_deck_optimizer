@@ -20,21 +20,21 @@ func brothersInArmsBlock(_ card.GameEngine, l card.Logger, self *card.CardState)
 
 func (BrothersInArmsRed) Modes() int              { return 2 }
 func (BrothersInArmsRed) BlockCost(mode int8) int { return int(mode) }
-func (BrothersInArmsRed) Block(g card.GameEngine, l card.Logger, self *card.CardState) {
-	brothersInArmsBlock(g, l, self)
+func (BrothersInArmsRed) Block(ge card.GameEngine, l card.Logger, self *card.CardState) {
+	brothersInArmsBlock(ge, l, self)
 }
-func (BrothersInArmsRed) Play(g card.GameEngine, l card.Logger, self *card.CardState) {}
+func (BrothersInArmsRed) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {}
 
 func (BrothersInArmsYellow) Modes() int              { return 2 }
 func (BrothersInArmsYellow) BlockCost(mode int8) int { return int(mode) }
-func (BrothersInArmsYellow) Block(g card.GameEngine, l card.Logger, self *card.CardState) {
-	brothersInArmsBlock(g, l, self)
+func (BrothersInArmsYellow) Block(ge card.GameEngine, l card.Logger, self *card.CardState) {
+	brothersInArmsBlock(ge, l, self)
 }
-func (BrothersInArmsYellow) Play(g card.GameEngine, l card.Logger, self *card.CardState) {}
+func (BrothersInArmsYellow) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {}
 
 func (BrothersInArmsBlue) Modes() int              { return 2 }
 func (BrothersInArmsBlue) BlockCost(mode int8) int { return int(mode) }
-func (BrothersInArmsBlue) Block(g card.GameEngine, l card.Logger, self *card.CardState) {
-	brothersInArmsBlock(g, l, self)
+func (BrothersInArmsBlue) Block(ge card.GameEngine, l card.Logger, self *card.CardState) {
+	brothersInArmsBlock(ge, l, self)
 }
-func (BrothersInArmsBlue) Play(g card.GameEngine, l card.Logger, self *card.CardState) {}
+func (BrothersInArmsBlue) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {}

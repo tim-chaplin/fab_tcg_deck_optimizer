@@ -30,18 +30,18 @@ func TestRunechantOnPlay_CreatesNTokens(t *testing.T) {
 		{cards.SpellbladeStrikeBlue{}, 1},
 	}
 	for _, tc := range cases {
-		s := gameengine.New()
-		s.ResolveChainStep(s.Logger(), &card.CardState{Card: tc.c})
-		if s.RunechantCount() != tc.n {
-			t.Errorf("%s: Runechants = %d, want %d", tc.c.Name(), s.RunechantCount(), tc.n)
+		ge := gameengine.New()
+		ge.ResolveChainStep(ge.Logger(), &card.CardState{Card: tc.c})
+		if ge.RunechantCount() != tc.n {
+			t.Errorf("%s: Runechants = %d, want %d", tc.c.Name(), ge.RunechantCount(), tc.n)
 		}
-		if !s.AuraCreated() {
+		if !ge.AuraCreated() {
 			t.Errorf("%s: AuraCreated = false, want true", tc.c.Name())
 		}
 		want := tc.c.Attack() + tc.n
-		if s.Value() != want {
+		if ge.Value() != want {
 			t.Errorf("%s: Value = %d, want %d (Attack %d + %d runechants)",
-				tc.c.Name(), s.Value(), want, tc.c.Attack(), tc.n)
+				tc.c.Name(), ge.Value(), want, tc.c.Attack(), tc.n)
 		}
 	}
 }

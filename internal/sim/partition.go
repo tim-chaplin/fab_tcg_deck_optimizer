@@ -275,40 +275,40 @@ func roleAllowed(r Role, isArsenalSlot, isDefenseReaction, canAttack bool) bool 
 //
 // Returns the per-DR cacheable status as a sticky bit — once a DR reads deck or graveyard,
 // the partition's defense-phase output isn't safe to cache.
-func defendersDamage(defenders, pitched []card.Card, deckPile *deck.Deck, state *gameengine.GameEngine, gravBuf []card.Card, cs *card.CardState, incomingDamage, blockBudget, arsenalDefenderIdx int) (int, []card.Card, bool) {
+func defendersDamage(defenders, pitched []card.Card, deckPile *deck.Deck, ge *gameengine.GameEngine, gravBuf []card.Card, cs *card.CardState, incomingDamage, blockBudget, arsenalDefenderIdx int) (int, []card.Card, bool) {
 	total := 0
 	remaining := incomingDamage
 	cacheable := true
-	state.SetDeck(deckPile)
+	ge.SetDeck(deckPile)
 	for i, def := range defenders {
 		if !attackerMetaPtrFor(def).actsAsDR {
 			continue
 		}
 		gravBuf = append(gravBuf[:0], defenders...)
-		state.SetGraveyard(gravBuf)
-		state.SetPitched(pitched)
-		state.SetDefenders(defenders)
-		state.SetValue(0)
-		state.SetIncomingDamage(remaining)
-		state.SetCacheable(true)
+		ge.SetGraveyard(gravBuf)
+		ge.SetPitched(pitched)
+		ge.SetDefenders(defenders)
+		ge.SetValue(0)
+		ge.SetIncomingDamage(remaining)
+		ge.SetCacheable(true)
 		*cs = card.CardState{Card: def, FromArsenal: i == arsenalDefenderIdx}
-		state.ResolveChainStep(state.Logger(), cs)
-		total += state.Value()
-		remaining = state.IncomingDamage()
-		if !state.IsCacheable() {
+		ge.ResolveChainStep(ge.Logger(), cs)
+		total += ge.Value()
+		remaining = ge.IncomingDamage()
+		if !ge.IsCacheable() {
 			cacheable = false
 		}
 	}
-	state.SetDefenders(defenders)
+	ge.SetDefenders(defenders)
 	for _, def := range defenders {
 		if attackerMetaPtrFor(def).actsAsDR {
 			continue
 		}
-		bestMode, bestCost := pickBlockerMode(def, state, cs, blockBudget)
+		bestMode, bestCost := pickBlockerMode(def, ge, cs, blockBudget)
 		blockBudget -= bestCost
 		*cs = card.CardState{Card: def, Mode: bestMode}
 		if b, ok := def.(card.Blocker); ok {
-			b.Block(state, state.Logger(), cs)
+			b.Block(ge, ge.Logger(), cs)
 		}
 		block := cs.EffectiveDefense()
 		if block > remaining {
@@ -324,7 +324,7 @@ func defendersDamage(defenders, pitched []card.Card, deckPile *deck.Deck, state 
 
 // pickBlockerMode returns the mode index and resource cost yielding the highest
 // BonusDefense for d within blockBudget.
-func pickBlockerMode(d card.Card, state *gameengine.GameEngine, cs *card.CardState, blockBudget int) (int8, int) {
+func pickBlockerMode(d card.Card, ge *gameengine.GameEngine, cs *card.CardState, blockBudget int) (int8, int) {
 	mc, ok := d.(card.Modal)
 	if !ok {
 		return 0, 0
@@ -346,7 +346,7 @@ func pickBlockerMode(d card.Card, state *gameengine.GameEngine, cs *card.CardSta
 			continue
 		}
 		*cs = card.CardState{Card: d, Mode: mode}
-		b.Block(state, state.Logger(), cs)
+		b.Block(ge, ge.Logger(), cs)
 		if cs.BonusDefense > bestBonus {
 			bestBonus = cs.BonusDefense
 			bestMode = mode

@@ -10,5 +10,5 @@ import (
 // not implemented: base-power cap on what this can defend is ignored; treated as legal vs every
 // attack
 
-func (PutInContextBlue) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+func (PutInContextBlue) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
 }

@@ -15,19 +15,19 @@ import (
 )
 
 // fiddlersGreenPlay credits N{h} as a sub-line under self (health valued 1-to-1 with damage).
-func fiddlersGreenPlay(g card.GameEngine, l card.Logger, self *card.CardState, heal int) {
-	g.AddValue(heal)
+func fiddlersGreenPlay(ge card.GameEngine, l card.Logger, self *card.CardState, heal int) {
+	ge.AddValue(heal)
 	l.AppendPostTriggerf(self.Card.DisplayName(), heal, "Gained %d health (graveyard trigger)", heal)
 }
 
-func (FiddlersGreenRed) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
-	fiddlersGreenPlay(g, l, self, 3)
+func (FiddlersGreenRed) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
+	fiddlersGreenPlay(ge, l, self, 3)
 }
 
-func (FiddlersGreenYellow) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
-	fiddlersGreenPlay(g, l, self, 2)
+func (FiddlersGreenYellow) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
+	fiddlersGreenPlay(ge, l, self, 2)
 }
 
-func (FiddlersGreenBlue) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
-	fiddlersGreenPlay(g, l, self, 1)
+func (FiddlersGreenBlue) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
+	fiddlersGreenPlay(ge, l, self, 1)
 }

@@ -11,23 +11,23 @@ import (
 
 // TestWarmongersRecital_NoAttackReturnsZero: no qualifying next attack card → +N rider fizzles.
 func TestWarmongersRecital_NoAttackReturnsZero(t *testing.T) {
-	s := gameengine.New()
+	ge := gameengine.New()
 	for _, c := range []card.Card{
 		cards.WarmongersRecitalRed{}, cards.WarmongersRecitalYellow{}, cards.WarmongersRecitalBlue{},
 	} {
-		s.ResolveChainStep(s.Logger(), &card.CardState{Card: c})
-		if s.Value() != 0 {
-			t.Errorf("%s: Play() = %d, want 0", c.Name(), s.Value())
+		ge.ResolveChainStep(ge.Logger(), &card.CardState{Card: c})
+		if ge.Value() != 0 {
+			t.Errorf("%s: Play() = %d, want 0", c.Name(), ge.Value())
 		}
 	}
 }
 
 // TestWarmongersRecital_NonAttackInRemainingFizzles: non-attack action fails the predicate.
 func TestWarmongersRecital_NonAttackInRemainingFizzles(t *testing.T) {
-	s := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCardsRemaining([]*card.CardState{{Card: testutils.GenericAction()}}).Build()}
-	s.ResolveChainStep(s.Logger(), &card.CardState{Card: cards.WarmongersRecitalRed{}})
-	if s.Value() != 0 {
-		t.Errorf("Play() = %d, want 0 (non-attack skipped)", s.Value())
+	ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCardsRemaining([]*card.CardState{{Card: testutils.GenericAction()}}).Build()}
+	ge.ResolveChainStep(ge.Logger(), &card.CardState{Card: cards.WarmongersRecitalRed{}})
+	if ge.Value() != 0 {
+		t.Errorf("Play() = %d, want 0 (non-attack skipped)", ge.Value())
 	}
 }
 
@@ -44,8 +44,8 @@ func TestWarmongersRecital_NextAttackReceivesBonusAndOnHit(t *testing.T) {
 	}
 	for _, tc := range cases {
 		target := &card.CardState{Card: testutils.GenericAttack(0, 0)}
-		s := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCardsRemaining([]*card.CardState{target}).Build()}
-		s.ResolveChainStep(s.Logger(), &card.CardState{Card: tc.c})
+		ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCardsRemaining([]*card.CardState{target}).Build()}
+		ge.ResolveChainStep(ge.Logger(), &card.CardState{Card: tc.c})
 		if target.BonusAttack != tc.want {
 			t.Errorf("%s: target BonusAttack = %d, want %d", tc.c.Name(), target.BonusAttack, tc.want)
 		}
@@ -61,30 +61,30 @@ func TestWarmongersRecital_OnHitFireRecyclesTargetFromGraveyardToDeckBottom(t *t
 	target := testutils.GenericAttack(0, 5)
 	targetState := &card.CardState{Card: target}
 	deckTop := testutils.GenericAttack(1, 7)
-	s := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCards([]card.Card{deckTop}).Build()}
-	s.SetCardsRemaining([]*card.CardState{targetState})
-	s.ResolveChainStep(s.Logger(), &card.CardState{Card: cards.WarmongersRecitalRed{}})
+	ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCards([]card.Card{deckTop}).Build()}
+	ge.SetCardsRemaining([]*card.CardState{targetState})
+	ge.ResolveChainStep(ge.Logger(), &card.CardState{Card: cards.WarmongersRecitalRed{}})
 	if len(targetState.OnHit) != 1 {
 		t.Fatalf("OnHit not registered: len=%d", len(targetState.OnHit))
 	}
 
-	// Simulate the chain step's graveyard deposit, then fire the OnHit.
-	s.AddToGraveyard(target)
-	preLog := len(s.LogEntries())
+	// Simulate the chain step'ge graveyard deposit, then fire the OnHit.
+	ge.AddToGraveyard(target)
+	preLog := len(ge.LogEntries())
 	h := &targetState.OnHit[0]
-	h.Fire(s, s.Logger(), targetState, h)
+	h.Fire(ge, ge.Logger(), targetState, h)
 
-	if g := s.Graveyard(); len(g) != 0 {
+	if g := ge.Graveyard(); len(g) != 0 {
 		t.Errorf("Graveyard after recycle = %v, want empty (target pulled out)", g)
 	}
-	if got := s.Deck().Size(); got != 2 {
+	if got := ge.Deck().Size(); got != 2 {
 		t.Errorf("Deck size after recycle = %d, want 2 (target appended to bottom)", got)
 	}
-	if top := s.Deck().PeekTop(); top != card.Card(deckTop) {
+	if top := ge.Deck().PeekTop(); top != card.Card(deckTop) {
 		t.Errorf("Deck top after recycle = %v, want %v (target went to bottom, deckTop unchanged)", top, deckTop)
 	}
-	// Rider line attributes the recycle to the buffed attack, not Warmonger's Recital.
-	added := s.LogEntries()[preLog:]
+	// Rider line attributes the recycle to the buffed attack, not Warmonger'ge Recital.
+	added := ge.LogEntries()[preLog:]
 	if len(added) != 1 || added[0].Source != target.DisplayName() {
 		t.Errorf("rider log = %+v, want one entry sourced to %q", added, target.DisplayName())
 	}

@@ -21,9 +21,9 @@ func TestDeathlyDuet_BaseDamage(t *testing.T) {
 		{cards.DeathlyDuetBlue{}, 2},
 	}
 	for _, tc := range cases {
-		s := gameengine.New()
-		s.ResolveChainStep(s.Logger(), &card.CardState{Card: tc.c})
-		if got := s.Value(); got != tc.want {
+		ge := gameengine.New()
+		ge.ResolveChainStep(ge.Logger(), &card.CardState{Card: tc.c})
+		if got := ge.Value(); got != tc.want {
 			t.Errorf("%s: Play() = %d, want %d", tc.c.Name(), got, tc.want)
 		}
 	}
@@ -31,13 +31,13 @@ func TestDeathlyDuet_BaseDamage(t *testing.T) {
 
 func TestDeathlyDuet_AttackAttributedAddsPower(t *testing.T) {
 	// Attack attributed → +2{p}.
-	s := gameengine.New()
+	ge := gameengine.New()
 	self := &card.CardState{
 		Card:          cards.DeathlyDuetRed{},
 		PitchedToPlay: []card.Card{testutils.RunebladeAttack{}},
 	}
-	s.ResolveChainStep(s.Logger(), self)
-	if got := s.Value(); got != 6 {
+	ge.ResolveChainStep(ge.Logger(), self)
+	if got := ge.Value(); got != 6 {
 		t.Errorf("Deathly Duet Red with attack attributed: Play() = %d, want 6", got)
 	}
 }
@@ -46,19 +46,19 @@ func TestDeathlyDuet_NonAttackActionAttributedCreatesRunechants(t *testing.T) {
 	// Non-attack action attributed → 2 Runechant tokens enter play, credited +1 each at creation.
 	// Play returns base + 2 (Deathly Duet Red base 4 + 2 token credits = 6). state.Runechants=2
 	// for downstream consume bookkeeping.
-	s := gameengine.New()
+	ge := gameengine.New()
 	self := &card.CardState{
 		Card:          cards.DeathlyDuetRed{},
 		PitchedToPlay: []card.Card{testutils.NonAttack{}},
 	}
-	s.ResolveChainStep(s.Logger(), self)
-	if got := s.Value(); got != 6 {
+	ge.ResolveChainStep(ge.Logger(), self)
+	if got := ge.Value(); got != 6 {
 		t.Errorf("Deathly Duet Red with non-attack attributed: Play() = %d, want 6 (base 4 + 2 token credits)", got)
 	}
-	if s.RunechantCount() != 2 {
-		t.Errorf("Runechants = %d, want 2", s.RunechantCount())
+	if ge.RunechantCount() != 2 {
+		t.Errorf("Runechants = %d, want 2", ge.RunechantCount())
 	}
-	if !s.AuraCreated() {
+	if !ge.AuraCreated() {
 		t.Errorf("AuraCreated should be set when Runechants are created")
 	}
 }
@@ -66,16 +66,16 @@ func TestDeathlyDuet_NonAttackActionAttributedCreatesRunechants(t *testing.T) {
 func TestDeathlyDuet_BothBranchesFire(t *testing.T) {
 	// Both an attack AND a non-attack action attributed → both riders fire: +2 power bonus,
 	// plus 2 Runechants credited +1 each at creation. Play returns base 4 + 2 power + 2 = 8.
-	s := gameengine.New()
+	ge := gameengine.New()
 	self := &card.CardState{
 		Card:          cards.DeathlyDuetRed{},
 		PitchedToPlay: []card.Card{testutils.RunebladeAttack{}, testutils.NonAttack{}},
 	}
-	s.ResolveChainStep(s.Logger(), self)
-	if got := s.Value(); got != 8 {
+	ge.ResolveChainStep(ge.Logger(), self)
+	if got := ge.Value(); got != 8 {
 		t.Errorf("Deathly Duet Red with both attributed: Play() = %d, want 8 (base 4 + 2 power + 2 token credits)", got)
 	}
-	if s.RunechantCount() != 2 {
-		t.Errorf("Runechants = %d, want 2", s.RunechantCount())
+	if ge.RunechantCount() != 2 {
+		t.Errorf("Runechants = %d, want 2", ge.RunechantCount())
 	}
 }

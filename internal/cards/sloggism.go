@@ -10,18 +10,18 @@ import (
 )
 
 // sloggismIsTarget gates the rider on attack action cards whose cost is 2 or more.
-func sloggismIsTarget(g card.GameEngine, pc *card.CardState) bool {
-	return pc.Card.Types(nil).IsAttackAction() && pc.Card.Cost(g) >= 2
+func sloggismIsTarget(ge card.GameEngine, pc *card.CardState) bool {
+	return pc.Card.Types(nil).IsAttackAction() && pc.Card.Cost(ge) >= 2
 }
 
-func (SloggismRed) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
-	GrantNextCardBonusAttack(g, 6, sloggismIsTarget)
+func (SloggismRed) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
+	GrantNextCardBonusAttack(ge, 6, sloggismIsTarget)
 }
 
-func (SloggismYellow) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
-	GrantNextCardBonusAttack(g, 5, sloggismIsTarget)
+func (SloggismYellow) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
+	GrantNextCardBonusAttack(ge, 5, sloggismIsTarget)
 }
 
-func (SloggismBlue) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
-	GrantNextCardBonusAttack(g, 4, sloggismIsTarget)
+func (SloggismBlue) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
+	GrantNextCardBonusAttack(ge, 4, sloggismIsTarget)
 }

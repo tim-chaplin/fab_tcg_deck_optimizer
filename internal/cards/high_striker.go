@@ -10,30 +10,30 @@ import (
 
 // highStrikerOnHit{6,4,2} fire on the next hit matching the trigger's TypeFilter (any
 // attack per the printed wording). One handler per variant carries N in the function name.
-func highStrikerOnHit6(g card.GameEngine, l card.Logger, t card.Trigger) {
-	highStrikerCreate(g, l, t, 6)
+func highStrikerOnHit6(ge card.GameEngine, l card.Logger, t card.Trigger) {
+	highStrikerCreate(ge, l, t, 6)
 }
-func highStrikerOnHit4(g card.GameEngine, l card.Logger, t card.Trigger) {
-	highStrikerCreate(g, l, t, 4)
+func highStrikerOnHit4(ge card.GameEngine, l card.Logger, t card.Trigger) {
+	highStrikerCreate(ge, l, t, 4)
 }
-func highStrikerOnHit2(g card.GameEngine, l card.Logger, t card.Trigger) {
-	highStrikerCreate(g, l, t, 2)
+func highStrikerOnHit2(ge card.GameEngine, l card.Logger, t card.Trigger) {
+	highStrikerCreate(ge, l, t, 2)
 }
 
-func highStrikerCreate(g card.GameEngine, l card.Logger, t card.Trigger, n int) {
-	g.CreateCopper(n)
-	l.AppendPostTriggerf(g.TriggeringCard().DisplayName(), 0,
+func highStrikerCreate(ge card.GameEngine, l card.Logger, t card.Trigger, n int) {
+	ge.CreateCopper(n)
+	l.AppendPostTriggerf(ge.TriggeringCard().DisplayName(), 0,
 		"%s created %d copper tokens on attack hit", t.CardName(), n)
 }
 
-func (c HighStrikerRed) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
-	g.AddHitTrigger(self, highStrikerOnHit6, card.TypeSet.IsAttack)
+func (c HighStrikerRed) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
+	ge.AddHitTrigger(self, highStrikerOnHit6, card.TypeSet.IsAttack)
 }
 
-func (c HighStrikerYellow) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
-	g.AddHitTrigger(self, highStrikerOnHit4, card.TypeSet.IsAttack)
+func (c HighStrikerYellow) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
+	ge.AddHitTrigger(self, highStrikerOnHit4, card.TypeSet.IsAttack)
 }
 
-func (c HighStrikerBlue) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
-	g.AddHitTrigger(self, highStrikerOnHit2, card.TypeSet.IsAttack)
+func (c HighStrikerBlue) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
+	ge.AddHitTrigger(self, highStrikerOnHit2, card.TypeSet.IsAttack)
 }

@@ -10,9 +10,9 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
-func (DroneOfBrutalityRed) Play(g card.GameEngine, l card.Logger, self *card.CardState) {}
+func (DroneOfBrutalityRed) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {}
 
-func (DroneOfBrutalityYellow) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+func (DroneOfBrutalityYellow) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
 }
 
-func (DroneOfBrutalityBlue) Play(g card.GameEngine, l card.Logger, self *card.CardState) {}
+func (DroneOfBrutalityBlue) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {}

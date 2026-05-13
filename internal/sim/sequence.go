@@ -51,7 +51,7 @@ func FormatLogEntry(e turnlogger.LogEntry) string {
 // (auras / items / banished / graveyard / opponent-marked) and matchup config (incoming
 // damage, arcane). Per-leaf and per-permutation copies branch off via Copy().
 func newTurnMasterState(prior Prior, mp Matchup, d *deck.Deck) *gameengine.GameState {
-	g := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().
+	ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().
 		SetHero(prior.Hero).
 		SetArsenal(prior.Arsenal).
 		SetBanished(append([]card.Card(nil), prior.Banished...)).
@@ -60,7 +60,7 @@ func newTurnMasterState(prior Prior, mp Matchup, d *deck.Deck) *gameengine.GameS
 		SetIncomingDamage(mp.IncomingDamage).
 		SetArcaneIncomingDamage(mp.ArcaneIncomingDamage).
 		Build()}
-	s := g.GameState
+	s := ge.GameState
 	s.SetDeck(d.Copy())
 	for _, a := range prior.Auras {
 		s.CreateAura(a.Copy())
@@ -266,11 +266,11 @@ func bestAttackWithWeapons(
 // (when runechants > 0) for variable-cost DR cost probing. Defense-reactions read
 // RunechantCount() off this engine to decide their Cost; no other state matters.
 func newDRCostProbe(runechants int) *gameengine.GameEngine {
-	g := gameengine.New()
+	ge := gameengine.New()
 	if runechants > 0 {
-		g.CreateAura(NewRunechantAura(runechants))
+		ge.CreateAura(NewRunechantAura(runechants))
 	}
-	return g
+	return ge
 }
 
 // sequenceContext carries the stable per-partition-leaf environment.
@@ -320,7 +320,7 @@ func (ctx *sequenceContext) runDefense(defenders, pitched []card.Card, deckPile 
 	state := ctx.leafState
 	state.SetLogger(ctx.newPermLogger())
 	state.SetDeck(deckPile)
-	engine := state.Engine()
+	ge := state.Engine()
 	cs := &ctx.bufs.drCardStateScratch
 
 	total := 0
@@ -341,7 +341,7 @@ func (ctx *sequenceContext) runDefense(defenders, pitched []card.Card, deckPile 
 		state.SetIncomingDamage(remaining)
 		state.SetCacheable(true)
 		*cs = card.CardState{Card: def, FromArsenal: i == arsenalDefenderIdx}
-		engine.ResolveChainStep(state.Logger(), cs)
+		ge.ResolveChainStep(state.Logger(), cs)
 		total += state.Value()
 		remaining = state.IncomingDamage()
 		if !state.IsCacheable() {
@@ -355,11 +355,11 @@ func (ctx *sequenceContext) runDefense(defenders, pitched []card.Card, deckPile 
 		if attackerMetaPtrFor(def).actsAsDR {
 			continue
 		}
-		bestMode, bestCost := pickBlockerMode(def, engine, cs, blockBudget)
+		bestMode, bestCost := pickBlockerMode(def, ge, cs, blockBudget)
 		blockBudget -= bestCost
 		*cs = card.CardState{Card: def, Mode: bestMode}
 		if b, ok := def.(card.Blocker); ok {
-			b.Block(engine, state.Logger(), cs)
+			b.Block(ge, state.Logger(), cs)
 		}
 		block := cs.EffectiveDefense()
 		if block > remaining {
@@ -415,9 +415,9 @@ func (ctx *sequenceContext) bestSequence(attackers []card.Card) (int, int, *game
 		}
 		emptyAttackers := ctx.bufs.ptrBuf[:0]
 		permState := ctx.preparePermState(emptyAttackers, 0)
-		eng := permState.Engine()
-		if eng.HasEndOfTurnFire() {
-			eng.FireEndOfTurn()
+		ge := permState.Engine()
+		if ge.HasEndOfTurnFire() {
+			ge.FireEndOfTurn()
 		}
 		return 0, pendingFutureValueFromState(permState), permState, true
 	}
@@ -565,7 +565,7 @@ func (ctx *sequenceContext) playSequenceWithMeta(n int) (damage int, futureValue
 	played := ptrBuf[:n]
 	state := ctx.preparePermState(played, n)
 	ctx.permState = state
-	engine := state.Engine()
+	ge := state.Engine()
 	pool := pitchPool{
 		perm:      ctx.attackPitchPerm,
 		vals:      ctx.attackPitchVals,
@@ -581,12 +581,12 @@ func (ctx *sequenceContext) playSequenceWithMeta(n int) (damage int, futureValue
 		if gameengine.LikelyToHit(activeAttack) {
 			for i := range activeAttack.OnHit {
 				h := &activeAttack.OnHit[i]
-				h.Fire(engine, state.Logger(), activeAttack, h)
+				h.Fire(ge, state.Logger(), activeAttack, h)
 			}
 			types := activeAttack.Card.Types(nil)
 			prevTriggering := state.TriggeringCard()
 			state.SetTriggeringCard(activeAttack.Card)
-			engine.FireHit(types)
+			ge.FireHit(types)
 			state.SetTriggeringCard(prevTriggering)
 		}
 		activeAttack = nil
@@ -601,7 +601,7 @@ func (ctx *sequenceContext) playSequenceWithMeta(n int) (damage int, futureValue
 		}
 		state.RemoveFromHand(pc.Card)
 		prevPitchIdx := pool.idx
-		contrib, ok := pool.pay(m.costAt(engine, pc.Mode))
+		contrib, ok := pool.pay(m.costAt(ge, pc.Mode))
 		if !ok {
 			return 0, 0, 0, nil, false
 		}
@@ -611,21 +611,21 @@ func (ctx *sequenceContext) playSequenceWithMeta(n int) (damage int, futureValue
 		}
 		if m.types.IsAttackReaction() {
 			if pre, ok := pc.Card.(card.PlayPrecondition); ok {
-				if !pre.PlayPrecondition(engine, pc) {
+				if !pre.PlayPrecondition(ge, pc) {
 					return 0, 0, 0, nil, false
 				}
 			}
 			ar, ok := pc.Card.(AttackReaction)
-			if !ok || activeAttack == nil || !ar.ARTargetAllowed(engine, activeAttack.Card, pc.Mode) {
+			if !ok || activeAttack == nil || !ar.ARTargetAllowed(ge, activeAttack.Card, pc.Mode) {
 				return 0, 0, 0, nil, false
 			}
-			ctx.hero.OnCardPlayed(pc.Card, engine, state.Logger())
+			ctx.hero.OnCardPlayed(pc.Card, ge, state.Logger())
 			state.SetAttackReactionTarget(activeAttack)
-			engine.ResolveChainStep(state.Logger(), pc)
+			ge.ResolveChainStep(state.Logger(), pc)
 			state.SetAttackReactionTarget(nil)
 			state.SetCardsPlayed(append(state.CardsPlayed(), pc.Card))
 			state.AppendGraveyard(pc.Card)
-			if pc.EffectiveGoAgain(engine) {
+			if pc.EffectiveGoAgain(ge) {
 				state.AddActionPoints(1)
 			}
 			continue
@@ -633,22 +633,22 @@ func (ctx *sequenceContext) playSequenceWithMeta(n int) (damage int, futureValue
 
 		finalizeActiveAttack()
 		if pre, ok := pc.Card.(card.PlayPrecondition); ok {
-			if !pre.PlayPrecondition(engine, pc) {
+			if !pre.PlayPrecondition(ge, pc) {
 				return 0, 0, 0, nil, false
 			}
 		}
 
 		state.SetCardsRemaining(played[i+1:])
 
-		ctx.hero.OnCardPlayed(pc.Card, engine, state.Logger())
+		ctx.hero.OnCardPlayed(pc.Card, ge, state.Logger())
 		state.SetCurrentStepRerouted(false)
-		engine.ResolveChainStep(state.Logger(), pc)
+		ge.ResolveChainStep(state.Logger(), pc)
 		if m.isAttack {
-			engine.FireAttack(pc.Card)
+			ge.FireAttack(pc.Card)
 			state.ClearOpponentMarked()
 		}
 		if m.isAttackAction {
-			engine.FireAttackAction(pc.Card)
+			ge.FireAttackAction(pc.Card)
 		}
 		if m.isAttack {
 			activeAttack = pc
@@ -660,7 +660,7 @@ func (ctx *sequenceContext) playSequenceWithMeta(n int) (damage int, futureValue
 		if !m.types.PersistsInPlay() && !state.CurrentStepRerouted() {
 			state.AppendGraveyard(pc.Card)
 		}
-		if pc.EffectiveGoAgain(engine) {
+		if pc.EffectiveGoAgain(ge) {
 			state.AddActionPoints(1)
 		}
 	}
@@ -669,23 +669,23 @@ func (ctx *sequenceContext) playSequenceWithMeta(n int) (damage int, futureValue
 	if pool.idx < pool.n {
 		return 0, 0, 0, nil, false
 	}
-	if engine.HasEndOfTurnFire() {
-		engine.FireEndOfTurn()
+	if ge.HasEndOfTurnFire() {
+		ge.FireEndOfTurn()
 	}
 	return state.Value(), pendingFutureValueFromState(state), pool.remaining, state, true
 }
 
 // pendingFutureValueFromState sums the Count of every Aura plus every Item on the state
 // at end of chain — the partition tiebreaker's "hidden later-turn payoff" signal.
-func pendingFutureValueFromState(s *gameengine.GameState) int {
-	if s == nil {
+func pendingFutureValueFromState(gs *gameengine.GameState) int {
+	if gs == nil {
 		return 0
 	}
 	total := 0
-	for _, a := range s.Auras() {
+	for _, a := range gs.Auras() {
 		total += a.Count()
 	}
-	for _, it := range s.Items() {
+	for _, it := range gs.Items() {
 		total += it.Count()
 	}
 	return total

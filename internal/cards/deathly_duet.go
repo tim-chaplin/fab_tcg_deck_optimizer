@@ -12,21 +12,21 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
-func (DeathlyDuetRed) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
-	deathlyDuetApplyRiders(g, l, self)
+func (DeathlyDuetRed) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
+	deathlyDuetApplyRiders(ge, l, self)
 }
 
-func (DeathlyDuetYellow) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
-	deathlyDuetApplyRiders(g, l, self)
+func (DeathlyDuetYellow) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
+	deathlyDuetApplyRiders(ge, l, self)
 }
 
-func (DeathlyDuetBlue) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
-	deathlyDuetApplyRiders(g, l, self)
+func (DeathlyDuetBlue) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
+	deathlyDuetApplyRiders(ge, l, self)
 }
 
 // deathlyDuetApplyRiders folds the two pitch-conditional riders into self and state.
 // Both riders can stack when self.PitchedToPlay contains both roles.
-func deathlyDuetApplyRiders(g card.GameEngine, l card.Logger, self *card.CardState) {
+func deathlyDuetApplyRiders(ge card.GameEngine, l card.Logger, self *card.CardState) {
 	var attackPitched, nonAttackActionPitched bool
 	for _, p := range self.PitchedToPlay {
 		t := p.Types(nil)
@@ -41,7 +41,7 @@ func deathlyDuetApplyRiders(g card.GameEngine, l card.Logger, self *card.CardSta
 		self.BonusAttack += 2
 	}
 	if nonAttackActionPitched {
-		g.CreateRunechants(2)
+		ge.CreateRunechants(2)
 		l.AppendPostTrigger(self.Card.DisplayName(), "Created 2 runechants", 2)
 	}
 }

@@ -10,20 +10,20 @@ import (
 )
 
 // springLoadPlay applies the +3{p} 'no cards in hand' rider.
-func springLoadPlay(g card.GameEngine, l card.Logger, self *card.CardState) {
-	if len(g.Hand()) == 0 {
+func springLoadPlay(ge card.GameEngine, l card.Logger, self *card.CardState) {
+	if len(ge.Hand()) == 0 {
 		self.BonusAttack += 3
 	}
 }
 
-func (SpringLoadRed) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
-	springLoadPlay(g, l, self)
+func (SpringLoadRed) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
+	springLoadPlay(ge, l, self)
 }
 
-func (SpringLoadYellow) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
-	springLoadPlay(g, l, self)
+func (SpringLoadYellow) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
+	springLoadPlay(ge, l, self)
 }
 
-func (SpringLoadBlue) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
-	springLoadPlay(g, l, self)
+func (SpringLoadBlue) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
+	springLoadPlay(ge, l, self)
 }

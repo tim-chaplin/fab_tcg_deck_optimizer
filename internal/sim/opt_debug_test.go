@@ -49,8 +49,8 @@ func TestOptDebug_PrintsOnlyWhenSet(t *testing.T) {
 		// Off by default: no output.
 		gameengine.OptDebug = false
 		out := captureStdout(t, func() {
-			s := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCards([]card.Card{a, b}).Build()}
-			s.Opt(s.Logger(), 2)
+			ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCards([]card.Card{a, b}).Build()}
+			ge.Opt(ge.Logger(), 2)
 		})
 		if out != "" {
 			t.Errorf("gameengine.OptDebug=false produced stdout: %q", out)
@@ -59,8 +59,8 @@ func TestOptDebug_PrintsOnlyWhenSet(t *testing.T) {
 		// On: a single line naming inputs, top, and bottom.
 		gameengine.OptDebug = true
 		out = captureStdout(t, func() {
-			s := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCards([]card.Card{a, b}).Build()}
-			s.Opt(s.Logger(), 2)
+			ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCards([]card.Card{a, b}).Build()}
+			ge.Opt(ge.Logger(), 2)
 		})
 		if !strings.Contains(out, "Opt(2)") || !strings.Contains(out, "top=") || !strings.Contains(out, "bottom=") {
 			t.Errorf("gameengine.OptDebug=true output missing expected fragments: %q", out)

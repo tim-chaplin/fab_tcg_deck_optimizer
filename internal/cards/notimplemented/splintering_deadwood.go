@@ -12,17 +12,17 @@ import (
 // not implemented: aura-swap rider modelled net-zero; no tempo credit for trading a weak aura
 // for a Runechant
 
-func (SplinteringDeadwoodRed) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+func (SplinteringDeadwoodRed) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
 }
 
 // not implemented: aura-swap rider modelled net-zero; no tempo credit for trading a weak aura
 // for a Runechant
 
-func (SplinteringDeadwoodYellow) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+func (SplinteringDeadwoodYellow) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
 }
 
 // not implemented: aura-swap rider modelled net-zero; no tempo credit for trading a weak aura
 // for a Runechant
 
-func (SplinteringDeadwoodBlue) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+func (SplinteringDeadwoodBlue) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
 }

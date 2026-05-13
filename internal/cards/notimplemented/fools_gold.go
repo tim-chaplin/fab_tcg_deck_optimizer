@@ -10,4 +10,4 @@ import (
 
 // not implemented: discard trigger creates a Gold token
 
-func (FoolsGoldYellow) Play(g card.GameEngine, l card.Logger, self *card.CardState) {}
+func (FoolsGoldYellow) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {}

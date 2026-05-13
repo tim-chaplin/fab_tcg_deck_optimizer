@@ -13,12 +13,12 @@ import (
 func TestSigilOfProtection_SetsAuraCreated(t *testing.T) {
 	cases := []card.Card{notimplemented.SigilOfProtectionRed{}, notimplemented.SigilOfProtectionYellow{}, notimplemented.SigilOfProtectionBlue{}}
 	for _, c := range cases {
-		s := gameengine.New()
-		s.ResolveChainStep(s.Logger(), &card.CardState{Card: c})
-		if got := s.Value(); got != 0 {
+		ge := gameengine.New()
+		ge.ResolveChainStep(ge.Logger(), &card.CardState{Card: c})
+		if got := ge.Value(); got != 0 {
 			t.Errorf("%s: Play() = %d, want 0", c.Name(), got)
 		}
-		if !s.AuraCreated() {
+		if !ge.AuraCreated() {
 			t.Errorf("%s: AuraCreated = false, want true", c.Name())
 		}
 	}

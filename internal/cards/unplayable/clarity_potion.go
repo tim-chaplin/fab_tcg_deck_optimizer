@@ -8,4 +8,4 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
-func (ClarityPotionBlue) Play(g card.GameEngine, l card.Logger, self *card.CardState) {}
+func (ClarityPotionBlue) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {}

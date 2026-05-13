@@ -15,22 +15,22 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
-func (SigilOfTheArknightBlue) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
-	g.CreateStartOfTurnAura(self, sigilOfTheArknightReveal, 1)
+func (SigilOfTheArknightBlue) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
+	ge.CreateStartOfTurnAura(self, sigilOfTheArknightReveal, 1)
 }
 
 // sigilOfTheArknightReveal logs the outcome on every fire — "drew X into hand" on a hit or
 // "revealed X but didn't draw it" on a whiff — so the printout makes the random reveal
 // visible. Empty deck is the silent edge case.
-func sigilOfTheArknightReveal(g card.GameEngine, l card.Logger, a card.Aura) {
+func sigilOfTheArknightReveal(ge card.GameEngine, l card.Logger, a card.Aura) {
 	a.Destroy(true)
-	top, ok := g.PeekDeck()
+	top, ok := ge.PeekDeck()
 	if !ok {
 		return
 	}
 	self := SigilOfTheArknightBlue{}.DisplayName()
 	if top.Types(nil).IsAttackAction() {
-		g.DrawOne()
+		ge.DrawOne()
 		l.AppendPostTriggerf(self, 0, "%s drew %s into hand", self, top.DisplayName())
 		return
 	}

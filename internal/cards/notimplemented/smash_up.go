@@ -11,5 +11,5 @@ import (
 
 // not implemented: on-hit opponent-arsenal manipulation rider
 
-func (SmashUpRed) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+func (SmashUpRed) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
 }

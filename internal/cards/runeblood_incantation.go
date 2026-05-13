@@ -12,24 +12,24 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
-func (RunebloodIncantationRed) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
-	g.CreateStartOfTurnAura(self, runebloodAuraHandler, 3)
+func (RunebloodIncantationRed) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
+	ge.CreateStartOfTurnAura(self, runebloodAuraHandler, 3)
 }
 
-func (RunebloodIncantationYellow) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
-	g.CreateStartOfTurnAura(self, runebloodAuraHandler, 2)
+func (RunebloodIncantationYellow) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
+	ge.CreateStartOfTurnAura(self, runebloodAuraHandler, 2)
 }
 
-func (RunebloodIncantationBlue) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
-	g.CreateStartOfTurnAura(self, runebloodAuraHandler, 1)
+func (RunebloodIncantationBlue) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
+	ge.CreateStartOfTurnAura(self, runebloodAuraHandler, 1)
 }
 
 // runebloodAuraHandler creates 1 runechant per fire and decrements the verse counter.
 // When the last verse fires, destroys the aura and graveyards the card.
-func runebloodAuraHandler(g card.GameEngine, l card.Logger, a card.Aura) {
+func runebloodAuraHandler(ge card.GameEngine, l card.Logger, a card.Aura) {
 	name := a.CardName()
 	lastVerse := a.DecrementCount() <= 0
-	g.CreateRunechants(1)
+	ge.CreateRunechants(1)
 	l.AppendPostTrigger(name, "Created a runechant (verse counter)", 1)
 	if lastVerse {
 		a.Destroy(true)

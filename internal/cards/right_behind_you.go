@@ -17,9 +17,9 @@ import (
 
 // rightBehindYouBlock fires the +1{d} together-bonus when at least two plain blockers
 // share the defenders slot. Short-circuits on the second non-DR sighting.
-func rightBehindYouBlock(g card.GameEngine, l card.Logger, self *card.CardState) {
+func rightBehindYouBlock(ge card.GameEngine, l card.Logger, self *card.CardState) {
 	plainCount := 0
-	for _, d := range g.Defenders() {
+	for _, d := range ge.Defenders() {
 		if d.Types(nil).IsDefenseReaction() {
 			continue
 		}
@@ -31,17 +31,17 @@ func rightBehindYouBlock(g card.GameEngine, l card.Logger, self *card.CardState)
 	}
 }
 
-func (RightBehindYouRed) Block(g card.GameEngine, l card.Logger, self *card.CardState) {
-	rightBehindYouBlock(g, l, self)
+func (RightBehindYouRed) Block(ge card.GameEngine, l card.Logger, self *card.CardState) {
+	rightBehindYouBlock(ge, l, self)
 }
-func (RightBehindYouRed) Play(g card.GameEngine, l card.Logger, self *card.CardState) {}
+func (RightBehindYouRed) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {}
 
-func (RightBehindYouYellow) Block(g card.GameEngine, l card.Logger, self *card.CardState) {
-	rightBehindYouBlock(g, l, self)
+func (RightBehindYouYellow) Block(ge card.GameEngine, l card.Logger, self *card.CardState) {
+	rightBehindYouBlock(ge, l, self)
 }
-func (RightBehindYouYellow) Play(g card.GameEngine, l card.Logger, self *card.CardState) {}
+func (RightBehindYouYellow) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {}
 
-func (RightBehindYouBlue) Block(g card.GameEngine, l card.Logger, self *card.CardState) {
-	rightBehindYouBlock(g, l, self)
+func (RightBehindYouBlue) Block(ge card.GameEngine, l card.Logger, self *card.CardState) {
+	rightBehindYouBlock(ge, l, self)
 }
-func (RightBehindYouBlue) Play(g card.GameEngine, l card.Logger, self *card.CardState) {}
+func (RightBehindYouBlue) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {}

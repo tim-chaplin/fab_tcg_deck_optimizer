@@ -21,8 +21,8 @@ func TestFromArsenalGoAgain_GrantsOnArsenalCopyOnly(t *testing.T) {
 	}
 	for _, c := range cards {
 		hand := &card.CardState{Card: c}
-		s := gameengine.New()
-		s.ResolveChainStep(s.Logger(), hand)
+		ge := gameengine.New()
+		ge.ResolveChainStep(ge.Logger(), hand)
 		if hand.GrantedGoAgain {
 			t.Errorf("%s: GrantedGoAgain = true with FromArsenal=false, want false", c.Name())
 		}

@@ -9,4 +9,4 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
-func (AmuletOfEchoesBlue) Play(g card.GameEngine, l card.Logger, self *card.CardState) {}
+func (AmuletOfEchoesBlue) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {}

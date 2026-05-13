@@ -13,31 +13,31 @@ import (
 
 const amplifyTheArknightPrintedCost = 3
 
-func amplifyTheArknightCost(g card.GameEngine) int {
-	eff := amplifyTheArknightPrintedCost - g.RunechantCount()
+func amplifyTheArknightCost(ge card.GameEngine) int {
+	eff := amplifyTheArknightPrintedCost - ge.RunechantCount()
 	if eff < 0 {
 		return 0
 	}
 	return eff
 }
 
-func (AmplifyTheArknightRed) Cost(g card.GameEngine) int { return amplifyTheArknightCost(g) }
-func (AmplifyTheArknightRed) MinCost() int               { return 0 }
-func (AmplifyTheArknightRed) MaxCost() int               { return amplifyTheArknightPrintedCost }
+func (AmplifyTheArknightRed) Cost(ge card.GameEngine) int { return amplifyTheArknightCost(ge) }
+func (AmplifyTheArknightRed) MinCost() int                { return 0 }
+func (AmplifyTheArknightRed) MaxCost() int                { return amplifyTheArknightPrintedCost }
 
-func (AmplifyTheArknightRed) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+func (AmplifyTheArknightRed) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
 }
 
-func (AmplifyTheArknightYellow) Cost(g card.GameEngine) int { return amplifyTheArknightCost(g) }
-func (AmplifyTheArknightYellow) MinCost() int               { return 0 }
-func (AmplifyTheArknightYellow) MaxCost() int               { return amplifyTheArknightPrintedCost }
+func (AmplifyTheArknightYellow) Cost(ge card.GameEngine) int { return amplifyTheArknightCost(ge) }
+func (AmplifyTheArknightYellow) MinCost() int                { return 0 }
+func (AmplifyTheArknightYellow) MaxCost() int                { return amplifyTheArknightPrintedCost }
 
-func (AmplifyTheArknightYellow) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+func (AmplifyTheArknightYellow) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
 }
 
-func (AmplifyTheArknightBlue) Cost(g card.GameEngine) int { return amplifyTheArknightCost(g) }
-func (AmplifyTheArknightBlue) MinCost() int               { return 0 }
-func (AmplifyTheArknightBlue) MaxCost() int               { return amplifyTheArknightPrintedCost }
+func (AmplifyTheArknightBlue) Cost(ge card.GameEngine) int { return amplifyTheArknightCost(ge) }
+func (AmplifyTheArknightBlue) MinCost() int                { return 0 }
+func (AmplifyTheArknightBlue) MaxCost() int                { return amplifyTheArknightPrintedCost }
 
-func (AmplifyTheArknightBlue) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+func (AmplifyTheArknightBlue) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
 }

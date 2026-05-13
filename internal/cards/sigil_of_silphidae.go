@@ -13,14 +13,14 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
-func (SigilOfSilphidaeBlue) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
-	banishAuraFromGraveyard(g, l, self.Card.DisplayName())
-	g.CreateStartOfTurnAura(self, sigilOfSilphidaeAuraHandler, 1)
+func (SigilOfSilphidaeBlue) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
+	banishAuraFromGraveyard(ge, l, self.Card.DisplayName())
+	ge.CreateStartOfTurnAura(self, sigilOfSilphidaeAuraHandler, 1)
 }
 
 // sigilOfSilphidaeAuraHandler runs the leave trigger on the next turn: scans the graveyard
 // for an aura to banish and deals 1 arcane damage on success, then destroys the aura.
-func sigilOfSilphidaeAuraHandler(g card.GameEngine, l card.Logger, a card.Aura) {
-	banishAuraFromGraveyard(g, l, a.CardName())
+func sigilOfSilphidaeAuraHandler(ge card.GameEngine, l card.Logger, a card.Aura) {
+	banishAuraFromGraveyard(ge, l, a.CardName())
 	a.Destroy(true)
 }

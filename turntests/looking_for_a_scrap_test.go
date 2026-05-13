@@ -14,8 +14,8 @@ import (
 func TestLookingForAScrap_NoBanishableRiderOff(t *testing.T) {
 	for _, c := range []card.Card{cards.LookingForAScrapRed{}, cards.LookingForAScrapYellow{}, cards.LookingForAScrapBlue{}} {
 		self := &card.CardState{Card: c}
-		s := gameengine.New()
-		s.ResolveChainStep(s.Logger(), self)
+		ge := gameengine.New()
+		ge.ResolveChainStep(ge.Logger(), self)
 		if self.GrantedGoAgain {
 			t.Errorf("%s [%d{p}]: GrantedGoAgain = true with empty graveyard, want false", c.Name(), c.Pitch())
 		}
@@ -29,9 +29,9 @@ func TestLookingForAScrap_NoBanishableRiderOff(t *testing.T) {
 // go-again rider.
 func TestLookingForAScrap_BanishesOnePowerForBonus(t *testing.T) {
 	for _, c := range []card.Card{cards.LookingForAScrapRed{}, cards.LookingForAScrapYellow{}, cards.LookingForAScrapBlue{}} {
-		s := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetGraveyard([]card.Card{testutils.GenericAttack(0, 1)}).Build()}
+		ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetGraveyard([]card.Card{testutils.GenericAttack(0, 1)}).Build()}
 		self := &card.CardState{Card: c}
-		s.ResolveChainStep(s.Logger(), self)
+		ge.ResolveChainStep(ge.Logger(), self)
 		if !self.GrantedGoAgain {
 			t.Errorf("%s [%d{p}]: GrantedGoAgain = false after banish, want true", c.Name(), c.Pitch())
 		}

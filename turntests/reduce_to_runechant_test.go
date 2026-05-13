@@ -23,14 +23,14 @@ func TestReduceToRunechant_PlayCreditsCreatedToken(t *testing.T) {
 		cards.ReduceToRunechantBlue{},
 	}
 	for _, c := range cases {
-		s := gameengine.New()
-		s.ResolveChainStep(s.Logger(), &card.CardState{Card: c})
-		got := s.Value()
+		ge := gameengine.New()
+		ge.ResolveChainStep(ge.Logger(), &card.CardState{Card: c})
+		got := ge.Value()
 		if got != 1 {
 			t.Errorf("%s: Play() = %d, want 1 (created Runechant credits +1)", c.Name(), got)
 		}
-		if s.RunechantCount() != 1 {
-			t.Errorf("%s: Runechants = %d, want 1 after Play", c.Name(), s.RunechantCount())
+		if ge.RunechantCount() != 1 {
+			t.Errorf("%s: Runechants = %d, want 1 after Play", c.Name(), ge.RunechantCount())
 		}
 	}
 }

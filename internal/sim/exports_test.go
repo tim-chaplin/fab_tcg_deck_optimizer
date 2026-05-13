@@ -58,7 +58,7 @@ func (s *SequenceContextForTest) BestSequence(attackers []card.Card) (int, int, 
 }
 
 // FireEndOfTurn re-exports the engine's end-of-turn fire for sim_test consumers.
-func FireEndOfTurn(state *gameengine.GameEngine) { state.FireEndOfTurn() }
+func FireEndOfTurn(ge *gameengine.GameEngine) { ge.FireEndOfTurn() }
 
 // PromoteRandomHandCardToArsenal re-exports promoteRandomHandCardToArsenal.
 func PromoteRandomHandCardToArsenal(best *TurnSummary, startingHand []card.Card, arsenalCardIn card.Card) {
@@ -79,14 +79,14 @@ func AppendGroupedChainEntries(out []string, log []turnlogger.LogEntry) []string
 }
 
 // DefendersDamage re-exports defendersDamage with an unbounded block budget.
-func DefendersDamage(defenders, pitched []card.Card, d *deck.Deck, state *gameengine.GameEngine, gravBuf []card.Card, cs *card.CardState, incomingDamage, arsenalDefenderIdx int) (int, []card.Card) {
-	total, gravBuf, _ := defendersDamage(defenders, pitched, d, state, gravBuf, cs, incomingDamage, noBlockBudgetCap, arsenalDefenderIdx)
+func DefendersDamage(defenders, pitched []card.Card, d *deck.Deck, ge *gameengine.GameEngine, gravBuf []card.Card, cs *card.CardState, incomingDamage, arsenalDefenderIdx int) (int, []card.Card) {
+	total, gravBuf, _ := defendersDamage(defenders, pitched, d, ge, gravBuf, cs, incomingDamage, noBlockBudgetCap, arsenalDefenderIdx)
 	return total, gravBuf
 }
 
 // DefendersDamageWithBudget is the budget-aware export.
-func DefendersDamageWithBudget(defenders, pitched []card.Card, d *deck.Deck, state *gameengine.GameEngine, gravBuf []card.Card, cs *card.CardState, incomingDamage, blockBudget, arsenalDefenderIdx int) (int, []card.Card) {
-	total, gravBuf, _ := defendersDamage(defenders, pitched, d, state, gravBuf, cs, incomingDamage, blockBudget, arsenalDefenderIdx)
+func DefendersDamageWithBudget(defenders, pitched []card.Card, d *deck.Deck, ge *gameengine.GameEngine, gravBuf []card.Card, cs *card.CardState, incomingDamage, blockBudget, arsenalDefenderIdx int) (int, []card.Card) {
+	total, gravBuf, _ := defendersDamage(defenders, pitched, d, ge, gravBuf, cs, incomingDamage, blockBudget, arsenalDefenderIdx)
 	return total, gravBuf
 }
 
@@ -118,41 +118,41 @@ func (b *attackBufs) State() *gameengine.GameEngine {
 // TurnSummary by hand use this to populate the State *GameState without going through
 // the full chain runner.
 func EngineWithHand(h []card.Card) *gameengine.GameState {
-	s := gameengine.GameStateBuilder().Build()
-	s.SetHand(h)
-	return s
+	gs := gameengine.GameStateBuilder().Build()
+	gs.SetHand(h)
+	return gs
 }
 
 // EngineWithItems returns a fresh GameState with the supplied items installed.
 func EngineWithItems(items []*Item) *gameengine.GameState {
-	s := gameengine.GameStateBuilder().Build()
+	gs := gameengine.GameStateBuilder().Build()
 	for _, it := range items {
-		s.CreateItem(it)
+		gs.CreateItem(it)
 	}
-	return s
+	return gs
 }
 
 // EngineWith returns a fresh GameState with hand, items, and log entries installed.
 // log can be nil to skip log seeding.
 func EngineWith(h []card.Card, items []*Item, log []turnlogger.LogEntry) *gameengine.GameState {
-	s := gameengine.GameStateBuilder().Build()
-	s.SetHand(h)
+	gs := gameengine.GameStateBuilder().Build()
+	gs.SetHand(h)
 	for _, it := range items {
-		s.CreateItem(it)
+		gs.CreateItem(it)
 	}
 	if len(log) > 0 {
 		for _, e := range log {
 			switch e.Kind {
 			case turnlogger.LogEntryChainStep:
-				s.Logger().AppendChainStep(e.Text, e.N)
+				gs.Logger().AppendChainStep(e.Text, e.N)
 			case turnlogger.LogEntryPostTrigger:
-				s.Logger().AppendPostTrigger(e.Source, e.Text, e.N)
+				gs.Logger().AppendPostTrigger(e.Source, e.Text, e.N)
 			case turnlogger.LogEntryPreTrigger:
-				s.Logger().AppendPreTrigger(e.Source, e.Text, e.N)
+				gs.Logger().AppendPreTrigger(e.Source, e.Text, e.N)
 			}
 		}
 	}
-	return s
+	return gs
 }
 
 // EvaluateImplForTest re-exports the unexported (*Evaluator).evaluateImpl.

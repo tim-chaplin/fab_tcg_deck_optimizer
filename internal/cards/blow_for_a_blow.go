@@ -18,18 +18,18 @@ const blowForABlowPingValue = 1
 
 // BlowForABlowRed.GoAgain returns true when the active hero opts into LowerHealthWanter.
 // nil-g reads as false (the printed default).
-func (BlowForABlowRed) GoAgain(g card.GameEngine) bool {
-	if g == nil {
+func (BlowForABlowRed) GoAgain(ge card.GameEngine) bool {
+	if ge == nil {
 		return false
 	}
-	return g.HeroWantsLowerHealth()
+	return ge.HeroWantsLowerHealth()
 }
-func (BlowForABlowRed) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+func (BlowForABlowRed) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
 	self.RegisterOnHit(blowForABlowOnHit)
 }
 
 // blowForABlowOnHit fires the printed "When this hits, deal 1 damage" rider.
-func blowForABlowOnHit(g card.GameEngine, l card.Logger, self *card.CardState, _ *card.OnHitHandler) {
-	g.AddValue(blowForABlowPingValue)
+func blowForABlowOnHit(ge card.GameEngine, l card.Logger, self *card.CardState, _ *card.OnHitHandler) {
+	ge.AddValue(blowForABlowPingValue)
 	l.AppendPostTrigger(self.Card.DisplayName(), "On-hit dealt 1 damage", blowForABlowPingValue)
 }

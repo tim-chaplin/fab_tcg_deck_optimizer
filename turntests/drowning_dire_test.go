@@ -15,8 +15,8 @@ import (
 func TestDrowningDire_NoAuraNoDominate(t *testing.T) {
 	for _, c := range []card.Card{cards.DrowningDireRed{}, cards.DrowningDireYellow{}, cards.DrowningDireBlue{}} {
 		self := &card.CardState{Card: c}
-		s := gameengine.New()
-		s.ResolveChainStep(s.Logger(), self)
+		ge := gameengine.New()
+		ge.ResolveChainStep(ge.Logger(), self)
 		if self.GrantedDominate {
 			t.Errorf("%s [%d{p}]: GrantedDominate = true without prior aura, want false", c.Name(), c.Pitch())
 		}
@@ -26,12 +26,12 @@ func TestDrowningDire_NoAuraNoDominate(t *testing.T) {
 // Tests that an aura played earlier this turn flips GrantedDominate via AuraCreated.
 func TestDrowningDire_AuraGrantsDominate(t *testing.T) {
 	for _, c := range []card.Card{cards.DrowningDireRed{}, cards.DrowningDireYellow{}, cards.DrowningDireBlue{}} {
-		s := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().
+		ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().
 			SetCardsPlayed([]card.Card{testutils.Aura{}}).
 			SetAuraCreated(true).
 			Build()}
 		self := &card.CardState{Card: c}
-		s.ResolveChainStep(s.Logger(), self)
+		ge.ResolveChainStep(ge.Logger(), self)
 		if !self.GrantedDominate {
 			t.Errorf("%s [%d{p}]: GrantedDominate = false after aura, want true", c.Name(), c.Pitch())
 		}
@@ -42,18 +42,18 @@ func TestDrowningDire_AuraGrantsDominate(t *testing.T) {
 func TestDrowningDire_OnHitRecyclesNonAttackToBottom(t *testing.T) {
 	non := testutils.GenericAction()
 	deck := []card.Card{testutils.RedAttack{}}
-	s := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().
+	ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().
 		SetCards(deck).
 		SetGraveyard([]card.Card{non}).
 		Build()}
 	self := &card.CardState{Card: cards.DrowningDireRed{}}
-	s.ResolveChainStep(s.Logger(), self)
+	ge.ResolveChainStep(ge.Logger(), self)
 	self.BonusAttack = 2
-	testutils.FireOnHitIfLikely(s, s.Logger(), self)
-	if got := s.Deck().Size(); got != 2 {
+	testutils.FireOnHitIfLikely(ge, ge.Logger(), self)
+	if got := ge.Deck().Size(); got != 2 {
 		t.Errorf("deck size after recycle = %d, want 2 (target appended to bottom)", got)
 	}
-	if top := s.Deck().PeekTop(); top != (testutils.RedAttack{}) {
+	if top := ge.Deck().PeekTop(); top != (testutils.RedAttack{}) {
 		t.Errorf("deck top after recycle = %v, want RedAttack still on top (target went to bottom)", top)
 	}
 }
