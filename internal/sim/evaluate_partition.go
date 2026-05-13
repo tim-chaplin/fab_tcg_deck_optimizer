@@ -6,12 +6,12 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/gameengine"
 )
 
-// evaluatePartition is the shared "given a fixed role assignment, score it" body used by
-// both findBest's recurse leaf (one of many partitions explored during the search) and
-// replayBest (the cached partition replayed without searching). It groups hand cards into
-// pitched/attackers/defenders/held, folds the arsenal-in card into the right bucket per
-// rolesBuf[n], computes the arsenal indices, and forwards everything to
-// bestAttackWithWeapons. The winning *GameEngine for this partition's chain is returned
+// evaluatePartition is the shared "given a fixed role assignment, score it" body used
+// by both findBest's recurse leaf (one of many partitions explored during the search)
+// and replayBest (the cached partition replayed without searching). It groups hand
+// cards into pitched/attackers/defenders/held, folds the arsenal-in card into the right
+// bucket per rolesBuf[n], computes the arsenal indices, and forwards everything to
+// bestAttackWithWeapons. The winning *GameState for this partition's chain is returned
 // for the caller to keep — discarding losers requires no explicit work since the only
 // reference to them was inside this leaf.
 //
@@ -24,7 +24,7 @@ import (
 // Mutates the bufs scratch slices (pitchedBuf, attackersBuf, defendersBuf, heldBuf) in
 // place; both callers feed pooled scratch through bufs and tolerate the rewrite.
 func (e *Evaluator) evaluatePartition(
-	masterEngine *gameengine.GameEngine,
+	masterState *gameengine.GameState,
 	weapons []Weapon, hand []card.Card,
 	d *deck.Deck,
 	rolesBuf []Role, n int, bufs *attackBufs,
@@ -32,7 +32,7 @@ func (e *Evaluator) evaluatePartition(
 	prior Prior, skipLog bool,
 ) (
 	attackDealt, defenseDealt int,
-	swung []string, winner *gameengine.GameEngine,
+	swung []string, winner *gameengine.GameState,
 	ok, cacheable bool,
 	arsenalAtChainStart card.Card,
 ) {
@@ -63,7 +63,7 @@ func (e *Evaluator) evaluatePartition(
 	arsenalAtChainStart = findArsenalCard(rolesBuf, arsenalCardIn, n)
 
 	attackDealt, defenseDealt, _, swung, winner, ok, cacheable = bestAttackWithWeapons(
-		masterEngine, weapons, a, defs, p, h, d, bufs,
+		masterState, weapons, a, defs, p, h, d, bufs,
 		mp, defenseSum,
 		arsenalInIdx, arsenalDefenderIdx, arsenalAtChainStart,
 		prior, skipLog,

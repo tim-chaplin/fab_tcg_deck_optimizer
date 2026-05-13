@@ -7,13 +7,11 @@ import (
 )
 
 // Spec is the test-friendly engine constructor input. Mirrors the scalar / card-typed
-// fields of GameEngine in exported form so callers outside the package don't have to
+// fields of GameState in exported form so callers outside the package don't have to
 // chain per-field setters after construction. Build via NewFromSpec.
 //
 // Spec carries no Auras / Triggers / Items list: callers seed those individually after
-// NewFromSpec via CreateAura / CreateTrigger / CreateItem. That shape lets each entry be
-// passed as its concrete struct without a slice-conversion helper — Go boxes the value to
-// the engine's Aura interface at the single-arg call site.
+// NewFromSpec via CreateAura / CreateTrigger / CreateItem on the underlying GameState.
 type Spec struct {
 	Hero                  Hero
 	Arsenal               card.Card
@@ -37,23 +35,31 @@ type Spec struct {
 	AttackReactionTarget  *card.CardState
 }
 
-// New returns a bare GameEngine with a fresh recording *TurnLogger, cacheable=true, and no
-// other state. Sim's chain runner calls Reset(seed) before use; tests typically use
-// NewFromSpec or NewFromCards instead.
-func New() *GameEngine {
-	return &GameEngine{
-		cacheable:      true,
-		currentAuraIdx: -1,
-		logger:         turnlogger.New(),
+// NewFromState wraps s in a *GameEngine. Pass an existing *GameState to drive a
+// chain-runner state through the rules-engine API (cards' Card.Play hooks see the
+// engine); pass nil to get a fresh empty state under the engine — cacheable=true,
+// currentAuraIdx=-1, fresh logger, no other state.
+//
+// Sim's chain runner holds *GameState directly and wraps via state.Engine() when it
+// needs to invoke card hooks; tests and external callers that want a bare engine reach
+// here with nil instead.
+func NewFromState(s *GameState) *GameEngine {
+	if s == nil {
+		s = &GameState{
+			cacheable:      true,
+			currentAuraIdx: -1,
+			logger:         turnlogger.New(),
+		}
 	}
+	return &GameEngine{GameState: s}
 }
 
-// NewFromSpec builds a *GameEngine from a Spec, sealing the unexported fields inside the
-// package. Use when an external caller — turntest, hero test, EvalOneTurnForTesting — needs
-// to construct a prior-turn state. Auras / Triggers / Items aren't on Spec; callers chain
-// CreateAura / CreateTrigger / CreateItem after NewFromSpec.
+// NewFromSpec builds a *GameEngine from a Spec, sealing the unexported fields inside
+// the package. Use when an external caller — turntest, hero test, EvalOneTurnForTesting
+// — needs to construct a prior-turn state. Auras / Triggers / Items aren't on Spec;
+// callers chain CreateAura / CreateTrigger / CreateItem on the state after NewFromSpec.
 func NewFromSpec(spec Spec) *GameEngine {
-	g := &GameEngine{
+	s := &GameState{
 		hero:                  spec.Hero,
 		arsenal:               spec.Arsenal,
 		banished:              spec.Banished,
@@ -78,7 +84,7 @@ func NewFromSpec(spec Spec) *GameEngine {
 		currentAuraIdx:        -1,
 		logger:                turnlogger.New(),
 	}
-	return g
+	return &GameEngine{GameState: s}
 }
 
 // NewFromCards is a test-only constructor that wraps a Card slice in a fresh *deck.Deck
@@ -89,7 +95,7 @@ func NewFromCards(deckCards, graveyard []card.Card) *GameEngine {
 	for i, c := range deckCards {
 		dc[i] = c
 	}
-	g := New()
+	g := NewFromState(nil)
 	g.deck = deck.New(nil, nil, dc)
 	g.graveyard = graveyard
 	return g

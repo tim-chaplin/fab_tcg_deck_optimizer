@@ -30,13 +30,14 @@ type CardAssignment struct {
 }
 
 // TurnSummary is the result of running Best on a hand: the winning card-role assignments
-// plus the post-chain *GameEngine the next turn inherits. State carries hand / deck /
-// arsenal / graveyard / banished / auras / items / log entries.
+// plus the post-chain *GameState the next turn inherits. State carries hand / deck /
+// arsenal / graveyard / banished / auras / items / log entries — pure data, no rules
+// engine. The deck-eval loop reads end-of-turn fields off it directly.
 type TurnSummary struct {
 	BestLine             []CardAssignment
 	SwungWeapons         []string
 	Value                int
-	State                *gameengine.GameEngine
+	State                *gameengine.GameState
 	TriggersFromLastTurn []TriggerContribution
 	StartOfTurnAuras     []card.Card
 	DealtHand            []card.Card
@@ -98,13 +99,13 @@ func (r Role) String() string {
 	return "UNKNOWN"
 }
 
-// auraCountByNameInEngine scans the engine's aura list for a token aura with the given
+// auraCountByNameInState scans the state's aura list for a token aura with the given
 // display name and returns its Count, or zero if no matching entry is present.
-func auraCountByNameInEngine(g *gameengine.GameEngine, name string) int {
-	if g == nil {
+func auraCountByNameInState(s *gameengine.GameState, name string) int {
+	if s == nil {
 		return 0
 	}
-	for _, a := range g.Auras() {
+	for _, a := range s.Auras() {
 		if a.CardName() == name {
 			return a.Count()
 		}
@@ -112,12 +113,12 @@ func auraCountByNameInEngine(g *gameengine.GameEngine, name string) int {
 	return 0
 }
 
-// itemCountByNameInEngine is the items counterpart of auraCountByNameInEngine.
-func itemCountByNameInEngine(g *gameengine.GameEngine, name string) int {
-	if g == nil {
+// itemCountByNameInState is the items counterpart of auraCountByNameInState.
+func itemCountByNameInState(s *gameengine.GameState, name string) int {
+	if s == nil {
 		return 0
 	}
-	for _, i := range g.Items() {
+	for _, i := range s.Items() {
 		if i.CardName() == name {
 			return i.Count()
 		}

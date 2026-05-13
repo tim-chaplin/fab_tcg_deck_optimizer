@@ -28,7 +28,7 @@ func NewRunechantAura(n int) *Aura {
 }
 
 // NewPonderAura returns a ponder token aura at count n. Production code calls
-// g.CreatePonder instead; this factory is for tests / Spec seeding.
+// g.CreatePonders instead; this factory is for tests / Spec seeding.
 func NewPonderAura(n int) *Aura {
 	return NewTokenAura(tokenNamePonder, ids.PonderTokenID, triggertype.EndOfTurn, ponderAuraHandler, n)
 }

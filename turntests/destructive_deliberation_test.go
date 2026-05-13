@@ -19,7 +19,7 @@ func TestDestructiveDeliberation_PlayCreditsAttack(t *testing.T) {
 		{cards.DestructiveDeliberationBlue{}, 3},
 	}
 	for _, tc := range cases {
-		s := gameengine.New()
+		s := gameengine.NewFromState(nil)
 		self := &card.CardState{Card: tc.c}
 		s.ResolveChainStep(s.Logger(), self)
 		if s.Value() != tc.want {
@@ -37,7 +37,7 @@ func TestDestructiveDeliberation_OnHitCreatesPonder(t *testing.T) {
 		cards.DestructiveDeliberationYellow{},
 		cards.DestructiveDeliberationBlue{},
 	} {
-		s := gameengine.New()
+		s := gameengine.NewFromState(nil)
 		self := &card.CardState{Card: c}
 		s.ResolveChainStep(s.Logger(), self)
 		self.OnHit[0].Fire(s, s.Logger(), self, &self.OnHit[0])

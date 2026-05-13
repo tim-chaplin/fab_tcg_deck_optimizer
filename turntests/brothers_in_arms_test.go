@@ -18,7 +18,7 @@ func TestBrothersInArms_Mode0NoBonus(t *testing.T) {
 	}
 	for _, c := range cases {
 		blocker := c.(card.Blocker)
-		s := gameengine.New()
+		s := gameengine.NewFromState(nil)
 		self := &card.CardState{Card: c}
 		blocker.Block(s, s.Logger(), self)
 		if self.BonusDefense != 0 {
@@ -36,7 +36,7 @@ func TestBrothersInArms_Mode1FiresBonus(t *testing.T) {
 	}
 	for _, c := range cases {
 		blocker := c.(card.Blocker)
-		s := gameengine.New()
+		s := gameengine.NewFromState(nil)
 		self := &card.CardState{Card: c, Mode: 1}
 		blocker.Block(s, s.Logger(), self)
 		if self.BonusDefense != 2 {

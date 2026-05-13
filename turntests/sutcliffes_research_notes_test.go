@@ -11,7 +11,7 @@ import (
 )
 
 func TestSutcliffesResearchNotes_EmptyDeck(t *testing.T) {
-	s := gameengine.New()
+	s := gameengine.NewFromState(nil)
 	s.ResolveChainStep(s.Logger(), &card.CardState{Card: cards.SutcliffesResearchNotesRed{}})
 	if got := s.Value(); got != 0 {
 		t.Errorf("Play() = %d, want 0 (empty deck reveals nothing)", got)

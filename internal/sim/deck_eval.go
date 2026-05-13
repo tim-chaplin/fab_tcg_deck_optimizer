@@ -339,14 +339,14 @@ func runOneShuffle(master *deck.Deck, scratch *shuffleScratch, stats *DeckStats,
 		tallyMarginalPresence(scratch.marginalBuf, idIndex, scratch.presentBuf, h, arsenalIn, float64(play.Value))
 		// Adopt the chain's post-mutation deck and recycle pitched cards onto the
 		// bottom — FaB's end-of-turn pitch-zone-to-deck rule.
-		d = play.State.DeckRaw()
+		d = play.State.Deck()
 		pitched := pitchedFromBestLine(play.BestLine)
 		recycled := make([]deck.Card, len(pitched))
 		for i, c := range pitched {
 			recycled[i] = c
 		}
 		d.PutBottom(recycled)
-		nextHeld = append(nextHeld[:0], play.State.HandRaw()...)
+		nextHeld = append(nextHeld[:0], play.State.Hand()...)
 		nextAuraTrigger = nextAuraTrigger[:0]
 		for _, a := range play.State.Auras() {
 			nextAuraTrigger = append(nextAuraTrigger, a.(*Aura))
@@ -356,7 +356,7 @@ func runOneShuffle(master *deck.Deck, scratch *shuffleScratch, stats *DeckStats,
 			nextItem = append(nextItem, it.(*Item))
 		}
 		nextBanish = append(nextBanish[:0], play.State.Banished()...)
-		nextGraveyard = append(nextGraveyard[:0], play.State.GraveyardRaw()...)
+		nextGraveyard = append(nextGraveyard[:0], play.State.Graveyard()...)
 		opponentMarked = play.State.OpponentMarked()
 		handIdx++
 		heldBuf, nextHeld = nextHeld, heldBuf
@@ -517,14 +517,16 @@ func processAurasAtStartOfTurn(queued []*Aura, d *deck.Deck) (
 	if len(queued) == 0 {
 		return queued[:0], nil, 0, nil, nil
 	}
-	// Drive a fresh engine over the queued aura list. Reveal handlers (Sigil of the
-	// Arknight) read the deck via PopDeckTop, which mutates d in place. Adopting queued
-	// onto the engine's aura list lets handlers' Destroy splice the live list directly.
-	g := gameengine.New()
-	g.SetDeck(d)
+	// Drive a fresh state + engine over the queued aura list. Reveal handlers (Sigil of
+	// the Arknight) read the deck via PopDeckTop, which mutates d in place. Adopting
+	// queued onto the state's aura list lets handlers' Destroy splice the live list
+	// directly.
+	s := gameengine.NewFromState(nil).GameState
+	s.SetDeck(d)
 	for _, a := range queued {
-		g.CreateAura(a)
+		s.CreateAura(a)
 	}
+	g := s.Engine()
 	// Walk queued in lockstep with FireStartOfTurn's callback: FireStartOfTurn visits
 	// auras in g.auras order, firing each TriggerStartOfTurn entry. We pre-capture each
 	// firing aura's SourceCard so the contribution carries source identity even after
@@ -554,11 +556,11 @@ func processAurasAtStartOfTurn(queued []*Aura, d *deck.Deck) (
 		damage += dmg
 		fireIdx++
 	})
-	out := make([]*Aura, 0, len(g.Auras()))
-	for _, a := range g.Auras() {
+	out := make([]*Aura, 0, len(s.Auras()))
+	for _, a := range s.Auras() {
 		out = append(out, a.(*Aura))
 	}
-	return out, contribs, damage, g.HandRaw(), append([]card.Card(nil), g.GraveyardRaw()...)
+	return out, contribs, damage, s.Hand(), append([]card.Card(nil), s.Graveyard()...)
 }
 
 // pitchedFromBestLine returns the cards in BestLine assigned the Pitch role (excluding the

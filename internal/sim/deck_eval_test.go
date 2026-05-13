@@ -48,17 +48,17 @@ func TestEvaluate_BestTurnSnapshotsState(t *testing.T) {
 		t.Fatalf("expected Best to be populated after Evaluate")
 	}
 	state := stats.Best.Summary.State
-	if len(state.GraveyardRaw()) == 0 {
+	if len(state.Graveyard()) == 0 {
 		t.Errorf("State.Graveyard is empty; want the played Snatch in graveyard")
 	}
-	surfaceCount := len(state.HandRaw()) + len(state.GraveyardRaw())
+	surfaceCount := len(state.Hand()) + len(state.Graveyard())
 	if state.Arsenal() != nil {
 		surfaceCount++
 	}
 	const handSize = 4 // Viserai's Intelligence
 	if surfaceCount <= handSize {
 		t.Errorf("surface count = %d, want >%d (Hand=%d Arsenal=%v Graveyard=%d). The mid-turn-drawn Snatch should have surfaced — without the State snapshot the carry would lose it.",
-			surfaceCount, handSize, len(state.HandRaw()), state.Arsenal(), len(state.GraveyardRaw()))
+			surfaceCount, handSize, len(state.Hand()), state.Arsenal(), len(state.Graveyard()))
 	}
 	// State.LogEntries() carries the per-event chain trace; recordBestTurn must preserve it
 	// so fabsim eval's "Best turn played" printout has the chain attribution lines. A Snatch

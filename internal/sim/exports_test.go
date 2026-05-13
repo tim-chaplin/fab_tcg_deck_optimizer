@@ -40,10 +40,14 @@ func (s *SequenceContextForTest) PlaySequence(order []card.Card) (damage int, fu
 	return s.ctx.playSequence(order)
 }
 
-// PermEngine returns the *GameEngine the most recent PlaySequence call ran the chain
-// against. Tests assert state on this engine (Graveyard, Hand, …) after PlaySequence.
+// PermEngine returns a *GameEngine wrapping the *GameState the most recent
+// PlaySequence call ran the chain against. Tests assert state via this engine
+// (Graveyard, Hand, …) after PlaySequence.
 func (s *SequenceContextForTest) PermEngine() *gameengine.GameEngine {
-	return s.ctx.permEngine
+	if s.ctx.permState == nil {
+		return nil
+	}
+	return s.ctx.permState.Engine()
 }
 
 // BestSequence wraps (*sequenceContext).bestSequence. Drops the returned winning engine
@@ -106,47 +110,47 @@ func (s *SequenceContextForTest) Bufs() *AttackBufs { return s.ctx.bufs }
 // returns a fresh engine.
 func (b *attackBufs) DefenseGravScratch() []card.Card     { return b.defenseGravScratch }
 func (b *attackBufs) DRCardStateScratch() *card.CardState { return &b.drCardStateScratch }
-func (b *attackBufs) State() *gameengine.GameEngine       { return gameengine.New() }
+func (b *attackBufs) State() *gameengine.GameEngine       { return gameengine.NewFromState(nil) }
 
-// EngineWithHand returns a fresh engine seeded with hand h. Tests that build a
-// TurnSummary by hand use this to populate the State *GameEngine without going through
+// EngineWithHand returns a fresh GameState seeded with hand h. Tests that build a
+// TurnSummary by hand use this to populate the State *GameState without going through
 // the full chain runner.
-func EngineWithHand(h []card.Card) *gameengine.GameEngine {
-	g := gameengine.New()
-	g.SetHand(h)
-	return g
+func EngineWithHand(h []card.Card) *gameengine.GameState {
+	s := gameengine.NewFromState(nil).GameState
+	s.SetHand(h)
+	return s
 }
 
-// EngineWithItems returns a fresh engine with the supplied items installed.
-func EngineWithItems(items []*Item) *gameengine.GameEngine {
-	g := gameengine.New()
+// EngineWithItems returns a fresh GameState with the supplied items installed.
+func EngineWithItems(items []*Item) *gameengine.GameState {
+	s := gameengine.NewFromState(nil).GameState
 	for _, it := range items {
-		g.CreateItem(it)
+		s.CreateItem(it)
 	}
-	return g
+	return s
 }
 
-// EngineWith returns a fresh engine with hand, items, and log entries installed. log can
-// be nil to skip log seeding.
-func EngineWith(h []card.Card, items []*Item, log []turnlogger.LogEntry) *gameengine.GameEngine {
-	g := gameengine.New()
-	g.SetHand(h)
+// EngineWith returns a fresh GameState with hand, items, and log entries installed.
+// log can be nil to skip log seeding.
+func EngineWith(h []card.Card, items []*Item, log []turnlogger.LogEntry) *gameengine.GameState {
+	s := gameengine.NewFromState(nil).GameState
+	s.SetHand(h)
 	for _, it := range items {
-		g.CreateItem(it)
+		s.CreateItem(it)
 	}
 	if len(log) > 0 {
 		for _, e := range log {
 			switch e.Kind {
 			case turnlogger.LogEntryChainStep:
-				g.Logger().AppendChainStep(e.Text, e.N)
+				s.Logger().AppendChainStep(e.Text, e.N)
 			case turnlogger.LogEntryPostTrigger:
-				g.Logger().AppendPostTrigger(e.Source, e.Text, e.N)
+				s.Logger().AppendPostTrigger(e.Source, e.Text, e.N)
 			case turnlogger.LogEntryPreTrigger:
-				g.Logger().AppendPreTrigger(e.Source, e.Text, e.N)
+				s.Logger().AppendPreTrigger(e.Source, e.Text, e.N)
 			}
 		}
 	}
-	return g
+	return s
 }
 
 // EvaluateImplForTest re-exports the unexported (*Evaluator).evaluateImpl.

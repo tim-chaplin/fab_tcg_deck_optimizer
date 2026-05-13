@@ -6,9 +6,10 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/gameengine"
 )
 
-// newSequenceContextForTest builds a sequenceContext wired to a fresh attackBufs sized for
-// the given chain length. runechantCarryover is wrapped into a Runechant token aura on the
-// leaf engine so playSequence reads the count off the live aura set, matching production.
+// newSequenceContextForTest builds a sequenceContext wired to a fresh attackBufs sized
+// for the given chain length. runechantCarryover is wrapped into a Runechant token aura
+// on the leaf state so playSequence reads the count off the live aura set, matching
+// production.
 func newSequenceContextForTest(h Hero, pitched, deckCards []card.Card, resourceBudget, runechantCarryover, chainLen int) *sequenceContext {
 	bufs := newAttackBufs(chainLen, 0, nil)
 	dc := make([]deck.Card, len(deckCards))
@@ -16,10 +17,10 @@ func newSequenceContextForTest(h Hero, pitched, deckCards []card.Card, resourceB
 		dc[i] = c
 	}
 	d := deck.New(nil, nil, dc)
-	leafEngine := gameengine.NewFromSpec(gameengine.Spec{Hero: h})
-	leafEngine.SetDeck(d)
+	leafState := gameengine.NewFromSpec(gameengine.Spec{Hero: h}).GameState
+	leafState.SetDeck(d)
 	if runechantCarryover > 0 {
-		leafEngine.CreateAura(NewRunechantAura(runechantCarryover))
+		leafState.CreateAura(NewRunechantAura(runechantCarryover))
 	}
 	return &sequenceContext{
 		hero:               h,
@@ -28,6 +29,6 @@ func newSequenceContextForTest(h Hero, pitched, deckCards []card.Card, resourceB
 		bufs:               bufs,
 		resourceBudget:     resourceBudget,
 		runechantCarryover: runechantCarryover,
-		leafEngine:         leafEngine,
+		leafState:          leafState,
 	}
 }

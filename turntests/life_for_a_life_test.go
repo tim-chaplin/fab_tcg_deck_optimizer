@@ -12,7 +12,7 @@ import (
 
 // Tests that the on-hit 1{h} gain credits +1 on a likely-hit attack.
 func TestLifeForALife_LikelyHitCreditsHeal(t *testing.T) {
-	s := gameengine.New()
+	s := gameengine.NewFromState(nil)
 	c := cards.LifeForALifeRed{}
 	cs := &card.CardState{Card: c}
 	s.ResolveChainStep(s.Logger(), cs)
@@ -32,7 +32,7 @@ func TestLifeForALife_BlockableSuppressesHeal(t *testing.T) {
 		{cards.LifeForALifeBlue{}, 2},
 	}
 	for _, tc := range cases {
-		s := gameengine.New()
+		s := gameengine.NewFromState(nil)
 		s.ResolveChainStep(s.Logger(), &card.CardState{Card: tc.c})
 		if got := s.Value(); got != tc.want {
 			t.Errorf("%s: Play() = %d, want %d (blockable, no heal)", tc.c.Name(), got, tc.want)

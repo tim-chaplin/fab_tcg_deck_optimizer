@@ -12,7 +12,7 @@ import (
 
 // Tests that Runic Reaping with no following attack-action target lands no riders.
 func TestRunicReaping_NoNextAttackReturnsZero(t *testing.T) {
-	s := gameengine.New()
+	s := gameengine.NewFromState(nil)
 	(cards.RunicReapingRed{}).Play(s, s.Logger(), &card.CardState{
 		Card:          cards.RunicReapingRed{},
 		PitchedToPlay: []card.Card{testutils.AttackWithPower{Power: 4}},

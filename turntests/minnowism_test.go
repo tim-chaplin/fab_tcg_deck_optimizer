@@ -12,7 +12,7 @@ import (
 
 // TestMinnowism_NoAttackReturnsZero: no qualifying next attack card → +3 rider fizzles.
 func TestMinnowism_NoAttackReturnsZero(t *testing.T) {
-	s := gameengine.New()
+	s := gameengine.NewFromState(nil)
 	for _, c := range []card.Card{cards.MinnowismRed{}, cards.MinnowismYellow{}, cards.MinnowismBlue{}} {
 		s.ResolveChainStep(s.Logger(), &card.CardState{Card: c})
 		if got := s.Value(); got != 0 {

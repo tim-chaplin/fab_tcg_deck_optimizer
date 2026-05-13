@@ -11,7 +11,7 @@ import (
 )
 
 func TestOathOfTheArknight_NoRemainingCards(t *testing.T) {
-	s := gameengine.New()
+	s := gameengine.NewFromState(nil)
 	s.ResolveChainStep(s.Logger(), &card.CardState{Card: cards.OathOfTheArknightRed{}})
 	if got := s.Value(); got != 1 {
 		t.Errorf("Play() = %d, want 1 (Runechant only, no attack to buff)", got)

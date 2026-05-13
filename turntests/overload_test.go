@@ -22,7 +22,7 @@ func TestOverload_OnHitGoAgainEagerByLikelyToHit(t *testing.T) {
 		{cards.OverloadBlue{}, 1, true},
 	}
 	for _, tc := range cases {
-		s := gameengine.New()
+		s := gameengine.NewFromState(nil)
 		self := &card.CardState{Card: tc.c}
 		s.ResolveChainStep(s.Logger(), self)
 		if got := s.Value(); got != tc.wantDmg {
@@ -47,7 +47,7 @@ func TestOverload_BonusAttackPushesIntoHitWindow(t *testing.T) {
 		{2}, // Red 3 + 2 = 5 with dominate → hit window
 	}
 	for _, tc := range cases {
-		s := gameengine.New()
+		s := gameengine.NewFromState(nil)
 		self := &card.CardState{Card: cards.OverloadRed{}, BonusAttack: tc.bonus}
 		s.ResolveChainStep(s.Logger(), self)
 		if !self.GrantedGoAgain {

@@ -60,13 +60,13 @@ func TestBest_DrawRiderSeesActualDeck(t *testing.T) {
 		}
 		return false
 	}
-	if !containsID(resA.State.HandRaw(), (testutils.RedAttack{}).ID()) && resA.State.Arsenal() == nil {
+	if !containsID(resA.State.Hand(), (testutils.RedAttack{}).ID()) && resA.State.Arsenal() == nil {
 		t.Errorf("deck A: drawn RedAttack didn't surface in State.Hand or State.Arsenal: hand=%v arsenal=%v",
-			resA.State.HandRaw(), resA.State.Arsenal())
+			resA.State.Hand(), resA.State.Arsenal())
 	}
-	if !containsID(resB.State.HandRaw(), (testutils.BlueAttack{}).ID()) && resB.State.Arsenal() == nil {
+	if !containsID(resB.State.Hand(), (testutils.BlueAttack{}).ID()) && resB.State.Arsenal() == nil {
 		t.Errorf("deck B: drawn BlueAttack didn't surface in State.Hand or State.Arsenal: hand=%v arsenal=%v",
-			resB.State.HandRaw(), resB.State.Arsenal())
+			resB.State.Hand(), resB.State.Arsenal())
 	}
 }
 

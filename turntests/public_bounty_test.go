@@ -13,7 +13,7 @@ import (
 // Tests that Public Bounty marks the opposing hero on Play.
 func TestPublicBounty_MarksOpponent(t *testing.T) {
 	for _, c := range []card.Card{cards.PublicBountyRed{}, cards.PublicBountyYellow{}, cards.PublicBountyBlue{}} {
-		s := gameengine.New()
+		s := gameengine.NewFromState(nil)
 		s.ResolveChainStep(s.Logger(), &card.CardState{Card: c})
 		if !s.OpponentMarked() {
 			t.Errorf("%s: OpponentMarked = false after Play, want true", c.Name())

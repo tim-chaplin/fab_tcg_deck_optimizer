@@ -10,7 +10,7 @@ import (
 )
 
 func peaceOfMindPlay(g card.GameEngine, l card.Logger, self *card.CardState) {
-	g.CreatePonder(1)
+	g.CreatePonders(1)
 }
 
 func (PeaceOfMindRed) DefensiveInstant() {}

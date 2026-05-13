@@ -9,7 +9,8 @@ package gameengine
 // Token tuning constants live with the heuristics; see DiscardValue / GoldTokenValue.
 
 // Token display names — the engine matches by CardName when bumping an existing entry's
-// Count or reading a count. Concrete Aura / Item impls report these strings via CardName.
+// Count or reading a count. Concrete Aura / Item impls report these strings via
+// CardName.
 const (
 	tokenNameRunechant = "Runechant"
 	tokenNamePonder    = "Ponder"
@@ -26,16 +27,16 @@ func (g *GameEngine) CreateRunechants(n int) {
 		return
 	}
 	g.AddValue(n)
-	g.bumpOrCreateAura(tokenNameRunechant, BuildRunechantAura, n)
+	bumpOrCreateAura(g.GameState, tokenNameRunechant, BuildRunechantAura, n)
 }
 
-// CreatePonder creates n Ponder tokens. No Value credit — Ponder pays out at end of turn
-// (see the runtime's Ponder aura handler).
-func (g *GameEngine) CreatePonder(n int) {
+// CreatePonders creates n Ponder tokens. No Value credit — Ponder pays out at end of
+// turn (see the runtime's Ponder aura handler).
+func (g *GameEngine) CreatePonders(n int) {
 	if n <= 0 {
 		return
 	}
-	g.bumpOrCreateAura(tokenNamePonder, BuildPonderAura, n)
+	bumpOrCreateAura(g.GameState, tokenNamePonder, BuildPonderAura, n)
 }
 
 // CreateGold / CreateSilver / CreateCopper create the matching token items. No Value
@@ -44,19 +45,19 @@ func (g *GameEngine) CreateGold(n int) {
 	if n <= 0 {
 		return
 	}
-	g.bumpOrCreateItem(tokenNameGold, BuildGoldItem, n)
+	bumpOrCreateItem(g.GameState, tokenNameGold, BuildGoldItem, n)
 }
 func (g *GameEngine) CreateSilver(n int) {
 	if n <= 0 {
 		return
 	}
-	g.bumpOrCreateItem(tokenNameSilver, BuildSilverItem, n)
+	bumpOrCreateItem(g.GameState, tokenNameSilver, BuildSilverItem, n)
 }
 func (g *GameEngine) CreateCopper(n int) {
 	if n <= 0 {
 		return
 	}
-	g.bumpOrCreateItem(tokenNameCopper, BuildCopperItem, n)
+	bumpOrCreateItem(g.GameState, tokenNameCopper, BuildCopperItem, n)
 }
 
 // RunechantCount / PonderCount / GoldCount / SilverCount / CopperCount return the live
@@ -67,35 +68,35 @@ func (g *GameEngine) GoldCount() int      { return itemCountByName(g.items, toke
 func (g *GameEngine) SilverCount() int    { return itemCountByName(g.items, tokenNameSilver) }
 func (g *GameEngine) CopperCount() int    { return itemCountByName(g.items, tokenNameCopper) }
 
-// bumpOrCreateAura increments an existing aura entry matching name, or appends a fresh
-// one built by build(n). Flips auraCreated.
-func (g *GameEngine) bumpOrCreateAura(name string, build func(int) Aura, n int) {
-	g.auraCreated = true
-	for i := range g.auras {
-		if g.auras[i].CardName() == name {
-			g.auras[i].SetCount(g.auras[i].Count() + n)
+// bumpOrCreateAura increments an existing aura entry matching name on s, or appends a
+// fresh one built by build(n). Flips s.auraCreated.
+func bumpOrCreateAura(s *GameState, name string, build func(int) Aura, n int) {
+	s.auraCreated = true
+	for i := range s.auras {
+		if s.auras[i].CardName() == name {
+			s.auras[i].SetCount(s.auras[i].Count() + n)
 			return
 		}
 	}
-	g.auras = append(g.auras, build(n))
+	s.auras = append(s.auras, build(n))
 }
 
-// bumpOrCreateItem increments an existing item entry matching name, or appends a fresh
-// one built by build(n). Items don't flip auraCreated.
-func (g *GameEngine) bumpOrCreateItem(name string, build func(int) Item, n int) {
-	for i := range g.items {
-		if g.items[i].CardName() == name {
-			g.items[i].SetCount(g.items[i].Count() + n)
+// bumpOrCreateItem increments an existing item entry matching name on s, or appends a
+// fresh one built by build(n). Items don't flip auraCreated.
+func bumpOrCreateItem(s *GameState, name string, build func(int) Item, n int) {
+	for i := range s.items {
+		if s.items[i].CardName() == name {
+			s.items[i].SetCount(s.items[i].Count() + n)
 			return
 		}
 	}
-	g.items = append(g.items, build(n))
+	s.items = append(s.items, build(n))
 }
 
-// ConsumeItemByName decrements the matching item's Count by n and removes the entry when
-// Count reaches zero. Token items don't head to the graveyard on destroy. No-op when no
-// item matches name. Called by token-ability Play implementations registered outside
-// gameengine.
+// ConsumeItemByName decrements the matching item's Count by n and removes the entry
+// when Count reaches zero. Token items don't head to the graveyard on destroy. No-op
+// when no item matches name. Called by token-ability Play implementations registered
+// outside gameengine.
 func (g *GameEngine) ConsumeItemByName(name string, n int) {
 	for i := range g.items {
 		if g.items[i].CardName() != name {
