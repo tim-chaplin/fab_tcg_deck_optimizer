@@ -10,7 +10,7 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/triggertype"
 )
 
-// TestSigilOfSilphidae_PlayFizzlesWithoutAura: no aura in s.Graveyard means the enter trigger
+// TestSigilOfSilphidae_PlayFizzlesWithoutAura: no aura in gs.Graveyard means the enter trigger
 // can't banish anything and Play returns 0. AuraCreated still fires (Silphidae IS an aura)
 // and a start-of-turn Aura is registered for the "destroy this" clause.
 func TestSigilOfSilphidae_PlayFizzlesWithoutAura(t *testing.T) {
@@ -30,7 +30,7 @@ func TestSigilOfSilphidae_PlayFizzlesWithoutAura(t *testing.T) {
 	}
 }
 
-// TestSigilOfSilphidae_PlayBanishesAuraForOneArcane: an aura in s.Graveyard triggers the
+// TestSigilOfSilphidae_PlayBanishesAuraForOneArcane: an aura in gs.Graveyard triggers the
 // enter banish — the aura moves to Banish, Play returns 1, and ArcaneDamageDealt flips.
 func TestSigilOfSilphidae_PlayBanishesAuraForOneArcane(t *testing.T) {
 	aura := cards.BlessingOfOccultRed{}

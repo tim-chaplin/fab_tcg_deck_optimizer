@@ -4,7 +4,7 @@
 // Text: "When this attacks, reveal the top card of your deck. This gets -X{p}, where X is the pitch
 // value of the card revealed this way. **Go again**"
 //
-// Peek g.Deck[0].Pitch() and subtract from base power, floored at 0. If the deck is empty, no card
+// Peek ge.Deck[0].Pitch() and subtract from base power, floored at 0. If the deck is empty, no card
 // is revealed so there's no penalty.
 
 package cards

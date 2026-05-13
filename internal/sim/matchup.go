@@ -6,7 +6,7 @@ package sim
 // int through every Best / Evaluate / IterateParallel signature.
 //
 // The chain runner copies these fields onto TurnState in resetStateForPermutation; cards
-// read the per-turn copy (s.incomingDamage, s.arcaneIncomingDamage) rather than reaching
+// read the per-turn copy (gs.incomingDamage, gs.arcaneIncomingDamage) rather than reaching
 // back into the Matchup so per-card hot paths stay one struct field deep.
 type Matchup struct {
 	// IncomingDamage is the opponent damage per turn.

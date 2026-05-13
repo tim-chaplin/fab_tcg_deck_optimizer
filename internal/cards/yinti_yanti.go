@@ -1,6 +1,6 @@
 // Yinti Yanti: "While Yinti Yanti is attacking and you control an aura, it has +1{p}.
 // While Yinti Yanti is defending and you control an aura, it has +1{d}." Both bonuses
-// gate on g.AuraCount() > 0 — any aura type qualifies.
+// gate on ge.AuraCount() > 0 — any aura type qualifies.
 
 package cards
 

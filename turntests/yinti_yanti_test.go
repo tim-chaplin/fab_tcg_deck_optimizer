@@ -37,7 +37,7 @@ func TestYintiYanti_SeesPonderFromPeaceOfMindInDefense(t *testing.T) {
 }
 
 // Tests that Yinti Yanti Blue plain-blocking alongside Reduce as DR sees Reduce's
-// Runechant when its Block runs (DRs run first, populating s.Auras).
+// Runechant when its Block runs (DRs run first, populating gs.Auras).
 func TestYintiYanti_BlueBlockSeesRunechantFromReduceInDefense(t *testing.T) {
 	d := deck.New(heroes.Viserai{}, nil, fillerDeck())
 	hand := []deck.Card{cards.YintiYantiBlue{}, cards.ReduceToRunechantRed{}, testutils.RedPitch{}}
@@ -48,7 +48,7 @@ func TestYintiYanti_BlueBlockSeesRunechantFromReduceInDefense(t *testing.T) {
 }
 
 // Tests that Yinti Yanti Blue plain-blocking alongside Peace of Mind sees the Ponder PoM's
-// DR puts in s.Auras (DR runs first, populating auras before the plain-block hook).
+// DR puts in gs.Auras (DR runs first, populating auras before the plain-block hook).
 func TestYintiYanti_BlueBlockSeesPonderFromPeaceOfMindInDefense(t *testing.T) {
 	d := deck.New(heroes.Viserai{}, nil, fillerDeck())
 	hand := []deck.Card{cards.YintiYantiBlue{}, cards.PeaceOfMindRed{}, testutils.BluePitch{}}

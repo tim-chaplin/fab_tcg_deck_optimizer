@@ -32,7 +32,7 @@ type GameEngine struct {
 
 // === Cards-facing zone accessors that flip cacheable. These shadow the same-name
 //     methods promoted from *GameState; the embedded versions stay reachable as
-//     g.GameState.X when the engine internals need the non-flipping variant.
+//     ge.GameState.X when the engine internals need the non-flipping variant.
 
 // Hand returns the live hand slice and flips IsCacheable to false. Cards must not mutate
 // the returned slice; use AppendHand / PopHandAt for mutations.
@@ -400,7 +400,7 @@ func (ge *GameEngine) HasEndOfTurnFire() bool {
 //   - Aura entries respect OncePerTurn / FiredThisTurn semantics; the handler owns
 //     destruction via the engine's destroyAura path.
 //   - Trigger entries are one-shot; fired entries are removed afterward. Snapshotting
-//     len(g.triggers) before iterating keeps a handler that calls AddXxxTrigger from
+//     len(ge.triggers) before iterating keeps a handler that calls AddXxxTrigger from
 //     firing its newcomer on the same pass — newcomers stay queued for the next
 //     matching event.
 func (ge *GameEngine) FireEndOfTurn() {
@@ -439,14 +439,14 @@ func (ge *GameEngine) FireHit(attackerTypes card.TypeSet) {
 	ge.triggers = kept
 }
 
-// FireStartOfTurn walks g.auras and invokes every triggertype.StartOfTurn entry,
+// FireStartOfTurn walks ge.auras and invokes every triggertype.StartOfTurn entry,
 // calling onFire with each entry's pre-state snapshot so sim can attribute damage /
 // draws / log lines back to the firing aura. Auras that destroy themselves splice
 // out; FiredThisTurn flips reset on each fresh turn boundary.
 //
 // The onFire callback receives:
-//   - pre is the index in g.auras of the firing entry at the time of the call.
-//   - damage is g.value's delta during this handler — the partition tiebreaker uses
+//   - pre is the index in ge.auras of the firing entry at the time of the call.
+//   - damage is ge.value's delta during this handler — the partition tiebreaker uses
 //     it.
 //   - drawnCard is the first card the handler appended to hand, or nil. Used by
 //     processAurasAtStartOfTurn to surface "revealed" entries.
@@ -523,7 +523,7 @@ func (ge *GameEngine) DestroyAura(addToGraveyard bool) {
 
 // ResolveChainStep runs card.Play on self and then applies the standard chain-step
 // resolution: for an attack-action or weapon-attack, credit self.EffectiveAttack() to
-// g.value; for a defense-reaction (or DefensiveInstant), credit the EffectiveDefense
+// ge.value; for a defense-reaction (or DefensiveInstant), credit the EffectiveDefense
 // capped at IncomingDamage and decrement IncomingDamage; for everything else, log
 // (+0). The "<DisplayName>: <VERB> (+N)" chain-step entry is appended after Play
 // returns so any self-buffs Play applied (e.g. modal +2{p} riders flipping
@@ -720,7 +720,7 @@ func (ge *GameEngine) SilverCount() int    { return itemCountByName(ge.items, to
 func (ge *GameEngine) CopperCount() int    { return itemCountByName(ge.items, tokenNameCopper) }
 
 // bumpOrCreateAura increments an existing aura entry matching name on s, or appends
-// a fresh one built by build(n). Flips s.auraCreated.
+// a fresh one built by build(n). Flips gs.auraCreated.
 func bumpOrCreateAura(s *GameState, name string, build func(int) Aura, n int) {
 	s.auraCreated = true
 	for i := range s.auras {

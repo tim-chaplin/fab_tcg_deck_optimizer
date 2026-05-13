@@ -497,7 +497,7 @@ const startOfTurnRevealRoom = 8
 //     OncePerTurn gates.
 //   - Fires every TriggerStartOfTurn handler against a shared TurnState seeded with the
 //     post-draw deck, so handlers that peek the top read the card about to be revealed.
-//     Handlers that destroy themselves call s.DestroyAura, which splices ts.auras
+//     Handlers that destroy themselves call ge.DestroyAura, which splices ts.auras
 //     immediately and (when addToGraveyard) appends Self to the start-of-turn graveyard.
 //   - Leaves non-start-of-turn auras in place so they can fire mid-chain.
 //
@@ -505,7 +505,7 @@ const startOfTurnRevealRoom = 8
 // to fold into Value, cards the handlers drew into the hand (ts.hand) in draw order, and
 // auras destroyed this pass in destroy order.
 //
-// Cascading reveals: a handler that pops s.Deck shrinks the view for the next handler, so
+// Cascading reveals: a handler that pops gs.Deck shrinks the view for the next handler, so
 // two reveal-capable auras see distinct tops.
 func processAurasAtStartOfTurn(queued []*Aura, d *deck.Deck) (
 	survivors []*Aura,

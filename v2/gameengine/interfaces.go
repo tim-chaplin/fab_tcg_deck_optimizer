@@ -35,7 +35,7 @@ type Aura interface {
 	// Fire invokes the aura's handler with a card.Aura context built by the engine.
 	Fire(g *GameEngine, l card.Logger)
 	// OnDestroy is called by the engine when the aura is destroyed with addToGraveyard=true.
-	// Card-backed auras push their source card into the graveyard via g.AppendGraveyard;
+	// Card-backed auras push their source card into the graveyard via ge.AppendGraveyard;
 	// token auras no-op.
 	OnDestroy(g *GameEngine)
 	// Copy returns a deep copy. GameEngine.Copy walks the aura list and stores the

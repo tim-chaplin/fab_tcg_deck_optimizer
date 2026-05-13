@@ -39,7 +39,7 @@ func TestBest_CacheablePlainAttackers(t *testing.T) {
 }
 
 // TestBest_UncacheableSkyFireLanterns: Sky Fire Lanterns peeks the deck top via
-// s.PeekDeck() to gate its runechant rider. Even when the rider doesn't fire, the read
+// ge.PeekDeck() to gate its runechant rider. Even when the rider doesn't fire, the read
 // happened — Cacheable must report false.
 func TestBest_UncacheableSkyFireLanterns(t *testing.T) {
 	h := []card.Card{cards.SkyFireLanternsRed{}}
@@ -51,7 +51,7 @@ func TestBest_UncacheableSkyFireLanterns(t *testing.T) {
 }
 
 // Tests that Sutcliffe's Research Notes pins Cacheable=false because its top-N scan
-// reads s.PeekTopN().
+// reads ge.PeekTopN().
 func TestBest_UncacheableSutcliffesResearchNotes(t *testing.T) {
 	h := []card.Card{cards.SutcliffesResearchNotesRed{}, testutils.BlueAttack{}}
 	deck := DeckOf(testutils.RunebladeAttack{})
@@ -74,7 +74,7 @@ func TestBest_UncacheableMoonWishTutor(t *testing.T) {
 }
 
 // TestBest_UncacheableRavenousRabble: the on-attack -X{p} debuff reads the deck top via
-// s.PeekDeck() — Cacheable=false even though the card "only" peeks.
+// ge.PeekDeck() — Cacheable=false even though the card "only" peeks.
 func TestBest_UncacheableRavenousRabble(t *testing.T) {
 	h := []card.Card{cards.RavenousRabbleRed{}}
 	got := Best(nil, h, Matchup{IncomingDamage: 0}, DeckOf(testutils.GenericAttackPitch(0, 0, 1)), Prior{Hero: testutils.Hero{Intel: 4}})
@@ -93,7 +93,7 @@ func TestBest_UncacheableSnatchHitDrawsViaDrawOne(t *testing.T) {
 	}
 }
 
-// Tests that Test of Strength's Clash flips Cacheable via s.Clash().
+// Tests that Test of Strength's Clash flips Cacheable via ge.Clash().
 func TestBest_UncacheableTestOfStrengthClash(t *testing.T) {
 	h := []card.Card{cards.TestOfStrengthRed{}}
 	got := Best(nil, h, Matchup{IncomingDamage: 1}, DeckOf(testutils.GenericAttack(0, 7)), Prior{Hero: testutils.Hero{Intel: 4}})
@@ -144,7 +144,7 @@ func TestBest_ResetBetweenCallsClearsCacheableState(t *testing.T) {
 }
 
 // Tests that cacheability tracks ACTUAL reads, not card identity: Snatch Yellow misses
-// s.LikelyToHit so DrawOne never fires and the result stays cacheable.
+// ge.LikelyToHit so DrawOne never fires and the result stays cacheable.
 func TestBest_RuntimeGatedNonFlipSnatchYellowMisses(t *testing.T) {
 	h := []card.Card{cards.SnatchYellow{}}
 	deck := DeckOf(testutils.RedAttack{})

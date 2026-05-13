@@ -9,7 +9,7 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/gameengine"
 )
 
-// Tests that the on-play "create N Runechant tokens" rider raises s.RunechantCount() by N,
+// Tests that the on-play "create N Runechant tokens" rider raises ge.RunechantCount() by N,
 // sets AuraCreated, and credits N damage to Value.
 func TestRunechantOnPlay_CreatesNTokens(t *testing.T) {
 	cases := []struct {

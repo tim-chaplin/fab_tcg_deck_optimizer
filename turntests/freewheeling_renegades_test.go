@@ -9,7 +9,7 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/gameengine"
 )
 
-// Tests that each variant credits printed_power - 2 to s.Value().
+// Tests that each variant credits printed_power - 2 to gs.Value().
 func TestFreewheelingRenegades_AlwaysDebuffedByTwo(t *testing.T) {
 	cases := []struct {
 		c    card.Card

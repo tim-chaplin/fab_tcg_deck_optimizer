@@ -4,7 +4,7 @@
 // action card revealed this way, then put the cards on top of your deck in any order." (N = 3
 // Red / 2 Yellow / 1 Blue.)
 //
-// Scan the top N cards of g.Deck; credit +1 per Runeblade attack action card revealed. The
+// Scan the top N cards of ge.Deck; credit +1 per Runeblade attack action card revealed. The
 // post-reveal reorder isn't modelled.
 
 package cards

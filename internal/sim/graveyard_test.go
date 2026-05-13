@@ -51,7 +51,7 @@ func TestGraveyard_WeaponSwingDoesNotEnterGraveyard(t *testing.T) {
 	}
 }
 
-// gravSpyDR is a test-only Defense Reaction whose Play captures a snapshot of s.Graveyard so
+// gravSpyDR is a test-only Defense Reaction whose Play captures a snapshot of gs.Graveyard so
 // tests can assert the solver seeded it with the expected defenders before the DR resolved.
 type gravSpyDR struct{ saw *[]card.Card }
 

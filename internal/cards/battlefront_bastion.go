@@ -3,7 +3,7 @@
 //
 // Text: "When this defends alone, prevent the next 1 damage that would be dealt to you this turn."
 //
-// Block scans g.Defenders() for a second plain blocker; if none is present (DRs alongside
+// Block scans ge.Defenders() for a second plain blocker; if none is present (DRs alongside
 // don't count), the +1 prevention fires by bumping self.BonusDefense.
 
 package cards

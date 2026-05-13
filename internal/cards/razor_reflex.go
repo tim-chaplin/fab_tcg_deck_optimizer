@@ -5,7 +5,7 @@
 // card with cost 1 or less gets +N{p} and 'When this hits, it gets **go again**.'"
 // (Red N=3, Yellow N=2, Blue N=1.)
 //
-// Mode 1's on-hit go-again rider is modelled eagerly: when g.LikelyToHit on the post-buff
+// Mode 1's on-hit go-again rider is modelled eagerly: when ge.LikelyToHit on the post-buff
 // target returns true, the AR grants 1 AP at Play time so the AP is available for the next
 // chain step's gate.
 

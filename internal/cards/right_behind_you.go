@@ -4,7 +4,7 @@
 // Text: "When this defends together with another card from hand, this gets +1{d} and you may look
 // at the top card of your deck. You may put it on the bottom."
 //
-// Block scans g.Defenders() for a second plain blocker; if at least one is present (DRs
+// Block scans ge.Defenders() for a second plain blocker; if at least one is present (DRs
 // alongside don't count), the +1{d} fires by bumping self.BonusDefense. The deck-top
 // peek/bottom rider is dropped — the optimizer would never bottom a card it'd rather
 // draw next.

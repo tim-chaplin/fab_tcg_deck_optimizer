@@ -3,7 +3,7 @@
 // Text: "Reveal the top card of your deck. If it's <same color as this variant>, create a
 // Runechant token."
 //
-// Peek g.Deck[0] and compare its pitch to this variant's pitch (color). On match, create
+// Peek ge.Deck[0] and compare its pitch to this variant's pitch (color). On match, create
 // one Runechant.
 
 package cards

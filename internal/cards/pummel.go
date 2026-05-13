@@ -6,7 +6,7 @@
 // (Red N=4, Yellow N=3, Blue N=2.)
 //
 // Mode 0 grants +N{p} to a club/hammer weapon attack. Mode 1 grants +N{p} to a cost-≥2
-// attack action card and registers an OnHit hero-discard rider via g.OpponentDiscard.
+// attack action card and registers an OnHit hero-discard rider via ge.OpponentDiscard.
 
 package cards
 

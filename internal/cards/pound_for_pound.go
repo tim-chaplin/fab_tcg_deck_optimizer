@@ -6,7 +6,7 @@
 //
 // Modelling: the "less {h} than an opposing hero" clause is treated as a hero attribute —
 // the Dominate grant fires for heroes implementing card.LowerHealthWanter (via
-// g.HeroWantsLowerHealth) and never fires otherwise, a coarse proxy that skips per-turn
+// ge.HeroWantsLowerHealth) and never fires otherwise, a coarse proxy that skips per-turn
 // life tracking.
 
 package cards

@@ -56,7 +56,7 @@ type GameState struct {
 // holds. Cheap (single struct allocation); the engine doesn't copy state.
 func (gs *GameState) Engine() *GameEngine { return &GameEngine{GameState: gs} }
 
-// Copy returns a deep copy of s. Slice and *deck.Deck fields get fresh backing storage;
+// Copy returns a deep copy of gs. Slice and *deck.Deck fields get fresh backing storage;
 // Aura / Item entries are deep-copied via their Copy() methods so per-permutation
 // Count / FiredThisTurn mutations stay isolated. Triggers are effectively immutable after
 // construction, so only the slice header is duplicated. Logger is reset to nil — the

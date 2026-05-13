@@ -80,7 +80,7 @@ func TestWeepingBattleground_OnlyOneAuraBanished(t *testing.T) {
 
 // TestWeepingBattleground_SecondCopyAlsoFires: two Weeping Battlegrounds against a graveyard
 // with two auras each banish one. The second one must still fire because Play mutates state.
-// Each fire credits +1, so cumulative s.Value() = 2.
+// Each fire credits +1, so cumulative gs.Value() = 2.
 func TestWeepingBattleground_SecondCopyAlsoFires(t *testing.T) {
 	aura1 := cards.SigilOfSilphidaeBlue{}
 	aura2 := cards.SigilOfSilphidaeBlue{}

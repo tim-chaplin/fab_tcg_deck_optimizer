@@ -8,8 +8,8 @@ import (
 )
 
 // Token aura / item logic. The engine knows about FaB's five built-in token kinds by name
-// (Runechant, Ponder, Gold, Silver, Copper) — cards call g.CreateRunechants /
-// g.RunechantCount and the engine routes through sim's builders registered at init.
+// (Runechant, Ponder, Gold, Silver, Copper) — cards call ge.CreateRunechants /
+// ge.RunechantCount and the engine routes through sim's builders registered at init.
 
 const (
 	tokenNameRunechant = "Runechant"
@@ -20,7 +20,7 @@ const (
 )
 
 // NewRunechantAura returns a runechant token aura at count n. Production code calls
-// g.CreateRunechants instead — it bumps an existing aura and credits +n damage. This
+// ge.CreateRunechants instead — it bumps an existing aura and credits +n damage. This
 // factory is for tests / Spec seeding that need to add a runechant aura without the
 // damage credit.
 func NewRunechantAura(n int) *Aura {
@@ -28,7 +28,7 @@ func NewRunechantAura(n int) *Aura {
 }
 
 // NewPonderAura returns a ponder token aura at count n. Production code calls
-// g.CreatePonders instead; this factory is for tests / Spec seeding.
+// ge.CreatePonders instead; this factory is for tests / Spec seeding.
 func NewPonderAura(n int) *Aura {
 	return NewTokenAura(tokenNamePonder, ids.PonderTokenID, triggertype.EndOfTurn, ponderAuraHandler, n)
 }
@@ -61,7 +61,7 @@ func ponderAuraHandler(ge card.GameEngine, _ card.Logger, a card.Aura) {
 }
 
 // NewGoldItem / NewSilverItem / NewCopperItem return fresh token items at count n.
-// Production code calls g.CreateGold / CreateSilver / CreateCopper instead.
+// Production code calls ge.CreateGold / CreateSilver / CreateCopper instead.
 func NewGoldItem(n int) *Item {
 	return NewTokenItem(tokenNameGold, ids.GoldTokenID, GoldTokenAbility{}, n)
 }
