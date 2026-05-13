@@ -22,7 +22,7 @@ func TestBlessingOfOccult_PlayCreatesAuraNoThisTurnRunes(t *testing.T) {
 		{cards.BlessingOfOccultBlue{}, 1},
 	}
 	for _, tc := range cases {
-		s := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().Build()}
+		s := gameengine.New()
 		s.ResolveChainStep(s.Logger(), &card.CardState{Card: tc.c})
 		if got := s.Value(); got != 0 {
 			t.Errorf("%s: Play() = %d, want 0 (rune creation deferred to trigger)", tc.c.Name(), got)
@@ -57,9 +57,9 @@ func TestBlessingOfOccult_TriggerHandlerCreatesNRunes(t *testing.T) {
 		{cards.BlessingOfOccultBlue{}, 1},
 	}
 	for _, tc := range cases {
-		play := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().Build()}
+		play := gameengine.New()
 		play.ResolveChainStep(play.Logger(), &card.CardState{Card: tc.c})
-		next := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().Build()}
+		next := gameengine.New()
 		next.CreateAura(play.Auras()[0])
 		next.FireStartOfTurn(nil)
 		if next.Value() != tc.n {

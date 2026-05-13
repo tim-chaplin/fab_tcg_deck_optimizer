@@ -10,7 +10,7 @@ import (
 
 // Tests that an end-of-turn Trigger fires once and is removed.
 func TestFireEndOfTurn_FiresOnceAndRemoves(t *testing.T) {
-	s := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().Build()}
+	s := gameengine.New()
 	calls := 0
 	s.CreateTrigger(NewCardTrigger(
 		&card.CardState{Card: FakeRedAttack{}},
@@ -29,7 +29,7 @@ func TestFireEndOfTurn_FiresOnceAndRemoves(t *testing.T) {
 
 // Tests that a non-matching TriggerType stays queued when end-of-turn fires.
 func TestFireEndOfTurn_LeavesNonMatchingType(t *testing.T) {
-	s := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().Build()}
+	s := gameengine.New()
 	calls := 0
 	s.CreateTrigger(NewCardTrigger(
 		&card.CardState{Card: FakeRedAttack{}},
@@ -49,7 +49,7 @@ func TestFireEndOfTurn_LeavesNonMatchingType(t *testing.T) {
 // Tests that a handler appending a new trigger during fire queues it for a future fire
 // walk rather than firing it on the current pass.
 func TestFireEndOfTurn_HandlerAddTriggerSafeReentry(t *testing.T) {
-	s := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().Build()}
+	s := gameengine.New()
 	calls := 0
 	s.CreateTrigger(NewCardTrigger(
 		&card.CardState{Card: FakeRedAttack{}},

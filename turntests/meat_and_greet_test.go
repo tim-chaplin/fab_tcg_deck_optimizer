@@ -21,7 +21,7 @@ func TestMeatAndGreet_OnHitRunechantGatedByLikelyToHit(t *testing.T) {
 		{cards.MeatAndGreetBlue{}, 2},
 	}
 	for _, tc := range cases {
-		s := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().Build()}
+		s := gameengine.New()
 		self := &card.CardState{Card: tc.c}
 		s.ResolveChainStep(s.Logger(), self)
 		testutils.FireOnHitIfLikely(s, s.Logger(), self)

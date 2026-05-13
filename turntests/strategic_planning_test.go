@@ -14,7 +14,7 @@ import (
 // Tests that Strategic Planning queues a TriggerEndOfTurn keyed to itself, not a Ponder.
 func TestStrategicPlanning_QueuesEndOfTurnTrigger(t *testing.T) {
 	for _, c := range []card.Card{cards.StrategicPlanningRed{}, cards.StrategicPlanningYellow{}, cards.StrategicPlanningBlue{}} {
-		s := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().Build()}
+		s := gameengine.New()
 		s.ResolveChainStep(s.Logger(), &card.CardState{Card: c})
 		matching := 0
 		for _, tr := range s.Triggers() {

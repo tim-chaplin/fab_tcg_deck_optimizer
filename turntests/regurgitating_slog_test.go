@@ -12,7 +12,7 @@ import (
 // Tests that Regurgitating Slog with no Sloggism in the graveyard does not gain Dominate.
 func TestRegurgitatingSlog_NoSloggismNoDominate(t *testing.T) {
 	for _, c := range []card.Card{cards.RegurgitatingSlogRed{}, cards.RegurgitatingSlogYellow{}, cards.RegurgitatingSlogBlue{}} {
-		s := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().Build()}
+		s := gameengine.New()
 		self := &card.CardState{Card: c}
 		s.ResolveChainStep(s.Logger(), self)
 		if self.GrantedDominate {

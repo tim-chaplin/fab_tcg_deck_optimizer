@@ -17,7 +17,7 @@ func TestArcanePolarity_NoArcaneIncomingCreditsOne(t *testing.T) {
 		cards.ArcanePolarityBlue{},
 	}
 	for _, c := range cases {
-		s := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().Build()}
+		s := gameengine.New()
 		s.ResolveChainStep(s.Logger(), &card.CardState{Card: c})
 		if s.Value() != 1 {
 			t.Errorf("%s: Value = %d, want 1", c.Name(), s.Value())

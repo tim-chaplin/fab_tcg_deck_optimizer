@@ -50,7 +50,7 @@ func TestTestOfStrength_LossNoGoldAndDocksValue(t *testing.T) {
 
 // Tests that an empty deck makes the clash a no-op (no Gold created).
 func TestTestOfStrength_EmptyDeckNoGold(t *testing.T) {
-	s := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().Build()}
+	s := gameengine.New()
 	s.ResolveChainStep(s.Logger(), &card.CardState{Card: cards.TestOfStrengthRed{}})
 	if s.GoldCount() != 0 {
 		t.Errorf("empty deck: Gold = %d, want 0 (clash fails)", s.GoldCount())

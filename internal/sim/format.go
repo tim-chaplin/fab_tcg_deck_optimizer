@@ -116,7 +116,7 @@ type bestLineDisplayParts struct {
 // and their cost contributes to the defense-phase pitch target.
 func partitionBestLineForDisplay(line []CardAssignment) bestLineDisplayParts {
 	var parts bestLineDisplayParts
-	zeroState := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().Build()}
+	zeroState := gameengine.New()
 	for _, a := range line {
 		switch a.Role {
 		case Pitch:

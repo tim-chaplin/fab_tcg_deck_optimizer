@@ -104,7 +104,7 @@ func TestBest_RespectsResourceConstraint(t *testing.T) {
 		case sim.Pitch:
 			res += c.(card.Card).Pitch()
 		case sim.Attack:
-			cost += c.(card.Card).Cost(&gameengine.GameEngine{GameState: gameengine.GameStateBuilder().Build()})
+			cost += c.(card.Card).Cost(gameengine.New())
 		}
 	}
 	if res < cost {

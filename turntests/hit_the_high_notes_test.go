@@ -21,7 +21,7 @@ func TestHitTheHighNotes_NoAuraReturnsBase(t *testing.T) {
 		{cards.HitTheHighNotesBlue{}, 2},
 	}
 	for _, tc := range cases {
-		s := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().Build()}
+		s := gameengine.New()
 		s.ResolveChainStep(s.Logger(), &card.CardState{Card: tc.c})
 		if got := s.Value(); got != tc.base {
 			t.Errorf("%s: Play() = %d, want %d", tc.c.Name(), got, tc.base)

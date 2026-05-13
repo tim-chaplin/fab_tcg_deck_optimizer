@@ -124,7 +124,7 @@ func TestFireEndOfTurn_PonderPopsDeckTopIntoHand(t *testing.T) {
 
 // TestFireEndOfTurn_PonderEmptyDeckIsNoOp.
 func TestFireEndOfTurn_PonderEmptyDeckIsNoOp(t *testing.T) {
-	s := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().Build()}
+	s := gameengine.New()
 	s.CreateAura(NewPonderAura(1))
 	FireEndOfTurn(s)
 	if h := s.Hand(); len(h) != 0 {
@@ -137,7 +137,7 @@ func TestFireEndOfTurn_PonderEmptyDeckIsNoOp(t *testing.T) {
 
 // Tests that Sigil of the Arknight's handler reveals an attack action.
 func TestProcessAurasAtStartOfTurn_RevealsAttackActionIntoHand(t *testing.T) {
-	play := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().Build()}
+	play := gameengine.New()
 	play.ResolveChainStep(play.Logger(), &card.CardState{Card: cards.SigilOfTheArknightBlue{}})
 	slash := cards.AetherSlashRed{}
 	_, contribs, total, revealed, _ := ProcessAurasAtStartOfTurn(play.Auras(), DeckOf(slash))
@@ -154,7 +154,7 @@ func TestProcessAurasAtStartOfTurn_RevealsAttackActionIntoHand(t *testing.T) {
 
 // Tests that the TriggerContribution carries the revealed card.
 func TestProcessAurasAtStartOfTurn_AttributesRevealedToContribution(t *testing.T) {
-	play := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().Build()}
+	play := gameengine.New()
 	play.ResolveChainStep(play.Logger(), &card.CardState{Card: cards.SigilOfTheArknightBlue{}})
 	slash := cards.AetherSlashRed{}
 	_, contribs, _, _, _ := ProcessAurasAtStartOfTurn(play.Auras(), DeckOf(slash))
@@ -168,7 +168,7 @@ func TestProcessAurasAtStartOfTurn_AttributesRevealedToContribution(t *testing.T
 
 // TestProcessAurasAtStartOfTurn_CascadingReveals.
 func TestProcessAurasAtStartOfTurn_CascadingReveals(t *testing.T) {
-	play := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().Build()}
+	play := gameengine.New()
 	play.ResolveChainStep(play.Logger(), &card.CardState{Card: cards.SigilOfTheArknightBlue{}})
 	play.ResolveChainStep(play.Logger(), &card.CardState{Card: cards.SigilOfTheArknightBlue{}})
 	first := cards.AetherSlashRed{}
@@ -184,7 +184,7 @@ func TestProcessAurasAtStartOfTurn_CascadingReveals(t *testing.T) {
 
 // TestProcessAurasAtStartOfTurn_NonAttackActionTopSkipsReveal.
 func TestProcessAurasAtStartOfTurn_NonAttackActionTopSkipsReveal(t *testing.T) {
-	play := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().Build()}
+	play := gameengine.New()
 	sigil := cards.SigilOfTheArknightBlue{}
 	play.ResolveChainStep(play.Logger(), &card.CardState{Card: sigil})
 	_, _, total, revealed, _ := ProcessAurasAtStartOfTurn(play.Auras(), DeckOf(sigil))
@@ -198,7 +198,7 @@ func TestProcessAurasAtStartOfTurn_NonAttackActionTopSkipsReveal(t *testing.T) {
 
 // TestProcessAurasAtStartOfTurn_SigilHitAuthorsLogText.
 func TestProcessAurasAtStartOfTurn_SigilHitAuthorsLogText(t *testing.T) {
-	play := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().Build()}
+	play := gameengine.New()
 	sigil := cards.SigilOfTheArknightBlue{}
 	play.ResolveChainStep(play.Logger(), &card.CardState{Card: sigil})
 	_, contribs, _, _, _ := ProcessAurasAtStartOfTurn(play.Auras(), DeckOf(cards.AetherSlashRed{}))
@@ -213,7 +213,7 @@ func TestProcessAurasAtStartOfTurn_SigilHitAuthorsLogText(t *testing.T) {
 
 // TestProcessAurasAtStartOfTurn_SigilWhiffStillLogs.
 func TestProcessAurasAtStartOfTurn_SigilWhiffStillLogs(t *testing.T) {
-	play := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().Build()}
+	play := gameengine.New()
 	sigil := cards.SigilOfTheArknightBlue{}
 	play.ResolveChainStep(play.Logger(), &card.CardState{Card: sigil})
 	_, contribs, _, _, _ := ProcessAurasAtStartOfTurn(play.Auras(), DeckOf(sigil))

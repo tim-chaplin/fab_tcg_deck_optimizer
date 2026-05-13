@@ -12,7 +12,7 @@ import (
 
 // TestSmashingGoodTime_NoAttackReturnsZero: no qualifying next attack card → +3 rider fizzles.
 func TestSmashingGoodTime_NoAttackReturnsZero(t *testing.T) {
-	s := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().Build()}
+	s := gameengine.New()
 	for _, c := range []card.Card{notimplemented.SmashingGoodTimeRed{}, notimplemented.SmashingGoodTimeYellow{}, notimplemented.SmashingGoodTimeBlue{}} {
 		s.ResolveChainStep(s.Logger(), &card.CardState{Card: c})
 		if got := s.Value(); got != 0 {

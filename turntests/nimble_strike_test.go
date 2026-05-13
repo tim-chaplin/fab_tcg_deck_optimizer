@@ -13,7 +13,7 @@ import (
 func TestNimbleStrike_NoNimblismRiderOff(t *testing.T) {
 	for _, c := range []card.Card{cards.NimbleStrikeRed{}, cards.NimbleStrikeYellow{}, cards.NimbleStrikeBlue{}} {
 		self := &card.CardState{Card: c}
-		s := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().Build()}
+		s := gameengine.New()
 		s.ResolveChainStep(s.Logger(), self)
 		if self.GrantedGoAgain {
 			t.Errorf("%s [%d{p}]: GrantedGoAgain = true with empty graveyard, want false", c.Name(), c.Pitch())

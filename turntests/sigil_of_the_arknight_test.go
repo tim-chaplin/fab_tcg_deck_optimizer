@@ -32,7 +32,7 @@ func TestSigilOfTheArknight_PlayOnlySetsAuraCreated(t *testing.T) {
 // is an attack action → the handler draws it into the hand and pops the deck. Damage
 // stays 0 (tempo is captured by the extra card, not a flat credit).
 func TestSigilOfTheArknight_TriggerRevealsAttackActionIntoHand(t *testing.T) {
-	play := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().Build()}
+	play := gameengine.New()
 	play.ResolveChainStep(play.Logger(), &card.CardState{Card: cards.SigilOfTheArknightBlue{}})
 	top := testutils.RunebladeAttack{}
 	next := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCards([]card.Card{top, testutils.NonAttack{}}).Build()}
@@ -52,7 +52,7 @@ func TestSigilOfTheArknight_TriggerRevealsAttackActionIntoHand(t *testing.T) {
 // TestSigilOfTheArknight_TriggerRevealsNonAttack: top card is non-attack → Hand stays
 // empty and Deck is untouched (the card stays on top of the deck in the real game).
 func TestSigilOfTheArknight_TriggerRevealsNonAttack(t *testing.T) {
-	play := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().Build()}
+	play := gameengine.New()
 	play.ResolveChainStep(play.Logger(), &card.CardState{Card: cards.SigilOfTheArknightBlue{}})
 	next := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCards([]card.Card{testutils.Aura{}, testutils.RunebladeAttack{}}).Build()}
 	next.CreateAura(play.Auras()[0])
@@ -70,9 +70,9 @@ func TestSigilOfTheArknight_TriggerRevealsNonAttack(t *testing.T) {
 
 // TestSigilOfTheArknight_TriggerEmptyDeck: nothing to reveal → zero result, Hand stays empty.
 func TestSigilOfTheArknight_TriggerEmptyDeck(t *testing.T) {
-	play := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().Build()}
+	play := gameengine.New()
 	play.ResolveChainStep(play.Logger(), &card.CardState{Card: cards.SigilOfTheArknightBlue{}})
-	next := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().Build()}
+	next := gameengine.New()
 	next.CreateAura(play.Auras()[0])
 	next.FireStartOfTurn(nil)
 	if next.Value() != 0 {

@@ -21,7 +21,7 @@ func TestShrillOfSkullform_BaseDamage(t *testing.T) {
 		{cards.ShrillOfSkullformBlue{}, 2},
 	}
 	for _, tc := range cases {
-		s := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().Build()}
+		s := gameengine.New()
 		s.ResolveChainStep(s.Logger(), &card.CardState{Card: tc.c})
 		got := s.Value()
 		if got != tc.want {

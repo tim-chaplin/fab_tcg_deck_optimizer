@@ -15,7 +15,7 @@ import (
 func TestDrowningDire_NoAuraNoDominate(t *testing.T) {
 	for _, c := range []card.Card{cards.DrowningDireRed{}, cards.DrowningDireYellow{}, cards.DrowningDireBlue{}} {
 		self := &card.CardState{Card: c}
-		s := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().Build()}
+		s := gameengine.New()
 		s.ResolveChainStep(s.Logger(), self)
 		if self.GrantedDominate {
 			t.Errorf("%s [%d{p}]: GrantedDominate = true without prior aura, want false", c.Name(), c.Pitch())

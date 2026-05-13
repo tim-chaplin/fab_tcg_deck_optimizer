@@ -30,7 +30,7 @@ func TestRunechantOnPlay_CreatesNTokens(t *testing.T) {
 		{cards.SpellbladeStrikeBlue{}, 1},
 	}
 	for _, tc := range cases {
-		s := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().Build()}
+		s := gameengine.New()
 		s.ResolveChainStep(s.Logger(), &card.CardState{Card: tc.c})
 		if s.RunechantCount() != tc.n {
 			t.Errorf("%s: Runechants = %d, want %d", tc.c.Name(), s.RunechantCount(), tc.n)

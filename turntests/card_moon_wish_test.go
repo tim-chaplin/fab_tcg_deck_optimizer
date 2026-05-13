@@ -17,12 +17,12 @@ import (
 func TestMoonWish_VariableCost(t *testing.T) {
 	cases := []card.Card{cards.MoonWishRed{}, cards.MoonWishYellow{}, cards.MoonWishBlue{}}
 	for _, c := range cases {
-		held := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().Build()}
+		held := gameengine.New()
 		held.SetHand([]card.Card{testutils.GenericAttack(0, 0)})
 		if got := c.Cost(held); got != 0 {
 			t.Errorf("%s: Cost(Hand) = %d, want 0", c.Name(), got)
 		}
-		empty := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().Build()}
+		empty := gameengine.New()
 		if got := c.Cost(empty); got != 2 {
 			t.Errorf("%s: Cost(empty) = %d, want 2", c.Name(), got)
 		}

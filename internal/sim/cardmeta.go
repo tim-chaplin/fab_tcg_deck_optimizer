@@ -172,7 +172,7 @@ func buildAttackerMeta(c card.Card) attackerMeta {
 		m.isVariable = m.minCost != m.maxCost
 	} else {
 		// Static cost: any TurnState probe returns the same value.
-		fixed := c.Cost(&gameengine.GameEngine{GameState: gameengine.GameStateBuilder().Build()})
+		fixed := c.Cost(gameengine.New())
 		m.minCost = fixed
 		m.maxCost = fixed
 	}

@@ -97,7 +97,7 @@ func TestFormatBestTurn_LogAttributesEachTriggerSeparately(t *testing.T) {
 	// Use the real Malefic Incantation card's Play to register the prior trigger so the
 	// handler matches production exactly (logs via AddPreTriggerLogEntry, sources from
 	// state.TriggeringCard).
-	bootstrap := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().Build()}
+	bootstrap := gameengine.New()
 	bootstrap.ResolveChainStep(bootstrap.Logger(), &card.CardState{Card: cards.MaleficIncantationRed{}})
 	priorAuras := make([]*Aura, 0, len(bootstrap.Auras()))
 	for _, a := range bootstrap.Auras() {

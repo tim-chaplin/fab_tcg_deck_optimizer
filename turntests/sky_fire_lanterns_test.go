@@ -10,7 +10,7 @@ import (
 )
 
 func TestSkyFireLanterns_EmptyDeck(t *testing.T) {
-	s := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().Build()}
+	s := gameengine.New()
 	s.ResolveChainStep(s.Logger(), &card.CardState{Card: cards.SkyFireLanternsRed{}})
 	if got := s.Value(); got != 0 {
 		t.Errorf("Play() = %d, want 0 (empty deck)", got)

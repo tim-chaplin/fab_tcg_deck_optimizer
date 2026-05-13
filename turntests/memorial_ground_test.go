@@ -12,7 +12,7 @@ import (
 
 // Tests that Memorial Ground with no eligible card in the graveyard leaves the deck empty.
 func TestMemorialGround_NoEligibleNoOp(t *testing.T) {
-	s := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().Build()}
+	s := gameengine.New()
 	s.ResolveChainStep(s.Logger(), &card.CardState{Card: cards.MemorialGroundRed{}})
 	if s.Deck().Size() != 0 {
 		t.Errorf("deck size = %d, want 0 (no eligible recycle target)", s.Deck().Size())

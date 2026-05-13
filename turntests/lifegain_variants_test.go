@@ -29,7 +29,7 @@ func TestLifegainPerVariant(t *testing.T) {
 		{"FiddlersGreenBlue", cards.FiddlersGreenBlue{}, 1},
 	}
 	for _, tc := range cases {
-		s := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().Build()}
+		s := gameengine.New()
 		s.ResolveChainStep(s.Logger(), &card.CardState{Card: tc.card})
 		if got := s.Value(); got != tc.want {
 			t.Errorf("%s: Play() = %d, want %d", tc.name, got, tc.want)

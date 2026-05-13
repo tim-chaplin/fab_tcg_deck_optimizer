@@ -18,6 +18,13 @@ type StateBuilder struct {
 	s *GameState
 }
 
+// New returns a fresh *GameEngine wrapping an empty default *GameState. Shorthand for
+// &GameEngine{GameState: GameStateBuilder().Build()}; reach for the builder directly
+// when you need to populate fields.
+func New() *GameEngine {
+	return &GameEngine{GameState: GameStateBuilder().Build()}
+}
+
 // GameStateBuilder returns a fresh *StateBuilder pre-populated with the defaults a
 // just-constructed *GameState carries: cacheable=true, currentAuraIdx=-1, empty
 // logger, and a non-nil empty *deck.Deck (so cards that recycle into the deck don't

@@ -22,7 +22,7 @@ func TestReekOfCorruption_NoAuraReturnsBaseAttack(t *testing.T) {
 		{cards.ReekOfCorruptionBlue{}, 2},
 	}
 	for _, tc := range cases {
-		s := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().Build()}
+		s := gameengine.New()
 		cs := &card.CardState{Card: tc.c}
 		s.ResolveChainStep(s.Logger(), cs)
 		testutils.FireOnHitIfLikely(s, s.Logger(), cs)

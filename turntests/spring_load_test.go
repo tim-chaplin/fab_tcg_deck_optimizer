@@ -13,7 +13,7 @@ import (
 // Tests that Spring Load with a non-empty hand attacks for printed power only.
 func TestSpringLoad_BasePower(t *testing.T) {
 	for _, c := range []card.Card{cards.SpringLoadRed{}, cards.SpringLoadYellow{}, cards.SpringLoadBlue{}} {
-		s := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().Build()}
+		s := gameengine.New()
 		s.SetHand([]card.Card{testutils.GenericAttack(0, 0)})
 		s.ResolveChainStep(s.Logger(), &card.CardState{Card: c})
 		if got := s.Value(); got != 2 {
@@ -25,7 +25,7 @@ func TestSpringLoad_BasePower(t *testing.T) {
 // Tests that Spring Load with an empty hand fires the +3{p} rider on every variant.
 func TestSpringLoad_EmptyHandFiresRider(t *testing.T) {
 	for _, c := range []card.Card{cards.SpringLoadRed{}, cards.SpringLoadYellow{}, cards.SpringLoadBlue{}} {
-		s := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().Build()}
+		s := gameengine.New()
 		s.ResolveChainStep(s.Logger(), &card.CardState{Card: c})
 		if got := s.Value(); got != 5 {
 			t.Errorf("%s: Play() with empty hand = %d, want 5 (2 printed + 3 rider)", c.Name(), got)

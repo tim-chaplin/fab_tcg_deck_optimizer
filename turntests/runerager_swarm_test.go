@@ -21,7 +21,7 @@ func TestRuneragerSwarm_NoAuraNoGoAgain(t *testing.T) {
 		{cards.RuneragerSwarmBlue{}, 1},
 	}
 	for _, tc := range cases {
-		s := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().Build()}
+		s := gameengine.New()
 		self := &card.CardState{Card: tc.c}
 		s.ResolveChainStep(s.Logger(), self)
 		if got := s.Value(); got != tc.want {

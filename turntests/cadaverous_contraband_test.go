@@ -14,7 +14,7 @@ import (
 func TestCadaverousContraband_RegistersOnHit(t *testing.T) {
 	for _, c := range []card.Card{cards.CadaverousContrabandRed{}, cards.CadaverousContrabandYellow{}, cards.CadaverousContrabandBlue{}} {
 		self := &card.CardState{Card: c}
-		s := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().Build()}
+		s := gameengine.New()
 		s.ResolveChainStep(s.Logger(), self)
 		if len(self.OnHit) != 1 {
 			t.Errorf("%s [%d{p}]: OnHit handlers = %d, want 1", c.Name(), c.Pitch(), len(self.OnHit))

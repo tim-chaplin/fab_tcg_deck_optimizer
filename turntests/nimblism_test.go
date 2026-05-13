@@ -12,7 +12,7 @@ import (
 
 // TestNimblism_NoAttackReturnsZero: no qualifying next attack card → +3 rider fizzles.
 func TestNimblism_NoAttackReturnsZero(t *testing.T) {
-	s := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().Build()}
+	s := gameengine.New()
 	for _, c := range []card.Card{cards.NimblismRed{}, cards.NimblismYellow{}, cards.NimblismBlue{}} {
 		s.ResolveChainStep(s.Logger(), &card.CardState{Card: c})
 		if got := s.Value(); got != 0 {

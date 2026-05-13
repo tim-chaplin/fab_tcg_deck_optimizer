@@ -12,7 +12,7 @@ import (
 // TestRunicFellingsong_NoAuraCreditsPrintedPowerOnly: an empty graveyard fizzles the banish
 // rider, so Play returns just Attack().
 func TestRunicFellingsong_NoAuraCreditsPrintedPowerOnly(t *testing.T) {
-	s := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().Build()}
+	s := gameengine.New()
 	c := cards.RunicFellingsongRed{}
 	s.ResolveChainStep(s.Logger(), &card.CardState{Card: c})
 	if got := s.Value(); got != c.Attack() {

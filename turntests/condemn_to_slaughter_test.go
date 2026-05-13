@@ -12,7 +12,7 @@ import (
 
 func TestCondemnToSlaughter_NoNextAttackReturnsZero(t *testing.T) {
 	// No Runeblade attack follows → rider doesn't fire, Play returns 0.
-	s := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().Build()}
+	s := gameengine.New()
 	s.ResolveChainStep(s.Logger(), &card.CardState{Card: notimplemented.CondemnToSlaughterRed{}})
 	if got := s.Value(); got != 0 {
 		t.Errorf("Play() = %d, want 0 when CardsRemaining is empty", got)

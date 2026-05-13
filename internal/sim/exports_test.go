@@ -111,7 +111,7 @@ func (s *SequenceContextForTest) Bufs() *AttackBufs { return s.ctx.bufs }
 func (b *attackBufs) DefenseGravScratch() []card.Card     { return b.defenseGravScratch }
 func (b *attackBufs) DRCardStateScratch() *card.CardState { return &b.drCardStateScratch }
 func (b *attackBufs) State() *gameengine.GameEngine {
-	return &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().Build()}
+	return gameengine.New()
 }
 
 // EngineWithHand returns a fresh GameState seeded with hand h. Tests that build a

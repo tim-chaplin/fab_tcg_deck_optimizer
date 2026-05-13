@@ -12,7 +12,7 @@ import (
 // Tests that with no Nimblism in the graveyard the rider stays off.
 func TestJackBeNimble_NoNimblismRiderOff(t *testing.T) {
 	self := &card.CardState{Card: cards.JackBeNimbleRed{}}
-	s := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().Build()}
+	s := gameengine.New()
 	s.ResolveChainStep(s.Logger(), self)
 	if self.GrantedGoAgain {
 		t.Errorf("GrantedGoAgain = true with empty graveyard, want false")

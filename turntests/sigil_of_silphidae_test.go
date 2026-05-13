@@ -14,7 +14,7 @@ import (
 // can't banish anything and Play returns 0. AuraCreated still fires (Silphidae IS an aura)
 // and a start-of-turn Aura is registered for the "destroy this" clause.
 func TestSigilOfSilphidae_PlayFizzlesWithoutAura(t *testing.T) {
-	s := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().Build()}
+	s := gameengine.New()
 	s.ResolveChainStep(s.Logger(), &card.CardState{Card: cards.SigilOfSilphidaeBlue{}})
 	if got := s.Value(); got != 0 {
 		t.Errorf("Play() = %d, want 0 (empty graveyard)", got)
@@ -51,9 +51,9 @@ func TestSigilOfSilphidae_PlayBanishesAuraForOneArcane(t *testing.T) {
 // start-of-turn graveyard, the leave trigger has no OTHER aura to banish — handler returns
 // 0 damage.
 func TestSigilOfSilphidae_StartOfTurnHandlerFizzlesWithoutAnotherAura(t *testing.T) {
-	play := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().Build()}
+	play := gameengine.New()
 	play.ResolveChainStep(play.Logger(), &card.CardState{Card: cards.SigilOfSilphidaeBlue{}})
-	next := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().Build()}
+	next := gameengine.New()
 	next.CreateAura(play.Auras()[0])
 	next.FireStartOfTurn(nil)
 	if next.Value() != 0 {
@@ -64,7 +64,7 @@ func TestSigilOfSilphidae_StartOfTurnHandlerFizzlesWithoutAnotherAura(t *testing
 // TestSigilOfSilphidae_StartOfTurnHandlerBanishesAnotherAura: with another aura already in
 // the start-of-turn graveyard, the leave trigger banishes it for 1 arcane.
 func TestSigilOfSilphidae_StartOfTurnHandlerBanishesAnotherAura(t *testing.T) {
-	play := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().Build()}
+	play := gameengine.New()
 	play.ResolveChainStep(play.Logger(), &card.CardState{Card: cards.SigilOfSilphidaeBlue{}})
 	other := cards.BlessingOfOccultRed{}
 	next := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetGraveyard([]card.Card{other}).Build()}

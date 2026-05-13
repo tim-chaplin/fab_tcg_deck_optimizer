@@ -14,7 +14,7 @@ import (
 // Copper tokens. Per-pitch Copper count (6/4/2 for R/Y/B) is covered by turntests since
 // it requires the chain runner to actually fire.
 func TestHighStriker_QueuesTriggerHit(t *testing.T) {
-	g := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().Build()}
+	g := gameengine.New()
 	g.ResolveChainStep(g.Logger(), &card.CardState{Card: cards.HighStrikerRed{}})
 	if got := triggerHitCount(g); got != 1 {
 		t.Fatalf("TriggerHit triggers = %d, want 1 (registered the rider)", got)
