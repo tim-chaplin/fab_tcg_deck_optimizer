@@ -20,7 +20,7 @@ import (
 func (g *GameEngine) ResolveChainStep(l card.Logger, self *card.CardState) {
 	self.Card.Play(g, l, self)
 	if self.Card.Types(nil).Has(card.TypeAura) {
-		g.auraCreated = true
+		g.state.auraCreated = true
 	}
 	n := g.chainStepDelta(self)
 	l.AppendChainStep(ChainStepText(self), n)
@@ -35,22 +35,23 @@ func (g *GameEngine) PlayCard(l card.Logger, self *card.CardState) {
 // chainStepDelta computes the chain step's display delta and applies the standard
 // damage / block side effects. Returns the (+N) value for the log line.
 func (g *GameEngine) chainStepDelta(self *card.CardState) int {
+	s := g.state
 	types := self.Card.Types(nil)
 	switch {
 	case types.IsAttackAction() || types.IsWeaponAttack():
 		n := self.EffectiveAttack()
-		g.value += n
+		s.value += n
 		return n
 	case types.IsDefenseReaction() || isDefensiveInstant(self.Card):
 		n := self.EffectiveDefense()
-		if n > g.incomingDamage {
-			n = g.incomingDamage
+		if n > s.incomingDamage {
+			n = s.incomingDamage
 		}
 		if n < 0 {
 			n = 0
 		}
-		g.incomingDamage -= n
-		g.value += n
+		s.incomingDamage -= n
+		s.value += n
 		return n
 	}
 	return 0

@@ -32,7 +32,7 @@ func TestSigilOfTheArknight_PlayOnlySetsAuraCreated(t *testing.T) {
 // is an attack action → the handler draws it into the hand and pops the deck. Damage
 // stays 0 (tempo is captured by the extra card, not a flat credit).
 func TestSigilOfTheArknight_TriggerRevealsAttackActionIntoHand(t *testing.T) {
-	var play gameengine.GameEngine
+	play := gameengine.New()
 	play.ResolveChainStep(play.Logger(), &card.CardState{Card: cards.SigilOfTheArknightBlue{}})
 	top := testutils.RunebladeAttack{}
 	next := gameengine.NewFromCards([]card.Card{top, testutils.NonAttack{}}, nil)
@@ -52,7 +52,7 @@ func TestSigilOfTheArknight_TriggerRevealsAttackActionIntoHand(t *testing.T) {
 // TestSigilOfTheArknight_TriggerRevealsNonAttack: top card is non-attack → Hand stays
 // empty and Deck is untouched (the card stays on top of the deck in the real game).
 func TestSigilOfTheArknight_TriggerRevealsNonAttack(t *testing.T) {
-	var play gameengine.GameEngine
+	play := gameengine.New()
 	play.ResolveChainStep(play.Logger(), &card.CardState{Card: cards.SigilOfTheArknightBlue{}})
 	next := gameengine.NewFromCards([]card.Card{testutils.Aura{}, testutils.RunebladeAttack{}}, nil)
 	next.CreateAura(play.Auras()[0])
@@ -70,7 +70,7 @@ func TestSigilOfTheArknight_TriggerRevealsNonAttack(t *testing.T) {
 
 // TestSigilOfTheArknight_TriggerEmptyDeck: nothing to reveal → zero result, Hand stays empty.
 func TestSigilOfTheArknight_TriggerEmptyDeck(t *testing.T) {
-	var play gameengine.GameEngine
+	play := gameengine.New()
 	play.ResolveChainStep(play.Logger(), &card.CardState{Card: cards.SigilOfTheArknightBlue{}})
 	next := gameengine.NewFromCards(nil, nil)
 	next.CreateAura(play.Auras()[0])

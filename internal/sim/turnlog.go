@@ -77,7 +77,7 @@ func BuildTurnLog(t TurnSummary, startingAuras []*Aura, startingItems []*Item) T
 
 	// End of turn: surviving hand cards, arsenal slot's contents, auras still in play.
 	if t.State != nil {
-		if line := endingHandLine(t.State.HandRaw()); line != "" {
+		if line := endingHandLine(t.State.Hand()); line != "" {
 			log.EndOfTurn = append(log.EndOfTurn, line)
 		}
 	}
@@ -89,10 +89,10 @@ func BuildTurnLog(t TurnSummary, startingAuras []*Aura, startingItems []*Item) T
 		for _, a := range t.State.Auras() {
 			endingAuras = append(endingAuras, a.(*Aura))
 		}
-		if line := endingAurasLine(endingAuras, auraCountByNameInEngine(t.State, "Runechant"), auraCountByNameInEngine(t.State, "Ponder")); line != "" {
+		if line := endingAurasLine(endingAuras, auraCountByNameInState(t.State, "Runechant"), auraCountByNameInState(t.State, "Ponder")); line != "" {
 			log.EndOfTurn = append(log.EndOfTurn, line)
 		}
-		if line := itemsLine(itemCountByNameInEngine(t.State, "Gold"), itemCountByNameInEngine(t.State, "Silver"), itemCountByNameInEngine(t.State, "Copper")); line != "" {
+		if line := itemsLine(itemCountByNameInState(t.State, "Gold"), itemCountByNameInState(t.State, "Silver"), itemCountByNameInState(t.State, "Copper")); line != "" {
 			log.EndOfTurn = append(log.EndOfTurn, line)
 		}
 	}

@@ -64,7 +64,7 @@ func TestFireAttackActionAuras_GraveyardsExhaustedAura(t *testing.T) {
 	if len(state.Auras()) != 0 {
 		t.Errorf("Auras = %+v, want empty (handler called Destroy)", state.Auras())
 	}
-	g := state.GraveyardRaw()
+	g := state.Graveyard()
 	if len(g) != 1 || g[0] != aura {
 		t.Errorf("Graveyard = %v, want [aura]", g)
 	}

@@ -93,7 +93,7 @@ func EvalOneTurnForTesting(master *deck.Deck, mp Matchup, initial Prior, initial
 		weapons[i] = w.(Weapon)
 	}
 	play := best(weapons, h, mp, d, initial)
-	d = play.State.DeckRaw()
+	d = play.State.Deck()
 	pitched := pitchedFromBestLine(play.BestLine)
 	recycled := make([]deck.Card, len(pitched))
 	for i, c := range pitched {
@@ -110,9 +110,9 @@ func EvalOneTurnForTesting(master *deck.Deck, mp Matchup, initial Prior, initial
 		itemQueue = append(itemQueue, it.(*Item))
 	}
 
-	held := append([]card.Card(nil), play.State.HandRaw()...)
-	graveyardOut := make([]deck.Card, len(play.State.GraveyardRaw()))
-	for i, c := range play.State.GraveyardRaw() {
+	held := append([]card.Card(nil), play.State.Hand()...)
+	graveyardOut := make([]deck.Card, len(play.State.Graveyard()))
+	for i, c := range play.State.Graveyard() {
 		graveyardOut[i] = c
 	}
 	if len(held) >= handSize || d.Size() < handSize-len(held) {

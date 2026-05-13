@@ -75,7 +75,7 @@ func TestProcessAurasAtStartOfTurn_GraveyardsExhaustedAura(t *testing.T) {
 		triggertype.StartOfTurn,
 		func(g card.GameEngine, _ card.Logger, _ card.Aura) {
 			eng := g.(*gameengine.GameEngine)
-			seen = append([]card.Card(nil), eng.GraveyardRaw()...)
+			seen = append([]card.Card(nil), eng.Graveyard()...)
 		},
 		1,
 		false,

@@ -108,45 +108,45 @@ func (b *attackBufs) DefenseGravScratch() []card.Card     { return b.defenseGrav
 func (b *attackBufs) DRCardStateScratch() *card.CardState { return &b.drCardStateScratch }
 func (b *attackBufs) State() *gameengine.GameEngine       { return gameengine.New() }
 
-// EngineWithHand returns a fresh engine seeded with hand h. Tests that build a
-// TurnSummary by hand use this to populate the State *GameEngine without going through
+// EngineWithHand returns a fresh GameState seeded with hand h. Tests that build a
+// TurnSummary by hand use this to populate the State *GameState without going through
 // the full chain runner.
-func EngineWithHand(h []card.Card) *gameengine.GameEngine {
-	g := gameengine.New()
-	g.SetHand(h)
-	return g
+func EngineWithHand(h []card.Card) *gameengine.GameState {
+	s := gameengine.NewState()
+	s.SetHand(h)
+	return s
 }
 
-// EngineWithItems returns a fresh engine with the supplied items installed.
-func EngineWithItems(items []*Item) *gameengine.GameEngine {
-	g := gameengine.New()
+// EngineWithItems returns a fresh GameState with the supplied items installed.
+func EngineWithItems(items []*Item) *gameengine.GameState {
+	s := gameengine.NewState()
 	for _, it := range items {
-		g.CreateItem(it)
+		s.CreateItem(it)
 	}
-	return g
+	return s
 }
 
-// EngineWith returns a fresh engine with hand, items, and log entries installed. log can
-// be nil to skip log seeding.
-func EngineWith(h []card.Card, items []*Item, log []turnlogger.LogEntry) *gameengine.GameEngine {
-	g := gameengine.New()
-	g.SetHand(h)
+// EngineWith returns a fresh GameState with hand, items, and log entries installed.
+// log can be nil to skip log seeding.
+func EngineWith(h []card.Card, items []*Item, log []turnlogger.LogEntry) *gameengine.GameState {
+	s := gameengine.NewState()
+	s.SetHand(h)
 	for _, it := range items {
-		g.CreateItem(it)
+		s.CreateItem(it)
 	}
 	if len(log) > 0 {
 		for _, e := range log {
 			switch e.Kind {
 			case turnlogger.LogEntryChainStep:
-				g.Logger().AppendChainStep(e.Text, e.N)
+				s.Logger().AppendChainStep(e.Text, e.N)
 			case turnlogger.LogEntryPostTrigger:
-				g.Logger().AppendPostTrigger(e.Source, e.Text, e.N)
+				s.Logger().AppendPostTrigger(e.Source, e.Text, e.N)
 			case turnlogger.LogEntryPreTrigger:
-				g.Logger().AppendPreTrigger(e.Source, e.Text, e.N)
+				s.Logger().AppendPreTrigger(e.Source, e.Text, e.N)
 			}
 		}
 	}
-	return g
+	return s
 }
 
 // EvaluateImplForTest re-exports the unexported (*Evaluator).evaluateImpl.

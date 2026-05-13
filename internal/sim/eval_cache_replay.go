@@ -75,7 +75,7 @@ func (e *Evaluator) replayBest(
 		SwungWeapons:   append([]string(nil), swung...),
 		IncomingDamage: mp.IncomingDamage,
 		Cacheable:      true,
-		State:          winner,
+		State:          winner.State(),
 	}
 	for i := 0; i < n; i++ {
 		best.BestLine[i] = CardAssignment{Card: hand[i], Role: rolesBuf[i]}

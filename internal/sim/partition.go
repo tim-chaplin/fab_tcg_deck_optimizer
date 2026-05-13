@@ -89,14 +89,14 @@ func (e *Evaluator) findBest(weapons []Weapon, hand []card.Card, mp Matchup, d *
 				}
 				if cmp == 0 {
 					willOccupy := arsenalAtChainStart != nil || len(winner.HandRaw()) > 0
-					runningWillOccupy := best.State.Arsenal() != nil || len(best.State.HandRaw()) > 0
+					runningWillOccupy := best.State.Arsenal() != nil || len(best.State.Hand()) > 0
 					if !willOccupy || runningWillOccupy {
 						return
 					}
 				}
 			}
 			winner.SetArsenal(arsenalAtChainStart)
-			best.State = winner
+			best.State = winner.State()
 			best.Value = v
 			runningFutureValue = futureValuePlayed
 			runningSeen = true
@@ -133,10 +133,10 @@ func (e *Evaluator) findBest(weapons []Weapon, hand []card.Card, mp Matchup, d *
 	best.SwungWeapons = bestSwung
 	best.Cacheable = cacheable
 	if best.State == nil {
-		// No feasible partition was found — synthesise an "untouched" trailing engine that
-		// holds the starting hand and prior state. Callers (deck_eval) still need a non-nil
-		// State to read end-of-turn fields.
-		fallback := masterEngine.Copy()
+		// No feasible partition was found — synthesise an "untouched" trailing state that
+		// holds the starting hand and prior values. Callers (deck_eval) still need a non-
+		// nil State to read end-of-turn fields.
+		fallback := masterEngine.Copy().State()
 		fallback.SetHand(append([]card.Card(nil), hand...))
 		fallback.SetArsenal(arsenalCardIn)
 		best.State = fallback
@@ -157,11 +157,11 @@ func (e *Evaluator) findBest(weapons []Weapon, hand []card.Card, mp Matchup, d *
 	return best
 }
 
-// promoteRandomHandCardToArsenal picks one card from best.State.HandRaw() and moves it
-// into best.State's arsenal slot, removing it from the engine's hand. Deterministic
+// promoteRandomHandCardToArsenal picks one card from best.State.Hand() and moves it
+// into best.State's arsenal slot, removing it from the state's hand. Deterministic
 // per-hand pick.
 func promoteRandomHandCardToArsenal(best *TurnSummary, startingHand []card.Card, arsenalCardIn card.Card) {
-	handState := best.State.HandRaw()
+	handState := best.State.Hand()
 	if len(handState) == 0 {
 		return
 	}
