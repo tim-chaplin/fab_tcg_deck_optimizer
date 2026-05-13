@@ -15,7 +15,7 @@ import (
 func TestEnchantingMelody_SetsAuraCreated(t *testing.T) {
 	cases := []card.Card{notimplemented.EnchantingMelodyRed{}, notimplemented.EnchantingMelodyYellow{}, notimplemented.EnchantingMelodyBlue{}}
 	for _, c := range cases {
-		s := gameengine.New()
+		s := gameengine.NewFromState(nil)
 		s.ResolveChainStep(s.Logger(), &card.CardState{Card: c})
 		if got := s.Value(); got != 0 {
 			t.Errorf("%s: Play() = %d, want 0", c.Name(), got)

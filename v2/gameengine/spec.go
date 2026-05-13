@@ -35,22 +35,23 @@ type Spec struct {
 	AttackReactionTarget  *card.CardState
 }
 
-// New returns a bare *GameEngine wrapping a fresh GameState. Sim's chain runner
-// builds higher-level constructs (master engines, per-permutation states) on top of
-// this; tests typically use NewFromSpec or NewFromCards instead.
-func New() *GameEngine {
-	return &GameEngine{GameState: NewState()}
-}
-
-// NewState returns a bare *GameState — cacheable=true, currentAuraIdx=-1, fresh logger.
-// Use directly when only the state container is needed (e.g. by sim's chain runner that
-// holds *GameState and wraps in *GameEngine when calling card hooks).
-func NewState() *GameState {
-	return &GameState{
-		cacheable:      true,
-		currentAuraIdx: -1,
-		logger:         turnlogger.New(),
+// NewFromState wraps s in a *GameEngine. Pass an existing *GameState to drive a
+// chain-runner state through the rules-engine API (cards' Card.Play hooks see the
+// engine); pass nil to get a fresh empty state under the engine — cacheable=true,
+// currentAuraIdx=-1, fresh logger, no other state.
+//
+// Sim's chain runner holds *GameState directly and wraps via state.Engine() when it
+// needs to invoke card hooks; tests and external callers that want a bare engine reach
+// here with nil instead.
+func NewFromState(s *GameState) *GameEngine {
+	if s == nil {
+		s = &GameState{
+			cacheable:      true,
+			currentAuraIdx: -1,
+			logger:         turnlogger.New(),
+		}
 	}
+	return &GameEngine{GameState: s}
 }
 
 // NewFromSpec builds a *GameEngine from a Spec, sealing the unexported fields inside
@@ -94,7 +95,7 @@ func NewFromCards(deckCards, graveyard []card.Card) *GameEngine {
 	for i, c := range deckCards {
 		dc[i] = c
 	}
-	g := New()
+	g := NewFromState(nil)
 	g.deck = deck.New(nil, nil, dc)
 	g.graveyard = graveyard
 	return g

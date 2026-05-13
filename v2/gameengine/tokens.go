@@ -30,9 +30,9 @@ func (g *GameEngine) CreateRunechants(n int) {
 	bumpOrCreateAura(g.GameState, tokenNameRunechant, BuildRunechantAura, n)
 }
 
-// CreatePonder creates n Ponder tokens. No Value credit — Ponder pays out at end of
+// CreatePonders creates n Ponder tokens. No Value credit — Ponder pays out at end of
 // turn (see the runtime's Ponder aura handler).
-func (g *GameEngine) CreatePonder(n int) {
+func (g *GameEngine) CreatePonders(n int) {
 	if n <= 0 {
 		return
 	}

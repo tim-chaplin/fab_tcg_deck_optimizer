@@ -103,12 +103,12 @@ func (s *GameState) Copy() *GameState {
 	return &out
 }
 
-// BeginPermutation resets per-chain locals so the state is ready to play a fresh chain
+// Reset resets per-chain locals so the state is ready to play a fresh chain
 // from this permutation's hand order. Auras, items, banished, graveyard, deck, arsenal,
 // pitched, hero, and OpponentMarked carry over untouched — they represent the leaf's
 // pre-chain state. logger is installed verbatim (pass nil for the find-best path, a
 // fresh logger for the recording path).
-func (s *GameState) BeginPermutation(hand []card.Card, incomingDamage int, logger *turnlogger.TurnLogger) {
+func (s *GameState) Reset(hand []card.Card, incomingDamage int, logger *turnlogger.TurnLogger) {
 	s.hand = hand
 	s.cardsPlayed = nil
 	s.cardsRemaining = nil

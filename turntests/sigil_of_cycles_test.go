@@ -11,7 +11,7 @@ import (
 
 // TestSigilOfCycles_SetsAuraCreated verifies the Blue-only variant flips AuraCreated and returns 0.
 func TestSigilOfCycles_SetsAuraCreated(t *testing.T) {
-	s := gameengine.New()
+	s := gameengine.NewFromState(nil)
 	s.ResolveChainStep(s.Logger(), &card.CardState{Card: notimplemented.SigilOfCyclesBlue{}})
 	if got := s.Value(); got != 0 {
 		t.Errorf("Play() = %d, want 0", got)

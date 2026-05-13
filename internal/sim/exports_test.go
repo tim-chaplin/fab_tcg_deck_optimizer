@@ -110,20 +110,20 @@ func (s *SequenceContextForTest) Bufs() *AttackBufs { return s.ctx.bufs }
 // returns a fresh engine.
 func (b *attackBufs) DefenseGravScratch() []card.Card     { return b.defenseGravScratch }
 func (b *attackBufs) DRCardStateScratch() *card.CardState { return &b.drCardStateScratch }
-func (b *attackBufs) State() *gameengine.GameEngine       { return gameengine.New() }
+func (b *attackBufs) State() *gameengine.GameEngine       { return gameengine.NewFromState(nil) }
 
 // EngineWithHand returns a fresh GameState seeded with hand h. Tests that build a
 // TurnSummary by hand use this to populate the State *GameState without going through
 // the full chain runner.
 func EngineWithHand(h []card.Card) *gameengine.GameState {
-	s := gameengine.NewState()
+	s := gameengine.NewFromState(nil).GameState
 	s.SetHand(h)
 	return s
 }
 
 // EngineWithItems returns a fresh GameState with the supplied items installed.
 func EngineWithItems(items []*Item) *gameengine.GameState {
-	s := gameengine.NewState()
+	s := gameengine.NewFromState(nil).GameState
 	for _, it := range items {
 		s.CreateItem(it)
 	}
@@ -133,7 +133,7 @@ func EngineWithItems(items []*Item) *gameengine.GameState {
 // EngineWith returns a fresh GameState with hand, items, and log entries installed.
 // log can be nil to skip log seeding.
 func EngineWith(h []card.Card, items []*Item, log []turnlogger.LogEntry) *gameengine.GameState {
-	s := gameengine.NewState()
+	s := gameengine.NewFromState(nil).GameState
 	s.SetHand(h)
 	for _, it := range items {
 		s.CreateItem(it)

@@ -19,7 +19,7 @@ func TestTremorOfIArathael_NoBanishReturnsBaseAttack(t *testing.T) {
 		{cards.TremorOfIArathaelBlue{}, 2},
 	}
 	for _, tc := range cases {
-		s := gameengine.New()
+		s := gameengine.NewFromState(nil)
 		s.ResolveChainStep(s.Logger(), &card.CardState{Card: tc.c})
 		if s.Value() != tc.base {
 			t.Errorf("%s: Value = %d, want %d (no banish, base attack only)", tc.c.Name(), s.Value(), tc.base)

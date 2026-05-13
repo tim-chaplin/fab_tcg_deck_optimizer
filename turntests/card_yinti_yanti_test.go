@@ -21,7 +21,7 @@ func TestYintiYanti_PlayNoAuraNoBonus(t *testing.T) {
 		{cards.YintiYantiBlue{}, 1},
 	}
 	for _, tc := range cases {
-		s := gameengine.New()
+		s := gameengine.NewFromState(nil)
 		self := &card.CardState{Card: tc.c}
 		s.ResolveChainStep(s.Logger(), self)
 		if s.Value() != tc.want {
@@ -41,7 +41,7 @@ func TestYintiYanti_PlayWithAuraGetsBonus(t *testing.T) {
 		{cards.YintiYantiBlue{}, 2},
 	}
 	for _, tc := range cases {
-		s := gameengine.New()
+		s := gameengine.NewFromState(nil)
 		s.CreateAura(sim.NewRunechantAura(1))
 		self := &card.CardState{Card: tc.c}
 		s.ResolveChainStep(s.Logger(), self)
@@ -54,7 +54,7 @@ func TestYintiYanti_PlayWithAuraGetsBonus(t *testing.T) {
 // Tests that Block leaves BonusDefense untouched when no aura is in play.
 func TestYintiYanti_BlockNoAuraNoBonus(t *testing.T) {
 	for _, c := range []card.Card{cards.YintiYantiRed{}, cards.YintiYantiYellow{}, cards.YintiYantiBlue{}} {
-		s := gameengine.New()
+		s := gameengine.NewFromState(nil)
 		self := &card.CardState{Card: c}
 		c.(card.Blocker).Block(s, s.Logger(), self)
 		if self.BonusDefense != 0 {
@@ -66,7 +66,7 @@ func TestYintiYanti_BlockNoAuraNoBonus(t *testing.T) {
 // Tests that Block bumps BonusDefense by 1 when an aura is in play.
 func TestYintiYanti_BlockWithAuraGetsBonus(t *testing.T) {
 	for _, c := range []card.Card{cards.YintiYantiRed{}, cards.YintiYantiYellow{}, cards.YintiYantiBlue{}} {
-		s := gameengine.New()
+		s := gameengine.NewFromState(nil)
 		s.CreateAura(sim.NewRunechantAura(1))
 		self := &card.CardState{Card: c}
 		c.(card.Blocker).Block(s, s.Logger(), self)

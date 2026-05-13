@@ -13,7 +13,7 @@ import (
 // TestTrotAlong_NoAttackReturnsZero covers the miss branch: no qualifying next attack → grant
 // fizzles.
 func TestTrotAlong_NoAttackReturnsZero(t *testing.T) {
-	s := gameengine.New()
+	s := gameengine.NewFromState(nil)
 	s.ResolveChainStep(s.Logger(), &card.CardState{Card: cards.TrotAlongBlue{}})
 	if got := s.Value(); got != 0 {
 		t.Errorf("Play() = %d, want 0", got)

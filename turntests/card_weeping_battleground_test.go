@@ -39,7 +39,7 @@ func TestWeepingBattleground_NoAuraInGraveyard(t *testing.T) {
 
 // TestWeepingBattleground_EmptyGraveyard: no graveyard at all means no banish, no damage.
 func TestWeepingBattleground_EmptyGraveyard(t *testing.T) {
-	s := gameengine.New()
+	s := gameengine.NewFromState(nil)
 	s.ResolveChainStep(s.Logger(), &card.CardState{Card: cards.WeepingBattlegroundRed{}})
 	if got := s.Value(); got != 0 {
 		t.Fatalf("Play() = %d, want 0", got)

@@ -521,7 +521,7 @@ func processAurasAtStartOfTurn(queued []*Aura, d *deck.Deck) (
 	// the Arknight) read the deck via PopDeckTop, which mutates d in place. Adopting
 	// queued onto the state's aura list lets handlers' Destroy splice the live list
 	// directly.
-	s := gameengine.NewState()
+	s := gameengine.NewFromState(nil).GameState
 	s.SetDeck(d)
 	for _, a := range queued {
 		s.CreateAura(a)

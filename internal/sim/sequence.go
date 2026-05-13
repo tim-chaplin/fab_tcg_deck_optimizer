@@ -266,7 +266,7 @@ func bestAttackWithWeapons(
 // (when runechants > 0) for variable-cost DR cost probing. Defense-reactions read
 // RunechantCount() off this engine to decide their Cost; no other state matters.
 func newDRCostProbe(runechants int) *gameengine.GameEngine {
-	g := gameengine.New()
+	g := gameengine.NewFromState(nil)
 	if runechants > 0 {
 		g.CreateAura(NewRunechantAura(runechants))
 	}
@@ -315,7 +315,7 @@ func (ctx *sequenceContext) newPermLogger() *turnlogger.TurnLogger {
 // runDefense mutates ctx.leafState through the defender list, accumulating per-DR Value
 // into total. Auras grow with any DR-added entries; graveyard is left as priorGraveyard
 // + defenders for the chain phase. Chain-locals (value, action points, …) get reset
-// per permutation via BeginPermutation, so runDefense doesn't bother restoring them.
+// per permutation via Reset, so runDefense doesn't bother restoring them.
 func (ctx *sequenceContext) runDefense(defenders, pitched []card.Card, deckPile *deck.Deck, matchupIncomingDamage, blockBudget, arsenalDefenderIdx int) (int, bool) {
 	state := ctx.leafState
 	state.SetLogger(ctx.newPermLogger())
@@ -381,7 +381,7 @@ func (ctx *sequenceContext) runDefense(defenders, pitched []card.Card, deckPile 
 
 // preparePermState returns a fresh per-permutation *GameState for the chain run. The
 // state inherits the leafState's post-defense auras / items / graveyard / banished /
-// hero / arsenal, and gets its chain-locals reset via BeginPermutation. Hand is set to
+// hero / arsenal, and gets its chain-locals reset via Reset. Hand is set to
 // the chain attackers + the attack-phase pitched bag so each chain step's Hand() read
 // sees the upcoming bag.
 func (ctx *sequenceContext) preparePermState(playedAttackers []*card.CardState, n int) *gameengine.GameState {
@@ -399,7 +399,7 @@ func (ctx *sequenceContext) preparePermState(playedAttackers []*card.CardState, 
 		hand = append(hand, c)
 	}
 	s.SetPitched(ctx.pitched)
-	s.BeginPermutation(hand, ctx.matchup.IncomingDamage, ctx.newPermLogger())
+	s.Reset(hand, ctx.matchup.IncomingDamage, ctx.newPermLogger())
 	return s
 }
 

@@ -41,7 +41,7 @@ type GameEngine interface {
 
 	// Token economy
 	CreateRunechants(int)
-	CreatePonder(int)
+	CreatePonders(int)
 	CreateGold(int)
 	CreateCopper(int)
 	RunechantCount() int

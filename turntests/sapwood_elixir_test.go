@@ -12,7 +12,7 @@ import (
 
 // TestSapwoodElixir_NoAttackReturnsZero: no qualifying next attack card → +3 rider fizzles.
 func TestSapwoodElixir_NoAttackReturnsZero(t *testing.T) {
-	s := gameengine.New()
+	s := gameengine.NewFromState(nil)
 	s.ResolveChainStep(s.Logger(), &card.CardState{Card: notimplemented.SapwoodElixirRed{}})
 	if got := s.Value(); got != 0 {
 		t.Errorf("Play() = %d, want 0", got)

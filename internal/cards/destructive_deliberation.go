@@ -11,7 +11,7 @@ func destructiveDeliberationPlay(g card.GameEngine, l card.Logger, self *card.Ca
 }
 
 func destructiveDeliberationOnHit(g card.GameEngine, l card.Logger, self *card.CardState, _ *card.OnHitHandler) {
-	g.CreatePonder(1)
+	g.CreatePonders(1)
 	l.AppendPostTrigger(self.Card.DisplayName(), "On-hit created a ponder", 0)
 }
 
