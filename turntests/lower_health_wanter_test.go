@@ -7,6 +7,7 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/gameengine"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/hero"
 )
 
 // stubLowHeroOn implements gameengine.LowerHealthWanter — used to exercise the "hero opts
@@ -18,7 +19,7 @@ func (stubLowHeroOn) Name() string                                             {
 func (stubLowHeroOn) Intelligence() int                                        { return 4 }
 func (stubLowHeroOn) Types() card.TypeSet                                      { return 0 }
 func (stubLowHeroOn) Class() card.CardType                                     { return 0 }
-func (stubLowHeroOn) OnCardPlayed(card.Card, card.GameEngine, card.Logger) int { return 0 }
+func (stubLowHeroOn) OnCardPlayed(card.Card, hero.GameEngine, hero.Logger) int { return 0 }
 func (stubLowHeroOn) Opt(cards []card.Card) (top, bottom []card.Card)          { return cards, nil }
 func (stubLowHeroOn) WantsLowerHealth()                                        {}
 
@@ -30,7 +31,7 @@ func (stubLowHeroOff) Name() string                                             
 func (stubLowHeroOff) Intelligence() int                                        { return 4 }
 func (stubLowHeroOff) Types() card.TypeSet                                      { return 0 }
 func (stubLowHeroOff) Class() card.CardType                                     { return 0 }
-func (stubLowHeroOff) OnCardPlayed(card.Card, card.GameEngine, card.Logger) int { return 0 }
+func (stubLowHeroOff) OnCardPlayed(card.Card, hero.GameEngine, hero.Logger) int { return 0 }
 func (stubLowHeroOff) Opt(cards []card.Card) (top, bottom []card.Card)          { return cards, nil }
 
 // engineWithHero returns a fresh empty engine with hero installed.

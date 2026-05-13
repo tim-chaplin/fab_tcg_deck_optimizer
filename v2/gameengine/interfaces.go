@@ -9,13 +9,14 @@ package gameengine
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/hero"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/triggertype"
 )
 
-// Aura is the engine's view of a persistent hook entry. The Fire signature uses
-// card.GameEngine so concrete aura impls satisfy this without importing gameengine —
-// *GameEngine satisfies card.GameEngine. Copy returns any for the same reason; the engine
-// type-asserts back to Aura when consuming.
+// Aura is the engine's view of a persistent hook entry. Engine, logger, and source-card
+// values flow through as `any` so concrete impls (in v2/aura) can satisfy this without
+// importing gameengine OR v2/card — the engine asserts the boxed values back to the typed
+// interfaces it uses. Copy uses any for the same reason; State.Copy asserts back to Aura.
 type Aura interface {
 	TriggerType() triggertype.Type
 	OncePerTurn() bool
@@ -23,47 +24,49 @@ type Aura interface {
 	SetFiredThisTurn(bool)
 	CardName() string
 	CardID() ids.CardID
-	// SourceCard returns the originating card.Card for card-backed auras, or nil for token
-	// auras. DestroyAura uses this to route the source card into the graveyard; sim's
-	// start-of-turn listing reads it to attribute aura fires to their source card.
-	SourceCard() card.Card
+	// SourceCard returns the originating card boxed as any for card-backed auras, or nil
+	// for token auras. DestroyAura asserts it back to card.Card to route into graveyard;
+	// sim's start-of-turn listing reads it to attribute aura fires to their source card.
+	SourceCard() any
 	Count() int
 	SetCount(int)
 	DecrementCount() int
-	Fire(ge card.GameEngine, l card.Logger)
-	// Copy returns a deep copy boxed as any so concrete impls satisfy without importing
-	// gameengine. State.Copy asserts the result back to Aura.
+	Fire(engine, logger any)
 	Copy() any
 }
 
-// Trigger is the engine's view of a one-shot deferred handler.
+// Trigger is the engine's view of a one-shot deferred handler. As with Aura, engine /
+// logger / type-set values flow through as `any`.
 type Trigger interface {
 	TriggerType() triggertype.Type
 	CardName() string
-	Matches(types card.TypeSet) bool
-	Fire(ge card.GameEngine, l card.Logger)
+	Matches(types any) bool
+	Fire(engine, logger any)
 }
 
-// Item is the engine's view of an in-play permanent with an activated ability.
+// Item is the engine's view of an in-play permanent with an activated ability. Ability
+// is returned as `any` so concrete Item impls (in v2/token) can satisfy this without
+// importing v2/card — engine and chain-runner callers assert back to card.Card.
 type Item interface {
 	CardName() string
 	CardID() ids.CardID
 	Count() int
 	SetCount(int)
-	Ability() card.Card
-	// Copy returns a deep copy boxed as any. State.Copy asserts the result back to Item.
+	Ability() any
 	Copy() any
 }
 
-// Hero is the engine's view of the active hero. OnCardPlayed takes card.GameEngine so
-// concrete heroes don't have to import gameengine — *GameEngine satisfies card.GameEngine.
+// Hero is the engine's view of the active hero. OnCardPlayed takes hero.GameEngine and
+// hero.Logger — narrow surfaces concrete heroes consume directly so v2/hero doesn't
+// reference v2/card.GameEngine / v2/card.Logger. *GameEngine satisfies hero.GameEngine
+// structurally.
 type Hero interface {
 	ID() ids.HeroID
 	Name() string
 	Class() card.CardType
 	Types() card.TypeSet
 	Intelligence() int
-	OnCardPlayed(played card.Card, ge card.GameEngine, l card.Logger) int
+	OnCardPlayed(played card.Card, ge hero.GameEngine, l hero.Logger) int
 	Opt(cards []card.Card) (top, bottom []card.Card)
 }
 

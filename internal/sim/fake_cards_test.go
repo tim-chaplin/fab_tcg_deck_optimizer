@@ -8,6 +8,7 @@ package sim
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/hero"
 )
 
 // FakeCard is a configurable Card stand-in. Tests construct it via NewFakeCard plus
@@ -83,7 +84,7 @@ func (FakeHero) Health() int                                              { retu
 func (h FakeHero) Intelligence() int                                      { return h.Intel }
 func (FakeHero) Types() card.TypeSet                                      { return 0 }
 func (FakeHero) Class() card.CardType                                     { return 0 }
-func (FakeHero) OnCardPlayed(card.Card, card.GameEngine, card.Logger) int { return 0 }
+func (FakeHero) OnCardPlayed(card.Card, hero.GameEngine, hero.Logger) int { return 0 }
 
 // Opt dispatches to OptStrategy when set; otherwise keeps every revealed card on top
 // of the deck in input order (no reshape).

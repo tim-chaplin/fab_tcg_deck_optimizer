@@ -568,7 +568,7 @@ func TestFormatBestTurn_StartOfTurnRunechantsOnly(t *testing.T) {
 // TestFormatBestTurn_StartOfTurnGoldItems surfaces a Gold token carryover as an
 // "Items: N Gold" line in the Start of turn section.
 func TestFormatBestTurn_StartOfTurnGoldItems(t *testing.T) {
-	out := FormatBestTurn(TurnSummary{}, nil, []*token.Item{token.NewGold(2)})
+	out := FormatBestTurn(TurnSummary{}, nil, []*token.Item{cards.NewGold(2)})
 	want := "Items: 2 Gold"
 	if !strings.Contains(out, want) {
 		t.Errorf("missing %q in:\n%s", want, out)
@@ -579,7 +579,7 @@ func TestFormatBestTurn_StartOfTurnGoldItems(t *testing.T) {
 // as an "Items: N Gold" line in the End of turn section.
 func TestFormatBestTurn_EndOfTurnGoldItems(t *testing.T) {
 	summary := TurnSummary{
-		State: EngineWithItems([]*token.Item{token.NewGold(1)}),
+		State: EngineWithItems([]*token.Item{cards.NewGold(1)}),
 	}
 	out := FormatBestTurn(summary, nil, nil)
 	want := "Items: 1 Gold"
@@ -608,7 +608,7 @@ func TestFormatBestTurn_EndOfTurnHandLine(t *testing.T) {
 func TestFormatBestTurn_EndOfTurnAurasWithRunechants(t *testing.T) {
 	gs := gameengine.GameStateBuilder().Build()
 	gs.CreateAura(aura.NewCard(
-		&card.CardState{Card: cards.MaleficIncantationRed{}},
+		cards.MaleficIncantationRed{},
 		triggertype.StartOfTurn,
 		nil, 1, false,
 	))

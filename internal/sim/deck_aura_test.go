@@ -21,13 +21,13 @@ import (
 // itself on the first fire.
 func damageTrigger(self card.Card, damage int, calls *int) gameengine.Aura {
 	return aura.NewCard(
-		&card.CardState{Card: self},
+		self,
 		triggertype.StartOfTurn,
-		func(ge card.GameEngine, _ card.Logger, a card.Aura) {
+		WrapAuraHandler(func(ge card.GameEngine, _ card.Logger, a card.Aura) {
 			*calls++
 			ge.AddValue(damage)
 			a.Destroy(true)
-		},
+		}),
 		1,
 		false,
 	)
@@ -72,21 +72,21 @@ func TestProcessAurasAtStartOfTurn_GraveyardsExhaustedAura(t *testing.T) {
 	src := testutils.RedAttack{}
 	var seen []card.Card
 	watcher := aura.NewCard(
-		&card.CardState{Card: testutils.YellowAttack{}},
+		testutils.YellowAttack{},
 		triggertype.StartOfTurn,
-		func(ge card.GameEngine, _ card.Logger, _ card.Aura) {
+		WrapAuraHandler(func(ge card.GameEngine, _ card.Logger, _ card.Aura) {
 			eng := ge.(*gameengine.GameEngine)
 			seen = append([]card.Card(nil), eng.Graveyard()...)
-		},
+		}),
 		1,
 		false,
 	)
 	first := aura.NewCard(
-		&card.CardState{Card: src},
+		src,
 		triggertype.StartOfTurn,
-		func(_ card.GameEngine, _ card.Logger, a card.Aura) {
+		WrapAuraHandler(func(_ card.GameEngine, _ card.Logger, a card.Aura) {
 			a.Destroy(true)
-		},
+		}),
 		1,
 		false,
 	)
@@ -267,9 +267,9 @@ func TestEvaluate_TriggersFromLastTurnSurfacesInBest(t *testing.T) {
 func TestProcessAurasAtStartOfTurn_ReArmsOncePerTurnGate(t *testing.T) {
 	src := testutils.RedAttack{}
 	exhausted := aura.NewCard(
-		&card.CardState{Card: src},
+		src,
 		triggertype.AttackAction,
-		func(card.GameEngine, card.Logger, card.Aura) {},
+		WrapAuraHandler(func(card.GameEngine, card.Logger, card.Aura) {}),
 		2,
 		true,
 	)

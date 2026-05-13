@@ -9,6 +9,10 @@ import (
 // v2/token). The engine's card-facing Create*Aura / AddXxxTrigger / Create*Token methods
 // construct entries by calling these builder funcs; sim registers them via init.
 //
+// The factory layer is also where typed card.AuraHandler / card.TriggerHandler values are
+// wrapped into the leaf packages' type-erased Handler closures — keeping aura / trigger
+// free of any v2/card dependency.
+//
 // Engines built before the builders are registered crash on the cards-facing construction
 // methods — by design: a runtime with no concrete types behind the engine can't build
 // anything, so silently no-oping would hide a setup bug.

@@ -422,8 +422,8 @@ func snapshotStartOfTurnAuras(queued []*aura.Aura) []card.Card {
 	}
 	var out []card.Card
 	for _, t := range queued {
-		if c := t.SourceCard(); c != nil {
-			out = append(out, c)
+		if src := t.SourceCard(); src != nil {
+			out = append(out, src.(card.Card))
 		}
 	}
 	return out
@@ -537,7 +537,11 @@ func processAurasAtStartOfTurn(queued []*aura.Aura, d *deck.Deck) (
 	sourceByFireIdx := make([]card.Card, 0, len(queued))
 	for _, a := range queued {
 		if a.TriggerType() == triggertype.StartOfTurn {
-			sourceByFireIdx = append(sourceByFireIdx, a.SourceCard())
+			var src card.Card
+			if s := a.SourceCard(); s != nil {
+				src = s.(card.Card)
+			}
+			sourceByFireIdx = append(sourceByFireIdx, src)
 		}
 	}
 	fireIdx := 0

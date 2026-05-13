@@ -197,6 +197,18 @@ func (ge *GameEngine) DrawOne() {
 	ge.cardsDrawn++
 }
 
+// PonderDrawOne pops the deck top into the hand without bumping CardsDrawn. Returns false
+// when the deck is empty. Used by the Ponder token aura at end of turn — ponder draws
+// aren't "draws" in the partition-tiebreaker sense, so the counter stays put.
+func (ge *GameEngine) PonderDrawOne() bool {
+	c, ok := ge.PopDeckTop()
+	if !ok {
+		return false
+	}
+	ge.hand = append(ge.hand, c)
+	return true
+}
+
 // === Rules-engine helpers cards reach through GameEngine ===
 
 // LikelyToHit reports whether self's attack is likely to land past the opponent's blocks.
@@ -512,8 +524,8 @@ func (ge *GameEngine) DestroyAura(addToGraveyard bool) {
 		return
 	}
 	if addToGraveyard {
-		if c := ge.auras[i].SourceCard(); c != nil {
-			ge.AppendGraveyard(c)
+		if src := ge.auras[i].SourceCard(); src != nil {
+			ge.AppendGraveyard(src.(card.Card))
 		}
 	}
 	ge.auras = append(ge.auras[:i], ge.auras[i+1:]...)

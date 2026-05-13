@@ -117,7 +117,7 @@ func bestAttackWithWeapons(
 		if copies > perItemAbilityCap {
 			copies = perItemAbilityCap
 		}
-		ab := it.Ability()
+		ab := it.Ability().(card.Card)
 		cost := attackerMetaPtrFor(ab).maxCost
 		for i := 0; i < copies; i++ {
 			abilities = append(abilities, ab)
