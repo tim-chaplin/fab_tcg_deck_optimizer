@@ -20,7 +20,7 @@ func TestPeaceOfMind_PreventsByPrinting(t *testing.T) {
 		{cards.PeaceOfMindBlue{}, 2},
 	}
 	for _, tc := range cases {
-		s := gameengine.NewFromSpec(gameengine.Spec{IncomingDamage: 10})
+		s := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetIncomingDamage(10).Build()}
 		self := &card.CardState{Card: tc.card}
 		s.ResolveChainStep(s.Logger(), self)
 		if s.Value() != tc.want {
@@ -32,7 +32,7 @@ func TestPeaceOfMind_PreventsByPrinting(t *testing.T) {
 // Tests that each printing creates one Ponder token on play.
 func TestPeaceOfMind_CreatesPonder(t *testing.T) {
 	for _, c := range []card.Card{cards.PeaceOfMindRed{}, cards.PeaceOfMindYellow{}, cards.PeaceOfMindBlue{}} {
-		s := gameengine.NewFromSpec(gameengine.Spec{IncomingDamage: 10})
+		s := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetIncomingDamage(10).Build()}
 		self := &card.CardState{Card: c}
 		s.ResolveChainStep(s.Logger(), self)
 		if got := s.PonderCount(); got != 1 {

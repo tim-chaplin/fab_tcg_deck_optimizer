@@ -25,7 +25,10 @@ var currentOptTestHero FakeHero
 // withOptHero-installed currentOptTestHero attached, mirroring the old TurnState-with-
 // global-hero shape the per-test bodies use.
 func newOptTestEngine(deckCards, graveyard []card.Card) *gameengine.GameEngine {
-	e := gameengine.NewFromCards(deckCards, graveyard)
+	e := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().
+		SetCards(deckCards).
+		SetGraveyard(graveyard).
+		Build()}
 	e.SetHero(currentOptTestHero)
 	return e
 }

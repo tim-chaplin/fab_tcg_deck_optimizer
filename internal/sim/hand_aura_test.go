@@ -13,7 +13,7 @@ import (
 func TestFireAttackActionAuras_FiresOnceWhenGated(t *testing.T) {
 	aura := FakeRedAttack{}
 	calls := 0
-	state := gameengine.NewFromState(nil)
+	state := gameengine.New()
 	state.CreateAura(NewCardAura(
 		&card.CardState{Card: aura},
 		triggertype.AttackAction,
@@ -49,7 +49,7 @@ func TestFireAttackActionAuras_FiresOnceWhenGated(t *testing.T) {
 // graveyard.
 func TestFireAttackActionAuras_GraveyardsExhaustedAura(t *testing.T) {
 	aura := FakeRedAttack{}
-	state := gameengine.NewFromState(nil)
+	state := gameengine.New()
 	state.CreateAura(NewCardAura(
 		&card.CardState{Card: aura},
 		triggertype.AttackAction,
@@ -74,7 +74,7 @@ func TestFireAttackActionAuras_GraveyardsExhaustedAura(t *testing.T) {
 func TestFireAttackActionAuras_PassesThroughNonAttackActionTriggers(t *testing.T) {
 	aura := FakeRedAttack{}
 	calls := 0
-	state := gameengine.NewFromState(nil)
+	state := gameengine.New()
 	state.CreateAura(NewCardAura(
 		&card.CardState{Card: aura},
 		triggertype.StartOfTurn,

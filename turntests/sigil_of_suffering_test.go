@@ -20,7 +20,7 @@ func TestSigilOfSuffering_FullCreditWhenIncomingAbsorbsBoost(t *testing.T) {
 		{cards.SigilOfSufferingBlue{}, 3},   // 1 block + 1 boost + 1 arcane
 	}
 	for _, tc := range cases {
-		s := gameengine.NewFromSpec(gameengine.Spec{IncomingDamage: 10})
+		s := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetIncomingDamage(10).Build()}
 		s.ResolveChainStep(s.Logger(), &card.CardState{Card: tc.c})
 		if got := s.Value(); got != tc.want {
 			t.Errorf("%s: Play(IncomingDamage=10) Value = %d, want %d (block + boost + arcane)",
@@ -42,7 +42,7 @@ func TestSigilOfSuffering_BoostWastedWhenIncomingMatchesDefense(t *testing.T) {
 		{cards.SigilOfSufferingBlue{}, 1, 2},   // 1 block + 1 arcane
 	}
 	for _, tc := range cases {
-		s := gameengine.NewFromSpec(gameengine.Spec{IncomingDamage: tc.incoming})
+		s := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetIncomingDamage(tc.incoming).Build()}
 		s.ResolveChainStep(s.Logger(), &card.CardState{Card: tc.c})
 		if got := s.Value(); got != tc.want {
 			t.Errorf("%s: Play(IncomingDamage=%d) Value = %d, want %d (block at cap + arcane only)",

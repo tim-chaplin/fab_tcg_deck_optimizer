@@ -23,7 +23,7 @@ func TestFateForeseen_BlocksAndCallsOpt1(t *testing.T) {
 
 	for _, tc := range cases {
 		top := testutils.NewStubCard("top")
-		s := gameengine.NewFromCards([]card.Card{top}, nil)
+		s := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCards([]card.Card{top}).Build()}
 		s.SetIncomingDamage(10)
 		s.ResolveChainStep(s.Logger(), &card.CardState{Card: tc.c})
 		if s.Value() != tc.block {

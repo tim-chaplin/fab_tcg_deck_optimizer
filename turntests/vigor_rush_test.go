@@ -25,10 +25,9 @@ func TestVigorRush_BaseGoAgainFalse(t *testing.T) {
 func TestVigorRush_NoNonAttackActionNoGoAgain(t *testing.T) {
 	cases := []card.Card{cards.VigorRushRed{}, cards.VigorRushYellow{}, cards.VigorRushBlue{}}
 	for _, c := range cases {
-		s := gameengine.NewFromSpec(gameengine.Spec{
-			CardsPlayed:           []card.Card{testutils.GenericAttack(0, 0)}, // attack, not non-attack
-			NonAttackActionPlayed: false,
-		})
+		s := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().
+			SetCardsPlayed([]card.Card{testutils.GenericAttack(0, 0)}). // not non-attack
+			SetNonAttackActionPlayed(false).Build()}
 		self := &card.CardState{Card: c}
 		s.ResolveChainStep(s.Logger(), self)
 		if got := s.Value(); got != c.Attack() {
@@ -45,10 +44,10 @@ func TestVigorRush_NoNonAttackActionNoGoAgain(t *testing.T) {
 func TestVigorRush_NonAttackActionGrantsGoAgain(t *testing.T) {
 	cases := []card.Card{cards.VigorRushRed{}, cards.VigorRushYellow{}, cards.VigorRushBlue{}}
 	for _, c := range cases {
-		s := gameengine.NewFromSpec(gameengine.Spec{
-			CardsPlayed:           []card.Card{testutils.GenericAction()},
-			NonAttackActionPlayed: true,
-		})
+		s := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().
+			SetCardsPlayed([]card.Card{testutils.GenericAction()}).
+			SetNonAttackActionPlayed(true).
+			Build()}
 		self := &card.CardState{Card: c}
 		s.ResolveChainStep(s.Logger(), self)
 		if !self.GrantedGoAgain {

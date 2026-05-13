@@ -11,7 +11,7 @@ import (
 
 // Tests that Play credits the flat 3-damage prevention.
 func TestCalmingBreeze_PreventsFlat3(t *testing.T) {
-	s := gameengine.NewFromSpec(gameengine.Spec{IncomingDamage: 5})
+	s := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetIncomingDamage(5).Build()}
 	self := &card.CardState{Card: cards.CalmingBreezeRed{}}
 	s.ResolveChainStep(s.Logger(), self)
 	if s.Value() != 3 {

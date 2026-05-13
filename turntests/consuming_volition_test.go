@@ -22,7 +22,7 @@ func TestConsumingVolition_ArcaneDamageNotDealtReturnsBaseAttack(t *testing.T) {
 		{cards.ConsumingVolitionBlue{}, 2},
 	}
 	for _, tc := range cases {
-		s := gameengine.NewFromState(nil)
+		s := gameengine.New()
 		cs := &card.CardState{Card: tc.c}
 		s.ResolveChainStep(s.Logger(), cs)
 		testutils.FireOnHitIfLikely(s, s.Logger(), cs)
@@ -35,7 +35,7 @@ func TestConsumingVolition_ArcaneDamageNotDealtReturnsBaseAttack(t *testing.T) {
 // Tests that the discard rider fires when ArcaneDamageDealt is set and the attack is likely
 // to hit.
 func TestConsumingVolition_LikelyToHitAndArcaneTriggersDiscard(t *testing.T) {
-	s := gameengine.NewFromSpec(gameengine.Spec{ArcaneDamageDealt: true})
+	s := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetArcaneDamageDealt(true).Build()}
 	c := cards.ConsumingVolitionRed{}
 	cs := &card.CardState{Card: c}
 	s.ResolveChainStep(s.Logger(), cs)
@@ -56,7 +56,7 @@ func TestConsumingVolition_BlockableBaseSuppressesDiscard(t *testing.T) {
 		{cards.ConsumingVolitionBlue{}, 2},
 	}
 	for _, tc := range cases {
-		s := gameengine.NewFromSpec(gameengine.Spec{ArcaneDamageDealt: true})
+		s := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetArcaneDamageDealt(true).Build()}
 		s.ResolveChainStep(s.Logger(), &card.CardState{Card: tc.c})
 		if got := s.Value(); got != tc.want {
 			t.Errorf("%s with ArcaneDamageDealt: Play() = %d, want %d (blockable, no rider)", tc.c.Name(), got, tc.want)
@@ -67,7 +67,7 @@ func TestConsumingVolition_BlockableBaseSuppressesDiscard(t *testing.T) {
 // Tests that co-firing runechants don't rescue a blockable variant — "this hits" reads only
 // this card's own damage.
 func TestConsumingVolition_RunechantsDontRescue(t *testing.T) {
-	s := gameengine.NewFromSpec(gameengine.Spec{ArcaneDamageDealt: true})
+	s := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetArcaneDamageDealt(true).Build()}
 	s.CreateAura(sim.NewRunechantAura(1))
 	c := cards.ConsumingVolitionYellow{}
 	s.ResolveChainStep(s.Logger(), &card.CardState{Card: c})

@@ -20,7 +20,7 @@ func TestFreewheelingRenegades_AlwaysDebuffedByTwo(t *testing.T) {
 		{cards.FreewheelingRenegadesBlue{}, 2},
 	}
 	for _, tc := range cases {
-		s := gameengine.NewFromState(nil)
+		s := gameengine.New()
 		s.ResolveChainStep(s.Logger(), &card.CardState{Card: tc.c})
 		if got := s.Value(); got != tc.want {
 			t.Errorf("%s: Play() = %d, want %d (printed - 2)", tc.c.Name(), got, tc.want)

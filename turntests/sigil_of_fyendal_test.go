@@ -14,7 +14,7 @@ import (
 // start-of-turn Aura with Count=1 — no same-turn damage, the 1{h} gain is credited
 // when the sim fires the trigger next turn.
 func TestSigilOfFyendal_PlayRegistersStartOfTurnTrigger(t *testing.T) {
-	s := gameengine.NewFromState(nil)
+	s := gameengine.New()
 	s.ResolveChainStep(s.Logger(), &card.CardState{Card: cards.SigilOfFyendalBlue{}})
 	if got := s.Value(); got != 0 {
 		t.Errorf("Play() = %d, want 0 (1{h} gain deferred to trigger)", got)
@@ -33,9 +33,9 @@ func TestSigilOfFyendal_PlayRegistersStartOfTurnTrigger(t *testing.T) {
 // TestSigilOfFyendal_TriggerHandlerCredits1Damage: the registered handler credits +1 damage
 // (the 1{h} gain, valued 1-to-1 with damage).
 func TestSigilOfFyendal_TriggerHandlerCredits1Damage(t *testing.T) {
-	s := gameengine.NewFromState(nil)
+	s := gameengine.New()
 	s.ResolveChainStep(s.Logger(), &card.CardState{Card: cards.SigilOfFyendalBlue{}})
-	fire := gameengine.NewFromCards(nil, nil)
+	fire := gameengine.New()
 	fire.CreateAura(s.Auras()[0])
 	fire.FireStartOfTurn(nil)
 	if fire.Value() != 1 {

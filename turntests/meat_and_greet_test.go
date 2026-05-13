@@ -21,7 +21,7 @@ func TestMeatAndGreet_OnHitRunechantGatedByLikelyToHit(t *testing.T) {
 		{cards.MeatAndGreetBlue{}, 2},
 	}
 	for _, tc := range cases {
-		s := gameengine.NewFromState(nil)
+		s := gameengine.New()
 		self := &card.CardState{Card: tc.c}
 		s.ResolveChainStep(s.Logger(), self)
 		testutils.FireOnHitIfLikely(s, s.Logger(), self)
@@ -46,7 +46,7 @@ func TestMeatAndGreet_ArcaneDamageDealtGrantsGoAgain(t *testing.T) {
 		cards.MeatAndGreetBlue{},
 	}
 	for _, c := range cases {
-		s := gameengine.NewFromSpec(gameengine.Spec{ArcaneDamageDealt: true})
+		s := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetArcaneDamageDealt(true).Build()}
 		self := &card.CardState{Card: c}
 		s.ResolveChainStep(s.Logger(), self)
 		if !self.GrantedGoAgain {

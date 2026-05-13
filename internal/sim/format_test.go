@@ -97,7 +97,7 @@ func TestFormatBestTurn_LogAttributesEachTriggerSeparately(t *testing.T) {
 	// Use the real Malefic Incantation card's Play to register the prior trigger so the
 	// handler matches production exactly (logs via AddPreTriggerLogEntry, sources from
 	// state.TriggeringCard).
-	bootstrap := gameengine.NewFromCards(nil, nil)
+	bootstrap := gameengine.New()
 	bootstrap.ResolveChainStep(bootstrap.Logger(), &card.CardState{Card: cards.MaleficIncantationRed{}})
 	priorAuras := make([]*Aura, 0, len(bootstrap.Auras()))
 	for _, a := range bootstrap.Auras() {
@@ -604,7 +604,7 @@ func TestFormatBestTurn_EndOfTurnHandLine(t *testing.T) {
 // surviving Auras + the live Runechant count render as one comma-separated line,
 // mirroring the start-of-turn formatting.
 func TestFormatBestTurn_EndOfTurnAurasWithRunechants(t *testing.T) {
-	state := gameengine.NewFromState(nil).GameState
+	state := gameengine.GameStateBuilder().Build()
 	state.CreateAura(NewCardAura(
 		&card.CardState{Card: cards.MaleficIncantationRed{}},
 		triggertype.StartOfTurn,

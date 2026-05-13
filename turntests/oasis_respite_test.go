@@ -20,12 +20,18 @@ func TestOasisRespite_PreventsAndLifeRider(t *testing.T) {
 		{cards.OasisRespiteBlue{}, 2, 3},
 	}
 	for _, tc := range cases {
-		sOff := gameengine.NewFromSpec(gameengine.Spec{Hero: stubLowHeroOff{}, IncomingDamage: 10})
+		sOff := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().
+			SetHero(stubLowHeroOff{}).
+			SetIncomingDamage(10).
+			Build()}
 		sOff.ResolveChainStep(sOff.Logger(), &card.CardState{Card: tc.card})
 		if sOff.Value() != tc.wantOff {
 			t.Errorf("%s: hero off Value = %d, want %d", tc.card.Name(), sOff.Value(), tc.wantOff)
 		}
-		sOn := gameengine.NewFromSpec(gameengine.Spec{Hero: stubLowHeroOn{}, IncomingDamage: 10})
+		sOn := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().
+			SetHero(stubLowHeroOn{}).
+			SetIncomingDamage(10).
+			Build()}
 		sOn.ResolveChainStep(sOn.Logger(), &card.CardState{Card: tc.card})
 		if sOn.Value() != tc.wantOn {
 			t.Errorf("%s: hero on Value = %d, want %d", tc.card.Name(), sOn.Value(), tc.wantOn)

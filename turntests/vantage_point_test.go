@@ -21,7 +21,7 @@ func TestVantagePoint_BaseDamageNoAura(t *testing.T) {
 		{cards.VantagePointBlue{}, 5},
 	}
 	for _, tc := range cases {
-		s := gameengine.NewFromState(nil)
+		s := gameengine.New()
 		self := &card.CardState{Card: tc.c}
 		s.ResolveChainStep(s.Logger(), self)
 		if got := s.Value(); got != tc.base {
@@ -35,7 +35,7 @@ func TestVantagePoint_BaseDamageNoAura(t *testing.T) {
 
 // Tests that the AuraCreated flag flips self.GrantedOverpower.
 func TestVantagePoint_AuraCreatedSetsOverpower(t *testing.T) {
-	s := gameengine.NewFromSpec(gameengine.Spec{AuraCreated: true})
+	s := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetAuraCreated(true).Build()}
 	self := &card.CardState{Card: cards.VantagePointRed{}}
 	s.ResolveChainStep(s.Logger(), self)
 	if got := s.Value(); got != 7 {

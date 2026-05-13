@@ -14,7 +14,7 @@ import (
 func TestLookingForAScrap_NoBanishableRiderOff(t *testing.T) {
 	for _, c := range []card.Card{cards.LookingForAScrapRed{}, cards.LookingForAScrapYellow{}, cards.LookingForAScrapBlue{}} {
 		self := &card.CardState{Card: c}
-		s := gameengine.NewFromCards(nil, nil)
+		s := gameengine.New()
 		s.ResolveChainStep(s.Logger(), self)
 		if self.GrantedGoAgain {
 			t.Errorf("%s [%d{p}]: GrantedGoAgain = true with empty graveyard, want false", c.Name(), c.Pitch())
@@ -29,7 +29,7 @@ func TestLookingForAScrap_NoBanishableRiderOff(t *testing.T) {
 // go-again rider.
 func TestLookingForAScrap_BanishesOnePowerForBonus(t *testing.T) {
 	for _, c := range []card.Card{cards.LookingForAScrapRed{}, cards.LookingForAScrapYellow{}, cards.LookingForAScrapBlue{}} {
-		s := gameengine.NewFromCards(nil, []card.Card{testutils.GenericAttack(0, 1)})
+		s := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetGraveyard([]card.Card{testutils.GenericAttack(0, 1)}).Build()}
 		self := &card.CardState{Card: c}
 		s.ResolveChainStep(s.Logger(), self)
 		if !self.GrantedGoAgain {

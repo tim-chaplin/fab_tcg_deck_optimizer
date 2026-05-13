@@ -22,7 +22,7 @@ func TestMaleficIncantation_PlayRegistersAttackActionTrigger(t *testing.T) {
 		{cards.MaleficIncantationBlue{}, 1},
 	}
 	for _, tc := range cases {
-		s := gameengine.NewFromState(nil)
+		s := gameengine.New()
 		s.ResolveChainStep(s.Logger(), &card.CardState{Card: tc.c})
 		if got := s.Value(); got != 0 {
 			t.Errorf("%s: Play() = %d, want 0 (rune comes from trigger, not Play)", tc.c.Name(), got)
@@ -52,9 +52,9 @@ func TestMaleficIncantation_PlayRegistersAttackActionTrigger(t *testing.T) {
 // Tests that one handler invocation creates one Runechant and credits 1 damage.
 func TestMaleficIncantation_HandlerCreatesOneRunechantPerFire(t *testing.T) {
 	for _, c := range []card.Card{cards.MaleficIncantationRed{}, cards.MaleficIncantationYellow{}, cards.MaleficIncantationBlue{}} {
-		s := gameengine.NewFromState(nil)
+		s := gameengine.New()
 		s.ResolveChainStep(s.Logger(), &card.CardState{Card: c})
-		chain := gameengine.NewFromCards(nil, nil)
+		chain := gameengine.New()
 		chain.SetTriggeringCard(c)
 		chain.CreateAura(s.Auras()[0])
 		chain.FireAttackAction(c)

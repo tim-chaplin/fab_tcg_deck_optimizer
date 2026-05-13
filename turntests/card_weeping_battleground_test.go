@@ -12,7 +12,7 @@ import (
 // TestWeepingBattleground_AuraInGraveyard: an aura in the graveyard gets banished for 1 arcane.
 func TestWeepingBattleground_AuraInGraveyard(t *testing.T) {
 	aura := cards.SigilOfSilphidaeBlue{}
-	s := gameengine.NewFromCards(nil, []card.Card{aura})
+	s := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetGraveyard([]card.Card{aura}).Build()}
 	s.ResolveChainStep(s.Logger(), &card.CardState{Card: cards.WeepingBattlegroundRed{}})
 	if got := s.Value(); got != 1 {
 		t.Fatalf("Play() = %d, want 1", got)
@@ -27,7 +27,7 @@ func TestWeepingBattleground_AuraInGraveyard(t *testing.T) {
 func TestWeepingBattleground_NoAuraInGraveyard(t *testing.T) {
 	// Shrill of Skullform is an Action - Attack (no Aura type), so it fails the aura scan.
 	nonAura := cards.ShrillOfSkullformRed{}
-	s := gameengine.NewFromCards(nil, []card.Card{nonAura})
+	s := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetGraveyard([]card.Card{nonAura}).Build()}
 	s.ResolveChainStep(s.Logger(), &card.CardState{Card: cards.WeepingBattlegroundRed{}})
 	if got := s.Value(); got != 0 {
 		t.Fatalf("Play() = %d, want 0 (no aura to banish)", got)
@@ -39,7 +39,7 @@ func TestWeepingBattleground_NoAuraInGraveyard(t *testing.T) {
 
 // TestWeepingBattleground_EmptyGraveyard: no graveyard at all means no banish, no damage.
 func TestWeepingBattleground_EmptyGraveyard(t *testing.T) {
-	s := gameengine.NewFromState(nil)
+	s := gameengine.New()
 	s.ResolveChainStep(s.Logger(), &card.CardState{Card: cards.WeepingBattlegroundRed{}})
 	if got := s.Value(); got != 0 {
 		t.Fatalf("Play() = %d, want 0", got)
@@ -51,7 +51,7 @@ func TestWeepingBattleground_EmptyGraveyard(t *testing.T) {
 func TestWeepingBattleground_BanishesAura(t *testing.T) {
 	aura := cards.SigilOfSilphidaeBlue{}
 	nonAura := cards.ShrillOfSkullformRed{}
-	s := gameengine.NewFromCards(nil, []card.Card{nonAura, aura})
+	s := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetGraveyard([]card.Card{nonAura, aura}).Build()}
 	s.ResolveChainStep(s.Logger(), &card.CardState{Card: cards.WeepingBattlegroundRed{}})
 	g := s.Graveyard()
 	if len(g) != 1 || g[0].ID() != nonAura.ID() {
@@ -68,7 +68,7 @@ func TestWeepingBattleground_BanishesAura(t *testing.T) {
 func TestWeepingBattleground_OnlyOneAuraBanished(t *testing.T) {
 	aura1 := cards.SigilOfSilphidaeBlue{}
 	aura2 := cards.SigilOfSilphidaeBlue{}
-	s := gameengine.NewFromCards(nil, []card.Card{aura1, aura2})
+	s := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetGraveyard([]card.Card{aura1, aura2}).Build()}
 	s.ResolveChainStep(s.Logger(), &card.CardState{Card: cards.WeepingBattlegroundRed{}})
 	if g := s.Graveyard(); len(g) != 1 {
 		t.Fatalf("want one aura left in graveyard, got %d", len(g))
@@ -84,7 +84,7 @@ func TestWeepingBattleground_OnlyOneAuraBanished(t *testing.T) {
 func TestWeepingBattleground_SecondCopyAlsoFires(t *testing.T) {
 	aura1 := cards.SigilOfSilphidaeBlue{}
 	aura2 := cards.SigilOfSilphidaeBlue{}
-	s := gameengine.NewFromCards(nil, []card.Card{aura1, aura2})
+	s := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetGraveyard([]card.Card{aura1, aura2}).Build()}
 	s.ResolveChainStep(s.Logger(), &card.CardState{Card: cards.WeepingBattlegroundRed{}})
 	if got := s.Value(); got != 1 {
 		t.Fatalf("first Play() Value = %d, want 1", got)
@@ -105,7 +105,7 @@ func TestWeepingBattleground_SecondCopyAlsoFires(t *testing.T) {
 // the first banishes it, the second contributes 0 (no aura left), so cumulative Value stays 1.
 func TestWeepingBattleground_SecondCopyFizzlesWhenOutOfAuras(t *testing.T) {
 	aura := cards.SigilOfSilphidaeBlue{}
-	s := gameengine.NewFromCards(nil, []card.Card{aura})
+	s := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetGraveyard([]card.Card{aura}).Build()}
 	s.ResolveChainStep(s.Logger(), &card.CardState{Card: cards.WeepingBattlegroundRed{}})
 	if got := s.Value(); got != 1 {
 		t.Fatalf("first Play() Value = %d, want 1", got)

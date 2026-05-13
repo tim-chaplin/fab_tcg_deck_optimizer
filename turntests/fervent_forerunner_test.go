@@ -39,7 +39,7 @@ func TestFerventForerunner_OnHitOptFiresOnlyWhenInHitWindow(t *testing.T) {
 		{cards.FerventForerunnerBlue{}, true, 1},
 	}
 	for _, tc := range cases {
-		s := gameengine.NewFromCards([]card.Card{a, b}, nil)
+		s := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCards([]card.Card{a, b}).Build()}
 		cs := &card.CardState{Card: tc.c}
 		s.ResolveChainStep(s.Logger(), cs)
 		testutils.FireOnHitIfLikely(s, s.Logger(), cs)
@@ -70,7 +70,7 @@ func TestFerventForerunner_OnHitOptFiresWithBonusAttackInWindow(t *testing.T) {
 
 	a, b := testutils.NewStubCard("a"), testutils.NewStubCard("b")
 	c := cards.FerventForerunnerRed{}
-	s := gameengine.NewFromCards([]card.Card{a, b}, nil)
+	s := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCards([]card.Card{a, b}).Build()}
 	cs := &card.CardState{Card: c, BonusAttack: 1}
 	s.ResolveChainStep(s.Logger(), cs)
 	testutils.FireOnHitIfLikely(s, s.Logger(), cs)

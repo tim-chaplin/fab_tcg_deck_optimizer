@@ -14,7 +14,7 @@ import (
 func TestCadaverousContraband_RegistersOnHit(t *testing.T) {
 	for _, c := range []card.Card{cards.CadaverousContrabandRed{}, cards.CadaverousContrabandYellow{}, cards.CadaverousContrabandBlue{}} {
 		self := &card.CardState{Card: c}
-		s := gameengine.NewFromCards(nil, nil)
+		s := gameengine.New()
 		s.ResolveChainStep(s.Logger(), self)
 		if len(self.OnHit) != 1 {
 			t.Errorf("%s [%d{p}]: OnHit handlers = %d, want 1", c.Name(), c.Pitch(), len(self.OnHit))
@@ -26,7 +26,10 @@ func TestCadaverousContraband_RegistersOnHit(t *testing.T) {
 func TestCadaverousContraband_OnHitRecyclesNonAttackToTop(t *testing.T) {
 	non := testutils.GenericAction()
 	deck := []card.Card{testutils.RedAttack{}}
-	s := gameengine.NewFromCards(deck, []card.Card{non})
+	s := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().
+		SetCards(deck).
+		SetGraveyard([]card.Card{non}).
+		Build()}
 	self := &card.CardState{Card: cards.CadaverousContrabandRed{}}
 	s.ResolveChainStep(s.Logger(), self)
 	self.BonusAttack = 1
@@ -45,7 +48,7 @@ func TestCadaverousContraband_OnHitRecyclesNonAttackToTop(t *testing.T) {
 // Tests that with no non-attack action card in the graveyard, the on-hit recycle leaves the
 // graveyard and deck untouched.
 func TestCadaverousContraband_OnHitNoEligibleCardNoOp(t *testing.T) {
-	s := gameengine.NewFromCards(nil, []card.Card{testutils.RedAttack{}})
+	s := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetGraveyard([]card.Card{testutils.RedAttack{}}).Build()}
 	self := &card.CardState{Card: cards.CadaverousContrabandRed{}}
 	s.ResolveChainStep(s.Logger(), self)
 	testutils.FireOnHitIfLikely(s, s.Logger(), self)

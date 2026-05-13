@@ -85,7 +85,7 @@ func (selfBuffStub) Play(g card.GameEngine, l card.Logger, self *card.CardState)
 }
 
 func TestResolveChainStep_AttackCreditsEffectiveAttack(t *testing.T) {
-	s := gameengine.NewFromSpec(gameengine.Spec{})
+	s := gameengine.New()
 	self := &card.CardState{Card: attackStub{}}
 	s.ResolveChainStep(s.Logger(), self)
 	if s.Value() != 3 {
@@ -97,7 +97,7 @@ func TestResolveChainStep_AttackCreditsEffectiveAttack(t *testing.T) {
 }
 
 func TestResolveChainStep_DefenseReactionCapsToIncomingDamage(t *testing.T) {
-	s := gameengine.NewFromSpec(gameengine.Spec{IncomingDamage: 2})
+	s := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetIncomingDamage(2).Build()}
 	self := &card.CardState{Card: drStub{}}
 	s.ResolveChainStep(s.Logger(), self)
 	if s.Value() != 2 {
@@ -112,7 +112,7 @@ func TestResolveChainStep_DefenseReactionCapsToIncomingDamage(t *testing.T) {
 }
 
 func TestResolveChainStep_DefenseReactionUncappedWhenIncomingExceedsDefense(t *testing.T) {
-	s := gameengine.NewFromSpec(gameengine.Spec{IncomingDamage: 10})
+	s := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetIncomingDamage(10).Build()}
 	self := &card.CardState{Card: drStub{}}
 	s.ResolveChainStep(s.Logger(), self)
 	if s.Value() != 4 {
@@ -125,7 +125,7 @@ func TestResolveChainStep_DefenseReactionUncappedWhenIncomingExceedsDefense(t *t
 
 func TestResolveChainStep_NonAttackContributesZero(t *testing.T) {
 	played := false
-	s := gameengine.NewFromSpec(gameengine.Spec{})
+	s := gameengine.New()
 	self := &card.CardState{Card: nonAttackStub{played: &played}}
 	s.ResolveChainStep(s.Logger(), self)
 	if !played {
@@ -140,7 +140,7 @@ func TestResolveChainStep_NonAttackContributesZero(t *testing.T) {
 }
 
 func TestResolveChainStep_SelfBuffInPlayAppliesBeforeCredit(t *testing.T) {
-	s := gameengine.NewFromSpec(gameengine.Spec{})
+	s := gameengine.New()
 	self := &card.CardState{Card: selfBuffStub{}}
 	s.ResolveChainStep(s.Logger(), self)
 	if s.Value() != 3 {
