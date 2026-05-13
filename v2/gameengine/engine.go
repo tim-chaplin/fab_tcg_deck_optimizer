@@ -500,20 +500,21 @@ func (ge *GameEngine) AdvanceTurnBoundary() {
 	}
 }
 
-// DestroyAura removes the aura currently being fired and, when addToGraveyard==true,
-// invokes the aura's OnDestroy hook to push the aura's source card into the graveyard
-// (token auras no-op). Direct splice (no cacheable flip) — destruction is
-// deterministic from the triggering event, not hidden state.
+// DestroyAura removes the aura currently being fired and, when addToGraveyard==true, pushes
+// the aura's source card into the graveyard (token auras with no source no-op). Direct
+// splice (no cacheable flip) — destruction is deterministic from the triggering event.
 //
-// Called by the card.Aura context the engine threads into each handler; cards do not
-// call this directly.
+// Called by the card.Aura context the engine threads into each handler; cards do not call
+// this directly.
 func (ge *GameEngine) DestroyAura(addToGraveyard bool) {
 	i := ge.currentAuraIdx
 	if i < 0 || i >= len(ge.auras) {
 		return
 	}
 	if addToGraveyard {
-		ge.auras[i].OnDestroy(ge)
+		if c := ge.auras[i].SourceCard(); c != nil {
+			ge.AppendGraveyard(c)
+		}
 	}
 	ge.auras = append(ge.auras[:i], ge.auras[i+1:]...)
 	ge.currentAuraDestroyed = true

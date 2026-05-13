@@ -7,8 +7,8 @@ import (
 	"testing"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/heroes"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/hero"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/registry"
 )
 
@@ -27,8 +27,8 @@ func TestMarshalUnmarshalRoundTrip(t *testing.T) {
 		t.Errorf("unexpected skipped cards on registered-only round trip: %v", skipped)
 	}
 
-	if got.Hero.(sim.Hero).Name() != d.Hero.(sim.Hero).Name() {
-		t.Errorf("hero: got %q want %q", got.Hero.(sim.Hero).Name(), d.Hero.(sim.Hero).Name())
+	if got.Hero.(hero.Hero).Name() != d.Hero.(hero.Hero).Name() {
+		t.Errorf("hero: got %q want %q", got.Hero.(hero.Hero).Name(), d.Hero.(hero.Hero).Name())
 	}
 	gotW, wantW := weaponNameCounts(got), weaponNameCounts(d)
 	if !reflect.DeepEqual(gotW, wantW) {
@@ -140,8 +140,8 @@ See the full deck @ https://fabrary.net/decks/01KP1AZ5SAS425YN30WB779M41
 	if err != nil {
 		t.Fatalf("Unmarshal: %v", err)
 	}
-	if d.Hero.(sim.Hero).Name() != "Viserai" {
-		t.Errorf("hero: got %q want %q", d.Hero.(sim.Hero).Name(), "Viserai")
+	if d.Hero.(hero.Hero).Name() != "Viserai" {
+		t.Errorf("hero: got %q want %q", d.Hero.(hero.Hero).Name(), "Viserai")
 	}
 	// Exactly one weapon in the sample maps to a registered weapon ("Reaping Blade"); the
 	// other non-weapon Arena lines are equipment the optimizer doesn't model — they land in

@@ -9,6 +9,7 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/heroes"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapons"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/aura"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
@@ -103,11 +104,11 @@ func TestPlaySequence_LeftoverFromNonAttackAction(t *testing.T) {
 
 // withRunechants returns a Prior.Auras slice carrying n Runechants — wrapper for
 // readability across tests that exercise Best with non-zero carryover.
-func withRunechants(n int) []*Aura {
+func withRunechants(n int) []*aura.Aura {
 	if n <= 0 {
 		return nil
 	}
-	return []*Aura{NewRunechantAura(n)}
+	return []*aura.Aura{aura.NewRunechant(n)}
 }
 
 // Tests carryover bookkeeping end-to-end with no starting runechants — every created token

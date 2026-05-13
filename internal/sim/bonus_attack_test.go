@@ -9,6 +9,7 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapons"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/aura"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
@@ -211,7 +212,7 @@ func TestBest_NimblismGrantsConsumingVolitionDiscardRider(t *testing.T) {
 		cards.NimblismBlue{},
 		pitchOnlyRed{},
 	}
-	got := Best(nil, h, Matchup{IncomingDamage: 0}, nil, Prior{Hero: testutils.Hero{Intel: 4}, Auras: []*Aura{NewRunechantAura(1)}})
+	got := Best(nil, h, Matchup{IncomingDamage: 0}, nil, Prior{Hero: testutils.Hero{Intel: 4}, Auras: []*aura.Aura{aura.NewRunechant(1)}})
 	if got.Value != 7 {
 		t.Fatalf("Value = %d, want 7 (Volition 3 base + Nimblism +1 BonusAttack + discard rider 3 from runechant-driven ArcaneDamageDealt × s.LikelyToHit on buffed 4-power attack); line=[%s]",
 			got.Value, FormatBestLine(got.BestLine))

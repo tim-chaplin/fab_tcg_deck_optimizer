@@ -8,7 +8,6 @@ package testutils
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
-	"github.com/tim-chaplin/fab-deck-optimizer/v2/gameengine"
 )
 
 // Hero is a minimal gameengine.Hero. Intel is the Intelligence (hand-draw size) the stub
@@ -27,7 +26,7 @@ func (Hero) DisplayName() string  { return "testutils.Hero" }
 func (h Hero) Intelligence() int  { return h.Intel }
 func (Hero) Types() card.TypeSet  { return 0 }
 func (Hero) Class() card.CardType { return 0 }
-func (Hero) OnCardPlayed(card.Card, *gameengine.GameEngine, card.Logger) int {
+func (Hero) OnCardPlayed(card.Card, card.GameEngine, card.Logger) int {
 	return 0
 }
 

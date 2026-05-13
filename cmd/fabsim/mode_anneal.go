@@ -18,6 +18,7 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/gameengine"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/hero"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/registry"
 )
 
@@ -65,7 +66,7 @@ func (c annealConfig) legalFilter() func(deck.Card) bool {
 // defaultDeckNameFor returns the deck name when -deck isn't supplied, keyed by hero, format, and
 // -incoming. Different regimes produce different optimal decks, so each gets its own file to
 // avoid hill-climbing one regime's best under another regime's objective.
-func defaultDeckNameFor(h sim.Hero, f deckformat.Format, incoming int) string {
+func defaultDeckNameFor(h hero.Hero, f deckformat.Format, incoming int) string {
 	return fmt.Sprintf("%s_%s_%d_incoming", strings.ToLower(h.Name()), f, incoming)
 }
 

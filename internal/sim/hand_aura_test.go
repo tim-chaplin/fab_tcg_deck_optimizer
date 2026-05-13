@@ -3,6 +3,7 @@ package sim
 import (
 	"testing"
 
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/aura"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/gameengine"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/triggertype"
@@ -11,11 +12,11 @@ import (
 // Tests that an OncePerTurn AttackAction aura fires on the first call and is gated by
 // FiredThisTurn on the second within the same turn.
 func TestFireAttackActionAuras_FiresOnceWhenGated(t *testing.T) {
-	aura := FakeRedAttack{}
+	src := FakeRedAttack{}
 	calls := 0
 	ge := gameengine.New()
-	ge.CreateAura(NewCardAura(
-		&card.CardState{Card: aura},
+	ge.CreateAura(aura.NewCard(
+		&card.CardState{Card: src},
 		triggertype.AttackAction,
 		func(ge card.GameEngine, l card.Logger, _ card.Aura) {
 			calls++
@@ -48,10 +49,10 @@ func TestFireAttackActionAuras_FiresOnceWhenGated(t *testing.T) {
 // Tests that a handler calling Destroy drops the entry from Auras and lands Self in the
 // graveyard.
 func TestFireAttackActionAuras_GraveyardsExhaustedAura(t *testing.T) {
-	aura := FakeRedAttack{}
+	src := FakeRedAttack{}
 	ge := gameengine.New()
-	ge.CreateAura(NewCardAura(
-		&card.CardState{Card: aura},
+	ge.CreateAura(aura.NewCard(
+		&card.CardState{Card: src},
 		triggertype.AttackAction,
 		func(ge card.GameEngine, _ card.Logger, a card.Aura) {
 			ge.AddValue(1)
@@ -65,18 +66,18 @@ func TestFireAttackActionAuras_GraveyardsExhaustedAura(t *testing.T) {
 		t.Errorf("Auras = %+v, want empty (handler called Destroy)", ge.Auras())
 	}
 	g := ge.Graveyard()
-	if len(g) != 1 || g[0] != aura {
-		t.Errorf("Graveyard = %v, want [aura]", g)
+	if len(g) != 1 || g[0] != src {
+		t.Errorf("Graveyard = %v, want [src]", g)
 	}
 }
 
 // Tests that a TriggerStartOfTurn aura is left untouched by FireAttackAction.
 func TestFireAttackActionAuras_PassesThroughNonAttackActionTriggers(t *testing.T) {
-	aura := FakeRedAttack{}
+	src := FakeRedAttack{}
 	calls := 0
 	ge := gameengine.New()
-	ge.CreateAura(NewCardAura(
-		&card.CardState{Card: aura},
+	ge.CreateAura(aura.NewCard(
+		&card.CardState{Card: src},
 		triggertype.StartOfTurn,
 		func(card.GameEngine, card.Logger, card.Aura) { calls++ },
 		1,

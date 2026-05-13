@@ -13,9 +13,12 @@ import (
 	"sync"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/aura"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/gameengine"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/hero"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/token"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/triggertype"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/turnlogger"
 )
@@ -94,7 +97,7 @@ func meanStandardError(stats *DeckStats) float64 {
 }
 
 func (ev *Evaluator) evaluateImpl(d *deck.Deck, maxRuns int, mp Matchup, rng *rand.Rand, stop shuffleStopper) DeckStats {
-	handSize := d.Hero.(Hero).Intelligence()
+	handSize := d.Hero.(hero.Hero).Intelligence()
 	deckSize := d.Size()
 	if handSize <= 0 || deckSize < handSize {
 		return DeckStats{}
@@ -213,8 +216,8 @@ type shuffleScratch struct {
 	weaponsBuf                      []Weapon
 	handBuf                         []card.Card
 	heldBuf, nextHeld               []card.Card
-	auraTriggerBuf, nextAuraTrigger []*Aura
-	itemBuf, nextItem               []*Item
+	auraTriggerBuf, nextAuraTrigger []*aura.Aura
+	itemBuf, nextItem               []*token.Item
 	banishBuf, nextBanish           []card.Card
 	graveyardBuf, nextGraveyard     []card.Card
 	presentBuf                      []bool
@@ -231,10 +234,10 @@ func newShuffleScratch(weaponCount, deckSize, handSize, numUniqueIDs int) *shuff
 		handBuf:         make([]card.Card, handSize, handSize+startOfTurnRevealRoom),
 		heldBuf:         make([]card.Card, 0, handSize),
 		nextHeld:        make([]card.Card, 0, handSize),
-		auraTriggerBuf:  make([]*Aura, 0, handSize),
-		nextAuraTrigger: make([]*Aura, 0, handSize),
-		itemBuf:         make([]*Item, 0, 4),
-		nextItem:        make([]*Item, 0, 4),
+		auraTriggerBuf:  make([]*aura.Aura, 0, handSize),
+		nextAuraTrigger: make([]*aura.Aura, 0, handSize),
+		itemBuf:         make([]*token.Item, 0, 4),
+		nextItem:        make([]*token.Item, 0, 4),
 		banishBuf:       make([]card.Card, 0, 4),
 		nextBanish:      make([]card.Card, 0, 4),
 		graveyardBuf:    make([]card.Card, 0, deckSize),
@@ -256,7 +259,7 @@ func runOneShuffle(master *deck.Deck, scratch *shuffleScratch, stats *DeckStats,
 	d := master.Copy()
 	d.Shuffle(rng)
 
-	hero := d.Hero.(Hero)
+	heroVal := d.Hero.(hero.Hero)
 	weapons := scratch.weaponsBuf
 	for i, w := range d.Weapons {
 		weapons[i] = w.(Weapon)
@@ -289,8 +292,8 @@ func runOneShuffle(master *deck.Deck, scratch *shuffleScratch, stats *DeckStats,
 		for i, c := range drawn {
 			h[len(heldBuf)+i] = c.(card.Card)
 		}
-		startingAuras := append([]*Aura(nil), auraTriggerBuf...)
-		startingItems := append([]*Item(nil), itemBuf...)
+		startingAuras := append([]*aura.Aura(nil), auraTriggerBuf...)
+		startingItems := append([]*token.Item(nil), itemBuf...)
 		startOfTurnAuras := snapshotStartOfTurnAuras(auraTriggerBuf)
 		dealtHand := append([]card.Card(nil), h...)
 		// processAurasAtStartOfTurn drives the deck through PopDeckTop on reveal-handling
@@ -306,7 +309,7 @@ func runOneShuffle(master *deck.Deck, scratch *shuffleScratch, stats *DeckStats,
 		arsenalIn := arsenalCard
 		sortHandByID(h)
 		play := runBestForTurn(weapons, h, mp, d, Prior{
-			Hero:           hero,
+			Hero:           heroVal,
 			Arsenal:        arsenalCard,
 			Banished:       banishBuf,
 			Graveyard:      graveyardBuf,
@@ -322,7 +325,7 @@ func runOneShuffle(master *deck.Deck, scratch *shuffleScratch, stats *DeckStats,
 
 		if recordTurnStats(stats, play, handIdx, handsPerCycle) {
 			replay := replayBestForTurnWithLog(weapons, h, mp, d, Prior{
-				Hero:           hero,
+				Hero:           heroVal,
 				Arsenal:        arsenalIn,
 				Banished:       banishBuf,
 				Graveyard:      graveyardBuf,
@@ -349,11 +352,11 @@ func runOneShuffle(master *deck.Deck, scratch *shuffleScratch, stats *DeckStats,
 		nextHeld = append(nextHeld[:0], play.State.Hand()...)
 		nextAuraTrigger = nextAuraTrigger[:0]
 		for _, a := range play.State.Auras() {
-			nextAuraTrigger = append(nextAuraTrigger, a.(*Aura))
+			nextAuraTrigger = append(nextAuraTrigger, a.(*aura.Aura))
 		}
 		nextItem = nextItem[:0]
 		for _, it := range play.State.Items() {
-			nextItem = append(nextItem, it.(*Item))
+			nextItem = append(nextItem, it.(*token.Item))
 		}
 		nextBanish = append(nextBanish[:0], play.State.Banished()...)
 		nextGraveyard = append(nextGraveyard[:0], play.State.Graveyard()...)
@@ -413,7 +416,7 @@ func finalizeBestTurnLog(stats *DeckStats) {
 // processAurasAtStartOfTurn fires and potentially destroys any. Token-style auras
 // (Runechants, …) are skipped: the formatter renders them separately. Returns nil when
 // the queue holds no card auras.
-func snapshotStartOfTurnAuras(queued []*Aura) []card.Card {
+func snapshotStartOfTurnAuras(queued []*aura.Aura) []card.Card {
 	if len(queued) == 0 {
 		return nil
 	}
@@ -507,8 +510,8 @@ const startOfTurnRevealRoom = 8
 //
 // Cascading reveals: a handler that pops gs.Deck shrinks the view for the next handler, so
 // two reveal-capable auras see distinct tops.
-func processAurasAtStartOfTurn(queued []*Aura, d *deck.Deck) (
-	survivors []*Aura,
+func processAurasAtStartOfTurn(queued []*aura.Aura, d *deck.Deck) (
+	survivors []*aura.Aura,
 	contribs []TriggerContribution,
 	damage int,
 	revealed []card.Card,
@@ -556,9 +559,9 @@ func processAurasAtStartOfTurn(queued []*Aura, d *deck.Deck) (
 		damage += dmg
 		fireIdx++
 	})
-	out := make([]*Aura, 0, len(gs.Auras()))
+	out := make([]*aura.Aura, 0, len(gs.Auras()))
 	for _, a := range gs.Auras() {
-		out = append(out, a.(*Aura))
+		out = append(out, a.(*aura.Aura))
 	}
 	return out, contribs, damage, gs.Hand(), append([]card.Card(nil), gs.Graveyard()...)
 }
@@ -612,7 +615,7 @@ func sortHandByID(hand []card.Card) {
 // the next call, so retaining them directly would let a later evaluation mutate the saved
 // peak. Nil-length slices skip the clone so the captured TurnSummary holds nil rather
 // than a zero-length allocation.
-func recordBestTurn(stats *DeckStats, play TurnSummary, startingAuras []*Aura, startingItems []*Item) {
+func recordBestTurn(stats *DeckStats, play TurnSummary, startingAuras []*aura.Aura, startingItems []*token.Item) {
 	lineCopy := make([]CardAssignment, len(play.BestLine))
 	copy(lineCopy, play.BestLine)
 	var swungCopy []string

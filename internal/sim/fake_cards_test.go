@@ -8,7 +8,6 @@ package sim
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
-	"github.com/tim-chaplin/fab-deck-optimizer/v2/gameengine"
 )
 
 // FakeCard is a configurable Card stand-in. Tests construct it via NewFakeCard plus
@@ -77,14 +76,14 @@ type FakeHero struct {
 	OptStrategy func(cs []card.Card) (top, bottom []card.Card)
 }
 
-func (FakeHero) ID() ids.HeroID                                                  { return ids.InvalidHero }
-func (FakeHero) Name() string                                                    { return "FakeHero" }
-func (FakeHero) DisplayName() string                                             { return "FakeHero" }
-func (FakeHero) Health() int                                                     { return 20 }
-func (h FakeHero) Intelligence() int                                             { return h.Intel }
-func (FakeHero) Types() card.TypeSet                                             { return 0 }
-func (FakeHero) Class() card.CardType                                            { return 0 }
-func (FakeHero) OnCardPlayed(card.Card, *gameengine.GameEngine, card.Logger) int { return 0 }
+func (FakeHero) ID() ids.HeroID                                           { return ids.InvalidHero }
+func (FakeHero) Name() string                                             { return "FakeHero" }
+func (FakeHero) DisplayName() string                                      { return "FakeHero" }
+func (FakeHero) Health() int                                              { return 20 }
+func (h FakeHero) Intelligence() int                                      { return h.Intel }
+func (FakeHero) Types() card.TypeSet                                      { return 0 }
+func (FakeHero) Class() card.CardType                                     { return 0 }
+func (FakeHero) OnCardPlayed(card.Card, card.GameEngine, card.Logger) int { return 0 }
 
 // Opt dispatches to OptStrategy when set; otherwise keeps every revealed card on top
 // of the deck in input order (no reshape).

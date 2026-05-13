@@ -11,8 +11,10 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/heroes"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapons"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/aura"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/gameengine"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/token"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/triggertype"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/turnlogger"
 )
@@ -99,9 +101,9 @@ func TestFormatBestTurn_LogAttributesEachTriggerSeparately(t *testing.T) {
 	// state.TriggeringCard).
 	bootstrap := gameengine.New()
 	bootstrap.ResolveChainStep(bootstrap.Logger(), &card.CardState{Card: cards.MaleficIncantationRed{}})
-	priorAuras := make([]*Aura, 0, len(bootstrap.Auras()))
+	priorAuras := make([]*aura.Aura, 0, len(bootstrap.Auras()))
 	for _, a := range bootstrap.Auras() {
-		priorAuras = append(priorAuras, a.(*Aura))
+		priorAuras = append(priorAuras, a.(*aura.Aura))
 	}
 	got := Best(nil, h, Matchup{}, nil, Prior{Hero: heroes.Viserai{}, Auras: priorAuras})
 	out := FormatBestTurn(got, nil, nil)
@@ -540,7 +542,7 @@ func TestFormatBestTurn_StartOfTurnAurasWithRunechants(t *testing.T) {
 	summary := TurnSummary{
 		StartOfTurnAuras: []card.Card{cards.MaleficIncantationRed{}},
 	}
-	out := FormatBestTurn(summary, []*Aura{NewRunechantAura(3)}, nil)
+	out := FormatBestTurn(summary, []*aura.Aura{aura.NewRunechant(3)}, nil)
 	want := "Auras: Malefic Incantation [R], 3 Runechants"
 	if !strings.Contains(out, want) {
 		t.Errorf("missing %q in:\n%s", want, out)
@@ -551,13 +553,13 @@ func TestFormatBestTurn_StartOfTurnAurasWithRunechants(t *testing.T) {
 // into the Auras entry even when no auras are in play, using singular "Runechant" when the
 // count is 1.
 func TestFormatBestTurn_StartOfTurnRunechantsOnly(t *testing.T) {
-	out := FormatBestTurn(TurnSummary{}, []*Aura{NewRunechantAura(1)}, nil)
+	out := FormatBestTurn(TurnSummary{}, []*aura.Aura{aura.NewRunechant(1)}, nil)
 	want := "Auras: 1 Runechant"
 	if !strings.Contains(out, want) {
 		t.Errorf("missing %q in:\n%s", want, out)
 	}
 	// Plural noun when count > 1.
-	out2 := FormatBestTurn(TurnSummary{}, []*Aura{NewRunechantAura(2)}, nil)
+	out2 := FormatBestTurn(TurnSummary{}, []*aura.Aura{aura.NewRunechant(2)}, nil)
 	if !strings.Contains(out2, "2 Runechants") {
 		t.Errorf("want plural 'Runechants' at count 2, got:\n%s", out2)
 	}
@@ -566,7 +568,7 @@ func TestFormatBestTurn_StartOfTurnRunechantsOnly(t *testing.T) {
 // TestFormatBestTurn_StartOfTurnGoldItems surfaces a Gold token carryover as an
 // "Items: N Gold" line in the Start of turn section.
 func TestFormatBestTurn_StartOfTurnGoldItems(t *testing.T) {
-	out := FormatBestTurn(TurnSummary{}, nil, []*Item{NewGoldItem(2)})
+	out := FormatBestTurn(TurnSummary{}, nil, []*token.Item{token.NewGold(2)})
 	want := "Items: 2 Gold"
 	if !strings.Contains(out, want) {
 		t.Errorf("missing %q in:\n%s", want, out)
@@ -577,7 +579,7 @@ func TestFormatBestTurn_StartOfTurnGoldItems(t *testing.T) {
 // as an "Items: N Gold" line in the End of turn section.
 func TestFormatBestTurn_EndOfTurnGoldItems(t *testing.T) {
 	summary := TurnSummary{
-		State: EngineWithItems([]*Item{NewGoldItem(1)}),
+		State: EngineWithItems([]*token.Item{token.NewGold(1)}),
 	}
 	out := FormatBestTurn(summary, nil, nil)
 	want := "Items: 1 Gold"
@@ -605,12 +607,12 @@ func TestFormatBestTurn_EndOfTurnHandLine(t *testing.T) {
 // mirroring the start-of-turn formatting.
 func TestFormatBestTurn_EndOfTurnAurasWithRunechants(t *testing.T) {
 	gs := gameengine.GameStateBuilder().Build()
-	gs.CreateAura(NewCardAura(
+	gs.CreateAura(aura.NewCard(
 		&card.CardState{Card: cards.MaleficIncantationRed{}},
 		triggertype.StartOfTurn,
 		nil, 1, false,
 	))
-	gs.CreateAura(NewRunechantAura(2))
+	gs.CreateAura(aura.NewRunechant(2))
 	summary := TurnSummary{State: gs}
 	out := FormatBestTurn(summary, nil, nil)
 	want := "Auras: Malefic Incantation [R], 2 Runechants"

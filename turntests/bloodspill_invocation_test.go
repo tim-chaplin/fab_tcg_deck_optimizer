@@ -4,9 +4,8 @@ import (
 	"testing"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
-
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/aura"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/gameengine"
 )
@@ -77,7 +76,7 @@ func TestBloodspillInvocation_WeaponDoesNotPop(t *testing.T) {
 		SetBlockTotal(0).
 		SetCardsRemaining([]*card.CardState{{Card: testutils.RunebladeWeapon{}}}).
 		Build()}
-	ge.CreateAura(sim.NewRunechantAura(1))
+	ge.CreateAura(aura.NewRunechant(1))
 	ge.ResolveChainStep(ge.Logger(), &card.CardState{Card: cards.BloodspillInvocationRed{}})
 	if got := ge.Value(); got != 0 {
 		t.Errorf("Play() = %d, want 0 (weapon hits don't trigger Bloodspill; under-block collapses value)", got)
@@ -92,7 +91,7 @@ func TestBloodspillInvocation_SameTurnPopByRunechant(t *testing.T) {
 		SetBlockTotal(0).
 		SetCardsRemaining([]*card.CardState{{Card: testutils.AttackWithPower{Power: 6}}}).
 		Build()}
-	ge.CreateAura(sim.NewRunechantAura(1))
+	ge.CreateAura(aura.NewRunechant(1))
 	ge.ResolveChainStep(ge.Logger(), &card.CardState{Card: cards.BloodspillInvocationRed{}})
 	if got := ge.Value(); got != 3 {
 		t.Errorf("Play() = %d, want 3 (Attack=6 blockable, 1 Runechant likely to hit)", got)

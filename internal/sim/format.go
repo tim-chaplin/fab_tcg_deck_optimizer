@@ -9,7 +9,9 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/aura"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/gameengine"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/token"
 )
 
 // formatContribution renders a contribution/damage value for the best-turn printout. Integers
@@ -94,7 +96,7 @@ func splitPitchesByPhase(pitched []CardAssignment, drCost int) (defensePitches, 
 // FormatBestTurn renders a TurnSummary's best-turn printout in one call, equivalent to
 // FormatTurnLog(BuildTurnLog(t, startingAuras, startingItems)). Convenient for one-shot
 // callers (tests, ad-hoc tools) that don't need to retain the TurnLog separately.
-func FormatBestTurn(t TurnSummary, startingAuras []*Aura, startingItems []*Item) string {
+func FormatBestTurn(t TurnSummary, startingAuras []*aura.Aura, startingItems []*token.Item) string {
 	return FormatTurnLog(BuildTurnLog(t, startingAuras, startingItems))
 }
 

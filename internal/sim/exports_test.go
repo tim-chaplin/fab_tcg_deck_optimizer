@@ -3,9 +3,12 @@ package sim
 import (
 	"math/rand"
 
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/aura"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/gameengine"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/hero"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/token"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/turnlogger"
 )
 
@@ -31,7 +34,7 @@ type SequenceContextForTest struct{ ctx *sequenceContext }
 
 // NewSequenceContextForTest builds a sequenceContext with the same shape as the in-package
 // newSequenceContextForTest helper.
-func NewSequenceContextForTest(h Hero, pitched, deck []card.Card, resourceBudget, runechantCarryover, chainLen int) *SequenceContextForTest {
+func NewSequenceContextForTest(h hero.Hero, pitched, deck []card.Card, resourceBudget, runechantCarryover, chainLen int) *SequenceContextForTest {
 	return &SequenceContextForTest{ctx: newSequenceContextForTest(h, pitched, deck, resourceBudget, runechantCarryover, chainLen)}
 }
 
@@ -124,7 +127,7 @@ func EngineWithHand(h []card.Card) *gameengine.GameState {
 }
 
 // EngineWithItems returns a fresh GameState with the supplied items installed.
-func EngineWithItems(items []*Item) *gameengine.GameState {
+func EngineWithItems(items []*token.Item) *gameengine.GameState {
 	gs := gameengine.GameStateBuilder().Build()
 	for _, it := range items {
 		gs.CreateItem(it)
@@ -134,7 +137,7 @@ func EngineWithItems(items []*Item) *gameengine.GameState {
 
 // EngineWith returns a fresh GameState with hand, items, and log entries installed.
 // log can be nil to skip log seeding.
-func EngineWith(h []card.Card, items []*Item, log []turnlogger.LogEntry) *gameengine.GameState {
+func EngineWith(h []card.Card, items []*token.Item, log []turnlogger.LogEntry) *gameengine.GameState {
 	gs := gameengine.GameStateBuilder().Build()
 	gs.SetHand(h)
 	for _, it := range items {
@@ -184,9 +187,9 @@ func ProcessAurasAtStartOfTurn(queued []gameengine.Aura, d *deck.Deck) (
 	revealed []card.Card,
 	graveyarded []card.Card,
 ) {
-	inAuras := make([]*Aura, 0, len(queued))
+	inAuras := make([]*aura.Aura, 0, len(queued))
 	for _, a := range queued {
-		inAuras = append(inAuras, a.(*Aura))
+		inAuras = append(inAuras, a.(*aura.Aura))
 	}
 	s, c, dmg, rev, gv := processAurasAtStartOfTurn(inAuras, d)
 	out := make([]gameengine.Aura, 0, len(s))

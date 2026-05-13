@@ -20,9 +20,12 @@ package sim
 import (
 	"fmt"
 
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/aura"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/gameengine"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/hero"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/token"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/turnlogger"
 )
 
@@ -63,10 +66,10 @@ func newTurnMasterState(prior Prior, mp Matchup, d *deck.Deck) *gameengine.GameS
 	s := ge.GameState
 	s.SetDeck(d.Copy())
 	for _, a := range prior.Auras {
-		s.CreateAura(a.Copy())
+		s.CreateAura(a.Copy().(gameengine.Aura))
 	}
 	for _, i := range prior.Items {
-		s.CreateItem(i.Copy())
+		s.CreateItem(i.Copy().(gameengine.Item))
 	}
 	s.SetAuraCreated(false)
 	return s
@@ -268,14 +271,14 @@ func bestAttackWithWeapons(
 func newDRCostProbe(runechants int) *gameengine.GameEngine {
 	ge := gameengine.New()
 	if runechants > 0 {
-		ge.CreateAura(NewRunechantAura(runechants))
+		ge.CreateAura(aura.NewRunechant(runechants))
 	}
 	return ge
 }
 
 // sequenceContext carries the stable per-partition-leaf environment.
 type sequenceContext struct {
-	hero                  Hero
+	hero                  hero.Hero
 	pitched               []card.Card
 	deck                  *deck.Deck
 	handStart             []card.Card
@@ -693,7 +696,7 @@ func pendingFutureValueFromState(gs *gameengine.GameState) int {
 
 // pendingFutureValue sums the Count of every Aura plus every Item — used by
 // partition.go when comparing partitions whose winning states are already in hand.
-func pendingFutureValue(auras []*Aura, items []*Item) int {
+func pendingFutureValue(auras []*aura.Aura, items []*token.Item) int {
 	total := 0
 	for _, a := range auras {
 		total += a.Count()

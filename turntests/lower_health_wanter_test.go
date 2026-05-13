@@ -13,25 +13,25 @@ import (
 // in" branch.
 type stubLowHeroOn struct{}
 
-func (stubLowHeroOn) ID() ids.HeroID                                                  { return ids.InvalidHero }
-func (stubLowHeroOn) Name() string                                                    { return "stubLowHeroOn" }
-func (stubLowHeroOn) Intelligence() int                                               { return 4 }
-func (stubLowHeroOn) Types() card.TypeSet                                             { return 0 }
-func (stubLowHeroOn) Class() card.CardType                                            { return 0 }
-func (stubLowHeroOn) OnCardPlayed(card.Card, *gameengine.GameEngine, card.Logger) int { return 0 }
-func (stubLowHeroOn) Opt(cards []card.Card) (top, bottom []card.Card)                 { return cards, nil }
-func (stubLowHeroOn) WantsLowerHealth()                                               {}
+func (stubLowHeroOn) ID() ids.HeroID                                           { return ids.InvalidHero }
+func (stubLowHeroOn) Name() string                                             { return "stubLowHeroOn" }
+func (stubLowHeroOn) Intelligence() int                                        { return 4 }
+func (stubLowHeroOn) Types() card.TypeSet                                      { return 0 }
+func (stubLowHeroOn) Class() card.CardType                                     { return 0 }
+func (stubLowHeroOn) OnCardPlayed(card.Card, card.GameEngine, card.Logger) int { return 0 }
+func (stubLowHeroOn) Opt(cards []card.Card) (top, bottom []card.Card)          { return cards, nil }
+func (stubLowHeroOn) WantsLowerHealth()                                        {}
 
 // stubLowHeroOff does NOT implement gameengine.LowerHealthWanter — the default branch.
 type stubLowHeroOff struct{}
 
-func (stubLowHeroOff) ID() ids.HeroID                                                  { return ids.InvalidHero }
-func (stubLowHeroOff) Name() string                                                    { return "stubLowHeroOff" }
-func (stubLowHeroOff) Intelligence() int                                               { return 4 }
-func (stubLowHeroOff) Types() card.TypeSet                                             { return 0 }
-func (stubLowHeroOff) Class() card.CardType                                            { return 0 }
-func (stubLowHeroOff) OnCardPlayed(card.Card, *gameengine.GameEngine, card.Logger) int { return 0 }
-func (stubLowHeroOff) Opt(cards []card.Card) (top, bottom []card.Card)                 { return cards, nil }
+func (stubLowHeroOff) ID() ids.HeroID                                           { return ids.InvalidHero }
+func (stubLowHeroOff) Name() string                                             { return "stubLowHeroOff" }
+func (stubLowHeroOff) Intelligence() int                                        { return 4 }
+func (stubLowHeroOff) Types() card.TypeSet                                      { return 0 }
+func (stubLowHeroOff) Class() card.CardType                                     { return 0 }
+func (stubLowHeroOff) OnCardPlayed(card.Card, card.GameEngine, card.Logger) int { return 0 }
+func (stubLowHeroOff) Opt(cards []card.Card) (top, bottom []card.Card)          { return cards, nil }
 
 // engineWithHero returns a fresh empty engine with hero installed.
 func engineWithHero(h gameengine.Hero) *gameengine.GameEngine {

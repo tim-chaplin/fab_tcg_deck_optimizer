@@ -9,6 +9,7 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/heroes"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/hero"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/registry"
 )
 
@@ -26,8 +27,8 @@ func TestMarshalUnmarshalRoundTrip(t *testing.T) {
 		t.Fatalf("Unmarshal: %v", err)
 	}
 
-	if got.Hero.(sim.Hero).Name() != d.Hero.(sim.Hero).Name() {
-		t.Errorf("hero: got %q want %q", got.Hero.(sim.Hero).Name(), d.Hero.(sim.Hero).Name())
+	if got.Hero.(hero.Hero).Name() != d.Hero.(hero.Hero).Name() {
+		t.Errorf("hero: got %q want %q", got.Hero.(hero.Hero).Name(), d.Hero.(hero.Hero).Name())
 	}
 	if got.Size() != d.Size() {
 		t.Fatalf("cards len: got %d want %d", got.Size(), d.Size())

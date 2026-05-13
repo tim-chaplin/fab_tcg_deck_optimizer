@@ -10,8 +10,8 @@ import (
 //
 // Aura / Trigger / Item lists aren't on the seed — Reset clears those lists, and the
 // caller follows up with CreateAura / CreateTrigger / CreateItem per entry. That shape
-// lets each entry be passed as its concrete struct without slice-conversion (a *sim.Aura
-// satisfies Aura, but []*sim.Aura is not assignable to []Aura).
+// lets each entry be passed as its concrete struct without slice-conversion (a *aura.Aura
+// satisfies Aura, but []*aura.Aura is not assignable to []Aura).
 type PermutationSeed struct {
 	Hand                 []card.Card
 	Deck                 *deck.Deck // engine copies into its own scratch deck

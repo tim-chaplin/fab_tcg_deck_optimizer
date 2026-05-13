@@ -81,7 +81,7 @@ func (gs *GameState) Copy() *GameState {
 	if len(gs.auras) > 0 {
 		out.auras = make([]Aura, len(gs.auras))
 		for i, a := range gs.auras {
-			out.auras[i] = a.Copy()
+			out.auras[i] = a.Copy().(Aura)
 		}
 	} else {
 		out.auras = nil
@@ -94,7 +94,7 @@ func (gs *GameState) Copy() *GameState {
 	if len(gs.items) > 0 {
 		out.items = make([]Item, len(gs.items))
 		for i, it := range gs.items {
-			out.items[i] = it.Copy()
+			out.items[i] = it.Copy().(Item)
 		}
 	} else {
 		out.items = nil
