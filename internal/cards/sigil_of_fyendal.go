@@ -11,14 +11,14 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
-func (SigilOfFyendalBlue) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
-	g.CreateStartOfTurnAura(self, sigilOfFyendalAuraHandler, 1)
+func (SigilOfFyendalBlue) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
+	ge.CreateStartOfTurnAura(self, sigilOfFyendalAuraHandler, 1)
 }
 
 // sigilOfFyendalAuraHandler credits the +1 health (valued 1-to-1 with damage) next turn
 // and destroys the aura.
-func sigilOfFyendalAuraHandler(g card.GameEngine, l card.Logger, a card.Aura) {
-	g.AddValue(1)
+func sigilOfFyendalAuraHandler(ge card.GameEngine, l card.Logger, a card.Aura) {
+	ge.AddValue(1)
 	l.AppendPostTrigger(a.CardName(), "Gained 1 health", 1)
 	a.Destroy(true)
 }

@@ -13,10 +13,10 @@ import (
 // Plunder Run from hand registers the on-hit-draw trigger and skips the +N{p} grant.
 func TestPlunderRun_FromHandQueuesTriggerNoBonus(t *testing.T) {
 	target := &card.CardState{Card: testutils.GenericAttack(0, 4)}
-	s := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCardsRemaining([]*card.CardState{target}).Build()}
+	ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCardsRemaining([]*card.CardState{target}).Build()}
 	self := &card.CardState{Card: cards.PlunderRunRed{}}
-	s.ResolveChainStep(s.Logger(), self)
-	if got := triggerHitCount(s); got != 1 {
+	ge.ResolveChainStep(ge.Logger(), self)
+	if got := triggerHitCount(ge); got != 1 {
 		t.Errorf("queued triggers = %d, want 1", got)
 	}
 	if target.BonusAttack != 0 {
@@ -37,10 +37,10 @@ func TestPlunderRun_FromArsenalAddsBonusAttack(t *testing.T) {
 	}
 	for _, tc := range cases {
 		target := &card.CardState{Card: testutils.GenericAttack(0, 4)}
-		s := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCardsRemaining([]*card.CardState{target}).Build()}
+		ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCardsRemaining([]*card.CardState{target}).Build()}
 		self := &card.CardState{Card: tc.c, FromArsenal: true}
-		s.ResolveChainStep(s.Logger(), self)
-		if got := triggerHitCount(s); got != 1 {
+		ge.ResolveChainStep(ge.Logger(), self)
+		if got := triggerHitCount(ge); got != 1 {
 			t.Errorf("%s: queued triggers = %d, want 1", tc.c.Name(), got)
 		}
 		if target.BonusAttack != tc.wantBoon {
@@ -51,10 +51,10 @@ func TestPlunderRun_FromArsenalAddsBonusAttack(t *testing.T) {
 
 // Multiple Plunder Runs queue independent triggers — they all fire on the same hit.
 func TestPlunderRun_TriggersStack(t *testing.T) {
-	s := gameengine.New()
-	s.ResolveChainStep(s.Logger(), &card.CardState{Card: cards.PlunderRunRed{}})
-	s.ResolveChainStep(s.Logger(), &card.CardState{Card: cards.PlunderRunBlue{}})
-	if got := triggerHitCount(s); got != 2 {
+	ge := gameengine.New()
+	ge.ResolveChainStep(ge.Logger(), &card.CardState{Card: cards.PlunderRunRed{}})
+	ge.ResolveChainStep(ge.Logger(), &card.CardState{Card: cards.PlunderRunBlue{}})
+	if got := triggerHitCount(ge); got != 2 {
 		t.Errorf("queued triggers = %d, want 2 (two independent listeners)", got)
 	}
 }

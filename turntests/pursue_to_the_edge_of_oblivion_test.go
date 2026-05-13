@@ -14,16 +14,16 @@ import (
 // the opposing hero when LikelyToHit fires.
 func TestPursueToTheEdgeOfOblivion_OnHitMarksOpponent(t *testing.T) {
 	self := &card.CardState{Card: cards.PursueToTheEdgeOfOblivionRed{}}
-	s := gameengine.New()
-	s.ResolveChainStep(s.Logger(), self)
+	ge := gameengine.New()
+	ge.ResolveChainStep(ge.Logger(), self)
 	if len(self.OnHit) != 1 {
 		t.Fatalf("OnHit handlers = %d, want 1", len(self.OnHit))
 	}
-	if s.OpponentMarked() {
+	if ge.OpponentMarked() {
 		t.Errorf("OpponentMarked = true before OnHit fires, want false")
 	}
-	testutils.FireOnHitIfLikely(s, s.Logger(), self)
-	if !s.OpponentMarked() {
+	testutils.FireOnHitIfLikely(ge, ge.Logger(), self)
+	if !ge.OpponentMarked() {
 		t.Errorf("OpponentMarked = false after OnHit fires, want true")
 	}
 }

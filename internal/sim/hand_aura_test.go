@@ -13,34 +13,34 @@ import (
 func TestFireAttackActionAuras_FiresOnceWhenGated(t *testing.T) {
 	aura := FakeRedAttack{}
 	calls := 0
-	state := gameengine.New()
-	state.CreateAura(NewCardAura(
+	ge := gameengine.New()
+	ge.CreateAura(NewCardAura(
 		&card.CardState{Card: aura},
 		triggertype.AttackAction,
-		func(g card.GameEngine, l card.Logger, _ card.Aura) {
+		func(ge card.GameEngine, l card.Logger, _ card.Aura) {
 			calls++
-			g.AddValue(1)
+			ge.AddValue(1)
 			l.AppendPreTriggerf("TestCard", 1, "test trigger fired")
 		},
 		3,
 		true, // oncePerTurn
 	))
 	trigger := FakeRedAttack{}
-	state.FireAttackAction(trigger)
-	if state.Value() != 1 {
-		t.Errorf("first fire Value = %d, want 1", state.Value())
+	ge.FireAttackAction(trigger)
+	if ge.Value() != 1 {
+		t.Errorf("first fire Value = %d, want 1", ge.Value())
 	}
-	state.FireAttackAction(trigger)
-	if state.Value() != 1 {
-		t.Errorf("second fire Value = %d, want 1 (OncePerTurn gate kept second fire from crediting)", state.Value())
+	ge.FireAttackAction(trigger)
+	if ge.Value() != 1 {
+		t.Errorf("second fire Value = %d, want 1 (OncePerTurn gate kept second fire from crediting)", ge.Value())
 	}
 	if calls != 1 {
 		t.Errorf("handler call count = %d, want 1 (gate prevented second call)", calls)
 	}
-	if len(state.Auras()) != 1 || state.Auras()[0].Count() != 3 {
-		t.Errorf("aura state = %+v, want one entry with Count=3", state.Auras())
+	if len(ge.Auras()) != 1 || ge.Auras()[0].Count() != 3 {
+		t.Errorf("aura ge = %+v, want one entry with Count=3", ge.Auras())
 	}
-	if !state.Auras()[0].FiredThisTurn() {
+	if !ge.Auras()[0].FiredThisTurn() {
 		t.Errorf("FiredThisTurn = false, want true (single fire latched)")
 	}
 }
@@ -49,22 +49,22 @@ func TestFireAttackActionAuras_FiresOnceWhenGated(t *testing.T) {
 // graveyard.
 func TestFireAttackActionAuras_GraveyardsExhaustedAura(t *testing.T) {
 	aura := FakeRedAttack{}
-	state := gameengine.New()
-	state.CreateAura(NewCardAura(
+	ge := gameengine.New()
+	ge.CreateAura(NewCardAura(
 		&card.CardState{Card: aura},
 		triggertype.AttackAction,
-		func(g card.GameEngine, _ card.Logger, a card.Aura) {
-			g.AddValue(1)
+		func(ge card.GameEngine, _ card.Logger, a card.Aura) {
+			ge.AddValue(1)
 			a.Destroy(true)
 		},
 		1,
 		false,
 	))
-	state.FireAttackAction(FakeRedAttack{})
-	if len(state.Auras()) != 0 {
-		t.Errorf("Auras = %+v, want empty (handler called Destroy)", state.Auras())
+	ge.FireAttackAction(FakeRedAttack{})
+	if len(ge.Auras()) != 0 {
+		t.Errorf("Auras = %+v, want empty (handler called Destroy)", ge.Auras())
 	}
-	g := state.Graveyard()
+	g := ge.Graveyard()
 	if len(g) != 1 || g[0] != aura {
 		t.Errorf("Graveyard = %v, want [aura]", g)
 	}
@@ -74,22 +74,22 @@ func TestFireAttackActionAuras_GraveyardsExhaustedAura(t *testing.T) {
 func TestFireAttackActionAuras_PassesThroughNonAttackActionTriggers(t *testing.T) {
 	aura := FakeRedAttack{}
 	calls := 0
-	state := gameengine.New()
-	state.CreateAura(NewCardAura(
+	ge := gameengine.New()
+	ge.CreateAura(NewCardAura(
 		&card.CardState{Card: aura},
 		triggertype.StartOfTurn,
 		func(card.GameEngine, card.Logger, card.Aura) { calls++ },
 		1,
 		false,
 	))
-	state.FireAttackAction(FakeRedAttack{})
-	if state.Value() != 0 {
-		t.Errorf("Value = %d, want 0 (start-of-turn aura doesn't fire on attack action)", state.Value())
+	ge.FireAttackAction(FakeRedAttack{})
+	if ge.Value() != 0 {
+		t.Errorf("Value = %d, want 0 (start-of-turn aura doesn't fire on attack action)", ge.Value())
 	}
 	if calls != 0 {
 		t.Errorf("handler call count = %d, want 0", calls)
 	}
-	if len(state.Auras()) != 1 || state.Auras()[0].Count() != 1 {
-		t.Errorf("aura should be untouched, got %+v", state.Auras())
+	if len(ge.Auras()) != 1 || ge.Auras()[0].Count() != 1 {
+		t.Errorf("aura should be untouched, got %+v", ge.Auras())
 	}
 }

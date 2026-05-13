@@ -18,24 +18,24 @@ import (
 
 // not implemented: on-hit item-destruction rider
 
-func (SmashingGoodTimeRed) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+func (SmashingGoodTimeRed) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
 	if self.FromArsenal {
-		cards.GrantNextCardBonusAttack(g, 3, cards.IsAttackAction)
+		cards.GrantNextCardBonusAttack(ge, 3, cards.IsAttackAction)
 	}
 }
 
 // not implemented: on-hit item-destruction rider
 
-func (SmashingGoodTimeYellow) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+func (SmashingGoodTimeYellow) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
 	if self.FromArsenal {
-		cards.GrantNextCardBonusAttack(g, 2, cards.IsAttackAction)
+		cards.GrantNextCardBonusAttack(ge, 2, cards.IsAttackAction)
 	}
 }
 
 // not implemented: on-hit item-destruction rider
 
-func (SmashingGoodTimeBlue) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+func (SmashingGoodTimeBlue) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
 	if self.FromArsenal {
-		cards.GrantNextCardBonusAttack(g, 1, cards.IsAttackAction)
+		cards.GrantNextCardBonusAttack(ge, 1, cards.IsAttackAction)
 	}
 }

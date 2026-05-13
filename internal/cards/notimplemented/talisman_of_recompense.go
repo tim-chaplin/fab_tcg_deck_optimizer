@@ -11,5 +11,5 @@ import (
 
 // not implemented: self-destroys on pitching a 1-resource card → gain {r}{r}{r} instead
 
-func (TalismanOfRecompenseYellow) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+func (TalismanOfRecompenseYellow) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
 }

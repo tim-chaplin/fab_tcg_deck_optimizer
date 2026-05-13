@@ -13,11 +13,11 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
-func (LifeOfThePartyRed) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+func (LifeOfThePartyRed) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
 }
 
-func (LifeOfThePartyYellow) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+func (LifeOfThePartyYellow) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
 }
 
-func (LifeOfThePartyBlue) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+func (LifeOfThePartyBlue) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
 }

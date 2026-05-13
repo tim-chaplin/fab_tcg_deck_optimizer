@@ -9,23 +9,23 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
-func snatchPlay(g card.GameEngine, l card.Logger, self *card.CardState) {
+func snatchPlay(ge card.GameEngine, l card.Logger, self *card.CardState) {
 	self.RegisterOnHit(snatchOnHit)
 }
 
 // snatchOnHit fires the printed "When this hits, draw a card" rider.
-func snatchOnHit(g card.GameEngine, l card.Logger, _ *card.CardState, _ *card.OnHitHandler) {
-	g.DrawOne()
+func snatchOnHit(ge card.GameEngine, l card.Logger, _ *card.CardState, _ *card.OnHitHandler) {
+	ge.DrawOne()
 }
 
-func (SnatchRed) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
-	snatchPlay(g, l, self)
+func (SnatchRed) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
+	snatchPlay(ge, l, self)
 }
 
-func (SnatchYellow) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
-	snatchPlay(g, l, self)
+func (SnatchYellow) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
+	snatchPlay(ge, l, self)
 }
 
-func (SnatchBlue) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
-	snatchPlay(g, l, self)
+func (SnatchBlue) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
+	snatchPlay(ge, l, self)
 }

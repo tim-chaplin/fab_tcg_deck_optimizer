@@ -9,7 +9,7 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/gameengine"
 )
 
-// Tests that each variant credits printed_power - 2 to s.Value().
+// Tests that each variant credits printed_power - 2 to gs.Value().
 func TestFreewheelingRenegades_AlwaysDebuffedByTwo(t *testing.T) {
 	cases := []struct {
 		c    card.Card
@@ -20,9 +20,9 @@ func TestFreewheelingRenegades_AlwaysDebuffedByTwo(t *testing.T) {
 		{cards.FreewheelingRenegadesBlue{}, 2},
 	}
 	for _, tc := range cases {
-		s := gameengine.New()
-		s.ResolveChainStep(s.Logger(), &card.CardState{Card: tc.c})
-		if got := s.Value(); got != tc.want {
+		ge := gameengine.New()
+		ge.ResolveChainStep(ge.Logger(), &card.CardState{Card: tc.c})
+		if got := ge.Value(); got != tc.want {
 			t.Errorf("%s: Play() = %d, want %d (printed - 2)", tc.c.Name(), got, tc.want)
 		}
 	}

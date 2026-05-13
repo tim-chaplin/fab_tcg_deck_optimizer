@@ -164,9 +164,9 @@ func emitGroup(dir, pkg, basename string, g CardGroup) error {
 			// Universal cards fold the active hero's class into their type-line. Passing
 			// nil (e.g. cardmeta lookups before a hero is set) returns the printed types
 			// only — class-independent predicates (IsAttack, IsAttackAction, …) still work.
-			fmt.Fprintf(&buf, "func (%s) Types(g card.GameEngine) card.TypeSet {\n", v.ID)
-			fmt.Fprintf(&buf, "\tif g == nil {\n\t\treturn %s\n\t}\n", tvar)
-			fmt.Fprintf(&buf, "\treturn %s | card.NewTypeSet(g.CurrentHeroClass())\n", tvar)
+			fmt.Fprintf(&buf, "func (%s) Types(ge card.GameEngine) card.TypeSet {\n", v.ID)
+			fmt.Fprintf(&buf, "\tif ge == nil {\n\t\treturn %s\n\t}\n", tvar)
+			fmt.Fprintf(&buf, "\treturn %s | card.NewTypeSet(ge.CurrentHeroClass())\n", tvar)
 			fmt.Fprintf(&buf, "}\n")
 			fmt.Fprintf(&buf, "func (%s) Universal()           {}\n", v.ID)
 		} else {

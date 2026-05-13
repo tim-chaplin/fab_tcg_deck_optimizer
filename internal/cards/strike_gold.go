@@ -7,23 +7,23 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
-func strikeGoldOnHit(g card.GameEngine, l card.Logger, self *card.CardState, _ *card.OnHitHandler) {
-	g.CreateGold(1)
+func strikeGoldOnHit(ge card.GameEngine, l card.Logger, self *card.CardState, _ *card.OnHitHandler) {
+	ge.CreateGold(1)
 	l.AppendPostTrigger(self.Card.DisplayName(), "On-hit created a gold token", 0)
 }
 
-func strikeGoldPlay(g card.GameEngine, l card.Logger, self *card.CardState) {
+func strikeGoldPlay(ge card.GameEngine, l card.Logger, self *card.CardState) {
 	self.RegisterOnHit(strikeGoldOnHit)
 }
 
-func (StrikeGoldRed) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
-	strikeGoldPlay(g, l, self)
+func (StrikeGoldRed) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
+	strikeGoldPlay(ge, l, self)
 }
 
-func (StrikeGoldYellow) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
-	strikeGoldPlay(g, l, self)
+func (StrikeGoldYellow) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
+	strikeGoldPlay(ge, l, self)
 }
 
-func (StrikeGoldBlue) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
-	strikeGoldPlay(g, l, self)
+func (StrikeGoldBlue) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
+	strikeGoldPlay(ge, l, self)
 }

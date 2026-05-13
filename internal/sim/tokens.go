@@ -8,8 +8,8 @@ import (
 )
 
 // Token aura / item logic. The engine knows about FaB's five built-in token kinds by name
-// (Runechant, Ponder, Gold, Silver, Copper) — cards call g.CreateRunechants /
-// g.RunechantCount and the engine routes through sim's builders registered at init.
+// (Runechant, Ponder, Gold, Silver, Copper) — cards call ge.CreateRunechants /
+// ge.RunechantCount and the engine routes through sim's builders registered at init.
 
 const (
 	tokenNameRunechant = "Runechant"
@@ -20,7 +20,7 @@ const (
 )
 
 // NewRunechantAura returns a runechant token aura at count n. Production code calls
-// g.CreateRunechants instead — it bumps an existing aura and credits +n damage. This
+// ge.CreateRunechants instead — it bumps an existing aura and credits +n damage. This
 // factory is for tests / Spec seeding that need to add a runechant aura without the
 // damage credit.
 func NewRunechantAura(n int) *Aura {
@@ -28,7 +28,7 @@ func NewRunechantAura(n int) *Aura {
 }
 
 // NewPonderAura returns a ponder token aura at count n. Production code calls
-// g.CreatePonders instead; this factory is for tests / Spec seeding.
+// ge.CreatePonders instead; this factory is for tests / Spec seeding.
 func NewPonderAura(n int) *Aura {
 	return NewTokenAura(tokenNamePonder, ids.PonderTokenID, triggertype.EndOfTurn, ponderAuraHandler, n)
 }
@@ -37,8 +37,8 @@ func NewPonderAura(n int) *Aura {
 // Fires before each attack / weapon swing: flips ArcaneDamageDealt when aura.Count clears
 // the LikelyDamageHits window and destroys the aura. Damage was credited at creation time
 // in CreateRunechants — this handler is pure state cleanup.
-func runechantAuraHandler(g card.GameEngine, _ card.Logger, a card.Aura) {
-	eng := g.(*gameengine.GameEngine)
+func runechantAuraHandler(ge card.GameEngine, _ card.Logger, a card.Aura) {
+	eng := ge.(*gameengine.GameEngine)
 	if gameengine.LikelyDamageHits(a.Count(), false) {
 		eng.SetArcaneDamageDealt(true)
 	}
@@ -48,8 +48,8 @@ func runechantAuraHandler(g card.GameEngine, _ card.Logger, a card.Aura) {
 // ponderAuraHandler is the TriggerEndOfTurn handler shared by every Ponder aura. For each
 // token in play it pops the deck top into the hand, letting the post-hoc arsenal-promotion
 // step fill an otherwise-empty arsenal slot. Pops past deck-end are silently skipped.
-func ponderAuraHandler(g card.GameEngine, _ card.Logger, a card.Aura) {
-	eng := g.(*gameengine.GameEngine)
+func ponderAuraHandler(ge card.GameEngine, _ card.Logger, a card.Aura) {
+	eng := ge.(*gameengine.GameEngine)
 	for i := 0; i < a.Count(); i++ {
 		c, ok := eng.PopDeckTop()
 		if !ok {
@@ -61,7 +61,7 @@ func ponderAuraHandler(g card.GameEngine, _ card.Logger, a card.Aura) {
 }
 
 // NewGoldItem / NewSilverItem / NewCopperItem return fresh token items at count n.
-// Production code calls g.CreateGold / CreateSilver / CreateCopper instead.
+// Production code calls ge.CreateGold / CreateSilver / CreateCopper instead.
 func NewGoldItem(n int) *Item {
 	return NewTokenItem(tokenNameGold, ids.GoldTokenID, GoldTokenAbility{}, n)
 }
@@ -92,12 +92,12 @@ func (GoldTokenAbility) Types(card.GameEngine) card.TypeSet { return tokenAbilit
 func (GoldTokenAbility) GoAgain(card.GameEngine) bool       { return true }
 
 // PlayPrecondition gates the ability on having a Gold token to spend.
-func (GoldTokenAbility) PlayPrecondition(g card.GameEngine, _ *card.CardState) bool {
-	return g.GoldCount() > 0
+func (GoldTokenAbility) PlayPrecondition(ge card.GameEngine, _ *card.CardState) bool {
+	return ge.GoldCount() > 0
 }
 
-func (GoldTokenAbility) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
-	eng := g.(*gameengine.GameEngine)
+func (GoldTokenAbility) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
+	eng := ge.(*gameengine.GameEngine)
 	eng.ConsumeItemByName(tokenNameGold, 1)
 	eng.DrawOne()
 	l.AppendPostTrigger(self.Card.DisplayName(), "Spent 1 gold to draw a card", 0)
@@ -116,12 +116,12 @@ func (SilverTokenAbility) Defense() int                       { return 0 }
 func (SilverTokenAbility) Types(card.GameEngine) card.TypeSet { return tokenAbilityTypes }
 func (SilverTokenAbility) GoAgain(card.GameEngine) bool       { return true }
 
-func (SilverTokenAbility) PlayPrecondition(g card.GameEngine, _ *card.CardState) bool {
-	return g.SilverCount() > 0
+func (SilverTokenAbility) PlayPrecondition(ge card.GameEngine, _ *card.CardState) bool {
+	return ge.SilverCount() > 0
 }
 
-func (SilverTokenAbility) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
-	eng := g.(*gameengine.GameEngine)
+func (SilverTokenAbility) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
+	eng := ge.(*gameengine.GameEngine)
 	eng.ConsumeItemByName(tokenNameSilver, 1)
 	eng.DrawOne()
 	l.AppendPostTrigger(self.Card.DisplayName(), "Spent 1 silver to draw a card", 0)
@@ -140,12 +140,12 @@ func (CopperTokenAbility) Defense() int                       { return 0 }
 func (CopperTokenAbility) Types(card.GameEngine) card.TypeSet { return tokenAbilityTypes }
 func (CopperTokenAbility) GoAgain(card.GameEngine) bool       { return true }
 
-func (CopperTokenAbility) PlayPrecondition(g card.GameEngine, _ *card.CardState) bool {
-	return g.CopperCount() > 0
+func (CopperTokenAbility) PlayPrecondition(ge card.GameEngine, _ *card.CardState) bool {
+	return ge.CopperCount() > 0
 }
 
-func (CopperTokenAbility) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
-	eng := g.(*gameengine.GameEngine)
+func (CopperTokenAbility) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
+	eng := ge.(*gameengine.GameEngine)
 	eng.ConsumeItemByName(tokenNameCopper, 1)
 	eng.DrawOne()
 	l.AppendPostTrigger(self.Card.DisplayName(), "Spent 1 copper to draw a card", 0)

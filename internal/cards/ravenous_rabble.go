@@ -4,7 +4,7 @@
 // Text: "When this attacks, reveal the top card of your deck. This gets -X{p}, where X is the pitch
 // value of the card revealed this way. **Go again**"
 //
-// Peek g.Deck[0].Pitch() and subtract from base power, floored at 0. If the deck is empty, no card
+// Peek ge.Deck[0].Pitch() and subtract from base power, floored at 0. If the deck is empty, no card
 // is revealed so there's no penalty.
 
 package cards
@@ -15,22 +15,22 @@ import (
 
 // ravenousRabbleApplyDebuff routes the -X{p} self-debuff (X = revealed deck-top pitch)
 // through self.BonusAttack. Empty deck means no penalty.
-func ravenousRabbleApplyDebuff(g card.GameEngine, l card.Logger, self *card.CardState) {
-	top, ok := g.PeekDeck()
+func ravenousRabbleApplyDebuff(ge card.GameEngine, l card.Logger, self *card.CardState) {
+	top, ok := ge.PeekDeck()
 	if !ok {
 		return
 	}
 	self.BonusAttack -= top.Pitch()
 }
 
-func (RavenousRabbleRed) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
-	ravenousRabbleApplyDebuff(g, l, self)
+func (RavenousRabbleRed) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
+	ravenousRabbleApplyDebuff(ge, l, self)
 }
 
-func (RavenousRabbleYellow) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
-	ravenousRabbleApplyDebuff(g, l, self)
+func (RavenousRabbleYellow) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
+	ravenousRabbleApplyDebuff(ge, l, self)
 }
 
-func (RavenousRabbleBlue) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
-	ravenousRabbleApplyDebuff(g, l, self)
+func (RavenousRabbleBlue) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
+	ravenousRabbleApplyDebuff(ge, l, self)
 }

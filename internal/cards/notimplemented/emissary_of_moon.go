@@ -12,5 +12,5 @@ import (
 
 // not implemented: hand-cycle draw rider
 
-func (c EmissaryOfMoonRed) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+func (c EmissaryOfMoonRed) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
 }

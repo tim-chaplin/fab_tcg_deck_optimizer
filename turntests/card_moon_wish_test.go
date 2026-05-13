@@ -42,31 +42,31 @@ func TestMoonWish_VariableCost(t *testing.T) {
 func TestMoonWish_AltCostMovesHandCardToDeckTop(t *testing.T) {
 	dr := testutils.GenericAttack(0, 0).WithName("dr")
 	other := testutils.GenericAttack(0, 0).WithName("deckTop")
-	s := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCards([]card.Card{other}).Build()}
-	s.SetHand([]card.Card{dr})
+	ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCards([]card.Card{other}).Build()}
+	ge.SetHand([]card.Card{dr})
 	self := &card.CardState{Card: cards.MoonWishYellow{}}
-	s.ResolveChainStep(s.Logger(), self)
-	testutils.FireOnHitIfLikely(s, s.Logger(), self)
-	if h := s.Hand(); len(h) != 0 {
+	ge.ResolveChainStep(ge.Logger(), self)
+	testutils.FireOnHitIfLikely(ge, ge.Logger(), self)
+	if h := ge.Hand(); len(h) != 0 {
 		t.Errorf("Hand = %d entries, want 0 (alt cost should pop the only hand card)", len(h))
 	}
-	if got := s.Deck().Size(); got != 2 {
+	if got := ge.Deck().Size(); got != 2 {
 		t.Errorf("Deck size = %d, want 2 (alt-cost'd card prepended onto existing top)", got)
 	}
-	if top := s.Deck().PeekTop(); top == nil || top.(card.Card).Name() != "dr" {
+	if top := ge.Deck().PeekTop(); top == nil || top.(card.Card).Name() != "dr" {
 		t.Errorf("Deck top = %v, want %q (alt-cost'd card moved to top)", top, "dr")
 	}
 	// One of the post-trigger log entries should name the returned card.
 	wantSuffix := "returned " + dr.DisplayName() + " to top of deck"
 	found := false
-	for _, e := range s.LogEntries() {
+	for _, e := range ge.LogEntries() {
 		if e.Source == "Moon Wish [Y]" && strings.HasSuffix(e.Text, wantSuffix) {
 			found = true
 			break
 		}
 	}
 	if !found {
-		t.Errorf("expected a Moon Wish post-trigger log line ending in %q; log = %+v", wantSuffix, s.LogEntries())
+		t.Errorf("expected a Moon Wish post-trigger log line ending in %q; log = %+v", wantSuffix, ge.LogEntries())
 	}
 }
 
@@ -83,11 +83,11 @@ func TestMoonWish_TutorPrefersRedSunKissThenYellowThenBlue(t *testing.T) {
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
-			s := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCards(append([]card.Card(nil), tc.deck...)).Build()}
+			ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCards(append([]card.Card(nil), tc.deck...)).Build()}
 			self := &card.CardState{Card: cards.MoonWishYellow{}}
-			s.ResolveChainStep(s.Logger(), self)
-			testutils.FireOnHitIfLikely(s, s.Logger(), self)
-			h := s.Hand()
+			ge.ResolveChainStep(ge.Logger(), self)
+			testutils.FireOnHitIfLikely(ge, ge.Logger(), self)
+			h := ge.Hand()
 			if len(h) != 1 || h[0].ID() != tc.want {
 				t.Errorf("Hand = %v, want first entry to be %v", h, tc.want)
 			}
@@ -99,27 +99,27 @@ func TestMoonWish_TutorPrefersRedSunKissThenYellowThenBlue(t *testing.T) {
 // leaves the deck intact.
 func TestMoonWish_TutorRequiresHit(t *testing.T) {
 	{
-		s := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCards([]card.Card{cards.SunKissRed{}}).Build()}
+		ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCards([]card.Card{cards.SunKissRed{}}).Build()}
 		self := &card.CardState{Card: cards.MoonWishYellow{}}
-		s.ResolveChainStep(s.Logger(), self)
-		testutils.FireOnHitIfLikely(s, s.Logger(), self)
-		h := s.Hand()
+		ge.ResolveChainStep(ge.Logger(), self)
+		testutils.FireOnHitIfLikely(ge, ge.Logger(), self)
+		h := ge.Hand()
 		if len(h) != 1 || h[0].ID() != ids.SunKissRed {
 			t.Errorf("base hit: Hand = %v, want [Sun Kiss [R]]", h)
 		}
-		if d := s.Deck(); d.Size() != 0 {
+		if d := ge.Deck(); d.Size() != 0 {
 			t.Errorf("base hit: Deck = %v, want [] (tutor removed Sun Kiss)", d)
 		}
 	}
 	{
-		s := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCards([]card.Card{cards.SunKissRed{}}).Build()}
+		ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCards([]card.Card{cards.SunKissRed{}}).Build()}
 		// Drive EffectiveAttack down so LikelyToHit fails (4 - 4 = 0, clamped, not in window).
 		self := &card.CardState{Card: cards.MoonWishYellow{}, BonusAttack: -4}
-		s.ResolveChainStep(s.Logger(), self)
-		if h := s.Hand(); len(h) != 0 {
+		ge.ResolveChainStep(ge.Logger(), self)
+		if h := ge.Hand(); len(h) != 0 {
 			t.Errorf("dampened: Hand = %v, want [] (no hit, no tutor)", h)
 		}
-		if d := s.Deck(); d.Size() != 1 || d.PeekTop().(card.Card).ID() != ids.SunKissRed {
+		if d := ge.Deck(); d.Size() != 1 || d.PeekTop().(card.Card).ID() != ids.SunKissRed {
 			t.Errorf("dampened: Deck = %v, want [Sun Kiss [R]] (untouched)", d)
 		}
 	}
@@ -128,32 +128,32 @@ func TestMoonWish_TutorRequiresHit(t *testing.T) {
 // Tests that Sun Kiss plays immediately when self has go-again, otherwise lands in hand.
 func TestMoonWish_GoAgainPlaysSunKissImmediately(t *testing.T) {
 	{
-		s := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCards([]card.Card{cards.SunKissRed{}}).Build()}
+		ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCards([]card.Card{cards.SunKissRed{}}).Build()}
 		self := &card.CardState{Card: cards.MoonWishYellow{}, GrantedGoAgain: true}
-		s.ResolveChainStep(s.Logger(), self)
-		testutils.FireOnHitIfLikely(s, s.Logger(), self)
-		dmg := s.Value()
+		ge.ResolveChainStep(ge.Logger(), self)
+		testutils.FireOnHitIfLikely(ge, ge.Logger(), self)
+		dmg := ge.Value()
 		if dmg != 4+3 {
 			t.Errorf("with go-again: damage = %d, want 7 (Moon Wish 4 + Sun Kiss 3)", dmg)
 		}
-		if h := s.Hand(); len(h) != 0 {
+		if h := ge.Hand(); len(h) != 0 {
 			t.Errorf("with go-again: Hand = %v, want [] (Sun Kiss played, not tutored to hand)", h)
 		}
-		g := s.Graveyard()
+		g := ge.Graveyard()
 		if len(g) != 1 || g[0].ID() != ids.SunKissRed {
 			t.Errorf("with go-again: Graveyard = %v, want [Sun Kiss [R]]", g)
 		}
 	}
 	{
-		s := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCards([]card.Card{cards.SunKissRed{}}).Build()}
+		ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCards([]card.Card{cards.SunKissRed{}}).Build()}
 		self := &card.CardState{Card: cards.MoonWishYellow{}}
-		s.ResolveChainStep(s.Logger(), self)
-		testutils.FireOnHitIfLikely(s, s.Logger(), self)
-		dmg := s.Value()
+		ge.ResolveChainStep(ge.Logger(), self)
+		testutils.FireOnHitIfLikely(ge, ge.Logger(), self)
+		dmg := ge.Value()
 		if dmg != 4 {
 			t.Errorf("no go-again: damage = %d, want 4 (Sun Kiss not played)", dmg)
 		}
-		h := s.Hand()
+		h := ge.Hand()
 		if len(h) != 1 || h[0].ID() != ids.SunKissRed {
 			t.Errorf("no go-again: Hand = %v, want [Sun Kiss [R]]", h)
 		}

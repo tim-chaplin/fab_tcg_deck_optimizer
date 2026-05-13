@@ -12,24 +12,24 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
-func scourTheBattlescapePlay(g card.GameEngine, l card.Logger, self *card.CardState) {
+func scourTheBattlescapePlay(ge card.GameEngine, l card.Logger, self *card.CardState) {
 	self.GrantGoAgainIfFromArsenal()
 }
 
 // not implemented: hand-cycle rider (put a card on bottom of deck, draw)
 
-func (ScourTheBattlescapeRed) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
-	scourTheBattlescapePlay(g, l, self)
+func (ScourTheBattlescapeRed) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
+	scourTheBattlescapePlay(ge, l, self)
 }
 
 // not implemented: hand-cycle rider (put a card on bottom of deck, draw)
 
-func (ScourTheBattlescapeYellow) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
-	scourTheBattlescapePlay(g, l, self)
+func (ScourTheBattlescapeYellow) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
+	scourTheBattlescapePlay(ge, l, self)
 }
 
 // not implemented: hand-cycle rider (put a card on bottom of deck, draw)
 
-func (ScourTheBattlescapeBlue) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
-	scourTheBattlescapePlay(g, l, self)
+func (ScourTheBattlescapeBlue) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
+	scourTheBattlescapePlay(ge, l, self)
 }

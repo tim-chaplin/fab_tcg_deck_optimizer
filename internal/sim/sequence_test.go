@@ -95,7 +95,7 @@ func TestBest_RunicReapingPrefersAttackPitch(t *testing.T) {
 	// BonusAttack. Runic Reaping's "if this hits, create N Runechants" clause is appended
 	// to Shrill's OnHit (same shape as Mauvrion Skies) and fires post-buff:
 	// target.EffectiveAttack = printed 4 + BonusAttack 1 = 5, which falls OUT of the {1,4,7}
-	// s.LikelyToHit window, so the runechant rider drops. The only damage
+	// ge.LikelyToHit window, so the runechant rider drops. The only damage
 	// on Runic Reaping's slot is Viserai's runechant for the prior non-attack action.
 	// Blue Malefic (1 arcane + 1 Viserai runechant = 2) → Runic Reaping (0 own damage + 1
 	// Viserai runechant = 1) → Shrill (4 base + 3 aura-created bonus + 1 BonusAttack = 8).

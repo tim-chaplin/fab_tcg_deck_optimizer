@@ -12,5 +12,5 @@ import (
 
 // not implemented: activated 'no DR this turn' + Royal-only arsenal-wipe on hit
 
-func (ImperialSealOfCommandRed) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+func (ImperialSealOfCommandRed) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
 }

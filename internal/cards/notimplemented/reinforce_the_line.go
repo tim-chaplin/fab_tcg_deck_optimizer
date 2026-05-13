@@ -10,13 +10,13 @@ import (
 
 // not implemented: Instant +N{d} grant to a defending attack action card
 
-func (ReinforceTheLineRed) Play(g card.GameEngine, l card.Logger, self *card.CardState) {}
+func (ReinforceTheLineRed) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {}
 
 // not implemented: Instant +N{d} grant to a defending attack action card
 
-func (ReinforceTheLineYellow) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+func (ReinforceTheLineYellow) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
 }
 
 // not implemented: Instant +N{d} grant to a defending attack action card
 
-func (ReinforceTheLineBlue) Play(g card.GameEngine, l card.Logger, self *card.CardState) {}
+func (ReinforceTheLineBlue) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {}

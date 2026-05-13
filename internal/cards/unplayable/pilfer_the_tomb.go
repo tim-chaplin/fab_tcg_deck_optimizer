@@ -9,5 +9,5 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
-func (PilferTheTombBlue) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+func (PilferTheTombBlue) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
 }

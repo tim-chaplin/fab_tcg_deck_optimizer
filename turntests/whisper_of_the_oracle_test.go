@@ -22,19 +22,19 @@ func TestWhisperOfTheOracle_PlayCallsOpt4(t *testing.T) {
 		testutils.NewStubCard("c"), testutils.NewStubCard("d")
 
 	for _, variant := range whisperOfTheOracleVariants {
-		s := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCards([]card.Card{a, b, c, d}).Build()}
-		s.ResolveChainStep(s.Logger(), &card.CardState{Card: variant})
-		if s.Value() != 0 {
-			t.Errorf("%s: Play() Value = %d, want 0", variant.Name(), s.Value())
+		ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCards([]card.Card{a, b, c, d}).Build()}
+		ge.ResolveChainStep(ge.Logger(), &card.CardState{Card: variant})
+		if ge.Value() != 0 {
+			t.Errorf("%s: Play() Value = %d, want 0", variant.Name(), ge.Value())
 		}
-		if len(s.LogEntries()) != 2 {
-			t.Errorf("%s: Log len = %d, want 2 (Opted... + chain step)", variant.Name(), len(s.LogEntries()))
+		if len(ge.LogEntries()) != 2 {
+			t.Errorf("%s: Log len = %d, want 2 (Opted... + chain step)", variant.Name(), len(ge.LogEntries()))
 			continue
 		}
 		// Play emits the Opted line; the chain step is auto-appended after Play
 		// returns, so the Opted entry lands first.
 		want := "Opted [a, b, c, d], put [a, b, c, d] on top, put [] on bottom"
-		if got := s.LogEntries()[0].Text; got != want {
+		if got := ge.LogEntries()[0].Text; got != want {
 			t.Errorf("%s: Opt log entry = %q, want %q", variant.Name(), got, want)
 		}
 	}

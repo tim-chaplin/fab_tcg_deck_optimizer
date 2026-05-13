@@ -12,12 +12,12 @@ import (
 
 // Tests that the on-hit 1-damage rider credits +1 on a likely-hit attack.
 func TestBlowForABlow_LikelyHitCreditsPing(t *testing.T) {
-	s := gameengine.New()
+	ge := gameengine.New()
 	c := cards.BlowForABlowRed{}
 	cs := &card.CardState{Card: c}
-	s.ResolveChainStep(s.Logger(), cs)
-	testutils.FireOnHitIfLikely(s, s.Logger(), cs)
-	if got := s.Value(); got != 4+1 {
+	ge.ResolveChainStep(ge.Logger(), cs)
+	testutils.FireOnHitIfLikely(ge, ge.Logger(), cs)
+	if got := ge.Value(); got != 4+1 {
 		t.Errorf("Play() = %d, want 5 (4 likely to hit + 1 ping)", got)
 	}
 }

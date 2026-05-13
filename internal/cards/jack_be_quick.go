@@ -14,14 +14,14 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
-func jackBeQuickPlay(g card.GameEngine, l card.Logger, self *card.CardState) {
-	if _, ok := g.BanishFromGraveyard(isNimblism); ok {
+func jackBeQuickPlay(ge card.GameEngine, l card.Logger, self *card.CardState) {
+	if _, ok := ge.BanishFromGraveyard(isNimblism); ok {
 		self.BonusAttack++
 		self.GrantedGoAgain = true
 		l.AppendPostTrigger(self.Card.DisplayName(), "Banished a Nimblism, +1{p} and go again", 1)
 	}
 }
 
-func (JackBeQuickRed) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
-	jackBeQuickPlay(g, l, self)
+func (JackBeQuickRed) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
+	jackBeQuickPlay(ge, l, self)
 }

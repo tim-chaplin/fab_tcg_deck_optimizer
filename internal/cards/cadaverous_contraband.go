@@ -10,26 +10,26 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
-func cadaverousContrabandOnHitRecycle(g card.GameEngine, l card.Logger, self *card.CardState, _ *card.OnHitHandler) {
-	if _, ok := g.RecycleFromGraveyardToTop(isNonAttackAction); ok {
+func cadaverousContrabandOnHitRecycle(ge card.GameEngine, l card.Logger, self *card.CardState, _ *card.OnHitHandler) {
+	if _, ok := ge.RecycleFromGraveyardToTop(isNonAttackAction); ok {
 		l.AppendPostTrigger(self.Card.DisplayName(), "Recycled a non-attack action card to top of deck", 0)
 	}
 }
 
 func isNonAttackAction(c card.Card) bool { return c.Types(nil).IsNonAttackAction() }
 
-func cadaverousContrabandPlay(g card.GameEngine, l card.Logger, self *card.CardState) {
+func cadaverousContrabandPlay(ge card.GameEngine, l card.Logger, self *card.CardState) {
 	self.RegisterOnHit(cadaverousContrabandOnHitRecycle)
 }
 
-func (CadaverousContrabandRed) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
-	cadaverousContrabandPlay(g, l, self)
+func (CadaverousContrabandRed) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
+	cadaverousContrabandPlay(ge, l, self)
 }
 
-func (CadaverousContrabandYellow) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
-	cadaverousContrabandPlay(g, l, self)
+func (CadaverousContrabandYellow) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
+	cadaverousContrabandPlay(ge, l, self)
 }
 
-func (CadaverousContrabandBlue) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
-	cadaverousContrabandPlay(g, l, self)
+func (CadaverousContrabandBlue) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
+	cadaverousContrabandPlay(ge, l, self)
 }

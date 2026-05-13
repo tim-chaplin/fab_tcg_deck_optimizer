@@ -61,12 +61,12 @@ type attackerMeta struct {
 // ModalCost cards dispatch on the mode index; static cards return the cached value
 // directly; VariableCost cards defer to Cost(s) so every game-state-dependent costing rule
 // lives inside the card, not the solver.
-func (m *attackerMeta) costAt(s *gameengine.GameEngine, mode int8) int {
+func (m *attackerMeta) costAt(ge *gameengine.GameEngine, mode int8) int {
 	if m.isModalCost {
 		return m.card.(card.ModalCost).ModalCost(mode)
 	}
 	if m.isVariable {
-		return m.card.Cost(s)
+		return m.card.Cost(ge)
 	}
 	return m.maxCost
 }

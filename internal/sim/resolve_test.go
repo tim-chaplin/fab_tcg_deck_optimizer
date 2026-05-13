@@ -26,8 +26,8 @@ func (attackStub) Defense() int             { return 0 }
 func (attackStub) Types(card.GameEngine) card.TypeSet {
 	return card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 }
-func (attackStub) GoAgain(card.GameEngine) bool                                { return false }
-func (attackStub) Play(g card.GameEngine, l card.Logger, self *card.CardState) {}
+func (attackStub) GoAgain(card.GameEngine) bool                                 { return false }
+func (attackStub) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {}
 
 // drStub is a vanilla defense-reaction card with printed defense 4.
 type drStub struct{}
@@ -42,8 +42,8 @@ func (drStub) Defense() int             { return 4 }
 func (drStub) Types(card.GameEngine) card.TypeSet {
 	return card.NewTypeSet(card.TypeGeneric, card.TypeDefenseReaction)
 }
-func (drStub) GoAgain(card.GameEngine) bool                                { return false }
-func (drStub) Play(g card.GameEngine, l card.Logger, self *card.CardState) {}
+func (drStub) GoAgain(card.GameEngine) bool                                 { return false }
+func (drStub) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {}
 
 // nonAttackStub is a non-attack action that flips a flag from Play (used to
 // confirm the Play body still runs even though the sim contributes no n).
@@ -60,7 +60,7 @@ func (nonAttackStub) Types(card.GameEngine) card.TypeSet {
 	return card.NewTypeSet(card.TypeGeneric, card.TypeAction)
 }
 func (nonAttackStub) GoAgain(card.GameEngine) bool { return false }
-func (n nonAttackStub) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+func (n nonAttackStub) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
 	*n.played = true
 }
 
@@ -80,73 +80,73 @@ func (selfBuffStub) Types(card.GameEngine) card.TypeSet {
 	return card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 }
 func (selfBuffStub) GoAgain(card.GameEngine) bool { return false }
-func (selfBuffStub) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+func (selfBuffStub) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
 	self.BonusAttack += 1
 }
 
 func TestResolveChainStep_AttackCreditsEffectiveAttack(t *testing.T) {
-	s := gameengine.New()
+	ge := gameengine.New()
 	self := &card.CardState{Card: attackStub{}}
-	s.ResolveChainStep(s.Logger(), self)
-	if s.Value() != 3 {
-		t.Errorf("Value = %d, want 3 (printed attack)", s.Value())
+	ge.ResolveChainStep(ge.Logger(), self)
+	if ge.Value() != 3 {
+		t.Errorf("Value = %d, want 3 (printed attack)", ge.Value())
 	}
-	if got := s.LogEntries(); len(got) != 1 || got[0].N != 3 {
+	if got := ge.LogEntries(); len(got) != 1 || got[0].N != 3 {
 		t.Errorf("log = %v, want one chain-step entry with N=3", got)
 	}
 }
 
 func TestResolveChainStep_DefenseReactionCapsToIncomingDamage(t *testing.T) {
-	s := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetIncomingDamage(2).Build()}
+	ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetIncomingDamage(2).Build()}
 	self := &card.CardState{Card: drStub{}}
-	s.ResolveChainStep(s.Logger(), self)
-	if s.Value() != 2 {
-		t.Errorf("Value = %d, want 2 (capped at IncomingDamage)", s.Value())
+	ge.ResolveChainStep(ge.Logger(), self)
+	if ge.Value() != 2 {
+		t.Errorf("Value = %d, want 2 (capped at IncomingDamage)", ge.Value())
 	}
-	if s.IncomingDamage() != 0 {
-		t.Errorf("IncomingDamage = %d, want 0 (decremented by capped block)", s.IncomingDamage())
+	if ge.IncomingDamage() != 0 {
+		t.Errorf("IncomingDamage = %d, want 0 (decremented by capped block)", ge.IncomingDamage())
 	}
-	if got := s.LogEntries(); len(got) != 1 || got[0].N != 2 {
+	if got := ge.LogEntries(); len(got) != 1 || got[0].N != 2 {
 		t.Errorf("log = %v, want one chain-step entry with N=2", got)
 	}
 }
 
 func TestResolveChainStep_DefenseReactionUncappedWhenIncomingExceedsDefense(t *testing.T) {
-	s := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetIncomingDamage(10).Build()}
+	ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetIncomingDamage(10).Build()}
 	self := &card.CardState{Card: drStub{}}
-	s.ResolveChainStep(s.Logger(), self)
-	if s.Value() != 4 {
-		t.Errorf("Value = %d, want 4 (printed defense, uncapped)", s.Value())
+	ge.ResolveChainStep(ge.Logger(), self)
+	if ge.Value() != 4 {
+		t.Errorf("Value = %d, want 4 (printed defense, uncapped)", ge.Value())
 	}
-	if s.IncomingDamage() != 6 {
-		t.Errorf("IncomingDamage = %d, want 6 (10 - 4)", s.IncomingDamage())
+	if ge.IncomingDamage() != 6 {
+		t.Errorf("IncomingDamage = %d, want 6 (10 - 4)", ge.IncomingDamage())
 	}
 }
 
 func TestResolveChainStep_NonAttackContributesZero(t *testing.T) {
 	played := false
-	s := gameengine.New()
+	ge := gameengine.New()
 	self := &card.CardState{Card: nonAttackStub{played: &played}}
-	s.ResolveChainStep(s.Logger(), self)
+	ge.ResolveChainStep(ge.Logger(), self)
 	if !played {
 		t.Error("non-attack Play body did not run")
 	}
-	if s.Value() != 0 {
-		t.Errorf("Value = %d, want 0", s.Value())
+	if ge.Value() != 0 {
+		t.Errorf("Value = %d, want 0", ge.Value())
 	}
-	if got := s.LogEntries(); len(got) != 1 || got[0].N != 0 {
+	if got := ge.LogEntries(); len(got) != 1 || got[0].N != 0 {
 		t.Errorf("log = %v, want one chain-step entry with N=0", got)
 	}
 }
 
 func TestResolveChainStep_SelfBuffInPlayAppliesBeforeCredit(t *testing.T) {
-	s := gameengine.New()
+	ge := gameengine.New()
 	self := &card.CardState{Card: selfBuffStub{}}
-	s.ResolveChainStep(s.Logger(), self)
-	if s.Value() != 3 {
-		t.Errorf("Value = %d, want 3 (printed 2 + Play's +1 BonusAttack)", s.Value())
+	ge.ResolveChainStep(ge.Logger(), self)
+	if ge.Value() != 3 {
+		t.Errorf("Value = %d, want 3 (printed 2 + Play'ge +1 BonusAttack)", ge.Value())
 	}
-	if got := s.LogEntries(); len(got) != 1 || got[0].N != 3 {
+	if got := ge.LogEntries(); len(got) != 1 || got[0].N != 3 {
 		t.Errorf("log = %v, want one chain-step entry with N=3", got)
 	}
 }

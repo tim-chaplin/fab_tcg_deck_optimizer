@@ -13,8 +13,8 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
-func (CutDownToSizeRed) Play(g card.GameEngine, l card.Logger, self *card.CardState) {}
+func (CutDownToSizeRed) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {}
 
-func (CutDownToSizeYellow) Play(g card.GameEngine, l card.Logger, self *card.CardState) {}
+func (CutDownToSizeYellow) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {}
 
-func (CutDownToSizeBlue) Play(g card.GameEngine, l card.Logger, self *card.CardState) {}
+func (CutDownToSizeBlue) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {}

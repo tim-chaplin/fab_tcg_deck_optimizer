@@ -19,5 +19,5 @@ import (
 // CardState.GrantAttackReactionBuff (the method most ARs call from Play) lives in v2/card —
 // it's pure GameEngine / Logger / CardState plumbing.
 type AttackReaction interface {
-	ARTargetAllowed(g card.GameEngine, c card.Card, mode int8) bool
+	ARTargetAllowed(ge card.GameEngine, c card.Card, mode int8) bool
 }

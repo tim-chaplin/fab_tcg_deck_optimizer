@@ -12,6 +12,6 @@ import (
 
 // not implemented: on-hit unfreeze rider (freeze/unfreeze state not tracked)
 
-func (RegainComposureBlue) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
-	cards.GrantNextCardBonusAttack(g, 1, cards.IsAttack)
+func (RegainComposureBlue) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
+	cards.GrantNextCardBonusAttack(ge, 1, cards.IsAttack)
 }

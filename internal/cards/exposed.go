@@ -12,7 +12,7 @@ import (
 func (ExposedBlue) ARTargetAllowed(_ card.GameEngine, c card.Card, _ int8) bool {
 	return c.Types(nil).IsAttack()
 }
-func (ExposedBlue) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
-	self.GrantAttackReactionBuff(g, l, 1)
-	g.MarkOpponent()
+func (ExposedBlue) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
+	self.GrantAttackReactionBuff(ge, l, 1)
+	ge.MarkOpponent()
 }

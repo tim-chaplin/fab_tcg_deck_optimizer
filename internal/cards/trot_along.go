@@ -11,8 +11,8 @@ import (
 // trotAlongApplySideEffect grants go again to the next qualifying attack scheduled later
 // this turn — attack action card OR weapon swing per the "your next attack" wording —
 // gated on base power 3 or less.
-func trotAlongApplySideEffect(g card.GameEngine) {
-	for _, pc := range g.CardsRemaining() {
+func trotAlongApplySideEffect(ge card.GameEngine) {
+	for _, pc := range ge.CardsRemaining() {
 		if !pc.Card.Types(nil).IsAttack() {
 			continue
 		}
@@ -23,6 +23,6 @@ func trotAlongApplySideEffect(g card.GameEngine) {
 	}
 }
 
-func (TrotAlongBlue) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
-	trotAlongApplySideEffect(g)
+func (TrotAlongBlue) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
+	trotAlongApplySideEffect(ge)
 }

@@ -22,9 +22,9 @@ func damageTrigger(self card.Card, damage int, calls *int) gameengine.Aura {
 	return NewCardAura(
 		&card.CardState{Card: self},
 		triggertype.StartOfTurn,
-		func(g card.GameEngine, _ card.Logger, a card.Aura) {
+		func(ge card.GameEngine, _ card.Logger, a card.Aura) {
 			*calls++
-			g.AddValue(damage)
+			ge.AddValue(damage)
 			a.Destroy(true)
 		},
 		1,
@@ -73,8 +73,8 @@ func TestProcessAurasAtStartOfTurn_GraveyardsExhaustedAura(t *testing.T) {
 	watcher := NewCardAura(
 		&card.CardState{Card: testutils.YellowAttack{}},
 		triggertype.StartOfTurn,
-		func(g card.GameEngine, _ card.Logger, _ card.Aura) {
-			eng := g.(*gameengine.GameEngine)
+		func(ge card.GameEngine, _ card.Logger, _ card.Aura) {
+			eng := ge.(*gameengine.GameEngine)
 			seen = append([]card.Card(nil), eng.Graveyard()...)
 		},
 		1,
@@ -106,32 +106,32 @@ func TestProcessAurasAtStartOfTurn_IgnoresPonder(t *testing.T) {
 // TestFireEndOfTurn_PonderPopsDeckTopIntoHand.
 func TestFireEndOfTurn_PonderPopsDeckTopIntoHand(t *testing.T) {
 	a, b, c := testutils.NewStubCard("a"), testutils.NewStubCard("b"), testutils.NewStubCard("c")
-	s := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCards([]card.Card{a, b, c}).Build()}
-	s.CreateAura(NewPonderAura(2))
-	FireEndOfTurn(s)
+	ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCards([]card.Card{a, b, c}).Build()}
+	ge.CreateAura(NewPonderAura(2))
+	FireEndOfTurn(ge)
 
-	h := s.Hand()
+	h := ge.Hand()
 	if len(h) != 2 || h[0] != a || h[1] != b {
 		t.Errorf("Hand = %v, want [a, b]", h)
 	}
-	if got := s.Deck().Size(); got != 1 {
+	if got := ge.Deck().Size(); got != 1 {
 		t.Errorf("Deck size = %d, want 1 (two cards popped)", got)
 	}
-	if len(s.Auras()) != 0 {
-		t.Errorf("Auras = %+v, want empty (Ponder destroyed itself)", s.Auras())
+	if len(ge.Auras()) != 0 {
+		t.Errorf("Auras = %+v, want empty (Ponder destroyed itself)", ge.Auras())
 	}
 }
 
 // TestFireEndOfTurn_PonderEmptyDeckIsNoOp.
 func TestFireEndOfTurn_PonderEmptyDeckIsNoOp(t *testing.T) {
-	s := gameengine.New()
-	s.CreateAura(NewPonderAura(1))
-	FireEndOfTurn(s)
-	if h := s.Hand(); len(h) != 0 {
+	ge := gameengine.New()
+	ge.CreateAura(NewPonderAura(1))
+	FireEndOfTurn(ge)
+	if h := ge.Hand(); len(h) != 0 {
 		t.Errorf("Hand = %v, want empty (no deck to draw from)", h)
 	}
-	if len(s.Auras()) != 0 {
-		t.Errorf("Auras = %+v, want empty (Ponder still destroys with empty deck)", s.Auras())
+	if len(ge.Auras()) != 0 {
+		t.Errorf("Auras = %+v, want empty (Ponder still destroys with empty deck)", ge.Auras())
 	}
 }
 

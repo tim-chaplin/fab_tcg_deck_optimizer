@@ -12,15 +12,15 @@ import (
 
 // not implemented: frailty/inertia/bloodrot pox tokens
 
-func (c InfectiousHostRed) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+func (c InfectiousHostRed) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
 }
 
 // not implemented: frailty/inertia/bloodrot pox tokens
 
-func (c InfectiousHostYellow) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+func (c InfectiousHostYellow) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
 }
 
 // not implemented: frailty/inertia/bloodrot pox tokens
 
-func (c InfectiousHostBlue) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+func (c InfectiousHostBlue) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
 }

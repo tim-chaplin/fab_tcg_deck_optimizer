@@ -13,9 +13,9 @@ import (
 // Tests that Public Bounty marks the opposing hero on Play.
 func TestPublicBounty_MarksOpponent(t *testing.T) {
 	for _, c := range []card.Card{cards.PublicBountyRed{}, cards.PublicBountyYellow{}, cards.PublicBountyBlue{}} {
-		s := gameengine.New()
-		s.ResolveChainStep(s.Logger(), &card.CardState{Card: c})
-		if !s.OpponentMarked() {
+		ge := gameengine.New()
+		ge.ResolveChainStep(ge.Logger(), &card.CardState{Card: c})
+		if !ge.OpponentMarked() {
 			t.Errorf("%s: OpponentMarked = false after Play, want true", c.Name())
 		}
 	}
@@ -33,8 +33,8 @@ func TestPublicBounty_GrantsBonusToNextAttack(t *testing.T) {
 	}
 	for _, tc := range cases {
 		target := &card.CardState{Card: testutils.GenericAttack(0, 0)}
-		s := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCardsRemaining([]*card.CardState{target}).Build()}
-		s.ResolveChainStep(s.Logger(), &card.CardState{Card: tc.c})
+		ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCardsRemaining([]*card.CardState{target}).Build()}
+		ge.ResolveChainStep(ge.Logger(), &card.CardState{Card: tc.c})
 		if target.BonusAttack != tc.want {
 			t.Errorf("%s: target BonusAttack = %d, want %d", tc.c.Name(), target.BonusAttack, tc.want)
 		}

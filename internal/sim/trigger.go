@@ -40,9 +40,9 @@ func (t *Trigger) Matches(types card.TypeSet) bool {
 	return t.typeFilter(types)
 }
 
-func (t *Trigger) Fire(g *gameengine.GameEngine, l card.Logger) {
+func (t *Trigger) Fire(ge *gameengine.GameEngine, l card.Logger) {
 	ctx := &triggerCtx{t: t}
-	t.handler(g, l, ctx)
+	t.handler(ge, l, ctx)
 }
 
 // triggerCtx is the adapter handed to each trigger handler — satisfies card.Trigger.

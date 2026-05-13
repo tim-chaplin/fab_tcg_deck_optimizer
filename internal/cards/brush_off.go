@@ -10,11 +10,11 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
-func (BrushOffRed) DefensiveInstant()                                           {}
-func (BrushOffRed) Play(g card.GameEngine, l card.Logger, self *card.CardState) {}
+func (BrushOffRed) DefensiveInstant()                                            {}
+func (BrushOffRed) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {}
 
-func (BrushOffYellow) DefensiveInstant()                                           {}
-func (BrushOffYellow) Play(g card.GameEngine, l card.Logger, self *card.CardState) {}
+func (BrushOffYellow) DefensiveInstant()                                            {}
+func (BrushOffYellow) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {}
 
-func (BrushOffBlue) DefensiveInstant()                                           {}
-func (BrushOffBlue) Play(g card.GameEngine, l card.Logger, self *card.CardState) {}
+func (BrushOffBlue) DefensiveInstant()                                            {}
+func (BrushOffBlue) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {}

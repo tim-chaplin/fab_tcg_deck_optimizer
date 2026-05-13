@@ -10,5 +10,5 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
-func (AmuletOfAssertivenessYellow) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+func (AmuletOfAssertivenessYellow) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
 }

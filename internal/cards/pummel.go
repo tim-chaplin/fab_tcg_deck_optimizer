@@ -6,7 +6,7 @@
 // (Red N=4, Yellow N=3, Blue N=2.)
 //
 // Mode 0 grants +N{p} to a club/hammer weapon attack. Mode 1 grants +N{p} to a cost-≥2
-// attack action card and registers an OnHit hero-discard rider via g.OpponentDiscard.
+// attack action card and registers an OnHit hero-discard rider via ge.OpponentDiscard.
 
 package cards
 
@@ -16,32 +16,32 @@ import (
 
 // pummelAccepts is the per-mode target predicate. Mode 0 gates on club/hammer weapon attack;
 // mode 1 gates on cost-≥2 attack action.
-func pummelAccepts(g card.GameEngine, c card.Card, mode int8) bool {
+func pummelAccepts(ge card.GameEngine, c card.Card, mode int8) bool {
 	t := c.Types(nil)
 	switch mode {
 	case 0:
 		return (t.Has(card.TypeClub) || t.Has(card.TypeHammer)) && t.IsWeaponAttack()
 	case 1:
-		return t.IsAttackAction() && c.Cost(g) >= 2
+		return t.IsAttackAction() && c.Cost(ge) >= 2
 	}
 	return false
 }
 
 // pummelOnHitDiscard fires the printed "when this hits a hero, they discard a card" rider.
-func pummelOnHitDiscard(g card.GameEngine, l card.Logger, self *card.CardState, h *card.OnHitHandler) {
-	v := g.OpponentDiscard(1)
+func pummelOnHitDiscard(ge card.GameEngine, l card.Logger, self *card.CardState, h *card.OnHitHandler) {
+	v := ge.OpponentDiscard(1)
 	l.AppendPostTriggerf(self.Card.DisplayName(), v,
 		"%s forced opponent to discard 1", h.Source.DisplayName())
 }
 
 // pummelPlay applies the chosen mode's effect. Mode 1 additionally registers the on-hit
 // hero-discard rider on the target.
-func pummelPlay(g card.GameEngine, l card.Logger, self *card.CardState, n int) {
-	target := g.AttackReactionTarget()
+func pummelPlay(ge card.GameEngine, l card.Logger, self *card.CardState, n int) {
+	target := ge.AttackReactionTarget()
 	if target == nil {
 		return
 	}
-	self.GrantAttackReactionBuff(g, l, n)
+	self.GrantAttackReactionBuff(ge, l, n)
 	if self.Mode == 1 {
 		target.OnHit = append(target.OnHit, card.OnHitHandler{
 			Fire:   pummelOnHitDiscard,
@@ -51,25 +51,25 @@ func pummelPlay(g card.GameEngine, l card.Logger, self *card.CardState, n int) {
 }
 
 func (PummelRed) Modes() int { return 2 }
-func (PummelRed) ARTargetAllowed(g card.GameEngine, c card.Card, mode int8) bool {
-	return pummelAccepts(g, c, mode)
+func (PummelRed) ARTargetAllowed(ge card.GameEngine, c card.Card, mode int8) bool {
+	return pummelAccepts(ge, c, mode)
 }
-func (PummelRed) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
-	pummelPlay(g, l, self, 4)
+func (PummelRed) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
+	pummelPlay(ge, l, self, 4)
 }
 
 func (PummelYellow) Modes() int { return 2 }
-func (PummelYellow) ARTargetAllowed(g card.GameEngine, c card.Card, mode int8) bool {
-	return pummelAccepts(g, c, mode)
+func (PummelYellow) ARTargetAllowed(ge card.GameEngine, c card.Card, mode int8) bool {
+	return pummelAccepts(ge, c, mode)
 }
-func (PummelYellow) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
-	pummelPlay(g, l, self, 3)
+func (PummelYellow) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
+	pummelPlay(ge, l, self, 3)
 }
 
 func (PummelBlue) Modes() int { return 2 }
-func (PummelBlue) ARTargetAllowed(g card.GameEngine, c card.Card, mode int8) bool {
-	return pummelAccepts(g, c, mode)
+func (PummelBlue) ARTargetAllowed(ge card.GameEngine, c card.Card, mode int8) bool {
+	return pummelAccepts(ge, c, mode)
 }
-func (PummelBlue) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
-	pummelPlay(g, l, self, 2)
+func (PummelBlue) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
+	pummelPlay(ge, l, self, 2)
 }

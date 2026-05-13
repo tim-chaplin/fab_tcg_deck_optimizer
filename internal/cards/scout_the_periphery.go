@@ -18,14 +18,14 @@ func scoutThePeripheryIsTarget(_ card.GameEngine, pc *card.CardState) bool {
 	return pc.FromArsenal && pc.Card.Types(nil).IsAttackAction()
 }
 
-func (ScoutThePeripheryRed) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
-	GrantNextCardBonusAttack(g, 3, scoutThePeripheryIsTarget)
+func (ScoutThePeripheryRed) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
+	GrantNextCardBonusAttack(ge, 3, scoutThePeripheryIsTarget)
 }
 
-func (ScoutThePeripheryYellow) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
-	GrantNextCardBonusAttack(g, 2, scoutThePeripheryIsTarget)
+func (ScoutThePeripheryYellow) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
+	GrantNextCardBonusAttack(ge, 2, scoutThePeripheryIsTarget)
 }
 
-func (ScoutThePeripheryBlue) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
-	GrantNextCardBonusAttack(g, 1, scoutThePeripheryIsTarget)
+func (ScoutThePeripheryBlue) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
+	GrantNextCardBonusAttack(ge, 1, scoutThePeripheryIsTarget)
 }

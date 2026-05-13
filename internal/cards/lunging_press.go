@@ -13,6 +13,6 @@ import (
 func (LungingPressBlue) ARTargetAllowed(_ card.GameEngine, c card.Card, _ int8) bool {
 	return c.Types(nil).IsAttackAction()
 }
-func (LungingPressBlue) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
-	self.GrantAttackReactionBuff(g, l, 1)
+func (LungingPressBlue) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
+	self.GrantAttackReactionBuff(ge, l, 1)
 }

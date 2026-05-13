@@ -15,16 +15,16 @@ import (
 // flips AuraCreated, registers a TriggerStartOfTurn entry, and returns 0. The deck peek
 // happens when the sim fires the trigger next turn.
 func TestSigilOfTheArknight_PlayOnlySetsAuraCreated(t *testing.T) {
-	s := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCards([]card.Card{testutils.RunebladeAttack{}}).Build()}
-	s.ResolveChainStep(s.Logger(), &card.CardState{Card: cards.SigilOfTheArknightBlue{}})
-	if got := s.Value(); got != 0 {
+	ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCards([]card.Card{testutils.RunebladeAttack{}}).Build()}
+	ge.ResolveChainStep(ge.Logger(), &card.CardState{Card: cards.SigilOfTheArknightBlue{}})
+	if got := ge.Value(); got != 0 {
 		t.Errorf("Play() = %d, want 0 (reveal deferred to trigger)", got)
 	}
-	if !s.AuraCreated() {
+	if !ge.AuraCreated() {
 		t.Error("AuraCreated = false, want true")
 	}
-	if len(s.Auras()) != 1 || s.Auras()[0].TriggerType() != triggertype.StartOfTurn {
-		t.Errorf("Auras = %+v, want one TriggerStartOfTurn entry", s.Auras())
+	if len(ge.Auras()) != 1 || ge.Auras()[0].TriggerType() != triggertype.StartOfTurn {
+		t.Errorf("Auras = %+v, want one TriggerStartOfTurn entry", ge.Auras())
 	}
 }
 

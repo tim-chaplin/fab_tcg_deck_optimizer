@@ -20,9 +20,9 @@ func TestSigilOfSuffering_FullCreditWhenIncomingAbsorbsBoost(t *testing.T) {
 		{cards.SigilOfSufferingBlue{}, 3},   // 1 block + 1 boost + 1 arcane
 	}
 	for _, tc := range cases {
-		s := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetIncomingDamage(10).Build()}
-		s.ResolveChainStep(s.Logger(), &card.CardState{Card: tc.c})
-		if got := s.Value(); got != tc.want {
+		ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetIncomingDamage(10).Build()}
+		ge.ResolveChainStep(ge.Logger(), &card.CardState{Card: tc.c})
+		if got := ge.Value(); got != tc.want {
 			t.Errorf("%s: Play(IncomingDamage=10) Value = %d, want %d (block + boost + arcane)",
 				tc.c.DisplayName(), got, tc.want)
 		}
@@ -42,9 +42,9 @@ func TestSigilOfSuffering_BoostWastedWhenIncomingMatchesDefense(t *testing.T) {
 		{cards.SigilOfSufferingBlue{}, 1, 2},   // 1 block + 1 arcane
 	}
 	for _, tc := range cases {
-		s := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetIncomingDamage(tc.incoming).Build()}
-		s.ResolveChainStep(s.Logger(), &card.CardState{Card: tc.c})
-		if got := s.Value(); got != tc.want {
+		ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetIncomingDamage(tc.incoming).Build()}
+		ge.ResolveChainStep(ge.Logger(), &card.CardState{Card: tc.c})
+		if got := ge.Value(); got != tc.want {
 			t.Errorf("%s: Play(IncomingDamage=%d) Value = %d, want %d (block at cap + arcane only)",
 				tc.c.DisplayName(), tc.incoming, got, tc.want)
 		}

@@ -10,18 +10,18 @@ import (
 )
 
 // nimblismIsTarget gates the rider on attack action cards whose cost is 1 or less.
-func nimblismIsTarget(g card.GameEngine, pc *card.CardState) bool {
-	return pc.Card.Types(nil).IsAttackAction() && pc.Card.Cost(g) <= 1
+func nimblismIsTarget(ge card.GameEngine, pc *card.CardState) bool {
+	return pc.Card.Types(nil).IsAttackAction() && pc.Card.Cost(ge) <= 1
 }
 
-func (NimblismRed) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
-	GrantNextCardBonusAttack(g, 3, nimblismIsTarget)
+func (NimblismRed) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
+	GrantNextCardBonusAttack(ge, 3, nimblismIsTarget)
 }
 
-func (NimblismYellow) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
-	GrantNextCardBonusAttack(g, 2, nimblismIsTarget)
+func (NimblismYellow) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
+	GrantNextCardBonusAttack(ge, 2, nimblismIsTarget)
 }
 
-func (NimblismBlue) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
-	GrantNextCardBonusAttack(g, 1, nimblismIsTarget)
+func (NimblismBlue) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
+	GrantNextCardBonusAttack(ge, 1, nimblismIsTarget)
 }

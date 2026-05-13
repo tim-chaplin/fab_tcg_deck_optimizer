@@ -44,10 +44,10 @@ func (stubAttack) Play(card.GameEngine, card.Logger, *card.CardState) {}
 
 // Tests that GrantAttackReactionBuff is a no-op when no target is set.
 func TestGrantAttackReactionBuff_NoTargetIsNoOp(t *testing.T) {
-	s := gameengine.New()
-	(&card.CardState{Card: stubAR{}}).GrantAttackReactionBuff(s, s.Logger(), 5)
-	if s.Value() != 0 {
-		t.Errorf("Value = %d, want 0", s.Value())
+	ge := gameengine.New()
+	(&card.CardState{Card: stubAR{}}).GrantAttackReactionBuff(ge, ge.Logger(), 5)
+	if ge.Value() != 0 {
+		t.Errorf("Value = %d, want 0", ge.Value())
 	}
 }
 
@@ -55,16 +55,16 @@ func TestGrantAttackReactionBuff_NoTargetIsNoOp(t *testing.T) {
 // target's chain-step log delta.
 func TestGrantAttackReactionBuff_AppliesBuffAndCreditsValue(t *testing.T) {
 	target := &card.CardState{Card: stubAttack{}}
-	s := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetAttackReactionTarget(target).Build()}
-	s.Logger().AppendChainStep("stubAttack: ATTACK", 1)
-	(&card.CardState{Card: stubAR{}}).GrantAttackReactionBuff(s, s.Logger(), 3)
+	ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetAttackReactionTarget(target).Build()}
+	ge.Logger().AppendChainStep("stubAttack: ATTACK", 1)
+	(&card.CardState{Card: stubAR{}}).GrantAttackReactionBuff(ge, ge.Logger(), 3)
 	if target.BonusAttack != 3 {
 		t.Errorf("target BonusAttack = %d, want 3", target.BonusAttack)
 	}
-	if s.Value() != 3 {
-		t.Errorf("Value = %d, want 3", s.Value())
+	if ge.Value() != 3 {
+		t.Errorf("Value = %d, want 3", ge.Value())
 	}
-	if got := s.LogEntries()[0].N; got != 4 {
+	if got := ge.LogEntries()[0].N; got != 4 {
 		t.Errorf("amended chain-step N = %d, want 4", got)
 	}
 }
@@ -72,11 +72,11 @@ func TestGrantAttackReactionBuff_AppliesBuffAndCreditsValue(t *testing.T) {
 // Tests that AmendLastChainStepN skips non-chain-step entries to find the most recent
 // chain-step.
 func TestAmendLastChainStepN_SkipsNonChainEntries(t *testing.T) {
-	s := gameengine.New()
-	s.Logger().AppendChainStep("first", 2)
-	s.Logger().AppendPostTrigger("first", "rider", 0)
-	s.Logger().AmendLastChainStepN(5)
-	entries := s.LogEntries()
+	ge := gameengine.New()
+	ge.Logger().AppendChainStep("first", 2)
+	ge.Logger().AppendPostTrigger("first", "rider", 0)
+	ge.Logger().AmendLastChainStepN(5)
+	entries := ge.LogEntries()
 	if got := entries[0].N; got != 7 {
 		t.Errorf("first chain-step N = %d, want 7", got)
 	}

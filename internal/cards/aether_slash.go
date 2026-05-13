@@ -11,23 +11,23 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
-func (AetherSlashRed) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
-	aetherSlashApplyRider(g, l, self)
+func (AetherSlashRed) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
+	aetherSlashApplyRider(ge, l, self)
 }
 
-func (AetherSlashYellow) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
-	aetherSlashApplyRider(g, l, self)
+func (AetherSlashYellow) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
+	aetherSlashApplyRider(ge, l, self)
 }
 
-func (AetherSlashBlue) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
-	aetherSlashApplyRider(g, l, self)
+func (AetherSlashBlue) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
+	aetherSlashApplyRider(ge, l, self)
 }
 
 // aetherSlashApplyRider deals 1 arcane when a non-attack action is among the pitched cards.
-func aetherSlashApplyRider(g card.GameEngine, l card.Logger, self *card.CardState) {
+func aetherSlashApplyRider(ge card.GameEngine, l card.Logger, self *card.CardState) {
 	for _, p := range self.PitchedToPlay {
 		if p.Types(nil).IsNonAttackAction() {
-			g.DealArcaneDamage(l, self.Card.DisplayName(), 1)
+			ge.DealArcaneDamage(l, self.Card.DisplayName(), 1)
 			return
 		}
 	}

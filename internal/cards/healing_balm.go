@@ -12,19 +12,19 @@ import (
 )
 
 // healingBalmPlay credits N{h} as a sub-line under self.
-func healingBalmPlay(g card.GameEngine, l card.Logger, self *card.CardState, heal int) {
-	g.AddValue(heal)
+func healingBalmPlay(ge card.GameEngine, l card.Logger, self *card.CardState, heal int) {
+	ge.AddValue(heal)
 	l.AppendPostTriggerf(self.Card.DisplayName(), heal, "Gained %d health", heal)
 }
 
-func (HealingBalmRed) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
-	healingBalmPlay(g, l, self, 3)
+func (HealingBalmRed) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
+	healingBalmPlay(ge, l, self, 3)
 }
 
-func (HealingBalmYellow) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
-	healingBalmPlay(g, l, self, 2)
+func (HealingBalmYellow) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
+	healingBalmPlay(ge, l, self, 2)
 }
 
-func (HealingBalmBlue) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
-	healingBalmPlay(g, l, self, 1)
+func (HealingBalmBlue) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
+	healingBalmPlay(ge, l, self, 1)
 }

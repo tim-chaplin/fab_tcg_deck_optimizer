@@ -14,23 +14,23 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
-func oasisRespitePlay(g card.GameEngine, l card.Logger, self *card.CardState) {
-	if g.HeroWantsLowerHealth() {
+func oasisRespitePlay(ge card.GameEngine, l card.Logger, self *card.CardState) {
+	if ge.HeroWantsLowerHealth() {
 		self.BonusDefense += 1
 	}
 }
 
 func (OasisRespiteRed) DefensiveInstant() {}
-func (OasisRespiteRed) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
-	oasisRespitePlay(g, l, self)
+func (OasisRespiteRed) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
+	oasisRespitePlay(ge, l, self)
 }
 
 func (OasisRespiteYellow) DefensiveInstant() {}
-func (OasisRespiteYellow) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
-	oasisRespitePlay(g, l, self)
+func (OasisRespiteYellow) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
+	oasisRespitePlay(ge, l, self)
 }
 
 func (OasisRespiteBlue) DefensiveInstant() {}
-func (OasisRespiteBlue) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
-	oasisRespitePlay(g, l, self)
+func (OasisRespiteBlue) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
+	oasisRespitePlay(ge, l, self)
 }

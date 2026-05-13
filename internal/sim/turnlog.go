@@ -190,11 +190,11 @@ func formatBlockLine(a CardAssignment) string {
 // appendGroupedChainEntries. Returns the updated remaining-incoming counter so the caller
 // can thread it into the next DR.
 func appendDefenseReactionLines(out []string, a CardAssignment, defenders []card.Card, remaining int) ([]string, int) {
-	state := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetGraveyard(append([]card.Card(nil), defenders...)).Build()}
-	state.SetIncomingDamage(remaining)
+	ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetGraveyard(append([]card.Card(nil), defenders...)).Build()}
+	ge.SetIncomingDamage(remaining)
 	cs := card.CardState{Card: a.Card, FromArsenal: a.FromArsenal}
-	state.ResolveChainStep(state.Logger(), &cs)
-	return appendGroupedChainEntries(out, state.LogEntries()), state.IncomingDamage()
+	ge.ResolveChainStep(ge.Logger(), &cs)
+	return appendGroupedChainEntries(out, ge.LogEntries()), ge.IncomingDamage()
 }
 
 // defendersFromParts collects every card committed to defense — Defense Reactions and plain

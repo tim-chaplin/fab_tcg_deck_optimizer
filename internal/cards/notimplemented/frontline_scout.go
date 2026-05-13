@@ -12,24 +12,24 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
-func frontlineScoutPlay(g card.GameEngine, l card.Logger, self *card.CardState) {
+func frontlineScoutPlay(ge card.GameEngine, l card.Logger, self *card.CardState) {
 	self.GrantGoAgainIfFromArsenal()
 }
 
 // not implemented: opposing-hand-peek rider
 
-func (FrontlineScoutRed) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
-	frontlineScoutPlay(g, l, self)
+func (FrontlineScoutRed) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
+	frontlineScoutPlay(ge, l, self)
 }
 
 // not implemented: opposing-hand-peek rider
 
-func (FrontlineScoutYellow) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
-	frontlineScoutPlay(g, l, self)
+func (FrontlineScoutYellow) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
+	frontlineScoutPlay(ge, l, self)
 }
 
 // not implemented: opposing-hand-peek rider
 
-func (FrontlineScoutBlue) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
-	frontlineScoutPlay(g, l, self)
+func (FrontlineScoutBlue) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
+	frontlineScoutPlay(ge, l, self)
 }

@@ -14,16 +14,16 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
-func (MaleficIncantationRed) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
-	g.CreateOncePerTurnAttackActionAura(self, maleficAuraHandler, 3)
+func (MaleficIncantationRed) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
+	ge.CreateOncePerTurnAttackActionAura(self, maleficAuraHandler, 3)
 }
 
-func (MaleficIncantationYellow) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
-	g.CreateOncePerTurnAttackActionAura(self, maleficAuraHandler, 2)
+func (MaleficIncantationYellow) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
+	ge.CreateOncePerTurnAttackActionAura(self, maleficAuraHandler, 2)
 }
 
-func (MaleficIncantationBlue) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
-	g.CreateOncePerTurnAttackActionAura(self, maleficAuraHandler, 1)
+func (MaleficIncantationBlue) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
+	ge.CreateOncePerTurnAttackActionAura(self, maleficAuraHandler, 1)
 }
 
 // maleficCreatedRunechantText is the precomputed rider line for each Malefic Incantation
@@ -43,11 +43,11 @@ var maleficCreatedRunechantText = func() map[ids.CardID]string {
 // maleficAuraHandler is the once-per-turn attack-action trigger handler shared across
 // Malefic Incantation variants. Decrements the verse counter and destroys the aura when
 // the last verse fires.
-func maleficAuraHandler(g card.GameEngine, l card.Logger, a card.Aura) {
+func maleficAuraHandler(ge card.GameEngine, l card.Logger, a card.Aura) {
 	cardID := a.CardID()
 	lastVerse := a.DecrementCount() <= 0
-	g.CreateRunechants(1)
-	l.AppendPostTrigger(g.TriggeringCard().DisplayName(), maleficCreatedRunechantText[cardID], 1)
+	ge.CreateRunechants(1)
+	l.AppendPostTrigger(ge.TriggeringCard().DisplayName(), maleficCreatedRunechantText[cardID], 1)
 	if lastVerse {
 		a.Destroy(true)
 	}

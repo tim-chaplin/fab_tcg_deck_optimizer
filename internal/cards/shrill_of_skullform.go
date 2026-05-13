@@ -8,21 +8,21 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
-func (ShrillOfSkullformRed) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
-	shrillPlay(g, l, self)
+func (ShrillOfSkullformRed) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
+	shrillPlay(ge, l, self)
 }
 
-func (ShrillOfSkullformYellow) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
-	shrillPlay(g, l, self)
+func (ShrillOfSkullformYellow) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
+	shrillPlay(ge, l, self)
 }
 
-func (ShrillOfSkullformBlue) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
-	shrillPlay(g, l, self)
+func (ShrillOfSkullformBlue) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
+	shrillPlay(ge, l, self)
 }
 
 // shrillPlay routes the +3{p} aura-in-play buff through self.BonusAttack.
-func shrillPlay(g card.GameEngine, l card.Logger, self *card.CardState) {
-	if g.AuraCreated() {
+func shrillPlay(ge card.GameEngine, l card.Logger, self *card.CardState) {
+	if ge.AuraCreated() {
 		self.BonusAttack += 3
 	}
 }

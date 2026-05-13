@@ -14,9 +14,9 @@ import (
 
 // demolitionCrewPrecondition is the shared additional-cost check across all 3 pitch
 // variants.
-func demolitionCrewPrecondition(g card.GameEngine) bool {
-	for _, c := range g.Hand() {
-		if c.Cost(g) >= 2 {
+func demolitionCrewPrecondition(ge card.GameEngine) bool {
+	for _, c := range ge.Hand() {
+		if c.Cost(ge) >= 2 {
 			return true
 		}
 	}
@@ -24,22 +24,22 @@ func demolitionCrewPrecondition(g card.GameEngine) bool {
 }
 
 func (DemolitionCrewRed) Dominate() {}
-func (DemolitionCrewRed) PlayPrecondition(g card.GameEngine, _ *card.CardState) bool {
-	return demolitionCrewPrecondition(g)
+func (DemolitionCrewRed) PlayPrecondition(ge card.GameEngine, _ *card.CardState) bool {
+	return demolitionCrewPrecondition(ge)
 }
-func (c DemolitionCrewRed) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+func (c DemolitionCrewRed) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
 }
 
 func (DemolitionCrewYellow) Dominate() {}
-func (DemolitionCrewYellow) PlayPrecondition(g card.GameEngine, _ *card.CardState) bool {
-	return demolitionCrewPrecondition(g)
+func (DemolitionCrewYellow) PlayPrecondition(ge card.GameEngine, _ *card.CardState) bool {
+	return demolitionCrewPrecondition(ge)
 }
-func (c DemolitionCrewYellow) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+func (c DemolitionCrewYellow) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
 }
 
 func (DemolitionCrewBlue) Dominate() {}
-func (DemolitionCrewBlue) PlayPrecondition(g card.GameEngine, _ *card.CardState) bool {
-	return demolitionCrewPrecondition(g)
+func (DemolitionCrewBlue) PlayPrecondition(ge card.GameEngine, _ *card.CardState) bool {
+	return demolitionCrewPrecondition(ge)
 }
-func (c DemolitionCrewBlue) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+func (c DemolitionCrewBlue) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
 }

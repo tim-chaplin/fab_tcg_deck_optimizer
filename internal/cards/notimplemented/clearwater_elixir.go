@@ -13,6 +13,6 @@ import (
 
 // not implemented: Bloodrot Pox health-gain rider dropped (status tokens not tracked)
 
-func (ClearwaterElixirRed) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
-	cards.GrantNextCardBonusAttack(g, 3, cards.IsAttack)
+func (ClearwaterElixirRed) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
+	cards.GrantNextCardBonusAttack(ge, 3, cards.IsAttack)
 }

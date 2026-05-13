@@ -11,4 +11,4 @@ import (
 
 // not implemented: passive tap-target Pirate; can't unfreeze; self-destroys at start of turn
 
-func (ClapEmInIronsBlue) Play(g card.GameEngine, l card.Logger, self *card.CardState) {}
+func (ClapEmInIronsBlue) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {}

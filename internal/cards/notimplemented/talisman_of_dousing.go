@@ -10,5 +10,5 @@ import (
 
 // not implemented: passive Spellvoid 1
 
-func (TalismanOfDousingYellow) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+func (TalismanOfDousingYellow) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
 }

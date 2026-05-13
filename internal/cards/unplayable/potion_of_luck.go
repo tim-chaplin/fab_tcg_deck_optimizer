@@ -9,4 +9,4 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
-func (PotionOfLuckBlue) Play(g card.GameEngine, l card.Logger, self *card.CardState) {}
+func (PotionOfLuckBlue) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {}

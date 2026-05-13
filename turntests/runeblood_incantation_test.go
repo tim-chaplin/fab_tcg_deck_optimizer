@@ -23,21 +23,21 @@ func TestRunebloodIncantation_PlayRegistersStartOfTurnTriggerWithCountN(t *testi
 		{cards.RunebloodIncantationBlue{}, 1},
 	}
 	for _, tc := range cases {
-		s := gameengine.New()
-		s.ResolveChainStep(s.Logger(), &card.CardState{Card: tc.c})
-		if got := s.Value(); got != 0 {
+		ge := gameengine.New()
+		ge.ResolveChainStep(ge.Logger(), &card.CardState{Card: tc.c})
+		if got := ge.Value(); got != 0 {
 			t.Errorf("%s: Play() = %d, want 0 (every rune fires on a future turn)", tc.c.Name(), got)
 		}
-		if !s.AuraCreated() {
+		if !ge.AuraCreated() {
 			t.Errorf("%s: AuraCreated should be set", tc.c.Name())
 		}
-		if s.RunechantCount() != 0 {
-			t.Errorf("%s: Runechants = %d, want 0 (no same-turn rune)", tc.c.Name(), s.RunechantCount())
+		if ge.RunechantCount() != 0 {
+			t.Errorf("%s: Runechants = %d, want 0 (no same-turn rune)", tc.c.Name(), ge.RunechantCount())
 		}
-		if len(s.Auras()) != 1 {
-			t.Fatalf("%s: Auras len = %d, want 1", tc.c.Name(), len(s.Auras()))
+		if len(ge.Auras()) != 1 {
+			t.Fatalf("%s: Auras len = %d, want 1", tc.c.Name(), len(ge.Auras()))
 		}
-		tr := s.Auras()[0]
+		tr := ge.Auras()[0]
 		if tr.TriggerType() != triggertype.StartOfTurn {
 			t.Errorf("%s: trigger Type = %d, want TriggerStartOfTurn", tc.c.Name(), tr.TriggerType())
 		}

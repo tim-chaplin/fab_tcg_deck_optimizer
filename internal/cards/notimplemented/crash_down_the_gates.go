@@ -13,15 +13,15 @@ import (
 
 // not implemented: deck-reveal comparison + on-hit deck-top destruction
 
-func (CrashDownTheGatesRed) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+func (CrashDownTheGatesRed) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
 }
 
 // not implemented: deck-reveal comparison + on-hit deck-top destruction
 
-func (CrashDownTheGatesYellow) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+func (CrashDownTheGatesYellow) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
 }
 
 // not implemented: deck-reveal comparison + on-hit deck-top destruction
 
-func (CrashDownTheGatesBlue) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+func (CrashDownTheGatesBlue) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
 }

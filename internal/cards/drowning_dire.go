@@ -13,27 +13,27 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
-func drowningDireOnHitRecycle(g card.GameEngine, l card.Logger, self *card.CardState, _ *card.OnHitHandler) {
-	if _, ok := g.RecycleFromGraveyardToBottom(isNonAttackAction); ok {
+func drowningDireOnHitRecycle(ge card.GameEngine, l card.Logger, self *card.CardState, _ *card.OnHitHandler) {
+	if _, ok := ge.RecycleFromGraveyardToBottom(isNonAttackAction); ok {
 		l.AppendPostTrigger(self.Card.DisplayName(), "Recycled a non-attack action card to bottom of deck", 0)
 	}
 }
 
-func drowningDirePlay(g card.GameEngine, l card.Logger, self *card.CardState) {
-	if g.AuraCreated() {
+func drowningDirePlay(ge card.GameEngine, l card.Logger, self *card.CardState) {
+	if ge.AuraCreated() {
 		self.GrantedDominate = true
 	}
 	self.RegisterOnHit(drowningDireOnHitRecycle)
 }
 
-func (DrowningDireRed) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
-	drowningDirePlay(g, l, self)
+func (DrowningDireRed) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
+	drowningDirePlay(ge, l, self)
 }
 
-func (DrowningDireYellow) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
-	drowningDirePlay(g, l, self)
+func (DrowningDireYellow) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
+	drowningDirePlay(ge, l, self)
 }
 
-func (DrowningDireBlue) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
-	drowningDirePlay(g, l, self)
+func (DrowningDireBlue) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
+	drowningDirePlay(ge, l, self)
 }

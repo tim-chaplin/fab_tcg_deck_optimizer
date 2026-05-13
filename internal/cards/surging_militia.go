@@ -12,8 +12,8 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
-func (SurgingMilitiaRed) Play(g card.GameEngine, l card.Logger, self *card.CardState) {}
+func (SurgingMilitiaRed) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {}
 
-func (SurgingMilitiaYellow) Play(g card.GameEngine, l card.Logger, self *card.CardState) {}
+func (SurgingMilitiaYellow) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {}
 
-func (SurgingMilitiaBlue) Play(g card.GameEngine, l card.Logger, self *card.CardState) {}
+func (SurgingMilitiaBlue) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {}

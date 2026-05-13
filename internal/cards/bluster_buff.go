@@ -10,7 +10,7 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
-func blusterBuffPlay(g card.GameEngine, l card.Logger, self *card.CardState) {
+func blusterBuffPlay(ge card.GameEngine, l card.Logger, self *card.CardState) {
 	if self.Mode == 0 {
 		self.BonusAttack -= 1
 	}
@@ -18,6 +18,6 @@ func blusterBuffPlay(g card.GameEngine, l card.Logger, self *card.CardState) {
 
 func (BlusterBuffRed) Modes() int              { return 2 }
 func (BlusterBuffRed) ModalCost(mode int8) int { return 1 + int(mode) }
-func (BlusterBuffRed) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
-	blusterBuffPlay(g, l, self)
+func (BlusterBuffRed) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
+	blusterBuffPlay(ge, l, self)
 }

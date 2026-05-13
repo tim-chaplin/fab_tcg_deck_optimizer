@@ -11,21 +11,21 @@ import (
 
 // scarForAScarGoAgain returns true when the active hero opts into LowerHealthWanter. nil-g
 // reads as false (the printed default).
-func scarForAScarGoAgain(g card.GameEngine) bool {
-	if g == nil {
+func scarForAScarGoAgain(ge card.GameEngine) bool {
+	if ge == nil {
 		return false
 	}
-	return g.HeroWantsLowerHealth()
+	return ge.HeroWantsLowerHealth()
 }
 
-func (ScarForAScarRed) GoAgain(g card.GameEngine) bool { return scarForAScarGoAgain(g) }
-func (c ScarForAScarRed) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+func (ScarForAScarRed) GoAgain(ge card.GameEngine) bool { return scarForAScarGoAgain(ge) }
+func (c ScarForAScarRed) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
 }
 
-func (ScarForAScarYellow) GoAgain(g card.GameEngine) bool { return scarForAScarGoAgain(g) }
-func (c ScarForAScarYellow) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+func (ScarForAScarYellow) GoAgain(ge card.GameEngine) bool { return scarForAScarGoAgain(ge) }
+func (c ScarForAScarYellow) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
 }
 
-func (ScarForAScarBlue) GoAgain(g card.GameEngine) bool { return scarForAScarGoAgain(g) }
-func (c ScarForAScarBlue) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+func (ScarForAScarBlue) GoAgain(ge card.GameEngine) bool { return scarForAScarGoAgain(ge) }
+func (c ScarForAScarBlue) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
 }

@@ -7,9 +7,9 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
-func (StartingStakeYellow) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
-	if g.GoldCount() == 0 {
-		g.CreateGold(1)
+func (StartingStakeYellow) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
+	if ge.GoldCount() == 0 {
+		ge.CreateGold(1)
 		l.AppendPostTrigger(self.Card.DisplayName(), "Created a gold token", 0)
 	}
 }

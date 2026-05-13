@@ -9,21 +9,21 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
-func (OathOfTheArknightRed) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
-	oathPlay(g, l, self, 3)
+func (OathOfTheArknightRed) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
+	oathPlay(ge, l, self, 3)
 }
 
-func (OathOfTheArknightYellow) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
-	oathPlay(g, l, self, 2)
+func (OathOfTheArknightYellow) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
+	oathPlay(ge, l, self, 2)
 }
 
-func (OathOfTheArknightBlue) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
-	oathPlay(g, l, self, 1)
+func (OathOfTheArknightBlue) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
+	oathPlay(ge, l, self, 1)
 }
 
 // oathPlay grants +n to the first scheduled Runeblade attack, then creates one Runechant.
-func oathPlay(g card.GameEngine, l card.Logger, self *card.CardState, bonus int) {
-	GrantNextCardBonusAttack(g, bonus, IsRunebladeAttack)
-	g.CreateRunechants(1)
+func oathPlay(ge card.GameEngine, l card.Logger, self *card.CardState, bonus int) {
+	GrantNextCardBonusAttack(ge, bonus, IsRunebladeAttack)
+	ge.CreateRunechants(1)
 	l.AppendPostTrigger(self.Card.DisplayName(), "Created a runechant", 1)
 }

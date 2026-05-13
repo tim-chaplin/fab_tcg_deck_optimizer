@@ -24,12 +24,12 @@ func TestArcaneCussing_BlockCoversIncomingReturnsN(t *testing.T) {
 		{cards.ArcaneCussingBlue{}, 1},
 	}
 	for _, tc := range cases {
-		s := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().
+		ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().
 			SetIncomingDamage(3).
 			SetBlockTotal(3).
 			Build()}
-		s.ResolveChainStep(s.Logger(), &card.CardState{Card: tc.c})
-		if got := s.Value(); got != tc.n {
+		ge.ResolveChainStep(ge.Logger(), &card.CardState{Card: tc.c})
+		if got := ge.Value(); got != tc.n {
 			t.Errorf("%s: Play() = %d, want %d (block == incoming)", tc.c.Name(), got, tc.n)
 		}
 	}
@@ -38,12 +38,12 @@ func TestArcaneCussing_BlockCoversIncomingReturnsN(t *testing.T) {
 // TestArcaneCussing_OverBlockReturnsN pins that BlockTotal is uncapped — over-blocking still
 // counts as covering incoming.
 func TestArcaneCussing_OverBlockReturnsN(t *testing.T) {
-	s := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().
+	ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().
 		SetIncomingDamage(3).
 		SetBlockTotal(7).
 		Build()}
-	s.ResolveChainStep(s.Logger(), &card.CardState{Card: cards.ArcaneCussingRed{}})
-	if got := s.Value(); got != 3 {
+	ge.ResolveChainStep(ge.Logger(), &card.CardState{Card: cards.ArcaneCussingRed{}})
+	if got := ge.Value(); got != 3 {
 		t.Errorf("Play() = %d, want 3 (over-block still covers)", got)
 	}
 }
@@ -57,12 +57,12 @@ func TestArcaneCussing_BlockShortReturnsZero(t *testing.T) {
 		cards.ArcaneCussingBlue{},
 	}
 	for _, c := range cases {
-		s := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().
+		ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().
 			SetIncomingDamage(3).
 			SetBlockTotal(2).
 			Build()}
-		s.ResolveChainStep(s.Logger(), &card.CardState{Card: c})
-		if got := s.Value(); got != 0 {
+		ge.ResolveChainStep(ge.Logger(), &card.CardState{Card: c})
+		if got := ge.Value(); got != 0 {
 			t.Errorf("%s: Play() = %d, want 0 (block < incoming, no same-turn pop)", c.Name(), got)
 		}
 	}
@@ -71,27 +71,27 @@ func TestArcaneCussing_BlockShortReturnsZero(t *testing.T) {
 // TestArcaneCussing_SameTurnPopBySalientAttack: even if we're taking damage, a later attack
 // with a likely-to-hit power pops the aura this turn for its full N.
 func TestArcaneCussing_SameTurnPopBySalientAttack(t *testing.T) {
-	s := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().
+	ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().
 		SetIncomingDamage(3).
 		SetBlockTotal(0).
 		SetCardsRemaining([]*card.CardState{{Card: testutils.AttackWithPower{Power: 4}}}).
 		Build()}
-	s.ResolveChainStep(s.Logger(), &card.CardState{Card: cards.ArcaneCussingRed{}})
-	if got := s.Value(); got != 3 {
+	ge.ResolveChainStep(ge.Logger(), &card.CardState{Card: cards.ArcaneCussingRed{}})
+	if got := ge.Value(); got != 3 {
 		t.Errorf("Play() = %d, want 3 (Attack=4 likely to hit, pops Cussing same turn)", got)
 	}
 }
 
 // Tests that Cussing's pop trigger fires off a likely-to-hit weapon swing.
 func TestArcaneCussing_SameTurnPopByWeaponSwing(t *testing.T) {
-	s := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().
+	ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().
 		SetIncomingDamage(3).
 		SetBlockTotal(0).
 		SetCardsRemaining([]*card.CardState{{Card: testutils.RunebladeWeapon{}}}).
 		Build()}
-	s.CreateAura(sim.NewRunechantAura(1))
-	s.ResolveChainStep(s.Logger(), &card.CardState{Card: cards.ArcaneCussingRed{}})
-	if got := s.Value(); got != 3 {
+	ge.CreateAura(sim.NewRunechantAura(1))
+	ge.ResolveChainStep(ge.Logger(), &card.CardState{Card: cards.ArcaneCussingRed{}})
+	if got := ge.Value(); got != 3 {
 		t.Errorf("Play() = %d, want 3 (1 Runechant fires with weapon, likely to hit)", got)
 	}
 }
@@ -99,14 +99,14 @@ func TestArcaneCussing_SameTurnPopByWeaponSwing(t *testing.T) {
 // TestArcaneCussing_SameTurnPopByRunechantAlone: even an attack whose Attack value is a
 // multiple of 3 (blockable) pops the aura if a single Runechant fires alongside it.
 func TestArcaneCussing_SameTurnPopByRunechantAlone(t *testing.T) {
-	s := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().
+	ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().
 		SetIncomingDamage(3).
 		SetBlockTotal(0).
 		SetCardsRemaining([]*card.CardState{{Card: testutils.AttackWithPower{Power: 6}}}).
 		Build()}
-	s.CreateAura(sim.NewRunechantAura(1))
-	s.ResolveChainStep(s.Logger(), &card.CardState{Card: cards.ArcaneCussingRed{}})
-	if got := s.Value(); got != 3 {
+	ge.CreateAura(sim.NewRunechantAura(1))
+	ge.ResolveChainStep(ge.Logger(), &card.CardState{Card: cards.ArcaneCussingRed{}})
+	if got := ge.Value(); got != 3 {
 		t.Errorf("Play() = %d, want 3 (Attack=6 blockable, but 1 Runechant likely to slip through)", got)
 	}
 }
@@ -115,13 +115,13 @@ func TestArcaneCussing_SameTurnPopByRunechantAlone(t *testing.T) {
 // multiple of 3 (blockable) and no Runechants firing can't pop Cussing — and we're taking
 // damage, so value collapses to 0.
 func TestArcaneCussing_BlockableAttackNoRunechantReturnsZero(t *testing.T) {
-	s := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().
+	ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().
 		SetIncomingDamage(3).
 		SetBlockTotal(0).
 		SetCardsRemaining([]*card.CardState{{Card: testutils.AttackWithPower{Power: 6}}}).
 		Build()}
-	s.ResolveChainStep(s.Logger(), &card.CardState{Card: cards.ArcaneCussingRed{}})
-	if got := s.Value(); got != 0 {
+	ge.ResolveChainStep(ge.Logger(), &card.CardState{Card: cards.ArcaneCussingRed{}})
+	if got := ge.Value(); got != 0 {
 		t.Errorf("Play() = %d, want 0 (Attack=6 blockable, no Runechants, taking damage)", got)
 	}
 }

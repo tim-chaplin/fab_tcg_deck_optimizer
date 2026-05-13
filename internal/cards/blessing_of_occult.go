@@ -19,23 +19,23 @@ var blessingOfOccultTriggerText = [...]string{
 	3: "Created 3 runechants",
 }
 
-func (BlessingOfOccultRed) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
-	g.CreateStartOfTurnAura(self, blessingOfOccultHandler, 3)
+func (BlessingOfOccultRed) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
+	ge.CreateStartOfTurnAura(self, blessingOfOccultHandler, 3)
 }
 
-func (BlessingOfOccultYellow) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
-	g.CreateStartOfTurnAura(self, blessingOfOccultHandler, 2)
+func (BlessingOfOccultYellow) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
+	ge.CreateStartOfTurnAura(self, blessingOfOccultHandler, 2)
 }
 
-func (BlessingOfOccultBlue) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
-	g.CreateStartOfTurnAura(self, blessingOfOccultHandler, 1)
+func (BlessingOfOccultBlue) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
+	ge.CreateStartOfTurnAura(self, blessingOfOccultHandler, 1)
 }
 
 // blessingOfOccultHandler creates a.Count() Runechants and destroys the aura. Count carries
 // the per-variant rune count (R=3 / Y=2 / B=1).
-func blessingOfOccultHandler(g card.GameEngine, l card.Logger, a card.Aura) {
+func blessingOfOccultHandler(ge card.GameEngine, l card.Logger, a card.Aura) {
 	n := a.Count()
-	g.CreateRunechants(n)
+	ge.CreateRunechants(n)
 	l.AppendPostTrigger(a.CardName(), blessingOfOccultTriggerText[n], n)
 	a.Destroy(true)
 }

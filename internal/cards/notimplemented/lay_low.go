@@ -11,5 +11,5 @@ import (
 // not implemented: marked-defender state not tracked; treated as always legal and the -1{p}
 // attacker debuff is dropped
 
-func (LayLowYellow) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+func (LayLowYellow) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
 }

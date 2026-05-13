@@ -8,11 +8,11 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
-func (EvasiveLeapRed) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+func (EvasiveLeapRed) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
 }
 
-func (EvasiveLeapYellow) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+func (EvasiveLeapYellow) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
 }
 
-func (EvasiveLeapBlue) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+func (EvasiveLeapBlue) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
 }

@@ -51,7 +51,7 @@ func TestGraveyard_WeaponSwingDoesNotEnterGraveyard(t *testing.T) {
 	}
 }
 
-// gravSpyDR is a test-only Defense Reaction whose Play captures a snapshot of s.Graveyard so
+// gravSpyDR is a test-only Defense Reaction whose Play captures a snapshot of gs.Graveyard so
 // tests can assert the solver seeded it with the expected defenders before the DR resolved.
 type gravSpyDR struct{ saw *[]card.Card }
 
@@ -66,8 +66,8 @@ func (gravSpyDR) Types(card.GameEngine) card.TypeSet {
 	return card.NewTypeSet(card.TypeGeneric, card.TypeDefenseReaction)
 }
 func (gravSpyDR) GoAgain(card.GameEngine) bool { return false }
-func (gs gravSpyDR) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
-	*gs.saw = append((*gs.saw)[:0], g.(*gameengine.GameEngine).Graveyard()...)
+func (gs gravSpyDR) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
+	*gs.saw = append((*gs.saw)[:0], ge.(*gameengine.GameEngine).Graveyard()...)
 }
 
 // auraDefender is a test-only card whose type line is Aura — a persistent type that normally

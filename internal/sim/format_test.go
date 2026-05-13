@@ -604,14 +604,14 @@ func TestFormatBestTurn_EndOfTurnHandLine(t *testing.T) {
 // surviving Auras + the live Runechant count render as one comma-separated line,
 // mirroring the start-of-turn formatting.
 func TestFormatBestTurn_EndOfTurnAurasWithRunechants(t *testing.T) {
-	state := gameengine.GameStateBuilder().Build()
-	state.CreateAura(NewCardAura(
+	gs := gameengine.GameStateBuilder().Build()
+	gs.CreateAura(NewCardAura(
 		&card.CardState{Card: cards.MaleficIncantationRed{}},
 		triggertype.StartOfTurn,
 		nil, 1, false,
 	))
-	state.CreateAura(NewRunechantAura(2))
-	summary := TurnSummary{State: state}
+	gs.CreateAura(NewRunechantAura(2))
+	summary := TurnSummary{State: gs}
 	out := FormatBestTurn(summary, nil, nil)
 	want := "Auras: Malefic Incantation [R], 2 Runechants"
 	if !strings.Contains(out, want) {

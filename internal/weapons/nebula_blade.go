@@ -35,15 +35,15 @@ func (NebulaBladeAbility) Attack() int                        { return 1 }
 func (NebulaBladeAbility) Defense() int                       { return 0 }
 func (NebulaBladeAbility) Types(card.GameEngine) card.TypeSet { return nebulaBladeAbilityTypes }
 func (NebulaBladeAbility) GoAgain(card.GameEngine) bool       { return false }
-func (NebulaBladeAbility) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
-	if g.NonAttackActionPlayed() {
+func (NebulaBladeAbility) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
+	if ge.NonAttackActionPlayed() {
 		self.BonusAttack += 3
 	}
 	self.RegisterOnHit(nebulaBladeOnHit)
 }
 
 // nebulaBladeOnHit fires the printed "If Nebula Blade hits, create a Runechant token" rider.
-func nebulaBladeOnHit(g card.GameEngine, l card.Logger, self *card.CardState, _ *card.OnHitHandler) {
-	g.CreateRunechants(1)
+func nebulaBladeOnHit(ge card.GameEngine, l card.Logger, self *card.CardState, _ *card.OnHitHandler) {
+	ge.CreateRunechants(1)
 	l.AppendPostTrigger(self.Card.DisplayName(), "On-hit created a runechant", 1)
 }

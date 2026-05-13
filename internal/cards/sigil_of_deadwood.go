@@ -11,13 +11,13 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
-func (SigilOfDeadwoodBlue) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
-	g.CreateStartOfTurnAura(self, sigilOfDeadwoodAuraHandler, 1)
+func (SigilOfDeadwoodBlue) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
+	ge.CreateStartOfTurnAura(self, sigilOfDeadwoodAuraHandler, 1)
 }
 
 // sigilOfDeadwoodAuraHandler creates 1 runechant on the next-turn fire and destroys the aura.
-func sigilOfDeadwoodAuraHandler(g card.GameEngine, l card.Logger, a card.Aura) {
-	g.CreateRunechants(1)
+func sigilOfDeadwoodAuraHandler(ge card.GameEngine, l card.Logger, a card.Aura) {
+	ge.CreateRunechants(1)
 	l.AppendPostTrigger(a.CardName(), "Created a runechant", 1)
 	a.Destroy(true)
 }

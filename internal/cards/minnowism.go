@@ -14,14 +14,14 @@ func minnowismIsTarget(_ card.GameEngine, pc *card.CardState) bool {
 	return pc.Card.Types(nil).IsAttackAction() && pc.Card.Attack() <= 3
 }
 
-func (MinnowismRed) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
-	GrantNextCardBonusAttack(g, 3, minnowismIsTarget)
+func (MinnowismRed) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
+	GrantNextCardBonusAttack(ge, 3, minnowismIsTarget)
 }
 
-func (MinnowismYellow) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
-	GrantNextCardBonusAttack(g, 2, minnowismIsTarget)
+func (MinnowismYellow) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
+	GrantNextCardBonusAttack(ge, 2, minnowismIsTarget)
 }
 
-func (MinnowismBlue) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
-	GrantNextCardBonusAttack(g, 1, minnowismIsTarget)
+func (MinnowismBlue) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
+	GrantNextCardBonusAttack(ge, 1, minnowismIsTarget)
 }

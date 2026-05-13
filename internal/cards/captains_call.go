@@ -15,12 +15,12 @@ import (
 
 // captainsCallPlay applies the modal grant to the next cost-≤maxCost attack action card in
 // CardsRemaining. Fizzles silently if no follow-up attack action matches.
-func captainsCallPlay(g card.GameEngine, l card.Logger, self *card.CardState, maxCost int) {
-	for _, pc := range g.CardsRemaining() {
+func captainsCallPlay(ge card.GameEngine, l card.Logger, self *card.CardState, maxCost int) {
+	for _, pc := range ge.CardsRemaining() {
 		if !pc.Card.Types(nil).IsAttackAction() {
 			continue
 		}
-		if pc.Card.Cost(g) > maxCost {
+		if pc.Card.Cost(ge) > maxCost {
 			continue
 		}
 		switch self.Mode {
@@ -34,16 +34,16 @@ func captainsCallPlay(g card.GameEngine, l card.Logger, self *card.CardState, ma
 }
 
 func (CaptainsCallRed) Modes() int { return 2 }
-func (CaptainsCallRed) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
-	captainsCallPlay(g, l, self, 2)
+func (CaptainsCallRed) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
+	captainsCallPlay(ge, l, self, 2)
 }
 
 func (CaptainsCallYellow) Modes() int { return 2 }
-func (CaptainsCallYellow) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
-	captainsCallPlay(g, l, self, 1)
+func (CaptainsCallYellow) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
+	captainsCallPlay(ge, l, self, 1)
 }
 
 func (CaptainsCallBlue) Modes() int { return 2 }
-func (CaptainsCallBlue) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
-	captainsCallPlay(g, l, self, 0)
+func (CaptainsCallBlue) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
+	captainsCallPlay(ge, l, self, 0)
 }

@@ -10,8 +10,8 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
-func lookingForAScrapPlay(g card.GameEngine, l card.Logger, self *card.CardState) {
-	if _, ok := g.BanishFromGraveyard(isOnePowerCard); ok {
+func lookingForAScrapPlay(ge card.GameEngine, l card.Logger, self *card.CardState) {
+	if _, ok := ge.BanishFromGraveyard(isOnePowerCard); ok {
 		self.BonusAttack++
 		self.GrantedGoAgain = true
 		l.AppendPostTrigger(self.Card.DisplayName(), "Banished a 1{p} card, +1{p} and go again", 1)
@@ -23,14 +23,14 @@ func lookingForAScrapPlay(g card.GameEngine, l card.Logger, self *card.CardState
 // redundant.
 func isOnePowerCard(c card.Card) bool { return c.Attack() == 1 }
 
-func (LookingForAScrapRed) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
-	lookingForAScrapPlay(g, l, self)
+func (LookingForAScrapRed) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
+	lookingForAScrapPlay(ge, l, self)
 }
 
-func (LookingForAScrapYellow) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
-	lookingForAScrapPlay(g, l, self)
+func (LookingForAScrapYellow) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
+	lookingForAScrapPlay(ge, l, self)
 }
 
-func (LookingForAScrapBlue) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
-	lookingForAScrapPlay(g, l, self)
+func (LookingForAScrapBlue) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
+	lookingForAScrapPlay(ge, l, self)
 }

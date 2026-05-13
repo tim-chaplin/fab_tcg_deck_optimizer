@@ -11,21 +11,21 @@ import (
 
 // adrenalineRushBonus returns the +3{p} rider when the current hero opts into
 // LowerHealthWanter, else 0.
-func adrenalineRushBonus(g card.GameEngine) int {
-	if g.HeroWantsLowerHealth() {
+func adrenalineRushBonus(ge card.GameEngine) int {
+	if ge.HeroWantsLowerHealth() {
 		return 3
 	}
 	return 0
 }
 
-func (AdrenalineRushRed) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
-	self.BonusAttack += adrenalineRushBonus(g)
+func (AdrenalineRushRed) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
+	self.BonusAttack += adrenalineRushBonus(ge)
 }
 
-func (AdrenalineRushYellow) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
-	self.BonusAttack += adrenalineRushBonus(g)
+func (AdrenalineRushYellow) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
+	self.BonusAttack += adrenalineRushBonus(ge)
 }
 
-func (AdrenalineRushBlue) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
-	self.BonusAttack += adrenalineRushBonus(g)
+func (AdrenalineRushBlue) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
+	self.BonusAttack += adrenalineRushBonus(ge)
 }

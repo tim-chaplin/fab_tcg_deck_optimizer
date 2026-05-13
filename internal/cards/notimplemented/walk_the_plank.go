@@ -11,15 +11,15 @@ import (
 
 // not implemented: pirate-target freeze rider
 
-func (WalkThePlankRed) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+func (WalkThePlankRed) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
 }
 
 // not implemented: pirate-target freeze rider
 
-func (WalkThePlankYellow) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+func (WalkThePlankYellow) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
 }
 
 // not implemented: pirate-target freeze rider
 
-func (WalkThePlankBlue) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
+func (WalkThePlankBlue) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
 }

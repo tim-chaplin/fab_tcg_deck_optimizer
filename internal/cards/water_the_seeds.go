@@ -18,14 +18,14 @@ func waterTheSeedsIsTarget(_ card.GameEngine, pc *card.CardState) bool {
 	return pc.Card.Types(nil).IsAttack() && pc.Card.Attack() <= 1
 }
 
-func (WaterTheSeedsRed) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
-	GrantNextCardBonusAttack(g, 1, waterTheSeedsIsTarget)
+func (WaterTheSeedsRed) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
+	GrantNextCardBonusAttack(ge, 1, waterTheSeedsIsTarget)
 }
 
-func (WaterTheSeedsYellow) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
-	GrantNextCardBonusAttack(g, 1, waterTheSeedsIsTarget)
+func (WaterTheSeedsYellow) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
+	GrantNextCardBonusAttack(ge, 1, waterTheSeedsIsTarget)
 }
 
-func (WaterTheSeedsBlue) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
-	GrantNextCardBonusAttack(g, 1, waterTheSeedsIsTarget)
+func (WaterTheSeedsBlue) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
+	GrantNextCardBonusAttack(ge, 1, waterTheSeedsIsTarget)
 }

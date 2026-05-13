@@ -14,24 +14,24 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
-func promiseOfPlentyPlay(g card.GameEngine, l card.Logger, self *card.CardState) {
+func promiseOfPlentyPlay(ge card.GameEngine, l card.Logger, self *card.CardState) {
 	self.GrantGoAgainIfFromArsenal()
 }
 
 // not implemented: on-hit arsenal-placement rider (arsenal/deck content tracking would be required)
 
-func (PromiseOfPlentyRed) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
-	promiseOfPlentyPlay(g, l, self)
+func (PromiseOfPlentyRed) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
+	promiseOfPlentyPlay(ge, l, self)
 }
 
 // not implemented: on-hit arsenal-placement rider (arsenal/deck content tracking would be required)
 
-func (PromiseOfPlentyYellow) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
-	promiseOfPlentyPlay(g, l, self)
+func (PromiseOfPlentyYellow) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
+	promiseOfPlentyPlay(ge, l, self)
 }
 
 // not implemented: on-hit arsenal-placement rider (arsenal/deck content tracking would be required)
 
-func (PromiseOfPlentyBlue) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
-	promiseOfPlentyPlay(g, l, self)
+func (PromiseOfPlentyBlue) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
+	promiseOfPlentyPlay(ge, l, self)
 }

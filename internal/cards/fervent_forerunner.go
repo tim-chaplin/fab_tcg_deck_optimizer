@@ -10,24 +10,24 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
-func ferventForerunnerPlay(g card.GameEngine, l card.Logger, self *card.CardState) {
+func ferventForerunnerPlay(ge card.GameEngine, l card.Logger, self *card.CardState) {
 	self.GrantGoAgainIfFromArsenal()
 	self.RegisterOnHit(ferventForerunnerOnHit)
 }
 
 // ferventForerunnerOnHit fires the printed "If this hits, opt 2" rider.
-func ferventForerunnerOnHit(g card.GameEngine, l card.Logger, _ *card.CardState, _ *card.OnHitHandler) {
-	g.Opt(l, 2)
+func ferventForerunnerOnHit(ge card.GameEngine, l card.Logger, _ *card.CardState, _ *card.OnHitHandler) {
+	ge.Opt(l, 2)
 }
 
-func (FerventForerunnerRed) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
-	ferventForerunnerPlay(g, l, self)
+func (FerventForerunnerRed) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
+	ferventForerunnerPlay(ge, l, self)
 }
 
-func (FerventForerunnerYellow) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
-	ferventForerunnerPlay(g, l, self)
+func (FerventForerunnerYellow) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
+	ferventForerunnerPlay(ge, l, self)
 }
 
-func (FerventForerunnerBlue) Play(g card.GameEngine, l card.Logger, self *card.CardState) {
-	ferventForerunnerPlay(g, l, self)
+func (FerventForerunnerBlue) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
+	ferventForerunnerPlay(ge, l, self)
 }

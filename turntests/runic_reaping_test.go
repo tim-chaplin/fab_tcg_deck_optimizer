@@ -12,15 +12,15 @@ import (
 
 // Tests that Runic Reaping with no following attack-action target lands no riders.
 func TestRunicReaping_NoNextAttackReturnsZero(t *testing.T) {
-	s := gameengine.New()
-	(cards.RunicReapingRed{}).Play(s, s.Logger(), &card.CardState{
+	ge := gameengine.New()
+	(cards.RunicReapingRed{}).Play(ge, ge.Logger(), &card.CardState{
 		Card:          cards.RunicReapingRed{},
 		PitchedToPlay: []card.Card{testutils.AttackWithPower{Power: 4}},
 	})
-	if got := s.Value(); got != 0 {
+	if got := ge.Value(); got != 0 {
 		t.Fatalf("Play() = %d, want 0", got)
 	}
-	if s.AuraCreated() {
+	if ge.AuraCreated() {
 		t.Fatalf("AuraCreated should stay false when no rider fires")
 	}
 }
@@ -28,9 +28,9 @@ func TestRunicReaping_NoNextAttackReturnsZero(t *testing.T) {
 // Tests that a Runeblade weapon as the next attack does not satisfy either rider.
 func TestRunicReaping_WeaponNextDoesNotQualify(t *testing.T) {
 	target := &card.CardState{Card: testutils.RunebladeWeapon{}}
-	s := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCardsRemaining([]*card.CardState{target}).Build()}
-	s.ResolveChainStep(s.Logger(), &card.CardState{Card: cards.RunicReapingRed{}})
-	if got := s.Value(); got != 0 {
+	ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCardsRemaining([]*card.CardState{target}).Build()}
+	ge.ResolveChainStep(ge.Logger(), &card.CardState{Card: cards.RunicReapingRed{}})
+	if got := ge.Value(); got != 0 {
 		t.Fatalf("Play() = %d, want 0", got)
 	}
 	if target.BonusAttack != 0 {
@@ -45,13 +45,13 @@ func TestRunicReaping_WeaponNextDoesNotQualify(t *testing.T) {
 // on-hit trigger.
 func TestRunicReaping_RegistersTriggerAndGrantsPitchedAttackBonus(t *testing.T) {
 	target := &card.CardState{Card: testutils.AttackWithPower{Power: 3}}
-	s := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCardsRemaining([]*card.CardState{target}).Build()}
-	(cards.RunicReapingRed{}).Play(s, s.Logger(), &card.CardState{
+	ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCardsRemaining([]*card.CardState{target}).Build()}
+	(cards.RunicReapingRed{}).Play(ge, ge.Logger(), &card.CardState{
 		Card:          cards.RunicReapingRed{},
 		PitchedToPlay: []card.Card{testutils.RunebladeAttack{}},
 	})
-	if got := s.Value(); got != 0 {
-		t.Fatalf("Play() = %d, want 0 (Runechant rider deferred to target's OnHit)", got)
+	if got := ge.Value(); got != 0 {
+		t.Fatalf("Play() = %d, want 0 (Runechant rider deferred to target'ge OnHit)", got)
 	}
 	if target.BonusAttack != 1 {
 		t.Errorf("target BonusAttack = %d, want 1 (pitched-attack +1{p} rider)", target.BonusAttack)
@@ -65,12 +65,12 @@ func TestRunicReaping_RegistersTriggerAndGrantsPitchedAttackBonus(t *testing.T) 
 // still registers.
 func TestRunicReaping_NoPitchedAttackSkipsBonusButRegistersTrigger(t *testing.T) {
 	target := &card.CardState{Card: testutils.AttackWithPower{Power: 4}}
-	s := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCardsRemaining([]*card.CardState{target}).Build()}
-	(cards.RunicReapingRed{}).Play(s, s.Logger(), &card.CardState{
+	ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCardsRemaining([]*card.CardState{target}).Build()}
+	(cards.RunicReapingRed{}).Play(ge, ge.Logger(), &card.CardState{
 		Card:          cards.RunicReapingRed{},
 		PitchedToPlay: []card.Card{testutils.NonAttack{}},
 	})
-	if got := s.Value(); got != 0 {
+	if got := ge.Value(); got != 0 {
 		t.Fatalf("Play() = %d, want 0", got)
 	}
 	if target.BonusAttack != 0 {

@@ -14,8 +14,8 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
-func (DragDownRed) Play(g card.GameEngine, l card.Logger, self *card.CardState) {}
+func (DragDownRed) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {}
 
-func (DragDownYellow) Play(g card.GameEngine, l card.Logger, self *card.CardState) {}
+func (DragDownYellow) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {}
 
-func (DragDownBlue) Play(g card.GameEngine, l card.Logger, self *card.CardState) {}
+func (DragDownBlue) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {}
