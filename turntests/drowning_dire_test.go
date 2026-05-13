@@ -26,7 +26,10 @@ func TestDrowningDire_NoAuraNoDominate(t *testing.T) {
 // Tests that an aura played earlier this turn flips GrantedDominate via AuraCreated.
 func TestDrowningDire_AuraGrantsDominate(t *testing.T) {
 	for _, c := range []card.Card{cards.DrowningDireRed{}, cards.DrowningDireYellow{}, cards.DrowningDireBlue{}} {
-		s := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCardsPlayed([]card.Card{testutils.Aura{}}).SetAuraCreated(true).Build()}
+		s := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().
+			SetCardsPlayed([]card.Card{testutils.Aura{}}).
+			SetAuraCreated(true).
+			Build()}
 		self := &card.CardState{Card: c}
 		s.ResolveChainStep(s.Logger(), self)
 		if !self.GrantedDominate {
@@ -39,7 +42,10 @@ func TestDrowningDire_AuraGrantsDominate(t *testing.T) {
 func TestDrowningDire_OnHitRecyclesNonAttackToBottom(t *testing.T) {
 	non := testutils.GenericAction()
 	deck := []card.Card{testutils.RedAttack{}}
-	s := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCards(deck).SetGraveyard([]card.Card{non}).Build()}
+	s := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().
+		SetCards(deck).
+		SetGraveyard([]card.Card{non}).
+		Build()}
 	self := &card.CardState{Card: cards.DrowningDireRed{}}
 	s.ResolveChainStep(s.Logger(), self)
 	self.BonusAttack = 2

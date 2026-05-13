@@ -51,7 +51,15 @@ func FormatLogEntry(e turnlogger.LogEntry) string {
 // (auras / items / banished / graveyard / opponent-marked) and matchup config (incoming
 // damage, arcane). Per-leaf and per-permutation copies branch off via Copy().
 func newTurnMasterState(prior Prior, mp Matchup, d *deck.Deck) *gameengine.GameState {
-	g := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetHero(prior.Hero).SetArsenal(prior.Arsenal).SetBanished(append([]card.Card(nil), prior.Banished...)).SetGraveyard(append([]card.Card(nil), prior.Graveyard...)).SetOpponentMarked(prior.OpponentMarked).SetIncomingDamage(mp.IncomingDamage).SetArcaneIncomingDamage(mp.ArcaneIncomingDamage).Build()}
+	g := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().
+		SetHero(prior.Hero).
+		SetArsenal(prior.Arsenal).
+		SetBanished(append([]card.Card(nil), prior.Banished...)).
+		SetGraveyard(append([]card.Card(nil), prior.Graveyard...)).
+		SetOpponentMarked(prior.OpponentMarked).
+		SetIncomingDamage(mp.IncomingDamage).
+		SetArcaneIncomingDamage(mp.ArcaneIncomingDamage).
+		Build()}
 	s := g.GameState
 	s.SetDeck(d.Copy())
 	for _, a := range prior.Auras {

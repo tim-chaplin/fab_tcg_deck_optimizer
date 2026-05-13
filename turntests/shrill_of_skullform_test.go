@@ -41,7 +41,10 @@ func TestShrillOfSkullform_AuraBonus(t *testing.T) {
 		{cards.ShrillOfSkullformBlue{}, 5},
 	}
 	for _, tc := range cases {
-		s := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCardsPlayed([]card.Card{testutils.Aura{}}).SetAuraCreated(true).Build()}
+		s := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().
+			SetCardsPlayed([]card.Card{testutils.Aura{}}).
+			SetAuraCreated(true).
+			Build()}
 		s.ResolveChainStep(s.Logger(), &card.CardState{Card: tc.c})
 		got := s.Value()
 		if got != tc.want {

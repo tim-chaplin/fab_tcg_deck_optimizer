@@ -24,7 +24,10 @@ func TestMemorialGround_NoEligibleNoOp(t *testing.T) {
 func TestMemorialGround_RecyclesEligibleAttackActionToTop(t *testing.T) {
 	target := testutils.GenericAttack(2, 4)
 	deck := []card.Card{testutils.BlueAttack{}}
-	s := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCards(deck).SetGraveyard([]card.Card{target}).Build()}
+	s := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().
+		SetCards(deck).
+		SetGraveyard([]card.Card{target}).
+		Build()}
 	s.ResolveChainStep(s.Logger(), &card.CardState{Card: cards.MemorialGroundRed{}})
 	if got := s.Deck().Size(); got != 2 {
 		t.Errorf("deck size after recycle = %d, want 2 (target moved onto the existing top)", got)

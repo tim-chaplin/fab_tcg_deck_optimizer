@@ -46,7 +46,10 @@ func TestReekOfCorruption_LikelyToHitWithAuraCreatedTriggersDiscard(t *testing.T
 
 // Tests that an aura earlier in CardsPlayed satisfies the rider precondition.
 func TestReekOfCorruption_AuraPlayedTriggersDiscard(t *testing.T) {
-	s := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCardsPlayed([]card.Card{testutils.Aura{}}).SetAuraCreated(true).Build()}
+	s := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().
+		SetCardsPlayed([]card.Card{testutils.Aura{}}).
+		SetAuraCreated(true).
+		Build()}
 	c := cards.ReekOfCorruptionRed{}
 	cs := &card.CardState{Card: c}
 	s.ResolveChainStep(s.Logger(), cs)

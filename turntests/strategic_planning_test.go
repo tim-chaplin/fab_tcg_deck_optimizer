@@ -35,7 +35,10 @@ func TestStrategicPlanning_QueuesEndOfTurnTrigger(t *testing.T) {
 func TestStrategicPlanning_RecyclesEligibleActionToBottom(t *testing.T) {
 	target := testutils.GenericAction()
 	deck := []card.Card{testutils.BlueAttack{}}
-	s := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCards(deck).SetGraveyard([]card.Card{target}).Build()}
+	s := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().
+		SetCards(deck).
+		SetGraveyard([]card.Card{target}).
+		Build()}
 	s.ResolveChainStep(s.Logger(), &card.CardState{Card: cards.StrategicPlanningRed{}})
 	if got := s.Deck().Size(); got != 2 {
 		t.Errorf("deck size after recycle = %d, want 2 (target appended to bottom)", got)

@@ -17,7 +17,10 @@ func newSequenceContextForTest(h Hero, pitched, deckCards []card.Card, resourceB
 		dc[i] = c
 	}
 	d := deck.New(nil, nil, dc)
-	leafState := gameengine.GameStateBuilder().SetHero(h).SetDeck(d).Build()
+	leafState := gameengine.GameStateBuilder().
+		SetHero(h).
+		SetDeck(d).
+		Build()
 	if runechantCarryover > 0 {
 		leafState.CreateAura(NewRunechantAura(runechantCarryover))
 	}

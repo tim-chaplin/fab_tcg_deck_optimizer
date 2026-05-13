@@ -26,7 +26,10 @@ func TestCadaverousContraband_RegistersOnHit(t *testing.T) {
 func TestCadaverousContraband_OnHitRecyclesNonAttackToTop(t *testing.T) {
 	non := testutils.GenericAction()
 	deck := []card.Card{testutils.RedAttack{}}
-	s := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCards(deck).SetGraveyard([]card.Card{non}).Build()}
+	s := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().
+		SetCards(deck).
+		SetGraveyard([]card.Card{non}).
+		Build()}
 	self := &card.CardState{Card: cards.CadaverousContrabandRed{}}
 	s.ResolveChainStep(s.Logger(), self)
 	self.BonusAttack = 1
