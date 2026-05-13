@@ -13,7 +13,7 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/token"
 )
 
-func TestGoldAbility_SpendsToFillArsenalAndSwings(t *testing.T) {
+func TestGoldToken_SpendsToFillArsenalAndSwings(t *testing.T) {
 	cards := []deck.Card{
 		// Five fillers covers the gold-spend draw plus next-turn's 4 dealt cards.
 		testutils.RedAttack{}, testutils.RedAttack{}, testutils.RedAttack{},

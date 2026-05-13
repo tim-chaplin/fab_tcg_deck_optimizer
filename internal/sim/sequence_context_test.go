@@ -1,7 +1,7 @@
 package sim
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/v2/aura"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/gameengine"
@@ -24,7 +24,7 @@ func newSequenceContextForTest(h hero.Hero, pitched, deckCards []card.Card, reso
 		SetDeck(d).
 		Build()
 	if runechantCarryover > 0 {
-		leafState.CreateAura(aura.NewRunechant(runechantCarryover))
+		leafState.CreateAura(cards.NewRunechant(runechantCarryover))
 	}
 	return &sequenceContext{
 		hero:               h,

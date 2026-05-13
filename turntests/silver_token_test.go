@@ -15,7 +15,7 @@ import (
 
 // Tests the Silver token activated ability end-to-end: spend Silver alone, verify the
 // drawn card promotes into arsenal.
-func TestSilverAbility_SpendsToFillArsenal(t *testing.T) {
+func TestSilverToken_SpendsToFillArsenal(t *testing.T) {
 	cards := []deck.Card{
 		testutils.RedAttack{}, testutils.RedAttack{}, testutils.RedAttack{},
 		testutils.RedAttack{}, testutils.RedAttack{},
@@ -44,7 +44,7 @@ func TestSilverAbility_SpendsToFillArsenal(t *testing.T) {
 
 // Tests that the Silver ability composes with a weapon swing when the pitch budget covers
 // both costs.
-func TestSilverAbility_SpendsAndSwings(t *testing.T) {
+func TestSilverToken_SpendsAndSwings(t *testing.T) {
 	cards := []deck.Card{
 		testutils.RedAttack{}, testutils.RedAttack{}, testutils.RedAttack{},
 		testutils.RedAttack{}, testutils.RedAttack{},

@@ -108,7 +108,7 @@ func withRunechants(n int) []*aura.Aura {
 	if n <= 0 {
 		return nil
 	}
-	return []*aura.Aura{aura.NewRunechant(n)}
+	return []*aura.Aura{cards.NewRunechant(n)}
 }
 
 // Tests carryover bookkeeping end-to-end with no starting runechants — every created token

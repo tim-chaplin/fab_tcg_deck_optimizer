@@ -98,7 +98,7 @@ func TestProcessAurasAtStartOfTurn_GraveyardsExhaustedAura(t *testing.T) {
 
 // TestProcessAurasAtStartOfTurn_IgnoresPonder: Ponder fires at end-of-turn (not start).
 func TestProcessAurasAtStartOfTurn_IgnoresPonder(t *testing.T) {
-	survivors, _, _, _, _ := ProcessAurasAtStartOfTurn([]gameengine.Aura{aura.NewPonder(1)}, DeckOf())
+	survivors, _, _, _, _ := ProcessAurasAtStartOfTurn([]gameengine.Aura{cards.NewPonder(1)}, DeckOf())
 	if len(survivors) != 1 || survivors[0].CardName() != "Ponder" {
 		t.Errorf("survivors = %+v, want one Ponder aura intact", survivors)
 	}
@@ -108,7 +108,7 @@ func TestProcessAurasAtStartOfTurn_IgnoresPonder(t *testing.T) {
 func TestFireEndOfTurn_PonderPopsDeckTopIntoHand(t *testing.T) {
 	a, b, c := testutils.NewStubCard("a"), testutils.NewStubCard("b"), testutils.NewStubCard("c")
 	ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCards([]card.Card{a, b, c}).Build()}
-	ge.CreateAura(aura.NewPonder(2))
+	ge.CreateAura(cards.NewPonder(2))
 	FireEndOfTurn(ge)
 
 	h := ge.Hand()
@@ -126,7 +126,7 @@ func TestFireEndOfTurn_PonderPopsDeckTopIntoHand(t *testing.T) {
 // TestFireEndOfTurn_PonderEmptyDeckIsNoOp.
 func TestFireEndOfTurn_PonderEmptyDeckIsNoOp(t *testing.T) {
 	ge := gameengine.New()
-	ge.CreateAura(aura.NewPonder(1))
+	ge.CreateAura(cards.NewPonder(1))
 	FireEndOfTurn(ge)
 	if h := ge.Hand(); len(h) != 0 {
 		t.Errorf("Hand = %v, want empty (no deck to draw from)", h)

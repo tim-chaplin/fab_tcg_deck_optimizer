@@ -13,7 +13,7 @@ import (
 )
 
 // Tests that the Copper token ability stays unspent when the chain can't fund its {4} cost.
-func TestCopperAbility_NotEnoughResourceSkipsSpend(t *testing.T) {
+func TestCopperToken_NotEnoughResourceSkipsSpend(t *testing.T) {
 	cards := []deck.Card{
 		testutils.RedAttack{}, testutils.RedAttack{}, testutils.RedAttack{},
 		testutils.RedAttack{}, testutils.RedAttack{},
@@ -30,7 +30,7 @@ func TestCopperAbility_NotEnoughResourceSkipsSpend(t *testing.T) {
 // Tests the Copper ability composes with a weapon swing when the pitch budget covers
 // both. Two blue pitches (3+3=6 res) fund the Copper ability ({4}) plus a Reaping
 // Blade swing ({1}), with 1 res to spare.
-func TestCopperAbility_SpendsAndSwings(t *testing.T) {
+func TestCopperToken_SpendsAndSwings(t *testing.T) {
 	cards := []deck.Card{
 		testutils.RedAttack{}, testutils.RedAttack{}, testutils.RedAttack{},
 		testutils.RedAttack{}, testutils.RedAttack{},

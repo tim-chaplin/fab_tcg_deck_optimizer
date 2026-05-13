@@ -542,7 +542,7 @@ func TestFormatBestTurn_StartOfTurnAurasWithRunechants(t *testing.T) {
 	summary := TurnSummary{
 		StartOfTurnAuras: []card.Card{cards.MaleficIncantationRed{}},
 	}
-	out := FormatBestTurn(summary, []*aura.Aura{aura.NewRunechant(3)}, nil)
+	out := FormatBestTurn(summary, []*aura.Aura{cards.NewRunechant(3)}, nil)
 	want := "Auras: Malefic Incantation [R], 3 Runechants"
 	if !strings.Contains(out, want) {
 		t.Errorf("missing %q in:\n%s", want, out)
@@ -553,13 +553,13 @@ func TestFormatBestTurn_StartOfTurnAurasWithRunechants(t *testing.T) {
 // into the Auras entry even when no auras are in play, using singular "Runechant" when the
 // count is 1.
 func TestFormatBestTurn_StartOfTurnRunechantsOnly(t *testing.T) {
-	out := FormatBestTurn(TurnSummary{}, []*aura.Aura{aura.NewRunechant(1)}, nil)
+	out := FormatBestTurn(TurnSummary{}, []*aura.Aura{cards.NewRunechant(1)}, nil)
 	want := "Auras: 1 Runechant"
 	if !strings.Contains(out, want) {
 		t.Errorf("missing %q in:\n%s", want, out)
 	}
 	// Plural noun when count > 1.
-	out2 := FormatBestTurn(TurnSummary{}, []*aura.Aura{aura.NewRunechant(2)}, nil)
+	out2 := FormatBestTurn(TurnSummary{}, []*aura.Aura{cards.NewRunechant(2)}, nil)
 	if !strings.Contains(out2, "2 Runechants") {
 		t.Errorf("want plural 'Runechants' at count 2, got:\n%s", out2)
 	}
@@ -612,7 +612,7 @@ func TestFormatBestTurn_EndOfTurnAurasWithRunechants(t *testing.T) {
 		triggertype.StartOfTurn,
 		nil, 1, false,
 	))
-	gs.CreateAura(aura.NewRunechant(2))
+	gs.CreateAura(cards.NewRunechant(2))
 	summary := TurnSummary{State: gs}
 	out := FormatBestTurn(summary, nil, nil)
 	want := "Auras: Malefic Incantation [R], 2 Runechants"

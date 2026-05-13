@@ -49,7 +49,7 @@ func TestStrikeGold_BlockableMissDoesNotCreateGold(t *testing.T) {
 }
 
 // Tests that a Gold token created on turn 1 carries to turn 2 in the Items list.
-func TestStrikeGold_GoldAbilityPlayableNextTurn(t *testing.T) {
+func TestStrikeGold_GoldTokenPlayableNextTurn(t *testing.T) {
 	deckCards := []deck.Card{
 		// Turn 1 hand.
 		cards.StrikeGoldRed{},

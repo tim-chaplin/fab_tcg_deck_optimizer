@@ -25,8 +25,8 @@ func init() {
 	gameengine.BuildCardTrigger = func(self *card.CardState, tt triggertype.Type, h card.TriggerHandler, filter func(card.TypeSet) bool) gameengine.Trigger {
 		return trigger.NewCard(self.Card, tt, wrapTriggerHandler(h), wrapTypeFilter(filter))
 	}
-	gameengine.BuildRunechantAura = func(n int) gameengine.Aura { return aura.NewRunechant(n) }
-	gameengine.BuildPonderAura = func(n int) gameengine.Aura { return aura.NewPonder(n) }
+	gameengine.BuildRunechantAura = func(n int) gameengine.Aura { return cards.NewRunechant(n) }
+	gameengine.BuildPonderAura = func(n int) gameengine.Aura { return cards.NewPonder(n) }
 	gameengine.BuildGoldItem = func(n int) gameengine.Item { return cards.NewGold(n) }
 	gameengine.BuildSilverItem = func(n int) gameengine.Item { return cards.NewSilver(n) }
 	gameengine.BuildCopperItem = func(n int) gameengine.Item { return cards.NewCopper(n) }

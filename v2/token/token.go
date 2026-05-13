@@ -1,8 +1,8 @@
 // Package token owns the concrete Item type — an in-play permanent with an activated
 // ability (currently FaB's three item-flavored tokens: Gold, Silver, Copper). Item itself
-// is generic; concrete ability cards (GoldAbility / SilverAbility / CopperAbility) and
-// their NewGold / NewSilver / NewCopper factories live in internal/cards, where the rest
-// of FaB's card implementations sit.
+// is generic; concrete activated-ability cards (GoldToken / SilverToken / CopperToken)
+// and their NewGold / NewSilver / NewCopper factories live in internal/cards, where the
+// rest of FaB's card implementations sit.
 //
 // The package defines its own narrow interfaces and does NOT import v2/card — the stored
 // ability is typed as `any` so consumers (the chain runner) assert it back to a richer

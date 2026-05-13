@@ -4,7 +4,6 @@ import (
 	"testing"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
-	"github.com/tim-chaplin/fab-deck-optimizer/v2/aura"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/gameengine"
 )
@@ -41,7 +40,7 @@ func TestYintiYanti_PlayWithAuraGetsBonus(t *testing.T) {
 	}
 	for _, tc := range cases {
 		ge := gameengine.New()
-		ge.CreateAura(aura.NewRunechant(1))
+		ge.CreateAura(cards.NewRunechant(1))
 		self := &card.CardState{Card: tc.c}
 		ge.ResolveChainStep(ge.Logger(), self)
 		if ge.Value() != tc.want {
@@ -66,7 +65,7 @@ func TestYintiYanti_BlockNoAuraNoBonus(t *testing.T) {
 func TestYintiYanti_BlockWithAuraGetsBonus(t *testing.T) {
 	for _, c := range []card.Card{cards.YintiYantiRed{}, cards.YintiYantiYellow{}, cards.YintiYantiBlue{}} {
 		ge := gameengine.New()
-		ge.CreateAura(aura.NewRunechant(1))
+		ge.CreateAura(cards.NewRunechant(1))
 		self := &card.CardState{Card: c}
 		c.(card.Blocker).Block(ge, ge.Logger(), self)
 		if self.BonusDefense != 1 {

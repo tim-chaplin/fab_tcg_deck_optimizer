@@ -2,13 +2,14 @@
 // scheduled trigger type (start of turn, attack, attack action, end of turn). Card-backed
 // and token-backed auras share the same struct; SourceCard distinguishes them.
 //
-// The package defines its own narrow interfaces (Card, GameEngine, Ctx, Handler) and does
-// not import v2/card or v2/gameengine. Stored handlers are typed as Handler — engine/logger
-// params are `any` so aura never depends on the consumer's broader engine surface. Callers
-// wrap their typed handlers into Handler closures at the factory layer (sim/init.go).
+// The package is a generic mechanism — it defines its own narrow interfaces (Card,
+// GameEngine, Ctx, Handler) and does not import v2/card or v2/gameengine. Stored handlers
+// are typed as Handler — engine/logger params are `any` so aura never depends on the
+// consumer's broader engine surface. Callers wrap their typed handlers into Handler
+// closures at the factory layer (sim/init.go).
 //
-// FaB's two aura-flavored tokens (Runechant, Ponder) are built here in tokens.go; the
-// runechant/ponder handlers reach into the engine through tiny package-local interfaces.
+// FaB's two aura-flavored tokens (Runechant, Ponder) live in internal/cards alongside
+// the rest of FaB's card implementations.
 package aura
 
 import (
