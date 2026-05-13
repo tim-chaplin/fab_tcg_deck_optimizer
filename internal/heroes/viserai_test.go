@@ -117,7 +117,7 @@ func TestViserai_WeaponSwingDoesNotTrigger(t *testing.T) {
 
 func TestViserai_EmptyTurn(t *testing.T) {
 	// First card of the turn: no prior plays, nothing to trigger on.
-	s := gameengine.NewFromState(nil)
+	s := &gameengine.GameEngine{GameState: gameengine.NewState()}
 	if got := (Viserai{}).OnCardPlayed(stubRuneAura{}, s, s.Logger()); got != 0 {
 		t.Fatalf("expected 0 on empty turn, got %d", got)
 	}

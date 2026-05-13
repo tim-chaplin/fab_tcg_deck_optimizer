@@ -12,7 +12,7 @@ import (
 
 // TestPrimeTheCrowd_NoAttackReturnsZero: no qualifying next attack card → +4 rider fizzles.
 func TestPrimeTheCrowd_NoAttackReturnsZero(t *testing.T) {
-	s := gameengine.NewFromState(nil)
+	s := &gameengine.GameEngine{GameState: gameengine.NewState()}
 	for _, c := range []card.Card{notimplemented.PrimeTheCrowdRed{}, notimplemented.PrimeTheCrowdYellow{}, notimplemented.PrimeTheCrowdBlue{}} {
 		s.ResolveChainStep(s.Logger(), &card.CardState{Card: c})
 		if got := s.Value(); got != 0 {

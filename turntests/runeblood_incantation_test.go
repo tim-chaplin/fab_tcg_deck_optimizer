@@ -23,7 +23,7 @@ func TestRunebloodIncantation_PlayRegistersStartOfTurnTriggerWithCountN(t *testi
 		{cards.RunebloodIncantationBlue{}, 1},
 	}
 	for _, tc := range cases {
-		s := gameengine.NewFromState(nil)
+		s := &gameengine.GameEngine{GameState: gameengine.NewState()}
 		s.ResolveChainStep(s.Logger(), &card.CardState{Card: tc.c})
 		if got := s.Value(); got != 0 {
 			t.Errorf("%s: Play() = %d, want 0 (every rune fires on a future turn)", tc.c.Name(), got)
@@ -52,7 +52,7 @@ func TestRunebloodIncantation_PlayRegistersStartOfTurnTriggerWithCountN(t *testi
 // Count, not from the handler doing more work each call.
 func TestRunebloodIncantation_HandlerCreatesOneRunechantPerFire(t *testing.T) {
 	for _, c := range []card.Card{cards.RunebloodIncantationRed{}, cards.RunebloodIncantationYellow{}, cards.RunebloodIncantationBlue{}} {
-		play := gameengine.NewFromState(nil)
+		play := &gameengine.GameEngine{GameState: gameengine.NewState()}
 		play.ResolveChainStep(play.Logger(), &card.CardState{Card: c})
 		fire := gameengine.NewFromCards(nil, nil)
 		fire.CreateAura(play.Auras()[0])

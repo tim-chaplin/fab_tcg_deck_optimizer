@@ -12,7 +12,7 @@ import (
 // Tests that Outed doesn't apply the marked-defender bonus when OpponentMarked is false.
 func TestOuted_NoMarkUnbuffed(t *testing.T) {
 	self := &card.CardState{Card: cards.OutedRed{}}
-	s := gameengine.NewFromState(nil)
+	s := &gameengine.GameEngine{GameState: gameengine.NewState()}
 	s.ResolveChainStep(s.Logger(), self)
 	if self.BonusAttack != 0 {
 		t.Errorf("BonusAttack = %d, want 0 (mark off)", self.BonusAttack)

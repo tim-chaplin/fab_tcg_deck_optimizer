@@ -13,7 +13,7 @@ import (
 // TestFlyingHigh_NoAttackReturnsZero covers the miss branch: with nothing attack-typed in
 // CardsRemaining the grant fizzles and Play returns 0.
 func TestFlyingHigh_NoAttackReturnsZero(t *testing.T) {
-	s := gameengine.NewFromState(nil)
+	s := &gameengine.GameEngine{GameState: gameengine.NewState()}
 	s.ResolveChainStep(s.Logger(), &card.CardState{Card: cards.FlyingHighRed{}})
 	if got := s.Value(); got != 0 {
 		t.Errorf("Play() = %d, want 0", got)

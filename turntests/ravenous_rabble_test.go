@@ -21,7 +21,7 @@ func TestRavenousRabble_EmptyDeckReturnsBasePower(t *testing.T) {
 		{cards.RavenousRabbleBlue{}, 3},
 	}
 	for _, tc := range cases {
-		s := gameengine.NewFromState(nil)
+		s := &gameengine.GameEngine{GameState: gameengine.NewState()}
 		s.ResolveChainStep(s.Logger(), &card.CardState{Card: tc.c})
 		if got := s.Value(); got != tc.want {
 			t.Errorf("%s: Play() = %d, want %d (empty deck → base power)", tc.c.Name(), got, tc.want)

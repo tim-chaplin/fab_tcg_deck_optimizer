@@ -12,7 +12,7 @@ import (
 
 // TestRegainComposure_NoAttackReturnsZero: no qualifying next attack card → +1 rider fizzles.
 func TestRegainComposure_NoAttackReturnsZero(t *testing.T) {
-	s := gameengine.NewFromState(nil)
+	s := &gameengine.GameEngine{GameState: gameengine.NewState()}
 	s.ResolveChainStep(s.Logger(), &card.CardState{Card: notimplemented.RegainComposureBlue{}})
 	if got := s.Value(); got != 0 {
 		t.Errorf("Play() = %d, want 0", got)

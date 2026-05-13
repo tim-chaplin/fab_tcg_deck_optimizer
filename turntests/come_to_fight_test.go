@@ -12,7 +12,7 @@ import (
 
 // TestComeToFight_NoAttackReturnsZero: no qualifying next attack card → +3 rider fizzles.
 func TestComeToFight_NoAttackReturnsZero(t *testing.T) {
-	s := gameengine.NewFromState(nil)
+	s := &gameengine.GameEngine{GameState: gameengine.NewState()}
 	for _, c := range []card.Card{cards.ComeToFightRed{}, cards.ComeToFightYellow{}, cards.ComeToFightBlue{}} {
 		s.ResolveChainStep(s.Logger(), &card.CardState{Card: c})
 		if got := s.Value(); got != 0 {

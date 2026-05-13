@@ -21,7 +21,7 @@ func TestVantagePoint_BaseDamageNoAura(t *testing.T) {
 		{cards.VantagePointBlue{}, 5},
 	}
 	for _, tc := range cases {
-		s := gameengine.NewFromState(nil)
+		s := &gameengine.GameEngine{GameState: gameengine.NewState()}
 		self := &card.CardState{Card: tc.c}
 		s.ResolveChainStep(s.Logger(), self)
 		if got := s.Value(); got != tc.base {

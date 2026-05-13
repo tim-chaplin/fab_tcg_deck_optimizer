@@ -44,7 +44,7 @@ func (stubAttack) Play(card.GameEngine, card.Logger, *card.CardState) {}
 
 // Tests that GrantAttackReactionBuff is a no-op when no target is set.
 func TestGrantAttackReactionBuff_NoTargetIsNoOp(t *testing.T) {
-	s := gameengine.NewFromState(nil)
+	s := &gameengine.GameEngine{GameState: gameengine.NewState()}
 	(&card.CardState{Card: stubAR{}}).GrantAttackReactionBuff(s, s.Logger(), 5)
 	if s.Value() != 0 {
 		t.Errorf("Value = %d, want 0", s.Value())
@@ -72,7 +72,7 @@ func TestGrantAttackReactionBuff_AppliesBuffAndCreditsValue(t *testing.T) {
 // Tests that AmendLastChainStepN skips non-chain-step entries to find the most recent
 // chain-step.
 func TestAmendLastChainStepN_SkipsNonChainEntries(t *testing.T) {
-	s := gameengine.NewFromState(nil)
+	s := &gameengine.GameEngine{GameState: gameengine.NewState()}
 	s.Logger().AppendChainStep("first", 2)
 	s.Logger().AppendPostTrigger("first", "rider", 0)
 	s.Logger().AmendLastChainStepN(5)

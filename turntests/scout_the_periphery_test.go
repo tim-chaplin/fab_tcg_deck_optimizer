@@ -12,7 +12,7 @@ import (
 
 // TestScoutThePeriphery_NoAttackReturnsZero: no qualifying next attack card → +3 rider fizzles.
 func TestScoutThePeriphery_NoAttackReturnsZero(t *testing.T) {
-	s := gameengine.NewFromState(nil)
+	s := &gameengine.GameEngine{GameState: gameengine.NewState()}
 	for _, c := range []card.Card{cards.ScoutThePeripheryRed{}, cards.ScoutThePeripheryYellow{}, cards.ScoutThePeripheryBlue{}} {
 		s.ResolveChainStep(s.Logger(), &card.CardState{Card: c})
 		if got := s.Value(); got != 0 {

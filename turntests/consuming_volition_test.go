@@ -22,7 +22,7 @@ func TestConsumingVolition_ArcaneDamageNotDealtReturnsBaseAttack(t *testing.T) {
 		{cards.ConsumingVolitionBlue{}, 2},
 	}
 	for _, tc := range cases {
-		s := gameengine.NewFromState(nil)
+		s := &gameengine.GameEngine{GameState: gameengine.NewState()}
 		cs := &card.CardState{Card: tc.c}
 		s.ResolveChainStep(s.Logger(), cs)
 		testutils.FireOnHitIfLikely(s, s.Logger(), cs)

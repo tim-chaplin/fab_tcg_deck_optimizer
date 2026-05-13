@@ -266,7 +266,7 @@ func bestAttackWithWeapons(
 // (when runechants > 0) for variable-cost DR cost probing. Defense-reactions read
 // RunechantCount() off this engine to decide their Cost; no other state matters.
 func newDRCostProbe(runechants int) *gameengine.GameEngine {
-	g := gameengine.NewFromState(nil)
+	g := &gameengine.GameEngine{GameState: gameengine.NewState()}
 	if runechants > 0 {
 		g.CreateAura(NewRunechantAura(runechants))
 	}

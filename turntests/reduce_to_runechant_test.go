@@ -23,7 +23,7 @@ func TestReduceToRunechant_PlayCreditsCreatedToken(t *testing.T) {
 		cards.ReduceToRunechantBlue{},
 	}
 	for _, c := range cases {
-		s := gameengine.NewFromState(nil)
+		s := &gameengine.GameEngine{GameState: gameengine.NewState()}
 		s.ResolveChainStep(s.Logger(), &card.CardState{Card: c})
 		got := s.Value()
 		if got != 1 {

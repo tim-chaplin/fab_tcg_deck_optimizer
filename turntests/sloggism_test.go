@@ -12,7 +12,7 @@ import (
 
 // TestSloggism_NoAttackReturnsZero: no qualifying next attack card → +6 rider fizzles.
 func TestSloggism_NoAttackReturnsZero(t *testing.T) {
-	s := gameengine.NewFromState(nil)
+	s := &gameengine.GameEngine{GameState: gameengine.NewState()}
 	for _, c := range []card.Card{cards.SloggismRed{}, cards.SloggismYellow{}, cards.SloggismBlue{}} {
 		s.ResolveChainStep(s.Logger(), &card.CardState{Card: c})
 		if got := s.Value(); got != 0 {

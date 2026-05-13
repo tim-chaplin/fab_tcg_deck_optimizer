@@ -11,7 +11,7 @@ import (
 
 // TestWarmongersRecital_NoAttackReturnsZero: no qualifying next attack card → +N rider fizzles.
 func TestWarmongersRecital_NoAttackReturnsZero(t *testing.T) {
-	s := gameengine.NewFromState(nil)
+	s := &gameengine.GameEngine{GameState: gameengine.NewState()}
 	for _, c := range []card.Card{
 		cards.WarmongersRecitalRed{}, cards.WarmongersRecitalYellow{}, cards.WarmongersRecitalBlue{},
 	} {

@@ -35,7 +35,7 @@ func (stubLowHeroOff) Opt(cards []card.Card) (top, bottom []card.Card)          
 
 // engineWithHero returns a fresh empty engine with hero installed.
 func engineWithHero(h gameengine.Hero) *gameengine.GameEngine {
-	g := gameengine.NewFromState(nil)
+	g := &gameengine.GameEngine{GameState: gameengine.NewState()}
 	g.SetHero(h)
 	return g
 }
@@ -97,7 +97,7 @@ func TestLowerHealthWanter_GoAgainRiders(t *testing.T) {
 
 // TestLowerHealthWanter_NilHeroIsOff guards the startup / unset-hero case.
 func TestLowerHealthWanter_NilHeroIsOff(t *testing.T) {
-	s := gameengine.NewFromState(nil)
+	s := &gameengine.GameEngine{GameState: gameengine.NewState()}
 	s.ResolveChainStep(s.Logger(), &card.CardState{Card: cards.AdrenalineRushRed{}})
 	if got := s.Value(); got != 4 {
 		t.Errorf("AdrenalineRushRed nil-hero Play() = %d, want 4", got)

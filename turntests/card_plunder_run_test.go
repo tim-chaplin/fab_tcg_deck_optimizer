@@ -51,7 +51,7 @@ func TestPlunderRun_FromArsenalAddsBonusAttack(t *testing.T) {
 
 // Multiple Plunder Runs queue independent triggers — they all fire on the same hit.
 func TestPlunderRun_TriggersStack(t *testing.T) {
-	s := gameengine.NewFromState(nil)
+	s := &gameengine.GameEngine{GameState: gameengine.NewState()}
 	s.ResolveChainStep(s.Logger(), &card.CardState{Card: cards.PlunderRunRed{}})
 	s.ResolveChainStep(s.Logger(), &card.CardState{Card: cards.PlunderRunBlue{}})
 	if got := triggerHitCount(s); got != 2 {
