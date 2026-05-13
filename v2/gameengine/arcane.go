@@ -10,7 +10,7 @@ import "github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 func (g *GameEngine) DealArcaneDamage(l card.Logger, source string, n int) {
 	g.AddValue(n)
 	if g.LikelyDamageHits(n, false) {
-		g.state.arcaneDamageDealt = true
+		g.arcaneDamageDealt = true
 	}
 	if n >= 0 && n < len(dealtArcaneText) {
 		l.AppendPostTrigger(source, dealtArcaneText[n], n)

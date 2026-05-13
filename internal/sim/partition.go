@@ -12,7 +12,7 @@ import (
 )
 
 func (e *Evaluator) findBest(weapons []Weapon, hand []card.Card, mp Matchup, d *deck.Deck, prior Prior, skipLog bool) TurnSummary {
-	masterEngine := newTurnMasterEngine(prior, mp, d)
+	masterState := newTurnMasterState(prior, mp, d)
 
 	var cacheKey evalCacheKey
 	cacheUsable := e.cache != nil
@@ -26,7 +26,7 @@ func (e *Evaluator) findBest(weapons []Weapon, hand []card.Card, mp Matchup, d *
 	if cacheUsable {
 		if entry, ok := e.cache.lookup(cacheKey); ok {
 			e.cache.hits.Add(1)
-			return e.replayBest(entry, weapons, hand, mp, d, prior, masterEngine, skipLog)
+			return e.replayBest(entry, weapons, hand, mp, d, prior, masterState, skipLog)
 		}
 		e.cache.misses.Add(1)
 	}
@@ -67,7 +67,7 @@ func (e *Evaluator) findBest(weapons []Weapon, hand []card.Card, mp Matchup, d *
 	recurse = func(i, pitchSum, defenseSum int) {
 		if i == totalN {
 			attackDealt, defenseDealt, swung, winner, ok, leafCacheable, arsenalAtChainStart := e.evaluatePartition(
-				masterEngine, weapons, hand, d,
+				masterState, weapons, hand, d,
 				rolesBuf, n, bufs,
 				mp, defenseSum,
 				prior, skipLog,
@@ -80,7 +80,7 @@ func (e *Evaluator) findBest(weapons []Weapon, hand []card.Card, mp Matchup, d *
 			}
 
 			v := attackDealt + defenseDealt
-			futureValuePlayed := pendingFutureValueFromEngine(winner)
+			futureValuePlayed := pendingFutureValueFromState(winner)
 			if runningSeen {
 				cmp := chainScoreCmp(v, winner.CardsDrawn(), futureValuePlayed,
 					best.Value, best.State.CardsDrawn(), runningFutureValue)
@@ -88,7 +88,7 @@ func (e *Evaluator) findBest(weapons []Weapon, hand []card.Card, mp Matchup, d *
 					return
 				}
 				if cmp == 0 {
-					willOccupy := arsenalAtChainStart != nil || len(winner.HandRaw()) > 0
+					willOccupy := arsenalAtChainStart != nil || len(winner.Hand()) > 0
 					runningWillOccupy := best.State.Arsenal() != nil || len(best.State.Hand()) > 0
 					if !willOccupy || runningWillOccupy {
 						return
@@ -96,7 +96,7 @@ func (e *Evaluator) findBest(weapons []Weapon, hand []card.Card, mp Matchup, d *
 				}
 			}
 			winner.SetArsenal(arsenalAtChainStart)
-			best.State = winner.State()
+			best.State = winner
 			best.Value = v
 			runningFutureValue = futureValuePlayed
 			runningSeen = true
@@ -133,10 +133,10 @@ func (e *Evaluator) findBest(weapons []Weapon, hand []card.Card, mp Matchup, d *
 	best.SwungWeapons = bestSwung
 	best.Cacheable = cacheable
 	if best.State == nil {
-		// No feasible partition was found — synthesise an "untouched" trailing state that
-		// holds the starting hand and prior values. Callers (deck_eval) still need a non-
-		// nil State to read end-of-turn fields.
-		fallback := masterEngine.Copy().State()
+		// No feasible partition was found — synthesise an "untouched" trailing state
+		// that holds the starting hand and prior values. Callers (deck_eval) still need
+		// a non-nil State to read end-of-turn fields.
+		fallback := masterState.Copy()
 		fallback.SetHand(append([]card.Card(nil), hand...))
 		fallback.SetArsenal(arsenalCardIn)
 		best.State = fallback

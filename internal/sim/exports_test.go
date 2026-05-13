@@ -40,10 +40,14 @@ func (s *SequenceContextForTest) PlaySequence(order []card.Card) (damage int, fu
 	return s.ctx.playSequence(order)
 }
 
-// PermEngine returns the *GameEngine the most recent PlaySequence call ran the chain
-// against. Tests assert state on this engine (Graveyard, Hand, …) after PlaySequence.
+// PermEngine returns a *GameEngine wrapping the *GameState the most recent
+// PlaySequence call ran the chain against. Tests assert state via this engine
+// (Graveyard, Hand, …) after PlaySequence.
 func (s *SequenceContextForTest) PermEngine() *gameengine.GameEngine {
-	return s.ctx.permEngine
+	if s.ctx.permState == nil {
+		return nil
+	}
+	return s.ctx.permState.Engine()
 }
 
 // BestSequence wraps (*sequenceContext).bestSequence. Drops the returned winning engine

@@ -39,7 +39,7 @@ type Spec struct {
 // builds higher-level constructs (master engines, per-permutation states) on top of
 // this; tests typically use NewFromSpec or NewFromCards instead.
 func New() *GameEngine {
-	return &GameEngine{state: NewState()}
+	return &GameEngine{GameState: NewState()}
 }
 
 // NewState returns a bare *GameState — cacheable=true, currentAuraIdx=-1, fresh logger.
@@ -83,7 +83,7 @@ func NewFromSpec(spec Spec) *GameEngine {
 		currentAuraIdx:        -1,
 		logger:                turnlogger.New(),
 	}
-	return &GameEngine{state: s}
+	return &GameEngine{GameState: s}
 }
 
 // NewFromCards is a test-only constructor that wraps a Card slice in a fresh *deck.Deck
@@ -95,7 +95,7 @@ func NewFromCards(deckCards, graveyard []card.Card) *GameEngine {
 		dc[i] = c
 	}
 	g := New()
-	g.state.deck = deck.New(nil, nil, dc)
-	g.state.graveyard = graveyard
+	g.deck = deck.New(nil, nil, dc)
+	g.graveyard = graveyard
 	return g
 }

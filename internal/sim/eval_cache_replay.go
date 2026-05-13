@@ -30,7 +30,7 @@ func (e *Evaluator) replayBest(
 	entry evalCacheEntry,
 	weapons []Weapon, hand []card.Card,
 	mp Matchup, d *deck.Deck,
-	prior Prior, masterEngine *gameengine.GameEngine, skipLog bool,
+	prior Prior, masterState *gameengine.GameState, skipLog bool,
 ) TurnSummary {
 	arsenalCardIn := prior.Arsenal
 	n := len(hand)
@@ -54,7 +54,7 @@ func (e *Evaluator) replayBest(
 	defenseSum := defenseSumFromRoles(hand, arsenalCardIn, rolesBuf, n)
 
 	attackDealt, defenseDealt, swung, winner, ok, _, arsenalAtChainStart := e.evaluatePartition(
-		masterEngine, weapons, hand, d,
+		masterState, weapons, hand, d,
 		rolesBuf, n, bufs,
 		mp, defenseSum,
 		prior, skipLog,
@@ -75,7 +75,7 @@ func (e *Evaluator) replayBest(
 		SwungWeapons:   append([]string(nil), swung...),
 		IncomingDamage: mp.IncomingDamage,
 		Cacheable:      true,
-		State:          winner.State(),
+		State:          winner,
 	}
 	for i := 0; i < n; i++ {
 		best.BestLine[i] = CardAssignment{Card: hand[i], Role: rolesBuf[i]}

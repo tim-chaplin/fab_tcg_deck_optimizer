@@ -27,7 +27,7 @@ func (g *GameEngine) CreateRunechants(n int) {
 		return
 	}
 	g.AddValue(n)
-	bumpOrCreateAura(g.state, tokenNameRunechant, BuildRunechantAura, n)
+	bumpOrCreateAura(g.GameState, tokenNameRunechant, BuildRunechantAura, n)
 }
 
 // CreatePonder creates n Ponder tokens. No Value credit — Ponder pays out at end of
@@ -36,7 +36,7 @@ func (g *GameEngine) CreatePonder(n int) {
 	if n <= 0 {
 		return
 	}
-	bumpOrCreateAura(g.state, tokenNamePonder, BuildPonderAura, n)
+	bumpOrCreateAura(g.GameState, tokenNamePonder, BuildPonderAura, n)
 }
 
 // CreateGold / CreateSilver / CreateCopper create the matching token items. No Value
@@ -45,28 +45,28 @@ func (g *GameEngine) CreateGold(n int) {
 	if n <= 0 {
 		return
 	}
-	bumpOrCreateItem(g.state, tokenNameGold, BuildGoldItem, n)
+	bumpOrCreateItem(g.GameState, tokenNameGold, BuildGoldItem, n)
 }
 func (g *GameEngine) CreateSilver(n int) {
 	if n <= 0 {
 		return
 	}
-	bumpOrCreateItem(g.state, tokenNameSilver, BuildSilverItem, n)
+	bumpOrCreateItem(g.GameState, tokenNameSilver, BuildSilverItem, n)
 }
 func (g *GameEngine) CreateCopper(n int) {
 	if n <= 0 {
 		return
 	}
-	bumpOrCreateItem(g.state, tokenNameCopper, BuildCopperItem, n)
+	bumpOrCreateItem(g.GameState, tokenNameCopper, BuildCopperItem, n)
 }
 
 // RunechantCount / PonderCount / GoldCount / SilverCount / CopperCount return the live
 // count of each token kind in play, or zero when none.
-func (g *GameEngine) RunechantCount() int { return auraCountByName(g.state.auras, tokenNameRunechant) }
-func (g *GameEngine) PonderCount() int    { return auraCountByName(g.state.auras, tokenNamePonder) }
-func (g *GameEngine) GoldCount() int      { return itemCountByName(g.state.items, tokenNameGold) }
-func (g *GameEngine) SilverCount() int    { return itemCountByName(g.state.items, tokenNameSilver) }
-func (g *GameEngine) CopperCount() int    { return itemCountByName(g.state.items, tokenNameCopper) }
+func (g *GameEngine) RunechantCount() int { return auraCountByName(g.auras, tokenNameRunechant) }
+func (g *GameEngine) PonderCount() int    { return auraCountByName(g.auras, tokenNamePonder) }
+func (g *GameEngine) GoldCount() int      { return itemCountByName(g.items, tokenNameGold) }
+func (g *GameEngine) SilverCount() int    { return itemCountByName(g.items, tokenNameSilver) }
+func (g *GameEngine) CopperCount() int    { return itemCountByName(g.items, tokenNameCopper) }
 
 // bumpOrCreateAura increments an existing aura entry matching name on s, or appends a
 // fresh one built by build(n). Flips s.auraCreated.
@@ -98,16 +98,15 @@ func bumpOrCreateItem(s *GameState, name string, build func(int) Item, n int) {
 // when no item matches name. Called by token-ability Play implementations registered
 // outside gameengine.
 func (g *GameEngine) ConsumeItemByName(name string, n int) {
-	s := g.state
-	for i := range s.items {
-		if s.items[i].CardName() != name {
+	for i := range g.items {
+		if g.items[i].CardName() != name {
 			continue
 		}
-		newCount := s.items[i].Count() - n
+		newCount := g.items[i].Count() - n
 		if newCount <= 0 {
-			s.items = append(s.items[:i], s.items[i+1:]...)
+			g.items = append(g.items[:i], g.items[i+1:]...)
 		} else {
-			s.items[i].SetCount(newCount)
+			g.items[i].SetCount(newCount)
 		}
 		return
 	}

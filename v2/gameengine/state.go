@@ -54,7 +54,7 @@ type GameState struct {
 // Engine wraps s in a *GameEngine so the chain runner can drive Card.Play hooks against
 // the rules-engine API while the underlying state remains the same pointer the caller
 // holds. Cheap (single struct allocation); the engine doesn't copy state.
-func (s *GameState) Engine() *GameEngine { return &GameEngine{state: s} }
+func (s *GameState) Engine() *GameEngine { return &GameEngine{GameState: s} }
 
 // Copy returns a deep copy of s. Slice and *deck.Deck fields get fresh backing storage;
 // Aura / Item entries are deep-copied via their Copy() methods so per-permutation
