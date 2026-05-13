@@ -518,3 +518,267 @@ func (g *GameEngine) DestroyAura(addToGraveyard bool) {
 	g.auras = append(g.auras[:i], g.auras[i+1:]...)
 	g.currentAuraDestroyed = true
 }
+
+// === Chain-step resolution ===
+
+// ResolveChainStep runs card.Play on self and then applies the standard chain-step
+// resolution: for an attack-action or weapon-attack, credit self.EffectiveAttack() to
+// g.value; for a defense-reaction (or DefensiveInstant), credit the EffectiveDefense
+// capped at IncomingDamage and decrement IncomingDamage; for everything else, log
+// (+0). The "<DisplayName>: <VERB> (+N)" chain-step entry is appended after Play
+// returns so any self-buffs Play applied (e.g. modal +2{p} riders flipping
+// self.BonusAttack) are reflected in the displayed delta.
+//
+// Cards' Play body owns card-specific behaviour: riders that emit rider log lines,
+// OnHit registration, conditional self-buffs, sub-card plays. The standard
+// printed-attack-deals-damage / DR-blocks-incoming mechanic is the engine's job;
+// cards don't reach for DealEffectiveAttack / DealEffectiveDefense or emit the chain
+// step themselves.
+func (g *GameEngine) ResolveChainStep(l card.Logger, self *card.CardState) {
+	self.Card.Play(g, l, self)
+	if self.Card.Types(nil).Has(card.TypeAura) {
+		g.auraCreated = true
+	}
+	n := g.chainStepDelta(self)
+	l.AppendChainStep(ChainStepText(self), n)
+}
+
+// PlayCard implements card.GameEngine.PlayCard. Cards reach this when they resolve
+// another card mid-handler (Moon Wish tutoring Sun Kiss into play on go-again).
+func (g *GameEngine) PlayCard(l card.Logger, self *card.CardState) {
+	g.ResolveChainStep(l, self)
+}
+
+// chainStepDelta computes the chain step's display delta and applies the standard
+// damage / block side effects. Returns the (+N) value for the log line.
+func (g *GameEngine) chainStepDelta(self *card.CardState) int {
+	types := self.Card.Types(nil)
+	switch {
+	case types.IsAttackAction() || types.IsWeaponAttack():
+		n := self.EffectiveAttack()
+		g.value += n
+		return n
+	case types.IsDefenseReaction() || isDefensiveInstant(self.Card):
+		n := self.EffectiveDefense()
+		if n > g.incomingDamage {
+			n = g.incomingDamage
+		}
+		if n < 0 {
+			n = 0
+		}
+		g.incomingDamage -= n
+		g.value += n
+		return n
+	}
+	return 0
+}
+
+// isDefensiveInstant reports whether c opts into the DR resolution path via the
+// DefensiveInstant marker. Centralised here so ResolveChainStep doesn't repeat the
+// type-assertion shape.
+func isDefensiveInstant(c card.Card) bool {
+	_, ok := c.(card.DefensiveInstant)
+	return ok
+}
+
+// ChainStepText returns the "<DisplayName>: <VERB>[ from arsenal]" prefix the chain-
+// step log line is built from. VERB picks WEAPON ATTACK for weapon activated-ability
+// cards (Weapon + Attack), ATTACK for attack-action cards, DEFENSE REACTION for
+// Defense Reactions, and PLAY for everything else; the "from arsenal" suffix tags
+// entries played out of the arsenal slot. Declared as a var so internal/optimizations
+// can swap in a memoised per-(CardID, FromArsenal) implementation at init.
+var ChainStepText = func(self *card.CardState) string {
+	types := self.Card.Types(nil)
+	var verb string
+	switch {
+	case types.IsWeaponAttack():
+		verb = "WEAPON ATTACK"
+	case types.IsAttackAction():
+		verb = "ATTACK"
+	case types.IsDefenseReaction():
+		verb = "DEFENSE REACTION"
+	default:
+		verb = "PLAY"
+	}
+	if self.FromArsenal {
+		verb += " from arsenal"
+	}
+	return self.Card.DisplayName() + ": " + verb
+}
+
+// === Arcane damage ===
+
+// DealArcaneDamage credits n arcane damage to Value, writes a "Dealt n arcane damage"
+// rider line under source, and flips ArcaneDamageDealt when LikelyDamageHits(n, false)
+// approves so same-turn triggers reading "if you've dealt arcane damage this turn"
+// fire. Routes through dealtArcaneText[n] so the hot path avoids per-call fmt.Sprintf
+// and variadic-int boxing.
+func (g *GameEngine) DealArcaneDamage(l card.Logger, source string, n int) {
+	g.AddValue(n)
+	if g.LikelyDamageHits(n, false) {
+		g.arcaneDamageDealt = true
+	}
+	if n >= 0 && n < len(dealtArcaneText) {
+		l.AppendPostTrigger(source, dealtArcaneText[n], n)
+		return
+	}
+	l.AppendPostTriggerf(source, n, "Dealt %d arcane damage", n)
+}
+
+// dealtArcaneText is the pre-built rider-line cache indexed by arcane-damage count,
+// keeping DealArcaneDamage alloc-free on the hot path. Extend if a new card prints
+// higher arcane.
+var dealtArcaneText = [...]string{
+	0: "Dealt 0 arcane damage",
+	1: "Dealt 1 arcane damage",
+	2: "Dealt 2 arcane damage",
+	3: "Dealt 3 arcane damage",
+	4: "Dealt 4 arcane damage",
+}
+
+// === Trigger registration ===
+
+// AddHitTrigger registers a one-shot triggertype.Hit listener. filter narrows the
+// qualifying hits to a card-type predicate; nil = any hit qualifies.
+func (g *GameEngine) AddHitTrigger(self *card.CardState, handler card.TriggerHandler, filter func(card.TypeSet) bool) {
+	g.CreateTrigger(BuildCardTrigger(self, triggertype.Hit, handler, filter))
+}
+
+// AddEndOfTurnTrigger registers a one-shot triggertype.EndOfTurn listener — fires
+// after the chain finishes resolving but before the carry-state snapshot.
+func (g *GameEngine) AddEndOfTurnTrigger(self *card.CardState, handler card.TriggerHandler) {
+	g.CreateTrigger(BuildCardTrigger(self, triggertype.EndOfTurn, handler, nil))
+}
+
+// === Tokens ===
+
+// Card-facing token creation / count methods on *GameEngine. v2/card.GameEngine
+// requires these for cards to make / read FaB's five built-in tokens (Runechant,
+// Ponder, Gold, Silver, Copper). The engine identifies live tokens by their CardName
+// (the public canonical display name) and delegates aura / item construction to the
+// registered Build*Aura / Build*Item factories so the concrete types live outside
+// gameengine.
+
+// Token display names — the engine matches by CardName when bumping an existing
+// entry's Count or reading a count. Concrete Aura / Item impls report these strings
+// via CardName.
+const (
+	tokenNameRunechant = "Runechant"
+	tokenNamePonder    = "Ponder"
+	tokenNameGold      = "Gold"
+	tokenNameSilver    = "Silver"
+	tokenNameCopper    = "Copper"
+)
+
+// CreateRunechants creates n Runechant tokens and credits +n damage at creation.
+// Tokens are stored as a single Aura entry — bump an existing entry's Count or add a
+// new one. Sets AuraCreated so same-turn "aura created this turn" effects see it.
+func (g *GameEngine) CreateRunechants(n int) {
+	if n <= 0 {
+		return
+	}
+	g.AddValue(n)
+	bumpOrCreateAura(g.GameState, tokenNameRunechant, BuildRunechantAura, n)
+}
+
+// CreatePonders creates n Ponder tokens. No Value credit — Ponder pays out at end of
+// turn (see the runtime's Ponder aura handler).
+func (g *GameEngine) CreatePonders(n int) {
+	if n <= 0 {
+		return
+	}
+	bumpOrCreateAura(g.GameState, tokenNamePonder, BuildPonderAura, n)
+}
+
+// CreateGold / CreateSilver / CreateCopper create the matching token items. No Value
+// credit — items only pay out when the activated ability is spent.
+func (g *GameEngine) CreateGold(n int) {
+	if n <= 0 {
+		return
+	}
+	bumpOrCreateItem(g.GameState, tokenNameGold, BuildGoldItem, n)
+}
+func (g *GameEngine) CreateSilver(n int) {
+	if n <= 0 {
+		return
+	}
+	bumpOrCreateItem(g.GameState, tokenNameSilver, BuildSilverItem, n)
+}
+func (g *GameEngine) CreateCopper(n int) {
+	if n <= 0 {
+		return
+	}
+	bumpOrCreateItem(g.GameState, tokenNameCopper, BuildCopperItem, n)
+}
+
+// RunechantCount / PonderCount / GoldCount / SilverCount / CopperCount return the
+// live count of each token kind in play, or zero when none.
+func (g *GameEngine) RunechantCount() int { return auraCountByName(g.auras, tokenNameRunechant) }
+func (g *GameEngine) PonderCount() int    { return auraCountByName(g.auras, tokenNamePonder) }
+func (g *GameEngine) GoldCount() int      { return itemCountByName(g.items, tokenNameGold) }
+func (g *GameEngine) SilverCount() int    { return itemCountByName(g.items, tokenNameSilver) }
+func (g *GameEngine) CopperCount() int    { return itemCountByName(g.items, tokenNameCopper) }
+
+// bumpOrCreateAura increments an existing aura entry matching name on s, or appends
+// a fresh one built by build(n). Flips s.auraCreated.
+func bumpOrCreateAura(s *GameState, name string, build func(int) Aura, n int) {
+	s.auraCreated = true
+	for i := range s.auras {
+		if s.auras[i].CardName() == name {
+			s.auras[i].SetCount(s.auras[i].Count() + n)
+			return
+		}
+	}
+	s.auras = append(s.auras, build(n))
+}
+
+// bumpOrCreateItem increments an existing item entry matching name on s, or appends
+// a fresh one built by build(n). Items don't flip auraCreated.
+func bumpOrCreateItem(s *GameState, name string, build func(int) Item, n int) {
+	for i := range s.items {
+		if s.items[i].CardName() == name {
+			s.items[i].SetCount(s.items[i].Count() + n)
+			return
+		}
+	}
+	s.items = append(s.items, build(n))
+}
+
+// ConsumeItemByName decrements the matching item's Count by n and removes the entry
+// when Count reaches zero. Token items don't head to the graveyard on destroy. No-op
+// when no item matches name. Called by token-ability Play implementations registered
+// outside gameengine.
+func (g *GameEngine) ConsumeItemByName(name string, n int) {
+	for i := range g.items {
+		if g.items[i].CardName() != name {
+			continue
+		}
+		newCount := g.items[i].Count() - n
+		if newCount <= 0 {
+			g.items = append(g.items[:i], g.items[i+1:]...)
+		} else {
+			g.items[i].SetCount(newCount)
+		}
+		return
+	}
+}
+
+// auraCountByName scans auras for a token aura by display name.
+func auraCountByName(auras []Aura, name string) int {
+	for _, a := range auras {
+		if a.CardName() == name {
+			return a.Count()
+		}
+	}
+	return 0
+}
+
+// itemCountByName scans items for a token item by display name.
+func itemCountByName(items []Item, name string) int {
+	for _, i := range items {
+		if i.CardName() == name {
+			return i.Count()
+		}
+	}
+	return 0
+}
