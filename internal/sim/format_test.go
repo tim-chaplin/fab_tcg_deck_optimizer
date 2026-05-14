@@ -101,11 +101,11 @@ func TestFormatBestTurn_LogAttributesEachTriggerSeparately(t *testing.T) {
 	// state.TriggeringCard).
 	bootstrap := gameengine.New()
 	bootstrap.ResolveChainStep(bootstrap.Logger(), &card.CardState{Card: cards.MaleficIncantationRed{}})
-	master := gameengine.GameStateBuilder().SetHero(heroes.Viserai{}).Build()
+	state := gameengine.GameStateBuilder().SetHero(heroes.Viserai{}).Build()
 	for _, a := range bootstrap.Auras() {
-		master.CreateAura(a)
+		state.CreateAura(a)
 	}
-	got := Best(nil, h, Matchup{}, nil, master)
+	got := Best(nil, h, Matchup{}, nil, state)
 	out := FormatBestTurn(got, nil, nil)
 	// Trigger lines render indented (9 spaces) with no "(from <source>)" suffix — the
 	// indentation under the parent chain entry conveys attribution. Each line carries
@@ -199,11 +199,11 @@ func TestFormatBestTurn_MoonWishTutorOnlyLogsAsPostTrigger(t *testing.T) {
 // "DEFENSE REACTION from arsenal".
 func TestFormatBestTurn_ArsenalInPlayedAsDR(t *testing.T) {
 	h := []card.Card{cards.MaleficIncantationBlue{}}
-	master := gameengine.GameStateBuilder().
+	state := gameengine.GameStateBuilder().
 		SetHero(testutils.Hero{Intel: 4}).
 		SetArsenal(cards.ToughenUpBlue{}).
 		Build()
-	got := Best(nil, h, Matchup{IncomingDamage: 4}, nil, master)
+	got := Best(nil, h, Matchup{IncomingDamage: 4}, nil, state)
 	out := FormatBestTurn(got, nil, nil)
 	if !strings.Contains(out, "  Opponent's turn:") {
 		t.Errorf("want 'Opponent's turn:' section header, got:\n%s", out)
@@ -258,11 +258,11 @@ func TestFormatBestTurn_DefenseReactionLinesAndRiders(t *testing.T) {
 // (role tag, not card-name tag).
 func TestFormatBestTurn_ArsenalInPlayedOnChain(t *testing.T) {
 	h := []card.Card{testutils.BlueAttack{}}
-	master := gameengine.GameStateBuilder().
+	state := gameengine.GameStateBuilder().
 		SetHero(testutils.Hero{Intel: 4}).
 		SetArsenal(testutils.RedAttack{}).
 		Build()
-	got := Best(nil, h, Matchup{IncomingDamage: 0}, nil, master)
+	got := Best(nil, h, Matchup{IncomingDamage: 0}, nil, state)
 	out := FormatBestTurn(got, nil, nil)
 	if !strings.Contains(out, "  My turn:") {
 		t.Errorf("want 'My turn:' section header, got:\n%s", out)
@@ -314,11 +314,11 @@ func TestFormatBestTurn_EndOfTurnArsenalStayed(t *testing.T) {
 	// Hand with no attacks / no pitches to pay for the arsenal DR at incoming=0 (defense is
 	// wasted anyway). Arsenal-in Toughen Up sits.
 	h := []card.Card{cards.ToughenUpBlue{}}
-	master := gameengine.GameStateBuilder().
+	state := gameengine.GameStateBuilder().
 		SetHero(testutils.Hero{Intel: 4}).
 		SetArsenal(cards.ToughenUpBlue{}).
 		Build()
-	got := Best(nil, h, Matchup{IncomingDamage: 0}, nil, master)
+	got := Best(nil, h, Matchup{IncomingDamage: 0}, nil, state)
 	out := FormatBestTurn(got, nil, nil)
 	if !strings.Contains(out, "(stayed)") {
 		t.Errorf("want the arsenal-in card tagged '(stayed)', got:\n%s", out)
