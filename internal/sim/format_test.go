@@ -199,7 +199,11 @@ func TestFormatBestTurn_MoonWishTutorOnlyLogsAsPostTrigger(t *testing.T) {
 // "DEFENSE REACTION from arsenal".
 func TestFormatBestTurn_ArsenalInPlayedAsDR(t *testing.T) {
 	h := []card.Card{cards.MaleficIncantationBlue{}}
-	got := Best(nil, h, Matchup{IncomingDamage: 4}, nil, gameengine.GameStateBuilder().SetHero(testutils.Hero{Intel: 4}).SetArsenal(cards.ToughenUpBlue{}).Build())
+	master := gameengine.GameStateBuilder().
+		SetHero(testutils.Hero{Intel: 4}).
+		SetArsenal(cards.ToughenUpBlue{}).
+		Build()
+	got := Best(nil, h, Matchup{IncomingDamage: 4}, nil, master)
 	out := FormatBestTurn(got, nil, nil)
 	if !strings.Contains(out, "  Opponent's turn:") {
 		t.Errorf("want 'Opponent's turn:' section header, got:\n%s", out)
@@ -254,7 +258,11 @@ func TestFormatBestTurn_DefenseReactionLinesAndRiders(t *testing.T) {
 // (role tag, not card-name tag).
 func TestFormatBestTurn_ArsenalInPlayedOnChain(t *testing.T) {
 	h := []card.Card{testutils.BlueAttack{}}
-	got := Best(nil, h, Matchup{IncomingDamage: 0}, nil, gameengine.GameStateBuilder().SetHero(testutils.Hero{Intel: 4}).SetArsenal(testutils.RedAttack{}).Build())
+	master := gameengine.GameStateBuilder().
+		SetHero(testutils.Hero{Intel: 4}).
+		SetArsenal(testutils.RedAttack{}).
+		Build()
+	got := Best(nil, h, Matchup{IncomingDamage: 0}, nil, master)
 	out := FormatBestTurn(got, nil, nil)
 	if !strings.Contains(out, "  My turn:") {
 		t.Errorf("want 'My turn:' section header, got:\n%s", out)
@@ -306,7 +314,11 @@ func TestFormatBestTurn_EndOfTurnArsenalStayed(t *testing.T) {
 	// Hand with no attacks / no pitches to pay for the arsenal DR at incoming=0 (defense is
 	// wasted anyway). Arsenal-in Toughen Up sits.
 	h := []card.Card{cards.ToughenUpBlue{}}
-	got := Best(nil, h, Matchup{IncomingDamage: 0}, nil, gameengine.GameStateBuilder().SetHero(testutils.Hero{Intel: 4}).SetArsenal(cards.ToughenUpBlue{}).Build())
+	master := gameengine.GameStateBuilder().
+		SetHero(testutils.Hero{Intel: 4}).
+		SetArsenal(cards.ToughenUpBlue{}).
+		Build()
+	got := Best(nil, h, Matchup{IncomingDamage: 0}, nil, master)
 	out := FormatBestTurn(got, nil, nil)
 	if !strings.Contains(out, "(stayed)") {
 		t.Errorf("want the arsenal-in card tagged '(stayed)', got:\n%s", out)
