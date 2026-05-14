@@ -95,8 +95,15 @@ func TestEvalCache_PriorItemsKeyedDistinctly(t *testing.T) {
 	ev := NewEvaluator()
 	mp := Matchup{IncomingDamage: 0}
 	h := FakeHero{Intel: 4}
-	_ = ev.Best(nil, hand, mp, nil, Prior{Hero: h, Items: []*token.Item{cards.NewGold(1)}})
-	_ = ev.Best(nil, hand, mp, nil, Prior{Hero: h, Items: []*token.Item{cards.NewGold(2)}})
+	masterFor := func(items []*token.Item) *gameengine.GameState {
+		s := gameengine.GameStateBuilder().SetHero(h).Build()
+		for _, it := range items {
+			s.CreateItem(it)
+		}
+		return s
+	}
+	_ = ev.Best(nil, hand, mp, nil, masterFor([]*token.Item{cards.NewGold(1)}))
+	_ = ev.Best(nil, hand, mp, nil, masterFor([]*token.Item{cards.NewGold(2)}))
 	stats := ev.CacheStats()
 	if stats.Hits != 0 {
 		t.Errorf("hits = %d, want 0 (different gold counts must not collide)", stats.Hits)
@@ -104,7 +111,7 @@ func TestEvalCache_PriorItemsKeyedDistinctly(t *testing.T) {
 	if stats.Misses != 2 {
 		t.Errorf("misses = %d, want 2 (one per distinct item key)", stats.Misses)
 	}
-	_ = ev.Best(nil, hand, mp, nil, Prior{Hero: h, Items: []*token.Item{cards.NewGold(2)}})
+	_ = ev.Best(nil, hand, mp, nil, masterFor([]*token.Item{cards.NewGold(2)}))
 	stats = ev.CacheStats()
 	if stats.Hits != 1 {
 		t.Errorf("hits after repeat = %d, want 1 (matching item key should hit)", stats.Hits)

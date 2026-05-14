@@ -21,6 +21,7 @@ import (
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/gameengine"
 )
 
 // maxCachedHandSize caps how big a hand the cache will fingerprint. Adult heroes deal up
@@ -146,12 +147,14 @@ func newEvalCache() *evalCache {
 // omitted — see evalCacheKey doc.
 func makeCacheKey(
 	weapons []Weapon, hand []card.Card,
-	prior Prior,
+	masterState *gameengine.GameState,
 ) (evalCacheKey, bool) {
+	auras := masterState.Auras()
+	items := masterState.Items()
 	if len(hand) > maxCachedHandSize ||
 		len(weapons) > maxCachedWeapons ||
-		len(prior.Auras) > maxCachedAuras ||
-		len(prior.Items) > maxCachedItems {
+		len(auras) > maxCachedAuras ||
+		len(items) > maxCachedItems {
 		return evalCacheKey{}, false
 	}
 	var key evalCacheKey
@@ -167,25 +170,25 @@ func makeCacheKey(
 	// stays multiset-invariant across registration order. Token kinds are distinguished
 	// via their reserved CardID range (RunechantTokenID, PonderTokenID, …) so no separate
 	// TokenType discriminator is needed.
-	key.auraLen = len(prior.Auras)
-	for i, t := range prior.Auras {
+	key.auraLen = len(auras)
+	for i, t := range auras {
 		insertPersistentEntry(key.auras[:i+1], persistentCacheKey{
 			CardID: t.CardID(), Count: t.Count(),
 		})
 	}
-	key.itemLen = len(prior.Items)
-	for i, it := range prior.Items {
+	key.itemLen = len(items)
+	for i, it := range items {
 		insertPersistentEntry(key.items[:i+1], persistentCacheKey{
 			CardID: it.CardID(), Count: it.Count(),
 		})
 	}
-	if prior.Hero != nil {
-		key.heroID = prior.Hero.ID()
+	if h := masterState.Hero(); h != nil {
+		key.heroID = h.ID()
 	}
-	if prior.Arsenal != nil {
-		key.arsenalID = prior.Arsenal.ID()
+	if arsenal := masterState.Arsenal(); arsenal != nil {
+		key.arsenalID = arsenal.ID()
 	}
-	key.opponentMarked = prior.OpponentMarked
+	key.opponentMarked = masterState.OpponentMarked()
 	return key, true
 }
 

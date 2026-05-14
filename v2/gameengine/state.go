@@ -103,6 +103,42 @@ func (gs *GameState) Copy() *GameState {
 	return &out
 }
 
+// PrepareNextTurn resets per-turn ephemerals so gs can serve as the master state for the
+// next turn. Persistent carry — hero, arsenal, auras, items, banished, graveyard,
+// opponentMarked, incomingDamage, arcaneIncomingDamage — stays untouched. Auras'
+// FiredThisTurn flags reset so OncePerTurn gates rearm.
+//
+// The deck is cleared: the chain runner threads the deck through the deck arg to Best, not
+// gs.deck, so a deck on the master is dead weight every per-leaf Copy would duplicate. The
+// eval loop adopts play.State.Deck() separately and recycles pitched cards onto its bottom.
+func (gs *GameState) PrepareNextTurn() {
+	gs.hand = nil
+	gs.deck = nil
+	gs.pitched = nil
+	gs.defenders = nil
+	gs.cardsPlayed = nil
+	gs.cardsRemaining = nil
+	gs.triggers = nil
+	gs.triggeringCard = nil
+	gs.attackReactionTarget = nil
+	gs.actionPoints = 1
+	gs.value = 0
+	gs.cardsDrawn = 0
+	gs.blockTotal = 0
+	gs.cardBanished = false
+	gs.arcaneDamageDealt = false
+	gs.nonAttackActionPlayed = false
+	gs.currentAuraDestroyed = false
+	gs.currentStepRerouted = false
+	gs.currentAuraIdx = -1
+	gs.cacheable = true
+	gs.logger = nil
+	gs.auraCreated = false
+	for _, a := range gs.auras {
+		a.SetFiredThisTurn(false)
+	}
+}
+
 // Reset resets per-chain locals so the state is ready to play a fresh chain
 // from this permutation's hand order. Auras, items, banished, graveyard, deck, arsenal,
 // pitched, hero, and OpponentMarked carry over untouched — they represent the leaf's

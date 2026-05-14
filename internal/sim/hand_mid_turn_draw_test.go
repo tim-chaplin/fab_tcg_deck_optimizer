@@ -10,6 +10,7 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/gameengine"
 )
 
 // Tests that state.deck and state.hand are reset between permutations so a draw in one
@@ -49,8 +50,8 @@ func TestBest_DrawRiderSeesActualDeck(t *testing.T) {
 	deckA := DeckOf(testutils.RedAttack{})
 	deckB := DeckOf(testutils.BlueAttack{})
 
-	resA := Best(nil, h, Matchup{IncomingDamage: 0}, deckA, Prior{Hero: heroes.Viserai{}})
-	resB := Best(nil, h, Matchup{IncomingDamage: 0}, deckB, Prior{Hero: heroes.Viserai{}})
+	resA := Best(nil, h, Matchup{IncomingDamage: 0}, deckA, gameengine.GameStateBuilder().SetHero(heroes.Viserai{}).Build())
+	resB := Best(nil, h, Matchup{IncomingDamage: 0}, deckB, gameengine.GameStateBuilder().SetHero(heroes.Viserai{}).Build())
 
 	containsID := func(cs []card.Card, id ids.CardID) bool {
 		for _, c := range cs {
@@ -85,8 +86,8 @@ func TestBest_DeckOrderDoesNotAffectHandRoles(t *testing.T) {
 		return m
 	}
 
-	resA := Best(nil, h, Matchup{IncomingDamage: 0}, deckA, Prior{Hero: testutils.Hero{Intel: 4}})
-	resB := Best(nil, h, Matchup{IncomingDamage: 0}, deckB, Prior{Hero: testutils.Hero{Intel: 4}})
+	resA := Best(nil, h, Matchup{IncomingDamage: 0}, deckA, gameengine.GameStateBuilder().SetHero(testutils.Hero{Intel: 4}).Build())
+	resB := Best(nil, h, Matchup{IncomingDamage: 0}, deckB, gameengine.GameStateBuilder().SetHero(testutils.Hero{Intel: 4}).Build())
 
 	rolesA := rolesFor(resA)
 	rolesB := rolesFor(resB)
