@@ -4,6 +4,7 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/aura"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/gameengine"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/hero"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/token"
 )
@@ -57,16 +58,26 @@ func (t TurnStartState) CopperCount() int {
 
 // EvalOneTurnForTesting runs one turn against the deck in source order (no shuffle) and
 // returns the tested turn's outcome plus the start-of-next-turn state. initial seeds the
-// turn's prior carryover (Auras / Items / Arsenal / Banished / Graveyard / OpponentMarked);
-// leave its Hero nil to inherit the deck's hero.
-func EvalOneTurnForTesting(master *deck.Deck, mp Matchup, initial Prior, initialHand []deck.Card) TurnStartState {
-	d := master.Copy()
+// turn's carryover (Hero / Arsenal / Auras / Items / Banished / Graveyard / OpponentMarked)
+// via a *gameengine.GameState; pass nil to start from a clean state inheriting the deck's
+// hero. Tests build initial via gameengine.GameStateBuilder().Set...().Build(), then layer
+// CreateAura / CreateItem for any token carryover.
+func EvalOneTurnForTesting(masterDeck *deck.Deck, mp Matchup, initial *gameengine.GameState, initialHand []deck.Card) TurnStartState {
+	d := masterDeck.Copy()
 	h := d.Hero.(hero.Hero)
-	if initial.Hero == nil {
-		initial.Hero = h
+	var master *gameengine.GameState
+	if initial != nil {
+		master = initial
+		if hv := master.Hero(); hv != nil {
+			h = hv.(hero.Hero)
+		} else {
+			master.SetHero(h)
+		}
 	} else {
-		h = initial.Hero
+		master = gameengine.GameStateBuilder().SetHero(h).Build()
 	}
+	master.SetIncomingDamage(mp.IncomingDamage)
+	master.SetArcaneIncomingDamage(mp.ArcaneIncomingDamage)
 	handSize := h.Intelligence()
 	if handSize <= 0 {
 		return TurnStartState{}
@@ -95,7 +106,7 @@ func EvalOneTurnForTesting(master *deck.Deck, mp Matchup, initial Prior, initial
 	for i, w := range d.Weapons {
 		weapons[i] = w.(Weapon)
 	}
-	play := best(weapons, hand, mp, d, initial)
+	play := best(weapons, hand, mp, d, master)
 	d = play.State.Deck()
 	pitched := pitchedFromBestLine(play.BestLine)
 	recycled := make([]deck.Card, len(pitched))

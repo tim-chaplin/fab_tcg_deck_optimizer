@@ -9,8 +9,19 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapons"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/gameengine"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/token"
 )
+
+// stateWithItems returns a *GameState seeded with the supplied items. Tests use this to
+// pass token carryover (Gold / Silver / Copper) into EvalOneTurnForTesting.
+func stateWithItems(items ...*token.Item) *gameengine.GameState {
+	b := gameengine.GameStateBuilder()
+	for _, it := range items {
+		b.AddItem(it)
+	}
+	return b.Build()
+}
 
 // Tests that the Copper token ability stays unspent when the chain can't fund its {4} cost.
 func TestCopperToken_NotEnoughResourceSkipsSpend(t *testing.T) {
@@ -21,7 +32,7 @@ func TestCopperToken_NotEnoughResourceSkipsSpend(t *testing.T) {
 	d := deck.New(heroes.Viserai{}, nil, cards)
 	hand := []deck.Card{testutils.BluePitch{}}
 	priorItems := []*token.Item{cardpkg.NewCopper(1)}
-	got := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, sim.Prior{Items: priorItems}, hand)
+	got := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, stateWithItems(priorItems...), hand)
 	if got.CopperCount() != 1 {
 		t.Fatalf("Copper after turn = %d, want 1 (single blue pitch can't fund {4})", got.CopperCount())
 	}
@@ -38,7 +49,7 @@ func TestCopperToken_SpendsAndSwings(t *testing.T) {
 	d := deck.New(heroes.Viserai{}, []deck.Weapon{weapons.ReapingBlade{}}, cards)
 	hand := []deck.Card{testutils.BluePitch{}, testutils.BluePitch{}}
 	priorItems := []*token.Item{cardpkg.NewCopper(1)}
-	got := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, sim.Prior{Items: priorItems}, hand)
+	got := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, stateWithItems(priorItems...), hand)
 	if got.Value != 3 {
 		t.Fatalf("Value = %d, want 3 (Reaping Blade swing power 3)", got.Value)
 	}

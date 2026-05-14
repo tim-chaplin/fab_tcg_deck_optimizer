@@ -103,13 +103,30 @@ func (gs *GameState) Copy() *GameState {
 	return &out
 }
 
-// Reset resets per-chain locals so the state is ready to play a fresh chain
-// from this permutation's hand order. Auras, items, banished, graveyard, deck, arsenal,
-// pitched, hero, and OpponentMarked carry over untouched — they represent the leaf's
-// pre-chain state. logger is installed verbatim (pass nil for the find-best path, a
-// fresh logger for the recording path).
-func (gs *GameState) Reset(hand []card.Card, incomingDamage int, logger *turnlogger.TurnLogger) {
-	gs.hand = hand
+// ResetEphemeralState returns gs to its start-of-turn baseline: it discards every field
+// that playing out a turn accumulates, keeping only the cross-turn carryover (hero, deck,
+// arsenal, graveyard, banished, the aura / item lists, opponentMarked, and the matchup's
+// incoming-damage figures).
+//
+// What it resets, by category:
+//   - per-turn zones — hand, pitched, defenders
+//   - resolution scratch — the played / remaining lists, the one-shot trigger queue, the
+//     value accumulator and draw counter, action points, the block total, the current-step
+//     machinery, the "happened this resolution" flags, the cacheable bit, the logger
+//   - aura gates — every aura's FiredThisTurn flag rearms, so OncePerTurn auras can fire
+//     again
+//
+// auraCreated lands at len(auras) > 0 — a state holding carryover auras reads as "an aura
+// is in play" for the cards that gate on it.
+//
+// incomingDamage is deliberately left alone: defense reactions decrement it as a turn
+// resolves, but ResetEphemeralState can't restore the matchup figure without being told
+// it, so the caller re-sets it. (A damagePrevented accumulator that keeps incomingDamage
+// constant would remove this wart — tracked separately.)
+func (gs *GameState) ResetEphemeralState() {
+	gs.hand = nil
+	gs.pitched = nil
+	gs.defenders = nil
 	gs.cardsPlayed = nil
 	gs.cardsRemaining = nil
 	gs.triggers = nil
@@ -118,16 +135,19 @@ func (gs *GameState) Reset(hand []card.Card, incomingDamage int, logger *turnlog
 	gs.actionPoints = 1
 	gs.value = 0
 	gs.cardsDrawn = 0
-	gs.incomingDamage = incomingDamage
-	gs.cardBanished = false
-	gs.arcaneDamageDealt = false
-	gs.nonAttackActionPlayed = false
+	gs.blockTotal = 0
 	gs.currentAuraDestroyed = false
 	gs.currentStepRerouted = false
 	gs.currentAuraIdx = -1
+	gs.cardBanished = false
+	gs.arcaneDamageDealt = false
+	gs.nonAttackActionPlayed = false
 	gs.cacheable = true
-	gs.logger = logger
+	gs.logger = nil
 	gs.auraCreated = len(gs.auras) > 0
+	for _, a := range gs.auras {
+		a.SetFiredThisTurn(false)
+	}
 }
 
 // === Pure state accessors. No cacheable flips; sim uses these to drive the chain runner. ===

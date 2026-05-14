@@ -22,9 +22,10 @@ func WrapTriggerHandler(h card.TriggerHandler) trigger.Handler { return wrapTrig
 
 // Test-only exports. Visible to package sim_test files in this directory only.
 
-// Best re-exports the package-private best for sim_test consumers.
-func Best(weapons []Weapon, hand []card.Card, mp Matchup, d *deck.Deck, prior Prior) TurnSummary {
-	return best(weapons, hand, mp, d, prior)
+// Best re-exports the package-private best for sim_test consumers. state is the carryover
+// *GameState — pass nil to start from a clean state seeded with hero h.
+func Best(weapons []Weapon, hand []card.Card, mp Matchup, d *deck.Deck, state *gameengine.GameState) TurnSummary {
+	return best(weapons, hand, mp, d, state)
 }
 
 // DeckOf builds a *deck.Deck from a list of cards.

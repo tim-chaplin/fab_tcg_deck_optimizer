@@ -11,14 +11,12 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/gameengine"
 )
 
-func (e *Evaluator) findBest(weapons []Weapon, hand []card.Card, mp Matchup, d *deck.Deck, prior Prior, skipLog bool) TurnSummary {
-	masterState := newTurnMasterState(prior, mp, d)
-
+func (e *Evaluator) findBest(weapons []Weapon, hand []card.Card, mp Matchup, d *deck.Deck, masterState *gameengine.GameState, skipLog bool) TurnSummary {
 	var cacheKey evalCacheKey
 	cacheUsable := e.cache != nil
 	if cacheUsable {
 		var keyOK bool
-		cacheKey, keyOK = makeCacheKey(weapons, hand, prior)
+		cacheKey, keyOK = makeCacheKey(weapons, hand, masterState)
 		if !keyOK {
 			cacheUsable = false
 		}
@@ -26,13 +24,13 @@ func (e *Evaluator) findBest(weapons []Weapon, hand []card.Card, mp Matchup, d *
 	if cacheUsable {
 		if entry, ok := e.cache.lookup(cacheKey); ok {
 			e.cache.hits.Add(1)
-			return e.replayBest(entry, weapons, hand, mp, d, prior, masterState, skipLog)
+			return e.replayBest(entry, weapons, hand, mp, d, masterState, skipLog)
 		}
 		e.cache.misses.Add(1)
 	}
 
 	bufs := e.getAttackBufs(len(hand), weapons)
-	arsenalCardIn := prior.Arsenal
+	arsenalCardIn := masterState.Arsenal()
 	n := len(hand)
 	totalN := n
 	if arsenalCardIn != nil {
@@ -70,7 +68,7 @@ func (e *Evaluator) findBest(weapons []Weapon, hand []card.Card, mp Matchup, d *
 				masterState, weapons, hand, d,
 				rolesBuf, n, bufs,
 				mp, defenseSum,
-				prior, skipLog,
+				skipLog,
 			)
 			if !leafCacheable {
 				cacheable = false

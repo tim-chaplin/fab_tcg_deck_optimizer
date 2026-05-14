@@ -26,6 +26,7 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/deckio"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/heroes"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/gameengine"
 )
 
 // loadRealDeck reads mydecks/viserai_v4.json from somewhere up the directory tree.
@@ -137,14 +138,14 @@ func TestEvalCache_ResetCache(t *testing.T) {
 	hand := []card.Card{cards.MaleficIncantationBlue{}, cards.MaleficIncantationBlue{}}
 
 	// First call populates the cache (miss + store).
-	ev.Best(nil, hand, Matchup{IncomingDamage: 0}, nil, Prior{Hero: heroes.Viserai{}})
+	ev.Best(nil, hand, Matchup{IncomingDamage: 0}, nil, gameengine.GameStateBuilder().SetHero(heroes.Viserai{}).Build())
 	preStats := ev.CacheStats()
 	if preStats.Entries == 0 {
 		t.Fatalf("expected cache to have an entry after first Best call")
 	}
 
 	// Second call hits the cache.
-	ev.Best(nil, hand, Matchup{IncomingDamage: 0}, nil, Prior{Hero: heroes.Viserai{}})
+	ev.Best(nil, hand, Matchup{IncomingDamage: 0}, nil, gameengine.GameStateBuilder().SetHero(heroes.Viserai{}).Build())
 	if got := ev.CacheStats().Hits; got != preStats.Hits+1 {
 		t.Errorf("hits = %d, want %d (one new hit on second call)", got, preStats.Hits+1)
 	}
@@ -161,7 +162,7 @@ func TestEvalCache_ResetCache(t *testing.T) {
 
 	// Same hand after reset is now a miss — confirms entries are actually gone, not just
 	// the count reading wrong.
-	ev.Best(nil, hand, Matchup{IncomingDamage: 0}, nil, Prior{Hero: heroes.Viserai{}})
+	ev.Best(nil, hand, Matchup{IncomingDamage: 0}, nil, gameengine.GameStateBuilder().SetHero(heroes.Viserai{}).Build())
 	if got := ev.CacheStats().Misses; got != post.Misses+1 {
 		t.Errorf("missed = %d, want %d (one new miss after reset)", got, post.Misses+1)
 	}
@@ -180,8 +181,8 @@ func TestEvalCache_PerHandEquivalence(t *testing.T) {
 	for _, h := range hands {
 		// Run twice to exercise cache hit on the second invocation.
 		for i := 0; i < 2; i++ {
-			cached := cachedEv.Best(nil, h, Matchup{IncomingDamage: 0}, deck, Prior{Hero: heroes.Viserai{}})
-			fresh := freshEv.Best(nil, h, Matchup{IncomingDamage: 0}, deck, Prior{Hero: heroes.Viserai{}})
+			cached := cachedEv.Best(nil, h, Matchup{IncomingDamage: 0}, deck, gameengine.GameStateBuilder().SetHero(heroes.Viserai{}).Build())
+			fresh := freshEv.Best(nil, h, Matchup{IncomingDamage: 0}, deck, gameengine.GameStateBuilder().SetHero(heroes.Viserai{}).Build())
 			if cached.Value != fresh.Value {
 				t.Errorf("hand=%v iter=%d: cached.Value=%d fresh.Value=%d", h, i, cached.Value, fresh.Value)
 			}

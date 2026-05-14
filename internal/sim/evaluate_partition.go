@@ -29,14 +29,14 @@ func (e *Evaluator) evaluatePartition(
 	d *deck.Deck,
 	rolesBuf []Role, n int, bufs *attackBufs,
 	mp Matchup, defenseSum int,
-	prior Prior, skipLog bool,
+	skipLog bool,
 ) (
 	attackDealt, defenseDealt int,
 	swung []string, winner *gameengine.GameState,
 	ok, cacheable bool,
 	arsenalAtChainStart card.Card,
 ) {
-	arsenalCardIn := prior.Arsenal
+	arsenalCardIn := masterState.Arsenal()
 	// Group hand cards into played / pitched / defending buckets, then fold in the
 	// arsenal-in card based on its slot's role.
 	p, a, defs := groupByRoleInto(
@@ -66,7 +66,7 @@ func (e *Evaluator) evaluatePartition(
 		masterState, weapons, a, defs, p, h, d, bufs,
 		mp, defenseSum,
 		arsenalInIdx, arsenalDefenderIdx, arsenalAtChainStart,
-		prior, skipLog,
+		skipLog,
 	)
 	return
 }

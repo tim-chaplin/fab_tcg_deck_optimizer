@@ -51,34 +51,11 @@ func FormatLogEntry(e turnlogger.LogEntry) string {
 	return fmt.Sprintf("%s (+%d) (from %s)", e.Text, e.N, e.Source)
 }
 
-// newTurnMasterState builds the start-of-turn master *GameState. Holds prior state
-// (auras / items / banished / graveyard / opponent-marked) and matchup config (incoming
-// damage, arcane). Per-leaf and per-permutation copies branch off via Copy().
-func newTurnMasterState(prior Prior, mp Matchup, d *deck.Deck) *gameengine.GameState {
-	ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().
-		SetHero(prior.Hero).
-		SetArsenal(prior.Arsenal).
-		SetBanished(append([]card.Card(nil), prior.Banished...)).
-		SetGraveyard(append([]card.Card(nil), prior.Graveyard...)).
-		SetOpponentMarked(prior.OpponentMarked).
-		SetIncomingDamage(mp.IncomingDamage).
-		SetArcaneIncomingDamage(mp.ArcaneIncomingDamage).
-		Build()}
-	s := ge.GameState
-	s.SetDeck(d.Copy())
-	for _, a := range prior.Auras {
-		s.CreateAura(a.Copy().(gameengine.Aura))
-	}
-	for _, i := range prior.Items {
-		s.CreateItem(i.Copy().(gameengine.Item))
-	}
-	s.SetAuraCreated(false)
-	return s
-}
-
 // bestAttackWithWeapons enumerates phase / weapon masks for one partition leaf and
 // returns the best (damage, futureValue, budget, swungWeapons, winnerState, legal,
-// cacheable) tuple.
+// cacheable) tuple. masterState holds the start-of-turn carryover (hero, arsenal, auras,
+// items, banished, graveyard, opponentMarked) the chain runner reads from; each per-leaf
+// state branches off via masterState.Copy().
 func bestAttackWithWeapons(
 	masterState *gameengine.GameState,
 	weapons []Weapon,
@@ -88,12 +65,11 @@ func bestAttackWithWeapons(
 	mp Matchup,
 	blockTotal, arsenalInIdx, arsenalDefenderIdx int,
 	arsenalAtChainStart card.Card,
-	prior Prior,
 	skipLog bool,
 ) (int, int, chainBudget, []string, *gameengine.GameState, bool, bool) {
-	runechantCarryover := auraCountByName(prior.Auras, "Runechant")
+	runechantCarryover := auraCountByNameInState(masterState, "Runechant")
 	ctx := &sequenceContext{
-		hero:                prior.Hero,
+		hero:                masterState.Hero().(hero.Hero),
 		pitched:             pitched,
 		deck:                d,
 		handStart:           held,
@@ -103,9 +79,9 @@ func bestAttackWithWeapons(
 		matchup:             mp,
 		blockTotal:          blockTotal,
 		arsenalInIdx:        arsenalInIdx,
-		priorOpponentMarked: prior.OpponentMarked,
-		priorBanish:         prior.Banished,
-		priorGraveyard:      prior.Graveyard,
+		priorOpponentMarked: masterState.OpponentMarked(),
+		priorBanish:         masterState.Banished(),
+		priorGraveyard:      masterState.Graveyard(),
 		defenders:           defenders,
 		skipLog:             skipLog,
 		cacheable:           true,
@@ -113,7 +89,7 @@ func bestAttackWithWeapons(
 	// Extend bufs.activatedAbilities with item ability instances for this Best call.
 	abilities := bufs.activatedAbilities[:bufs.weaponAbilityCount]
 	abilityCosts := bufs.activatedAbilityCosts[:bufs.weaponAbilityCount]
-	for _, it := range prior.Items {
+	for _, it := range masterState.Items() {
 		copies := it.Count()
 		if copies > perItemAbilityCap {
 			copies = perItemAbilityCap
@@ -385,11 +361,12 @@ func (ctx *sequenceContext) runDefense(defenders, pitched []card.Card, deckPile 
 
 // preparePermState returns a fresh per-permutation *GameState for the chain run. The
 // state inherits the leafState's post-defense auras / items / graveyard / banished /
-// hero / arsenal, and gets its chain-locals reset via Reset. Hand is set to
-// the chain attackers + the attack-phase pitched bag so each chain step's Hand() read
-// sees the upcoming bag.
+// hero / arsenal; ResetEphemeralState wipes the previous permutation's play state, then
+// this permutation's inputs are installed. Hand is set to the chain attackers + the
+// attack-phase pitched bag so each chain step's Hand() read sees the upcoming bag.
 func (ctx *sequenceContext) preparePermState(playedAttackers []*card.CardState, n int) *gameengine.GameState {
 	s := ctx.leafState.Copy()
+	s.ResetEphemeralState()
 	s.SetHero(ctx.hero)
 	s.SetArsenal(ctx.arsenalAtChainStart)
 	s.SetOpponentMarked(ctx.priorOpponentMarked)
@@ -403,7 +380,9 @@ func (ctx *sequenceContext) preparePermState(playedAttackers []*card.CardState, 
 		hand = append(hand, c)
 	}
 	s.SetPitched(ctx.pitched)
-	s.Reset(hand, ctx.matchup.IncomingDamage, ctx.newPermLogger())
+	s.SetHand(hand)
+	s.SetIncomingDamage(ctx.matchup.IncomingDamage)
+	s.SetLogger(ctx.newPermLogger())
 	return s
 }
 
