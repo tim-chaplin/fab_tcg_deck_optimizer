@@ -297,7 +297,7 @@ func (ctx *sequenceContext) newPermLogger() *turnlogger.TurnLogger {
 // + defenders for the chain phase. Chain-locals (value, action points, …) get reset
 // per permutation via ResetEphemeralState, so runDefense doesn't bother restoring them.
 //
-// SetIncomingDamage installs the matchup figure once and zeroes the damage-prevented
+// SetIncomingDamage installs the matchup figure once and zeroes the damage-blocked
 // accumulator; each DR's resolution and each plain block then bank into that accumulator,
 // so leafState.RemainingUnblockedDamage() reads the unblocked remainder as defense
 // proceeds while the matchup figure itself stays constant.
@@ -350,7 +350,7 @@ func (ctx *sequenceContext) runDefense(defenders, pitched []card.Card, deckPile 
 		}
 		if block > 0 {
 			total += block
-			state.AddDamagePrevented(block)
+			state.AddDamageBlocked(block)
 		}
 	}
 
@@ -369,7 +369,7 @@ func (ctx *sequenceContext) runDefense(defenders, pitched []card.Card, deckPile 
 // attack-phase pitched bag so each chain step's Hand() read sees the upcoming bag.
 //
 // IncomingDamage needs no re-install: the matchup figure rode in constant on leafState,
-// and ResetEphemeralState zeroed the damage-prevented accumulator, so the attack chain
+// and ResetEphemeralState zeroed the damage-blocked accumulator, so the attack chain
 // already sees the full matchup figure.
 func (ctx *sequenceContext) preparePermState(playedAttackers []*card.CardState, n int) *gameengine.GameState {
 	s := ctx.leafState.Copy()

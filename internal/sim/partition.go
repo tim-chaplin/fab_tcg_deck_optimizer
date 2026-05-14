@@ -264,7 +264,7 @@ func roleAllowed(r Role, isArsenalSlot, isDefenseReaction, canAttack bool) bool 
 // defendersDamage tallies the total Value contribution of the partition's defense phase
 // against the caller-supplied state engine. DRs resolve first; plain blocks then consume
 // whatever incoming damage is left, capped per card. The engine is mutated in place: the
-// matchup figure rides in via SetIncomingDamage (which zeroes the damage-prevented
+// matchup figure rides in via SetIncomingDamage (which zeroes the damage-blocked
 // accumulator), each DR's resolution and each plain block bank into that accumulator, and
 // the chain phase reads the post-defense graveyard via the engine's left-behind state.
 //
@@ -313,7 +313,7 @@ func defendersDamage(defenders, pitched []card.Card, deckPile *deck.Deck, ge *ga
 		}
 		if block > 0 {
 			total += block
-			ge.AddDamagePrevented(block)
+			ge.AddDamageBlocked(block)
 		}
 	}
 	return total, gravBuf, cacheable

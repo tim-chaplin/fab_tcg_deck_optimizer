@@ -537,7 +537,7 @@ func (ge *GameEngine) DestroyAura(addToGraveyard bool) {
 // ResolveChainStep runs card.Play on self and then applies the standard chain-step
 // resolution: for an attack-action or weapon-attack, credit self.EffectiveAttack() to
 // ge.value; for a defense-reaction (or DefensiveInstant), credit the EffectiveDefense
-// capped at the unblocked IncomingDamage and bank it via AddDamagePrevented; for
+// capped at the remaining unblocked damage and bank it via AddDamageBlocked; for
 // everything else, log (+0). The "<DisplayName>: <VERB> (+N)" chain-step entry is
 // appended after Play returns so any self-buffs Play applied (e.g. modal +2{p} riders
 // flipping self.BonusAttack) are reflected in the displayed delta.
@@ -573,13 +573,13 @@ func (ge *GameEngine) chainStepDelta(self *card.CardState) int {
 		return n
 	case types.IsDefenseReaction() || isDefensiveInstant(self.Card):
 		n := self.EffectiveDefense()
-		if rem := ge.incomingDamage - ge.damagePrevented; n > rem {
+		if rem := ge.incomingDamage - ge.damageBlocked; n > rem {
 			n = rem
 		}
 		if n < 0 {
 			n = 0
 		}
-		ge.damagePrevented += n
+		ge.damageBlocked += n
 		ge.value += n
 		return n
 	}
