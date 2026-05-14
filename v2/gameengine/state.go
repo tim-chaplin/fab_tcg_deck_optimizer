@@ -37,6 +37,7 @@ type GameState struct {
 	value                int
 	cardsDrawn           int
 	incomingDamage       int
+	damagePrevented      int
 	arcaneIncomingDamage int
 	blockTotal           int
 	currentAuraIdx       int
@@ -119,10 +120,8 @@ func (gs *GameState) Copy() *GameState {
 // auraCreated lands at len(auras) > 0 — a state holding carryover auras reads as "an aura
 // is in play" for the cards that gate on it.
 //
-// incomingDamage is deliberately left alone: defense reactions decrement it as a turn
-// resolves, but ResetEphemeralState can't restore the matchup figure without being told
-// it, so the caller re-sets it. (A damagePrevented accumulator that keeps incomingDamage
-// constant would remove this wart — tracked separately.)
+// incomingDamage stays put — it's the constant matchup figure, carried over untouched.
+// damagePrevented (how much of it defense has absorbed so far) resets to zero.
 func (gs *GameState) ResetEphemeralState() {
 	gs.hand = nil
 	gs.pitched = nil
@@ -135,6 +134,7 @@ func (gs *GameState) ResetEphemeralState() {
 	gs.actionPoints = 1
 	gs.value = 0
 	gs.cardsDrawn = 0
+	gs.damagePrevented = 0
 	gs.blockTotal = 0
 	gs.currentAuraDestroyed = false
 	gs.currentStepRerouted = false
@@ -253,8 +253,24 @@ func (gs *GameState) AddValue(n int) { gs.value += n }
 func (gs *GameState) CardsDrawn() int     { return gs.cardsDrawn }
 func (gs *GameState) SetCardsDrawn(n int) { gs.cardsDrawn = n }
 
-func (gs *GameState) IncomingDamage() int     { return gs.incomingDamage }
-func (gs *GameState) SetIncomingDamage(n int) { gs.incomingDamage = n }
+// IncomingDamage returns the opponent damage still unblocked this turn — the constant
+// matchup figure minus everything defense has absorbed so far.
+func (gs *GameState) IncomingDamage() int { return gs.incomingDamage - gs.damagePrevented }
+
+// SetIncomingDamage installs the turn's incoming-damage figure and zeroes the
+// damage-prevented accumulator — "n incoming, none prevented yet". Defense reactions and
+// blocks then chip away at it via AddDamagePrevented (and the engine's DR resolution)
+// rather than mutating the figure itself, so the matchup number stays constant and
+// carries across turns untouched.
+func (gs *GameState) SetIncomingDamage(n int) {
+	gs.incomingDamage = n
+	gs.damagePrevented = 0
+}
+
+// AddDamagePrevented credits n damage as absorbed by defense, shrinking IncomingDamage by
+// n. The engine's DR resolution accumulates through here; the chain runner's plain-block
+// pass calls it directly.
+func (gs *GameState) AddDamagePrevented(n int) { gs.damagePrevented += n }
 
 func (gs *GameState) ArcaneIncomingDamage() int     { return gs.arcaneIncomingDamage }
 func (gs *GameState) SetArcaneIncomingDamage(n int) { gs.arcaneIncomingDamage = n }

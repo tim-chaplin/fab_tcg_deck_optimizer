@@ -295,16 +295,21 @@ func (ctx *sequenceContext) newPermLogger() *turnlogger.TurnLogger {
 // runDefense mutates ctx.leafState through the defender list, accumulating per-DR Value
 // into total. Auras grow with any DR-added entries; graveyard is left as priorGraveyard
 // + defenders for the chain phase. Chain-locals (value, action points, …) get reset
-// per permutation via Reset, so runDefense doesn't bother restoring them.
+// per permutation via ResetEphemeralState, so runDefense doesn't bother restoring them.
+//
+// SetIncomingDamage installs the matchup figure once and zeroes the damage-prevented
+// accumulator; each DR's resolution and each plain block then bank into that accumulator,
+// so leafState.IncomingDamage() reads the unblocked remainder as defense proceeds while
+// the matchup figure itself stays constant.
 func (ctx *sequenceContext) runDefense(defenders, pitched []card.Card, deckPile *deck.Deck, matchupIncomingDamage, blockBudget, arsenalDefenderIdx int) (int, bool) {
 	state := ctx.leafState
 	state.SetLogger(ctx.newPermLogger())
 	state.SetDeck(deckPile)
+	state.SetIncomingDamage(matchupIncomingDamage)
 	ge := state.Engine()
 	cs := &ctx.bufs.drCardStateScratch
 
 	total := 0
-	remaining := matchupIncomingDamage
 	cacheable := true
 
 	// Per-DR view: graveyard = defenders so DRs that scan graveyard see the defender
@@ -318,12 +323,10 @@ func (ctx *sequenceContext) runDefense(defenders, pitched []card.Card, deckPile 
 		state.SetPitched(pitched)
 		state.SetDefenders(defenders)
 		state.SetValue(0)
-		state.SetIncomingDamage(remaining)
 		state.SetCacheable(true)
 		*cs = card.CardState{Card: def, FromArsenal: i == arsenalDefenderIdx}
 		ge.ResolveChainStep(state.Logger(), cs)
 		total += state.Value()
-		remaining = state.IncomingDamage()
 		if !state.IsCacheable() {
 			cacheable = false
 		}
@@ -342,12 +345,12 @@ func (ctx *sequenceContext) runDefense(defenders, pitched []card.Card, deckPile 
 			b.Block(ge, state.Logger(), cs)
 		}
 		block := cs.EffectiveDefense()
-		if block > remaining {
-			block = remaining
+		if rem := state.IncomingDamage(); block > rem {
+			block = rem
 		}
 		if block > 0 {
 			total += block
-			remaining -= block
+			state.AddDamagePrevented(block)
 		}
 	}
 
@@ -364,6 +367,10 @@ func (ctx *sequenceContext) runDefense(defenders, pitched []card.Card, deckPile 
 // hero / arsenal; ResetEphemeralState wipes the previous permutation's play state, then
 // this permutation's inputs are installed. Hand is set to the chain attackers + the
 // attack-phase pitched bag so each chain step's Hand() read sees the upcoming bag.
+//
+// IncomingDamage needs no re-install: the matchup figure rode in constant on leafState,
+// and ResetEphemeralState zeroed the damage-prevented accumulator, so the attack chain
+// already sees the full matchup figure.
 func (ctx *sequenceContext) preparePermState(playedAttackers []*card.CardState, n int) *gameengine.GameState {
 	s := ctx.leafState.Copy()
 	s.ResetEphemeralState()
@@ -381,7 +388,6 @@ func (ctx *sequenceContext) preparePermState(playedAttackers []*card.CardState, 
 	}
 	s.SetPitched(ctx.pitched)
 	s.SetHand(hand)
-	s.SetIncomingDamage(ctx.matchup.IncomingDamage)
 	s.SetLogger(ctx.newPermLogger())
 	return s
 }

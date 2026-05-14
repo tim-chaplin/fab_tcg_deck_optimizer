@@ -263,9 +263,10 @@ func roleAllowed(r Role, isArsenalSlot, isDefenseReaction, canAttack bool) bool 
 
 // defendersDamage tallies the total Value contribution of the partition's defense phase
 // against the caller-supplied state engine. DRs resolve first; plain blocks then consume
-// whatever incoming damage is left, capped per card. The engine is mutated in place: each
-// DR's resolution updates the running aura set and the engine's IncomingDamage; the chain
-// phase will read the post-defense graveyard via the engine's left-behind state.
+// whatever incoming damage is left, capped per card. The engine is mutated in place: the
+// matchup figure rides in via SetIncomingDamage (which zeroes the damage-prevented
+// accumulator), each DR's resolution and each plain block bank into that accumulator, and
+// the chain phase reads the post-defense graveyard via the engine's left-behind state.
 //
 // blockBudget is the remaining defense-phase pitch supply after the caller has subtracted
 // DR costs. Modal blockers enumerate their modes within blockBudget and pick the one
@@ -275,9 +276,9 @@ func roleAllowed(r Role, isArsenalSlot, isDefenseReaction, canAttack bool) bool 
 // the partition's defense-phase output isn't safe to cache.
 func defendersDamage(defenders, pitched []card.Card, deckPile *deck.Deck, ge *gameengine.GameEngine, gravBuf []card.Card, cs *card.CardState, incomingDamage, blockBudget, arsenalDefenderIdx int) (int, []card.Card, bool) {
 	total := 0
-	remaining := incomingDamage
 	cacheable := true
 	ge.SetDeck(deckPile)
+	ge.SetIncomingDamage(incomingDamage)
 	for i, def := range defenders {
 		if !attackerMetaPtrFor(def).actsAsDR {
 			continue
@@ -287,12 +288,10 @@ func defendersDamage(defenders, pitched []card.Card, deckPile *deck.Deck, ge *ga
 		ge.SetPitched(pitched)
 		ge.SetDefenders(defenders)
 		ge.SetValue(0)
-		ge.SetIncomingDamage(remaining)
 		ge.SetCacheable(true)
 		*cs = card.CardState{Card: def, FromArsenal: i == arsenalDefenderIdx}
 		ge.ResolveChainStep(ge.Logger(), cs)
 		total += ge.Value()
-		remaining = ge.IncomingDamage()
 		if !ge.IsCacheable() {
 			cacheable = false
 		}
@@ -309,12 +308,12 @@ func defendersDamage(defenders, pitched []card.Card, deckPile *deck.Deck, ge *ga
 			b.Block(ge, ge.Logger(), cs)
 		}
 		block := cs.EffectiveDefense()
-		if block > remaining {
-			block = remaining
+		if rem := ge.IncomingDamage(); block > rem {
+			block = rem
 		}
 		if block > 0 {
 			total += block
-			remaining -= block
+			ge.AddDamagePrevented(block)
 		}
 	}
 	return total, gravBuf, cacheable
