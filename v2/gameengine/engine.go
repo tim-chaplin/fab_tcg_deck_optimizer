@@ -503,15 +503,6 @@ func (ge *GameEngine) FireStartOfTurn(onFire func(idx int, damage int, drawnCard
 	}
 }
 
-// AdvanceTurnBoundary clears the per-turn FiredThisTurn flag on every persisted aura.
-// The chain runner calls this when advancing across the turn boundary so the
-// OncePerTurn gate rearms.
-func (ge *GameEngine) AdvanceTurnBoundary() {
-	for i := range ge.auras {
-		ge.auras[i].SetFiredThisTurn(false)
-	}
-}
-
 // DestroyAura removes the aura currently being fired and, when addToGraveyard==true, pushes
 // the aura's source card into the graveyard (token auras with no source no-op). Direct
 // splice (no cacheable flip) — destruction is deterministic from the triggering event.
