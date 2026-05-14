@@ -327,7 +327,7 @@ func runOneShuffle(masterDeck *deck.Deck, scratch *shuffleScratch, stats *DeckSt
 		// Carry hand leftover into next turn's heldBuf; thread play.State forward as master.
 		heldBuf = append(heldBuf[:0], play.State.Hand()...)
 		master = play.State
-		master.PrepareNextTurn()
+		master.ResetTurn()
 		handIdx++
 	}
 	scratch.heldBuf = heldBuf

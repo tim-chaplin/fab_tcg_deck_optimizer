@@ -379,7 +379,7 @@ func (ctx *sequenceContext) preparePermState(playedAttackers []*card.CardState, 
 		hand = append(hand, c)
 	}
 	s.SetPitched(ctx.pitched)
-	s.Reset(hand, ctx.matchup.IncomingDamage, ctx.newPermLogger())
+	s.ResetSequence(hand, ctx.matchup.IncomingDamage, ctx.newPermLogger())
 	return s
 }
 

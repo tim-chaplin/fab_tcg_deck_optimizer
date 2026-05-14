@@ -103,19 +103,13 @@ func (gs *GameState) Copy() *GameState {
 	return &out
 }
 
-// PrepareNextTurn resets per-turn ephemerals so gs can serve as the master state for the
-// next turn. Persistent carry — hero, arsenal, auras, items, banished, graveyard,
-// opponentMarked, incomingDamage, arcaneIncomingDamage — stays untouched. Auras'
-// FiredThisTurn flags reset so OncePerTurn gates rearm.
-//
-// The deck is cleared: the chain runner threads the deck through the deck arg to Best, not
-// gs.deck, so a deck on the master is dead weight every per-leaf Copy would duplicate. The
-// eval loop adopts play.State.Deck() separately and recycles pitched cards onto its bottom.
-func (gs *GameState) PrepareNextTurn() {
-	gs.hand = nil
-	gs.deck = nil
-	gs.pitched = nil
-	gs.defenders = nil
+// resetResolutionScratch zeroes the fields the engine writes while resolving a play
+// sequence: the played / remaining lists, the one-shot trigger queue, the value
+// accumulator and draw counter, the current-step machinery, and the "happened this
+// resolution" flags. The card zones (hand / deck / pitched / defenders), the persistent
+// aura / item lists, and the matchup config are left alone — ResetSequence / ResetTurn
+// layer the remaining fields on top.
+func (gs *GameState) resetResolutionScratch() {
 	gs.cardsPlayed = nil
 	gs.cardsRemaining = nil
 	gs.triggers = nil
@@ -124,7 +118,6 @@ func (gs *GameState) PrepareNextTurn() {
 	gs.actionPoints = 1
 	gs.value = 0
 	gs.cardsDrawn = 0
-	gs.blockTotal = 0
 	gs.cardBanished = false
 	gs.arcaneDamageDealt = false
 	gs.nonAttackActionPlayed = false
@@ -132,38 +125,41 @@ func (gs *GameState) PrepareNextTurn() {
 	gs.currentStepRerouted = false
 	gs.currentAuraIdx = -1
 	gs.cacheable = true
+}
+
+// ResetSequence readies gs to resolve one candidate play sequence — the cards in the given
+// hand order, top to bottom. It clears the resolution scratch and installs the per-sequence
+// inputs: the hand, the incoming-damage figure (restored each call because defense
+// reactions decrement it as the sequence resolves), and the logger (nil for the find-best
+// path, a fresh logger for the recording path). deck, pitched, defenders, and blockTotal
+// are left untouched — the caller sets those around this call. Auras, items, banished,
+// graveyard, arsenal, hero, and OpponentMarked carry over untouched.
+func (gs *GameState) ResetSequence(hand []card.Card, incomingDamage int, logger *turnlogger.TurnLogger) {
+	gs.resetResolutionScratch()
+	gs.hand = hand
+	gs.incomingDamage = incomingDamage
+	gs.logger = logger
+	gs.auraCreated = len(gs.auras) > 0
+}
+
+// ResetTurn readies gs to serve as the start-of-turn state for the next turn. It clears
+// the resolution scratch plus everything else the previous turn dirtied — the card zones
+// (hand / deck / pitched / defenders), the block total, the logger — and rearms every
+// aura's FiredThisTurn gate. Only the genuine cross-turn carryover survives: hero,
+// arsenal, the aura / item lists, banished, graveyard, opponentMarked, and the matchup's
+// incoming-damage figures.
+func (gs *GameState) ResetTurn() {
+	gs.resetResolutionScratch()
+	gs.hand = nil
+	gs.deck = nil
+	gs.pitched = nil
+	gs.defenders = nil
+	gs.blockTotal = 0
 	gs.logger = nil
 	gs.auraCreated = false
 	for _, a := range gs.auras {
 		a.SetFiredThisTurn(false)
 	}
-}
-
-// Reset resets per-chain locals so the state is ready to play a fresh chain
-// from this permutation's hand order. Auras, items, banished, graveyard, deck, arsenal,
-// pitched, hero, and OpponentMarked carry over untouched — they represent the leaf's
-// pre-chain state. logger is installed verbatim (pass nil for the find-best path, a
-// fresh logger for the recording path).
-func (gs *GameState) Reset(hand []card.Card, incomingDamage int, logger *turnlogger.TurnLogger) {
-	gs.hand = hand
-	gs.cardsPlayed = nil
-	gs.cardsRemaining = nil
-	gs.triggers = nil
-	gs.triggeringCard = nil
-	gs.attackReactionTarget = nil
-	gs.actionPoints = 1
-	gs.value = 0
-	gs.cardsDrawn = 0
-	gs.incomingDamage = incomingDamage
-	gs.cardBanished = false
-	gs.arcaneDamageDealt = false
-	gs.nonAttackActionPlayed = false
-	gs.currentAuraDestroyed = false
-	gs.currentStepRerouted = false
-	gs.currentAuraIdx = -1
-	gs.cacheable = true
-	gs.logger = logger
-	gs.auraCreated = len(gs.auras) > 0
 }
 
 // === Pure state accessors. No cacheable flips; sim uses these to drive the chain runner. ===
