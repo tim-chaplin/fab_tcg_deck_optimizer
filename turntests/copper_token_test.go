@@ -16,11 +16,11 @@ import (
 // stateWithItems returns a *GameState seeded with the supplied items. Tests use this to
 // pass token carryover (Gold / Silver / Copper) into EvalOneTurnForTesting.
 func stateWithItems(items ...*token.Item) *gameengine.GameState {
-	s := gameengine.GameStateBuilder().Build()
+	b := gameengine.GameStateBuilder()
 	for _, it := range items {
-		s.CreateItem(it)
+		b.AddItem(it)
 	}
-	return s
+	return b.Build()
 }
 
 // Tests that the Copper token ability stays unspent when the chain can't fund its {4} cost.

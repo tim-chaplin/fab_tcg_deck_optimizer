@@ -101,10 +101,10 @@ func TestFormatBestTurn_LogAttributesEachTriggerSeparately(t *testing.T) {
 	// state.TriggeringCard).
 	bootstrap := gameengine.New()
 	bootstrap.ResolveChainStep(bootstrap.Logger(), &card.CardState{Card: cards.MaleficIncantationRed{}})
-	state := gameengine.GameStateBuilder().SetHero(heroes.Viserai{}).Build()
-	for _, a := range bootstrap.Auras() {
-		state.CreateAura(a)
-	}
+	state := gameengine.GameStateBuilder().
+		SetHero(heroes.Viserai{}).
+		AddAura(bootstrap.Auras()...).
+		Build()
 	got := Best(nil, h, Matchup{}, nil, state)
 	out := FormatBestTurn(got, nil, nil)
 	// Trigger lines render indented (9 spaces) with no "(from <source>)" suffix — the

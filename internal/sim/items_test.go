@@ -96,11 +96,11 @@ func TestEvalCache_PriorItemsKeyedDistinctly(t *testing.T) {
 	mp := Matchup{IncomingDamage: 0}
 	h := FakeHero{Intel: 4}
 	stateWithItems := func(items []*token.Item) *gameengine.GameState {
-		s := gameengine.GameStateBuilder().SetHero(h).Build()
+		b := gameengine.GameStateBuilder().SetHero(h)
 		for _, it := range items {
-			s.CreateItem(it)
+			b.AddItem(it)
 		}
-		return s
+		return b.Build()
 	}
 	_ = ev.Best(nil, hand, mp, nil, stateWithItems([]*token.Item{cards.NewGold(1)}))
 	_ = ev.Best(nil, hand, mp, nil, stateWithItems([]*token.Item{cards.NewGold(2)}))

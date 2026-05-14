@@ -107,11 +107,11 @@ func TestPlaySequence_LeftoverFromNonAttackAction(t *testing.T) {
 // aura list — wrapper for tests that exercise Best with non-zero carryover. n<=0 returns
 // the bare state (no runechants).
 func stateWithRunechants(h hero.Hero, n int) *gameengine.GameState {
-	s := gameengine.GameStateBuilder().SetHero(h).Build()
+	b := gameengine.GameStateBuilder().SetHero(h)
 	if n > 0 {
-		s.CreateAura(cards.NewRunechant(n))
+		b.AddAura(cards.NewRunechant(n))
 	}
-	return s
+	return b.Build()
 }
 
 // Tests carryover bookkeeping end-to-end with no starting runechants — every created token
