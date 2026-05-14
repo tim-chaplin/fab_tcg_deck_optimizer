@@ -106,7 +106,7 @@ func (p *CardState) EffectiveAttack() int {
 
 // EffectiveDefense returns Defense() + BonusDefense + ArsenalDefenseBonus (when this copy
 // came from arsenal), clamped at 0. Read by ResolveChainStep to credit the DR's chain-step
-// (+N) and decrement IncomingDamage.
+// (+N) and bank the block against IncomingDamage.
 func (p *CardState) EffectiveDefense() int {
 	n := p.Card.Defense() + p.BonusDefense
 	if p.FromArsenal {

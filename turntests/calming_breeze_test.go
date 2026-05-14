@@ -17,7 +17,7 @@ func TestCalmingBreeze_PreventsFlat3(t *testing.T) {
 	if ge.Value() != 3 {
 		t.Errorf("Value = %d, want 3", ge.Value())
 	}
-	if ge.IncomingDamage() != 2 {
-		t.Errorf("IncomingDamage = %d, want 2", ge.IncomingDamage())
+	if ge.RemainingUnblockedDamage() != 2 {
+		t.Errorf("RemainingUnblockedDamage = %d, want 2", ge.RemainingUnblockedDamage())
 	}
 }

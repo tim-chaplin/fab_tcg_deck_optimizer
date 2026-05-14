@@ -49,7 +49,7 @@ func fragileAuraValue(ge card.GameEngine, n int, attackActionOnly bool) int {
 	if popsThisTurn(ge, attackActionOnly) {
 		return n
 	}
-	if ge.BlockTotal() >= ge.IncomingDamage() {
+	if ge.BlockTotal() >= ge.RemainingUnblockedDamage() {
 		return n
 	}
 	return 0

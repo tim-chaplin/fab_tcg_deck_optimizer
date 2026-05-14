@@ -103,8 +103,8 @@ func TestResolveChainStep_DefenseReactionCapsToIncomingDamage(t *testing.T) {
 	if ge.Value() != 2 {
 		t.Errorf("Value = %d, want 2 (capped at IncomingDamage)", ge.Value())
 	}
-	if ge.IncomingDamage() != 0 {
-		t.Errorf("IncomingDamage = %d, want 0 (decremented by capped block)", ge.IncomingDamage())
+	if ge.RemainingUnblockedDamage() != 0 {
+		t.Errorf("RemainingUnblockedDamage = %d, want 0 (capped block banked against it)", ge.RemainingUnblockedDamage())
 	}
 	if got := ge.LogEntries(); len(got) != 1 || got[0].N != 2 {
 		t.Errorf("log = %v, want one chain-step entry with N=2", got)
@@ -118,8 +118,8 @@ func TestResolveChainStep_DefenseReactionUncappedWhenIncomingExceedsDefense(t *t
 	if ge.Value() != 4 {
 		t.Errorf("Value = %d, want 4 (printed defense, uncapped)", ge.Value())
 	}
-	if ge.IncomingDamage() != 6 {
-		t.Errorf("IncomingDamage = %d, want 6 (10 - 4)", ge.IncomingDamage())
+	if ge.RemainingUnblockedDamage() != 6 {
+		t.Errorf("RemainingUnblockedDamage = %d, want 6 (10 - 4)", ge.RemainingUnblockedDamage())
 	}
 }
 
