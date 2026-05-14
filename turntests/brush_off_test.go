@@ -27,8 +27,8 @@ func TestBrushOff_PreventsCap(t *testing.T) {
 		if ge.Value() != tc.want {
 			t.Errorf("%s: Value = %d, want %d", tc.card.Name(), ge.Value(), tc.want)
 		}
-		if ge.IncomingDamage() != 5-tc.want {
-			t.Errorf("%s: IncomingDamage = %d, want %d", tc.card.Name(), ge.IncomingDamage(), 5-tc.want)
+		if ge.RemainingUnblockedDamage() != 5-tc.want {
+			t.Errorf("%s: RemainingUnblockedDamage = %d, want %d", tc.card.Name(), ge.RemainingUnblockedDamage(), 5-tc.want)
 		}
 	}
 }

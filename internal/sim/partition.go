@@ -308,7 +308,7 @@ func defendersDamage(defenders, pitched []card.Card, deckPile *deck.Deck, ge *ga
 			b.Block(ge, ge.Logger(), cs)
 		}
 		block := cs.EffectiveDefense()
-		if rem := ge.IncomingDamage(); block > rem {
+		if rem := ge.RemainingUnblockedDamage(); block > rem {
 			block = rem
 		}
 		if block > 0 {

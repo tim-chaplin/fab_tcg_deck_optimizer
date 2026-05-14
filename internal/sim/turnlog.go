@@ -185,18 +185,18 @@ func formatBlockLine(a CardAssignment) string {
 }
 
 // appendDefenseReactionLines re-Plays the DR with the same fresh state shape defendersDamage
-// uses (Graveyard = all defenders so banish-target scans see the right shape; IncomingDamage
-// threaded across the DR loop so each defender sees what's left after earlier ones blocked)
-// and walks the resulting log: the chain step renders with its own (+N) for the block, and
-// any arcane / runechant / +1{d} riders attach as childEntryPrefix-tagged sub-lines via
-// appendGroupedChainEntries. Returns the updated remaining-incoming counter so the caller
-// can thread it into the next DR.
+// uses (Graveyard = all defenders so banish-target scans see the right shape; the remaining
+// unblocked damage threaded across the DR loop so each defender sees what's left after
+// earlier ones blocked) and walks the resulting log: the chain step renders with its own
+// (+N) for the block, and any arcane / runechant / +1{d} riders attach as
+// childEntryPrefix-tagged sub-lines via appendGroupedChainEntries. Returns the updated
+// remaining-damage counter so the caller can thread it into the next DR.
 func appendDefenseReactionLines(out []string, a CardAssignment, defenders []card.Card, remaining int) ([]string, int) {
 	ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetGraveyard(append([]card.Card(nil), defenders...)).Build()}
 	ge.SetIncomingDamage(remaining)
 	cs := card.CardState{Card: a.Card, FromArsenal: a.FromArsenal}
 	ge.ResolveChainStep(ge.Logger(), &cs)
-	return appendGroupedChainEntries(out, ge.LogEntries()), ge.IncomingDamage()
+	return appendGroupedChainEntries(out, ge.LogEntries()), ge.RemainingUnblockedDamage()
 }
 
 // defendersFromParts collects every card committed to defense — Defense Reactions and plain

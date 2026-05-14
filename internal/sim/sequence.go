@@ -299,8 +299,8 @@ func (ctx *sequenceContext) newPermLogger() *turnlogger.TurnLogger {
 //
 // SetIncomingDamage installs the matchup figure once and zeroes the damage-prevented
 // accumulator; each DR's resolution and each plain block then bank into that accumulator,
-// so leafState.IncomingDamage() reads the unblocked remainder as defense proceeds while
-// the matchup figure itself stays constant.
+// so leafState.RemainingUnblockedDamage() reads the unblocked remainder as defense
+// proceeds while the matchup figure itself stays constant.
 func (ctx *sequenceContext) runDefense(defenders, pitched []card.Card, deckPile *deck.Deck, matchupIncomingDamage, blockBudget, arsenalDefenderIdx int) (int, bool) {
 	state := ctx.leafState
 	state.SetLogger(ctx.newPermLogger())
@@ -345,7 +345,7 @@ func (ctx *sequenceContext) runDefense(defenders, pitched []card.Card, deckPile 
 			b.Block(ge, state.Logger(), cs)
 		}
 		block := cs.EffectiveDefense()
-		if rem := state.IncomingDamage(); block > rem {
+		if rem := state.RemainingUnblockedDamage(); block > rem {
 			block = rem
 		}
 		if block > 0 {

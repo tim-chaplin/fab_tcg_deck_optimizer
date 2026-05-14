@@ -253,9 +253,9 @@ func (gs *GameState) AddValue(n int) { gs.value += n }
 func (gs *GameState) CardsDrawn() int     { return gs.cardsDrawn }
 func (gs *GameState) SetCardsDrawn(n int) { gs.cardsDrawn = n }
 
-// IncomingDamage returns the opponent damage still unblocked this turn — the constant
-// matchup figure minus everything defense has absorbed so far.
-func (gs *GameState) IncomingDamage() int { return gs.incomingDamage - gs.damagePrevented }
+// RemainingUnblockedDamage returns the opponent damage still unblocked this turn — the
+// constant matchup figure minus everything defense has absorbed so far.
+func (gs *GameState) RemainingUnblockedDamage() int { return gs.incomingDamage - gs.damagePrevented }
 
 // SetIncomingDamage installs the turn's incoming-damage figure and zeroes the
 // damage-prevented accumulator — "n incoming, none prevented yet". Defense reactions and
@@ -267,9 +267,9 @@ func (gs *GameState) SetIncomingDamage(n int) {
 	gs.damagePrevented = 0
 }
 
-// AddDamagePrevented credits n damage as absorbed by defense, shrinking IncomingDamage by
-// n. The engine's DR resolution accumulates through here; the chain runner's plain-block
-// pass calls it directly.
+// AddDamagePrevented credits n damage as absorbed by defense, shrinking
+// RemainingUnblockedDamage by n. The engine's DR resolution accumulates through here; the
+// chain runner's plain-block pass calls it directly.
 func (gs *GameState) AddDamagePrevented(n int) { gs.damagePrevented += n }
 
 func (gs *GameState) ArcaneIncomingDamage() int     { return gs.arcaneIncomingDamage }

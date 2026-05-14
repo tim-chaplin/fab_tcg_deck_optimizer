@@ -82,7 +82,7 @@ type GameEngine interface {
 	MarkOpponent()
 
 	// Partition / matchup state.
-	IncomingDamage() int
+	RemainingUnblockedDamage() int
 	ArcaneIncomingDamage() int
 	BlockTotal() int
 	Defenders() []Card
