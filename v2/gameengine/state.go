@@ -103,13 +103,30 @@ func (gs *GameState) Copy() *GameState {
 	return &out
 }
 
-// resetResolutionScratch zeroes the fields the engine writes while resolving a play
-// sequence: the played / remaining lists, the one-shot trigger queue, the value
-// accumulator and draw counter, the current-step machinery, and the "happened this
-// resolution" flags. The card zones (hand / deck / pitched / defenders), the persistent
-// aura / item lists, and the matchup config are left alone — ResetSequence / ResetTurn
-// layer the remaining fields on top.
-func (gs *GameState) resetResolutionScratch() {
+// ResetEphemeralState returns gs to its start-of-turn baseline: it discards every field
+// that playing out a turn accumulates, keeping only the cross-turn carryover (hero, deck,
+// arsenal, graveyard, banished, the aura / item lists, opponentMarked, and the matchup's
+// incoming-damage figures).
+//
+// What it resets, by category:
+//   - per-turn zones — hand, pitched, defenders
+//   - resolution scratch — the played / remaining lists, the one-shot trigger queue, the
+//     value accumulator and draw counter, action points, the block total, the current-step
+//     machinery, the "happened this resolution" flags, the cacheable bit, the logger
+//   - aura gates — every aura's FiredThisTurn flag rearms, so OncePerTurn auras can fire
+//     again
+//
+// auraCreated lands at len(auras) > 0 — a state holding carryover auras reads as "an aura
+// is in play" for the cards that gate on it.
+//
+// incomingDamage is deliberately left alone: defense reactions decrement it as a turn
+// resolves, but ResetEphemeralState can't restore the matchup figure without being told
+// it, so the caller re-sets it. (A damagePrevented accumulator that keeps incomingDamage
+// constant would remove this wart — tracked separately.)
+func (gs *GameState) ResetEphemeralState() {
+	gs.hand = nil
+	gs.pitched = nil
+	gs.defenders = nil
 	gs.cardsPlayed = nil
 	gs.cardsRemaining = nil
 	gs.triggers = nil
@@ -118,45 +135,16 @@ func (gs *GameState) resetResolutionScratch() {
 	gs.actionPoints = 1
 	gs.value = 0
 	gs.cardsDrawn = 0
-	gs.cardBanished = false
-	gs.arcaneDamageDealt = false
-	gs.nonAttackActionPlayed = false
+	gs.blockTotal = 0
 	gs.currentAuraDestroyed = false
 	gs.currentStepRerouted = false
 	gs.currentAuraIdx = -1
+	gs.cardBanished = false
+	gs.arcaneDamageDealt = false
+	gs.nonAttackActionPlayed = false
 	gs.cacheable = true
-}
-
-// ResetSequence readies gs to resolve one candidate play sequence — the cards in the given
-// hand order, top to bottom. It clears the resolution scratch and installs the per-sequence
-// inputs: the hand, the incoming-damage figure (restored each call because defense
-// reactions decrement it as the sequence resolves), and the logger (nil for the find-best
-// path, a fresh logger for the recording path). deck, pitched, defenders, and blockTotal
-// are left untouched — the caller sets those around this call. Auras, items, banished,
-// graveyard, arsenal, hero, and OpponentMarked carry over untouched.
-func (gs *GameState) ResetSequence(hand []card.Card, incomingDamage int, logger *turnlogger.TurnLogger) {
-	gs.resetResolutionScratch()
-	gs.hand = hand
-	gs.incomingDamage = incomingDamage
-	gs.logger = logger
-	gs.auraCreated = len(gs.auras) > 0
-}
-
-// ResetTurn readies gs to serve as the start-of-turn state for the next turn. It clears
-// the resolution scratch plus everything else the previous turn dirtied — the card zones
-// (hand / deck / pitched / defenders), the block total, the logger — and rearms every
-// aura's FiredThisTurn gate. Only the genuine cross-turn carryover survives: hero,
-// arsenal, the aura / item lists, banished, graveyard, opponentMarked, and the matchup's
-// incoming-damage figures.
-func (gs *GameState) ResetTurn() {
-	gs.resetResolutionScratch()
-	gs.hand = nil
-	gs.deck = nil
-	gs.pitched = nil
-	gs.defenders = nil
-	gs.blockTotal = 0
 	gs.logger = nil
-	gs.auraCreated = false
+	gs.auraCreated = len(gs.auras) > 0
 	for _, a := range gs.auras {
 		a.SetFiredThisTurn(false)
 	}

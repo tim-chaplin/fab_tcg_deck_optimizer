@@ -327,7 +327,11 @@ func runOneShuffle(masterDeck *deck.Deck, scratch *shuffleScratch, stats *DeckSt
 		// Carry hand leftover into next turn's heldBuf; thread play.State forward as master.
 		heldBuf = append(heldBuf[:0], play.State.Hand()...)
 		master = play.State
-		master.ResetTurn()
+		master.ResetEphemeralState()
+		// The chain runner installs a fresh per-leaf deck copy; a deck on the master is
+		// dead weight every per-leaf Copy would duplicate. d already holds the post-turn
+		// deck for the next iteration.
+		master.SetDeck(nil)
 		handIdx++
 	}
 	scratch.heldBuf = heldBuf

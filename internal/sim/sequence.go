@@ -361,11 +361,12 @@ func (ctx *sequenceContext) runDefense(defenders, pitched []card.Card, deckPile 
 
 // preparePermState returns a fresh per-permutation *GameState for the chain run. The
 // state inherits the leafState's post-defense auras / items / graveyard / banished /
-// hero / arsenal, and gets its chain-locals reset via Reset. Hand is set to
-// the chain attackers + the attack-phase pitched bag so each chain step's Hand() read
-// sees the upcoming bag.
+// hero / arsenal; ResetEphemeralState wipes the previous permutation's play state, then
+// this permutation's inputs are installed. Hand is set to the chain attackers + the
+// attack-phase pitched bag so each chain step's Hand() read sees the upcoming bag.
 func (ctx *sequenceContext) preparePermState(playedAttackers []*card.CardState, n int) *gameengine.GameState {
 	s := ctx.leafState.Copy()
+	s.ResetEphemeralState()
 	s.SetHero(ctx.hero)
 	s.SetArsenal(ctx.arsenalAtChainStart)
 	s.SetOpponentMarked(ctx.priorOpponentMarked)
@@ -379,7 +380,9 @@ func (ctx *sequenceContext) preparePermState(playedAttackers []*card.CardState, 
 		hand = append(hand, c)
 	}
 	s.SetPitched(ctx.pitched)
-	s.ResetSequence(hand, ctx.matchup.IncomingDamage, ctx.newPermLogger())
+	s.SetHand(hand)
+	s.SetIncomingDamage(ctx.matchup.IncomingDamage)
+	s.SetLogger(ctx.newPermLogger())
 	return s
 }
 
