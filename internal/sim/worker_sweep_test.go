@@ -64,7 +64,7 @@ func BenchmarkEvalWorkerSweep(b *testing.B) {
 	}
 }
 
-// BenchmarkAnnealWorkerSweep measures one IterateParallel call across a 2D grid of
+// BenchmarkAnnealWorkerSweep measures one RunMutationRound call across a 2D grid of
 // (mutationWorkers, shuffleWorkers) on viserai_v4. The mutation list is the first
 // mutationSampleSize entries of deck.AllMutations(viserai_v4), evaluated against an unreachable
 // baseline so the worker pool drains every sampled mutation (production rounds short-
@@ -136,7 +136,7 @@ func BenchmarkAnnealWorkerSweep(b *testing.B) {
 				b.StopTimer()
 				iterRNG := rand.New(rand.NewSource(42))
 				b.StartTimer()
-				_, _, _, _, found := IterateParallel(
+				_, _, _, _, found := RunMutationRound(
 					context.Background(), mutations, unreachableBaseline, 0, 0,
 					0, Matchup{IncomingDamage: incoming}, c.mut, c.shuf,
 					iterRNG.Int63(), nil, true, 0.1,

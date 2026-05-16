@@ -91,9 +91,9 @@ func NewEvaluatorParallel(numWorkers int) *Evaluator {
 }
 
 // NewEvaluatorWithCache returns an Evaluator pointing at an existing shared Cache. Used
-// by iterate-mode's mutation-parallel pool so every worker's lookups and stores hit one
-// memo. numWorkers is 0 (shuffle loop runs single-threaded); set the field directly on
-// the returned pointer to layer shuffle parallelism on top.
+// by RunMutationRound's worker pool so every worker's lookups and stores hit one memo.
+// numWorkers is 0 (shuffle loop runs single-threaded); set the field directly on the
+// returned pointer to layer shuffle parallelism on top.
 func NewEvaluatorWithCache(c *Cache) *Evaluator {
 	return &Evaluator{cache: c}
 }
@@ -115,8 +115,8 @@ type Cache = evalCache
 func NewCache() *Cache { return newEvalCache() }
 
 // ResetCache drops the cached entries while preserving the stats counters. Use between
-// distinct decks when reusing one Evaluator across many of them (the iterate-mode worker
-// pool's per-mutation loop): entries from one deck rarely help another — different card
+// distinct decks when reusing one Evaluator across many of them (RunMutationRound's
+// per-mutation worker loop): entries from one deck rarely help another — different card
 // sets produce different hand multisets — so dropping them at deck boundaries caps memory
 // at one-deck's-worth of entries. No-op when caching is disabled. Routes through the
 // cache's reset method so the write lock guards against concurrent lookups in a parallel-

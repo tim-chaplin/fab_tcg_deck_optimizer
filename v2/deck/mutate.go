@@ -1,6 +1,6 @@
 package deck
 
-// Mutation enumeration for the iterate-mode hill climb. Every alternative weapon loadout,
+// Mutation enumeration for the anneal-mode hill climb. Every alternative weapon loadout,
 // every (remove one, add one) single-card swap, and every paired (-1/-1, +1/+1) synergy
 // swap a deck admits. Ordering is by ascending ids.CardID for stability — no value-based
 // bias. The anneal driver shuffles the returned slice each round so exploration order is

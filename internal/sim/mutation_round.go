@@ -1,8 +1,11 @@
 package sim
 
-// Iterate-mode round runner: IterateParallel walks candidate Mutations and applies the
-// Metropolis acceptance rule on each, returning the first acceptance. Two independent
-// parallelism knobs let callers dial each dimension to the workload:
+// Mutation-round runner: RunMutationRound walks a list of candidate mutations and applies
+// the Metropolis acceptance rule on each, returning the first acceptance. Anneal mode's
+// inner loop is the only production caller today; the function is generic by mechanics
+// and could serve any "evaluate this batch of decks under SA-style acceptance" workload.
+//
+// Two independent parallelism knobs let callers dial each dimension to the workload:
 //
 //   - mutationWorkers fans the mutation queue across N worker goroutines that pull from a
 //     shared FIFO channel. Each worker evaluates one mutation at a time end-to-end. The
@@ -11,9 +14,9 @@ package sim
 //     goroutines (per the parallel path in deck_eval.go's evaluateParallelImpl).
 //
 // (mutationWorkers, shuffleWorkers) shapes:
-//   - (1, W): the iterate.go-equivalent of a single-deck eval — every mutation runs
-//     sequentially, but each mutation's shuffle loop fans across W goroutines. Right shape
-//     for fabsim eval (one deck → no mutation parallelism available).
+//   - (1, W): single-deck-eval equivalent — every mutation runs sequentially, but each
+//     mutation's shuffle loop fans across W goroutines. Right shape for fabsim eval (one
+//     deck → no mutation parallelism available).
 //   - (M, 1): every mutation runs in parallel, each one shuffle-single-threaded. Right
 //     shape for anneal when M decks worth of independent work fits the core count.
 //   - (M, W): both layers active. The product M×W can exceed the core count — useful for
@@ -33,19 +36,21 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
 )
 
-// iterateImprovement is the per-acceptance message a worker sends to the coordinator: the
+// mutationImprovement is the per-acceptance message a worker sends to the coordinator: the
 // mutation index that won, its evaluated average, the deck-after-mutation that produced
 // it, and the full DeckStats from that mutation's evaluation.
-type iterateImprovement struct {
+type mutationImprovement struct {
 	idx       int
 	avg       float64
 	candidate *deck.Deck
 	stats     DeckStats
 }
 
-// iterateWorkerConfig bundles every read-only parameter a worker shares with its peers so
-// the goroutine body can take a single struct instead of a long argument list.
-type iterateWorkerConfig struct {
+// deckEvalConfig bundles every read-only parameter a worker shares with its peers so the
+// goroutine body can take a single struct instead of a long argument list. Named for the
+// substantive work each worker does (per-deck evaluation); the mutation indexing and
+// Metropolis gate are bookkeeping on top.
+type deckEvalConfig struct {
 	mutations      []deck.Mutation
 	bestAvg        float64
 	temperature    float64
@@ -60,7 +65,7 @@ type iterateWorkerConfig struct {
 	precision      float64
 }
 
-// IterateParallel runs one iterate-mode round. mutationWorkers goroutines pull mutation
+// RunMutationRound runs one mutation-round pass. mutationWorkers goroutines pull mutation
 // indices from a shared queue, evaluate each one with a per-worker Evaluator that points
 // at the round's shared Cache, and apply the Metropolis acceptance gate. The first worker
 // to land an acceptable mutation wins; the others are cancelled.
@@ -80,7 +85,7 @@ type iterateWorkerConfig struct {
 // Cache: every worker constructs its Evaluator via NewEvaluatorWithCache pointing at one
 // Cache built locally for this round. Workers' lookups and stores all hit the same memo
 // so cross-mutation hand multisets share work; the cache's RWMutex serialises stores but
-// lookups remain parallel. The round's cache lives only for IterateParallel's lifetime,
+// lookups remain parallel. The round's cache lives only for RunMutationRound's lifetime,
 // so memory growth from accumulating one round's worth of distinct hand multisets is
 // capped at the round boundary — the function returns, the cache pointer drops, the
 // next round starts fresh.
@@ -106,7 +111,7 @@ type iterateWorkerConfig struct {
 // Returns (acceptedDeck, acceptedStats, acceptedAvg, acceptedIndex, true) on first
 // acceptance, or (nil, zero, bestAvg, -1, false) if nothing cleared the gate or ctx was
 // cancelled.
-func IterateParallel(
+func RunMutationRound(
 	ctx context.Context,
 	mutations []deck.Mutation,
 	bestAvg float64,
@@ -122,7 +127,7 @@ func IterateParallel(
 ) (*deck.Deck, DeckStats, float64, int, bool) {
 	if mutationWorkers <= 0 {
 		// 1 mutation worker is the empirical default — see the BenchmarkAnnealWorkerSweep
-		// table on the IterateParallel docstring for the rationale.
+		// table on the RunMutationRound docstring for the rationale.
 		mutationWorkers = 1
 	}
 	if shuffleWorkers <= 0 {
@@ -139,7 +144,7 @@ func IterateParallel(
 	// blocking even if all of them race past cancellation simultaneously — only the
 	// first one drained by the coordinator's select wins, the rest are GC'd with the
 	// channel.
-	improvementCh := make(chan iterateImprovement, mutationWorkers)
+	improvementCh := make(chan mutationImprovement, mutationWorkers)
 
 	jobs := make(chan int, len(mutations))
 	for i := range mutations {
@@ -147,7 +152,7 @@ func IterateParallel(
 	}
 	close(jobs)
 
-	cfg := iterateWorkerConfig{
+	cfg := deckEvalConfig{
 		mutations:      mutations,
 		bestAvg:        bestAvg,
 		temperature:    temperature,
@@ -167,7 +172,7 @@ func IterateParallel(
 		wg.Add(1)
 		go func(workerIdx int) {
 			defer wg.Done()
-			runIterateWorker(innerCtx, cancel, workerIdx, cfg, jobs, improvementCh)
+			runDeckEvalWorker(innerCtx, cancel, workerIdx, cfg, jobs, improvementCh)
 		}(w)
 	}
 
@@ -192,19 +197,19 @@ func IterateParallel(
 	}
 }
 
-// runIterateWorker pulls mutation indices from jobs, evaluates each, and on a passing
-// result sends an iterateImprovement and cancels the shared context. Each worker owns its
-// own per-call scratch (Evaluator with private attackBufs) but points to the round's
-// shared Cache so lookup work pools across all workers' mutation evals. The Evaluator's
-// numWorkers is set to cfg.shuffleWorkers so the per-mutation eval may layer shuffle-
-// level fan-out on top. Returns when jobs is drained or the context is cancelled.
-func runIterateWorker(
+// runDeckEvalWorker pulls mutation indices from jobs, evaluates the corresponding deck,
+// and on a passing result sends a mutationImprovement and cancels the shared context.
+// Each worker owns its own per-call scratch (Evaluator with private attackBufs) but points
+// to the round's shared Cache so lookup work pools across all workers' deck evals. The
+// Evaluator's numWorkers is set to cfg.shuffleWorkers so the per-deck eval may layer
+// shuffle-level fan-out on top. Returns when jobs is drained or the context is cancelled.
+func runDeckEvalWorker(
 	ctx context.Context,
 	cancel context.CancelFunc,
 	workerIdx int,
-	cfg iterateWorkerConfig,
+	cfg deckEvalConfig,
 	jobs <-chan int,
-	improvementCh chan<- iterateImprovement,
+	improvementCh chan<- mutationImprovement,
 ) {
 	ev := NewEvaluatorWithCache(cfg.cache)
 	if cfg.shuffleWorkers > 1 {
@@ -231,7 +236,7 @@ func runIterateWorker(
 			continue
 		}
 		select {
-		case improvementCh <- iterateImprovement{idx: i, avg: avg, candidate: d, stats: stats}:
+		case improvementCh <- mutationImprovement{idx: i, avg: avg, candidate: d, stats: stats}:
 		default:
 			// Buffer is sized to mutationWorkers, so this default fires only if every
 			// peer already filled the channel — coordinator drains exactly one anyway.
@@ -246,12 +251,12 @@ func runIterateWorker(
 // units rather than adding throughput: capping at physical cores outperforms defaulting
 // to GOMAXPROCS by ~20% on a typical consumer CPU. Still clamped by GOMAXPROCS so a lower
 // user/cgroup override wins. Exported so cmd/fabsim's modes can size their parallel
-// Evaluators consistently with iterate-mode's worker pool.
+// Evaluators consistently with the mutation-round worker pool.
 func DefaultWorkers() int { return defaultWorkers() }
 
-// defaultWorkers is the package-internal helper iterate-mode and the public DefaultWorkers
-// share. Kept private so callers go through DefaultWorkers and the sizing rule has one
-// docstring.
+// defaultWorkers is the package-internal helper RunMutationRound and the public
+// DefaultWorkers share. Kept private so callers go through DefaultWorkers and the sizing
+// rule has one docstring.
 func defaultWorkers() int {
 	maxProcs := runtime.GOMAXPROCS(0)
 	physical := cpuid.CPU.PhysicalCores
