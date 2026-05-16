@@ -643,14 +643,15 @@ var dealtArcaneText = [...]string{
 // === Trigger registration ===
 
 // AddHitTrigger registers a one-shot triggertype.Hit listener. filter narrows the
-// qualifying hits to a card-type predicate; nil = any hit qualifies.
-func (ge *GameEngine) AddHitTrigger(self *card.CardState, handler card.TriggerHandler, filter func(card.TypeSet) bool) {
+// qualifying hits to a card-type predicate; nil = any hit qualifies. The handler
+// signature matches card.GameEngine's inline declaration.
+func (ge *GameEngine) AddHitTrigger(self *card.CardState, handler func(card.GameEngine, card.Logger, card.Trigger), filter func(card.TypeSet) bool) {
 	ge.CreateTrigger(BuildCardTrigger(self, triggertype.Hit, handler, filter))
 }
 
 // AddEndOfTurnTrigger registers a one-shot triggertype.EndOfTurn listener — fires
 // after the chain finishes resolving but before the carry-state snapshot.
-func (ge *GameEngine) AddEndOfTurnTrigger(self *card.CardState, handler card.TriggerHandler) {
+func (ge *GameEngine) AddEndOfTurnTrigger(self *card.CardState, handler func(card.GameEngine, card.Logger, card.Trigger)) {
 	ge.CreateTrigger(BuildCardTrigger(self, triggertype.EndOfTurn, handler, nil))
 }
 

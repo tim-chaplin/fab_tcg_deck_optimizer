@@ -2,9 +2,9 @@
 // scheduled trigger type (start of turn, attack, attack action, end of turn). Card-backed
 // and token-backed auras share the same struct; SourceCard distinguishes them.
 //
-// Handlers are typed against v2/card directly (card.AuraHandler taking
-// card.GameEngine / card.Logger / card.Aura); the package's own ctx struct implements
-// card.Aura so handler bodies receive the typed surface without an outer wrapping layer.
+// Handler is the aura-domain function shape; the package's own ctx struct implements
+// card.Aura so handler bodies receive the typed surface directly without an outer
+// wrapping layer.
 package aura
 
 import (
@@ -13,11 +13,17 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/triggertype"
 )
 
+// Handler is the typed aura handler signature. Lives in v2/aura (not v2/card) because
+// the shape is meaningful only to aura: it's the signature stored on each Aura and called
+// at every Fire. card.GameEngine.CreateStartOfTurnAura et al. inline the function type in
+// their parameter declarations so v2/card doesn't need to import v2/aura.
+type Handler func(card.GameEngine, card.Logger, card.Aura)
+
 // Aura is the concrete entry the engine stores in its persistent hook list. source is
 // non-nil for card-backed auras; tokenName / tokenID are populated for token auras.
 type Aura struct {
 	triggerType   triggertype.Type
-	fire          card.AuraHandler
+	fire          Handler
 	source        card.Card
 	tokenName     string
 	tokenID       ids.CardID
@@ -29,7 +35,7 @@ type Aura struct {
 // NewFromCard builds a card-backed aura. source is the originating card — typically the
 // Card field of a CardState. SourceCard surfaces it back so engines can route it into the
 // graveyard on destroy.
-func NewFromCard(source card.Card, tt triggertype.Type, fire card.AuraHandler, count int, oncePerTurn bool) *Aura {
+func NewFromCard(source card.Card, tt triggertype.Type, fire Handler, count int, oncePerTurn bool) *Aura {
 	return &Aura{
 		triggerType: tt,
 		fire:        fire,
@@ -41,7 +47,7 @@ func NewFromCard(source card.Card, tt triggertype.Type, fire card.AuraHandler, c
 
 // NewFromToken builds a token aura — no originating card. CardName returns the supplied
 // name; CardID returns tokenID so cache keys distinguish each token kind.
-func NewFromToken(name string, tokenID ids.CardID, tt triggertype.Type, fire card.AuraHandler, count int) *Aura {
+func NewFromToken(name string, tokenID ids.CardID, tt triggertype.Type, fire Handler, count int) *Aura {
 	return &Aura{
 		triggerType: tt,
 		fire:        fire,

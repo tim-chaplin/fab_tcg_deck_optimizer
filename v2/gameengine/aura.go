@@ -10,14 +10,15 @@ import (
 // factory so the concrete Aura type lives outside gameengine.
 
 // CreateStartOfTurnAura registers a triggertype.StartOfTurn aura: the handler fires at
-// the start of each subsequent turn.
-func (ge *GameEngine) CreateStartOfTurnAura(self *card.CardState, handler card.AuraHandler, count int) {
+// the start of each subsequent turn. The handler signature matches card.GameEngine's
+// inline declaration; BuildCardAura's slot accepts aura.Handler structurally.
+func (ge *GameEngine) CreateStartOfTurnAura(self *card.CardState, handler func(card.GameEngine, card.Logger, card.Aura), count int) {
 	ge.CreateAura(BuildCardAura(self, triggertype.StartOfTurn, handler, count, false))
 }
 
 // CreateOncePerTurnAttackActionAura registers a triggertype.AttackAction aura with the
 // OncePerTurn gate set — fires at most once per turn regardless of how many attack
 // actions resolve.
-func (ge *GameEngine) CreateOncePerTurnAttackActionAura(self *card.CardState, handler card.AuraHandler, count int) {
+func (ge *GameEngine) CreateOncePerTurnAttackActionAura(self *card.CardState, handler func(card.GameEngine, card.Logger, card.Aura), count int) {
 	ge.CreateAura(BuildCardAura(self, triggertype.AttackAction, handler, count, true))
 }

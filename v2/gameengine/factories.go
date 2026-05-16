@@ -1,7 +1,9 @@
 package gameengine
 
 import (
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/aura"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/trigger"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/triggertype"
 )
 
@@ -9,19 +11,15 @@ import (
 // v2/token). The engine's card-facing Create*Aura / AddXxxTrigger / Create*Token methods
 // construct entries by calling these builder funcs; sim registers them via init.
 //
-// The factory layer is also where typed card.AuraHandler / card.TriggerHandler values are
-// wrapped into the leaf packages' type-erased Handler closures — keeping aura / trigger
-// free of any v2/card dependency.
-//
 // Engines built before the builders are registered crash on the cards-facing construction
 // methods — by design: a runtime with no concrete types behind the engine can't build
 // anything, so silently no-oping would hide a setup bug.
 var (
 	// BuildCardAura constructs a card-backed aura whose source is self.Card.
-	BuildCardAura func(self *card.CardState, tt triggertype.Type, handler card.AuraHandler, count int, oncePerTurn bool) Aura
+	BuildCardAura func(self *card.CardState, tt triggertype.Type, handler aura.Handler, count int, oncePerTurn bool) Aura
 
 	// BuildCardTrigger constructs a one-shot trigger whose source is self.Card.
-	BuildCardTrigger func(self *card.CardState, tt triggertype.Type, handler card.TriggerHandler, typeFilter func(card.TypeSet) bool) Trigger
+	BuildCardTrigger func(self *card.CardState, tt triggertype.Type, handler trigger.Handler, typeFilter trigger.TypeFilter) Trigger
 
 	// BuildRunechantAura returns a runechant token aura at count n.
 	BuildRunechantAura func(n int) Aura

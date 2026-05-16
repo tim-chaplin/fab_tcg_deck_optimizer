@@ -15,14 +15,15 @@ import (
 // importing the concrete types directly. Each concrete type satisfies its matching engine
 // interface structurally, so the assignment is a no-op box per call.
 //
-// The aura / trigger builders pass card-typed handlers straight through — v2/aura and
-// v2/trigger now import v2/card, so the handler signatures match end-to-end.
+// Handler types (aura.Handler, trigger.Handler) are leaf-package typed and pass straight
+// through — no wrap layer, since v2/aura and v2/trigger import v2/card and their stored
+// handler signatures match what cards write.
 func init() {
-	gameengine.BuildCardAura = func(self *card.CardState, tt triggertype.Type, h card.AuraHandler, count int, oncePerTurn bool) gameengine.Aura {
+	gameengine.BuildCardAura = func(self *card.CardState, tt triggertype.Type, h aura.Handler, count int, oncePerTurn bool) gameengine.Aura {
 		return aura.NewFromCard(self.Card, tt, h, count, oncePerTurn)
 	}
-	gameengine.BuildCardTrigger = func(self *card.CardState, tt triggertype.Type, h card.TriggerHandler, filter func(card.TypeSet) bool) gameengine.Trigger {
-		return trigger.NewFromCard(self.Card, tt, h, trigger.TypeFilter(filter))
+	gameengine.BuildCardTrigger = func(self *card.CardState, tt triggertype.Type, h trigger.Handler, filter trigger.TypeFilter) gameengine.Trigger {
+		return trigger.NewFromCard(self.Card, tt, h, filter)
 	}
 	gameengine.BuildRunechantAura = func(n int) gameengine.Aura { return token.NewRunechant(n) }
 	gameengine.BuildPonderAura = func(n int) gameengine.Aura { return token.NewPonder(n) }

@@ -2,15 +2,22 @@
 // on the next matching event (typically triggertype.Hit or triggertype.EndOfTurn) and is
 // then removed from the engine's trigger queue.
 //
-// Handlers are typed against v2/card directly (card.TriggerHandler taking
-// card.GameEngine / card.Logger / card.Trigger); the package's own ctx struct implements
-// card.Trigger so handler bodies receive the typed surface without an outer wrapping layer.
+// Handler is the trigger-domain function shape; the package's own ctx struct implements
+// card.Trigger so handler bodies receive the typed surface directly without an outer
+// wrapping layer.
 package trigger
 
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/triggertype"
 )
+
+// Handler is the typed trigger handler signature. Lives in v2/trigger (not v2/card)
+// because the shape is meaningful only to trigger: it's the signature stored on each
+// Trigger and called at every Fire. card.GameEngine.AddHitTrigger et al. inline the
+// function type in their parameter declarations so v2/card doesn't need to import
+// v2/trigger.
+type Handler func(card.GameEngine, card.Logger, card.Trigger)
 
 // TypeFilter narrows the firing site to a card-type predicate. nil means any matching
 // event qualifies.
@@ -21,14 +28,14 @@ type TypeFilter func(card.TypeSet) bool
 // trigger "only on attack-action hits"); nil means any matching event qualifies.
 type Trigger struct {
 	triggerType triggertype.Type
-	fire        card.TriggerHandler
+	fire        Handler
 	source      card.Card
 	typeFilter  TypeFilter
 }
 
 // NewFromCard builds a one-shot trigger whose source is the supplied card. typeFilter
 // narrows the firing site (currently used only by triggertype.Hit); pass nil for no filter.
-func NewFromCard(source card.Card, tt triggertype.Type, fire card.TriggerHandler, typeFilter TypeFilter) *Trigger {
+func NewFromCard(source card.Card, tt triggertype.Type, fire Handler, typeFilter TypeFilter) *Trigger {
 	return &Trigger{
 		triggerType: tt,
 		fire:        fire,
