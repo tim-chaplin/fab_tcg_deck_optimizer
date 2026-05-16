@@ -8,12 +8,12 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
-	"github.com/tim-chaplin/fab-deck-optimizer/v2/hero"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/aura"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/gameengine"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/hero"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/token"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/triggertype"
 )
@@ -24,11 +24,11 @@ func damageTrigger(self card.Card, damage int, calls *int) gameengine.Aura {
 	return aura.NewFromCard(
 		self,
 		triggertype.StartOfTurn,
-		WrapAuraHandler(func(ge card.GameEngine, _ card.Logger, a card.Aura) {
+		func(ge card.GameEngine, _ card.Logger, a card.Aura) {
 			*calls++
 			ge.AddValue(damage)
 			a.Destroy(true)
-		}),
+		},
 		1,
 		false,
 	)
@@ -75,19 +75,19 @@ func TestProcessAurasAtStartOfTurn_GraveyardsExhaustedAura(t *testing.T) {
 	watcher := aura.NewFromCard(
 		testutils.YellowAttack{},
 		triggertype.StartOfTurn,
-		WrapAuraHandler(func(ge card.GameEngine, _ card.Logger, _ card.Aura) {
+		func(ge card.GameEngine, _ card.Logger, _ card.Aura) {
 			eng := ge.(*gameengine.GameEngine)
 			seen = append([]card.Card(nil), eng.Graveyard()...)
-		}),
+		},
 		1,
 		false,
 	)
 	first := aura.NewFromCard(
 		src,
 		triggertype.StartOfTurn,
-		WrapAuraHandler(func(_ card.GameEngine, _ card.Logger, a card.Aura) {
+		func(_ card.GameEngine, _ card.Logger, a card.Aura) {
 			a.Destroy(true)
-		}),
+		},
 		1,
 		false,
 	)
@@ -270,7 +270,7 @@ func TestProcessAurasAtStartOfTurn_ReArmsOncePerTurnGate(t *testing.T) {
 	exhausted := aura.NewFromCard(
 		src,
 		triggertype.AttackAction,
-		WrapAuraHandler(func(card.GameEngine, card.Logger, card.Aura) {}),
+		func(card.GameEngine, card.Logger, card.Aura) {},
 		2,
 		true,
 	)

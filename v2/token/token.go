@@ -14,6 +14,7 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/aura"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/item"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/triggertype"
 )
@@ -42,13 +43,11 @@ func NewCopper(n int) *item.Item {
 // CreateRunechants; this handler is pure state cleanup.
 func NewRunechant(n int) *aura.Aura {
 	return aura.NewFromToken("Runechant", ids.RunechantTokenID, triggertype.Attack,
-		func(engine, _, ctx any) {
-			eng := engine.(GameEngine)
-			a := ctx.(Aura)
-			if eng.LikelyDamageHits(a.Count(), false) {
-				eng.SetArcaneDamageDealt(true)
+		func(engine card.GameEngine, _ card.Logger, ctx card.Aura) {
+			if engine.LikelyDamageHits(ctx.Count(), false) {
+				engine.(GameEngine).SetArcaneDamageDealt(true)
 			}
-			a.Destroy(false)
+			ctx.Destroy(false)
 		}, n)
 }
 
@@ -58,14 +57,13 @@ func NewRunechant(n int) *aura.Aura {
 // past deck-end are silently skipped.
 func NewPonder(n int) *aura.Aura {
 	return aura.NewFromToken("Ponder", ids.PonderTokenID, triggertype.EndOfTurn,
-		func(engine, _, ctx any) {
+		func(engine card.GameEngine, _ card.Logger, ctx card.Aura) {
 			eng := engine.(GameEngine)
-			a := ctx.(Aura)
-			for i := 0; i < a.Count(); i++ {
+			for i := 0; i < ctx.Count(); i++ {
 				if !eng.PonderDrawOne() {
 					break
 				}
 			}
-			a.Destroy(false)
+			ctx.Destroy(false)
 		}, n)
 }

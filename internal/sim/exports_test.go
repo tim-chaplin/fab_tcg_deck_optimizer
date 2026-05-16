@@ -9,16 +9,8 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/gameengine"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/hero"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/item"
-	"github.com/tim-chaplin/fab-deck-optimizer/v2/trigger"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/turnlogger"
 )
-
-// WrapAuraHandler exposes the typed-handler wrap for sim_test consumers — converts a
-// card.AuraHandler into the type-erased aura.Handler stored on aura entries.
-func WrapAuraHandler(h card.AuraHandler) aura.Handler { return wrapAuraHandler(h) }
-
-// WrapTriggerHandler is the trigger.Handler counterpart of WrapAuraHandler.
-func WrapTriggerHandler(h card.TriggerHandler) trigger.Handler { return wrapTriggerHandler(h) }
 
 // Test-only exports. Visible to package sim_test files in this directory only.
 
