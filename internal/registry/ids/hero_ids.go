@@ -14,7 +14,7 @@ type HeroID uint16
 const InvalidHero HeroID = 0
 
 // Hero IDs. Suffixed with "ID" to distinguish from the hero struct types of the same display
-// name (e.g. heroes.Viserai the struct vs. ids.ViseraiID the ID constant).
+// name (e.g. hero.Viserai the struct vs. ids.ViseraiID the ID constant).
 const (
 	ViseraiID HeroID = iota + 1
 )

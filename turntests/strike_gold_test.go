@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/heroes"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/hero"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
@@ -12,14 +12,14 @@ import (
 
 // Tests that Strike Gold's on-hit rider lands a Gold token in Items when the attack hits.
 func TestStrikeGold_OnHitCreatesGoldToken(t *testing.T) {
-	d := deck.New(heroes.Viserai{}, nil, fillerDeck())
+	d := deck.New(hero.Viserai{}, nil, fillerDeck())
 	hand := []deck.Card{
 		cards.StrikeGoldRed{},
 		testutils.BluePitch{},
 		testutils.BluePitch{},
 		testutils.BluePitch{},
 	}
-	state := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, sim.Prior{}, hand)
+	state := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, nil, hand)
 	if state.Value != 4 {
 		t.Fatalf("Value = %d, want 4 (Strike Gold Red 4 power)\nBestLine: %s",
 			state.Value, formatBestLine(state.BestLine))
@@ -31,14 +31,14 @@ func TestStrikeGold_OnHitCreatesGoldToken(t *testing.T) {
 
 // Tests that Strike Gold's on-hit rider does not fire when the attack misses LikelyToHit.
 func TestStrikeGold_BlockableMissDoesNotCreateGold(t *testing.T) {
-	d := deck.New(heroes.Viserai{}, nil, fillerDeck())
+	d := deck.New(hero.Viserai{}, nil, fillerDeck())
 	hand := []deck.Card{
 		cards.StrikeGoldYellow{},
 		testutils.BluePitch{},
 		testutils.BluePitch{},
 		testutils.BluePitch{},
 	}
-	state := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, sim.Prior{}, hand)
+	state := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, nil, hand)
 	if state.Value != 3 {
 		t.Fatalf("Value = %d, want 3 (Strike Gold Yellow 3 power)\nBestLine: %s",
 			state.Value, formatBestLine(state.BestLine))
@@ -49,7 +49,7 @@ func TestStrikeGold_BlockableMissDoesNotCreateGold(t *testing.T) {
 }
 
 // Tests that a Gold token created on turn 1 carries to turn 2 in the Items list.
-func TestStrikeGold_GoldAbilityPlayableNextTurn(t *testing.T) {
+func TestStrikeGold_GoldTokenPlayableNextTurn(t *testing.T) {
 	deckCards := []deck.Card{
 		// Turn 1 hand.
 		cards.StrikeGoldRed{},
@@ -65,8 +65,8 @@ func TestStrikeGold_GoldAbilityPlayableNextTurn(t *testing.T) {
 		testutils.BlueAttack{}, testutils.BlueAttack{},
 		testutils.BlueAttack{}, testutils.BlueAttack{},
 	}
-	d := deck.New(heroes.Viserai{}, nil, deckCards)
-	state := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, sim.Prior{}, nil)
+	d := deck.New(hero.Viserai{}, nil, deckCards)
+	state := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, nil, nil)
 	if state.GoldCount() != 1 {
 		t.Fatalf("after turn 1: Gold = %d, want 1 (Strike Gold Red on-hit)", state.GoldCount())
 	}

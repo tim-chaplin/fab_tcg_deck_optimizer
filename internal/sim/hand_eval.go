@@ -3,6 +3,7 @@ package sim
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/gameengine"
 )
 
 // Entry points for hand evaluation. Best computes the optimal turn line for a given hand
@@ -17,31 +18,33 @@ import (
 // stays in the arsenal slot at end of turn). Pitch resources split across attack / defense
 // phases since resources don't carry between turns.
 //
-// prior is the start-of-turn carryover from the previous turn — Arsenal (the card sitting
-// in the arsenal slot, nil if empty), Auras (mid-chain triggers may fire and contribute
-// damage), and Items (activated abilities become playable chain steps). The other
-// TurnState fields are ignored. TurnSummary.State.Arsenal / .Auras / .Items feed back as
-// next turn's prior.
+// master holds the start-of-turn carryover from the previous turn — Hero, Arsenal (the
+// card sitting in the arsenal slot, nil if empty), Auras (mid-chain triggers may fire and
+// contribute damage), Items (activated abilities become playable chain steps), Banished /
+// Graveyard / OpponentMarked, plus the matchup-derived IncomingDamage / ArcaneIncomingDamage.
+// Other GameState fields are ignored (per-turn ephemerals — value, hand, pitched, log).
+// TurnSummary.State is the post-chain GameState; the deck-eval loop calls PrepareNextTurn
+// on it and threads it forward as the next call's master.
 //
 // Package-private so external packages can't bypass EvalOneTurnForTesting — the turntests
 // convention is to drive the chain runner through that deck-level entry point so every test
 // exercises the same per-turn pipeline production runs through Evaluate.
-func best(weapons []Weapon, hand []card.Card, mp Matchup, d *deck.Deck, prior Prior) TurnSummary {
-	return sharedEvaluator.Best(weapons, hand, mp, d, prior)
+func best(weapons []Weapon, hand []card.Card, mp Matchup, d *deck.Deck, master *gameengine.GameState) TurnSummary {
+	return sharedEvaluator.Best(weapons, hand, mp, d, master)
 }
 
 // Best is the method form of the package-level Best. Returns a TurnSummary with
 // State.Log fully populated.
-func (e *Evaluator) Best(weapons []Weapon, hand []card.Card, mp Matchup, d *deck.Deck, prior Prior) TurnSummary {
-	return e.findBest(weapons, hand, mp, d, prior, false)
+func (e *Evaluator) Best(weapons []Weapon, hand []card.Card, mp Matchup, d *deck.Deck, master *gameengine.GameState) TurnSummary {
+	return e.findBest(weapons, hand, mp, d, master, false)
 }
 
 // BestSkipLog is Best without populating State.Log. Same Value and non-Log carry-state
 // fields; State.Log comes back empty. The deck-eval loop uses this for every turn to skip
 // the per-chain Log slice copy that dominates allocation bytes; only turns that become the
 // new deck-best are replayed via Best to recover Log.
-func (e *Evaluator) BestSkipLog(weapons []Weapon, hand []card.Card, mp Matchup, d *deck.Deck, prior Prior) TurnSummary {
-	return e.findBest(weapons, hand, mp, d, prior, true)
+func (e *Evaluator) BestSkipLog(weapons []Weapon, hand []card.Card, mp Matchup, d *deck.Deck, master *gameengine.GameState) TurnSummary {
+	return e.findBest(weapons, hand, mp, d, master, true)
 }
 
 // Evaluator caches per-goroutine scratch state across Best calls. The first call allocates

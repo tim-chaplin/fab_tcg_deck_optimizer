@@ -4,8 +4,7 @@ import (
 	"testing"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
-
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/token"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/gameengine"
@@ -89,7 +88,7 @@ func TestArcaneCussing_SameTurnPopByWeaponSwing(t *testing.T) {
 		SetBlockTotal(0).
 		SetCardsRemaining([]*card.CardState{{Card: testutils.RunebladeWeapon{}}}).
 		Build()}
-	ge.CreateAura(sim.NewRunechantAura(1))
+	ge.CreateAura(token.NewRunechant(1))
 	ge.ResolveChainStep(ge.Logger(), &card.CardState{Card: cards.ArcaneCussingRed{}})
 	if got := ge.Value(); got != 3 {
 		t.Errorf("Play() = %d, want 3 (1 Runechant fires with weapon, likely to hit)", got)
@@ -104,7 +103,7 @@ func TestArcaneCussing_SameTurnPopByRunechantAlone(t *testing.T) {
 		SetBlockTotal(0).
 		SetCardsRemaining([]*card.CardState{{Card: testutils.AttackWithPower{Power: 6}}}).
 		Build()}
-	ge.CreateAura(sim.NewRunechantAura(1))
+	ge.CreateAura(token.NewRunechant(1))
 	ge.ResolveChainStep(ge.Logger(), &card.CardState{Card: cards.ArcaneCussingRed{}})
 	if got := ge.Value(); got != 3 {
 		t.Errorf("Play() = %d, want 3 (Attack=6 blockable, but 1 Runechant likely to slip through)", got)

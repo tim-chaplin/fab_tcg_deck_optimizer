@@ -4,7 +4,7 @@ import (
 	"math/rand"
 	"testing"
 
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/heroes"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/hero"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
 )
 
@@ -12,7 +12,7 @@ import (
 // Registry.
 func TestRegistry_DrivesDeckRandom(t *testing.T) {
 	rng := rand.New(rand.NewSource(7))
-	d := deck.Random(heroes.Viserai{}, 40, 2, rng, nil, Registry{})
+	d := deck.Random(hero.Viserai{}, 40, 2, rng, nil, Registry{})
 	if d.Size() != 40 {
 		t.Errorf("len(Cards) = %d, want 40", d.Size())
 	}

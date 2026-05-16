@@ -7,8 +7,10 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/aura"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/gameengine"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/item"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/turnlogger"
 )
 
@@ -17,7 +19,7 @@ import (
 // token counts get pulled from them for the StartOfTurn "Auras: ..." / "Items: ..."
 // lines. MyTurn's chain content comes from t.State.Log; pitches and defense lines come
 // from BestLine; ending zone state comes from t.State.
-func BuildTurnLog(t TurnSummary, startingAuras []*Aura, startingItems []*Item) TurnLog {
+func BuildTurnLog(t TurnSummary, startingAuras []*aura.Aura, startingItems []*item.Item) TurnLog {
 	var log TurnLog
 	parts := partitionBestLineForDisplay(t.BestLine)
 	defensePitches, attackPitches := splitPitchesByPhase(parts.pitched, parts.drCost)
@@ -85,9 +87,9 @@ func BuildTurnLog(t TurnSummary, startingAuras []*Aura, startingItems []*Item) T
 		log.EndOfTurn = append(log.EndOfTurn, line)
 	}
 	if t.State != nil {
-		endingAuras := make([]*Aura, 0, len(t.State.Auras()))
+		endingAuras := make([]*aura.Aura, 0, len(t.State.Auras()))
 		for _, a := range t.State.Auras() {
-			endingAuras = append(endingAuras, a.(*Aura))
+			endingAuras = append(endingAuras, a.(*aura.Aura))
 		}
 		if line := endingAurasLine(endingAuras, auraCountByNameInState(t.State, "Runechant"), auraCountByNameInState(t.State, "Ponder")); line != "" {
 			log.EndOfTurn = append(log.EndOfTurn, line)
@@ -183,18 +185,18 @@ func formatBlockLine(a CardAssignment) string {
 }
 
 // appendDefenseReactionLines re-Plays the DR with the same fresh state shape defendersDamage
-// uses (Graveyard = all defenders so banish-target scans see the right shape; IncomingDamage
-// threaded across the DR loop so each defender sees what's left after earlier ones blocked)
-// and walks the resulting log: the chain step renders with its own (+N) for the block, and
-// any arcane / runechant / +1{d} riders attach as childEntryPrefix-tagged sub-lines via
-// appendGroupedChainEntries. Returns the updated remaining-incoming counter so the caller
-// can thread it into the next DR.
+// uses (Graveyard = all defenders so banish-target scans see the right shape; the remaining
+// unblocked damage threaded across the DR loop so each defender sees what's left after
+// earlier ones blocked) and walks the resulting log: the chain step renders with its own
+// (+N) for the block, and any arcane / runechant / +1{d} riders attach as
+// childEntryPrefix-tagged sub-lines via appendGroupedChainEntries. Returns the updated
+// remaining-damage counter so the caller can thread it into the next DR.
 func appendDefenseReactionLines(out []string, a CardAssignment, defenders []card.Card, remaining int) ([]string, int) {
 	ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetGraveyard(append([]card.Card(nil), defenders...)).Build()}
 	ge.SetIncomingDamage(remaining)
 	cs := card.CardState{Card: a.Card, FromArsenal: a.FromArsenal}
 	ge.ResolveChainStep(ge.Logger(), &cs)
-	return appendGroupedChainEntries(out, ge.LogEntries()), ge.IncomingDamage()
+	return appendGroupedChainEntries(out, ge.LogEntries()), ge.RemainingUnblockedDamage()
 }
 
 // defendersFromParts collects every card committed to defense — Defense Reactions and plain
@@ -251,7 +253,7 @@ func endingArsenalLine(arsenal []CardAssignment) string {
 // re-rendered as count phrases so pluralisation lives in one place. Card-aura names
 // sort alphabetically; token phrases append last in declaration order. Returns "" when
 // nothing survived.
-func endingAurasLine(triggers []*Aura, runechants, ponders int) string {
+func endingAurasLine(triggers []*aura.Aura, runechants, ponders int) string {
 	var items []string
 	for _, t := range triggers {
 		if t.SourceCard() == nil {

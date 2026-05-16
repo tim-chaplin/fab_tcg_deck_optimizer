@@ -49,6 +49,20 @@ func (b *StateBuilder) SetHero(h Hero) *StateBuilder { b.gs.hero = h; return b }
 // SetArsenal installs c into the arsenal slot.
 func (b *StateBuilder) SetArsenal(c card.Card) *StateBuilder { b.gs.arsenal = c; return b }
 
+// AddAura appends auras to the carryover aura list. Unlike GameState.CreateAura it does
+// not flip the auraCreated flag — builder auras are pre-turn carryover, not auras created
+// during this turn's chain; reach for SetAuraCreated to set that flag explicitly.
+func (b *StateBuilder) AddAura(auras ...Aura) *StateBuilder {
+	b.gs.auras = append(b.gs.auras, auras...)
+	return b
+}
+
+// AddItem appends items to the carryover item list.
+func (b *StateBuilder) AddItem(items ...Item) *StateBuilder {
+	b.gs.items = append(b.gs.items, items...)
+	return b
+}
+
 // SetBanished replaces the banished-zone slice.
 func (b *StateBuilder) SetBanished(cs []card.Card) *StateBuilder { b.gs.banished = cs; return b }
 

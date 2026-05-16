@@ -4,8 +4,7 @@ import (
 	"testing"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
-
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/token"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/gameengine"
 )
@@ -38,7 +37,7 @@ func TestDrawnToTheDarkDimension_CostBounds(t *testing.T) {
 			t.Errorf("%s: Cost(zeroState) = %d, want 2", c.Name(), c.Cost(gameengine.New()))
 		}
 		withRune := gameengine.New()
-		withRune.CreateAura(sim.NewRunechantAura(5))
+		withRune.CreateAura(token.NewRunechant(5))
 		if c.Cost(withRune) != 0 {
 			t.Errorf("%s: Cost(Runechants=5) = %d, want 0", c.Name(), c.Cost(withRune))
 		}

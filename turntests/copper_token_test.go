@@ -3,23 +3,36 @@ package turntests
 import (
 	"testing"
 
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/heroes"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapons"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/gameengine"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/hero"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/item"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/token"
 )
 
+// stateWithItems returns a *GameState seeded with the supplied items. Tests use this to
+// pass token carryover (Gold / Silver / Copper) into EvalOneTurnForTesting.
+func stateWithItems(items ...*item.Item) *gameengine.GameState {
+	b := gameengine.GameStateBuilder()
+	for _, it := range items {
+		b.AddItem(it)
+	}
+	return b.Build()
+}
+
 // Tests that the Copper token ability stays unspent when the chain can't fund its {4} cost.
-func TestCopperAbility_NotEnoughResourceSkipsSpend(t *testing.T) {
+func TestCopperToken_NotEnoughResourceSkipsSpend(t *testing.T) {
 	cards := []deck.Card{
 		testutils.RedAttack{}, testutils.RedAttack{}, testutils.RedAttack{},
 		testutils.RedAttack{}, testutils.RedAttack{},
 	}
-	d := deck.New(heroes.Viserai{}, nil, cards)
+	d := deck.New(hero.Viserai{}, nil, cards)
 	hand := []deck.Card{testutils.BluePitch{}}
-	priorItems := []*sim.Item{sim.NewCopperItem(1)}
-	got := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, sim.Prior{Items: priorItems}, hand)
+	priorItems := []*item.Item{token.NewCopper(1)}
+	got := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, stateWithItems(priorItems...), hand)
 	if got.CopperCount() != 1 {
 		t.Fatalf("Copper after turn = %d, want 1 (single blue pitch can't fund {4})", got.CopperCount())
 	}
@@ -28,15 +41,15 @@ func TestCopperAbility_NotEnoughResourceSkipsSpend(t *testing.T) {
 // Tests the Copper ability composes with a weapon swing when the pitch budget covers
 // both. Two blue pitches (3+3=6 res) fund the Copper ability ({4}) plus a Reaping
 // Blade swing ({1}), with 1 res to spare.
-func TestCopperAbility_SpendsAndSwings(t *testing.T) {
+func TestCopperToken_SpendsAndSwings(t *testing.T) {
 	cards := []deck.Card{
 		testutils.RedAttack{}, testutils.RedAttack{}, testutils.RedAttack{},
 		testutils.RedAttack{}, testutils.RedAttack{},
 	}
-	d := deck.New(heroes.Viserai{}, []deck.Weapon{weapons.ReapingBlade{}}, cards)
+	d := deck.New(hero.Viserai{}, []deck.Weapon{weapons.ReapingBlade{}}, cards)
 	hand := []deck.Card{testutils.BluePitch{}, testutils.BluePitch{}}
-	priorItems := []*sim.Item{sim.NewCopperItem(1)}
-	got := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, sim.Prior{Items: priorItems}, hand)
+	priorItems := []*item.Item{token.NewCopper(1)}
+	got := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, stateWithItems(priorItems...), hand)
 	if got.Value != 3 {
 		t.Fatalf("Value = %d, want 3 (Reaping Blade swing power 3)", got.Value)
 	}

@@ -1,12 +1,12 @@
 package registry
 
-import "github.com/tim-chaplin/fab-deck-optimizer/internal/heroes"
+import "github.com/tim-chaplin/fab-deck-optimizer/v2/hero"
 
 // heroesByName resolves a Hero's display name to the concrete Hero value. Single source of
 // truth for the hero roster; serialization packages look up heroes here.
 var heroesByName = func() map[string]Hero {
 	all := []Hero{
-		heroes.Viserai{},
+		hero.Viserai{},
 	}
 	m := make(map[string]Hero, len(all))
 	for _, h := range all {

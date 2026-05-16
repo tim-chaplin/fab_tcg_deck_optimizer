@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/heroes"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/hero"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
@@ -26,13 +26,13 @@ func TestHighStriker_TriggersOnNextAttackActionHit(t *testing.T) {
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
-			d := deck.New(heroes.Viserai{}, nil, fillerDeck())
+			d := deck.New(hero.Viserai{}, nil, fillerDeck())
 			hand := []deck.Card{
 				tc.striker,
 				cards.CriticalStrikeYellow{},
 				testutils.BluePitch{},
 			}
-			state := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, sim.Prior{}, hand)
+			state := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, nil, hand)
 			if state.CopperCount() != tc.wantCopper {
 				t.Fatalf("Copper = %d, want %d (next attack hit fires the rider)\nBestLine: %s",
 					state.CopperCount(), tc.wantCopper, formatBestLine(state.BestLine))

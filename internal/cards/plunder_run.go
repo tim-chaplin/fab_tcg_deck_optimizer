@@ -23,7 +23,7 @@ func plunderRunOnHitDraw(ge card.GameEngine, l card.Logger, t card.Trigger) {
 func plunderRunPlay(ge card.GameEngine, l card.Logger, self *card.CardState, n int) {
 	ge.AddHitTrigger(self, plunderRunOnHitDraw, card.TypeSet.IsAttackAction)
 	if self.FromArsenal {
-		GrantNextCardBonusAttack(ge, n, IsAttackAction)
+		GrantNextCardBonusAttack(ge, n, card.IsAttackAction)
 	}
 }
 

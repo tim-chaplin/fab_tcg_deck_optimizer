@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/heroes"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/hero"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
 )
@@ -15,13 +15,13 @@ import (
 // recycle to Critical Strike) → Critical Strike (now power 7, hits, OnHit pulls it from
 // graveyard onto deck). End-of-turn deck should contain Critical Strike.
 func TestWarmongersRecital_OnHitRecyclesToDeck(t *testing.T) {
-	d := deck.New(heroes.Viserai{}, nil, nil)
+	d := deck.New(hero.Viserai{}, nil, nil)
 	hand := []deck.Card{
 		cards.TitaniumBaubleBlue{},
 		cards.WarmongersRecitalRed{},
 		cards.CriticalStrikeYellow{},
 	}
-	got := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, sim.Prior{}, hand)
+	got := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, nil, hand)
 	csName := cards.CriticalStrikeYellow{}.DisplayName()
 	if got.StartOfNextTurnDeck.NameCounts()[csName] == 0 {
 		t.Fatalf("Critical Strike missing from end-of-turn deck; graveyard=%v", got.Graveyard)

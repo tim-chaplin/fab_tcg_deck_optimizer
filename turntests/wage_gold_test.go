@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/heroes"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/hero"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
@@ -12,14 +12,14 @@ import (
 
 // Tests that Wage Gold's on-hit rider creates a Gold token when the attack hits.
 func TestWageGold_OnHitCreatesGoldToken(t *testing.T) {
-	d := deck.New(heroes.Viserai{}, nil, fillerDeck())
+	d := deck.New(hero.Viserai{}, nil, fillerDeck())
 	hand := []deck.Card{
 		cards.WageGoldRed{},
 		testutils.BluePitch{},
 		testutils.BluePitch{},
 		testutils.BluePitch{},
 	}
-	state := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, sim.Prior{}, hand)
+	state := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, nil, hand)
 	if state.Value != 7 {
 		t.Fatalf("Value = %d, want 7 (Wage Gold Red 7 power)\nBestLine: %s",
 			state.Value, formatBestLine(state.BestLine))
@@ -31,14 +31,14 @@ func TestWageGold_OnHitCreatesGoldToken(t *testing.T) {
 
 // Tests that Wage Gold's on-hit rider skips Gold when the attack misses LikelyToHit.
 func TestWageGold_BlockableMissDoesNotCreateGold(t *testing.T) {
-	d := deck.New(heroes.Viserai{}, nil, fillerDeck())
+	d := deck.New(hero.Viserai{}, nil, fillerDeck())
 	hand := []deck.Card{
 		cards.WageGoldBlue{},
 		testutils.BluePitch{},
 		testutils.BluePitch{},
 		testutils.BluePitch{},
 	}
-	state := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, sim.Prior{}, hand)
+	state := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, nil, hand)
 	if state.Value != 5 {
 		t.Fatalf("Value = %d, want 5 (Wage Gold Blue 5 power)\nBestLine: %s",
 			state.Value, formatBestLine(state.BestLine))

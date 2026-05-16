@@ -11,14 +11,12 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/gameengine"
 )
 
-func (e *Evaluator) findBest(weapons []Weapon, hand []card.Card, mp Matchup, d *deck.Deck, prior Prior, skipLog bool) TurnSummary {
-	masterState := newTurnMasterState(prior, mp, d)
-
+func (e *Evaluator) findBest(weapons []Weapon, hand []card.Card, mp Matchup, d *deck.Deck, masterState *gameengine.GameState, skipLog bool) TurnSummary {
 	var cacheKey evalCacheKey
 	cacheUsable := e.cache != nil
 	if cacheUsable {
 		var keyOK bool
-		cacheKey, keyOK = makeCacheKey(weapons, hand, prior)
+		cacheKey, keyOK = makeCacheKey(weapons, hand, masterState)
 		if !keyOK {
 			cacheUsable = false
 		}
@@ -26,13 +24,13 @@ func (e *Evaluator) findBest(weapons []Weapon, hand []card.Card, mp Matchup, d *
 	if cacheUsable {
 		if entry, ok := e.cache.lookup(cacheKey); ok {
 			e.cache.hits.Add(1)
-			return e.replayBest(entry, weapons, hand, mp, d, prior, masterState, skipLog)
+			return e.replayBest(entry, weapons, hand, mp, d, masterState, skipLog)
 		}
 		e.cache.misses.Add(1)
 	}
 
 	bufs := e.getAttackBufs(len(hand), weapons)
-	arsenalCardIn := prior.Arsenal
+	arsenalCardIn := masterState.Arsenal()
 	n := len(hand)
 	totalN := n
 	if arsenalCardIn != nil {
@@ -70,7 +68,7 @@ func (e *Evaluator) findBest(weapons []Weapon, hand []card.Card, mp Matchup, d *
 				masterState, weapons, hand, d,
 				rolesBuf, n, bufs,
 				mp, defenseSum,
-				prior, skipLog,
+				skipLog,
 			)
 			if !leafCacheable {
 				cacheable = false
@@ -265,9 +263,10 @@ func roleAllowed(r Role, isArsenalSlot, isDefenseReaction, canAttack bool) bool 
 
 // defendersDamage tallies the total Value contribution of the partition's defense phase
 // against the caller-supplied state engine. DRs resolve first; plain blocks then consume
-// whatever incoming damage is left, capped per card. The engine is mutated in place: each
-// DR's resolution updates the running aura set and the engine's IncomingDamage; the chain
-// phase will read the post-defense graveyard via the engine's left-behind state.
+// whatever incoming damage is left, capped per card. The engine is mutated in place: the
+// matchup figure rides in via SetIncomingDamage (which zeroes the damage-blocked
+// accumulator), each DR's resolution and each plain block bank into that accumulator, and
+// the chain phase reads the post-defense graveyard via the engine's left-behind state.
 //
 // blockBudget is the remaining defense-phase pitch supply after the caller has subtracted
 // DR costs. Modal blockers enumerate their modes within blockBudget and pick the one
@@ -277,9 +276,9 @@ func roleAllowed(r Role, isArsenalSlot, isDefenseReaction, canAttack bool) bool 
 // the partition's defense-phase output isn't safe to cache.
 func defendersDamage(defenders, pitched []card.Card, deckPile *deck.Deck, ge *gameengine.GameEngine, gravBuf []card.Card, cs *card.CardState, incomingDamage, blockBudget, arsenalDefenderIdx int) (int, []card.Card, bool) {
 	total := 0
-	remaining := incomingDamage
 	cacheable := true
 	ge.SetDeck(deckPile)
+	ge.SetIncomingDamage(incomingDamage)
 	for i, def := range defenders {
 		if !attackerMetaPtrFor(def).actsAsDR {
 			continue
@@ -289,12 +288,10 @@ func defendersDamage(defenders, pitched []card.Card, deckPile *deck.Deck, ge *ga
 		ge.SetPitched(pitched)
 		ge.SetDefenders(defenders)
 		ge.SetValue(0)
-		ge.SetIncomingDamage(remaining)
 		ge.SetCacheable(true)
 		*cs = card.CardState{Card: def, FromArsenal: i == arsenalDefenderIdx}
 		ge.ResolveChainStep(ge.Logger(), cs)
 		total += ge.Value()
-		remaining = ge.IncomingDamage()
 		if !ge.IsCacheable() {
 			cacheable = false
 		}
@@ -311,12 +308,12 @@ func defendersDamage(defenders, pitched []card.Card, deckPile *deck.Deck, ge *ga
 			b.Block(ge, ge.Logger(), cs)
 		}
 		block := cs.EffectiveDefense()
-		if block > remaining {
-			block = remaining
+		if rem := ge.RemainingUnblockedDamage(); block > rem {
+			block = rem
 		}
 		if block > 0 {
 			total += block
-			remaining -= block
+			ge.AddDamageBlocked(block)
 		}
 	}
 	return total, gravBuf, cacheable

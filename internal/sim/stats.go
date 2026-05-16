@@ -4,7 +4,11 @@ package sim
 // the single best turn ever seen, and a histogram of hand values that supports Min / Max without
 // retaining every individual hand.
 
-import "github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+import (
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/aura"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/item"
+)
 
 // DeckStats holds aggregate hand-value statistics across all simulated runs of a Deck.
 type DeckStats struct {
@@ -45,10 +49,10 @@ type BestTurn struct {
 	Summary TurnSummary
 	// StartingAuras is the carryover aura set entering this turn — sigils, incantations,
 	// and token auras in play when the hand was dealt.
-	StartingAuras []*Aura
+	StartingAuras []*aura.Aura
 	// StartingItems is the carryover item set entering this turn — Gold tokens (and
 	// future card items) in play when the hand was dealt.
-	StartingItems []*Item
+	StartingItems []*item.Item
 	// Log is the four-section structured record (StartOfTurn / MyTurn / OpponentTurn /
 	// EndOfTurn) of the best turn's printout. Each entry is content-only; the formatter
 	// owns indentation, section headers, and chain numbering. Evaluate populates it

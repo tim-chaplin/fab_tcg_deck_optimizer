@@ -1,8 +1,10 @@
 package sim
 
 import (
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/aura"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/gameengine"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/item"
 )
 
 // Turn-summary data shapes returned by Best: Role, CardAssignment, TurnSummary. Cross-turn
@@ -128,7 +130,7 @@ func itemCountByNameInState(gs *gameengine.GameState, name string) int {
 
 // auraCountByName scans a sim-concrete aura slice for a token aura by display name.
 // Used by the cross-turn bookkeeping in deck_eval.go to size the runechant carryover.
-func auraCountByName(auras []*Aura, name string) int {
+func auraCountByName(auras []*aura.Aura, name string) int {
 	for _, a := range auras {
 		if a.CardName() == name {
 			return a.Count()
@@ -138,7 +140,7 @@ func auraCountByName(auras []*Aura, name string) int {
 }
 
 // itemCountByName scans a sim-concrete item slice for a token item by display name.
-func itemCountByName(items []*Item, name string) int {
+func itemCountByName(items []*item.Item, name string) int {
 	for _, i := range items {
 		if i.CardName() == name {
 			return i.Count()

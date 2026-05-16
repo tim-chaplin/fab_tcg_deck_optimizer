@@ -37,6 +37,7 @@ type GameState struct {
 	value                int
 	cardsDrawn           int
 	incomingDamage       int
+	damageBlocked        int
 	arcaneIncomingDamage int
 	blockTotal           int
 	currentAuraIdx       int
@@ -81,7 +82,7 @@ func (gs *GameState) Copy() *GameState {
 	if len(gs.auras) > 0 {
 		out.auras = make([]Aura, len(gs.auras))
 		for i, a := range gs.auras {
-			out.auras[i] = a.Copy()
+			out.auras[i] = a.Copy().(Aura)
 		}
 	} else {
 		out.auras = nil
@@ -94,7 +95,7 @@ func (gs *GameState) Copy() *GameState {
 	if len(gs.items) > 0 {
 		out.items = make([]Item, len(gs.items))
 		for i, it := range gs.items {
-			out.items[i] = it.Copy()
+			out.items[i] = it.Copy().(Item)
 		}
 	} else {
 		out.items = nil
@@ -103,13 +104,28 @@ func (gs *GameState) Copy() *GameState {
 	return &out
 }
 
-// Reset resets per-chain locals so the state is ready to play a fresh chain
-// from this permutation's hand order. Auras, items, banished, graveyard, deck, arsenal,
-// pitched, hero, and OpponentMarked carry over untouched — they represent the leaf's
-// pre-chain state. logger is installed verbatim (pass nil for the find-best path, a
-// fresh logger for the recording path).
-func (gs *GameState) Reset(hand []card.Card, incomingDamage int, logger *turnlogger.TurnLogger) {
-	gs.hand = hand
+// ResetEphemeralState returns gs to its start-of-turn baseline: it discards every field
+// that playing out a turn accumulates, keeping only the cross-turn carryover (hero, deck,
+// arsenal, graveyard, banished, the aura / item lists, opponentMarked, and the matchup's
+// incoming-damage figures).
+//
+// What it resets, by category:
+//   - per-turn zones — hand, pitched, defenders
+//   - resolution scratch — the played / remaining lists, the one-shot trigger queue, the
+//     value accumulator and draw counter, action points, the block total, the current-step
+//     machinery, the "happened this resolution" flags, the cacheable bit, the logger
+//   - aura gates — every aura's FiredThisTurn flag rearms, so OncePerTurn auras can fire
+//     again
+//
+// auraCreated lands at len(auras) > 0 — a state holding carryover auras reads as "an aura
+// is in play" for the cards that gate on it.
+//
+// incomingDamage stays put — it's the constant matchup figure, carried over untouched.
+// damageBlocked (how much of it defense has absorbed so far) resets to zero.
+func (gs *GameState) ResetEphemeralState() {
+	gs.hand = nil
+	gs.pitched = nil
+	gs.defenders = nil
 	gs.cardsPlayed = nil
 	gs.cardsRemaining = nil
 	gs.triggers = nil
@@ -118,16 +134,20 @@ func (gs *GameState) Reset(hand []card.Card, incomingDamage int, logger *turnlog
 	gs.actionPoints = 1
 	gs.value = 0
 	gs.cardsDrawn = 0
-	gs.incomingDamage = incomingDamage
-	gs.cardBanished = false
-	gs.arcaneDamageDealt = false
-	gs.nonAttackActionPlayed = false
+	gs.damageBlocked = 0
+	gs.blockTotal = 0
 	gs.currentAuraDestroyed = false
 	gs.currentStepRerouted = false
 	gs.currentAuraIdx = -1
+	gs.cardBanished = false
+	gs.arcaneDamageDealt = false
+	gs.nonAttackActionPlayed = false
 	gs.cacheable = true
-	gs.logger = logger
+	gs.logger = nil
 	gs.auraCreated = len(gs.auras) > 0
+	for _, a := range gs.auras {
+		a.SetFiredThisTurn(false)
+	}
 }
 
 // === Pure state accessors. No cacheable flips; sim uses these to drive the chain runner. ===
@@ -233,8 +253,24 @@ func (gs *GameState) AddValue(n int) { gs.value += n }
 func (gs *GameState) CardsDrawn() int     { return gs.cardsDrawn }
 func (gs *GameState) SetCardsDrawn(n int) { gs.cardsDrawn = n }
 
-func (gs *GameState) IncomingDamage() int     { return gs.incomingDamage }
-func (gs *GameState) SetIncomingDamage(n int) { gs.incomingDamage = n }
+// RemainingUnblockedDamage returns the opponent damage still unblocked this turn — the
+// constant matchup figure minus everything defense has absorbed so far.
+func (gs *GameState) RemainingUnblockedDamage() int { return gs.incomingDamage - gs.damageBlocked }
+
+// SetIncomingDamage installs the turn's incoming-damage figure and zeroes the
+// damage-blocked accumulator — "n incoming, none blocked yet". Defense reactions and
+// blocks then chip away at it via AddDamageBlocked (and the engine's DR resolution)
+// rather than mutating the figure itself, so the matchup number stays constant and
+// carries across turns untouched.
+func (gs *GameState) SetIncomingDamage(n int) {
+	gs.incomingDamage = n
+	gs.damageBlocked = 0
+}
+
+// AddDamageBlocked credits n damage as absorbed by defense, shrinking
+// RemainingUnblockedDamage by n. The engine's DR resolution accumulates through here; the
+// chain runner's plain-block pass calls it directly.
+func (gs *GameState) AddDamageBlocked(n int) { gs.damageBlocked += n }
 
 func (gs *GameState) ArcaneIncomingDamage() int     { return gs.arcaneIncomingDamage }
 func (gs *GameState) SetArcaneIncomingDamage(n int) { gs.arcaneIncomingDamage = n }

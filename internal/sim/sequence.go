@@ -20,9 +20,13 @@ package sim
 import (
 	"fmt"
 
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/aura"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/gameengine"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/hero"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/item"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/token"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/turnlogger"
 )
 
@@ -47,34 +51,11 @@ func FormatLogEntry(e turnlogger.LogEntry) string {
 	return fmt.Sprintf("%s (+%d) (from %s)", e.Text, e.N, e.Source)
 }
 
-// newTurnMasterState builds the start-of-turn master *GameState. Holds prior state
-// (auras / items / banished / graveyard / opponent-marked) and matchup config (incoming
-// damage, arcane). Per-leaf and per-permutation copies branch off via Copy().
-func newTurnMasterState(prior Prior, mp Matchup, d *deck.Deck) *gameengine.GameState {
-	ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().
-		SetHero(prior.Hero).
-		SetArsenal(prior.Arsenal).
-		SetBanished(append([]card.Card(nil), prior.Banished...)).
-		SetGraveyard(append([]card.Card(nil), prior.Graveyard...)).
-		SetOpponentMarked(prior.OpponentMarked).
-		SetIncomingDamage(mp.IncomingDamage).
-		SetArcaneIncomingDamage(mp.ArcaneIncomingDamage).
-		Build()}
-	s := ge.GameState
-	s.SetDeck(d.Copy())
-	for _, a := range prior.Auras {
-		s.CreateAura(a.Copy())
-	}
-	for _, i := range prior.Items {
-		s.CreateItem(i.Copy())
-	}
-	s.SetAuraCreated(false)
-	return s
-}
-
 // bestAttackWithWeapons enumerates phase / weapon masks for one partition leaf and
 // returns the best (damage, futureValue, budget, swungWeapons, winnerState, legal,
-// cacheable) tuple.
+// cacheable) tuple. masterState holds the start-of-turn carryover (hero, arsenal, auras,
+// items, banished, graveyard, opponentMarked) the chain runner reads from; each per-leaf
+// state branches off via masterState.Copy().
 func bestAttackWithWeapons(
 	masterState *gameengine.GameState,
 	weapons []Weapon,
@@ -84,12 +65,11 @@ func bestAttackWithWeapons(
 	mp Matchup,
 	blockTotal, arsenalInIdx, arsenalDefenderIdx int,
 	arsenalAtChainStart card.Card,
-	prior Prior,
 	skipLog bool,
 ) (int, int, chainBudget, []string, *gameengine.GameState, bool, bool) {
-	runechantCarryover := auraCountByName(prior.Auras, "Runechant")
+	runechantCarryover := auraCountByNameInState(masterState, "Runechant")
 	ctx := &sequenceContext{
-		hero:                prior.Hero,
+		hero:                masterState.Hero().(hero.Hero),
 		pitched:             pitched,
 		deck:                d,
 		handStart:           held,
@@ -99,9 +79,9 @@ func bestAttackWithWeapons(
 		matchup:             mp,
 		blockTotal:          blockTotal,
 		arsenalInIdx:        arsenalInIdx,
-		priorOpponentMarked: prior.OpponentMarked,
-		priorBanish:         prior.Banished,
-		priorGraveyard:      prior.Graveyard,
+		priorOpponentMarked: masterState.OpponentMarked(),
+		priorBanish:         masterState.Banished(),
+		priorGraveyard:      masterState.Graveyard(),
 		defenders:           defenders,
 		skipLog:             skipLog,
 		cacheable:           true,
@@ -109,12 +89,12 @@ func bestAttackWithWeapons(
 	// Extend bufs.activatedAbilities with item ability instances for this Best call.
 	abilities := bufs.activatedAbilities[:bufs.weaponAbilityCount]
 	abilityCosts := bufs.activatedAbilityCosts[:bufs.weaponAbilityCount]
-	for _, it := range prior.Items {
+	for _, it := range masterState.Items() {
 		copies := it.Count()
 		if copies > perItemAbilityCap {
 			copies = perItemAbilityCap
 		}
-		ab := it.Ability()
+		ab := it.Ability().(card.Card)
 		cost := attackerMetaPtrFor(ab).maxCost
 		for i := 0; i < copies; i++ {
 			abilities = append(abilities, ab)
@@ -268,14 +248,14 @@ func bestAttackWithWeapons(
 func newDRCostProbe(runechants int) *gameengine.GameEngine {
 	ge := gameengine.New()
 	if runechants > 0 {
-		ge.CreateAura(NewRunechantAura(runechants))
+		ge.CreateAura(token.NewRunechant(runechants))
 	}
 	return ge
 }
 
 // sequenceContext carries the stable per-partition-leaf environment.
 type sequenceContext struct {
-	hero                  Hero
+	hero                  hero.Hero
 	pitched               []card.Card
 	deck                  *deck.Deck
 	handStart             []card.Card
@@ -315,16 +295,21 @@ func (ctx *sequenceContext) newPermLogger() *turnlogger.TurnLogger {
 // runDefense mutates ctx.leafState through the defender list, accumulating per-DR Value
 // into total. Auras grow with any DR-added entries; graveyard is left as priorGraveyard
 // + defenders for the chain phase. Chain-locals (value, action points, …) get reset
-// per permutation via Reset, so runDefense doesn't bother restoring them.
+// per permutation via ResetEphemeralState, so runDefense doesn't bother restoring them.
+//
+// SetIncomingDamage installs the matchup figure once and zeroes the damage-blocked
+// accumulator; each DR's resolution and each plain block then bank into that accumulator,
+// so leafState.RemainingUnblockedDamage() reads the unblocked remainder as defense
+// proceeds while the matchup figure itself stays constant.
 func (ctx *sequenceContext) runDefense(defenders, pitched []card.Card, deckPile *deck.Deck, matchupIncomingDamage, blockBudget, arsenalDefenderIdx int) (int, bool) {
 	state := ctx.leafState
 	state.SetLogger(ctx.newPermLogger())
 	state.SetDeck(deckPile)
+	state.SetIncomingDamage(matchupIncomingDamage)
 	ge := state.Engine()
 	cs := &ctx.bufs.drCardStateScratch
 
 	total := 0
-	remaining := matchupIncomingDamage
 	cacheable := true
 
 	// Per-DR view: graveyard = defenders so DRs that scan graveyard see the defender
@@ -338,12 +323,10 @@ func (ctx *sequenceContext) runDefense(defenders, pitched []card.Card, deckPile 
 		state.SetPitched(pitched)
 		state.SetDefenders(defenders)
 		state.SetValue(0)
-		state.SetIncomingDamage(remaining)
 		state.SetCacheable(true)
 		*cs = card.CardState{Card: def, FromArsenal: i == arsenalDefenderIdx}
 		ge.ResolveChainStep(state.Logger(), cs)
 		total += state.Value()
-		remaining = state.IncomingDamage()
 		if !state.IsCacheable() {
 			cacheable = false
 		}
@@ -362,12 +345,12 @@ func (ctx *sequenceContext) runDefense(defenders, pitched []card.Card, deckPile 
 			b.Block(ge, state.Logger(), cs)
 		}
 		block := cs.EffectiveDefense()
-		if block > remaining {
-			block = remaining
+		if rem := state.RemainingUnblockedDamage(); block > rem {
+			block = rem
 		}
 		if block > 0 {
 			total += block
-			remaining -= block
+			state.AddDamageBlocked(block)
 		}
 	}
 
@@ -381,11 +364,16 @@ func (ctx *sequenceContext) runDefense(defenders, pitched []card.Card, deckPile 
 
 // preparePermState returns a fresh per-permutation *GameState for the chain run. The
 // state inherits the leafState's post-defense auras / items / graveyard / banished /
-// hero / arsenal, and gets its chain-locals reset via Reset. Hand is set to
-// the chain attackers + the attack-phase pitched bag so each chain step's Hand() read
-// sees the upcoming bag.
+// hero / arsenal; ResetEphemeralState wipes the previous permutation's play state, then
+// this permutation's inputs are installed. Hand is set to the chain attackers + the
+// attack-phase pitched bag so each chain step's Hand() read sees the upcoming bag.
+//
+// IncomingDamage needs no re-install: the matchup figure rode in constant on leafState,
+// and ResetEphemeralState zeroed the damage-blocked accumulator, so the attack chain
+// already sees the full matchup figure.
 func (ctx *sequenceContext) preparePermState(playedAttackers []*card.CardState, n int) *gameengine.GameState {
 	s := ctx.leafState.Copy()
+	s.ResetEphemeralState()
 	s.SetHero(ctx.hero)
 	s.SetArsenal(ctx.arsenalAtChainStart)
 	s.SetOpponentMarked(ctx.priorOpponentMarked)
@@ -399,7 +387,8 @@ func (ctx *sequenceContext) preparePermState(playedAttackers []*card.CardState, 
 		hand = append(hand, c)
 	}
 	s.SetPitched(ctx.pitched)
-	s.Reset(hand, ctx.matchup.IncomingDamage, ctx.newPermLogger())
+	s.SetHand(hand)
+	s.SetLogger(ctx.newPermLogger())
 	return s
 }
 
@@ -693,7 +682,7 @@ func pendingFutureValueFromState(gs *gameengine.GameState) int {
 
 // pendingFutureValue sums the Count of every Aura plus every Item — used by
 // partition.go when comparing partitions whose winning states are already in hand.
-func pendingFutureValue(auras []*Aura, items []*Item) int {
+func pendingFutureValue(auras []*aura.Aura, items []*item.Item) int {
 	total := 0
 	for _, a := range auras {
 		total += a.Count()

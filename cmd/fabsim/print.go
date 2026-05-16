@@ -13,6 +13,7 @@ import (
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/hero"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/registry"
 )
 
@@ -57,7 +58,7 @@ func printGroupedStrings(ss []string) {
 // `fabsim eval -brief` calls printDeckSummary directly so a scripted re-score gets just the
 // numbers without the card-list scroll.
 func printDeckSummary(d *deck.Deck, s sim.DeckStats) {
-	fmt.Printf("Hero:    %s\n", d.Hero.(sim.Hero).Name())
+	fmt.Printf("Hero:    %s\n", d.Hero.(hero.Hero).Name())
 	fmt.Printf("Weapons: %s\n", weaponNames(d.Weapons))
 	fmt.Printf("Pitch:   %s\n", d.PitchCountsLine())
 	fmt.Println()

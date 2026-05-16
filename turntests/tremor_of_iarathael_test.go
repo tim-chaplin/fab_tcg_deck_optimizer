@@ -4,10 +4,11 @@ import (
 	"testing"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/heroes"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/hero"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/gameengine"
 )
 
 // Tests that a same-turn banish (Jack Be Quick consuming a graveyard Nimblism) flips
@@ -15,15 +16,13 @@ import (
 // {3} → Jack Be Quick (banishes Nimblism, +1{p} and go again, deals 4) → Tremor (cost 1,
 // deals 4 + 2 bonus = 6). Total 10.
 func TestTremorOfIArathael_SameTurnBanishActivatesBonus(t *testing.T) {
-	d := deck.New(heroes.Viserai{}, nil, fillerDeck())
+	d := deck.New(hero.Viserai{}, nil, fillerDeck())
 	hand := []deck.Card{
 		cards.TremorOfIArathaelRed{},
 		cards.JackBeQuickRed{},
 		cards.TitaniumBaubleBlue{},
 	}
-	initial := sim.Prior{
-		Graveyard: []card.Card{cards.NimblismRed{}},
-	}
+	initial := gameengine.GameStateBuilder().SetGraveyard([]card.Card{cards.NimblismRed{}}).Build()
 	got := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, initial, hand).Value
 	if got != 10 {
 		t.Fatalf("Value = %d, want 10 (Bauble pitch → JBQ banishes Nimblism for 4 → Tremor 4+2=6)", got)
@@ -34,11 +33,9 @@ func TestTremorOfIArathael_SameTurnBanishActivatesBonus(t *testing.T) {
 // flip CardBanished — Tremor plays at its base power. Hand: Tremor, Bauble. Initial
 // banish has one card seeded; CardBanished stays false. Total 4.
 func TestTremorOfIArathael_PriorTurnBanishedZoneDoesNotActivate(t *testing.T) {
-	d := deck.New(heroes.Viserai{}, nil, fillerDeck())
+	d := deck.New(hero.Viserai{}, nil, fillerDeck())
 	hand := []deck.Card{cards.TremorOfIArathaelRed{}, cards.TitaniumBaubleBlue{}}
-	initial := sim.Prior{
-		Banished: []card.Card{cards.NimblismRed{}},
-	}
+	initial := gameengine.GameStateBuilder().SetBanished([]card.Card{cards.NimblismRed{}}).Build()
 	got := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, initial, hand).Value
 	if got != 4 {
 		t.Fatalf("Value = %d, want 4 (Tremor base 4; prior-turn banish doesn't trigger bonus)", got)

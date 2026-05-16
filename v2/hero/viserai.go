@@ -2,12 +2,11 @@
 // Text: "Whenever you play a Runeblade card, if you have played another 'non-attack' action card
 // this turn, create a Runechant token."
 
-package heroes
+package hero
 
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
-	"github.com/tim-chaplin/fab-deck-optimizer/v2/gameengine"
 )
 
 var viseraiTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeHero, card.TypeYoung)
@@ -24,11 +23,11 @@ func (Viserai) Class() card.CardType { return card.TypeRuneblade }
 
 // OnCardPlayed implements Viserai's hero ability: whenever a Runeblade card is played, if a
 // non-attack action (Action without Attack) has been played this turn, create a Runechant
-// token.
-func (Viserai) OnCardPlayed(played card.Card, ge *gameengine.GameEngine, l card.Logger) int {
-	// Universal cards fold the active hero'ge class into their Types(ge) so Viserai'ge
-	// Runeblade trigger fires on them too.
-	t := played.Types(ge)
+// token. The played.Types call wants the richer card.GameEngine (for Universal-class
+// folding) so we type-assert past the narrow GameEngine — *gameengine.GameEngine satisfies
+// both.
+func (Viserai) OnCardPlayed(played card.Card, ge GameEngine, l Logger) int {
+	t := played.Types(ge.(card.GameEngine))
 	// Weapon swings aren't "playing a card" and don't trigger Viserai.
 	if !t.Has(card.TypeRuneblade) || t.Has(card.TypeWeapon) {
 		return 0

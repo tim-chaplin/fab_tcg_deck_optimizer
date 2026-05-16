@@ -1,84 +1,72 @@
 // Package gameengine owns GameEngine — the per-turn shared state threaded through every
 // Card.Play — and the local interfaces (Aura, Trigger, Item, Hero) it consumes. Concrete
-// impls of those interfaces live in the caller (today internal/sim; eventually their own
-// v2/ subpackages). v2/card.GameEngine is a narrow subset of GameEngine's method set — the
-// card-facing surface; sim imports this package directly and gets the full API including
-// Reset / Snapshot / Fire* / SetHero.
+// impls live in dedicated leaf packages (v2/aura, v2/trigger, v2/hero, v2/token) that do
+// not import gameengine; sim wires builders in via init so the engine never imports the
+// concrete types directly. v2/card.GameEngine is a narrow subset of GameEngine's method
+// set — the card-facing surface.
 package gameengine
 
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/hero"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/triggertype"
 )
 
-// Aura is the engine's view of a persistent hook entry. Concrete aura impls expose
-// what the engine needs through these methods directly.
+// Aura is the engine's view of a persistent hook entry. Engine, logger, and source-card
+// values flow through as `any` so concrete impls (in v2/aura) can satisfy this without
+// importing gameengine OR v2/card — the engine asserts the boxed values back to the typed
+// interfaces it uses. Copy uses any for the same reason; State.Copy asserts back to Aura.
 type Aura interface {
 	TriggerType() triggertype.Type
 	OncePerTurn() bool
 	FiredThisTurn() bool
 	SetFiredThisTurn(bool)
-	// CardName is the originating card or token's display name, used for log attribution.
 	CardName() string
-	// CardID is the originating card's registry ID; tokens carry their reserved engine
-	// token-ID (RunechantTokenID, …) so cache keys distinguish each kind without an
-	// extra discriminator.
 	CardID() ids.CardID
-	// SourceCard returns the originating card.Card for card-backed auras, or nil for
-	// token auras. The eval-loop start-of-turn aura listing uses it to attribute aura
-	// fires back to their source card in the printout.
-	SourceCard() card.Card
+	// SourceCard returns the originating card boxed as any for card-backed auras, or nil
+	// for token auras. DestroyAura asserts it back to card.Card to route into graveyard;
+	// sim's start-of-turn listing reads it to attribute aura fires to their source card.
+	SourceCard() any
 	Count() int
 	SetCount(int)
 	DecrementCount() int
-	// Fire invokes the aura's handler with a card.Aura context built by the engine.
-	Fire(g *GameEngine, l card.Logger)
-	// OnDestroy is called by the engine when the aura is destroyed with addToGraveyard=true.
-	// Card-backed auras push their source card into the graveyard via ge.AppendGraveyard;
-	// token auras no-op.
-	OnDestroy(g *GameEngine)
-	// Copy returns a deep copy. GameEngine.Copy walks the aura list and stores the
-	// result so per-permutation Count / FiredThisTurn mutations don't leak across copies.
-	Copy() Aura
+	Fire(engine, logger any)
+	Copy() any
 }
 
-// Trigger is the engine's view of a one-shot deferred handler.
+// Trigger is the engine's view of a one-shot deferred handler. As with Aura, engine /
+// logger / type-set values flow through as `any`.
 type Trigger interface {
 	TriggerType() triggertype.Type
-	// CardName is the source card's display name, used for log attribution.
 	CardName() string
-	// Matches narrows triggertype.Hit fires to a card-type predicate. Returns true when the
-	// trigger has no type filter.
-	Matches(types card.TypeSet) bool
-	// Fire invokes the trigger's handler with a card.Trigger context built by the engine.
-	Fire(g *GameEngine, l card.Logger)
+	Matches(types any) bool
+	Fire(engine, logger any)
 }
 
-// Item is the engine's view of an in-play permanent with an activated ability.
+// Item is the engine's view of an in-play permanent with an activated ability. Ability
+// is returned as `any` so concrete Item impls (in v2/token) can satisfy this without
+// importing v2/card — engine and chain-runner callers assert back to card.Card.
 type Item interface {
 	CardName() string
 	CardID() ids.CardID
 	Count() int
 	SetCount(int)
-	// Ability is the activated-ability card the chain runner enqueues each turn.
-	Ability() card.Card
-	// Copy returns a deep copy. GameEngine.Copy walks the item list and stores the
-	// result so per-permutation Count mutations don't leak across copies.
-	Copy() Item
+	Ability() any
+	Copy() any
 }
 
-// Hero is the engine's view of the active hero. Concrete heroes (e.g. internal/heroes/*)
-// satisfy this. The engine reads Class / Types on demand (Universal cards fold the active
-// hero's class into their own Types) and calls OnCardPlayed before each chain step resolves
-// so hero abilities fire ahead of the card itself.
+// Hero is the engine's view of the active hero. OnCardPlayed takes hero.GameEngine and
+// hero.Logger — narrow surfaces concrete heroes consume directly so v2/hero doesn't
+// reference v2/card.GameEngine / v2/card.Logger. *GameEngine satisfies hero.GameEngine
+// structurally.
 type Hero interface {
 	ID() ids.HeroID
 	Name() string
 	Class() card.CardType
 	Types() card.TypeSet
 	Intelligence() int
-	OnCardPlayed(played card.Card, g *GameEngine, l card.Logger) int
+	OnCardPlayed(played card.Card, ge hero.GameEngine, l hero.Logger) int
 	Opt(cards []card.Card) (top, bottom []card.Card)
 }
 

@@ -197,6 +197,18 @@ func (ge *GameEngine) DrawOne() {
 	ge.cardsDrawn++
 }
 
+// PonderDrawOne pops the deck top into the hand without bumping CardsDrawn. Returns false
+// when the deck is empty. Used by the Ponder token aura at end of turn — ponder draws
+// aren't "draws" in the partition-tiebreaker sense, so the counter stays put.
+func (ge *GameEngine) PonderDrawOne() bool {
+	c, ok := ge.PopDeckTop()
+	if !ok {
+		return false
+	}
+	ge.hand = append(ge.hand, c)
+	return true
+}
+
 // === Rules-engine helpers cards reach through GameEngine ===
 
 // LikelyToHit reports whether self's attack is likely to land past the opponent's blocks.
@@ -491,29 +503,21 @@ func (ge *GameEngine) FireStartOfTurn(onFire func(idx int, damage int, drawnCard
 	}
 }
 
-// AdvanceTurnBoundary clears the per-turn FiredThisTurn flag on every persisted aura.
-// The chain runner calls this when advancing across the turn boundary so the
-// OncePerTurn gate rearms.
-func (ge *GameEngine) AdvanceTurnBoundary() {
-	for i := range ge.auras {
-		ge.auras[i].SetFiredThisTurn(false)
-	}
-}
-
-// DestroyAura removes the aura currently being fired and, when addToGraveyard==true,
-// invokes the aura's OnDestroy hook to push the aura's source card into the graveyard
-// (token auras no-op). Direct splice (no cacheable flip) — destruction is
-// deterministic from the triggering event, not hidden state.
+// DestroyAura removes the aura currently being fired and, when addToGraveyard==true, pushes
+// the aura's source card into the graveyard (token auras with no source no-op). Direct
+// splice (no cacheable flip) — destruction is deterministic from the triggering event.
 //
-// Called by the card.Aura context the engine threads into each handler; cards do not
-// call this directly.
+// Called by the card.Aura context the engine threads into each handler; cards do not call
+// this directly.
 func (ge *GameEngine) DestroyAura(addToGraveyard bool) {
 	i := ge.currentAuraIdx
 	if i < 0 || i >= len(ge.auras) {
 		return
 	}
 	if addToGraveyard {
-		ge.auras[i].OnDestroy(ge)
+		if src := ge.auras[i].SourceCard(); src != nil {
+			ge.AppendGraveyard(src.(card.Card))
+		}
 	}
 	ge.auras = append(ge.auras[:i], ge.auras[i+1:]...)
 	ge.currentAuraDestroyed = true
@@ -524,10 +528,10 @@ func (ge *GameEngine) DestroyAura(addToGraveyard bool) {
 // ResolveChainStep runs card.Play on self and then applies the standard chain-step
 // resolution: for an attack-action or weapon-attack, credit self.EffectiveAttack() to
 // ge.value; for a defense-reaction (or DefensiveInstant), credit the EffectiveDefense
-// capped at IncomingDamage and decrement IncomingDamage; for everything else, log
-// (+0). The "<DisplayName>: <VERB> (+N)" chain-step entry is appended after Play
-// returns so any self-buffs Play applied (e.g. modal +2{p} riders flipping
-// self.BonusAttack) are reflected in the displayed delta.
+// capped at the remaining unblocked damage and bank it via AddDamageBlocked; for
+// everything else, log (+0). The "<DisplayName>: <VERB> (+N)" chain-step entry is
+// appended after Play returns so any self-buffs Play applied (e.g. modal +2{p} riders
+// flipping self.BonusAttack) are reflected in the displayed delta.
 //
 // Cards' Play body owns card-specific behaviour: riders that emit rider log lines,
 // OnHit registration, conditional self-buffs, sub-card plays. The standard
@@ -560,13 +564,13 @@ func (ge *GameEngine) chainStepDelta(self *card.CardState) int {
 		return n
 	case types.IsDefenseReaction() || isDefensiveInstant(self.Card):
 		n := self.EffectiveDefense()
-		if n > ge.incomingDamage {
-			n = ge.incomingDamage
+		if rem := ge.incomingDamage - ge.damageBlocked; n > rem {
+			n = rem
 		}
 		if n < 0 {
 			n = 0
 		}
-		ge.incomingDamage -= n
+		ge.damageBlocked += n
 		ge.value += n
 		return n
 	}
