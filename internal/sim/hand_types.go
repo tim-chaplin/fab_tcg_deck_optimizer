@@ -4,7 +4,7 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/aura"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/gameengine"
-	"github.com/tim-chaplin/fab-deck-optimizer/v2/token"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/item"
 )
 
 // Turn-summary data shapes returned by Best: Role, CardAssignment, TurnSummary. Cross-turn
@@ -140,7 +140,7 @@ func auraCountByName(auras []*aura.Aura, name string) int {
 }
 
 // itemCountByName scans a sim-concrete item slice for a token item by display name.
-func itemCountByName(items []*token.Item, name string) int {
+func itemCountByName(items []*item.Item, name string) int {
 	for _, i := range items {
 		if i.CardName() == name {
 			return i.Count()

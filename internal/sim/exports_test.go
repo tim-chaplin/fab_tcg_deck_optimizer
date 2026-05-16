@@ -8,7 +8,7 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/gameengine"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/hero"
-	"github.com/tim-chaplin/fab-deck-optimizer/v2/token"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/item"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/trigger"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/turnlogger"
 )
@@ -136,7 +136,7 @@ func EngineWithHand(h []card.Card) *gameengine.GameState {
 }
 
 // EngineWithItems returns a fresh GameState with the supplied items installed.
-func EngineWithItems(items []*token.Item) *gameengine.GameState {
+func EngineWithItems(items []*item.Item) *gameengine.GameState {
 	gs := gameengine.GameStateBuilder().Build()
 	for _, it := range items {
 		gs.CreateItem(it)
@@ -146,7 +146,7 @@ func EngineWithItems(items []*token.Item) *gameengine.GameState {
 
 // EngineWith returns a fresh GameState with hand, items, and log entries installed.
 // log can be nil to skip log seeding.
-func EngineWith(h []card.Card, items []*token.Item, log []turnlogger.LogEntry) *gameengine.GameState {
+func EngineWith(h []card.Card, items []*item.Item, log []turnlogger.LogEntry) *gameengine.GameState {
 	gs := gameengine.GameStateBuilder().Build()
 	gs.SetHand(h)
 	for _, it := range items {

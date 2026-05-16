@@ -6,7 +6,7 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/gameengine"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/hero"
-	"github.com/tim-chaplin/fab-deck-optimizer/v2/token"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/item"
 )
 
 // Test-only entry point: drives one turn against a fixed deck order so tests can assert
@@ -24,7 +24,7 @@ type TurnStartState struct {
 	StartOfNextTurnArsenal       deck.Card
 	StartOfNextTurnDeck          *deck.Deck
 	StartOfNextTurnAuras         []*aura.Aura
-	StartOfNextTurnItems         []*token.Item
+	StartOfNextTurnItems         []*item.Item
 	CardsDrawn                   int
 	OpponentMarked               bool
 	StartOfNextTurnTriggerDamage int
@@ -119,9 +119,9 @@ func EvalOneTurnForTesting(masterDeck *deck.Deck, mp Matchup, initial *gameengin
 	for _, a := range play.State.Auras() {
 		auraQueue = append(auraQueue, a.(*aura.Aura))
 	}
-	itemQueue := make([]*token.Item, 0, len(play.State.Items()))
+	itemQueue := make([]*item.Item, 0, len(play.State.Items()))
 	for _, it := range play.State.Items() {
-		itemQueue = append(itemQueue, it.(*token.Item))
+		itemQueue = append(itemQueue, it.(*item.Item))
 	}
 
 	held := append([]card.Card(nil), play.State.Hand()...)
@@ -137,7 +137,7 @@ func EvalOneTurnForTesting(masterDeck *deck.Deck, mp Matchup, initial *gameengin
 			StartOfNextTurnArsenal: play.State.Arsenal(),
 			StartOfNextTurnDeck:    d.Copy(),
 			StartOfNextTurnAuras:   append([]*aura.Aura(nil), auraQueue...),
-			StartOfNextTurnItems:   append([]*token.Item(nil), itemQueue...),
+			StartOfNextTurnItems:   append([]*item.Item(nil), itemQueue...),
 			CardsDrawn:             play.State.CardsDrawn(),
 			OpponentMarked:         play.State.OpponentMarked(),
 		}
@@ -167,7 +167,7 @@ func EvalOneTurnForTesting(masterDeck *deck.Deck, mp Matchup, initial *gameengin
 		StartOfNextTurnArsenal:       play.State.Arsenal(),
 		StartOfNextTurnDeck:          d.Copy(),
 		StartOfNextTurnAuras:         append([]*aura.Aura(nil), survivors...),
-		StartOfNextTurnItems:         append([]*token.Item(nil), itemQueue...),
+		StartOfNextTurnItems:         append([]*item.Item(nil), itemQueue...),
 		CardsDrawn:                   play.State.CardsDrawn(),
 		OpponentMarked:               play.State.OpponentMarked(),
 		StartOfNextTurnTriggerDamage: trigDamage,

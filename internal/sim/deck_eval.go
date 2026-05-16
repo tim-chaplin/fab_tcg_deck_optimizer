@@ -18,7 +18,7 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/gameengine"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/hero"
-	"github.com/tim-chaplin/fab-deck-optimizer/v2/token"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/item"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/triggertype"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/turnlogger"
 )
@@ -352,13 +352,13 @@ func concreteAuras(in []gameengine.Aura) []*aura.Aura {
 }
 
 // concreteItems is the items counterpart of concreteAuras.
-func concreteItems(in []gameengine.Item) []*token.Item {
+func concreteItems(in []gameengine.Item) []*item.Item {
 	if len(in) == 0 {
 		return nil
 	}
-	out := make([]*token.Item, 0, len(in))
+	out := make([]*item.Item, 0, len(in))
 	for _, it := range in {
-		out = append(out, it.(*token.Item))
+		out = append(out, it.(*item.Item))
 	}
 	return out
 }
@@ -602,7 +602,7 @@ func sortHandByID(hand []card.Card) {
 // the next call, so retaining them directly would let a later evaluation mutate the saved
 // peak. Nil-length slices skip the clone so the captured TurnSummary holds nil rather
 // than a zero-length allocation.
-func recordBestTurn(stats *DeckStats, play TurnSummary, startingAuras []*aura.Aura, startingItems []*token.Item) {
+func recordBestTurn(stats *DeckStats, play TurnSummary, startingAuras []*aura.Aura, startingItems []*item.Item) {
 	lineCopy := make([]CardAssignment, len(play.BestLine))
 	copy(lineCopy, play.BestLine)
 	var swungCopy []string

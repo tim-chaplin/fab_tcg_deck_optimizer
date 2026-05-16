@@ -8,12 +8,13 @@ import (
 	. "github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
-	"github.com/tim-chaplin/fab-deck-optimizer/v2/hero"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapons"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/aura"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/gameengine"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/hero"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/item"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/token"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/triggertype"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/turnlogger"
@@ -580,7 +581,7 @@ func TestFormatBestTurn_StartOfTurnRunechantsOnly(t *testing.T) {
 // TestFormatBestTurn_StartOfTurnGoldItems surfaces a Gold token carryover as an
 // "Items: N Gold" line in the Start of turn section.
 func TestFormatBestTurn_StartOfTurnGoldItems(t *testing.T) {
-	out := FormatBestTurn(TurnSummary{}, nil, []*token.Item{token.NewGold(2)})
+	out := FormatBestTurn(TurnSummary{}, nil, []*item.Item{token.NewGold(2)})
 	want := "Items: 2 Gold"
 	if !strings.Contains(out, want) {
 		t.Errorf("missing %q in:\n%s", want, out)
@@ -591,7 +592,7 @@ func TestFormatBestTurn_StartOfTurnGoldItems(t *testing.T) {
 // as an "Items: N Gold" line in the End of turn section.
 func TestFormatBestTurn_EndOfTurnGoldItems(t *testing.T) {
 	summary := TurnSummary{
-		State: EngineWithItems([]*token.Item{token.NewGold(1)}),
+		State: EngineWithItems([]*item.Item{token.NewGold(1)}),
 	}
 	out := FormatBestTurn(summary, nil, nil)
 	want := "Items: 1 Gold"

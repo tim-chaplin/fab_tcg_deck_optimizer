@@ -1,53 +1,46 @@
-// Package token owns the concrete Item type — an in-play permanent with an activated
-// ability — along with FaB's five built-in tokens: the item tokens Gold / Silver / Copper
-// (gold.go / silver.go / copper.go) and the aura-flavored tokens Runechant / Ponder
-// (runechant.go / ponder.go). Item is the generic store; the per-token files each own
-// their own narrow consumer-side interfaces and their type-set so adding a non-generic
-// future token doesn't tangle the others.
+// Package token owns the factories for FaB's five built-in tokens: the item tokens
+// Gold / Silver / Copper, and the aura-flavored tokens Runechant / Ponder. Each factory
+// returns the concrete value the engine stores — *item.Item for the item tokens, *aura.Aura
+// for the aura tokens — wiring in the per-token name, identifier, and (for auras) the
+// trigger type + fire handler.
 //
-// Item itself defines no v2/card dependency — its ability slot is typed as `any` so the
-// chain runner asserts it back to a richer card type when invoking; the per-token files
-// do import v2/card to declare their card implementations.
+// The activated-ability card types backing the item tokens (cards.GoldToken et al.) live
+// in internal/cards alongside other card implementations. The aura-token fire handlers
+// and their narrow consumer interfaces live in runechant.go / ponder.go alongside the
+// token-specific consts.
 package token
 
 import (
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/aura"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/item"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/triggertype"
 )
 
-// Item is the concrete entry the engine stores in its persistent item list. Today every
-// item is a token; the ability is the activated card the chain runner enqueues as a
-// 1-AP playable while the token is in play.
-type Item struct {
-	tokenName string
-	tokenID   ids.CardID
-	ability   any
-	count     int
+// NewGold returns a fresh Gold token item at count n.
+func NewGold(n int) *item.Item {
+	return item.NewFromToken(cards.GoldTokenName, ids.GoldTokenID, cards.GoldToken{}, n)
 }
 
-// NewItem builds a token item with the supplied name, identifier, activated-ability card,
-// and initial count. Production callers reach for NewGold / NewSilver / NewCopper, which
-// wire the appropriate ability card.
-func NewItem(name string, tokenID ids.CardID, ability any, count int) *Item {
-	return &Item{
-		tokenName: name,
-		tokenID:   tokenID,
-		ability:   ability,
-		count:     count,
-	}
+// NewSilver returns a fresh Silver token item at count n.
+func NewSilver(n int) *item.Item {
+	return item.NewFromToken(cards.SilverTokenName, ids.SilverTokenID, cards.SilverToken{}, n)
 }
 
-func (i *Item) CardName() string   { return i.tokenName }
-func (i *Item) CardID() ids.CardID { return i.tokenID }
-func (i *Item) Count() int         { return i.count }
-func (i *Item) SetCount(n int)     { i.count = n }
+// NewCopper returns a fresh Copper token item at count n.
+func NewCopper(n int) *item.Item {
+	return item.NewFromToken(cards.CopperTokenName, ids.CopperTokenID, cards.CopperToken{}, n)
+}
 
-// Ability returns the activated-ability card boxed as any. Callers type-assert to their
-// richer card type (typically v2/card.Card) when invoking.
-func (i *Item) Ability() any { return i.ability }
+// NewRunechant returns a fresh Runechant token aura at count n. Fires per attack
+// (triggertype.Attack); the fire handler lives in runechant.go.
+func NewRunechant(n int) *aura.Aura {
+	return aura.NewFromToken(runechantTokenName, ids.RunechantTokenID, triggertype.Attack, runechantFire, n)
+}
 
-// Copy returns a deep copy boxed as any so the gameengine.Item interface declaration can
-// avoid referencing its own type — letting concrete impls satisfy without importing.
-func (i *Item) Copy() any {
-	out := *i
-	return &out
+// NewPonder returns a fresh Ponder token aura at count n. Fires at end-of-turn
+// (triggertype.EndOfTurn); the fire handler lives in ponder.go.
+func NewPonder(n int) *aura.Aura {
+	return aura.NewFromToken(ponderTokenName, ids.PonderTokenID, triggertype.EndOfTurn, ponderFire, n)
 }

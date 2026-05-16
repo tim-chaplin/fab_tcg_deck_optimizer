@@ -25,6 +25,7 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/gameengine"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/hero"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/item"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/token"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/turnlogger"
 )
@@ -681,7 +682,7 @@ func pendingFutureValueFromState(gs *gameengine.GameState) int {
 
 // pendingFutureValue sums the Count of every Aura plus every Item — used by
 // partition.go when comparing partitions whose winning states are already in hand.
-func pendingFutureValue(auras []*aura.Aura, items []*token.Item) int {
+func pendingFutureValue(auras []*aura.Aura, items []*item.Item) int {
 	total := 0
 	for _, a := range auras {
 		total += a.Count()

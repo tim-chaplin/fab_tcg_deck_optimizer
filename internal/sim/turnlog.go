@@ -10,7 +10,7 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/aura"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/gameengine"
-	"github.com/tim-chaplin/fab-deck-optimizer/v2/token"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/item"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/turnlogger"
 )
 
@@ -19,7 +19,7 @@ import (
 // token counts get pulled from them for the StartOfTurn "Auras: ..." / "Items: ..."
 // lines. MyTurn's chain content comes from t.State.Log; pitches and defense lines come
 // from BestLine; ending zone state comes from t.State.
-func BuildTurnLog(t TurnSummary, startingAuras []*aura.Aura, startingItems []*token.Item) TurnLog {
+func BuildTurnLog(t TurnSummary, startingAuras []*aura.Aura, startingItems []*item.Item) TurnLog {
 	var log TurnLog
 	parts := partitionBestLineForDisplay(t.BestLine)
 	defensePitches, attackPitches := splitPitchesByPhase(parts.pitched, parts.drCost)

@@ -1,18 +1,15 @@
 // Copper token: cost {4}, draw a card, destroy one Copper token. Carries Go again.
 
-package token
+package cards
 
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
-const copperTokenName = "Copper"
-
-// NewCopper returns a fresh Copper token item at count n.
-func NewCopper(n int) *Item {
-	return NewItem(copperTokenName, ids.CopperTokenID, CopperToken{}, n)
-}
+// CopperTokenName is the canonical display name. The engine matches by CardName when
+// bumping an existing entry's Count or reading a count.
+const CopperTokenName = "Copper"
 
 // copperTypes is the Types bitmask CopperToken reports. Cached as a package-level var so
 // Types() returns without recomputing the OR per call.
@@ -28,8 +25,8 @@ type copperConsumer interface {
 type CopperToken struct{}
 
 func (CopperToken) ID() ids.CardID                     { return ids.CopperTokenAbilityID }
-func (CopperToken) Name() string                       { return copperTokenName }
-func (CopperToken) DisplayName() string                { return copperTokenName }
+func (CopperToken) Name() string                       { return CopperTokenName }
+func (CopperToken) DisplayName() string                { return CopperTokenName }
 func (CopperToken) Cost(card.GameEngine) int           { return 4 }
 func (CopperToken) Pitch() int                         { return 0 }
 func (CopperToken) Attack() int                        { return 0 }
@@ -42,7 +39,7 @@ func (CopperToken) PlayPrecondition(ge card.GameEngine, _ *card.CardState) bool 
 }
 
 func (CopperToken) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
-	ge.(copperConsumer).ConsumeItemByName(copperTokenName, 1)
+	ge.(copperConsumer).ConsumeItemByName(CopperTokenName, 1)
 	ge.DrawOne()
 	l.AppendPostTrigger(self.Card.DisplayName(), "Spent 1 copper to draw a card", 0)
 }

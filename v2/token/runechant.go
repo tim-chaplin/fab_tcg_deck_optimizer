@@ -1,24 +1,14 @@
 // Runechant token: aura-flavored token created by ge.CreateRunechants. Fires per attack
 // (triggertype.Attack) — flips ArcaneDamageDealt when its count clears the
 // damage-likely-to-hit window, then destroys. Damage is credited at creation time inside
-// CreateRunechants; this handler is pure state cleanup.
+// CreateRunechants; this handler is pure state cleanup. The NewRunechant factory lives in
+// token.go alongside the other token factories.
 
 package token
-
-import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
-	"github.com/tim-chaplin/fab-deck-optimizer/v2/aura"
-	"github.com/tim-chaplin/fab-deck-optimizer/v2/triggertype"
-)
 
 // runechantTokenName is the canonical display name. The engine matches by CardName when
 // bumping an existing entry's Count or reading a count.
 const runechantTokenName = "Runechant"
-
-// NewRunechant returns a fresh Runechant token aura at count n.
-func NewRunechant(n int) *aura.Aura {
-	return aura.NewFromToken(runechantTokenName, ids.RunechantTokenID, triggertype.Attack, runechantFire, n)
-}
 
 // runechantEngine is the slice of engine surface runechantFire reaches for —
 // *gameengine.GameEngine satisfies it structurally.
