@@ -6,6 +6,8 @@ import (
 
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/token"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/trigger"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/triggertype"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/turnlogger"
 )
@@ -646,13 +648,13 @@ var dealtArcaneText = [...]string{
 // qualifying hits to a card-type predicate; nil = any hit qualifies. The handler
 // signature matches card.GameEngine's inline declaration.
 func (ge *GameEngine) AddHitTrigger(self *card.CardState, handler func(card.GameEngine, card.Logger, card.Trigger), filter func(card.TypeSet) bool) {
-	ge.CreateTrigger(BuildCardTrigger(self, triggertype.Hit, handler, filter))
+	ge.CreateTrigger(trigger.NewFromCard(self.Card, triggertype.Hit, handler, filter))
 }
 
 // AddEndOfTurnTrigger registers a one-shot triggertype.EndOfTurn listener — fires
 // after the chain finishes resolving but before the carry-state snapshot.
 func (ge *GameEngine) AddEndOfTurnTrigger(self *card.CardState, handler func(card.GameEngine, card.Logger, card.Trigger)) {
-	ge.CreateTrigger(BuildCardTrigger(self, triggertype.EndOfTurn, handler, nil))
+	ge.CreateTrigger(trigger.NewFromCard(self.Card, triggertype.EndOfTurn, handler, nil))
 }
 
 // === Tokens ===
@@ -683,7 +685,7 @@ func (ge *GameEngine) CreateRunechants(n int) {
 		return
 	}
 	ge.AddValue(n)
-	bumpOrCreateAura(ge.GameState, tokenNameRunechant, BuildRunechantAura, n)
+	bumpOrCreateAura(ge.GameState, tokenNameRunechant, func(n int) Aura { return token.NewRunechant(n) }, n)
 }
 
 // CreatePonders creates n Ponder tokens. No Value credit — Ponder pays out at end of
@@ -692,7 +694,7 @@ func (ge *GameEngine) CreatePonders(n int) {
 	if n <= 0 {
 		return
 	}
-	bumpOrCreateAura(ge.GameState, tokenNamePonder, BuildPonderAura, n)
+	bumpOrCreateAura(ge.GameState, tokenNamePonder, func(n int) Aura { return token.NewPonder(n) }, n)
 }
 
 // CreateGold / CreateSilver / CreateCopper create the matching token items. No Value
@@ -701,19 +703,19 @@ func (ge *GameEngine) CreateGold(n int) {
 	if n <= 0 {
 		return
 	}
-	bumpOrCreateItem(ge.GameState, tokenNameGold, BuildGoldItem, n)
+	bumpOrCreateItem(ge.GameState, tokenNameGold, func(n int) Item { return token.NewGold(n) }, n)
 }
 func (ge *GameEngine) CreateSilver(n int) {
 	if n <= 0 {
 		return
 	}
-	bumpOrCreateItem(ge.GameState, tokenNameSilver, BuildSilverItem, n)
+	bumpOrCreateItem(ge.GameState, tokenNameSilver, func(n int) Item { return token.NewSilver(n) }, n)
 }
 func (ge *GameEngine) CreateCopper(n int) {
 	if n <= 0 {
 		return
 	}
-	bumpOrCreateItem(ge.GameState, tokenNameCopper, BuildCopperItem, n)
+	bumpOrCreateItem(ge.GameState, tokenNameCopper, func(n int) Item { return token.NewCopper(n) }, n)
 }
 
 // RunechantCount / PonderCount / GoldCount / SilverCount / CopperCount return the
