@@ -7,9 +7,10 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
-// GoldTokenName is the canonical display name. The engine matches by CardName when
-// bumping an existing entry's Count or reading a count.
-const GoldTokenName = "Gold"
+// goldTokenName is the canonical display name. The engine matches by CardName when
+// bumping an existing entry's Count or reading a count. External callers reach it via
+// GoldToken{}.Name() rather than importing the const directly.
+const goldTokenName = "Gold"
 
 // goldTypes is the Types bitmask GoldToken reports. Cached as a package-level var so
 // Types() returns without recomputing the OR per call.
@@ -25,8 +26,8 @@ type goldConsumer interface {
 type GoldToken struct{}
 
 func (GoldToken) ID() ids.CardID                     { return ids.GoldTokenAbilityID }
-func (GoldToken) Name() string                       { return GoldTokenName }
-func (GoldToken) DisplayName() string                { return GoldTokenName }
+func (GoldToken) Name() string                       { return goldTokenName }
+func (GoldToken) DisplayName() string                { return goldTokenName }
 func (GoldToken) Cost(card.GameEngine) int           { return 2 }
 func (GoldToken) Pitch() int                         { return 0 }
 func (GoldToken) Attack() int                        { return 0 }
@@ -39,7 +40,7 @@ func (GoldToken) PlayPrecondition(ge card.GameEngine, _ *card.CardState) bool {
 }
 
 func (GoldToken) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
-	ge.(goldConsumer).ConsumeItemByName(GoldTokenName, 1)
+	ge.(goldConsumer).ConsumeItemByName(goldTokenName, 1)
 	ge.DrawOne()
 	l.AppendPostTrigger(self.Card.DisplayName(), "Spent 1 gold to draw a card", 0)
 }

@@ -7,9 +7,10 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
-// SilverTokenName is the canonical display name. The engine matches by CardName when
-// bumping an existing entry's Count or reading a count.
-const SilverTokenName = "Silver"
+// silverTokenName is the canonical display name. The engine matches by CardName when
+// bumping an existing entry's Count or reading a count. External callers reach it via
+// SilverToken{}.Name() rather than importing the const directly.
+const silverTokenName = "Silver"
 
 // silverTypes is the Types bitmask SilverToken reports. Cached as a package-level var so
 // Types() returns without recomputing the OR per call.
@@ -25,8 +26,8 @@ type silverConsumer interface {
 type SilverToken struct{}
 
 func (SilverToken) ID() ids.CardID                     { return ids.SilverTokenAbilityID }
-func (SilverToken) Name() string                       { return SilverTokenName }
-func (SilverToken) DisplayName() string                { return SilverTokenName }
+func (SilverToken) Name() string                       { return silverTokenName }
+func (SilverToken) DisplayName() string                { return silverTokenName }
 func (SilverToken) Cost(card.GameEngine) int           { return 3 }
 func (SilverToken) Pitch() int                         { return 0 }
 func (SilverToken) Attack() int                        { return 0 }
@@ -39,7 +40,7 @@ func (SilverToken) PlayPrecondition(ge card.GameEngine, _ *card.CardState) bool 
 }
 
 func (SilverToken) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
-	ge.(silverConsumer).ConsumeItemByName(SilverTokenName, 1)
+	ge.(silverConsumer).ConsumeItemByName(silverTokenName, 1)
 	ge.DrawOne()
 	l.AppendPostTrigger(self.Card.DisplayName(), "Spent 1 silver to draw a card", 0)
 }
