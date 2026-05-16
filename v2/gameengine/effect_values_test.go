@@ -1,11 +1,18 @@
-package sim
+package gameengine_test
 
 import (
 	"testing"
 
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/gameengine"
 )
+
+// dominatingStub embeds testutils.StubCard and adds the Dominate() marker — exercises
+// the printed-Dominate branch of EffectiveDominate / HasDominate / LikelyToHit.
+type dominatingStub struct{ testutils.StubCard }
+
+func (dominatingStub) Dominate() {}
 
 // Tests that without Dominate only 1/4/7 damage are treated as likely-to-hit.
 func TestLikelyDamageHits_OnlyAwkwardAmounts(t *testing.T) {
@@ -47,19 +54,19 @@ func TestLikelyToHit_FoldsEffectiveAttackAndDominate(t *testing.T) {
 		printedDom  bool
 		want        bool
 	}{
-		{"printed 3, no bonus → not in 1/4/7", 3, 0, false, false, false},
-		{"printed 3, +1 bonus → 4 hits", 3, 1, false, false, true},
-		{"printed 4, -10 bonus → clamped to 0, no hit", 4, -10, false, false, false},
-		{"printed 5 with granted Dominate → 5+ clears one block", 5, 0, true, false, true},
-		{"printed 5 with printed Dominate marker → 5+ clears one block", 5, 0, false, true, true},
-		{"printed 5, no Dominate → blockable", 5, 0, false, false, false},
-		{"printed 4, +1 bonus, granted Dominate → still in 1/4/7 OR 5+", 4, 1, true, false, true},
+		{"printed 3, no bonus -> not in 1/4/7", 3, 0, false, false, false},
+		{"printed 3, +1 bonus -> 4 hits", 3, 1, false, false, true},
+		{"printed 4, -10 bonus -> clamped to 0, no hit", 4, -10, false, false, false},
+		{"printed 5 with granted Dominate -> 5+ clears one block", 5, 0, true, false, true},
+		{"printed 5 with printed Dominate marker -> 5+ clears one block", 5, 0, false, true, true},
+		{"printed 5, no Dominate -> blockable", 5, 0, false, false, false},
+		{"printed 4, +1 bonus, granted Dominate -> still in 1/4/7 OR 5+", 4, 1, true, false, true},
 	}
 	for _, tc := range cases {
-		base := NewFakeCard(tc.name).WithAttack(tc.printed)
+		base := testutils.NewStubCard(tc.name).WithAttack(tc.printed)
 		var c card.Card = base
 		if tc.printedDom {
-			c = DominatingFakeCard{FakeCard: base}
+			c = dominatingStub{StubCard: base}
 		}
 		p := &card.CardState{Card: c, BonusAttack: tc.bonusAttack, GrantedDominate: tc.grantedDom}
 		if got := gameengine.LikelyToHit(p); got != tc.want {

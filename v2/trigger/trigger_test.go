@@ -1,9 +1,9 @@
-package sim
+package trigger_test
 
 import (
 	"testing"
 
-	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/gameengine"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/trigger"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/triggertype"
@@ -14,9 +14,9 @@ func TestFireEndOfTurn_FiresOnceAndRemoves(t *testing.T) {
 	ge := gameengine.New()
 	calls := 0
 	ge.CreateTrigger(trigger.NewFromCard(
-		FakeRedAttack{},
+		testutils.RedAttack{},
 		triggertype.EndOfTurn,
-		wrapTriggerHandler(func(_ card.GameEngine, _ card.Logger, _ card.Trigger) { calls++ }),
+		func(_, _, _ any) { calls++ },
 		nil,
 	))
 	ge.FireEndOfTurn()
@@ -33,9 +33,9 @@ func TestFireEndOfTurn_LeavesNonMatchingType(t *testing.T) {
 	ge := gameengine.New()
 	calls := 0
 	ge.CreateTrigger(trigger.NewFromCard(
-		FakeRedAttack{},
+		testutils.RedAttack{},
 		triggertype.Attack,
-		wrapTriggerHandler(func(_ card.GameEngine, _ card.Logger, _ card.Trigger) { calls++ }),
+		func(_, _, _ any) { calls++ },
 		nil,
 	))
 	ge.FireEndOfTurn()
@@ -53,18 +53,18 @@ func TestFireEndOfTurn_HandlerAddTriggerSafeReentry(t *testing.T) {
 	ge := gameengine.New()
 	calls := 0
 	ge.CreateTrigger(trigger.NewFromCard(
-		FakeRedAttack{},
+		testutils.RedAttack{},
 		triggertype.EndOfTurn,
-		wrapTriggerHandler(func(ge card.GameEngine, _ card.Logger, _ card.Trigger) {
+		func(engine, _, _ any) {
 			calls++
-			ts := ge.(*gameengine.GameEngine)
+			ts := engine.(*gameengine.GameEngine)
 			ts.CreateTrigger(trigger.NewFromCard(
-				FakeRedAttack{},
+				testutils.RedAttack{},
 				triggertype.EndOfTurn,
-				wrapTriggerHandler(func(_ card.GameEngine, _ card.Logger, _ card.Trigger) { calls++ }),
+				func(_, _, _ any) { calls++ },
 				nil,
 			))
-		}),
+		},
 		nil,
 	))
 	ge.FireEndOfTurn()

@@ -1,13 +1,20 @@
-package sim
+package card_test
 
 import (
 	"testing"
 
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
+// dominatingStub embeds testutils.StubCard and adds the Dominate() marker — exercises
+// the printed-Dominate branch of EffectiveDominate / HasDominate.
+type dominatingStub struct{ testutils.StubCard }
+
+func (dominatingStub) Dominate() {}
+
 // TestCardState_EffectiveGoAgain: printed GoAgain OR a mid-chain grant qualifies the card
-// for Go again. Neither printed nor granted → false.
+// for Go again. Neither printed nor granted -> false.
 func TestCardState_EffectiveGoAgain(t *testing.T) {
 	cases := []struct {
 		name    string
@@ -21,7 +28,7 @@ func TestCardState_EffectiveGoAgain(t *testing.T) {
 		{"both", true, true, true},
 	}
 	for _, tc := range cases {
-		base := NewFakeCard(tc.name)
+		base := testutils.NewStubCard(tc.name)
 		if tc.printed {
 			base = base.WithGoAgain()
 		}
@@ -35,8 +42,8 @@ func TestCardState_EffectiveGoAgain(t *testing.T) {
 // TestCardState_EffectiveDominate: the Dominator marker OR a mid-chain grant (a "gains
 // dominate" rider flipping self.GrantedDominate) each qualifies the attack as dominating.
 func TestCardState_EffectiveDominate(t *testing.T) {
-	plain := NewFakeCard("plain")
-	dominator := DominatingFakeCard{FakeCard: NewFakeCard("printed")}
+	plain := testutils.NewStubCard("plain")
+	dominator := dominatingStub{StubCard: testutils.NewStubCard("printed")}
 
 	cases := []struct {
 		name    string
@@ -60,10 +67,10 @@ func TestCardState_EffectiveDominate(t *testing.T) {
 // TestHasDominate_MatchesMarker: the free helper is the static printed-keyword check;
 // type assertion to Dominator decides.
 func TestHasDominate_MatchesMarker(t *testing.T) {
-	if card.HasDominate(NewFakeCard("plain")) {
+	if card.HasDominate(testutils.NewStubCard("plain")) {
 		t.Error("HasDominate(plain) = true, want false")
 	}
-	if !card.HasDominate(DominatingFakeCard{}) {
+	if !card.HasDominate(dominatingStub{}) {
 		t.Error("HasDominate(dominator) = false, want true")
 	}
 }
@@ -86,7 +93,7 @@ func TestCardState_EffectiveAttack(t *testing.T) {
 	}
 	for _, tc := range cases {
 		p := &card.CardState{
-			Card:        NewFakeCard(tc.name).WithAttack(tc.printed),
+			Card:        testutils.NewStubCard(tc.name).WithAttack(tc.printed),
 			BonusAttack: tc.bonusAttack,
 		}
 		if got := p.EffectiveAttack(); got != tc.want {
