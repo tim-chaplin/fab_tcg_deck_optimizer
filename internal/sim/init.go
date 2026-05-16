@@ -23,7 +23,7 @@ func init() {
 		return aura.NewFromCard(self.Card, tt, wrapAuraHandler(h), count, oncePerTurn)
 	}
 	gameengine.BuildCardTrigger = func(self *card.CardState, tt triggertype.Type, h card.TriggerHandler, filter func(card.TypeSet) bool) gameengine.Trigger {
-		return trigger.NewCard(self.Card, tt, wrapTriggerHandler(h), wrapTypeFilter(filter))
+		return trigger.NewFromCard(self.Card, tt, wrapTriggerHandler(h), wrapTypeFilter(filter))
 	}
 	gameengine.BuildRunechantAura = func(n int) gameengine.Aura { return token.NewRunechant(n) }
 	gameengine.BuildPonderAura = func(n int) gameengine.Aura { return token.NewPonder(n) }
@@ -43,7 +43,7 @@ func wrapAuraHandler(h card.AuraHandler) aura.Handler {
 
 // wrapTriggerHandler is the trigger.Handler counterpart of wrapAuraHandler.
 func wrapTriggerHandler(h card.TriggerHandler) trigger.Handler {
-	return func(engine, logger any, ctx trigger.Ctx) {
+	return func(engine, logger, ctx any) {
 		h(engine.(card.GameEngine), logger.(card.Logger), ctx.(card.Trigger))
 	}
 }
