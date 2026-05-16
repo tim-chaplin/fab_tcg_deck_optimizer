@@ -1,4 +1,4 @@
-package sim_test
+package sim
 
 import (
 	"context"
@@ -9,7 +9,6 @@ import (
 	"testing"
 	"time"
 
-	. "github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/hero"

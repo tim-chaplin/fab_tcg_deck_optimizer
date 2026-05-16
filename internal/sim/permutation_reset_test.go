@@ -1,9 +1,7 @@
-package sim_test
+package sim
 
 import (
 	"testing"
-
-	. "github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"

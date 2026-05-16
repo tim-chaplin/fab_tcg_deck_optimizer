@@ -1,11 +1,9 @@
-package sim_test
+package sim
 
 import (
 	"reflect"
 	"strings"
 	"testing"
-
-	. "github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"

@@ -1,4 +1,4 @@
-package sim_test
+package sim
 
 // End-to-end tests for TurnSummary.Cacheable propagation through hand.Best. The bit
 // reports whether the chain that produced the summary depended on hidden state (deck
@@ -9,8 +9,6 @@ package sim_test
 
 import (
 	"testing"
-
-	. "github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
