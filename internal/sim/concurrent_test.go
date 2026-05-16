@@ -50,9 +50,9 @@ func TestEvaluate_ConcurrentNoMapPanic(t *testing.T) {
 	wg.Wait()
 }
 
-// Tests IterateParallel as a smoke test: completes without deadlock and reports invariant
+// Tests RunMutationRound as a smoke test: completes without deadlock and reports invariant
 // shapes regardless of whether an improvement is found.
-func TestIterateParallel_RunsWithoutPanic(t *testing.T) {
+func TestRunMutationRound_RunsWithoutPanic(t *testing.T) {
 	rng := rand.New(rand.NewSource(42))
 	baseline := deck.Random(hero.Viserai{}, 40, 2, rng, nil, registry.Registry{})
 	baseAvg := NewEvaluator().Evaluate(baseline, 10, Matchup{}, rng).Mean()
@@ -62,7 +62,7 @@ func TestIterateParallel_RunsWithoutPanic(t *testing.T) {
 		mutations = mutations[:40]
 	}
 
-	d, _, avg, idx, found := IterateParallel(
+	d, _, avg, idx, found := RunMutationRound(
 		context.Background(), mutations, baseAvg, 0, 0,
 		30, Matchup{}, 0, 0,
 		rng.Int63(), nil, false, 0.1,
@@ -91,9 +91,9 @@ func TestIterateParallel_RunsWithoutPanic(t *testing.T) {
 	}
 }
 
-// Tests that IterateParallel returns promptly with abort semantics on context cancellation.
+// Tests that RunMutationRound returns promptly with abort semantics on context cancellation.
 // Pre-cancels for deterministic behaviour.
-func TestIterateParallel_AbortsOnContextCancel(t *testing.T) {
+func TestRunMutationRound_AbortsOnContextCancel(t *testing.T) {
 	rng := rand.New(rand.NewSource(42))
 	baseline := deck.Random(hero.Viserai{}, 40, 2, rng, nil, registry.Registry{})
 	baseAvg := NewEvaluator().Evaluate(baseline, 10, Matchup{}, rng).Mean()
@@ -104,7 +104,7 @@ func TestIterateParallel_AbortsOnContextCancel(t *testing.T) {
 
 	var tested atomic.Int64
 	start := time.Now()
-	d, _, avg, idx, found := IterateParallel(
+	d, _, avg, idx, found := RunMutationRound(
 		ctx, mutations, baseAvg, 0, 0,
 		1000, Matchup{}, 0, 0,
 		rng.Int63(), &tested, false, 0.1,
@@ -127,13 +127,13 @@ func TestIterateParallel_AbortsOnContextCancel(t *testing.T) {
 	// second — the exact bound is loose to tolerate scheduler noise, but anything near the no-
 	// cancellation runtime indicates we're not actually aborting.
 	if elapsed > 3*time.Second {
-		t.Errorf("IterateParallel returned after %s; abort should be near-instant", elapsed)
+		t.Errorf("RunMutationRound returned after %s; abort should be near-instant", elapsed)
 	}
 }
 
-// Tests that IterateParallel terminates promptly with no improvement when bestAvg is
+// Tests that RunMutationRound terminates promptly with no improvement when bestAvg is
 // unreachable — workers drain the queue without a serial deep-confirm bottleneck.
-func TestIterateParallel_TerminatesWithNoImprovement(t *testing.T) {
+func TestRunMutationRound_TerminatesWithNoImprovement(t *testing.T) {
 	rng := rand.New(rand.NewSource(42))
 	baseline := deck.Random(hero.Viserai{}, 40, 2, rng, nil, registry.Registry{})
 	mutations := deck.AllMutations(baseline, 2, registry.Registry{}, nil)
@@ -144,7 +144,7 @@ func TestIterateParallel_TerminatesWithNoImprovement(t *testing.T) {
 	}
 
 	start := time.Now()
-	d, _, avg, idx, found := IterateParallel(
+	d, _, avg, idx, found := RunMutationRound(
 		context.Background(), mutations, 1_000_000.0, 0, 0, // unreachable baseline, T=0
 		100, Matchup{}, 0, 0,
 		rng.Int63(), nil, false, 0.1,
@@ -165,6 +165,6 @@ func TestIterateParallel_TerminatesWithNoImprovement(t *testing.T) {
 	}
 	// Threshold sized for the parallel 40-mutation pass.
 	if elapsed > 300*time.Second {
-		t.Errorf("IterateParallel returned after %s for 40 mutations; want under 300s", elapsed)
+		t.Errorf("RunMutationRound returned after %s for 40 mutations; want under 300s", elapsed)
 	}
 }

@@ -13,11 +13,11 @@ import (
 	"time"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/deckformat"
-	"github.com/tim-chaplin/fab-deck-optimizer/v2/hero"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/mydecks"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/gameengine"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/hero"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/registry"
 )
 
@@ -245,7 +245,7 @@ func runAnneal(cfg annealConfig) annealResult {
 		roundStart := time.Now()
 		stopTicker := startRoundTicker(round, len(mutations), roundStart, &completed,
 			temperature, currentAvg, bestEverAvg)
-		d, dStats, avg, idx, found := sim.IterateParallel(
+		d, dStats, avg, idx, found := sim.RunMutationRound(
 			ctx, mutations, currentAvg, temperature, cfg.minImprovement,
 			cfg.shuffles, cfg.matchup, 0, 0,
 			rng.Int63(), &completed, cfg.adaptive, cfg.minImprovement,
@@ -474,9 +474,9 @@ func maybePrintBaselineCards(cfg annealConfig, d *deck.Deck) {
 }
 
 // watchStdinForAbort spawns a background goroutine that calls cancel() on the first keypress.
-// EOF / closed stdin isn't an abort (so iterate doesn't exit immediately on non-TTY stdin); only
-// a successful read of at least one byte counts. Cancellation propagates into IterateParallel so
-// an abort takes effect mid-round.
+// EOF / closed stdin isn't an abort (so anneal doesn't exit immediately on non-TTY stdin); only
+// a successful read of at least one byte counts. Cancellation propagates into RunMutationRound
+// so an abort takes effect mid-round.
 func watchStdinForAbort(cancel context.CancelFunc) {
 	go func() {
 		buf := make([]byte, 1)

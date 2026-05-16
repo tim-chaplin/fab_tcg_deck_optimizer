@@ -15,7 +15,7 @@ import (
 
 // BenchmarkAnnealRoundOnViseraiV4 mimics anneal's per-round workload anchored on
 // mydecks/viserai_v4.json: build the mutation pool, run the first sampleSize mutations
-// through IterateParallel against an unreachable baseline so the worker pool drains every
+// through RunMutationRound against an unreachable baseline so the worker pool drains every
 // sampled mutation end-to-end. This is the gold-standard anneal bench — the workload PGO
 // profiles target and the canonical reference for measuring per-mutation-eval changes.
 //
@@ -58,7 +58,7 @@ func BenchmarkAnnealRoundOnViseraiV4(b *testing.B) {
 		b.StopTimer()
 		iterRNG := rand.New(rand.NewSource(42))
 		b.StartTimer()
-		_, _, _, _, found := sim.IterateParallel(
+		_, _, _, _, found := sim.RunMutationRound(
 			context.Background(), mutations, unreachableBaseline, 0, 0,
 			0, sim.Matchup{IncomingDamage: incoming}, 0, 0,
 			iterRNG.Int63(), nil, true, 0.1,
