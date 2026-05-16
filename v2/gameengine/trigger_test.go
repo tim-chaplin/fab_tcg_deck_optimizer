@@ -1,20 +1,19 @@
-package sim
+package gameengine
 
 import (
 	"testing"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
-	"github.com/tim-chaplin/fab-deck-optimizer/v2/gameengine"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/trigger"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/triggertype"
 )
 
 // Tests that an end-of-turn Trigger fires once and is removed.
 func TestFireEndOfTurn_FiresOnceAndRemoves(t *testing.T) {
-	ge := gameengine.New()
+	ge := New()
 	calls := 0
 	ge.CreateTrigger(trigger.NewFromCard(
-		FakeRedAttack{},
+		stubCard{name: "src"},
 		triggertype.EndOfTurn,
 		func(_ card.GameEngine, _ card.Logger, _ card.Trigger) { calls++ },
 		nil,
@@ -30,10 +29,10 @@ func TestFireEndOfTurn_FiresOnceAndRemoves(t *testing.T) {
 
 // Tests that a non-matching TriggerType stays queued when end-of-turn fires.
 func TestFireEndOfTurn_LeavesNonMatchingType(t *testing.T) {
-	ge := gameengine.New()
+	ge := New()
 	calls := 0
 	ge.CreateTrigger(trigger.NewFromCard(
-		FakeRedAttack{},
+		stubCard{name: "src"},
 		triggertype.Attack,
 		func(_ card.GameEngine, _ card.Logger, _ card.Trigger) { calls++ },
 		nil,
@@ -50,16 +49,16 @@ func TestFireEndOfTurn_LeavesNonMatchingType(t *testing.T) {
 // Tests that a handler appending a new trigger during fire queues it for a future fire
 // walk rather than firing it on the current pass.
 func TestFireEndOfTurn_HandlerAddTriggerSafeReentry(t *testing.T) {
-	ge := gameengine.New()
+	ge := New()
 	calls := 0
 	ge.CreateTrigger(trigger.NewFromCard(
-		FakeRedAttack{},
+		stubCard{name: "src"},
 		triggertype.EndOfTurn,
-		func(ge card.GameEngine, _ card.Logger, _ card.Trigger) {
+		func(engine card.GameEngine, _ card.Logger, _ card.Trigger) {
 			calls++
-			ts := ge.(*gameengine.GameEngine)
+			ts := engine.(*GameEngine)
 			ts.CreateTrigger(trigger.NewFromCard(
-				FakeRedAttack{},
+				stubCard{name: "added"},
 				triggertype.EndOfTurn,
 				func(_ card.GameEngine, _ card.Logger, _ card.Trigger) { calls++ },
 				nil,
