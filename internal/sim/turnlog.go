@@ -1,6 +1,6 @@
 package sim
 
-// TurnLog assembly (BuildTurnLog) and rendering (FormatTurnLog).
+// deckstats.TurnLog assembly (BuildTurnLog) and rendering (FormatTurnLog).
 
 import (
 	"fmt"
@@ -9,18 +9,19 @@ import (
 
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/aura"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/deckstats"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/gameengine"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/item"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/turnlogger"
 )
 
-// BuildTurnLog converts a TurnSummary into the four-section TurnLog shape.
+// BuildTurnLog converts a TurnSummary into the four-section deckstats.TurnLog shape.
 // startingAuras / startingItems are the carryover aura / item sets entering this turn;
 // token counts get pulled from them for the StartOfTurn "Auras: ..." / "Items: ..."
 // lines. MyTurn's chain content comes from t.State.Log; pitches and defense lines come
 // from BestLine; ending zone state comes from t.State.
-func BuildTurnLog(t TurnSummary, startingAuras []*aura.Aura, startingItems []*item.Item) TurnLog {
-	var log TurnLog
+func BuildTurnLog(t TurnSummary, startingAuras []*aura.Aura, startingItems []*item.Item) deckstats.TurnLog {
+	var log deckstats.TurnLog
 	parts := partitionBestLineForDisplay(t.BestLine)
 	defensePitches, attackPitches := splitPitchesByPhase(parts.pitched, parts.drCost)
 	startingRunechants := auraCountByName(startingAuras, "Runechant")
@@ -121,7 +122,7 @@ func startingHandLine(dealtHand []card.Card) string {
 
 // startingArsenalLine returns "Arsenal: cardname" when the turn started with an arsenal-in
 // card (BestLine entry with FromArsenal=true), "" otherwise.
-func startingArsenalLine(line []CardAssignment) string {
+func startingArsenalLine(line []deckstats.CardAssignment) string {
 	for _, a := range line {
 		if a.FromArsenal {
 			return "Arsenal: " + a.Card.DisplayName()
@@ -161,7 +162,7 @@ func startingAurasLine(auras []card.Card, startingRunechants, startingPonders in
 // verbatim; otherwise we synthesise "Aura Name: drew X into hand" / "Aura Name: START
 // OF ACTION PHASE (+N)" from Damage and Revealed. Returns "" for zero-effect fires so
 // the section doesn't pad with bare aura-name lines.
-func startOfTurnTriggerLine(d TriggerContribution) string {
+func startOfTurnTriggerLine(d deckstats.TriggerContribution) string {
 	if d.Text != "" {
 		return d.Text
 	}
@@ -176,7 +177,7 @@ func startOfTurnTriggerLine(d TriggerContribution) string {
 // "(+N)" suffix — printed Defense plus an ArsenalDefenseBonus rider when the blocker came
 // from arsenal. The suffix matches the attack chain's "(+N)" convention so the log reads
 // symmetrically across attack and defense phases.
-func formatBlockLine(a CardAssignment) string {
+func formatBlockLine(a deckstats.CardAssignment) string {
 	def := a.Card.Defense()
 	if a.FromArsenal {
 		def += card.ArsenalDefenseBonusOf(a.Card)
@@ -191,7 +192,7 @@ func formatBlockLine(a CardAssignment) string {
 // (+N) for the block, and any arcane / runechant / +1{d} riders attach as
 // childEntryPrefix-tagged sub-lines via appendGroupedChainEntries. Returns the updated
 // remaining-damage counter so the caller can thread it into the next DR.
-func appendDefenseReactionLines(out []string, a CardAssignment, defenders []card.Card, remaining int) ([]string, int) {
+func appendDefenseReactionLines(out []string, a deckstats.CardAssignment, defenders []card.Card, remaining int) ([]string, int) {
 	ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetGraveyard(append([]card.Card(nil), defenders...)).Build()}
 	ge.SetIncomingDamage(remaining)
 	cs := card.CardState{Card: a.Card, FromArsenal: a.FromArsenal}
@@ -231,7 +232,7 @@ func endingHandLine(handHeld []card.Card) string {
 // Arsenal-role entries. The tag derives from FromArsenal — the arsenal-in card kept the
 // slot when FromArsenal=true ("(stayed)"); any other origin (post-hoc Held promotion)
 // reads "(new)". Returns "" when arsenal ended empty.
-func endingArsenalLine(arsenal []CardAssignment) string {
+func endingArsenalLine(arsenal []deckstats.CardAssignment) string {
 	if len(arsenal) == 0 {
 		return ""
 	}
@@ -419,13 +420,13 @@ func chainEntryCardName(text string) string {
 	return text
 }
 
-// FormatTurnLog renders a TurnLog into a printable string. Section headers and indentation
+// FormatTurnLog renders a deckstats.TurnLog into a printable string. Section headers and indentation
 // come from the formatter; chain events in MyTurn / OpponentTurn get a continuous numbered
 // prefix ("    1. ..."), while StartOfTurn / EndOfTurn entries are unnumbered informational
 // lines indented two extra spaces beneath the section header. MyTurn entries tagged with
 // childEntryPrefix render indented under the preceding numbered entry without their own
 // step number — this is the trigger-grouping mode appendGroupedChainEntries produces.
-func FormatTurnLog(log TurnLog) string {
+func FormatTurnLog(log deckstats.TurnLog) string {
 	var lines []string
 	step := 0
 	nextStep := func() int { step++; return step }

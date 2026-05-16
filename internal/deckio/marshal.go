@@ -9,19 +9,19 @@ import (
 	"sort"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/deckstats"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/hero"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/registry"
 )
 
 // Marshal returns the JSON encoding of `d` and its accumulated `stats` (indented) with
 // card/weapon/hero names in place of interface values.
-func Marshal(d *deck.Deck, stats sim.DeckStats) ([]byte, error) {
+func Marshal(d *deck.Deck, stats deckstats.DeckStats) ([]byte, error) {
 	return json.MarshalIndent(toJSON(d, stats), "", "  ")
 }
 
-func toJSON(d *deck.Deck, stats sim.DeckStats) *DeckJSON {
+func toJSON(d *deck.Deck, stats deckstats.DeckStats) *DeckJSON {
 	weapons := make([]string, len(d.Weapons))
 	for i, w := range d.Weapons {
 		weapons[i] = w.Name()
@@ -52,7 +52,7 @@ func sortedStrings(ss []string) []string {
 	return out
 }
 
-func statsToJSON(s sim.DeckStats) StatsJSON {
+func statsToJSON(s deckstats.DeckStats) StatsJSON {
 	return StatsJSON{
 		Runs:            s.Runs,
 		Hands:           s.Hands,
@@ -69,7 +69,7 @@ func statsToJSON(s sim.DeckStats) StatsJSON {
 // perCardMarginalToJSON flattens the ids.CardID-keyed marginal-stats map into a slice sorted
 // by Marginal descending, then by card name — matching the on-screen card-value table's
 // order so the JSON and the printout read in lockstep.
-func perCardMarginalToJSON(m map[ids.CardID]sim.CardMarginalStats) []CardMarginalStatsJSON {
+func perCardMarginalToJSON(m map[ids.CardID]deckstats.CardMarginalStats) []CardMarginalStatsJSON {
 	if len(m) == 0 {
 		return nil
 	}
@@ -93,15 +93,15 @@ func perCardMarginalToJSON(m map[ids.CardID]sim.CardMarginalStats) []CardMargina
 	return out
 }
 
-// bestTurnToJSON serialises sim.BestTurn.Log directly. The structured TurnSummary stays in
+// bestTurnToJSON serialises deckstats.BestTurn.Log directly. The structured TurnSummary stays in
 // memory for the live computation but never crosses the JSON boundary — the structured Log
 // is the single source of truth on disk and feeds the formatter at print time.
-func bestTurnToJSON(b sim.BestTurn) BestTurnJSON {
+func bestTurnToJSON(b deckstats.BestTurn) BestTurnJSON {
 	if b.Log.IsEmpty() {
 		return BestTurnJSON{}
 	}
 	return BestTurnJSON{
-		Value: b.Summary.Value,
+		Value: b.Value,
 		Log:   b.Log,
 	}
 }

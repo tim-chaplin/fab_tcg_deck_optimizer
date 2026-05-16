@@ -5,11 +5,12 @@ import (
 	"testing"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
-	"github.com/tim-chaplin/fab-deck-optimizer/v2/hero"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapons"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/deckstats"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/hero"
 )
 
 // Pins on-hit-go-again chain extension through a weapon swing: Nimblism + Razor Reflex
@@ -47,7 +48,7 @@ func TestOnHitGoAgain_TwoConsecutiveARsExtendToWeaponSwing(t *testing.T) {
 }
 
 // formatBestLine renders the chosen role assignment in chain order for failure messages.
-func formatBestLine(line []sim.CardAssignment) string {
+func formatBestLine(line []deckstats.CardAssignment) string {
 	var parts []string
 	for _, a := range line {
 		parts = append(parts, a.Card.DisplayName()+":"+roleName(a.Role))
@@ -55,17 +56,17 @@ func formatBestLine(line []sim.CardAssignment) string {
 	return strings.Join(parts, ", ")
 }
 
-func roleName(r sim.Role) string {
+func roleName(r deckstats.Role) string {
 	switch r {
-	case sim.Pitch:
+	case deckstats.Pitch:
 		return "Pitch"
-	case sim.Attack:
+	case deckstats.Attack:
 		return "Attack"
-	case sim.Defend:
+	case deckstats.Defend:
 		return "Defend"
-	case sim.Held:
+	case deckstats.Held:
 		return "Held"
-	case sim.Arsenal:
+	case deckstats.Arsenal:
 		return "Arsenal"
 	}
 	return "Unknown"

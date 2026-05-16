@@ -6,6 +6,7 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/aura"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/deckstats"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/gameengine"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/hero"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/item"
@@ -160,7 +161,7 @@ func EngineWith(h []card.Card, items []*item.Item, log []turnlogger.LogEntry) *g
 }
 
 // EvaluateImplForTest re-exports the unexported (*Evaluator).evaluateImpl.
-func (ev *Evaluator) EvaluateImplForTest(d *deck.Deck, maxRuns int, mp Matchup, rng *rand.Rand, stop func(stats *DeckStats, runs int) bool) DeckStats {
+func (ev *Evaluator) EvaluateImplForTest(d *deck.Deck, maxRuns int, mp Matchup, rng *rand.Rand, stop func(stats *deckstats.DeckStats, runs int) bool) deckstats.DeckStats {
 	return ev.evaluateImpl(d, maxRuns, mp, rng, stop)
 }
 
@@ -171,19 +172,19 @@ const AdaptiveCheckInterval = adaptiveCheckInterval
 const AdaptiveShufflesCap = adaptiveShufflesCap
 
 // MakeAdaptiveStop re-exports makeAdaptiveStop.
-func MakeAdaptiveStop(targetSE float64) func(stats *DeckStats, runs int) bool {
+func MakeAdaptiveStop(targetSE float64) func(stats *deckstats.DeckStats, runs int) bool {
 	return makeAdaptiveStop(targetSE)
 }
 
 // MeanStandardError re-exports meanStandardError.
-func MeanStandardError(stats *DeckStats) float64 { return meanStandardError(stats) }
+func MeanStandardError(stats *deckstats.DeckStats) float64 { return meanStandardError(stats) }
 
 // ProcessAurasAtStartOfTurn re-exports processAurasAtStartOfTurn. Takes / returns
 // gameengine.Aura at the boundary so sim_test callers (in package sim_test, outside
 // sim's concrete-type namespace) keep working through the engine interface.
 func ProcessAurasAtStartOfTurn(queued []gameengine.Aura, d *deck.Deck) (
 	survivors []gameengine.Aura,
-	contribs []TriggerContribution,
+	contribs []deckstats.TriggerContribution,
 	damage int,
 	revealed []card.Card,
 	graveyarded []card.Card,

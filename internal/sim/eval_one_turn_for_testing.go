@@ -4,6 +4,7 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/aura"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/deckstats"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/gameengine"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/hero"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/item"
@@ -18,7 +19,7 @@ import (
 // effects can be asserted without simulating the next turn.
 type TurnStartState struct {
 	Value                        int
-	BestLine                     []CardAssignment
+	BestLine                     []deckstats.CardAssignment
 	Graveyard                    []deck.Card
 	StartOfNextTurnHand          []deck.Card
 	StartOfNextTurnArsenal       deck.Card
@@ -132,7 +133,7 @@ func EvalOneTurnForTesting(masterDeck *deck.Deck, mp Matchup, initial *gameengin
 	if len(held) >= handSize || d.Size() < handSize-len(held) {
 		return TurnStartState{
 			Value:                  play.Value,
-			BestLine:               append([]CardAssignment(nil), play.BestLine...),
+			BestLine:               append([]deckstats.CardAssignment(nil), play.BestLine...),
 			Graveyard:              graveyardOut,
 			StartOfNextTurnArsenal: play.State.Arsenal(),
 			StartOfNextTurnDeck:    d.Copy(),
@@ -161,7 +162,7 @@ func EvalOneTurnForTesting(masterDeck *deck.Deck, mp Matchup, initial *gameengin
 
 	return TurnStartState{
 		Value:                        play.Value,
-		BestLine:                     append([]CardAssignment(nil), play.BestLine...),
+		BestLine:                     append([]deckstats.CardAssignment(nil), play.BestLine...),
 		Graveyard:                    graveyardOut,
 		StartOfNextTurnHand:          handOut,
 		StartOfNextTurnArsenal:       play.State.Arsenal(),
