@@ -382,6 +382,12 @@ func (c StubCard) Types(card.GameEngine) card.TypeSet               { return c.t
 func (c StubCard) GoAgain(card.GameEngine) bool                     { return c.goAgain }
 func (StubCard) Play(card.GameEngine, card.Logger, *card.CardState) {}
 
+// DominatingCard embeds StubCard with the card.Dominator marker — exercises the printed-
+// Dominate branch of EffectiveDominate / HasDominate / LikelyToHit.
+type DominatingCard struct{ StubCard }
+
+func (DominatingCard) Dominate() {}
+
 // InstantStub is a 0-cost, 0-power Generic Action - Instant card with no Go again.
 // Tests chain-runner behaviour around the Action Point debit: an Instant after a
 // non-Go-again card should still resolve because Instants cost 0 AP.
