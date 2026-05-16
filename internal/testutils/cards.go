@@ -382,11 +382,52 @@ func (c StubCard) Types(card.GameEngine) card.TypeSet               { return c.t
 func (c StubCard) GoAgain(card.GameEngine) bool                     { return c.goAgain }
 func (StubCard) Play(card.GameEngine, card.Logger, *card.CardState) {}
 
-// DominatingCard embeds StubCard with the card.Dominator marker — exercises the printed-
-// Dominate branch of EffectiveDominate / HasDominate / LikelyToHit.
-type DominatingCard struct{ StubCard }
+// DominatingCard is a configurable Card with the card.Dominator marker — exercises the
+// printed-Dominate branch of EffectiveDominate / HasDominate / LikelyToHit. Mirrors
+// StubCard's field set with explicit methods (no embedding) so the surface stays obvious
+// at a glance.
+type DominatingCard struct {
+	id      ids.CardID
+	name    string
+	types   card.TypeSet
+	attack  int
+	pitch   int
+	defense int
+	goAgain bool
+}
 
-func (DominatingCard) Dominate() {}
+// NewDominatingCard returns a DominatingCard with just a name set.
+func NewDominatingCard(name string) DominatingCard { return DominatingCard{name: name} }
+
+// WithID returns a copy of c with id set.
+func (c DominatingCard) WithID(id ids.CardID) DominatingCard { c.id = id; return c }
+
+// WithTypes returns a copy of c with types set.
+func (c DominatingCard) WithTypes(t card.TypeSet) DominatingCard { c.types = t; return c }
+
+// WithAttack returns a copy of c with the printed attack value set.
+func (c DominatingCard) WithAttack(a int) DominatingCard { c.attack = a; return c }
+
+// WithPitch returns a copy of c with the printed pitch value set (1=red, 2=yellow, 3=blue).
+func (c DominatingCard) WithPitch(p int) DominatingCard { c.pitch = p; return c }
+
+// WithDefense returns a copy of c with the printed defense value set.
+func (c DominatingCard) WithDefense(d int) DominatingCard { c.defense = d; return c }
+
+// WithGoAgain returns a copy of c with goAgain=true.
+func (c DominatingCard) WithGoAgain() DominatingCard { c.goAgain = true; return c }
+
+func (c DominatingCard) ID() ids.CardID                                   { return c.id }
+func (c DominatingCard) Name() string                                     { return c.name }
+func (c DominatingCard) DisplayName() string                              { return c.name }
+func (DominatingCard) Cost(card.GameEngine) int                           { return 0 }
+func (c DominatingCard) Pitch() int                                       { return c.pitch }
+func (c DominatingCard) Attack() int                                      { return c.attack }
+func (c DominatingCard) Defense() int                                     { return c.defense }
+func (c DominatingCard) Types(card.GameEngine) card.TypeSet               { return c.types }
+func (c DominatingCard) GoAgain(card.GameEngine) bool                     { return c.goAgain }
+func (DominatingCard) Play(card.GameEngine, card.Logger, *card.CardState) {}
+func (DominatingCard) Dominate()                                          {}
 
 // InstantStub is a 0-cost, 0-power Generic Action - Instant card with no Go again.
 // Tests chain-runner behaviour around the Action Point debit: an Instant after a
