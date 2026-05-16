@@ -14,5 +14,5 @@ import (
 // not implemented: Frailty health-gain rider dropped (status tokens not tracked)
 
 func (SapwoodElixirRed) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
-	cards.GrantNextCardBonusAttack(ge, 3, cards.IsAttack)
+	cards.GrantNextCardBonusAttack(ge, 3, card.IsAttack)
 }

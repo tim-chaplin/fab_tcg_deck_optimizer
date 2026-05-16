@@ -15,7 +15,7 @@ import (
 // Sight is a non-attack action — no Attack() to apply), and resolves the arsenal-gated
 // Opt 2.
 func forceSightPlay(ge card.GameEngine, l card.Logger, self *card.CardState, bonus int) {
-	GrantNextCardBonusAttack(ge, bonus, IsAttackAction)
+	GrantNextCardBonusAttack(ge, bonus, card.IsAttackAction)
 	if self.FromArsenal {
 		ge.Opt(l, 2)
 	}

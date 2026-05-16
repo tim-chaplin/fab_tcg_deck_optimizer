@@ -106,3 +106,23 @@ func (s TypeSet) IsAttackReaction() bool {
 func (s TypeSet) IsResource() bool {
 	return s&TypeSet(TypeResource) != 0
 }
+
+// IsAttack matches any scheduled attack — action card OR weapon swing — for "your next
+// attack" wording. Pairs with helpers that take a `func(GameEngine, *CardState) bool`
+// predicate.
+func IsAttack(_ GameEngine, pc *CardState) bool {
+	return pc.Card.Types(nil).IsAttack()
+}
+
+// IsAttackAction matches scheduled attack action cards (excludes weapon swings) for "the
+// next attack action card" wording.
+func IsAttackAction(_ GameEngine, pc *CardState) bool {
+	return pc.Card.Types(nil).IsAttackAction()
+}
+
+// IsRunebladeAttack matches scheduled Runeblade attacks (action or weapon) for "your next
+// Runeblade attack" wording. Engine threaded through so Universal cards fold the active
+// hero's class into their Types.
+func IsRunebladeAttack(ge GameEngine, pc *CardState) bool {
+	return pc.Card.Types(ge).IsRunebladeAttack()
+}

@@ -3,7 +3,7 @@
 // damage-likely-to-hit window, then destroys. Damage is credited at creation time inside
 // CreateRunechants; this handler is pure state cleanup.
 
-package cards
+package token
 
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
@@ -17,13 +17,8 @@ const runechantTokenName = "Runechant"
 
 // NewRunechant returns a fresh Runechant token aura at count n.
 func NewRunechant(n int) *aura.Aura {
-	return aura.NewToken(runechantTokenName, ids.RunechantTokenID, triggertype.Attack, runechantFire, n)
+	return aura.NewFromToken(runechantTokenName, ids.RunechantTokenID, triggertype.Attack, runechantFire, n)
 }
-
-// RunechantToken is the marker struct for FaB's runechant token-aura — exists for
-// naming-convention symmetry with the item tokens (GoldToken / SilverToken / CopperToken).
-// Runechants don't print an activated-ability card; the behaviour lives in runechantFire.
-type RunechantToken struct{}
 
 // runechantEngine is the slice of engine surface runechantFire reaches for —
 // *gameengine.GameEngine satisfies it structurally.
@@ -31,9 +26,16 @@ type runechantEngine interface {
 	SetArcaneDamageDealt(bool)
 }
 
+// runechantAura is the slice of the firing aura's surface runechantFire needs.
+type runechantAura interface {
+	Count() int
+	Destroy(addToGraveyard bool)
+}
+
 // runechantFire is the triggertype.Attack handler shared by every Runechant aura. Fires
 // before each attack / weapon swing.
-func runechantFire(engine, _ any, a aura.Ctx) {
+func runechantFire(engine, _, ctx any) {
+	a := ctx.(runechantAura)
 	if likelyDamageHits(a.Count(), false) {
 		engine.(runechantEngine).SetArcaneDamageDealt(true)
 	}

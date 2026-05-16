@@ -111,22 +111,3 @@ func GrantNextCardBonusAttack(ge card.GameEngine, n int, match func(card.GameEng
 		}
 	}
 }
-
-// IsAttack matches any scheduled attack — action card OR weapon swing — for
-// "your next attack" wording.
-func IsAttack(_ card.GameEngine, pc *card.CardState) bool {
-	return pc.Card.Types(nil).IsAttack()
-}
-
-// IsAttackAction matches scheduled attack action cards (excludes weapon swings)
-// for "the next attack action card" wording.
-func IsAttackAction(_ card.GameEngine, pc *card.CardState) bool {
-	return pc.Card.Types(nil).IsAttackAction()
-}
-
-// IsRunebladeAttack matches scheduled Runeblade attacks (action or weapon) for
-// "your next Runeblade attack" wording. Engine threaded through so Universal cards
-// fold the active hero's class into their Types.
-func IsRunebladeAttack(ge card.GameEngine, pc *card.CardState) bool {
-	return pc.Card.Types(ge).IsRunebladeAttack()
-}

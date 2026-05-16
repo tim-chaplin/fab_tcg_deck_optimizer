@@ -1,10 +1,10 @@
 package sim
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/aura"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/gameengine"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/token"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/trigger"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/triggertype"
 )
@@ -20,23 +20,23 @@ import (
 // v2/aura and v2/trigger free of any v2/card dependency.
 func init() {
 	gameengine.BuildCardAura = func(self *card.CardState, tt triggertype.Type, h card.AuraHandler, count int, oncePerTurn bool) gameengine.Aura {
-		return aura.NewCard(self.Card, tt, wrapAuraHandler(h), count, oncePerTurn)
+		return aura.NewFromCard(self.Card, tt, wrapAuraHandler(h), count, oncePerTurn)
 	}
 	gameengine.BuildCardTrigger = func(self *card.CardState, tt triggertype.Type, h card.TriggerHandler, filter func(card.TypeSet) bool) gameengine.Trigger {
 		return trigger.NewCard(self.Card, tt, wrapTriggerHandler(h), wrapTypeFilter(filter))
 	}
-	gameengine.BuildRunechantAura = func(n int) gameengine.Aura { return cards.NewRunechant(n) }
-	gameengine.BuildPonderAura = func(n int) gameengine.Aura { return cards.NewPonder(n) }
-	gameengine.BuildGoldItem = func(n int) gameengine.Item { return cards.NewGold(n) }
-	gameengine.BuildSilverItem = func(n int) gameengine.Item { return cards.NewSilver(n) }
-	gameengine.BuildCopperItem = func(n int) gameengine.Item { return cards.NewCopper(n) }
+	gameengine.BuildRunechantAura = func(n int) gameengine.Aura { return token.NewRunechant(n) }
+	gameengine.BuildPonderAura = func(n int) gameengine.Aura { return token.NewPonder(n) }
+	gameengine.BuildGoldItem = func(n int) gameengine.Item { return token.NewGold(n) }
+	gameengine.BuildSilverItem = func(n int) gameengine.Item { return token.NewSilver(n) }
+	gameengine.BuildCopperItem = func(n int) gameengine.Item { return token.NewCopper(n) }
 }
 
 // wrapAuraHandler adapts a typed card.AuraHandler into the type-erased aura.Handler the
 // leaf package stores. The engine/logger values flowing through aura.Fire are *GameEngine
 // / *TurnLogger at runtime; the type assertions succeed by construction.
 func wrapAuraHandler(h card.AuraHandler) aura.Handler {
-	return func(engine, logger any, ctx aura.Ctx) {
+	return func(engine, logger, ctx any) {
 		h(engine.(card.GameEngine), logger.(card.Logger), ctx.(card.Aura))
 	}
 }

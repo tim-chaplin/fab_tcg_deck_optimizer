@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/heroes"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/hero"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
@@ -14,7 +14,7 @@ import (
 // chain runner. Solo Blue printing in hand: cost 0, power 1 sits in the LikelyToHit
 // window, on-hit fires.
 func TestPerformanceBonus_OnHitCreatesGold(t *testing.T) {
-	d := deck.New(heroes.Viserai{}, nil, fillerDeck())
+	d := deck.New(hero.Viserai{}, nil, fillerDeck())
 	hand := []deck.Card{cards.PerformanceBonusBlue{}}
 	state := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, nil, hand)
 	if state.Value != 1 {

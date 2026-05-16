@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/heroes"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/hero"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
@@ -30,7 +30,7 @@ func TestEvalOneTurn_MidTurnDrawArsenalsWhenSlotEmpty(t *testing.T) {
 		testutils.YellowAttack{},
 		testutils.YellowAttack{},
 	}
-	d := deck.New(heroes.Viserai{}, nil, deckCards)
+	d := deck.New(hero.Viserai{}, nil, deckCards)
 	state := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, nil, nil)
 
 	wantHand := []deck.Card{
@@ -68,7 +68,7 @@ func TestEvalOneTurn_TwoMidTurnDraws_OneArsenalsOneHeld(t *testing.T) {
 		testutils.BlueAttack{},
 		testutils.YellowAttack{},
 	}
-	d := deck.New(heroes.Viserai{}, nil, deckCards)
+	d := deck.New(hero.Viserai{}, nil, deckCards)
 	state := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, nil, nil)
 
 	// One beacon arsenaled, the other held at slot 0; the remaining three slots are the fresh
@@ -108,7 +108,7 @@ func TestEvalOneTurn_ThreeMidTurnDraws_ArsenalFromDrawnPool(t *testing.T) {
 		testutils.BlueAttack{},
 		testutils.YellowAttack{},
 	}
-	d := deck.New(heroes.Viserai{}, nil, deckCards)
+	d := deck.New(hero.Viserai{}, nil, deckCards)
 	state := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, gameengine.GameStateBuilder().SetArsenal(arsenalIn).Build(), nil)
 
 	// Two held beacons plus two fresh Blues from deck positions 7..8.
@@ -147,7 +147,7 @@ func TestEvalOneTurn_MidTurnDrawHeldWhenArsenalFull(t *testing.T) {
 		testutils.YellowAttack{},
 		testutils.YellowAttack{},
 	}
-	d := deck.New(heroes.Viserai{}, nil, deckCards)
+	d := deck.New(hero.Viserai{}, nil, deckCards)
 	state := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, gameengine.GameStateBuilder().SetArsenal(arsenalIn).Build(), nil)
 
 	wantHand := []deck.Card{
@@ -182,7 +182,7 @@ func TestEvalOneTurn_MidTurnDrawSansGoAgainStaysHeld(t *testing.T) {
 		testutils.BlueAttack{},
 		testutils.BlueAttack{},
 	}
-	d := deck.New(heroes.Viserai{}, nil, deckCards)
+	d := deck.New(hero.Viserai{}, nil, deckCards)
 	state := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, nil, initialHand)
 
 	// Turn 1 damage: Snatch alone for 4 (no chain extension, no Viserai trigger — Snatch isn't
@@ -231,7 +231,7 @@ func TestEvalOneTurn_MidTurnDrawSansGoAgainStaysHeld(t *testing.T) {
 // Tests that DrawOne against an empty deck is a no-op (no panic, no spurious draw).
 func TestEvalOneTurn_DrawOneOnEmptyDeckIsNoop(t *testing.T) {
 	initialHand := []deck.Card{cards.SnatchRed{}}
-	d := deck.New(heroes.Viserai{}, nil, nil)
+	d := deck.New(hero.Viserai{}, nil, nil)
 	state := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, nil, initialHand)
 
 	if state.Value != 4 {

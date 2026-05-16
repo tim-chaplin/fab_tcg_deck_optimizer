@@ -8,7 +8,7 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/heroes"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/hero"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapons"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
@@ -46,8 +46,8 @@ func captureStdout(t *testing.T, f func()) string {
 // collapsed into the "identical card lists" branch.
 func TestPrintCardDelta_IncludesWeaponDifferences(t *testing.T) {
 	cs := []deck.Card{registry.GetCard(ids.ReadTheRunesRed)}
-	d1 := deck.New(heroes.Viserai{}, []deck.Weapon{weapons.NebulaBlade{}}, cs)
-	d2 := deck.New(heroes.Viserai{}, []deck.Weapon{weapons.ReapingBlade{}}, cs)
+	d1 := deck.New(hero.Viserai{}, []deck.Weapon{weapons.NebulaBlade{}}, cs)
+	d2 := deck.New(hero.Viserai{}, []deck.Weapon{weapons.ReapingBlade{}}, cs)
 
 	out := captureStdout(t, func() { printCardDelta("d1", "d2", d1, d2) })
 
@@ -68,8 +68,8 @@ func TestPrintCardDelta_IncludesWeaponDifferences(t *testing.T) {
 func TestPrintCardDelta_WeaponsLeadEachBlock(t *testing.T) {
 	read := registry.GetCard(ids.ReadTheRunesRed)
 	snatch := registry.GetCard(ids.SnatchRed)
-	d1 := deck.New(heroes.Viserai{}, []deck.Weapon{weapons.NebulaBlade{}}, []deck.Card{read, read})
-	d2 := deck.New(heroes.Viserai{}, []deck.Weapon{weapons.ReapingBlade{}}, []deck.Card{snatch, snatch})
+	d1 := deck.New(hero.Viserai{}, []deck.Weapon{weapons.NebulaBlade{}}, []deck.Card{read, read})
+	d2 := deck.New(hero.Viserai{}, []deck.Weapon{weapons.ReapingBlade{}}, []deck.Card{snatch, snatch})
 
 	out := captureStdout(t, func() { printCardDelta("d1", "d2", d1, d2) })
 
@@ -104,8 +104,8 @@ func TestPrintCardDelta_WeaponsLeadEachBlock(t *testing.T) {
 func TestPrintCardDelta_IdenticalLoadoutNotesBothCounts(t *testing.T) {
 	cs := []deck.Card{registry.GetCard(ids.ReadTheRunesRed), registry.GetCard(ids.SnatchRed)}
 	weps := []deck.Weapon{weapons.NebulaBlade{}}
-	d1 := deck.New(heroes.Viserai{}, weps, cs)
-	d2 := deck.New(heroes.Viserai{}, weps, cs)
+	d1 := deck.New(hero.Viserai{}, weps, cs)
+	d2 := deck.New(hero.Viserai{}, weps, cs)
 
 	out := captureStdout(t, func() { printCardDelta("d1", "d2", d1, d2) })
 

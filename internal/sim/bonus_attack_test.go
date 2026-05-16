@@ -11,6 +11,7 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapons"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/gameengine"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/token"
 )
 
 // pitchOnlyRed is a 0-cost, pitch-1, 0-attack, 0-defense red action: pure resource fodder for
@@ -214,7 +215,7 @@ func TestBest_NimblismGrantsConsumingVolitionDiscardRider(t *testing.T) {
 	}
 	state := gameengine.GameStateBuilder().
 		SetHero(testutils.Hero{Intel: 4}).
-		AddAura(cards.NewRunechant(1)).
+		AddAura(token.NewRunechant(1)).
 		Build()
 	got := Best(nil, h, Matchup{IncomingDamage: 0}, nil, state)
 	if got.Value != 7 {

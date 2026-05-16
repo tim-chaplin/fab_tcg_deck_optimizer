@@ -12,7 +12,7 @@ import (
 
 func publicBountyPlay(ge card.GameEngine, l card.Logger, self *card.CardState, n int) {
 	ge.MarkOpponent()
-	GrantNextCardBonusAttack(ge, n, IsAttack)
+	GrantNextCardBonusAttack(ge, n, card.IsAttack)
 }
 
 func (PublicBountyRed) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {

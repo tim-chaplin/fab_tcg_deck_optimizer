@@ -3,13 +3,11 @@ package turntests
 import (
 	"testing"
 
-	cardpkg "github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/heroes"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/hero"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapons"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
-	"github.com/tim-chaplin/fab-deck-optimizer/v2/hero"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/token"
 )
 
@@ -20,9 +18,9 @@ func TestSilverToken_SpendsToFillArsenal(t *testing.T) {
 		testutils.RedAttack{}, testutils.RedAttack{}, testutils.RedAttack{},
 		testutils.RedAttack{}, testutils.RedAttack{},
 	}
-	d := deck.New(heroes.Viserai{}, nil, cards)
+	d := deck.New(hero.Viserai{}, nil, cards)
 	hand := []deck.Card{testutils.BluePitch{}}
-	priorItems := []*token.Item{cardpkg.NewSilver(1)}
+	priorItems := []*token.Item{token.NewSilver(1)}
 	got := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, stateWithItems(priorItems...), hand)
 	if got.Value != 0 {
 		t.Fatalf("Value = %d, want 0 (Silver ability has no damage)", got.Value)
@@ -49,9 +47,9 @@ func TestSilverToken_SpendsAndSwings(t *testing.T) {
 		testutils.RedAttack{}, testutils.RedAttack{}, testutils.RedAttack{},
 		testutils.RedAttack{}, testutils.RedAttack{},
 	}
-	d := deck.New(heroes.Viserai{}, []deck.Weapon{weapons.ReapingBlade{}}, cards)
+	d := deck.New(hero.Viserai{}, []deck.Weapon{weapons.ReapingBlade{}}, cards)
 	hand := []deck.Card{testutils.BluePitch{}, testutils.BluePitch{}}
-	priorItems := []*token.Item{cardpkg.NewSilver(1)}
+	priorItems := []*token.Item{token.NewSilver(1)}
 	got := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, stateWithItems(priorItems...), hand)
 	if got.Value != 3 {
 		t.Fatalf("Value = %d, want 3 (Reaping Blade swing power 3)", got.Value)

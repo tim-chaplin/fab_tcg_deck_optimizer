@@ -1,11 +1,11 @@
 package sim
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/gameengine"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/hero"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/token"
 )
 
 // newSequenceContextForTest builds a sequenceContext wired to a fresh attackBufs sized
@@ -24,7 +24,7 @@ func newSequenceContextForTest(h hero.Hero, pitched, deckCards []card.Card, reso
 		SetDeck(d).
 		Build()
 	if runechantCarryover > 0 {
-		leafState.CreateAura(cards.NewRunechant(runechantCarryover))
+		leafState.CreateAura(token.NewRunechant(runechantCarryover))
 	}
 	return &sequenceContext{
 		hero:               h,

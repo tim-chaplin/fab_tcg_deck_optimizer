@@ -61,7 +61,7 @@ const (
 	// adaptiveShufflesCap is the upper bound on the adaptive shuffle path. Caps a
 	// pathological high-variance regime that doesn't converge — the run terminates at this
 	// many shuffles even if the SE target was never hit. Sized for precision=0.01 (~82k
-	// shuffles on a baseline Viserai deck) with headroom for higher-variance heroes.
+	// shuffles on a baseline Viserai deck) with headroom for higher-variance hero.
 	adaptiveShufflesCap = 200000
 )
 

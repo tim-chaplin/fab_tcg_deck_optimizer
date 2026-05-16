@@ -11,13 +11,13 @@ import (
 )
 
 func (ComeToFightRed) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
-	GrantNextCardBonusAttack(ge, 3, IsAttackAction)
+	GrantNextCardBonusAttack(ge, 3, card.IsAttackAction)
 }
 
 func (ComeToFightYellow) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
-	GrantNextCardBonusAttack(ge, 2, IsAttackAction)
+	GrantNextCardBonusAttack(ge, 2, card.IsAttackAction)
 }
 
 func (ComeToFightBlue) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
-	GrantNextCardBonusAttack(ge, 1, IsAttackAction)
+	GrantNextCardBonusAttack(ge, 1, card.IsAttackAction)
 }

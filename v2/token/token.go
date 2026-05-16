@@ -1,12 +1,13 @@
 // Package token owns the concrete Item type — an in-play permanent with an activated
-// ability (currently FaB's three item-flavored tokens: Gold, Silver, Copper). Item itself
-// is generic; concrete activated-ability cards (GoldToken / SilverToken / CopperToken)
-// and their NewGold / NewSilver / NewCopper factories live in internal/cards, where the
-// rest of FaB's card implementations sit.
+// ability — along with FaB's five built-in tokens: the item tokens Gold / Silver / Copper
+// (gold.go / silver.go / copper.go) and the aura-flavored tokens Runechant / Ponder
+// (runechant.go / ponder.go). Item is the generic store; the per-token files each own
+// their own narrow consumer-side interfaces and their type-set so adding a non-generic
+// future token doesn't tangle the others.
 //
-// The package defines its own narrow interfaces and does NOT import v2/card — the stored
-// ability is typed as `any` so consumers (the chain runner) assert it back to a richer
-// card type when invoking.
+// Item itself defines no v2/card dependency — its ability slot is typed as `any` so the
+// chain runner asserts it back to a richer card type when invoking; the per-token files
+// do import v2/card to declare their card implementations.
 package token
 
 import (
@@ -24,8 +25,8 @@ type Item struct {
 }
 
 // NewItem builds a token item with the supplied name, identifier, activated-ability card,
-// and initial count. Production callers reach for cards.NewGold / cards.NewSilver /
-// cards.NewCopper which wire the appropriate ability card.
+// and initial count. Production callers reach for NewGold / NewSilver / NewCopper, which
+// wire the appropriate ability card.
 func NewItem(name string, tokenID ids.CardID, ability any, count int) *Item {
 	return &Item{
 		tokenName: name,

@@ -13,12 +13,11 @@ import (
 	"time"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/deckformat"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/heroes"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/hero"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/mydecks"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/gameengine"
-	"github.com/tim-chaplin/fab-deck-optimizer/v2/hero"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/registry"
 )
 
@@ -115,7 +114,7 @@ func runAnnealCmd(args []string) {
 
 	name := *deckName
 	if name == "" {
-		name = defaultDeckNameFor(heroes.Viserai{}, fmtValue, *incoming)
+		name = defaultDeckNameFor(hero.Viserai{}, fmtValue, *incoming)
 	}
 	outPath, err := mydecks.Path(name)
 	if err != nil {
@@ -398,7 +397,7 @@ func prepareBaseline(cfg annealConfig, rng *rand.Rand) (*deck.Deck, sim.DeckStat
 	}
 	if best == nil {
 		fmt.Fprintf(os.Stderr, "no deck at %s; generating a random starting deck\n", cfg.outPath)
-		best = deck.Random(heroes.Viserai{}, cfg.deckSize, cfg.maxCopies, rng,
+		best = deck.Random(hero.Viserai{}, cfg.deckSize, cfg.maxCopies, rng,
 			cfg.legalFilter(), registry.Registry{})
 		bestStats = baselineEvaluate(best, cfg, rng)
 		bestAvg := bestStats.Mean()

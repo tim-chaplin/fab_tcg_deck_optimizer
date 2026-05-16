@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/heroes"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/hero"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
 )
@@ -15,7 +15,7 @@ import (
 // recycle to Critical Strike) → Critical Strike (now power 7, hits, OnHit pulls it from
 // graveyard onto deck). End-of-turn deck should contain Critical Strike.
 func TestWarmongersRecital_OnHitRecyclesToDeck(t *testing.T) {
-	d := deck.New(heroes.Viserai{}, nil, nil)
+	d := deck.New(hero.Viserai{}, nil, nil)
 	hand := []deck.Card{
 		cards.TitaniumBaubleBlue{},
 		cards.WarmongersRecitalRed{},

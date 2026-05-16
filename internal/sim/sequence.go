@@ -20,7 +20,6 @@ package sim
 import (
 	"fmt"
 
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/aura"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
@@ -248,7 +247,7 @@ func bestAttackWithWeapons(
 func newDRCostProbe(runechants int) *gameengine.GameEngine {
 	ge := gameengine.New()
 	if runechants > 0 {
-		ge.CreateAura(cards.NewRunechant(runechants))
+		ge.CreateAura(token.NewRunechant(runechants))
 	}
 	return ge
 }

@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/token"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/gameengine"
@@ -79,7 +80,7 @@ func TestReekOfCorruption_BlockableBaseSuppressesDiscard(t *testing.T) {
 // this card's own damage.
 func TestReekOfCorruption_RunechantsDontRescue(t *testing.T) {
 	ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetAuraCreated(true).Build()}
-	ge.CreateAura(cards.NewRunechant(1))
+	ge.CreateAura(token.NewRunechant(1))
 	c := cards.ReekOfCorruptionYellow{}
 	ge.ResolveChainStep(ge.Logger(), &card.CardState{Card: c})
 	if got := ge.Value(); got != 3 {

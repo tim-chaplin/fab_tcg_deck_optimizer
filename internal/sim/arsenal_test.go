@@ -7,7 +7,7 @@ import (
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
 	notimpl "github.com/tim-chaplin/fab-deck-optimizer/internal/cards/notimplemented"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/heroes"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/hero"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
@@ -133,7 +133,7 @@ func TestBest_ArsenalInSmashingGoodTimeGatesOnlyArsenalCopy(t *testing.T) {
 		cards.HocusPocusRed{},
 	}
 	state := gameengine.GameStateBuilder().
-		SetHero(heroes.Viserai{}).
+		SetHero(hero.Viserai{}).
 		SetArsenal(notimpl.SmashingGoodTimeRed{}).
 		Build()
 	got := Best(nil, h, Matchup{IncomingDamage: 0}, nil, state)

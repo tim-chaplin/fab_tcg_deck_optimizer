@@ -3,18 +3,17 @@ package sim
 import (
 	"testing"
 
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/gameengine"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/token"
 )
 
-// Tests that cards.GoldToken.Play decrements Count and removes the entry at zero.
+// Tests that token.GoldToken.Play decrements Count and removes the entry at zero.
 func TestGoldToken_PlaysDecrementsAndDestroys(t *testing.T) {
 	ge := gameengine.New()
 	ge.SetDeck(DeckOf(FakeRedAttack{}))
-	ge.CreateItem(cards.NewGold(1))
-	ge.ResolveChainStep(ge.Logger(), &card.CardState{Card: cards.GoldToken{}})
+	ge.CreateItem(token.NewGold(1))
+	ge.ResolveChainStep(ge.Logger(), &card.CardState{Card: token.GoldToken{}})
 	if ge.GoldCount() != 0 {
 		t.Fatalf("Gold = %d after spending the only token, want 0", ge.GoldCount())
 	}
@@ -30,19 +29,19 @@ func TestGoldToken_PlaysDecrementsAndDestroys(t *testing.T) {
 func TestGoldToken_PlayDecrementsCountWhenMultiple(t *testing.T) {
 	ge := gameengine.New()
 	ge.SetDeck(DeckOf(FakeRedAttack{}))
-	ge.CreateItem(cards.NewGold(3))
-	ge.ResolveChainStep(ge.Logger(), &card.CardState{Card: cards.GoldToken{}})
+	ge.CreateItem(token.NewGold(3))
+	ge.ResolveChainStep(ge.Logger(), &card.CardState{Card: token.GoldToken{}})
 	if ge.GoldCount() != 2 {
 		t.Fatalf("Gold = %d after spending 1 of 3, want 2", ge.GoldCount())
 	}
 }
 
-// Tests cards.SilverToken.Play decrement + draw behaviour.
+// Tests token.SilverToken.Play decrement + draw behaviour.
 func TestSilverToken_PlaysDecrementsAndDestroys(t *testing.T) {
 	ge := gameengine.New()
 	ge.SetDeck(DeckOf(FakeRedAttack{}))
-	ge.CreateItem(cards.NewSilver(1))
-	ge.ResolveChainStep(ge.Logger(), &card.CardState{Card: cards.SilverToken{}})
+	ge.CreateItem(token.NewSilver(1))
+	ge.ResolveChainStep(ge.Logger(), &card.CardState{Card: token.SilverToken{}})
 	if ge.SilverCount() != 0 {
 		t.Fatalf("Silver = %d after spending the only token, want 0", ge.SilverCount())
 	}
@@ -54,12 +53,12 @@ func TestSilverToken_PlaysDecrementsAndDestroys(t *testing.T) {
 	}
 }
 
-// Tests cards.CopperToken.Play decrement + draw behaviour.
+// Tests token.CopperToken.Play decrement + draw behaviour.
 func TestCopperToken_PlaysDecrementsAndDestroys(t *testing.T) {
 	ge := gameengine.New()
 	ge.SetDeck(DeckOf(FakeRedAttack{}))
-	ge.CreateItem(cards.NewCopper(1))
-	ge.ResolveChainStep(ge.Logger(), &card.CardState{Card: cards.CopperToken{}})
+	ge.CreateItem(token.NewCopper(1))
+	ge.ResolveChainStep(ge.Logger(), &card.CardState{Card: token.CopperToken{}})
 	if ge.CopperCount() != 0 {
 		t.Fatalf("Copper = %d after spending the only token, want 0", ge.CopperCount())
 	}
@@ -102,8 +101,8 @@ func TestEvalCache_PriorItemsKeyedDistinctly(t *testing.T) {
 		}
 		return b.Build()
 	}
-	_ = ev.Best(nil, hand, mp, nil, stateWithItems([]*token.Item{cards.NewGold(1)}))
-	_ = ev.Best(nil, hand, mp, nil, stateWithItems([]*token.Item{cards.NewGold(2)}))
+	_ = ev.Best(nil, hand, mp, nil, stateWithItems([]*token.Item{token.NewGold(1)}))
+	_ = ev.Best(nil, hand, mp, nil, stateWithItems([]*token.Item{token.NewGold(2)}))
 	stats := ev.CacheStats()
 	if stats.Hits != 0 {
 		t.Errorf("hits = %d, want 0 (different gold counts must not collide)", stats.Hits)
@@ -111,7 +110,7 @@ func TestEvalCache_PriorItemsKeyedDistinctly(t *testing.T) {
 	if stats.Misses != 2 {
 		t.Errorf("misses = %d, want 2 (one per distinct item key)", stats.Misses)
 	}
-	_ = ev.Best(nil, hand, mp, nil, stateWithItems([]*token.Item{cards.NewGold(2)}))
+	_ = ev.Best(nil, hand, mp, nil, stateWithItems([]*token.Item{token.NewGold(2)}))
 	stats = ev.CacheStats()
 	if stats.Hits != 1 {
 		t.Errorf("hits after repeat = %d, want 1 (matching item key should hit)", stats.Hits)

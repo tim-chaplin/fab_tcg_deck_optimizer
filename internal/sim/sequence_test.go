@@ -6,7 +6,7 @@ import (
 	. "github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/heroes"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/hero"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapons"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
@@ -26,7 +26,7 @@ func TestBest_ViseraiMaleficShrillCombo(t *testing.T) {
 		cards.MaleficIncantationRed{},
 		cards.ShrillOfSkullformRed{},
 	}
-	got := Best(nil, h, Matchup{IncomingDamage: 4}, nil, gameengine.GameStateBuilder().SetHero(heroes.Viserai{}).Build())
+	got := Best(nil, h, Matchup{IncomingDamage: 4}, nil, gameengine.GameStateBuilder().SetHero(hero.Viserai{}).Build())
 	if got.Value != 11 {
 		t.Fatalf("want value 11, got %d (roles=[%s])",
 			got.Value, FormatBestLine(got.BestLine))
@@ -46,7 +46,7 @@ func TestBest_ViseraiReapingBladeBlueMalefics(t *testing.T) {
 		cards.MaleficIncantationBlue{},
 	}
 	weapons := []Weapon{weapons.ReapingBlade{}}
-	got := Best(weapons, h, Matchup{IncomingDamage: 0}, nil, gameengine.GameStateBuilder().SetHero(heroes.Viserai{}).Build())
+	got := Best(weapons, h, Matchup{IncomingDamage: 0}, nil, gameengine.GameStateBuilder().SetHero(hero.Viserai{}).Build())
 	if got.Value != 5 {
 		t.Fatalf("want value 5, got %d (roles=[%s])",
 			got.Value, FormatBestLine(got.BestLine))
@@ -64,7 +64,7 @@ func TestBest_ViseraiReapingBladeMaleficsPlusShrill(t *testing.T) {
 		cards.ShrillOfSkullformRed{},
 	}
 	weapons := []Weapon{weapons.ReapingBlade{}}
-	got := Best(weapons, h, Matchup{IncomingDamage: 0}, nil, gameengine.GameStateBuilder().SetHero(heroes.Viserai{}).Build())
+	got := Best(weapons, h, Matchup{IncomingDamage: 0}, nil, gameengine.GameStateBuilder().SetHero(hero.Viserai{}).Build())
 	if got.Value != 11 {
 		t.Fatalf("want value 11, got %d (roles=[%s])",
 			got.Value, FormatBestLine(got.BestLine))
@@ -83,7 +83,7 @@ func TestBest_ViseraiOathBlueHocusRedMalefic(t *testing.T) {
 		cards.MaleficIncantationRed{},
 	}
 	weapons := []Weapon{weapons.ReapingBlade{}}
-	got := Best(weapons, h, Matchup{IncomingDamage: 0}, nil, gameengine.GameStateBuilder().SetHero(heroes.Viserai{}).Build())
+	got := Best(weapons, h, Matchup{IncomingDamage: 0}, nil, gameengine.GameStateBuilder().SetHero(hero.Viserai{}).Build())
 	if got.Value != 8 {
 		t.Fatalf("want value 8, got %d (roles=[%s])",
 			got.Value, FormatBestLine(got.BestLine))
@@ -107,7 +107,7 @@ func TestBest_RunicReapingPrefersAttackPitch(t *testing.T) {
 		cards.RunicReapingRed{},
 		cards.ShrillOfSkullformRed{},
 	}
-	got := Best(nil, h, Matchup{IncomingDamage: 0}, nil, gameengine.GameStateBuilder().SetHero(heroes.Viserai{}).Build())
+	got := Best(nil, h, Matchup{IncomingDamage: 0}, nil, gameengine.GameStateBuilder().SetHero(hero.Viserai{}).Build())
 	if got.Value != 11 {
 		t.Fatalf("want value 11, got %d (roles=[%s])",
 			got.Value, FormatBestLine(got.BestLine))
@@ -128,7 +128,7 @@ func TestBest_ViseraiMauvrionGrantsGoAgainToShrill(t *testing.T) {
 		cards.ShrillOfSkullformRed{},
 	}
 	weapons := []Weapon{weapons.ReapingBlade{}}
-	got := Best(weapons, h, Matchup{IncomingDamage: 0}, nil, gameengine.GameStateBuilder().SetHero(heroes.Viserai{}).Build())
+	got := Best(weapons, h, Matchup{IncomingDamage: 0}, nil, gameengine.GameStateBuilder().SetHero(hero.Viserai{}).Build())
 	if got.Value != 16 {
 		t.Fatalf("want value 16, got %d (roles=[%s])",
 			got.Value, FormatBestLine(got.BestLine))
@@ -143,7 +143,7 @@ func TestBest_ViseraiMauvrionPredictsDrowningDireDominate(t *testing.T) {
 		cards.DrowningDireRed{},
 		testutils.YellowAttack{},
 	}
-	got := Best(nil, h, Matchup{IncomingDamage: 0}, nil, gameengine.GameStateBuilder().SetHero(heroes.Viserai{}).Build())
+	got := Best(nil, h, Matchup{IncomingDamage: 0}, nil, gameengine.GameStateBuilder().SetHero(hero.Viserai{}).Build())
 	if got.Value != 9 {
 		t.Fatalf("want value 9, got %d (roles=[%s])",
 			got.Value, FormatBestLine(got.BestLine))
@@ -161,7 +161,7 @@ func TestIsLegalOrder_MauvrionCantSaveShrillWhenRuneragerIsAhead(t *testing.T) {
 		cards.ShrillOfSkullformRed{},
 		weapons.ReapingBlade{}.Ability(),
 	}
-	ctx := NewSequenceContextForTest(heroes.Viserai{}, nil, nil, 1_000_000, 0, len(order))
+	ctx := NewSequenceContextForTest(hero.Viserai{}, nil, nil, 1_000_000, 0, len(order))
 	if _, _, _, legal := ctx.PlaySequence(order); legal {
 		t.Fatalf("ordering %v should be illegal (Shrill has no go-again and Mauvrion granted Runerager instead)",
 			testutils.CardNamesSim(order))
@@ -178,7 +178,7 @@ func TestBest_ViseraiMauvrionChainsShrillIntoRuneragerIntoWeapon(t *testing.T) {
 		cards.ShrillOfSkullformRed{},
 	}
 	weapons := []Weapon{weapons.ReapingBlade{}}
-	got := Best(weapons, h, Matchup{IncomingDamage: 0}, nil, gameengine.GameStateBuilder().SetHero(heroes.Viserai{}).Build())
+	got := Best(weapons, h, Matchup{IncomingDamage: 0}, nil, gameengine.GameStateBuilder().SetHero(hero.Viserai{}).Build())
 	if got.Value != 18 {
 		t.Fatalf("want value 18, got %d (roles=[%s])",
 			got.Value, FormatBestLine(got.BestLine))

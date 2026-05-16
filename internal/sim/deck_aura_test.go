@@ -8,19 +8,20 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/heroes"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/hero"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/aura"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/gameengine"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/token"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/triggertype"
 )
 
 // damageTrigger returns a StartOfTurn Aura crediting the given damage and destroying
 // itself on the first fire.
 func damageTrigger(self card.Card, damage int, calls *int) gameengine.Aura {
-	return aura.NewCard(
+	return aura.NewFromCard(
 		self,
 		triggertype.StartOfTurn,
 		WrapAuraHandler(func(ge card.GameEngine, _ card.Logger, a card.Aura) {
@@ -71,7 +72,7 @@ func TestProcessAurasAtStartOfTurn_EmptyQueue(t *testing.T) {
 func TestProcessAurasAtStartOfTurn_GraveyardsExhaustedAura(t *testing.T) {
 	src := testutils.RedAttack{}
 	var seen []card.Card
-	watcher := aura.NewCard(
+	watcher := aura.NewFromCard(
 		testutils.YellowAttack{},
 		triggertype.StartOfTurn,
 		WrapAuraHandler(func(ge card.GameEngine, _ card.Logger, _ card.Aura) {
@@ -81,7 +82,7 @@ func TestProcessAurasAtStartOfTurn_GraveyardsExhaustedAura(t *testing.T) {
 		1,
 		false,
 	)
-	first := aura.NewCard(
+	first := aura.NewFromCard(
 		src,
 		triggertype.StartOfTurn,
 		WrapAuraHandler(func(_ card.GameEngine, _ card.Logger, a card.Aura) {
@@ -98,7 +99,7 @@ func TestProcessAurasAtStartOfTurn_GraveyardsExhaustedAura(t *testing.T) {
 
 // TestProcessAurasAtStartOfTurn_IgnoresPonder: Ponder fires at end-of-turn (not start).
 func TestProcessAurasAtStartOfTurn_IgnoresPonder(t *testing.T) {
-	survivors, _, _, _, _ := ProcessAurasAtStartOfTurn([]gameengine.Aura{cards.NewPonder(1)}, DeckOf())
+	survivors, _, _, _, _ := ProcessAurasAtStartOfTurn([]gameengine.Aura{token.NewPonder(1)}, DeckOf())
 	if len(survivors) != 1 || survivors[0].CardName() != "Ponder" {
 		t.Errorf("survivors = %+v, want one Ponder aura intact", survivors)
 	}
@@ -108,7 +109,7 @@ func TestProcessAurasAtStartOfTurn_IgnoresPonder(t *testing.T) {
 func TestFireEndOfTurn_PonderPopsDeckTopIntoHand(t *testing.T) {
 	a, b, c := testutils.NewStubCard("a"), testutils.NewStubCard("b"), testutils.NewStubCard("c")
 	ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCards([]card.Card{a, b, c}).Build()}
-	ge.CreateAura(cards.NewPonder(2))
+	ge.CreateAura(token.NewPonder(2))
 	FireEndOfTurn(ge)
 
 	h := ge.Hand()
@@ -126,7 +127,7 @@ func TestFireEndOfTurn_PonderPopsDeckTopIntoHand(t *testing.T) {
 // TestFireEndOfTurn_PonderEmptyDeckIsNoOp.
 func TestFireEndOfTurn_PonderEmptyDeckIsNoOp(t *testing.T) {
 	ge := gameengine.New()
-	ge.CreateAura(cards.NewPonder(1))
+	ge.CreateAura(token.NewPonder(1))
 	FireEndOfTurn(ge)
 	if h := ge.Hand(); len(h) != 0 {
 		t.Errorf("Hand = %v, want empty (no deck to draw from)", h)
@@ -242,7 +243,7 @@ func TestEvaluate_TriggersFromLastTurnSurfacesInBest(t *testing.T) {
 	for i := 0; i < 6; i++ {
 		deckCards = append(deckCards, testutils.BlueAttack{})
 	}
-	d := deck.New(heroes.Viserai{}, nil, deckCards)
+	d := deck.New(hero.Viserai{}, nil, deckCards)
 	rng := rand.New(rand.NewSource(42))
 	stats := NewEvaluator().Evaluate(d, 20, Matchup{}, rng)
 
@@ -266,7 +267,7 @@ func TestEvaluate_TriggersFromLastTurnSurfacesInBest(t *testing.T) {
 // Tests that the OncePerTurn FiredThisTurn flag is cleared at every turn boundary.
 func TestProcessAurasAtStartOfTurn_ReArmsOncePerTurnGate(t *testing.T) {
 	src := testutils.RedAttack{}
-	exhausted := aura.NewCard(
+	exhausted := aura.NewFromCard(
 		src,
 		triggertype.AttackAction,
 		WrapAuraHandler(func(card.GameEngine, card.Logger, card.Aura) {}),

@@ -20,7 +20,7 @@ import (
 
 func (SmashingGoodTimeRed) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
 	if self.FromArsenal {
-		cards.GrantNextCardBonusAttack(ge, 3, cards.IsAttackAction)
+		cards.GrantNextCardBonusAttack(ge, 3, card.IsAttackAction)
 	}
 }
 
@@ -28,7 +28,7 @@ func (SmashingGoodTimeRed) Play(ge card.GameEngine, l card.Logger, self *card.Ca
 
 func (SmashingGoodTimeYellow) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
 	if self.FromArsenal {
-		cards.GrantNextCardBonusAttack(ge, 2, cards.IsAttackAction)
+		cards.GrantNextCardBonusAttack(ge, 2, card.IsAttackAction)
 	}
 }
 
@@ -36,6 +36,6 @@ func (SmashingGoodTimeYellow) Play(ge card.GameEngine, l card.Logger, self *card
 
 func (SmashingGoodTimeBlue) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
 	if self.FromArsenal {
-		cards.GrantNextCardBonusAttack(ge, 1, cards.IsAttackAction)
+		cards.GrantNextCardBonusAttack(ge, 1, card.IsAttackAction)
 	}
 }

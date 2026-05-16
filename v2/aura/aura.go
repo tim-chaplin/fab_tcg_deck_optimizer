@@ -3,13 +3,11 @@
 // and token-backed auras share the same struct; SourceCard distinguishes them.
 //
 // The package is a generic mechanism — it defines its own narrow interfaces (Card,
-// GameEngine, Ctx, Handler) and does not import v2/card or v2/gameengine. Stored handlers
-// are typed as Handler — engine/logger params are `any` so aura never depends on the
-// consumer's broader engine surface. Callers wrap their typed handlers into Handler
-// closures at the factory layer (sim/init.go).
-//
-// FaB's two aura-flavored tokens (Runechant, Ponder) live in internal/cards alongside
-// the rest of FaB's card implementations.
+// GameEngine in interfaces.go) and does not import v2/card or v2/gameengine. Stored
+// handlers are typed as Handler — engine, logger, and the per-fire ctx all flow through
+// as `any` so aura never depends on the consumer's broader surfaces. Each consumer defines
+// its own interface (e.g. v2/card.Aura for the per-fire ctx) and asserts at the handler
+// boundary; the factory layer (sim/init.go) wraps typed user handlers into Handler closures.
 package aura
 
 import (
@@ -17,33 +15,11 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/triggertype"
 )
 
-// Card is the minimal source-card surface aura needs (display name + ID). The richer
-// v2/card.Card satisfies it structurally so consumers can pass card values through.
-type Card interface {
-	DisplayName() string
-	ID() ids.CardID
-}
-
-// GameEngine is the narrow engine surface aura's own context wiring needs. The Destroy
-// hop on a firing aura's Ctx reaches back through this. *gameengine.GameEngine satisfies
-// it structurally.
-type GameEngine interface {
-	DestroyAura(addToGraveyard bool)
-}
-
-// Handler is the per-aura stored handler. Engine and logger params are typed as `any`
-// so aura doesn't depend on the consumer's engine/logger interfaces — the factory layer
-// wraps typed user handlers into closures of this shape.
-type Handler func(engine, logger any, ctx Ctx)
-
-// Ctx is the per-fire surface aura handlers see on the firing aura.
-type Ctx interface {
-	Count() int
-	DecrementCount() int
-	CardName() string
-	CardID() ids.CardID
-	Destroy(addToGraveyard bool)
-}
+// Handler is the per-aura stored handler. Every argument is typed as `any` — engine,
+// logger, and the per-fire ctx — so aura doesn't depend on the consumer's interfaces. The
+// factory layer wraps typed user handlers into closures of this shape; handler bodies
+// type-assert to whatever richer interfaces they need.
+type Handler func(engine, logger, ctx any)
 
 // Aura is the concrete entry the engine stores in its persistent hook list. source is
 // non-nil for card-backed auras; tokenName / tokenID are populated for token auras.
@@ -58,10 +34,10 @@ type Aura struct {
 	firedThisTurn bool
 }
 
-// NewCard builds a card-backed aura. source is the originating card — typically the Card
-// field of a CardState. SourceCard surfaces it back so engines can route it into the
+// NewFromCard builds a card-backed aura. source is the originating card — typically the
+// Card field of a CardState. SourceCard surfaces it back so engines can route it into the
 // graveyard on destroy.
-func NewCard(source Card, tt triggertype.Type, fire Handler, count int, oncePerTurn bool) *Aura {
+func NewFromCard(source Card, tt triggertype.Type, fire Handler, count int, oncePerTurn bool) *Aura {
 	return &Aura{
 		triggerType: tt,
 		fire:        fire,
@@ -71,9 +47,9 @@ func NewCard(source Card, tt triggertype.Type, fire Handler, count int, oncePerT
 	}
 }
 
-// NewToken builds a token aura — no originating card. CardName returns the supplied name;
-// CardID returns tokenID so cache keys distinguish each token kind.
-func NewToken(name string, tokenID ids.CardID, tt triggertype.Type, fire Handler, count int) *Aura {
+// NewFromToken builds a token aura — no originating card. CardName returns the supplied
+// name; CardID returns tokenID so cache keys distinguish each token kind.
+func NewFromToken(name string, tokenID ids.CardID, tt triggertype.Type, fire Handler, count int) *Aura {
 	return &Aura{
 		triggerType: tt,
 		fire:        fire,
@@ -118,8 +94,9 @@ func (a *Aura) DecrementCount() int {
 	return a.count
 }
 
-// Fire invokes the stored handler. engine/logger are passed through as `any` — the handler
-// (typically wrapped at the factory layer) asserts them to its preferred typed interfaces.
+// Fire invokes the stored handler. engine, logger, and the per-fire ctx pass through as
+// `any` — the handler (typically wrapped at the factory layer) asserts them to its
+// preferred typed interfaces.
 func (a *Aura) Fire(engine, logger any) {
 	a.fire(engine, logger, &ctx{a: a, engine: engine})
 }
@@ -131,9 +108,10 @@ func (a *Aura) Copy() any {
 	return &out
 }
 
-// ctx adapts (Aura, engine) into the Ctx surface handlers see. Cards reach for Count /
-// DecrementCount / CardName / CardID through this and request destruction via Destroy —
-// the latter routes back to the engine's DestroyAura via the local GameEngine interface.
+// ctx is the concrete per-fire value Fire passes to the handler as `any`. Consumers
+// define their own interface (e.g. v2/card.Aura) and assert this value to it; the method
+// set here is what every such interface can rely on. Destroy routes back to the engine's
+// DestroyAura through the package's local GameEngine interface.
 type ctx struct {
 	a      *Aura
 	engine any
