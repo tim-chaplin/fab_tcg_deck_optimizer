@@ -32,6 +32,11 @@ type GameEngine interface {
 	// the engine builds the underlying aura. Source is derived from self.Card.
 	CreateStartOfTurnAura(self *CardState, handler AuraHandler, count int)
 	CreateOncePerTurnAttackActionAura(self *CardState, handler AuraHandler, count int)
+	// DestroyAura removes the aura currently being fired. addToGraveyard sends the
+	// originating card to the graveyard (token auras skip the append). Reached via the
+	// per-fire ctx's Destroy method; exposed on GameEngine so the ctx can route the call
+	// through its stored engine reference.
+	DestroyAura(addToGraveyard bool)
 
 	// Triggers: one-shot, per-trigger-type. AddHitTrigger's filter narrows the firing event
 	// to a card-type predicate (typically TypeSet.IsAttack or TypeSet.IsAttackAction); nil

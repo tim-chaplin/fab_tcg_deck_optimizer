@@ -13,10 +13,11 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/triggertype"
 )
 
-// Aura is the engine's view of a persistent hook entry. Engine, logger, and source-card
-// values flow through as `any` so concrete impls (in v2/aura) can satisfy this without
-// importing gameengine OR v2/card — the engine asserts the boxed values back to the typed
-// interfaces it uses. Copy uses any for the same reason; State.Copy asserts back to Aura.
+// Aura is the engine's view of a persistent hook entry. Fire takes typed
+// card.GameEngine / card.Logger arguments — the concrete *aura.Aura imports v2/card
+// directly so the handler signature is end-to-end typed (no wrap closure). SourceCard
+// stays `any` so token auras can return nil cleanly; consumers assert to card.Card.
+// Copy uses any so State.Copy can box without referencing the concrete type.
 type Aura interface {
 	TriggerType() triggertype.Type
 	OncePerTurn() bool
@@ -24,24 +25,22 @@ type Aura interface {
 	SetFiredThisTurn(bool)
 	CardName() string
 	CardID() ids.CardID
-	// SourceCard returns the originating card boxed as any for card-backed auras, or nil
-	// for token auras. DestroyAura asserts it back to card.Card to route into graveyard;
-	// sim's start-of-turn listing reads it to attribute aura fires to their source card.
 	SourceCard() any
 	Count() int
 	SetCount(int)
 	DecrementCount() int
-	Fire(engine, logger any)
+	Fire(engine card.GameEngine, logger card.Logger)
 	Copy() any
 }
 
-// Trigger is the engine's view of a one-shot deferred handler. As with Aura, engine /
-// logger / type-set values flow through as `any`.
+// Trigger is the engine's view of a one-shot deferred handler. Like Aura, Fire takes
+// typed card.GameEngine / card.Logger arguments; Matches takes the firing card's
+// TypeSet directly.
 type Trigger interface {
 	TriggerType() triggertype.Type
 	CardName() string
-	Matches(types any) bool
-	Fire(engine, logger any)
+	Matches(types card.TypeSet) bool
+	Fire(engine card.GameEngine, logger card.Logger)
 }
 
 // Item is the engine's view of an in-play permanent with an activated ability. Ability
