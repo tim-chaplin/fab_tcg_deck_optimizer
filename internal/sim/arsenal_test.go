@@ -1,17 +1,15 @@
-package sim_test
+package sim
 
 import (
 	"testing"
 
-	. "github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
-
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
 	notimpl "github.com/tim-chaplin/fab-deck-optimizer/internal/cards/notimplemented"
-	"github.com/tim-chaplin/fab-deck-optimizer/v2/hero"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/gameengine"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/hero"
 )
 
 // Tests post-hoc Arsenal promotion of a Held card when the slot is empty.

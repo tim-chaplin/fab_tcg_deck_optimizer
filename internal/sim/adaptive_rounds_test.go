@@ -12,9 +12,8 @@ import (
 
 	. "github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
-	"github.com/tim-chaplin/fab-deck-optimizer/v2/registry"
-
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/hero"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/registry"
 )
 
 // Logs Stats.Runs for various deck shapes — `Runs <= numWorkers × adaptiveCheckInterval`
