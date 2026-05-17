@@ -156,6 +156,32 @@ func bestAttackWithWeapons(
 	var bestWinner *gameengine.GameState
 	foundFeasible := false
 
+	// Loop invariants hoisted out of the pmask×wmask loops. weaponBitsMask /
+	// totalAbilityMasks depend only on the constant weapons / abilities lists; drCost
+	// depends only on defenders and the carryover runechants so it can be costed once
+	// up front. The probe engine + runechant aura on bufs is only built / re-seeded
+	// when at least one defender actually acts as a DR — leaves with only plain
+	// blockers skip it entirely.
+	weaponBitsMask := (1 << len(weapons)) - 1
+	totalAbilityMasks := 1 << len(ctx.activatedAbilities)
+	drCost := 0
+	hasDRDefender := false
+	for _, def := range defenders {
+		if attackerMetaPtrFor(def).actsAsDR {
+			hasDRDefender = true
+			break
+		}
+	}
+	if hasDRDefender {
+		probe := ctx.drCostProbe(ctx.runechantCarryover)
+		for _, def := range defenders {
+			if !attackerMetaPtrFor(def).actsAsDR {
+				continue
+			}
+			drCost += def.Cost(probe)
+		}
+	}
+
 	for pmask := 0; pmask < phaseCount; pmask++ {
 		phase := splitPitchesAcrossPhases(pitchedVals, pmask, phaseCount)
 
@@ -172,8 +198,6 @@ func bestAttackWithWeapons(
 		ctx.attackPitchPerm = attackPitchPerm
 		ctx.attackPitchVals = attackPitchVals
 
-		weaponBitsMask := (1 << len(weapons)) - 1
-		totalAbilityMasks := 1 << len(ctx.activatedAbilities)
 		for wmask := 0; wmask < totalAbilityMasks; wmask++ {
 			abilityCost := 0
 			for j := range ctx.activatedAbilities {
@@ -193,19 +217,6 @@ func bestAttackWithWeapons(
 			dealt, futureValue, winner, legal := ctx.bestSequence(allAttackers)
 			if !legal {
 				continue
-			}
-			// Cost the DRs against the prior-turn runechant carryover. Build a one-shot
-			// probe engine seeded with the runechant aura so variable-cost DRs read
-			// RunechantCount() off this aura.
-			drCost := 0
-			if len(defenders) > 0 {
-				probe := ctx.drCostProbe(ctx.runechantCarryover)
-				for _, def := range defenders {
-					if !attackerMetaPtrFor(def).actsAsDR {
-						continue
-					}
-					drCost += def.Cost(probe)
-				}
 			}
 			if drCost > phase.defendBudget {
 				continue
