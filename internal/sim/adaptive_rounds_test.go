@@ -1,4 +1,4 @@
-package sim_test
+package sim
 
 // Adaptive-round count experiment. Runs adaptive eval on a range of decks (random Viserai
 // at multiple seeds + the saved annealed list) and reports how many parallel chunks each
@@ -10,7 +10,6 @@ import (
 	"math/rand"
 	"testing"
 
-	. "github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/hero"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/registry"
