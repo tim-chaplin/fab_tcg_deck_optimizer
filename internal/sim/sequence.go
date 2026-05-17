@@ -293,7 +293,7 @@ type sequenceContext struct {
 
 // promoteWinnerDeck swaps winner's pooled-deck pointer for a freshly-allocated copy so
 // ctx.pooledDeck stays free for the next permutation to reset. Without this hand-off,
-// the next preparePermState's ResetFromShared call would mutate the wrapper bestWinner
+// the next preparePermState's ShallowCopyFrom call would mutate the wrapper bestWinner
 // still holds. The clone reuses the same shared slice backings (cap=len), so the chain
 // runner's append-only mutations on either side still allocate fresh.
 func (ctx *sequenceContext) promoteWinnerDeck(winner *gameengine.GameState) {
@@ -410,7 +410,7 @@ func (ctx *sequenceContext) preparePermState(playedAttackers []*card.CardState, 
 	if ctx.pooledDeck == nil {
 		ctx.pooledDeck = ctx.deck.ShallowCopy()
 	} else {
-		ctx.pooledDeck.ResetFromShared(ctx.deck)
+		ctx.pooledDeck.ShallowCopyFrom(ctx.deck)
 	}
 	s.SetDeck(ctx.pooledDeck)
 	hand := make([]card.Card, len(ctx.handStart), len(ctx.handStart)+n+len(ctx.attackPitchPerm))

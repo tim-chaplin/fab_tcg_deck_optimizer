@@ -158,14 +158,14 @@ func (d *Deck) ShallowCopy() *Deck {
 	return out
 }
 
-// ResetFromShared resets d to mirror src using shared slice backings — equivalent to what
+// ShallowCopyFrom resets d to mirror src using shared slice backings — equivalent to what
 // ShallowCopy would have returned, but writing into the receiver instead of allocating a
 // fresh wrapper. The cards and Weapons slices are reproduced with cap=len (3-arg slice
 // form) so any future append on d allocates a fresh backing rather than writing past the
 // shared region. Same safety contract as ShallowCopy: only call when d will never be
 // Shuffle()d. Used by the per-permutation chain runner to recycle one *Deck wrapper
 // across all losing permutations; the winner clones the deck out before next perm runs.
-func (d *Deck) ResetFromShared(src *Deck) {
+func (d *Deck) ShallowCopyFrom(src *Deck) {
 	if src == nil {
 		d.Hero = nil
 		d.cards = nil
