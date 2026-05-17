@@ -1,4 +1,4 @@
-package gameengine
+package lint
 
 import (
 	"go/ast"
@@ -8,8 +8,6 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
-
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/lint"
 )
 
 // TestGameStateBuilder_MultiLineWhenMultiSetter enforces the codebase convention that a
@@ -24,7 +22,7 @@ import (
 // Single-setter chains (GameStateBuilder().SetHero(h).Build()) may stay inline. The test
 // walks every .go file in the repo so the rule holds across packages.
 func TestGameStateBuilder_MultiLineWhenMultiSetter(t *testing.T) {
-	root := lint.RepoRoot(t)
+	root := RepoRoot(t)
 	fset := token.NewFileSet()
 	err := filepath.WalkDir(root, func(path string, d os.DirEntry, err error) error {
 		if err != nil {
