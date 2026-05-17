@@ -342,6 +342,12 @@ func (ctx *sequenceContext) promoteWinnerState(winner *gameengine.GameState) {
 		copy(clone, winnerGrav)
 		winner.SetGraveyard(clone)
 	}
+	winnerCardsPlayed := winner.CardsPlayed()
+	if len(winnerCardsPlayed) > 0 {
+		clone := make([]card.Card, len(winnerCardsPlayed))
+		copy(clone, winnerCardsPlayed)
+		winner.SetCardsPlayed(clone)
+	}
 }
 
 // newPermLogger returns a fresh logger when ctx is recording, or nil for the find-best
@@ -483,6 +489,15 @@ func (ctx *sequenceContext) preparePermState(playedAttackers []*card.CardState, 
 		hand = append(hand, c)
 	}
 	bufs.pooledHandBuf = hand
+	// Seed cardsPlayed with the pooled backing. Headroom = n + len(attackPitchPerm)
+	// covers the chain runner's per-step appends; mid-chain free chain steps that don't
+	// consume hand cards (rare) grow this buffer normally.
+	cpNeeded := n + len(ctx.attackPitchPerm)
+	if cap(bufs.pooledCardsPlayedBuf) < cpNeeded {
+		bufs.pooledCardsPlayedBuf = make([]card.Card, 0, cpNeeded)
+	}
+	bufs.pooledCardsPlayedBuf = bufs.pooledCardsPlayedBuf[:0]
+	s.SetCardsPlayed(bufs.pooledCardsPlayedBuf)
 	s.SetPitched(ctx.pitched)
 	s.SetHand(hand)
 	s.SetLogger(ctx.newPermLogger())
