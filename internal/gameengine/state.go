@@ -104,6 +104,109 @@ func (gs *GameState) Copy() *GameState {
 	return &out
 }
 
+// ResetFromMaster rewrites *gs in place to match what src.Copy() would produce. Reuses
+// the receiver's slice and *deck.Deck backings when capacity permits so a pool slot can
+// stand in for repeated per-Best masterState.Copy() allocations. Auras and items are
+// deep-copied per entry via CopyInto on the pooled slot when present, so the pool
+// amortises both the *GameState alloc and the per-entry *Aura / *Item allocs.
+func (gs *GameState) ResetFromMaster(src *GameState) {
+	pooledHand := gs.hand
+	pooledGrav := gs.graveyard
+	pooledBanished := gs.banished
+	pooledPitched := gs.pitched
+	pooledDefenders := gs.defenders
+	pooledCardsPlayed := gs.cardsPlayed
+	pooledCardsRemaining := gs.cardsRemaining
+	pooledAuras := gs.auras
+	pooledTriggers := gs.triggers
+	pooledItems := gs.items
+	pooledDeck := gs.deck
+	*gs = *src
+	gs.logger = nil
+	gs.hand = resetCardSlice(pooledHand, src.hand)
+	gs.graveyard = resetCardSlice(pooledGrav, src.graveyard)
+	gs.banished = resetCardSlice(pooledBanished, src.banished)
+	gs.pitched = resetCardSlice(pooledPitched, src.pitched)
+	gs.defenders = resetCardSlice(pooledDefenders, src.defenders)
+	gs.cardsPlayed = resetCardSlice(pooledCardsPlayed, src.cardsPlayed)
+	if n := len(src.cardsRemaining); n > 0 {
+		if cap(pooledCardsRemaining) >= n {
+			gs.cardsRemaining = pooledCardsRemaining[:n]
+		} else {
+			gs.cardsRemaining = make([]*card.CardState, n)
+		}
+		copy(gs.cardsRemaining, src.cardsRemaining)
+	} else {
+		gs.cardsRemaining = nil
+	}
+	if n := len(src.triggers); n > 0 {
+		if cap(pooledTriggers) >= n {
+			gs.triggers = pooledTriggers[:n]
+		} else {
+			gs.triggers = make([]Trigger, n)
+		}
+		copy(gs.triggers, src.triggers)
+	} else {
+		gs.triggers = nil
+	}
+	if n := len(src.auras); n > 0 {
+		if cap(pooledAuras) >= n {
+			gs.auras = pooledAuras[:n]
+		} else {
+			gs.auras = make([]Aura, n)
+		}
+		priorLen := len(pooledAuras)
+		for i, a := range src.auras {
+			var prev any
+			if i < priorLen {
+				prev = pooledAuras[i]
+			}
+			gs.auras[i] = a.CopyInto(prev).(Aura)
+		}
+	} else {
+		gs.auras = nil
+	}
+	if n := len(src.items); n > 0 {
+		if cap(pooledItems) >= n {
+			gs.items = pooledItems[:n]
+		} else {
+			gs.items = make([]Item, n)
+		}
+		for i, it := range src.items {
+			gs.items[i] = it.Copy().(Item)
+		}
+	} else {
+		gs.items = nil
+	}
+	if src.deck != nil {
+		if pooledDeck != nil {
+			pooledDeck.CopyFrom(src.deck)
+			gs.deck = pooledDeck
+		} else {
+			gs.deck = src.deck.Copy()
+		}
+	} else {
+		gs.deck = nil
+	}
+}
+
+// resetCardSlice returns a fresh slice header that aliases pooled when capacity permits,
+// or a freshly allocated backing sized to src. Empty src returns nil to match the Copy()
+// path's nil-on-empty semantics.
+func resetCardSlice(pooled, src []card.Card) []card.Card {
+	if len(src) == 0 {
+		return nil
+	}
+	if cap(pooled) >= len(src) {
+		out := pooled[:len(src)]
+		copy(out, src)
+		return out
+	}
+	out := make([]card.Card, len(src))
+	copy(out, src)
+	return out
+}
+
 // CopyPersistentState is a lighter variant of Copy that copies only the cross-turn
 // persistent state — the inverse of ResetEphemeralState's reset set. Hand, pitched,
 // defenders, cardsPlayed, cardsRemaining, triggers, deck, and logger are left nil

@@ -96,6 +96,11 @@ type attackBufs struct {
 	// before the perm runs, so aliasing the leafState's slice to these buffers is safe.
 	runDefenseDRGravBuf    []card.Card
 	runDefenseChainGravBuf []card.Card
+	// pooledLeafState is the per-Best leafState recycled across every call. bestAttackWithWeapons
+	// resets it from masterState via ResetFromMaster so the per-call masterState.Copy()
+	// allocation goes away. Defense mutations write through to this pool slot; preparePermState
+	// then ResetForPermutationFrom this slot per perm.
+	pooledLeafState *gameengine.GameState
 }
 
 func newAttackBufs(handSize, weaponCount int, weapons []weapon.Weapon) *attackBufs {
