@@ -369,7 +369,11 @@ func (ge *GameEngine) FireAttackAction(triggeringCard card.Card) {
 // fireMatching is the shared aura-fire walk for FireAttack / FireAttackAction /
 // FireEndOfTurn. Iterates auras with a cursor so handler-side splicing (Destroy
 // mutates the auras slice in place, shifting the next entry down to the cursor's
-// index) advances only when the slice length didn't change.
+// index) advances only when the slice length didn't change. When a Fire body called
+// Destroy, the spliced *Aura is released to the aura pool only after Fire fully
+// returns — the post-fire activeEngine clear must complete before the *Aura can be
+// handed off, otherwise a concurrent goroutine that pulled the recycled pointer would
+// race the write.
 func (ge *GameEngine) fireMatching(triggeringCard card.Card, trigger triggertype.Type) {
 	for i := 0; i < len(ge.auras); {
 		a := ge.auras[i]
@@ -383,12 +387,21 @@ func (ge *GameEngine) fireMatching(triggeringCard card.Card, trigger triggertype
 		a.Fire(ge, ge.logger)
 		ge.currentAuraIdx = -1
 		ge.triggeringCard = nil
-		if !ge.currentAuraDestroyed {
-			ge.auras[i].SetFiredThisTurn(true)
-			i++
+		if ge.currentAuraDestroyed {
+			if r, ok := a.(auraReleaser); ok {
+				r.Release()
+			}
+			continue
 		}
+		ge.auras[i].SetFiredThisTurn(true)
+		i++
 	}
 }
+
+// auraReleaser is the optional opt-in interface concrete Aura impls implement when
+// their per-instance memory can be returned to a pool after destruction. The engine
+// queries for it via type assertion so the gameengine.Aura interface stays minimal.
+type auraReleaser interface{ Release() }
 
 // HasEndOfTurnFire reports whether either Auras or Triggers carries a
 // triggertype.EndOfTurn entry. Lets the chain runner skip the end-of-turn walk when
@@ -499,9 +512,13 @@ func (ge *GameEngine) FireStartOfTurn(onFire func(idx int, damage int, drawnCard
 		if onFire != nil {
 			onFire(i, damage, drawn, newEntries)
 		}
-		if !ge.currentAuraDestroyed {
-			i++
+		if ge.currentAuraDestroyed {
+			if r, ok := a.(auraReleaser); ok {
+				r.Release()
+			}
+			continue
 		}
+		i++
 	}
 }
 

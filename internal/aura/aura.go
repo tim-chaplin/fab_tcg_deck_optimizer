@@ -8,6 +8,8 @@
 package aura
 
 import (
+	"sync"
+
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/ids"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/triggertype"
@@ -52,15 +54,34 @@ func NewFromCard(source card.Card, tt triggertype.Type, fire Handler, count int,
 }
 
 // NewFromToken builds a token aura — no originating card. CardName returns the supplied
-// name; CardID returns tokenID so cache keys distinguish each token kind.
+// name; CardID returns tokenID so cache keys distinguish each token kind. Pulls from
+// auraPool to recycle *Aura allocations across mid-chain create/destroy cycles.
 func NewFromToken(name string, tokenID ids.CardID, tt triggertype.Type, fire Handler, count int) *Aura {
-	return &Aura{
+	a := auraPool.Get().(*Aura)
+	*a = Aura{
 		triggerType: tt,
 		fire:        fire,
 		tokenName:   name,
 		tokenID:     tokenID,
 		count:       count,
 	}
+	return a
+}
+
+// auraPool recycles *Aura values destroyed mid-chain via the deferred-release path the
+// engine drives (Release called only after Fire returns, so the post-fire activeEngine
+// clear can't race a concurrent goroutine pulling the recycled pointer via Get).
+var auraPool = sync.Pool{New: func() any { return &Aura{} }}
+
+// Release returns a to the recycling pool. Only safe to call after Fire has fully
+// returned; the engine's fireMatching loop enforces this by deferring Release until
+// after Fire's activeEngine = nil completes. Card-backed auras (source != nil) skip
+// the pool because they may live across turns and be referenced by snapshots.
+func (a *Aura) Release() {
+	if a == nil || a.source != nil {
+		return
+	}
+	auraPool.Put(a)
 }
 
 func (a *Aura) TriggerType() triggertype.Type { return a.triggerType }
