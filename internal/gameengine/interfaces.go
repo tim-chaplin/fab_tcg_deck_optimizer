@@ -17,7 +17,10 @@ import (
 // card.GameEngine / card.Logger arguments — the concrete *aura.Aura imports internal/card
 // directly so the handler signature is end-to-end typed (no wrap closure). SourceCard
 // stays `any` so token auras can return nil cleanly; consumers assert to card.Card.
-// Copy uses any so State.Copy can box without referencing the concrete type.
+// Copy uses any so State.Copy can box without referencing the concrete type. CopyInto
+// is the per-perm reset fast path: when ResetForPermutationFrom has a pooled slot from
+// the prior perm it hands the existing concrete value back as `any` so the implementation
+// can rewrite that value's fields in place and return it boxed without allocating.
 type Aura interface {
 	TriggerType() triggertype.Type
 	OncePerTurn() bool
@@ -31,6 +34,7 @@ type Aura interface {
 	DecrementCount() int
 	Fire(engine card.GameEngine, logger card.Logger)
 	Copy() any
+	CopyInto(dst any) any
 }
 
 // Trigger is the engine's view of a one-shot deferred handler. Like Aura, Fire takes

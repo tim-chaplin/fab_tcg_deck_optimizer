@@ -118,6 +118,19 @@ func (a *Aura) Copy() any {
 	return &out
 }
 
+// CopyInto rewrites *dst with a's fields and returns dst as any. When dst is a *Aura
+// from a prior permutation's slot the per-perm reset reuses the existing allocation
+// instead of paying for a fresh one. dst types other than *Aura fall back to Copy.
+func (a *Aura) CopyInto(dst any) any {
+	d, ok := dst.(*Aura)
+	if !ok {
+		return a.Copy()
+	}
+	*d = *a
+	d.activeEngine = nil
+	return d
+}
+
 // Compile-time check that *Aura satisfies card.Aura.
 var _ card.Aura = (*Aura)(nil)
 
