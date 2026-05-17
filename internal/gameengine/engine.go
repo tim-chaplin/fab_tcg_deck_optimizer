@@ -554,10 +554,11 @@ func (ge *GameEngine) DestroyAura(addToGraveyard bool) {
 // step themselves.
 func (ge *GameEngine) ResolveChainStep(l card.Logger, self *card.CardState) {
 	self.Card.Play(ge, l, self)
-	if self.Card.Types(nil).Has(card.TypeAura) {
+	types := self.Card.Types(nil)
+	if types.Has(card.TypeAura) {
 		ge.auraCreated = true
 	}
-	n := ge.chainStepDelta(self)
+	n := ge.chainStepDelta(self, types)
 	l.AppendChainStep(ChainStepText(self), n)
 }
 
@@ -568,9 +569,10 @@ func (ge *GameEngine) PlayCard(l card.Logger, self *card.CardState) {
 }
 
 // chainStepDelta computes the chain step's display delta and applies the standard
-// damage / block side effects. Returns the (+N) value for the log line.
-func (ge *GameEngine) chainStepDelta(self *card.CardState) int {
-	types := self.Card.Types(nil)
+// damage / block side effects. Returns the (+N) value for the log line. types is
+// the caller's already-resolved Types(nil) — passed in to skip a redundant interface
+// dispatch when ResolveChainStep has already paid for one.
+func (ge *GameEngine) chainStepDelta(self *card.CardState, types card.TypeSet) int {
 	switch {
 	case types.IsAttackAction() || types.IsWeaponAttack():
 		n := self.EffectiveAttack()
