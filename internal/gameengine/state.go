@@ -269,6 +269,7 @@ func (gs *GameState) SetDefenders(d []card.Card) { gs.defenders = d }
 
 func (gs *GameState) CardsPlayed() []card.Card               { return gs.cardsPlayed }
 func (gs *GameState) SetCardsPlayed(cs []card.Card)          { gs.cardsPlayed = cs }
+func (gs *GameState) AppendCardsPlayed(c card.Card)          { gs.cardsPlayed = append(gs.cardsPlayed, c) }
 func (gs *GameState) CardsRemaining() []*card.CardState      { return gs.cardsRemaining }
 func (gs *GameState) SetCardsRemaining(cs []*card.CardState) { gs.cardsRemaining = cs }
 

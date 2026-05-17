@@ -614,7 +614,7 @@ func (ctx *sequenceContext) playSequenceWithMeta(n int) (damage int, futureValue
 			state.SetAttackReactionTarget(activeAttack)
 			ge.ResolveChainStep(state.Logger(), pc)
 			state.SetAttackReactionTarget(nil)
-			state.SetCardsPlayed(append(state.CardsPlayed(), pc.Card))
+			state.AppendCardsPlayed(pc.Card)
 			state.AppendGraveyard(pc.Card)
 			if pc.EffectiveGoAgain(ge) {
 				state.AddActionPoints(1)
@@ -644,7 +644,7 @@ func (ctx *sequenceContext) playSequenceWithMeta(n int) (damage int, futureValue
 		if m.isAttack {
 			activeAttack = pc
 		}
-		state.SetCardsPlayed(append(state.CardsPlayed(), pc.Card))
+		state.AppendCardsPlayed(pc.Card)
 		if m.types.IsNonAttackAction() {
 			state.SetNonAttackActionPlayed(true)
 		}
