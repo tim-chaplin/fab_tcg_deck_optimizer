@@ -2,9 +2,8 @@
 // on the next matching event (typically triggertype.Hit or triggertype.EndOfTurn) and is
 // then removed from the engine's trigger queue.
 //
-// Handler is the trigger-domain function shape; the package's own ctx struct implements
-// card.Trigger so handler bodies receive the typed surface directly without an outer
-// wrapping layer.
+// *Trigger itself satisfies card.Trigger, so Fire passes the trigger directly to the
+// handler with zero allocation.
 package trigger
 
 import (
@@ -61,18 +60,12 @@ func (t *Trigger) Matches(types card.TypeSet) bool {
 	return t.typeFilter(types)
 }
 
-// Fire invokes the stored handler. The handler signature is typed against internal/card so the
-// engine and logger arguments pass straight through without a per-fire assertion.
+// Fire invokes the stored handler. *Trigger itself satisfies card.Trigger via its
+// CardName method, so the handler receives the typed surface directly with no per-fire
+// wrapper allocation.
 func (t *Trigger) Fire(engine card.GameEngine, logger card.Logger) {
-	t.fire(engine, logger, &ctx{t: t})
+	t.fire(engine, logger, t)
 }
 
-// ctx is the per-fire value Fire passes to the handler. Implements card.Trigger.
-type ctx struct {
-	t *Trigger
-}
-
-// Compile-time check that ctx satisfies card.Trigger.
-var _ card.Trigger = (*ctx)(nil)
-
-func (c *ctx) CardName() string { return c.t.CardName() }
+// Compile-time check that *Trigger satisfies card.Trigger.
+var _ card.Trigger = (*Trigger)(nil)
