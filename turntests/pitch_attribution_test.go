@@ -14,9 +14,9 @@ import (
 func TestPitchAttribution_AetherSlashSingleNonAttackPitchFiresRider(t *testing.T) {
 	hand := []deck.Card{cards.AetherSlashRed{}, cards.MaleficIncantationBlue{}}
 	d := deck.New(heroes.Viserai{}, nil, fillerDeck())
-	state := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, nil, hand)
-	if state.Value != 5 {
-		t.Fatalf("Value = %d, want 5 (Aether Slash 4 + rider 1)", state.Value)
+	_, extras := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, nil, hand)
+	if extras.Value != 5 {
+		t.Fatalf("Value = %d, want 5 (Aether Slash 4 + rider 1)", extras.Value)
 	}
 }
 
@@ -24,9 +24,9 @@ func TestPitchAttribution_AetherSlashSingleNonAttackPitchFiresRider(t *testing.T
 func TestPitchAttribution_AetherSlashAttackPitchDoesNotFireRider(t *testing.T) {
 	hand := []deck.Card{cards.AetherSlashRed{}, testutils.YellowAttack{}}
 	d := deck.New(heroes.Viserai{}, nil, fillerDeck())
-	state := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, nil, hand)
-	if state.Value != 4 {
-		t.Fatalf("Value = %d, want 4 (Aether Slash base power, no rider)", state.Value)
+	_, extras := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, nil, hand)
+	if extras.Value != 4 {
+		t.Fatalf("Value = %d, want 4 (Aether Slash base power, no rider)", extras.Value)
 	}
 }
 
@@ -38,7 +38,8 @@ func TestPitchAttribution_DeathlyDuetBothRidersFireFromMixedFunding(t *testing.T
 		cards.AetherSlashRed{},
 		cards.MaleficIncantationBlue{},
 	}
-	if got := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, nil, hand).Value; got != 8 {
+	_, extras := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, nil, hand)
+	if got := extras.Value; got != 8 {
 		t.Fatalf("Value = %d, want 8 (Deathly Duet 4 + attack rider 2 + 2 runechants)", got)
 	}
 }
@@ -52,7 +53,8 @@ func TestPitchAttribution_OneNonAttackPitchFundsMultipleAetherSlashes(t *testing
 		cards.AetherSlashRed{}, cards.AetherSlashRed{},
 		cards.MaleficIncantationBlue{},
 	}
-	if got := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, nil, withNonAttack).Value; got != 15 {
+	_, extras := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, nil, withNonAttack)
+	if got := extras.Value; got != 15 {
 		t.Errorf("non-attack pitch: Value = %d, want 15", got)
 	}
 
@@ -61,7 +63,8 @@ func TestPitchAttribution_OneNonAttackPitchFundsMultipleAetherSlashes(t *testing
 		cards.AetherSlashRed{}, cards.AetherSlashRed{},
 		testutils.BlueAttack{},
 	}
-	if got := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, nil, withAttack).Value; got != 13 {
+	_, extras = sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, nil, withAttack)
+	if got := extras.Value; got != 13 {
 		t.Errorf("attack pitch: Value = %d, want 13", got)
 	}
 }

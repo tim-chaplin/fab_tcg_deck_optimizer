@@ -32,10 +32,10 @@ func (zeroDefenseAura) Play(card.GameEngine, card.Logger, *card.CardState) {}
 func TestBest_WeepingBattlegroundBanishesAuraFromGraveyard(t *testing.T) {
 	h := []deck.Card{cards.WeepingBattlegroundRed{}, zeroDefenseAura{}}
 	d := deck.New(testutils.Hero{Intel: 4}, nil, nil)
-	got := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 4}, nil, h)
-	if got.Value != 4 {
+	_, extras := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 4}, nil, h)
+	if extras.Value != 4 {
 		t.Errorf("Value = %d, want 4 (3 block + 1 arcane from banish). Roles=[%s]",
-			got.Value, sim.FormatBestLine(got.BestLine))
+			extras.Value, sim.FormatBestLine(extras.BestLine))
 	}
 }
 
@@ -44,9 +44,9 @@ func TestBest_WeepingBattlegroundBanishesAuraFromGraveyard(t *testing.T) {
 func TestBest_WeepingBattlegroundFizzlesWithoutAura(t *testing.T) {
 	h := []deck.Card{cards.WeepingBattlegroundRed{}}
 	d := deck.New(testutils.Hero{Intel: 4}, nil, nil)
-	got := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 4}, nil, h)
-	if got.Value != 3 {
+	_, extras := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 4}, nil, h)
+	if extras.Value != 3 {
 		t.Errorf("Value = %d, want 3 (3 block only; banish fizzles). Roles=[%s]",
-			got.Value, sim.FormatBestLine(got.BestLine))
+			extras.Value, sim.FormatBestLine(extras.BestLine))
 	}
 }

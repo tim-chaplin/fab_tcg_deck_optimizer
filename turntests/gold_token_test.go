@@ -22,21 +22,21 @@ func TestGoldToken_SpendsToFillArsenalAndSwings(t *testing.T) {
 	d := deck.New(heroes.Viserai{}, []deck.Weapon{weapons.ReapingBlade{}}, cards)
 	hand := []deck.Card{testutils.BluePitch{}}
 	priorItems := []*item.Item{token.NewGold(1)}
-	got := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, stateWithItems(priorItems...), hand)
-	if got.Value != 3 {
-		t.Fatalf("Value = %d, want 3 (Reaping Blade swing power 3)", got.Value)
+	gs, extras := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, stateWithItems(priorItems...), hand)
+	if extras.Value != 3 {
+		t.Fatalf("Value = %d, want 3 (Reaping Blade swing power 3)", extras.Value)
 	}
-	if got.GoldCount() != 0 {
-		t.Fatalf("Gold after turn = %d, want 0 (the only token spent)", got.GoldCount())
+	if gs.GoldCount() != 0 {
+		t.Fatalf("Gold after turn = %d, want 0 (the only token spent)", gs.GoldCount())
 	}
-	if got.CardsDrawn != 1 {
-		t.Fatalf("CardsDrawn = %d, want 1 (Gold ability draws one card)", got.CardsDrawn)
+	if gs.CardsDrawn() != 1 {
+		t.Fatalf("CardsDrawn = %d, want 1 (Gold ability draws one card)", gs.CardsDrawn())
 	}
-	if got.StartOfNextTurnArsenal == nil {
-		t.Fatalf("StartOfNextTurnArsenal = nil, want the drawn card promoted into the slot")
+	if gs.Arsenal() == nil {
+		t.Fatalf("Arsenal() = nil, want the drawn card promoted into the slot")
 	}
-	if len(got.StartOfNextTurnHand) != d.Hero.(hero.Hero).Intelligence() {
-		t.Fatalf("StartOfNextTurnHand size = %d, want %d (Gold-spend draw should leave enough deck for next turn's full deal)",
-			len(got.StartOfNextTurnHand), d.Hero.(hero.Hero).Intelligence())
+	if len(gs.Hand()) != d.Hero.(hero.Hero).Intelligence() {
+		t.Fatalf("Hand() size = %d, want %d (Gold-spend draw should leave enough deck for next turn's full deal)",
+			len(gs.Hand()), d.Hero.(hero.Hero).Intelligence())
 	}
 }
