@@ -9,7 +9,6 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapons"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
-	"github.com/tim-chaplin/fab-deck-optimizer/v2/deckstats"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/hero"
 )
 
@@ -48,7 +47,7 @@ func TestOnHitGoAgain_TwoConsecutiveARsExtendToWeaponSwing(t *testing.T) {
 }
 
 // formatBestLine renders the chosen role assignment in chain order for failure messages.
-func formatBestLine(line []deckstats.CardAssignment) string {
+func formatBestLine(line []deck.CardAssignment) string {
 	var parts []string
 	for _, a := range line {
 		parts = append(parts, a.Card.DisplayName()+":"+roleName(a.Role))
@@ -56,17 +55,17 @@ func formatBestLine(line []deckstats.CardAssignment) string {
 	return strings.Join(parts, ", ")
 }
 
-func roleName(r deckstats.Role) string {
+func roleName(r deck.Role) string {
 	switch r {
-	case deckstats.Pitch:
+	case deck.Pitch:
 		return "Pitch"
-	case deckstats.Attack:
+	case deck.Attack:
 		return "Attack"
-	case deckstats.Defend:
+	case deck.Defend:
 		return "Defend"
-	case deckstats.Held:
+	case deck.Held:
 		return "Held"
-	case deckstats.Arsenal:
+	case deck.Arsenal:
 		return "Arsenal"
 	}
 	return "Unknown"

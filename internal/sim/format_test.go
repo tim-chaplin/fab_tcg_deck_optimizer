@@ -10,7 +10,7 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapons"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/aura"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
-	"github.com/tim-chaplin/fab-deck-optimizer/v2/deckstats"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/gameengine"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/hero"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/item"
@@ -23,15 +23,15 @@ import (
 // stable.
 func TestRole_String(t *testing.T) {
 	cases := []struct {
-		r    deckstats.Role
+		r    deck.Role
 		want string
 	}{
-		{deckstats.Pitch, "PITCH"},
-		{deckstats.Attack, "ATTACK"},
-		{deckstats.Defend, "DEFEND"},
-		{deckstats.Held, "HELD"},
-		{deckstats.Arsenal, "ARSENAL"},
-		{deckstats.Role(99), "UNKNOWN"},
+		{deck.Pitch, "PITCH"},
+		{deck.Attack, "ATTACK"},
+		{deck.Defend, "DEFEND"},
+		{deck.Held, "HELD"},
+		{deck.Arsenal, "ARSENAL"},
+		{deck.Role(99), "UNKNOWN"},
 	}
 	for _, c := range cases {
 		if got := c.r.String(); got != c.want {
@@ -43,10 +43,10 @@ func TestRole_String(t *testing.T) {
 // TestFormatBestLine_Compact is the one-line compact formatter used in test error messages —
 // just a comma-separated "card: ROLE" list with a " (from arsenal)" tag on arsenal-in entries.
 func TestFormatBestLine_Compact(t *testing.T) {
-	line := []deckstats.CardAssignment{
-		{Card: testutils.RedAttack{}, Role: deckstats.Pitch},
-		{Card: testutils.RedAttack{}, Role: deckstats.Attack},
-		{Card: cards.ToughenUpBlue{}, Role: deckstats.Defend, FromArsenal: true},
+	line := []deck.CardAssignment{
+		{Card: testutils.RedAttack{}, Role: deck.Pitch},
+		{Card: testutils.RedAttack{}, Role: deck.Attack},
+		{Card: cards.ToughenUpBlue{}, Role: deck.Defend, FromArsenal: true},
 	}
 	got := FormatBestLine(line)
 	want := "cardtest.RedAttack [R]: PITCH, cardtest.RedAttack [R]: ATTACK, Toughen Up [B] (from arsenal): DEFEND"
@@ -337,7 +337,7 @@ func TestFormatBestTurn_EmptyBestLine(t *testing.T) {
 // not in the unnumbered Start of turn block.
 func TestFormatBestTurn_TriggersFromLastTurnLine(t *testing.T) {
 	summary := TurnSummary{
-		TriggersFromLastTurn: []deckstats.TriggerContribution{
+		TriggersFromLastTurn: []deck.TriggerContribution{
 			{Card: testutils.RedAttack{}, Damage: 3},
 		},
 	}
@@ -359,14 +359,14 @@ func TestFormatBestTurn_TriggersFromLastTurnLine(t *testing.T) {
 func TestFormatBestTurn_StartOfTurnHandReadsDealtHand(t *testing.T) {
 	summary := TurnSummary{
 		DealtHand: []card.Card{testutils.RedAttack{}},
-		BestLine: []deckstats.CardAssignment{
-			{Card: testutils.RedAttack{}, Role: deckstats.Attack},
+		BestLine: []deck.CardAssignment{
+			{Card: testutils.RedAttack{}, Role: deck.Attack},
 			// Mauvrion is in BestLine because the reveal augmented the hand the partition
 			// saw, but it never appeared in DealtHand — so it must not show up in the
 			// start-of-turn hand line.
-			{Card: cards.MauvrionSkiesRed{}, Role: deckstats.Held},
+			{Card: cards.MauvrionSkiesRed{}, Role: deck.Held},
 		},
-		TriggersFromLastTurn: []deckstats.TriggerContribution{
+		TriggersFromLastTurn: []deck.TriggerContribution{
 			{Card: cards.SigilOfTheArknightBlue{}, Revealed: cards.MauvrionSkiesRed{}},
 		},
 	}
@@ -385,7 +385,7 @@ func TestFormatBestTurn_StartOfTurnHandReadsDealtHand(t *testing.T) {
 // Tests that a trigger's Revealed card surfaces in the My turn section's first numbered entry.
 func TestFormatBestTurn_TriggersFromLastTurnRevealedLine(t *testing.T) {
 	summary := TurnSummary{
-		TriggersFromLastTurn: []deckstats.TriggerContribution{
+		TriggersFromLastTurn: []deck.TriggerContribution{
 			{Card: cards.SigilOfTheArknightBlue{}, Revealed: cards.MauvrionSkiesRed{}},
 		},
 	}
@@ -396,11 +396,11 @@ func TestFormatBestTurn_TriggersFromLastTurnRevealedLine(t *testing.T) {
 	}
 }
 
-// Tests that a deckstats.TriggerContribution.Text override renders verbatim, skipping the synthesised
+// Tests that a deck.TriggerContribution.Text override renders verbatim, skipping the synthesised
 // "drew X into hand" suffix.
 func TestFormatBestTurn_TriggersFromLastTurnHandlerAuthoredText(t *testing.T) {
 	summary := TurnSummary{
-		TriggersFromLastTurn: []deckstats.TriggerContribution{
+		TriggersFromLastTurn: []deck.TriggerContribution{
 			{
 				Card:     cards.SigilOfTheArknightBlue{},
 				Revealed: cards.MauvrionSkiesRed{},
@@ -422,7 +422,7 @@ func TestFormatBestTurn_TriggersFromLastTurnHandlerAuthoredText(t *testing.T) {
 // Tests that zero-effect carryover triggers (no damage, no reveal) render no line at all.
 func TestFormatBestTurn_TriggersFromLastTurnZeroEffectDropped(t *testing.T) {
 	summary := TurnSummary{
-		TriggersFromLastTurn: []deckstats.TriggerContribution{
+		TriggersFromLastTurn: []deck.TriggerContribution{
 			{Card: cards.SigilOfTheArknightBlue{}},
 		},
 	}
@@ -507,8 +507,8 @@ func TestAppendGroupedChainEntries_OrphanTriggerSurfacesAtTopLevel(t *testing.T)
 // Tests that plain BLOCK lines render the defender's effective Defense as a "(+N)" suffix.
 func TestFormatBestTurn_BlockLineCarriesDefenseValue(t *testing.T) {
 	summary := TurnSummary{
-		BestLine: []deckstats.CardAssignment{
-			{Card: testutils.RedAttack{}, Role: deckstats.Defend},
+		BestLine: []deck.CardAssignment{
+			{Card: testutils.RedAttack{}, Role: deck.Defend},
 		},
 	}
 	out := FormatBestTurn(summary, nil, nil)
@@ -540,7 +540,7 @@ func TestFormatBestTurn_StartOfTurnAurasLine(t *testing.T) {
 // entry when no auras were in play and no starting runechants carry in — the empty state
 // shouldn't render a dangling "Auras:" label.
 func TestFormatBestTurn_StartOfTurnAurasSuppressedWhenEmpty(t *testing.T) {
-	summary := TurnSummary{BestLine: []deckstats.CardAssignment{{Card: testutils.RedAttack{}, Role: deckstats.Attack}}}
+	summary := TurnSummary{BestLine: []deck.CardAssignment{{Card: testutils.RedAttack{}, Role: deck.Attack}}}
 	out := FormatBestTurn(summary, nil, nil)
 	if strings.Contains(out, "Auras: ") {
 		t.Errorf("unexpected Auras line in output:\n%s", out)
@@ -638,8 +638,8 @@ func TestFormatBestTurn_EndOfTurnAurasWithRunechants(t *testing.T) {
 // (new) branch coverage; the round-trip integration tests only exercise (new).
 func TestFormatBestTurn_EndOfTurnArsenalStayedDirect(t *testing.T) {
 	summary := TurnSummary{
-		BestLine: []deckstats.CardAssignment{
-			{Card: cards.ToughenUpBlue{}, Role: deckstats.Arsenal, FromArsenal: true},
+		BestLine: []deck.CardAssignment{
+			{Card: cards.ToughenUpBlue{}, Role: deck.Arsenal, FromArsenal: true},
 		},
 	}
 	out := FormatBestTurn(summary, nil, nil)

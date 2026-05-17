@@ -34,17 +34,16 @@ import (
 	"github.com/klauspost/cpuid/v2"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
-	"github.com/tim-chaplin/fab-deck-optimizer/v2/deckstats"
 )
 
 // mutationImprovement is the per-acceptance message a worker sends to the coordinator: the
 // mutation index that won, its evaluated average, the deck-after-mutation that produced
-// it, and the full deckstats.DeckStats from that mutation's evaluation.
+// it, and the full deck.Stats from that mutation's evaluation.
 type mutationImprovement struct {
 	idx       int
 	avg       float64
 	candidate *deck.Deck
-	stats     deckstats.DeckStats
+	stats     deck.Stats
 }
 
 // deckEvalConfig bundles every read-only parameter a worker shares with its peers so the
@@ -125,7 +124,7 @@ func RunMutationRound(
 	completed *atomic.Int64,
 	adaptive bool,
 	precision float64,
-) (*deck.Deck, deckstats.DeckStats, float64, int, bool) {
+) (*deck.Deck, deck.Stats, float64, int, bool) {
 	if mutationWorkers <= 0 {
 		// 1 mutation worker is the empirical default — see the BenchmarkAnnealWorkerSweep
 		// table on the RunMutationRound docstring for the rationale.
@@ -135,7 +134,7 @@ func RunMutationRound(
 		shuffleWorkers = defaultWorkers()
 	}
 	if len(mutations) == 0 {
-		return nil, deckstats.DeckStats{}, bestAvg, -1, false
+		return nil, deck.Stats{}, bestAvg, -1, false
 	}
 
 	innerCtx, cancel := context.WithCancel(ctx)
@@ -194,7 +193,7 @@ func RunMutationRound(
 			return imp.candidate, imp.stats, imp.avg, imp.idx, true
 		default:
 		}
-		return nil, deckstats.DeckStats{}, bestAvg, -1, false
+		return nil, deck.Stats{}, bestAvg, -1, false
 	}
 }
 
@@ -223,7 +222,7 @@ func runDeckEvalWorker(
 		}
 		mut := cfg.mutations[i]
 		d := mut.Deck.Copy()
-		var stats deckstats.DeckStats
+		var stats deck.Stats
 		if cfg.adaptive {
 			stats = ev.EvaluateAdaptive(d, cfg.precision, cfg.matchup, rng)
 		} else {

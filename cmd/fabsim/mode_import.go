@@ -14,7 +14,6 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/fabrary"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/mydecks"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
-	"github.com/tim-chaplin/fab-deck-optimizer/v2/deckstats"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/hero"
 )
 
@@ -45,7 +44,7 @@ func runImport() {
 	if err != nil {
 		die("parse fabrary text: %v", err)
 	}
-	out, err := deckio.Marshal(d, deckstats.DeckStats{})
+	out, err := deckio.Marshal(d, deck.Stats{})
 	if err != nil {
 		die("encode deck JSON: %v", err)
 	}

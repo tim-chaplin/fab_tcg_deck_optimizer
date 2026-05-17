@@ -8,7 +8,6 @@ import (
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
-	"github.com/tim-chaplin/fab-deck-optimizer/v2/deckstats"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/hero"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/registry"
 )
@@ -96,11 +95,11 @@ func TestRoundTrip_PreservesPerCardMarginal(t *testing.T) {
 	}
 }
 
-// Tests that deckstats.BestTurn.Log round-trips through Marshal/Unmarshal verbatim.
+// Tests that deck.BestTurn.Log round-trips through Marshal/Unmarshal verbatim.
 func TestRoundTrip_PreservesBestTurnLog(t *testing.T) {
 	rng := rand.New(rand.NewSource(7))
 	d := deck.Random(hero.Viserai{}, 40, 2, rng, nil, registry.Registry{})
-	want := deckstats.TurnLog{
+	want := deck.TurnLog{
 		StartOfTurn: []string{
 			"Hand: Hocus Pocus [B], Consuming Volition [R]",
 			"Arsenal: Sigil of the Arknight [B]",
@@ -117,8 +116,8 @@ func TestRoundTrip_PreservesBestTurnLog(t *testing.T) {
 			"Auras: 1 Runechant",
 		},
 	}
-	stats := deckstats.DeckStats{
-		Best: deckstats.BestTurn{
+	stats := deck.Stats{
+		Best: deck.BestTurn{
 			Value: 21,
 			Log:   want,
 		},
@@ -148,7 +147,7 @@ func TestRoundTrip_PreservesSideboard(t *testing.T) {
 	d := deck.Random(hero.Viserai{}, 40, 2, rng, nil, registry.Registry{})
 	d.Sideboard = []string{"Aether Slash [R]", "Aether Slash [R]", "Arcanic Spike [B]"}
 
-	data, err := Marshal(d, deckstats.DeckStats{})
+	data, err := Marshal(d, deck.Stats{})
 	if err != nil {
 		t.Fatalf("Marshal: %v", err)
 	}
@@ -173,7 +172,7 @@ func TestRoundTrip_PreservesSideboard(t *testing.T) {
 func TestMarshal_OmitsEmptySideboard(t *testing.T) {
 	rng := rand.New(rand.NewSource(1))
 	d := deck.Random(hero.Viserai{}, 40, 2, rng, nil, registry.Registry{})
-	data, err := Marshal(d, deckstats.DeckStats{})
+	data, err := Marshal(d, deck.Stats{})
 	if err != nil {
 		t.Fatalf("Marshal: %v", err)
 	}
@@ -211,7 +210,7 @@ func TestRoundTrip_PreservesEquipment(t *testing.T) {
 	d := deck.Random(hero.Viserai{}, 40, 2, rng, nil, registry.Registry{})
 	d.Equipment = []string{"Beckoning Haunt", "Nullrune Boots", "Blade Beckoner Helm"}
 
-	data, err := Marshal(d, deckstats.DeckStats{})
+	data, err := Marshal(d, deck.Stats{})
 	if err != nil {
 		t.Fatalf("Marshal: %v", err)
 	}
@@ -231,7 +230,7 @@ func TestRoundTrip_PreservesEquipment(t *testing.T) {
 func TestMarshal_OmitsEmptyEquipment(t *testing.T) {
 	rng := rand.New(rand.NewSource(1))
 	d := deck.Random(hero.Viserai{}, 40, 2, rng, nil, registry.Registry{})
-	data, err := Marshal(d, deckstats.DeckStats{})
+	data, err := Marshal(d, deck.Stats{})
 	if err != nil {
 		t.Fatalf("Marshal: %v", err)
 	}
