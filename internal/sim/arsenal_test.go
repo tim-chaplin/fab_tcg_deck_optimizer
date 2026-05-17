@@ -3,14 +3,14 @@ package sim
 import (
 	"testing"
 
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
-	notimpl "github.com/tim-chaplin/fab-deck-optimizer/internal/cards/notimplemented"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card/cards"
+	notimpl "github.com/tim-chaplin/fab-deck-optimizer/v2/card/cards/notimplemented"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/gameengine"
-	"github.com/tim-chaplin/fab-deck-optimizer/v2/hero"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/hero/heroes"
 )
 
 // Tests post-hoc Arsenal promotion of a Held card when the slot is empty.
@@ -132,7 +132,7 @@ func TestBest_ArsenalInSmashingGoodTimeGatesOnlyArsenalCopy(t *testing.T) {
 		cards.HocusPocusRed{},
 	}
 	state := gameengine.GameStateBuilder().
-		SetHero(hero.Viserai{}).
+		SetHero(heroes.Viserai{}).
 		SetArsenal(notimpl.SmashingGoodTimeRed{}).
 		Build()
 	got := Best(nil, h, Matchup{IncomingDamage: 0}, nil, state)

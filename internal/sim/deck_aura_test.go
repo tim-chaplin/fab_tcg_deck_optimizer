@@ -6,14 +6,14 @@ import (
 	"testing"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/hero/heroes"
 
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/aura"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card/cards"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/gameengine"
-	"github.com/tim-chaplin/fab-deck-optimizer/v2/hero"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/token"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/triggertype"
 )
@@ -243,7 +243,7 @@ func TestEvaluate_TriggersFromLastTurnSurfacesInBest(t *testing.T) {
 	for i := 0; i < 6; i++ {
 		deckCards = append(deckCards, testutils.BlueAttack{})
 	}
-	d := deck.New(hero.Viserai{}, nil, deckCards)
+	d := deck.New(heroes.Viserai{}, nil, deckCards)
 	rng := rand.New(rand.NewSource(42))
 	stats := NewEvaluator().Evaluate(d, 20, Matchup{}, rng)
 

@@ -3,16 +3,16 @@ package turntests
 import (
 	"testing"
 
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card/cards"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
-	"github.com/tim-chaplin/fab-deck-optimizer/v2/hero"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/hero/heroes"
 )
 
 // Tests that Wage Gold's on-hit rider creates a Gold token when the attack hits.
 func TestWageGold_OnHitCreatesGoldToken(t *testing.T) {
-	d := deck.New(hero.Viserai{}, nil, fillerDeck())
+	d := deck.New(heroes.Viserai{}, nil, fillerDeck())
 	hand := []deck.Card{
 		cards.WageGoldRed{},
 		testutils.BluePitch{},
@@ -31,7 +31,7 @@ func TestWageGold_OnHitCreatesGoldToken(t *testing.T) {
 
 // Tests that Wage Gold's on-hit rider skips Gold when the attack misses LikelyToHit.
 func TestWageGold_BlockableMissDoesNotCreateGold(t *testing.T) {
-	d := deck.New(hero.Viserai{}, nil, fillerDeck())
+	d := deck.New(heroes.Viserai{}, nil, fillerDeck())
 	hand := []deck.Card{
 		cards.WageGoldBlue{},
 		testutils.BluePitch{},

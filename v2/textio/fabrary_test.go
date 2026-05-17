@@ -8,6 +8,7 @@ import (
 
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/hero"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/hero/heroes"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/registry"
 )
 
@@ -15,7 +16,7 @@ import (
 // that weapons, cards, and hero all come back intact (stats are intentionally not round-tripped).
 func TestFabrary_MarshalUnmarshalRoundTrip(t *testing.T) {
 	rng := rand.New(rand.NewSource(1))
-	d := deck.Random(hero.Viserai{}, 40, 2, rng, registry.Registry{})
+	d := deck.Random(heroes.Viserai{}, 40, 2, rng, registry.Registry{})
 
 	text := MarshalFabrary(d)
 	got, skipped, err := UnmarshalFabrary(text)
@@ -45,7 +46,7 @@ func TestFabrary_MarshalUnmarshalRoundTrip(t *testing.T) {
 // update consciously.
 func TestMarshalFormat(t *testing.T) {
 	rng := rand.New(rand.NewSource(1))
-	d := deck.Random(hero.Viserai{}, 40, 2, rng, registry.Registry{})
+	d := deck.Random(heroes.Viserai{}, 40, 2, rng, registry.Registry{})
 	text := MarshalFabrary(d)
 
 	wantPrefix := "Name: Viserai\nHero: Viserai\nFormat: Silver Age\n\nArena cards\n"
@@ -67,7 +68,7 @@ func TestMarshalFormat(t *testing.T) {
 // surface whatever defaults a caller applied, so test coverage here only needs an arbitrary
 // non-empty Defaults to exercise the pass-through.
 func TestMarshalRendersAppliedDefaults(t *testing.T) {
-	d := &deck.Deck{Hero: hero.Viserai{}}
+	d := &deck.Deck{Hero: heroes.Viserai{}}
 	d.ApplyDefaults(deck.Defaults{
 		Equipment: []string{"Beckoning Haunt", "Blade Beckoner Helm"},
 		Sideboard: []deck.SideboardDefault{
@@ -215,7 +216,7 @@ Deck cards
 // placed after Deck cards.
 func TestMarshalSideboardSection(t *testing.T) {
 	rng := rand.New(rand.NewSource(1))
-	d := deck.Random(hero.Viserai{}, 40, 2, rng, registry.Registry{})
+	d := deck.Random(heroes.Viserai{}, 40, 2, rng, registry.Registry{})
 
 	// Use Mauvrion Skies [R] — its pitch-color suffix exercises the toFabraryCardName
 	// lowercase conversion. Sideboard is a string list; names are stored in canonical form.

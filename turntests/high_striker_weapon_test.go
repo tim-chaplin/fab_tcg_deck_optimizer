@@ -3,16 +3,16 @@ package turntests
 import (
 	"testing"
 
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card/cards"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
-	"github.com/tim-chaplin/fab-deck-optimizer/v2/hero"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/hero/heroes"
 )
 
 // Tests that High Striker's "next attack hits" rider fires on a follow-up weapon swing.
 func TestHighStriker_WeaponHitCreatesCopper(t *testing.T) {
-	d := deck.New(hero.Viserai{}, []deck.Weapon{testutils.ClubWeapon{}}, fillerDeck())
+	d := deck.New(heroes.Viserai{}, []deck.Weapon{testutils.ClubWeapon{}}, fillerDeck())
 	hand := []deck.Card{
 		cards.HighStrikerRed{},
 		testutils.BluePitch{},

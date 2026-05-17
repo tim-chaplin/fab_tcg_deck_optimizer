@@ -3,12 +3,12 @@ package turntests
 import (
 	"testing"
 
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card/cards"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/gameengine"
-	"github.com/tim-chaplin/fab-deck-optimizer/v2/hero"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/hero/heroes"
 )
 
 // Tests that a same-turn banish (Jack Be Quick consuming a graveyard Nimblism) flips
@@ -16,7 +16,7 @@ import (
 // {3} → Jack Be Quick (banishes Nimblism, +1{p} and go again, deals 4) → Tremor (cost 1,
 // deals 4 + 2 bonus = 6). Total 10.
 func TestTremorOfIArathael_SameTurnBanishActivatesBonus(t *testing.T) {
-	d := deck.New(hero.Viserai{}, nil, fillerDeck())
+	d := deck.New(heroes.Viserai{}, nil, fillerDeck())
 	hand := []deck.Card{
 		cards.TremorOfIArathaelRed{},
 		cards.JackBeQuickRed{},
@@ -33,7 +33,7 @@ func TestTremorOfIArathael_SameTurnBanishActivatesBonus(t *testing.T) {
 // flip CardBanished — Tremor plays at its base power. Hand: Tremor, Bauble. Initial
 // banish has one card seeded; CardBanished stays false. Total 4.
 func TestTremorOfIArathael_PriorTurnBanishedZoneDoesNotActivate(t *testing.T) {
-	d := deck.New(hero.Viserai{}, nil, fillerDeck())
+	d := deck.New(heroes.Viserai{}, nil, fillerDeck())
 	hand := []deck.Card{cards.TremorOfIArathaelRed{}, cards.TitaniumBaubleBlue{}}
 	initial := gameengine.GameStateBuilder().SetBanished([]card.Card{cards.NimblismRed{}}).Build()
 	got := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, initial, hand).Value

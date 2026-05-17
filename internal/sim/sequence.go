@@ -605,7 +605,7 @@ func (ctx *sequenceContext) playSequenceWithMeta(n int) (damage int, futureValue
 					return 0, 0, 0, nil, false
 				}
 			}
-			ar, ok := pc.Card.(AttackReaction)
+			ar, ok := pc.Card.(card.AttackReaction)
 			if !ok || activeAttack == nil || !ar.ARTargetAllowed(ge, activeAttack.Card, pc.Mode) {
 				return 0, 0, 0, nil, false
 			}

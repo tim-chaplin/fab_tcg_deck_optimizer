@@ -3,16 +3,16 @@ package turntests
 import (
 	"testing"
 
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card/cards"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
-	"github.com/tim-chaplin/fab-deck-optimizer/v2/hero"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/hero/heroes"
 )
 
 // Tests that Strike Gold's on-hit rider lands a Gold token in Items when the attack hits.
 func TestStrikeGold_OnHitCreatesGoldToken(t *testing.T) {
-	d := deck.New(hero.Viserai{}, nil, fillerDeck())
+	d := deck.New(heroes.Viserai{}, nil, fillerDeck())
 	hand := []deck.Card{
 		cards.StrikeGoldRed{},
 		testutils.BluePitch{},
@@ -31,7 +31,7 @@ func TestStrikeGold_OnHitCreatesGoldToken(t *testing.T) {
 
 // Tests that Strike Gold's on-hit rider does not fire when the attack misses LikelyToHit.
 func TestStrikeGold_BlockableMissDoesNotCreateGold(t *testing.T) {
-	d := deck.New(hero.Viserai{}, nil, fillerDeck())
+	d := deck.New(heroes.Viserai{}, nil, fillerDeck())
 	hand := []deck.Card{
 		cards.StrikeGoldYellow{},
 		testutils.BluePitch{},
@@ -65,7 +65,7 @@ func TestStrikeGold_GoldTokenPlayableNextTurn(t *testing.T) {
 		testutils.BlueAttack{}, testutils.BlueAttack{},
 		testutils.BlueAttack{}, testutils.BlueAttack{},
 	}
-	d := deck.New(hero.Viserai{}, nil, deckCards)
+	d := deck.New(heroes.Viserai{}, nil, deckCards)
 	state := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, nil, nil)
 	if state.GoldCount() != 1 {
 		t.Fatalf("after turn 1: Gold = %d, want 1 (Strike Gold Red on-hit)", state.GoldCount())

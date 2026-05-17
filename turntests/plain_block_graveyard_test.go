@@ -3,15 +3,15 @@ package turntests
 import (
 	"testing"
 
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card/cards"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
-	"github.com/tim-chaplin/fab-deck-optimizer/v2/hero"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/hero/heroes"
 )
 
 // Tests that a plain-block card lands in the graveyard after defending.
 func TestPlainBlock_LandsInGraveyard(t *testing.T) {
-	d := deck.New(hero.Viserai{}, nil, fillerDeck())
+	d := deck.New(heroes.Viserai{}, nil, fillerDeck())
 	hand := []deck.Card{cards.OnTheHorizonRed{}}
 	state := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 4}, nil, hand)
 	if state.Value != 4 {

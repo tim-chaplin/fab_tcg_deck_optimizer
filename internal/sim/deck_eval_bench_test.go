@@ -5,9 +5,8 @@ import (
 	"testing"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/hero/heroes"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/registry"
-
-	"github.com/tim-chaplin/fab-deck-optimizer/v2/hero"
 )
 
 // BenchmarkEvaluate drives the single-threaded hot path: generate a random Viserai deck and
@@ -21,7 +20,7 @@ func BenchmarkEvaluate(b *testing.B) {
 		incoming  = 0
 	)
 	setupRNG := rand.New(rand.NewSource(42))
-	d := deck.Random(hero.Viserai{}, deckSize, maxCopies, setupRNG, registry.Registry{})
+	d := deck.Random(heroes.Viserai{}, deckSize, maxCopies, setupRNG, registry.Registry{})
 	ev := NewEvaluator()
 	evalRNG := rand.New(rand.NewSource(42))
 
