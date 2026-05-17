@@ -2,8 +2,8 @@
 // per-chain-step CardState wrapper that carries mutable flags between resolution phases,
 // and the narrow GameEngine / Logger / Aura / Trigger interfaces cards consume from the sim.
 //
-// The package owns the contract; it does NOT import the sim. *sim.TurnState satisfies
-// GameEngine structurally and *turnlogger.TurnLogger satisfies Logger structurally.
+// The package owns the contract; it does NOT import the sim. gameengine.GameEngine and
+// gameengine.NoopLogger satisfy these interfaces structurally.
 package card
 
 import (
@@ -138,9 +138,6 @@ type GameEngine interface {
 }
 
 // Logger is the cards-facing log sink the chain runner threads through every Card hook.
-// Matches *turnlogger.TurnLogger structurally. A typed-nil receiver is the find-best skip
-// sentinel — every method short-circuits inside the implementation, so cards never gate at
-// the call site.
 //
 // Cards use AppendPostTrigger / AppendPostTriggerf for self-riders ("Created a runechant"),
 // AppendPreTrigger for hero or aura attack-action triggers. The AppendChainStep /

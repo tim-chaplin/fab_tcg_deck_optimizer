@@ -319,8 +319,7 @@ func mergeStatsInto(dst, src *deck.Stats) {
 	}
 }
 
-// runBestForTurn dispatches to ev.BestSkipLog — the hot-path case that skips log
-// materialisation.
+// runBestForTurn dispatches to ev.Best.
 func runBestForTurn(
 	weapons []weapon.Weapon,
 	h []card.Card,
@@ -329,7 +328,7 @@ func runBestForTurn(
 	master *gameengine.GameState,
 	ev *Evaluator,
 ) TurnSummary {
-	return ev.BestSkipLog(weapons, h, mp, d, master)
+	return ev.Best(weapons, h, mp, d, master)
 }
 
 // recordTurnStats folds one resolved turn's accumulators into stats: bumps Hands /

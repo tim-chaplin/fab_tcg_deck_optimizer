@@ -1,7 +1,6 @@
 package turntests
 
 import (
-	"strings"
 	"testing"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card/cards"
@@ -37,8 +36,7 @@ func TestMoonWish_VariableCost(t *testing.T) {
 	}
 }
 
-// Tests that the alt cost pops a hand card, prepends it to the deck, and logs the
-// "returned X to top of deck" rider.
+// Tests that the alt cost pops a hand card and prepends it to the deck.
 func TestMoonWish_AltCostMovesHandCardToDeckTop(t *testing.T) {
 	dr := testutils.GenericAttack(0, 0).WithName("dr")
 	other := testutils.GenericAttack(0, 0).WithName("deckTop")
@@ -55,18 +53,6 @@ func TestMoonWish_AltCostMovesHandCardToDeckTop(t *testing.T) {
 	}
 	if top := ge.Deck().PeekTop(); top == nil || top.(card.Card).Name() != "dr" {
 		t.Errorf("Deck top = %v, want %q (alt-cost'd card moved to top)", top, "dr")
-	}
-	// One of the post-trigger log entries should name the returned card.
-	wantSuffix := "returned " + dr.DisplayName() + " to top of deck"
-	found := false
-	for _, e := range ge.LogEntries() {
-		if e.Source == "Moon Wish [Y]" && strings.HasSuffix(e.Text, wantSuffix) {
-			found = true
-			break
-		}
-	}
-	if !found {
-		t.Errorf("expected a Moon Wish post-trigger log line ending in %q; log = %+v", wantSuffix, ge.LogEntries())
 	}
 }
 

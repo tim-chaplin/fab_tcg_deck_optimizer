@@ -10,8 +10,7 @@ type GameEngine interface {
 	CreateRunechants(int)
 }
 
-// Logger is the narrow log surface hero abilities use. *turnlogger.TurnLogger satisfies
-// it structurally.
+// Logger is the narrow log surface hero abilities use.
 type Logger interface {
 	AppendPreTrigger(source, text string, n int)
 }

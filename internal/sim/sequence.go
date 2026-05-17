@@ -18,8 +18,6 @@ package sim
 //     the rules-engine API the card.GameEngine interface demands.
 
 import (
-	"fmt"
-
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/aura"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
@@ -27,7 +25,6 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/hero"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/item"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/token"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/turnlogger"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapon"
 )
 
@@ -36,21 +33,6 @@ import (
 // gets large. Realistic counts in play tend to 1-3; 4 leaves headroom without letting a
 // pathological hand blow up the per-leaf mask loop.
 const perItemAbilityCap = 4
-
-// FormatLogEntry renders a LogEntry into its display string. Chain entries with N=0
-// drop the "(+0)" suffix; trigger entries carry a "(from <source>)" tail.
-func FormatLogEntry(e turnlogger.LogEntry) string {
-	if e.Kind == turnlogger.LogEntryChainStep {
-		if e.N == 0 {
-			return e.Text
-		}
-		return fmt.Sprintf("%s (+%d)", e.Text, e.N)
-	}
-	if e.N == 0 {
-		return fmt.Sprintf("%s (from %s)", e.Text, e.Source)
-	}
-	return fmt.Sprintf("%s (+%d) (from %s)", e.Text, e.N, e.Source)
-}
 
 // bestAttackWithWeapons enumerates phase / weapon masks for one partition leaf and
 // returns the best (damage, futureValue, budget, swungWeapons, winnerState, legal,
@@ -66,7 +48,6 @@ func bestAttackWithWeapons(
 	mp Matchup,
 	blockTotal, arsenalInIdx, arsenalDefenderIdx int,
 	arsenalAtChainStart card.Card,
-	skipLog bool,
 ) (int, int, chainBudget, []string, *gameengine.GameState, bool, bool) {
 	runechantCarryover := auraCountByNameInState(masterState, "Runechant")
 	ctx := &sequenceContext{
@@ -84,7 +65,6 @@ func bestAttackWithWeapons(
 		priorBanish:         masterState.Banished(),
 		priorGraveyard:      masterState.Graveyard(),
 		defenders:           defenders,
-		skipLog:             skipLog,
 		cacheable:           true,
 	}
 	// Extend bufs.activatedAbilities with item ability instances for this Best call.
@@ -189,7 +169,6 @@ func bestAttackWithWeapons(
 			drCost += def.Cost(probe)
 		}
 	}
-
 
 	for pmask := 0; pmask < phaseCount; pmask++ {
 		phase := splitPitchesAcrossPhases(pitchedVals, pmask, phaseCount)
@@ -309,7 +288,6 @@ type sequenceContext struct {
 	activatedAbilityCosts []int
 	defenders             []card.Card
 	leafState             *gameengine.GameState
-	skipLog               bool
 	cacheable             bool
 	// permState is the last *GameState a playSequence call ran the chain against. Set
 	// by playSequence so the test-only PermEngine accessor can read the post-chain
@@ -423,12 +401,6 @@ func (ctx *sequenceContext) promoteWinnerState(winner *gameengine.GameState) {
 // proceeds while the matchup figure itself stays constant.
 func (ctx *sequenceContext) runDefense(defenders, pitched []card.Card, deckPile *deck.Deck, matchupIncomingDamage, blockBudget, arsenalDefenderIdx int) (int, bool) {
 	state := ctx.leafState
-	// In the recording path the per-perm preparePermState owns logger installation; here
-	// we only need to install when defense actually wants to emit lines. masterState's
-	// logger is nil out of CopyFrom, so the find-best skipLog path can leave it alone.
-	if !ctx.skipLog {
-		state.SetLogger(turnlogger.New())
-	}
 	state.SetDeck(deckPile)
 	state.SetIncomingDamage(matchupIncomingDamage)
 	ge := state.Engine()
@@ -559,11 +531,6 @@ func (ctx *sequenceContext) preparePermState(playedAttackers []*card.CardState, 
 	s.SetCardsPlayed(bufs.pooledCardsPlayedBuf)
 	s.SetPitched(ctx.pitched)
 	s.SetHand(hand)
-	// ResetEphemeralState already nil-ed s.logger; only pay the SetLogger write barrier
-	// when the recording path actually needs a fresh per-perm logger.
-	if !ctx.skipLog {
-		s.SetLogger(turnlogger.New())
-	}
 	return s
 }
 

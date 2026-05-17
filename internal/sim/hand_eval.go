@@ -34,18 +34,9 @@ func best(weapons []weapon.Weapon, hand []card.Card, mp Matchup, d *deck.Deck, m
 	return sharedEvaluator.Best(weapons, hand, mp, d, master)
 }
 
-// Best is the method form of the package-level Best. Returns a TurnSummary with
-// State.Log fully populated.
+// Best is the method form of the package-level Best.
 func (e *Evaluator) Best(weapons []weapon.Weapon, hand []card.Card, mp Matchup, d *deck.Deck, master *gameengine.GameState) TurnSummary {
-	return e.findBest(weapons, hand, mp, d, master, false)
-}
-
-// BestSkipLog is Best without populating State.Log. Same Value and non-Log carry-state
-// fields; State.Log comes back empty. The deck-eval loop uses this for every turn to skip
-// the per-chain Log slice copy that dominates allocation bytes; only turns that become the
-// new deck-best are replayed via Best to recover Log.
-func (e *Evaluator) BestSkipLog(weapons []weapon.Weapon, hand []card.Card, mp Matchup, d *deck.Deck, master *gameengine.GameState) TurnSummary {
-	return e.findBest(weapons, hand, mp, d, master, true)
+	return e.findBest(weapons, hand, mp, d, master)
 }
 
 // Evaluator caches per-goroutine scratch state across Best calls. The first call allocates

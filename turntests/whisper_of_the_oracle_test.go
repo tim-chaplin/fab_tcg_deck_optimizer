@@ -16,7 +16,8 @@ var whisperOfTheOracleVariants = []card.Card{
 	cards.WhisperOfTheOracleBlue{},
 }
 
-// Tests that every variant emits a LogPlay step and an Opt 4 log entry.
+// Tests that every variant returns Value 0 (the Opt 4 rider reshapes the deck, doesn't
+// credit damage).
 func TestWhisperOfTheOracle_PlayCallsOpt4(t *testing.T) {
 	a, b, c, d := testutils.NewStubCard("a"), testutils.NewStubCard("b"),
 		testutils.NewStubCard("c"), testutils.NewStubCard("d")
@@ -26,16 +27,6 @@ func TestWhisperOfTheOracle_PlayCallsOpt4(t *testing.T) {
 		ge.ResolveChainStep(ge.Logger(), &card.CardState{Card: variant})
 		if ge.Value() != 0 {
 			t.Errorf("%s: Play() Value = %d, want 0", variant.Name(), ge.Value())
-		}
-		if len(ge.LogEntries()) != 2 {
-			t.Errorf("%s: Log len = %d, want 2 (Opted... + chain step)", variant.Name(), len(ge.LogEntries()))
-			continue
-		}
-		// Play emits the Opted line; the chain step is auto-appended after Play
-		// returns, so the Opted entry lands first.
-		want := "Opted [a, b, c, d], put [a, b, c, d] on top, put [] on bottom"
-		if got := ge.LogEntries()[0].Text; got != want {
-			t.Errorf("%s: Opt log entry = %q, want %q", variant.Name(), got, want)
 		}
 	}
 }

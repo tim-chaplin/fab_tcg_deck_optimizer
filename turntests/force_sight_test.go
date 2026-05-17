@@ -54,9 +54,9 @@ func TestForceSight_NextAttackReturnsBonus(t *testing.T) {
 	}
 }
 
-// Tests that Force Sight played from hand skips the arsenal-gated Opt.
-func TestForceSight_HandPlaySkipsOpt(t *testing.T) {
-
+// Tests that Force Sight played from hand returns Value 0 — the arsenal-gated Opt rider
+// doesn't fire in this path, and Force Sight isn't an attack so no damage is credited.
+func TestForceSight_HandPlayValueZero(t *testing.T) {
 	a, b := testutils.NewStubCard("a"), testutils.NewStubCard("b")
 	for _, c := range []card.Card{cards.ForceSightRed{}, cards.ForceSightYellow{}, cards.ForceSightBlue{}} {
 		ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCards([]card.Card{a, b}).Build()}
@@ -64,33 +64,18 @@ func TestForceSight_HandPlaySkipsOpt(t *testing.T) {
 		if ge.Value() != 0 {
 			t.Errorf("%s: Play() from hand Value = %d, want 0", c.Name(), ge.Value())
 		}
-		// Just the LogPlay chain step, no Opt sub-entry.
-		if len(ge.LogEntries()) != 1 {
-			t.Errorf("%s: Log len = %d, want 1 (LogPlay only — Opt arsenal-gated)",
-				c.Name(), len(ge.LogEntries()))
-		}
 	}
 }
 
-// Tests that Force Sight played from arsenal emits an Opt 2 log entry after LogPlay.
-func TestForceSight_ArsenalPlayCallsOpt2(t *testing.T) {
-
+// Tests that Force Sight played from arsenal returns Value 0 (the rider's effect is the
+// deck reshape, not a value credit).
+func TestForceSight_ArsenalPlayValueZero(t *testing.T) {
 	a, b := testutils.NewStubCard("a"), testutils.NewStubCard("b")
 	for _, c := range []card.Card{cards.ForceSightRed{}, cards.ForceSightYellow{}, cards.ForceSightBlue{}} {
 		ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCards([]card.Card{a, b}).Build()}
 		ge.ResolveChainStep(ge.Logger(), &card.CardState{Card: c, FromArsenal: true})
 		if ge.Value() != 0 {
 			t.Errorf("%s: Play() from arsenal Value = %d, want 0", c.Name(), ge.Value())
-		}
-		if len(ge.LogEntries()) != 2 {
-			t.Errorf("%s: Log len = %d, want 2 (Opted... + chain step)", c.Name(), len(ge.LogEntries()))
-			continue
-		}
-		// Play emits the Opted line during arsenal-gated resolution; the chain step is
-		// auto-appended after Play returns, so the Opted entry lands first.
-		want := "Opted [a, b], put [a, b] on top, put [] on bottom"
-		if got := ge.LogEntries()[0].Text; got != want {
-			t.Errorf("%s: Opt log entry = %q, want %q", c.Name(), got, want)
 		}
 	}
 }

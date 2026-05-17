@@ -91,9 +91,6 @@ func TestResolveChainStep_AttackCreditsEffectiveAttack(t *testing.T) {
 	if ge.Value() != 3 {
 		t.Errorf("Value = %d, want 3 (printed attack)", ge.Value())
 	}
-	if got := ge.LogEntries(); len(got) != 1 || got[0].N != 3 {
-		t.Errorf("log = %v, want one chain-step entry with N=3", got)
-	}
 }
 
 func TestResolveChainStep_DefenseReactionCapsToIncomingDamage(t *testing.T) {
@@ -105,9 +102,6 @@ func TestResolveChainStep_DefenseReactionCapsToIncomingDamage(t *testing.T) {
 	}
 	if ge.RemainingUnblockedDamage() != 0 {
 		t.Errorf("RemainingUnblockedDamage = %d, want 0 (capped block banked against it)", ge.RemainingUnblockedDamage())
-	}
-	if got := ge.LogEntries(); len(got) != 1 || got[0].N != 2 {
-		t.Errorf("log = %v, want one chain-step entry with N=2", got)
 	}
 }
 
@@ -134,9 +128,6 @@ func TestResolveChainStep_NonAttackContributesZero(t *testing.T) {
 	if ge.Value() != 0 {
 		t.Errorf("Value = %d, want 0", ge.Value())
 	}
-	if got := ge.LogEntries(); len(got) != 1 || got[0].N != 0 {
-		t.Errorf("log = %v, want one chain-step entry with N=0", got)
-	}
 }
 
 func TestResolveChainStep_SelfBuffInPlayAppliesBeforeCredit(t *testing.T) {
@@ -145,8 +136,5 @@ func TestResolveChainStep_SelfBuffInPlayAppliesBeforeCredit(t *testing.T) {
 	ge.ResolveChainStep(ge.Logger(), self)
 	if ge.Value() != 3 {
 		t.Errorf("Value = %d, want 3 (printed 2 + Play'ge +1 BonusAttack)", ge.Value())
-	}
-	if got := ge.LogEntries(); len(got) != 1 || got[0].N != 3 {
-		t.Errorf("log = %v, want one chain-step entry with N=3", got)
 	}
 }

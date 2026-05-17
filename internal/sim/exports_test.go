@@ -8,7 +8,6 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/gameengine"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/hero"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/item"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/turnlogger"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapon"
 )
 
@@ -75,11 +74,6 @@ func BeatsBest(v, futureValuePlayed int, willOccupyArsenal bool, best TurnSummar
 	return willOccupyArsenal && !bestWillOccupyArsenal
 }
 
-// AppendGroupedChainEntries re-exports appendGroupedChainEntries.
-func AppendGroupedChainEntries(out []string, log []turnlogger.LogEntry) []string {
-	return appendGroupedChainEntries(out, log)
-}
-
 // DefendersDamage re-exports defendersDamage with an unbounded block budget.
 func DefendersDamage(defenders, pitched []card.Card, d *deck.Deck, ge *gameengine.GameEngine, gravBuf []card.Card, cs *card.CardState, incomingDamage, arsenalDefenderIdx int) (int, []card.Card) {
 	total, gravBuf, _ := defendersDamage(defenders, pitched, d, ge, gravBuf, cs, incomingDamage, noBlockBudgetCap, arsenalDefenderIdx)
@@ -124,29 +118,6 @@ func EngineWithItems(items []*item.Item) *gameengine.GameState {
 	gs := gameengine.GameStateBuilder().Build()
 	for _, it := range items {
 		gs.CreateItem(it)
-	}
-	return gs
-}
-
-// EngineWith returns a fresh GameState with hand, items, and log entries installed.
-// log can be nil to skip log seeding.
-func EngineWith(h []card.Card, items []*item.Item, log []turnlogger.LogEntry) *gameengine.GameState {
-	gs := gameengine.GameStateBuilder().Build()
-	gs.SetHand(h)
-	for _, it := range items {
-		gs.CreateItem(it)
-	}
-	if len(log) > 0 {
-		for _, e := range log {
-			switch e.Kind {
-			case turnlogger.LogEntryChainStep:
-				gs.Logger().AppendChainStep(e.Text, e.N)
-			case turnlogger.LogEntryPostTrigger:
-				gs.Logger().AppendPostTrigger(e.Source, e.Text, e.N)
-			case turnlogger.LogEntryPreTrigger:
-				gs.Logger().AppendPreTrigger(e.Source, e.Text, e.N)
-			}
-		}
 	}
 	return gs
 }

@@ -3,7 +3,6 @@ package gameengine
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/turnlogger"
 )
 
 // GameState owns the raw per-turn data — every slice, every scalar, every flag the
@@ -448,16 +447,6 @@ func (gs *GameState) SetCardsRemaining(cs []*card.CardState) { gs.cardsRemaining
 
 func (gs *GameState) Logger() card.Logger     { return gs.logger }
 func (gs *GameState) SetLogger(l card.Logger) { gs.logger = l }
-
-// LogEntries returns the accumulated chain log when the installed logger captures entries
-// (e.g. *turnlogger.TurnLogger). Returns nil for stream / noop loggers — production paths
-// don't read entries back; this exists for tests that install a TurnLogger explicitly.
-func (gs *GameState) LogEntries() []turnlogger.LogEntry {
-	if c, ok := gs.logger.(interface{ Entries() []turnlogger.LogEntry }); ok {
-		return c.Entries()
-	}
-	return nil
-}
 
 func (gs *GameState) TriggeringCard() card.Card                  { return gs.triggeringCard }
 func (gs *GameState) SetTriggeringCard(c card.Card)              { gs.triggeringCard = c }

@@ -51,36 +51,15 @@ func TestGrantAttackReactionBuff_NoTargetIsNoOp(t *testing.T) {
 	}
 }
 
-// Tests that GrantAttackReactionBuff buffs BonusAttack, credits Value, and amends the
-// target's chain-step log delta.
+// Tests that GrantAttackReactionBuff buffs BonusAttack and credits Value.
 func TestGrantAttackReactionBuff_AppliesBuffAndCreditsValue(t *testing.T) {
 	target := &card.CardState{Card: stubAttack{}}
 	ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetAttackReactionTarget(target).Build()}
-	ge.Logger().AppendChainStep("stubAttack: ATTACK", 1)
 	(&card.CardState{Card: stubAR{}}).GrantAttackReactionBuff(ge, ge.Logger(), 3)
 	if target.BonusAttack != 3 {
 		t.Errorf("target BonusAttack = %d, want 3", target.BonusAttack)
 	}
 	if ge.Value() != 3 {
 		t.Errorf("Value = %d, want 3", ge.Value())
-	}
-	if got := ge.LogEntries()[0].N; got != 4 {
-		t.Errorf("amended chain-step N = %d, want 4", got)
-	}
-}
-
-// Tests that AmendLastChainStepN skips non-chain-step entries to find the most recent
-// chain-step.
-func TestAmendLastChainStepN_SkipsNonChainEntries(t *testing.T) {
-	ge := gameengine.New()
-	ge.Logger().AppendChainStep("first", 2)
-	ge.Logger().AppendPostTrigger("first", "rider", 0)
-	ge.Logger().AmendLastChainStepN(5)
-	entries := ge.LogEntries()
-	if got := entries[0].N; got != 7 {
-		t.Errorf("first chain-step N = %d, want 7", got)
-	}
-	if got := entries[1].N; got != 0 {
-		t.Errorf("post-trigger N = %d, want 0 (untouched)", got)
 	}
 }
