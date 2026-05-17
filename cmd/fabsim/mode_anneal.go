@@ -32,7 +32,6 @@ type annealConfig struct {
 	maxCopies  int
 	seed       int64
 	outPath    string
-	format     Format
 	debug      bool
 	reevaluate bool
 	// startTemp / tempDecay / minTemp are the simulated-annealing knobs. startTemp of 0
@@ -58,7 +57,7 @@ type annealConfig struct {
 // defaultDeckNameFor returns the deck name when -deck isn't supplied, keyed by hero, format, and
 // -incoming. Different regimes produce different optimal decks, so each gets its own file to
 // avoid hill-climbing one regime's best under another regime's objective.
-func defaultDeckNameFor(h hero.Hero, f Format, incoming int) string {
+func defaultDeckNameFor(h hero.Hero, f GameplayFormat, incoming int) string {
 	return fmt.Sprintf("%s_%s_%d_incoming", strings.ToLower(h.Name()), f, incoming)
 }
 
@@ -91,7 +90,7 @@ func runAnnealCmd(args []string) {
 	}
 	requireFlag(fs, "anneal", "incoming")
 
-	fmtValue, err := parseFormat(*formatFlag)
+	fmtValue, err := parseGameplayFormat(*formatFlag)
 	if err != nil {
 		die("%v", err)
 	}
@@ -122,7 +121,6 @@ func runAnnealCmd(args []string) {
 		maxCopies:      *maxCopies,
 		seed:           *seed,
 		outPath:        outPath,
-		format:         fmtValue,
 		debug:          *debug,
 		reevaluate:     *reevaluate,
 		startTemp:      *startTemp,

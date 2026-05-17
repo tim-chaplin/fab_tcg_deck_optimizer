@@ -192,7 +192,7 @@ func TestWriteFileAtomic_PreservesOldOnFailure(t *testing.T) {
 // TestDefaultDeckNameFor pins the filename shape: hero_format_incoming.
 func TestDefaultDeckNameFor(t *testing.T) {
 	cases := []struct {
-		f    Format
+		f    GameplayFormat
 		in   int
 		want string
 	}{

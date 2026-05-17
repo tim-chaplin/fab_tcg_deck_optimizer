@@ -34,7 +34,7 @@ func runCompareCmd(args []string) {
 		die("compare: need exactly 2 positional deck names (got %d); try `fabsim compare <deck1> <deck2>`", fs.NArg())
 	}
 	requireFlag(fs, "compare", "incoming")
-	fmtValue, err := parseFormat(*formatFlag)
+	fmtValue, err := parseGameplayFormat(*formatFlag)
 	if err != nil {
 		die("%v", err)
 	}
@@ -47,7 +47,7 @@ func runCompareCmd(args []string) {
 // hand value, per-cycle means, the hand-value histograms, and finally the per-card count
 // delta. The header line at the top of the output records the (shuffles, incoming)
 // settings so the per-section rows don't have to repeat them.
-func runCompare(name1, name2 string, shuffles int, mp sim.Matchup, maxCopies int, seed int64, fmtValue Format) {
+func runCompare(name1, name2 string, shuffles int, mp sim.Matchup, maxCopies int, seed int64, fmtValue GameplayFormat) {
 	// compare always uses a fixed -shuffles count so the two decks are scored under matched
 	// conditions. Adaptive stop would let one deck terminate at a different shuffle count
 	// than the other, breaking the apples-to-apples invariant the per-stat comparison rests on.
