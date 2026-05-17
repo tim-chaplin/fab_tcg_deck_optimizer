@@ -115,7 +115,12 @@ func bestAttackWithWeapons(
 	// deck mutations don't bleed into the chain).
 	hasDRs := containsDefenseReaction(defenders)
 	hasModalBlocker := containsModalBlocker(defenders)
-	leafState := masterState.Copy()
+	if bufs.pooledLeafState == nil {
+		bufs.pooledLeafState = masterState.Copy()
+	} else {
+		bufs.pooledLeafState.CopyFrom(masterState)
+	}
+	leafState := bufs.pooledLeafState
 	ctx.leafState = leafState
 
 	var defenseDealtConst int
@@ -347,6 +352,15 @@ func (ctx *sequenceContext) promoteWinnerState(winner *gameengine.GameState) {
 		clone := make([]card.Card, len(winnerCardsPlayed))
 		copy(clone, winnerCardsPlayed)
 		winner.SetCardsPlayed(clone)
+	}
+	// Banished aliases the pooled leafState's backing via CopyForPermutation's [:n:n]
+	// slice and isn't reset per perm. Clone it so the next Best call's CopyFrom on
+	// the leafState pool can't overwrite winner.banished's data.
+	winnerBanished := winner.Banished()
+	if len(winnerBanished) > 0 {
+		clone := make([]card.Card, len(winnerBanished))
+		copy(clone, winnerBanished)
+		winner.SetBanished(clone)
 	}
 }
 
