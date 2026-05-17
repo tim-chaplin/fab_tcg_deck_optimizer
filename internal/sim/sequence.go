@@ -118,7 +118,7 @@ func bestAttackWithWeapons(
 	if bufs.pooledLeafState == nil {
 		bufs.pooledLeafState = masterState.Copy()
 	} else {
-		bufs.pooledLeafState.ResetFromMaster(masterState)
+		bufs.pooledLeafState.CopyFrom(masterState)
 	}
 	leafState := bufs.pooledLeafState
 	ctx.leafState = leafState
@@ -354,7 +354,7 @@ func (ctx *sequenceContext) promoteWinnerState(winner *gameengine.GameState) {
 		winner.SetCardsPlayed(clone)
 	}
 	// Banished aliases the pooled leafState's backing via CopyForPermutation's [:n:n]
-	// slice and isn't reset per perm. Clone it so the next Best call's ResetFromMaster on
+	// slice and isn't reset per perm. Clone it so the next Best call's CopyFrom on
 	// the leafState pool can't overwrite winner.banished's data.
 	winnerBanished := winner.Banished()
 	if len(winnerBanished) > 0 {

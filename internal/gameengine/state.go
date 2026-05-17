@@ -104,12 +104,12 @@ func (gs *GameState) Copy() *GameState {
 	return &out
 }
 
-// ResetFromMaster rewrites *gs in place to match what src.Copy() would produce. Reuses
+// CopyFrom rewrites *gs in place to match what src.Copy() would produce. Reuses
 // the receiver's slice and *deck.Deck backings when capacity permits so a pool slot can
 // stand in for repeated per-Best masterState.Copy() allocations. Auras and items are
 // deep-copied per entry via CopyInto on the pooled slot when present, so the pool
 // amortises both the *GameState alloc and the per-entry *Aura / *Item allocs.
-func (gs *GameState) ResetFromMaster(src *GameState) {
+func (gs *GameState) CopyFrom(src *GameState) {
 	pooledHand := gs.hand
 	pooledGrav := gs.graveyard
 	pooledBanished := gs.banished
