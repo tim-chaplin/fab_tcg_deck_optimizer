@@ -12,12 +12,12 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/mydecks"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/gameengine"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/hero"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/registry"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/textio"
 )
 
 // annealConfig bundles the knobs runAnneal needs. Built by runAnnealCmd from its flag.FlagSet.
@@ -108,7 +108,7 @@ func runAnnealCmd(args []string) {
 	if name == "" {
 		name = defaultDeckNameFor(hero.Viserai{}, fmtValue, *incoming)
 	}
-	outPath, err := mydecks.Path(name)
+	outPath, err := textio.MydecksPath(name)
 	if err != nil {
 		die("%v", err)
 	}

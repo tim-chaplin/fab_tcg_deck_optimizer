@@ -11,10 +11,10 @@ import (
 	"os"
 	"strings"
 
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/mydecks"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/optimizations"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/registry"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/textio"
 )
 
 // Warms the chain-step text cache from the registry so the runtime hot path is pure
@@ -42,8 +42,8 @@ func main() {
 
 	// Create mydecks/ up front so downstream WriteFile calls can't fail on a missing dir after
 	// a long run. Every subcommand reads or writes this directory.
-	if err := os.MkdirAll(mydecks.Dir, 0o755); err != nil {
-		die("mkdir %s: %v", mydecks.Dir, err)
+	if err := os.MkdirAll(textio.MydecksDir, 0o755); err != nil {
+		die("mkdir %s: %v", textio.MydecksDir, err)
 	}
 
 	switch subcommand {

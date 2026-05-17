@@ -10,7 +10,6 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/mydecks"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/hero"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/textio"
@@ -29,7 +28,7 @@ func runImport() {
 	}
 	name := strings.TrimSpace(nameLine)
 	name = strings.TrimSuffix(name, ".json")
-	if err := mydecks.ValidateName(name); err != nil {
+	if err := textio.ValidateMydecksName(name); err != nil {
 		die("%v", err)
 	}
 
@@ -49,7 +48,7 @@ func runImport() {
 	}
 	out = append(out, '\n')
 
-	dest, err := mydecks.Path(name)
+	dest, err := textio.MydecksPath(name)
 	if err != nil {
 		die("%v", err)
 	}
