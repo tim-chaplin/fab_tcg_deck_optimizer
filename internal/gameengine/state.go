@@ -104,6 +104,45 @@ func (gs *GameState) Copy() *GameState {
 	return &out
 }
 
+// CopyPersistentState is a lighter variant of Copy that copies only the cross-turn
+// persistent state — the inverse of ResetEphemeralState's reset set. Hand, pitched,
+// defenders, cardsPlayed, cardsRemaining, triggers, deck, and logger are left nil
+// (callers that want those populated set them after copying). Graveyard and banished
+// are shallow-copied (slice header with cap=len, sharing the backing) so append-only
+// mutations on the copy allocate fresh backings on first write and the receiver's
+// backings stay intact. Auras and items get full per-entry copies because their
+// fire-this-turn / count fields mutate independently of the source.
+func (gs *GameState) CopyPersistentState() *GameState {
+	out := *gs
+	out.hand = nil
+	out.pitched = nil
+	out.defenders = nil
+	out.cardsPlayed = nil
+	out.cardsRemaining = nil
+	out.triggers = nil
+	out.deck = nil
+	out.logger = nil
+	if n := len(gs.graveyard); n > 0 {
+		out.graveyard = gs.graveyard[:n:n]
+	}
+	if n := len(gs.banished); n > 0 {
+		out.banished = gs.banished[:n:n]
+	}
+	if len(gs.auras) > 0 {
+		out.auras = make([]Aura, len(gs.auras))
+		for i, a := range gs.auras {
+			out.auras[i] = a.Copy().(Aura)
+		}
+	}
+	if len(gs.items) > 0 {
+		out.items = make([]Item, len(gs.items))
+		for i, it := range gs.items {
+			out.items[i] = it.Copy().(Item)
+		}
+	}
+	return &out
+}
+
 // ResetEphemeralState returns gs to its start-of-turn baseline: it discards every field
 // that playing out a turn accumulates, keeping only the cross-turn carryover (hero, deck,
 // arsenal, graveyard, banished, the aura / item lists, opponentMarked, and the matchup's
