@@ -129,6 +129,29 @@ func (d *Deck) Copy() *Deck {
 	return out
 }
 
+// ShallowCopy returns a fresh *Deck wrapper that shares slice backing with the receiver.
+// The cards and Weapons slices are reproduced with cap=len (via the 3-arg slice form) so
+// any future append on the copy allocates a fresh backing rather than writing past the
+// shared region. Read paths and the mutating methods that allocate fresh backings on
+// every call (PutTop, PutBottom, Tutor) stay safe; Shuffle (which mutates in place)
+// does not, so ShallowCopy is only safe when the caller never Shuffles the result.
+// The per-permutation chain runner uses this to skip the per-permutation deep copy.
+func (d *Deck) ShallowCopy() *Deck {
+	if d == nil {
+		return &Deck{}
+	}
+	out := &Deck{Hero: d.Hero}
+	if len(d.cards) > 0 {
+		out.cards = d.cards[:len(d.cards):len(d.cards)]
+	}
+	if len(d.Weapons) > 0 {
+		out.Weapons = d.Weapons[:len(d.Weapons):len(d.Weapons)]
+	}
+	out.Sideboard = d.Sideboard
+	out.Equipment = d.Equipment
+	return out
+}
+
 // CopyFrom provides a memory-efficient way to copy a Deck by reusing an already-allocated
 // Deck (the receiver) that's no longer needed: d's cards / Weapons / Hero are overwritten
 // from src, reusing d's existing slice backing arrays when they have enough capacity.
