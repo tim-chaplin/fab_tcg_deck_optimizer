@@ -96,31 +96,14 @@ func TestRoundTrip_PreservesPerCardMarginal(t *testing.T) {
 	}
 }
 
-// Tests that deck.BestTurn.Log round-trips through Marshal/Unmarshal verbatim.
-func TestRoundTrip_PreservesBestTurnLog(t *testing.T) {
+// Tests that deck.BestTurn.Value round-trips through Marshal/Unmarshal.
+func TestRoundTrip_PreservesBestTurnValue(t *testing.T) {
 	rng := rand.New(rand.NewSource(7))
 	d := deck.Random(heroes.Viserai{}, 40, 2, rng, registry.Registry{})
-	want := deck.TurnLog{
-		StartOfTurn: []string{
-			"Hand: Hocus Pocus [B], Consuming Volition [R]",
-			"Arsenal: Sigil of the Arknight [B]",
-			"Auras: 1 Runechant",
-			"Sigil of the Arknight [B]: drew Hit the High Notes [R] into hand",
-		},
-		MyTurn: []string{
-			"Hocus Pocus [B]: PITCH",
-			"Consuming Volition [R]: ATTACK (+4)",
-			"Viserai created a runechant (+1)",
-		},
-		EndOfTurn: []string{
-			"Hand: Hit the High Notes [R]",
-			"Auras: 1 Runechant",
-		},
-	}
 	stats := deck.Stats{
 		Best: deck.BestTurn{
-			Value: 21,
-			Log:   want,
+			Value:    21,
+			BestLine: []deck.CardAssignment{{Role: deck.Attack}},
 		},
 	}
 
@@ -133,9 +116,6 @@ func TestRoundTrip_PreservesBestTurnLog(t *testing.T) {
 		t.Fatalf("Unmarshal: %v", err)
 	}
 
-	if !reflect.DeepEqual(gotStats.Best.Log, want) {
-		t.Errorf("Log: got %+v\n want %+v", gotStats.Best.Log, want)
-	}
 	if gotStats.Best.Value != 21 {
 		t.Errorf("Value: got %d want 21", gotStats.Best.Value)
 	}

@@ -11,8 +11,8 @@ import (
 )
 
 // TurnExtras carries the turn-1 results that don't sit naturally on the returned
-// start-of-next-turn *gameengine.GameState: the turn's score, the played BestLine, and
-// the damage / graveyard produced by the start-of-next-turn aura tick.
+// start-of-next-turn *gameengine.GameState: score, BestLine, and the damage / graveyard
+// produced by the start-of-next-turn aura tick.
 type TurnExtras struct {
 	Value            int
 	BestLine         []deck.CardAssignment
@@ -21,12 +21,11 @@ type TurnExtras struct {
 }
 
 // EvalOneTurnForTesting drives one turn against the deck in source order (no shuffle) so
-// tests can assert chain outcomes plus the start-of-next-turn state without running the
-// full multi-shuffle Evaluate loop — production callers use Evaluate. Returns the GameState
-// at the start of the next turn plus the turn-1 extras; the returned GameState's Value()
-// mirrors extras.Value. initial seeds the turn's carryover (Hero / Arsenal / Auras / Items
-// / Banished / Graveyard / OpponentMarked); pass nil to start clean inheriting the deck's
-// hero.
+// tests can assert chain outcomes plus the start-of-next-turn state without the full
+// multi-shuffle Evaluate loop. Returns the GameState at the start of the next turn plus
+// turn-1 extras; the returned GameState's Value() mirrors extras.Value. initial seeds the
+// turn's carryover (Hero / Arsenal / Auras / Items / Banished / Graveyard /
+// OpponentMarked); pass nil to start clean inheriting the deck's hero.
 func EvalOneTurnForTesting(masterDeck *deck.Deck, mp Matchup, initial *gameengine.GameState, initialHand []deck.Card) (*gameengine.GameState, TurnExtras) {
 	d := masterDeck.Copy()
 	h := d.Hero.(hero.Hero)
@@ -121,14 +120,20 @@ func EvalOneTurnForTesting(masterDeck *deck.Deck, mp Matchup, initial *gameengin
 	for _, c := range d.Draw(handSize - len(held)) {
 		turn2Hand = append(turn2Hand, c.(card.Card))
 	}
-	survivors, _, trigDamage, trigRevealed, trigGraveyarded := processAurasAtStartOfTurn(auraQueue, d)
-	for _, c := range trigRevealed {
-		turn2Hand = append(turn2Hand, c)
+	// Drive the start-of-next-turn aura tick on a fresh carryover state so reveals / damage
+	// / destroyed-with-graveyard side effects are observable on the returned extras.
+	tick := gameengine.GameStateBuilder().Build()
+	for _, a := range auraQueue {
+		tick.CreateAura(a)
 	}
+	preGrav := len(tick.Graveyard())
+	trigDamage := processAurasAtStartOfTurn(tick, d, &turn2Hand)
 	extras.TriggerDamage = trigDamage
-	extras.TriggerGraveyard = make([]deck.Card, len(trigGraveyarded))
-	for i, c := range trigGraveyarded {
-		extras.TriggerGraveyard[i] = c
+	if newGrav := tick.Graveyard(); len(newGrav) > preGrav {
+		extras.TriggerGraveyard = make([]deck.Card, 0, len(newGrav)-preGrav)
+		for _, c := range newGrav[preGrav:] {
+			extras.TriggerGraveyard = append(extras.TriggerGraveyard, c)
+		}
 	}
 
 	gs := gameengine.GameStateBuilder().
@@ -141,8 +146,8 @@ func EvalOneTurnForTesting(masterDeck *deck.Deck, mp Matchup, initial *gameengin
 		Build()
 	gs.SetHand(turn2Hand)
 	gs.SetCardsDrawn(play.State.CardsDrawn())
-	for _, a := range survivors {
-		gs.CreateAura(a)
+	for _, a := range tick.Auras() {
+		gs.CreateAura(a.(*aura.Aura))
 	}
 	for _, it := range itemQueue {
 		gs.CreateItem(it)

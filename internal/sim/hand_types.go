@@ -2,28 +2,22 @@ package sim
 
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/aura"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/gameengine"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/item"
 )
 
 // TurnSummary is the sim-runtime working type returned by Best — the winning card-role
-// assignments plus the post-chain *GameState the next turn inherits. State carries hand
-// / deck / arsenal / graveyard / banished / auras / items / log entries — pure data, no
-// rules engine. The deck-eval loop reads end-of-turn fields off it directly. The persisted
-// per-deck outcome (deck.BestTurn) lifts only the durable fields off TurnSummary;
-// State and friends stay sim-runtime.
+// assignments plus the post-chain *GameState the next turn inherits. State carries hand /
+// deck / arsenal / graveyard / banished / auras / items / log entries; pure data, no rules
+// engine. The persisted per-deck outcome (deck.BestTurn) lifts only the durable fields.
 type TurnSummary struct {
-	BestLine             []deck.CardAssignment
-	SwungWeapons         []string
-	Value                int
-	State                *gameengine.GameState
-	TriggersFromLastTurn []deck.TriggerContribution
-	StartOfTurnAuras     []card.Card
-	DealtHand            []card.Card
-	IncomingDamage       int
-	Cacheable            bool
+	BestLine       []deck.CardAssignment
+	SwungWeapons   []string
+	Value          int
+	State          *gameengine.GameState
+	IncomingDamage int
+	Cacheable      bool
 }
 
 // ArsenalIn returns the assignment for the card that started the turn in the arsenal.
@@ -64,7 +58,6 @@ func itemCountByNameInState(gs *gameengine.GameState, name string) int {
 }
 
 // auraCountByName scans a sim-concrete aura slice for a token aura by display name.
-// Used by the cross-turn bookkeeping in deck_eval.go to size the runechant carryover.
 func auraCountByName(auras []*aura.Aura, name string) int {
 	for _, a := range auras {
 		if a.CardName() == name {

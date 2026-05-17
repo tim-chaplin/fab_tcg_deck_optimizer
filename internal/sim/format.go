@@ -1,35 +1,18 @@
 package sim
 
-// Human-readable rendering of TurnSummary: the compact one-liner FormatBestLine plus the
-// sectioned play-order printout FormatBestTurn. Pure presentation layer — no solver state
-// leaks in, and nothing in this file is called from the partition / sequence hot loops.
+// Compact one-liner FormatBestLine plus the partition helpers that slot the winning
+// BestLine into display sections. Pure presentation, off the hot loops.
 
 import (
-	"fmt"
 	"sort"
 	"strings"
 
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/aura"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/gameengine"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/item"
 )
 
-// formatContribution renders a contribution/damage value for the best-turn printout. Integers
-// render bare; fractional values (proportional defense share when multiple blockers split an
-// incoming attack) show one decimal place.
-func formatContribution(v float64) string {
-	if v == float64(int(v)) {
-		return fmt.Sprintf("%d", int(v))
-	}
-	return fmt.Sprintf("%.1f", v)
-}
-
-// assignmentName returns the card's display name, suffixed with " (from arsenal)" when the
-// assignment came from the arsenal slot — that tag tells readers why the card isn't in the
-// dealt-hand list the optimiser reports alongside. Used by FormatBestLine (debug one-liner)
-// and the held/arsenal footer; FormatBestTurn's numbered play order attaches the arsenal
-// tag to the role label instead ("PLAY from arsenal").
+// assignmentName returns the card's display name, suffixed with " (from arsenal)" when
+// the assignment came from the arsenal slot.
 func assignmentName(a deck.CardAssignment) string {
 	if a.FromArsenal {
 		return a.Card.DisplayName() + " (from arsenal)"
@@ -38,8 +21,7 @@ func assignmentName(a deck.CardAssignment) string {
 }
 
 // FormatBestLine pairs each card in BestLine with its assigned role for debug output, e.g.
-// "Hocus Pocus [B]: PITCH, Runic Reaping [R]: ATTACK". Compact one-line form; use
-// FormatBestTurn for chronological play order.
+// "Hocus Pocus [B]: PITCH, Runic Reaping [R]: ATTACK". Compact one-line form.
 func FormatBestLine(line []deck.CardAssignment) string {
 	parts := make([]string, len(line))
 	for i, a := range line {
@@ -48,32 +30,13 @@ func FormatBestLine(line []deck.CardAssignment) string {
 	return strings.Join(parts, ", ")
 }
 
-// roleLabelWithArsenal attaches " from arsenal" to the role label when a is arsenal-in, so the
-// numbered play order reads "Mauvrion Skies [R]: PLAY from arsenal" rather than tagging the
-// card name. Bare label otherwise.
+// roleLabelWithArsenal attaches " from arsenal" to the role label when a is arsenal-in,
+// so the numbered play order tags the role rather than the card name. Bare label otherwise.
 func roleLabelWithArsenal(a deck.CardAssignment, label string) string {
 	if a.FromArsenal {
 		return label + " from arsenal"
 	}
 	return label
-}
-
-// formatTriggerEffect renders the effect suffix for a cross-turn Aura line — the
-// portion after the aura name. Damage > 0 surfaces as "START OF ACTION PHASE (+N)"; a
-// non-nil Revealed card surfaces as "drew X into hand". No current card both damages and
-// reveals; the comma-join handles it generically in case one is added. Returns "" when the
-// trigger had no visible effect — caller drops the line entirely so a zero-impact
-// reveal-capable aura (e.g. Sigil of the Arknight when the top card wasn't an attack
-// action) doesn't clutter the output with a bare "(+0)".
-func formatTriggerEffect(d deck.TriggerContribution) string {
-	var parts []string
-	if d.Damage > 0 {
-		parts = append(parts, fmt.Sprintf("START OF ACTION PHASE (+%d)", d.Damage))
-	}
-	if d.Revealed != nil {
-		parts = append(parts, fmt.Sprintf("drew %s into hand", d.Revealed.DisplayName()))
-	}
-	return strings.Join(parts, ", ")
 }
 
 // splitPitchesByPhase assigns each pitch card to the defense or attack phase, simulating the
@@ -94,17 +57,10 @@ func splitPitchesByPhase(pitched []deck.CardAssignment, drCost int) (defensePitc
 	return defensePitches, attackPitches
 }
 
-// FormatBestTurn renders a TurnSummary's best-turn printout in one call, equivalent to
-// FormatTurnLog(BuildTurnLog(t, startingAuras, startingItems)). Convenient for one-shot
-// callers (tests, ad-hoc tools) that don't need to retain the deck.TurnLog separately.
-func FormatBestTurn(t TurnSummary, startingAuras []*aura.Aura, startingItems []*item.Item) string {
-	return FormatTurnLog(BuildTurnLog(t, startingAuras, startingItems))
-}
-
-// bestLineDisplayParts groups BestLine entries by the display section each belongs to. Pitches
-// pool before being split into defense / attack phases; blocks split again by whether the card
-// is a Defense Reaction (which has its own "DEFENSE REACTION" tag). drCost sums Defense-Reaction
-// costs so splitPitchesByPhase can decide how much of the pitch pool funds the opponent's turn.
+// bestLineDisplayParts groups BestLine entries by display section. Pitches pool before being
+// split into defense / attack phases; blocks split again by whether the card is a Defense
+// Reaction (its own tag). drCost sums DR costs so splitPitchesByPhase can decide how much
+// of the pitch pool funds the opponent's turn.
 type bestLineDisplayParts struct {
 	pitched          []deck.CardAssignment
 	plainBlocks      []deck.CardAssignment
@@ -114,8 +70,8 @@ type bestLineDisplayParts struct {
 	drCost           int
 }
 
-// partitionBestLineForDisplay sorts the winning line into the buckets FormatBestTurn renders
-// section-by-section. Defenders split on DR membership so DR-only lines get the right label
+// partitionBestLineForDisplay sorts the winning line into the buckets the printout renders
+// section by section. Defenders split on DR membership so DR-only lines get the right label
 // and their cost contributes to the defense-phase pitch target.
 func partitionBestLineForDisplay(line []deck.CardAssignment) bestLineDisplayParts {
 	var parts bestLineDisplayParts
@@ -125,9 +81,6 @@ func partitionBestLineForDisplay(line []deck.CardAssignment) bestLineDisplayPart
 		case deck.Pitch:
 			parts.pitched = append(parts.pitched, a)
 		case deck.Attack:
-			// Attack-phase cost sum is computed here to match the turn's modeling, but is not
-			// surfaced in the rendered output — the attack chain's per-card lines already show
-			// damage credit rather than cost.
 			_ = a.Card.Cost(zeroState)
 		case deck.Defend:
 			if a.Card.Types(nil).IsDefenseReaction() {

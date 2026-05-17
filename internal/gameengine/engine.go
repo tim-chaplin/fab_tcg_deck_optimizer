@@ -9,25 +9,18 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/token"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/trigger"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/triggertype"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/turnlogger"
 )
 
-// GameEngine is the rules-engine wrapper around a *GameState. Cards play against this
-// type via the internal/card.GameEngine interface; the engine's method surface mixes
-// (a) cacheable-aware accessors that flip cacheable as a side effect of touching hidden
-// state and (b) rules-orchestration methods (Fire*, ResolveChainStep, Opt, Clash,
-// DealArcaneDamage, token economy) that apply the FaB rule set on top of the raw state
-// mutations the state itself exposes.
+// GameEngine is the rules-engine wrapper around a *GameState. Cards play against this type
+// via internal/card.GameEngine. The method surface mixes (a) cacheable-aware accessors that
+// flip cacheable as a side effect of touching hidden state and (b) rules-orchestration
+// methods (Fire*, ResolveChainStep, Opt, Clash, DealArcaneDamage, token economy).
 //
-// *GameState is embedded so every pure state accessor (Hand, Deck, Auras, SetX, …) and
-// the Copy / Reset utilities promote automatically. Methods listed below
-// override the embedded ones to add cacheable-flipping or rules logic; everything else
-// falls through to GameState verbatim.
-//
-// GameState owns the data and the cheap pure accessors; GameEngine owns the rules. The
-// split lets internal machinery (TurnSummary.State, sim's per-permutation copy, the
-// find-best winner) pass around a *GameState pointer without dragging the whole engine
-// API along when all it needs to do is read or copy raw state.
+// *GameState is embedded so every pure accessor and the Copy / Reset utilities promote
+// automatically. Methods declared below override the embedded ones to add cacheable-flipping
+// or rules logic. GameState owns the data; GameEngine owns the rules. The split lets
+// internal machinery pass around a *GameState pointer when it just needs to read or copy
+// raw state.
 type GameEngine struct {
 	*GameState
 }
@@ -116,7 +109,7 @@ func (ge *GameEngine) PrependToDeck(c card.Card) {
 
 // RecycleToDeckBottom appends self.Card to the bottom of the deck and flags the chain
 // dispatcher to skip the usual non-persistent → graveyard append. Models the FaB clause
-// "put this on the bottom of its owner's deck" (Relentless Pursuit). Flips IsCacheable.
+// "put this on the bottom of its owner's deck". Flips IsCacheable.
 func (ge *GameEngine) RecycleToDeckBottom(self *card.CardState) {
 	ge.cacheable = false
 	ge.deck.PutBottom([]deck.Card{self.Card})
@@ -177,11 +170,9 @@ func (ge *GameEngine) recycleFromGraveyard(pred func(card.Card) bool, toTop bool
 	return nil, false
 }
 
-// AddToGraveyard appends c to graveyard so later-resolving cards see it. Used by cards
-// running a mini-dispatcher inline (Moon Wish's go-again Sun Kiss play). Flips
-// IsCacheable to false. The promoted AppendGraveyard does the same append without the
-// flip — framework-internal callers (the chain dispatcher's "non-persistent →
-// graveyard" rule, Aura.OnDestroy) reach for that one instead.
+// AddToGraveyard appends c to graveyard so later-resolving cards see it. Card-facing entry
+// point — flips IsCacheable to false. Framework-internal callers use the promoted
+// AppendGraveyard, which appends without the cacheable flip.
 func (ge *GameEngine) AddToGraveyard(c card.Card) {
 	ge.cacheable = false
 	ge.graveyard = append(ge.graveyard, c)
@@ -199,9 +190,8 @@ func (ge *GameEngine) DrawOne() {
 	ge.cardsDrawn++
 }
 
-// PonderDrawOne pops the deck top into the hand without bumping CardsDrawn. Returns false
-// when the deck is empty. Used by the Ponder token aura at end of turn — ponder draws
-// aren't "draws" in the partition-tiebreaker sense, so the counter stays put.
+// PonderDrawOne pops the deck top into the hand without bumping CardsDrawn — Ponder draws
+// don't count as "draws" for the partition tiebreaker. Returns false on an empty deck.
 func (ge *GameEngine) PonderDrawOne() bool {
 	c, ok := ge.PopDeckTop()
 	if !ok {
@@ -465,20 +455,12 @@ func (ge *GameEngine) FireHit(attackerTypes card.TypeSet) {
 	ge.triggers = kept
 }
 
-// FireStartOfTurn walks ge.auras and invokes every triggertype.StartOfTurn entry,
-// calling onFire with each entry's pre-state snapshot so sim can attribute damage /
-// draws / log lines back to the firing aura. Auras that destroy themselves splice
-// out; FiredThisTurn flips reset on each fresh turn boundary.
-//
-// The onFire callback receives:
-//   - pre is the index in ge.auras of the firing entry at the time of the call.
-//   - damage is ge.value's delta during this handler — the partition tiebreaker uses
-//     it.
-//   - drawnCard is the first card the handler appended to hand, or nil. Used by
-//     processAurasAtStartOfTurn to surface "revealed" entries.
-//   - newLogEntries is the slice of LogEntries the handler appended (caller may copy
-//     out).
-func (ge *GameEngine) FireStartOfTurn(onFire func(idx int, damage int, drawnCard card.Card, newLogEntries []turnlogger.LogEntry)) {
+// FireStartOfTurn walks ge.auras and invokes every triggertype.StartOfTurn entry. Auras
+// that destroy themselves splice out; FiredThisTurn resets on each fresh turn boundary.
+// Returns the summed ge.value delta as the start-of-turn damage to fold into the turn's
+// Value.
+func (ge *GameEngine) FireStartOfTurn() int {
+	preValue := ge.value
 	for i := 0; i < len(ge.auras); {
 		a := ge.auras[i]
 		ge.auras[i].SetFiredThisTurn(false)
@@ -486,44 +468,20 @@ func (ge *GameEngine) FireStartOfTurn(onFire func(idx int, damage int, drawnCard
 			i++
 			continue
 		}
-		preHand := len(ge.hand)
-		capture, _ := ge.logger.(interface{ Entries() []turnlogger.LogEntry })
-		preLog := 0
-		if capture != nil {
-			preLog = len(capture.Entries())
-		}
-		preValue := ge.value
 		ge.currentAuraIdx = i
 		ge.currentAuraDestroyed = false
 		a.Fire(ge, ge.logger)
 		ge.currentAuraIdx = -1
-
-		damage := ge.value - preValue
-		var drawn card.Card
-		if len(ge.hand) > preHand {
-			drawn = ge.hand[preHand]
-		}
-		var newEntries []turnlogger.LogEntry
-		if capture != nil {
-			if entries := capture.Entries(); len(entries) > preLog {
-				newEntries = entries[preLog:]
-			}
-		}
-		if onFire != nil {
-			onFire(i, damage, drawn, newEntries)
-		}
 		if !ge.currentAuraDestroyed {
 			i++
 		}
 	}
+	return ge.value - preValue
 }
 
 // DestroyAura removes the aura currently being fired and, when addToGraveyard==true, pushes
-// the aura's source card into the graveyard (token auras with no source no-op). Direct
-// splice (no cacheable flip) — destruction is deterministic from the triggering event.
-//
-// Called by the card.Aura context the engine threads into each handler; cards do not call
-// this directly.
+// the aura's source card into the graveyard (no-op for token auras with no source). Direct
+// splice with no cacheable flip — destruction is deterministic from the triggering event.
 func (ge *GameEngine) DestroyAura(addToGraveyard bool) {
 	i := ge.currentAuraIdx
 	if i < 0 || i >= len(ge.auras) {
@@ -541,18 +499,11 @@ func (ge *GameEngine) DestroyAura(addToGraveyard bool) {
 // === Chain-step resolution ===
 
 // ResolveChainStep runs card.Play on self and then applies the standard chain-step
-// resolution: for an attack-action or weapon-attack, credit self.EffectiveAttack() to
-// ge.value; for a defense-reaction (or DefensiveInstant), credit the EffectiveDefense
-// capped at the remaining unblocked damage and bank it via AddDamageBlocked; for
-// everything else, log (+0). The "<DisplayName>: <VERB> (+N)" chain-step entry is
-// appended after Play returns so any self-buffs Play applied (e.g. modal +2{p} riders
-// flipping self.BonusAttack) are reflected in the displayed delta.
-//
-// Cards' Play body owns card-specific behaviour: riders that emit rider log lines,
-// OnHit registration, conditional self-buffs, sub-card plays. The standard
-// printed-attack-deals-damage / DR-blocks-incoming mechanic is the engine's job;
-// cards don't reach for DealEffectiveAttack / DealEffectiveDefense or emit the chain
-// step themselves.
+// resolution: attack-action / weapon-attack credit self.EffectiveAttack() to ge.value;
+// defense-reaction (or DefensiveInstant) credits EffectiveDefense capped at the remaining
+// unblocked damage; everything else logs (+0). The "<DisplayName>: <VERB> (+N)" chain-step
+// entry is appended after Play returns so self-buffs Play applied are reflected in the
+// displayed delta.
 func (ge *GameEngine) ResolveChainStep(l card.Logger, self *card.CardState) {
 	self.Card.Play(ge, l, self)
 	types := self.Card.Types(nil)
@@ -563,16 +514,14 @@ func (ge *GameEngine) ResolveChainStep(l card.Logger, self *card.CardState) {
 	l.AppendChainStep(ChainStepText(self), n)
 }
 
-// PlayCard implements card.GameEngine.PlayCard. Cards reach this when they resolve
-// another card mid-handler (Moon Wish tutoring Sun Kiss into play on go-again).
+// PlayCard implements card.GameEngine.PlayCard — resolves another card mid-handler.
 func (ge *GameEngine) PlayCard(l card.Logger, self *card.CardState) {
 	ge.ResolveChainStep(l, self)
 }
 
-// chainStepDelta computes the chain step's display delta and applies the standard
-// damage / block side effects. Returns the (+N) value for the log line. types is
-// the caller's already-resolved Types(nil) — passed in to skip a redundant interface
-// dispatch when ResolveChainStep has already paid for one.
+// chainStepDelta computes the chain step's display delta and applies the standard damage /
+// block side effects. Returns the (+N) value for the log line. types is the caller's
+// already-resolved Types(nil) so we skip a second interface dispatch.
 func (ge *GameEngine) chainStepDelta(self *card.CardState, types card.TypeSet) int {
 	switch {
 	case types.IsAttackAction() || types.IsWeaponAttack():
@@ -595,19 +544,16 @@ func (ge *GameEngine) chainStepDelta(self *card.CardState, types card.TypeSet) i
 }
 
 // isDefensiveInstant reports whether c opts into the DR resolution path via the
-// DefensiveInstant marker. Centralised here so ResolveChainStep doesn't repeat the
-// type-assertion shape.
+// DefensiveInstant marker.
 func isDefensiveInstant(c card.Card) bool {
 	_, ok := c.(card.DefensiveInstant)
 	return ok
 }
 
-// ChainStepText returns the "<DisplayName>: <VERB>[ from arsenal]" prefix the chain-
-// step log line is built from. VERB picks WEAPON ATTACK for weapon activated-ability
-// cards (Weapon + Attack), ATTACK for attack-action cards, DEFENSE REACTION for
-// Defense Reactions, and PLAY for everything else; the "from arsenal" suffix tags
-// entries played out of the arsenal slot. Declared as a var so internal/optimizations
-// can swap in a memoised per-(CardID, FromArsenal) implementation at init.
+// ChainStepText returns the "<DisplayName>: <VERB>[ from arsenal]" prefix for the chain-
+// step log line. VERB picks WEAPON ATTACK for Weapon+Attack, ATTACK for attack-actions,
+// DEFENSE REACTION for DRs, and PLAY otherwise. Declared as a var so a memoised
+// implementation can be swapped in at init.
 var ChainStepText = func(self *card.CardState) string {
 	types := self.Card.Types(nil)
 	var verb string
@@ -629,11 +575,10 @@ var ChainStepText = func(self *card.CardState) string {
 
 // === Arcane damage ===
 
-// DealArcaneDamage credits n arcane damage to Value, writes a "Dealt n arcane damage"
-// rider line under source, and flips ArcaneDamageDealt when LikelyDamageHits(n, false)
-// approves so same-turn triggers reading "if you've dealt arcane damage this turn"
-// fire. Routes through dealtArcaneText[n] so the hot path avoids per-call fmt.Sprintf
-// and variadic-int boxing.
+// DealArcaneDamage credits n arcane damage to Value, writes a "Dealt n arcane damage" rider
+// line under source, and flips ArcaneDamageDealt when LikelyDamageHits(n, false) approves
+// so same-turn triggers reading "if you've dealt arcane damage this turn" fire. Routes
+// through dealtArcaneText to avoid per-call fmt.Sprintf and variadic-int boxing.
 func (ge *GameEngine) DealArcaneDamage(l card.Logger, source string, n int) {
 	ge.AddValue(n)
 	if ge.LikelyDamageHits(n, false) {
@@ -646,9 +591,8 @@ func (ge *GameEngine) DealArcaneDamage(l card.Logger, source string, n int) {
 	l.AppendPostTriggerf(source, n, "Dealt %d arcane damage", n)
 }
 
-// dealtArcaneText is the pre-built rider-line cache indexed by arcane-damage count,
-// keeping DealArcaneDamage alloc-free on the hot path. Extend if a new card prints
-// higher arcane.
+// dealtArcaneText is the pre-built rider-line cache indexed by arcane-damage count, keeping
+// DealArcaneDamage alloc-free on the hot path. Extend if a new card prints higher arcane.
 var dealtArcaneText = [...]string{
 	0: "Dealt 0 arcane damage",
 	1: "Dealt 1 arcane damage",
@@ -659,9 +603,8 @@ var dealtArcaneText = [...]string{
 
 // === Trigger registration ===
 
-// AddHitTrigger registers a one-shot triggertype.Hit listener. filter narrows the
-// qualifying hits to a card-type predicate; nil = any hit qualifies. The handler
-// signature matches card.GameEngine's inline declaration.
+// AddHitTrigger registers a one-shot triggertype.Hit listener. filter narrows the qualifying
+// hits to a card-type predicate; nil = any hit qualifies.
 func (ge *GameEngine) AddHitTrigger(self *card.CardState, handler func(card.GameEngine, card.Logger, card.Trigger), filter func(card.TypeSet) bool) {
 	ge.CreateTrigger(trigger.NewFromCard(self.Card, triggertype.Hit, handler, filter))
 }
@@ -674,16 +617,12 @@ func (ge *GameEngine) AddEndOfTurnTrigger(self *card.CardState, handler func(car
 
 // === Tokens ===
 
-// Card-facing token creation / count methods on *GameEngine. internal/card.GameEngine
-// requires these for cards to make / read FaB's five built-in tokens (Runechant,
-// Ponder, Gold, Silver, Copper). The engine identifies live tokens by their CardName
-// (the public canonical display name) and delegates aura / item construction to the
-// registered Build*Aura / Build*Item factories so the concrete types live outside
-// gameengine.
+// Card-facing token creation / count methods on *GameEngine. Live tokens are identified by
+// CardName (the canonical display name); concrete Aura / Item types live outside gameengine
+// and are produced by the token-package factories used below.
 
-// Token display names — the engine matches by CardName when bumping an existing
-// entry's Count or reading a count. Concrete Aura / Item impls report these strings
-// via CardName.
+// Token display names — the engine matches by CardName when bumping an existing entry's
+// Count or reading a count.
 const (
 	tokenNameRunechant = "Runechant"
 	tokenNamePonder    = "Ponder"
@@ -703,8 +642,7 @@ func (ge *GameEngine) CreateRunechants(n int) {
 	bumpOrCreateAura(ge.GameState, tokenNameRunechant, func(n int) Aura { return token.NewRunechant(n) }, n)
 }
 
-// CreatePonders creates n Ponder tokens. No Value credit — Ponder pays out at end of
-// turn (see the runtime's Ponder aura handler).
+// CreatePonders creates n Ponder tokens. No Value credit — Ponder pays out at end of turn.
 func (ge *GameEngine) CreatePonders(n int) {
 	if n <= 0 {
 		return
@@ -766,10 +704,9 @@ func bumpOrCreateItem(s *GameState, name string, build func(int) Item, n int) {
 	s.items = append(s.items, build(n))
 }
 
-// ConsumeItemByName decrements the matching item's Count by n and removes the entry
-// when Count reaches zero. Token items don't head to the graveyard on destroy. No-op
-// when no item matches name. Called by token-ability Play implementations registered
-// outside gameengine.
+// ConsumeItemByName decrements the matching item's Count by n and removes the entry when
+// Count reaches zero. Token items don't head to the graveyard on destroy. No-op when no
+// item matches name.
 func (ge *GameEngine) ConsumeItemByName(name string, n int) {
 	for i := range ge.items {
 		if ge.items[i].CardName() != name {

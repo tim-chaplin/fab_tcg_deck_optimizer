@@ -3,7 +3,6 @@ package sim
 import (
 	"math/rand"
 
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/aura"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/gameengine"
@@ -13,10 +12,10 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapon"
 )
 
-// Test-only exports. Visible to package sim_test files in this directory only.
+// Test-only exports.
 
-// Best re-exports the package-private best for sim_test consumers. state is the carryover
-// *GameState — pass nil to start from a clean state seeded with hero h.
+// Best re-exports the package-private best. state is the carryover *GameState — pass nil
+// to start from a clean state.
 func Best(weapons []weapon.Weapon, hand []card.Card, mp Matchup, d *deck.Deck, state *gameengine.GameState) TurnSummary {
 	return best(weapons, hand, mp, d, state)
 }
@@ -31,11 +30,10 @@ func DeckOf(cards ...card.Card) *deck.Deck {
 }
 
 // SequenceContextForTest wraps *sequenceContext so sim_test files can drive playSequence /
-// bestSequence without touching the unexported type directly.
+// bestSequence without the unexported type.
 type SequenceContextForTest struct{ ctx *sequenceContext }
 
-// NewSequenceContextForTest builds a sequenceContext with the same shape as the in-package
-// newSequenceContextForTest helper.
+// NewSequenceContextForTest builds a sequenceContext via newSequenceContextForTest.
 func NewSequenceContextForTest(h hero.Hero, pitched, deck []card.Card, resourceBudget, runechantCarryover, chainLen int) *SequenceContextForTest {
 	return &SequenceContextForTest{ctx: newSequenceContextForTest(h, pitched, deck, resourceBudget, runechantCarryover, chainLen)}
 }
@@ -45,9 +43,8 @@ func (s *SequenceContextForTest) PlaySequence(order []card.Card) (damage int, fu
 	return s.ctx.playSequence(order)
 }
 
-// PermEngine returns a *GameEngine wrapping the *GameState the most recent
-// PlaySequence call ran the chain against. Tests assert state via this engine
-// (Graveyard, Hand, …) after PlaySequence.
+// PermEngine returns a *GameEngine wrapping the *GameState the most recent PlaySequence
+// call ran the chain against.
 func (s *SequenceContextForTest) PermEngine() *gameengine.GameEngine {
 	if s.ctx.permState == nil {
 		return nil
@@ -55,8 +52,8 @@ func (s *SequenceContextForTest) PermEngine() *gameengine.GameEngine {
 	return s.ctx.permState.Engine()
 }
 
-// BestSequence wraps (*sequenceContext).bestSequence. Drops the returned winning engine
-// pointer — sim_test consumers care only about the damage / future-value / legal triplet.
+// BestSequence wraps (*sequenceContext).bestSequence and returns only the
+// damage / future-value / legal triplet.
 func (s *SequenceContextForTest) BestSequence(attackers []card.Card) (int, int, bool) {
 	d, fv, _, ok := s.ctx.bestSequence(attackers)
 	return d, fv, ok
@@ -95,9 +92,6 @@ func DefendersDamageWithBudget(defenders, pitched []card.Card, d *deck.Deck, ge 
 	return total, gravBuf
 }
 
-// FormatContribution re-exports formatContribution.
-func FormatContribution(v float64) string { return formatContribution(v) }
-
 // AttackBufs is the exported alias of attackBufs.
 type AttackBufs = attackBufs
 
@@ -109,19 +103,16 @@ func NewAttackBufs(handSize, weaponCount int, weapons []weapon.Weapon) *AttackBu
 // Bufs returns the wrapped sequenceContext's pooled scratch buffers.
 func (s *SequenceContextForTest) Bufs() *AttackBufs { return s.ctx.bufs }
 
-// DefenseGravScratch / DRCardStateScratch expose the unexported attackBufs fields. The
-// engine itself is no longer pooled on attackBufs (per-permutation Copy means each chain
-// run owns its own); tests that need a chain-runner engine call State() — each call
-// returns a fresh engine.
+// DefenseGravScratch / DRCardStateScratch expose unexported attackBufs fields. State()
+// returns a fresh engine per call; the chain runner uses per-permutation Copy so attackBufs
+// doesn't pool one.
 func (b *attackBufs) DefenseGravScratch() []card.Card     { return b.defenseGravScratch }
 func (b *attackBufs) DRCardStateScratch() *card.CardState { return &b.drCardStateScratch }
 func (b *attackBufs) State() *gameengine.GameEngine {
 	return gameengine.New()
 }
 
-// EngineWithHand returns a fresh GameState seeded with hand h. Tests that build a
-// TurnSummary by hand use this to populate the State *GameState without going through
-// the full chain runner.
+// EngineWithHand returns a fresh GameState seeded with hand h.
 func EngineWithHand(h []card.Card) *gameengine.GameState {
 	gs := gameengine.GameStateBuilder().Build()
 	gs.SetHand(h)
@@ -179,24 +170,25 @@ func MakeAdaptiveStop(targetSE float64) func(stats *deck.Stats, runs int) bool {
 // MeanStandardError re-exports meanStandardError.
 func MeanStandardError(stats *deck.Stats) float64 { return meanStandardError(stats) }
 
-// ProcessAurasAtStartOfTurn re-exports processAurasAtStartOfTurn. Takes / returns
-// gameengine.Aura at the boundary so sim_test callers (in package sim_test, outside
-// sim's concrete-type namespace) keep working through the engine interface.
-func ProcessAurasAtStartOfTurn(queued []gameengine.Aura, d *deck.Deck) (
+// ProcessAurasAtStartOfTurnForTest drives processAurasAtStartOfTurn against an arbitrary
+// aura queue and returns the post-tick (survivors, damage, revealedCards, graveyardedCards)
+// tuple.
+func ProcessAurasAtStartOfTurnForTest(queued []gameengine.Aura, d *deck.Deck) (
 	survivors []gameengine.Aura,
-	contribs []deck.TriggerContribution,
 	damage int,
 	revealed []card.Card,
 	graveyarded []card.Card,
 ) {
-	inAuras := make([]*aura.Aura, 0, len(queued))
+	gs := gameengine.GameStateBuilder().Build()
 	for _, a := range queued {
-		inAuras = append(inAuras, a.(*aura.Aura))
+		gs.CreateAura(a)
 	}
-	s, c, dmg, rev, gv := processAurasAtStartOfTurn(inAuras, d)
-	out := make([]gameengine.Aura, 0, len(s))
-	for _, a := range s {
-		out = append(out, a)
+	preGrav := len(gs.Graveyard())
+	var revealedBuf []card.Card
+	damage = processAurasAtStartOfTurn(gs, d, &revealedBuf)
+	if newGrav := gs.Graveyard(); len(newGrav) > preGrav {
+		graveyarded = append([]card.Card(nil), newGrav[preGrav:]...)
 	}
-	return out, c, dmg, rev, gv
+	survivors = append([]gameengine.Aura(nil), gs.Auras()...)
+	return survivors, damage, revealedBuf, graveyarded
 }

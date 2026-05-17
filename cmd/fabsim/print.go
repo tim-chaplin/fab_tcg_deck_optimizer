@@ -7,6 +7,7 @@ package main
 
 import (
 	"fmt"
+	"os"
 	"sort"
 	"strconv"
 	"strings"
@@ -14,14 +15,11 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/hero"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
 
-// printCardList writes the deck's card list in canonical "Card list:" form: one
-// grouped-and-sorted count-and-name line per unique card. When the deck carries user-managed
-// Equipment or Sideboard sections, trailing "Equipment:" / "Sideboard:" blocks list their
-// contents in the same grouped form — empty sections are silently skipped so stock decks
-// stay untouched.
+// printCardList writes the deck's "Card list:" block: one grouped-and-sorted count-and-name
+// line per unique card, with optional "Equipment:" / "Sideboard:" blocks appended when
+// those sections are non-empty.
 func printCardList(d *deck.Deck) {
 	fmt.Println("Card list:")
 	printGroupedStrings(d.DisplayNames())
@@ -35,8 +33,7 @@ func printCardList(d *deck.Deck) {
 	}
 }
 
-// printGroupedStrings is the string-slice counterpart of printGroupedCards — used by the
-// Equipment section where entries are opaque names rather than registry cards.
+// printGroupedStrings prints "  Nx Name" lines for ss, grouped and alphabetised.
 func printGroupedStrings(ss []string) {
 	counts := map[string]int{}
 	for _, s := range ss {
@@ -53,10 +50,7 @@ func printGroupedStrings(ss []string) {
 }
 
 // printDeckSummary prints the compact summary: a loadout block (hero, weapons, pitch colour
-// counts) followed by a blank line and a stats block (overall mean, per-cycle means).
-// printBestDeck wraps this with the card list, best-turn block, and per-card stats;
-// `fabsim eval -brief` calls printDeckSummary directly so a scripted re-score gets just the
-// numbers without the card-list scroll.
+// counts) followed by a stats block (overall mean, per-cycle means).
 func printDeckSummary(d *deck.Deck, s deck.Stats) {
 	fmt.Printf("Hero:    %s\n", d.Hero.(hero.Hero).Name())
 	fmt.Printf("Weapons: %s\n", weaponNames(d.Weapons))
@@ -108,10 +102,8 @@ func printSideBySideStats(name1, name2 string, sections []statSection) {
 }
 
 // printBestDeck dumps the full deck report: summary, card list, best turn played, the
-// hand-value histogram, and the per-card value table pairing each card's role-based avg
-// contribution with its correlational marginal hand-value lift. Sections silently skip
-// themselves when their backing slice/map on s is empty so unscored decks still render
-// the parts that do exist.
+// hand-value histogram, and the per-card marginal value table. Sections with no backing
+// data are skipped.
 func printBestDeck(d *deck.Deck, s deck.Stats) {
 	printDeckSummary(d, s)
 	fmt.Println()
@@ -130,28 +122,18 @@ func histogramTitle(s deck.Stats) string {
 	return fmt.Sprintf("Hand-value distribution (%s hands):", commaInt(s.Hands))
 }
 
-// printBestTurn renders the persisted peak-Value turn from its structured TurnLog —
-// "Best turn played (value N):" header plus sim.FormatTurnLog's per-section body. No-ops
-// on an unscored deck (empty TurnLog).
+// printBestTurn streams the peak-Value turn's printout. No-op when nothing is attached.
 func printBestTurn(s deck.Stats) {
-	b := s.Best
-	if b.Log.IsEmpty() {
+	if len(s.Best.BestLine) == 0 || s.PrintBest == nil {
 		return
 	}
-	fmt.Println()
-	fmt.Printf("Best turn played (value %d):\n", b.Value)
-	fmt.Println(sim.FormatTurnLog(b.Log))
+	s.PrintBest(os.Stdout)
 }
 
 // printCardValues renders one row per unique card with the marginal +/- signal: mean turn
-// value when the card sits in the dealt hand or arsenal-in slot, minus the mean turn value
-// when it's absent. Picks up within-turn indirect lift (card draw, runechant generation,
-// mid-turn triggers).
-//
-// Sorted by marginal descending so suspected above-curve cards surface at the top and the
-// drags sit at the bottom — the spread is a smell test for buggy implementations or
-// oversimplified mechanics. See deck.Stats.PerCardMarginal for the cross-turn caveat
-// that limits this view's reach for next-turn-payoff cards.
+// value with the card present in the dealt hand or arsenal-in slot, minus mean when
+// absent. Sorted by marginal descending so above-curve cards surface at the top — used as
+// a smell test for buggy or oversimplified implementations.
 func printCardValues(d *deck.Deck, s deck.Stats) {
 	type row struct {
 		name      string
