@@ -21,12 +21,18 @@ type Handler func(card.GameEngine, card.Logger, card.Aura)
 
 // Aura is the concrete entry the engine stores in its persistent hook list. source is
 // non-nil for card-backed auras; tokenName / tokenID are populated for token auras.
+//
+// activeEngine is set by Fire to the engine driving the current firing event so the
+// aura's own card.Aura-interface methods (Destroy) can route back without allocating a
+// per-fire wrapper struct. Single-threaded per chain-runner; a copied aura clears
+// activeEngine via Copy.
 type Aura struct {
 	triggerType   triggertype.Type
 	fire          Handler
 	source        card.Card
 	tokenName     string
 	tokenID       ids.CardID
+	activeEngine  card.GameEngine
 	count         int
 	oncePerTurn   bool
 	firedThisTurn bool
@@ -92,34 +98,32 @@ func (a *Aura) DecrementCount() int {
 	return a.count
 }
 
-// Fire invokes the stored handler. The handler signature is typed against internal/card so the
-// engine and logger arguments pass straight through without a per-fire assertion.
+// Fire invokes the stored handler. *Aura itself satisfies card.Aura — the activeEngine
+// field is set so Destroy() can route back through engine.DestroyAura without allocating
+// a per-fire wrapper. Cleared after the handler returns so a stray reference to the
+// Aura outside its firing window can't accidentally call into a stale engine.
 func (a *Aura) Fire(engine card.GameEngine, logger card.Logger) {
-	a.fire(engine, logger, &ctx{a: a, engine: engine})
+	a.activeEngine = engine
+	a.fire(engine, logger, a)
+	a.activeEngine = nil
 }
 
 // Copy returns a deep copy boxed as any so the gameengine.Aura interface declaration can
 // avoid referencing its own type — letting concrete impls satisfy without importing.
+// activeEngine is cleared on the copy so a per-permutation aura clone starts with no
+// stale firing-engine pointer.
 func (a *Aura) Copy() any {
 	out := *a
+	out.activeEngine = nil
 	return &out
 }
 
-// ctx is the per-fire value Fire passes to the handler. Implements card.Aura so handler
-// bodies receive the typed surface directly; Destroy routes back to the engine's
-// DestroyAura through the stored card.GameEngine reference.
-type ctx struct {
-	a      *Aura
-	engine card.GameEngine
-}
+// Compile-time check that *Aura satisfies card.Aura.
+var _ card.Aura = (*Aura)(nil)
 
-// Compile-time check that ctx satisfies card.Aura.
-var _ card.Aura = (*ctx)(nil)
-
-func (c *ctx) Count() int          { return c.a.count }
-func (c *ctx) DecrementCount() int { c.a.count--; return c.a.count }
-func (c *ctx) CardName() string    { return c.a.CardName() }
-func (c *ctx) CardID() ids.CardID  { return c.a.CardID() }
-func (c *ctx) Destroy(addToGraveyard bool) {
-	c.engine.DestroyAura(addToGraveyard)
+// Destroy ends the aura currently being fired. Routed through the engine reference Fire
+// installed in activeEngine; calling Destroy outside a Fire window panics deterministically
+// rather than silently no-oping.
+func (a *Aura) Destroy(addToGraveyard bool) {
+	a.activeEngine.DestroyAura(addToGraveyard)
 }
