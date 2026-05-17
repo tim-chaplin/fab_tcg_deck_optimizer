@@ -132,6 +132,14 @@ func bestAttackWithWeapons(
 	defenseDealt := defenseDealtConst
 	defenseCacheable := defenseCacheableConst
 
+	// Seed bufs.pooledGravBuf's prefix with leafState's current graveyard once per Best
+	// call. preparePermState re-slices the pool to len(leafGrav) per perm; the chain
+	// runner only appends past the prefix so the prefix stays intact across perms and
+	// the copy needn't be repeated. modal-blocker leaves re-seed inside the wmask loop
+	// after each runDefense call (which rewrites leafGrav). Sized for the worst-case
+	// mid-chain growth so preparePermState never needs to realloc.
+	ctx.seedPoolGravBuf(len(attackers)+len(ctx.activatedAbilities), len(pitched))
+
 	pitchedVals := bufs.pitchedValsScratch[:0]
 	for _, c := range pitched {
 		pitchedVals = append(pitchedVals, c.Pitch())
@@ -182,6 +190,7 @@ func bestAttackWithWeapons(
 		}
 	}
 
+
 	for pmask := 0; pmask < phaseCount; pmask++ {
 		phase := splitPitchesAcrossPhases(pitchedVals, pmask, phaseCount)
 
@@ -223,6 +232,7 @@ func bestAttackWithWeapons(
 			}
 			if hasModalBlocker {
 				defenseDealt, defenseCacheable = ctx.runDefense(defenders, pitched, d, mp.IncomingDamage, phase.defendBudget-drCost, arsenalDefenderIdx)
+				ctx.seedPoolGravBuf(len(allAttackers), len(attackPitchPerm))
 			}
 			if phase.hasDefendPitches && phase.defendBudget-drCost >= phase.maxDefendPitch {
 				continue
@@ -306,6 +316,25 @@ type sequenceContext struct {
 	// state; the hot bestSequence path threads the winner through return values and
 	// leaves this nil.
 	permState *gameengine.GameState
+}
+
+// seedPoolGravBuf grows bufs.pooledGravBuf if needed, copies leafState.Graveyard() into
+// its prefix, and sets the slice length to len(leafGrav). preparePermState then re-uses
+// the prefix verbatim across all permutations (chain appends only past the prefix, so
+// the prefix never gets overwritten). maxChainAttackers and maxPitchPerm are upper
+// bounds on the per-perm chain that determine the trailing headroom required to keep
+// AppendGraveyard alloc-free.
+func (ctx *sequenceContext) seedPoolGravBuf(maxChainAttackers, maxPitchPerm int) {
+	bufs := ctx.bufs
+	leafGrav := ctx.leafState.Graveyard()
+	gravNeeded := len(leafGrav) + maxChainAttackers + maxPitchPerm
+	if cap(bufs.pooledGravBuf) < gravNeeded {
+		bufs.pooledGravBuf = make([]card.Card, len(leafGrav), gravNeeded)
+		copy(bufs.pooledGravBuf, leafGrav)
+		return
+	}
+	bufs.pooledGravBuf = bufs.pooledGravBuf[:len(leafGrav)]
+	copy(bufs.pooledGravBuf, leafGrav)
 }
 
 // permEngine returns ctx.bufs.pooledEngine with its embedded *GameState rebound to state.
@@ -499,18 +528,11 @@ func (ctx *sequenceContext) preparePermState(playedAttackers []*card.CardState, 
 	// Defend), and blockTotal is zeroed by ResetEphemeralState.
 	s.SetArsenal(ctx.arsenalAtChainStart)
 	s.SetBlockTotal(ctx.blockTotal)
-	// Seed the pool's graveyard from leafState's, with headroom so the chain runner's
-	// AppendGraveyard calls grow ctx.bufs.pooledGravBuf in place rather than allocating
-	// per-perm. The headroom = n + len(attackPitchPerm) bounds chain-extending appends;
-	// cards that banish themselves or hit non-persistent → graveyard land here.
-	leafGrav := ctx.leafState.Graveyard()
-	gravNeeded := len(leafGrav) + n + len(ctx.attackPitchPerm)
-	if cap(bufs.pooledGravBuf) < gravNeeded {
-		bufs.pooledGravBuf = make([]card.Card, 0, gravNeeded)
-	}
-	grav := bufs.pooledGravBuf[:len(leafGrav)]
-	copy(grav, leafGrav)
-	bufs.pooledGravBuf = grav
+	// pooledGravBuf's prefix was seeded with leafState.Graveyard() by
+	// bestAttackWithWeapons / runDefense (modal path), and the chain runner only ever
+	// appends past that prefix — so per perm we just re-slice back to the prefix's
+	// length without re-copying.
+	grav := bufs.pooledGravBuf
 	s.SetGraveyard(grav)
 	if bufs.pooledDeck == nil {
 		bufs.pooledDeck = ctx.deck.ShallowCopy()
