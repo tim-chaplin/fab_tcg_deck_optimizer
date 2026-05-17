@@ -6,7 +6,6 @@ import (
 	"sort"
 	"time"
 
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/deckformat"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
 )
@@ -28,14 +27,14 @@ func runCompareCmd(args []string) {
 	incoming := fs.Int("incoming", 0, "opponent damage per turn (required — both decks are re-scored against this value)")
 	arcaneIncoming := fs.Int("arcane-incoming", 0, "opponent arcane damage per turn (defaults to 0 — the non-arcane matchup; raise it to score cards that gate on incoming arcane)")
 	seed := fs.Int64("seed", time.Now().UnixNano(), "RNG seed (each deck builds an independent RNG from this seed)")
-	formatFlag := fs.String("format", string(deckformat.SilverAge), "constructed format predicate applied to replacement picks when a loaded deck contains NotImplemented cards")
+	formatFlag := fs.String("format", string(SilverAge), "constructed format predicate applied to replacement picks when a loaded deck contains NotImplemented cards")
 	maxCopies := fs.Int("max-copies", defaultMaxCopies, "maximum copies of any single card printing per deck, applied when replacing NotImplemented cards in a loaded deck")
 	_ = parseFlagsAnywhere(fs, args)
 	if fs.NArg() != 2 {
 		die("compare: need exactly 2 positional deck names (got %d); try `fabsim compare <deck1> <deck2>`", fs.NArg())
 	}
 	requireFlag(fs, "compare", "incoming")
-	fmtValue, err := deckformat.Parse(*formatFlag)
+	fmtValue, err := parseGameplayFormat(*formatFlag)
 	if err != nil {
 		die("%v", err)
 	}
@@ -48,7 +47,7 @@ func runCompareCmd(args []string) {
 // hand value, per-cycle means, the hand-value histograms, and finally the per-card count
 // delta. The header line at the top of the output records the (shuffles, incoming)
 // settings so the per-section rows don't have to repeat them.
-func runCompare(name1, name2 string, shuffles int, mp sim.Matchup, maxCopies int, seed int64, fmtValue deckformat.Format) {
+func runCompare(name1, name2 string, shuffles int, mp sim.Matchup, maxCopies int, seed int64, fmtValue GameplayFormat) {
 	// compare always uses a fixed -shuffles count so the two decks are scored under matched
 	// conditions. Adaptive stop would let one deck terminate at a different shuffle count
 	// than the other, breaking the apples-to-apples invariant the per-stat comparison rests on.

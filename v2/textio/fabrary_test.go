@@ -15,7 +15,7 @@ import (
 // that weapons, cards, and hero all come back intact (stats are intentionally not round-tripped).
 func TestFabrary_MarshalUnmarshalRoundTrip(t *testing.T) {
 	rng := rand.New(rand.NewSource(1))
-	d := deck.Random(hero.Viserai{}, 40, 2, rng, nil, registry.Registry{})
+	d := deck.Random(hero.Viserai{}, 40, 2, rng, registry.Registry{})
 
 	text := MarshalFabrary(d)
 	got, skipped, err := UnmarshalFabrary(text)
@@ -45,7 +45,7 @@ func TestFabrary_MarshalUnmarshalRoundTrip(t *testing.T) {
 // update consciously.
 func TestMarshalFormat(t *testing.T) {
 	rng := rand.New(rand.NewSource(1))
-	d := deck.Random(hero.Viserai{}, 40, 2, rng, nil, registry.Registry{})
+	d := deck.Random(hero.Viserai{}, 40, 2, rng, registry.Registry{})
 	text := MarshalFabrary(d)
 
 	wantPrefix := "Name: Viserai\nHero: Viserai\nFormat: Silver Age\n\nArena cards\n"
@@ -215,7 +215,7 @@ Deck cards
 // placed after Deck cards.
 func TestMarshalSideboardSection(t *testing.T) {
 	rng := rand.New(rand.NewSource(1))
-	d := deck.Random(hero.Viserai{}, 40, 2, rng, nil, registry.Registry{})
+	d := deck.Random(hero.Viserai{}, 40, 2, rng, registry.Registry{})
 
 	// Use Mauvrion Skies [R] — its pitch-color suffix exercises the toFabraryCardName
 	// lowercase conversion. Sideboard is a string list; names are stored in canonical form.

@@ -109,7 +109,7 @@ func TestEvalCache_ParallelEquivalentToSequential(t *testing.T) {
 		driftTolerance = 0.5
 	)
 	setupRNG := rand.New(rand.NewSource(123))
-	baseline := deck.Random(hero.Viserai{}, deckSize, maxCopies, setupRNG, nil, registry.Registry{})
+	baseline := deck.Random(hero.Viserai{}, deckSize, maxCopies, setupRNG, registry.Registry{})
 
 	seq := baseline.Copy()
 	seqStats := NewEvaluator().Evaluate(seq, shuffles, Matchup{IncomingDamage: incoming}, rand.New(rand.NewSource(99)))
@@ -203,7 +203,7 @@ func TestEvalCache_EquivalenceWithUncached(t *testing.T) {
 		driftTolerance = 0.05
 	)
 	setupRNG := rand.New(rand.NewSource(123))
-	baseline := deck.Random(hero.Viserai{}, deckSize, maxCopies, setupRNG, nil, registry.Registry{})
+	baseline := deck.Random(hero.Viserai{}, deckSize, maxCopies, setupRNG, registry.Registry{})
 
 	cached := baseline.Copy()
 	cachedStats := NewEvaluator().Evaluate(cached, shuffles, Matchup{IncomingDamage: incoming}, rand.New(rand.NewSource(99)))

@@ -105,7 +105,7 @@ func BenchmarkAnnealWorkerSweep(b *testing.B) {
 	if loaded == nil {
 		b.Skip("mydecks/viserai_v4.json not found — saved deck needed for realistic bench")
 	}
-	all := deck.AllMutations(loaded, 2, registry.Registry{}, nil)
+	all := deck.AllMutations(loaded, 2, registry.Registry{})
 	if len(all) < mutationSampleSize {
 		b.Fatalf("mutation pool size %d < sample size %d", len(all), mutationSampleSize)
 	}

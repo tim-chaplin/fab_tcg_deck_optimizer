@@ -140,7 +140,7 @@ func TestRandom_BuildsLegalDeckWithinCopyBudget(t *testing.T) {
 	reg := newFakeRegistry()
 	rng := rand.New(rand.NewSource(42))
 
-	d := Random(nil, 8, 2, rng, nil, reg)
+	d := Random(nil, 8, 2, rng, reg)
 	if len(d.cards) != 8 {
 		t.Errorf("deck size = %d, want 8", len(d.cards))
 	}
@@ -156,18 +156,6 @@ func TestRandom_BuildsLegalDeckWithinCopyBudget(t *testing.T) {
 	if len(d.Weapons) == 0 || len(d.Weapons) > 2 {
 		t.Errorf("Weapons count = %d, want 1 or 2", len(d.Weapons))
 	}
-}
-
-// Tests that Random honours the legal filter — when legal rejects every card, Random
-// panics rather than returning a partial deck.
-func TestRandom_PanicsWhenLegalFilterRejectsEveryCard(t *testing.T) {
-	reg := newFakeRegistry()
-	defer func() {
-		if recover() == nil {
-			t.Errorf("Random didn't panic when legal rejected every card")
-		}
-	}()
-	Random(nil, 4, 2, rand.New(rand.NewSource(1)), func(Card) bool { return false }, reg)
 }
 
 // TestShuffle_RandomisesCardsInPlace pins Shuffle's two-part contract: the post-shuffle
