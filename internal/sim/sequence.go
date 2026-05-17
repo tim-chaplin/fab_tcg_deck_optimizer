@@ -300,6 +300,13 @@ type sequenceContext struct {
 	// per-perm hand allocation. promoteWinnerState clones the winner's hand onto a fresh
 	// slice so the next preparePermState's hand rebuild can't trample winning state.
 	handBuf []card.Card
+	// gravBuf is the per-context graveyard backing recycled across losing permutations.
+	// Each preparePermState seeds it from leafState.Graveyard() and installs it on the
+	// pool state with headroom, so the chain runner's AppendGraveyard calls extend the
+	// pooled backing in place instead of paying first-append growslice per perm.
+	// promoteWinnerState clones the winner's graveyard onto a fresh slice so the next
+	// preparePermState's reseed can't trample winning state.
+	gravBuf []card.Card
 }
 
 // promoteWinnerDeck swaps winner's pooled-deck pointer for a freshly-allocated copy so
@@ -324,9 +331,12 @@ func (ctx *sequenceContext) promoteWinnerDeck(winner *gameengine.GameState) {
 // (best-of-N! permutations), so the recycled-on-loss path is the common case and the
 // allocation only happens once per new best.
 //
-// Also clones the winner's hand so the next preparePermState's hand rebuild can't
-// trample the winning permutation's recorded hand state. The clone is unconditional
-// because the hand may or may not still alias ctx.handBuf after mid-chain growth.
+// Also clones the winner's hand and graveyard so the next preparePermState's reseed
+// can't trample the winning permutation's recorded state. The clones are unconditional
+// because the slices may or may not still alias ctx.handBuf / ctx.gravBuf after mid-
+// chain growth — if growth happened they're already independent and the extra clone is
+// a no-op cost; if not, the clone is the only thing keeping winner's state stable
+// across the next perm's reset.
 func (ctx *sequenceContext) promoteWinnerState(winner *gameengine.GameState) {
 	if winner == nil {
 		return
@@ -339,6 +349,12 @@ func (ctx *sequenceContext) promoteWinnerState(winner *gameengine.GameState) {
 		clone := make([]card.Card, len(winnerHand))
 		copy(clone, winnerHand)
 		winner.SetHand(clone)
+	}
+	winnerGrav := winner.Graveyard()
+	if len(winnerGrav) > 0 {
+		clone := make([]card.Card, len(winnerGrav))
+		copy(clone, winnerGrav)
+		winner.SetGraveyard(clone)
 	}
 }
 
@@ -447,6 +463,19 @@ func (ctx *sequenceContext) preparePermState(playedAttackers []*card.CardState, 
 	s.SetArsenal(ctx.arsenalAtChainStart)
 	s.SetOpponentMarked(ctx.priorOpponentMarked)
 	s.SetBlockTotal(ctx.blockTotal)
+	// Seed the pool's graveyard from leafState's, with headroom so the chain runner's
+	// AppendGraveyard calls grow ctx.gravBuf in place rather than allocating per-perm.
+	// The headroom = n + len(attackPitchPerm) bounds chain-extending appends; cards that
+	// banish themselves or hit non-persistent → graveyard land here.
+	leafGrav := ctx.leafState.Graveyard()
+	gravNeeded := len(leafGrav) + n + len(ctx.attackPitchPerm)
+	if cap(ctx.gravBuf) < gravNeeded {
+		ctx.gravBuf = make([]card.Card, 0, gravNeeded)
+	}
+	grav := ctx.gravBuf[:len(leafGrav)]
+	copy(grav, leafGrav)
+	ctx.gravBuf = grav
+	s.SetGraveyard(grav)
 	if ctx.pooledDeck == nil {
 		ctx.pooledDeck = ctx.deck.ShallowCopy()
 	} else {
