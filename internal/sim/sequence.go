@@ -202,7 +202,7 @@ func bestAttackWithWeapons(
 			// RunechantCount() off this aura.
 			drCost := 0
 			if len(defenders) > 0 {
-				probe := newDRCostProbe(ctx.runechantCarryover)
+				probe := ctx.drCostProbe(ctx.runechantCarryover)
 				for _, def := range defenders {
 					if !attackerMetaPtrFor(def).actsAsDR {
 						continue
@@ -248,13 +248,24 @@ func bestAttackWithWeapons(
 	return bestDealt, defenseDealt, bestBudget, bestSwung, bestWinner, true, ctx.cacheable && defenseCacheable
 }
 
-// newDRCostProbe returns a fresh empty *GameEngine seeded only with the runechant aura
-// (when runechants > 0) for variable-cost DR cost probing. Defense-reactions read
-// RunechantCount() off this engine to decide their Cost; no other state matters.
-func newDRCostProbe(runechants int) *gameengine.GameEngine {
-	ge := gameengine.New()
+// drCostProbe returns the pooled *GameEngine seeded with a runechant aura at count
+// runechants (when > 0) for variable-cost DR cost probing. Defense-reactions read
+// RunechantCount() off this engine to decide their Cost; no other state matters. The
+// engine and its single runechant aura are lazily built on first call and reused across
+// every Best-call probe — per call we rewrite the aura's Count instead of allocating.
+func (ctx *sequenceContext) drCostProbe(runechants int) *gameengine.GameEngine {
+	bufs := ctx.bufs
+	ge := bufs.pooledDRCostProbe
+	if ge == nil {
+		ge = gameengine.New()
+		bufs.pooledDRCostProbe = ge
+		bufs.pooledDRProbeAura = token.NewRunechant(0)
+	}
+	gs := ge.GameState
+	gs.ClearAuras()
 	if runechants > 0 {
-		ge.CreateAura(token.NewRunechant(runechants))
+		bufs.pooledDRProbeAura.SetCount(runechants)
+		gs.CreateAura(bufs.pooledDRProbeAura)
 	}
 	return ge
 }

@@ -1,6 +1,7 @@
 package sim
 
 import (
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/aura"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/gameengine"
@@ -101,6 +102,14 @@ type attackBufs struct {
 	// allocation goes away. Defense mutations write through to this pool slot; preparePermState
 	// then ResetForPermutationFrom this slot per perm.
 	pooledLeafState *gameengine.GameState
+	// pooledDRCostProbe is the recycled empty *GameEngine the variable-cost DR cost path
+	// reads RunechantCount off. Lazy-init on first DR-cost call; per call we rewrite the
+	// aura count rather than allocating a fresh engine + aura per probe.
+	pooledDRCostProbe *gameengine.GameEngine
+	// pooledDRProbeAura is the recycled runechant *aura.Aura the probe holds in its
+	// auras slot, lazy-init alongside pooledDRCostProbe. Per probe we rewrite its Count
+	// instead of building a fresh aura via token.NewRunechant.
+	pooledDRProbeAura *aura.Aura
 }
 
 func newAttackBufs(handSize, weaponCount int, weapons []weapon.Weapon) *attackBufs {
