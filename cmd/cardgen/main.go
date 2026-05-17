@@ -137,7 +137,7 @@ func emitGroup(dir, pkg, basename string, g CardGroup) error {
 	fmt.Fprintf(&buf, "\npackage %s\n\n", pkg)
 
 	fmt.Fprintf(&buf, "import (\n")
-	fmt.Fprintf(&buf, "\t\"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids\"\n")
+	fmt.Fprintf(&buf, "\t\"github.com/tim-chaplin/fab-deck-optimizer/v2/ids\"\n")
 	fmt.Fprintf(&buf, "\t\"github.com/tim-chaplin/fab-deck-optimizer/v2/card\"\n")
 	fmt.Fprintf(&buf, ")\n\n")
 

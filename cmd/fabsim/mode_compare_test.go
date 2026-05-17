@@ -8,7 +8,7 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/ids"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/hero/heroes"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/registry"

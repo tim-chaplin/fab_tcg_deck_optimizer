@@ -9,7 +9,7 @@
 package item
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/ids"
 )
 
 // Item is the concrete entry the engine stores in its persistent item list. Today every

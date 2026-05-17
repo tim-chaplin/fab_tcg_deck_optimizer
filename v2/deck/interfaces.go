@@ -1,6 +1,6 @@
 package deck
 
-import "github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+import "github.com/tim-chaplin/fab-deck-optimizer/v2/ids"
 
 // Hero is a deck's hero slot. Deck stores Hero through verbatim and never calls into it;
 // the simulator's own Hero contract carries every behaviour. Keeping the deck-side surface

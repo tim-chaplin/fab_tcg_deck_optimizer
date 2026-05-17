@@ -7,7 +7,7 @@
 package card
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/ids"
 )
 
 // GameEngine is the cards-facing rules-engine handle the sim threads through every Card

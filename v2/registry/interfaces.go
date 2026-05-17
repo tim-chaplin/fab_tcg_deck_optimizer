@@ -4,7 +4,7 @@
 // hooks are wired.
 package registry
 
-import "github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+import "github.com/tim-chaplin/fab-deck-optimizer/v2/ids"
 
 // Card is the registry-side view of a printed card: identity + display name, the bits
 // needed to index, name, and dedupe printings. Name is the printed name without pitch

@@ -11,7 +11,7 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/ids"
 )
 
 // Deck is a hero, equipped weapons, and a deck of cards. Sideboard is the reserve-card

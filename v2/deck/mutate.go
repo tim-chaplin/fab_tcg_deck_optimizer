@@ -24,7 +24,7 @@ import (
 	"fmt"
 	"sort"
 
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/ids"
 )
 
 // Mutation is one candidate single-slot or pair change: the mutated Deck plus a

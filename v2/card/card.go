@@ -1,7 +1,7 @@
 package card
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/ids"
 )
 
 // Card is any Flesh and Blood card that can be in a deck. Methods return the card's static
