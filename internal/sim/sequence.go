@@ -294,9 +294,10 @@ type sequenceContext struct {
 	leafState             *gameengine.GameState
 	skipLog               bool
 	cacheable             bool
-	// permState is the active per-permutation state. Set by preparePermState before
-	// each permutation's chain run; nil otherwise. Aliases ctx.bufs.pooledState until
-	// promoteWinnerState hands it off to bestWinner.
+	// permState is the last *GameState a playSequence call ran the chain against. Set
+	// by playSequence so the test-only PermEngine accessor can read the post-chain
+	// state; the hot bestSequence path threads the winner through return values and
+	// leaves this nil.
 	permState *gameengine.GameState
 }
 
@@ -655,6 +656,9 @@ func (ctx *sequenceContext) bestSequence(attackers []card.Card) (int, int, *game
 }
 
 // playSequence is a thin wrapper that builds permMeta and calls playSequenceWithMeta.
+// Records the last-played state on ctx.permState so the test-only PermEngine accessor can
+// inspect the chain run's final state; bestSequence's hot path skips this write since the
+// winner state is plumbed through return values instead.
 func (ctx *sequenceContext) playSequence(order []card.Card) (damage int, futureValue int, residualBudget int, legal bool) {
 	n := len(order)
 	pcBuf := ctx.bufs.pcBuf
@@ -663,7 +667,8 @@ func (ctx *sequenceContext) playSequence(order []card.Card) (damage int, futureV
 		meta[i] = attackerMetaPtrFor(c)
 		ctx.seedChainEntry(&pcBuf[i], c, i)
 	}
-	d, fv, rb, _, lg := ctx.playSequenceWithMeta(n)
+	d, fv, rb, winner, lg := ctx.playSequenceWithMeta(n)
+	ctx.permState = winner
 	return d, fv, rb, lg
 }
 
@@ -699,7 +704,6 @@ func (ctx *sequenceContext) playSequenceWithMeta(n int) (damage int, futureValue
 	}
 	played := ptrBuf[:n]
 	state := ctx.preparePermState(played, n)
-	ctx.permState = state
 	ge := ctx.permEngine(state)
 	pool := pitchPool{
 		perm:      ctx.attackPitchPerm,
