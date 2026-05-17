@@ -24,7 +24,7 @@ func TestEvaluate_ConcurrentNoMapPanic(t *testing.T) {
 	}
 	const iterations = 25
 
-	baseline := deck.Random(hero.Viserai{}, 40, 2, rand.New(rand.NewSource(42)), nil, registry.Registry{})
+	baseline := deck.Random(hero.Viserai{}, 40, 2, rand.New(rand.NewSource(42)), registry.Registry{})
 
 	var wg sync.WaitGroup
 	for w := 0; w < numWorkers; w++ {
@@ -53,9 +53,9 @@ func TestEvaluate_ConcurrentNoMapPanic(t *testing.T) {
 // shapes regardless of whether an improvement is found.
 func TestRunMutationRound_RunsWithoutPanic(t *testing.T) {
 	rng := rand.New(rand.NewSource(42))
-	baseline := deck.Random(hero.Viserai{}, 40, 2, rng, nil, registry.Registry{})
+	baseline := deck.Random(hero.Viserai{}, 40, 2, rng, registry.Registry{})
 	baseAvg := NewEvaluator().Evaluate(baseline, 10, Matchup{}, rng).Mean()
-	mutations := deck.AllMutations(baseline, 2, registry.Registry{}, nil)
+	mutations := deck.AllMutations(baseline, 2, registry.Registry{})
 	// Cap mutations so the test stays under a second; full list is thousands of entries.
 	if len(mutations) > 40 {
 		mutations = mutations[:40]
@@ -94,9 +94,9 @@ func TestRunMutationRound_RunsWithoutPanic(t *testing.T) {
 // Pre-cancels for deterministic behaviour.
 func TestRunMutationRound_AbortsOnContextCancel(t *testing.T) {
 	rng := rand.New(rand.NewSource(42))
-	baseline := deck.Random(hero.Viserai{}, 40, 2, rng, nil, registry.Registry{})
+	baseline := deck.Random(hero.Viserai{}, 40, 2, rng, registry.Registry{})
 	baseAvg := NewEvaluator().Evaluate(baseline, 10, Matchup{}, rng).Mean()
-	mutations := deck.AllMutations(baseline, 2, registry.Registry{}, nil)
+	mutations := deck.AllMutations(baseline, 2, registry.Registry{})
 
 	ctx, cancel := context.WithCancel(context.Background())
 	cancel() // pre-cancel so no mutation ever completes its shallow eval
@@ -134,8 +134,8 @@ func TestRunMutationRound_AbortsOnContextCancel(t *testing.T) {
 // unreachable — workers drain the queue without a serial deep-confirm bottleneck.
 func TestRunMutationRound_TerminatesWithNoImprovement(t *testing.T) {
 	rng := rand.New(rand.NewSource(42))
-	baseline := deck.Random(hero.Viserai{}, 40, 2, rng, nil, registry.Registry{})
-	mutations := deck.AllMutations(baseline, 2, registry.Registry{}, nil)
+	baseline := deck.Random(hero.Viserai{}, 40, 2, rng, registry.Registry{})
+	mutations := deck.AllMutations(baseline, 2, registry.Registry{})
 	// Cap the mutation list so the test stays well under the hang-regression threshold even on
 	// slower CI runners. Full mutation list is thousands of entries.
 	if len(mutations) > 40 {

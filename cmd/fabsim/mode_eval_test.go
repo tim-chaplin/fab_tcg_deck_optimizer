@@ -63,7 +63,7 @@ func TestRunEval_DefaultRewritesFile(t *testing.T) {
 	// Seed a deck with empty stats; the fresh sim is guaranteed to overwrite. 40 random
 	// Viserai cards gives the sim enough to produce non-zero Value.
 	rng := rand.New(rand.NewSource(1))
-	d := deck.Random(hero.Viserai{}, 40, 2, rng, nil, registry.Registry{})
+	d := deck.Random(hero.Viserai{}, 40, 2, rng, registry.Registry{})
 	if err := writeDeck(d, deck.Stats{}, path); err != nil {
 		t.Fatalf("seed writeDeck: %v", err)
 	}
@@ -106,7 +106,7 @@ func TestRunEval_PrintOnlyLeavesFileUnchanged(t *testing.T) {
 	// overwrite Hands>0 with a different number; -print-only must preserve the seeded file
 	// byte-for-byte.
 	rng := rand.New(rand.NewSource(1))
-	d := deck.Random(hero.Viserai{}, 40, 2, rng, nil, registry.Registry{})
+	d := deck.Random(hero.Viserai{}, 40, 2, rng, registry.Registry{})
 	stats := sim.NewEvaluator().Evaluate(d, 20, sim.Matchup{}, rng)
 	if err := writeDeck(d, stats, path); err != nil {
 		t.Fatalf("seed writeDeck: %v", err)
@@ -152,7 +152,7 @@ func TestRunEval_DefaultPrintsFullDump(t *testing.T) {
 	path := filepath.Join(dir, "deck.json")
 
 	rng := rand.New(rand.NewSource(1))
-	d := deck.Random(hero.Viserai{}, 40, 2, rng, nil, registry.Registry{})
+	d := deck.Random(hero.Viserai{}, 40, 2, rng, registry.Registry{})
 	if err := writeDeck(d, deck.Stats{}, path); err != nil {
 		t.Fatalf("seed writeDeck: %v", err)
 	}
@@ -185,7 +185,7 @@ func TestRunEval_BriefSkipsBestTurnAndCardList(t *testing.T) {
 	path := filepath.Join(dir, "deck.json")
 
 	rng := rand.New(rand.NewSource(1))
-	d := deck.Random(hero.Viserai{}, 40, 2, rng, nil, registry.Registry{})
+	d := deck.Random(hero.Viserai{}, 40, 2, rng, registry.Registry{})
 	if err := writeDeck(d, deck.Stats{}, path); err != nil {
 		t.Fatalf("seed writeDeck: %v", err)
 	}

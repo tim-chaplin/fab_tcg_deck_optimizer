@@ -14,7 +14,7 @@ import (
 
 func TestDeck_MarshalUnmarshalRoundTrip(t *testing.T) {
 	rng := rand.New(rand.NewSource(1))
-	d := deck.Random(hero.Viserai{}, 40, 2, rng, nil, registry.Registry{})
+	d := deck.Random(hero.Viserai{}, 40, 2, rng, registry.Registry{})
 	stats := sim.NewEvaluator().Evaluate(d, 50, sim.Matchup{IncomingDamage: 4}, rng)
 
 	data, err := MarshalDeck(d, stats)
@@ -51,7 +51,7 @@ func TestDeck_MarshalUnmarshalRoundTrip(t *testing.T) {
 // Marshal/Unmarshal.
 func TestRoundTrip_PreservesPerCardMarginal(t *testing.T) {
 	rng := rand.New(rand.NewSource(13))
-	d := deck.Random(hero.Viserai{}, 40, 2, rng, nil, registry.Registry{})
+	d := deck.Random(hero.Viserai{}, 40, 2, rng, registry.Registry{})
 	stats := sim.NewEvaluator().Evaluate(d, 50, sim.Matchup{IncomingDamage: 4}, rng)
 	if len(stats.PerCardMarginal) == 0 {
 		t.Fatalf("baseline deck produced no PerCardMarginal entries; test can't differentiate good from bad")
@@ -98,7 +98,7 @@ func TestRoundTrip_PreservesPerCardMarginal(t *testing.T) {
 // Tests that deck.BestTurn.Log round-trips through Marshal/Unmarshal verbatim.
 func TestRoundTrip_PreservesBestTurnLog(t *testing.T) {
 	rng := rand.New(rand.NewSource(7))
-	d := deck.Random(hero.Viserai{}, 40, 2, rng, nil, registry.Registry{})
+	d := deck.Random(hero.Viserai{}, 40, 2, rng, registry.Registry{})
 	want := deck.TurnLog{
 		StartOfTurn: []string{
 			"Hand: Hocus Pocus [B], Consuming Volition [R]",
@@ -144,7 +144,7 @@ func TestRoundTrip_PreservesBestTurnLog(t *testing.T) {
 // multiset of names.
 func TestRoundTrip_PreservesSideboard(t *testing.T) {
 	rng := rand.New(rand.NewSource(42))
-	d := deck.Random(hero.Viserai{}, 40, 2, rng, nil, registry.Registry{})
+	d := deck.Random(hero.Viserai{}, 40, 2, rng, registry.Registry{})
 	d.Sideboard = []string{"Aether Slash [R]", "Aether Slash [R]", "Arcanic Spike [B]"}
 
 	data, err := MarshalDeck(d, deck.Stats{})
@@ -171,7 +171,7 @@ func TestRoundTrip_PreservesSideboard(t *testing.T) {
 // a re-serialize.
 func TestMarshal_OmitsEmptySideboard(t *testing.T) {
 	rng := rand.New(rand.NewSource(1))
-	d := deck.Random(hero.Viserai{}, 40, 2, rng, nil, registry.Registry{})
+	d := deck.Random(hero.Viserai{}, 40, 2, rng, registry.Registry{})
 	data, err := MarshalDeck(d, deck.Stats{})
 	if err != nil {
 		t.Fatalf("Marshal: %v", err)
@@ -207,7 +207,7 @@ func TestUnmarshal_SideboardAcceptsAnyName(t *testing.T) {
 // model equipment pieces).
 func TestRoundTrip_PreservesEquipment(t *testing.T) {
 	rng := rand.New(rand.NewSource(1))
-	d := deck.Random(hero.Viserai{}, 40, 2, rng, nil, registry.Registry{})
+	d := deck.Random(hero.Viserai{}, 40, 2, rng, registry.Registry{})
 	d.Equipment = []string{"Beckoning Haunt", "Nullrune Boots", "Blade Beckoner Helm"}
 
 	data, err := MarshalDeck(d, deck.Stats{})
@@ -229,7 +229,7 @@ func TestRoundTrip_PreservesEquipment(t *testing.T) {
 // the field at all, keeping existing files byte-identical after a re-serialize.
 func TestMarshal_OmitsEmptyEquipment(t *testing.T) {
 	rng := rand.New(rand.NewSource(1))
-	d := deck.Random(hero.Viserai{}, 40, 2, rng, nil, registry.Registry{})
+	d := deck.Random(hero.Viserai{}, 40, 2, rng, registry.Registry{})
 	data, err := MarshalDeck(d, deck.Stats{})
 	if err != nil {
 		t.Fatalf("Marshal: %v", err)

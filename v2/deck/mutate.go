@@ -61,28 +61,24 @@ type Mutation struct {
 // shared filter strips any whose result deck exceeds the per-printing limit.
 //
 // Returned decks share no backing slices with d or each other.
-func AllMutations(d *Deck, maxCopies int, reg Registry, legal func(Card) bool) []Mutation {
-	pool := buildLegalByID(reg, legal)
+func AllMutations(d *Deck, maxCopies int, reg Registry) []Mutation {
+	pool := buildLegalByID(reg)
 	out := weaponLoadoutMutations(d, reg)
 	out = append(out, singleSwapMutations(d, pool)...)
 	out = append(out, pairSwapMutations(d, CardPairs, pool)...)
 	return filterMaxCopiesViolations(out, maxCopies)
 }
 
-// buildLegalByID materialises the registry's legal pool as an ID→Card map filtered by
-// legal, plus the IDs in ascending order for stable iteration. The map gives the mutation
-// generators an O(1) "is this swap-in eligible" check without re-scanning the registry on
-// every candidate.
-func buildLegalByID(reg Registry, legal func(Card) bool) legalCardPool {
+// buildLegalByID materialises the registry's legal pool as an ID→Card map plus the IDs
+// in ascending order for stable iteration. The map gives the mutation generators an O(1)
+// "is this swap-in eligible" check without re-scanning the registry on every candidate.
+func buildLegalByID(reg Registry) legalCardPool {
 	cards := reg.LegalCards()
 	pool := legalCardPool{
 		byID: make(map[ids.CardID]Card, len(cards)),
 		ids:  make([]ids.CardID, 0, len(cards)),
 	}
 	for _, c := range cards {
-		if legal != nil && !legal(c) {
-			continue
-		}
 		pool.byID[c.ID()] = c
 		pool.ids = append(pool.ids, c.ID())
 	}

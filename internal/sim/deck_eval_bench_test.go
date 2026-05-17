@@ -21,7 +21,7 @@ func BenchmarkEvaluate(b *testing.B) {
 		incoming  = 0
 	)
 	setupRNG := rand.New(rand.NewSource(42))
-	d := deck.Random(hero.Viserai{}, deckSize, maxCopies, setupRNG, nil, registry.Registry{})
+	d := deck.Random(hero.Viserai{}, deckSize, maxCopies, setupRNG, registry.Registry{})
 	ev := NewEvaluator()
 	evalRNG := rand.New(rand.NewSource(42))
 

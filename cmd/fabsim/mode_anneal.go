@@ -12,7 +12,6 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/deckformat"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/mydecks"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
@@ -33,7 +32,7 @@ type annealConfig struct {
 	maxCopies  int
 	seed       int64
 	outPath    string
-	format     deckformat.Format
+	format     Format
 	debug      bool
 	reevaluate bool
 	// startTemp / tempDecay / minTemp are the simulated-annealing knobs. startTemp of 0
@@ -56,16 +55,10 @@ type annealConfig struct {
 	maxDuration time.Duration
 }
 
-// legalFilter returns the card-pool predicate for this run's format. anneal always runs under a
-// format, so this is non-nil; the deck package accepts nil for "no filtering" generally.
-func (c annealConfig) legalFilter() func(deck.Card) bool {
-	return c.format.IsLegal
-}
-
 // defaultDeckNameFor returns the deck name when -deck isn't supplied, keyed by hero, format, and
 // -incoming. Different regimes produce different optimal decks, so each gets its own file to
 // avoid hill-climbing one regime's best under another regime's objective.
-func defaultDeckNameFor(h hero.Hero, f deckformat.Format, incoming int) string {
+func defaultDeckNameFor(h hero.Hero, f Format, incoming int) string {
 	return fmt.Sprintf("%s_%s_%d_incoming", strings.ToLower(h.Name()), f, incoming)
 }
 
@@ -80,7 +73,7 @@ func runAnnealCmd(args []string) {
 	deckSize := fs.Int("deck-size", 40, "number of cards per deck")
 	maxCopies := fs.Int("max-copies", defaultMaxCopies, "maximum copies of any single card printing per deck")
 	seed := fs.Int64("seed", time.Now().UnixNano(), "RNG seed")
-	formatFlag := fs.String("format", string(deckformat.SilverAge), "constructed format whose banlist restricts the card pool during search (only \"silver_age\" is supported today)")
+	formatFlag := fs.String("format", string(SilverAge), "constructed format whose banlist restricts the card pool during search (only \"silver_age\" is supported today)")
 	debug := fs.Bool("debug", false, "print additional debug info to stdout / stderr")
 	reevaluate := fs.Bool("reevaluate", false, "force re-evaluation of the loaded deck's baseline avg, even if its prior run count already matches the current -shuffles budget. Use after adjusting modelling assumptions or fixing bugs that may have shifted the deck's true score.")
 	finalize := fs.Bool("finalize", false, "high-precision pass — sets -shuffles to 100000 (fixed) and tightens -min-improvement to 0.01. Use on a deck that's already converged to squeeze out the remaining sub-percent improvements.")
@@ -98,7 +91,7 @@ func runAnnealCmd(args []string) {
 	}
 	requireFlag(fs, "anneal", "incoming")
 
-	fmtValue, err := deckformat.Parse(*formatFlag)
+	fmtValue, err := parseFormat(*formatFlag)
 	if err != nil {
 		die("%v", err)
 	}
@@ -286,7 +279,7 @@ func runAnneal(cfg annealConfig) annealResult {
 // disproportionately, and what keeps the probabilistic SA gate from concentrating its
 // acceptances on a fixed slice of the solution space.
 func buildRoundMutations(cfg annealConfig, rng *rand.Rand, current *deck.Deck) []deck.Mutation {
-	mutations := deck.AllMutations(current, cfg.maxCopies, registry.Registry{}, cfg.legalFilter())
+	mutations := deck.AllMutations(current, cfg.maxCopies, registry.Registry{})
 	rng.Shuffle(len(mutations), func(i, j int) {
 		mutations[i], mutations[j] = mutations[j], mutations[i]
 	})
@@ -397,8 +390,7 @@ func prepareBaseline(cfg annealConfig, rng *rand.Rand) (*deck.Deck, deck.Stats, 
 	}
 	if best == nil {
 		fmt.Fprintf(os.Stderr, "no deck at %s; generating a random starting deck\n", cfg.outPath)
-		best = deck.Random(hero.Viserai{}, cfg.deckSize, cfg.maxCopies, rng,
-			cfg.legalFilter(), registry.Registry{})
+		best = deck.Random(hero.Viserai{}, cfg.deckSize, cfg.maxCopies, rng, registry.Registry{})
 		bestStats = baselineEvaluate(best, cfg, rng)
 		bestAvg := bestStats.Mean()
 		if err := writeDeck(best, bestStats, cfg.outPath); err != nil {

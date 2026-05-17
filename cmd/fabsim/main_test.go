@@ -9,7 +9,6 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/deckformat"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/hero"
 )
 
@@ -193,12 +192,12 @@ func TestWriteFileAtomic_PreservesOldOnFailure(t *testing.T) {
 // TestDefaultDeckNameFor pins the filename shape: hero_format_incoming.
 func TestDefaultDeckNameFor(t *testing.T) {
 	cases := []struct {
-		f    deckformat.Format
+		f    Format
 		in   int
 		want string
 	}{
-		{deckformat.SilverAge, 0, "viserai_silver_age_0_incoming"},
-		{deckformat.SilverAge, 4, "viserai_silver_age_4_incoming"},
+		{SilverAge, 0, "viserai_silver_age_0_incoming"},
+		{SilverAge, 4, "viserai_silver_age_4_incoming"},
 	}
 	for _, c := range cases {
 		if got := defaultDeckNameFor(hero.Viserai{}, c.f, c.in); got != c.want {

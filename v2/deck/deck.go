@@ -320,11 +320,7 @@ func (d *Deck) ApplyDefaults(defaults Defaults) {
 // reg.LegalWeapons (one 2H or two 1H; dual-wielding the same weapon allowed) and size
 // cards drawn uniformly from reg.LegalCards one at a time, skipping any roll that would
 // exceed maxCopies for the picked card's ID.
-//
-// legal further filters the card pool: only cards for which legal(c) returns true are
-// candidates. Pass nil for no filtering. Callers typically wire a constructed format's
-// banlist predicate through here.
-func Random(h Hero, size, maxCopies int, rng *rand.Rand, legal func(Card) bool, reg Registry) *Deck {
+func Random(h Hero, size, maxCopies int, rng *rand.Rand, reg Registry) *Deck {
 	if maxCopies < 1 {
 		panic(fmt.Sprintf("deck: Random requires maxCopies >= 1 (got %d)", maxCopies))
 	}
@@ -334,9 +330,9 @@ func Random(h Hero, size, maxCopies int, rng *rand.Rand, legal func(Card) bool, 
 	}
 	weapons := loadouts[rng.Intn(len(loadouts))]
 
-	pool := legalPool(reg, legal)
+	pool := reg.LegalCards()
 	if len(pool) == 0 {
-		panic("deck: Random's legal filter rejected every card — cannot build a deck")
+		panic("deck: Random has no legal cards — cannot build a deck")
 	}
 	counts := map[ids.CardID]int{}
 	picks := make([]Card, 0, size)
@@ -349,20 +345,4 @@ func Random(h Hero, size, maxCopies int, rng *rand.Rand, legal func(Card) bool, 
 		picks = append(picks, c)
 	}
 	return New(h, weapons, picks)
-}
-
-// legalPool returns reg.LegalCards filtered by legal. legal == nil disables the extra
-// filter (still excludes pool-marked cards via reg's own definition).
-func legalPool(reg Registry, legal func(Card) bool) []Card {
-	pool := reg.LegalCards()
-	if legal == nil {
-		return pool
-	}
-	filtered := pool[:0]
-	for _, c := range pool {
-		if legal(c) {
-			filtered = append(filtered, c)
-		}
-	}
-	return filtered
 }
