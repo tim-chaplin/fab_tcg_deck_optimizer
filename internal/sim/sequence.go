@@ -373,7 +373,7 @@ func (ctx *sequenceContext) runDefense(defenders, pitched []card.Card, deckPile 
 // and ResetEphemeralState zeroed the damage-blocked accumulator, so the attack chain
 // already sees the full matchup figure.
 func (ctx *sequenceContext) preparePermState(playedAttackers []*card.CardState, n int) *gameengine.GameState {
-	s := ctx.leafState.Copy()
+	s := ctx.leafState.CopyForPermutation()
 	s.ResetEphemeralState()
 	s.SetHero(ctx.hero)
 	s.SetArsenal(ctx.arsenalAtChainStart)

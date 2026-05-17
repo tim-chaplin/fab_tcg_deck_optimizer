@@ -104,6 +104,46 @@ func (gs *GameState) Copy() *GameState {
 	return &out
 }
 
+// CopyForPermutation is a lighter variant of Copy tailored to the chain runner's
+// per-permutation reset path. The chain runner calls ResetEphemeralState immediately
+// after, which wipes hand / pitched / defenders / cardsPlayed / cardsRemaining /
+// triggers anyway, so those slices are left nil rather than deep-copied. The deck is
+// left nil too — the caller installs a fresh ShallowCopy. Graveyard and banished are
+// shallow-copied (slice header with cap=len, sharing the backing) so the chain's
+// append-only mutations allocate fresh backings on first write and the receiver's
+// backings stay intact. Auras and items still need full per-entry copies because their
+// fire-this-turn / count fields mutate per permutation.
+func (gs *GameState) CopyForPermutation() *GameState {
+	out := *gs
+	out.hand = nil
+	out.pitched = nil
+	out.defenders = nil
+	out.cardsPlayed = nil
+	out.cardsRemaining = nil
+	out.triggers = nil
+	out.deck = nil
+	out.logger = nil
+	if n := len(gs.graveyard); n > 0 {
+		out.graveyard = gs.graveyard[:n:n]
+	}
+	if n := len(gs.banished); n > 0 {
+		out.banished = gs.banished[:n:n]
+	}
+	if len(gs.auras) > 0 {
+		out.auras = make([]Aura, len(gs.auras))
+		for i, a := range gs.auras {
+			out.auras[i] = a.Copy().(Aura)
+		}
+	}
+	if len(gs.items) > 0 {
+		out.items = make([]Item, len(gs.items))
+		for i, it := range gs.items {
+			out.items[i] = it.Copy().(Item)
+		}
+	}
+	return &out
+}
+
 // ResetEphemeralState returns gs to its start-of-turn baseline: it discards every field
 // that playing out a turn accumulates, keeping only the cross-turn carryover (hero, deck,
 // arsenal, graveyard, banished, the aura / item lists, opponentMarked, and the matchup's
