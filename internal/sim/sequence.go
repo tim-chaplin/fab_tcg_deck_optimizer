@@ -143,11 +143,8 @@ func bestAttackWithWeapons(
 	}
 
 	attackersMinCost := 0
-	attackersMaxCost := 0
 	for _, a := range attackers {
-		m := attackerMetaPtrFor(a)
-		attackersMinCost += m.minCost
-		attackersMaxCost += m.maxCost
+		attackersMinCost += attackerMetaPtrFor(a).minCost
 	}
 
 	copy(bufs.attackerBuf, attackers)
@@ -241,7 +238,6 @@ func bestAttackWithWeapons(
 		}
 	}
 
-	_ = attackersMaxCost
 	if !foundFeasible {
 		return 0, 0, chainBudget{}, nil, nil, false, defenseCacheable
 	}
@@ -484,9 +480,13 @@ func (ctx *sequenceContext) preparePermState(playedAttackers []*card.CardState, 
 	}
 	s := bufs.pooledState
 	s.ResetEphemeralState()
-	s.SetHero(ctx.hero)
+	// Hero and opponentMarked already mirror leafState (via the CopyPersistentStateFrom
+	// above or the freshly-allocated copy) and leafState's values match ctx.hero /
+	// ctx.priorOpponentMarked respectively — they all root back to masterState. Only
+	// arsenal and blockTotal need explicit setting: arsenal may have been promoted out
+	// of the leaf via findArsenalCard (nil-ed when the slot was reassigned to Attack/
+	// Defend), and blockTotal is zeroed by ResetEphemeralState.
 	s.SetArsenal(ctx.arsenalAtChainStart)
-	s.SetOpponentMarked(ctx.priorOpponentMarked)
 	s.SetBlockTotal(ctx.blockTotal)
 	// Seed the pool's graveyard from leafState's, with headroom so the chain runner's
 	// AppendGraveyard calls grow ctx.bufs.pooledGravBuf in place rather than allocating
@@ -578,11 +578,11 @@ func (ctx *sequenceContext) bestSequence(attackers []card.Card) (int, int, *game
 	tryPitchOrdering := func() {
 		tryOnce := func() {
 			dmg, futureValue, _, winner, legal := ctx.playSequenceWithMeta(n)
-			if winner != nil && ctx.cacheable && !winner.IsCacheable() {
-				ctx.cacheable = false
-			}
 			if !legal {
 				return
+			}
+			if ctx.cacheable && !winner.IsCacheable() {
+				ctx.cacheable = false
 			}
 			drawn := winner.CardsDrawn()
 			cmp := chainScoreCmp(dmg, drawn, futureValue, best, bestCardsDrawn, bestFutureValue)
