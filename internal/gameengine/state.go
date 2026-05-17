@@ -104,16 +104,15 @@ func (gs *GameState) Copy() *GameState {
 	return &out
 }
 
-// CopyForPermutation is a lighter variant of Copy tailored to the chain runner's
-// per-permutation reset path. The chain runner calls ResetEphemeralState immediately
-// after, which wipes hand / pitched / defenders / cardsPlayed / cardsRemaining /
-// triggers anyway, so those slices are left nil rather than deep-copied. The deck is
-// left nil too — the caller installs a fresh ShallowCopy. Graveyard and banished are
-// shallow-copied (slice header with cap=len, sharing the backing) so the chain's
-// append-only mutations allocate fresh backings on first write and the receiver's
-// backings stay intact. Auras and items still need full per-entry copies because their
-// fire-this-turn / count fields mutate per permutation.
-func (gs *GameState) CopyForPermutation() *GameState {
+// CopyPersistentState is a lighter variant of Copy that copies only the cross-turn
+// persistent state — the inverse of ResetEphemeralState's reset set. Hand, pitched,
+// defenders, cardsPlayed, cardsRemaining, triggers, deck, and logger are left nil
+// (callers that want those populated set them after copying). Graveyard and banished
+// are shallow-copied (slice header with cap=len, sharing the backing) so append-only
+// mutations on the copy allocate fresh backings on first write and the receiver's
+// backings stay intact. Auras and items get full per-entry copies because their
+// fire-this-turn / count fields mutate independently of the source.
+func (gs *GameState) CopyPersistentState() *GameState {
 	out := *gs
 	out.hand = nil
 	out.pitched = nil
