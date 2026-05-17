@@ -1,0 +1,24 @@
+// Enchanting Melody — Generic Action - Aura. Cost 2. Printed pitch variants: Red 1, Yellow 2, Blue
+// 3. Defense 2.
+//
+// Text: "**Go again** If your hero would be dealt damage, instead destroy Enchanting Melody and
+// prevent 4 damage that source would deal. At the beginning of your end phase, destroy Enchanting
+// Melody unless you have played a 'non-attack' action card this turn."
+
+package notimplemented
+
+import (
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+)
+
+// not implemented: damage-prevention trigger, end-phase destruction clause
+
+func (EnchantingMelodyRed) Play(card.GameEngine, card.Logger, *card.CardState) {}
+
+// not implemented: damage-prevention trigger, end-phase destruction clause
+
+func (EnchantingMelodyYellow) Play(card.GameEngine, card.Logger, *card.CardState) {}
+
+// not implemented: damage-prevention trigger, end-phase destruction clause
+
+func (EnchantingMelodyBlue) Play(card.GameEngine, card.Logger, *card.CardState) {}

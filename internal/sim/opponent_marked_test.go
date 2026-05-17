@@ -3,8 +3,8 @@ package sim
 import (
 	"testing"
 
-	"github.com/tim-chaplin/fab-deck-optimizer/v2/gameengine"
-	"github.com/tim-chaplin/fab-deck-optimizer/v2/token"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/gameengine"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/token"
 )
 
 // Tests that the runechant aura handler leaves OpponentMarked alone — arcane damage

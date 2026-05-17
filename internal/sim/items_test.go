@@ -3,10 +3,10 @@ package sim
 import (
 	"testing"
 
-	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
-	"github.com/tim-chaplin/fab-deck-optimizer/v2/gameengine"
-	"github.com/tim-chaplin/fab-deck-optimizer/v2/item"
-	"github.com/tim-chaplin/fab-deck-optimizer/v2/token"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/gameengine"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/item"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/token"
 )
 
 // Tests that the eval cache fingerprints priorItems so calls with different gold counts

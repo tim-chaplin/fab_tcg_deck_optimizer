@@ -3,11 +3,11 @@ package turntests
 import (
 	"testing"
 
-	"github.com/tim-chaplin/fab-deck-optimizer/v2/card/cards"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card/cards"
 
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/gameengine"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
-	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
-	"github.com/tim-chaplin/fab-deck-optimizer/v2/gameengine"
 )
 
 // TestTrotAlong_NoAttackReturnsZero covers the miss branch: no qualifying next attack → grant

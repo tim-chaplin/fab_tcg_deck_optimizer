@@ -11,10 +11,10 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/hero"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
-	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
-	"github.com/tim-chaplin/fab-deck-optimizer/v2/hero"
-	"github.com/tim-chaplin/fab-deck-optimizer/v2/registry"
 )
 
 // printCardList writes the deck's card list in canonical "Card list:" form: one

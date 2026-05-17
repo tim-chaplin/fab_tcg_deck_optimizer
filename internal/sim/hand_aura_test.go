@@ -3,10 +3,10 @@ package sim
 import (
 	"testing"
 
-	"github.com/tim-chaplin/fab-deck-optimizer/v2/aura"
-	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
-	"github.com/tim-chaplin/fab-deck-optimizer/v2/gameengine"
-	"github.com/tim-chaplin/fab-deck-optimizer/v2/triggertype"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/aura"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/gameengine"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/triggertype"
 )
 
 // Tests that an OncePerTurn AttackAction aura fires on the first call and is gated by

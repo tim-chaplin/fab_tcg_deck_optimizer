@@ -12,16 +12,16 @@ import (
 	"sort"
 	"sync"
 
-	"github.com/tim-chaplin/fab-deck-optimizer/v2/ids"
-	"github.com/tim-chaplin/fab-deck-optimizer/v2/aura"
-	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
-	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
-	"github.com/tim-chaplin/fab-deck-optimizer/v2/gameengine"
-	"github.com/tim-chaplin/fab-deck-optimizer/v2/hero"
-	"github.com/tim-chaplin/fab-deck-optimizer/v2/item"
-	"github.com/tim-chaplin/fab-deck-optimizer/v2/triggertype"
-	"github.com/tim-chaplin/fab-deck-optimizer/v2/turnlogger"
-	"github.com/tim-chaplin/fab-deck-optimizer/v2/weapon"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/aura"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/gameengine"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/hero"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/ids"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/item"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/triggertype"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/turnlogger"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapon"
 )
 
 // Evaluate simulates `runs` shuffles of d. Each run assembles successive hands of

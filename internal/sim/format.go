@@ -9,10 +9,10 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/tim-chaplin/fab-deck-optimizer/v2/aura"
-	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
-	"github.com/tim-chaplin/fab-deck-optimizer/v2/gameengine"
-	"github.com/tim-chaplin/fab-deck-optimizer/v2/item"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/aura"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/gameengine"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/item"
 )
 
 // formatContribution renders a contribution/damage value for the best-turn printout. Integers

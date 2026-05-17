@@ -3,7 +3,7 @@ package main
 import (
 	"testing"
 
-	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
 )
 
 // TestBuildHistogramColumns_Stretch verifies the stretch regime: each integer value places a

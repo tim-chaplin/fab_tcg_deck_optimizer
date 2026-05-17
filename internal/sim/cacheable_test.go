@@ -10,10 +10,10 @@ package sim
 import (
 	"testing"
 
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card/cards"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/gameengine"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
-	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
-	"github.com/tim-chaplin/fab-deck-optimizer/v2/card/cards"
-	"github.com/tim-chaplin/fab-deck-optimizer/v2/gameengine"
 )
 
 // TestBest_CacheableEmptyHand: no chain ran, nothing read hidden state — Cacheable=true.

@@ -33,7 +33,7 @@ import (
 
 	"github.com/klauspost/cpuid/v2"
 
-	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
 )
 
 // mutationImprovement is the per-acceptance message a worker sends to the coordinator: the

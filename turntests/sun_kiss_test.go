@@ -3,11 +3,11 @@ package turntests
 import (
 	"testing"
 
-	"github.com/tim-chaplin/fab-deck-optimizer/v2/card/cards"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card/cards"
 
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/gameengine"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
-	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
-	"github.com/tim-chaplin/fab-deck-optimizer/v2/gameengine"
 )
 
 // TestSunKiss_SoloIsHealOnly: with no Moon Wish in CardsPlayed the printed health-gain

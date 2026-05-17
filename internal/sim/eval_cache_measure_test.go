@@ -18,14 +18,14 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
-	"github.com/tim-chaplin/fab-deck-optimizer/v2/hero/heroes"
-	"github.com/tim-chaplin/fab-deck-optimizer/v2/registry"
-	"github.com/tim-chaplin/fab-deck-optimizer/v2/textio"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/hero/heroes"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/textio"
 
-	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
-	"github.com/tim-chaplin/fab-deck-optimizer/v2/card/cards"
-	"github.com/tim-chaplin/fab-deck-optimizer/v2/gameengine"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card/cards"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/gameengine"
 )
 
 // loadRealDeck reads mydecks/viserai_v4.json from somewhere up the directory tree.

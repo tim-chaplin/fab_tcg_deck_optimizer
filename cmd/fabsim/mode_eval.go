@@ -7,9 +7,9 @@ import (
 	"os"
 	"time"
 
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/gameengine"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
-	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
-	"github.com/tim-chaplin/fab-deck-optimizer/v2/gameengine"
 )
 
 // runEvalCmd parses eval's flags and dispatches to runEval. eval always operates on an

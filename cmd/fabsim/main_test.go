@@ -9,7 +9,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/tim-chaplin/fab-deck-optimizer/v2/hero/heroes"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/hero/heroes"
 )
 
 // TestFabraryPathFor pins the sibling-path derivation: .json is swapped for .txt; anything else

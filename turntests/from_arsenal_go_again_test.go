@@ -3,10 +3,10 @@ package turntests
 import (
 	"testing"
 
-	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
-	"github.com/tim-chaplin/fab-deck-optimizer/v2/card/cards"
-	notimpl "github.com/tim-chaplin/fab-deck-optimizer/v2/card/cards/notimplemented"
-	"github.com/tim-chaplin/fab-deck-optimizer/v2/gameengine"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card/cards"
+	notimpl "github.com/tim-chaplin/fab-deck-optimizer/internal/card/cards/notimplemented"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/gameengine"
 )
 
 // Tests that the played-from-arsenal go-again rider flips self.GrantedGoAgain iff

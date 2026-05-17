@@ -12,13 +12,13 @@ import (
 	"sync/atomic"
 	"time"
 
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/gameengine"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/hero"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/hero/heroes"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
-	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
-	"github.com/tim-chaplin/fab-deck-optimizer/v2/gameengine"
-	"github.com/tim-chaplin/fab-deck-optimizer/v2/hero"
-	"github.com/tim-chaplin/fab-deck-optimizer/v2/hero/heroes"
-	"github.com/tim-chaplin/fab-deck-optimizer/v2/registry"
-	"github.com/tim-chaplin/fab-deck-optimizer/v2/textio"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/textio"
 )
 
 // annealConfig bundles the knobs runAnneal needs. Built by runAnnealCmd from its flag.FlagSet.

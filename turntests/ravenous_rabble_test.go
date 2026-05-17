@@ -3,11 +3,11 @@ package turntests
 import (
 	"testing"
 
-	"github.com/tim-chaplin/fab-deck-optimizer/v2/card/cards"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card/cards"
 
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/gameengine"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
-	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
-	"github.com/tim-chaplin/fab-deck-optimizer/v2/gameengine"
 )
 
 // TestRavenousRabble_EmptyDeckReturnsBasePower: with no deck, no card is revealed → no penalty.

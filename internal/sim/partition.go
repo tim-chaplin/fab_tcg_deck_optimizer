@@ -6,10 +6,10 @@ package sim
 // filled, plus the roleAllowed policy function that shapes the partition tree.
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
-	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
-	"github.com/tim-chaplin/fab-deck-optimizer/v2/gameengine"
-	"github.com/tim-chaplin/fab-deck-optimizer/v2/weapon"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/gameengine"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapon"
 )
 
 func (e *Evaluator) findBest(weapons []weapon.Weapon, hand []card.Card, mp Matchup, d *deck.Deck, masterState *gameengine.GameState, skipLog bool) TurnSummary {

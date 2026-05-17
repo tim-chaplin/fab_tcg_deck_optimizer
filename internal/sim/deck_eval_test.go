@@ -5,13 +5,13 @@ import (
 	"testing"
 	"time"
 
-	"github.com/tim-chaplin/fab-deck-optimizer/v2/ids"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card/cards"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/hero/heroes"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/ids"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
-	"github.com/tim-chaplin/fab-deck-optimizer/v2/card/cards"
-	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
-	"github.com/tim-chaplin/fab-deck-optimizer/v2/hero/heroes"
-	"github.com/tim-chaplin/fab-deck-optimizer/v2/registry"
-	"github.com/tim-chaplin/fab-deck-optimizer/v2/weapon/weapons"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapon/weapons"
 )
 
 // Tests the marginal-stats invariant: PresentHands + AbsentHands == Stats.Hands per card.

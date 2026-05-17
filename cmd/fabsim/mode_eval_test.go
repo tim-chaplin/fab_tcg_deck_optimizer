@@ -10,10 +10,10 @@ import (
 	"sync"
 	"testing"
 
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/hero/heroes"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
-	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
-	"github.com/tim-chaplin/fab-deck-optimizer/v2/hero/heroes"
-	"github.com/tim-chaplin/fab-deck-optimizer/v2/registry"
 )
 
 // captureEvalOutput redirects os.Stdout / os.Stderr into pipes, drains them concurrently

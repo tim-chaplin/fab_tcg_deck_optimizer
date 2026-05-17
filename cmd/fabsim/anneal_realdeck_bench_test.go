@@ -7,10 +7,10 @@ import (
 	"path/filepath"
 	"testing"
 
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
-	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
-	"github.com/tim-chaplin/fab-deck-optimizer/v2/registry"
-	"github.com/tim-chaplin/fab-deck-optimizer/v2/textio"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/textio"
 )
 
 // BenchmarkAnnealRoundOnViseraiV4 mimics anneal's per-round workload anchored on

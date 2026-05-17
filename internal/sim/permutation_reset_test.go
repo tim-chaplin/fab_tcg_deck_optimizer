@@ -3,9 +3,9 @@ package sim
 import (
 	"testing"
 
-	"github.com/tim-chaplin/fab-deck-optimizer/v2/ids"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/ids"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
-	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 
 // flipsAndReadsDominate is a stub Action - Attack whose Play increments *saw whenever

@@ -3,8 +3,8 @@ package sim
 import (
 	"testing"
 
-	"github.com/tim-chaplin/fab-deck-optimizer/v2/ids"
-	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/ids"
 )
 
 // modalBlocker is a test stub mirroring Brothers in Arms: mode 0 costs 0 and contributes
