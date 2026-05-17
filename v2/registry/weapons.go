@@ -1,6 +1,6 @@
 package registry
 
-import "github.com/tim-chaplin/fab-deck-optimizer/internal/weapons"
+import "github.com/tim-chaplin/fab-deck-optimizer/v2/weapon/weapons"
 
 // Weapons are equipment, not deck cards; this roster is a small standalone lookup keyed by
 // display name rather than the ID-indexed card slice.

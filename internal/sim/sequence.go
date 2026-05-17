@@ -28,6 +28,7 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/item"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/token"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/turnlogger"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/weapon"
 )
 
 // perItemAbilityCap caps how many instances of one item's activated ability the chain
@@ -58,7 +59,7 @@ func FormatLogEntry(e turnlogger.LogEntry) string {
 // state branches off via masterState.Copy().
 func bestAttackWithWeapons(
 	masterState *gameengine.GameState,
-	weapons []Weapon,
+	weapons []weapon.Weapon,
 	attackers, defenders, pitched, held []card.Card,
 	d *deck.Deck,
 	bufs *attackBufs,

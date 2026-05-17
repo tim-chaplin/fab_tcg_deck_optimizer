@@ -21,6 +21,7 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/item"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/triggertype"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/turnlogger"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/weapon"
 )
 
 // Evaluate simulates `runs` shuffles of d. Each run assembles successive hands of
@@ -212,7 +213,7 @@ func (ev *Evaluator) evaluateParallelImpl(d *deck.Deck, maxRuns int, mp Matchup,
 // *gameengine.GameState master threaded across turns, so only the per-turn dealt-hand and
 // the leftover held-card buffer live here.
 type shuffleScratch struct {
-	weaponsBuf  []Weapon
+	weaponsBuf  []weapon.Weapon
 	handBuf     []card.Card
 	heldBuf     []card.Card
 	presentBuf  []bool
@@ -225,7 +226,7 @@ type shuffleScratch struct {
 // worker runs.
 func newShuffleScratch(weaponCount, _, handSize, numUniqueIDs int) *shuffleScratch {
 	return &shuffleScratch{
-		weaponsBuf:  make([]Weapon, weaponCount),
+		weaponsBuf:  make([]weapon.Weapon, weaponCount),
 		handBuf:     make([]card.Card, handSize, handSize+startOfTurnRevealRoom),
 		heldBuf:     make([]card.Card, 0, handSize),
 		presentBuf:  make([]bool, numUniqueIDs),
@@ -248,7 +249,7 @@ func runOneShuffle(masterDeck *deck.Deck, scratch *shuffleScratch, stats *deck.S
 	heroVal := d.Hero.(hero.Hero)
 	weapons := scratch.weaponsBuf
 	for i, w := range d.Weapons {
-		weapons[i] = w.(Weapon)
+		weapons[i] = w.(weapon.Weapon)
 	}
 
 	// master is the start-of-turn carryover state — built once per shuffle and threaded
@@ -406,7 +407,7 @@ func snapshotStartOfTurnAuras(queued []*aura.Aura) []card.Card {
 // returned TurnSummary has State.Log empty; replayBestForTurnWithLog re-runs with full
 // Log materialisation when a turn becomes the new deck-best.
 func runBestForTurn(
-	weapons []Weapon,
+	weapons []weapon.Weapon,
 	h []card.Card,
 	mp Matchup,
 	d *deck.Deck,
@@ -422,7 +423,7 @@ func runBestForTurn(
 // run, plus a fully populated State.Log. Used only when a turn becomes the new deck-best,
 // so the replay cost amortises across the bulk of turns that don't.
 func replayBestForTurnWithLog(
-	weapons []Weapon,
+	weapons []weapon.Weapon,
 	h []card.Card,
 	mp Matchup,
 	d *deck.Deck,

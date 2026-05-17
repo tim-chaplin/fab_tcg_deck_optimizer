@@ -7,7 +7,6 @@ import (
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapons"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/aura"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
@@ -17,6 +16,8 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/token"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/triggertype"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/turnlogger"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/weapon"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/weapon/weapons"
 )
 
 // TestRole_String pins the human-readable labels for each Role value so display strings stay
@@ -280,7 +281,7 @@ func TestFormatBestTurn_ArsenalInPlayedOnChain(t *testing.T) {
 // State.Log (FormatBestTurn reads weapon swings from State.Log, not SwungWeapons).
 func TestFormatBestTurn_WeaponSwingInChain(t *testing.T) {
 	h := []card.Card{testutils.RedAttack{}}
-	weapons := []Weapon{weapons.ReapingBlade{}}
+	weapons := []weapon.Weapon{weapons.ReapingBlade{}}
 	got := Best(weapons, h, Matchup{IncomingDamage: 0}, nil, gameengine.GameStateBuilder().SetHero(testutils.Hero{Intel: 4}).Build())
 	out := FormatBestTurn(got, nil, nil)
 	if !strings.Contains(out, "Reaping Blade: WEAPON ATTACK") {

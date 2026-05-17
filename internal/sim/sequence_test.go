@@ -5,10 +5,11 @@ import (
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapons"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/gameengine"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/hero"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/weapon"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/weapon/weapons"
 )
 
 func TestBest_ViseraiMaleficShrillCombo(t *testing.T) {
@@ -43,7 +44,7 @@ func TestBest_ViseraiReapingBladeBlueMalefics(t *testing.T) {
 		cards.MaleficIncantationBlue{},
 		cards.MaleficIncantationBlue{},
 	}
-	weapons := []Weapon{weapons.ReapingBlade{}}
+	weapons := []weapon.Weapon{weapons.ReapingBlade{}}
 	got := Best(weapons, h, Matchup{IncomingDamage: 0}, nil, gameengine.GameStateBuilder().SetHero(hero.Viserai{}).Build())
 	if got.Value != 5 {
 		t.Fatalf("want value 5, got %d (roles=[%s])",
@@ -61,7 +62,7 @@ func TestBest_ViseraiReapingBladeMaleficsPlusShrill(t *testing.T) {
 		cards.MaleficIncantationBlue{},
 		cards.ShrillOfSkullformRed{},
 	}
-	weapons := []Weapon{weapons.ReapingBlade{}}
+	weapons := []weapon.Weapon{weapons.ReapingBlade{}}
 	got := Best(weapons, h, Matchup{IncomingDamage: 0}, nil, gameengine.GameStateBuilder().SetHero(hero.Viserai{}).Build())
 	if got.Value != 11 {
 		t.Fatalf("want value 11, got %d (roles=[%s])",
@@ -80,7 +81,7 @@ func TestBest_ViseraiOathBlueHocusRedMalefic(t *testing.T) {
 		cards.OathOfTheArknightRed{},
 		cards.MaleficIncantationRed{},
 	}
-	weapons := []Weapon{weapons.ReapingBlade{}}
+	weapons := []weapon.Weapon{weapons.ReapingBlade{}}
 	got := Best(weapons, h, Matchup{IncomingDamage: 0}, nil, gameengine.GameStateBuilder().SetHero(hero.Viserai{}).Build())
 	if got.Value != 8 {
 		t.Fatalf("want value 8, got %d (roles=[%s])",
@@ -125,7 +126,7 @@ func TestBest_ViseraiMauvrionGrantsGoAgainToShrill(t *testing.T) {
 		cards.MauvrionSkiesRed{},
 		cards.ShrillOfSkullformRed{},
 	}
-	weapons := []Weapon{weapons.ReapingBlade{}}
+	weapons := []weapon.Weapon{weapons.ReapingBlade{}}
 	got := Best(weapons, h, Matchup{IncomingDamage: 0}, nil, gameengine.GameStateBuilder().SetHero(hero.Viserai{}).Build())
 	if got.Value != 16 {
 		t.Fatalf("want value 16, got %d (roles=[%s])",
@@ -175,7 +176,7 @@ func TestBest_ViseraiMauvrionChainsShrillIntoRuneragerIntoWeapon(t *testing.T) {
 		cards.RuneragerSwarmRed{},
 		cards.ShrillOfSkullformRed{},
 	}
-	weapons := []Weapon{weapons.ReapingBlade{}}
+	weapons := []weapon.Weapon{weapons.ReapingBlade{}}
 	got := Best(weapons, h, Matchup{IncomingDamage: 0}, nil, gameengine.GameStateBuilder().SetHero(hero.Viserai{}).Build())
 	if got.Value != 18 {
 		t.Fatalf("want value 18, got %d (roles=[%s])",

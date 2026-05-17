@@ -4,6 +4,7 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/gameengine"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/weapon"
 )
 
 // evaluatePartition is the shared "given a fixed role assignment, score it" body used
@@ -25,7 +26,7 @@ import (
 // place; both callers feed pooled scratch through bufs and tolerate the rewrite.
 func (e *Evaluator) evaluatePartition(
 	masterState *gameengine.GameState,
-	weapons []Weapon, hand []card.Card,
+	weapons []weapon.Weapon, hand []card.Card,
 	d *deck.Deck,
 	rolesBuf []deck.Role, n int, bufs *attackBufs,
 	mp Matchup, defenseSum int,
