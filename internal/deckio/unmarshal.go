@@ -10,31 +10,31 @@ import (
 	"fmt"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/deckstats"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/registry"
 )
 
 // Unmarshal decodes JSON produced by Marshal into a *deck.Deck and the associated DeckStats.
 // Returns an error if any card, weapon, or hero name isn't recognized.
-func Unmarshal(data []byte) (*deck.Deck, sim.DeckStats, error) {
+func Unmarshal(data []byte) (*deck.Deck, deckstats.DeckStats, error) {
 	var dj DeckJSON
 	if err := json.Unmarshal(data, &dj); err != nil {
-		return nil, sim.DeckStats{}, err
+		return nil, deckstats.DeckStats{}, err
 	}
 	return fromJSON(&dj)
 }
 
-func fromJSON(dj *DeckJSON) (*deck.Deck, sim.DeckStats, error) {
+func fromJSON(dj *DeckJSON) (*deck.Deck, deckstats.DeckStats, error) {
 	h, ok := registry.HeroByName(dj.Hero)
 	if !ok {
-		return nil, sim.DeckStats{}, fmt.Errorf("deckio: unknown hero %q", dj.Hero)
+		return nil, deckstats.DeckStats{}, fmt.Errorf("deckio: unknown hero %q", dj.Hero)
 	}
 	weapons := make([]deck.Weapon, len(dj.Weapons))
 	for i, name := range dj.Weapons {
 		w, ok := registry.WeaponByName(name)
 		if !ok {
-			return nil, sim.DeckStats{}, fmt.Errorf("deckio: unknown weapon %q", name)
+			return nil, deckstats.DeckStats{}, fmt.Errorf("deckio: unknown weapon %q", name)
 		}
 		weapons[i] = w
 	}
@@ -42,17 +42,17 @@ func fromJSON(dj *DeckJSON) (*deck.Deck, sim.DeckStats, error) {
 	for i, name := range dj.Cards {
 		id, ok := registry.CardByName(name)
 		if !ok {
-			return nil, sim.DeckStats{}, fmt.Errorf("deckio: unknown card %q", name)
+			return nil, deckstats.DeckStats{}, fmt.Errorf("deckio: unknown card %q", name)
 		}
 		cs[i] = registry.GetCard(id)
 	}
 	best, err := bestTurnFromJSON(dj.Stats.Best)
 	if err != nil {
-		return nil, sim.DeckStats{}, err
+		return nil, deckstats.DeckStats{}, err
 	}
 	perCardMarginal, err := perCardMarginalFromJSON(dj.Stats.PerCardMarginal)
 	if err != nil {
-		return nil, sim.DeckStats{}, err
+		return nil, deckstats.DeckStats{}, err
 	}
 	d := deck.New(h, weapons, cs)
 	// Sideboard and Equipment are name-only lists — the optimizer doesn't read them and the
@@ -64,7 +64,7 @@ func fromJSON(dj *DeckJSON) (*deck.Deck, sim.DeckStats, error) {
 	if len(dj.Equipment) > 0 {
 		d.Equipment = append([]string(nil), dj.Equipment...)
 	}
-	stats := sim.DeckStats{
+	stats := deckstats.DeckStats{
 		Runs:            dj.Stats.Runs,
 		Hands:           dj.Stats.Hands,
 		TotalValue:      dj.Stats.TotalValue,
@@ -77,17 +77,17 @@ func fromJSON(dj *DeckJSON) (*deck.Deck, sim.DeckStats, error) {
 	return d, stats, nil
 }
 
-func perCardMarginalFromJSON(entries []CardMarginalStatsJSON) (map[ids.CardID]sim.CardMarginalStats, error) {
+func perCardMarginalFromJSON(entries []CardMarginalStatsJSON) (map[ids.CardID]deckstats.CardMarginalStats, error) {
 	if len(entries) == 0 {
 		return nil, nil
 	}
-	out := make(map[ids.CardID]sim.CardMarginalStats, len(entries))
+	out := make(map[ids.CardID]deckstats.CardMarginalStats, len(entries))
 	for _, e := range entries {
 		id, ok := registry.CardByName(e.Card)
 		if !ok {
 			return nil, fmt.Errorf("deckio: unknown card %q in per_card_marginal stats", e.Card)
 		}
-		out[id] = sim.CardMarginalStats{
+		out[id] = deckstats.CardMarginalStats{
 			PresentTotal: e.PresentTotal,
 			PresentHands: e.PresentHands,
 			AbsentTotal:  e.AbsentTotal,
@@ -102,12 +102,12 @@ func perCardMarginalFromJSON(entries []CardMarginalStatsJSON) (map[ids.CardID]si
 // TriggersFromLastTurn, State) aren't reconstructed — fabsim's print path renders Log
 // via sim.FormatTurnLog, which already encodes the rendered "Auras: ..." line.
 // Returns a zero BestTurn when the JSON has no log.
-func bestTurnFromJSON(bj BestTurnJSON) (sim.BestTurn, error) {
+func bestTurnFromJSON(bj BestTurnJSON) (deckstats.BestTurn, error) {
 	if bj.Log.IsEmpty() {
-		return sim.BestTurn{}, nil
+		return deckstats.BestTurn{}, nil
 	}
-	return sim.BestTurn{
-		Summary: sim.TurnSummary{Value: bj.Value},
-		Log:     bj.Log,
+	return deckstats.BestTurn{
+		Value: bj.Value,
+		Log:   bj.Log,
 	}, nil
 }

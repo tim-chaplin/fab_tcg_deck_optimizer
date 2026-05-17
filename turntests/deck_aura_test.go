@@ -8,11 +8,12 @@ import (
 	"testing"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
-	"github.com/tim-chaplin/fab-deck-optimizer/v2/hero"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/deckstats"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/hero"
 )
 
 // Tests that Sigil of Fyendal plays turn 1 and its start-of-turn trigger fires on turn 2 —
@@ -30,7 +31,7 @@ func TestEvalOneTurn_SigilOfFyendalQueuesTrigger(t *testing.T) {
 
 	sigilPlayed := false
 	for _, a := range state.BestLine {
-		if a.Card.ID() == ids.SigilOfFyendalBlue && a.Role == sim.Attack {
+		if a.Card.ID() == ids.SigilOfFyendalBlue && a.Role == deckstats.Attack {
 			sigilPlayed = true
 			break
 		}
@@ -68,7 +69,7 @@ func TestEvalOneTurn_SigilOfTheArknightRevealsIntoHand(t *testing.T) {
 
 	sigilPlayed := false
 	for _, a := range state.BestLine {
-		if a.Card.ID() == ids.SigilOfTheArknightBlue && a.Role == sim.Attack {
+		if a.Card.ID() == ids.SigilOfTheArknightBlue && a.Role == deckstats.Attack {
 			sigilPlayed = true
 			break
 		}
@@ -119,7 +120,7 @@ func TestEvalOneTurn_BlessingOfOccultCreatesRunesAtStartOfNextTurn(t *testing.T)
 	}
 	blessingPlayed := false
 	for _, a := range state.BestLine {
-		if a.Card.ID() == ids.BlessingOfOccultRed && a.Role == sim.Attack {
+		if a.Card.ID() == ids.BlessingOfOccultRed && a.Role == deckstats.Attack {
 			blessingPlayed = true
 			break
 		}
@@ -156,10 +157,10 @@ func TestEvalOneTurn_MaleficIncantationOncePerTurnLimitsToOneRune(t *testing.T) 
 
 	maleficPlayed, hocusPlayed := false, false
 	for _, a := range state.BestLine {
-		if a.Card.ID() == ids.MaleficIncantationRed && a.Role == sim.Attack {
+		if a.Card.ID() == ids.MaleficIncantationRed && a.Role == deckstats.Attack {
 			maleficPlayed = true
 		}
-		if a.Card.ID() == ids.HocusPocusRed && a.Role == sim.Attack {
+		if a.Card.ID() == ids.HocusPocusRed && a.Role == deckstats.Attack {
 			hocusPlayed = true
 		}
 	}
@@ -201,7 +202,7 @@ func TestEvalOneTurn_RunebloodIncantationTicksAcrossTurns(t *testing.T) {
 
 	runebloodPlayed := false
 	for _, a := range state.BestLine {
-		if a.Card.ID() == ids.RunebloodIncantationRed && a.Role == sim.Attack {
+		if a.Card.ID() == ids.RunebloodIncantationRed && a.Role == deckstats.Attack {
 			runebloodPlayed = true
 			break
 		}

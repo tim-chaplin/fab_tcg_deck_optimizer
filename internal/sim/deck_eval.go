@@ -1,7 +1,7 @@
 package sim
 
 // Hand-by-hand simulation of a Deck: (*Evaluator).Evaluate shuffles, walks two cycles of hands
-// per run, and folds each turn's outcome into a fresh DeckStats. All cross-turn bookkeeping
+// per run, and folds each turn's outcome into a fresh deckstats.DeckStats. All cross-turn bookkeeping
 // (held cards, arsenal, runechant carryover, start-of-turn Aura handling) lives here. The
 // single-turn assertion-style entry point EvalOneTurnForTesting lives in
 // eval_one_turn_for_testing.go.
@@ -16,6 +16,7 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/aura"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/deckstats"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/gameengine"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/hero"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/item"
@@ -28,9 +29,9 @@ import (
 // against mp, and recycles Pitched cards to deck bottom. A run ends when the deck can't
 // fill the next hand. A "cycle" is one pass through the original deck size.
 //
-// Returns a fresh DeckStats — callers that want to accumulate across multiple Evaluate
-// calls maintain their own DeckStats and merge returned values in.
-func (ev *Evaluator) Evaluate(d *deck.Deck, runs int, mp Matchup, rng *rand.Rand) DeckStats {
+// Returns a fresh deckstats.DeckStats — callers that want to accumulate across multiple Evaluate
+// calls maintain their own deckstats.DeckStats and merge returned values in.
+func (ev *Evaluator) Evaluate(d *deck.Deck, runs int, mp Matchup, rng *rand.Rand) deckstats.DeckStats {
 	return ev.evaluateImpl(d, runs, mp, rng, nil)
 }
 
@@ -41,13 +42,13 @@ func (ev *Evaluator) Evaluate(d *deck.Deck, runs int, mp Matchup, rng *rand.Rand
 // counts (compare, explicit -shuffles) should use Evaluate with a fixed runs count.
 // Order-of-magnitude scale on a Viserai deck: precision=0.1 ≈ 1k shuffles, precision=0.01
 // ≈ 80k shuffles.
-func (ev *Evaluator) EvaluateAdaptive(d *deck.Deck, precision float64, mp Matchup, rng *rand.Rand) DeckStats {
+func (ev *Evaluator) EvaluateAdaptive(d *deck.Deck, precision float64, mp Matchup, rng *rand.Rand) deckstats.DeckStats {
 	return ev.evaluateImpl(d, adaptiveShufflesCap, mp, rng, makeAdaptiveStop(precision/4))
 }
 
 // shuffleStopper is the early-stop policy for the eval shuffle loop. Called once after each
 // shuffle's stats are recorded; returning true breaks the loop. nil disables early stop.
-type shuffleStopper func(stats *DeckStats, runs int) bool
+type shuffleStopper func(stats *deckstats.DeckStats, runs int) bool
 
 const (
 	// adaptiveCheckInterval is the per-worker chunk size in the parallel-shuffle path —
@@ -69,7 +70,7 @@ const (
 // error drops below targetSE. Checks every adaptiveCheckInterval shuffles so the
 // histogram walk doesn't run on every iteration.
 func makeAdaptiveStop(targetSE float64) shuffleStopper {
-	return func(stats *DeckStats, runs int) bool {
+	return func(stats *deckstats.DeckStats, runs int) bool {
 		if runs%adaptiveCheckInterval != 0 {
 			return false
 		}
@@ -81,7 +82,7 @@ func makeAdaptiveStop(targetSE float64) shuffleStopper {
 // where sigma is the unbiased per-turn sample standard deviation. Walks the histogram so
 // it's O(unique values) ~ O(30) per call rather than O(N). Returns +Inf when fewer than two
 // turns have been simulated (variance is undefined).
-func meanStandardError(stats *DeckStats) float64 {
+func meanStandardError(stats *deckstats.DeckStats) float64 {
 	n := float64(stats.Hands)
 	if n < 2 {
 		return math.Inf(1)
@@ -96,11 +97,11 @@ func meanStandardError(stats *DeckStats) float64 {
 	return math.Sqrt(variance / n)
 }
 
-func (ev *Evaluator) evaluateImpl(d *deck.Deck, maxRuns int, mp Matchup, rng *rand.Rand, stop shuffleStopper) DeckStats {
+func (ev *Evaluator) evaluateImpl(d *deck.Deck, maxRuns int, mp Matchup, rng *rand.Rand, stop shuffleStopper) deckstats.DeckStats {
 	handSize := d.Hero.(hero.Hero).Intelligence()
 	deckSize := d.Size()
 	if handSize <= 0 || deckSize < handSize {
-		return DeckStats{}
+		return deckstats.DeckStats{}
 	}
 	if ev.numWorkers > 1 {
 		return ev.evaluateParallelImpl(d, maxRuns, mp, rng, stop, handSize, deckSize)
@@ -110,12 +111,12 @@ func (ev *Evaluator) evaluateImpl(d *deck.Deck, maxRuns int, mp Matchup, rng *ra
 
 // evaluateSequentialImpl runs the shuffle loop in the calling goroutine, using ev's
 // cachedBufs scratch directly. This is the deterministic-RNG path tests rely on.
-func (ev *Evaluator) evaluateSequentialImpl(d *deck.Deck, maxRuns int, mp Matchup, rng *rand.Rand, stop shuffleStopper, handSize, deckSize int) DeckStats {
+func (ev *Evaluator) evaluateSequentialImpl(d *deck.Deck, maxRuns int, mp Matchup, rng *rand.Rand, stop shuffleStopper, handSize, deckSize int) deckstats.DeckStats {
 	handsPerCycle := deckSize / handSize
 	uniqueIDs, idIndex := d.UniqueIDs()
 	scratch := newShuffleScratch(len(d.Weapons), deckSize, handSize, len(uniqueIDs))
 
-	var stats DeckStats
+	var stats deckstats.DeckStats
 	actualRuns := 0
 	for r := 0; r < maxRuns; r++ {
 		runOneShuffle(d, scratch, &stats, idIndex, ev, rng, mp, handsPerCycle, handSize)
@@ -126,32 +127,31 @@ func (ev *Evaluator) evaluateSequentialImpl(d *deck.Deck, maxRuns int, mp Matchu
 	}
 	stats.Runs += actualRuns
 	mergeMarginalBuf(&stats, uniqueIDs, scratch.marginalBuf)
-	finalizeBestTurnLog(&stats)
 	return stats
 }
 
 // evaluateParallelImpl fans the shuffle loop across ev.numWorkers goroutines that share
 // ev.cache (RWMutex-protected) but each carry their own per-call scratch. Shuffles are
 // processed in chunks of (numWorkers × adaptiveCheckInterval); after each chunk the main
-// goroutine merges every worker's local DeckStats into the running aggregate and runs the
+// goroutine merges every worker's local deckstats.DeckStats into the running aggregate and runs the
 // adaptive stop check. Per-worker RNG seeds are derived from rng.Int63() so the chunk
 // distribution is deterministic given the input rng.
-func (ev *Evaluator) evaluateParallelImpl(d *deck.Deck, maxRuns int, mp Matchup, rng *rand.Rand, stop shuffleStopper, handSize, deckSize int) DeckStats {
+func (ev *Evaluator) evaluateParallelImpl(d *deck.Deck, maxRuns int, mp Matchup, rng *rand.Rand, stop shuffleStopper, handSize, deckSize int) deckstats.DeckStats {
 	numWorkers := ev.numWorkers
 	handsPerCycle := deckSize / handSize
 	uniqueIDs, idIndex := d.UniqueIDs()
-	aggregateMarginal := make([]CardMarginalStats, len(uniqueIDs))
+	aggregateMarginal := make([]deckstats.CardMarginalStats, len(uniqueIDs))
 
 	chunkPerWorker := adaptiveCheckInterval
 	maxChunk := numWorkers * chunkPerWorker
 
 	type partial struct {
-		stats    DeckStats
-		marginal []CardMarginalStats
+		stats    deckstats.DeckStats
+		marginal []deckstats.CardMarginalStats
 	}
 	results := make(chan partial, numWorkers)
 
-	var stats DeckStats
+	var stats deckstats.DeckStats
 	actualRuns := 0
 	for actualRuns < maxRuns {
 		sz := maxChunk
@@ -179,7 +179,7 @@ func (ev *Evaluator) evaluateParallelImpl(d *deck.Deck, maxRuns int, mp Matchup,
 				workerEv := &Evaluator{cache: ev.cache}
 				workerRNG := rand.New(rand.NewSource(seed))
 				scratch := newShuffleScratch(len(d.Weapons), deckSize, handSize, len(uniqueIDs))
-				var local DeckStats
+				var local deckstats.DeckStats
 				for r := 0; r < runs; r++ {
 					runOneShuffle(d, scratch, &local, idIndex, workerEv, workerRNG, mp, handsPerCycle, handSize)
 				}
@@ -205,7 +205,6 @@ func (ev *Evaluator) evaluateParallelImpl(d *deck.Deck, maxRuns int, mp Matchup,
 	}
 	stats.Runs += actualRuns
 	mergeMarginalBuf(&stats, uniqueIDs, aggregateMarginal)
-	finalizeBestTurnLog(&stats)
 	return stats
 }
 
@@ -218,7 +217,7 @@ type shuffleScratch struct {
 	handBuf     []card.Card
 	heldBuf     []card.Card
 	presentBuf  []bool
-	marginalBuf []CardMarginalStats
+	marginalBuf []deckstats.CardMarginalStats
 }
 
 // newShuffleScratch sizes the per-shuffle reusable buffers for a deck of
@@ -231,19 +230,19 @@ func newShuffleScratch(weaponCount, _, handSize, numUniqueIDs int) *shuffleScrat
 		handBuf:     make([]card.Card, handSize, handSize+startOfTurnRevealRoom),
 		heldBuf:     make([]card.Card, 0, handSize),
 		presentBuf:  make([]bool, numUniqueIDs),
-		marginalBuf: make([]CardMarginalStats, numUniqueIDs),
+		marginalBuf: make([]deckstats.CardMarginalStats, numUniqueIDs),
 	}
 }
 
 // runOneShuffle simulates a single shuffle of the deck end-to-end (Copy → Shuffle → walk
-// turns → record stats). Accumulates results into the caller-owned *DeckStats. Both the
-// sequential and parallel paths pass a local DeckStats here; the parallel path merges
+// turns → record stats). Accumulates results into the caller-owned *deckstats.DeckStats. Both the
+// sequential and parallel paths pass a local deckstats.DeckStats here; the parallel path merges
 // per-worker totals at chunk boundaries via mergeStatsInto.
 //
 // masterDeck is the per-evaluation deck shared with mutation enumeration; runOneShuffle
 // copies it before shuffling so each shuffle trial gets an independent deck and the
 // master's Cards order stays stable across goroutines.
-func runOneShuffle(masterDeck *deck.Deck, scratch *shuffleScratch, stats *DeckStats, idIndex map[ids.CardID]int, ev *Evaluator, rng *rand.Rand, mp Matchup, handsPerCycle, handSize int) {
+func runOneShuffle(masterDeck *deck.Deck, scratch *shuffleScratch, stats *deckstats.DeckStats, idIndex map[ids.CardID]int, ev *Evaluator, rng *rand.Rand, mp Matchup, handsPerCycle, handSize int) {
 	d := masterDeck.Copy()
 	d.Shuffle(rng)
 
@@ -364,10 +363,10 @@ func concreteItems(in []gameengine.Item) []*item.Item {
 }
 
 // mergeStatsInto folds src's per-shuffle accumulators into dst. Used by the parallel path
-// to merge each worker's local DeckStats into the run's aggregate after a chunk barrier.
+// to merge each worker's local deckstats.DeckStats into the run's aggregate after a chunk barrier.
 // Histogram / PerCardMarginal merging is handled separately (the latter via
 // mergeMarginalBuf at the end of the run).
-func mergeStatsInto(dst, src *DeckStats) {
+func mergeStatsInto(dst, src *deckstats.DeckStats) {
 	dst.Hands += src.Hands
 	dst.TotalValue += src.TotalValue
 	dst.FirstCycle.Hands += src.FirstCycle.Hands
@@ -380,17 +379,9 @@ func mergeStatsInto(dst, src *DeckStats) {
 	for v, c := range src.Histogram {
 		dst.Histogram[v] += c
 	}
-	if len(src.Best.Summary.BestLine) > 0 &&
-		(len(dst.Best.Summary.BestLine) == 0 || src.Best.Summary.Value > dst.Best.Summary.Value) {
+	if len(src.Best.BestLine) > 0 &&
+		(len(dst.Best.BestLine) == 0 || src.Best.Value > dst.Best.Value) {
 		dst.Best = src.Best
-	}
-}
-
-// finalizeBestTurnLog assembles the best turn's structured Log from State.Log once at end
-// of run. JSON round-trips Log verbatim; printing routes through FormatTurnLog.
-func finalizeBestTurnLog(stats *DeckStats) {
-	if len(stats.Best.Summary.BestLine) > 0 {
-		stats.Best.Log = BuildTurnLog(stats.Best.Summary, stats.Best.StartingAuras, stats.Best.StartingItems)
 	}
 }
 
@@ -451,7 +442,7 @@ func replayBestForTurnWithLog(
 // populated (replayed via replayBestForTurnWithLog when the SkipLog path was used). Keeping
 // the recordBestTurn clone out of here means the SkipLog run isn't cloned uselessly when
 // the caller plans to overwrite with the replayed result.
-func recordTurnStats(stats *DeckStats, play TurnSummary, handIdx, handsPerCycle int) bool {
+func recordTurnStats(stats *deckstats.DeckStats, play TurnSummary, handIdx, handsPerCycle int) bool {
 	v := float64(play.Value)
 	stats.TotalValue += v
 	stats.Hands++
@@ -459,7 +450,7 @@ func recordTurnStats(stats *DeckStats, play TurnSummary, handIdx, handsPerCycle 
 		stats.Histogram = map[int]int{}
 	}
 	stats.Histogram[play.Value]++
-	newBest := play.Value > stats.Best.Summary.Value || len(stats.Best.Summary.BestLine) == 0
+	newBest := play.Value > stats.Best.Value || len(stats.Best.BestLine) == 0
 	switch handIdx / handsPerCycle {
 	case 0:
 		stats.FirstCycle.Hands++
@@ -495,7 +486,7 @@ const startOfTurnRevealRoom = 8
 // two reveal-capable auras see distinct tops.
 func processAurasAtStartOfTurn(queued []*aura.Aura, d *deck.Deck) (
 	survivors []*aura.Aura,
-	contribs []TriggerContribution,
+	contribs []deckstats.TriggerContribution,
 	damage int,
 	revealed []card.Card,
 	graveyarded []card.Card,
@@ -537,7 +528,7 @@ func processAurasAtStartOfTurn(queued []*aura.Aura, d *deck.Deck) (
 		if fireIdx < len(sourceByFireIdx) {
 			src = sourceByFireIdx[fireIdx]
 		}
-		contribs = append(contribs, TriggerContribution{
+		contribs = append(contribs, deckstats.TriggerContribution{
 			Card:     src,
 			Damage:   dmg,
 			Revealed: drawn,
@@ -562,13 +553,13 @@ func processAurasAtStartOfTurn(queued []*aura.Aura, d *deck.Deck) (
 // pick (different tie-break winner among optimal partitions), and without canonical
 // sorting the two paths' recycled decks would diverge by card position even though the
 // chain output is identical.
-func pitchedFromBestLine(line []CardAssignment) []card.Card {
+func pitchedFromBestLine(line []deckstats.CardAssignment) []card.Card {
 	var out []card.Card
 	for _, a := range line {
 		if a.FromArsenal {
 			continue
 		}
-		if a.Role == Pitch {
+		if a.Role == deckstats.Pitch {
 			out = append(out, a.Card)
 		}
 	}
@@ -597,21 +588,21 @@ func sortHandByID(hand []card.Card) {
 }
 
 // recordBestTurn clones the winning turn's slices into fresh storage and stamps stats.Best
-// with the resulting BestTurn. Every slice in play (BestLine, SwungWeapons,
+// with the resulting deckstats.BestTurn. Every slice in play (BestLine, SwungWeapons,
 // TriggersFromLastTurn, StartOfTurnAuras, State.*) aliases scratch Best may rewrite on
 // the next call, so retaining them directly would let a later evaluation mutate the saved
 // peak. Nil-length slices skip the clone so the captured TurnSummary holds nil rather
 // than a zero-length allocation.
-func recordBestTurn(stats *DeckStats, play TurnSummary, startingAuras []*aura.Aura, startingItems []*item.Item) {
-	lineCopy := make([]CardAssignment, len(play.BestLine))
+func recordBestTurn(stats *deckstats.DeckStats, play TurnSummary, startingAuras []*aura.Aura, startingItems []*item.Item) {
+	lineCopy := make([]deckstats.CardAssignment, len(play.BestLine))
 	copy(lineCopy, play.BestLine)
 	var swungCopy []string
 	if len(play.SwungWeapons) > 0 {
 		swungCopy = append([]string(nil), play.SwungWeapons...)
 	}
-	var trigCopy []TriggerContribution
+	var trigCopy []deckstats.TriggerContribution
 	if len(play.TriggersFromLastTurn) > 0 {
-		trigCopy = make([]TriggerContribution, len(play.TriggersFromLastTurn))
+		trigCopy = make([]deckstats.TriggerContribution, len(play.TriggersFromLastTurn))
 		copy(trigCopy, play.TriggersFromLastTurn)
 	}
 	var aurasCopy []card.Card
@@ -619,23 +610,17 @@ func recordBestTurn(stats *DeckStats, play TurnSummary, startingAuras []*aura.Au
 		aurasCopy = make([]card.Card, len(play.StartOfTurnAuras))
 		copy(aurasCopy, play.StartOfTurnAuras)
 	}
-	var dealtCopy []card.Card
-	if len(play.DealtHand) > 0 {
-		dealtCopy = append([]card.Card(nil), play.DealtHand...)
-	}
-	stats.Best = BestTurn{
-		Summary: TurnSummary{
-			BestLine:             lineCopy,
-			SwungWeapons:         swungCopy,
-			Value:                play.Value,
-			State:                play.State,
-			TriggersFromLastTurn: trigCopy,
-			StartOfTurnAuras:     aurasCopy,
-			DealtHand:            dealtCopy,
-			IncomingDamage:       play.IncomingDamage,
-		},
-		StartingAuras: startingAuras,
-		StartingItems: startingItems,
+	stats.Best = deckstats.BestTurn{
+		Value:                play.Value,
+		BestLine:             lineCopy,
+		SwungWeapons:         swungCopy,
+		TriggersFromLastTurn: trigCopy,
+		StartOfTurnAuras:     aurasCopy,
+		IncomingDamage:       play.IncomingDamage,
+		State:                play.State,
+		StartingAuras:        startingAuras,
+		StartingItems:        startingItems,
+		Log:                  BuildTurnLog(play, startingAuras, startingItems),
 	}
 }
 
@@ -644,7 +629,7 @@ func recordBestTurn(stats *DeckStats, play TurnSummary, startingAuras []*aura.Au
 // ran. presentBuf is a scratch slice indexed parallel to marginalBuf; the caller owns both
 // across turns to keep this path allocation-free. Operates entirely on slices so the inner
 // loop avoids the per-turn map churn a direct PerCardMarginal[id] update would cost.
-func tallyMarginalPresence(marginalBuf []CardMarginalStats, idIndex map[ids.CardID]int, presentBuf []bool, dealt []card.Card, arsenalIn card.Card, value float64) {
+func tallyMarginalPresence(marginalBuf []deckstats.CardMarginalStats, idIndex map[ids.CardID]int, presentBuf []bool, dealt []card.Card, arsenalIn card.Card, value float64) {
 	if len(marginalBuf) == 0 {
 		return
 	}
@@ -671,14 +656,14 @@ func tallyMarginalPresence(marginalBuf []CardMarginalStats, idIndex map[ids.Card
 }
 
 // mergeMarginalBuf folds the per-Evaluate slice accumulator into PerCardMarginal on the
-// supplied DeckStats. The map is lazily initialised so unscored decks don't pay for an
+// supplied deckstats.DeckStats. The map is lazily initialised so unscored decks don't pay for an
 // empty map.
-func mergeMarginalBuf(stats *DeckStats, uniqueIDs []ids.CardID, marginalBuf []CardMarginalStats) {
+func mergeMarginalBuf(stats *deckstats.DeckStats, uniqueIDs []ids.CardID, marginalBuf []deckstats.CardMarginalStats) {
 	if len(uniqueIDs) == 0 {
 		return
 	}
 	if stats.PerCardMarginal == nil {
-		stats.PerCardMarginal = make(map[ids.CardID]CardMarginalStats, len(uniqueIDs))
+		stats.PerCardMarginal = make(map[ids.CardID]deckstats.CardMarginalStats, len(uniqueIDs))
 	}
 	for i, id := range uniqueIDs {
 		m := stats.PerCardMarginal[id]

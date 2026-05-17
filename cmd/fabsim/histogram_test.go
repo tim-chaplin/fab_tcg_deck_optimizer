@@ -3,7 +3,7 @@ package main
 import (
 	"testing"
 
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/deckstats"
 )
 
 // TestBuildHistogramColumns_Stretch verifies the stretch regime: each integer value places a
@@ -317,11 +317,11 @@ func TestXAxisTickRow_CollisionDropsInteriorWinsMinMax(t *testing.T) {
 func TestUnionHistogramScale_StretchesAxesToCoverBoth(t *testing.T) {
 	// d1: values 9..21, peak 32135 — narrower range, taller peak.
 	// d2: values 7..27, peak 19723 — wider range, shorter peak.
-	s1 := sim.DeckStats{
+	s1 := deckstats.DeckStats{
 		Hands:     100000,
 		Histogram: map[int]int{9: 1000, 12: 32135, 15: 24000, 18: 16000, 21: 8000},
 	}
-	s2 := sim.DeckStats{
+	s2 := deckstats.DeckStats{
 		Hands:     100000,
 		Histogram: map[int]int{7: 1, 12: 14000, 17: 19723, 22: 9000, 27: 1},
 	}

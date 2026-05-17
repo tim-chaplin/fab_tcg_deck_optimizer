@@ -16,6 +16,7 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/mydecks"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/deckstats"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/gameengine"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/hero"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/registry"
@@ -308,8 +309,8 @@ func formatTempLabel(temperature float64) string {
 // the deck to disk when avg exceeds bestEverAvg, and returns the possibly-updated bestEver /
 // bestEverAvg. The current deck and its avg stay owned by the caller.
 func applyAcceptedMutation(cfg annealConfig, round int, verbose bool, tempLabel string,
-	idx, total int, mut deck.Mutation, d *deck.Deck, dStats sim.DeckStats, avg, currentAvg float64,
-	bestEver *deck.Deck, bestEverStats sim.DeckStats, bestEverAvg float64) (*deck.Deck, sim.DeckStats, float64) {
+	idx, total int, mut deck.Mutation, d *deck.Deck, dStats deckstats.DeckStats, avg, currentAvg float64,
+	bestEver *deck.Deck, bestEverStats deckstats.DeckStats, bestEverAvg float64) (*deck.Deck, deckstats.DeckStats, float64) {
 	verb := "improvement"
 	if avg <= currentAvg {
 		verb = "annealing step"
@@ -339,7 +340,7 @@ func applyAcceptedMutation(cfg annealConfig, round int, verbose bool, tempLabel 
 // full best-ever deck listing, and builds the annealResult the top-level command surfaces as
 // exit code and session summary. aborted is threaded through as-is because runAnnealCmd keys
 // exit code 130 off it.
-func finishAnnealRun(cfg annealConfig, bestEver *deck.Deck, bestEverStats sim.DeckStats, bestEverAvg, startingAvg float64,
+func finishAnnealRun(cfg annealConfig, bestEver *deck.Deck, bestEverStats deckstats.DeckStats, bestEverAvg, startingAvg float64,
 	statusLine string, aborted bool) annealResult {
 	fmt.Fprintln(os.Stderr, "\n"+statusLine)
 	fmt.Println()
@@ -375,7 +376,7 @@ func coolDown(temperature, decay, minTemp float64) float64 {
 // may finish below the cap and prompt a re-evaluation next session, which is fine —
 // adaptive runs are cheap). Routes through evaluateParallel so the once-per-session
 // baseline benefits from the same DefaultWorkers fan-out as iterate's per-mutation evals.
-func baselineEvaluate(d *deck.Deck, cfg annealConfig, rng *rand.Rand) sim.DeckStats {
+func baselineEvaluate(d *deck.Deck, cfg annealConfig, rng *rand.Rand) deckstats.DeckStats {
 	shuffles := cfg.shuffles
 	if cfg.adaptive {
 		shuffles = -1
@@ -390,7 +391,7 @@ func baselineEvaluate(d *deck.Deck, cfg annealConfig, rng *rand.Rand) sim.DeckSt
 // re-evaluation even if the run count already matches); or deck already evaluated at the
 // budget (use as-is). File exists but doesn't parse → die loudly rather than silently
 // overwrite a corrupt checkpoint.
-func prepareBaseline(cfg annealConfig, rng *rand.Rand) (*deck.Deck, sim.DeckStats, float64) {
+func prepareBaseline(cfg annealConfig, rng *rand.Rand) (*deck.Deck, deckstats.DeckStats, float64) {
 	best, bestStats, err := loadExisting(cfg.outPath)
 	if err != nil {
 		die("%v", err)
@@ -415,7 +416,7 @@ func prepareBaseline(cfg annealConfig, rng *rand.Rand) (*deck.Deck, sim.DeckStat
 	// which carries no precision guarantee for the new run's target.
 	needReeval := cfg.adaptive || cfg.reevaluate || bestStats.Runs < cfg.shuffles
 	if needReeval {
-		var freshStats sim.DeckStats
+		var freshStats deckstats.DeckStats
 		best, freshStats, bestAvg = reevaluateBaseline(cfg, rng, best, bestStats, bestAvg)
 		maybePrintBaselineCards(cfg, best)
 		return best, freshStats, bestAvg
@@ -430,7 +431,7 @@ func prepareBaseline(cfg annealConfig, rng *rand.Rand) (*deck.Deck, sim.DeckStat
 // stale shuffle count), reconstructs the deck (Sideboard and Equipment preserved), runs
 // baselineEvaluate, and persists the result. Returns the rebuilt deck, its fresh stats, and
 // avg.
-func reevaluateBaseline(cfg annealConfig, rng *rand.Rand, loaded *deck.Deck, loadedStats sim.DeckStats, savedAvg float64) (*deck.Deck, sim.DeckStats, float64) {
+func reevaluateBaseline(cfg annealConfig, rng *rand.Rand, loaded *deck.Deck, loadedStats deckstats.DeckStats, savedAvg float64) (*deck.Deck, deckstats.DeckStats, float64) {
 	reason := fmt.Sprintf("from %d shuffles", loadedStats.Runs)
 	if cfg.reevaluate && loadedStats.Runs >= cfg.shuffles {
 		reason = "-reevaluate forced"

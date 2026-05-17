@@ -21,6 +21,7 @@ import (
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/deckstats"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/gameengine"
 )
 
@@ -85,7 +86,7 @@ type evalCacheKey struct {
 // list of swung weapon names. Value, State, and Log come from re-running the chain
 // against the cached partition.
 type evalCacheEntry struct {
-	line         []CardAssignment
+	line         []deckstats.CardAssignment
 	swungWeapons []string
 }
 

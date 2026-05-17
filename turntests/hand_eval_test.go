@@ -9,6 +9,7 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/deckstats"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/gameengine"
 )
 
@@ -101,9 +102,9 @@ func TestBest_RespectsResourceConstraint(t *testing.T) {
 	var res, cost int
 	for i, c := range h {
 		switch got.BestLine[i].Role {
-		case sim.Pitch:
+		case deckstats.Pitch:
 			res += c.(card.Card).Pitch()
-		case sim.Attack:
+		case deckstats.Attack:
 			cost += c.(card.Card).Cost(gameengine.New())
 		}
 	}
@@ -121,7 +122,7 @@ func TestBest_AllHeldWhenNoLegalPlay(t *testing.T) {
 	if got.Value != 0 {
 		t.Fatalf("Value = %d, want 0", got.Value)
 	}
-	if got.BestLine[0].Role != sim.Arsenal {
+	if got.BestLine[0].Role != deckstats.Arsenal {
 		t.Errorf("role = %s, want ARSENAL (empty slot + Held card → promoted)", got.BestLine[0].Role)
 	}
 	if got.StartOfNextTurnArsenal == nil || got.StartOfNextTurnArsenal.ID() != ids.ToughenUpBlue {
