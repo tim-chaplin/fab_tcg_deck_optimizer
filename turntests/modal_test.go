@@ -3,18 +3,18 @@ package turntests
 import (
 	"testing"
 
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card/cards"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
-	"github.com/tim-chaplin/fab-deck-optimizer/v2/hero"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/hero/heroes"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/weapon/weapons"
 )
 
 // Tests that Captain's Call picks the go-again mode when a follow-up attack can extend the
 // chain into more total damage than the +2{p} buff alone.
 func TestModal_CaptainsCallPicksGoAgainOverBuffWhenChainExtends(t *testing.T) {
-	d := deck.New(hero.Viserai{}, nil, fillerDeck())
+	d := deck.New(heroes.Viserai{}, nil, fillerDeck())
 	hand := []deck.Card{
 		cards.CaptainsCallRed{},
 		cards.SnatchRed{},
@@ -29,7 +29,7 @@ func TestModal_CaptainsCallPicksGoAgainOverBuffWhenChainExtends(t *testing.T) {
 // Tests that Captain's Call picks the +2{p} mode when no follow-up attack can use a granted
 // go-again.
 func TestModal_CaptainsCallPicksBuffWhenChainCantExtend(t *testing.T) {
-	d := deck.New(hero.Viserai{}, nil, fillerDeck())
+	d := deck.New(heroes.Viserai{}, nil, fillerDeck())
 	hand := []deck.Card{
 		cards.CaptainsCallRed{},
 		cards.SnatchRed{},
@@ -42,7 +42,7 @@ func TestModal_CaptainsCallPicksBuffWhenChainCantExtend(t *testing.T) {
 
 // Tests that Razor Reflex's mode-0 +N{p} buff lands on a sword weapon target.
 func TestModal_RazorReflexMode0BuffsSwordWeapon(t *testing.T) {
-	d := deck.New(hero.Viserai{}, []deck.Weapon{weapons.NebulaBlade{}}, fillerDeck())
+	d := deck.New(heroes.Viserai{}, []deck.Weapon{weapons.NebulaBlade{}}, fillerDeck())
 	hand := []deck.Card{
 		cards.RazorReflexRed{},
 		cards.ToughenUpBlue{},
@@ -57,7 +57,7 @@ func TestModal_RazorReflexMode0BuffsSwordWeapon(t *testing.T) {
 // cost-≤1 attack action: the buffed Snatch hits 7 power (in the 1/4/7 likely-hit window),
 // the eager on-hit go-again grants 1 AP, and a second Snatch chains for full damage.
 func TestModal_RazorReflexMode1BuffAndOnHitGoAgainExtendChain(t *testing.T) {
-	d := deck.New(hero.Viserai{}, nil, fillerDeck())
+	d := deck.New(heroes.Viserai{}, nil, fillerDeck())
 	hand := []deck.Card{
 		cards.RazorReflexRed{},
 		cards.SnatchRed{},
@@ -73,7 +73,7 @@ func TestModal_RazorReflexMode1BuffAndOnHitGoAgainExtendChain(t *testing.T) {
 // Tests that Pummel's mode-1 +N{p} buff and on-hit hero-discard rider both land on a cost-≥2
 // attack action target.
 func TestModal_PummelMode1BuffsAndDiscardsOnHit(t *testing.T) {
-	d := deck.New(hero.Viserai{}, nil, fillerDeck())
+	d := deck.New(heroes.Viserai{}, nil, fillerDeck())
 	hand := []deck.Card{
 		cards.PummelBlue{},
 		cards.AdrenalineRushBlue{},
@@ -88,7 +88,7 @@ func TestModal_PummelMode1BuffsAndDiscardsOnHit(t *testing.T) {
 
 // Tests that Pummel's mode-0 +N{p} buff lands on a Club weapon target.
 func TestModal_PummelMode0BuffsClubWeapon(t *testing.T) {
-	d := deck.New(hero.Viserai{}, []deck.Weapon{testutils.ClubWeapon{}}, fillerDeck())
+	d := deck.New(heroes.Viserai{}, []deck.Weapon{testutils.ClubWeapon{}}, fillerDeck())
 	hand := []deck.Card{
 		cards.PummelRed{},
 		cards.ToughenUpBlue{},

@@ -5,14 +5,14 @@ import (
 	"testing"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
-	"github.com/tim-chaplin/fab-deck-optimizer/v2/hero"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/hero/heroes"
 )
 
 // Tests that v2/deck.Random builds a legal deck against the production card pool through
 // Registry.
 func TestRegistry_DrivesDeckRandom(t *testing.T) {
 	rng := rand.New(rand.NewSource(7))
-	d := deck.Random(hero.Viserai{}, 40, 2, rng, Registry{})
+	d := deck.Random(heroes.Viserai{}, 40, 2, rng, Registry{})
 	if d.Size() != 40 {
 		t.Errorf("len(Cards) = %d, want 40", d.Size())
 	}

@@ -5,11 +5,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card/cards"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
-	"github.com/tim-chaplin/fab-deck-optimizer/v2/hero"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/hero/heroes"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/registry"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/weapon/weapons"
 )
@@ -20,7 +20,7 @@ func TestEvaluate_PerCardMarginalCoversEveryHand(t *testing.T) {
 	snatch := registry.GetCard(ids.SnatchRed)
 	// 4 of each so Snatch isn't pinned to a single hand and the absent bucket gets exercised.
 	deckCards := []deck.Card{read, read, read, read, snatch, snatch, snatch, snatch}
-	d := deck.New(hero.Viserai{}, nil, deckCards)
+	d := deck.New(heroes.Viserai{}, nil, deckCards)
 	stats := NewEvaluator().Evaluate(d, 20, Matchup{}, rand.New(rand.NewSource(1)))
 
 	if stats.PerCardMarginal == nil {
@@ -46,7 +46,7 @@ func TestEvaluate_PerCardMarginalCoversEveryHand(t *testing.T) {
 // Tests the singleton-deck case: AbsentHands == 0, Marginal() == 0 (no comparison possible).
 func TestEvaluate_PerCardMarginalAlwaysPresent(t *testing.T) {
 	read := registry.GetCard(ids.ReadTheRunesRed)
-	d := deck.New(hero.Viserai{}, nil, []deck.Card{read, read, read, read, read, read, read, read})
+	d := deck.New(heroes.Viserai{}, nil, []deck.Card{read, read, read, read, read, read, read, read})
 	stats := NewEvaluator().Evaluate(d, 5, Matchup{}, rand.New(rand.NewSource(1)))
 
 	m := stats.PerCardMarginal[ids.ReadTheRunesRed]
@@ -109,7 +109,7 @@ func TestEvaluate_TerminatesAfterTwoCycles(t *testing.T) {
 	for i := range deckCards {
 		deckCards[i] = cards.ToughenUpBlue{}
 	}
-	d := deck.New(hero.Viserai{}, []deck.Weapon{weapons.ReapingBlade{}}, deckCards)
+	d := deck.New(heroes.Viserai{}, []deck.Weapon{weapons.ReapingBlade{}}, deckCards)
 	done := make(chan struct{})
 	var stats deck.Stats
 	go func() {
@@ -122,7 +122,7 @@ func TestEvaluate_TerminatesAfterTwoCycles(t *testing.T) {
 		t.Fatalf("Evaluate did not terminate within 2 seconds — infinite loop regression")
 	}
 	// Two cycles of a 40-card / 4-hand-size deck is exactly 20 hands.
-	handsPerCycle := len(deckCards) / hero.Viserai{}.Intelligence()
+	handsPerCycle := len(deckCards) / heroes.Viserai{}.Intelligence()
 	maxHands := 2 * handsPerCycle
 	if stats.Hands != maxHands {
 		t.Errorf("Stats.Hands = %d, want exactly %d (steady-state pitched-pitch loop hits the cap)",
@@ -140,7 +140,7 @@ func TestEvaluateAdaptive_StopsBeforeMaxRunsWhenSEMet(t *testing.T) {
 	for len(deckCards) < 40 {
 		deckCards = append(deckCards, registry.GetCard(ids.ReadTheRunesBlue))
 	}
-	d := deck.New(hero.Viserai{}, []deck.Weapon{weapons.ReapingBlade{}}, deckCards)
+	d := deck.New(heroes.Viserai{}, []deck.Weapon{weapons.ReapingBlade{}}, deckCards)
 	stats := NewEvaluator().EvaluateAdaptive(d, 0.1, Matchup{}, rand.New(rand.NewSource(42)))
 	if stats.Runs >= AdaptiveShufflesCap {
 		t.Errorf("Runs = %d; expected adaptive stop well before cap=%d", stats.Runs, AdaptiveShufflesCap)
@@ -160,7 +160,7 @@ func TestEvaluateAdaptive_RespectsMaxRunsCapWhenSEUnreachable(t *testing.T) {
 	for len(deckCards) < 40 {
 		deckCards = append(deckCards, registry.GetCard(ids.ReadTheRunesBlue))
 	}
-	d := deck.New(hero.Viserai{}, []deck.Weapon{weapons.ReapingBlade{}}, deckCards)
+	d := deck.New(heroes.Viserai{}, []deck.Weapon{weapons.ReapingBlade{}}, deckCards)
 	// Negative targetSE is structurally unreachable — MeanStandardError is always >= 0, so
 	// the `<= targetSE` predicate never fires. Loop should exhaust at maxRuns regardless of
 	// the deck's actual variance (which can be zero for trivially-identical-card decks).

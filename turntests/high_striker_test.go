@@ -3,12 +3,12 @@ package turntests
 import (
 	"testing"
 
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card/cards"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
-	"github.com/tim-chaplin/fab-deck-optimizer/v2/hero"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/hero/heroes"
 )
 
 // Tests the High Striker → Critical Strike chain: High Striker's on-attack-action-hit
@@ -26,7 +26,7 @@ func TestHighStriker_TriggersOnNextAttackActionHit(t *testing.T) {
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
-			d := deck.New(hero.Viserai{}, nil, fillerDeck())
+			d := deck.New(heroes.Viserai{}, nil, fillerDeck())
 			hand := []deck.Card{
 				tc.striker,
 				cards.CriticalStrikeYellow{},

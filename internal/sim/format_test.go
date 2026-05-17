@@ -5,13 +5,13 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/aura"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card/cards"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/gameengine"
-	"github.com/tim-chaplin/fab-deck-optimizer/v2/hero"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/hero/heroes"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/item"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/token"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/triggertype"
@@ -83,7 +83,7 @@ func TestFormatBestTurn_AttackAndPitch(t *testing.T) {
 // label so the reader can distinguish damage-dealing chain steps from resource/setup plays.
 func TestFormatBestTurn_NonAttackCardUsesPlayLabel(t *testing.T) {
 	h := []card.Card{cards.MauvrionSkiesRed{}, cards.ShrillOfSkullformRed{}, cards.MaleficIncantationBlue{}}
-	got := Best(nil, h, Matchup{IncomingDamage: 0}, nil, gameengine.GameStateBuilder().SetHero(hero.Viserai{}).Build())
+	got := Best(nil, h, Matchup{IncomingDamage: 0}, nil, gameengine.GameStateBuilder().SetHero(heroes.Viserai{}).Build())
 	out := FormatBestTurn(got, nil, nil)
 	if !strings.Contains(out, "Mauvrion Skies [R]: PLAY") {
 		t.Errorf("want Mauvrion (non-attack action) labelled PLAY, got:\n%s", out)
@@ -103,7 +103,7 @@ func TestFormatBestTurn_LogAttributesEachTriggerSeparately(t *testing.T) {
 	bootstrap := gameengine.New()
 	bootstrap.ResolveChainStep(bootstrap.Logger(), &card.CardState{Card: cards.MaleficIncantationRed{}})
 	state := gameengine.GameStateBuilder().
-		SetHero(hero.Viserai{}).
+		SetHero(heroes.Viserai{}).
 		AddAura(bootstrap.Auras()...).
 		Build()
 	got := Best(nil, h, Matchup{}, nil, state)
@@ -140,7 +140,7 @@ func TestFormatBestTurn_LogAttributesEachTriggerSeparately(t *testing.T) {
 // render, trigger lines only render on positive contribution.
 func TestFormatBestTurn_LogSuppressesZeroTriggers(t *testing.T) {
 	h := []card.Card{testutils.RedAttack{}}
-	got := Best(nil, h, Matchup{IncomingDamage: 0}, nil, gameengine.GameStateBuilder().SetHero(hero.Viserai{}).Build())
+	got := Best(nil, h, Matchup{IncomingDamage: 0}, nil, gameengine.GameStateBuilder().SetHero(heroes.Viserai{}).Build())
 	if strings.Contains(FormatBestTurn(got, nil, nil), "Viserai created") {
 		t.Errorf("hero trigger line shouldn't render when Viserai contributed 0; got:\n%s",
 			FormatBestTurn(got, nil, nil))

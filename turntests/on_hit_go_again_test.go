@@ -4,18 +4,18 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card/cards"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
-	"github.com/tim-chaplin/fab-deck-optimizer/v2/hero"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/hero/heroes"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/weapon/weapons"
 )
 
 // Pins on-hit-go-again chain extension through a weapon swing: Nimblism + Razor Reflex
 // buff Critical Strike to 7, RR's on-hit go-again grants AP for Reaping Blade (3).
 func TestOnHitGoAgain_RazorReflexExtendsToWeaponSwing(t *testing.T) {
-	d := deck.New(hero.Viserai{}, []deck.Weapon{weapons.ReapingBlade{}}, fillerDeck())
+	d := deck.New(heroes.Viserai{}, []deck.Weapon{weapons.ReapingBlade{}}, fillerDeck())
 	hand := []deck.Card{
 		testutils.BluePitch{},
 		cards.CriticalStrikeRed{},
@@ -32,7 +32,7 @@ func TestOnHitGoAgain_RazorReflexExtendsToWeaponSwing(t *testing.T) {
 // Pins two consecutive attack reactions stacking on a single attack: 2x Razor Reflex
 // buff Snatch to 4, the second RR's on-hit go-again grants AP for Reaping Blade (3).
 func TestOnHitGoAgain_TwoConsecutiveARsExtendToWeaponSwing(t *testing.T) {
-	d := deck.New(hero.Viserai{}, []deck.Weapon{weapons.ReapingBlade{}}, fillerDeck())
+	d := deck.New(heroes.Viserai{}, []deck.Weapon{weapons.ReapingBlade{}}, fillerDeck())
 	hand := []deck.Card{
 		testutils.BluePitch{},
 		cards.SnatchBlue{},

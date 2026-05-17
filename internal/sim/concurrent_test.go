@@ -10,8 +10,8 @@ import (
 	"time"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/hero/heroes"
 
-	"github.com/tim-chaplin/fab-deck-optimizer/v2/hero"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/registry"
 )
 
@@ -24,7 +24,7 @@ func TestEvaluate_ConcurrentNoMapPanic(t *testing.T) {
 	}
 	const iterations = 25
 
-	baseline := deck.Random(hero.Viserai{}, 40, 2, rand.New(rand.NewSource(42)), registry.Registry{})
+	baseline := deck.Random(heroes.Viserai{}, 40, 2, rand.New(rand.NewSource(42)), registry.Registry{})
 
 	var wg sync.WaitGroup
 	for w := 0; w < numWorkers; w++ {
@@ -53,7 +53,7 @@ func TestEvaluate_ConcurrentNoMapPanic(t *testing.T) {
 // shapes regardless of whether an improvement is found.
 func TestRunMutationRound_RunsWithoutPanic(t *testing.T) {
 	rng := rand.New(rand.NewSource(42))
-	baseline := deck.Random(hero.Viserai{}, 40, 2, rng, registry.Registry{})
+	baseline := deck.Random(heroes.Viserai{}, 40, 2, rng, registry.Registry{})
 	baseAvg := NewEvaluator().Evaluate(baseline, 10, Matchup{}, rng).Mean()
 	mutations := deck.AllMutations(baseline, 2, registry.Registry{})
 	// Cap mutations so the test stays under a second; full list is thousands of entries.
@@ -94,7 +94,7 @@ func TestRunMutationRound_RunsWithoutPanic(t *testing.T) {
 // Pre-cancels for deterministic behaviour.
 func TestRunMutationRound_AbortsOnContextCancel(t *testing.T) {
 	rng := rand.New(rand.NewSource(42))
-	baseline := deck.Random(hero.Viserai{}, 40, 2, rng, registry.Registry{})
+	baseline := deck.Random(heroes.Viserai{}, 40, 2, rng, registry.Registry{})
 	baseAvg := NewEvaluator().Evaluate(baseline, 10, Matchup{}, rng).Mean()
 	mutations := deck.AllMutations(baseline, 2, registry.Registry{})
 
@@ -134,7 +134,7 @@ func TestRunMutationRound_AbortsOnContextCancel(t *testing.T) {
 // unreachable — workers drain the queue without a serial deep-confirm bottleneck.
 func TestRunMutationRound_TerminatesWithNoImprovement(t *testing.T) {
 	rng := rand.New(rand.NewSource(42))
-	baseline := deck.Random(hero.Viserai{}, 40, 2, rng, registry.Registry{})
+	baseline := deck.Random(heroes.Viserai{}, 40, 2, rng, registry.Registry{})
 	mutations := deck.AllMutations(baseline, 2, registry.Registry{})
 	// Cap the mutation list so the test stays well under the hang-regression threshold even on
 	// slower CI runners. Full mutation list is thousands of entries.

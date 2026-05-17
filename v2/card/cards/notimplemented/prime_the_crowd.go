@@ -10,7 +10,7 @@ package notimplemented
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/card/cards"
 )
 
 // not implemented: Crowd cheers / Crowd boos keywords dropped
