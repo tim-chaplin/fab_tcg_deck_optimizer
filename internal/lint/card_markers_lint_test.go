@@ -1,4 +1,4 @@
-package cards_test
+package lint
 
 import (
 	"go/ast"
@@ -30,7 +30,8 @@ func TestLayout_MarkersStayInSubpackages(t *testing.T) {
 		markers []string
 	}
 	var findings []finding
-	err := filepath.WalkDir("./", func(path string, d os.DirEntry, err error) error {
+	cardsRoot := filepath.Join(RepoRoot(t), "internal", "card", "cards")
+	err := filepath.WalkDir(cardsRoot, func(path string, d os.DirEntry, err error) error {
 		if err != nil {
 			return err
 		}
@@ -61,7 +62,7 @@ func TestLayout_MarkersStayInSubpackages(t *testing.T) {
 		}
 		// Determine which subdir (or top-level) this file lives in.
 		dir := ""
-		if rel, err := filepath.Rel("./", path); err == nil {
+		if rel, err := filepath.Rel(cardsRoot, path); err == nil {
 			parts := strings.Split(rel, string(filepath.Separator))
 			if len(parts) > 1 {
 				dir = parts[0]

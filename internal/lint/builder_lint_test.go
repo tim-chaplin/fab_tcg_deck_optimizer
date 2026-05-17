@@ -1,4 +1,4 @@
-package gameengine_test
+package lint
 
 import (
 	"go/ast"
@@ -22,7 +22,7 @@ import (
 // Single-setter chains (GameStateBuilder().SetHero(h).Build()) may stay inline. The test
 // walks every .go file in the repo so the rule holds across packages.
 func TestGameStateBuilder_MultiLineWhenMultiSetter(t *testing.T) {
-	root := repoRoot(t)
+	root := RepoRoot(t)
 	fset := token.NewFileSet()
 	err := filepath.WalkDir(root, func(path string, d os.DirEntry, err error) error {
 		if err != nil {
@@ -107,24 +107,5 @@ func gameStateBuilderChainLines(fset *token.FileSet, call *ast.CallExpr) (lines 
 		default:
 			return nil, false
 		}
-	}
-}
-
-// repoRoot walks up from the test's working directory to the directory holding go.mod.
-func repoRoot(t *testing.T) string {
-	t.Helper()
-	dir, err := os.Getwd()
-	if err != nil {
-		t.Fatalf("getwd: %v", err)
-	}
-	for {
-		if _, err := os.Stat(filepath.Join(dir, "go.mod")); err == nil {
-			return dir
-		}
-		parent := filepath.Dir(dir)
-		if parent == dir {
-			t.Fatal("go.mod not found walking up from the test directory")
-		}
-		dir = parent
 	}
 }
