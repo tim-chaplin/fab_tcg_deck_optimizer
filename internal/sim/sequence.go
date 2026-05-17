@@ -380,7 +380,8 @@ func (ctx *sequenceContext) preparePermState(playedAttackers []*card.CardState, 
 	s.SetOpponentMarked(ctx.priorOpponentMarked)
 	s.SetBlockTotal(ctx.blockTotal)
 	s.SetDeck(ctx.deck.ShallowCopy())
-	hand := append([]card.Card(nil), ctx.handStart...)
+	hand := make([]card.Card, len(ctx.handStart), len(ctx.handStart)+n+len(ctx.attackPitchPerm))
+	copy(hand, ctx.handStart)
 	for k := 0; k < n; k++ {
 		hand = append(hand, playedAttackers[k].Card)
 	}
