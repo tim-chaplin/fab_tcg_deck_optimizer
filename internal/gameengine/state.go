@@ -372,11 +372,15 @@ func (gs *GameState) AppendHandRaw(c card.Card) {
 }
 
 // RemoveFromHand removes the first matching card from the hand without flipping
-// IsCacheable. Returns true if a card was removed.
+// IsCacheable. Returns true if a card was removed. Does not preserve order — the
+// removed slot is filled by the last element (swap-with-last). The chain runner
+// reads hand by membership / length, not by index, so order doesn't matter.
 func (gs *GameState) RemoveFromHand(c card.Card) bool {
 	for i := range gs.hand {
 		if gs.hand[i] == c {
-			gs.hand = append(gs.hand[:i], gs.hand[i+1:]...)
+			last := len(gs.hand) - 1
+			gs.hand[i] = gs.hand[last]
+			gs.hand = gs.hand[:last]
 			return true
 		}
 	}
