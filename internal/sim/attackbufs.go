@@ -3,6 +3,7 @@ package sim
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/weapon"
 )
 
 // Pre-allocated scratch buffers threaded through the attack-evaluation pipeline (findBest
@@ -61,7 +62,7 @@ type attackBufs struct {
 	drCardStateScratch card.CardState
 }
 
-func newAttackBufs(handSize, weaponCount int, weapons []Weapon) *attackBufs {
+func newAttackBufs(handSize, weaponCount int, weapons []weapon.Weapon) *attackBufs {
 	// +1 reserves a slot for the arsenal-in card; +maxDrawnExtensions leaves headroom for
 	// mid-turn-drawn cards that play as chain extensions.
 	const maxDrawnExtensions = 32
@@ -117,7 +118,7 @@ func newAttackBufs(handSize, weaponCount int, weapons []Weapon) *attackBufs {
 
 // getAttackBufs returns the Evaluator's cached attackBufs when (handSize, weapons) match
 // the last call; otherwise allocates a fresh one and caches it.
-func (e *Evaluator) getAttackBufs(handSize int, weapons []Weapon) *attackBufs {
+func (e *Evaluator) getAttackBufs(handSize int, weapons []weapon.Weapon) *attackBufs {
 	if e.cachedBufs != nil && e.cachedHandSize == handSize && sameWeapons(e.cachedWeapons, weapons) {
 		return e.cachedBufs
 	}
@@ -129,7 +130,7 @@ func (e *Evaluator) getAttackBufs(handSize int, weapons []Weapon) *attackBufs {
 
 // sameWeapons reports whether two weapon slices contain the same weapons in the same
 // order.
-func sameWeapons(a, b []Weapon) bool {
+func sameWeapons(a, b []weapon.Weapon) bool {
 	if len(a) != len(b) {
 		return false
 	}

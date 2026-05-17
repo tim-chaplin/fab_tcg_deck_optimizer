@@ -4,6 +4,7 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/gameengine"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/weapon"
 )
 
 // Entry points for hand evaluation. Best computes the optimal turn line for a given hand
@@ -29,13 +30,13 @@ import (
 // Package-private so external packages can't bypass EvalOneTurnForTesting — the turntests
 // convention is to drive the chain runner through that deck-level entry point so every test
 // exercises the same per-turn pipeline production runs through Evaluate.
-func best(weapons []Weapon, hand []card.Card, mp Matchup, d *deck.Deck, master *gameengine.GameState) TurnSummary {
+func best(weapons []weapon.Weapon, hand []card.Card, mp Matchup, d *deck.Deck, master *gameengine.GameState) TurnSummary {
 	return sharedEvaluator.Best(weapons, hand, mp, d, master)
 }
 
 // Best is the method form of the package-level Best. Returns a TurnSummary with
 // State.Log fully populated.
-func (e *Evaluator) Best(weapons []Weapon, hand []card.Card, mp Matchup, d *deck.Deck, master *gameengine.GameState) TurnSummary {
+func (e *Evaluator) Best(weapons []weapon.Weapon, hand []card.Card, mp Matchup, d *deck.Deck, master *gameengine.GameState) TurnSummary {
 	return e.findBest(weapons, hand, mp, d, master, false)
 }
 
@@ -43,7 +44,7 @@ func (e *Evaluator) Best(weapons []Weapon, hand []card.Card, mp Matchup, d *deck
 // fields; State.Log comes back empty. The deck-eval loop uses this for every turn to skip
 // the per-chain Log slice copy that dominates allocation bytes; only turns that become the
 // new deck-best are replayed via Best to recover Log.
-func (e *Evaluator) BestSkipLog(weapons []Weapon, hand []card.Card, mp Matchup, d *deck.Deck, master *gameengine.GameState) TurnSummary {
+func (e *Evaluator) BestSkipLog(weapons []weapon.Weapon, hand []card.Card, mp Matchup, d *deck.Deck, master *gameengine.GameState) TurnSummary {
 	return e.findBest(weapons, hand, mp, d, master, true)
 }
 
@@ -64,7 +65,7 @@ func (e *Evaluator) BestSkipLog(weapons []Weapon, hand []card.Card, mp Matchup, 
 type Evaluator struct {
 	cachedBufs     *attackBufs
 	cachedHandSize int
-	cachedWeapons  []Weapon
+	cachedWeapons  []weapon.Weapon
 	cache          *evalCache
 	// numWorkers tells Evaluate how many goroutines to fan the shuffle loop across.
 	// 0 or 1 runs sequentially in the calling goroutine, reusing cachedBufs as the per-

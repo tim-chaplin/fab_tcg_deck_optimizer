@@ -10,13 +10,14 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/hero"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/item"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/turnlogger"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/weapon"
 )
 
 // Test-only exports. Visible to package sim_test files in this directory only.
 
 // Best re-exports the package-private best for sim_test consumers. state is the carryover
 // *GameState — pass nil to start from a clean state seeded with hero h.
-func Best(weapons []Weapon, hand []card.Card, mp Matchup, d *deck.Deck, state *gameengine.GameState) TurnSummary {
+func Best(weapons []weapon.Weapon, hand []card.Card, mp Matchup, d *deck.Deck, state *gameengine.GameState) TurnSummary {
 	return best(weapons, hand, mp, d, state)
 }
 
@@ -101,7 +102,7 @@ func FormatContribution(v float64) string { return formatContribution(v) }
 type AttackBufs = attackBufs
 
 // NewAttackBufs re-exports newAttackBufs.
-func NewAttackBufs(handSize, weaponCount int, weapons []Weapon) *AttackBufs {
+func NewAttackBufs(handSize, weaponCount int, weapons []weapon.Weapon) *AttackBufs {
 	return newAttackBufs(handSize, weaponCount, weapons)
 }
 

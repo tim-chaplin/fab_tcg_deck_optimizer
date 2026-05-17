@@ -7,9 +7,9 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapons"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/hero"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/weapon/weapons"
 )
 
 // Pins on-hit-go-again chain extension through a weapon swing: Nimblism + Razor Reflex

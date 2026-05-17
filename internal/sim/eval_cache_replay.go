@@ -13,6 +13,7 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/gameengine"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/weapon"
 )
 
 // replayBest is the cache-hit body. Thin wrapper around evaluatePartition: project the
@@ -28,7 +29,7 @@ import (
 // on the BestLine afterward.
 func (e *Evaluator) replayBest(
 	entry evalCacheEntry,
-	weapons []Weapon, hand []card.Card,
+	weapons []weapon.Weapon, hand []card.Card,
 	mp Matchup, d *deck.Deck,
 	masterState *gameengine.GameState, skipLog bool,
 ) TurnSummary {

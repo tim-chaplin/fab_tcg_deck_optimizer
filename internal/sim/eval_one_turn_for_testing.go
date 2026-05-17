@@ -7,6 +7,7 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/gameengine"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/hero"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/item"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/weapon"
 )
 
 // Test-only entry point: drives one turn against a fixed deck order so tests can assert
@@ -102,9 +103,9 @@ func EvalOneTurnForTesting(masterDeck *deck.Deck, mp Matchup, initial *gameengin
 		}
 	}
 	sortHandByID(hand)
-	weapons := make([]Weapon, len(d.Weapons))
+	weapons := make([]weapon.Weapon, len(d.Weapons))
 	for i, w := range d.Weapons {
-		weapons[i] = w.(Weapon)
+		weapons[i] = w.(weapon.Weapon)
 	}
 	play := best(weapons, hand, mp, d, master)
 	d = play.State.Deck()

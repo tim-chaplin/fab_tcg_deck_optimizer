@@ -5,11 +5,12 @@ import (
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapons"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/gameengine"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/hero"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/token"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/weapon"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/weapon/weapons"
 )
 
 // Tests that playSequence flips ArcaneDamageDealt before calling Play when Runechants are
@@ -140,7 +141,7 @@ func TestBest_MauvrionReadWithCarryover(t *testing.T) {
 // Tests that an attack consumes a carryover runechant without re-crediting damage.
 func TestBest_AetherSlashAloneConsumesCarryover(t *testing.T) {
 	h := []card.Card{cards.AetherSlashRed{}}
-	weapons := []Weapon{weapons.ReapingBlade{}}
+	weapons := []weapon.Weapon{weapons.ReapingBlade{}}
 	got := Best(weapons, h, Matchup{IncomingDamage: 0}, nil, stateWithRunechants(hero.Viserai{}, 1))
 	if got.Value != 3 {
 		t.Errorf("Value = %d, want 3 (Reaping Blade attack; carryover consumed without credit)", got.Value)
