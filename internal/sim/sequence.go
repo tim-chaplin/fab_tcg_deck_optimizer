@@ -295,6 +295,11 @@ type sequenceContext struct {
 	// slice allocation. promoteWinnerState clears this pointer when a permutation wins so
 	// the winner's state survives untouched and the next perm allocates a fresh pool slot.
 	pooledState *gameengine.GameState
+	// handBuf is the per-context hand backing recycled across losing permutations. Each
+	// preparePermState rebuilds the hand slice via append into handBuf[:0], avoiding the
+	// per-perm hand allocation. promoteWinnerState clones the winner's hand onto a fresh
+	// slice so the next preparePermState's hand rebuild can't trample winning state.
+	handBuf []card.Card
 }
 
 // promoteWinnerDeck swaps winner's pooled-deck pointer for a freshly-allocated copy so
@@ -318,11 +323,23 @@ func (ctx *sequenceContext) promoteWinnerDeck(winner *gameengine.GameState) {
 // reallocates a fresh state via CopyPersistentState. Wins are rare relative to losses
 // (best-of-N! permutations), so the recycled-on-loss path is the common case and the
 // allocation only happens once per new best.
+//
+// Also clones the winner's hand so the next preparePermState's hand rebuild can't
+// trample the winning permutation's recorded hand state. The clone is unconditional
+// because the hand may or may not still alias ctx.handBuf after mid-chain growth.
 func (ctx *sequenceContext) promoteWinnerState(winner *gameengine.GameState) {
-	if winner == nil || winner != ctx.pooledState {
+	if winner == nil {
 		return
 	}
-	ctx.pooledState = nil
+	if winner == ctx.pooledState {
+		ctx.pooledState = nil
+	}
+	winnerHand := winner.Hand()
+	if len(winnerHand) > 0 {
+		clone := make([]card.Card, len(winnerHand))
+		copy(clone, winnerHand)
+		winner.SetHand(clone)
+	}
 }
 
 // newPermLogger returns a fresh logger when ctx is recording, or nil for the find-best
@@ -436,14 +453,19 @@ func (ctx *sequenceContext) preparePermState(playedAttackers []*card.CardState, 
 		ctx.pooledDeck.ShallowCopyFrom(ctx.deck)
 	}
 	s.SetDeck(ctx.pooledDeck)
-	hand := make([]card.Card, len(ctx.handStart), len(ctx.handStart)+n+len(ctx.attackPitchPerm))
-	copy(hand, ctx.handStart)
+	needed := len(ctx.handStart) + n + len(ctx.attackPitchPerm)
+	if cap(ctx.handBuf) < needed {
+		ctx.handBuf = make([]card.Card, 0, needed)
+	}
+	hand := ctx.handBuf[:0]
+	hand = append(hand, ctx.handStart...)
 	for k := 0; k < n; k++ {
 		hand = append(hand, playedAttackers[k].Card)
 	}
 	for _, c := range ctx.attackPitchPerm {
 		hand = append(hand, c)
 	}
+	ctx.handBuf = hand
 	s.SetPitched(ctx.pitched)
 	s.SetHand(hand)
 	s.SetLogger(ctx.newPermLogger())
