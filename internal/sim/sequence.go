@@ -291,7 +291,7 @@ type sequenceContext struct {
 	pooledDeck *deck.Deck
 	// pooledState is the per-context *GameState recycled across losing permutations.
 	// preparePermState writes the next permutation's start state into it via
-	// ResetForPermutationFrom, skipping the per-perm GameState allocation and aura / item
+	// CopyPersistentStateFrom, skipping the per-perm GameState allocation and aura / item
 	// slice allocation. promoteWinnerState clears this pointer when a permutation wins so
 	// the winner's state survives untouched and the next perm allocates a fresh pool slot.
 	pooledState *gameengine.GameState
@@ -314,7 +314,7 @@ func (ctx *sequenceContext) promoteWinnerDeck(winner *gameengine.GameState) {
 }
 
 // promoteWinnerState hands off ctx.pooledState to bestWinner so the next permutation's
-// ResetForPermutationFrom doesn't trample it. The pool pointer is cleared; next perm
+// CopyPersistentStateFrom doesn't trample it. The pool pointer is cleared; next perm
 // reallocates a fresh state via CopyPersistentState. Wins are rare relative to losses
 // (best-of-N! permutations), so the recycled-on-loss path is the common case and the
 // allocation only happens once per new best.
@@ -422,7 +422,7 @@ func (ctx *sequenceContext) preparePermState(playedAttackers []*card.CardState, 
 	if ctx.pooledState == nil {
 		ctx.pooledState = ctx.leafState.CopyPersistentState()
 	} else {
-		ctx.pooledState.ResetForPermutationFrom(ctx.leafState)
+		ctx.pooledState.CopyPersistentStateFrom(ctx.leafState)
 	}
 	s := ctx.pooledState
 	s.ResetEphemeralState()

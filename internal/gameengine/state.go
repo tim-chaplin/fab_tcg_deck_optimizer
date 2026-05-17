@@ -143,13 +143,13 @@ func (gs *GameState) CopyPersistentState() *GameState {
 	return &out
 }
 
-// ResetForPermutationFrom overwrites *gs in place to match what CopyPersistentState(src)
+// CopyPersistentStateFrom overwrites *gs in place to match what CopyPersistentState(src)
 // would produce. Reuses gs's auras / items slice backing when capacity permits, avoiding
 // the per-permutation slice allocation in the chain runner's hot loop. The chain runner
 // follows with ResetEphemeralState which wipes the same ephemeral fields CopyPersistentState
 // left nil, so this path mirrors CopyPersistentState exactly — only the persistent
 // carryover fields and the aura / item per-entry copies are load-bearing here.
-func (gs *GameState) ResetForPermutationFrom(src *GameState) {
+func (gs *GameState) CopyPersistentStateFrom(src *GameState) {
 	// Stash the pool's existing slice backings before overwriting gs, then reuse them if
 	// cap suffices. Without this the *gs = *src would alias src.auras / src.items and the
 	// per-entry copy loop below would scribble Copy() values into the leafState's own
