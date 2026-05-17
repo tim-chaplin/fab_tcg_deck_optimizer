@@ -3,7 +3,7 @@ package card
 import (
 	"testing"
 
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/ids"
 )
 
 // stubCard is a minimal Card with the fields these tests read. Inline (rather than from

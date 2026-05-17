@@ -10,7 +10,7 @@
 package hero
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/ids"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 )
 

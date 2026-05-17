@@ -6,7 +6,7 @@ package sim
 // the external (sim_test) tests use, just with a Fake prefix instead of Stub.
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/ids"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/hero"
 )
