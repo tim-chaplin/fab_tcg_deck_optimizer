@@ -370,23 +370,35 @@ func (ge *GameEngine) FireAttackAction(triggeringCard card.Card) {
 // FireEndOfTurn. Iterates auras with a cursor so handler-side splicing (Destroy
 // mutates the auras slice in place, shifting the next entry down to the cursor's
 // index) advances only when the slice length didn't change.
+//
+// triggeringCard is published on ge.triggeringCard once per call (lazily, only when an
+// aura actually fires) and cleared at the end; handler-side log calls
+// (ge.TriggeringCard()) read it during their Fire body. currentAuraIdx similarly
+// only resets to the -1 sentinel after the whole walk, since DestroyAura only matters
+// from within the active Fire call's stack.
 func (ge *GameEngine) fireMatching(triggeringCard card.Card, trigger triggertype.Type) {
+	fired := false
 	for i := 0; i < len(ge.auras); {
 		a := ge.auras[i]
 		if a.TriggerType() != trigger || (a.OncePerTurn() && a.FiredThisTurn()) {
 			i++
 			continue
 		}
-		ge.triggeringCard = triggeringCard
+		if !fired {
+			ge.triggeringCard = triggeringCard
+			fired = true
+		}
 		ge.currentAuraIdx = i
 		ge.currentAuraDestroyed = false
 		a.Fire(ge, ge.logger)
-		ge.currentAuraIdx = -1
-		ge.triggeringCard = nil
 		if !ge.currentAuraDestroyed {
 			ge.auras[i].SetFiredThisTurn(true)
 			i++
 		}
+	}
+	if fired {
+		ge.currentAuraIdx = -1
+		ge.triggeringCard = nil
 	}
 }
 
