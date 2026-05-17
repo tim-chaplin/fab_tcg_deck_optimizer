@@ -1,4 +1,4 @@
-package fabrary
+package textio
 
 import (
 	"math/rand"
@@ -6,19 +6,19 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/tim-chaplin/fab-deck-optimizer/v2/hero"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/hero"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/registry"
 )
 
 // TestMarshalUnmarshalRoundTrip exercises a random deck through Marshal → Unmarshal and checks
 // that weapons, cards, and hero all come back intact (stats are intentionally not round-tripped).
-func TestMarshalUnmarshalRoundTrip(t *testing.T) {
+func TestFabrary_MarshalUnmarshalRoundTrip(t *testing.T) {
 	rng := rand.New(rand.NewSource(1))
 	d := deck.Random(hero.Viserai{}, 40, 2, rng, nil, registry.Registry{})
 
-	text := Marshal(d)
-	got, skipped, err := Unmarshal(text)
+	text := MarshalFabrary(d)
+	got, skipped, err := UnmarshalFabrary(text)
 	if err != nil {
 		t.Fatalf("Unmarshal: %v\n---\n%s", err, text)
 	}
@@ -46,7 +46,7 @@ func TestMarshalUnmarshalRoundTrip(t *testing.T) {
 func TestMarshalFormat(t *testing.T) {
 	rng := rand.New(rand.NewSource(1))
 	d := deck.Random(hero.Viserai{}, 40, 2, rng, nil, registry.Registry{})
-	text := Marshal(d)
+	text := MarshalFabrary(d)
 
 	wantPrefix := "Name: Viserai\nHero: Viserai\nFormat: Silver Age\n\nArena cards\n"
 	if !strings.HasPrefix(text, wantPrefix) {
@@ -75,7 +75,7 @@ func TestMarshalRendersAppliedDefaults(t *testing.T) {
 			{Name: "Read the Runes [R]", Count: 2},
 		},
 	})
-	text := Marshal(d)
+	text := MarshalFabrary(d)
 
 	for _, want := range []string{
 		"1x Beckoning Haunt\n",
@@ -135,7 +135,7 @@ Deck cards
 Made with ❤️ at the FaBrary
 See the full deck @ https://fabrary.net/decks/01KP1AZ5SAS425YN30WB779M41
 `
-	d, skipped, err := Unmarshal(sample)
+	d, skipped, err := UnmarshalFabrary(sample)
 	if err != nil {
 		t.Fatalf("Unmarshal: %v", err)
 	}
@@ -198,7 +198,7 @@ Arena cards
 Deck cards
 2x Not A Real Card (red)
 `
-	d, skipped, err := Unmarshal(text)
+	d, skipped, err := UnmarshalFabrary(text)
 	if err != nil {
 		t.Fatalf("Unmarshal: %v", err)
 	}
@@ -220,7 +220,7 @@ func TestMarshalSideboardSection(t *testing.T) {
 	// Use Mauvrion Skies [R] — its pitch-color suffix exercises the toFabraryCardName
 	// lowercase conversion. Sideboard is a string list; names are stored in canonical form.
 	d.Sideboard = []string{"Mauvrion Skies [R]", "Mauvrion Skies [R]"}
-	text := Marshal(d)
+	text := MarshalFabrary(d)
 	if !strings.Contains(text, "\nSideboard\n") {
 		t.Errorf("populated sideboard should emit a Sideboard section; got:\n%s", text)
 	}
@@ -249,7 +249,7 @@ Sideboard
 2x Mauvrion Skies (red)
 1x Runic Reaping (blue)
 `
-	d, skipped, err := Unmarshal(sample)
+	d, skipped, err := UnmarshalFabrary(sample)
 	if err != nil {
 		t.Fatalf("Unmarshal: %v", err)
 	}
@@ -281,7 +281,7 @@ Arena cards
 
 Deck cards
 `
-	_, _, err := Unmarshal(text)
+	_, _, err := UnmarshalFabrary(text)
 	if err == nil {
 		t.Fatal("expected error for unknown hero, got nil")
 	}

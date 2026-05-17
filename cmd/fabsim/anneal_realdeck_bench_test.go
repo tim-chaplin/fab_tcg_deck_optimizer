@@ -7,10 +7,10 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/deckio"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/registry"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/textio"
 )
 
 // BenchmarkAnnealRoundOnViseraiV4 mimics anneal's per-round workload anchored on
@@ -41,7 +41,7 @@ func BenchmarkAnnealRoundOnViseraiV4(b *testing.B) {
 	if err != nil {
 		b.Fatalf("read deck: %v", err)
 	}
-	loaded, _, err := deckio.Unmarshal(data)
+	loaded, _, err := textio.UnmarshalDeck(data)
 	if err != nil {
 		b.Fatalf("unmarshal deck: %v", err)
 	}

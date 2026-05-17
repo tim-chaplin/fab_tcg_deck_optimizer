@@ -1,4 +1,4 @@
-package fabrary
+package textio
 
 // Runtime Deck → fabrary-style text encoding: Marshal assembles the Name / Hero / Format
 // header plus the Arena cards / Deck cards / Sideboard sections. Stats aren't emitted —
@@ -26,7 +26,7 @@ const defaultFormat = "Silver Age"
 // Callers that want the hardcoded default equipment / sideboard loadout baked in should run
 // d.ApplyDefaults(defaults) before Marshal. writeDeck does that automatically so the
 // persisted .txt always carries the full loadout.
-func Marshal(d *deck.Deck) string {
+func MarshalFabrary(d *deck.Deck) string {
 	var b strings.Builder
 	name := d.Hero.(hero.Hero).Name()
 	fmt.Fprintf(&b, "Name: %s\n", name)

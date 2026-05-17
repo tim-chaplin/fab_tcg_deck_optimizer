@@ -1,4 +1,4 @@
-package deckio
+package textio
 
 import (
 	"strings"
@@ -41,12 +41,12 @@ func TestUnmarshal_RejectsUnknownNamesAndBadJSON(t *testing.T) {
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
-			_, _, err := Unmarshal([]byte(tc.input))
+			_, _, err := UnmarshalDeck([]byte(tc.input))
 			if err == nil {
-				t.Fatalf("Unmarshal(%q): err = nil, want error containing %q", tc.input, tc.wantError)
+				t.Fatalf("UnmarshalDeck(%q): err = nil, want error containing %q", tc.input, tc.wantError)
 			}
 			if !strings.Contains(err.Error(), tc.wantError) {
-				t.Errorf("Unmarshal(%q): err = %q, want substring %q", tc.input, err.Error(), tc.wantError)
+				t.Errorf("UnmarshalDeck(%q): err = %q, want substring %q", tc.input, err.Error(), tc.wantError)
 			}
 		})
 	}

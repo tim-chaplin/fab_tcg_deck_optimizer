@@ -1,4 +1,4 @@
-package deckio
+package textio
 
 import "github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
 
