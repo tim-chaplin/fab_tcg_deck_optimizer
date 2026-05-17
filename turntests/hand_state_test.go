@@ -23,7 +23,8 @@ import (
 func TestHandState_SpringLoadAlonePitchEmptiesHand(t *testing.T) {
 	d := deck.New(heroes.Viserai{}, nil, fillerDeck())
 	hand := []deck.Card{testutils.BluePitch{}, cards.SpringLoadRed{}}
-	if got := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, nil, hand).Value; got != 5 {
+	_, extras := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, nil, hand)
+	if got := extras.Value; got != 5 {
 		t.Fatalf("Value = %d, want 5 (Spring Load 2 + rider 3)", got)
 	}
 }
@@ -34,7 +35,8 @@ func TestHandState_BlockerEmptiesHandForSpringLoad(t *testing.T) {
 	hand := []deck.Card{testutils.BluePitch{}, cards.DodgeBlue{}, cards.SpringLoadRed{}}
 	// Incoming = 3 → BluePitch pitched (3 res), Dodge played as DR for 2 prevented,
 	// Spring Load resolves with empty hand. Value = 5 (Spring Load + rider) + 2 (Dodge).
-	if got := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 3}, nil, hand).Value; got != 7 {
+	_, extras := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 3}, nil, hand)
+	if got := extras.Value; got != 7 {
 		t.Fatalf("Value = %d, want 7 (Spring Load 2 + rider 3 + Dodge 2)", got)
 	}
 }
@@ -50,7 +52,8 @@ func TestHandState_UpcomingChainStepBlocksFirstSpringLoadRider(t *testing.T) {
 	// Pitch BluePitch (3 res) → fund Flying High (0) + Spring Load × 2 (1 + 1).
 	// Chain order [FH, SL1, SL2]: at SL1's Play, SL2 is upcoming → Hand non-empty,
 	// rider blocked. At SL2's Play, hand is empty → rider fires. Value = 0 + 2 + 5 = 7.
-	if got := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, nil, hand).Value; got != 7 {
+	_, extras := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, nil, hand)
+	if got := extras.Value; got != 7 {
 		t.Fatalf("Value = %d, want 7 (FH 0 + SL no rider 2 + SL with rider 5)", got)
 	}
 }
@@ -71,7 +74,8 @@ func TestHandState_MidChainDrawBlocksSpringLoadRider(t *testing.T) {
 	//   [FH, Snatch, SL] — Snatch hits, draws into Hand → SL sees the drawn card.
 	// Damage in both: FH 0 + Snatch 4 + SL 2 = 6. (Drawn card may itself extend the
 	// chain, but its presence at the moment SL resolves keeps the rider off.)
-	if got := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, nil, hand).Value; got != 6 {
+	_, extras := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, nil, hand)
+	if got := extras.Value; got != 6 {
 		t.Fatalf("Value = %d, want 6 (FH 0 + Snatch 4 + SL no rider 2)", got)
 	}
 }
@@ -90,7 +94,8 @@ func TestHandState_HeldCardBlocksSpringLoadRider(t *testing.T) {
 	// for Value 5. Whether a no-op Defend assignment should still count as "stuck in
 	// hand" is a sim-semantics call beyond the chain-step Hand snapshot — flagged for
 	// review.
-	if got := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, nil, hand).Value; got != 2 {
+	_, extras := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, nil, hand)
+	if got := extras.Value; got != 2 {
 		t.Fatalf("Value = %d, want 2 (Spring Load base 2; rider blocked by held Dodge)", got)
 	}
 }
@@ -112,7 +117,8 @@ func TestHandState_DemolitionCrewSeesUncommittedPitchInHand(t *testing.T) {
 		cards.DragDownYellow{},
 		notimpl.BrandishRed{},
 	}
-	if got := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, gameengine.GameStateBuilder().SetArsenal(cards.FlyingHighRed{}).Build(), hand).Value; got != 10 {
+	_, extras := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, gameengine.GameStateBuilder().SetArsenal(cards.FlyingHighRed{}).Build(), hand)
+	if got := extras.Value; got != 10 {
 		t.Fatalf("Value = %d, want 10 (FH 0 + DC 7 + Brandish 3 — DC reveal sees pitched Toughen Up)", got)
 	}
 }

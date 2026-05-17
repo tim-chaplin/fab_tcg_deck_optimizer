@@ -16,13 +16,13 @@ import (
 func TestPerformanceBonus_OnHitCreatesGold(t *testing.T) {
 	d := deck.New(heroes.Viserai{}, nil, fillerDeck())
 	hand := []deck.Card{cards.PerformanceBonusBlue{}}
-	state := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, nil, hand)
-	if state.Value != 1 {
+	gs, extras := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, nil, hand)
+	if extras.Value != 1 {
 		t.Fatalf("Value = %d, want 1 (PB Blue power 1 hits)\nBestLine: %s",
-			state.Value, formatBestLine(state.BestLine))
+			extras.Value, formatBestLine(extras.BestLine))
 	}
-	if state.GoldCount() != 1 {
-		t.Fatalf("Gold = %d, want 1 (on-hit token)", state.GoldCount())
+	if gs.GoldCount() != 1 {
+		t.Fatalf("Gold = %d, want 1 (on-hit token)", gs.GoldCount())
 	}
 	_ = testutils.RedAttack{}
 }

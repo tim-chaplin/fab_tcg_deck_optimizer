@@ -23,7 +23,8 @@ func TestTremorOfIArathael_SameTurnBanishActivatesBonus(t *testing.T) {
 		cards.TitaniumBaubleBlue{},
 	}
 	initial := gameengine.GameStateBuilder().SetGraveyard([]card.Card{cards.NimblismRed{}}).Build()
-	got := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, initial, hand).Value
+	_, extras := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, initial, hand)
+	got := extras.Value
 	if got != 10 {
 		t.Fatalf("Value = %d, want 10 (Bauble pitch → JBQ banishes Nimblism for 4 → Tremor 4+2=6)", got)
 	}
@@ -36,7 +37,8 @@ func TestTremorOfIArathael_PriorTurnBanishedZoneDoesNotActivate(t *testing.T) {
 	d := deck.New(heroes.Viserai{}, nil, fillerDeck())
 	hand := []deck.Card{cards.TremorOfIArathaelRed{}, cards.TitaniumBaubleBlue{}}
 	initial := gameengine.GameStateBuilder().SetBanished([]card.Card{cards.NimblismRed{}}).Build()
-	got := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, initial, hand).Value
+	_, extras := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, initial, hand)
+	got := extras.Value
 	if got != 4 {
 		t.Fatalf("Value = %d, want 4 (Tremor base 4; prior-turn banish doesn't trigger bonus)", got)
 	}

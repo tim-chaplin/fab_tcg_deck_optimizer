@@ -20,9 +20,9 @@ func TestPlunderRun_TriggerWaitsAcrossMissAndFiresOnHit(t *testing.T) {
 		cards.RuneragerSwarmRed{},
 		cards.CriticalStrikeYellow{},
 	}
-	state := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, nil, hand)
-	if state.Value != 8 {
+	_, extras := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, nil, hand)
+	if extras.Value != 8 {
 		t.Fatalf("Value = %d, want 8 (Runerager 3 + Viserai runechant 1 + CS 4)\nBestLine: %s",
-			state.Value, formatBestLine(state.BestLine))
+			extras.Value, formatBestLine(extras.BestLine))
 	}
 }

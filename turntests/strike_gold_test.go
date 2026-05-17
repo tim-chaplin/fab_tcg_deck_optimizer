@@ -19,12 +19,12 @@ func TestStrikeGold_OnHitCreatesGoldToken(t *testing.T) {
 		testutils.BluePitch{},
 		testutils.BluePitch{},
 	}
-	state := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, nil, hand)
-	if state.Value != 4 {
+	gs, extras := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, nil, hand)
+	if extras.Value != 4 {
 		t.Fatalf("Value = %d, want 4 (Strike Gold Red 4 power)\nBestLine: %s",
-			state.Value, formatBestLine(state.BestLine))
+			extras.Value, formatBestLine(extras.BestLine))
 	}
-	if got := state.GoldCount(); got != 1 {
+	if got := gs.GoldCount(); got != 1 {
 		t.Fatalf("Gold count at start of next turn = %d, want 1 (on-hit token)", got)
 	}
 }
@@ -38,12 +38,12 @@ func TestStrikeGold_BlockableMissDoesNotCreateGold(t *testing.T) {
 		testutils.BluePitch{},
 		testutils.BluePitch{},
 	}
-	state := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, nil, hand)
-	if state.Value != 3 {
+	gs, extras := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, nil, hand)
+	if extras.Value != 3 {
 		t.Fatalf("Value = %d, want 3 (Strike Gold Yellow 3 power)\nBestLine: %s",
-			state.Value, formatBestLine(state.BestLine))
+			extras.Value, formatBestLine(extras.BestLine))
 	}
-	if got := state.GoldCount(); got != 0 {
+	if got := gs.GoldCount(); got != 0 {
 		t.Fatalf("Gold count = %d, want 0 (power-3 attack misses LikelyToHit window)", got)
 	}
 }
@@ -66,8 +66,8 @@ func TestStrikeGold_GoldTokenPlayableNextTurn(t *testing.T) {
 		testutils.BlueAttack{}, testutils.BlueAttack{},
 	}
 	d := deck.New(heroes.Viserai{}, nil, deckCards)
-	state := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, nil, nil)
-	if state.GoldCount() != 1 {
-		t.Fatalf("after turn 1: Gold = %d, want 1 (Strike Gold Red on-hit)", state.GoldCount())
+	gs, _ := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, nil, nil)
+	if gs.GoldCount() != 1 {
+		t.Fatalf("after turn 1: Gold = %d, want 1 (Strike Gold Red on-hit)", gs.GoldCount())
 	}
 }

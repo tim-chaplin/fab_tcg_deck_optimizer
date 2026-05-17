@@ -10,60 +10,24 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapon"
 )
 
-// Test-only entry point: drives one turn against a fixed deck order so tests can assert
-// chain outcomes plus the start-of-next-turn state without running the full multi-shuffle
-// Evaluate loop. The ForTesting suffix marks the contract; production callers use Evaluate.
-
-// TurnStartState is the result of EvalOneTurnForTesting: the tested turn's outcome (Value,
-// BestLine, Graveyard) plus the start-of-next-turn state (StartOfNextTurn*) so cross-turn
-// effects can be asserted without simulating the next turn.
-type TurnStartState struct {
-	Value                        int
-	BestLine                     []deck.CardAssignment
-	Graveyard                    []deck.Card
-	StartOfNextTurnHand          []deck.Card
-	StartOfNextTurnArsenal       deck.Card
-	StartOfNextTurnDeck          *deck.Deck
-	StartOfNextTurnAuras         []*aura.Aura
-	StartOfNextTurnItems         []*item.Item
-	CardsDrawn                   int
-	OpponentMarked               bool
-	StartOfNextTurnTriggerDamage int
-	StartOfNextTurnGraveyard     []deck.Card
+// TurnExtras carries the turn-1 results that don't sit naturally on the returned
+// start-of-next-turn *gameengine.GameState: the turn's score, the played BestLine, and
+// the damage / graveyard produced by the start-of-next-turn aura tick.
+type TurnExtras struct {
+	Value            int
+	BestLine         []deck.CardAssignment
+	TriggerDamage    int
+	TriggerGraveyard []deck.Card
 }
 
-// RunechantCount returns the live Runechant token count at the start of the next turn.
-func (t TurnStartState) RunechantCount() int {
-	return auraCountByName(t.StartOfNextTurnAuras, "Runechant")
-}
-
-// PonderCount returns the live Ponder token count at the start of the next turn.
-func (t TurnStartState) PonderCount() int {
-	return auraCountByName(t.StartOfNextTurnAuras, "Ponder")
-}
-
-// GoldCount returns the live Gold token count at the start of the next turn.
-func (t TurnStartState) GoldCount() int {
-	return itemCountByName(t.StartOfNextTurnItems, "Gold")
-}
-
-// SilverCount returns the live Silver token count at the start of the next turn.
-func (t TurnStartState) SilverCount() int {
-	return itemCountByName(t.StartOfNextTurnItems, "Silver")
-}
-
-// CopperCount returns the live Copper token count at the start of the next turn.
-func (t TurnStartState) CopperCount() int {
-	return itemCountByName(t.StartOfNextTurnItems, "Copper")
-}
-
-// EvalOneTurnForTesting runs one turn against the deck in source order (no shuffle) and
-// returns the tested turn's outcome plus the start-of-next-turn state. initial seeds the
-// turn's carryover (Hero / Arsenal / Auras / Items / Banished / Graveyard / OpponentMarked)
-// via a *gameengine.GameState; pass nil to start from a clean state inheriting the deck's
-// hero. Tests build initial via gameengine.GameStateBuilder().Set...().Build(), then layer
-// CreateAura / CreateItem for any token carryover.
-func EvalOneTurnForTesting(masterDeck *deck.Deck, mp Matchup, initial *gameengine.GameState, initialHand []deck.Card) TurnStartState {
+// EvalOneTurnForTesting drives one turn against the deck in source order (no shuffle) so
+// tests can assert chain outcomes plus the start-of-next-turn state without running the
+// full multi-shuffle Evaluate loop — production callers use Evaluate. Returns the GameState
+// at the start of the next turn plus the turn-1 extras; the returned GameState's Value()
+// mirrors extras.Value. initial seeds the turn's carryover (Hero / Arsenal / Auras / Items
+// / Banished / Graveyard / OpponentMarked); pass nil to start clean inheriting the deck's
+// hero.
+func EvalOneTurnForTesting(masterDeck *deck.Deck, mp Matchup, initial *gameengine.GameState, initialHand []deck.Card) (*gameengine.GameState, TurnExtras) {
 	d := masterDeck.Copy()
 	h := d.Hero.(hero.Hero)
 	var master *gameengine.GameState
@@ -81,13 +45,13 @@ func EvalOneTurnForTesting(masterDeck *deck.Deck, mp Matchup, initial *gameengin
 	master.SetArcaneIncomingDamage(mp.ArcaneIncomingDamage)
 	handSize := h.Intelligence()
 	if handSize <= 0 {
-		return TurnStartState{}
+		return gameengine.GameStateBuilder().SetHero(h).Build(), TurnExtras{}
 	}
 	if initialHand == nil && d.Size() < handSize {
-		return TurnStartState{}
+		return gameengine.GameStateBuilder().SetHero(h).Build(), TurnExtras{}
 	}
 	if initialHand != nil && (len(initialHand) == 0 || len(initialHand) > handSize) {
-		return TurnStartState{}
+		return gameengine.GameStateBuilder().SetHero(h).Build(), TurnExtras{}
 	}
 	handBuf := make([]card.Card, handSize, handSize+startOfTurnRevealRoom)
 	var hand []card.Card
@@ -126,23 +90,33 @@ func EvalOneTurnForTesting(masterDeck *deck.Deck, mp Matchup, initial *gameengin
 	}
 
 	held := append([]card.Card(nil), play.State.Hand()...)
-	graveyardOut := make([]deck.Card, len(play.State.Graveyard()))
-	for i, c := range play.State.Graveyard() {
-		graveyardOut[i] = c
+	graveyardOut := append([]card.Card(nil), play.State.Graveyard()...)
+	extras := TurnExtras{
+		Value:    play.Value,
+		BestLine: append([]deck.CardAssignment(nil), play.BestLine...),
 	}
+
+	// No room or not enough deck to refill — skip the start-of-next-turn aura tick and
+	// return the state as it stood at the end of turn 1.
 	if len(held) >= handSize || d.Size() < handSize-len(held) {
-		return TurnStartState{
-			Value:                  play.Value,
-			BestLine:               append([]deck.CardAssignment(nil), play.BestLine...),
-			Graveyard:              graveyardOut,
-			StartOfNextTurnArsenal: play.State.Arsenal(),
-			StartOfNextTurnDeck:    d.Copy(),
-			StartOfNextTurnAuras:   append([]*aura.Aura(nil), auraQueue...),
-			StartOfNextTurnItems:   append([]*item.Item(nil), itemQueue...),
-			CardsDrawn:             play.State.CardsDrawn(),
-			OpponentMarked:         play.State.OpponentMarked(),
+		gs := gameengine.GameStateBuilder().
+			SetHero(h).
+			SetArsenal(play.State.Arsenal()).
+			SetDeck(d.Copy()).
+			SetGraveyard(graveyardOut).
+			SetOpponentMarked(play.State.OpponentMarked()).
+			SetValue(play.Value).
+			Build()
+		gs.SetCardsDrawn(play.State.CardsDrawn())
+		for _, a := range auraQueue {
+			gs.CreateAura(a)
 		}
+		for _, it := range itemQueue {
+			gs.CreateItem(it)
+		}
+		return gs, extras
 	}
+
 	turn2Hand := append([]card.Card(nil), held...)
 	for _, c := range d.Draw(handSize - len(held)) {
 		turn2Hand = append(turn2Hand, c.(card.Card))
@@ -151,27 +125,27 @@ func EvalOneTurnForTesting(masterDeck *deck.Deck, mp Matchup, initial *gameengin
 	for _, c := range trigRevealed {
 		turn2Hand = append(turn2Hand, c)
 	}
-	handOut := make([]deck.Card, len(turn2Hand))
-	for i, c := range turn2Hand {
-		handOut[i] = c
-	}
-	graveyardedOut := make([]deck.Card, len(trigGraveyarded))
+	extras.TriggerDamage = trigDamage
+	extras.TriggerGraveyard = make([]deck.Card, len(trigGraveyarded))
 	for i, c := range trigGraveyarded {
-		graveyardedOut[i] = c
+		extras.TriggerGraveyard[i] = c
 	}
 
-	return TurnStartState{
-		Value:                        play.Value,
-		BestLine:                     append([]deck.CardAssignment(nil), play.BestLine...),
-		Graveyard:                    graveyardOut,
-		StartOfNextTurnHand:          handOut,
-		StartOfNextTurnArsenal:       play.State.Arsenal(),
-		StartOfNextTurnDeck:          d.Copy(),
-		StartOfNextTurnAuras:         append([]*aura.Aura(nil), survivors...),
-		StartOfNextTurnItems:         append([]*item.Item(nil), itemQueue...),
-		CardsDrawn:                   play.State.CardsDrawn(),
-		OpponentMarked:               play.State.OpponentMarked(),
-		StartOfNextTurnTriggerDamage: trigDamage,
-		StartOfNextTurnGraveyard:     graveyardedOut,
+	gs := gameengine.GameStateBuilder().
+		SetHero(h).
+		SetArsenal(play.State.Arsenal()).
+		SetDeck(d.Copy()).
+		SetGraveyard(graveyardOut).
+		SetOpponentMarked(play.State.OpponentMarked()).
+		SetValue(play.Value).
+		Build()
+	gs.SetHand(turn2Hand)
+	gs.SetCardsDrawn(play.State.CardsDrawn())
+	for _, a := range survivors {
+		gs.CreateAura(a)
 	}
+	for _, it := range itemQueue {
+		gs.CreateItem(it)
+	}
+	return gs, extras
 }
