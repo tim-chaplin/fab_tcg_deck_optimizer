@@ -412,16 +412,6 @@ func (ctx *sequenceContext) promoteWinnerState(winner *gameengine.GameState) {
 	}
 }
 
-// newPermLogger returns a fresh logger when ctx is recording, or nil for the find-best
-// pass. Each permutation gets its own logger so the winning permutation's log doesn't
-// get overwritten by subsequent permutations.
-func (ctx *sequenceContext) newPermLogger() *turnlogger.TurnLogger {
-	if ctx.skipLog {
-		return nil
-	}
-	return turnlogger.New()
-}
-
 // runDefense mutates ctx.leafState through the defender list, accumulating per-DR Value
 // into total. Auras grow with any DR-added entries; graveyard is left as priorGraveyard
 // + defenders for the chain phase. Chain-locals (value, action points, …) get reset
@@ -433,7 +423,12 @@ func (ctx *sequenceContext) newPermLogger() *turnlogger.TurnLogger {
 // proceeds while the matchup figure itself stays constant.
 func (ctx *sequenceContext) runDefense(defenders, pitched []card.Card, deckPile *deck.Deck, matchupIncomingDamage, blockBudget, arsenalDefenderIdx int) (int, bool) {
 	state := ctx.leafState
-	state.SetLogger(ctx.newPermLogger())
+	// In the recording path the per-perm preparePermState owns logger installation; here
+	// we only need to install when defense actually wants to emit lines. masterState's
+	// logger is nil out of CopyFrom, so the find-best skipLog path can leave it alone.
+	if !ctx.skipLog {
+		state.SetLogger(turnlogger.New())
+	}
 	state.SetDeck(deckPile)
 	state.SetIncomingDamage(matchupIncomingDamage)
 	ge := state.Engine()
@@ -564,7 +559,11 @@ func (ctx *sequenceContext) preparePermState(playedAttackers []*card.CardState, 
 	s.SetCardsPlayed(bufs.pooledCardsPlayedBuf)
 	s.SetPitched(ctx.pitched)
 	s.SetHand(hand)
-	s.SetLogger(ctx.newPermLogger())
+	// ResetEphemeralState already nil-ed s.logger; only pay the SetLogger write barrier
+	// when the recording path actually needs a fresh per-perm logger.
+	if !ctx.skipLog {
+		s.SetLogger(turnlogger.New())
+	}
 	return s
 }
 
