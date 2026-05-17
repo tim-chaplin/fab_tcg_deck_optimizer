@@ -89,6 +89,13 @@ type attackBufs struct {
 	// per perm (first append spawns a fresh backing otherwise) plus growth events.
 	// promoteWinnerState clones the winner's slice when the winner aliases this backing.
 	pooledCardsPlayedBuf []card.Card
+	// runDefenseDRGravBuf and runDefenseChainGravBuf back the two graveyard views the
+	// defense pass installs on leafState: the DR-loop view (just defenders) and the
+	// post-defense view (priorGraveyard + defenders). Recycled across runDefense calls.
+	// preparePermState's gravBuf seed copies leafState's graveyard into its own backing
+	// before the perm runs, so aliasing the leafState's slice to these buffers is safe.
+	runDefenseDRGravBuf    []card.Card
+	runDefenseChainGravBuf []card.Card
 }
 
 func newAttackBufs(handSize, weaponCount int, weapons []weapon.Weapon) *attackBufs {

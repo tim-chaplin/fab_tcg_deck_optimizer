@@ -381,8 +381,9 @@ func (ctx *sequenceContext) runDefense(defenders, pitched []card.Card, deckPile 
 	cacheable := true
 
 	// Per-DR view: graveyard = defenders so DRs that scan graveyard see the defender
-	// set.
-	drGraveyard := append([]card.Card(nil), defenders...)
+	// set. runDefenseDRGravBuf is recycled across runDefense calls.
+	drGraveyard := append(ctx.bufs.runDefenseDRGravBuf[:0], defenders...)
+	ctx.bufs.runDefenseDRGravBuf = drGraveyard
 	for i, def := range defenders {
 		if !attackerMetaPtrFor(def).actsAsDR {
 			continue
@@ -423,8 +424,12 @@ func (ctx *sequenceContext) runDefense(defenders, pitched []card.Card, deckPile 
 	}
 
 	// Leave state with graveyard = priorGraveyard + defenders for the chain phase.
-	chainGraveyard := append([]card.Card(nil), ctx.priorGraveyard...)
+	// runDefenseChainGravBuf is recycled across runDefense calls; preparePermState
+	// copies the installed slice into bufs.pooledGravBuf before each perm so the
+	// aliasing on leafState's graveyard is safe.
+	chainGraveyard := append(ctx.bufs.runDefenseChainGravBuf[:0], ctx.priorGraveyard...)
 	chainGraveyard = append(chainGraveyard, defenders...)
+	ctx.bufs.runDefenseChainGravBuf = chainGraveyard
 	state.SetGraveyard(chainGraveyard)
 
 	return total, cacheable
