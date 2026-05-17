@@ -29,7 +29,7 @@ type GameState struct {
 	pitched        []card.Card
 	defenders      []card.Card
 
-	logger               *turnlogger.TurnLogger
+	logger               card.Logger
 	triggeringCard       card.Card
 	attackReactionTarget *card.CardState
 
@@ -100,7 +100,7 @@ func (gs *GameState) Copy() *GameState {
 	} else {
 		out.items = nil
 	}
-	out.logger = nil
+	out.logger = NoopLogger{}
 	return &out
 }
 
@@ -122,7 +122,7 @@ func (gs *GameState) CopyFrom(src *GameState) {
 	pooledItems := gs.items
 	pooledDeck := gs.deck
 	*gs = *src
-	gs.logger = nil
+	gs.logger = NoopLogger{}
 	gs.hand = resetCardSlice(pooledHand, src.hand)
 	gs.graveyard = resetCardSlice(pooledGrav, src.graveyard)
 	gs.banished = resetCardSlice(pooledBanished, src.banished)
@@ -224,7 +224,7 @@ func (gs *GameState) CopyPersistentState() *GameState {
 	out.cardsRemaining = nil
 	out.triggers = nil
 	out.deck = nil
-	out.logger = nil
+	out.logger = NoopLogger{}
 	if n := len(gs.graveyard); n > 0 {
 		out.graveyard = gs.graveyard[:n:n]
 	}
@@ -267,7 +267,7 @@ func (gs *GameState) CopyPersistentStateFrom(src *GameState) {
 	gs.cardsRemaining = nil
 	gs.triggers = nil
 	gs.deck = nil
-	gs.logger = nil
+	gs.logger = NoopLogger{}
 	if n := len(src.graveyard); n > 0 {
 		gs.graveyard = src.graveyard[:n:n]
 	} else {
@@ -351,7 +351,7 @@ func (gs *GameState) ResetEphemeralState() {
 	gs.arcaneDamageDealt = false
 	gs.nonAttackActionPlayed = false
 	gs.cacheable = true
-	gs.logger = nil
+	gs.logger = NoopLogger{}
 	gs.auraCreated = len(gs.auras) > 0
 	for _, a := range gs.auras {
 		a.SetFiredThisTurn(false)
@@ -446,9 +446,18 @@ func (gs *GameState) AppendCardsPlayed(c card.Card)          { gs.cardsPlayed = 
 func (gs *GameState) CardsRemaining() []*card.CardState      { return gs.cardsRemaining }
 func (gs *GameState) SetCardsRemaining(cs []*card.CardState) { gs.cardsRemaining = cs }
 
-func (gs *GameState) Logger() *turnlogger.TurnLogger     { return gs.logger }
-func (gs *GameState) SetLogger(l *turnlogger.TurnLogger) { gs.logger = l }
-func (gs *GameState) LogEntries() []turnlogger.LogEntry  { return gs.logger.Entries() }
+func (gs *GameState) Logger() card.Logger     { return gs.logger }
+func (gs *GameState) SetLogger(l card.Logger) { gs.logger = l }
+
+// LogEntries returns the accumulated chain log when the installed logger captures entries
+// (e.g. *turnlogger.TurnLogger). Returns nil for stream / noop loggers — production paths
+// don't read entries back; this exists for tests that install a TurnLogger explicitly.
+func (gs *GameState) LogEntries() []turnlogger.LogEntry {
+	if c, ok := gs.logger.(interface{ Entries() []turnlogger.LogEntry }); ok {
+		return c.Entries()
+	}
+	return nil
+}
 
 func (gs *GameState) TriggeringCard() card.Card                  { return gs.triggeringCard }
 func (gs *GameState) SetTriggeringCard(c card.Card)              { gs.triggeringCard = c }

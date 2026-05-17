@@ -487,9 +487,10 @@ func (ge *GameEngine) FireStartOfTurn(onFire func(idx int, damage int, drawnCard
 			continue
 		}
 		preHand := len(ge.hand)
+		capture, _ := ge.logger.(interface{ Entries() []turnlogger.LogEntry })
 		preLog := 0
-		if ge.logger != nil {
-			preLog = len(ge.logger.Entries())
+		if capture != nil {
+			preLog = len(capture.Entries())
 		}
 		preValue := ge.value
 		ge.currentAuraIdx = i
@@ -503,8 +504,8 @@ func (ge *GameEngine) FireStartOfTurn(onFire func(idx int, damage int, drawnCard
 			drawn = ge.hand[preHand]
 		}
 		var newEntries []turnlogger.LogEntry
-		if ge.logger != nil {
-			if entries := ge.logger.Entries(); len(entries) > preLog {
+		if capture != nil {
+			if entries := capture.Entries(); len(entries) > preLog {
 				newEntries = entries[preLog:]
 			}
 		}
