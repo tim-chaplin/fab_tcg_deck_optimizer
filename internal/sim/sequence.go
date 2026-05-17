@@ -281,6 +281,30 @@ type sequenceContext struct {
 	// permState is the active per-permutation state. Set by preparePermState before
 	// each permutation's chain run; nil otherwise.
 	permState *gameengine.GameState
+	// pooledDeck is the per-context *Deck wrapper recycled across permutations: each
+	// preparePermState resets its slice headers to alias ctx.deck's, avoiding the per-perm
+	// ShallowCopy allocation. The losing perms drop their permState (which holds this
+	// wrapper) so the wrapper is automatically free for next perm. The winning perm
+	// transplants the wrapper into a freshly-allocated copy via promoteWinnerDeck before
+	// the next perm reclaims the pool slot — bestWinner's *GameState then holds an
+	// independent deck that won't be mutated when the next perm draws cards.
+	pooledDeck *deck.Deck
+}
+
+// promoteWinnerDeck swaps winner's pooled-deck pointer for a freshly-allocated copy so
+// ctx.pooledDeck stays free for the next permutation to reset. Without this hand-off,
+// the next preparePermState's ShallowCopyFrom call would mutate the wrapper bestWinner
+// still holds. The clone reuses the same shared slice backings (cap=len), so the chain
+// runner's append-only mutations on either side still allocate fresh.
+func (ctx *sequenceContext) promoteWinnerDeck(winner *gameengine.GameState) {
+	if winner == nil {
+		return
+	}
+	winnerDeck := winner.Deck()
+	if winnerDeck != ctx.pooledDeck {
+		return
+	}
+	winner.SetDeck(winnerDeck.ShallowCopy())
 }
 
 // newPermLogger returns a fresh logger when ctx is recording, or nil for the find-best
@@ -372,6 +396,10 @@ func (ctx *sequenceContext) runDefense(defenders, pitched []card.Card, deckPile 
 // IncomingDamage needs no re-install: the matchup figure rode in constant on leafState,
 // and ResetEphemeralState zeroed the damage-blocked accumulator, so the attack chain
 // already sees the full matchup figure.
+//
+// Deck wrapper recycling: ctx.pooledDeck is the per-context scratch wrapper reused
+// across losing permutations. The bestWinner tracker clones the wrapper out before next
+// perm runs (see bestSequence's tryOnce), so the pool slot is always free here.
 func (ctx *sequenceContext) preparePermState(playedAttackers []*card.CardState, n int) *gameengine.GameState {
 	s := ctx.leafState.CopyPersistentState()
 	s.ResetEphemeralState()
@@ -379,7 +407,12 @@ func (ctx *sequenceContext) preparePermState(playedAttackers []*card.CardState, 
 	s.SetArsenal(ctx.arsenalAtChainStart)
 	s.SetOpponentMarked(ctx.priorOpponentMarked)
 	s.SetBlockTotal(ctx.blockTotal)
-	s.SetDeck(ctx.deck.ShallowCopy())
+	if ctx.pooledDeck == nil {
+		ctx.pooledDeck = ctx.deck.ShallowCopy()
+	} else {
+		ctx.pooledDeck.ShallowCopyFrom(ctx.deck)
+	}
+	s.SetDeck(ctx.pooledDeck)
 	hand := make([]card.Card, len(ctx.handStart), len(ctx.handStart)+n+len(ctx.attackPitchPerm))
 	copy(hand, ctx.handStart)
 	for k := 0; k < n; k++ {
@@ -410,6 +443,7 @@ func (ctx *sequenceContext) bestSequence(attackers []card.Card) (int, int, *game
 		if ge.HasEndOfTurnFire() {
 			ge.FireEndOfTurn()
 		}
+		ctx.promoteWinnerDeck(permState)
 		return 0, pendingFutureValueFromState(permState), permState, true
 	}
 	pcBuf := ctx.bufs.pcBuf[:n]
@@ -449,6 +483,7 @@ func (ctx *sequenceContext) bestSequence(attackers []card.Card) (int, int, *game
 				bestFutureValue = futureValue
 				foundLegal = true
 				bestWinner = winner
+				ctx.promoteWinnerDeck(winner)
 			}
 		}
 		if !hasModal {
