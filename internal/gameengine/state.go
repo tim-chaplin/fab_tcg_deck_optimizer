@@ -181,8 +181,16 @@ func (gs *GameState) CopyPersistentStateFrom(src *GameState) {
 		} else {
 			gs.auras = make([]Aura, n)
 		}
+		// Hand the prior perm's slot (if any) back to CopyInto so the concrete *Aura
+		// allocation is rewritten in place instead of replaced. Empty slots (new entries
+		// past the prior pool's length) fall through to a fresh Copy().
+		priorLen := len(pooledAuras)
 		for i, a := range src.auras {
-			gs.auras[i] = a.Copy().(Aura)
+			var prevSlot any
+			if i < priorLen {
+				prevSlot = pooledAuras[i]
+			}
+			gs.auras[i] = a.CopyInto(prevSlot).(Aura)
 		}
 	} else {
 		gs.auras = nil
