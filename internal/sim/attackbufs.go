@@ -84,6 +84,11 @@ type attackBufs struct {
 	// scribble the winning state.
 	pooledHandBuf []card.Card
 	pooledGravBuf []card.Card
+	// pooledCardsPlayedBuf backs the per-perm cardsPlayed accumulator. The chain runner
+	// appends to it via AppendCardsPlayed every chain step; pooling skips one allocation
+	// per perm (first append spawns a fresh backing otherwise) plus growth events.
+	// promoteWinnerState clones the winner's slice when the winner aliases this backing.
+	pooledCardsPlayedBuf []card.Card
 }
 
 func newAttackBufs(handSize, weaponCount int, weapons []weapon.Weapon) *attackBufs {
