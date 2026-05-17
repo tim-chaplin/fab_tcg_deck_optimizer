@@ -21,9 +21,9 @@ import (
 	. "github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/registry"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/textio"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/cards"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/deckio"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/gameengine"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/hero"
@@ -43,7 +43,7 @@ func loadRealDeck(tb testing.TB) *deck.Deck {
 	for i := 0; i < 5; i++ {
 		candidate := filepath.Join(dir, rel)
 		if data, err := os.ReadFile(candidate); err == nil {
-			loaded, _, err := deckio.Unmarshal(data)
+			loaded, _, err := textio.UnmarshalDeck(data)
 			if err != nil {
 				tb.Fatalf("unmarshal %s: %v", candidate, err)
 			}

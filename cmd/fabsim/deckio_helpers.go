@@ -12,11 +12,10 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/deckio"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/fabrary"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/mydecks"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/textio"
 )
 
 // loadExisting reads and deserializes the deck at path. Returns (nil, zero, nil) when the
@@ -32,7 +31,7 @@ func loadExisting(path string) (*deck.Deck, deck.Stats, error) {
 		}
 		return nil, deck.Stats{}, fmt.Errorf("read %s: %w", path, err)
 	}
-	d, stats, err := deckio.Unmarshal(data)
+	d, stats, err := textio.UnmarshalDeck(data)
 	if err != nil {
 		return nil, deck.Stats{}, fmt.Errorf("parse %s: %w (file exists but isn't a valid deck — "+
 			"refusing to silently overwrite; inspect the file and delete it manually if you "+
@@ -55,7 +54,7 @@ func loadExisting(path string) (*deck.Deck, deck.Stats, error) {
 // empty or partially written.
 func writeDeck(d *deck.Deck, stats deck.Stats, path string) error {
 	d.ApplyDefaults(deck.ViseraiDefaults)
-	data, err := deckio.Marshal(d, stats)
+	data, err := textio.MarshalDeck(d, stats)
 	if err != nil {
 		return fmt.Errorf("marshal: %w", err)
 	}
@@ -63,7 +62,7 @@ func writeDeck(d *deck.Deck, stats deck.Stats, path string) error {
 		return fmt.Errorf("write %s: %w", path, err)
 	}
 	txtPath := fabraryPathFor(path)
-	if err := writeFileAtomic(txtPath, []byte(fabrary.Marshal(d))); err != nil {
+	if err := writeFileAtomic(txtPath, []byte(textio.MarshalFabrary(d))); err != nil {
 		return fmt.Errorf("write %s: %w", txtPath, err)
 	}
 	return nil

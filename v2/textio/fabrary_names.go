@@ -1,4 +1,4 @@
-package fabrary
+package textio
 
 // Card-name conversion between the optimizer's canonical pitch suffix ("[R]") and
 // fabrary's lowercase parenthesised form ("(red)"). Shared by both marshalling (which

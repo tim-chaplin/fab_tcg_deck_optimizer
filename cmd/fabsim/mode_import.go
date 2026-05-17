@@ -10,11 +10,10 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/deckio"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/fabrary"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/mydecks"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/hero"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/textio"
 )
 
 // runImport interactively pastes a fabrary.net plain-text deck from stdin, asks for a deck
@@ -40,11 +39,11 @@ func runImport() {
 		die("read stdin: %v", err)
 	}
 
-	d, skipped, err := fabrary.Unmarshal(string(data))
+	d, skipped, err := textio.UnmarshalFabrary(string(data))
 	if err != nil {
 		die("parse fabrary text: %v", err)
 	}
-	out, err := deckio.Marshal(d, deck.Stats{})
+	out, err := textio.MarshalDeck(d, deck.Stats{})
 	if err != nil {
 		die("encode deck JSON: %v", err)
 	}

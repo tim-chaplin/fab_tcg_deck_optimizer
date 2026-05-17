@@ -1,4 +1,4 @@
-package fabrary
+package textio
 
 // Fabrary text → runtime Deck decoding: Unmarshal walks the Name / Hero / Format header plus
 // each "<N>x <card>" section line, routing entries into weapons / cards / sideboard /
@@ -23,7 +23,7 @@ import (
 // Arena-section entries split by lookup: weapon names land in d.Weapons, everything else lands
 // in d.Equipment (the user-managed arena list) so the round-trip preserves the full loadout.
 // A missing hero aborts: the deck can't be constructed without one.
-func Unmarshal(text string) (*deck.Deck, map[string]int, error) {
+func UnmarshalFabrary(text string) (*deck.Deck, map[string]int, error) {
 	var (
 		heroName  string
 		section   string

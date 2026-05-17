@@ -1,4 +1,4 @@
-package deckio
+package textio
 
 import (
 	"math/rand"
@@ -12,16 +12,16 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/registry"
 )
 
-func TestMarshalUnmarshalRoundTrip(t *testing.T) {
+func TestDeck_MarshalUnmarshalRoundTrip(t *testing.T) {
 	rng := rand.New(rand.NewSource(1))
 	d := deck.Random(hero.Viserai{}, 40, 2, rng, nil, registry.Registry{})
 	stats := sim.NewEvaluator().Evaluate(d, 50, sim.Matchup{IncomingDamage: 4}, rng)
 
-	data, err := Marshal(d, stats)
+	data, err := MarshalDeck(d, stats)
 	if err != nil {
 		t.Fatalf("Marshal: %v", err)
 	}
-	got, gotStats, err := Unmarshal(data)
+	got, gotStats, err := UnmarshalDeck(data)
 	if err != nil {
 		t.Fatalf("Unmarshal: %v", err)
 	}
@@ -57,11 +57,11 @@ func TestRoundTrip_PreservesPerCardMarginal(t *testing.T) {
 		t.Fatalf("baseline deck produced no PerCardMarginal entries; test can't differentiate good from bad")
 	}
 
-	data, err := Marshal(d, stats)
+	data, err := MarshalDeck(d, stats)
 	if err != nil {
 		t.Fatalf("Marshal: %v", err)
 	}
-	_, gotStats, err := Unmarshal(data)
+	_, gotStats, err := UnmarshalDeck(data)
 	if err != nil {
 		t.Fatalf("Unmarshal: %v", err)
 	}
@@ -123,11 +123,11 @@ func TestRoundTrip_PreservesBestTurnLog(t *testing.T) {
 		},
 	}
 
-	data, err := Marshal(d, stats)
+	data, err := MarshalDeck(d, stats)
 	if err != nil {
 		t.Fatalf("Marshal: %v", err)
 	}
-	_, gotStats, err := Unmarshal(data)
+	_, gotStats, err := UnmarshalDeck(data)
 	if err != nil {
 		t.Fatalf("Unmarshal: %v", err)
 	}
@@ -147,11 +147,11 @@ func TestRoundTrip_PreservesSideboard(t *testing.T) {
 	d := deck.Random(hero.Viserai{}, 40, 2, rng, nil, registry.Registry{})
 	d.Sideboard = []string{"Aether Slash [R]", "Aether Slash [R]", "Arcanic Spike [B]"}
 
-	data, err := Marshal(d, deck.Stats{})
+	data, err := MarshalDeck(d, deck.Stats{})
 	if err != nil {
 		t.Fatalf("Marshal: %v", err)
 	}
-	got, _, err := Unmarshal(data)
+	got, _, err := UnmarshalDeck(data)
 	if err != nil {
 		t.Fatalf("Unmarshal: %v", err)
 	}
@@ -172,7 +172,7 @@ func TestRoundTrip_PreservesSideboard(t *testing.T) {
 func TestMarshal_OmitsEmptySideboard(t *testing.T) {
 	rng := rand.New(rand.NewSource(1))
 	d := deck.Random(hero.Viserai{}, 40, 2, rng, nil, registry.Registry{})
-	data, err := Marshal(d, deck.Stats{})
+	data, err := MarshalDeck(d, deck.Stats{})
 	if err != nil {
 		t.Fatalf("Marshal: %v", err)
 	}
@@ -192,7 +192,7 @@ func TestUnmarshal_SideboardAcceptsAnyName(t *testing.T) {
   "pitch": {"red": 0, "yellow": 0, "blue": 0},
   "stats": {"avg": 0, "runs": 0, "hands": 0, "total_value": 0, "first_cycle": {"Hands": 0, "Total": 0}, "second_cycle": {"Hands": 0, "Total": 0}, "best": {"hand": [], "roles": [], "weapons": [], "value": 0, "starting_runechants": 0}}
 }`
-	d, _, err := Unmarshal([]byte(raw))
+	d, _, err := UnmarshalDeck([]byte(raw))
 	if err != nil {
 		t.Fatalf("Unmarshal: %v", err)
 	}
@@ -210,11 +210,11 @@ func TestRoundTrip_PreservesEquipment(t *testing.T) {
 	d := deck.Random(hero.Viserai{}, 40, 2, rng, nil, registry.Registry{})
 	d.Equipment = []string{"Beckoning Haunt", "Nullrune Boots", "Blade Beckoner Helm"}
 
-	data, err := Marshal(d, deck.Stats{})
+	data, err := MarshalDeck(d, deck.Stats{})
 	if err != nil {
 		t.Fatalf("Marshal: %v", err)
 	}
-	got, _, err := Unmarshal(data)
+	got, _, err := UnmarshalDeck(data)
 	if err != nil {
 		t.Fatalf("Unmarshal: %v", err)
 	}
@@ -230,7 +230,7 @@ func TestRoundTrip_PreservesEquipment(t *testing.T) {
 func TestMarshal_OmitsEmptyEquipment(t *testing.T) {
 	rng := rand.New(rand.NewSource(1))
 	d := deck.Random(hero.Viserai{}, 40, 2, rng, nil, registry.Registry{})
-	data, err := Marshal(d, deck.Stats{})
+	data, err := MarshalDeck(d, deck.Stats{})
 	if err != nil {
 		t.Fatalf("Marshal: %v", err)
 	}

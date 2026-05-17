@@ -1,4 +1,4 @@
-package deckio
+package textio
 
 // Runtime Deck → JSON encoding: Marshal is the public entry point; toJSON / statsToJSON /
 // bestTurnToJSON walk the deck, flatten interface values to names, and sort the outputs so
@@ -16,7 +16,7 @@ import (
 
 // Marshal returns the JSON encoding of `d` and its accumulated `stats` (indented) with
 // card/weapon/hero names in place of interface values.
-func Marshal(d *deck.Deck, stats deck.Stats) ([]byte, error) {
+func MarshalDeck(d *deck.Deck, stats deck.Stats) ([]byte, error) {
 	return json.MarshalIndent(toJSON(d, stats), "", "  ")
 }
 

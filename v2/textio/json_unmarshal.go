@@ -1,4 +1,4 @@
-package deckio
+package textio
 
 // JSON → runtime Deck decoding: Unmarshal is the public entry point; fromJSON /
 // perCardFromJSON / bestTurnFromJSON walk the decoded form, resolve every name through the
@@ -16,7 +16,7 @@ import (
 
 // Unmarshal decodes JSON produced by Marshal into a *deck.Deck and the associated DeckStats.
 // Returns an error if any card, weapon, or hero name isn't recognized.
-func Unmarshal(data []byte) (*deck.Deck, deck.Stats, error) {
+func UnmarshalDeck(data []byte) (*deck.Deck, deck.Stats, error) {
 	var dj DeckJSON
 	if err := json.Unmarshal(data, &dj); err != nil {
 		return nil, deck.Stats{}, err
