@@ -143,6 +143,64 @@ func (gs *GameState) CopyPersistentState() *GameState {
 	return &out
 }
 
+// ResetForPermutationFrom overwrites *gs in place to match what CopyPersistentState(src)
+// would produce. Reuses gs's auras / items slice backing when capacity permits, avoiding
+// the per-permutation slice allocation in the chain runner's hot loop. The chain runner
+// follows with ResetEphemeralState which wipes the same ephemeral fields CopyPersistentState
+// left nil, so this path mirrors CopyPersistentState exactly — only the persistent
+// carryover fields and the aura / item per-entry copies are load-bearing here.
+func (gs *GameState) ResetForPermutationFrom(src *GameState) {
+	// Stash the pool's existing slice backings before overwriting gs, then reuse them if
+	// cap suffices. Without this the *gs = *src would alias src.auras / src.items and the
+	// per-entry copy loop below would scribble Copy() values into the leafState's own
+	// backing, corrupting it for the next permutation.
+	pooledAuras := gs.auras
+	pooledItems := gs.items
+	*gs = *src
+	gs.hand = nil
+	gs.pitched = nil
+	gs.defenders = nil
+	gs.cardsPlayed = nil
+	gs.cardsRemaining = nil
+	gs.triggers = nil
+	gs.deck = nil
+	gs.logger = nil
+	if n := len(src.graveyard); n > 0 {
+		gs.graveyard = src.graveyard[:n:n]
+	} else {
+		gs.graveyard = nil
+	}
+	if n := len(src.banished); n > 0 {
+		gs.banished = src.banished[:n:n]
+	} else {
+		gs.banished = nil
+	}
+	if n := len(src.auras); n > 0 {
+		if cap(pooledAuras) >= n {
+			gs.auras = pooledAuras[:n]
+		} else {
+			gs.auras = make([]Aura, n)
+		}
+		for i, a := range src.auras {
+			gs.auras[i] = a.Copy().(Aura)
+		}
+	} else {
+		gs.auras = nil
+	}
+	if n := len(src.items); n > 0 {
+		if cap(pooledItems) >= n {
+			gs.items = pooledItems[:n]
+		} else {
+			gs.items = make([]Item, n)
+		}
+		for i, it := range src.items {
+			gs.items[i] = it.Copy().(Item)
+		}
+	} else {
+		gs.items = nil
+	}
+}
+
 // ResetEphemeralState returns gs to its start-of-turn baseline: it discards every field
 // that playing out a turn accumulates, keeping only the cross-turn carryover (hero, deck,
 // arsenal, graveyard, banished, the aura / item lists, opponentMarked, and the matchup's

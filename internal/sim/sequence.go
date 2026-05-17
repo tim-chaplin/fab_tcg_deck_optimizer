@@ -289,6 +289,12 @@ type sequenceContext struct {
 	// the next perm reclaims the pool slot — bestWinner's *GameState then holds an
 	// independent deck that won't be mutated when the next perm draws cards.
 	pooledDeck *deck.Deck
+	// pooledState is the per-context *GameState recycled across losing permutations.
+	// preparePermState writes the next permutation's start state into it via
+	// ResetForPermutationFrom, skipping the per-perm GameState allocation and aura / item
+	// slice allocation. promoteWinnerState clears this pointer when a permutation wins so
+	// the winner's state survives untouched and the next perm allocates a fresh pool slot.
+	pooledState *gameengine.GameState
 }
 
 // promoteWinnerDeck swaps winner's pooled-deck pointer for a freshly-allocated copy so
@@ -305,6 +311,18 @@ func (ctx *sequenceContext) promoteWinnerDeck(winner *gameengine.GameState) {
 		return
 	}
 	winner.SetDeck(winnerDeck.ShallowCopy())
+}
+
+// promoteWinnerState hands off ctx.pooledState to bestWinner so the next permutation's
+// ResetForPermutationFrom doesn't trample it. The pool pointer is cleared; next perm
+// reallocates a fresh state via CopyPersistentState. Wins are rare relative to losses
+// (best-of-N! permutations), so the recycled-on-loss path is the common case and the
+// allocation only happens once per new best.
+func (ctx *sequenceContext) promoteWinnerState(winner *gameengine.GameState) {
+	if winner == nil || winner != ctx.pooledState {
+		return
+	}
+	ctx.pooledState = nil
 }
 
 // newPermLogger returns a fresh logger when ctx is recording, or nil for the find-best
@@ -401,7 +419,12 @@ func (ctx *sequenceContext) runDefense(defenders, pitched []card.Card, deckPile 
 // across losing permutations. The bestWinner tracker clones the wrapper out before next
 // perm runs (see bestSequence's tryOnce), so the pool slot is always free here.
 func (ctx *sequenceContext) preparePermState(playedAttackers []*card.CardState, n int) *gameengine.GameState {
-	s := ctx.leafState.CopyPersistentState()
+	if ctx.pooledState == nil {
+		ctx.pooledState = ctx.leafState.CopyPersistentState()
+	} else {
+		ctx.pooledState.ResetForPermutationFrom(ctx.leafState)
+	}
+	s := ctx.pooledState
 	s.ResetEphemeralState()
 	s.SetHero(ctx.hero)
 	s.SetArsenal(ctx.arsenalAtChainStart)
@@ -444,6 +467,7 @@ func (ctx *sequenceContext) bestSequence(attackers []card.Card) (int, int, *game
 			ge.FireEndOfTurn()
 		}
 		ctx.promoteWinnerDeck(permState)
+		ctx.promoteWinnerState(permState)
 		return 0, pendingFutureValueFromState(permState), permState, true
 	}
 	pcBuf := ctx.bufs.pcBuf[:n]
@@ -484,6 +508,7 @@ func (ctx *sequenceContext) bestSequence(attackers []card.Card) (int, int, *game
 				foundLegal = true
 				bestWinner = winner
 				ctx.promoteWinnerDeck(winner)
+				ctx.promoteWinnerState(winner)
 			}
 		}
 		if !hasModal {
