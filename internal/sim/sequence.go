@@ -111,7 +111,7 @@ func bestAttackWithWeapons(
 	// this state so post-defense auras / graveyard propagate into the chain start state
 	// via leafState.Copy() per permutation. After defense the leaf state's deck is
 	// dropped so per-permutation Copy doesn't waste cycles copying it — preparePermState
-	// installs a fresh ctx.deck.Copy() instead (matching old behaviour where defense's
+	// installs a fresh ctx.deck.ShallowCopy() instead (matching old behaviour where defense's
 	// deck mutations don't bleed into the chain).
 	hasDRs := containsDefenseReaction(defenders)
 	hasModalBlocker := containsModalBlocker(defenders)
@@ -379,7 +379,7 @@ func (ctx *sequenceContext) preparePermState(playedAttackers []*card.CardState, 
 	s.SetArsenal(ctx.arsenalAtChainStart)
 	s.SetOpponentMarked(ctx.priorOpponentMarked)
 	s.SetBlockTotal(ctx.blockTotal)
-	s.SetDeck(ctx.deck.Copy())
+	s.SetDeck(ctx.deck.ShallowCopy())
 	hand := append([]card.Card(nil), ctx.handStart...)
 	for k := 0; k < n; k++ {
 		hand = append(hand, playedAttackers[k].Card)

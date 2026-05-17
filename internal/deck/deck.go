@@ -34,6 +34,12 @@ type Deck struct {
 	cards     []Card
 	Sideboard []string
 	Equipment []string
+	// mustNotShuffle marks wrappers that share slice backing with another *Deck
+	// (produced by ShallowCopy). Shuffle would rearrange the shared backing and
+	// silently corrupt every peer wrapper, so it panics on these. Cards that need
+	// to shuffle mid-turn would trip this — if that ever happens, the
+	// shallow-copy optimization needs to revert to a deep Copy at the call site.
+	mustNotShuffle bool
 }
 
 // UniqueIDs returns the distinct card IDs in deck order of first appearance plus a
@@ -129,6 +135,29 @@ func (d *Deck) Copy() *Deck {
 	return out
 }
 
+// ShallowCopy returns a fresh *Deck wrapper that shares slice backing with the receiver.
+// The cards and Weapons slices are reproduced with cap=len (via the 3-arg slice form) so
+// any future append on the copy allocates a fresh backing rather than writing past the
+// shared region. Read paths and the mutating methods that allocate fresh backings on
+// every call (PutTop, PutBottom, Tutor) stay safe; Shuffle (which mutates in place)
+// does not, so ShallowCopy is only safe when the caller never Shuffles the result.
+// The per-permutation chain runner uses this to skip the per-permutation deep copy.
+func (d *Deck) ShallowCopy() *Deck {
+	if d == nil {
+		return &Deck{}
+	}
+	out := &Deck{Hero: d.Hero, mustNotShuffle: true}
+	if len(d.cards) > 0 {
+		out.cards = d.cards[:len(d.cards):len(d.cards)]
+	}
+	if len(d.Weapons) > 0 {
+		out.Weapons = d.Weapons[:len(d.Weapons):len(d.Weapons)]
+	}
+	out.Sideboard = d.Sideboard
+	out.Equipment = d.Equipment
+	return out
+}
+
 // CopyFrom provides a memory-efficient way to copy a Deck by reusing an already-allocated
 // Deck (the receiver) that's no longer needed: d's cards / Weapons / Hero are overwritten
 // from src, reusing d's existing slice backing arrays when they have enough capacity.
@@ -158,7 +187,15 @@ func (d *Deck) CopyFrom(src *Deck) {
 
 // Shuffle randomises the deck in place via Fisher-Yates. Mutates the receiver — callers
 // running independent trials should Copy() the master deck first.
+//
+// Panics on wrappers produced by ShallowCopy (where mustNotShuffle is set): those share
+// slice backing with peer wrappers and an in-place shuffle would silently corrupt them.
+// A card calling Shuffle mid-turn is the most likely tripper — if that's now intentional,
+// drop the shallow-copy optimization at the per-permutation call site and use a deep Copy.
 func (d *Deck) Shuffle(rng *rand.Rand) {
+	if d.mustNotShuffle {
+		panic("deck: Shuffle called on a ShallowCopy-produced wrapper — a card mutated the per-permutation deck via Shuffle, which would corrupt sibling permutations sharing the same slice backing")
+	}
 	for i := len(d.cards) - 1; i > 0; i-- {
 		j := rng.Intn(i + 1)
 		d.cards[i], d.cards[j] = d.cards[j], d.cards[i]
