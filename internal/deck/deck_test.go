@@ -320,3 +320,29 @@ func TestTutor_NoMatchReturnsFalse(t *testing.T) {
 		t.Errorf("Size mutated by failed Tutor: %d, want %d", d.Size(), beforeSize)
 	}
 }
+
+// TestShallowCopy_ShufflePanics confirms the safety net on the ShallowCopy optimization:
+// a card calling Shuffle mid-turn on a per-permutation deck would silently corrupt every
+// peer permutation sharing the same slice backing, so ShallowCopy-produced wrappers must
+// panic on Shuffle. Any chain-runner test that exercises a card whose Play() shuffles
+// the deck mid-turn will trip this panic.
+func TestShallowCopy_ShufflePanics(t *testing.T) {
+	master := New(nil, nil, []Card{fakeCard{id: 1}, fakeCard{id: 2}, fakeCard{id: 3}})
+	shallow := master.ShallowCopy()
+	defer func() {
+		if r := recover(); r == nil {
+			t.Fatal("Shuffle on a ShallowCopy-produced wrapper did not panic")
+		}
+	}()
+	shallow.Shuffle(rand.New(rand.NewSource(1)))
+}
+
+// TestDeck_ShuffleOnMasterStillWorks confirms the panic is gated on the ShallowCopy
+// marker — Shuffle on a fresh / Copy()'d deck behaves normally.
+func TestDeck_ShuffleOnMasterStillWorks(t *testing.T) {
+	d := New(nil, nil, []Card{fakeCard{id: 1}, fakeCard{id: 2}, fakeCard{id: 3}})
+	d.Shuffle(rand.New(rand.NewSource(1))) // must not panic
+	if d.Size() != 3 {
+		t.Errorf("post-Shuffle size = %d, want 3", d.Size())
+	}
+}
