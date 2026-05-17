@@ -1,4 +1,4 @@
-package sim_test
+package sim
 
 // Cache hit-rate measurement. Loads a high-quality saved Viserai deck (mydecks/viserai_v4)
 // and runs it through Evaluate at production shuffle counts, printing per-Evaluator cache
@@ -18,7 +18,6 @@ import (
 	"path/filepath"
 	"testing"
 
-	. "github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/registry"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/textio"
