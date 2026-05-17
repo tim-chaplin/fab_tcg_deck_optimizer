@@ -3,6 +3,7 @@ package sim
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/gameengine"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapon"
 )
 
@@ -60,6 +61,29 @@ type attackBufs struct {
 	defenseGravScratch []card.Card
 	// drCardStateScratch is a pooled *CardState handed to DR Card.Play calls.
 	drCardStateScratch card.CardState
+	// Per-permutation scratch recycled across every partition leaf the Best call evaluates.
+	// Each preparePermState rebinds these to the active leaf's state shape, so a single set
+	// of backings amortises across the whole findBest pass instead of per-leaf reallocation.
+	// pooledState is the active recycled *GameState; preparePermState calls
+	// CopyPersistentStateFrom(leafState) to rewrite it for the current leaf's perm. The
+	// promoteWinnerState path clears this so the next perm allocates a fresh state and the
+	// winner stays untouched.
+	pooledState *gameengine.GameState
+	// pooledDeck is the recycled *Deck wrapper; preparePermState rebinds its slice headers
+	// to alias ctx.deck. The winning perm's wrapper is cloned out via promoteWinnerDeck so
+	// the next perm can rebind safely.
+	pooledDeck *deck.Deck
+	// pooledEngine wraps the active permState; rebound per perm so chain runs use a single
+	// engine wrapper. The wrapper holds no state of its own; no caller stashes ge across
+	// perms.
+	pooledEngine *gameengine.GameEngine
+	// pooledHandBuf / pooledGravBuf back the per-perm hand and graveyard slices.
+	// preparePermState rebuilds them via append into [:0] and SetHand / SetGraveyard them
+	// on the pool state; mid-chain growth allocates fresh backing without trampling these.
+	// promoteWinnerState clones the winner's hand and graveyard so the next reset can't
+	// scribble the winning state.
+	pooledHandBuf []card.Card
+	pooledGravBuf []card.Card
 }
 
 func newAttackBufs(handSize, weaponCount int, weapons []weapon.Weapon) *attackBufs {

@@ -279,38 +279,24 @@ type sequenceContext struct {
 	skipLog               bool
 	cacheable             bool
 	// permState is the active per-permutation state. Set by preparePermState before
-	// each permutation's chain run; nil otherwise.
+	// each permutation's chain run; nil otherwise. Aliases ctx.bufs.pooledState until
+	// promoteWinnerState hands it off to bestWinner.
 	permState *gameengine.GameState
-	// pooledDeck is the per-context *Deck wrapper recycled across permutations: each
-	// preparePermState resets its slice headers to alias ctx.deck's, avoiding the per-perm
-	// ShallowCopy allocation. The losing perms drop their permState (which holds this
-	// wrapper) so the wrapper is automatically free for next perm. The winning perm
-	// transplants the wrapper into a freshly-allocated copy via promoteWinnerDeck before
-	// the next perm reclaims the pool slot — bestWinner's *GameState then holds an
-	// independent deck that won't be mutated when the next perm draws cards.
-	pooledDeck *deck.Deck
-	// pooledState is the per-context *GameState recycled across losing permutations.
-	// preparePermState writes the next permutation's start state into it via
-	// CopyPersistentStateFrom, skipping the per-perm GameState allocation and aura / item
-	// slice allocation. promoteWinnerState clears this pointer when a permutation wins so
-	// the winner's state survives untouched and the next perm allocates a fresh pool slot.
-	pooledState *gameengine.GameState
-	// handBuf is the per-context hand backing recycled across losing permutations. Each
-	// preparePermState rebuilds the hand slice via append into handBuf[:0], avoiding the
-	// per-perm hand allocation. promoteWinnerState clones the winner's hand onto a fresh
-	// slice so the next preparePermState's hand rebuild can't trample winning state.
-	handBuf []card.Card
-	// gravBuf is the per-context graveyard backing recycled across losing permutations.
-	// Each preparePermState seeds it from leafState.Graveyard() and installs it on the
-	// pool state with headroom, so the chain runner's AppendGraveyard calls extend the
-	// pooled backing in place instead of paying first-append growslice per perm.
-	// promoteWinnerState clones the winner's graveyard onto a fresh slice so the next
-	// preparePermState's reseed can't trample winning state.
-	gravBuf []card.Card
+}
+
+// permEngine returns ctx.bufs.pooledEngine with its embedded *GameState rebound to state.
+// Lazily allocates the wrapper on first call.
+func (ctx *sequenceContext) permEngine(state *gameengine.GameState) *gameengine.GameEngine {
+	if ctx.bufs.pooledEngine == nil {
+		ctx.bufs.pooledEngine = state.Engine()
+		return ctx.bufs.pooledEngine
+	}
+	ctx.bufs.pooledEngine.GameState = state
+	return ctx.bufs.pooledEngine
 }
 
 // promoteWinnerDeck swaps winner's pooled-deck pointer for a freshly-allocated copy so
-// ctx.pooledDeck stays free for the next permutation to reset. Without this hand-off,
+// ctx.bufs.pooledDeck stays free for the next permutation to reset. Without this hand-off,
 // the next preparePermState's ShallowCopyFrom call would mutate the wrapper bestWinner
 // still holds. The clone reuses the same shared slice backings (cap=len), so the chain
 // runner's append-only mutations on either side still allocate fresh.
@@ -319,13 +305,13 @@ func (ctx *sequenceContext) promoteWinnerDeck(winner *gameengine.GameState) {
 		return
 	}
 	winnerDeck := winner.Deck()
-	if winnerDeck != ctx.pooledDeck {
+	if winnerDeck != ctx.bufs.pooledDeck {
 		return
 	}
 	winner.SetDeck(winnerDeck.ShallowCopy())
 }
 
-// promoteWinnerState hands off ctx.pooledState to bestWinner so the next permutation's
+// promoteWinnerState hands off ctx.bufs.pooledState to bestWinner so the next permutation's
 // CopyPersistentStateFrom doesn't trample it. The pool pointer is cleared; next perm
 // reallocates a fresh state via CopyPersistentState. Wins are rare relative to losses
 // (best-of-N! permutations), so the recycled-on-loss path is the common case and the
@@ -333,16 +319,16 @@ func (ctx *sequenceContext) promoteWinnerDeck(winner *gameengine.GameState) {
 //
 // Also clones the winner's hand and graveyard so the next preparePermState's reseed
 // can't trample the winning permutation's recorded state. The clones are unconditional
-// because the slices may or may not still alias ctx.handBuf / ctx.gravBuf after mid-
-// chain growth — if growth happened they're already independent and the extra clone is
-// a no-op cost; if not, the clone is the only thing keeping winner's state stable
-// across the next perm's reset.
+// because the slices may or may not still alias ctx.bufs.pooledHandBuf / pooledGravBuf
+// after mid-chain growth — if growth happened they're already independent and the extra
+// clone is a no-op cost; if not, the clone is the only thing keeping winner's state
+// stable across the next perm's reset.
 func (ctx *sequenceContext) promoteWinnerState(winner *gameengine.GameState) {
 	if winner == nil {
 		return
 	}
-	if winner == ctx.pooledState {
-		ctx.pooledState = nil
+	if winner == ctx.bufs.pooledState {
+		ctx.bufs.pooledState = nil
 	}
 	winnerHand := winner.Hand()
 	if len(winnerHand) > 0 {
@@ -448,45 +434,47 @@ func (ctx *sequenceContext) runDefense(defenders, pitched []card.Card, deckPile 
 // and ResetEphemeralState zeroed the damage-blocked accumulator, so the attack chain
 // already sees the full matchup figure.
 //
-// Deck wrapper recycling: ctx.pooledDeck is the per-context scratch wrapper reused
-// across losing permutations. The bestWinner tracker clones the wrapper out before next
-// perm runs (see bestSequence's tryOnce), so the pool slot is always free here.
+// Deck wrapper recycling: ctx.bufs.pooledDeck is the scratch wrapper reused across
+// permutations and across every partition leaf of this Best call. The bestWinner tracker
+// clones the wrapper out before next perm runs (see bestSequence's tryOnce), so the pool
+// slot is always free here.
 func (ctx *sequenceContext) preparePermState(playedAttackers []*card.CardState, n int) *gameengine.GameState {
-	if ctx.pooledState == nil {
-		ctx.pooledState = ctx.leafState.CopyPersistentState()
+	bufs := ctx.bufs
+	if bufs.pooledState == nil {
+		bufs.pooledState = ctx.leafState.CopyPersistentState()
 	} else {
-		ctx.pooledState.CopyPersistentStateFrom(ctx.leafState)
+		bufs.pooledState.CopyPersistentStateFrom(ctx.leafState)
 	}
-	s := ctx.pooledState
+	s := bufs.pooledState
 	s.ResetEphemeralState()
 	s.SetHero(ctx.hero)
 	s.SetArsenal(ctx.arsenalAtChainStart)
 	s.SetOpponentMarked(ctx.priorOpponentMarked)
 	s.SetBlockTotal(ctx.blockTotal)
 	// Seed the pool's graveyard from leafState's, with headroom so the chain runner's
-	// AppendGraveyard calls grow ctx.gravBuf in place rather than allocating per-perm.
-	// The headroom = n + len(attackPitchPerm) bounds chain-extending appends; cards that
-	// banish themselves or hit non-persistent → graveyard land here.
+	// AppendGraveyard calls grow ctx.bufs.pooledGravBuf in place rather than allocating
+	// per-perm. The headroom = n + len(attackPitchPerm) bounds chain-extending appends;
+	// cards that banish themselves or hit non-persistent → graveyard land here.
 	leafGrav := ctx.leafState.Graveyard()
 	gravNeeded := len(leafGrav) + n + len(ctx.attackPitchPerm)
-	if cap(ctx.gravBuf) < gravNeeded {
-		ctx.gravBuf = make([]card.Card, 0, gravNeeded)
+	if cap(bufs.pooledGravBuf) < gravNeeded {
+		bufs.pooledGravBuf = make([]card.Card, 0, gravNeeded)
 	}
-	grav := ctx.gravBuf[:len(leafGrav)]
+	grav := bufs.pooledGravBuf[:len(leafGrav)]
 	copy(grav, leafGrav)
-	ctx.gravBuf = grav
+	bufs.pooledGravBuf = grav
 	s.SetGraveyard(grav)
-	if ctx.pooledDeck == nil {
-		ctx.pooledDeck = ctx.deck.ShallowCopy()
+	if bufs.pooledDeck == nil {
+		bufs.pooledDeck = ctx.deck.ShallowCopy()
 	} else {
-		ctx.pooledDeck.ShallowCopyFrom(ctx.deck)
+		bufs.pooledDeck.ShallowCopyFrom(ctx.deck)
 	}
-	s.SetDeck(ctx.pooledDeck)
+	s.SetDeck(bufs.pooledDeck)
 	needed := len(ctx.handStart) + n + len(ctx.attackPitchPerm)
-	if cap(ctx.handBuf) < needed {
-		ctx.handBuf = make([]card.Card, 0, needed)
+	if cap(bufs.pooledHandBuf) < needed {
+		bufs.pooledHandBuf = make([]card.Card, 0, needed)
 	}
-	hand := ctx.handBuf[:0]
+	hand := bufs.pooledHandBuf[:0]
 	hand = append(hand, ctx.handStart...)
 	for k := 0; k < n; k++ {
 		hand = append(hand, playedAttackers[k].Card)
@@ -494,7 +482,7 @@ func (ctx *sequenceContext) preparePermState(playedAttackers []*card.CardState, 
 	for _, c := range ctx.attackPitchPerm {
 		hand = append(hand, c)
 	}
-	ctx.handBuf = hand
+	bufs.pooledHandBuf = hand
 	s.SetPitched(ctx.pitched)
 	s.SetHand(hand)
 	s.SetLogger(ctx.newPermLogger())
@@ -513,7 +501,7 @@ func (ctx *sequenceContext) bestSequence(attackers []card.Card) (int, int, *game
 		}
 		emptyAttackers := ctx.bufs.ptrBuf[:0]
 		permState := ctx.preparePermState(emptyAttackers, 0)
-		ge := permState.Engine()
+		ge := ctx.permEngine(permState)
 		if ge.HasEndOfTurnFire() {
 			ge.FireEndOfTurn()
 		}
@@ -667,7 +655,7 @@ func (ctx *sequenceContext) playSequenceWithMeta(n int) (damage int, futureValue
 	played := ptrBuf[:n]
 	state := ctx.preparePermState(played, n)
 	ctx.permState = state
-	ge := state.Engine()
+	ge := ctx.permEngine(state)
 	pool := pitchPool{
 		perm:      ctx.attackPitchPerm,
 		vals:      ctx.attackPitchVals,
