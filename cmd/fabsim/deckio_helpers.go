@@ -12,7 +12,6 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/mydecks"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/textio"
@@ -117,9 +116,9 @@ func mustLoadDeck(path string) (*deck.Deck, deck.Stats) {
 
 // resolveDeckPath is the positional-arg counterpart to anneal's -deck flag. Subcommands that
 // always operate on an existing deck (eval, diff) accept the deck name as a positional arg
-// and resolve it to mydecks/<name>.json via mydecks.Path.
+// and resolve it to mydecks/<name>.json via textio.MydecksPath.
 func resolveDeckPath(name string) string {
-	p, err := mydecks.Path(name)
+	p, err := textio.MydecksPath(name)
 	if err != nil {
 		die("%v", err)
 	}
