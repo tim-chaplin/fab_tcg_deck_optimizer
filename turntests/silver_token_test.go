@@ -3,14 +3,14 @@ package turntests
 import (
 	"testing"
 
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/hero"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/hero/heroes"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/item"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
-	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
-	"github.com/tim-chaplin/fab-deck-optimizer/v2/hero"
-	"github.com/tim-chaplin/fab-deck-optimizer/v2/hero/heroes"
-	"github.com/tim-chaplin/fab-deck-optimizer/v2/item"
-	"github.com/tim-chaplin/fab-deck-optimizer/v2/token"
-	"github.com/tim-chaplin/fab-deck-optimizer/v2/weapon/weapons"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/token"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapon/weapons"
 )
 
 // Tests the Silver token activated ability end-to-end: spend Silver alone, verify the

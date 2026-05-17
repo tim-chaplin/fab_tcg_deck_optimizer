@@ -12,9 +12,9 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
-	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
-	"github.com/tim-chaplin/fab-deck-optimizer/v2/textio"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/textio"
 )
 
 // loadExisting reads and deserializes the deck at path. Returns (nil, zero, nil) when the

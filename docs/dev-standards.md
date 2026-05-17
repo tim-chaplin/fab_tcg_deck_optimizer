@@ -149,9 +149,9 @@ The chain runner builds `ctx.itemAbilities` by replicating each Item's `Ability`
 
 ## Registry / sim split
 
-`v2/registry` is the master roster of every implemented card, weapon, and hero. It declares minimal `Card` / `Hero` / `Weapon` interfaces (identity + display name) so its surface stays decoupled from sim's richer contracts; concrete card / weapon / hero types satisfy both, and callers needing behaviour assert to `card.Card` / `sim.Weapon` / `sim.Hero` at the read site. Marker interfaces (`NotImplemented`, `Unplayable`, `NotSilverAgeLegal`) are declared locally in both packages and matched structurally — neither package imports the other.
+`internal/registry` is the master roster of every implemented card, weapon, and hero. It declares minimal `Card` / `Hero` / `Weapon` interfaces (identity + display name) so its surface stays decoupled from sim's richer contracts; concrete card / weapon / hero types satisfy both, and callers needing behaviour assert to `card.Card` / `sim.Weapon` / `sim.Hero` at the read site. Marker interfaces (`NotImplemented`, `Unplayable`, `NotSilverAgeLegal`) are declared locally in both packages and matched structurally — neither package imports the other.
 
-Callers that need cards / weapons / heroes import `v2/registry` directly and assert to `card.Card` / `sim.Weapon` / `sim.Hero` at the read site. `cmd/fabsim` warms `optimizations.WarmChainStepCache` from registry data in a small `init` so the runtime hot path is pure cache reads; other callers rely on the lazy backfill in `optimizations.cachedChainStepText`.
+Callers that need cards / weapons / heroes import `internal/registry` directly and assert to `card.Card` / `sim.Weapon` / `sim.Hero` at the read site. `cmd/fabsim` warms `optimizations.WarmChainStepCache` from registry data in a small `init` so the runtime hot path is pure cache reads; other callers rely on the lazy backfill in `optimizations.cachedChainStepText`.
 
 ## Cross-file references
 

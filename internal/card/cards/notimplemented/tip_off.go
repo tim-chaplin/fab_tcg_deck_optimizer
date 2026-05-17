@@ -1,0 +1,25 @@
+// Tip-Off — Generic Action - Attack. Cost 1. Printed power: Red 5, Yellow 4, Blue 3. Printed pitch
+// variants: Red 1, Yellow 2, Blue 3. Defense 2.
+//
+// Text: "**Instant** - Discard this: **Mark** target opposing hero."
+
+package notimplemented
+
+import (
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+)
+
+// not implemented: instant discard-to-mark activation
+
+func (c TipOffRed) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
+}
+
+// not implemented: instant discard-to-mark activation
+
+func (c TipOffYellow) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
+}
+
+// not implemented: instant discard-to-mark activation
+
+func (c TipOffBlue) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
+}

@@ -6,9 +6,9 @@ package testutils
 // hero whose printed ability would perturb the measured value.
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/v2/ids"
-	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
-	"github.com/tim-chaplin/fab-deck-optimizer/v2/hero"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/hero"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/ids"
 )
 
 // Hero is a minimal gameengine.Hero. Intel is the Intelligence (hand-draw size) the stub

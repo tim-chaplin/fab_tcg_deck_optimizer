@@ -7,7 +7,7 @@ import (
 	"testing"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
-	"github.com/tim-chaplin/fab-deck-optimizer/v2/textio"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/textio"
 )
 
 // BenchmarkEvalRealDeck mimics what `fabsim eval <deck> -incoming 5 -deep-shuffles 10000`

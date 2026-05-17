@@ -6,8 +6,8 @@ import (
 	"sort"
 	"time"
 
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
-	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
 )
 
 // runCompareCmd parses compare's flags and dispatches to runCompare. Both decks are positional

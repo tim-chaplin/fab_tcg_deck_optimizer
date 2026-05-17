@@ -3,10 +3,10 @@ package turntests
 import (
 	"testing"
 
-	"github.com/tim-chaplin/fab-deck-optimizer/v2/card/cards"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card/cards"
 
-	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
-	"github.com/tim-chaplin/fab-deck-optimizer/v2/gameengine"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/gameengine"
 )
 
 // LikelyDamageHits is true at 1/4/7 or 5+ with dominate. Of printed powers (Red 3, Yellow 2,

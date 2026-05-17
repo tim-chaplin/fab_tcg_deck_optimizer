@@ -26,8 +26,8 @@ import (
 	"math/rand"
 	"testing"
 
-	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
-	"github.com/tim-chaplin/fab-deck-optimizer/v2/registry"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry"
 )
 
 // BenchmarkEvalWorkerSweep measures one Evaluate call on viserai_v4 across a range of
