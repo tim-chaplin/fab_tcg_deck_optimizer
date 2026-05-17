@@ -218,6 +218,10 @@ type shuffleScratch struct {
 	heldBuf     []card.Card
 	presentBuf  []bool
 	marginalBuf []deck.CardMarginalStats
+	// recycledBuf backs the per-turn "pitched-to-deck-bottom" slice runOneShuffle hands
+	// to d.PutBottom. Refilled each turn; PutBottom copies into its own backing so this
+	// stays safe to overwrite next turn.
+	recycledBuf []deck.Card
 }
 
 // newShuffleScratch sizes the per-shuffle reusable buffers for a deck of
@@ -318,10 +322,11 @@ func runOneShuffle(masterDeck *deck.Deck, scratch *shuffleScratch, stats *deck.S
 		// bottom — FaB's end-of-turn pitch-zone-to-deck rule.
 		d = play.State.Deck()
 		pitched := pitchedFromBestLine(play.BestLine)
-		recycled := make([]deck.Card, len(pitched))
-		for i, c := range pitched {
-			recycled[i] = c
+		recycled := scratch.recycledBuf[:0]
+		for _, c := range pitched {
+			recycled = append(recycled, c)
 		}
+		scratch.recycledBuf = recycled
 		d.PutBottom(recycled)
 		// Carry hand leftover into next turn's heldBuf; thread play.State forward as master.
 		heldBuf = append(heldBuf[:0], play.State.Hand()...)
