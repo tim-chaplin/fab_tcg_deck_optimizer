@@ -3,7 +3,7 @@ package sim
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/aura"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
-	"github.com/tim-chaplin/fab-deck-optimizer/v2/deckstats"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/gameengine"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/item"
 )
@@ -12,14 +12,14 @@ import (
 // assignments plus the post-chain *GameState the next turn inherits. State carries hand
 // / deck / arsenal / graveyard / banished / auras / items / log entries — pure data, no
 // rules engine. The deck-eval loop reads end-of-turn fields off it directly. The persisted
-// per-deck outcome (deckstats.BestTurn) lifts only the durable fields off TurnSummary;
+// per-deck outcome (deck.BestTurn) lifts only the durable fields off TurnSummary;
 // State and friends stay sim-runtime.
 type TurnSummary struct {
-	BestLine             []deckstats.CardAssignment
+	BestLine             []deck.CardAssignment
 	SwungWeapons         []string
 	Value                int
 	State                *gameengine.GameState
-	TriggersFromLastTurn []deckstats.TriggerContribution
+	TriggersFromLastTurn []deck.TriggerContribution
 	StartOfTurnAuras     []card.Card
 	DealtHand            []card.Card
 	IncomingDamage       int
@@ -27,13 +27,13 @@ type TurnSummary struct {
 }
 
 // ArsenalIn returns the assignment for the card that started the turn in the arsenal.
-func (t TurnSummary) ArsenalIn() (deckstats.CardAssignment, bool) {
+func (t TurnSummary) ArsenalIn() (deck.CardAssignment, bool) {
 	for _, a := range t.BestLine {
 		if a.FromArsenal {
 			return a, true
 		}
 	}
-	return deckstats.CardAssignment{}, false
+	return deck.CardAssignment{}, false
 }
 
 // auraCountByNameInState scans the state's aura list for a token aura with the given

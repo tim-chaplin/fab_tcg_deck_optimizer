@@ -8,7 +8,6 @@ package sim
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
-	"github.com/tim-chaplin/fab-deck-optimizer/v2/deckstats"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/gameengine"
 )
 
@@ -39,15 +38,15 @@ func (e *Evaluator) findBest(weapons []Weapon, hand []card.Card, mp Matchup, d *
 	}
 
 	best := TurnSummary{
-		BestLine:       make([]deckstats.CardAssignment, totalN),
+		BestLine:       make([]deck.CardAssignment, totalN),
 		IncomingDamage: mp.IncomingDamage,
 		Cacheable:      true,
 	}
 	for i := 0; i < n; i++ {
-		best.BestLine[i] = deckstats.CardAssignment{Card: hand[i], Role: deckstats.Held}
+		best.BestLine[i] = deck.CardAssignment{Card: hand[i], Role: deck.Held}
 	}
 	if arsenalCardIn != nil {
-		best.BestLine[n] = deckstats.CardAssignment{Card: arsenalCardIn, Role: deckstats.Arsenal, FromArsenal: true}
+		best.BestLine[n] = deck.CardAssignment{Card: arsenalCardIn, Role: deck.Arsenal, FromArsenal: true}
 	}
 	cacheable := true
 	var bestSwung []string
@@ -106,24 +105,24 @@ func (e *Evaluator) findBest(weapons []Weapon, hand []card.Card, mp Matchup, d *
 			return
 		}
 		isArsenalSlot := i == n && arsenalCardIn != nil
-		maxRole := deckstats.Held
+		maxRole := deck.Held
 		if isArsenalSlot {
-			maxRole = deckstats.Arsenal
+			maxRole = deck.Arsenal
 		}
-		for r := deckstats.Role(0); r <= maxRole; r++ {
+		for r := deck.Role(0); r <= maxRole; r++ {
 			if !roleAllowed(r, isArsenalSlot, isDR[i], canAttack[i]) {
 				continue
 			}
-			if r == deckstats.Defend && mp.IncomingDamage == 0 {
+			if r == deck.Defend && mp.IncomingDamage == 0 {
 				continue
 			}
 			rolesBuf[i] = r
 			switch r {
-			case deckstats.Pitch:
+			case deck.Pitch:
 				recurse(i+1, pitchSum+pvals[i], defenseSum)
-			case deckstats.Defend:
+			case deck.Defend:
 				recurse(i+1, pitchSum, defenseSum+dvals[i])
-			case deckstats.Attack, deckstats.Held, deckstats.Arsenal:
+			case deck.Attack, deck.Held, deck.Arsenal:
 				recurse(i+1, pitchSum, defenseSum)
 			}
 		}
@@ -146,7 +145,7 @@ func (e *Evaluator) findBest(weapons []Weapon, hand []card.Card, mp Matchup, d *
 	if cacheUsable {
 		if best.Cacheable {
 			e.cache.store(cacheKey, evalCacheEntry{
-				line:         append([]deckstats.CardAssignment(nil), best.BestLine...),
+				line:         append([]deck.CardAssignment(nil), best.BestLine...),
 				swungWeapons: append([]string(nil), best.SwungWeapons...),
 			})
 		} else {
@@ -181,8 +180,8 @@ func promoteRandomHandCardToArsenal(best *TurnSummary, startingHand []card.Card,
 	newHand := append(handState[:pick:pick], handState[pick+1:]...)
 	best.State.SetHand(newHand)
 	for i := range best.BestLine {
-		if best.BestLine[i].Role == deckstats.Held && best.BestLine[i].Card.ID() == chosen.ID() {
-			best.BestLine[i].Role = deckstats.Arsenal
+		if best.BestLine[i].Role == deck.Held && best.BestLine[i].Card.ID() == chosen.ID() {
+			best.BestLine[i].Role = deck.Arsenal
 			break
 		}
 	}
@@ -212,14 +211,14 @@ func arsenalPromotionHash(startingHand, stateHand []card.Card, arsenalCardIn car
 
 // groupByRoleInto appends hand cards into caller-provided pitched/attackers/defenders
 // slices.
-func groupByRoleInto(hand []card.Card, roles []deckstats.Role, pitched, attackers, defenders []card.Card) ([]card.Card, []card.Card, []card.Card) {
+func groupByRoleInto(hand []card.Card, roles []deck.Role, pitched, attackers, defenders []card.Card) ([]card.Card, []card.Card, []card.Card) {
 	for i, c := range hand {
 		switch roles[i] {
-		case deckstats.Pitch:
+		case deck.Pitch:
 			pitched = append(pitched, c)
-		case deckstats.Attack:
+		case deck.Attack:
 			attackers = append(attackers, c)
-		case deckstats.Defend:
+		case deck.Defend:
 			defenders = append(defenders, c)
 		}
 	}
@@ -227,9 +226,9 @@ func groupByRoleInto(hand []card.Card, roles []deckstats.Role, pitched, attacker
 }
 
 // gatherHeldCards appends every hand card with role Held into the caller-provided held slice.
-func gatherHeldCards(hand []card.Card, roles []deckstats.Role, held []card.Card) []card.Card {
+func gatherHeldCards(hand []card.Card, roles []deck.Role, held []card.Card) []card.Card {
 	for i, c := range hand {
-		if roles[i] == deckstats.Held {
+		if roles[i] == deck.Held {
 			held = append(held, c)
 		}
 	}
@@ -238,8 +237,8 @@ func gatherHeldCards(hand []card.Card, roles []deckstats.Role, held []card.Card)
 
 // findArsenalCard returns the arsenal-in card when it stays in the arsenal slot, nil
 // otherwise.
-func findArsenalCard(rolesBuf []deckstats.Role, arsenalCardIn card.Card, n int) card.Card {
-	if arsenalCardIn != nil && rolesBuf[n] == deckstats.Arsenal {
+func findArsenalCard(rolesBuf []deck.Role, arsenalCardIn card.Card, n int) card.Card {
+	if arsenalCardIn != nil && rolesBuf[n] == deck.Arsenal {
 		return arsenalCardIn
 	}
 	return nil
@@ -247,19 +246,19 @@ func findArsenalCard(rolesBuf []deckstats.Role, arsenalCardIn card.Card, n int) 
 
 // roleAllowed decides whether the partition enumerator may assign role r to the current
 // card.
-func roleAllowed(r deckstats.Role, isArsenalSlot, isDefenseReaction, canAttack bool) bool {
+func roleAllowed(r deck.Role, isArsenalSlot, isDefenseReaction, canAttack bool) bool {
 	if isArsenalSlot {
 		switch r {
-		case deckstats.Pitch, deckstats.Held:
+		case deck.Pitch, deck.Held:
 			return false
-		case deckstats.Attack:
+		case deck.Attack:
 			return canAttack
-		case deckstats.Defend:
+		case deck.Defend:
 			return isDefenseReaction
 		}
 		return true
 	}
-	return r != deckstats.Attack || canAttack
+	return r != deck.Attack || canAttack
 }
 
 // defendersDamage tallies the total Value contribution of the partition's defense phase

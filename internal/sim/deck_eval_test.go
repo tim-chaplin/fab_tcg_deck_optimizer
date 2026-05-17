@@ -10,64 +10,9 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapons"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
-	"github.com/tim-chaplin/fab-deck-optimizer/v2/deckstats"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/hero"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/registry"
 )
-
-// Tests that deckstats.BestTurn.StartingAuras reflects pre-hand carryover (empty on the first hand).
-func TestEvaluate_BestTurnStartingAurasIsPreHandCarryover(t *testing.T) {
-	// 4-card deck + Viserai Intel=4 gives exactly one hand per run.
-	read := registry.GetCard(ids.ReadTheRunesRed)
-	d := deck.New(hero.Viserai{}, nil, []deck.Card{read, read, read, read})
-
-	stats := NewEvaluator().Evaluate(d, 1, Matchup{}, rand.New(rand.NewSource(1)))
-
-	if len(stats.Best.BestLine) == 0 {
-		t.Fatalf("expected Best to be populated after Evaluate")
-	}
-	// Sanity: the hand creates runechants — without that, the assertion below couldn't
-	// distinguish "no carryover" from "no token tracking happening at all".
-	if stats.Best.Value == 0 {
-		t.Fatalf("expected nonzero Value from a hand of Read the Runes; got 0")
-	}
-	if len(stats.Best.StartingAuras) != 0 {
-		t.Errorf("StartingAuras = %v, want empty (first hand of the run has no previous-turn carryover)",
-			stats.Best.StartingAuras)
-	}
-}
-
-// Tests that deckstats.BestTurn deep-copies the winning turn's full CarryState (Hand, Deck, Graveyard,
-// Arsenal, Log, etc.) — including mid-chain draws.
-func TestEvaluate_BestTurnSnapshotsState(t *testing.T) {
-	snatch := registry.GetCard(ids.SnatchRed)
-	d := deck.New(hero.Viserai{}, nil, []deck.Card{snatch, snatch, snatch, snatch, snatch, snatch, snatch, snatch})
-	stats := NewEvaluator().Evaluate(d, 1, Matchup{}, rand.New(rand.NewSource(1)))
-
-	if len(stats.Best.BestLine) == 0 {
-		t.Fatalf("expected Best to be populated after Evaluate")
-	}
-	state := stats.Best.State
-	if len(state.Graveyard()) == 0 {
-		t.Errorf("State.Graveyard is empty; want the played Snatch in graveyard")
-	}
-	surfaceCount := len(state.Hand()) + len(state.Graveyard())
-	if state.Arsenal() != nil {
-		surfaceCount++
-	}
-	const handSize = 4 // Viserai's Intelligence
-	if surfaceCount <= handSize {
-		t.Errorf("surface count = %d, want >%d (Hand=%d Arsenal=%v Graveyard=%d). The mid-turn-drawn Snatch should have surfaced — without the State snapshot the carry would lose it.",
-			surfaceCount, handSize, len(state.Hand()), state.Arsenal(), len(state.Graveyard()))
-	}
-	// State.LogEntries() carries the per-event chain trace; recordBestTurn must preserve it
-	// so fabsim eval's "Best turn played" printout has the chain attribution lines. A Snatch
-	// chain has at least one ATTACK entry — if Log is empty the deck-level snapshot dropped
-	// the Log on the floor.
-	if len(state.LogEntries()) == 0 {
-		t.Errorf("State.LogEntries is empty after the deck-level snapshot; FormatBestTurn will render no chain lines for the saved Best")
-	}
-}
 
 // Tests the marginal-stats invariant: PresentHands + AbsentHands == Stats.Hands per card.
 func TestEvaluate_PerCardMarginalCoversEveryHand(t *testing.T) {
@@ -136,7 +81,7 @@ func TestEvaluate_HeldCardDefersDrawToNextTurn(t *testing.T) {
 	if len(stats.Best.BestLine) == 0 {
 		t.Fatalf("expected Best to be populated after at least one hand")
 	}
-	if stats.Best.BestLine[0].Role != deckstats.Arsenal {
+	if stats.Best.BestLine[0].Role != deck.Arsenal {
 		t.Errorf("Best.Play.Roles[0] = %s, want ARSENAL (empty slot on turn 1 → Held promoted)", stats.Best.BestLine[0].Role)
 	}
 }
@@ -166,7 +111,7 @@ func TestEvaluate_TerminatesAfterTwoCycles(t *testing.T) {
 	}
 	d := deck.New(hero.Viserai{}, []deck.Weapon{weapons.ReapingBlade{}}, deckCards)
 	done := make(chan struct{})
-	var stats deckstats.DeckStats
+	var stats deck.Stats
 	go func() {
 		stats = NewEvaluator().Evaluate(d, 1, Matchup{}, rand.New(rand.NewSource(1)))
 		close(done)
@@ -230,7 +175,7 @@ func TestEvaluateAdaptive_RespectsMaxRunsCapWhenSEUnreachable(t *testing.T) {
 func TestMeanStandardError_FromHistogram(t *testing.T) {
 	// Three turns: values 10, 12, 14. Mean = 12, sample variance = ((10-12)^2 + (12-12)^2 +
 	// (14-12)^2) / (3-1) = 8/2 = 4. SE = sqrt(4/3) ≈ 1.1547.
-	stats := &deckstats.DeckStats{
+	stats := &deck.Stats{
 		Hands:      3,
 		TotalValue: 36,
 		Histogram:  map[int]int{10: 1, 12: 1, 14: 1},

@@ -7,7 +7,7 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
-	"github.com/tim-chaplin/fab-deck-optimizer/v2/deckstats"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/gameengine"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/hero"
 )
@@ -77,8 +77,8 @@ func TestBest_DeckOrderDoesNotAffectHandRoles(t *testing.T) {
 	deckA := DeckOf(testutils.HugeAttack{}, testutils.PitchOneDR{})
 	deckB := DeckOf(testutils.PitchOneDR{}, testutils.HugeAttack{})
 
-	rolesFor := func(summary TurnSummary) map[ids.CardID]deckstats.Role {
-		m := make(map[ids.CardID]deckstats.Role, len(summary.BestLine))
+	rolesFor := func(summary TurnSummary) map[ids.CardID]deck.Role {
+		m := make(map[ids.CardID]deck.Role, len(summary.BestLine))
 		for _, a := range summary.BestLine {
 			m[a.Card.ID()] = a.Role
 		}

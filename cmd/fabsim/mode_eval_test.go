@@ -12,7 +12,6 @@ import (
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
-	"github.com/tim-chaplin/fab-deck-optimizer/v2/deckstats"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/hero"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/registry"
 )
@@ -65,7 +64,7 @@ func TestRunEval_DefaultRewritesFile(t *testing.T) {
 	// Viserai cards gives the sim enough to produce non-zero Value.
 	rng := rand.New(rand.NewSource(1))
 	d := deck.Random(hero.Viserai{}, 40, 2, rng, nil, registry.Registry{})
-	if err := writeDeck(d, deckstats.DeckStats{}, path); err != nil {
+	if err := writeDeck(d, deck.Stats{}, path); err != nil {
 		t.Fatalf("seed writeDeck: %v", err)
 	}
 
@@ -154,7 +153,7 @@ func TestRunEval_DefaultPrintsFullDump(t *testing.T) {
 
 	rng := rand.New(rand.NewSource(1))
 	d := deck.Random(hero.Viserai{}, 40, 2, rng, nil, registry.Registry{})
-	if err := writeDeck(d, deckstats.DeckStats{}, path); err != nil {
+	if err := writeDeck(d, deck.Stats{}, path); err != nil {
 		t.Fatalf("seed writeDeck: %v", err)
 	}
 
@@ -187,7 +186,7 @@ func TestRunEval_BriefSkipsBestTurnAndCardList(t *testing.T) {
 
 	rng := rand.New(rand.NewSource(1))
 	d := deck.Random(hero.Viserai{}, 40, 2, rng, nil, registry.Registry{})
-	if err := writeDeck(d, deckstats.DeckStats{}, path); err != nil {
+	if err := writeDeck(d, deck.Stats{}, path); err != nil {
 		t.Fatalf("seed writeDeck: %v", err)
 	}
 

@@ -13,7 +13,6 @@ import (
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
-	"github.com/tim-chaplin/fab-deck-optimizer/v2/deckstats"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/hero"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/registry"
 )
@@ -58,7 +57,7 @@ func printGroupedStrings(ss []string) {
 // printBestDeck wraps this with the card list, best-turn block, and per-card stats;
 // `fabsim eval -brief` calls printDeckSummary directly so a scripted re-score gets just the
 // numbers without the card-list scroll.
-func printDeckSummary(d *deck.Deck, s deckstats.DeckStats) {
+func printDeckSummary(d *deck.Deck, s deck.Stats) {
 	fmt.Printf("Hero:    %s\n", d.Hero.(hero.Hero).Name())
 	fmt.Printf("Weapons: %s\n", weaponNames(d.Weapons))
 	fmt.Printf("Pitch:   %s\n", d.PitchCountsLine())
@@ -70,7 +69,7 @@ func printDeckSummary(d *deck.Deck, s deckstats.DeckStats) {
 
 // meanValueLine returns "14.041 (10,000 shuffles)" — the deck's overall mean plus the run
 // count that produced it.
-func meanValueLine(s deckstats.DeckStats) string {
+func meanValueLine(s deck.Stats) string {
 	return fmt.Sprintf("%.3f (%s shuffles)", s.Mean(), commaInt(s.Runs))
 }
 
@@ -113,7 +112,7 @@ func printSideBySideStats(name1, name2 string, sections []statSection) {
 // contribution with its correlational marginal hand-value lift. Sections silently skip
 // themselves when their backing slice/map on s is empty so unscored decks still render
 // the parts that do exist.
-func printBestDeck(d *deck.Deck, s deckstats.DeckStats) {
+func printBestDeck(d *deck.Deck, s deck.Stats) {
 	printDeckSummary(d, s)
 	fmt.Println()
 	printCardList(d)
@@ -127,14 +126,14 @@ func printBestDeck(d *deck.Deck, s deckstats.DeckStats) {
 }
 
 // histogramTitle returns the standard "Hand-value distribution (N hands):" header.
-func histogramTitle(s deckstats.DeckStats) string {
+func histogramTitle(s deck.Stats) string {
 	return fmt.Sprintf("Hand-value distribution (%s hands):", commaInt(s.Hands))
 }
 
 // printBestTurn renders the persisted peak-Value turn from its structured TurnLog —
 // "Best turn played (value N):" header plus sim.FormatTurnLog's per-section body. No-ops
 // on an unscored deck (empty TurnLog).
-func printBestTurn(s deckstats.DeckStats) {
+func printBestTurn(s deck.Stats) {
 	b := s.Best
 	if b.Log.IsEmpty() {
 		return
@@ -151,9 +150,9 @@ func printBestTurn(s deckstats.DeckStats) {
 //
 // Sorted by marginal descending so suspected above-curve cards surface at the top and the
 // drags sit at the bottom — the spread is a smell test for buggy implementations or
-// oversimplified mechanics. See deckstats.DeckStats.PerCardMarginal for the cross-turn caveat
+// oversimplified mechanics. See deck.Stats.PerCardMarginal for the cross-turn caveat
 // that limits this view's reach for next-turn-payoff cards.
-func printCardValues(d *deck.Deck, s deckstats.DeckStats) {
+func printCardValues(d *deck.Deck, s deck.Stats) {
 	type row struct {
 		name      string
 		margin    float64
@@ -228,7 +227,7 @@ type histogramScale struct {
 
 // naturalHistogramScale returns the histogramScale derived from s's own min/max/peak — what to
 // pass to printHistogram for a single-deck chart at its native resolution.
-func naturalHistogramScale(s deckstats.DeckStats) histogramScale {
+func naturalHistogramScale(s deck.Stats) histogramScale {
 	minV := s.Min()
 	maxV := s.Max()
 	_, peak := buildHistogramColumns(s.Histogram, minV, maxV, histChartWidth(maxV-minV+1))
@@ -238,7 +237,7 @@ func naturalHistogramScale(s deckstats.DeckStats) histogramScale {
 // unionHistogramScale returns the smallest scale that fits both decks' data, so the two
 // charts can be rendered with matching x and y axes. The peak is computed under the union
 // range and width because binning shifts when the range widens.
-func unionHistogramScale(s1, s2 deckstats.DeckStats) histogramScale {
+func unionHistogramScale(s1, s2 deck.Stats) histogramScale {
 	minV := min(s1.Min(), s2.Min())
 	maxV := max(s1.Max(), s2.Max())
 	width := histChartWidth(maxV - minV + 1)

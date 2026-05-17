@@ -2,7 +2,7 @@ package sim
 
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
-	"github.com/tim-chaplin/fab-deck-optimizer/v2/deckstats"
+	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
 )
 
 // Pre-allocated scratch buffers threaded through the attack-evaluation pipeline (findBest
@@ -42,7 +42,7 @@ type attackBufs struct {
 
 	// Partition-loop buffers, consumed by findBest. Sized handSize+1 to cover the optional
 	// arsenal-in slot the enumerator treats as index n.
-	rolesBuf           []deckstats.Role
+	rolesBuf           []deck.Role
 	pitchVals          []int
 	defenseVals        []int
 	isDRBuf            []bool
@@ -98,7 +98,7 @@ func newAttackBufs(handSize, weaponCount int, weapons []Weapon) *attackBufs {
 		activatedAbilities:    activatedAbilities,
 		activatedAbilityCosts: activatedAbilityCosts,
 		weaponAbilityCount:    len(weapons),
-		rolesBuf:              make([]deckstats.Role, handSize+1),
+		rolesBuf:              make([]deck.Role, handSize+1),
 		pitchVals:             make([]int, handSize+1),
 		defenseVals:           make([]int, handSize+1),
 		isDRBuf:               make([]bool, handSize+1),

@@ -1,32 +1,27 @@
-// Package deckstats holds the serializable per-deck evaluation result types — the data
-// shape sim produces during Evaluate / EvaluateAdaptive and that fabsim renders and
-// deckio persists. Pure data + small derived-stat methods (Mean, Min, Max, …); no
-// reference to sim or gameengine, so the package can be imported by either.
-//
-// sim still owns the runtime working types (TurnSummary with its *GameState pointer,
-// per-permutation context, etc.); BestTurn lifts only the fields callers / persisted
-// output actually need off TurnSummary so the persisted shape is decoupled from the
-// runtime shape.
-package deckstats
+package deck
 
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry/ids"
-	"github.com/tim-chaplin/fab-deck-optimizer/v2/aura"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
-	"github.com/tim-chaplin/fab-deck-optimizer/v2/gameengine"
-	"github.com/tim-chaplin/fab-deck-optimizer/v2/item"
 )
 
-// DeckStats is the aggregate hand-value statistics across all simulated runs of a Deck.
-type DeckStats struct {
+// Per-deck evaluation result types. sim produces these during Evaluate / EvaluateAdaptive;
+// cmd/fabsim renders them; internal/deckio persists them. Pure data + small derived-stat
+// methods — no reference to sim or gameengine, so this file can live in v2/deck (which
+// gameengine imports) without introducing a cycle.
+//
+// sim still owns its runtime working type (TurnSummary, holding *GameState and chain
+// scratch state); BestTurn carries only the durable outcome callers actually read.
+
+// Stats is the aggregate hand-value statistics across all simulated runs of a Deck.
+type Stats struct {
 	Runs        int
 	Hands       int
 	TotalValue  float64
 	FirstCycle  CycleStats
 	SecondCycle CycleStats
 	// Best is the single highest-value hand seen across all runs (ties broken by first
-	// occurrence). BestLine is in canonical (post-sort) order. Zero-valued if no hands
-	// have been evaluated.
+	// occurrence). Zero-valued if no hands have been evaluated.
 	Best BestTurn
 	// PerCardMarginal carries a coarse correlational view of each card's hand-value
 	// impact: for every unique card ID in the deck, the mean turn Value across turns
@@ -48,7 +43,7 @@ type DeckStats struct {
 }
 
 // Mean returns the overall arithmetic mean hand value.
-func (s DeckStats) Mean() float64 {
+func (s Stats) Mean() float64 {
 	if s.Hands == 0 {
 		return 0
 	}
@@ -57,7 +52,7 @@ func (s DeckStats) Mean() float64 {
 
 // Min returns the lowest Value any simulated hand produced. Zero when no hands have been
 // seen.
-func (s DeckStats) Min() int {
+func (s Stats) Min() int {
 	if len(s.Histogram) == 0 {
 		return 0
 	}
@@ -74,7 +69,7 @@ func (s DeckStats) Min() int {
 
 // Max returns the highest Value any simulated hand produced. Zero when no hands have
 // been seen.
-func (s DeckStats) Max() int {
+func (s Stats) Max() int {
 	m := 0
 	for v := range s.Histogram {
 		if v > m {
@@ -84,32 +79,21 @@ func (s DeckStats) Max() int {
 	return m
 }
 
-// BestTurn records the peak draw a deck saw during simulation: the turn's value, the
-// canonical-order card / role assignments, the starting carryover (auras / items / aura-
-// fires from last turn / start-of-turn aura snapshot), and the rendered structured Log.
-// State is the post-chain *gameengine.GameState the winning chain produced — preserved
-// in-memory so callers can inspect Hand / Deck / Graveyard / Arsenal after Evaluate; not
-// serialized (the engine has no JSON encoding; the Log is the persisted shape).
+// BestTurn records the peak draw a deck saw during simulation. Pruned to just the fields
+// production code reads:
+//   - Value: the headline number cmd/fabsim prints and deckio persists.
+//   - BestLine: the canonical-order assignments sim's "have-we-seen-a-best-yet" sentinel
+//     gates on (len > 0). FormatBestLine reads it for one-line renders.
+//   - Log: the four-section structured printout deckio persists and cmd/fabsim renders.
+//
+// Fields that previously lived here but had no production reader (State,
+// StartingAuras/Items, SwungWeapons, IncomingDamage, StartOfTurnAuras,
+// TriggersFromLastTurn, DealtHand) were removed when this package moved out of sim.
+// sim's runtime TurnSummary still carries them where needed during evaluation.
 type BestTurn struct {
-	Value                int
-	BestLine             []CardAssignment
-	SwungWeapons         []string
-	TriggersFromLastTurn []TriggerContribution
-	StartOfTurnAuras     []card.Card
-	IncomingDamage       int
-	// State is the post-chain engine state the winning permutation produced. Lives only
-	// in memory; deckio marshals around it.
-	State *gameengine.GameState `json:"-"`
-	// StartingAuras is the carryover aura set entering this turn — sigils, incantations,
-	// and token auras in play when the hand was dealt.
-	StartingAuras []*aura.Aura
-	// StartingItems is the carryover item set entering this turn — Gold tokens (and
-	// future card items) in play when the hand was dealt.
-	StartingItems []*item.Item
-	// Log is the four-section structured record (StartOfTurn / MyTurn / OpponentTurn /
-	// EndOfTurn) of the best turn's printout. Each entry is content-only; the formatter
-	// owns indentation, section headers, and chain numbering.
-	Log TurnLog
+	Value    int
+	BestLine []CardAssignment
+	Log      TurnLog
 }
 
 // Role is what a card did on a given turn cycle.
@@ -143,7 +127,8 @@ func (r Role) String() string {
 
 // CardAssignment is a single card + the role it took this turn. Hand cards produce one
 // per card; an arsenal-in card contributes one with FromArsenal set so a turn fits in
-// one slice.
+// one slice. Card is the rich v2/card.Card — sim's formatter / chain runner reads Pitch
+// / Attack / Cost / Types off it directly.
 type CardAssignment struct {
 	Card        card.Card
 	Role        Role

@@ -3,7 +3,6 @@ package sim
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
-	"github.com/tim-chaplin/fab-deck-optimizer/v2/deckstats"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/gameengine"
 )
 
@@ -28,7 +27,7 @@ func (e *Evaluator) evaluatePartition(
 	masterState *gameengine.GameState,
 	weapons []Weapon, hand []card.Card,
 	d *deck.Deck,
-	rolesBuf []deckstats.Role, n int, bufs *attackBufs,
+	rolesBuf []deck.Role, n int, bufs *attackBufs,
 	mp Matchup, defenseSum int,
 	skipLog bool,
 ) (
@@ -46,18 +45,18 @@ func (e *Evaluator) evaluatePartition(
 	)
 	if arsenalCardIn != nil {
 		switch rolesBuf[n] {
-		case deckstats.Attack:
+		case deck.Attack:
 			a = append(a, arsenalCardIn)
-		case deckstats.Defend:
+		case deck.Defend:
 			defs = append(defs, arsenalCardIn)
 		}
 	}
 	arsenalInIdx := -1
-	if arsenalCardIn != nil && rolesBuf[n] == deckstats.Attack {
+	if arsenalCardIn != nil && rolesBuf[n] == deck.Attack {
 		arsenalInIdx = len(a) - 1
 	}
 	arsenalDefenderIdx := -1
-	if arsenalCardIn != nil && rolesBuf[n] == deckstats.Defend {
+	if arsenalCardIn != nil && rolesBuf[n] == deck.Defend {
 		arsenalDefenderIdx = len(defs) - 1
 	}
 	h := gatherHeldCards(hand, rolesBuf[:n], bufs.heldBuf[:0])

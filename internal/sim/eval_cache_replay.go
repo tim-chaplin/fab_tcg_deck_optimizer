@@ -12,7 +12,6 @@ import (
 
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
-	"github.com/tim-chaplin/fab-deck-optimizer/v2/deckstats"
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/gameengine"
 )
 
@@ -49,7 +48,7 @@ func (e *Evaluator) replayBest(
 	}
 
 	if postPromotedFromHeld >= 0 {
-		rolesBuf[postPromotedFromHeld] = deckstats.Held
+		rolesBuf[postPromotedFromHeld] = deck.Held
 	}
 
 	defenseSum := defenseSumFromRoles(hand, arsenalCardIn, rolesBuf, n)
@@ -66,12 +65,12 @@ func (e *Evaluator) replayBest(
 	}
 
 	if postPromotedFromHeld >= 0 {
-		rolesBuf[postPromotedFromHeld] = deckstats.Arsenal
+		rolesBuf[postPromotedFromHeld] = deck.Arsenal
 	}
 
 	winner.SetArsenal(arsenalAtChainStart)
 	best := TurnSummary{
-		BestLine:       make([]deckstats.CardAssignment, totalN),
+		BestLine:       make([]deck.CardAssignment, totalN),
 		Value:          attackDealt + defenseDealt,
 		SwungWeapons:   append([]string(nil), swung...),
 		IncomingDamage: mp.IncomingDamage,
@@ -79,10 +78,10 @@ func (e *Evaluator) replayBest(
 		State:          winner,
 	}
 	for i := 0; i < n; i++ {
-		best.BestLine[i] = deckstats.CardAssignment{Card: hand[i], Role: rolesBuf[i]}
+		best.BestLine[i] = deck.CardAssignment{Card: hand[i], Role: rolesBuf[i]}
 	}
 	if arsenalCardIn != nil {
-		best.BestLine[n] = deckstats.CardAssignment{Card: arsenalCardIn, Role: rolesBuf[n], FromArsenal: true}
+		best.BestLine[n] = deck.CardAssignment{Card: arsenalCardIn, Role: rolesBuf[n], FromArsenal: true}
 	}
 	if best.State.Arsenal() == nil {
 		promoteRandomHandCardToArsenal(&best, hand, arsenalCardIn)
@@ -92,14 +91,14 @@ func (e *Evaluator) replayBest(
 
 // defenseSumFromRoles totals Defense() across every Defend-role card per the rolesBuf
 // assignment.
-func defenseSumFromRoles(hand []card.Card, arsenalCardIn card.Card, rolesBuf []deckstats.Role, n int) int {
+func defenseSumFromRoles(hand []card.Card, arsenalCardIn card.Card, rolesBuf []deck.Role, n int) int {
 	sum := 0
 	for i := 0; i < n; i++ {
-		if rolesBuf[i] == deckstats.Defend {
+		if rolesBuf[i] == deck.Defend {
 			sum += hand[i].Defense()
 		}
 	}
-	if arsenalCardIn != nil && rolesBuf[n] == deckstats.Defend {
+	if arsenalCardIn != nil && rolesBuf[n] == deck.Defend {
 		sum += arsenalCardIn.Defense() + card.ArsenalDefenseBonusOf(arsenalCardIn)
 	}
 	return sum
@@ -107,7 +106,7 @@ func defenseSumFromRoles(hand []card.Card, arsenalCardIn card.Card, rolesBuf []d
 
 // mapCachedRolesToHand walks entry.line and the new call's hand, assigning each hand /
 // arsenal-in card a role from the cached entry by ID. Returns false on multiset mismatch.
-func mapCachedRolesToHand(cachedLine []deckstats.CardAssignment, hand []card.Card, arsenalCardIn card.Card, rolesBuf []deckstats.Role, postPromotedFromHeld *int) bool {
+func mapCachedRolesToHand(cachedLine []deck.CardAssignment, hand []card.Card, arsenalCardIn card.Card, rolesBuf []deck.Role, postPromotedFromHeld *int) bool {
 	*postPromotedFromHeld = -1
 	used := make([]bool, len(cachedLine))
 	if arsenalCardIn != nil {
@@ -133,7 +132,7 @@ func mapCachedRolesToHand(cachedLine []deckstats.CardAssignment, hand []card.Car
 			rolesBuf[hi] = a.Role
 			used[i] = true
 			matched = true
-			if a.Role == deckstats.Arsenal {
+			if a.Role == deck.Arsenal {
 				*postPromotedFromHeld = hi
 			}
 			break

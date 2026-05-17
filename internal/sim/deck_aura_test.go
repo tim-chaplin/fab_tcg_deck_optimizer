@@ -2,6 +2,7 @@ package sim
 
 import (
 	"math/rand"
+	"strings"
 	"testing"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/v2/deck"
@@ -153,7 +154,7 @@ func TestProcessAurasAtStartOfTurn_RevealsAttackActionIntoHand(t *testing.T) {
 	}
 }
 
-// Tests that the deckstats.TriggerContribution carries the revealed card.
+// Tests that the deck.TriggerContribution carries the revealed card.
 func TestProcessAurasAtStartOfTurn_AttributesRevealedToContribution(t *testing.T) {
 	play := gameengine.New()
 	play.ResolveChainStep(play.Logger(), &card.CardState{Card: cards.SigilOfTheArknightBlue{}})
@@ -246,20 +247,12 @@ func TestEvaluate_TriggersFromLastTurnSurfacesInBest(t *testing.T) {
 	rng := rand.New(rand.NewSource(42))
 	stats := NewEvaluator().Evaluate(d, 20, Matchup{}, rng)
 
-	if len(stats.Best.TriggersFromLastTurn) == 0 {
-		t.Errorf("Stats.Best.TriggersFromLastTurn is empty; Best.Value=%d",
-			stats.Best.Value)
-	}
-	foundBlessing := false
-	for _, a := range stats.Best.StartOfTurnAuras {
-		if a.ID() == ids.BlessingOfOccultRed {
-			foundBlessing = true
-			break
-		}
-	}
-	if !foundBlessing {
-		t.Errorf("Stats.Best.StartOfTurnAuras missing Blessing; got %+v",
-			stats.Best.StartOfTurnAuras)
+	// Cross-turn carryover surfaces via the structured Log — the "Auras: ..." snapshot in
+	// the StartOfTurn section names every aura entering the turn, and any aura that fired
+	// at the top of action phase contributes a credit line beneath it.
+	startOfTurn := strings.Join(stats.Best.Log.StartOfTurn, "\n")
+	if !strings.Contains(startOfTurn, "Blessing of Occult") {
+		t.Errorf("Best.Log.StartOfTurn missing Blessing of Occult carryover; got:\n%s", startOfTurn)
 	}
 }
 
