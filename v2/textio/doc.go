@@ -2,7 +2,7 @@
 //
 // Two formats live here today:
 //
-//   - JSON deck-plus-stats (deck_*.go) is the canonical persistence format mydecks/*.json
+//   - JSON deck-plus-stats (json_*.go) is the canonical persistence format mydecks/*.json
 //     uses. MarshalDeck encodes a *deck.Deck + deck.Stats; UnmarshalDeck reverses it.
 //     Round-trips the Best turn's structured Log so saved decks render the same chain
 //     attribution as live runs.
