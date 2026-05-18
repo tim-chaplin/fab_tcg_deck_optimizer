@@ -15,9 +15,9 @@ import (
 
 // turnSnapshot holds the inputs needed to drive a single playSequence call matching the
 // eval-time winner. cardsPlayed is the exact resolution order from the winning turn's
-// CardsPlayed list. Matchup figures and equipped weapons ride on master.
+// CardsPlayed list. Matchup figures and equipped weapons ride on state.
 type turnSnapshot struct {
-	master       *gameengine.GameState
+	state        *gameengine.GameState
 	deck         *deck.Deck
 	hand         []card.Card
 	bestLine     []deck.CardAssignment
@@ -35,16 +35,16 @@ func PrintBestTurn(ev *Evaluator, snap *turnSnapshot, w io.Writer) {
 	}
 	fmt.Fprintln(w)
 	fmt.Fprintf(w, "Best turn played (value %d):\n", snap.value)
-	writeSnapshotSummary(w, "Start of turn:", snap.master, snap.hand, snap.bestLine)
+	writeSnapshotSummary(w, "Start of turn:", snap.state, snap.hand, snap.bestLine)
 
-	summary, _ := playOneTurn(snap.master, snap.hand, snap.deck, ev, snap, gameengine.NewStreamLogger(w))
+	summary, _ := playOneTurn(snap.state, snap.hand, snap.deck, ev, snap, gameengine.NewStreamLogger(w))
 
 	writeSnapshotSummary(w, "End of turn:", summary.State, nil, snap.bestLine)
 }
 
 // runReplayForTurn drives the chain through snapshot's known role assignment + cardsPlayed
 // order with logger installed on every per-perm state, skipping Best's partition
-// enumeration. Called after start-of-turn auras have fired against snapshot.master / .deck.
+// enumeration. Called after start-of-turn auras have fired against snapshot.state / .deck.
 func runReplayForTurn(snapshot *turnSnapshot, logger card.Logger) TurnSummary {
 	parts := partitionBestLineForDisplay(snapshot.bestLine)
 	defensePitches, attackPitches := splitPitchesByPhase(parts.pitched, parts.drCost)
@@ -53,13 +53,13 @@ func runReplayForTurn(snapshot *turnSnapshot, logger card.Logger) TurnSummary {
 	defenders := append(assignmentCards(parts.defenseReactions), assignmentCards(parts.plainBlocks)...)
 	held := assignmentCards(parts.held)
 	arsenalAtChainStart := arsenalRoleCard(snapshot.bestLine)
-	arsenalCardIn := snapshot.master.Arsenal()
+	arsenalCardIn := snapshot.state.Arsenal()
 	arsenalInIdx := matchedCardIndex(snapshot.cardsPlayed, arsenalCardIn, snapshot.bestLine, deck.Attack)
 	arsenalDefenderIdx := matchedCardIndex(defenders, arsenalCardIn, snapshot.bestLine, deck.Defend)
 
-	weapons := snapshot.master.Weapons()
+	weapons := snapshot.state.Weapons()
 	bufs := newAttackBufs(len(snapshot.cardsPlayed), len(weapons), weapons)
-	ctx := newSequenceContext(snapshot.master, weapons, snapshot.cardsPlayed, defenders, pitched, held, snapshot.deck, bufs, 0, arsenalInIdx, arsenalAtChainStart)
+	ctx := newSequenceContext(snapshot.state, weapons, snapshot.cardsPlayed, defenders, pitched, held, snapshot.deck, bufs, 0, arsenalInIdx, arsenalAtChainStart)
 	ctx.replayLogger = logger
 	ctx.attackPitchPerm = assignmentCards(attackPitches)
 	ctx.attackPitchVals = pitchValues(attackPitches)
@@ -69,7 +69,7 @@ func runReplayForTurn(snapshot *turnSnapshot, logger card.Logger) TurnSummary {
 	ctx.resourceBudget = 0
 
 	if len(defenders) > 0 {
-		ctx.runDefense(defenders, pitched, snapshot.deck, snapshot.master.IncomingDamage(), noBlockBudgetCap, arsenalDefenderIdx)
+		ctx.runDefense(defenders, pitched, snapshot.deck, snapshot.state.IncomingDamage(), noBlockBudgetCap, arsenalDefenderIdx)
 	}
 	ctx.leafState.SetDeck(nil)
 	ctx.seedPoolGravBuf(len(snapshot.cardsPlayed), len(ctx.attackPitchPerm))
@@ -80,7 +80,7 @@ func runReplayForTurn(snapshot *turnSnapshot, logger card.Logger) TurnSummary {
 		SwungWeapons:   snapshot.swungWeapons,
 		Value:          snapshot.value,
 		State:          ctx.permState,
-		IncomingDamage: snapshot.master.IncomingDamage(),
+		IncomingDamage: snapshot.state.IncomingDamage(),
 	}
 }
 
