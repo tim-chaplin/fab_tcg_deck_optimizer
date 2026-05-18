@@ -386,33 +386,30 @@ func (ctx *sequenceContext) promoteWinnerState(winner *gameengine.GameState) {
 	if winner == ctx.bufs.pooledState {
 		ctx.bufs.pooledState = nil
 	}
-	winnerHand := winner.Hand()
-	if len(winnerHand) > 0 {
-		clone := make([]card.Card, len(winnerHand))
-		copy(clone, winnerHand)
-		winner.SetHand(clone)
+	// Hand / Graveyard / CardsPlayed alias the pooled per-perm scratch buffers; Banished
+	// aliases the pooled leafState's [:n:n] backing. The next Best call's CopyFrom on the
+	// leafState pool or the next perm's preparePermState would trample them in place,
+	// so clone each into an independent backing here.
+	if h := winner.Hand(); len(h) > 0 {
+		winner.SetHand(cloneCardSlice(h))
 	}
-	winnerGrav := winner.Graveyard()
-	if len(winnerGrav) > 0 {
-		clone := make([]card.Card, len(winnerGrav))
-		copy(clone, winnerGrav)
-		winner.SetGraveyard(clone)
+	if g := winner.Graveyard(); len(g) > 0 {
+		winner.SetGraveyard(cloneCardSlice(g))
 	}
-	winnerCardsPlayed := winner.CardsPlayed()
-	if len(winnerCardsPlayed) > 0 {
-		clone := make([]card.Card, len(winnerCardsPlayed))
-		copy(clone, winnerCardsPlayed)
-		winner.SetCardsPlayed(clone)
+	if cp := winner.CardsPlayed(); len(cp) > 0 {
+		winner.SetCardsPlayed(cloneCardSlice(cp))
 	}
-	// Banished aliases the pooled leafState's backing via CopyForPermutation's [:n:n]
-	// slice and isn't reset per perm. Clone it so the next Best call's CopyFrom on
-	// the leafState pool can't overwrite winner.banished's data.
-	winnerBanished := winner.Banished()
-	if len(winnerBanished) > 0 {
-		clone := make([]card.Card, len(winnerBanished))
-		copy(clone, winnerBanished)
-		winner.SetBanished(clone)
+	if b := winner.Banished(); len(b) > 0 {
+		winner.SetBanished(cloneCardSlice(b))
 	}
+}
+
+// cloneCardSlice returns an independent backing copy of src. Callers should gate on
+// len(src) > 0 when they want to preserve the field's existing slice header on empty.
+func cloneCardSlice(src []card.Card) []card.Card {
+	out := make([]card.Card, len(src))
+	copy(out, src)
+	return out
 }
 
 // runDefense mutates ctx.leafState through the defender list, accumulating per-DR Value
