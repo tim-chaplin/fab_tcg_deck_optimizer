@@ -225,7 +225,7 @@ func runOneShuffle(masterDeck *deck.Deck, scratch *shuffleScratch, stats *deck.S
 	d := masterDeck.Copy()
 	d.Shuffle(rng)
 
-	master := gameengine.GameStateBuilder().
+	state := gameengine.GameStateBuilder().
 		SetHero(d.Hero.(hero.Hero)).
 		SetWeapons(weaponsFromDeck(d)).
 		SetIncomingDamage(mp.IncomingDamage).
@@ -242,14 +242,14 @@ func runOneShuffle(masterDeck *deck.Deck, scratch *shuffleScratch, stats *deck.S
 	maxHands := 2 * handsPerCycle
 	for handIdx := 0; handIdx < maxHands; handIdx++ {
 		preDeckSize := d.Size()
-		summary, snap := playOneTurn(master, h, d, ev, nil, nil)
+		summary, snap := playOneTurn(state, h, d, ev, nil, nil)
 
 		if recordTurnStats(stats, summary, handIdx, handsPerCycle) {
 			recordBestTurnFromSnap(stats, summary, ev, snap)
 		}
 		tallyMarginalPresence(scratch.marginalBuf, idIndex, scratch.presentBuf, summary.BestLine, float64(summary.Value))
 
-		master = summary.State
+		state = summary.State
 		d = summary.State.Deck()
 		h = summary.State.Hand()
 		// Stop when no fresh cards entered the next hand: either deck exhausted (len(h) <
@@ -284,37 +284,37 @@ func countPitched(bestLine []deck.CardAssignment) int {
 	return n
 }
 
-// playOneTurn drives one full turn: advance master, capture the start-of-turn snapshot,
+// playOneTurn drives one full turn: advance state, capture the start-of-turn snapshot,
 // fire start-of-turn auras, run chain via Best, recycle pitched to deck bottom, draw the
 // next hand (partial OK).
 //
 // Returned summary.State is the end-of-turn boundary (pitched recycled, next hand drawn,
-// Value accrued) and threads directly into the next call as master. snap is the start-of-
-// turn snapshot (independent of subsequent mutations to master/d) for record-if-best /
-// replay; nil in replay mode.
+// Value accrued) and threads directly into the next call as the carryover state. snap is
+// the start-of-turn snapshot (independent of subsequent mutations to state/d) for
+// record-if-best / replay; nil in replay mode.
 //
 // When snapshot is non-nil, runs in REPLAY mode: drives the chain through snapshot.bestLine
 // + snapshot.cardsPlayed (no enumeration), streams emissions via logger (when non-nil), and
 // returns the raw post-chain per-perm state without recycle / next-draw cleanup.
 func playOneTurn(
-	master *gameengine.GameState,
+	state *gameengine.GameState,
 	hand []card.Card,
 	d *deck.Deck,
 	ev *Evaluator,
 	snapshot *turnSnapshot,
 	logger card.Logger,
 ) (summary TurnSummary, snap *turnSnapshot) {
-	advanceToNextTurn(master)
+	advanceToNextTurn(state)
 
 	if snapshot == nil {
 		snap = &turnSnapshot{
-			master: master.CopyPersistentState(),
-			deck:   d.Copy(),
-			hand:   append([]card.Card(nil), hand...),
+			state: state.CopyPersistentState(),
+			deck:  d.Copy(),
+			hand:  append([]card.Card(nil), hand...),
 		}
 	}
 
-	processAurasAtStartOfTurn(master, d, &hand)
+	processAurasAtStartOfTurn(state, d, &hand)
 	sortHandByID(hand)
 	if snapshot != nil {
 		summary = runReplayForTurn(snapshot, logger)
@@ -322,7 +322,7 @@ func playOneTurn(
 		// the caller needs for its end-of-turn snapshot.
 		return summary, nil
 	}
-	summary = runBestForTurn(master.Weapons(), hand, d, master, ev)
+	summary = runBestForTurn(state.Weapons(), hand, d, state, ev)
 
 	// Chain ran on a shallow copy of d that may have drawn mid-turn; use the winner's
 	// post-chain deck for recycle / next-turn draw.
@@ -335,7 +335,7 @@ func playOneTurn(
 	postChainDeck.PutBottom(recycled)
 
 	held := summary.State.Hand()
-	toDraw := master.Hero().(hero.Hero).Intelligence() - len(held)
+	toDraw := state.Hero().(hero.Hero).Intelligence() - len(held)
 	if toDraw > postChainDeck.Size() {
 		toDraw = postChainDeck.Size()
 	}
@@ -355,10 +355,10 @@ func playOneTurn(
 }
 
 // advanceToNextTurn clears per-turn ephemerals (value, cardsPlayed, ...) and detaches any
-// stale deck pointer. Idempotent on a freshly-built master.
-func advanceToNextTurn(master *gameengine.GameState) {
-	master.ResetEphemeralState()
-	master.SetDeck(nil)
+// stale deck pointer. Idempotent on a freshly-built state.
+func advanceToNextTurn(state *gameengine.GameState) {
+	state.ResetEphemeralState()
+	state.SetDeck(nil)
 }
 
 // mergeStatsInto folds src's per-shuffle accumulators into dst. PerCardMarginal merging
@@ -388,10 +388,10 @@ func runBestForTurn(
 	weapons []weapon.Weapon,
 	h []card.Card,
 	d *deck.Deck,
-	master *gameengine.GameState,
+	state *gameengine.GameState,
 	ev *Evaluator,
 ) TurnSummary {
-	return ev.Best(weapons, h, d, master)
+	return ev.Best(weapons, h, d, state)
 }
 
 // recordTurnStats folds one resolved turn's accumulators into stats: bumps Hands /
@@ -421,23 +421,23 @@ func recordTurnStats(stats *deck.Stats, summary TurnSummary, handIdx, handsPerCy
 // turn's dealt hand. Sized large enough that handBuf never reallocates.
 const startOfTurnRevealRoom = 8
 
-// processAurasAtStartOfTurn fires every StartOfTurn aura handler queued on master. Handlers
-// write value gains directly to master.Value() and reveals append to h. Re-arms
+// processAurasAtStartOfTurn fires every StartOfTurn aura handler queued on state. Handlers
+// write value gains directly to state.Value() and reveals append to h. Re-arms
 // FiredThisTurn. Callers must refill h to full size first so reveal handlers see the
 // post-draw deck top. Cascading reveals: a handler that pops d shrinks the view for the
 // next, so two reveal-capable auras see distinct tops.
-func processAurasAtStartOfTurn(master *gameengine.GameState, d *deck.Deck, h *[]card.Card) {
-	if len(master.Auras()) == 0 {
+func processAurasAtStartOfTurn(state *gameengine.GameState, d *deck.Deck, h *[]card.Card) {
+	if len(state.Auras()) == 0 {
 		return
 	}
-	master.SetDeck(d)
-	preHand := len(master.Hand())
-	master.Engine().FireStartOfTurn()
-	if revealed := master.Hand(); len(revealed) > preHand {
+	state.SetDeck(d)
+	preHand := len(state.Hand())
+	state.Engine().FireStartOfTurn()
+	if revealed := state.Hand(); len(revealed) > preHand {
 		*h = append(*h, revealed[preHand:]...)
-		master.SetHand(revealed[:preHand])
+		state.SetHand(revealed[:preHand])
 	}
-	master.SetDeck(nil)
+	state.SetDeck(nil)
 }
 
 // pitchedFromBestLine returns BestLine's Pitch-role cards (excluding the arsenal-in slot,
