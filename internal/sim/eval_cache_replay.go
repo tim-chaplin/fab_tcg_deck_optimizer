@@ -1,11 +1,10 @@
 package sim
 
 // Cache-hit replay: rebuild a TurnSummary from a cached winning partition by running the
-// chain dispatcher against just that one role assignment. Skips the partition search
-// (the dominant cost — exponential in hand size) but still runs bestAttackWithWeapons
-// once and the post-hoc arsenal promotion + Hand carryover bookkeeping that findBest
-// does after the search loop, so the resulting summary is byte-identical to a full
-// from-scratch Best call.
+// chain dispatcher against just that one role assignment. Skips the partition search (the
+// dominant cost — exponential in hand size) but still runs bestAttackWithWeapons once and
+// the post-hoc arsenal promotion + Hand carryover bookkeeping, so the resulting summary
+// is byte-identical to a from-scratch Best call.
 
 import (
 	"fmt"
@@ -16,17 +15,14 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapon"
 )
 
-// replayBest is the cache-hit body. Thin wrapper around evaluatePartition: project the
-// cached BestLine onto the new call's hand to fill rolesBuf, hand off to evaluatePartition
-// for the actual chain run, then assemble the TurnSummary from its outputs. The cache key
-// already locked the inputs (hand multiset, runechantCarryover, arsenalCardIn, auras) so
-// the chain output here is byte-identical to what the original cached call produced.
+// replayBest is the cache-hit body. Projects the cached BestLine onto the new call's hand
+// to fill rolesBuf, hands off to evaluatePartition for the chain run, then assembles the
+// TurnSummary. The cache key locks all inputs so the chain output here is byte-identical
+// to the original call.
 //
-// One quirk in projecting the BestLine: the cached entry may tag a hand card with
-// Role=Arsenal (the post-hoc promotion target). Hand cards never have that role during
-// the chain run — the search treats them as Held and the post-hoc step re-flips at the
-// end — so we flip the entry back to Held before evaluatePartition and re-stamp Arsenal
-// on the BestLine afterward.
+// Quirk: the cached entry may tag a hand card with Role=Arsenal (post-hoc promotion
+// target), but hand cards never have that role during the chain run. Flip the entry back
+// to Held before evaluatePartition; re-stamp Arsenal on the BestLine afterward.
 func (e *Evaluator) replayBest(
 	entry evalCacheEntry,
 	weapons []weapon.Weapon, hand []card.Card,

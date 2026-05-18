@@ -19,17 +19,14 @@ import (
 // stays in the arsenal slot at end of turn). Pitch resources split across attack / defense
 // phases since resources don't carry between turns.
 //
-// master holds the start-of-turn carryover from the previous turn — Hero, Arsenal (the
-// card sitting in the arsenal slot, nil if empty), Auras (mid-chain triggers may fire and
-// contribute damage), Items (activated abilities become playable chain steps), Banished /
-// Graveyard / OpponentMarked, plus the matchup-derived IncomingDamage / ArcaneIncomingDamage.
-// Other GameState fields are ignored (per-turn ephemerals — value, hand, pitched, log).
-// TurnSummary.State is the post-chain GameState; the deck-eval loop calls PrepareNextTurn
-// on it and threads it forward as the next call's master.
+// master holds start-of-turn carryover from the previous turn — Hero, Arsenal, Auras,
+// Items, Banished, Graveyard, OpponentMarked, plus matchup-derived IncomingDamage /
+// ArcaneIncomingDamage. Per-turn ephemerals (value, hand, pitched, log) are ignored.
+// TurnSummary.State is the post-chain GameState; the next turn's master comes from
+// calling PrepareNextTurn on it.
 //
-// Package-private so external packages can't bypass EvalOneTurnForTesting — the turntests
-// convention is to drive the chain runner through that deck-level entry point so every test
-// exercises the same per-turn pipeline production runs through Evaluate.
+// Package-private so callers route through EvalOneTurnForTesting and exercise the same
+// per-turn pipeline production uses.
 func best(weapons []weapon.Weapon, hand []card.Card, d *deck.Deck, master *gameengine.GameState) TurnSummary {
 	return sharedEvaluator.Best(weapons, hand, d, master)
 }
@@ -40,30 +37,22 @@ func (e *Evaluator) Best(weapons []weapon.Weapon, hand []card.Card, d *deck.Deck
 }
 
 // Evaluator caches per-goroutine scratch state across Best calls. The first call allocates
-// an attackBufs sized for (handSize, weapons); subsequent calls with the same shape reuse it,
-// avoiding ~12% of total bytes for a 10k-shuffle eval (newAttackBufs was the second-biggest
-// allocator after the eval-time slice copies). Different shapes invalidate the cache and
-// allocate fresh — fine for normal use because a single deck eval reuses one shape across
-// every shuffle. Not safe for concurrent use; concurrent callers construct one Evaluator per
-// goroutine (the parallel-shuffle path inside evaluateImpl already does this — each worker
-// in the fan-out builds its own private Evaluator pointing to ev.cache).
+// an attackBufs sized for (handSize, weapons); subsequent calls with the same shape reuse
+// it, saving ~12% of bytes on a 10k-shuffle eval. Different shapes invalidate the cache.
+// Not safe for concurrent use; concurrent callers construct one Evaluator per goroutine.
 //
 // The hand-eval cache (cache field) memoizes the optimal partition per evalCacheKey. On a
 // hit, Best skips the partition search and replays the chain against the cached BestLine;
 // on a miss, the search runs and the result is stored when the chain didn't depend on
-// hidden state. nil disables caching — used by benchmark and test helpers that want the
-// from-scratch path.
+// hidden state. nil disables caching.
 type Evaluator struct {
 	cachedBufs     *attackBufs
 	cachedHandSize int
 	cachedWeapons  []weapon.Weapon
 	cache          *evalCache
-	// numWorkers tells Evaluate how many goroutines to fan the shuffle loop across.
-	// 0 or 1 runs sequentially in the calling goroutine, reusing cachedBufs as the per-
-	// call scratch — the original single-threaded behaviour and the right default for
-	// tests that want deterministic single-RNG runs. > 1 spawns N workers that share the
-	// cache (which is RWMutex-protected) but each carry their own attackBufs scratch;
-	// fabsim eval / anneal / compare use this path.
+	// numWorkers controls Evaluate's shuffle-loop fan-out. 0 or 1 runs sequentially in
+	// the calling goroutine; >1 spawns N workers that share the (RWMutex-protected) cache
+	// but carry their own attackBufs scratch.
 	numWorkers int
 }
 
@@ -76,43 +65,34 @@ func NewEvaluator() *Evaluator {
 
 // NewEvaluatorParallel returns an Evaluator that fans the shuffle loop across numWorkers
 // goroutines, each carrying its own attackBufs scratch and sharing the Evaluator's
-// private cache. Single-deck callers (fabsim eval, compare) use this for shuffle-level
-// parallelism.
+// private cache.
 func NewEvaluatorParallel(numWorkers int) *Evaluator {
 	return &Evaluator{cache: newEvalCache(), numWorkers: numWorkers}
 }
 
-// NewEvaluatorWithCache returns an Evaluator pointing at an existing shared Cache. Used
-// by RunMutationRound's worker pool so every worker's lookups and stores hit one memo.
-// numWorkers is 0 (shuffle loop runs single-threaded); set the field directly on the
-// returned pointer to layer shuffle parallelism on top.
+// NewEvaluatorWithCache returns an Evaluator pointing at an existing shared Cache so a
+// pool of workers can pool lookup work. numWorkers is 0 (single-threaded shuffle); set
+// the field directly on the returned pointer to layer shuffle parallelism on top.
 func NewEvaluatorWithCache(c *Cache) *Evaluator {
 	return &Evaluator{cache: c}
 }
 
 // NewEvaluatorWithoutCache returns a fresh Evaluator with the hand-eval cache disabled.
-// Used for the from-scratch path in benchmarks and equivalence tests; production callers
-// route through NewEvaluator / NewEvaluatorParallel / NewEvaluatorWithCache.
 func NewEvaluatorWithoutCache() *Evaluator {
 	return &Evaluator{}
 }
 
-// Cache is the thread-safe hand-eval cache shared across multiple Evaluators. Use
-// NewCache to construct one and pass it to NewEvaluatorWithCache for each worker that
-// should share the memo. The cache's lookup path takes a read lock for map access
-// (concurrent readers don't serialise); store and reset take the write lock.
+// Cache is the thread-safe hand-eval cache shared across multiple Evaluators. Lookups take
+// a read lock (concurrent readers don't serialise); store and reset take the write lock.
 type Cache = evalCache
 
 // NewCache returns a fresh shared cache.
 func NewCache() *Cache { return newEvalCache() }
 
 // ResetCache drops the cached entries while preserving the stats counters. Use between
-// distinct decks when reusing one Evaluator across many of them (RunMutationRound's
-// per-mutation worker loop): entries from one deck rarely help another — different card
-// sets produce different hand multisets — so dropping them at deck boundaries caps memory
-// at one-deck's-worth of entries. No-op when caching is disabled. Routes through the
-// cache's reset method so the write lock guards against concurrent lookups in a parallel-
-// shuffle worker pool.
+// distinct decks when reusing one Evaluator across many: entries from one deck rarely
+// help another, so dropping them at deck boundaries caps memory at one deck's worth.
+// No-op when caching is disabled.
 func (e *Evaluator) ResetCache() {
 	if e.cache != nil {
 		e.cache.reset()
@@ -138,9 +118,7 @@ func (e *Evaluator) CacheStats() CacheStats {
 	}
 }
 
-// sharedEvaluator backs the package-level Best — single-threaded callers don't need to
-// construct their own. Caching is OFF here because the cache key (see evalCacheKey)
-// assumes a constant Matchup per Evaluator and the test suite exercises Best across many
-// matchup values against the same package-level entry point. Tests that want cache
-// behaviour construct their own Evaluator via NewEvaluator.
+// sharedEvaluator backs the package-level best — caching is OFF because the cache key
+// assumes a constant Matchup per Evaluator and shared callers exercise many matchups
+// against this entry point. Tests that want cache behaviour construct their own Evaluator.
 var sharedEvaluator = NewEvaluatorWithoutCache()
