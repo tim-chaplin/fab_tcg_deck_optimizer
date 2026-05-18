@@ -18,12 +18,10 @@ package sim
 //     the rules-engine API the card.GameEngine interface demands.
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/aura"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/gameengine"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/hero"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/item"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/token"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapon"
 )
@@ -879,19 +877,6 @@ func pendingFutureValueFromState(gs *gameengine.GameState) int {
 		total += a.Count()
 	}
 	for _, it := range gs.Items() {
-		total += it.Count()
-	}
-	return total
-}
-
-// pendingFutureValue sums the Count of every Aura plus every Item — used by
-// partition.go when comparing partitions whose winning states are already in hand.
-func pendingFutureValue(auras []*aura.Aura, items []*item.Item) int {
-	total := 0
-	for _, a := range auras {
-		total += a.Count()
-	}
-	for _, it := range items {
 		total += it.Count()
 	}
 	return total

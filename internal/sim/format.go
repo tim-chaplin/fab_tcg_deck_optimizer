@@ -30,15 +30,6 @@ func FormatBestLine(line []deck.CardAssignment) string {
 	return strings.Join(parts, ", ")
 }
 
-// roleLabelWithArsenal attaches " from arsenal" to the role label when a is arsenal-in,
-// so the numbered play order tags the role rather than the card name. Bare label otherwise.
-func roleLabelWithArsenal(a deck.CardAssignment, label string) string {
-	if a.FromArsenal {
-		return label + " from arsenal"
-	}
-	return label
-}
-
 // splitPitchesByPhase assigns each pitch card to the defense or attack phase, simulating the
 // order FaB prompts them in. Smallest pitches fund the defense bucket until drCost is covered;
 // the rest pay for this turn's attacks. Stable on ties so display order is deterministic.
