@@ -767,6 +767,10 @@ func (ctx *sequenceContext) playSequenceWithMeta(n int) (damage int, futureValue
 		attr:      ctx.bufs.pitchAttrBuf[:0],
 	}
 	var activeAttack *card.CardState
+	// activeAttackTypes is the cached TypeSet of the current activeAttack's Card. Set
+	// alongside activeAttack so finalize's FireHit skips an interface-dispatched Types
+	// call per finalized attack — meta[i].types already holds the same value.
+	var activeAttackTypes card.TypeSet
 	finalizeActiveAttack := func() {
 		if activeAttack == nil {
 			return
@@ -776,10 +780,9 @@ func (ctx *sequenceContext) playSequenceWithMeta(n int) (damage int, futureValue
 				h := &activeAttack.OnHit[i]
 				h.Fire(ge, state.Logger(), activeAttack, h)
 			}
-			types := activeAttack.Card.Types(nil)
 			prevTriggering := state.TriggeringCard()
 			state.SetTriggeringCard(activeAttack.Card)
-			ge.FireHit(types)
+			ge.FireHit(activeAttackTypes)
 			state.SetTriggeringCard(prevTriggering)
 		}
 		activeAttack = nil
@@ -845,6 +848,7 @@ func (ctx *sequenceContext) playSequenceWithMeta(n int) (damage int, futureValue
 		}
 		if m.isAttack {
 			activeAttack = pc
+			activeAttackTypes = m.types
 		}
 		state.AppendCardsPlayed(pc.Card)
 		if m.types.IsNonAttackAction() {
