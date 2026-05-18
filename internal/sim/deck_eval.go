@@ -319,7 +319,8 @@ func mergeStatsInto(dst, src *deck.Stats) {
 	}
 }
 
-// runBestForTurn dispatches to ev.Best.
+// runBestForTurn dispatches to ev.BestSkipLog — eval-time turns don't need the chain
+// log, so the per-perm TurnLogger allocations are skipped.
 func runBestForTurn(
 	weapons []weapon.Weapon,
 	h []card.Card,
@@ -328,7 +329,7 @@ func runBestForTurn(
 	master *gameengine.GameState,
 	ev *Evaluator,
 ) TurnSummary {
-	return ev.Best(weapons, h, mp, d, master)
+	return ev.BestSkipLog(weapons, h, mp, d, master)
 }
 
 // recordTurnStats folds one resolved turn's accumulators into stats: bumps Hands /

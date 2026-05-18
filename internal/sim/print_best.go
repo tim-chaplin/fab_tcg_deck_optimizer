@@ -1,18 +1,20 @@
 package sim
 
-// Print-time replay of the peak turn. PrintBestTurn re-runs Best against a snapshot to
-// recover the winning chain order from State.CardsPlayed(), then streams the four-section
-// printout (start of turn, my turn, opponent's turn, end of turn) to an io.Writer.
+// Print-time replay of the peak turn. PrintBestTurn re-runs Best (the log-capturing
+// variant) against a snapshot and streams the four-section printout (start of turn, my
+// turn, opponent's turn, end of turn) to an io.Writer.
 
 import (
 	"fmt"
 	"io"
+	"strings"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/aura"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/gameengine"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/item"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/turnlogger"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapon"
 )
 
@@ -45,8 +47,8 @@ func PrintBestTurn(ev *Evaluator, snap *bestSnapshot, w io.Writer) {
 	defensePitches, attackPitches := splitPitchesByPhase(parts.pitched, parts.drCost)
 
 	startOfTurn := buildStartOfTurnLines(snap.hand, snap.bestLine, snap.master)
-	myTurn := buildMyTurnLines(attackPitches, summary.State.CardsPlayed())
-	oppTurn := buildOpponentTurnLines(defensePitches, parts)
+	myTurn := buildMyTurnLines(attackPitches, chainEntriesOf(summary.State))
+	oppTurn := buildOpponentTurnLines(defensePitches, parts, snap.mp.IncomingDamage)
 	endOfTurn := buildEndOfTurnLines(parts.arsenal, summary.State)
 
 	writeSection(w, "Start of turn:", startOfTurn, false)
@@ -55,16 +57,38 @@ func PrintBestTurn(ev *Evaluator, snap *bestSnapshot, w io.Writer) {
 	writeSection(w, "End of turn:", endOfTurn, false)
 }
 
-// writeSection emits a section header followed by its content lines. numbered=true prefixes
-// each line with a step number; numbered=false uses plain indentation. No-op on empty lines.
+// chainEntriesOf returns the captured chain log on the winning state's logger. Best's
+// per-permutation install lands a *turnlogger.TurnLogger on the winner; print-only callers
+// type-assert to recover its entries. Returns nil when the state isn't carrying a
+// capturing logger (BestSkipLog path, never called from print).
+func chainEntriesOf(s *gameengine.GameState) []turnlogger.LogEntry {
+	if s == nil {
+		return nil
+	}
+	tl, ok := s.Logger().(*turnlogger.TurnLogger)
+	if !ok {
+		return nil
+	}
+	return tl.Entries()
+}
+
+// writeSection emits a section header followed by its content lines. Lines tagged with
+// childEntryPrefix indent under the prior numbered entry without consuming a step number;
+// numbered=false sections skip the "N. " step prefix entirely.
 func writeSection(w io.Writer, header string, lines []string, numbered bool) {
 	if len(lines) == 0 {
 		return
 	}
 	fmt.Fprintf(w, "  %s\n", header)
-	for i, entry := range lines {
+	step := 0
+	for _, entry := range lines {
+		if rest, isChild := strings.CutPrefix(entry, childEntryPrefix); isChild {
+			fmt.Fprintf(w, "         %s\n", rest)
+			continue
+		}
 		if numbered {
-			fmt.Fprintf(w, "    %d. %s\n", i+1, entry)
+			step++
+			fmt.Fprintf(w, "    %d. %s\n", step, entry)
 		} else {
 			fmt.Fprintf(w, "    %s\n", entry)
 		}
@@ -98,23 +122,19 @@ func buildStartOfTurnLines(dealtHand []card.Card, line []deck.CardAssignment, ma
 	return out
 }
 
-// buildMyTurnLines emits attack-phase pitch lines followed by one line per card resolved
-// in the chain. Chain entries render as "<DisplayName>: <VERB>" via ChainStepText; trigger
-// riders and per-step damage deltas are not surfaced.
-func buildMyTurnLines(attackPitches []deck.CardAssignment, cardsPlayed []card.Card) []string {
+// buildMyTurnLines emits attack-phase pitch lines followed by the chain log; grouped
+// trigger lines from appendGroupedChainEntries indent beneath their parent chain step.
+func buildMyTurnLines(attackPitches []deck.CardAssignment, log []turnlogger.LogEntry) []string {
 	var out []string
 	for _, p := range attackPitches {
 		out = append(out, p.Card.DisplayName()+": "+roleLabelWithArsenal(p, "PITCH"))
 	}
-	for _, c := range cardsPlayed {
-		out = append(out, gameengine.ChainStepText(&card.CardState{Card: c}))
-	}
-	return out
+	return appendGroupedChainEntries(out, log)
 }
 
-// buildOpponentTurnLines emits defense-phase pitches, plain blocks, then Defense Reaction
-// rows. DRs render bare ("<name>: DEFENSE REACTION") without per-rider detail.
-func buildOpponentTurnLines(defensePitches []deck.CardAssignment, parts bestLineDisplayParts) []string {
+// buildOpponentTurnLines emits defense-phase pitches, plain blocks, then Defense Reactions.
+// DRs re-play through appendDefenseReactionLines so each rider line lands beneath its DR.
+func buildOpponentTurnLines(defensePitches []deck.CardAssignment, parts bestLineDisplayParts, incomingDamage int) []string {
 	var out []string
 	for _, p := range defensePitches {
 		out = append(out, p.Card.DisplayName()+": "+roleLabelWithArsenal(p, "PITCH"))
@@ -122,8 +142,10 @@ func buildOpponentTurnLines(defensePitches []deck.CardAssignment, parts bestLine
 	for _, b := range parts.plainBlocks {
 		out = append(out, formatBlockLine(b))
 	}
+	defenders := defendersFromParts(parts)
+	remaining := incomingDamage
 	for _, dr := range parts.defenseReactions {
-		out = append(out, dr.Card.DisplayName()+": "+roleLabelWithArsenal(dr, "DEFENSE REACTION"))
+		out, remaining = appendDefenseReactionLines(out, dr, defenders, remaining)
 	}
 	return out
 }

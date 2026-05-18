@@ -25,6 +25,7 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/hero"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/item"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/token"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/turnlogger"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapon"
 )
 
@@ -48,6 +49,7 @@ func bestAttackWithWeapons(
 	mp Matchup,
 	blockTotal, arsenalInIdx, arsenalDefenderIdx int,
 	arsenalAtChainStart card.Card,
+	skipLog bool,
 ) (int, int, chainBudget, []string, *gameengine.GameState, bool, bool) {
 	runechantCarryover := auraCountByNameInState(masterState, "Runechant")
 	ctx := &sequenceContext{
@@ -65,6 +67,7 @@ func bestAttackWithWeapons(
 		priorBanish:         masterState.Banished(),
 		priorGraveyard:      masterState.Graveyard(),
 		defenders:           defenders,
+		skipLog:             skipLog,
 		cacheable:           true,
 	}
 	// Extend bufs.activatedAbilities with item ability instances for this Best call.
@@ -288,6 +291,7 @@ type sequenceContext struct {
 	activatedAbilityCosts []int
 	defenders             []card.Card
 	leafState             *gameengine.GameState
+	skipLog               bool
 	cacheable             bool
 	// permState is the last *GameState a playSequence call ran the chain against. Set
 	// by playSequence so the test-only PermEngine accessor can read the post-chain
@@ -401,6 +405,12 @@ func (ctx *sequenceContext) promoteWinnerState(winner *gameengine.GameState) {
 // proceeds while the matchup figure itself stays constant.
 func (ctx *sequenceContext) runDefense(defenders, pitched []card.Card, deckPile *deck.Deck, matchupIncomingDamage, blockBudget, arsenalDefenderIdx int) (int, bool) {
 	state := ctx.leafState
+	// In the recording path the per-perm preparePermState installs a fresh capturing
+	// logger; the defense pass runs before any of that, so install one here too when
+	// !skipLog so DR rider lines land on the winning state's logger.
+	if !ctx.skipLog {
+		state.SetLogger(turnlogger.New())
+	}
 	state.SetDeck(deckPile)
 	state.SetIncomingDamage(matchupIncomingDamage)
 	ge := state.Engine()
@@ -531,6 +541,11 @@ func (ctx *sequenceContext) preparePermState(playedAttackers []*card.CardState, 
 	s.SetCardsPlayed(bufs.pooledCardsPlayedBuf)
 	s.SetPitched(ctx.pitched)
 	s.SetHand(hand)
+	// ResetEphemeralState already set s.logger to NoopLogger; for the recording path
+	// swap in a fresh per-perm TurnLogger so the winning state carries its chain log.
+	if !ctx.skipLog {
+		s.SetLogger(turnlogger.New())
+	}
 	return s
 }
 

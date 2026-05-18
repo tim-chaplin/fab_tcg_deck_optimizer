@@ -12,7 +12,7 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapon"
 )
 
-func (e *Evaluator) findBest(weapons []weapon.Weapon, hand []card.Card, mp Matchup, d *deck.Deck, masterState *gameengine.GameState) TurnSummary {
+func (e *Evaluator) findBest(weapons []weapon.Weapon, hand []card.Card, mp Matchup, d *deck.Deck, masterState *gameengine.GameState, skipLog bool) TurnSummary {
 	var cacheKey evalCacheKey
 	cacheUsable := e.cache != nil
 	if cacheUsable {
@@ -25,7 +25,7 @@ func (e *Evaluator) findBest(weapons []weapon.Weapon, hand []card.Card, mp Match
 	if cacheUsable {
 		if entry, ok := e.cache.lookup(cacheKey); ok {
 			e.cache.hits.Add(1)
-			return e.replayBest(entry, weapons, hand, mp, d, masterState)
+			return e.replayBest(entry, weapons, hand, mp, d, masterState, skipLog)
 		}
 		e.cache.misses.Add(1)
 	}
@@ -69,6 +69,7 @@ func (e *Evaluator) findBest(weapons []weapon.Weapon, hand []card.Card, mp Match
 				masterState, weapons, hand, d,
 				rolesBuf, n, bufs,
 				mp, defenseSum,
+				skipLog,
 			)
 			if !leafCacheable {
 				cacheable = false

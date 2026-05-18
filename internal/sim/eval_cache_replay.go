@@ -31,7 +31,7 @@ func (e *Evaluator) replayBest(
 	entry evalCacheEntry,
 	weapons []weapon.Weapon, hand []card.Card,
 	mp Matchup, d *deck.Deck,
-	masterState *gameengine.GameState,
+	masterState *gameengine.GameState, skipLog bool,
 ) TurnSummary {
 	arsenalCardIn := masterState.Arsenal()
 	n := len(hand)
@@ -58,6 +58,7 @@ func (e *Evaluator) replayBest(
 		masterState, weapons, hand, d,
 		rolesBuf, n, bufs,
 		mp, defenseSum,
+		skipLog,
 	)
 	if !ok {
 		panic(fmt.Sprintf("replayBest: cached partition is infeasible — cache invariant violated (hand=%d, matchup=%+v)",
