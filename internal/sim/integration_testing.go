@@ -19,8 +19,10 @@ import (
 // d.Draw themselves and pass the result). d is consumed in place — callers shouldn't reuse
 // it across calls.
 func EvalOneTurnForTesting(d *deck.Deck, initial *gameengine.GameState, initialHand []card.Card) TurnSummary {
-	master, weapons := setupTurn(d, initial)
-	summary, _ := playOneTurn(master, initialHand, d, weapons, ev(), nil, nil)
+	if initial == nil {
+		initial = gameengine.GameStateBuilder().Build()
+	}
+	summary, _ := playOneTurn(initial, initialHand, d, weaponsFromDeck(d), ev(), nil, nil)
 	return summary
 }
 
@@ -29,9 +31,12 @@ func EvalOneTurnForTesting(d *deck.Deck, initial *gameengine.GameState, initialH
 // partial hand. The returned turn1.State is an independent snapshot; turn2 mutates the
 // shared master.
 func EvalTwoTurnsForTesting(d *deck.Deck, initial *gameengine.GameState, hand1 []card.Card) (TurnSummary, TurnSummary) {
-	master, weapons := setupTurn(d, initial)
+	if initial == nil {
+		initial = gameengine.GameStateBuilder().Build()
+	}
+	weapons := weaponsFromDeck(d)
 
-	turn1, _ := playOneTurn(master, hand1, d, weapons, ev(), nil, nil)
+	turn1, _ := playOneTurn(initial, hand1, d, weapons, ev(), nil, nil)
 	stable := turn1
 	stable.State = snapshotState(turn1.State, turn1.State.Deck(), turn1.State.Hand(), turn1.Value, turn1.State.CardsDrawn())
 
@@ -39,19 +44,14 @@ func EvalTwoTurnsForTesting(d *deck.Deck, initial *gameengine.GameState, hand1 [
 	return stable, turn2
 }
 
-// setupTurn assembles the per-turn fixture from d: master *GameState (`initial` when
-// provided, else the builder's default state) and the weapon list.
-func setupTurn(d *deck.Deck, initial *gameengine.GameState) (master *gameengine.GameState, weapons []weapon.Weapon) {
-	if initial != nil {
-		master = initial
-	} else {
-		master = gameengine.GameStateBuilder().Build()
-	}
-	weapons = make([]weapon.Weapon, len(d.Weapons))
+// weaponsFromDeck widens d.Weapons (typed as []deck.Weapon) into the []weapon.Weapon the
+// chain runner consumes.
+func weaponsFromDeck(d *deck.Deck) []weapon.Weapon {
+	weapons := make([]weapon.Weapon, len(d.Weapons))
 	for i, w := range d.Weapons {
 		weapons[i] = w.(weapon.Weapon)
 	}
-	return master, weapons
+	return weapons
 }
 
 // ev returns the package-level Evaluator so test helpers share its cache/scratch state.
