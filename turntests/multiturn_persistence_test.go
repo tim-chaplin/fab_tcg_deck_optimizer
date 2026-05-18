@@ -14,6 +14,7 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/ids"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/token"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapon/weapons"
 )
 
@@ -129,5 +130,23 @@ func TestEvalTwoTurns_OpponentMarkedPersistsAcrossTurns(t *testing.T) {
 	}
 	if !bestLineHasRole(turn2.BestLine, ids.OutedRed, deck.Attack) {
 		t.Errorf("turn 2 BestLine missing Outed as Attack: %s", formatBestLine(turn2.BestLine))
+	}
+}
+
+// Tests that a token item (Gold) in play at the start of turn 1 is still on the items list
+// at the start of turn 2 when neither turn can fund its ability cost.
+func TestEvalTwoTurns_ItemTokenPersistsAcrossTurns(t *testing.T) {
+	d := deck.New(heroes.Viserai{}, nil, nil)
+	initial := gameengine.GameStateBuilder().AddItem(token.NewGold(1)).Build()
+
+	turn1, turn2 := sim.EvalTwoTurnsForTesting(d, initial, nil)
+
+	if turn1.State.GoldCount() != 1 {
+		t.Errorf("turn 1 GoldCount = %d, want 1 (empty hand can't fund the {2} ability cost)",
+			turn1.State.GoldCount())
+	}
+	if turn2.State.GoldCount() != 1 {
+		t.Errorf("turn 2 GoldCount = %d, want 1 (items must persist across the turn boundary)",
+			turn2.State.GoldCount())
 	}
 }
