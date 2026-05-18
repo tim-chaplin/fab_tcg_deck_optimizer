@@ -63,12 +63,6 @@ func (FakeRedAttack) Types(card.GameEngine) card.TypeSet {
 func (FakeRedAttack) GoAgain(card.GameEngine) bool                       { return false }
 func (FakeRedAttack) Play(card.GameEngine, card.Logger, *card.CardState) {}
 
-// DominatingFakeCard embeds FakeCard and adds the Dominator marker — exercises the
-// printed-Dominate branch of EffectiveDominate / HasDominate.
-type DominatingFakeCard struct{ FakeCard }
-
-func (DominatingFakeCard) Dominate() {}
-
 // FakeHero is a minimal Hero with configurable Intelligence and an optional Opt
 // strategy. Every other method returns a fixed zero value so tests measure hand /
 // deck behaviour in isolation from hero ability contributions.

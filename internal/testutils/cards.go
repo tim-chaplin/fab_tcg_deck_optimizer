@@ -9,7 +9,6 @@ package testutils
 
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/ids"
 )
 
@@ -382,25 +381,6 @@ func (c StubCard) Types(card.GameEngine) card.TypeSet               { return c.t
 func (c StubCard) GoAgain(card.GameEngine) bool                     { return c.goAgain }
 func (StubCard) Play(card.GameEngine, card.Logger, *card.CardState) {}
 
-// DominatingCard is a fixed 5-power Generic Action-Attack carrying the card.Dominator
-// marker. Use it as the printed-Dominate card under EffectiveDominate / HasDominate /
-// LikelyToHit — 5 power exercises the dominate "clears a single block" threshold.
-type DominatingCard struct{}
-
-func (DominatingCard) ID() ids.CardID           { return FakeDominator }
-func (DominatingCard) Name() string             { return "DominatingCard" }
-func (DominatingCard) DisplayName() string      { return "DominatingCard" }
-func (DominatingCard) Cost(card.GameEngine) int { return 0 }
-func (DominatingCard) Pitch() int               { return 0 }
-func (DominatingCard) Attack() int              { return 5 }
-func (DominatingCard) Defense() int             { return 0 }
-func (DominatingCard) Types(card.GameEngine) card.TypeSet {
-	return card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
-}
-func (DominatingCard) GoAgain(card.GameEngine) bool                       { return false }
-func (DominatingCard) Play(card.GameEngine, card.Logger, *card.CardState) {}
-func (DominatingCard) Dominate()                                          {}
-
 // InstantStub is a 0-cost, 0-power Generic Action - Instant card with no Go again.
 // Tests chain-runner behaviour around the Action Point debit: an Instant after a
 // non-Go-again card should still resolve because Instants cost 0 AP.
@@ -486,15 +466,6 @@ func (g GrantSpy) Play(ge card.GameEngine, l card.Logger, self *card.CardState) 
 			*g.Saw = true
 		}
 	}
-}
-
-// CardNames renders a slice of Card names for test failure messages.
-func CardNames(cs []deck.Card) []string {
-	out := make([]string, len(cs))
-	for i, c := range cs {
-		out[i] = c.(card.Card).Name()
-	}
-	return out
 }
 
 // CardNamesSim is the []card.Card overload of CardNames so tests holding sim slices

@@ -26,5 +26,4 @@ const (
 	FakeRedPitch
 	FakeClubWeaponAbility
 	FakeHammerWeaponAbility
-	FakeDominator
 )

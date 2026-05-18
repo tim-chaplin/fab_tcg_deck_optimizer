@@ -7,7 +7,6 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/gameengine"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/hero"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/item"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapon"
 )
 
@@ -94,9 +93,6 @@ func NewAttackBufs(handSize, weaponCount int, weapons []weapon.Weapon) *AttackBu
 	return newAttackBufs(handSize, weaponCount, weapons)
 }
 
-// Bufs returns the wrapped sequenceContext's pooled scratch buffers.
-func (s *SequenceContextForTest) Bufs() *AttackBufs { return s.ctx.bufs }
-
 // DefenseGravScratch / DRCardStateScratch expose unexported attackBufs fields. State()
 // returns a fresh engine per call; the chain runner uses per-permutation Copy so attackBufs
 // doesn't pool one.
@@ -110,15 +106,6 @@ func (b *attackBufs) State() *gameengine.GameEngine {
 func EngineWithHand(h []card.Card) *gameengine.GameState {
 	gs := gameengine.GameStateBuilder().Build()
 	gs.SetHand(h)
-	return gs
-}
-
-// EngineWithItems returns a fresh GameState with the supplied items installed.
-func EngineWithItems(items []*item.Item) *gameengine.GameState {
-	gs := gameengine.GameStateBuilder().Build()
-	for _, it := range items {
-		gs.CreateItem(it)
-	}
 	return gs
 }
 
