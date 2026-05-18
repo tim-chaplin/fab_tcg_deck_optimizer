@@ -115,6 +115,12 @@ type attackBufs struct {
 	// alloc goes away. Sole users are bestAttackWithWeapons and the one-shot replay path;
 	// neither retains the ctx past its call, so pool reuse is safe.
 	pooledSequenceCtx *sequenceContext
+	// recycledState is a *GameState handed back to the pool after a prior best-winner is
+	// superseded by a better permutation. Its hand/graveyard/cardsPlayed/banished are the
+	// independent clones promoteWinnerState produced for the prior winner, so the struct
+	// can be recycled into pooledState without trampling any live state. preparePermState
+	// drains this slot before falling back to leafState.CopyPersistentState().
+	recycledState *gameengine.GameState
 }
 
 func newAttackBufs(handSize, weaponCount int, weapons []weapon.Weapon) *attackBufs {
