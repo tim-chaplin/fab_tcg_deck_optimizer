@@ -230,11 +230,3 @@ func pitchValues(as []deck.CardAssignment) []int {
 	}
 	return out
 }
-
-// maxInt returns the larger of two ints.
-func maxInt(a, b int) int {
-	if a > b {
-		return a
-	}
-	return b
-}
