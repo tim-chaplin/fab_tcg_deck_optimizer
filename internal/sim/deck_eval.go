@@ -203,7 +203,6 @@ func (ev *Evaluator) evaluateParallelImpl(d *deck.Deck, maxRuns int, mp Matchup,
 type shuffleScratch struct {
 	weaponsBuf  []weapon.Weapon
 	handBuf     []card.Card
-	heldBuf     []card.Card
 	presentBuf  []bool
 	marginalBuf []deck.CardMarginalStats
 	// recycledBuf backs the per-turn pitched-to-deck-bottom slice fed to d.PutBottom.
@@ -218,7 +217,6 @@ func newShuffleScratch(weaponCount, _, handSize, numUniqueIDs int) *shuffleScrat
 	return &shuffleScratch{
 		weaponsBuf:  make([]weapon.Weapon, weaponCount),
 		handBuf:     make([]card.Card, handSize, handSize+startOfTurnRevealRoom),
-		heldBuf:     make([]card.Card, 0, handSize),
 		presentBuf:  make([]bool, numUniqueIDs),
 		marginalBuf: make([]deck.CardMarginalStats, numUniqueIDs),
 	}
@@ -238,92 +236,129 @@ func runOneShuffle(masterDeck *deck.Deck, scratch *shuffleScratch, stats *deck.S
 		weapons[i] = w.(weapon.Weapon)
 	}
 
-	// Start-of-turn carryover, threaded across turns; each turn's summary.State becomes the
-	// next master.
 	master := gameengine.GameStateBuilder().
 		SetHero(heroVal).
 		SetIncomingDamage(mp.IncomingDamage).
 		SetArcaneIncomingDamage(mp.ArcaneIncomingDamage).
 		Build()
 
-	handIdx := 0
-	heldBuf := scratch.heldBuf[:0]
+	// Initial hand drawn into the reusable handBuf.
 	handBuf := scratch.handBuf
+	h := handBuf[:handSize]
+	for i, c := range d.Draw(handSize) {
+		h[i] = c.(card.Card)
+	}
+
+	// recordIfBest records-if-best and tallies marginal presence. handIdx is captured by
+	// reference so each call sees the current iteration's value.
+	handIdx := 0
+	recordIfBest := func(summary TurnSummary, dealtHand []card.Card, arsenalIn card.Card, snap *bestSnapshot) {
+		if recordTurnStats(stats, summary, handIdx, handsPerCycle) {
+			recordBestTurnFromSnap(stats, summary, ev, snap)
+		}
+		tallyMarginalPresence(scratch.marginalBuf, idIndex, scratch.presentBuf, dealtHand, arsenalIn, float64(summary.Value))
+	}
+
 	maxHands := 2 * handsPerCycle
-	for handIdx < maxHands {
-		drawCount := handSize - len(heldBuf)
-		if drawCount <= 0 || d.Size() < drawCount {
+	for ; handIdx < maxHands; handIdx++ {
+		preDeckSize := d.Size()
+		var summary TurnSummary
+		summary, scratch.recycledBuf = playOneTurn(master, h, d, mp, weapons, ev, handSize, scratch.recycledBuf, recordIfBest)
+
+		master = summary.State
+		d = summary.State.Deck()
+		h = summary.State.Hand()
+		// Stop when no fresh cards entered the next hand: either deck exhausted (len(h) <
+		// handSize) or chain held everything (toDraw == 0, which would loop on identical
+		// inputs forever). freshDrawn = preDeck + pitched - postDeck reduces to draw count.
+		freshDrawn := preDeckSize + len(scratch.recycledBuf) - d.Size()
+		if freshDrawn == 0 || len(h) < handSize {
 			break
 		}
-		// Build hand: held prefix plus freshly drawn cards from the deck top.
-		h := handBuf[:handSize]
-		copy(h, heldBuf)
-		drawn := d.Draw(drawCount)
-		for i, c := range drawn {
-			h[len(heldBuf)+i] = c.(card.Card)
-		}
-		arsenalIn := master.Arsenal()
-		var summary TurnSummary
-		summary, h = playOneTurn(master, h, d, mp, weapons, ev)
-
-		if recordTurnStats(stats, summary, handIdx, handsPerCycle) {
-			recordBestTurn(stats, summary, ev, weapons, h, mp, d, master)
-		}
-		tallyMarginalPresence(scratch.marginalBuf, idIndex, scratch.presentBuf, h, arsenalIn, float64(summary.Value))
-		var carry turnCarryover
-		carry, scratch.recycledBuf = advanceToNextTurn(summary, scratch.recycledBuf, heldBuf)
-		d = carry.deck
-		master = carry.master
-		heldBuf = carry.held
-		handIdx++
 	}
-	scratch.heldBuf = heldBuf
 }
 
-// playOneTurn drives one full turn: fire start-of-action-phase aura triggers, then run the
-// chain. Tick damage written to master.Value() seeds each chain perm's starting value, so
-// summary.Value already includes it. Mutates master. Returns hand (possibly grown by
-// reveals) so callers can rebind their reference.
-func playOneTurn(master *gameengine.GameState, hand []card.Card, d *deck.Deck, mp Matchup, weapons []weapon.Weapon, ev *Evaluator) (TurnSummary, []card.Card) {
+// playOneTurn drives one full turn: advance master, snapshot for replay (if record != nil),
+// fire start-of-turn auras, run chain via Best, invoke record, recycle pitched to deck
+// bottom, draw the next hand (partial OK).
+//
+// Returned summary.State is the end-of-turn boundary (pitched recycled, next hand drawn,
+// Value accrued) and threads directly into the next call as master. recycledBuf is reused
+// in place when non-nil.
+func playOneTurn(
+	master *gameengine.GameState,
+	hand []card.Card,
+	d *deck.Deck,
+	mp Matchup,
+	weapons []weapon.Weapon,
+	ev *Evaluator,
+	handSize int,
+	recycledBuf []deck.Card,
+	record turnRecord,
+) (summary TurnSummary, recycledOut []deck.Card) {
+	advanceToNextTurn(master)
+
+	var snap *bestSnapshot
+	var arsenalIn card.Card
+	if record != nil {
+		arsenalIn = master.Arsenal()
+		snap = &bestSnapshot{
+			master:  master.CopyPersistentState(),
+			deck:    d.Copy(),
+			hand:    append([]card.Card(nil), hand...),
+			weapons: append([]weapon.Weapon(nil), weapons...),
+			mp:      mp,
+		}
+	}
+
 	processAurasAtStartOfTurn(master, d, &hand)
 	sortHandByID(hand)
-	summary := runBestForTurn(weapons, hand, mp, d, master, ev)
-	return summary, hand
-}
+	dealtHand := hand
+	summary = runBestForTurn(weapons, hand, mp, d, master, ev)
 
-// turnCarryover bundles the next turn's deck, master GameState, and held hand prefix.
-type turnCarryover struct {
-	deck   *deck.Deck
-	master *gameengine.GameState
-	held   []card.Card
-}
-
-// advanceToNextTurn applies end-of-turn → start-of-next-turn carryover: recycle pitched
-// cards to deck bottom, capture summary.State.Hand() as the held prefix before
-// ResetEphemeralState wipes it, and thread summary.State forward as the next master with
-// deck detached. recycledBuf and heldBuf are reused in place when non-nil.
-func advanceToNextTurn(summary TurnSummary, recycledBuf []deck.Card, heldBuf []card.Card) (turnCarryover, []deck.Card) {
-	d := summary.State.Deck()
-	pitched := pitchedFromBestLine(summary.BestLine)
-	recycled := recycledBuf[:0]
-	for _, c := range pitched {
-		recycled = append(recycled, c)
-	}
-	d.PutBottom(recycled)
-
-	var held []card.Card
-	srcHand := summary.State.Hand()
-	if heldBuf != nil {
-		held = append(heldBuf[:0], srcHand...)
-	} else if len(srcHand) > 0 {
-		held = append([]card.Card(nil), srcHand...)
+	if record != nil {
+		record(summary, dealtHand, arsenalIn, snap)
 	}
 
-	master := summary.State
+	// Chain ran on a shallow copy of d that may have drawn mid-turn; use the winner's
+	// post-chain deck for recycle / next-turn draw.
+	postChainDeck := summary.State.Deck()
+	recycledOut = recycledBuf[:0]
+	for _, c := range pitchedFromBestLine(summary.BestLine) {
+		recycledOut = append(recycledOut, c)
+	}
+	postChainDeck.PutBottom(recycledOut)
+
+	held := summary.State.Hand()
+	toDraw := handSize - len(held)
+	if toDraw > postChainDeck.Size() {
+		toDraw = postChainDeck.Size()
+	}
+	nextHand := held
+	if toDraw > 0 {
+		// Allocate fresh: held aliases the chain's per-perm hand buffer, which the next
+		// playOneTurn call may overwrite.
+		nextHand = make([]card.Card, len(held), len(held)+toDraw)
+		copy(nextHand, held)
+		for _, c := range postChainDeck.Draw(toDraw) {
+			nextHand = append(nextHand, c.(card.Card))
+		}
+	}
+
+	summary.State.SetHand(nextHand)
+	return summary, recycledOut
+}
+
+// turnRecord runs after the chain. snap is captured at start-of-turn (post-reset,
+// pre-aura) so PrintBestTurn can replay against the exact deck the chain saw — critical
+// when chain effects draw or tutor. Tests pass nil to skip the snapshot alloc.
+type turnRecord func(summary TurnSummary, dealtHand []card.Card, arsenalIn card.Card, snap *bestSnapshot)
+
+// advanceToNextTurn clears per-turn ephemerals (value, cardsPlayed, ...) and detaches any
+// stale deck pointer. Idempotent on a freshly-built master.
+func advanceToNextTurn(master *gameengine.GameState) {
 	master.ResetEphemeralState()
 	master.SetDeck(nil)
-
-	return turnCarryover{deck: d, master: master, held: held}, recycled
 }
 
 // mergeStatsInto folds src's per-shuffle accumulators into dst. PerCardMarginal merging
@@ -440,34 +475,22 @@ func sortHandByID(hand []card.Card) {
 	}
 }
 
-// recordBestTurn clones the winning BestLine into stats.Best and attaches stats.PrintBest
-// with a snapshot of the carryover state / deck / hand / matchup that the print path can
-// replay on demand.
-func recordBestTurn(stats *deck.Stats, summary TurnSummary, ev *Evaluator, weapons []weapon.Weapon, h []card.Card, mp Matchup, d *deck.Deck, master *gameengine.GameState) {
+// recordBestTurnFromSnap commits a winning turn to stats: clones BestLine into stats.Best,
+// fills snap with the chain-produced bestLine / cardsPlayed / swungWeapons / value, and
+// attaches stats.PrintBest as the deferred replay closure.
+func recordBestTurnFromSnap(stats *deck.Stats, summary TurnSummary, ev *Evaluator, snap *bestSnapshot) {
 	lineCopy := make([]deck.CardAssignment, len(summary.BestLine))
 	copy(lineCopy, summary.BestLine)
 	stats.Best = deck.BestTurn{
 		Value:    summary.Value,
 		BestLine: lineCopy,
 	}
-	weaponsCopy := append([]weapon.Weapon(nil), weapons...)
-	handCopy := append([]card.Card(nil), h...)
-	var cardsPlayed []card.Card
+	snap.bestLine = lineCopy
+	snap.swungWeapons = append([]string(nil), summary.SwungWeapons...)
 	if summary.State != nil {
-		cardsPlayed = append([]card.Card(nil), summary.State.CardsPlayed()...)
+		snap.cardsPlayed = append([]card.Card(nil), summary.State.CardsPlayed()...)
 	}
-	swungCopy := append([]string(nil), summary.SwungWeapons...)
-	snap := &bestSnapshot{
-		master:       master.CopyPersistentState(),
-		deck:         d.Copy(),
-		hand:         handCopy,
-		weapons:      weaponsCopy,
-		mp:           mp,
-		bestLine:     lineCopy,
-		cardsPlayed:  cardsPlayed,
-		swungWeapons: swungCopy,
-		value:        summary.Value,
-	}
+	snap.value = summary.Value
 	stats.PrintBest = func(w io.Writer) { PrintBestTurn(ev, snap, w) }
 }
 
