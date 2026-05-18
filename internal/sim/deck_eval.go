@@ -205,9 +205,6 @@ type shuffleScratch struct {
 	handBuf     []card.Card
 	presentBuf  []bool
 	marginalBuf []deck.CardMarginalStats
-	// recycledBuf backs the per-turn pitched-to-deck-bottom slice fed to d.PutBottom.
-	// PutBottom copies into its own backing, so this stays safe to overwrite next turn.
-	recycledBuf []deck.Card
 }
 
 // newShuffleScratch sizes the per-shuffle reusable buffers for a deck of (weaponCount,
@@ -252,15 +249,12 @@ func runOneShuffle(masterDeck *deck.Deck, scratch *shuffleScratch, stats *deck.S
 	maxHands := 2 * handsPerCycle
 	for handIdx := 0; handIdx < maxHands; handIdx++ {
 		preDeckSize := d.Size()
-		var summary TurnSummary
-		var dealtHand []card.Card
-		var snap *turnSnapshot
-		summary, dealtHand, snap, scratch.recycledBuf = playOneTurn(master, h, d, mp, weapons, ev, handSize, scratch.recycledBuf, nil, nil)
+		summary, snap := playOneTurn(master, h, d, mp, weapons, ev, handSize, nil, nil)
 
 		if recordTurnStats(stats, summary, handIdx, handsPerCycle) {
 			recordBestTurnFromSnap(stats, summary, ev, snap)
 		}
-		tallyMarginalPresence(scratch.marginalBuf, idIndex, scratch.presentBuf, dealtHand, snap.master.Arsenal(), float64(summary.Value))
+		tallyMarginalPresence(scratch.marginalBuf, idIndex, scratch.presentBuf, summary.BestLine, float64(summary.Value))
 
 		master = summary.State
 		d = summary.State.Deck()
@@ -268,11 +262,23 @@ func runOneShuffle(masterDeck *deck.Deck, scratch *shuffleScratch, stats *deck.S
 		// Stop when no fresh cards entered the next hand: either deck exhausted (len(h) <
 		// handSize) or chain held everything (toDraw == 0, which would loop on identical
 		// inputs forever). freshDrawn = preDeck + pitched - postDeck reduces to draw count.
-		freshDrawn := preDeckSize + len(scratch.recycledBuf) - d.Size()
+		freshDrawn := preDeckSize + countPitched(summary.BestLine) - d.Size()
 		if freshDrawn == 0 || len(h) < handSize {
 			break
 		}
 	}
+}
+
+// countPitched returns the number of Pitch-role entries in bestLine, excluding the arsenal
+// slot (which never recycles).
+func countPitched(bestLine []deck.CardAssignment) int {
+	n := 0
+	for _, a := range bestLine {
+		if a.Role == deck.Pitch && !a.FromArsenal {
+			n++
+		}
+	}
+	return n
 }
 
 // playOneTurn drives one full turn: advance master, capture the start-of-turn snapshot,
@@ -280,10 +286,9 @@ func runOneShuffle(masterDeck *deck.Deck, scratch *shuffleScratch, stats *deck.S
 // next hand (partial OK).
 //
 // Returned summary.State is the end-of-turn boundary (pitched recycled, next hand drawn,
-// Value accrued) and threads directly into the next call as master. dealtHand is the
-// post-reveal hand the chain actually played; snap is the start-of-turn snapshot
-// (independent of subsequent mutations to master/d) for record-if-best / replay. snap is
-// nil in replay mode. recycledBuf is reused in place when non-nil.
+// Value accrued) and threads directly into the next call as master. snap is the start-of-
+// turn snapshot (independent of subsequent mutations to master/d) for record-if-best /
+// replay; nil in replay mode.
 //
 // When snapshot is non-nil, runs in REPLAY mode: drives the chain through snapshot.bestLine
 // + snapshot.cardsPlayed (no enumeration), streams emissions via logger (when non-nil), and
@@ -296,10 +301,9 @@ func playOneTurn(
 	weapons []weapon.Weapon,
 	ev *Evaluator,
 	handSize int,
-	recycledBuf []deck.Card,
 	snapshot *turnSnapshot,
 	logger card.Logger,
-) (summary TurnSummary, dealtHand []card.Card, snap *turnSnapshot, recycledOut []deck.Card) {
+) (summary TurnSummary, snap *turnSnapshot) {
 	advanceToNextTurn(master)
 
 	if snapshot == nil {
@@ -314,23 +318,23 @@ func playOneTurn(
 
 	processAurasAtStartOfTurn(master, d, &hand)
 	sortHandByID(hand)
-	dealtHand = hand
 	if snapshot != nil {
 		summary = runReplayForTurn(snapshot, logger)
 		// Skip end-of-turn cleanup so summary.State stays at the post-chain per-perm state
 		// the caller needs for its end-of-turn snapshot.
-		return summary, dealtHand, nil, recycledBuf
+		return summary, nil
 	}
 	summary = runBestForTurn(weapons, hand, mp, d, master, ev)
 
 	// Chain ran on a shallow copy of d that may have drawn mid-turn; use the winner's
 	// post-chain deck for recycle / next-turn draw.
 	postChainDeck := summary.State.Deck()
-	recycledOut = recycledBuf[:0]
-	for _, c := range pitchedFromBestLine(summary.BestLine) {
-		recycledOut = append(recycledOut, c)
+	pitched := pitchedFromBestLine(summary.BestLine)
+	recycled := make([]deck.Card, len(pitched))
+	for i, c := range pitched {
+		recycled[i] = c
 	}
-	postChainDeck.PutBottom(recycledOut)
+	postChainDeck.PutBottom(recycled)
 
 	held := summary.State.Hand()
 	toDraw := handSize - len(held)
@@ -349,7 +353,7 @@ func playOneTurn(
 	}
 
 	summary.State.SetHand(nextHand)
-	return summary, dealtHand, snap, recycledOut
+	return summary, snap
 }
 
 // advanceToNextTurn clears per-turn ephemerals (value, cardsPlayed, ...) and detaches any
@@ -493,21 +497,17 @@ func recordBestTurnFromSnap(stats *deck.Stats, summary TurnSummary, ev *Evaluato
 }
 
 // tallyMarginalPresence credits this turn's value to each entry in marginalBuf, bucketed by
-// whether the card was present in the dealt hand or in the arsenal-in slot when Best ran.
-// presentBuf is a scratch slice indexed parallel to marginalBuf; both are caller-owned
-// across turns to keep this path allocation-free.
-func tallyMarginalPresence(marginalBuf []deck.CardMarginalStats, idIndex map[ids.CardID]int, presentBuf []bool, dealt []card.Card, arsenalIn card.Card, value float64) {
+// whether the card was present in the dealt hand or arsenal-in slot when Best ran. bestLine
+// covers both — each hand card has one entry, plus one FromArsenal entry for the arsenal
+// card. presentBuf is a scratch slice indexed parallel to marginalBuf; both are caller-
+// owned across turns to keep this path allocation-free.
+func tallyMarginalPresence(marginalBuf []deck.CardMarginalStats, idIndex map[ids.CardID]int, presentBuf []bool, bestLine []deck.CardAssignment, value float64) {
 	if len(marginalBuf) == 0 {
 		return
 	}
 	clear(presentBuf)
-	for _, c := range dealt {
-		if i, ok := idIndex[c.ID()]; ok {
-			presentBuf[i] = true
-		}
-	}
-	if arsenalIn != nil {
-		if i, ok := idIndex[arsenalIn.ID()]; ok {
+	for _, a := range bestLine {
+		if i, ok := idIndex[a.Card.ID()]; ok {
 			presentBuf[i] = true
 		}
 	}
