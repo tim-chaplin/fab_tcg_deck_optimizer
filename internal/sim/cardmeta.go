@@ -50,8 +50,12 @@ type attackerMeta struct {
 	// Cached so per-leaf hot-path defender checks fold the type-assertion into the
 	// once-per-ID slow path.
 	actsAsDR bool
+	// hasPlayPrecondition is true when the card implements card.PlayPrecondition. Cached
+	// to gate the per-chain-step type assertion — only ~6 cards in the registry implement
+	// it, so the 99%+ case folds into a single bool read.
+	hasPlayPrecondition bool
 	// modes is the mode count for a Modal, 1 for non-modal cards. Sized int8 so it
-	// packs into the bool block's padding without growing attackerMeta — every chain step
+	// packs into the bool block's padding alongside the bools above — every chain step
 	// reads permMeta[i] in the inner loop, and every extra cache line through that table
 	// shows up in the anneal bench.
 	modes int8
@@ -122,14 +126,16 @@ func cardMetaSlowPath(c card.Card, id ids.CardID) attackerMeta {
 func buildAttackerMeta(c card.Card) attackerMeta {
 	t := c.Types(nil)
 	_, isDefensiveInstant := c.(card.DefensiveInstant)
+	_, hasPlayPre := c.(card.PlayPrecondition)
 	m := attackerMeta{
-		types:           t,
-		card:            c,
-		isAttack:        t.Has(card.TypeAttack),
-		isAttackAction:  t.IsAttackAction(),
-		isFreeChainStep: t.Has(card.TypeInstant) || t.IsAttackReaction(),
-		actsAsDR:        t.IsDefenseReaction() || isDefensiveInstant,
-		modes:           1,
+		types:               t,
+		card:                c,
+		isAttack:            t.Has(card.TypeAttack),
+		isAttackAction:      t.IsAttackAction(),
+		isFreeChainStep:     t.Has(card.TypeInstant) || t.IsAttackReaction(),
+		actsAsDR:            t.IsDefenseReaction() || isDefensiveInstant,
+		hasPlayPrecondition: hasPlayPre,
+		modes:               1,
 	}
 	if mc, ok := c.(card.Modal); ok {
 		// A Modal must expose at least two modes — the marker exists to enumerate
