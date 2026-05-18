@@ -806,8 +806,8 @@ func (ctx *sequenceContext) playSequenceWithMeta(n int) (damage int, futureValue
 			state.RemoveFromHand(pool.perm[k])
 		}
 		if m.types.IsAttackReaction() {
-			if pre, ok := pc.Card.(card.PlayPrecondition); ok {
-				if !pre.PlayPrecondition(ge, pc) {
+			if m.hasPlayPrecondition {
+				if !pc.Card.(card.PlayPrecondition).PlayPrecondition(ge, pc) {
 					return 0, 0, 0, nil, false
 				}
 			}
@@ -828,8 +828,8 @@ func (ctx *sequenceContext) playSequenceWithMeta(n int) (damage int, futureValue
 		}
 
 		finalizeActiveAttack()
-		if pre, ok := pc.Card.(card.PlayPrecondition); ok {
-			if !pre.PlayPrecondition(ge, pc) {
+		if m.hasPlayPrecondition {
+			if !pc.Card.(card.PlayPrecondition).PlayPrecondition(ge, pc) {
 				return 0, 0, 0, nil, false
 			}
 		}
