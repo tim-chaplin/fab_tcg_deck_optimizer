@@ -110,6 +110,11 @@ type attackBufs struct {
 	// auras slot, lazy-init alongside pooledDRCostProbe. Per probe we rewrite its Count
 	// instead of building a fresh aura via token.NewRunechant.
 	pooledDRProbeAura *aura.Aura
+	// pooledSequenceCtx is the recycled per-partition-leaf sequenceContext.
+	// newSequenceContext zeroes it and fills the active fields in place so the per-leaf
+	// alloc goes away. Sole users are bestAttackWithWeapons and the one-shot replay path;
+	// neither retains the ctx past its call, so pool reuse is safe.
+	pooledSequenceCtx *sequenceContext
 }
 
 func newAttackBufs(handSize, weaponCount int, weapons []weapon.Weapon) *attackBufs {
