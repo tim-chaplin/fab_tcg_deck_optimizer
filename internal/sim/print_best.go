@@ -1,6 +1,6 @@
 package sim
 
-// Print-time replay of the peak turn. The eval loop captures a bestSnapshot every time a
+// Print-time replay of the peak turn. The eval loop captures a turnSnapshot every time a
 // new best lands; PrintBestTurn re-runs that turn via playOneTurn in replay mode with a
 // *gameengine.StreamLogger so every emission streams to the writer — no log accumulation.
 
@@ -14,10 +14,10 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapon"
 )
 
-// bestSnapshot holds the inputs needed to drive a single playSequence call matching the
+// turnSnapshot holds the inputs needed to drive a single playSequence call matching the
 // eval-time winner. cardsPlayed is the exact resolution order from the winning turn's
 // CardsPlayed list.
-type bestSnapshot struct {
+type turnSnapshot struct {
 	master       *gameengine.GameState
 	deck         *deck.Deck
 	hand         []card.Card
@@ -32,7 +32,7 @@ type bestSnapshot struct {
 // PrintBestTurn streams the peak turn's printout to w: header + start-of-turn snapshot,
 // then one playOneTurn call in replay mode (chain emissions stream inline via a
 // StreamLogger), then the end-of-turn snapshot from the post-replay state.
-func PrintBestTurn(ev *Evaluator, snap *bestSnapshot, w io.Writer) {
+func PrintBestTurn(ev *Evaluator, snap *turnSnapshot, w io.Writer) {
 	if snap == nil {
 		return
 	}
@@ -48,7 +48,7 @@ func PrintBestTurn(ev *Evaluator, snap *bestSnapshot, w io.Writer) {
 // runReplayForTurn drives the chain through snapshot's known role assignment + cardsPlayed
 // order with logger installed on every per-perm state, skipping Best's partition
 // enumeration. Called after start-of-turn auras have fired against snapshot.master / .deck.
-func runReplayForTurn(snapshot *bestSnapshot, logger card.Logger) TurnSummary {
+func runReplayForTurn(snapshot *turnSnapshot, logger card.Logger) TurnSummary {
 	parts := partitionBestLineForDisplay(snapshot.bestLine)
 	defensePitches, attackPitches := splitPitchesByPhase(parts.pitched, parts.drCost)
 

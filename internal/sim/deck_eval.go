@@ -254,7 +254,7 @@ func runOneShuffle(masterDeck *deck.Deck, scratch *shuffleScratch, stats *deck.S
 		preDeckSize := d.Size()
 		var summary TurnSummary
 		var dealtHand []card.Card
-		var snap *bestSnapshot
+		var snap *turnSnapshot
 		summary, dealtHand, snap, scratch.recycledBuf = playOneTurn(master, h, d, mp, weapons, ev, handSize, scratch.recycledBuf, nil, nil)
 
 		if recordTurnStats(stats, summary, handIdx, handsPerCycle) {
@@ -297,13 +297,13 @@ func playOneTurn(
 	ev *Evaluator,
 	handSize int,
 	recycledBuf []deck.Card,
-	snapshot *bestSnapshot,
+	snapshot *turnSnapshot,
 	logger card.Logger,
-) (summary TurnSummary, dealtHand []card.Card, snap *bestSnapshot, recycledOut []deck.Card) {
+) (summary TurnSummary, dealtHand []card.Card, snap *turnSnapshot, recycledOut []deck.Card) {
 	advanceToNextTurn(master)
 
 	if snapshot == nil {
-		snap = &bestSnapshot{
+		snap = &turnSnapshot{
 			master:  master.CopyPersistentState(),
 			deck:    d.Copy(),
 			hand:    append([]card.Card(nil), hand...),
@@ -476,7 +476,7 @@ func sortHandByID(hand []card.Card) {
 // recordBestTurnFromSnap commits a winning turn to stats: clones BestLine into stats.Best,
 // fills snap with the chain-produced bestLine / cardsPlayed / swungWeapons / value, and
 // attaches stats.PrintBest as the deferred replay closure.
-func recordBestTurnFromSnap(stats *deck.Stats, summary TurnSummary, ev *Evaluator, snap *bestSnapshot) {
+func recordBestTurnFromSnap(stats *deck.Stats, summary TurnSummary, ev *Evaluator, snap *turnSnapshot) {
 	lineCopy := make([]deck.CardAssignment, len(summary.BestLine))
 	copy(lineCopy, summary.BestLine)
 	stats.Best = deck.BestTurn{
