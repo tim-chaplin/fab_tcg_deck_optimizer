@@ -249,21 +249,18 @@ func runOneShuffle(masterDeck *deck.Deck, scratch *shuffleScratch, stats *deck.S
 		h[i] = c.(card.Card)
 	}
 
-	// recordIfBest records-if-best and tallies marginal presence. handIdx is captured by
-	// reference so each call sees the current iteration's value.
-	handIdx := 0
-	recordIfBest := func(summary TurnSummary, dealtHand []card.Card, arsenalIn card.Card, snap *bestSnapshot) {
+	maxHands := 2 * handsPerCycle
+	for handIdx := 0; handIdx < maxHands; handIdx++ {
+		preDeckSize := d.Size()
+		var summary TurnSummary
+		var dealtHand []card.Card
+		var snap *bestSnapshot
+		summary, dealtHand, snap, scratch.recycledBuf = playOneTurn(master, h, d, mp, weapons, ev, handSize, scratch.recycledBuf, nil, nil)
+
 		if recordTurnStats(stats, summary, handIdx, handsPerCycle) {
 			recordBestTurnFromSnap(stats, summary, ev, snap)
 		}
-		tallyMarginalPresence(scratch.marginalBuf, idIndex, scratch.presentBuf, dealtHand, arsenalIn, float64(summary.Value))
-	}
-
-	maxHands := 2 * handsPerCycle
-	for ; handIdx < maxHands; handIdx++ {
-		preDeckSize := d.Size()
-		var summary TurnSummary
-		summary, scratch.recycledBuf = playOneTurn(master, h, d, mp, weapons, ev, handSize, scratch.recycledBuf, recordIfBest)
+		tallyMarginalPresence(scratch.marginalBuf, idIndex, scratch.presentBuf, dealtHand, snap.master.Arsenal(), float64(summary.Value))
 
 		master = summary.State
 		d = summary.State.Deck()
@@ -278,13 +275,19 @@ func runOneShuffle(masterDeck *deck.Deck, scratch *shuffleScratch, stats *deck.S
 	}
 }
 
-// playOneTurn drives one full turn: advance master, snapshot for replay (if record != nil),
-// fire start-of-turn auras, run chain via Best, invoke record, recycle pitched to deck
-// bottom, draw the next hand (partial OK).
+// playOneTurn drives one full turn: advance master, capture the start-of-turn snapshot,
+// fire start-of-turn auras, run chain via Best, recycle pitched to deck bottom, draw the
+// next hand (partial OK).
 //
 // Returned summary.State is the end-of-turn boundary (pitched recycled, next hand drawn,
-// Value accrued) and threads directly into the next call as master. recycledBuf is reused
-// in place when non-nil.
+// Value accrued) and threads directly into the next call as master. dealtHand is the
+// post-reveal hand the chain actually played; snap is the start-of-turn snapshot
+// (independent of subsequent mutations to master/d) for record-if-best / replay. snap is
+// nil in replay mode. recycledBuf is reused in place when non-nil.
+//
+// When snapshot is non-nil, runs in REPLAY mode: drives the chain through snapshot.bestLine
+// + snapshot.cardsPlayed (no enumeration), streams emissions via logger (when non-nil), and
+// returns the raw post-chain per-perm state without recycle / next-draw cleanup.
 func playOneTurn(
 	master *gameengine.GameState,
 	hand []card.Card,
@@ -294,14 +297,12 @@ func playOneTurn(
 	ev *Evaluator,
 	handSize int,
 	recycledBuf []deck.Card,
-	record turnRecord,
-) (summary TurnSummary, recycledOut []deck.Card) {
+	snapshot *bestSnapshot,
+	logger card.Logger,
+) (summary TurnSummary, dealtHand []card.Card, snap *bestSnapshot, recycledOut []deck.Card) {
 	advanceToNextTurn(master)
 
-	var snap *bestSnapshot
-	var arsenalIn card.Card
-	if record != nil {
-		arsenalIn = master.Arsenal()
+	if snapshot == nil {
 		snap = &bestSnapshot{
 			master:  master.CopyPersistentState(),
 			deck:    d.Copy(),
@@ -313,12 +314,14 @@ func playOneTurn(
 
 	processAurasAtStartOfTurn(master, d, &hand)
 	sortHandByID(hand)
-	dealtHand := hand
-	summary = runBestForTurn(weapons, hand, mp, d, master, ev)
-
-	if record != nil {
-		record(summary, dealtHand, arsenalIn, snap)
+	dealtHand = hand
+	if snapshot != nil {
+		summary = runReplayForTurn(snapshot, logger)
+		// Skip end-of-turn cleanup so summary.State stays at the post-chain per-perm state
+		// the caller needs for its end-of-turn snapshot.
+		return summary, dealtHand, nil, recycledBuf
 	}
+	summary = runBestForTurn(weapons, hand, mp, d, master, ev)
 
 	// Chain ran on a shallow copy of d that may have drawn mid-turn; use the winner's
 	// post-chain deck for recycle / next-turn draw.
@@ -346,13 +349,8 @@ func playOneTurn(
 	}
 
 	summary.State.SetHand(nextHand)
-	return summary, recycledOut
+	return summary, dealtHand, snap, recycledOut
 }
-
-// turnRecord runs after the chain. snap is captured at start-of-turn (post-reset,
-// pre-aura) so PrintBestTurn can replay against the exact deck the chain saw — critical
-// when chain effects draw or tutor. Tests pass nil to skip the snapshot alloc.
-type turnRecord func(summary TurnSummary, dealtHand []card.Card, arsenalIn card.Card, snap *bestSnapshot)
 
 // advanceToNextTurn clears per-turn ephemerals (value, cardsPlayed, ...) and detaches any
 // stale deck pointer. Idempotent on a freshly-built master.

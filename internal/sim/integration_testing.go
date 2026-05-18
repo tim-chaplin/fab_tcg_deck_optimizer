@@ -20,7 +20,7 @@ func EvalOneTurnForTesting(masterDeck *deck.Deck, mp Matchup, initial *gameengin
 	if !ok {
 		return TurnSummary{State: gameengine.GameStateBuilder().SetHero(d.Hero.(hero.Hero)).Build()}
 	}
-	summary, _ := playOneTurn(master, hand, d, mp, weapons, ev(), handSize, nil, nil)
+	summary, _, _, _ := playOneTurn(master, hand, d, mp, weapons, ev(), handSize, nil, nil, nil)
 	return summary
 }
 
@@ -34,11 +34,11 @@ func EvalTwoTurnsForTesting(masterDeck *deck.Deck, mp Matchup, initial *gameengi
 		return TurnSummary{State: gameengine.GameStateBuilder().SetHero(d.Hero.(hero.Hero)).Build()}, TurnSummary{}
 	}
 
-	turn1, _ := playOneTurn(master, hand, d, mp, weapons, ev(), handSize, nil, nil)
+	turn1, _, _, _ := playOneTurn(master, hand, d, mp, weapons, ev(), handSize, nil, nil, nil)
 	stable := turn1
 	stable.State = snapshotState(turn1.State, turn1.State.Deck(), turn1.State.Hand(), turn1.Value, turn1.State.CardsDrawn())
 
-	turn2, _ := playOneTurn(turn1.State, turn1.State.Hand(), turn1.State.Deck(), mp, weapons, ev(), handSize, nil, nil)
+	turn2, _, _, _ := playOneTurn(turn1.State, turn1.State.Hand(), turn1.State.Deck(), mp, weapons, ev(), handSize, nil, nil, nil)
 	return stable, turn2
 }
 
