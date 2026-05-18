@@ -49,10 +49,16 @@ func PrintBestTurn(ev *Evaluator, snap *bestSnapshot, w io.Writer) {
 }
 
 // replayBest reconstructs the sequenceContext from snap and runs the winning turn through
-// existing chain-runner machinery (runDefense + playSequence) with logger installed on
-// every per-perm state. Returns the post-turn *GameState the chain runner left behind so
-// the caller can summarise end-of-turn state.
+// the chain-runner (start-of-turn auras + runDefense + playSequence) with logger installed
+// on every per-perm state. snap holds the post-reset pre-aura state, so this fires auras
+// first to reach the pre-chain configuration the winner ran against. Returns the post-turn
+// *GameState the chain runner left behind.
 func replayBest(snap *bestSnapshot, logger card.Logger) *gameengine.GameState {
+	// Re-fire start-of-turn auras against the captured master/deck so reveals land in hand
+	// and ge.value picks up any tick damage. processAurasAtStartOfTurn appends revealed
+	// cards onto snap.hand in place.
+	processAurasAtStartOfTurn(snap.master, snap.deck, &snap.hand)
+
 	parts := partitionBestLineForDisplay(snap.bestLine)
 	defensePitches, attackPitches := splitPitchesByPhase(parts.pitched, parts.drCost)
 

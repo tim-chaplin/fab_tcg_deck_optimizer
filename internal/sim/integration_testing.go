@@ -13,42 +13,33 @@ import (
 )
 
 // EvalOneTurnForTesting drives one turn and returns its TurnSummary. State reflects the
-// post end-of-turn cleanup boundary (pitched recycled, arsenal refilled, next hand drawn —
-// partial or empty hands are fine). initial seeds carryover (Hero, Arsenal, Auras, Items,
-// Banished, Graveyard, OpponentMarked); nil starts clean inheriting the deck's hero.
+// end-of-turn boundary (pitched recycled, next hand drawn; partial or empty hands OK).
+// initial seeds carryover; nil starts clean inheriting the deck's hero.
 func EvalOneTurnForTesting(masterDeck *deck.Deck, mp Matchup, initial *gameengine.GameState, initialHand []deck.Card) TurnSummary {
 	d, master, hand, handSize, weapons, ok := setupTurn(masterDeck, mp, initial, initialHand)
 	if !ok {
 		return TurnSummary{State: gameengine.GameStateBuilder().SetHero(d.Hero.(hero.Hero)).Build()}
 	}
-	summary, _ := playOneTurn(master, hand, d, mp, weapons, ev())
-	turnDraws := summary.State.CardsDrawn()
-	d, master, nextHand := advanceAndDraw(summary, d, handSize)
-	summary.State = snapshotState(master, d, nextHand, summary.Value, turnDraws)
+	summary, _ := playOneTurn(master, hand, d, mp, weapons, ev(), handSize, nil, nil)
 	return summary
 }
 
 // EvalTwoTurnsForTesting drives two turns, threading carryover between them. Each turn's
-// Value folds in its own start-of-turn trigger damage (turn2 sees auras created by turn1).
-// Turn 2 runs even with an empty or partial hand (matching the real-game rule that turns
-// continue past deck exhaustion).
+// Value folds in its own start-of-turn trigger damage. Turn 2 runs even with an empty or
+// partial hand. The returned turn1.State is an independent snapshot; turn2 mutates the
+// shared master.
 func EvalTwoTurnsForTesting(masterDeck *deck.Deck, mp Matchup, initial *gameengine.GameState, hand1 []deck.Card) (TurnSummary, TurnSummary) {
 	d, master, hand, handSize, weapons, ok := setupTurn(masterDeck, mp, initial, hand1)
 	if !ok {
 		return TurnSummary{State: gameengine.GameStateBuilder().SetHero(d.Hero.(hero.Hero)).Build()}, TurnSummary{}
 	}
 
-	turn1, _ := playOneTurn(master, hand, d, mp, weapons, ev())
-	turn1Draws := turn1.State.CardsDrawn()
-	d, master, turn2Hand := advanceAndDraw(turn1, d, handSize)
-	turn1.State = snapshotState(master, d, turn2Hand, turn1.Value, turn1Draws)
+	turn1, _ := playOneTurn(master, hand, d, mp, weapons, ev(), handSize, nil, nil)
+	stable := turn1
+	stable.State = snapshotState(turn1.State, turn1.State.Deck(), turn1.State.Hand(), turn1.Value, turn1.State.CardsDrawn())
 
-	turn2, _ := playOneTurn(master, turn2Hand, d, mp, weapons, ev())
-	turn2Draws := turn2.State.CardsDrawn()
-	d, master, turn3Hand := advanceAndDraw(turn2, d, handSize)
-	turn2.State = snapshotState(master, d, turn3Hand, turn2.Value, turn2Draws)
-
-	return turn1, turn2
+	turn2, _ := playOneTurn(turn1.State, turn1.State.Hand(), turn1.State.Deck(), mp, weapons, ev(), handSize, nil, nil)
+	return stable, turn2
 }
 
 // setupTurn assembles the per-turn fixture: deck copy, master *GameState seeded with
@@ -97,38 +88,11 @@ func setupTurn(masterDeck *deck.Deck, mp Matchup, initial *gameengine.GameState,
 	return d, master, hand, handSize, weapons, true
 }
 
-// advanceAndDraw runs end-of-turn cleanup (recycle pitched, reset ephemeral, capture held)
-// and draws the next hand (partial draws OK). Returns the post-recycle deck, mutated
-// master, and next hand (nil when held is empty and no draws were possible).
-func advanceAndDraw(summary TurnSummary, d *deck.Deck, handSize int) (*deck.Deck, *gameengine.GameState, []card.Card) {
-	carry, _ := advanceToNextTurn(summary, nil, nil)
-	d = carry.deck
-	master := carry.master
-	held := carry.held
-
-	toDraw := handSize - len(held)
-	if toDraw > d.Size() {
-		toDraw = d.Size()
-	}
-	if toDraw <= 0 {
-		if len(held) == 0 {
-			return d, master, nil
-		}
-		return d, master, held
-	}
-	nextHand := make([]card.Card, 0, handSize)
-	nextHand = append(nextHand, held...)
-	for _, c := range d.Draw(toDraw) {
-		nextHand = append(nextHand, c.(card.Card))
-	}
-	return d, master, nextHand
-}
-
 // ev returns the package-level Evaluator so test helpers share its cache/scratch state.
 func ev() *Evaluator { return sharedEvaluator }
 
 // snapshotState clones src's persistent carryover and overlays deck (copied), hand, value,
-// and cardsDrawn.
+// and cardsDrawn. The result is independent of future mutations to src.
 func snapshotState(src *gameengine.GameState, d *deck.Deck, hand []card.Card, value, cardsDrawn int) *gameengine.GameState {
 	out := src.CopyPersistentState()
 	if d != nil {
