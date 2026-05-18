@@ -9,7 +9,6 @@ package testutils
 
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/ids"
 )
 
@@ -467,15 +466,6 @@ func (g GrantSpy) Play(ge card.GameEngine, l card.Logger, self *card.CardState) 
 			*g.Saw = true
 		}
 	}
-}
-
-// CardNames renders a slice of Card names for test failure messages.
-func CardNames(cs []deck.Card) []string {
-	out := make([]string, len(cs))
-	for i, c := range cs {
-		out[i] = c.(card.Card).Name()
-	}
-	return out
 }
 
 // CardNamesSim is the []card.Card overload of CardNames so tests holding sim slices
