@@ -15,12 +15,12 @@ import (
 // EvalOneTurnForTesting drives one turn and returns its TurnSummary. State reflects the
 // end-of-turn boundary (pitched recycled, next hand drawn; partial or empty hands OK).
 // initial seeds carryover (hero, arsenal, auras, items, banished, graveyard, opponentMarked,
-// incoming damage); nil starts clean inheriting the deck's hero and zero incoming damage.
-// d is consumed in place — callers shouldn't reuse it across calls.
+// incoming damage); nil uses gameengine's default state (heroes.Default — 20hp/4int, no
+// abilities). d is consumed in place — callers shouldn't reuse it across calls.
 func EvalOneTurnForTesting(d *deck.Deck, initial *gameengine.GameState, initialHand []card.Card) TurnSummary {
 	master, hand, handSize, weapons, ok := setupTurn(d, initial, initialHand)
 	if !ok {
-		return TurnSummary{State: gameengine.GameStateBuilder().SetHero(d.Hero.(hero.Hero)).Build()}
+		return TurnSummary{State: gameengine.GameStateBuilder().Build()}
 	}
 	summary, _ := playOneTurn(master, hand, d, weapons, ev(), handSize, nil, nil)
 	return summary
@@ -33,7 +33,7 @@ func EvalOneTurnForTesting(d *deck.Deck, initial *gameengine.GameState, initialH
 func EvalTwoTurnsForTesting(d *deck.Deck, initial *gameengine.GameState, hand1 []card.Card) (TurnSummary, TurnSummary) {
 	master, hand, handSize, weapons, ok := setupTurn(d, initial, hand1)
 	if !ok {
-		return TurnSummary{State: gameengine.GameStateBuilder().SetHero(d.Hero.(hero.Hero)).Build()}, TurnSummary{}
+		return TurnSummary{State: gameengine.GameStateBuilder().Build()}, TurnSummary{}
 	}
 
 	turn1, _ := playOneTurn(master, hand, d, weapons, ev(), handSize, nil, nil)
@@ -44,27 +44,21 @@ func EvalTwoTurnsForTesting(d *deck.Deck, initial *gameengine.GameState, hand1 [
 	return stable, turn2
 }
 
-// setupTurn assembles the per-turn fixture from d: master *GameState seeded with carryover,
-// dealt hand, handSize, weapon list. d is consumed in place (Draw mutates it when
-// initialHand is nil). ok=false on invalid inputs (handSize <= 0; initialHand empty or
-// oversized; no initialHand and deck can't deal handSize).
+// setupTurn assembles the per-turn fixture from d: master *GameState (`initial` when
+// provided, else the builder's default state), dealt hand, handSize, weapon list. d is
+// consumed in place (Draw mutates it when initialHand is nil). ok=false on invalid inputs
+// (handSize <= 0; initialHand empty or oversized; no initialHand and deck can't deal
+// handSize).
 func setupTurn(d *deck.Deck, initial *gameengine.GameState, initialHand []card.Card) (master *gameengine.GameState, hand []card.Card, handSize int, weapons []weapon.Weapon, ok bool) {
-	// Master GameState: inherit from `initial` when provided, else build fresh from the
-	// deck's hero.
-	h := d.Hero.(hero.Hero)
+	// Master GameState.
 	if initial != nil {
 		master = initial
-		if hv := master.Hero(); hv != nil {
-			h = hv.(hero.Hero)
-		} else {
-			master.SetHero(h)
-		}
 	} else {
-		master = gameengine.GameStateBuilder().SetHero(h).Build()
+		master = gameengine.GameStateBuilder().Build()
 	}
 
 	// Hand size + input validation.
-	handSize = h.Intelligence()
+	handSize = master.Hero().(hero.Hero).Intelligence()
 	if handSize <= 0 {
 		return nil, nil, 0, nil, false
 	}

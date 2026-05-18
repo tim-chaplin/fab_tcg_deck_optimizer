@@ -92,7 +92,7 @@ func TestEvalTwoTurns_MaleficIncantationOncePerTurnLimitsToOneRune(t *testing.T)
 	malefic := cards.MaleficIncantationRed{}
 	hocus := cards.HocusPocusRed{}
 	d := deck.New(heroes.Viserai{}, nil, nil)
-	turn1, turn2 := sim.EvalTwoTurnsForTesting(d, gameengine.GameStateBuilder().SetIncomingDamage(0).Build(), []card.Card{malefic, hocus})
+	turn1, turn2 := sim.EvalTwoTurnsForTesting(d, gameengine.GameStateBuilder().SetHero(heroes.Viserai{}).Build(), []card.Card{malefic, hocus})
 
 	if !bestLineHasRole(turn1.BestLine, ids.MaleficIncantationRed, deck.Attack) {
 		t.Errorf("turn 1 BestLine didn't play Malefic as Role=Attack: %+v", turn1.BestLine)

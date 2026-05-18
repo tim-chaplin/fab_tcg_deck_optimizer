@@ -26,8 +26,9 @@ func New() *GameEngine {
 
 // GameStateBuilder returns a fresh *StateBuilder pre-populated with the defaults a
 // just-constructed *GameState carries: cacheable=true, currentAuraIdx=-1, a no-op logger
-// (NoopLogger), and a non-nil empty *deck.Deck (so cards that recycle into the deck don't
-// panic on a zero-card state). SetDeck / SetCards overrides the empty deck.
+// (NoopLogger), a non-nil empty *deck.Deck (so cards that recycle into the deck don't
+// panic on a zero-card state), and a no-ability fallback hero (20 health, 4 Intelligence).
+// SetDeck / SetCards overrides the empty deck; SetHero overrides the default hero.
 func GameStateBuilder() *StateBuilder {
 	return &StateBuilder{
 		gs: &GameState{
@@ -35,6 +36,7 @@ func GameStateBuilder() *StateBuilder {
 			currentAuraIdx: -1,
 			logger:         NoopLogger{},
 			deck:           deck.New(nil, nil, nil),
+			hero:           defaultHero{},
 		},
 	}
 }

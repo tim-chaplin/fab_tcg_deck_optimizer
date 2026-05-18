@@ -16,5 +16,8 @@ const InvalidHero HeroID = 0
 // Hero IDs. Suffixed with "ID" to distinguish from the hero struct types of the same display
 // name (e.g. heroes.Viserai the struct vs. ids.ViseraiID the ID constant).
 const (
-	ViseraiID HeroID = iota + 1
+	// DefaultHeroID identifies the no-ability fallback hero (20 health, 4 int) used by
+	// gameengine.GameStateBuilder when SetHero isn't called.
+	DefaultHeroID HeroID = iota + 1
+	ViseraiID
 )
