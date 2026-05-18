@@ -238,7 +238,7 @@ func runOneShuffle(masterDeck *deck.Deck, scratch *shuffleScratch, stats *deck.S
 		weapons[i] = w.(weapon.Weapon)
 	}
 
-	// Start-of-turn carryover, threaded across turns; each turn's play.State becomes the
+	// Start-of-turn carryover, threaded across turns; each turn's summary.State becomes the
 	// next master.
 	master := gameengine.GameStateBuilder().
 		SetHero(heroVal).
@@ -263,15 +263,15 @@ func runOneShuffle(masterDeck *deck.Deck, scratch *shuffleScratch, stats *deck.S
 			h[len(heldBuf)+i] = c.(card.Card)
 		}
 		arsenalIn := master.Arsenal()
-		var play TurnSummary
-		play, h = playOneTurn(master, h, d, mp, weapons, ev)
+		var summary TurnSummary
+		summary, h = playOneTurn(master, h, d, mp, weapons, ev)
 
-		if recordTurnStats(stats, play, handIdx, handsPerCycle) {
-			recordBestTurn(stats, play, ev, weapons, h, mp, d, master)
+		if recordTurnStats(stats, summary, handIdx, handsPerCycle) {
+			recordBestTurn(stats, summary, ev, weapons, h, mp, d, master)
 		}
-		tallyMarginalPresence(scratch.marginalBuf, idIndex, scratch.presentBuf, h, arsenalIn, float64(play.Value))
+		tallyMarginalPresence(scratch.marginalBuf, idIndex, scratch.presentBuf, h, arsenalIn, float64(summary.Value))
 		var carry turnCarryover
-		carry, scratch.recycledBuf = advanceToNextTurn(play, scratch.recycledBuf, heldBuf)
+		carry, scratch.recycledBuf = advanceToNextTurn(summary, scratch.recycledBuf, heldBuf)
 		d = carry.deck
 		master = carry.master
 		heldBuf = carry.held
@@ -281,14 +281,14 @@ func runOneShuffle(masterDeck *deck.Deck, scratch *shuffleScratch, stats *deck.S
 }
 
 // playOneTurn drives one full turn: fire start-of-action-phase aura triggers, run the
-// chain, fold trigger damage into play.Value. Mutates master. Returns hand (possibly grown
+// chain, fold trigger damage into summary.Value. Mutates master. Returns hand (possibly grown
 // by reveals) so callers can rebind their reference.
 func playOneTurn(master *gameengine.GameState, hand []card.Card, d *deck.Deck, mp Matchup, weapons []weapon.Weapon, ev *Evaluator) (TurnSummary, []card.Card) {
 	trigDamage := processAurasAtStartOfTurn(master, d, &hand)
 	sortHandByID(hand)
-	play := runBestForTurn(weapons, hand, mp, d, master, ev)
-	play.Value += trigDamage
-	return play, hand
+	summary := runBestForTurn(weapons, hand, mp, d, master, ev)
+	summary.Value += trigDamage
+	return summary, hand
 }
 
 // turnCarryover bundles the next turn's deck, master GameState, and held hand prefix.
@@ -299,12 +299,12 @@ type turnCarryover struct {
 }
 
 // advanceToNextTurn applies end-of-turn → start-of-next-turn carryover: recycle pitched
-// cards to deck bottom, capture play.State.Hand() as the held prefix before
-// ResetEphemeralState wipes it, and thread play.State forward as the next master with
+// cards to deck bottom, capture summary.State.Hand() as the held prefix before
+// ResetEphemeralState wipes it, and thread summary.State forward as the next master with
 // deck detached. recycledBuf and heldBuf are reused in place when non-nil.
-func advanceToNextTurn(play TurnSummary, recycledBuf []deck.Card, heldBuf []card.Card) (turnCarryover, []deck.Card) {
-	d := play.State.Deck()
-	pitched := pitchedFromBestLine(play.BestLine)
+func advanceToNextTurn(summary TurnSummary, recycledBuf []deck.Card, heldBuf []card.Card) (turnCarryover, []deck.Card) {
+	d := summary.State.Deck()
+	pitched := pitchedFromBestLine(summary.BestLine)
 	recycled := recycledBuf[:0]
 	for _, c := range pitched {
 		recycled = append(recycled, c)
@@ -312,14 +312,14 @@ func advanceToNextTurn(play TurnSummary, recycledBuf []deck.Card, heldBuf []card
 	d.PutBottom(recycled)
 
 	var held []card.Card
-	srcHand := play.State.Hand()
+	srcHand := summary.State.Hand()
 	if heldBuf != nil {
 		held = append(heldBuf[:0], srcHand...)
 	} else if len(srcHand) > 0 {
 		held = append([]card.Card(nil), srcHand...)
 	}
 
-	master := play.State
+	master := summary.State
 	master.ResetEphemeralState()
 	master.SetDeck(nil)
 
@@ -363,15 +363,15 @@ func runBestForTurn(
 // recordTurnStats folds one resolved turn's accumulators into stats: bumps Hands /
 // TotalValue, lazily initialises Histogram, and credits the value to FirstCycle /
 // SecondCycle based on handIdx. Returns true when this turn's Value beats stats.Best.
-func recordTurnStats(stats *deck.Stats, play TurnSummary, handIdx, handsPerCycle int) bool {
-	v := float64(play.Value)
+func recordTurnStats(stats *deck.Stats, summary TurnSummary, handIdx, handsPerCycle int) bool {
+	v := float64(summary.Value)
 	stats.TotalValue += v
 	stats.Hands++
 	if stats.Histogram == nil {
 		stats.Histogram = map[int]int{}
 	}
-	stats.Histogram[play.Value]++
-	newBest := play.Value > stats.Best.Value || len(stats.Best.BestLine) == 0
+	stats.Histogram[summary.Value]++
+	newBest := summary.Value > stats.Best.Value || len(stats.Best.BestLine) == 0
 	switch handIdx / handsPerCycle {
 	case 0:
 		stats.FirstCycle.Hands++
@@ -444,20 +444,20 @@ func sortHandByID(hand []card.Card) {
 // recordBestTurn clones the winning BestLine into stats.Best and attaches stats.PrintBest
 // with a snapshot of the carryover state / deck / hand / matchup that the print path can
 // replay on demand.
-func recordBestTurn(stats *deck.Stats, play TurnSummary, ev *Evaluator, weapons []weapon.Weapon, h []card.Card, mp Matchup, d *deck.Deck, master *gameengine.GameState) {
-	lineCopy := make([]deck.CardAssignment, len(play.BestLine))
-	copy(lineCopy, play.BestLine)
+func recordBestTurn(stats *deck.Stats, summary TurnSummary, ev *Evaluator, weapons []weapon.Weapon, h []card.Card, mp Matchup, d *deck.Deck, master *gameengine.GameState) {
+	lineCopy := make([]deck.CardAssignment, len(summary.BestLine))
+	copy(lineCopy, summary.BestLine)
 	stats.Best = deck.BestTurn{
-		Value:    play.Value,
+		Value:    summary.Value,
 		BestLine: lineCopy,
 	}
 	weaponsCopy := append([]weapon.Weapon(nil), weapons...)
 	handCopy := append([]card.Card(nil), h...)
 	var cardsPlayed []card.Card
-	if play.State != nil {
-		cardsPlayed = append([]card.Card(nil), play.State.CardsPlayed()...)
+	if summary.State != nil {
+		cardsPlayed = append([]card.Card(nil), summary.State.CardsPlayed()...)
 	}
-	swungCopy := append([]string(nil), play.SwungWeapons...)
+	swungCopy := append([]string(nil), summary.SwungWeapons...)
 	snap := &bestSnapshot{
 		master:       master.CopyPersistentState(),
 		deck:         d.Copy(),
@@ -467,7 +467,7 @@ func recordBestTurn(stats *deck.Stats, play TurnSummary, ev *Evaluator, weapons 
 		bestLine:     lineCopy,
 		cardsPlayed:  cardsPlayed,
 		swungWeapons: swungCopy,
-		value:        play.Value,
+		value:        summary.Value,
 	}
 	stats.PrintBest = func(w io.Writer) { PrintBestTurn(ev, snap, w) }
 }
