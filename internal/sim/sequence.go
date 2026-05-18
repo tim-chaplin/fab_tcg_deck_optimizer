@@ -69,6 +69,7 @@ func newSequenceContext(
 		priorBanish:         masterState.Banished(),
 		priorGraveyard:      masterState.Graveyard(),
 		defenders:           defenders,
+		startOfTurnValue:    masterState.Value(),
 		cacheable:           true,
 	}
 	abilities := bufs.activatedAbilities[:bufs.weaponAbilityCount]
@@ -298,7 +299,11 @@ type sequenceContext struct {
 	activatedAbilityCosts []int
 	defenders             []card.Card
 	leafState             *gameengine.GameState
-	cacheable             bool
+	// startOfTurnValue is masterState.Value() captured at construction and re-seeded into
+	// each per-perm state after ResetEphemeralState. Chain accumulators ride on top of the
+	// start-of-action-phase aura tick, so summary.Value from Best includes that baseline.
+	startOfTurnValue int
+	cacheable        bool
 	// replayLogger, when non-nil, is installed on each per-perm state so cards' log
 	// emissions stream to it inline. PrintBestTurn sets it to a *gameengine.StreamLogger
 	// pointed at stdout for single-chain replay; the eval hot path leaves it nil so the
@@ -505,6 +510,7 @@ func (ctx *sequenceContext) preparePermState(playedAttackers []*card.CardState, 
 	}
 	s := bufs.pooledState
 	s.ResetEphemeralState()
+	s.SetValue(ctx.startOfTurnValue)
 	// Hero and opponentMarked already mirror leafState (via the CopyPersistentStateFrom
 	// above or the freshly-allocated copy) and leafState's values match ctx.hero /
 	// ctx.priorOpponentMarked respectively — they all root back to masterState. Only
@@ -575,7 +581,8 @@ func (ctx *sequenceContext) bestSequence(attackers []card.Card) (int, int, *game
 		}
 		ctx.promoteWinnerDeck(permState)
 		ctx.promoteWinnerState(permState)
-		return 0, pendingFutureValueFromState(permState), permState, true
+		// permState.Value() carries the seeded baseline plus any EndOfTurn fire delta.
+		return permState.Value(), pendingFutureValueFromState(permState), permState, true
 	}
 	pcBuf := ctx.bufs.pcBuf[:n]
 	permMeta := ctx.bufs.permMeta[:n]

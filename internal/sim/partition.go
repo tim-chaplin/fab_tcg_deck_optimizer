@@ -132,12 +132,14 @@ func (e *Evaluator) findBest(weapons []weapon.Weapon, hand []card.Card, mp Match
 	best.Cacheable = cacheable
 	if best.State == nil {
 		// No feasible partition was found — synthesise an "untouched" trailing state
-		// that holds the starting hand and prior values. Callers (deck_eval) still need
-		// a non-nil State to read end-of-turn fields.
+		// that holds the starting hand and prior values, so callers can read end-of-turn
+		// fields off a non-nil State. Carry masterState.Value() onto best.Value so the
+		// no-chain path still credits any start-of-action-phase aura tick.
 		fallback := masterState.Copy()
 		fallback.SetHand(append([]card.Card(nil), hand...))
 		fallback.SetArsenal(arsenalCardIn)
 		best.State = fallback
+		best.Value = masterState.Value()
 	}
 	if best.State.Arsenal() == nil {
 		promoteRandomHandCardToArsenal(&best, hand, arsenalCardIn)
