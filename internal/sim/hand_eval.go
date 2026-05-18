@@ -34,20 +34,9 @@ func best(weapons []weapon.Weapon, hand []card.Card, mp Matchup, d *deck.Deck, m
 	return sharedEvaluator.Best(weapons, hand, mp, d, master)
 }
 
-// Best is the method form of the package-level Best. Installs a capturing logger per
-// permutation so the winning state carries its chain log; reach for this only from print
-// paths that want to format the chain afterwards.
+// Best is the method form of the package-level Best.
 func (e *Evaluator) Best(weapons []weapon.Weapon, hand []card.Card, mp Matchup, d *deck.Deck, master *gameengine.GameState) TurnSummary {
-	return e.findBest(weapons, hand, mp, d, master, false)
-}
-
-// BestSkipLog is Best without per-perm log capture — every chain runs against the
-// inherited NoopLogger, so cards' AppendChainStep / AppendPostTrigger emissions compile
-// to no-ops. Returns identical Value / BestLine / carry state to Best, just with an
-// empty chain log on the winner. The deck-eval hot path uses this so the per-turn search
-// doesn't allocate a TurnLogger per permutation.
-func (e *Evaluator) BestSkipLog(weapons []weapon.Weapon, hand []card.Card, mp Matchup, d *deck.Deck, master *gameengine.GameState) TurnSummary {
-	return e.findBest(weapons, hand, mp, d, master, true)
+	return e.findBest(weapons, hand, mp, d, master)
 }
 
 // Evaluator caches per-goroutine scratch state across Best calls. The first call allocates
