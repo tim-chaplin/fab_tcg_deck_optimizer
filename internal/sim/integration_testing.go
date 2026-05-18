@@ -1,10 +1,7 @@
 package sim
 
-// Integration-test entry points exposed to turntests: EvalOneTurnForTesting and
-// EvalTwoTurnsForTesting drive one or two turns in source order (no shuffle) so tests can
-// assert chain outcomes and cross-turn state without spinning up the full Evaluate loop.
-// snapshotState / cardsToDeckCards are the small shared helpers both entry points lean
-// on; they live here too so the whole testing surface sits in one file.
+// Integration-test entry points that drive one or two turns in source order (no shuffle),
+// letting tests assert chain outcomes and cross-turn state without the full Evaluate loop.
 
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
@@ -14,8 +11,9 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapon"
 )
 
-// TurnExtras carries a turn's chain results (Value, BestLine) plus the damage and
-// graveyard adds produced by the following turn's start-of-turn aura tick.
+// TurnExtras carries a turn's chain results plus the following turn's start-of-turn aura
+// tick (damage credit and any auras that exhausted into graveyard). TriggerDamage /
+// TriggerGraveyard are zero unless populated by a multi-turn entry point.
 type TurnExtras struct {
 	Value            int
 	BestLine         []deck.CardAssignment
@@ -23,11 +21,10 @@ type TurnExtras struct {
 	TriggerGraveyard []deck.Card
 }
 
-// EvalOneTurnForTesting drives one turn against the deck in source order (no shuffle) and
-// returns the start-of-next-turn GameState plus the turn's extras. The returned state's
-// Value() mirrors extras.Value. initial seeds the turn's carryover (Hero / Arsenal /
-// Auras / Items / Banished / Graveyard / OpponentMarked); pass nil for a clean start
-// inheriting the deck's hero.
+// EvalOneTurnForTesting drives one turn and returns the post end-of-turn-cleanup GameState
+// (pitched cards recycled, arsenal refilled, next hand drawn) plus the turn's chain extras.
+// initial seeds carryover (Hero / Arsenal / Auras / Items / Banished / Graveyard /
+// OpponentMarked); nil means a clean start inheriting the deck's hero.
 func EvalOneTurnForTesting(masterDeck *deck.Deck, mp Matchup, initial *gameengine.GameState, initialHand []deck.Card) (*gameengine.GameState, TurnExtras) {
 	d := masterDeck.Copy()
 	h := d.Hero.(hero.Hero)
@@ -82,29 +79,22 @@ func EvalOneTurnForTesting(masterDeck *deck.Deck, mp Matchup, initial *gameengin
 	held := carry.held
 
 	if len(held) >= handSize || d.Size() < handSize-len(held) {
-		// Can't refill — skip the start-of-next-turn tick.
+		// Not enough deck left to refill — return post-recycle state with held cards intact.
 		return snapshotState(master, d, held, play.Value, turnDraws), extras
 	}
 
-	turn2Hand := make([]card.Card, 0, handSize+startOfTurnRevealRoom)
-	turn2Hand = append(turn2Hand, held...)
+	nextHand := make([]card.Card, 0, handSize)
+	nextHand = append(nextHand, held...)
 	for _, c := range d.Draw(handSize - len(held)) {
-		turn2Hand = append(turn2Hand, c.(card.Card))
+		nextHand = append(nextHand, c.(card.Card))
 	}
-	preGrav := len(master.Graveyard())
-	damage := processAurasAtStartOfTurn(master, d, &turn2Hand)
-	extras.TriggerDamage = damage
-	extras.TriggerGraveyard = cardsToDeckCards(master.Graveyard()[preGrav:])
-
-	return snapshotState(master, d, turn2Hand, play.Value, turnDraws), extras
+	return snapshotState(master, d, nextHand, play.Value, turnDraws), extras
 }
 
-// EvalTwoTurnsForTesting drives two turns in source order (no shuffle), threading the
-// cross-turn carryover EvalOneTurnForTesting threads, then runs a second turn against
-// the carried state. Returns the start-of-turn-3 GameState plus the per-turn extras
-// (extras1.TriggerDamage / Graveyard report the start-of-turn-2 tick; extras2's report
-// start-of-turn-3). Truncates the snapshot at the furthest turn that ran when refills
-// or validation fall short.
+// EvalTwoTurnsForTesting drives two turns, threading carryover between them, and returns
+// the start-of-turn-3 GameState plus per-turn extras. extras1's TriggerDamage/Graveyard
+// report the start-of-turn-2 aura tick; extras2's report start-of-turn-3. Snapshot
+// truncates at the furthest turn that ran when refills or validation fall short.
 func EvalTwoTurnsForTesting(masterDeck *deck.Deck, mp Matchup, initial *gameengine.GameState, hand1 []deck.Card) (*gameengine.GameState, TurnExtras, TurnExtras) {
 	d := masterDeck.Copy()
 	h := d.Hero.(hero.Hero)
