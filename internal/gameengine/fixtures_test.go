@@ -28,21 +28,10 @@ func (stubCard) Types(card.GameEngine) card.TypeSet                 { return 0 }
 func (stubCard) GoAgain(card.GameEngine) bool                       { return false }
 func (stubCard) Play(card.GameEngine, card.Logger, *card.CardState) {}
 
-// dominatingStub is a card.Card with configurable attack AND the card.Dominator marker —
-// exercises the printed-Dominate branch of LikelyToHit.
+// dominatingStub is a stubCard plus the card.Dominator marker — exercises the printed-
+// Dominate branch of LikelyToHit.
 type dominatingStub struct {
-	name   string
-	attack int
+	stubCard
 }
 
-func (c dominatingStub) ID() ids.CardID                                   { return ids.InvalidCard }
-func (c dominatingStub) Name() string                                     { return c.name }
-func (c dominatingStub) DisplayName() string                              { return c.name }
-func (dominatingStub) Cost(card.GameEngine) int                           { return 0 }
-func (dominatingStub) Pitch() int                                         { return 0 }
-func (c dominatingStub) Attack() int                                      { return c.attack }
-func (dominatingStub) Defense() int                                       { return 0 }
-func (dominatingStub) Types(card.GameEngine) card.TypeSet                 { return 0 }
-func (dominatingStub) GoAgain(card.GameEngine) bool                       { return false }
-func (dominatingStub) Play(card.GameEngine, card.Logger, *card.CardState) {}
-func (dominatingStub) Dominate()                                          {}
+func (dominatingStub) Dominate() {}
