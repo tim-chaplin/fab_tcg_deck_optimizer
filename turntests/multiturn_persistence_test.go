@@ -108,3 +108,26 @@ func TestEvalTwoTurns_DestroyedAuraSourceReachesGraveyard(t *testing.T) {
 			formatBestLine(turn2.BestLine))
 	}
 }
+
+// Tests that an OpponentMarked flag carried over from turn 1 is still set when turn 2's
+// marked-defender riders run.
+func TestEvalTwoTurns_OpponentMarkedPersistsAcrossTurns(t *testing.T) {
+	d := deck.New(heroes.Viserai{}, nil, []deck.Card{
+		cards.OutedRed{},
+	})
+	initial := gameengine.GameStateBuilder().SetOpponentMarked(true).Build()
+
+	turn1, turn2 := sim.EvalTwoTurnsForTesting(d, initial, nil)
+
+	if turn1.Value != 0 {
+		t.Errorf("turn 1 Value = %d, want 0 (empty hand)\nBestLine: %s",
+			turn1.Value, formatBestLine(turn1.BestLine))
+	}
+	if turn2.Value != 4 {
+		t.Errorf("turn 2 Value = %d, want 4 (Outed 3{p} + 1 marked-defender bonus must see the carried mark)\nBestLine: %s",
+			turn2.Value, formatBestLine(turn2.BestLine))
+	}
+	if !bestLineHasRole(turn2.BestLine, ids.OutedRed, deck.Attack) {
+		t.Errorf("turn 2 BestLine missing Outed as Attack: %s", formatBestLine(turn2.BestLine))
+	}
+}
