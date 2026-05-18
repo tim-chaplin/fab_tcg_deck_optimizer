@@ -780,10 +780,12 @@ func (ctx *sequenceContext) playSequenceWithMeta(n int) (damage int, futureValue
 				h := &activeAttack.OnHit[i]
 				h.Fire(ge, state.Logger(), activeAttack, h)
 			}
-			prevTriggering := state.TriggeringCard()
+			// triggeringCard is nil between chain steps (fireMatching clears it on exit
+			// and no chain-runner code sets it elsewhere) — clear directly instead of
+			// stashing-and-restoring a value we know is nil.
 			state.SetTriggeringCard(activeAttack.Card)
 			ge.FireHit(activeAttackTypes)
-			state.SetTriggeringCard(prevTriggering)
+			state.SetTriggeringCard(nil)
 		}
 		activeAttack = nil
 	}
