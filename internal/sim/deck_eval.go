@@ -249,7 +249,7 @@ func runOneShuffle(masterDeck *deck.Deck, scratch *shuffleScratch, stats *deck.S
 	maxHands := 2 * handsPerCycle
 	for handIdx := 0; handIdx < maxHands; handIdx++ {
 		preDeckSize := d.Size()
-		summary, snap := playOneTurn(master, h, d, weapons, ev, handSize, nil, nil)
+		summary, snap := playOneTurn(master, h, d, weapons, ev, nil, nil)
 
 		if recordTurnStats(stats, summary, handIdx, handsPerCycle) {
 			recordBestTurnFromSnap(stats, summary, ev, snap)
@@ -299,7 +299,6 @@ func playOneTurn(
 	d *deck.Deck,
 	weapons []weapon.Weapon,
 	ev *Evaluator,
-	handSize int,
 	snapshot *turnSnapshot,
 	logger card.Logger,
 ) (summary TurnSummary, snap *turnSnapshot) {
@@ -335,7 +334,7 @@ func playOneTurn(
 	postChainDeck.PutBottom(recycled)
 
 	held := summary.State.Hand()
-	toDraw := handSize - len(held)
+	toDraw := master.Hero().(hero.Hero).Intelligence() - len(held)
 	if toDraw > postChainDeck.Size() {
 		toDraw = postChainDeck.Size()
 	}

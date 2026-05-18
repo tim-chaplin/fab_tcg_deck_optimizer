@@ -8,7 +8,6 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/gameengine"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/hero"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapon"
 )
 
@@ -20,11 +19,8 @@ import (
 // d.Draw themselves and pass the result). d is consumed in place — callers shouldn't reuse
 // it across calls.
 func EvalOneTurnForTesting(d *deck.Deck, initial *gameengine.GameState, initialHand []card.Card) TurnSummary {
-	master, handSize, weapons, ok := setupTurn(d, initial, initialHand)
-	if !ok {
-		return TurnSummary{State: gameengine.GameStateBuilder().Build()}
-	}
-	summary, _ := playOneTurn(master, initialHand, d, weapons, ev(), handSize, nil, nil)
+	master, weapons := setupTurn(d, initial)
+	summary, _ := playOneTurn(master, initialHand, d, weapons, ev(), nil, nil)
 	return summary
 }
 
@@ -33,43 +29,29 @@ func EvalOneTurnForTesting(d *deck.Deck, initial *gameengine.GameState, initialH
 // partial hand. The returned turn1.State is an independent snapshot; turn2 mutates the
 // shared master.
 func EvalTwoTurnsForTesting(d *deck.Deck, initial *gameengine.GameState, hand1 []card.Card) (TurnSummary, TurnSummary) {
-	master, handSize, weapons, ok := setupTurn(d, initial, hand1)
-	if !ok {
-		return TurnSummary{State: gameengine.GameStateBuilder().Build()}, TurnSummary{}
-	}
+	master, weapons := setupTurn(d, initial)
 
-	turn1, _ := playOneTurn(master, hand1, d, weapons, ev(), handSize, nil, nil)
+	turn1, _ := playOneTurn(master, hand1, d, weapons, ev(), nil, nil)
 	stable := turn1
 	stable.State = snapshotState(turn1.State, turn1.State.Deck(), turn1.State.Hand(), turn1.Value, turn1.State.CardsDrawn())
 
-	turn2, _ := playOneTurn(turn1.State, turn1.State.Hand(), turn1.State.Deck(), weapons, ev(), handSize, nil, nil)
+	turn2, _ := playOneTurn(turn1.State, turn1.State.Hand(), turn1.State.Deck(), weapons, ev(), nil, nil)
 	return stable, turn2
 }
 
 // setupTurn assembles the per-turn fixture from d: master *GameState (`initial` when
-// provided, else the builder's default state), handSize, weapon list. ok=false when
-// handSize <= 0 or initialHand has more cards than handSize.
-func setupTurn(d *deck.Deck, initial *gameengine.GameState, initialHand []card.Card) (master *gameengine.GameState, handSize int, weapons []weapon.Weapon, ok bool) {
-	// Master GameState.
+// provided, else the builder's default state) and the weapon list.
+func setupTurn(d *deck.Deck, initial *gameengine.GameState) (master *gameengine.GameState, weapons []weapon.Weapon) {
 	if initial != nil {
 		master = initial
 	} else {
 		master = gameengine.GameStateBuilder().Build()
 	}
-
-	// Hand size + input validation. Empty initialHand is allowed (turn plays with no cards).
-	handSize = master.Hero().(hero.Hero).Intelligence()
-	if handSize <= 0 || len(initialHand) > handSize {
-		return nil, 0, nil, false
-	}
-
-	// Weapons: widen []deck.Weapon to []weapon.Weapon.
 	weapons = make([]weapon.Weapon, len(d.Weapons))
 	for i, w := range d.Weapons {
 		weapons[i] = w.(weapon.Weapon)
 	}
-
-	return master, handSize, weapons, true
+	return master, weapons
 }
 
 // ev returns the package-level Evaluator so test helpers share its cache/scratch state.
