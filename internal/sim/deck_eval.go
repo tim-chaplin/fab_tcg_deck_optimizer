@@ -239,8 +239,8 @@ func runOneShuffle(masterDeck *deck.Deck, scratch *shuffleScratch, stats *deck.S
 		weapons[i] = w.(weapon.Weapon)
 	}
 
-	// master is the start-of-turn carryover state, built once per shuffle and threaded
-	// across turns. play.State (the post-chain winner) becomes the next turn's master.
+	// Start-of-turn carryover, threaded across turns; each turn's play.State becomes the
+	// next master.
 	master := gameengine.GameStateBuilder().
 		SetHero(heroVal).
 		SetIncomingDamage(mp.IncomingDamage).
@@ -275,26 +275,50 @@ func runOneShuffle(masterDeck *deck.Deck, scratch *shuffleScratch, stats *deck.S
 			recordBestTurn(stats, play, ev, weapons, h, mp, d, master)
 		}
 		tallyMarginalPresence(scratch.marginalBuf, idIndex, scratch.presentBuf, h, arsenalIn, float64(play.Value))
-		// Adopt the chain's post-mutation deck and recycle pitched cards onto the
-		// bottom — FaB's end-of-turn pitch-zone-to-deck rule.
-		d = play.State.Deck()
-		pitched := pitchedFromBestLine(play.BestLine)
-		recycled := scratch.recycledBuf[:0]
-		for _, c := range pitched {
-			recycled = append(recycled, c)
-		}
-		scratch.recycledBuf = recycled
-		d.PutBottom(recycled)
-		// Carry hand leftover into next turn's heldBuf; thread play.State forward as master.
-		heldBuf = append(heldBuf[:0], play.State.Hand()...)
-		master = play.State
-		master.ResetEphemeralState()
-		// Clear master.Deck — d already holds the post-turn deck and the chain runner will
-		// install its own per-leaf copy, so leaving one on the master is dead weight.
-		master.SetDeck(nil)
+		var carry turnCarryover
+		carry, scratch.recycledBuf = advanceToNextTurn(play, scratch.recycledBuf, heldBuf)
+		d = carry.deck
+		master = carry.master
+		heldBuf = carry.held
 		handIdx++
 	}
 	scratch.heldBuf = heldBuf
+}
+
+// turnCarryover bundles the next turn's deck, master GameState, and held hand prefix.
+type turnCarryover struct {
+	deck   *deck.Deck
+	master *gameengine.GameState
+	held   []card.Card
+}
+
+// advanceToNextTurn applies end-of-turn → start-of-next-turn carryover: recycle pitched
+// cards onto the deck bottom (FaB's end-of-turn pitch rule), capture play.State.Hand()
+// as the held prefix before ResetEphemeralState wipes it, and thread play.State forward
+// as the next master with the deck detached. recycledBuf and heldBuf are reused in
+// place when non-nil; pass nil for fresh allocation.
+func advanceToNextTurn(play TurnSummary, recycledBuf []deck.Card, heldBuf []card.Card) (turnCarryover, []deck.Card) {
+	d := play.State.Deck()
+	pitched := pitchedFromBestLine(play.BestLine)
+	recycled := recycledBuf[:0]
+	for _, c := range pitched {
+		recycled = append(recycled, c)
+	}
+	d.PutBottom(recycled)
+
+	var held []card.Card
+	srcHand := play.State.Hand()
+	if heldBuf != nil {
+		held = append(heldBuf[:0], srcHand...)
+	} else if len(srcHand) > 0 {
+		held = append([]card.Card(nil), srcHand...)
+	}
+
+	master := play.State
+	master.ResetEphemeralState()
+	master.SetDeck(nil)
+
+	return turnCarryover{deck: d, master: master, held: held}, recycled
 }
 
 // mergeStatsInto folds src's per-shuffle accumulators into dst. PerCardMarginal merging
@@ -360,7 +384,9 @@ const startOfTurnRevealRoom = 8
 
 // processAurasAtStartOfTurn fires every triggertype.StartOfTurn handler queued on master,
 // returns the summed damage to fold into the turn's Value, and appends any cards the
-// handlers revealed onto h. Re-arms FiredThisTurn at the same time.
+// handlers revealed onto h. Re-arms FiredThisTurn at the same time. Callers must refill
+// h to its full size before this call so reveal-handling auras read the post-draw deck
+// top.
 //
 // Mutates master in place: destroyed auras splice out, revealed cards push onto
 // master.Hand() (then move into h). master.Deck is set to d for the duration so reveal
