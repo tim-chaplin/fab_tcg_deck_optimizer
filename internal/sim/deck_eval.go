@@ -280,14 +280,14 @@ func runOneShuffle(masterDeck *deck.Deck, scratch *shuffleScratch, stats *deck.S
 	scratch.heldBuf = heldBuf
 }
 
-// playOneTurn drives one full turn: fire start-of-action-phase aura triggers, run the
-// chain, fold trigger damage into summary.Value. Mutates master. Returns hand (possibly grown
-// by reveals) so callers can rebind their reference.
+// playOneTurn drives one full turn: fire start-of-action-phase aura triggers, then run the
+// chain. Tick damage written to master.Value() seeds each chain perm's starting value, so
+// summary.Value already includes it. Mutates master. Returns hand (possibly grown by
+// reveals) so callers can rebind their reference.
 func playOneTurn(master *gameengine.GameState, hand []card.Card, d *deck.Deck, mp Matchup, weapons []weapon.Weapon, ev *Evaluator) (TurnSummary, []card.Card) {
-	trigDamage := processAurasAtStartOfTurn(master, d, &hand)
+	processAurasAtStartOfTurn(master, d, &hand)
 	sortHandByID(hand)
 	summary := runBestForTurn(weapons, hand, mp, d, master, ev)
-	summary.Value += trigDamage
 	return summary, hand
 }
 
@@ -387,24 +387,23 @@ func recordTurnStats(stats *deck.Stats, summary TurnSummary, handIdx, handsPerCy
 // turn's dealt hand. Sized large enough that handBuf never reallocates.
 const startOfTurnRevealRoom = 8
 
-// processAurasAtStartOfTurn fires every StartOfTurn aura handler queued on master, returns
-// the summed damage to fold into Value, and appends revealed cards onto h. Re-arms
+// processAurasAtStartOfTurn fires every StartOfTurn aura handler queued on master. Handlers
+// write value gains directly to master.Value() and reveals append to h. Re-arms
 // FiredThisTurn. Callers must refill h to full size first so reveal handlers see the
 // post-draw deck top. Cascading reveals: a handler that pops d shrinks the view for the
 // next, so two reveal-capable auras see distinct tops.
-func processAurasAtStartOfTurn(master *gameengine.GameState, d *deck.Deck, h *[]card.Card) int {
+func processAurasAtStartOfTurn(master *gameengine.GameState, d *deck.Deck, h *[]card.Card) {
 	if len(master.Auras()) == 0 {
-		return 0
+		return
 	}
 	master.SetDeck(d)
 	preHand := len(master.Hand())
-	damage := master.Engine().FireStartOfTurn()
+	master.Engine().FireStartOfTurn()
 	if revealed := master.Hand(); len(revealed) > preHand {
 		*h = append(*h, revealed[preHand:]...)
 		master.SetHand(revealed[:preHand])
 	}
 	master.SetDeck(nil)
-	return damage
 }
 
 // pitchedFromBestLine returns BestLine's Pitch-role cards (excluding the arsenal-in slot,

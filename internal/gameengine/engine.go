@@ -457,10 +457,8 @@ func (ge *GameEngine) FireHit(attackerTypes card.TypeSet) {
 
 // FireStartOfTurn walks ge.auras and invokes every triggertype.StartOfTurn entry. Auras
 // that destroy themselves splice out; FiredThisTurn resets on each fresh turn boundary.
-// Returns the summed ge.value delta as the start-of-turn damage to fold into the turn's
-// Value.
-func (ge *GameEngine) FireStartOfTurn() int {
-	preValue := ge.value
+// Handlers write value gains directly to ge.value; callers read it via ge state.
+func (ge *GameEngine) FireStartOfTurn() {
 	for i := 0; i < len(ge.auras); {
 		a := ge.auras[i]
 		ge.auras[i].SetFiredThisTurn(false)
@@ -476,7 +474,6 @@ func (ge *GameEngine) FireStartOfTurn() int {
 			i++
 		}
 	}
-	return ge.value - preValue
 }
 
 // DestroyAura removes the aura currently being fired and, when addToGraveyard==true, pushes
