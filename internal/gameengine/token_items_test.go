@@ -97,3 +97,28 @@ func TestCreateSilverCopper_BumpsExistingEntry(t *testing.T) {
 		t.Errorf("Items entries = %d, want 2 (one Silver + one Copper)", got)
 	}
 }
+
+// Tests that a CopyPersistentState snapshot's graveyard view is unaffected by an in-place
+// splice on the source.
+func TestCopyPersistentState_GraveyardIsolatedFromSpliceOnSource(t *testing.T) {
+	a := stubCard{name: "A"}
+	b := stubCard{name: "B"}
+	c := stubCard{name: "C"}
+	gs := &GameState{}
+	gs.graveyard = []card.Card{a, b, c}
+
+	snap := gs.CopyPersistentState()
+	// Mirror BanishFromGraveyard's splice-out at index 1.
+	gs.graveyard = append(gs.graveyard[:1], gs.graveyard[2:]...)
+
+	want := []card.Card{a, b, c}
+	if len(snap.graveyard) != len(want) {
+		t.Fatalf("snap.graveyard len = %d, want %d", len(snap.graveyard), len(want))
+	}
+	for i, w := range want {
+		if snap.graveyard[i] != w {
+			t.Errorf("snap.graveyard[%d] = %v, want %v (source splice must not leak into snapshot)",
+				i, snap.graveyard[i], w)
+		}
+	}
+}
