@@ -80,27 +80,13 @@ func (gs *GameState) Copy() *GameState {
 	} else {
 		out.cardsRemaining = nil
 	}
-	if len(gs.auras) > 0 {
-		out.auras = make([]Aura, len(gs.auras))
-		for i, a := range gs.auras {
-			out.auras[i] = a.Copy().(Aura)
-		}
-	} else {
-		out.auras = nil
-	}
+	out.auras = copyAurasInto(nil, gs.auras)
 	if len(gs.triggers) > 0 {
 		out.triggers = append([]Trigger(nil), gs.triggers...)
 	} else {
 		out.triggers = nil
 	}
-	if len(gs.items) > 0 {
-		out.items = make([]Item, len(gs.items))
-		for i, it := range gs.items {
-			out.items[i] = it.Copy().(Item)
-		}
-	} else {
-		out.items = nil
-	}
+	out.items = copyItemsInto(nil, gs.items)
 	out.logger = NoopLogger{}
 	return &out
 }
@@ -150,35 +136,8 @@ func (gs *GameState) CopyFrom(src *GameState) {
 	} else {
 		gs.triggers = nil
 	}
-	if n := len(src.auras); n > 0 {
-		if cap(pooledAuras) >= n {
-			gs.auras = pooledAuras[:n]
-		} else {
-			gs.auras = make([]Aura, n)
-		}
-		priorLen := len(pooledAuras)
-		for i, a := range src.auras {
-			var prev any
-			if i < priorLen {
-				prev = pooledAuras[i]
-			}
-			gs.auras[i] = a.CopyInto(prev).(Aura)
-		}
-	} else {
-		gs.auras = nil
-	}
-	if n := len(src.items); n > 0 {
-		if cap(pooledItems) >= n {
-			gs.items = pooledItems[:n]
-		} else {
-			gs.items = make([]Item, n)
-		}
-		for i, it := range src.items {
-			gs.items[i] = it.Copy().(Item)
-		}
-	} else {
-		gs.items = nil
-	}
+	gs.auras = copyAurasInto(pooledAuras, src.auras)
+	gs.items = copyItemsInto(pooledItems, src.items)
 	if src.deck != nil {
 		if pooledDeck != nil {
 			pooledDeck.CopyFrom(src.deck)
@@ -189,6 +148,53 @@ func (gs *GameState) CopyFrom(src *GameState) {
 	} else {
 		gs.deck = nil
 	}
+}
+
+// copyAurasInto returns a per-entry deep copy of src, reusing pool's backing slice when
+// capacity permits and reaching for CopyInto on each prior-slot entry so concrete *Aura
+// allocations are rewritten in place rather than replaced. Empty src returns nil to match
+// the Copy() path's nil-on-empty semantics; a nil pool falls through to a fresh Copy()
+// per entry (CopyInto's contract on a nil dst).
+func copyAurasInto(pool, src []Aura) []Aura {
+	n := len(src)
+	if n == 0 {
+		return nil
+	}
+	var out []Aura
+	if cap(pool) >= n {
+		out = pool[:n]
+	} else {
+		out = make([]Aura, n)
+	}
+	priorLen := len(pool)
+	for i, a := range src {
+		var prev any
+		if i < priorLen {
+			prev = pool[i]
+		}
+		out[i] = a.CopyInto(prev).(Aura)
+	}
+	return out
+}
+
+// copyItemsInto is the items counterpart of copyAurasInto. Item doesn't expose CopyInto
+// today (no in-place reset surface), so the per-entry path always allocates via Copy().
+// The pool's slice backing is still reused when capacity permits.
+func copyItemsInto(pool, src []Item) []Item {
+	n := len(src)
+	if n == 0 {
+		return nil
+	}
+	var out []Item
+	if cap(pool) >= n {
+		out = pool[:n]
+	} else {
+		out = make([]Item, n)
+	}
+	for i, it := range src {
+		out[i] = it.Copy().(Item)
+	}
+	return out
 }
 
 // resetCardSlice returns a fresh slice header that aliases pooled when capacity permits,
@@ -233,18 +239,8 @@ func (gs *GameState) CopyPersistentState() *GameState {
 	if n := len(gs.banished); n > 0 {
 		out.banished = gs.banished[:n:n]
 	}
-	if len(gs.auras) > 0 {
-		out.auras = make([]Aura, len(gs.auras))
-		for i, a := range gs.auras {
-			out.auras[i] = a.Copy().(Aura)
-		}
-	}
-	if len(gs.items) > 0 {
-		out.items = make([]Item, len(gs.items))
-		for i, it := range gs.items {
-			out.items[i] = it.Copy().(Item)
-		}
-	}
+	out.auras = copyAurasInto(nil, gs.auras)
+	out.items = copyItemsInto(nil, gs.items)
 	return &out
 }
 
@@ -255,10 +251,9 @@ func (gs *GameState) CopyPersistentState() *GameState {
 // left nil, so this path mirrors CopyPersistentState exactly — only the persistent
 // carryover fields and the aura / item per-entry copies are load-bearing here.
 func (gs *GameState) CopyPersistentStateFrom(src *GameState) {
-	// Stash the pool's existing slice backings before overwriting gs, then reuse them if
-	// cap suffices. Without this the *gs = *src would alias src.auras / src.items and the
-	// per-entry copy loop below would scribble Copy() values into the leafState's own
-	// backing, corrupting it for the next permutation.
+	// Stash the pool's existing slice backings before *gs = *src aliases them onto src.
+	// copyAurasInto / copyItemsInto then write per-entry copies into the pooled backings
+	// without trampling the source the leafState pool keeps.
 	pooledAuras := gs.auras
 	pooledItems := gs.items
 	*gs = *src
@@ -280,38 +275,8 @@ func (gs *GameState) CopyPersistentStateFrom(src *GameState) {
 	} else {
 		gs.banished = nil
 	}
-	if n := len(src.auras); n > 0 {
-		if cap(pooledAuras) >= n {
-			gs.auras = pooledAuras[:n]
-		} else {
-			gs.auras = make([]Aura, n)
-		}
-		// Hand the prior perm's slot (if any) back to CopyInto so the concrete *Aura
-		// allocation is rewritten in place instead of replaced. Empty slots (new entries
-		// past the prior pool's length) fall through to a fresh Copy().
-		priorLen := len(pooledAuras)
-		for i, a := range src.auras {
-			var prevSlot any
-			if i < priorLen {
-				prevSlot = pooledAuras[i]
-			}
-			gs.auras[i] = a.CopyInto(prevSlot).(Aura)
-		}
-	} else {
-		gs.auras = nil
-	}
-	if n := len(src.items); n > 0 {
-		if cap(pooledItems) >= n {
-			gs.items = pooledItems[:n]
-		} else {
-			gs.items = make([]Item, n)
-		}
-		for i, it := range src.items {
-			gs.items[i] = it.Copy().(Item)
-		}
-	} else {
-		gs.items = nil
-	}
+	gs.auras = copyAurasInto(pooledAuras, src.auras)
+	gs.items = copyItemsInto(pooledItems, src.items)
 }
 
 // ResetEphemeralState returns gs to its start-of-turn baseline: it discards every field
