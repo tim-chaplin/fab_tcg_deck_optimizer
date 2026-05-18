@@ -33,7 +33,7 @@ func TestCopperToken_NotEnoughResourceSkipsSpend(t *testing.T) {
 	d := deck.New(heroes.Viserai{}, nil, cards)
 	hand := []card.Card{testutils.BluePitch{}}
 	priorItems := []*item.Item{token.NewCopper(1)}
-	summary := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, stateWithItems(priorItems...), hand)
+	summary := sim.EvalOneTurnForTesting(d, stateWithItems(priorItems...), hand)
 	if summary.State.CopperCount() != 1 {
 		t.Fatalf("Copper after turn = %d, want 1 (single blue pitch can't fund {4})", summary.State.CopperCount())
 	}
@@ -50,7 +50,7 @@ func TestCopperToken_SpendsAndSwings(t *testing.T) {
 	d := deck.New(heroes.Viserai{}, []deck.Weapon{weapons.ReapingBlade{}}, cards)
 	hand := []card.Card{testutils.BluePitch{}, testutils.BluePitch{}}
 	priorItems := []*item.Item{token.NewCopper(1)}
-	summary := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, stateWithItems(priorItems...), hand)
+	summary := sim.EvalOneTurnForTesting(d, stateWithItems(priorItems...), hand)
 	if summary.Value != 3 {
 		t.Fatalf("Value = %d, want 3 (Reaping Blade swing power 3)", summary.Value)
 	}

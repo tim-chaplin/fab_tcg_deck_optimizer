@@ -31,7 +31,7 @@ func TestEvalOneTurn_MidTurnDrawArsenalsWhenSlotEmpty(t *testing.T) {
 		testutils.YellowAttack{},
 	}
 	d := deck.New(heroes.Viserai{}, nil, deckCards)
-	summary := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, nil, nil)
+	summary := sim.EvalOneTurnForTesting(d, nil, nil)
 
 	wantHand := []card.Card{
 		testutils.BlueAttack{},
@@ -69,7 +69,7 @@ func TestEvalOneTurn_TwoMidTurnDraws_OneArsenalsOneHeld(t *testing.T) {
 		testutils.YellowAttack{},
 	}
 	d := deck.New(heroes.Viserai{}, nil, deckCards)
-	summary := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, nil, nil)
+	summary := sim.EvalOneTurnForTesting(d, nil, nil)
 
 	// One beacon arsenaled, the other held at slot 0; the remaining three slots are the fresh
 	// refill from deck positions 6..8.
@@ -109,7 +109,7 @@ func TestEvalOneTurn_ThreeMidTurnDraws_ArsenalFromDrawnPool(t *testing.T) {
 		testutils.YellowAttack{},
 	}
 	d := deck.New(heroes.Viserai{}, nil, deckCards)
-	summary := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, gameengine.GameStateBuilder().SetArsenal(arsenalIn).Build(), nil)
+	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetArsenal(arsenalIn).Build(), nil)
 
 	// Two held beacons plus two fresh Blues from deck positions 7..8.
 	wantHand := []card.Card{
@@ -148,7 +148,7 @@ func TestEvalOneTurn_MidTurnDrawHeldWhenArsenalFull(t *testing.T) {
 		testutils.YellowAttack{},
 	}
 	d := deck.New(heroes.Viserai{}, nil, deckCards)
-	summary := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, gameengine.GameStateBuilder().SetArsenal(arsenalIn).Build(), nil)
+	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetArsenal(arsenalIn).Build(), nil)
 
 	wantHand := []card.Card{
 		beacon,
@@ -183,7 +183,7 @@ func TestEvalOneTurn_MidTurnDrawSansGoAgainStaysHeld(t *testing.T) {
 		testutils.BlueAttack{},
 	}
 	d := deck.New(heroes.Viserai{}, nil, deckCards)
-	summary := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, nil, initialHand)
+	summary := sim.EvalOneTurnForTesting(d, nil, initialHand)
 
 	// Turn 1 damage: Snatch alone for 4 (no chain extension, no Viserai trigger — Snatch isn't
 	// Runeblade and nothing else was played).
@@ -232,7 +232,7 @@ func TestEvalOneTurn_MidTurnDrawSansGoAgainStaysHeld(t *testing.T) {
 func TestEvalOneTurn_DrawOneOnEmptyDeckIsNoop(t *testing.T) {
 	initialHand := []card.Card{cards.SnatchRed{}}
 	d := deck.New(heroes.Viserai{}, nil, nil)
-	summary := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, nil, initialHand)
+	summary := sim.EvalOneTurnForTesting(d, nil, initialHand)
 
 	if summary.Value != 4 {
 		t.Errorf("turn 1 Value = %d, want 4 (Snatch damage; DrawOne is a no-op on empty deck)", summary.Value)

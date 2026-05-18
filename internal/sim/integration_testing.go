@@ -14,14 +14,15 @@ import (
 
 // EvalOneTurnForTesting drives one turn and returns its TurnSummary. State reflects the
 // end-of-turn boundary (pitched recycled, next hand drawn; partial or empty hands OK).
-// initial seeds carryover; nil starts clean inheriting the deck's hero. d is consumed in
-// place — callers shouldn't reuse it across calls.
-func EvalOneTurnForTesting(d *deck.Deck, mp Matchup, initial *gameengine.GameState, initialHand []card.Card) TurnSummary {
-	master, hand, handSize, weapons, ok := setupTurn(d, mp, initial, initialHand)
+// initial seeds carryover (hero, arsenal, auras, items, banished, graveyard, opponentMarked,
+// incoming damage); nil starts clean inheriting the deck's hero and zero incoming damage.
+// d is consumed in place — callers shouldn't reuse it across calls.
+func EvalOneTurnForTesting(d *deck.Deck, initial *gameengine.GameState, initialHand []card.Card) TurnSummary {
+	master, hand, handSize, weapons, ok := setupTurn(d, initial, initialHand)
 	if !ok {
 		return TurnSummary{State: gameengine.GameStateBuilder().SetHero(d.Hero.(hero.Hero)).Build()}
 	}
-	summary, _ := playOneTurn(master, hand, d, mp, weapons, ev(), handSize, nil, nil)
+	summary, _ := playOneTurn(master, hand, d, matchupFromMaster(master), weapons, ev(), handSize, nil, nil)
 	return summary
 }
 
@@ -29,11 +30,12 @@ func EvalOneTurnForTesting(d *deck.Deck, mp Matchup, initial *gameengine.GameSta
 // Value folds in its own start-of-turn trigger damage. Turn 2 runs even with an empty or
 // partial hand. The returned turn1.State is an independent snapshot; turn2 mutates the
 // shared master.
-func EvalTwoTurnsForTesting(d *deck.Deck, mp Matchup, initial *gameengine.GameState, hand1 []card.Card) (TurnSummary, TurnSummary) {
-	master, hand, handSize, weapons, ok := setupTurn(d, mp, initial, hand1)
+func EvalTwoTurnsForTesting(d *deck.Deck, initial *gameengine.GameState, hand1 []card.Card) (TurnSummary, TurnSummary) {
+	master, hand, handSize, weapons, ok := setupTurn(d, initial, hand1)
 	if !ok {
 		return TurnSummary{State: gameengine.GameStateBuilder().SetHero(d.Hero.(hero.Hero)).Build()}, TurnSummary{}
 	}
+	mp := matchupFromMaster(master)
 
 	turn1, _ := playOneTurn(master, hand, d, mp, weapons, ev(), handSize, nil, nil)
 	stable := turn1
@@ -47,9 +49,9 @@ func EvalTwoTurnsForTesting(d *deck.Deck, mp Matchup, initial *gameengine.GameSt
 // dealt hand, handSize, weapon list. d is consumed in place (Draw mutates it when
 // initialHand is nil). ok=false on invalid inputs (handSize <= 0; initialHand empty or
 // oversized; no initialHand and deck can't deal handSize).
-func setupTurn(d *deck.Deck, mp Matchup, initial *gameengine.GameState, initialHand []card.Card) (master *gameengine.GameState, hand []card.Card, handSize int, weapons []weapon.Weapon, ok bool) {
+func setupTurn(d *deck.Deck, initial *gameengine.GameState, initialHand []card.Card) (master *gameengine.GameState, hand []card.Card, handSize int, weapons []weapon.Weapon, ok bool) {
 	// Master GameState: inherit from `initial` when provided, else build fresh from the
-	// deck's hero. Overlay matchup damage either way.
+	// deck's hero.
 	h := d.Hero.(hero.Hero)
 	if initial != nil {
 		master = initial
@@ -61,8 +63,6 @@ func setupTurn(d *deck.Deck, mp Matchup, initial *gameengine.GameState, initialH
 	} else {
 		master = gameengine.GameStateBuilder().SetHero(h).Build()
 	}
-	master.SetIncomingDamage(mp.IncomingDamage)
-	master.SetArcaneIncomingDamage(mp.ArcaneIncomingDamage)
 
 	// Hand size + input validation.
 	handSize = h.Intelligence()
@@ -93,6 +93,16 @@ func setupTurn(d *deck.Deck, mp Matchup, initial *gameengine.GameState, initialH
 	}
 
 	return master, hand, handSize, weapons, true
+}
+
+// matchupFromMaster reads the matchup figures master carries (set by the caller before
+// passing it in). chain runner machinery still consumes Matchup as a value — this is just
+// the unwrap.
+func matchupFromMaster(master *gameengine.GameState) Matchup {
+	return Matchup{
+		IncomingDamage:       master.IncomingDamage(),
+		ArcaneIncomingDamage: master.ArcaneIncomingDamage(),
+	}
 }
 
 // ev returns the package-level Evaluator so test helpers share its cache/scratch state.

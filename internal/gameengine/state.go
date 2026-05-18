@@ -483,6 +483,7 @@ func (gs *GameState) SetIncomingDamage(n int) {
 // chain runner's plain-block pass calls it directly.
 func (gs *GameState) AddDamageBlocked(n int) { gs.damageBlocked += n }
 
+func (gs *GameState) IncomingDamage() int           { return gs.incomingDamage }
 func (gs *GameState) ArcaneIncomingDamage() int     { return gs.arcaneIncomingDamage }
 func (gs *GameState) SetArcaneIncomingDamage(n int) { gs.arcaneIncomingDamage = n }
 

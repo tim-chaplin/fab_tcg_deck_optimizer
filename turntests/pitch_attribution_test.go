@@ -6,6 +6,7 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card/cards"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/gameengine"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/hero/heroes"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
@@ -15,7 +16,7 @@ import (
 func TestPitchAttribution_AetherSlashSingleNonAttackPitchFiresRider(t *testing.T) {
 	hand := []card.Card{cards.AetherSlashRed{}, cards.MaleficIncantationBlue{}}
 	d := deck.New(heroes.Viserai{}, nil, fillerDeck())
-	summary := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, nil, hand)
+	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingDamage(0).Build(), hand)
 	if summary.Value != 5 {
 		t.Fatalf("Value = %d, want 5 (Aether Slash 4 + rider 1)", summary.Value)
 	}
@@ -25,7 +26,7 @@ func TestPitchAttribution_AetherSlashSingleNonAttackPitchFiresRider(t *testing.T
 func TestPitchAttribution_AetherSlashAttackPitchDoesNotFireRider(t *testing.T) {
 	hand := []card.Card{cards.AetherSlashRed{}, testutils.YellowAttack{}}
 	d := deck.New(heroes.Viserai{}, nil, fillerDeck())
-	summary := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, nil, hand)
+	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingDamage(0).Build(), hand)
 	if summary.Value != 4 {
 		t.Fatalf("Value = %d, want 4 (Aether Slash base power, no rider)", summary.Value)
 	}
@@ -39,7 +40,7 @@ func TestPitchAttribution_DeathlyDuetBothRidersFireFromMixedFunding(t *testing.T
 		cards.AetherSlashRed{},
 		cards.MaleficIncantationBlue{},
 	}
-	summary := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, nil, hand)
+	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingDamage(0).Build(), hand)
 	if got := summary.Value; got != 8 {
 		t.Fatalf("Value = %d, want 8 (Deathly Duet 4 + attack rider 2 + 2 runechants)", got)
 	}
@@ -54,7 +55,7 @@ func TestPitchAttribution_OneNonAttackPitchFundsMultipleAetherSlashes(t *testing
 		cards.AetherSlashRed{}, cards.AetherSlashRed{},
 		cards.MaleficIncantationBlue{},
 	}
-	summary := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, nil, withNonAttack)
+	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingDamage(0).Build(), withNonAttack)
 	if got := summary.Value; got != 15 {
 		t.Errorf("non-attack pitch: Value = %d, want 15", got)
 	}
@@ -64,7 +65,7 @@ func TestPitchAttribution_OneNonAttackPitchFundsMultipleAetherSlashes(t *testing
 		cards.AetherSlashRed{}, cards.AetherSlashRed{},
 		testutils.BlueAttack{},
 	}
-	summary = sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, nil, withAttack)
+	summary = sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingDamage(0).Build(), withAttack)
 	if got := summary.Value; got != 13 {
 		t.Errorf("attack pitch: Value = %d, want 13", got)
 	}
