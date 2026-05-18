@@ -80,7 +80,6 @@ func EvalOneTurnForTesting(masterDeck *deck.Deck, mp Matchup, initial *gameengin
 		return snapshotState(master, d, held, play.Value, turnDraws), extras
 	}
 
-	// Refill before the tick so reveal-handling auras see the post-draw deck top.
 	turn2Hand := make([]card.Card, 0, handSize+startOfTurnRevealRoom)
 	turn2Hand = append(turn2Hand, held...)
 	for _, c := range d.Draw(handSize - len(held)) {

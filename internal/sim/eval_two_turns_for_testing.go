@@ -8,24 +8,12 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapon"
 )
 
-// EvalTwoTurnsForTesting drives two turns in source order (no shuffle), threading
-// cross-turn carryover so tests can assert that turn-1 state shapes turn 2. Returns the
-// start-of-turn-3 GameState plus per-turn extras.
-//
-// initial seeds turn-1 carryover (nil for a clean start). hand1 optionally fixes turn 1's
-// hand; pass nil to draw from the deck top. Turn 2's hand always comes from real
-// carryover (held + fresh draws + start-of-turn reveals).
-//
-// Extras: Value / BestLine describe the turn's chain. TriggerDamage / TriggerGraveyard
-// report the FOLLOWING turn's start-of-turn aura tick (extras1 → start-of-turn-2, extras2
-// → start-of-turn-3). extras2.Value already folds in the start-of-turn-2 tick damage.
-//
-// Turn 1 runs no start-of-turn aura tick. To exercise start-of-turn behavior for turn
-// N ≥ 2, install the aura via a turn-1 play and read extras2 / the returned gs.
-//
-// On failure the snapshot stops at the furthest boundary reached and missing turns get
-// zero extras: validation failure → hero-only GameState; turn 2 can't field → end-of-1;
-// turn 3 can't refill → end-of-2 with extras2.TriggerDamage zero.
+// EvalTwoTurnsForTesting drives two turns in source order (no shuffle), threading the
+// cross-turn carryover EvalOneTurnForTesting threads, then runs a second turn against
+// the carried state. Returns the start-of-turn-3 GameState plus the per-turn extras
+// (extras1.TriggerDamage / Graveyard report the start-of-turn-2 tick; extras2's report
+// start-of-turn-3). Truncates the snapshot at the furthest turn that ran when refills
+// or validation fall short.
 func EvalTwoTurnsForTesting(masterDeck *deck.Deck, mp Matchup, initial *gameengine.GameState, hand1 []deck.Card) (*gameengine.GameState, TurnExtras, TurnExtras) {
 	d := masterDeck.Copy()
 	h := d.Hero.(hero.Hero)
@@ -84,7 +72,6 @@ func EvalTwoTurnsForTesting(masterDeck *deck.Deck, mp Matchup, initial *gameengi
 		return snapshotState(master, d, held, play1.Value, turn1Draws), extras1, TurnExtras{}
 	}
 
-	// Refill before the tick so reveal-handling auras see the post-draw deck top.
 	turn2Hand := make([]card.Card, 0, handSize+startOfTurnRevealRoom)
 	turn2Hand = append(turn2Hand, held...)
 	for _, c := range d.Draw(handSize - len(held)) {

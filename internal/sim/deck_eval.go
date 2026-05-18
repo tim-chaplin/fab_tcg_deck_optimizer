@@ -293,13 +293,10 @@ type turnCarryover struct {
 }
 
 // advanceToNextTurn applies end-of-turn → start-of-next-turn carryover: recycle pitched
-// cards onto the deck bottom (FaB's end-of-turn pitch rule), capture play.State.Hand() as
-// the held prefix before ResetEphemeralState wipes it, and thread play.State forward as
-// the next master with the deck detached. Per-turn ephemerals reset; auras / items /
-// arsenal / graveyard / banished / OpponentMarked / incomingDamage carry forward.
-//
-// recycledBuf and heldBuf are reused in place when non-nil; pass nil for fresh
-// allocation. Returns the carryover plus the (possibly grown) recycledBuf.
+// cards onto the deck bottom (FaB's end-of-turn pitch rule), capture play.State.Hand()
+// as the held prefix before ResetEphemeralState wipes it, and thread play.State forward
+// as the next master with the deck detached. recycledBuf and heldBuf are reused in
+// place when non-nil; pass nil for fresh allocation.
 func advanceToNextTurn(play TurnSummary, recycledBuf []deck.Card, heldBuf []card.Card) (turnCarryover, []deck.Card) {
 	d := play.State.Deck()
 	pitched := pitchedFromBestLine(play.BestLine)
@@ -387,7 +384,9 @@ const startOfTurnRevealRoom = 8
 
 // processAurasAtStartOfTurn fires every triggertype.StartOfTurn handler queued on master,
 // returns the summed damage to fold into the turn's Value, and appends any cards the
-// handlers revealed onto h. Re-arms FiredThisTurn at the same time.
+// handlers revealed onto h. Re-arms FiredThisTurn at the same time. Callers must refill
+// h to its full size before this call so reveal-handling auras read the post-draw deck
+// top.
 //
 // Mutates master in place: destroyed auras splice out, revealed cards push onto
 // master.Hand() (then move into h). master.Deck is set to d for the duration so reveal

@@ -6,9 +6,8 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/gameengine"
 )
 
-// snapshotState clones src's persistent carryover and overlays deck (copied), hand, value,
-// and cardsDrawn. cardsDrawn is passed explicitly because ResetEphemeralState wipes it on
-// src before the snapshot is taken.
+// snapshotState clones src's persistent carryover and overlays deck (copied), hand,
+// value, and cardsDrawn.
 func snapshotState(src *gameengine.GameState, d *deck.Deck, hand []card.Card, value, cardsDrawn int) *gameengine.GameState {
 	out := src.CopyPersistentState()
 	if d != nil {
