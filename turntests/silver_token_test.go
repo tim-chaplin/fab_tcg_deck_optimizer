@@ -24,7 +24,7 @@ func TestSilverToken_SpendsToFillArsenal(t *testing.T) {
 	d := deck.New(heroes.Viserai{}, nil, cards)
 	hand := []card.Card{testutils.BluePitch{}}
 	priorItems := []*item.Item{token.NewSilver(1)}
-	summary := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, stateWithItems(priorItems...), hand)
+	summary := sim.EvalOneTurnForTesting(d, stateWithItems(priorItems...), hand)
 	if summary.Value != 0 {
 		t.Fatalf("Value = %d, want 0 (Silver ability has no damage)", summary.Value)
 	}
@@ -53,7 +53,7 @@ func TestSilverToken_SpendsAndSwings(t *testing.T) {
 	d := deck.New(heroes.Viserai{}, []deck.Weapon{weapons.ReapingBlade{}}, cards)
 	hand := []card.Card{testutils.BluePitch{}, testutils.BluePitch{}}
 	priorItems := []*item.Item{token.NewSilver(1)}
-	summary := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, stateWithItems(priorItems...), hand)
+	summary := sim.EvalOneTurnForTesting(d, stateWithItems(priorItems...), hand)
 	if summary.Value != 3 {
 		t.Fatalf("Value = %d, want 3 (Reaping Blade swing power 3)", summary.Value)
 	}

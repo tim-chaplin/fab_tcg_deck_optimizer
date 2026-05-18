@@ -6,6 +6,7 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card/cards"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/gameengine"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/hero/heroes"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/ids"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
@@ -22,7 +23,7 @@ func TestWarmongersRecital_OnHitRecyclesToDeck(t *testing.T) {
 		cards.WarmongersRecitalRed{},
 		cards.CriticalStrikeYellow{},
 	}
-	summary := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, nil, hand)
+	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingDamage(0).Build(), hand)
 	if got := countAcrossSurfaces(summary.State, ids.CriticalStrikeYellow); got != 1 {
 		t.Fatalf("Critical Strike total across turn-2 surfaces = %d, want 1 "+
 			"(OnHit recycled it; graveyard=%v)", got, summary.State.Graveyard())

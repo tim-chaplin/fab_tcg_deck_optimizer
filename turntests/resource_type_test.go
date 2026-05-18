@@ -6,6 +6,7 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card/cards"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/gameengine"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/hero/heroes"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
@@ -16,7 +17,7 @@ import (
 func TestResource_TitaniumBaubleBlocks(t *testing.T) {
 	d := deck.New(heroes.Viserai{}, nil, fillerDeck())
 	hand := []card.Card{cards.TitaniumBaubleBlue{}}
-	summary := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 5}, nil, hand)
+	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingDamage(5).Build(), hand)
 	got := summary.Value
 	if got != 3 {
 		t.Fatalf("Value = %d, want 3 (Titanium blocks 3 of 5 incoming)", got)
@@ -27,7 +28,7 @@ func TestResource_TitaniumBaubleBlocks(t *testing.T) {
 func TestResource_DoesNotPromoteToArsenal(t *testing.T) {
 	d := deck.New(heroes.Viserai{}, nil, fillerDeck())
 	hand := []card.Card{cards.TitaniumBaubleBlue{}}
-	summary := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, nil, hand)
+	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingDamage(0).Build(), hand)
 	if summary.State.Arsenal() != nil {
 		t.Fatalf("Arsenal = %v, want nil (Resource cards skip post-hoc promotion)", summary.State.Arsenal())
 	}
@@ -39,7 +40,7 @@ func TestResource_DoesNotPromoteToArsenal(t *testing.T) {
 func TestArsenalPromotion_SkipsPureBlock(t *testing.T) {
 	d := deck.New(heroes.Viserai{}, nil, fillerDeck())
 	hand := []card.Card{cards.OnTheHorizonRed{}}
-	summary := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, nil, hand)
+	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingDamage(0).Build(), hand)
 	if summary.State.Arsenal() != nil {
 		t.Fatalf("Arsenal = %v, want nil (pure Block cards skip post-hoc promotion)", summary.State.Arsenal())
 	}

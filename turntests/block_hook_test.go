@@ -6,6 +6,7 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card/cards"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/gameengine"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/hero/heroes"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
@@ -15,7 +16,7 @@ import (
 func TestBlock_BattlefrontBastionAloneFiresBonus(t *testing.T) {
 	d := deck.New(heroes.Viserai{}, nil, fillerDeck())
 	hand := []card.Card{cards.BattlefrontBastionRed{}}
-	summary := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 5}, nil, hand)
+	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingDamage(5).Build(), hand)
 	got := summary.Value
 	if got != 3 {
 		t.Fatalf("Value = %d, want 3 (BB block 2 + alone bonus 1)", got)
@@ -31,7 +32,7 @@ func TestBlock_BattlefrontBastionAloneFiresBesideDR(t *testing.T) {
 		cards.ToughenUpBlue{},
 		testutils.BluePitch{},
 	}
-	summary := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 10}, nil, hand)
+	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingDamage(10).Build(), hand)
 	got := summary.Value
 	if got != 7 {
 		t.Fatalf("Value = %d, want 7 (Toughen Up DR 4 + BB 2 + alone bonus 1)", got)
@@ -43,7 +44,7 @@ func TestBlock_BattlefrontBastionAloneFiresBesideDR(t *testing.T) {
 func TestBlock_BattlefrontBastionAloneCancelledByBlockCard(t *testing.T) {
 	d := deck.New(heroes.Viserai{}, nil, fillerDeck())
 	hand := []card.Card{cards.BattlefrontBastionRed{}, cards.OnTheHorizonRed{}}
-	summary := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 10}, nil, hand)
+	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingDamage(10).Build(), hand)
 	got := summary.Value
 	if got != 6 {
 		t.Fatalf("Value = %d, want 6 (OTH 4 + BB 2; no alone bonus, OTH is a plain blocker)", got)
@@ -55,7 +56,7 @@ func TestBlock_BattlefrontBastionAloneCancelledByBlockCard(t *testing.T) {
 func TestBlock_BattlefrontBastionAloneCancelledByPlainBlocker(t *testing.T) {
 	d := deck.New(heroes.Viserai{}, nil, fillerDeck())
 	hand := []card.Card{cards.BattlefrontBastionRed{}, cards.RightBehindYouRed{}}
-	summary := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 5}, nil, hand)
+	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingDamage(5).Build(), hand)
 	got := summary.Value
 	if got != 5 {
 		t.Fatalf("Value = %d, want 5 (BB 2 + RBY 2 + RBY together bonus 1)", got)
@@ -67,7 +68,7 @@ func TestBlock_BattlefrontBastionAloneCancelledByPlainBlocker(t *testing.T) {
 func TestBlock_RightBehindYouAloneNoBonus(t *testing.T) {
 	d := deck.New(heroes.Viserai{}, nil, fillerDeck())
 	hand := []card.Card{cards.RightBehindYouRed{}}
-	summary := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 5}, nil, hand)
+	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingDamage(5).Build(), hand)
 	got := summary.Value
 	if got != 2 {
 		t.Fatalf("Value = %d, want 2 (RBY block 2; no together bonus)", got)

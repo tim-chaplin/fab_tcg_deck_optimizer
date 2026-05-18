@@ -6,6 +6,7 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card/cards"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/gameengine"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/hero/heroes"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
@@ -32,7 +33,7 @@ func TestHighStriker_TriggersOnNextAttackActionHit(t *testing.T) {
 				cards.CriticalStrikeYellow{},
 				testutils.BluePitch{},
 			}
-			summary := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, nil, hand)
+			summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingDamage(0).Build(), hand)
 			if summary.State.CopperCount() != tc.wantCopper {
 				t.Fatalf("Copper = %d, want %d (next attack hit fires the rider)\nBestLine: %s",
 					summary.State.CopperCount(), tc.wantCopper, formatBestLine(summary.BestLine))

@@ -6,6 +6,7 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card/cards"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/gameengine"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/hero/heroes"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
@@ -21,7 +22,7 @@ func TestModalBlock_BrothersInArmsPicksMode1WhenAffordable(t *testing.T) {
 		cards.ToughenUpBlue{},
 		testutils.BluePitch{},
 	}
-	summary := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 10}, nil, hand)
+	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingDamage(10).Build(), hand)
 	got := summary.Value
 	// Toughen Up DR: 4{d}; BIA mode 1: 2 + 2 = 4{d}; pitch supply 3{r} covers 2 (TU) + 1 (BIA mode 1).
 	if got != 8 {
@@ -34,7 +35,7 @@ func TestModalBlock_BrothersInArmsPicksMode1WhenAffordable(t *testing.T) {
 func TestModalBlock_BrothersInArmsFallsBackToMode0(t *testing.T) {
 	d := deck.New(heroes.Viserai{}, nil, fillerDeck())
 	hand := []card.Card{cards.BrothersInArmsRed{}}
-	summary := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 10}, nil, hand)
+	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingDamage(10).Build(), hand)
 	got := summary.Value
 	if got != 2 {
 		t.Fatalf("Value = %d, want 2 (BIA mode 0: printed 2{d}, no spare {r} for mode 1)", got)

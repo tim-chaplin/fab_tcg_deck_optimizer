@@ -6,6 +6,7 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card/cards"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/gameengine"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/hero/heroes"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
@@ -20,7 +21,7 @@ func TestStrikeGold_OnHitCreatesGoldToken(t *testing.T) {
 		testutils.BluePitch{},
 		testutils.BluePitch{},
 	}
-	summary := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, nil, hand)
+	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingDamage(0).Build(), hand)
 	if summary.Value != 4 {
 		t.Fatalf("Value = %d, want 4 (Strike Gold Red 4 power)\nBestLine: %s",
 			summary.Value, formatBestLine(summary.BestLine))
@@ -39,7 +40,7 @@ func TestStrikeGold_BlockableMissDoesNotCreateGold(t *testing.T) {
 		testutils.BluePitch{},
 		testutils.BluePitch{},
 	}
-	summary := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, nil, hand)
+	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingDamage(0).Build(), hand)
 	if summary.Value != 3 {
 		t.Fatalf("Value = %d, want 3 (Strike Gold Yellow 3 power)\nBestLine: %s",
 			summary.Value, formatBestLine(summary.BestLine))
@@ -67,7 +68,7 @@ func TestStrikeGold_GoldTokenPlayableNextTurn(t *testing.T) {
 		testutils.BlueAttack{}, testutils.BlueAttack{},
 	}
 	d := deck.New(heroes.Viserai{}, nil, deckCards)
-	summary := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, nil, nil)
+	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingDamage(0).Build(), nil)
 	if summary.State.GoldCount() != 1 {
 		t.Fatalf("after turn 1: Gold = %d, want 1 (Strike Gold Red on-hit)", summary.State.GoldCount())
 	}

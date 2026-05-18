@@ -16,7 +16,7 @@ func TestBest_AllRedHand(t *testing.T) {
 	// Best: pitch 2 reds (2 res) to attack with the other 2 (cost 2, dealt 6). Value = 6.
 	h := []card.Card{testutils.RedAttack{}, testutils.RedAttack{}, testutils.RedAttack{}, testutils.RedAttack{}}
 	d := deck.New(testutils.Hero{Intel: 4}, nil, nil)
-	summary := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 4}, nil, h)
+	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingDamage(4).Build(), h)
 	if summary.Value != 6 {
 		t.Fatalf("want value 6, got %d", summary.Value)
 	}
@@ -27,7 +27,7 @@ func TestBest_AllBlueHand(t *testing.T) {
 	// 3). Value = 5.
 	h := []card.Card{testutils.BlueAttack{}, testutils.BlueAttack{}, testutils.BlueAttack{}, testutils.BlueAttack{}}
 	d := deck.New(testutils.Hero{Intel: 4}, nil, nil)
-	summary := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 4}, nil, h)
+	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingDamage(4).Build(), h)
 	if summary.Value != 5 {
 		t.Fatalf("want value 5, got %d", summary.Value)
 	}
@@ -38,7 +38,7 @@ func TestBest_MixedHand(t *testing.T) {
 	// 3). Value = 9.
 	h := []card.Card{testutils.BlueAttack{}, testutils.BlueAttack{}, testutils.RedAttack{}, testutils.RedAttack{}}
 	d := deck.New(testutils.Hero{Intel: 4}, nil, nil)
-	summary := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 4}, nil, h)
+	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingDamage(4).Build(), h)
 	if summary.Value != 9 {
 		t.Fatalf("want value 9, got %d", summary.Value)
 	}
@@ -49,7 +49,7 @@ func TestBest_DefenseCappedAtIncoming(t *testing.T) {
 	// incoming=2). Value = 4.
 	h := []card.Card{testutils.BlueAttack{}, testutils.BlueAttack{}, testutils.BlueAttack{}, testutils.BlueAttack{}}
 	d := deck.New(testutils.Hero{Intel: 4}, nil, nil)
-	summary := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 2}, nil, h)
+	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingDamage(2).Build(), h)
 	if summary.Value != 4 {
 		t.Fatalf("want value 4, got %d", summary.Value)
 	}
@@ -61,7 +61,7 @@ func TestBest_DefenseReactionRequiresCostPaid(t *testing.T) {
 	// legal lines are to pitch it (0 damage prevented) or do nothing — Value must be 0.
 	h := []card.Card{cards.ToughenUpBlue{}}
 	d := deck.New(testutils.Hero{Intel: 4}, nil, nil)
-	summary := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 4}, nil, h)
+	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingDamage(4).Build(), h)
 	if summary.Value != 0 {
 		t.Fatalf("want value 0 (cost unpaid), got %d", summary.Value)
 	}
@@ -72,7 +72,7 @@ func TestBest_DefenseReactionAffordableResolves(t *testing.T) {
 	// incoming=4). Value = 4.
 	h := []card.Card{cards.MaleficIncantationBlue{}, cards.ToughenUpBlue{}}
 	d := deck.New(testutils.Hero{Intel: 4}, nil, nil)
-	summary := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 4}, nil, h)
+	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingDamage(4).Build(), h)
 	if summary.Value != 4 {
 		t.Fatalf("want value 4 (cost paid, full block), got %d", summary.Value)
 	}
@@ -83,7 +83,7 @@ func TestBest_PlainBlockStillFree(t *testing.T) {
 	// Red attacker (Defense 1) alone, used as a blocker against 1 incoming, prevents 1. Value = 1.
 	h := []card.Card{testutils.RedAttack{}}
 	d := deck.New(testutils.Hero{Intel: 4}, nil, nil)
-	summary := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 1}, nil, h)
+	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingDamage(1).Build(), h)
 	if summary.Value != 1 {
 		t.Fatalf("want value 1 (free plain block), got %d", summary.Value)
 	}
@@ -94,7 +94,7 @@ func TestBest_RespectsResourceConstraint(t *testing.T) {
 	// cover costs.
 	h := []card.Card{testutils.RedAttack{}, testutils.RedAttack{}, testutils.RedAttack{}, testutils.RedAttack{}}
 	d := deck.New(testutils.Hero{Intel: 4}, nil, nil)
-	summary := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, nil, h)
+	summary := sim.EvalOneTurnForTesting(d, nil, h)
 	if summary.Value != 6 {
 		t.Fatalf("want value 6, got %d", summary.Value)
 	}
@@ -117,7 +117,7 @@ func TestBest_RespectsResourceConstraint(t *testing.T) {
 func TestBest_AllHeldWhenNoLegalPlay(t *testing.T) {
 	h := []card.Card{cards.ToughenUpBlue{}}
 	d := deck.New(testutils.Hero{Intel: 4}, nil, nil)
-	summary := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 4}, nil, h)
+	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingDamage(4).Build(), h)
 	if summary.Value != 0 {
 		t.Fatalf("Value = %d, want 0", summary.Value)
 	}
@@ -134,7 +134,7 @@ func TestBest_AllHeldWhenNoLegalPlay(t *testing.T) {
 func TestBest_AttackPitchCantCoverDefense(t *testing.T) {
 	h := []card.Card{cards.MaleficIncantationBlue{}, cards.ToughenUpBlue{}, testutils.RedAttack{}}
 	d := deck.New(testutils.Hero{Intel: 4}, nil, nil)
-	summary := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 4}, nil, h)
+	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingDamage(4).Build(), h)
 	if summary.Value != 5 {
 		t.Fatalf("Value = %d, want 5 (attack and defense pitches are separate pools; Roles=[%s])",
 			summary.Value, sim.FormatBestLine(summary.BestLine))
@@ -150,7 +150,7 @@ func TestBest_DRPitchNeedsSecondPitchedCard(t *testing.T) {
 		testutils.RedAttack{},
 	}
 	d := deck.New(testutils.Hero{Intel: 4}, nil, nil)
-	summary := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 4}, nil, h)
+	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingDamage(4).Build(), h)
 	if summary.Value != 7 {
 		t.Fatalf("Value = %d, want 7 (two pitched cards let attack + defense phases both pay; Roles=[%s])",
 			summary.Value, sim.FormatBestLine(summary.BestLine))
@@ -165,7 +165,7 @@ func TestBest_AllAttackHandPlusArsenalNoWeapons(t *testing.T) {
 		cards.WoundingBlowRed{}, cards.WoundingBlowRed{},
 	}
 	d := deck.New(testutils.Hero{Intel: 4}, nil, nil)
-	summary := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, gameengine.GameStateBuilder().SetArsenal(cards.WoundingBlowRed{}).Build(), h)
+	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetArsenal(cards.WoundingBlowRed{}).Build(), h)
 	if summary.Value != 4 {
 		t.Fatalf("Value = %d, want 4 (one Wounding Blow Red lands; rest can't chain without GoAgain). Roles=[%s]",
 			summary.Value, sim.FormatBestLine(summary.BestLine))

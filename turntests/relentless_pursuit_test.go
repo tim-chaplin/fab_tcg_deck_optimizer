@@ -6,6 +6,7 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card/cards"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/gameengine"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/hero/heroes"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
@@ -20,7 +21,7 @@ func TestRelentlessPursuit_RecyclesToDeckBottomAfterAttack(t *testing.T) {
 		cards.RelentlessPursuitBlue{}, // resolves second; recycles to deck bottom
 		testutils.RedPitch{},          // funds RedAttack's cost-1
 	}
-	summary := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, nil, hand)
+	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingDamage(0).Build(), hand)
 	rp := cards.RelentlessPursuitBlue{}
 	rpName := rp.DisplayName()
 	for _, c := range summary.State.Graveyard() {
@@ -38,7 +39,7 @@ func TestRelentlessPursuit_RecyclesToDeckBottomAfterAttack(t *testing.T) {
 func TestRelentlessPursuit_GoesToGraveyardWithoutPriorAttack(t *testing.T) {
 	d := deck.New(heroes.Viserai{}, nil, fillerDeck())
 	hand := []card.Card{cards.RelentlessPursuitBlue{}, cards.OutedRed{}}
-	summary := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, nil, hand)
+	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingDamage(0).Build(), hand)
 	if summary.Value != 4 {
 		t.Fatalf("Value = %d, want 4 (RP marks, Outed reads mark for 3+1=4)", summary.Value)
 	}
