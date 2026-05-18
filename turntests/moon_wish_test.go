@@ -24,24 +24,24 @@ func TestEvalOneTurn_MoonWishAltCostTutorsSunKissAndConsumesDeck(t *testing.T) {
 		testutils.RedAttack{}, testutils.RedAttack{},
 	}
 	d := deck.New(testutils.Hero{Intel: 4}, nil, deckCards)
-	gs, extras := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, nil, []deck.Card{
+	summary := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, nil, []deck.Card{
 		cards.MoonWishYellow{},
 		cards.WeepingBattlegroundRed{},
 	})
 
-	if extras.Value != 4 {
+	if summary.Value != 4 {
 		t.Errorf("turn-1 Value = %d, want 4 (Moon Wish base attack; Sun Kiss tutored, not played)",
-			extras.Value)
+			summary.Value)
 	}
-	if gs.Arsenal() == nil || gs.Arsenal().ID() != ids.SunKissRed {
+	if summary.State.Arsenal() == nil || summary.State.Arsenal().ID() != ids.SunKissRed {
 		t.Errorf("Arsenal() = %v, want Sun Kiss [R] (post-hoc promoted from hand)",
-			gs.Arsenal())
+			summary.State.Arsenal())
 	}
-	if got := countAcrossSurfaces(gs, ids.SunKissRed); got != 1 {
+	if got := countAcrossSurfaces(summary.State, ids.SunKissRed); got != 1 {
 		t.Errorf("Sun Kiss [R] total across turn-2 Hand/Deck/Arsenal = %d, want 1 (in Arsenal)",
 			got)
 	}
-	if got := countAcrossSurfaces(gs, ids.WeepingBattlegroundRed); got != 1 {
+	if got := countAcrossSurfaces(summary.State, ids.WeepingBattlegroundRed); got != 1 {
 		t.Errorf("Weeping Battleground [R] total across turn-2 surfaces = %d, want 1 "+
 			"(alt cost returned it to deck — should still exist somewhere)",
 			got)
@@ -56,20 +56,20 @@ func TestEvalOneTurn_MoonWishAltCostTutorFizzlesWithoutSunKiss(t *testing.T) {
 		testutils.RedAttack{}, testutils.RedAttack{}, testutils.RedAttack{},
 	}
 	d := deck.New(testutils.Hero{Intel: 4}, nil, deckCards)
-	gs, extras := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, nil, []deck.Card{
+	summary := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, nil, []deck.Card{
 		cards.MoonWishYellow{},
 		cards.WeepingBattlegroundRed{},
 	})
 
-	if extras.Value != 4 {
+	if summary.Value != 4 {
 		t.Errorf("turn-1 Value = %d, want 4 (Moon Wish base attack; tutor fizzles)",
-			extras.Value)
+			summary.Value)
 	}
-	if gs.Arsenal() != nil {
+	if summary.State.Arsenal() != nil {
 		t.Errorf("Arsenal() = %v, want nil (DR was the only Held; alt cost consumed it)",
-			gs.Arsenal())
+			summary.State.Arsenal())
 	}
-	if got := countAcrossSurfaces(gs, ids.WeepingBattlegroundRed); got != 1 {
+	if got := countAcrossSurfaces(summary.State, ids.WeepingBattlegroundRed); got != 1 {
 		t.Errorf("Weeping Battleground [R] total across turn-2 surfaces = %d, want 1 "+
 			"(alt cost returned it to deck even when the tutor fizzled)",
 			got)
@@ -86,18 +86,18 @@ func TestEvalOneTurn_MoonWishWithFlyingHighPlaysTutoredSunKiss(t *testing.T) {
 		testutils.RedAttack{}, testutils.RedAttack{}, testutils.RedAttack{}, testutils.RedAttack{},
 	}
 	d := deck.New(testutils.Hero{Intel: 4}, nil, deckCards)
-	gs, extras := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, nil, []deck.Card{
+	summary := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, nil, []deck.Card{
 		cards.FlyingHighRed{},
 		cards.MoonWishYellow{},
 		cards.WeepingBattlegroundRed{},
 	})
 
-	if extras.Value != 7 {
+	if summary.Value != 7 {
 		t.Errorf("turn-1 Value = %d, want 7 (Moon Wish 4 + Sun Kiss 3 via Flying High go-again)",
-			extras.Value)
+			summary.Value)
 	}
 	skInGraveyard := false
-	for _, c := range gs.Graveyard() {
+	for _, c := range summary.State.Graveyard() {
 		if c.ID() == ids.SunKissRed {
 			skInGraveyard = true
 			break
@@ -105,13 +105,13 @@ func TestEvalOneTurn_MoonWishWithFlyingHighPlaysTutoredSunKiss(t *testing.T) {
 	}
 	if !skInGraveyard {
 		t.Errorf("Sun Kiss [R] not in turn-1 Graveyard %v; want it there (tutored and played)",
-			testutils.CardNamesSim(gs.Graveyard()))
+			testutils.CardNamesSim(summary.State.Graveyard()))
 	}
-	if got := countAcrossSurfaces(gs, ids.SunKissRed); got != 0 {
+	if got := countAcrossSurfaces(summary.State, ids.SunKissRed); got != 0 {
 		t.Errorf("Sun Kiss [R] total across turn-2 surfaces = %d, want 0 (it's in the graveyard)",
 			got)
 	}
-	if gs.Arsenal() == nil {
+	if summary.State.Arsenal() == nil {
 		t.Error("Arsenal() = nil; want any card (Sun Kiss's DrawOne pulled one card; " +
 			"arsenal promotion is the only candidate)")
 	}
@@ -120,15 +120,15 @@ func TestEvalOneTurn_MoonWishWithFlyingHighPlaysTutoredSunKiss(t *testing.T) {
 // countAcrossSurfaces totals occurrences of the printing across the start-of-next-turn
 // Hand, Deck, and Arsenal — keyed by DisplayName since that's what NameCounts surfaces.
 // Asserts "exists / doesn't exist" without pinning a specific position.
-func countAcrossSurfaces(gs *gameengine.GameState, id ids.CardID) int {
+func countAcrossSurfaces(state *gameengine.GameState, id ids.CardID) int {
 	name := registry.GetCard(id).DisplayName()
-	n := gs.Deck().NameCounts()[name]
-	for _, c := range gs.Hand() {
+	n := state.Deck().NameCounts()[name]
+	for _, c := range state.Hand() {
 		if c.DisplayName() == name {
 			n++
 		}
 	}
-	if gs.Arsenal() != nil && gs.Arsenal().DisplayName() == name {
+	if state.Arsenal() != nil && state.Arsenal().DisplayName() == name {
 		n++
 	}
 	return n

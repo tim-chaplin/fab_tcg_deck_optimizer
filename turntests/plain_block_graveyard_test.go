@@ -13,15 +13,15 @@ import (
 func TestPlainBlock_LandsInGraveyard(t *testing.T) {
 	d := deck.New(heroes.Viserai{}, nil, fillerDeck())
 	hand := []deck.Card{cards.OnTheHorizonRed{}}
-	gs, extras := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 4}, nil, hand)
-	if extras.Value != 4 {
-		t.Fatalf("Value = %d, want 4 (On the Horizon Red blocks 4)", extras.Value)
+	summary := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 4}, nil, hand)
+	if summary.Value != 4 {
+		t.Fatalf("Value = %d, want 4 (On the Horizon Red blocks 4)", summary.Value)
 	}
 	target := cards.OnTheHorizonRed{}.ID()
-	for _, c := range gs.Graveyard() {
+	for _, c := range summary.State.Graveyard() {
 		if c.ID() == target {
 			return
 		}
 	}
-	t.Fatalf("On the Horizon [R] missing from graveyard after blocking; got %v", gs.Graveyard())
+	t.Fatalf("On the Horizon [R] missing from graveyard after blocking; got %v", summary.State.Graveyard())
 }

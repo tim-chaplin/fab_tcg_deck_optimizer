@@ -14,8 +14,8 @@ import (
 func TestPursueToTheEdgeOfOblivion_MarksOpponentOnHit(t *testing.T) {
 	d := deck.New(heroes.Viserai{}, nil, fillerDeck())
 	hand := []deck.Card{cards.PursueToTheEdgeOfOblivionRed{}}
-	gs, _ := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, nil, hand)
-	if !gs.OpponentMarked() {
+	summary := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, nil, hand)
+	if !summary.State.OpponentMarked() {
 		t.Fatalf("OpponentMarked = false after Pursue resolved, want true")
 	}
 }
@@ -25,8 +25,8 @@ func TestPursueToTheEdgeOfOblivion_MarksOpponentOnHit(t *testing.T) {
 func TestPursueToTheEdgeOfOblivion_PreservesMarkWhenOpponentAlreadyMarked(t *testing.T) {
 	d := deck.New(heroes.Viserai{}, nil, fillerDeck())
 	hand := []deck.Card{cards.PursueToTheEdgeOfOblivionRed{}}
-	gs, _ := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, gameengine.GameStateBuilder().SetOpponentMarked(true).Build(), hand)
-	if !gs.OpponentMarked() {
+	summary := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, gameengine.GameStateBuilder().SetOpponentMarked(true).Build(), hand)
+	if !summary.State.OpponentMarked() {
 		t.Fatalf("OpponentMarked = false after Pursue resolved against pre-marked opponent, want true")
 	}
 }
@@ -35,9 +35,9 @@ func TestPursueToTheEdgeOfOblivion_PreservesMarkWhenOpponentAlreadyMarked(t *tes
 func TestOuted_NoBonusWhenOpponentUnmarked(t *testing.T) {
 	d := deck.New(heroes.Viserai{}, nil, fillerDeck())
 	hand := []deck.Card{cards.OutedRed{}}
-	_, extras := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, nil, hand)
-	if extras.Value != 3 {
-		t.Fatalf("Value = %d, want 3 (Outed printed 3{p}, no marked-defender bonus)", extras.Value)
+	summary := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, nil, hand)
+	if summary.Value != 3 {
+		t.Fatalf("Value = %d, want 3 (Outed printed 3{p}, no marked-defender bonus)", summary.Value)
 	}
 }
 
@@ -46,8 +46,8 @@ func TestOuted_NoBonusWhenOpponentUnmarked(t *testing.T) {
 func TestOuted_BonusWhenOpponentAlreadyMarked(t *testing.T) {
 	d := deck.New(heroes.Viserai{}, nil, fillerDeck())
 	hand := []deck.Card{cards.OutedRed{}}
-	_, extras := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, gameengine.GameStateBuilder().SetOpponentMarked(true).Build(), hand)
-	if extras.Value != 4 {
-		t.Fatalf("Value = %d, want 4 (Outed printed 3{p} + 1 marked-defender)", extras.Value)
+	summary := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, gameengine.GameStateBuilder().SetOpponentMarked(true).Build(), hand)
+	if summary.Value != 4 {
+		t.Fatalf("Value = %d, want 4 (Outed printed 3{p} + 1 marked-defender)", summary.Value)
 	}
 }

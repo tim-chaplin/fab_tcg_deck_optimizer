@@ -32,9 +32,9 @@ func TestCopperToken_NotEnoughResourceSkipsSpend(t *testing.T) {
 	d := deck.New(heroes.Viserai{}, nil, cards)
 	hand := []deck.Card{testutils.BluePitch{}}
 	priorItems := []*item.Item{token.NewCopper(1)}
-	gs, _ := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, stateWithItems(priorItems...), hand)
-	if gs.CopperCount() != 1 {
-		t.Fatalf("Copper after turn = %d, want 1 (single blue pitch can't fund {4})", gs.CopperCount())
+	summary := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, stateWithItems(priorItems...), hand)
+	if summary.State.CopperCount() != 1 {
+		t.Fatalf("Copper after turn = %d, want 1 (single blue pitch can't fund {4})", summary.State.CopperCount())
 	}
 }
 
@@ -49,17 +49,17 @@ func TestCopperToken_SpendsAndSwings(t *testing.T) {
 	d := deck.New(heroes.Viserai{}, []deck.Weapon{weapons.ReapingBlade{}}, cards)
 	hand := []deck.Card{testutils.BluePitch{}, testutils.BluePitch{}}
 	priorItems := []*item.Item{token.NewCopper(1)}
-	gs, extras := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, stateWithItems(priorItems...), hand)
-	if extras.Value != 3 {
-		t.Fatalf("Value = %d, want 3 (Reaping Blade swing power 3)", extras.Value)
+	summary := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, stateWithItems(priorItems...), hand)
+	if summary.Value != 3 {
+		t.Fatalf("Value = %d, want 3 (Reaping Blade swing power 3)", summary.Value)
 	}
-	if gs.CopperCount() != 0 {
-		t.Fatalf("Copper after turn = %d, want 0 (the only token spent)", gs.CopperCount())
+	if summary.State.CopperCount() != 0 {
+		t.Fatalf("Copper after turn = %d, want 0 (the only token spent)", summary.State.CopperCount())
 	}
-	if gs.CardsDrawn() != 1 {
-		t.Fatalf("CardsDrawn = %d, want 1 (Copper ability draws one card)", gs.CardsDrawn())
+	if summary.State.CardsDrawn() != 1 {
+		t.Fatalf("CardsDrawn = %d, want 1 (Copper ability draws one card)", summary.State.CardsDrawn())
 	}
-	if gs.Arsenal() == nil {
+	if summary.State.Arsenal() == nil {
 		t.Fatalf("Arsenal() = nil, want the drawn card promoted into the slot")
 	}
 }

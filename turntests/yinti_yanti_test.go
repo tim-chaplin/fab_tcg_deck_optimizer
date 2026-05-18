@@ -19,8 +19,8 @@ import (
 func TestYintiYanti_SeesRunechantFromReduceInDefense(t *testing.T) {
 	d := deck.New(heroes.Viserai{}, nil, fillerDeck())
 	hand := []deck.Card{cards.YintiYantiRed{}, cards.ReduceToRunechantRed{}, testutils.RedPitch{}}
-	_, extras := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 4}, nil, hand)
-	got := extras.Value
+	summary := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 4}, nil, hand)
+	got := summary.Value
 	if got != 9 {
 		t.Fatalf("Value = %d, want 9 (Reduce defense 4 + Yinti Yanti 4 with +1 aura bonus + creation credit 1)", got)
 	}
@@ -31,32 +31,32 @@ func TestYintiYanti_SeesRunechantFromReduceInDefense(t *testing.T) {
 func TestYintiYanti_SeesPonderFromPeaceOfMindInDefense(t *testing.T) {
 	d := deck.New(heroes.Viserai{}, nil, fillerDeck())
 	hand := []deck.Card{cards.YintiYantiRed{}, cards.PeaceOfMindRed{}, testutils.BluePitch{}}
-	_, extras := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 4}, nil, hand)
-	got := extras.Value
+	summary := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 4}, nil, hand)
+	got := summary.Value
 	if got != 8 {
 		t.Fatalf("Value = %d, want 8 (Peace of Mind defense 4 + Yinti Yanti 4 with +1 aura bonus from Ponder)", got)
 	}
 }
 
 // Tests that Yinti Yanti Blue plain-blocking alongside Reduce as DR sees Reduce's
-// Runechant when its Block runs (DRs run first, populating gs.Auras).
+// Runechant when its Block runs (DRs run first, populating auras before plain-block).
 func TestYintiYanti_BlueBlockSeesRunechantFromReduceInDefense(t *testing.T) {
 	d := deck.New(heroes.Viserai{}, nil, fillerDeck())
 	hand := []deck.Card{cards.YintiYantiBlue{}, cards.ReduceToRunechantRed{}, testutils.RedPitch{}}
-	_, extras := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 7}, nil, hand)
-	got := extras.Value
+	summary := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 7}, nil, hand)
+	got := summary.Value
 	if got != 8 {
 		t.Fatalf("Value = %d, want 8 (Reduce defense 4 + Yinti Yanti block 3 with +1 aura bonus + creation credit 1)", got)
 	}
 }
 
 // Tests that Yinti Yanti Blue plain-blocking alongside Peace of Mind sees the Ponder PoM's
-// DR puts in gs.Auras (DR runs first, populating auras before the plain-block hook).
+// DR puts in auras (DR runs first, populating auras before the plain-block hook).
 func TestYintiYanti_BlueBlockSeesPonderFromPeaceOfMindInDefense(t *testing.T) {
 	d := deck.New(heroes.Viserai{}, nil, fillerDeck())
 	hand := []deck.Card{cards.YintiYantiBlue{}, cards.PeaceOfMindRed{}, testutils.BluePitch{}}
-	_, extras := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 7}, nil, hand)
-	got := extras.Value
+	summary := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 7}, nil, hand)
+	got := summary.Value
 	if got != 7 {
 		t.Fatalf("Value = %d, want 7 (Peace of Mind defense 4 + Yinti Yanti block 3 with +1 aura bonus from Ponder)", got)
 	}

@@ -19,16 +19,16 @@ func TestRelentlessPursuit_RecyclesToDeckBottomAfterAttack(t *testing.T) {
 		cards.RelentlessPursuitBlue{}, // resolves second; recycles to deck bottom
 		testutils.RedPitch{},          // funds RedAttack's cost-1
 	}
-	gs, _ := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, nil, hand)
+	summary := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, nil, hand)
 	rp := cards.RelentlessPursuitBlue{}
 	rpName := rp.DisplayName()
-	for _, c := range gs.Graveyard() {
+	for _, c := range summary.State.Graveyard() {
 		if c.ID() == rp.ID() {
-			t.Fatalf("Relentless Pursuit unexpectedly in graveyard after recycle; got %v", gs.Graveyard())
+			t.Fatalf("Relentless Pursuit unexpectedly in graveyard after recycle; got %v", summary.State.Graveyard())
 		}
 	}
-	if gs.Deck().NameCounts()[rpName] == 0 {
-		t.Fatalf("Relentless Pursuit missing from next turn's deck; graveyard=%v", gs.Graveyard())
+	if summary.State.Deck().NameCounts()[rpName] == 0 {
+		t.Fatalf("Relentless Pursuit missing from next turn's deck; graveyard=%v", summary.State.Graveyard())
 	}
 }
 
@@ -37,15 +37,15 @@ func TestRelentlessPursuit_RecyclesToDeckBottomAfterAttack(t *testing.T) {
 func TestRelentlessPursuit_GoesToGraveyardWithoutPriorAttack(t *testing.T) {
 	d := deck.New(heroes.Viserai{}, nil, fillerDeck())
 	hand := []deck.Card{cards.RelentlessPursuitBlue{}, cards.OutedRed{}}
-	gs, extras := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, nil, hand)
-	if extras.Value != 4 {
-		t.Fatalf("Value = %d, want 4 (RP marks, Outed reads mark for 3+1=4)", extras.Value)
+	summary := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, nil, hand)
+	if summary.Value != 4 {
+		t.Fatalf("Value = %d, want 4 (RP marks, Outed reads mark for 3+1=4)", summary.Value)
 	}
 	rpID := cards.RelentlessPursuitBlue{}.ID()
-	for _, c := range gs.Graveyard() {
+	for _, c := range summary.State.Graveyard() {
 		if c.ID() == rpID {
 			return
 		}
 	}
-	t.Fatalf("Relentless Pursuit missing from graveyard (RP→Outed order, no prior attack); graveyard=%v", gs.Graveyard())
+	t.Fatalf("Relentless Pursuit missing from graveyard (RP→Outed order, no prior attack); graveyard=%v", summary.State.Graveyard())
 }
