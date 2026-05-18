@@ -125,9 +125,6 @@ func (b *StateBuilder) SetNonAttackActionPlayed(v bool) *StateBuilder {
 	return b
 }
 
-// SetActionPoints replaces the running action-point pool.
-func (b *StateBuilder) SetActionPoints(n int) *StateBuilder { b.gs.actionPoints = n; return b }
-
 // SetIncomingDamage replaces the matchup's incoming-damage tally.
 func (b *StateBuilder) SetIncomingDamage(n int) *StateBuilder { b.gs.incomingDamage = n; return b }
 
@@ -139,15 +136,6 @@ func (b *StateBuilder) SetArcaneIncomingDamage(n int) *StateBuilder {
 
 // SetBlockTotal replaces the partition's uncapped defense sum.
 func (b *StateBuilder) SetBlockTotal(n int) *StateBuilder { b.gs.blockTotal = n; return b }
-
-// SetValue replaces the running chain value.
-func (b *StateBuilder) SetValue(n int) *StateBuilder { b.gs.value = n; return b }
-
-// SetTriggeringCard replaces the triggering-card slot.
-func (b *StateBuilder) SetTriggeringCard(c card.Card) *StateBuilder {
-	b.gs.triggeringCard = c
-	return b
-}
 
 // SetAttackReactionTarget installs the buff target for the AR resolving next.
 func (b *StateBuilder) SetAttackReactionTarget(cs *card.CardState) *StateBuilder {
