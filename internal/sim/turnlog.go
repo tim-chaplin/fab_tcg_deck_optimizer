@@ -58,31 +58,6 @@ func aurasLineFromNames(names []string, runechants, ponders int) string {
 	return "Auras: " + strings.Join(items, ", ")
 }
 
-// formatBlockLine renders a plain-block content line with the card's effective defense as a
-// "(+N)" suffix — printed Defense plus an ArsenalDefenseBonus rider when the blocker came
-// from arsenal.
-func formatBlockLine(a deck.CardAssignment) string {
-	def := a.Card.Defense()
-	if a.FromArsenal {
-		def += card.ArsenalDefenseBonusOf(a.Card)
-	}
-	return fmt.Sprintf("%s: %s (+%d)", a.Card.DisplayName(), roleLabelWithArsenal(a, "BLOCK"), def)
-}
-
-// endingHandLine builds "Hand: A, B" from the cards in hand at end of chain — the partition's
-// Held set plus anything tutored / drawn that didn't get played. Returns "" when the hand
-// ended empty.
-func endingHandLine(handHeld []card.Card) string {
-	if len(handHeld) == 0 {
-		return ""
-	}
-	names := make([]string, len(handHeld))
-	for i, c := range handHeld {
-		names[i] = c.DisplayName()
-	}
-	return "Hand: " + strings.Join(names, ", ")
-}
-
 // endingArsenalLine builds "Arsenal: cardname (stayed)" / "(new)" from BestLine's
 // Arsenal-role entries. The tag derives from FromArsenal — the arsenal-in card kept the
 // slot when FromArsenal=true ("(stayed)"); any other origin (post-hoc Held promotion)
