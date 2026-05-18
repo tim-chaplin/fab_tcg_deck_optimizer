@@ -211,11 +211,12 @@ func resetCardSlice(pooled, src []card.Card) []card.Card {
 // CopyPersistentState is a lighter variant of Copy that copies only the cross-turn
 // persistent state — the inverse of ResetEphemeralState's reset set. Hand, pitched,
 // defenders, cardsPlayed, cardsRemaining, triggers, deck, and logger are left nil
-// (callers that want those populated set them after copying). Graveyard, banished, and
-// weapons are shallow-copied (slice header with cap=len, sharing the backing) so
-// append-only mutations on the copy allocate fresh backings on first write and the
-// receiver's backings stay intact. Auras and items get full per-entry copies because
-// their fire-this-turn / count fields mutate independently of the source.
+// (callers that want those populated set them after copying). Graveyard and banished
+// are shallow-copied (slice header with cap=len, sharing the backing) so append-only
+// mutations on the copy allocate fresh backings on first write and the receiver's
+// backings stay intact. Weapons are carried via the implicit `out := *gs` slice-header
+// copy — no per-entry cloning (stateless structs). Auras and items get full per-entry
+// copies because their fire-this-turn / count fields mutate independently of the source.
 func (gs *GameState) CopyPersistentState() *GameState {
 	out := *gs
 	out.hand = nil
@@ -231,9 +232,6 @@ func (gs *GameState) CopyPersistentState() *GameState {
 	}
 	if n := len(gs.banished); n > 0 {
 		out.banished = gs.banished[:n:n]
-	}
-	if n := len(gs.weapons); n > 0 {
-		out.weapons = gs.weapons[:n:n]
 	}
 	if len(gs.auras) > 0 {
 		out.auras = make([]Aura, len(gs.auras))
@@ -281,11 +279,6 @@ func (gs *GameState) CopyPersistentStateFrom(src *GameState) {
 		gs.banished = src.banished[:n:n]
 	} else {
 		gs.banished = nil
-	}
-	if n := len(src.weapons); n > 0 {
-		gs.weapons = src.weapons[:n:n]
-	} else {
-		gs.weapons = nil
 	}
 	if n := len(src.auras); n > 0 {
 		if cap(pooledAuras) >= n {
