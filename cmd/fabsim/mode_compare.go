@@ -78,13 +78,12 @@ func runCompare(name1, name2 string, shuffles int, mp sim.Matchup, maxCopies int
 	printCardDelta(name1, name2, d1, d2)
 }
 
-// printCardDelta writes the per-loadout count delta between d1 and d2 — negative rows first,
-// then positives; weapons lead each block (alphabetical) followed by cards (alphabetical),
-// so the loadout-defining piece sits at the top of each list. Entries present in equal
-// counts in both decks are omitted. Covers both the deck's Cards and its Weapons since both
-// are sim-relevant loadout choices a comparison reader needs to see. Hero, Equipment, and
-// Sideboard are out of scope. When the two loadouts match exactly an explicit confirmation
-// line replaces the empty body so silence can't be mistaken for a failure.
+// printCardDelta writes the per-loadout count delta between d1 and d2 — negative rows
+// first, then positives; weapons lead each block (alphabetical) followed by cards
+// (alphabetical), so the loadout-defining piece sits at the top of each list. Equal-count
+// entries are omitted. Covers Cards and Weapons (both sim-relevant); Hero, Equipment, and
+// Sideboard are out of scope. On exact match, an explicit confirmation line prints so
+// silence can't be mistaken for a failure.
 func printCardDelta(name1, name2 string, d1, d2 *deck.Deck) {
 	counts1 := loadoutCounts(d1)
 	counts2 := loadoutCounts(d2)
@@ -144,11 +143,10 @@ func printCardDelta(name1, name2 string, d1, d2 *deck.Deck) {
 	}
 }
 
-// loadoutCounts tallies the deck's cards and weapons by display name in a single map.
-// Weapon names don't collide with card names in the current registry, so a flat
-// name-keyed map cleanly captures both lists for diffing. Card.DisplayName keeps pitch
-// printings as distinct entries so a "-1 Aether Slash [R], +1 Aether Slash [Y]" diff is
-// legible.
+// loadoutCounts tallies the deck's cards and weapons by display name in one map. Weapon
+// names don't collide with card names in the current registry, so a flat name-keyed map
+// captures both for diffing. Card.DisplayName keeps pitch printings as distinct entries
+// so "-1 Aether Slash [R], +1 Aether Slash [Y]" is legible.
 func loadoutCounts(d *deck.Deck) map[string]int {
 	out := d.NameCounts()
 	for _, w := range d.Weapons {
