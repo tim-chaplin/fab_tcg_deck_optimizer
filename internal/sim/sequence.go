@@ -724,6 +724,15 @@ func (ctx *sequenceContext) playSequence(order []card.Card) (damage int, futureV
 func (ctx *sequenceContext) seedChainEntry(pc *card.CardState, c card.Card, idx int) {
 	pc.Card = c
 	pc.FromArsenal = idx == ctx.arsenalInIdx
+	pc.Mode = 0
+	resetPerPermChainStepFields(pc)
+}
+
+// resetPerPermChainStepFields zeroes the resolution-scratch fields a per-perm chain run
+// dirties on a *CardState — granted keywords, bonus accumulators, OnHit registrations, and
+// the pitch-to-play list. Card / FromArsenal / Mode are left alone since they ride the
+// permutation's identity and are reseeded by the outer permutation loop.
+func resetPerPermChainStepFields(pc *card.CardState) {
 	pc.GrantedGoAgain = false
 	pc.GrantedDominate = false
 	pc.GrantedOverpower = false
@@ -731,7 +740,6 @@ func (ctx *sequenceContext) seedChainEntry(pc *card.CardState, c card.Card, idx 
 	pc.BonusDefense = 0
 	pc.PitchedToPlay = nil
 	pc.OnHit = pc.OnHit[:0]
-	pc.Mode = 0
 }
 
 // playSequenceWithMeta runs the permutation currently held in ctx.bufs.pcBuf[:n] with
@@ -742,13 +750,7 @@ func (ctx *sequenceContext) playSequenceWithMeta(n int) (damage int, futureValue
 	ptrBuf := ctx.bufs.ptrBuf
 	meta := ctx.bufs.permMeta[:n]
 	for i := 0; i < n; i++ {
-		pcBuf[i].GrantedGoAgain = false
-		pcBuf[i].GrantedDominate = false
-		pcBuf[i].GrantedOverpower = false
-		pcBuf[i].BonusAttack = 0
-		pcBuf[i].BonusDefense = 0
-		pcBuf[i].PitchedToPlay = nil
-		pcBuf[i].OnHit = pcBuf[i].OnHit[:0]
+		resetPerPermChainStepFields(&pcBuf[i])
 	}
 	played := ptrBuf[:n]
 	state := ctx.preparePermState(played, n)
