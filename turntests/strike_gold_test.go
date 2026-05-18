@@ -52,23 +52,24 @@ func TestStrikeGold_BlockableMissDoesNotCreateGold(t *testing.T) {
 
 // Tests that a Gold token created on turn 1 carries to turn 2 in the Items list.
 func TestStrikeGold_GoldTokenPlayableNextTurn(t *testing.T) {
-	deckCards := []deck.Card{
-		// Turn 1 hand.
+	hand := []card.Card{
 		cards.StrikeGoldRed{},
 		testutils.BluePitch{},
 		testutils.BluePitch{},
 		testutils.BluePitch{},
+	}
+	deckCards := []deck.Card{
 		// Turn 2 hand: red pitches to fund the Gold ability ({2}).
 		testutils.RedAttack{},
 		testutils.RedAttack{},
 		testutils.RedAttack{},
 		testutils.RedAttack{},
-		// Filler so the dealer can pull a hand.
+		// Filler so the turn-2 refill has cards to pull from.
 		testutils.BlueAttack{}, testutils.BlueAttack{},
 		testutils.BlueAttack{}, testutils.BlueAttack{},
 	}
 	d := deck.New(heroes.Viserai{}, nil, deckCards)
-	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingDamage(0).Build(), nil)
+	summary := sim.EvalOneTurnForTesting(d, nil, hand)
 	if summary.State.GoldCount() != 1 {
 		t.Fatalf("after turn 1: Gold = %d, want 1 (Strike Gold Red on-hit)", summary.State.GoldCount())
 	}
