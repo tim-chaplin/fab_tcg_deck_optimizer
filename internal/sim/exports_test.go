@@ -13,10 +13,10 @@ import (
 
 // Test-only exports.
 
-// Best re-exports the package-private best. state is the carryover *GameState — pass nil
-// to start from a clean state.
-func Best(weapons []weapon.Weapon, hand []card.Card, mp Matchup, d *deck.Deck, state *gameengine.GameState) TurnSummary {
-	return best(weapons, hand, mp, d, state)
+// Best re-exports the package-private best. state carries the matchup figures (set via
+// SetIncomingDamage) and any other carryover.
+func Best(weapons []weapon.Weapon, hand []card.Card, d *deck.Deck, state *gameengine.GameState) TurnSummary {
+	return best(weapons, hand, d, state)
 }
 
 // DeckOf builds a *deck.Deck from a list of cards.

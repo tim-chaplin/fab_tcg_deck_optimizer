@@ -118,7 +118,7 @@ func stateWithRunechants(h hero.Hero, n int) *gameengine.GameState {
 // is credited once and persists as leftover.
 func TestBest_MauvrionReadNoCarryover(t *testing.T) {
 	h := []card.Card{cards.MauvrionSkiesRed{}, cards.ReadTheRunesRed{}}
-	got := Best(nil, h, Matchup{IncomingDamage: 0}, nil, gameengine.GameStateBuilder().SetHero(heroes.Viserai{}).Build())
+	got := Best(nil, h, nil, gameengine.GameStateBuilder().SetHero(heroes.Viserai{}).Build())
 	if got.Value != 4 {
 		t.Errorf("Value = %d, want 4 (3 Read tokens + 1 Viserai token)", got.Value)
 	}
@@ -133,7 +133,7 @@ func TestBest_MauvrionReadNoCarryover(t *testing.T) {
 // get consumed (no attack in the chain), so leftover = 5.
 func TestBest_MauvrionReadWithCarryover(t *testing.T) {
 	h := []card.Card{cards.MauvrionSkiesRed{}, cards.ReadTheRunesRed{}}
-	got := Best(nil, h, Matchup{IncomingDamage: 0}, nil, stateWithRunechants(heroes.Viserai{}, 1))
+	got := Best(nil, h, nil, stateWithRunechants(heroes.Viserai{}, 1))
 	if got.State.RunechantCount() != 5 {
 		t.Errorf("leftover Runechants = %d, want 5 (1 carryover + 4 created)", got.State.RunechantCount())
 	}
@@ -143,7 +143,7 @@ func TestBest_MauvrionReadWithCarryover(t *testing.T) {
 func TestBest_AetherSlashAloneConsumesCarryover(t *testing.T) {
 	h := []card.Card{cards.AetherSlashRed{}}
 	weapons := []weapon.Weapon{weapons.ReapingBlade{}}
-	got := Best(weapons, h, Matchup{IncomingDamage: 0}, nil, stateWithRunechants(heroes.Viserai{}, 1))
+	got := Best(weapons, h, nil, stateWithRunechants(heroes.Viserai{}, 1))
 	if got.Value != 3 {
 		t.Errorf("Value = %d, want 3 (Reaping Blade attack; carryover consumed without credit)", got.Value)
 	}
@@ -158,7 +158,7 @@ func TestBest_BlessingOfOccultTokensDoNotAffectSameTurnChain(t *testing.T) {
 		cards.MaleficIncantationRed{},
 		cards.BlessingOfOccultRed{},
 	}
-	got := Best(nil, h, Matchup{IncomingDamage: 0}, nil, gameengine.GameStateBuilder().SetHero(testutils.Hero{Intel: 4}).Build())
+	got := Best(nil, h, nil, gameengine.GameStateBuilder().SetHero(testutils.Hero{Intel: 4}).Build())
 	if got.Value != 0 {
 		t.Errorf("Value = %d, want 0 (Malefic needs an attack action to fire; Blessing is deferred)", got.Value)
 	}
@@ -172,7 +172,9 @@ func TestBest_BlessingOfOccultTokensDoNotAffectSameTurnChain(t *testing.T) {
 // no pitch.
 func TestBest_ReduceToRunechantAffordableWithCarryover(t *testing.T) {
 	h := []card.Card{cards.ReduceToRunechantRed{}}
-	got := Best(nil, h, Matchup{IncomingDamage: 4}, nil, stateWithRunechants(heroes.Viserai{}, 1))
+	state := stateWithRunechants(heroes.Viserai{}, 1)
+	state.SetIncomingDamage(4)
+	got := Best(nil, h, nil, state)
 	if got.Value != 5 {
 		t.Errorf("Value = %d, want 5 (Reduce defends at cost 0 thanks to 1 carryover Runechant)", got.Value)
 	}
@@ -182,7 +184,10 @@ func TestBest_ReduceToRunechantAffordableWithCarryover(t *testing.T) {
 // a pitch (Value 0).
 func TestBest_ReduceToRunechantUnaffordableWithoutCarryover(t *testing.T) {
 	h := []card.Card{cards.ReduceToRunechantRed{}}
-	got := Best(nil, h, Matchup{IncomingDamage: 4}, nil, gameengine.GameStateBuilder().SetHero(heroes.Viserai{}).Build())
+	got := Best(nil, h, nil, gameengine.GameStateBuilder().
+		SetHero(heroes.Viserai{}).
+		SetIncomingDamage(4).
+		Build())
 	if got.Value != 0 {
 		t.Errorf("Value = %d, want 0 (Reduce can't pay its cost without Runechants or pitch)", got.Value)
 	}
@@ -192,7 +197,7 @@ func TestBest_ReduceToRunechantUnaffordableWithoutCarryover(t *testing.T) {
 // are available.
 func TestBest_DiscountAttackerPaysByPitchWithoutCarryover(t *testing.T) {
 	h := []card.Card{cards.AmplifyTheArknightRed{}, testutils.BlueAttack{}}
-	got := Best(nil, h, Matchup{IncomingDamage: 0}, nil, gameengine.GameStateBuilder().SetHero(testutils.Hero{Intel: 4}).Build())
+	got := Best(nil, h, nil, gameengine.GameStateBuilder().SetHero(testutils.Hero{Intel: 4}).Build())
 	if got.Value != 6 {
 		t.Errorf("Value = %d, want 6", got.Value)
 	}
@@ -201,7 +206,7 @@ func TestBest_DiscountAttackerPaysByPitchWithoutCarryover(t *testing.T) {
 // Tests that runechants cover part of the printed cost and a tight pitch covers the rest.
 func TestBest_DiscountAttackerPaysByPartialCarryoverAndTightPitch(t *testing.T) {
 	h := []card.Card{cards.AmplifyTheArknightRed{}, testutils.RedAttack{}}
-	got := Best(nil, h, Matchup{IncomingDamage: 0}, nil, stateWithRunechants(testutils.Hero{Intel: 4}, 2))
+	got := Best(nil, h, nil, stateWithRunechants(testutils.Hero{Intel: 4}, 2))
 	if got.Value != 6 {
 		t.Errorf("Value = %d, want 6", got.Value)
 	}
@@ -211,7 +216,10 @@ func TestBest_DiscountAttackerPaysByPartialCarryoverAndTightPitch(t *testing.T) 
 // runechants are available.
 func TestBest_DiscountDefenderPaysByPitchWithoutCarryover(t *testing.T) {
 	h := []card.Card{cards.ReduceToRunechantRed{}, testutils.RedAttack{}}
-	got := Best(nil, h, Matchup{IncomingDamage: 4}, nil, gameengine.GameStateBuilder().SetHero(testutils.Hero{Intel: 4}).Build())
+	got := Best(nil, h, nil, gameengine.GameStateBuilder().
+		SetHero(testutils.Hero{Intel: 4}).
+		SetIncomingDamage(4).
+		Build())
 	if got.Value != 5 {
 		t.Errorf("Value = %d, want 5", got.Value)
 	}
@@ -221,13 +229,13 @@ func TestBest_DiscountDefenderPaysByPitchWithoutCarryover(t *testing.T) {
 // runechants cover the printed cost.
 func TestBest_CarryoverFeedsDiscount(t *testing.T) {
 	h := []card.Card{cards.AmplifyTheArknightRed{}}
-	got := Best(nil, h, Matchup{IncomingDamage: 0}, nil, gameengine.GameStateBuilder().SetHero(testutils.Hero{Intel: 4}).Build())
+	got := Best(nil, h, nil, gameengine.GameStateBuilder().SetHero(testutils.Hero{Intel: 4}).Build())
 	if got.Value != 0 {
 		t.Errorf("no carryover: Value = %d, want 0 (discount insufficient without runechants)", got.Value)
 	}
 	// With 3 runechants carried in, the discount fully covers the cost. Value is just the
 	// Attack() power — consumed carryover runechants aren't re-credited.
-	got = Best(nil, h, Matchup{IncomingDamage: 0}, nil, stateWithRunechants(testutils.Hero{Intel: 4}, 3))
+	got = Best(nil, h, nil, stateWithRunechants(testutils.Hero{Intel: 4}, 3))
 	if got.Value != 6 {
 		t.Errorf("carryover=3: Value = %d, want 6 (Attack only; carryover tokens don't re-credit)", got.Value)
 	}
