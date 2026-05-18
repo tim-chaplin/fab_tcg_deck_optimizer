@@ -6,14 +6,14 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card/cards"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/hero/heroes"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/ids"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
 
-// Tests that Warmonger's Recital's OnHit recycle lands the buffed attack on the bottom
-// of the deck. Hand: Bauble, Warmonger's Recital, Critical Strike. Empty starting deck.
-// Optimal line: pitch Bauble {3} → Warmonger's Recital (cost 1, grants +3{p} and OnHit
-// recycle to Critical Strike) → Critical Strike (now power 7, hits, OnHit pulls it from
-// graveyard onto deck). End-of-turn deck should contain Critical Strike.
+// Warmonger's Recital's OnHit recycle lands the buffed attack on the deck bottom.
+// Line: pitch Bauble {3} → Warmonger's Recital (cost 1, +3{p}, OnHit recycle) → Critical
+// Strike (power 7, hits, OnHit pulls from graveyard onto deck). The turn-2 refill draws
+// the lone deck card, so we look across Hand/Deck/Arsenal.
 func TestWarmongersRecital_OnHitRecyclesToDeck(t *testing.T) {
 	d := deck.New(heroes.Viserai{}, nil, nil)
 	hand := []deck.Card{
@@ -22,8 +22,8 @@ func TestWarmongersRecital_OnHitRecyclesToDeck(t *testing.T) {
 		cards.CriticalStrikeYellow{},
 	}
 	summary := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, nil, hand)
-	csName := cards.CriticalStrikeYellow{}.DisplayName()
-	if summary.State.Deck().NameCounts()[csName] == 0 {
-		t.Fatalf("Critical Strike missing from end-of-turn deck; graveyard=%v", summary.State.Graveyard())
+	if got := countAcrossSurfaces(summary.State, ids.CriticalStrikeYellow); got != 1 {
+		t.Fatalf("Critical Strike total across turn-2 surfaces = %d, want 1 "+
+			"(OnHit recycled it; graveyard=%v)", got, summary.State.Graveyard())
 	}
 }

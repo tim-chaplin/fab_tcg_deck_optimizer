@@ -7,13 +7,11 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/item"
 )
 
-// TurnSummary is the sim-runtime working type returned by Best — the winning card-role
-// assignments plus a *GameState carrying hand / deck / arsenal / graveyard / banished /
-// auras / items / log entries; pure data, no rules engine. State's contents depend on
-// who built the summary: production paths leave the post-chain state Best produced;
-// integration-test entry points may overwrite with a post end-of-turn-cleanup snapshot
-// (pitched cards recycled, arsenal refilled, next hand drawn). The persisted per-deck
-// outcome (deck.BestTurn) lifts only the durable fields off TurnSummary.
+// TurnSummary is the sim-runtime working type returned by Best: winning card-role
+// assignments plus a *GameState snapshot (hand, deck, arsenal, graveyard, banished, auras,
+// items, log entries). Pure data, no rules engine. State's contents depend on the caller —
+// production leaves Best's post-chain state; integration-test entry points overwrite with
+// a post end-of-turn-cleanup snapshot. deck.BestTurn persists only the durable fields.
 type TurnSummary struct {
 	BestLine       []deck.CardAssignment
 	SwungWeapons   []string

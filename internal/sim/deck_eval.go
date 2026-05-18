@@ -198,17 +198,16 @@ func (ev *Evaluator) evaluateParallelImpl(d *deck.Deck, maxRuns int, mp Matchup,
 }
 
 // shuffleScratch holds the per-goroutine slabs the shuffle loop reuses across iterations.
-// Cross-turn aura / item / banished / graveyard / opponentMarked state lives on the master
-// *gameengine.GameState threaded across turns; only per-turn buffers sit here.
+// Cross-turn carryover lives on the master *gameengine.GameState; only per-turn buffers
+// sit here.
 type shuffleScratch struct {
 	weaponsBuf  []weapon.Weapon
 	handBuf     []card.Card
 	heldBuf     []card.Card
 	presentBuf  []bool
 	marginalBuf []deck.CardMarginalStats
-	// recycledBuf backs the per-turn "pitched-to-deck-bottom" slice runOneShuffle hands
-	// to d.PutBottom. Refilled each turn; PutBottom copies into its own backing so this
-	// stays safe to overwrite next turn.
+	// recycledBuf backs the per-turn pitched-to-deck-bottom slice fed to d.PutBottom.
+	// PutBottom copies into its own backing, so this stays safe to overwrite next turn.
 	recycledBuf []deck.Card
 }
 
@@ -239,7 +238,7 @@ func runOneShuffle(masterDeck *deck.Deck, scratch *shuffleScratch, stats *deck.S
 		weapons[i] = w.(weapon.Weapon)
 	}
 
-	// Start-of-turn carryover, threaded across turns; each turn's play.State becomes the
+	// Start-of-turn carryover, threaded across turns; each turn's summary.State becomes the
 	// next master.
 	master := gameengine.GameStateBuilder().
 		SetHero(heroVal).
@@ -263,26 +262,33 @@ func runOneShuffle(masterDeck *deck.Deck, scratch *shuffleScratch, stats *deck.S
 		for i, c := range drawn {
 			h[len(heldBuf)+i] = c.(card.Card)
 		}
-		// Reveals from start-of-turn auras (e.g. Sigil of the Arknight) pop d in place and
-		// append onto h before the chain runs.
-		trigDamage := processAurasAtStartOfTurn(master, d, &h)
 		arsenalIn := master.Arsenal()
-		sortHandByID(h)
-		play := runBestForTurn(weapons, h, mp, d, master, ev)
-		play.Value += trigDamage
+		var summary TurnSummary
+		summary, h = playOneTurn(master, h, d, mp, weapons, ev)
 
-		if recordTurnStats(stats, play, handIdx, handsPerCycle) {
-			recordBestTurn(stats, play, ev, weapons, h, mp, d, master)
+		if recordTurnStats(stats, summary, handIdx, handsPerCycle) {
+			recordBestTurn(stats, summary, ev, weapons, h, mp, d, master)
 		}
-		tallyMarginalPresence(scratch.marginalBuf, idIndex, scratch.presentBuf, h, arsenalIn, float64(play.Value))
+		tallyMarginalPresence(scratch.marginalBuf, idIndex, scratch.presentBuf, h, arsenalIn, float64(summary.Value))
 		var carry turnCarryover
-		carry, scratch.recycledBuf = advanceToNextTurn(play, scratch.recycledBuf, heldBuf)
+		carry, scratch.recycledBuf = advanceToNextTurn(summary, scratch.recycledBuf, heldBuf)
 		d = carry.deck
 		master = carry.master
 		heldBuf = carry.held
 		handIdx++
 	}
 	scratch.heldBuf = heldBuf
+}
+
+// playOneTurn drives one full turn: fire start-of-action-phase aura triggers, run the
+// chain, fold trigger damage into summary.Value. Mutates master. Returns hand (possibly grown
+// by reveals) so callers can rebind their reference.
+func playOneTurn(master *gameengine.GameState, hand []card.Card, d *deck.Deck, mp Matchup, weapons []weapon.Weapon, ev *Evaluator) (TurnSummary, []card.Card) {
+	trigDamage := processAurasAtStartOfTurn(master, d, &hand)
+	sortHandByID(hand)
+	summary := runBestForTurn(weapons, hand, mp, d, master, ev)
+	summary.Value += trigDamage
+	return summary, hand
 }
 
 // turnCarryover bundles the next turn's deck, master GameState, and held hand prefix.
@@ -293,13 +299,12 @@ type turnCarryover struct {
 }
 
 // advanceToNextTurn applies end-of-turn → start-of-next-turn carryover: recycle pitched
-// cards onto the deck bottom (FaB's end-of-turn pitch rule), capture play.State.Hand()
-// as the held prefix before ResetEphemeralState wipes it, and thread play.State forward
-// as the next master with the deck detached. recycledBuf and heldBuf are reused in
-// place when non-nil; pass nil for fresh allocation.
-func advanceToNextTurn(play TurnSummary, recycledBuf []deck.Card, heldBuf []card.Card) (turnCarryover, []deck.Card) {
-	d := play.State.Deck()
-	pitched := pitchedFromBestLine(play.BestLine)
+// cards to deck bottom, capture summary.State.Hand() as the held prefix before
+// ResetEphemeralState wipes it, and thread summary.State forward as the next master with
+// deck detached. recycledBuf and heldBuf are reused in place when non-nil.
+func advanceToNextTurn(summary TurnSummary, recycledBuf []deck.Card, heldBuf []card.Card) (turnCarryover, []deck.Card) {
+	d := summary.State.Deck()
+	pitched := pitchedFromBestLine(summary.BestLine)
 	recycled := recycledBuf[:0]
 	for _, c := range pitched {
 		recycled = append(recycled, c)
@@ -307,14 +312,14 @@ func advanceToNextTurn(play TurnSummary, recycledBuf []deck.Card, heldBuf []card
 	d.PutBottom(recycled)
 
 	var held []card.Card
-	srcHand := play.State.Hand()
+	srcHand := summary.State.Hand()
 	if heldBuf != nil {
 		held = append(heldBuf[:0], srcHand...)
 	} else if len(srcHand) > 0 {
 		held = append([]card.Card(nil), srcHand...)
 	}
 
-	master := play.State
+	master := summary.State
 	master.ResetEphemeralState()
 	master.SetDeck(nil)
 
@@ -358,15 +363,15 @@ func runBestForTurn(
 // recordTurnStats folds one resolved turn's accumulators into stats: bumps Hands /
 // TotalValue, lazily initialises Histogram, and credits the value to FirstCycle /
 // SecondCycle based on handIdx. Returns true when this turn's Value beats stats.Best.
-func recordTurnStats(stats *deck.Stats, play TurnSummary, handIdx, handsPerCycle int) bool {
-	v := float64(play.Value)
+func recordTurnStats(stats *deck.Stats, summary TurnSummary, handIdx, handsPerCycle int) bool {
+	v := float64(summary.Value)
 	stats.TotalValue += v
 	stats.Hands++
 	if stats.Histogram == nil {
 		stats.Histogram = map[int]int{}
 	}
-	stats.Histogram[play.Value]++
-	newBest := play.Value > stats.Best.Value || len(stats.Best.BestLine) == 0
+	stats.Histogram[summary.Value]++
+	newBest := summary.Value > stats.Best.Value || len(stats.Best.BestLine) == 0
 	switch handIdx / handsPerCycle {
 	case 0:
 		stats.FirstCycle.Hands++
@@ -382,16 +387,11 @@ func recordTurnStats(stats *deck.Stats, play TurnSummary, handIdx, handsPerCycle
 // turn's dealt hand. Sized large enough that handBuf never reallocates.
 const startOfTurnRevealRoom = 8
 
-// processAurasAtStartOfTurn fires every triggertype.StartOfTurn handler queued on master,
-// returns the summed damage to fold into the turn's Value, and appends any cards the
-// handlers revealed onto h. Re-arms FiredThisTurn at the same time. Callers must refill
-// h to its full size before this call so reveal-handling auras read the post-draw deck
-// top.
-//
-// Mutates master in place: destroyed auras splice out, revealed cards push onto
-// master.Hand() (then move into h). master.Deck is set to d for the duration so reveal
-// handlers can PopDeckTop, then cleared on return. Cascading reveals: a handler that pops
-// d shrinks the view for the next handler, so two reveal-capable auras see distinct tops.
+// processAurasAtStartOfTurn fires every StartOfTurn aura handler queued on master, returns
+// the summed damage to fold into Value, and appends revealed cards onto h. Re-arms
+// FiredThisTurn. Callers must refill h to full size first so reveal handlers see the
+// post-draw deck top. Cascading reveals: a handler that pops d shrinks the view for the
+// next, so two reveal-capable auras see distinct tops.
 func processAurasAtStartOfTurn(master *gameengine.GameState, d *deck.Deck, h *[]card.Card) int {
 	if len(master.Auras()) == 0 {
 		return 0
@@ -407,11 +407,9 @@ func processAurasAtStartOfTurn(master *gameengine.GameState, d *deck.Deck, h *[]
 	return damage
 }
 
-// pitchedFromBestLine returns the cards in BestLine assigned the Pitch role (excluding the
-// arsenal-in slot, which never recycles). Sorted by ID so the deck-bottom recycle order is
-// canonical by multiset — cache-replay and from-scratch search may pick different tie-break
-// winners among equally-optimal partitions, and canonical sorting keeps their recycled
-// decks byte-identical.
+// pitchedFromBestLine returns BestLine's Pitch-role cards (excluding the arsenal-in slot,
+// which never recycles), sorted by ID so recycled decks stay byte-identical across cache
+// hits and from-scratch searches that pick different equally-optimal partitions.
 func pitchedFromBestLine(line []deck.CardAssignment) []card.Card {
 	var out []card.Card
 	for _, a := range line {
@@ -426,11 +424,10 @@ func pitchedFromBestLine(line []deck.CardAssignment) []card.Card {
 	return out
 }
 
-// sortHandByID sorts hand in place by Card.ID() so the partition recurse enumerates against
-// a canonical order — drops a positional-tie-break source from findBest's leaf comparator
-// and makes the cache-off / cache-on paths produce byte-identical results for matching
-// multisets. Insertion sort beats sort.SliceStable handily at the small hand sizes (~7)
-// where the reflection-based interface comparator dominates wall-clock.
+// sortHandByID sorts hand in place by Card.ID() to give findBest a canonical enumeration
+// order, so cache-off and cache-on paths produce byte-identical results for matching
+// multisets. Insertion sort wins at small hand sizes (~7) where the reflection-based
+// interface comparator dominates wall-clock.
 func sortHandByID(hand []card.Card) {
 	for i := 1; i < len(hand); i++ {
 		c := hand[i]
@@ -447,20 +444,20 @@ func sortHandByID(hand []card.Card) {
 // recordBestTurn clones the winning BestLine into stats.Best and attaches stats.PrintBest
 // with a snapshot of the carryover state / deck / hand / matchup that the print path can
 // replay on demand.
-func recordBestTurn(stats *deck.Stats, play TurnSummary, ev *Evaluator, weapons []weapon.Weapon, h []card.Card, mp Matchup, d *deck.Deck, master *gameengine.GameState) {
-	lineCopy := make([]deck.CardAssignment, len(play.BestLine))
-	copy(lineCopy, play.BestLine)
+func recordBestTurn(stats *deck.Stats, summary TurnSummary, ev *Evaluator, weapons []weapon.Weapon, h []card.Card, mp Matchup, d *deck.Deck, master *gameengine.GameState) {
+	lineCopy := make([]deck.CardAssignment, len(summary.BestLine))
+	copy(lineCopy, summary.BestLine)
 	stats.Best = deck.BestTurn{
-		Value:    play.Value,
+		Value:    summary.Value,
 		BestLine: lineCopy,
 	}
 	weaponsCopy := append([]weapon.Weapon(nil), weapons...)
 	handCopy := append([]card.Card(nil), h...)
 	var cardsPlayed []card.Card
-	if play.State != nil {
-		cardsPlayed = append([]card.Card(nil), play.State.CardsPlayed()...)
+	if summary.State != nil {
+		cardsPlayed = append([]card.Card(nil), summary.State.CardsPlayed()...)
 	}
-	swungCopy := append([]string(nil), play.SwungWeapons...)
+	swungCopy := append([]string(nil), summary.SwungWeapons...)
 	snap := &bestSnapshot{
 		master:       master.CopyPersistentState(),
 		deck:         d.Copy(),
@@ -470,7 +467,7 @@ func recordBestTurn(stats *deck.Stats, play TurnSummary, ev *Evaluator, weapons 
 		bestLine:     lineCopy,
 		cardsPlayed:  cardsPlayed,
 		swungWeapons: swungCopy,
-		value:        play.Value,
+		value:        summary.Value,
 	}
 	stats.PrintBest = func(w io.Writer) { PrintBestTurn(ev, snap, w) }
 }
