@@ -22,10 +22,10 @@ func TestOnHitGoAgain_RazorReflexExtendsToWeaponSwing(t *testing.T) {
 		cards.RazorReflexBlue{},
 		cards.NimblismBlue{},
 	}
-	_, extras := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, nil, hand)
-	if extras.Value != 10 {
+	summary := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, nil, hand)
+	if summary.Value != 10 {
 		t.Fatalf("Value = %d, want 10 (CS buffed to 7 by Nimblism+RR + Reaping 3 via on-hit go-again)\nBestLine: %s",
-			extras.Value, formatBestLine(extras.BestLine))
+			summary.Value, formatBestLine(summary.BestLine))
 	}
 }
 
@@ -39,10 +39,10 @@ func TestOnHitGoAgain_TwoConsecutiveARsExtendToWeaponSwing(t *testing.T) {
 		cards.RazorReflexBlue{},
 		cards.RazorReflexBlue{},
 	}
-	_, extras := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, nil, hand)
-	if extras.Value != 7 {
+	summary := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, nil, hand)
+	if summary.Value != 7 {
 		t.Fatalf("Value = %d, want 7 (Snatch buffed to 4 by 2x RR + Reaping 3 via on-hit go-again)\nBestLine: %s",
-			extras.Value, formatBestLine(extras.BestLine))
+			summary.Value, formatBestLine(summary.BestLine))
 	}
 }
 

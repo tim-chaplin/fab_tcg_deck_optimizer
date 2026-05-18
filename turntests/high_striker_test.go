@@ -32,10 +32,10 @@ func TestHighStriker_TriggersOnNextAttackActionHit(t *testing.T) {
 				cards.CriticalStrikeYellow{},
 				testutils.BluePitch{},
 			}
-			gs, extras := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, nil, hand)
-			if gs.CopperCount() != tc.wantCopper {
+			summary := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, nil, hand)
+			if summary.State.CopperCount() != tc.wantCopper {
 				t.Fatalf("Copper = %d, want %d (next attack hit fires the rider)\nBestLine: %s",
-					gs.CopperCount(), tc.wantCopper, formatBestLine(extras.BestLine))
+					summary.State.CopperCount(), tc.wantCopper, formatBestLine(summary.BestLine))
 			}
 		})
 	}

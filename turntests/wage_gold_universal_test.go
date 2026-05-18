@@ -19,9 +19,9 @@ func TestWageGold_UniversalTriggersViseraiOnPlay(t *testing.T) {
 		testutils.BluePitch{},
 		testutils.BluePitch{},
 	}
-	_, extras := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, nil, hand)
-	if extras.Value != 8 {
+	summary := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, nil, hand)
+	if summary.Value != 8 {
 		t.Fatalf("Value = %d, want 8 (Wage Gold 7 + Viserai-via-Universal runechant +1)\nBestLine: %s",
-			extras.Value, formatBestLine(extras.BestLine))
+			summary.Value, formatBestLine(summary.BestLine))
 	}
 }

@@ -8,9 +8,12 @@ import (
 )
 
 // TurnSummary is the sim-runtime working type returned by Best — the winning card-role
-// assignments plus the post-chain *GameState the next turn inherits. State carries hand /
-// deck / arsenal / graveyard / banished / auras / items / log entries; pure data, no rules
-// engine. The persisted per-deck outcome (deck.BestTurn) lifts only the durable fields.
+// assignments plus a *GameState carrying hand / deck / arsenal / graveyard / banished /
+// auras / items / log entries; pure data, no rules engine. State's contents depend on
+// who built the summary: production paths leave the post-chain state Best produced;
+// integration-test entry points may overwrite with a post end-of-turn-cleanup snapshot
+// (pitched cards recycled, arsenal refilled, next hand drawn). The persisted per-deck
+// outcome (deck.BestTurn) lifts only the durable fields off TurnSummary.
 type TurnSummary struct {
 	BestLine       []deck.CardAssignment
 	SwungWeapons   []string

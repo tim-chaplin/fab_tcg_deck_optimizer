@@ -11,9 +11,8 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapon"
 )
 
-// TurnExtras carries a turn's chain results plus the following turn's start-of-turn aura
-// tick (damage credit and any auras that exhausted into graveyard). TriggerDamage /
-// TriggerGraveyard are zero unless populated by a multi-turn entry point.
+// TurnExtras carries one turn's chain result (Value, BestLine) plus the following turn's
+// start-of-turn aura tick: damage credited and any auras that exhausted into graveyard.
 type TurnExtras struct {
 	Value            int
 	BestLine         []deck.CardAssignment
@@ -21,11 +20,11 @@ type TurnExtras struct {
 	TriggerGraveyard []deck.Card
 }
 
-// EvalOneTurnForTesting drives one turn and returns the post end-of-turn-cleanup GameState
-// (pitched cards recycled, arsenal refilled, next hand drawn) plus the turn's chain extras.
-// initial seeds carryover (Hero / Arsenal / Auras / Items / Banished / Graveyard /
-// OpponentMarked); nil means a clean start inheriting the deck's hero.
-func EvalOneTurnForTesting(masterDeck *deck.Deck, mp Matchup, initial *gameengine.GameState, initialHand []deck.Card) (*gameengine.GameState, TurnExtras) {
+// EvalOneTurnForTesting drives one turn and returns its TurnSummary. State reflects the
+// post end-of-turn-cleanup boundary: pitched cards recycled to deck bottom, arsenal refilled
+// if vacant, next hand drawn. initial seeds carryover (Hero, Arsenal, Auras, Items, Banished,
+// Graveyard, OpponentMarked); nil means a clean start inheriting the deck's hero.
+func EvalOneTurnForTesting(masterDeck *deck.Deck, mp Matchup, initial *gameengine.GameState, initialHand []deck.Card) TurnSummary {
 	d := masterDeck.Copy()
 	h := d.Hero.(hero.Hero)
 	var master *gameengine.GameState
@@ -43,13 +42,13 @@ func EvalOneTurnForTesting(masterDeck *deck.Deck, mp Matchup, initial *gameengin
 	master.SetArcaneIncomingDamage(mp.ArcaneIncomingDamage)
 	handSize := h.Intelligence()
 	if handSize <= 0 {
-		return gameengine.GameStateBuilder().SetHero(h).Build(), TurnExtras{}
+		return TurnSummary{State: gameengine.GameStateBuilder().SetHero(h).Build()}
 	}
 	if initialHand == nil && d.Size() < handSize {
-		return gameengine.GameStateBuilder().SetHero(h).Build(), TurnExtras{}
+		return TurnSummary{State: gameengine.GameStateBuilder().SetHero(h).Build()}
 	}
 	if initialHand != nil && (len(initialHand) == 0 || len(initialHand) > handSize) {
-		return gameengine.GameStateBuilder().SetHero(h).Build(), TurnExtras{}
+		return TurnSummary{State: gameengine.GameStateBuilder().SetHero(h).Build()}
 	}
 	hand := make([]card.Card, 0, handSize+startOfTurnRevealRoom)
 	if initialHand != nil {
@@ -67,10 +66,6 @@ func EvalOneTurnForTesting(masterDeck *deck.Deck, mp Matchup, initial *gameengin
 		weapons[i] = w.(weapon.Weapon)
 	}
 	play := best(weapons, hand, mp, d, master)
-	extras := TurnExtras{
-		Value:    play.Value,
-		BestLine: append([]deck.CardAssignment(nil), play.BestLine...),
-	}
 	turnDraws := play.State.CardsDrawn()
 
 	carry, _ := advanceToNextTurn(play, nil, nil)
@@ -78,22 +73,21 @@ func EvalOneTurnForTesting(masterDeck *deck.Deck, mp Matchup, initial *gameengin
 	master = carry.master
 	held := carry.held
 
-	if len(held) >= handSize || d.Size() < handSize-len(held) {
-		// Not enough deck left to refill — return post-recycle state with held cards intact.
-		return snapshotState(master, d, held, play.Value, turnDraws), extras
+	nextHand := held
+	if !(len(held) >= handSize || d.Size() < handSize-len(held)) {
+		nextHand = make([]card.Card, 0, handSize)
+		nextHand = append(nextHand, held...)
+		for _, c := range d.Draw(handSize - len(held)) {
+			nextHand = append(nextHand, c.(card.Card))
+		}
 	}
-
-	nextHand := make([]card.Card, 0, handSize)
-	nextHand = append(nextHand, held...)
-	for _, c := range d.Draw(handSize - len(held)) {
-		nextHand = append(nextHand, c.(card.Card))
-	}
-	return snapshotState(master, d, nextHand, play.Value, turnDraws), extras
+	play.State = snapshotState(master, d, nextHand, play.Value, turnDraws)
+	return play
 }
 
 // EvalTwoTurnsForTesting drives two turns, threading carryover between them, and returns
-// the start-of-turn-3 GameState plus per-turn extras. extras1's TriggerDamage/Graveyard
-// report the start-of-turn-2 aura tick; extras2's report start-of-turn-3. Snapshot
+// the start-of-turn-3 GameState plus per-turn TurnExtras. Each extras' TriggerDamage and
+// TriggerGraveyard report the following turn's start-of-turn aura tick. The snapshot
 // truncates at the furthest turn that ran when refills or validation fall short.
 func EvalTwoTurnsForTesting(masterDeck *deck.Deck, mp Matchup, initial *gameengine.GameState, hand1 []deck.Card) (*gameengine.GameState, TurnExtras, TurnExtras) {
 	d := masterDeck.Copy()

@@ -19,9 +19,9 @@ func TestHighStriker_WeaponHitCreatesCopper(t *testing.T) {
 		testutils.BluePitch{},
 		testutils.BluePitch{},
 	}
-	gs, extras := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, nil, hand)
-	if got := gs.CopperCount(); got != 6 {
+	summary := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, nil, hand)
+	if got := summary.State.CopperCount(); got != 6 {
 		t.Fatalf("Copper at start of next turn = %d, want 6 (HSR rider on Club swing)\nBestLine: %s",
-			got, formatBestLine(extras.BestLine))
+			got, formatBestLine(summary.BestLine))
 	}
 }
