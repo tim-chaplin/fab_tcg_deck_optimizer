@@ -3,6 +3,7 @@ package gameengine
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapon"
 )
 
 // GameState owns the raw per-turn data — every slice, every scalar, every flag the
@@ -12,7 +13,8 @@ import (
 // *GameState and adds the rules-engine API cards see; the unexported fields stay
 // package-private so external callers can only touch them through methods.
 type GameState struct {
-	hero Hero
+	hero    Hero
+	weapons []weapon.Weapon // currently-equipped weapons; persistent across turns
 
 	hand      []card.Card
 	deck      *deck.Deck // owned scratch; refilled on Reset via CopyFrom
@@ -209,11 +211,11 @@ func resetCardSlice(pooled, src []card.Card) []card.Card {
 // CopyPersistentState is a lighter variant of Copy that copies only the cross-turn
 // persistent state — the inverse of ResetEphemeralState's reset set. Hand, pitched,
 // defenders, cardsPlayed, cardsRemaining, triggers, deck, and logger are left nil
-// (callers that want those populated set them after copying). Graveyard and banished
-// are shallow-copied (slice header with cap=len, sharing the backing) so append-only
-// mutations on the copy allocate fresh backings on first write and the receiver's
-// backings stay intact. Auras and items get full per-entry copies because their
-// fire-this-turn / count fields mutate independently of the source.
+// (callers that want those populated set them after copying). Graveyard, banished, and
+// weapons are shallow-copied (slice header with cap=len, sharing the backing) so
+// append-only mutations on the copy allocate fresh backings on first write and the
+// receiver's backings stay intact. Auras and items get full per-entry copies because
+// their fire-this-turn / count fields mutate independently of the source.
 func (gs *GameState) CopyPersistentState() *GameState {
 	out := *gs
 	out.hand = nil
@@ -229,6 +231,9 @@ func (gs *GameState) CopyPersistentState() *GameState {
 	}
 	if n := len(gs.banished); n > 0 {
 		out.banished = gs.banished[:n:n]
+	}
+	if n := len(gs.weapons); n > 0 {
+		out.weapons = gs.weapons[:n:n]
 	}
 	if len(gs.auras) > 0 {
 		out.auras = make([]Aura, len(gs.auras))
@@ -276,6 +281,11 @@ func (gs *GameState) CopyPersistentStateFrom(src *GameState) {
 		gs.banished = src.banished[:n:n]
 	} else {
 		gs.banished = nil
+	}
+	if n := len(src.weapons); n > 0 {
+		gs.weapons = src.weapons[:n:n]
+	} else {
+		gs.weapons = nil
 	}
 	if n := len(src.auras); n > 0 {
 		if cap(pooledAuras) >= n {
@@ -359,10 +369,12 @@ func (gs *GameState) ResetEphemeralState() {
 
 // === Pure state accessors. No cacheable flips; sim uses these to drive the chain runner. ===
 
-func (gs *GameState) Hero() Hero          { return gs.hero }
-func (gs *GameState) SetHero(h Hero)      { gs.hero = h }
-func (gs *GameState) IsCacheable() bool   { return gs.cacheable }
-func (gs *GameState) SetCacheable(v bool) { gs.cacheable = v }
+func (gs *GameState) Hero() Hero                   { return gs.hero }
+func (gs *GameState) SetHero(h Hero)               { gs.hero = h }
+func (gs *GameState) Weapons() []weapon.Weapon     { return gs.weapons }
+func (gs *GameState) SetWeapons(w []weapon.Weapon) { gs.weapons = w }
+func (gs *GameState) IsCacheable() bool            { return gs.cacheable }
+func (gs *GameState) SetCacheable(v bool)          { gs.cacheable = v }
 
 func (gs *GameState) Hand() []card.Card     { return gs.hand }
 func (gs *GameState) SetHand(h []card.Card) { gs.hand = h }

@@ -11,17 +11,15 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/gameengine"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapon"
 )
 
 // turnSnapshot holds the inputs needed to drive a single playSequence call matching the
 // eval-time winner. cardsPlayed is the exact resolution order from the winning turn's
-// CardsPlayed list. Matchup figures ride on master.
+// CardsPlayed list. Matchup figures and equipped weapons ride on master.
 type turnSnapshot struct {
 	master       *gameengine.GameState
 	deck         *deck.Deck
 	hand         []card.Card
-	weapons      []weapon.Weapon
 	bestLine     []deck.CardAssignment
 	cardsPlayed  []card.Card
 	swungWeapons []string
@@ -39,7 +37,7 @@ func PrintBestTurn(ev *Evaluator, snap *turnSnapshot, w io.Writer) {
 	fmt.Fprintf(w, "Best turn played (value %d):\n", snap.value)
 	writeSnapshotSummary(w, "Start of turn:", snap.master, snap.hand, snap.bestLine)
 
-	summary, _ := playOneTurn(snap.master, snap.hand, snap.deck, snap.weapons, ev, snap, gameengine.NewStreamLogger(w))
+	summary, _ := playOneTurn(snap.master, snap.hand, snap.deck, ev, snap, gameengine.NewStreamLogger(w))
 
 	writeSnapshotSummary(w, "End of turn:", summary.State, nil, snap.bestLine)
 }
@@ -59,8 +57,9 @@ func runReplayForTurn(snapshot *turnSnapshot, logger card.Logger) TurnSummary {
 	arsenalInIdx := matchedCardIndex(snapshot.cardsPlayed, arsenalCardIn, snapshot.bestLine, deck.Attack)
 	arsenalDefenderIdx := matchedCardIndex(defenders, arsenalCardIn, snapshot.bestLine, deck.Defend)
 
-	bufs := newAttackBufs(len(snapshot.cardsPlayed), len(snapshot.weapons), snapshot.weapons)
-	ctx := newSequenceContext(snapshot.master, snapshot.weapons, snapshot.cardsPlayed, defenders, pitched, held, snapshot.deck, bufs, 0, arsenalInIdx, arsenalAtChainStart)
+	weapons := snapshot.master.Weapons()
+	bufs := newAttackBufs(len(snapshot.cardsPlayed), len(weapons), weapons)
+	ctx := newSequenceContext(snapshot.master, weapons, snapshot.cardsPlayed, defenders, pitched, held, snapshot.deck, bufs, 0, arsenalInIdx, arsenalAtChainStart)
 	ctx.replayLogger = logger
 	ctx.attackPitchPerm = assignmentCards(attackPitches)
 	ctx.attackPitchVals = pitchValues(attackPitches)

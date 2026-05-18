@@ -201,18 +201,16 @@ func (ev *Evaluator) evaluateParallelImpl(d *deck.Deck, maxRuns int, mp Matchup,
 // Cross-turn carryover lives on the master *gameengine.GameState; only per-turn buffers
 // sit here.
 type shuffleScratch struct {
-	weaponsBuf  []weapon.Weapon
 	handBuf     []card.Card
 	presentBuf  []bool
 	marginalBuf []deck.CardMarginalStats
 }
 
-// newShuffleScratch sizes the per-shuffle reusable buffers for a deck of (weaponCount,
-// deckSize, handSize) shape. Called once per worker; the returned scratch is reused across
-// every shuffle that worker runs.
-func newShuffleScratch(weaponCount, _, handSize, numUniqueIDs int) *shuffleScratch {
+// newShuffleScratch sizes the per-shuffle reusable buffers for a deck of (deckSize, handSize)
+// shape. Called once per worker; the returned scratch is reused across every shuffle that
+// worker runs.
+func newShuffleScratch(_, _, handSize, numUniqueIDs int) *shuffleScratch {
 	return &shuffleScratch{
-		weaponsBuf:  make([]weapon.Weapon, weaponCount),
 		handBuf:     make([]card.Card, handSize, handSize+startOfTurnRevealRoom),
 		presentBuf:  make([]bool, numUniqueIDs),
 		marginalBuf: make([]deck.CardMarginalStats, numUniqueIDs),
@@ -227,14 +225,9 @@ func runOneShuffle(masterDeck *deck.Deck, scratch *shuffleScratch, stats *deck.S
 	d := masterDeck.Copy()
 	d.Shuffle(rng)
 
-	heroVal := d.Hero.(hero.Hero)
-	weapons := scratch.weaponsBuf
-	for i, w := range d.Weapons {
-		weapons[i] = w.(weapon.Weapon)
-	}
-
 	master := gameengine.GameStateBuilder().
-		SetHero(heroVal).
+		SetHero(d.Hero.(hero.Hero)).
+		SetWeapons(weaponsFromDeck(d)).
 		SetIncomingDamage(mp.IncomingDamage).
 		SetArcaneIncomingDamage(mp.ArcaneIncomingDamage).
 		Build()
@@ -249,7 +242,7 @@ func runOneShuffle(masterDeck *deck.Deck, scratch *shuffleScratch, stats *deck.S
 	maxHands := 2 * handsPerCycle
 	for handIdx := 0; handIdx < maxHands; handIdx++ {
 		preDeckSize := d.Size()
-		summary, snap := playOneTurn(master, h, d, weapons, ev, nil, nil)
+		summary, snap := playOneTurn(master, h, d, ev, nil, nil)
 
 		if recordTurnStats(stats, summary, handIdx, handsPerCycle) {
 			recordBestTurnFromSnap(stats, summary, ev, snap)
@@ -267,6 +260,16 @@ func runOneShuffle(masterDeck *deck.Deck, scratch *shuffleScratch, stats *deck.S
 			break
 		}
 	}
+}
+
+// weaponsFromDeck widens d.Weapons (typed as []deck.Weapon) into the []weapon.Weapon the
+// chain runner consumes.
+func weaponsFromDeck(d *deck.Deck) []weapon.Weapon {
+	weapons := make([]weapon.Weapon, len(d.Weapons))
+	for i, w := range d.Weapons {
+		weapons[i] = w.(weapon.Weapon)
+	}
+	return weapons
 }
 
 // countPitched returns the number of Pitch-role entries in bestLine, excluding the arsenal
@@ -297,7 +300,6 @@ func playOneTurn(
 	master *gameengine.GameState,
 	hand []card.Card,
 	d *deck.Deck,
-	weapons []weapon.Weapon,
 	ev *Evaluator,
 	snapshot *turnSnapshot,
 	logger card.Logger,
@@ -306,10 +308,9 @@ func playOneTurn(
 
 	if snapshot == nil {
 		snap = &turnSnapshot{
-			master:  master.CopyPersistentState(),
-			deck:    d.Copy(),
-			hand:    append([]card.Card(nil), hand...),
-			weapons: append([]weapon.Weapon(nil), weapons...),
+			master: master.CopyPersistentState(),
+			deck:   d.Copy(),
+			hand:   append([]card.Card(nil), hand...),
 		}
 	}
 
@@ -321,7 +322,7 @@ func playOneTurn(
 		// the caller needs for its end-of-turn snapshot.
 		return summary, nil
 	}
-	summary = runBestForTurn(weapons, hand, d, master, ev)
+	summary = runBestForTurn(master.Weapons(), hand, d, master, ev)
 
 	// Chain ran on a shallow copy of d that may have drawn mid-turn; use the winner's
 	// post-chain deck for recycle / next-turn draw.

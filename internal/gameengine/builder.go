@@ -3,6 +3,7 @@ package gameengine
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapon"
 )
 
 // StateBuilder fluently constructs a *GameState. Callers chain setters and finish
@@ -46,6 +47,10 @@ func (b *StateBuilder) Build() *GameState { return b.gs }
 
 // SetHero installs h as the active hero.
 func (b *StateBuilder) SetHero(h Hero) *StateBuilder { b.gs.hero = h; return b }
+
+// SetWeapons installs the equipped weapons. Persistent across turns; mid-game equip /
+// unequip card abilities mutate via GameState.SetWeapons.
+func (b *StateBuilder) SetWeapons(w []weapon.Weapon) *StateBuilder { b.gs.weapons = w; return b }
 
 // SetArsenal installs c into the arsenal slot.
 func (b *StateBuilder) SetArsenal(c card.Card) *StateBuilder { b.gs.arsenal = c; return b }
