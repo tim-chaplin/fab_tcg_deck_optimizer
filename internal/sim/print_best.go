@@ -43,7 +43,7 @@ func PrintBestTurn(ev *Evaluator, snap *bestSnapshot, w io.Writer) {
 	writeSnapshotSummary(w, "Start of turn:", snap.master, snap.hand, snap.bestLine)
 
 	snap.logger = gameengine.NewStreamLogger(w)
-	summary, _ := playOneTurn(snap.master, snap.hand, snap.deck, snap.mp, snap.weapons, ev, 0, nil, nil, snap)
+	summary, _, _, _ := playOneTurn(snap.master, snap.hand, snap.deck, snap.mp, snap.weapons, ev, 0, nil, snap)
 
 	writeSnapshotSummary(w, "End of turn:", summary.State, nil, snap.bestLine)
 }
