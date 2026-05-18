@@ -1,13 +1,8 @@
 // Package token owns the factories for FaB's five built-in tokens: the item tokens
 // Gold / Silver / Copper, and the aura-flavored tokens Runechant / Ponder. Each factory
-// returns the concrete value the engine stores — *item.Item for the item tokens, *aura.Aura
-// for the aura tokens — wiring in the per-token name, identifier, and (for auras) the
-// trigger type + inlined fire closure.
-//
-// The activated-ability card types backing the item tokens (cards.GoldToken et al.) live
-// in internal/cards alongside other card implementations. The narrow consumer interfaces
-// the aura-token fire closures type-assert against (GameEngine, Aura) live in
-// interfaces.go.
+// returns the concrete value the engine stores — *item.Item for item tokens, *aura.Aura
+// for aura tokens — wiring in the name, identifier, and (for auras) the trigger type +
+// fire closure.
 package token
 
 import (

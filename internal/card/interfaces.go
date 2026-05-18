@@ -30,8 +30,7 @@ type GameEngine interface {
 
 	// Auras: per-trigger-type registration. Cards supply the handler and initial count;
 	// the engine builds the underlying aura. Source is derived from self.Card. Handler
-	// signatures are inlined — the named aura.Handler type lives in internal/aura, and inlining
-	// here keeps internal/card free of any internal/aura import.
+	// signatures are inlined to keep this package import-free of the concrete aura type.
 	CreateStartOfTurnAura(self *CardState, handler func(GameEngine, Logger, Aura), count int)
 	CreateOncePerTurnAttackActionAura(self *CardState, handler func(GameEngine, Logger, Aura), count int)
 	// DestroyAura removes the aura currently being fired. addToGraveyard sends the
@@ -42,8 +41,7 @@ type GameEngine interface {
 
 	// Triggers: one-shot, per-trigger-type. AddHitTrigger's filter narrows the firing event
 	// to a card-type predicate (typically TypeSet.IsAttack or TypeSet.IsAttackAction); nil
-	// = no filter. Handler signatures are inlined for the same reason as the aura methods
-	// above — the named trigger.Handler type lives in internal/trigger.
+	// = no filter. Handler signatures are inlined for the same reason as the aura methods.
 	AddHitTrigger(self *CardState, handler func(GameEngine, Logger, Trigger), filter func(TypeSet) bool)
 	AddEndOfTurnTrigger(self *CardState, handler func(GameEngine, Logger, Trigger))
 
@@ -179,10 +177,8 @@ type Trigger interface {
 	CardName() string
 }
 
-// Hero is the narrow view of the active hero internal/card needs. Sim's richer Hero interface
-// satisfies it; this package only reads Class / Types so card-side helpers can answer
-// "what's the current hero's class?" without importing sim. CurrentHero (in hero.go) holds
-// the active value; sim wires it at run start.
+// Hero is the narrow view of the active hero internal/card needs (Class / Types only) so
+// card-side helpers can answer "what's the current hero's class?" without importing sim.
 type Hero interface {
 	Class() CardType
 	Types() TypeSet

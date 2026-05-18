@@ -1,11 +1,9 @@
-// Package hero defines the Hero interface a FaB hero card satisfies. Sim and its external
-// consumers (cmd/fabsim, internal/textio) call methods on hero.Hero values; concrete heroes
-// live in the sibling internal/hero/heroes subpackage.
+// Package hero defines the Hero interface a FaB hero card satisfies. Concrete heroes live
+// in the sibling internal/hero/heroes subpackage.
 //
-// The OnCardPlayed signature uses package-local GameEngine / Logger interfaces (declared
-// in interfaces.go) so internal/hero doesn't depend on internal/card.GameEngine or
-// internal/card.Logger. The card-typed arguments and constants (CardType / TypeSet / Card)
-// are foundational identification types and remain imported from internal/card.
+// OnCardPlayed takes package-local GameEngine / Logger interfaces (interfaces.go) to avoid
+// depending on internal/card.GameEngine. Card-typed arguments and identification constants
+// (CardType / TypeSet / Card) are imported from internal/card.
 package hero
 
 import (

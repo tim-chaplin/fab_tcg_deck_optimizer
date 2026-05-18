@@ -11,11 +11,8 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/triggertype"
 )
 
-// Handler is the typed trigger handler signature. Lives in internal/trigger (not internal/card)
-// because the shape is meaningful only to trigger: it's the signature stored on each
-// Trigger and called at every Fire. card.GameEngine.AddHitTrigger et al. inline the
-// function type in their parameter declarations so internal/card doesn't need to import
-// internal/trigger.
+// Handler is the typed trigger handler signature: the func stored on each Trigger and
+// called at every Fire.
 type Handler func(card.GameEngine, card.Logger, card.Trigger)
 
 // TypeFilter narrows the firing site to a card-type predicate. nil means any matching

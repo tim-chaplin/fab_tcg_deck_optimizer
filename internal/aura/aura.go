@@ -1,10 +1,6 @@
 // Package aura owns the concrete Aura type — a persistent hook entry that fires at a
 // scheduled trigger type (start of turn, attack, attack action, end of turn). Card-backed
 // and token-backed auras share the same struct; SourceCard distinguishes them.
-//
-// Handler is the aura-domain function shape; the package's own ctx struct implements
-// card.Aura so handler bodies receive the typed surface directly without an outer
-// wrapping layer.
 package aura
 
 import (
@@ -13,10 +9,8 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/triggertype"
 )
 
-// Handler is the typed aura handler signature. Lives in internal/aura (not internal/card) because
-// the shape is meaningful only to aura: it's the signature stored on each Aura and called
-// at every Fire. card.GameEngine.CreateStartOfTurnAura et al. inline the function type in
-// their parameter declarations so internal/card doesn't need to import internal/aura.
+// Handler is the typed aura handler signature: the func stored on each Aura and called at
+// every Fire.
 type Handler func(card.GameEngine, card.Logger, card.Aura)
 
 // Aura is the concrete entry the engine stores in its persistent hook list. source is
@@ -83,8 +77,8 @@ func (a *Aura) CardID() ids.CardID {
 }
 
 // SourceCard returns the originating source as `any` — nil for token-backed auras, the
-// stored card.Card otherwise. Boxed to `any` so the gameengine.Aura interface declaration
-// can avoid referencing card.Card directly; consumers assert back.
+// stored card.Card otherwise. Boxed to `any` so the interface declaration can avoid
+// referencing card.Card directly; consumers assert back.
 func (a *Aura) SourceCard() any {
 	if a.source == nil {
 		return nil
@@ -108,10 +102,9 @@ func (a *Aura) Fire(engine card.GameEngine, logger card.Logger) {
 	a.activeEngine = nil
 }
 
-// Copy returns a deep copy boxed as any so the gameengine.Aura interface declaration can
-// avoid referencing its own type — letting concrete impls satisfy without importing.
-// activeEngine is cleared on the copy so a per-permutation aura clone starts with no
-// stale firing-engine pointer.
+// Copy returns a deep copy boxed as any so the consumer interface can avoid referencing
+// its own concrete type. activeEngine is cleared on the copy so a per-permutation aura
+// clone starts with no stale firing-engine pointer.
 func (a *Aura) Copy() any {
 	out := *a
 	out.activeEngine = nil
