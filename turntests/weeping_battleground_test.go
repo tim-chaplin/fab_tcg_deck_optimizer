@@ -30,7 +30,7 @@ func (zeroDefenseAura) Play(card.GameEngine, card.Logger, *card.CardState) {}
 // Tests that Weeping Battleground banishes a same-turn-blocked aura from the graveyard
 // for 1 arcane while also defending.
 func TestBest_WeepingBattlegroundBanishesAuraFromGraveyard(t *testing.T) {
-	h := []deck.Card{cards.WeepingBattlegroundRed{}, zeroDefenseAura{}}
+	h := []card.Card{cards.WeepingBattlegroundRed{}, zeroDefenseAura{}}
 	d := deck.New(testutils.Hero{Intel: 4}, nil, nil)
 	summary := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 4}, nil, h)
 	if summary.Value != 4 {
@@ -42,7 +42,7 @@ func TestBest_WeepingBattlegroundBanishesAuraFromGraveyard(t *testing.T) {
 // TestBest_WeepingBattlegroundFizzlesWithoutAura: hand is just Weeping Battleground — no
 // aura anywhere, so the banish rider fizzles. WB still blocks 3 of the 4 incoming. Value = 3.
 func TestBest_WeepingBattlegroundFizzlesWithoutAura(t *testing.T) {
-	h := []deck.Card{cards.WeepingBattlegroundRed{}}
+	h := []card.Card{cards.WeepingBattlegroundRed{}}
 	d := deck.New(testutils.Hero{Intel: 4}, nil, nil)
 	summary := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 4}, nil, h)
 	if summary.Value != 3 {

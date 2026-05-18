@@ -3,6 +3,7 @@ package turntests
 import (
 	"testing"
 
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card/cards"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/hero/heroes"
@@ -16,7 +17,7 @@ import (
 // the lone deck card, so we look across Hand/Deck/Arsenal.
 func TestWarmongersRecital_OnHitRecyclesToDeck(t *testing.T) {
 	d := deck.New(heroes.Viserai{}, nil, nil)
-	hand := []deck.Card{
+	hand := []card.Card{
 		cards.TitaniumBaubleBlue{},
 		cards.WarmongersRecitalRed{},
 		cards.CriticalStrikeYellow{},

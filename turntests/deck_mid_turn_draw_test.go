@@ -172,7 +172,7 @@ func TestEvalOneTurn_MidTurnDrawHeldWhenArsenalFull(t *testing.T) {
 // Tests that without go-again the drawn card and a Held card share the post-chain pool —
 // exactly one arsenals, the other anchors turn 2's hand (either outcome is accepted).
 func TestEvalOneTurn_MidTurnDrawSansGoAgainStaysHeld(t *testing.T) {
-	initialHand := []deck.Card{
+	initialHand := []card.Card{
 		cards.SnatchRed{},
 		cards.ToughenUpBlue{},
 	}
@@ -230,7 +230,7 @@ func TestEvalOneTurn_MidTurnDrawSansGoAgainStaysHeld(t *testing.T) {
 
 // Tests that DrawOne against an empty deck is a no-op (no panic, no spurious draw).
 func TestEvalOneTurn_DrawOneOnEmptyDeckIsNoop(t *testing.T) {
-	initialHand := []deck.Card{cards.SnatchRed{}}
+	initialHand := []card.Card{cards.SnatchRed{}}
 	d := deck.New(heroes.Viserai{}, nil, nil)
 	summary := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, nil, initialHand)
 

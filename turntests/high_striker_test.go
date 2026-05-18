@@ -27,7 +27,7 @@ func TestHighStriker_TriggersOnNextAttackActionHit(t *testing.T) {
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
 			d := deck.New(heroes.Viserai{}, nil, fillerDeck())
-			hand := []deck.Card{
+			hand := []card.Card{
 				tc.striker,
 				cards.CriticalStrikeYellow{},
 				testutils.BluePitch{},

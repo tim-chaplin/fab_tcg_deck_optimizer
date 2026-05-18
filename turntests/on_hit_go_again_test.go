@@ -4,6 +4,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card/cards"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/hero/heroes"
@@ -16,7 +17,7 @@ import (
 // buff Critical Strike to 7, RR's on-hit go-again grants AP for Reaping Blade (3).
 func TestOnHitGoAgain_RazorReflexExtendsToWeaponSwing(t *testing.T) {
 	d := deck.New(heroes.Viserai{}, []deck.Weapon{weapons.ReapingBlade{}}, fillerDeck())
-	hand := []deck.Card{
+	hand := []card.Card{
 		testutils.BluePitch{},
 		cards.CriticalStrikeRed{},
 		cards.RazorReflexBlue{},
@@ -33,7 +34,7 @@ func TestOnHitGoAgain_RazorReflexExtendsToWeaponSwing(t *testing.T) {
 // buff Snatch to 4, the second RR's on-hit go-again grants AP for Reaping Blade (3).
 func TestOnHitGoAgain_TwoConsecutiveARsExtendToWeaponSwing(t *testing.T) {
 	d := deck.New(heroes.Viserai{}, []deck.Weapon{weapons.ReapingBlade{}}, fillerDeck())
-	hand := []deck.Card{
+	hand := []card.Card{
 		testutils.BluePitch{},
 		cards.SnatchBlue{},
 		cards.RazorReflexBlue{},

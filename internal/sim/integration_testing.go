@@ -15,7 +15,7 @@ import (
 // EvalOneTurnForTesting drives one turn and returns its TurnSummary. State reflects the
 // end-of-turn boundary (pitched recycled, next hand drawn; partial or empty hands OK).
 // initial seeds carryover; nil starts clean inheriting the deck's hero.
-func EvalOneTurnForTesting(masterDeck *deck.Deck, mp Matchup, initial *gameengine.GameState, initialHand []deck.Card) TurnSummary {
+func EvalOneTurnForTesting(masterDeck *deck.Deck, mp Matchup, initial *gameengine.GameState, initialHand []card.Card) TurnSummary {
 	d, master, hand, handSize, weapons, ok := setupTurn(masterDeck, mp, initial, initialHand)
 	if !ok {
 		return TurnSummary{State: gameengine.GameStateBuilder().SetHero(d.Hero.(hero.Hero)).Build()}
@@ -28,7 +28,7 @@ func EvalOneTurnForTesting(masterDeck *deck.Deck, mp Matchup, initial *gameengin
 // Value folds in its own start-of-turn trigger damage. Turn 2 runs even with an empty or
 // partial hand. The returned turn1.State is an independent snapshot; turn2 mutates the
 // shared master.
-func EvalTwoTurnsForTesting(masterDeck *deck.Deck, mp Matchup, initial *gameengine.GameState, hand1 []deck.Card) (TurnSummary, TurnSummary) {
+func EvalTwoTurnsForTesting(masterDeck *deck.Deck, mp Matchup, initial *gameengine.GameState, hand1 []card.Card) (TurnSummary, TurnSummary) {
 	d, master, hand, handSize, weapons, ok := setupTurn(masterDeck, mp, initial, hand1)
 	if !ok {
 		return TurnSummary{State: gameengine.GameStateBuilder().SetHero(d.Hero.(hero.Hero)).Build()}, TurnSummary{}
@@ -45,7 +45,7 @@ func EvalTwoTurnsForTesting(masterDeck *deck.Deck, mp Matchup, initial *gameengi
 // setupTurn assembles the per-turn fixture: deck copy, master *GameState seeded with
 // carryover, dealt hand, handSize, weapon list. ok=false on invalid inputs (handSize <= 0;
 // initialHand empty or oversized; no initialHand and deck can't deal handSize).
-func setupTurn(masterDeck *deck.Deck, mp Matchup, initial *gameengine.GameState, initialHand []deck.Card) (*deck.Deck, *gameengine.GameState, []card.Card, int, []weapon.Weapon, bool) {
+func setupTurn(masterDeck *deck.Deck, mp Matchup, initial *gameengine.GameState, initialHand []card.Card) (*deck.Deck, *gameengine.GameState, []card.Card, int, []weapon.Weapon, bool) {
 	d := masterDeck.Copy()
 	h := d.Hero.(hero.Hero)
 	var master *gameengine.GameState
@@ -73,9 +73,7 @@ func setupTurn(masterDeck *deck.Deck, mp Matchup, initial *gameengine.GameState,
 	}
 	hand := make([]card.Card, 0, handSize+startOfTurnRevealRoom)
 	if initialHand != nil {
-		for _, c := range initialHand {
-			hand = append(hand, c.(card.Card))
-		}
+		hand = append(hand, initialHand...)
 	} else {
 		for _, c := range d.Draw(handSize) {
 			hand = append(hand, c.(card.Card))

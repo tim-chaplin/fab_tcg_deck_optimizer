@@ -3,6 +3,7 @@ package turntests
 import (
 	"testing"
 
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card/cards"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/hero/heroes"
@@ -14,7 +15,7 @@ import (
 // pitch supply has the resource to spare.
 func TestModalCost_BlusterBuffPicksMode1WhenAffordable(t *testing.T) {
 	d := deck.New(heroes.Viserai{}, nil, fillerDeck())
-	hand := []deck.Card{
+	hand := []card.Card{
 		cards.BlusterBuffRed{},
 		testutils.BluePitch{},
 	}
@@ -29,7 +30,7 @@ func TestModalCost_BlusterBuffPicksMode1WhenAffordable(t *testing.T) {
 // printed 1{r} is available.
 func TestModalCost_BlusterBuffPicksMode0WhenBudgetTight(t *testing.T) {
 	d := deck.New(heroes.Viserai{}, nil, fillerDeck())
-	hand := []deck.Card{
+	hand := []card.Card{
 		cards.BlusterBuffRed{},
 		cards.BlusterBuffRed{},
 	}
@@ -45,7 +46,7 @@ func TestModalCost_BlusterBuffPicksMode0WhenBudgetTight(t *testing.T) {
 // Tests that Look Tuff picks mode 1 when the partition has 4{r} of pitch (printed 3 + extra 1).
 func TestModalCost_LookTuffPicksMode1WhenAffordable(t *testing.T) {
 	d := deck.New(heroes.Viserai{}, nil, fillerDeck())
-	hand := []deck.Card{
+	hand := []card.Card{
 		cards.LookTuffRed{},
 		testutils.BluePitch{},
 		cards.LookTuffRed{}, // pitch supply: BluePitch 3 + 1 = 4

@@ -3,6 +3,7 @@ package turntests
 import (
 	"testing"
 
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card/cards"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/hero/heroes"
@@ -12,7 +13,7 @@ import (
 
 // Tests that a non-attack pitch funding Aether Slash activates the +1 arcane rider.
 func TestPitchAttribution_AetherSlashSingleNonAttackPitchFiresRider(t *testing.T) {
-	hand := []deck.Card{cards.AetherSlashRed{}, cards.MaleficIncantationBlue{}}
+	hand := []card.Card{cards.AetherSlashRed{}, cards.MaleficIncantationBlue{}}
 	d := deck.New(heroes.Viserai{}, nil, fillerDeck())
 	summary := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, nil, hand)
 	if summary.Value != 5 {
@@ -22,7 +23,7 @@ func TestPitchAttribution_AetherSlashSingleNonAttackPitchFiresRider(t *testing.T
 
 // Tests that an attack-typed pitch funding Aether Slash does not activate the rider.
 func TestPitchAttribution_AetherSlashAttackPitchDoesNotFireRider(t *testing.T) {
-	hand := []deck.Card{cards.AetherSlashRed{}, testutils.YellowAttack{}}
+	hand := []card.Card{cards.AetherSlashRed{}, testutils.YellowAttack{}}
 	d := deck.New(heroes.Viserai{}, nil, fillerDeck())
 	summary := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, nil, hand)
 	if summary.Value != 4 {
@@ -33,7 +34,7 @@ func TestPitchAttribution_AetherSlashAttackPitchDoesNotFireRider(t *testing.T) {
 // Tests that Deathly Duet fires both riders when funded by one attack and one non-attack action.
 func TestPitchAttribution_DeathlyDuetBothRidersFireFromMixedFunding(t *testing.T) {
 	d := deck.New(heroes.Viserai{}, nil, fillerDeck())
-	hand := []deck.Card{
+	hand := []card.Card{
 		cards.DeathlyDuetRed{},
 		cards.AetherSlashRed{},
 		cards.MaleficIncantationBlue{},
@@ -48,7 +49,7 @@ func TestPitchAttribution_DeathlyDuetBothRidersFireFromMixedFunding(t *testing.T
 func TestPitchAttribution_OneNonAttackPitchFundsMultipleAetherSlashes(t *testing.T) {
 	d := deck.New(heroes.Viserai{}, nil, fillerDeck())
 
-	withNonAttack := []deck.Card{
+	withNonAttack := []card.Card{
 		cards.MauvrionSkiesRed{},
 		cards.AetherSlashRed{}, cards.AetherSlashRed{},
 		cards.MaleficIncantationBlue{},
@@ -58,7 +59,7 @@ func TestPitchAttribution_OneNonAttackPitchFundsMultipleAetherSlashes(t *testing
 		t.Errorf("non-attack pitch: Value = %d, want 15", got)
 	}
 
-	withAttack := []deck.Card{
+	withAttack := []card.Card{
 		cards.MauvrionSkiesRed{},
 		cards.AetherSlashRed{}, cards.AetherSlashRed{},
 		testutils.BlueAttack{},

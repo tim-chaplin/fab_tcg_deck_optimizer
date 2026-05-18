@@ -3,6 +3,7 @@ package turntests
 import (
 	"testing"
 
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card/cards"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/hero/heroes"
@@ -14,7 +15,7 @@ import (
 // graveyard) when an attack has already resolved this turn.
 func TestRelentlessPursuit_RecyclesToDeckBottomAfterAttack(t *testing.T) {
 	d := deck.New(heroes.Viserai{}, nil, fillerDeck())
-	hand := []deck.Card{
+	hand := []card.Card{
 		testutils.RedAttack{},         // attack first to satisfy the recycle gate
 		cards.RelentlessPursuitBlue{}, // resolves second; recycles to deck bottom
 		testutils.RedPitch{},          // funds RedAttack's cost-1
@@ -36,7 +37,7 @@ func TestRelentlessPursuit_RecyclesToDeckBottomAfterAttack(t *testing.T) {
 // attack this turn (no prior attack to recycle).
 func TestRelentlessPursuit_GoesToGraveyardWithoutPriorAttack(t *testing.T) {
 	d := deck.New(heroes.Viserai{}, nil, fillerDeck())
-	hand := []deck.Card{cards.RelentlessPursuitBlue{}, cards.OutedRed{}}
+	hand := []card.Card{cards.RelentlessPursuitBlue{}, cards.OutedRed{}}
 	summary := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, nil, hand)
 	if summary.Value != 4 {
 		t.Fatalf("Value = %d, want 4 (RP marks, Outed reads mark for 3+1=4)", summary.Value)

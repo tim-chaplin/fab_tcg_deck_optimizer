@@ -14,7 +14,7 @@ import (
 
 func TestBest_AllRedHand(t *testing.T) {
 	// Best: pitch 2 reds (2 res) to attack with the other 2 (cost 2, dealt 6). Value = 6.
-	h := []deck.Card{testutils.RedAttack{}, testutils.RedAttack{}, testutils.RedAttack{}, testutils.RedAttack{}}
+	h := []card.Card{testutils.RedAttack{}, testutils.RedAttack{}, testutils.RedAttack{}, testutils.RedAttack{}}
 	d := deck.New(testutils.Hero{Intel: 4}, nil, nil)
 	summary := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 4}, nil, h)
 	if summary.Value != 6 {
@@ -25,7 +25,7 @@ func TestBest_AllRedHand(t *testing.T) {
 func TestBest_AllBlueHand(t *testing.T) {
 	// Best: pitch 1 blue (3 res), attack with 2 blues (cost 2, dealt 2), defend with 1 blue (prevented
 	// 3). Value = 5.
-	h := []deck.Card{testutils.BlueAttack{}, testutils.BlueAttack{}, testutils.BlueAttack{}, testutils.BlueAttack{}}
+	h := []card.Card{testutils.BlueAttack{}, testutils.BlueAttack{}, testutils.BlueAttack{}, testutils.BlueAttack{}}
 	d := deck.New(testutils.Hero{Intel: 4}, nil, nil)
 	summary := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 4}, nil, h)
 	if summary.Value != 5 {
@@ -36,7 +36,7 @@ func TestBest_AllBlueHand(t *testing.T) {
 func TestBest_MixedHand(t *testing.T) {
 	// Best: pitch 1 blue (3 res), attack with 2 reds (cost 2, dealt 6), defend with 1 blue (prevented
 	// 3). Value = 9.
-	h := []deck.Card{testutils.BlueAttack{}, testutils.BlueAttack{}, testutils.RedAttack{}, testutils.RedAttack{}}
+	h := []card.Card{testutils.BlueAttack{}, testutils.BlueAttack{}, testutils.RedAttack{}, testutils.RedAttack{}}
 	d := deck.New(testutils.Hero{Intel: 4}, nil, nil)
 	summary := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 4}, nil, h)
 	if summary.Value != 9 {
@@ -47,7 +47,7 @@ func TestBest_MixedHand(t *testing.T) {
 func TestBest_DefenseCappedAtIncoming(t *testing.T) {
 	// Best: pitch 1 blue, attack with 2 blues (dealt 2), defend with 1 blue (prevented capped at
 	// incoming=2). Value = 4.
-	h := []deck.Card{testutils.BlueAttack{}, testutils.BlueAttack{}, testutils.BlueAttack{}, testutils.BlueAttack{}}
+	h := []card.Card{testutils.BlueAttack{}, testutils.BlueAttack{}, testutils.BlueAttack{}, testutils.BlueAttack{}}
 	d := deck.New(testutils.Hero{Intel: 4}, nil, nil)
 	summary := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 2}, nil, h)
 	if summary.Value != 4 {
@@ -59,7 +59,7 @@ func TestBest_DefenseReactionRequiresCostPaid(t *testing.T) {
 	// Toughen Up [B]: Cost 2, Pitch 3, Defense 4. A hand of just this card can't pay its own
 	// 2-resource cost to play as a Defense Reaction (there's nothing else to pitch). The only
 	// legal lines are to pitch it (0 damage prevented) or do nothing — Value must be 0.
-	h := []deck.Card{cards.ToughenUpBlue{}}
+	h := []card.Card{cards.ToughenUpBlue{}}
 	d := deck.New(testutils.Hero{Intel: 4}, nil, nil)
 	summary := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 4}, nil, h)
 	if summary.Value != 0 {
@@ -70,7 +70,7 @@ func TestBest_DefenseReactionRequiresCostPaid(t *testing.T) {
 func TestBest_DefenseReactionAffordableResolves(t *testing.T) {
 	// Pitch 1 Blue Malefic (3 res), pay Toughen Up [B]'s cost 2, prevent 4 damage (capped at
 	// incoming=4). Value = 4.
-	h := []deck.Card{cards.MaleficIncantationBlue{}, cards.ToughenUpBlue{}}
+	h := []card.Card{cards.MaleficIncantationBlue{}, cards.ToughenUpBlue{}}
 	d := deck.New(testutils.Hero{Intel: 4}, nil, nil)
 	summary := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 4}, nil, h)
 	if summary.Value != 4 {
@@ -81,7 +81,7 @@ func TestBest_DefenseReactionAffordableResolves(t *testing.T) {
 func TestBest_PlainBlockStillFree(t *testing.T) {
 	// Attack cards have no Defense-Reaction type, so using them as blockers costs nothing. One
 	// Red attacker (Defense 1) alone, used as a blocker against 1 incoming, prevents 1. Value = 1.
-	h := []deck.Card{testutils.RedAttack{}}
+	h := []card.Card{testutils.RedAttack{}}
 	d := deck.New(testutils.Hero{Intel: 4}, nil, nil)
 	summary := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 1}, nil, h)
 	if summary.Value != 1 {
@@ -92,7 +92,7 @@ func TestBest_PlainBlockStillFree(t *testing.T) {
 func TestBest_RespectsResourceConstraint(t *testing.T) {
 	// Best: pitch 2 reds (2 res) to attack with 2 reds (cost 2, dealt 6). Value = 6. Resources must
 	// cover costs.
-	h := []deck.Card{testutils.RedAttack{}, testutils.RedAttack{}, testutils.RedAttack{}, testutils.RedAttack{}}
+	h := []card.Card{testutils.RedAttack{}, testutils.RedAttack{}, testutils.RedAttack{}, testutils.RedAttack{}}
 	d := deck.New(testutils.Hero{Intel: 4}, nil, nil)
 	summary := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, nil, h)
 	if summary.Value != 6 {
@@ -115,7 +115,7 @@ func TestBest_RespectsResourceConstraint(t *testing.T) {
 // Tests the "hand does nothing this turn" case: a Held card with an empty arsenal gets
 // post-hoc promoted to Arsenal.
 func TestBest_AllHeldWhenNoLegalPlay(t *testing.T) {
-	h := []deck.Card{cards.ToughenUpBlue{}}
+	h := []card.Card{cards.ToughenUpBlue{}}
 	d := deck.New(testutils.Hero{Intel: 4}, nil, nil)
 	summary := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 4}, nil, h)
 	if summary.Value != 0 {
@@ -132,7 +132,7 @@ func TestBest_AllHeldWhenNoLegalPlay(t *testing.T) {
 // Tests that attack-phase and defense-phase pitches draw from disjoint pools — a single
 // pitched card can't fund both phases.
 func TestBest_AttackPitchCantCoverDefense(t *testing.T) {
-	h := []deck.Card{cards.MaleficIncantationBlue{}, cards.ToughenUpBlue{}, testutils.RedAttack{}}
+	h := []card.Card{cards.MaleficIncantationBlue{}, cards.ToughenUpBlue{}, testutils.RedAttack{}}
 	d := deck.New(testutils.Hero{Intel: 4}, nil, nil)
 	summary := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 4}, nil, h)
 	if summary.Value != 5 {
@@ -143,7 +143,7 @@ func TestBest_AttackPitchCantCoverDefense(t *testing.T) {
 
 // Tests that two pitched cards unlock the attack/defense split — one pitch funds each phase.
 func TestBest_DRPitchNeedsSecondPitchedCard(t *testing.T) {
-	h := []deck.Card{
+	h := []card.Card{
 		cards.MaleficIncantationBlue{},
 		cards.MaleficIncantationBlue{},
 		cards.ToughenUpBlue{},
@@ -160,7 +160,7 @@ func TestBest_DRPitchNeedsSecondPitchedCard(t *testing.T) {
 // Tests attackBufs scratch sizing on a full 4-card hand of 0-cost attackers plus an
 // arsenal-in attacker (5 attackers, no weapons) — guards against slice-bounds panics.
 func TestBest_AllAttackHandPlusArsenalNoWeapons(t *testing.T) {
-	h := []deck.Card{
+	h := []card.Card{
 		cards.WoundingBlowRed{}, cards.WoundingBlowRed{},
 		cards.WoundingBlowRed{}, cards.WoundingBlowRed{},
 	}

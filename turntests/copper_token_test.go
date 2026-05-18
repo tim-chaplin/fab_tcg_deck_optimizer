@@ -3,6 +3,7 @@ package turntests
 import (
 	"testing"
 
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/gameengine"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/hero/heroes"
@@ -30,7 +31,7 @@ func TestCopperToken_NotEnoughResourceSkipsSpend(t *testing.T) {
 		testutils.RedAttack{}, testutils.RedAttack{},
 	}
 	d := deck.New(heroes.Viserai{}, nil, cards)
-	hand := []deck.Card{testutils.BluePitch{}}
+	hand := []card.Card{testutils.BluePitch{}}
 	priorItems := []*item.Item{token.NewCopper(1)}
 	summary := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, stateWithItems(priorItems...), hand)
 	if summary.State.CopperCount() != 1 {
@@ -47,7 +48,7 @@ func TestCopperToken_SpendsAndSwings(t *testing.T) {
 		testutils.RedAttack{}, testutils.RedAttack{},
 	}
 	d := deck.New(heroes.Viserai{}, []deck.Weapon{weapons.ReapingBlade{}}, cards)
-	hand := []deck.Card{testutils.BluePitch{}, testutils.BluePitch{}}
+	hand := []card.Card{testutils.BluePitch{}, testutils.BluePitch{}}
 	priorItems := []*item.Item{token.NewCopper(1)}
 	summary := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, stateWithItems(priorItems...), hand)
 	if summary.Value != 3 {

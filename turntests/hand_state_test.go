@@ -10,6 +10,7 @@ package turntests
 import (
 	"testing"
 
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card/cards"
 	notimpl "github.com/tim-chaplin/fab-deck-optimizer/internal/card/cards/notimplemented"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
@@ -22,7 +23,7 @@ import (
 // Tests that pitching a single blue and playing Spring Load fires the +3{p} rider.
 func TestHandState_SpringLoadAlonePitchEmptiesHand(t *testing.T) {
 	d := deck.New(heroes.Viserai{}, nil, fillerDeck())
-	hand := []deck.Card{testutils.BluePitch{}, cards.SpringLoadRed{}}
+	hand := []card.Card{testutils.BluePitch{}, cards.SpringLoadRed{}}
 	summary := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, nil, hand)
 	if got := summary.Value; got != 5 {
 		t.Fatalf("Value = %d, want 5 (Spring Load 2 + rider 3)", got)
@@ -32,7 +33,7 @@ func TestHandState_SpringLoadAlonePitchEmptiesHand(t *testing.T) {
 // Tests that a card committed to blocking counts as out-of-hand for Spring Load's rider.
 func TestHandState_BlockerEmptiesHandForSpringLoad(t *testing.T) {
 	d := deck.New(heroes.Viserai{}, nil, fillerDeck())
-	hand := []deck.Card{testutils.BluePitch{}, cards.DodgeBlue{}, cards.SpringLoadRed{}}
+	hand := []card.Card{testutils.BluePitch{}, cards.DodgeBlue{}, cards.SpringLoadRed{}}
 	// Incoming = 3 → BluePitch pitched (3 res), Dodge played as DR for 2 prevented,
 	// Spring Load resolves with empty hand. Value = 5 (Spring Load + rider) + 2 (Dodge).
 	summary := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 3}, nil, hand)
@@ -44,7 +45,7 @@ func TestHandState_BlockerEmptiesHandForSpringLoad(t *testing.T) {
 // Tests that an upcoming chain step keeps Hand non-empty: only ONE Spring Load fires the rider.
 func TestHandState_UpcomingChainStepBlocksFirstSpringLoadRider(t *testing.T) {
 	d := deck.New(heroes.Viserai{}, nil, fillerDeck())
-	hand := []deck.Card{
+	hand := []card.Card{
 		testutils.BluePitch{},
 		cards.FlyingHighBlue{},
 		cards.SpringLoadRed{}, cards.SpringLoadRed{},
@@ -62,7 +63,7 @@ func TestHandState_UpcomingChainStepBlocksFirstSpringLoadRider(t *testing.T) {
 // alongside Snatch.
 func TestHandState_MidChainDrawBlocksSpringLoadRider(t *testing.T) {
 	d := deck.New(heroes.Viserai{}, nil, fillerDeck())
-	hand := []deck.Card{
+	hand := []card.Card{
 		testutils.BluePitch{},
 		cards.FlyingHighBlue{},
 		cards.SnatchRed{},
@@ -83,7 +84,7 @@ func TestHandState_MidChainDrawBlocksSpringLoadRider(t *testing.T) {
 // Tests that a card stuck in hand (no profitable role) keeps Spring Load's rider off.
 func TestHandState_HeldCardBlocksSpringLoadRider(t *testing.T) {
 	d := deck.New(heroes.Viserai{}, nil, fillerDeck())
-	hand := []deck.Card{testutils.BluePitch{}, cards.DodgeBlue{}, cards.SpringLoadRed{}}
+	hand := []card.Card{testutils.BluePitch{}, cards.DodgeBlue{}, cards.SpringLoadRed{}}
 	// Same hand as TestHandState_BlockerEmptiesHandForSpringLoad but with incoming = 0
 	// so there's no damage for Dodge to defend against. Per the test's stated intent,
 	// Dodge sits Held → hand non-empty at Spring Load's Play → rider blocked. Value = 2.
@@ -111,7 +112,7 @@ func TestHandState_DemolitionCrewSeesUncommittedPitchInHand(t *testing.T) {
 	// Brandish. Toughen Up has to be in hand at Demolition Crew's Play even though it's
 	// queued to pitch later in the chain — that's the pitch-tracking semantic under test.
 	// Value: 0 (Flying High) + 7 (Demolition Crew base 6 + Flying High +1{p}) + 3 (Brandish) = 10.
-	hand := []deck.Card{
+	hand := []card.Card{
 		cards.DemolitionCrewRed{},
 		cards.ToughenUpBlue{},
 		cards.DragDownYellow{},

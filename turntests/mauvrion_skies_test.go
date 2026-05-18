@@ -3,6 +3,7 @@ package turntests
 import (
 	"testing"
 
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card/cards"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
@@ -15,7 +16,7 @@ import (
 
 // Tests that Mauvrion alone (no matching target) deals zero damage.
 func TestBest_MauvrionAloneFizzlesWithoutDamage(t *testing.T) {
-	h := []deck.Card{cards.MauvrionSkiesRed{}}
+	h := []card.Card{cards.MauvrionSkiesRed{}}
 	d := deck.New(testutils.Hero{Intel: 4}, nil, nil)
 	summary := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, nil, h)
 	if summary.Value != 0 {
@@ -27,7 +28,7 @@ func TestBest_MauvrionAloneFizzlesWithoutDamage(t *testing.T) {
 // Tests that a Runeblade weapon swing doesn't satisfy Mauvrion's predicate (attack action
 // only).
 func TestBest_MauvrionBladeOnlyFizzles(t *testing.T) {
-	h := []deck.Card{cards.MauvrionSkiesRed{}, testutils.YellowAttack{}}
+	h := []card.Card{cards.MauvrionSkiesRed{}, testutils.YellowAttack{}}
 	ws := []deck.Weapon{weapons.ReapingBlade{}}
 	d := deck.New(testutils.Hero{Intel: 4}, ws, nil)
 	summary := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, nil, h)
@@ -41,7 +42,7 @@ func TestBest_MauvrionBladeOnlyFizzles(t *testing.T) {
 
 // Tests that a Generic (non-Runeblade) attack action doesn't satisfy Mauvrion's predicate.
 func TestBest_MauvrionNonRunebladeAttackFizzles(t *testing.T) {
-	h := []deck.Card{cards.MauvrionSkiesRed{}, testutils.RedAttack{}, testutils.YellowAttack{}}
+	h := []card.Card{cards.MauvrionSkiesRed{}, testutils.RedAttack{}, testutils.YellowAttack{}}
 	d := deck.New(testutils.Hero{Intel: 4}, nil, nil)
 	summary := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, nil, h)
 	// Pitch YellowAttack (2 res) → play Mauvrion (cost 0, go again) → play fake RedAttack
@@ -55,7 +56,7 @@ func TestBest_MauvrionNonRunebladeAttackFizzles(t *testing.T) {
 
 // Tests that a likely-hit Runeblade attack action picks up Mauvrion's +3 Runechant rider.
 func TestBest_MauvrionLikelyHitRunebladeAttackCreditsRider(t *testing.T) {
-	h := []deck.Card{
+	h := []card.Card{
 		cards.MauvrionSkiesRed{},
 		cards.ShrillOfSkullformRed{},
 		testutils.YellowAttack{},
@@ -75,7 +76,7 @@ func TestBest_MauvrionLikelyHitRunebladeAttackCreditsRider(t *testing.T) {
 // Tests that a blockable Runeblade attack drops Mauvrion's Runechant rider but keeps the
 // go-again grant.
 func TestBest_MauvrionBlockableRunebladeAttackDropsRider(t *testing.T) {
-	h := []deck.Card{
+	h := []card.Card{
 		cards.MauvrionSkiesRed{},
 		cards.ShrillOfSkullformBlue{},
 		testutils.YellowAttack{},
