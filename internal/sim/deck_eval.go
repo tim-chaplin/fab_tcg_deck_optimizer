@@ -263,7 +263,7 @@ func runOneShuffle(masterDeck *deck.Deck, scratch *shuffleScratch, stats *deck.S
 	for ; handIdx < maxHands; handIdx++ {
 		preDeckSize := d.Size()
 		var summary TurnSummary
-		summary, scratch.recycledBuf = playOneTurn(master, h, d, mp, weapons, ev, handSize, scratch.recycledBuf, recordIfBest)
+		summary, scratch.recycledBuf = playOneTurn(master, h, d, mp, weapons, ev, handSize, scratch.recycledBuf, recordIfBest, nil)
 
 		master = summary.State
 		d = summary.State.Deck()
@@ -285,6 +285,10 @@ func runOneShuffle(masterDeck *deck.Deck, scratch *shuffleScratch, stats *deck.S
 // Returned summary.State is the end-of-turn boundary (pitched recycled, next hand drawn,
 // Value accrued) and threads directly into the next call as master. recycledBuf is reused
 // in place when non-nil.
+//
+// When snapshot is non-nil, runs in replay mode: drives the chain through snapshot.bestLine
+// + snapshot.cardsPlayed (no enumeration), streams emissions via snapshot.logger, and
+// returns the raw post-chain per-perm state without recycle / next-draw cleanup.
 func playOneTurn(
 	master *gameengine.GameState,
 	hand []card.Card,
@@ -295,12 +299,13 @@ func playOneTurn(
 	handSize int,
 	recycledBuf []deck.Card,
 	record turnRecord,
+	snapshot *bestSnapshot,
 ) (summary TurnSummary, recycledOut []deck.Card) {
 	advanceToNextTurn(master)
 
 	var snap *bestSnapshot
 	var arsenalIn card.Card
-	if record != nil {
+	if snapshot == nil && record != nil {
 		arsenalIn = master.Arsenal()
 		snap = &bestSnapshot{
 			master:  master.CopyPersistentState(),
@@ -314,10 +319,20 @@ func playOneTurn(
 	processAurasAtStartOfTurn(master, d, &hand)
 	sortHandByID(hand)
 	dealtHand := hand
-	summary = runBestForTurn(weapons, hand, mp, d, master, ev)
+	if snapshot != nil {
+		summary = runReplayForTurn(snapshot)
+	} else {
+		summary = runBestForTurn(weapons, hand, mp, d, master, ev)
+	}
 
 	if record != nil {
 		record(summary, dealtHand, arsenalIn, snap)
+	}
+
+	if snapshot != nil {
+		// Skip end-of-turn cleanup so summary.State stays at the post-chain per-perm state
+		// the caller needs for its end-of-turn snapshot.
+		return summary, recycledBuf
 	}
 
 	// Chain ran on a shallow copy of d that may have drawn mid-turn; use the winner's
