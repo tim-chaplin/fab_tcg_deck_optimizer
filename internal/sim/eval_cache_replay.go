@@ -30,7 +30,7 @@ import (
 func (e *Evaluator) replayBest(
 	entry evalCacheEntry,
 	weapons []weapon.Weapon, hand []card.Card,
-	mp Matchup, d *deck.Deck,
+	d *deck.Deck,
 	masterState *gameengine.GameState,
 ) TurnSummary {
 	arsenalCardIn := masterState.Arsenal()
@@ -57,11 +57,11 @@ func (e *Evaluator) replayBest(
 	attackDealt, defenseDealt, swung, winner, ok, _, arsenalAtChainStart := e.evaluatePartition(
 		masterState, weapons, hand, d,
 		rolesBuf, n, bufs,
-		mp, defenseSum,
+		defenseSum,
 	)
 	if !ok {
-		panic(fmt.Sprintf("replayBest: cached partition is infeasible — cache invariant violated (hand=%d, matchup=%+v)",
-			len(hand), mp))
+		panic(fmt.Sprintf("replayBest: cached partition is infeasible — cache invariant violated (hand=%d, incoming=%d)",
+			len(hand), masterState.IncomingDamage()))
 	}
 
 	if postPromotedFromHeld >= 0 {
@@ -73,7 +73,7 @@ func (e *Evaluator) replayBest(
 		BestLine:       make([]deck.CardAssignment, totalN),
 		Value:          attackDealt + defenseDealt,
 		SwungWeapons:   append([]string(nil), swung...),
-		IncomingDamage: mp.IncomingDamage,
+		IncomingDamage: masterState.IncomingDamage(),
 		Cacheable:      true,
 		State:          winner,
 	}

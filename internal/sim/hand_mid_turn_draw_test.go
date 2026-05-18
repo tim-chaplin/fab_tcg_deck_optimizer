@@ -49,8 +49,8 @@ func TestBest_DrawRiderSeesActualDeck(t *testing.T) {
 	deckA := DeckOf(testutils.RedAttack{})
 	deckB := DeckOf(testutils.BlueAttack{})
 
-	resA := Best(nil, h, Matchup{IncomingDamage: 0}, deckA, gameengine.GameStateBuilder().SetHero(heroes.Viserai{}).Build())
-	resB := Best(nil, h, Matchup{IncomingDamage: 0}, deckB, gameengine.GameStateBuilder().SetHero(heroes.Viserai{}).Build())
+	resA := Best(nil, h, deckA, gameengine.GameStateBuilder().SetHero(heroes.Viserai{}).Build())
+	resB := Best(nil, h, deckB, gameengine.GameStateBuilder().SetHero(heroes.Viserai{}).Build())
 
 	containsID := func(cs []card.Card, id ids.CardID) bool {
 		for _, c := range cs {
@@ -85,8 +85,8 @@ func TestBest_DeckOrderDoesNotAffectHandRoles(t *testing.T) {
 		return m
 	}
 
-	resA := Best(nil, h, Matchup{IncomingDamage: 0}, deckA, gameengine.GameStateBuilder().SetHero(testutils.Hero{Intel: 4}).Build())
-	resB := Best(nil, h, Matchup{IncomingDamage: 0}, deckB, gameengine.GameStateBuilder().SetHero(testutils.Hero{Intel: 4}).Build())
+	resA := Best(nil, h, deckA, gameengine.GameStateBuilder().SetHero(testutils.Hero{Intel: 4}).Build())
+	resB := Best(nil, h, deckB, gameengine.GameStateBuilder().SetHero(testutils.Hero{Intel: 4}).Build())
 
 	rolesA := rolesFor(resA)
 	rolesB := rolesFor(resB)

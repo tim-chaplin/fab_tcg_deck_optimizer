@@ -16,7 +16,10 @@ import (
 // Tests post-hoc Arsenal promotion of a Held card when the slot is empty.
 func TestBest_EmptyArsenalClaimsHeldCard(t *testing.T) {
 	h := []card.Card{cards.ToughenUpBlue{}}
-	got := Best(nil, h, Matchup{IncomingDamage: 4}, nil, gameengine.GameStateBuilder().SetHero(testutils.Hero{Intel: 4}).Build())
+	got := Best(nil, h, nil, gameengine.GameStateBuilder().
+		SetHero(testutils.Hero{Intel: 4}).
+		SetIncomingDamage(4).
+		Build())
 	if got.BestLine[0].Role != deck.Arsenal {
 		t.Errorf("Roles[0] = %s, want ARSENAL", got.BestLine[0].Role)
 	}
@@ -31,8 +34,9 @@ func TestBest_ArsenalInPlayDR(t *testing.T) {
 	state := gameengine.GameStateBuilder().
 		SetHero(testutils.Hero{Intel: 4}).
 		SetArsenal(cards.ToughenUpBlue{}).
+		SetIncomingDamage(4).
 		Build()
-	got := Best(nil, h, Matchup{IncomingDamage: 4}, nil, state)
+	got := Best(nil, h, nil, state)
 	if got.Value != 4 {
 		t.Fatalf("Value = %d, want 4 (Malefic pitches to pay arsenal DR, prevents 4). Roles=[%s]",
 			got.Value, FormatBestLine(got.BestLine))
@@ -58,7 +62,7 @@ func TestBest_ArsenalInStayBlocksNewArsenal(t *testing.T) {
 		SetHero(testutils.Hero{Intel: 4}).
 		SetArsenal(cards.ToughenUpBlue{}).
 		Build()
-	got := Best(nil, h, Matchup{IncomingDamage: 0}, nil, state)
+	got := Best(nil, h, nil, state)
 	if got.BestLine[0].Role != deck.Held {
 		t.Errorf("Roles[0] = %s, want HELD (slot occupied by arsenal-in, can't promote)", got.BestLine[0].Role)
 	}
@@ -74,7 +78,7 @@ func TestBest_ArsenalInPlayAttack(t *testing.T) {
 		SetHero(testutils.Hero{Intel: 4}).
 		SetArsenal(testutils.RedAttack{}).
 		Build()
-	got := Best(nil, h, Matchup{IncomingDamage: 0}, nil, state)
+	got := Best(nil, h, nil, state)
 	if got.Value != 3 {
 		t.Fatalf("Value = %d, want 3 (arsenal Red played, hand Red pitched to fund it). Roles=[%s]",
 			got.Value, FormatBestLine(got.BestLine))
@@ -91,7 +95,7 @@ func TestBest_ArsenalInNonAttackActionPlays(t *testing.T) {
 		SetHero(testutils.Hero{Intel: 4}).
 		SetArsenal(cards.ArcaneCussingRed{}).
 		Build()
-	got := Best(nil, h, Matchup{IncomingDamage: 0}, nil, state)
+	got := Best(nil, h, nil, state)
 	if got.Value != 3 {
 		t.Fatalf("Value = %d, want 3 (Malefic pitched, arsenal Cussing played for 3). Roles=[%s]",
 			got.Value, FormatBestLine(got.BestLine))
@@ -107,8 +111,9 @@ func TestBest_ArsenalInUnmovableGrantsDefenseBonus(t *testing.T) {
 	state := gameengine.GameStateBuilder().
 		SetHero(testutils.Hero{Intel: 4}).
 		SetArsenal(cards.UnmovableRed{}).
+		SetIncomingDamage(8).
 		Build()
-	got := Best(nil, h, Matchup{IncomingDamage: 8}, nil, state)
+	got := Best(nil, h, nil, state)
 	if got.Value != 8 {
 		t.Fatalf("Value = %d, want 8 (Unmovable from arsenal blocks 7+1). Roles=[%s]",
 			got.Value, FormatBestLine(got.BestLine))
@@ -118,7 +123,10 @@ func TestBest_ArsenalInUnmovableGrantsDefenseBonus(t *testing.T) {
 // Tests that Unmovable's arsenal-defense rider does NOT fire when played from hand.
 func TestBest_HandUnmovableNoDefenseBonus(t *testing.T) {
 	h := []card.Card{cards.MaleficIncantationBlue{}, cards.UnmovableRed{}}
-	got := Best(nil, h, Matchup{IncomingDamage: 8}, nil, gameengine.GameStateBuilder().SetHero(testutils.Hero{Intel: 4}).Build())
+	got := Best(nil, h, nil, gameengine.GameStateBuilder().
+		SetHero(testutils.Hero{Intel: 4}).
+		SetIncomingDamage(8).
+		Build())
 	if got.Value != 7 {
 		t.Fatalf("Value = %d, want 7 (hand-played Unmovable: no rider). Roles=[%s]",
 			got.Value, FormatBestLine(got.BestLine))
@@ -135,7 +143,7 @@ func TestBest_ArsenalInSmashingGoodTimeGatesOnlyArsenalCopy(t *testing.T) {
 		SetHero(heroes.Viserai{}).
 		SetArsenal(notimpl.SmashingGoodTimeRed{}).
 		Build()
-	got := Best(nil, h, Matchup{IncomingDamage: 0}, nil, state)
+	got := Best(nil, h, nil, state)
 	if got.Value != 8 {
 		t.Fatalf("Value = %d, want 8 (only arsenal SGT grants +3). Roles=[%s]",
 			got.Value, FormatBestLine(got.BestLine))

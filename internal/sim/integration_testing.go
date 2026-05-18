@@ -22,7 +22,7 @@ func EvalOneTurnForTesting(d *deck.Deck, initial *gameengine.GameState, initialH
 	if !ok {
 		return TurnSummary{State: gameengine.GameStateBuilder().SetHero(d.Hero.(hero.Hero)).Build()}
 	}
-	summary, _ := playOneTurn(master, hand, d, matchupFromMaster(master), weapons, ev(), handSize, nil, nil)
+	summary, _ := playOneTurn(master, hand, d, weapons, ev(), handSize, nil, nil)
 	return summary
 }
 
@@ -35,13 +35,12 @@ func EvalTwoTurnsForTesting(d *deck.Deck, initial *gameengine.GameState, hand1 [
 	if !ok {
 		return TurnSummary{State: gameengine.GameStateBuilder().SetHero(d.Hero.(hero.Hero)).Build()}, TurnSummary{}
 	}
-	mp := matchupFromMaster(master)
 
-	turn1, _ := playOneTurn(master, hand, d, mp, weapons, ev(), handSize, nil, nil)
+	turn1, _ := playOneTurn(master, hand, d, weapons, ev(), handSize, nil, nil)
 	stable := turn1
 	stable.State = snapshotState(turn1.State, turn1.State.Deck(), turn1.State.Hand(), turn1.Value, turn1.State.CardsDrawn())
 
-	turn2, _ := playOneTurn(turn1.State, turn1.State.Hand(), turn1.State.Deck(), mp, weapons, ev(), handSize, nil, nil)
+	turn2, _ := playOneTurn(turn1.State, turn1.State.Hand(), turn1.State.Deck(), weapons, ev(), handSize, nil, nil)
 	return stable, turn2
 }
 
@@ -93,16 +92,6 @@ func setupTurn(d *deck.Deck, initial *gameengine.GameState, initialHand []card.C
 	}
 
 	return master, hand, handSize, weapons, true
-}
-
-// matchupFromMaster reads the matchup figures master carries (set by the caller before
-// passing it in). chain runner machinery still consumes Matchup as a value — this is just
-// the unwrap.
-func matchupFromMaster(master *gameengine.GameState) Matchup {
-	return Matchup{
-		IncomingDamage:       master.IncomingDamage(),
-		ArcaneIncomingDamage: master.ArcaneIncomingDamage(),
-	}
 }
 
 // ev returns the package-level Evaluator so test helpers share its cache/scratch state.

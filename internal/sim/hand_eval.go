@@ -30,13 +30,13 @@ import (
 // Package-private so external packages can't bypass EvalOneTurnForTesting — the turntests
 // convention is to drive the chain runner through that deck-level entry point so every test
 // exercises the same per-turn pipeline production runs through Evaluate.
-func best(weapons []weapon.Weapon, hand []card.Card, mp Matchup, d *deck.Deck, master *gameengine.GameState) TurnSummary {
-	return sharedEvaluator.Best(weapons, hand, mp, d, master)
+func best(weapons []weapon.Weapon, hand []card.Card, d *deck.Deck, master *gameengine.GameState) TurnSummary {
+	return sharedEvaluator.Best(weapons, hand, d, master)
 }
 
 // Best is the method form of the package-level Best.
-func (e *Evaluator) Best(weapons []weapon.Weapon, hand []card.Card, mp Matchup, d *deck.Deck, master *gameengine.GameState) TurnSummary {
-	return e.findBest(weapons, hand, mp, d, master)
+func (e *Evaluator) Best(weapons []weapon.Weapon, hand []card.Card, d *deck.Deck, master *gameengine.GameState) TurnSummary {
+	return e.findBest(weapons, hand, d, master)
 }
 
 // Evaluator caches per-goroutine scratch state across Best calls. The first call allocates

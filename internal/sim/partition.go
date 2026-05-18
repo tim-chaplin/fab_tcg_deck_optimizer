@@ -12,7 +12,7 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapon"
 )
 
-func (e *Evaluator) findBest(weapons []weapon.Weapon, hand []card.Card, mp Matchup, d *deck.Deck, masterState *gameengine.GameState) TurnSummary {
+func (e *Evaluator) findBest(weapons []weapon.Weapon, hand []card.Card, d *deck.Deck, masterState *gameengine.GameState) TurnSummary {
 	var cacheKey evalCacheKey
 	cacheUsable := e.cache != nil
 	if cacheUsable {
@@ -25,13 +25,14 @@ func (e *Evaluator) findBest(weapons []weapon.Weapon, hand []card.Card, mp Match
 	if cacheUsable {
 		if entry, ok := e.cache.lookup(cacheKey); ok {
 			e.cache.hits.Add(1)
-			return e.replayBest(entry, weapons, hand, mp, d, masterState)
+			return e.replayBest(entry, weapons, hand, d, masterState)
 		}
 		e.cache.misses.Add(1)
 	}
 
 	bufs := e.getAttackBufs(len(hand), weapons)
 	arsenalCardIn := masterState.Arsenal()
+	incoming := masterState.IncomingDamage()
 	n := len(hand)
 	totalN := n
 	if arsenalCardIn != nil {
@@ -40,7 +41,7 @@ func (e *Evaluator) findBest(weapons []weapon.Weapon, hand []card.Card, mp Match
 
 	best := TurnSummary{
 		BestLine:       make([]deck.CardAssignment, totalN),
-		IncomingDamage: mp.IncomingDamage,
+		IncomingDamage: incoming,
 		Cacheable:      true,
 	}
 	for i := 0; i < n; i++ {
@@ -68,7 +69,7 @@ func (e *Evaluator) findBest(weapons []weapon.Weapon, hand []card.Card, mp Match
 			attackDealt, defenseDealt, swung, winner, ok, leafCacheable, arsenalAtChainStart := e.evaluatePartition(
 				masterState, weapons, hand, d,
 				rolesBuf, n, bufs,
-				mp, defenseSum,
+				defenseSum,
 			)
 			if !leafCacheable {
 				cacheable = false
@@ -113,7 +114,7 @@ func (e *Evaluator) findBest(weapons []weapon.Weapon, hand []card.Card, mp Match
 			if !roleAllowed(r, isArsenalSlot, isDR[i], canAttack[i]) {
 				continue
 			}
-			if r == deck.Defend && mp.IncomingDamage == 0 {
+			if r == deck.Defend && incoming == 0 {
 				continue
 			}
 			rolesBuf[i] = r

@@ -215,7 +215,7 @@ func TestBest_NimblismGrantsConsumingVolitionDiscardRider(t *testing.T) {
 		SetHero(testutils.Hero{Intel: 4}).
 		AddAura(token.NewRunechant(1)).
 		Build()
-	got := Best(nil, h, Matchup{IncomingDamage: 0}, nil, state)
+	got := Best(nil, h, nil, state)
 	if got.Value != 7 {
 		t.Fatalf("Value = %d, want 7 (Volition 3 base + Nimblism +1 BonusAttack + discard rider 3 from runechant-driven ArcaneDamageDealt × s.LikelyToHit on buffed 4-power attack); line=[%s]",
 			got.Value, FormatBestLine(got.BestLine))
