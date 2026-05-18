@@ -1,7 +1,5 @@
 // Package triggertype categorises when an Aura or one-shot Trigger fires. Lives in its
-// own micro-package (mirroring internal/registry/ids) because both gameengine and sim —
-// and the cards / tests that drive them — need to name the same enum without pulling in
-// the whole engine just to spell a constant.
+// own micro-package so consumers can name the enum without pulling in the whole engine.
 package triggertype
 
 // Type identifies the lifecycle event an Aura / Trigger subscribes to.
