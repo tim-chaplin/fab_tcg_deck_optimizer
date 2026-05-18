@@ -842,13 +842,11 @@ func (ctx *sequenceContext) playSequenceWithMeta(n int) (damage int, futureValue
 		if m.isAttack {
 			ge.FireAttack(pc.Card)
 			state.ClearOpponentMarked()
+			activeAttack = pc
+			activeAttackTypes = m.types
 		}
 		if m.isAttackAction {
 			ge.FireAttackAction(pc.Card)
-		}
-		if m.isAttack {
-			activeAttack = pc
-			activeAttackTypes = m.types
 		}
 		state.AppendCardsPlayed(pc.Card)
 		if m.types.IsNonAttackAction() {
