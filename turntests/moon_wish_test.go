@@ -3,6 +3,7 @@ package turntests
 import (
 	"testing"
 
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card/cards"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/gameengine"
@@ -24,7 +25,7 @@ func TestEvalOneTurn_MoonWishAltCostTutorsSunKissAndConsumesDeck(t *testing.T) {
 		testutils.RedAttack{}, testutils.RedAttack{},
 	}
 	d := deck.New(testutils.Hero{Intel: 4}, nil, deckCards)
-	summary := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, nil, []deck.Card{
+	summary := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, nil, []card.Card{
 		cards.MoonWishYellow{},
 		cards.WeepingBattlegroundRed{},
 	})
@@ -56,7 +57,7 @@ func TestEvalOneTurn_MoonWishAltCostTutorFizzlesWithoutSunKiss(t *testing.T) {
 		testutils.RedAttack{}, testutils.RedAttack{}, testutils.RedAttack{},
 	}
 	d := deck.New(testutils.Hero{Intel: 4}, nil, deckCards)
-	summary := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, nil, []deck.Card{
+	summary := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, nil, []card.Card{
 		cards.MoonWishYellow{},
 		cards.WeepingBattlegroundRed{},
 	})
@@ -86,7 +87,7 @@ func TestEvalOneTurn_MoonWishWithFlyingHighPlaysTutoredSunKiss(t *testing.T) {
 		testutils.RedAttack{}, testutils.RedAttack{}, testutils.RedAttack{}, testutils.RedAttack{},
 	}
 	d := deck.New(testutils.Hero{Intel: 4}, nil, deckCards)
-	summary := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, nil, []deck.Card{
+	summary := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, nil, []card.Card{
 		cards.FlyingHighRed{},
 		cards.MoonWishYellow{},
 		cards.WeepingBattlegroundRed{},

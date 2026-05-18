@@ -3,6 +3,7 @@ package turntests
 import (
 	"testing"
 
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card/cards"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/hero/heroes"
@@ -14,7 +15,7 @@ import (
 // missed attack and fires on the next attack action card that lands.
 func TestPlunderRun_TriggerWaitsAcrossMissAndFiresOnHit(t *testing.T) {
 	d := deck.New(heroes.Viserai{}, nil, fillerDeck())
-	hand := []deck.Card{
+	hand := []card.Card{
 		testutils.BluePitch{},
 		cards.PlunderRunRed{},
 		cards.RuneragerSwarmRed{},

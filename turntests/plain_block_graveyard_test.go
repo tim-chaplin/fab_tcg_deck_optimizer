@@ -3,6 +3,7 @@ package turntests
 import (
 	"testing"
 
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card/cards"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/hero/heroes"
@@ -12,7 +13,7 @@ import (
 // Tests that a plain-block card lands in the graveyard after defending.
 func TestPlainBlock_LandsInGraveyard(t *testing.T) {
 	d := deck.New(heroes.Viserai{}, nil, fillerDeck())
-	hand := []deck.Card{cards.OnTheHorizonRed{}}
+	hand := []card.Card{cards.OnTheHorizonRed{}}
 	summary := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 4}, nil, hand)
 	if summary.Value != 4 {
 		t.Fatalf("Value = %d, want 4 (On the Horizon Red blocks 4)", summary.Value)

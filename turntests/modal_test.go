@@ -3,6 +3,7 @@ package turntests
 import (
 	"testing"
 
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card/cards"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/hero/heroes"
@@ -15,7 +16,7 @@ import (
 // chain into more total damage than the +2{p} buff alone.
 func TestModal_CaptainsCallPicksGoAgainOverBuffWhenChainExtends(t *testing.T) {
 	d := deck.New(heroes.Viserai{}, nil, fillerDeck())
-	hand := []deck.Card{
+	hand := []card.Card{
 		cards.CaptainsCallRed{},
 		cards.SnatchRed{},
 		cards.SnatchRed{},
@@ -31,7 +32,7 @@ func TestModal_CaptainsCallPicksGoAgainOverBuffWhenChainExtends(t *testing.T) {
 // go-again.
 func TestModal_CaptainsCallPicksBuffWhenChainCantExtend(t *testing.T) {
 	d := deck.New(heroes.Viserai{}, nil, fillerDeck())
-	hand := []deck.Card{
+	hand := []card.Card{
 		cards.CaptainsCallRed{},
 		cards.SnatchRed{},
 	}
@@ -45,7 +46,7 @@ func TestModal_CaptainsCallPicksBuffWhenChainCantExtend(t *testing.T) {
 // Tests that Razor Reflex's mode-0 +N{p} buff lands on a sword weapon target.
 func TestModal_RazorReflexMode0BuffsSwordWeapon(t *testing.T) {
 	d := deck.New(heroes.Viserai{}, []deck.Weapon{weapons.NebulaBlade{}}, fillerDeck())
-	hand := []deck.Card{
+	hand := []card.Card{
 		cards.RazorReflexRed{},
 		cards.ToughenUpBlue{},
 	}
@@ -61,7 +62,7 @@ func TestModal_RazorReflexMode0BuffsSwordWeapon(t *testing.T) {
 // the eager on-hit go-again grants 1 AP, and a second Snatch chains for full damage.
 func TestModal_RazorReflexMode1BuffAndOnHitGoAgainExtendChain(t *testing.T) {
 	d := deck.New(heroes.Viserai{}, nil, fillerDeck())
-	hand := []deck.Card{
+	hand := []card.Card{
 		cards.RazorReflexRed{},
 		cards.SnatchRed{},
 		cards.SnatchRed{},
@@ -78,7 +79,7 @@ func TestModal_RazorReflexMode1BuffAndOnHitGoAgainExtendChain(t *testing.T) {
 // attack action target.
 func TestModal_PummelMode1BuffsAndDiscardsOnHit(t *testing.T) {
 	d := deck.New(heroes.Viserai{}, nil, fillerDeck())
-	hand := []deck.Card{
+	hand := []card.Card{
 		cards.PummelBlue{},
 		cards.AdrenalineRushBlue{},
 		testutils.BlueAttack{},
@@ -94,7 +95,7 @@ func TestModal_PummelMode1BuffsAndDiscardsOnHit(t *testing.T) {
 // Tests that Pummel's mode-0 +N{p} buff lands on a Club weapon target.
 func TestModal_PummelMode0BuffsClubWeapon(t *testing.T) {
 	d := deck.New(heroes.Viserai{}, []deck.Weapon{testutils.ClubWeapon{}}, fillerDeck())
-	hand := []deck.Card{
+	hand := []card.Card{
 		cards.PummelRed{},
 		cards.ToughenUpBlue{},
 	}

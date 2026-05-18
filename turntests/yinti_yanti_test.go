@@ -6,6 +6,7 @@ package turntests
 import (
 	"testing"
 
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card/cards"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/hero/heroes"
@@ -18,7 +19,7 @@ import (
 // pollute the test by satisfying Yinti Yanti's gate before Reduce ever played).
 func TestYintiYanti_SeesRunechantFromReduceInDefense(t *testing.T) {
 	d := deck.New(heroes.Viserai{}, nil, fillerDeck())
-	hand := []deck.Card{cards.YintiYantiRed{}, cards.ReduceToRunechantRed{}, testutils.RedPitch{}}
+	hand := []card.Card{cards.YintiYantiRed{}, cards.ReduceToRunechantRed{}, testutils.RedPitch{}}
 	summary := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 4}, nil, hand)
 	got := summary.Value
 	if got != 9 {
@@ -30,7 +31,7 @@ func TestYintiYanti_SeesRunechantFromReduceInDefense(t *testing.T) {
 // credits +1{p}. Blue pitch funds Peace of Mind's cost.
 func TestYintiYanti_SeesPonderFromPeaceOfMindInDefense(t *testing.T) {
 	d := deck.New(heroes.Viserai{}, nil, fillerDeck())
-	hand := []deck.Card{cards.YintiYantiRed{}, cards.PeaceOfMindRed{}, testutils.BluePitch{}}
+	hand := []card.Card{cards.YintiYantiRed{}, cards.PeaceOfMindRed{}, testutils.BluePitch{}}
 	summary := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 4}, nil, hand)
 	got := summary.Value
 	if got != 8 {
@@ -42,7 +43,7 @@ func TestYintiYanti_SeesPonderFromPeaceOfMindInDefense(t *testing.T) {
 // Runechant when its Block runs (DRs run first, populating auras before plain-block).
 func TestYintiYanti_BlueBlockSeesRunechantFromReduceInDefense(t *testing.T) {
 	d := deck.New(heroes.Viserai{}, nil, fillerDeck())
-	hand := []deck.Card{cards.YintiYantiBlue{}, cards.ReduceToRunechantRed{}, testutils.RedPitch{}}
+	hand := []card.Card{cards.YintiYantiBlue{}, cards.ReduceToRunechantRed{}, testutils.RedPitch{}}
 	summary := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 7}, nil, hand)
 	got := summary.Value
 	if got != 8 {
@@ -54,7 +55,7 @@ func TestYintiYanti_BlueBlockSeesRunechantFromReduceInDefense(t *testing.T) {
 // DR puts in auras (DR runs first, populating auras before the plain-block hook).
 func TestYintiYanti_BlueBlockSeesPonderFromPeaceOfMindInDefense(t *testing.T) {
 	d := deck.New(heroes.Viserai{}, nil, fillerDeck())
-	hand := []deck.Card{cards.YintiYantiBlue{}, cards.PeaceOfMindRed{}, testutils.BluePitch{}}
+	hand := []card.Card{cards.YintiYantiBlue{}, cards.PeaceOfMindRed{}, testutils.BluePitch{}}
 	summary := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 7}, nil, hand)
 	got := summary.Value
 	if got != 7 {

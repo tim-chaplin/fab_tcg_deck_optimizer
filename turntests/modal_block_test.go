@@ -3,6 +3,7 @@ package turntests
 import (
 	"testing"
 
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card/cards"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/hero/heroes"
@@ -15,7 +16,7 @@ import (
 // extra {r} fits the 3{r} from the Blue Pitch.
 func TestModalBlock_BrothersInArmsPicksMode1WhenAffordable(t *testing.T) {
 	d := deck.New(heroes.Viserai{}, nil, fillerDeck())
-	hand := []deck.Card{
+	hand := []card.Card{
 		cards.BrothersInArmsRed{},
 		cards.ToughenUpBlue{},
 		testutils.BluePitch{},
@@ -32,7 +33,7 @@ func TestModalBlock_BrothersInArmsPicksMode1WhenAffordable(t *testing.T) {
 // hand has no pitch source besides BIA itself, and pitching BIA would forfeit the block.
 func TestModalBlock_BrothersInArmsFallsBackToMode0(t *testing.T) {
 	d := deck.New(heroes.Viserai{}, nil, fillerDeck())
-	hand := []deck.Card{cards.BrothersInArmsRed{}}
+	hand := []card.Card{cards.BrothersInArmsRed{}}
 	summary := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 10}, nil, hand)
 	got := summary.Value
 	if got != 2 {

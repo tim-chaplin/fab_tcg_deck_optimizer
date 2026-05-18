@@ -17,7 +17,7 @@ import (
 // hand picks the create line over the Held alternative.
 func TestStartingStake_CreatesGoldViaChain(t *testing.T) {
 	d := deck.New(heroes.Viserai{}, nil, fillerDeck())
-	hand := []deck.Card{cards.StartingStakeYellow{}}
+	hand := []card.Card{cards.StartingStakeYellow{}}
 	summary := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, nil, hand)
 	if summary.State.GoldCount() != 1 {
 		t.Fatalf("Gold = %d, want 1 (Starting Stake creates one)\nBestLine: %s",

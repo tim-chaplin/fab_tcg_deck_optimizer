@@ -3,6 +3,7 @@ package turntests
 import (
 	"testing"
 
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card/cards"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/hero/heroes"
@@ -15,7 +16,7 @@ import (
 // window, on-hit fires.
 func TestPerformanceBonus_OnHitCreatesGold(t *testing.T) {
 	d := deck.New(heroes.Viserai{}, nil, fillerDeck())
-	hand := []deck.Card{cards.PerformanceBonusBlue{}}
+	hand := []card.Card{cards.PerformanceBonusBlue{}}
 	summary := sim.EvalOneTurnForTesting(d, sim.Matchup{IncomingDamage: 0}, nil, hand)
 	if summary.Value != 1 {
 		t.Fatalf("Value = %d, want 1 (PB Blue power 1 hits)\nBestLine: %s",
