@@ -255,7 +255,7 @@ func runOneShuffle(masterDeck *deck.Deck, scratch *shuffleScratch, stats *deck.S
 		var summary TurnSummary
 		var dealtHand []card.Card
 		var snap *bestSnapshot
-		summary, dealtHand, snap, scratch.recycledBuf = playOneTurn(master, h, d, mp, weapons, ev, handSize, scratch.recycledBuf, nil)
+		summary, dealtHand, snap, scratch.recycledBuf = playOneTurn(master, h, d, mp, weapons, ev, handSize, scratch.recycledBuf, nil, nil)
 
 		if recordTurnStats(stats, summary, handIdx, handsPerCycle) {
 			recordBestTurnFromSnap(stats, summary, ev, snap)
@@ -286,7 +286,7 @@ func runOneShuffle(masterDeck *deck.Deck, scratch *shuffleScratch, stats *deck.S
 // nil in replay mode. recycledBuf is reused in place when non-nil.
 //
 // When snapshot is non-nil, runs in REPLAY mode: drives the chain through snapshot.bestLine
-// + snapshot.cardsPlayed (no enumeration), streams emissions via snapshot.logger, and
+// + snapshot.cardsPlayed (no enumeration), streams emissions via logger (when non-nil), and
 // returns the raw post-chain per-perm state without recycle / next-draw cleanup.
 func playOneTurn(
 	master *gameengine.GameState,
@@ -298,6 +298,7 @@ func playOneTurn(
 	handSize int,
 	recycledBuf []deck.Card,
 	snapshot *bestSnapshot,
+	logger card.Logger,
 ) (summary TurnSummary, dealtHand []card.Card, snap *bestSnapshot, recycledOut []deck.Card) {
 	advanceToNextTurn(master)
 
@@ -315,7 +316,7 @@ func playOneTurn(
 	sortHandByID(hand)
 	dealtHand = hand
 	if snapshot != nil {
-		summary = runReplayForTurn(snapshot)
+		summary = runReplayForTurn(snapshot, logger)
 		// Skip end-of-turn cleanup so summary.State stays at the post-chain per-perm state
 		// the caller needs for its end-of-turn snapshot.
 		return summary, dealtHand, nil, recycledBuf

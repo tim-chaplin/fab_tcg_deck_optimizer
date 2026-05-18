@@ -16,8 +16,7 @@ import (
 
 // bestSnapshot holds the inputs needed to drive a single playSequence call matching the
 // eval-time winner. cardsPlayed is the exact resolution order from the winning turn's
-// CardsPlayed list. logger, when non-nil, is installed on per-perm states during replay so
-// chain emissions stream to it.
+// CardsPlayed list.
 type bestSnapshot struct {
 	master       *gameengine.GameState
 	deck         *deck.Deck
@@ -28,7 +27,6 @@ type bestSnapshot struct {
 	cardsPlayed  []card.Card
 	swungWeapons []string
 	value        int
-	logger       card.Logger
 }
 
 // PrintBestTurn streams the peak turn's printout to w: header + start-of-turn snapshot,
@@ -42,16 +40,15 @@ func PrintBestTurn(ev *Evaluator, snap *bestSnapshot, w io.Writer) {
 	fmt.Fprintf(w, "Best turn played (value %d):\n", snap.value)
 	writeSnapshotSummary(w, "Start of turn:", snap.master, snap.hand, snap.bestLine)
 
-	snap.logger = gameengine.NewStreamLogger(w)
-	summary, _, _, _ := playOneTurn(snap.master, snap.hand, snap.deck, snap.mp, snap.weapons, ev, 0, nil, snap)
+	summary, _, _, _ := playOneTurn(snap.master, snap.hand, snap.deck, snap.mp, snap.weapons, ev, 0, nil, snap, gameengine.NewStreamLogger(w))
 
 	writeSnapshotSummary(w, "End of turn:", summary.State, nil, snap.bestLine)
 }
 
 // runReplayForTurn drives the chain through snapshot's known role assignment + cardsPlayed
-// order with snapshot.logger installed on every per-perm state, skipping Best's partition
+// order with logger installed on every per-perm state, skipping Best's partition
 // enumeration. Called after start-of-turn auras have fired against snapshot.master / .deck.
-func runReplayForTurn(snapshot *bestSnapshot) TurnSummary {
+func runReplayForTurn(snapshot *bestSnapshot, logger card.Logger) TurnSummary {
 	parts := partitionBestLineForDisplay(snapshot.bestLine)
 	defensePitches, attackPitches := splitPitchesByPhase(parts.pitched, parts.drCost)
 
@@ -65,7 +62,7 @@ func runReplayForTurn(snapshot *bestSnapshot) TurnSummary {
 
 	bufs := newAttackBufs(len(snapshot.cardsPlayed), len(snapshot.weapons), snapshot.weapons)
 	ctx := newSequenceContext(snapshot.master, snapshot.weapons, snapshot.cardsPlayed, defenders, pitched, held, snapshot.deck, bufs, snapshot.mp, 0, arsenalInIdx, arsenalAtChainStart)
-	ctx.replayLogger = snapshot.logger
+	ctx.replayLogger = logger
 	ctx.attackPitchPerm = assignmentCards(attackPitches)
 	ctx.attackPitchVals = pitchValues(attackPitches)
 	// resourceBudget starts at 0 — the pitch pool pops perm entries lazily as costs come
