@@ -1,27 +1,26 @@
 package turntests
 
-// Multi-turn tests that pin behaviour requiring persistent state to carry across the
-// turn boundary correctly. Catches regressions where ResetEphemeralState wipes a
-// persistent field, or per-perm cloning fails to inherit one.
+// Multi-turn tests that pin state which must survive the turn boundary: equipped weapons,
+// graveyard contents, and destroyed-aura source cards.
 
 import (
 	"testing"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card/cards"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/gameengine"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/hero/heroes"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/ids"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapon/weapons"
 )
 
 // TestEvalTwoTurns_EquippedWeaponPersistsAcrossTurns pins that an equipped weapon stays
-// swingable on turn 2 — catches a regression where weapons aren't carried in the cross-turn
-// state. Hand1 = 1 BluePitch (pitches 3, funds the 2-cost swing); deck = 1 BluePitch
-// (drawn into turn 2 for the same line). Each turn: pitch the Blue, swing Nebula Blade
-// (1 base attack + 1 from the on-hit Runechant credit) = 2 damage. Expected:
-// turn1.Value == 2 AND turn2.Value == 2. If the weapon goes missing on turn 2 (persistence
-// broken), turn2.Value drops to 0.
+// swingable on turn 2. Each turn pitches a Blue (cost 3) to swing Nebula Blade for
+// 1 base + 1 on-hit Runechant = 2. Expected turn1.Value == turn2.Value == 2; if the
+// weapon is lost across the turn boundary, turn2.Value drops to 0.
 func TestEvalTwoTurns_EquippedWeaponPersistsAcrossTurns(t *testing.T) {
 	d := deck.New(heroes.Viserai{}, []deck.Weapon{weapons.NebulaBlade{}}, []deck.Card{
 		testutils.BluePitch{},
@@ -31,11 +30,81 @@ func TestEvalTwoTurns_EquippedWeaponPersistsAcrossTurns(t *testing.T) {
 	turn1, turn2 := sim.EvalTwoTurnsForTesting(d, nil, hand)
 
 	if turn1.Value != 2 {
-		t.Errorf("turn 1 Value = %d, want 2 (pitch Blue, swing Nebula Blade for 1+1)\nBestLine: %s",
-			turn1.Value, formatBestLine(turn1.BestLine))
+		t.Errorf("turn 1 Value = %d, want 2\nBestLine: %s", turn1.Value, formatBestLine(turn1.BestLine))
+	}
+	if !bestLineHasRole(turn1.BestLine, testutils.FakeBluePitch, deck.Pitch) {
+		t.Errorf("turn 1 BestLine missing BluePitch as Pitch: %s", formatBestLine(turn1.BestLine))
 	}
 	if turn2.Value != 2 {
-		t.Errorf("turn 2 Value = %d, want 2 (weapon should still be equipped; pitch Blue, swing again for 1+1)\nBestLine: %s",
+		t.Errorf("turn 2 Value = %d, want 2 (weapon should still be equipped)\nBestLine: %s",
 			turn2.Value, formatBestLine(turn2.BestLine))
+	}
+	if !bestLineHasRole(turn2.BestLine, testutils.FakeBluePitch, deck.Pitch) {
+		t.Errorf("turn 2 BestLine missing BluePitch as Pitch: %s", formatBestLine(turn2.BestLine))
+	}
+}
+
+// TestEvalTwoTurns_GraveyardPersistsAcrossTurns pins that a card in the graveyard at the
+// start of turn 1 is still there for turn 2. Initial graveyard = [Sigil of Deadwood];
+// turn 1 has an empty hand; turn 2 plays Sigil of Silphidae, whose on-enter banishes
+// another aura from the graveyard for 1 arcane. Expected turn1.Value == 0, turn2.Value == 1;
+// if the graveyard is wiped between turns, the banish finds nothing and turn2.Value == 0.
+func TestEvalTwoTurns_GraveyardPersistsAcrossTurns(t *testing.T) {
+	d := deck.New(heroes.Viserai{}, nil, []deck.Card{
+		cards.SigilOfSilphidaeBlue{},
+	})
+	initial := gameengine.GameStateBuilder().
+		SetGraveyard([]card.Card{cards.SigilOfDeadwoodBlue{}}).
+		Build()
+
+	turn1, turn2 := sim.EvalTwoTurnsForTesting(d, initial, nil)
+
+	if turn1.Value != 0 {
+		t.Errorf("turn 1 Value = %d, want 0 (empty hand)\nBestLine: %s",
+			turn1.Value, formatBestLine(turn1.BestLine))
+	}
+	if len(turn1.BestLine) != 0 {
+		t.Errorf("turn 1 BestLine = %s, want empty", formatBestLine(turn1.BestLine))
+	}
+	if turn2.Value != 1 {
+		t.Errorf("turn 2 Value = %d, want 1\nBestLine: %s", turn2.Value, formatBestLine(turn2.BestLine))
+	}
+	if !bestLineHasRole(turn2.BestLine, ids.SigilOfSilphidaeBlue, deck.Attack) {
+		t.Errorf("turn 2 BestLine missing Sigil of Silphidae as Attack: %s",
+			formatBestLine(turn2.BestLine))
+	}
+}
+
+// TestEvalTwoTurns_DestroyedAuraSourceReachesGraveyard pins the FaB rule that a destroyed
+// aura's source card lands in the graveyard. Initial state has a Sigil of Fyendal aura in
+// play; turn 1's hand is empty, so the only event is the start-of-turn aura tick (+1) which
+// destroys the aura and deposits Fyendal in the graveyard. Turn 2 plays Sigil of Silphidae,
+// whose on-enter banishes Fyendal from the graveyard for 1 arcane. Expected turn1.Value ==
+// turn2.Value == 1; if destroyed aura sources don't reach the graveyard, turn2.Value == 0.
+func TestEvalTwoTurns_DestroyedAuraSourceReachesGraveyard(t *testing.T) {
+	d := deck.New(heroes.Viserai{}, nil, []deck.Card{
+		cards.SigilOfSilphidaeBlue{},
+	})
+	initial := gameengine.GameStateBuilder().
+		CreateAuraFromCard(cards.SigilOfFyendalBlue{}).
+		Build()
+
+	turn1, turn2 := sim.EvalTwoTurnsForTesting(d, initial, nil)
+
+	if turn1.Value != 1 {
+		t.Errorf("turn 1 Value = %d, want 1 (Fyendal aura tick)\nBestLine: %s",
+			turn1.Value, formatBestLine(turn1.BestLine))
+	}
+	if len(turn1.BestLine) != 0 {
+		t.Errorf("turn 1 BestLine = %s, want empty (value is from the aura tick, not a chain play)",
+			formatBestLine(turn1.BestLine))
+	}
+	if turn2.Value != 1 {
+		t.Errorf("turn 2 Value = %d, want 1 (destroyed Fyendal must persist in graveyard for Silphidae to banish)\nBestLine: %s",
+			turn2.Value, formatBestLine(turn2.BestLine))
+	}
+	if !bestLineHasRole(turn2.BestLine, ids.SigilOfSilphidaeBlue, deck.Attack) {
+		t.Errorf("turn 2 BestLine missing Sigil of Silphidae as Attack: %s",
+			formatBestLine(turn2.BestLine))
 	}
 }
