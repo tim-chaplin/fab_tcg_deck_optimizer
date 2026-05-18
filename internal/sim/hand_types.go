@@ -1,10 +1,8 @@
 package sim
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/aura"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/gameengine"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/item"
 )
 
 // TurnSummary is the sim-runtime working type returned by playOneTurn: winning card-role
@@ -39,39 +37,6 @@ func auraCountByNameInState(gs *gameengine.GameState, name string) int {
 	for _, a := range gs.Auras() {
 		if a.CardName() == name {
 			return a.Count()
-		}
-	}
-	return 0
-}
-
-// itemCountByNameInState is the items counterpart of auraCountByNameInState.
-func itemCountByNameInState(gs *gameengine.GameState, name string) int {
-	if gs == nil {
-		return 0
-	}
-	for _, i := range gs.Items() {
-		if i.CardName() == name {
-			return i.Count()
-		}
-	}
-	return 0
-}
-
-// auraCountByName scans a sim-concrete aura slice for a token aura by display name.
-func auraCountByName(auras []*aura.Aura, name string) int {
-	for _, a := range auras {
-		if a.CardName() == name {
-			return a.Count()
-		}
-	}
-	return 0
-}
-
-// itemCountByName scans a sim-concrete item slice for a token item by display name.
-func itemCountByName(items []*item.Item, name string) int {
-	for _, i := range items {
-		if i.CardName() == name {
-			return i.Count()
 		}
 	}
 	return 0
