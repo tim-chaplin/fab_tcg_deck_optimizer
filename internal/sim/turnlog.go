@@ -8,7 +8,6 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/aura"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
 )
@@ -37,28 +36,24 @@ func startingArsenalLine(line []deck.CardAssignment) string {
 	return ""
 }
 
-// startingAurasLine builds "Auras: A, B, 1 Runechant, 2 Ponders" from auras in play at
-// the top of the turn plus the per-token carryovers. Card-aura names sort alphabetically;
-// token phrases append last in token-declaration order. Returns "" when nothing is in
-// play so the caller skips the line entirely.
-func startingAurasLine(auras []card.Card, startingRunechants, startingPonders int) string {
-	if len(auras) == 0 && startingRunechants == 0 && startingPonders == 0 {
+// aurasLineFromNames builds "Auras: A, B, 1 Runechant, 2 Ponders" from card-aura display
+// names plus the per-token carryovers. Names sort alphabetically; token phrases append
+// last. Returns "" when nothing is in play so the caller skips the line entirely.
+func aurasLineFromNames(names []string, runechants, ponders int) string {
+	if len(names) == 0 && runechants == 0 && ponders == 0 {
 		return ""
 	}
 	var items []string
-	if len(auras) > 0 {
-		names := make([]string, len(auras))
-		for i, a := range auras {
-			names[i] = a.DisplayName()
-		}
-		sort.Strings(names)
-		items = append(items, names...)
+	if len(names) > 0 {
+		sorted := append([]string(nil), names...)
+		sort.Strings(sorted)
+		items = append(items, sorted...)
 	}
-	if startingRunechants > 0 {
-		items = append(items, runechantPhrase(startingRunechants))
+	if runechants > 0 {
+		items = append(items, runechantPhrase(runechants))
 	}
-	if startingPonders > 0 {
-		items = append(items, ponderPhrase(startingPonders))
+	if ponders > 0 {
+		items = append(items, ponderPhrase(ponders))
 	}
 	return "Auras: " + strings.Join(items, ", ")
 }
@@ -107,32 +102,6 @@ func endingArsenalLine(arsenal []deck.CardAssignment) string {
 		parts[i] = label
 	}
 	return "Arsenal: " + strings.Join(parts, ", ")
-}
-
-// endingAurasLine builds "Auras: A, B, 2 Runechants, 1 Ponder" from the auras surviving
-// into the next turn plus the live token counts. Token auras are filtered out and
-// re-rendered as count phrases so pluralisation lives in one place. Card-aura names
-// sort alphabetically; token phrases append last in declaration order. Returns "" when
-// nothing survived.
-func endingAurasLine(triggers []*aura.Aura, runechants, ponders int) string {
-	var items []string
-	for _, t := range triggers {
-		if t.SourceCard() == nil {
-			continue // token auras collapse into the token phrases below
-		}
-		items = append(items, t.CardName())
-	}
-	sort.Strings(items)
-	if runechants > 0 {
-		items = append(items, runechantPhrase(runechants))
-	}
-	if ponders > 0 {
-		items = append(items, ponderPhrase(ponders))
-	}
-	if len(items) == 0 {
-		return ""
-	}
-	return "Auras: " + strings.Join(items, ", ")
 }
 
 // runechantPhrase pluralises the Runechant noun: "1 Runechant" vs "N Runechants".

@@ -430,14 +430,21 @@ func recordBestTurn(stats *deck.Stats, play TurnSummary, ev *Evaluator, weapons 
 	}
 	weaponsCopy := append([]weapon.Weapon(nil), weapons...)
 	handCopy := append([]card.Card(nil), h...)
+	var cardsPlayed []card.Card
+	if play.State != nil {
+		cardsPlayed = append([]card.Card(nil), play.State.CardsPlayed()...)
+	}
+	swungCopy := append([]string(nil), play.SwungWeapons...)
 	snap := &bestSnapshot{
-		master:   master.CopyPersistentState(),
-		deck:     d.Copy(),
-		hand:     handCopy,
-		weapons:  weaponsCopy,
-		mp:       mp,
-		bestLine: lineCopy,
-		value:    play.Value,
+		master:       master.CopyPersistentState(),
+		deck:         d.Copy(),
+		hand:         handCopy,
+		weapons:      weaponsCopy,
+		mp:           mp,
+		bestLine:     lineCopy,
+		cardsPlayed:  cardsPlayed,
+		swungWeapons: swungCopy,
+		value:        play.Value,
 	}
 	stats.PrintBest = func(w io.Writer) { PrintBestTurn(ev, snap, w) }
 }

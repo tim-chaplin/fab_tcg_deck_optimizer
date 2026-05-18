@@ -39,17 +39,21 @@ const perItemAbilityCap = 4
 // cacheable) tuple. masterState holds the start-of-turn carryover (hero, arsenal, auras,
 // items, banished, graveyard, opponentMarked) the chain runner reads from; each per-leaf
 // state branches off via masterState.Copy().
-func bestAttackWithWeapons(
+// newSequenceContext builds the sequenceContext shared between the search path
+// (bestAttackWithWeapons) and the print-time replay path (ReplayBest). It folds in item-
+// ability instances and refreshes the pooled leafState from master, but does NOT run
+// defense or seed the graveyard buf — callers do those steps after attaching any
+// per-perm overrides (pmask, wmask, replayLogger).
+func newSequenceContext(
 	masterState *gameengine.GameState,
 	weapons []weapon.Weapon,
 	attackers, defenders, pitched, held []card.Card,
 	d *deck.Deck,
 	bufs *attackBufs,
 	mp Matchup,
-	blockTotal, arsenalInIdx, arsenalDefenderIdx int,
+	blockTotal, arsenalInIdx int,
 	arsenalAtChainStart card.Card,
-) (int, int, chainBudget, []string, *gameengine.GameState, bool, bool) {
-	runechantCarryover := auraCountByNameInState(masterState, "Runechant")
+) *sequenceContext {
 	ctx := &sequenceContext{
 		hero:                masterState.Hero().(hero.Hero),
 		pitched:             pitched,
@@ -57,7 +61,7 @@ func bestAttackWithWeapons(
 		handStart:           held,
 		arsenalAtChainStart: arsenalAtChainStart,
 		bufs:                bufs,
-		runechantCarryover:  runechantCarryover,
+		runechantCarryover:  auraCountByNameInState(masterState, "Runechant"),
 		matchup:             mp,
 		blockTotal:          blockTotal,
 		arsenalInIdx:        arsenalInIdx,
@@ -67,7 +71,6 @@ func bestAttackWithWeapons(
 		defenders:           defenders,
 		cacheable:           true,
 	}
-	// Extend bufs.activatedAbilities with item ability instances for this Best call.
 	abilities := bufs.activatedAbilities[:bufs.weaponAbilityCount]
 	abilityCosts := bufs.activatedAbilityCosts[:bufs.weaponAbilityCount]
 	for _, it := range masterState.Items() {
@@ -87,28 +90,35 @@ func bestAttackWithWeapons(
 	ctx.activatedAbilities = abilities
 	ctx.activatedAbilityCosts = abilityCosts
 
-	// Build a per-leaf state from the master. Defense (if non-modal blockers) mutates
-	// this state so post-defense auras / graveyard propagate into the chain start state
-	// via leafState.Copy() per permutation. After defense the leaf state's deck is
-	// dropped so per-permutation Copy doesn't waste cycles copying it — preparePermState
-	// installs a fresh ctx.deck.ShallowCopy() instead (matching old behaviour where defense's
-	// deck mutations don't bleed into the chain).
-	hasDRs := containsDefenseReaction(defenders)
-	hasModalBlocker := containsModalBlocker(defenders)
 	if bufs.pooledLeafState == nil {
 		bufs.pooledLeafState = masterState.Copy()
 	} else {
 		bufs.pooledLeafState.CopyFrom(masterState)
 	}
-	leafState := bufs.pooledLeafState
-	ctx.leafState = leafState
+	ctx.leafState = bufs.pooledLeafState
+	return ctx
+}
+
+func bestAttackWithWeapons(
+	masterState *gameengine.GameState,
+	weapons []weapon.Weapon,
+	attackers, defenders, pitched, held []card.Card,
+	d *deck.Deck,
+	bufs *attackBufs,
+	mp Matchup,
+	blockTotal, arsenalInIdx, arsenalDefenderIdx int,
+	arsenalAtChainStart card.Card,
+) (int, int, chainBudget, []string, *gameengine.GameState, bool, bool) {
+	ctx := newSequenceContext(masterState, weapons, attackers, defenders, pitched, held, d, bufs, mp, blockTotal, arsenalInIdx, arsenalAtChainStart)
+	hasDRs := containsDefenseReaction(defenders)
+	hasModalBlocker := containsModalBlocker(defenders)
 
 	var defenseDealtConst int
 	defenseCacheableConst := true
 	if !hasModalBlocker && len(defenders) > 0 {
 		defenseDealtConst, defenseCacheableConst = ctx.runDefense(defenders, pitched, d, mp.IncomingDamage, noBlockBudgetCap, arsenalDefenderIdx)
 	}
-	leafState.SetDeck(nil)
+	ctx.leafState.SetDeck(nil)
 	defenseDealt := defenseDealtConst
 	defenseCacheable := defenseCacheableConst
 
@@ -289,6 +299,11 @@ type sequenceContext struct {
 	defenders             []card.Card
 	leafState             *gameengine.GameState
 	cacheable             bool
+	// replayLogger, when non-nil, is installed on each per-perm state so cards' log
+	// emissions stream to it inline. PrintBestTurn sets it to a *gameengine.StreamLogger
+	// pointed at stdout for single-chain replay; the eval hot path leaves it nil so the
+	// state's default NoopLogger keeps every emission free.
+	replayLogger card.Logger
 	// permState is the last *GameState a playSequence call ran the chain against. Set
 	// by playSequence so the test-only PermEngine accessor can read the post-chain
 	// state; the hot bestSequence path threads the winner through return values and
@@ -401,6 +416,9 @@ func (ctx *sequenceContext) promoteWinnerState(winner *gameengine.GameState) {
 // proceeds while the matchup figure itself stays constant.
 func (ctx *sequenceContext) runDefense(defenders, pitched []card.Card, deckPile *deck.Deck, matchupIncomingDamage, blockBudget, arsenalDefenderIdx int) (int, bool) {
 	state := ctx.leafState
+	if ctx.replayLogger != nil {
+		state.SetLogger(ctx.replayLogger)
+	}
 	state.SetDeck(deckPile)
 	state.SetIncomingDamage(matchupIncomingDamage)
 	ge := state.Engine()
@@ -531,6 +549,11 @@ func (ctx *sequenceContext) preparePermState(playedAttackers []*card.CardState, 
 	s.SetCardsPlayed(bufs.pooledCardsPlayedBuf)
 	s.SetPitched(ctx.pitched)
 	s.SetHand(hand)
+	// ResetEphemeralState set s.logger to NoopLogger; PrintBestTurn-driven runs install
+	// a StreamLogger here so every emission streams to the writer inline.
+	if ctx.replayLogger != nil {
+		s.SetLogger(ctx.replayLogger)
+	}
 	return s
 }
 
