@@ -15,14 +15,16 @@ import (
 // EvalOneTurnForTesting drives one turn and returns its TurnSummary. State reflects the
 // end-of-turn boundary (pitched recycled, next hand drawn; partial or empty hands OK).
 // initial seeds carryover (hero, arsenal, auras, items, banished, graveyard, opponentMarked,
-// incoming damage); nil uses gameengine's default state (heroes.Default — 20hp/4int, no
-// abilities). d is consumed in place — callers shouldn't reuse it across calls.
+// incoming damage); nil uses gameengine's default state (20hp/4int, no abilities).
+// initialHand is the dealt hand — required (callers that want a deck-drawn hand do the
+// d.Draw themselves and pass the result). d is consumed in place — callers shouldn't reuse
+// it across calls.
 func EvalOneTurnForTesting(d *deck.Deck, initial *gameengine.GameState, initialHand []card.Card) TurnSummary {
-	master, hand, handSize, weapons, ok := setupTurn(d, initial, initialHand)
+	master, handSize, weapons, ok := setupTurn(d, initial, initialHand)
 	if !ok {
 		return TurnSummary{State: gameengine.GameStateBuilder().Build()}
 	}
-	summary, _ := playOneTurn(master, hand, d, weapons, ev(), handSize, nil, nil)
+	summary, _ := playOneTurn(master, initialHand, d, weapons, ev(), handSize, nil, nil)
 	return summary
 }
 
@@ -31,12 +33,12 @@ func EvalOneTurnForTesting(d *deck.Deck, initial *gameengine.GameState, initialH
 // partial hand. The returned turn1.State is an independent snapshot; turn2 mutates the
 // shared master.
 func EvalTwoTurnsForTesting(d *deck.Deck, initial *gameengine.GameState, hand1 []card.Card) (TurnSummary, TurnSummary) {
-	master, hand, handSize, weapons, ok := setupTurn(d, initial, hand1)
+	master, handSize, weapons, ok := setupTurn(d, initial, hand1)
 	if !ok {
 		return TurnSummary{State: gameengine.GameStateBuilder().Build()}, TurnSummary{}
 	}
 
-	turn1, _ := playOneTurn(master, hand, d, weapons, ev(), handSize, nil, nil)
+	turn1, _ := playOneTurn(master, hand1, d, weapons, ev(), handSize, nil, nil)
 	stable := turn1
 	stable.State = snapshotState(turn1.State, turn1.State.Deck(), turn1.State.Hand(), turn1.Value, turn1.State.CardsDrawn())
 
@@ -45,11 +47,9 @@ func EvalTwoTurnsForTesting(d *deck.Deck, initial *gameengine.GameState, hand1 [
 }
 
 // setupTurn assembles the per-turn fixture from d: master *GameState (`initial` when
-// provided, else the builder's default state), dealt hand, handSize, weapon list. d is
-// consumed in place (Draw mutates it when initialHand is nil). ok=false on invalid inputs
-// (handSize <= 0; initialHand empty or oversized; no initialHand and deck can't deal
-// handSize).
-func setupTurn(d *deck.Deck, initial *gameengine.GameState, initialHand []card.Card) (master *gameengine.GameState, hand []card.Card, handSize int, weapons []weapon.Weapon, ok bool) {
+// provided, else the builder's default state), handSize, weapon list. ok=false when
+// handSize <= 0 or initialHand has more cards than handSize.
+func setupTurn(d *deck.Deck, initial *gameengine.GameState, initialHand []card.Card) (master *gameengine.GameState, handSize int, weapons []weapon.Weapon, ok bool) {
 	// Master GameState.
 	if initial != nil {
 		master = initial
@@ -57,26 +57,10 @@ func setupTurn(d *deck.Deck, initial *gameengine.GameState, initialHand []card.C
 		master = gameengine.GameStateBuilder().Build()
 	}
 
-	// Hand size + input validation.
+	// Hand size + input validation. Empty initialHand is allowed (turn plays with no cards).
 	handSize = master.Hero().(hero.Hero).Intelligence()
-	if handSize <= 0 {
-		return nil, nil, 0, nil, false
-	}
-	if initialHand == nil && d.Size() < handSize {
-		return nil, nil, 0, nil, false
-	}
-	if initialHand != nil && (len(initialHand) == 0 || len(initialHand) > handSize) {
-		return nil, nil, 0, nil, false
-	}
-
-	// Hand: caller's initialHand verbatim, or draw from deck top.
-	hand = make([]card.Card, 0, handSize+startOfTurnRevealRoom)
-	if initialHand != nil {
-		hand = append(hand, initialHand...)
-	} else {
-		for _, c := range d.Draw(handSize) {
-			hand = append(hand, c.(card.Card))
-		}
+	if handSize <= 0 || len(initialHand) > handSize {
+		return nil, 0, nil, false
 	}
 
 	// Weapons: widen []deck.Weapon to []weapon.Weapon.
@@ -85,7 +69,7 @@ func setupTurn(d *deck.Deck, initial *gameengine.GameState, initialHand []card.C
 		weapons[i] = w.(weapon.Weapon)
 	}
 
-	return master, hand, handSize, weapons, true
+	return master, handSize, weapons, true
 }
 
 // ev returns the package-level Evaluator so test helpers share its cache/scratch state.

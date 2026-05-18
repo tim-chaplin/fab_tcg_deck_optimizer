@@ -18,12 +18,14 @@ import (
 // being held into turn 2.
 func TestEvalOneTurn_MidTurnDrawArsenalsWhenSlotEmpty(t *testing.T) {
 	beacon := testutils.RedAttack{}
-	deckCards := []deck.Card{
+	hand := []card.Card{
 		cards.SnatchRed{},
 		testutils.BlueAttack{},
 		testutils.BlueAttack{},
 		testutils.BlueAttack{},
-		beacon,
+	}
+	deckCards := []deck.Card{
+		beacon, // Snatch draws this mid-turn.
 		testutils.BlueAttack{},
 		testutils.BlueAttack{},
 		testutils.BlueAttack{},
@@ -31,7 +33,7 @@ func TestEvalOneTurn_MidTurnDrawArsenalsWhenSlotEmpty(t *testing.T) {
 		testutils.YellowAttack{},
 	}
 	d := deck.New(heroes.Viserai{}, nil, deckCards)
-	summary := sim.EvalOneTurnForTesting(d, nil, nil)
+	summary := sim.EvalOneTurnForTesting(d, nil, hand)
 
 	wantHand := []card.Card{
 		testutils.BlueAttack{},
@@ -40,7 +42,7 @@ func TestEvalOneTurn_MidTurnDrawArsenalsWhenSlotEmpty(t *testing.T) {
 		testutils.YellowAttack{},
 	}
 	if !reflect.DeepEqual(summary.State.Hand(), wantHand) {
-		t.Errorf("turn 2 hand = %v, want %v (full 4-card refill from positions 5..8; Yellow at slot 3 proves drawn card arsenaled rather than held)", summary.State.Hand(), wantHand)
+		t.Errorf("turn 2 hand = %v, want %v (full 4-card refill; Yellow at slot 3 proves drawn card arsenaled rather than held)", summary.State.Hand(), wantHand)
 	}
 
 	if summary.State.Arsenal() != beacon {
@@ -56,23 +58,25 @@ func TestEvalOneTurn_MidTurnDrawArsenalsWhenSlotEmpty(t *testing.T) {
 // the other stays Held into turn 2.
 func TestEvalOneTurn_TwoMidTurnDraws_OneArsenalsOneHeld(t *testing.T) {
 	beacon := testutils.RedAttack{}
+	hand := []card.Card{
+		cards.FlyingHighRed{},
+		cards.FlyingHighRed{},
+		cards.SnatchRed{},
+		cards.SnatchRed{},
+	}
 	deckCards := []deck.Card{
-		cards.FlyingHighRed{},
-		cards.FlyingHighRed{},
-		cards.SnatchRed{},
-		cards.SnatchRed{},
-		beacon,
-		beacon,
+		beacon, // Snatch #1 draws this.
+		beacon, // Snatch #2 draws this.
 		testutils.BlueAttack{},
 		testutils.BlueAttack{},
 		testutils.BlueAttack{},
 		testutils.YellowAttack{},
 	}
 	d := deck.New(heroes.Viserai{}, nil, deckCards)
-	summary := sim.EvalOneTurnForTesting(d, nil, nil)
+	summary := sim.EvalOneTurnForTesting(d, nil, hand)
 
-	// One beacon arsenaled, the other held at slot 0; the remaining three slots are the fresh
-	// refill from deck positions 6..8.
+	// One beacon arsenaled, the other held at slot 0; the remaining three slots are the
+	// fresh refill from the remaining Blues.
 	wantHand := []card.Card{
 		beacon,
 		testutils.BlueAttack{},
@@ -96,22 +100,24 @@ func TestEvalOneTurn_TwoMidTurnDraws_OneArsenalsOneHeld(t *testing.T) {
 func TestEvalOneTurn_ThreeMidTurnDraws_ArsenalFromDrawnPool(t *testing.T) {
 	beacon := testutils.RedAttack{}
 	arsenalIn := cards.SnatchRed{}
+	hand := []card.Card{
+		cards.FlyingHighRed{},
+		cards.FlyingHighRed{},
+		cards.SnatchRed{},
+		cards.SnatchRed{},
+	}
 	deckCards := []deck.Card{
-		cards.FlyingHighRed{},
-		cards.FlyingHighRed{},
-		cards.SnatchRed{},
-		cards.SnatchRed{},
-		beacon,
-		beacon,
-		beacon,
+		beacon, // Drawn by arsenal-in Snatch.
+		beacon, // Drawn by hand Snatch #1.
+		beacon, // Drawn by hand Snatch #2.
 		testutils.BlueAttack{},
 		testutils.BlueAttack{},
 		testutils.YellowAttack{},
 	}
 	d := deck.New(heroes.Viserai{}, nil, deckCards)
-	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetArsenal(arsenalIn).Build(), nil)
+	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetArsenal(arsenalIn).Build(), hand)
 
-	// Two held beacons plus two fresh Blues from deck positions 7..8.
+	// Two held beacons plus two fresh Blues from the remaining deck.
 	wantHand := []card.Card{
 		beacon,
 		beacon,
@@ -135,12 +141,14 @@ func TestEvalOneTurn_ThreeMidTurnDraws_ArsenalFromDrawnPool(t *testing.T) {
 func TestEvalOneTurn_MidTurnDrawHeldWhenArsenalFull(t *testing.T) {
 	beacon := testutils.RedAttack{}
 	arsenalIn := cards.ToughenUpBlue{} // DR, cost 2, defense 4 — stays in arsenal with incoming 0
-	deckCards := []deck.Card{
+	hand := []card.Card{
 		cards.SnatchRed{},
 		testutils.BlueAttack{},
 		testutils.BlueAttack{},
 		testutils.BlueAttack{},
-		beacon,
+	}
+	deckCards := []deck.Card{
+		beacon, // Snatch draws this mid-turn.
 		testutils.BlueAttack{},
 		testutils.BlueAttack{},
 		testutils.BlueAttack{},
@@ -148,7 +156,7 @@ func TestEvalOneTurn_MidTurnDrawHeldWhenArsenalFull(t *testing.T) {
 		testutils.YellowAttack{},
 	}
 	d := deck.New(heroes.Viserai{}, nil, deckCards)
-	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetArsenal(arsenalIn).Build(), nil)
+	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetArsenal(arsenalIn).Build(), hand)
 
 	wantHand := []card.Card{
 		beacon,
