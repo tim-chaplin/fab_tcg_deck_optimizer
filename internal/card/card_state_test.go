@@ -26,22 +26,13 @@ func (stubCard) Types(GameEngine) TypeSet            { return 0 }
 func (c stubCard) GoAgain(GameEngine) bool           { return c.goAgain }
 func (stubCard) Play(GameEngine, Logger, *CardState) {}
 
-// dominatingStub is a Card carrying the Dominator marker — exercises the printed-Dominate
-// branches of EffectiveDominate / HasDominate. Fixed-value (no Attack configurability)
-// since these tests don't read it.
-type dominatingStub struct{ name string }
+// dominatingStub is a stubCard with the Dominator marker — exercises the printed-
+// Dominate branches of EffectiveDominate / HasDominate.
+type dominatingStub struct {
+	stubCard
+}
 
-func (c dominatingStub) ID() ids.CardID                    { return ids.InvalidCard }
-func (c dominatingStub) Name() string                      { return c.name }
-func (c dominatingStub) DisplayName() string               { return c.name }
-func (dominatingStub) Cost(GameEngine) int                 { return 0 }
-func (dominatingStub) Pitch() int                          { return 0 }
-func (dominatingStub) Attack() int                         { return 0 }
-func (dominatingStub) Defense() int                        { return 0 }
-func (dominatingStub) Types(GameEngine) TypeSet            { return 0 }
-func (dominatingStub) GoAgain(GameEngine) bool             { return false }
-func (dominatingStub) Play(GameEngine, Logger, *CardState) {}
-func (dominatingStub) Dominate()                           {}
+func (dominatingStub) Dominate() {}
 
 // TestCardState_EffectiveGoAgain: printed GoAgain OR a mid-chain grant qualifies the card
 // for Go again. Neither printed nor granted -> false.
@@ -72,7 +63,7 @@ func TestCardState_EffectiveGoAgain(t *testing.T) {
 // dominate" rider flipping self.GrantedDominate) each qualifies the attack as dominating.
 func TestCardState_EffectiveDominate(t *testing.T) {
 	plain := stubCard{name: "plain"}
-	dominator := dominatingStub{name: "printed"}
+	dominator := dominatingStub{stubCard{name: "printed"}}
 
 	cases := []struct {
 		name    string
