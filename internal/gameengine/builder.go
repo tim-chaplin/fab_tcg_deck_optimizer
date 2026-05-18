@@ -63,6 +63,18 @@ func (b *StateBuilder) AddAura(auras ...Aura) *StateBuilder {
 	return b
 }
 
+// CreateAuraFromCard plays c against an ephemeral *GameEngine wrapping the state being
+// built so the card's Play body lands its aura on b.gs without test fixtures needing to
+// duplicate the card's aura-construction logic. Best for pure-aura cards (Sigil of Fyendal,
+// Runeblood Incantation, Blessing of Occult, etc.); cards whose Play has additional side
+// effects (graveyard banishes, on-hit registration, immediate value credit) run those too.
+func (b *StateBuilder) CreateAuraFromCard(c card.Card) *StateBuilder {
+	ge := &GameEngine{GameState: b.gs}
+	cs := &card.CardState{Card: c}
+	c.Play(ge, NoopLogger{}, cs)
+	return b
+}
+
 // AddItem appends items to the carryover item list.
 func (b *StateBuilder) AddItem(items ...Item) *StateBuilder {
 	b.gs.items = append(b.gs.items, items...)
