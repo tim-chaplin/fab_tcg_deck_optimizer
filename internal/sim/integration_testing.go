@@ -29,8 +29,8 @@ func EvalOneTurnForTesting(d *deck.Deck, initialState *gameengine.GameState, ini
 
 // EvalTwoTurnsForTesting drives two turns, threading carryover between them. Each turn's
 // Value folds in its own start-of-turn trigger damage. Turn 2 runs even with an empty or
-// partial hand. The returned turn1.State is an independent snapshot; turn2 mutates the
-// shared master.
+// partial hand. The returned turn1.State is an independent deep copy; turn2 mutates the
+// shared state.
 func EvalTwoTurnsForTesting(d *deck.Deck, initialState *gameengine.GameState, hand1 []card.Card) (TurnSummary, TurnSummary) {
 	if initialState == nil {
 		initialState = gameengine.GameStateBuilder().Build()
@@ -39,7 +39,7 @@ func EvalTwoTurnsForTesting(d *deck.Deck, initialState *gameengine.GameState, ha
 
 	turn1, _ := playOneTurn(initialState, hand1, d, ev(), nil, nil)
 	stable := turn1
-	stable.State = snapshotState(turn1.State, turn1.State.Deck(), turn1.State.Hand(), turn1.Value, turn1.State.CardsDrawn())
+	stable.State = turn1.State.Copy()
 
 	turn2, _ := playOneTurn(turn1.State, turn1.State.Hand(), turn1.State.Deck(), ev(), nil, nil)
 	return stable, turn2
@@ -47,16 +47,3 @@ func EvalTwoTurnsForTesting(d *deck.Deck, initialState *gameengine.GameState, ha
 
 // ev returns the package-level Evaluator so test helpers share its cache/scratch state.
 func ev() *Evaluator { return sharedEvaluator }
-
-// snapshotState clones src's persistent carryover and overlays deck (copied), hand, value,
-// and cardsDrawn. The result is independent of future mutations to src.
-func snapshotState(src *gameengine.GameState, d *deck.Deck, hand []card.Card, value, cardsDrawn int) *gameengine.GameState {
-	out := src.CopyPersistentState()
-	if d != nil {
-		out.SetDeck(d.Copy())
-	}
-	out.SetHand(hand)
-	out.SetValue(value)
-	out.SetCardsDrawn(cardsDrawn)
-	return out
-}
