@@ -53,7 +53,12 @@ func newSequenceContext(
 	blockTotal, arsenalInIdx int,
 	arsenalAtChainStart card.Card,
 ) *sequenceContext {
-	ctx := &sequenceContext{
+	ctx := bufs.pooledSequenceCtx
+	if ctx == nil {
+		ctx = &sequenceContext{}
+		bufs.pooledSequenceCtx = ctx
+	}
+	*ctx = sequenceContext{
 		hero:                masterState.Hero().(hero.Hero),
 		pitched:             pitched,
 		deck:                d,
