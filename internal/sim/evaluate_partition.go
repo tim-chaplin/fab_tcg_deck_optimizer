@@ -29,7 +29,7 @@ func (e *Evaluator) evaluatePartition(
 	weapons []weapon.Weapon, hand []card.Card,
 	d *deck.Deck,
 	rolesBuf []deck.Role, n int, bufs *attackBufs,
-	mp Matchup, defenseSum int,
+	defenseSum int,
 ) (
 	attackDealt, defenseDealt int,
 	swung []string, winner *gameengine.GameState,
@@ -64,7 +64,7 @@ func (e *Evaluator) evaluatePartition(
 
 	attackDealt, defenseDealt, _, swung, winner, ok, cacheable = bestAttackWithWeapons(
 		masterState, weapons, a, defs, p, h, d, bufs,
-		mp, defenseSum,
+		defenseSum,
 		arsenalInIdx, arsenalDefenderIdx, arsenalAtChainStart,
 	)
 	return

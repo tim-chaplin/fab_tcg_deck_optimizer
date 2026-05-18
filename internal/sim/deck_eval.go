@@ -249,7 +249,7 @@ func runOneShuffle(masterDeck *deck.Deck, scratch *shuffleScratch, stats *deck.S
 	maxHands := 2 * handsPerCycle
 	for handIdx := 0; handIdx < maxHands; handIdx++ {
 		preDeckSize := d.Size()
-		summary, snap := playOneTurn(master, h, d, mp, weapons, ev, handSize, nil, nil)
+		summary, snap := playOneTurn(master, h, d, weapons, ev, handSize, nil, nil)
 
 		if recordTurnStats(stats, summary, handIdx, handsPerCycle) {
 			recordBestTurnFromSnap(stats, summary, ev, snap)
@@ -297,7 +297,6 @@ func playOneTurn(
 	master *gameengine.GameState,
 	hand []card.Card,
 	d *deck.Deck,
-	mp Matchup,
 	weapons []weapon.Weapon,
 	ev *Evaluator,
 	handSize int,
@@ -312,7 +311,6 @@ func playOneTurn(
 			deck:    d.Copy(),
 			hand:    append([]card.Card(nil), hand...),
 			weapons: append([]weapon.Weapon(nil), weapons...),
-			mp:      mp,
 		}
 	}
 
@@ -324,7 +322,7 @@ func playOneTurn(
 		// the caller needs for its end-of-turn snapshot.
 		return summary, nil
 	}
-	summary = runBestForTurn(weapons, hand, mp, d, master, ev)
+	summary = runBestForTurn(weapons, hand, d, master, ev)
 
 	// Chain ran on a shallow copy of d that may have drawn mid-turn; use the winner's
 	// post-chain deck for recycle / next-turn draw.
@@ -389,12 +387,11 @@ func mergeStatsInto(dst, src *deck.Stats) {
 func runBestForTurn(
 	weapons []weapon.Weapon,
 	h []card.Card,
-	mp Matchup,
 	d *deck.Deck,
 	master *gameengine.GameState,
 	ev *Evaluator,
 ) TurnSummary {
-	return ev.Best(weapons, h, mp, d, master)
+	return ev.Best(weapons, h, d, master)
 }
 
 // recordTurnStats folds one resolved turn's accumulators into stats: bumps Hands /

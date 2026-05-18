@@ -50,7 +50,6 @@ func newSequenceContext(
 	attackers, defenders, pitched, held []card.Card,
 	d *deck.Deck,
 	bufs *attackBufs,
-	mp Matchup,
 	blockTotal, arsenalInIdx int,
 	arsenalAtChainStart card.Card,
 ) *sequenceContext {
@@ -62,7 +61,6 @@ func newSequenceContext(
 		arsenalAtChainStart: arsenalAtChainStart,
 		bufs:                bufs,
 		runechantCarryover:  auraCountByNameInState(masterState, "Runechant"),
-		matchup:             mp,
 		blockTotal:          blockTotal,
 		arsenalInIdx:        arsenalInIdx,
 		priorOpponentMarked: masterState.OpponentMarked(),
@@ -106,18 +104,18 @@ func bestAttackWithWeapons(
 	attackers, defenders, pitched, held []card.Card,
 	d *deck.Deck,
 	bufs *attackBufs,
-	mp Matchup,
 	blockTotal, arsenalInIdx, arsenalDefenderIdx int,
 	arsenalAtChainStart card.Card,
 ) (int, int, chainBudget, []string, *gameengine.GameState, bool, bool) {
-	ctx := newSequenceContext(masterState, weapons, attackers, defenders, pitched, held, d, bufs, mp, blockTotal, arsenalInIdx, arsenalAtChainStart)
+	ctx := newSequenceContext(masterState, weapons, attackers, defenders, pitched, held, d, bufs, blockTotal, arsenalInIdx, arsenalAtChainStart)
 	hasDRs := containsDefenseReaction(defenders)
 	hasModalBlocker := containsModalBlocker(defenders)
+	incoming := masterState.IncomingDamage()
 
 	var defenseDealtConst int
 	defenseCacheableConst := true
 	if !hasModalBlocker && len(defenders) > 0 {
-		defenseDealtConst, defenseCacheableConst = ctx.runDefense(defenders, pitched, d, mp.IncomingDamage, noBlockBudgetCap, arsenalDefenderIdx)
+		defenseDealtConst, defenseCacheableConst = ctx.runDefense(defenders, pitched, d, incoming, noBlockBudgetCap, arsenalDefenderIdx)
 	}
 	ctx.leafState.SetDeck(nil)
 	defenseDealt := defenseDealtConst
@@ -221,7 +219,7 @@ func bestAttackWithWeapons(
 				continue
 			}
 			if hasModalBlocker {
-				defenseDealt, defenseCacheable = ctx.runDefense(defenders, pitched, d, mp.IncomingDamage, phase.defendBudget-drCost, arsenalDefenderIdx)
+				defenseDealt, defenseCacheable = ctx.runDefense(defenders, pitched, d, incoming, phase.defendBudget-drCost, arsenalDefenderIdx)
 				ctx.seedPoolGravBuf(len(allAttackers), len(attackPitchPerm))
 			}
 			if phase.hasDefendPitches && phase.defendBudget-drCost >= phase.maxDefendPitch {
@@ -289,7 +287,6 @@ type sequenceContext struct {
 	attackPitchVals       []int
 	resourceBudget        int
 	runechantCarryover    int
-	matchup               Matchup
 	blockTotal            int
 	arsenalInIdx          int
 	priorOpponentMarked   bool
