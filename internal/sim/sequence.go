@@ -246,6 +246,12 @@ func bestAttackWithWeapons(
 				bestFutureValue = futureValue
 				bestSwung = bufs.weaponNames[wmask&weaponBitsMask]
 				bestBudget = chainBudget{resource: phase.attackBudget, maxPitch: phase.maxAttackPitch, hasAttackPitches: phase.hasAttackPitches}
+				// Hand the superseded leaf-best to bufs.recycledState so the next
+				// preparePermState can reuse its struct + aura backing instead of
+				// allocating a fresh CopyPersistentState.
+				if bestWinner != nil && bufs.recycledState == nil {
+					bufs.recycledState = bestWinner
+				}
 				bestWinner = winner
 				foundFeasible = true
 			}
@@ -506,7 +512,17 @@ func (ctx *sequenceContext) runDefense(defenders, pitched []card.Card, deckPile 
 func (ctx *sequenceContext) preparePermState(playedAttackers []*card.CardState, n int) *gameengine.GameState {
 	bufs := ctx.bufs
 	if bufs.pooledState == nil {
-		bufs.pooledState = ctx.leafState.CopyPersistentState()
+		// Drain the recycled slot before falling back to a fresh struct alloc: superseded
+		// best-winners (handed off by bestSequence's tryOnce when a better perm displaces
+		// them) already carry independent slice backings, so CopyPersistentStateFrom can
+		// rewrite the struct in place without leaking any prior-winner reference.
+		if bufs.recycledState != nil {
+			bufs.pooledState = bufs.recycledState
+			bufs.recycledState = nil
+			bufs.pooledState.CopyPersistentStateFrom(ctx.leafState)
+		} else {
+			bufs.pooledState = ctx.leafState.CopyPersistentState()
+		}
 	} else {
 		bufs.pooledState.CopyPersistentStateFrom(ctx.leafState)
 	}
@@ -622,6 +638,13 @@ func (ctx *sequenceContext) bestSequence(attackers []card.Card) (int, int, *game
 				bestCardsDrawn = drawn
 				bestFutureValue = futureValue
 				foundLegal = true
+				// A prior best is superseded — hand its *GameState to bufs.recycledState so
+				// the next preparePermState reuses it instead of allocating a fresh struct.
+				// promoteWinnerState already cloned that prior winner's slices, so the
+				// recycle slot's backings are independent.
+				if bestWinner != nil && ctx.bufs.recycledState == nil {
+					ctx.bufs.recycledState = bestWinner
+				}
 				bestWinner = winner
 				ctx.promoteWinnerDeck(winner)
 				ctx.promoteWinnerState(winner)
