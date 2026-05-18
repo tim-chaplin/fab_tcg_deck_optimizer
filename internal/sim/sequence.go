@@ -34,16 +34,10 @@ import (
 // pathological hand blow up the per-leaf mask loop.
 const perItemAbilityCap = 4
 
-// bestAttackWithWeapons enumerates phase / weapon masks for one partition leaf and
-// returns the best (damage, futureValue, budget, swungWeapons, winnerState, legal,
-// cacheable) tuple. masterState holds the start-of-turn carryover (hero, arsenal, auras,
-// items, banished, graveyard, opponentMarked) the chain runner reads from; each per-leaf
-// state branches off via masterState.Copy().
-// newSequenceContext builds the sequenceContext shared between the search path
-// (bestAttackWithWeapons) and the print-time replay path (ReplayBest). It folds in item-
-// ability instances and refreshes the pooled leafState from master, but does NOT run
-// defense or seed the graveyard buf — callers do those steps after attaching any
-// per-perm overrides (pmask, wmask, replayLogger).
+// newSequenceContext builds the sequenceContext shared between the search path and the
+// print-time replay path. It folds in item-ability instances and refreshes the pooled
+// leafState from master, but does NOT run defense or seed the graveyard buf — callers do
+// those steps after attaching any per-perm overrides (pmask, wmask, replayLogger).
 func newSequenceContext(
 	masterState *gameengine.GameState,
 	weapons []weapon.Weapon,
@@ -103,6 +97,9 @@ func newSequenceContext(
 	return ctx
 }
 
+// bestAttackWithWeapons enumerates phase / weapon masks for one partition leaf and
+// returns the best (damage, futureValue, budget, swungWeapons, winnerState, legal,
+// cacheable) tuple. Each per-leaf state branches off via masterState.Copy().
 func bestAttackWithWeapons(
 	masterState *gameengine.GameState,
 	weapons []weapon.Weapon,
