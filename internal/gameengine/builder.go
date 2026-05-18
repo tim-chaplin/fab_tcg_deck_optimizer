@@ -3,7 +3,6 @@ package gameengine
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/turnlogger"
 )
 
 // StateBuilder fluently constructs a *GameState. Callers chain setters and finish
@@ -26,15 +25,15 @@ func New() *GameEngine {
 }
 
 // GameStateBuilder returns a fresh *StateBuilder pre-populated with the defaults a
-// just-constructed *GameState carries: cacheable=true, currentAuraIdx=-1, empty
-// logger, and a non-nil empty *deck.Deck (so cards that recycle into the deck don't
+// just-constructed *GameState carries: cacheable=true, currentAuraIdx=-1, a no-op logger
+// (NoopLogger), and a non-nil empty *deck.Deck (so cards that recycle into the deck don't
 // panic on a zero-card state). SetDeck / SetCards overrides the empty deck.
 func GameStateBuilder() *StateBuilder {
 	return &StateBuilder{
 		gs: &GameState{
 			cacheable:      true,
 			currentAuraIdx: -1,
-			logger:         turnlogger.New(),
+			logger:         NoopLogger{},
 			deck:           deck.New(nil, nil, nil),
 		},
 	}

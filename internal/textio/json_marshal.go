@@ -1,7 +1,7 @@
 package textio
 
-// Runtime Deck → JSON encoding: Marshal is the public entry point; toJSON / statsToJSON /
-// bestTurnToJSON walk the deck, flatten interface values to names, and sort the outputs so
+// Runtime Deck → JSON encoding. MarshalDeck is the public entry point; toJSON / statsToJSON
+// / bestTurnToJSON walk the deck, flatten interface values to names, and sort outputs so
 // diffs across runs stay stable.
 
 import (
@@ -14,8 +14,8 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry"
 )
 
-// Marshal returns the JSON encoding of `d` and its accumulated `stats` (indented) with
-// card/weapon/hero names in place of interface values.
+// MarshalDeck returns the indented JSON encoding of d and stats, with card / weapon / hero
+// names in place of interface values.
 func MarshalDeck(d *deck.Deck, stats deck.Stats) ([]byte, error) {
 	return json.MarshalIndent(toJSON(d, stats), "", "  ")
 }
@@ -39,9 +39,8 @@ func toJSON(d *deck.Deck, stats deck.Stats) *DeckJSON {
 	}
 }
 
-// sortedStrings returns a sorted copy of ss. Nil on empty input so omitempty can elide the
-// field entirely. Used for name-only parallel lists (Sideboard, Equipment) that don't
-// participate in simulation.
+// sortedStrings returns a sorted copy of ss, nil on empty input so omitempty elides the
+// field entirely.
 func sortedStrings(ss []string) []string {
 	if len(ss) == 0 {
 		return nil
@@ -65,9 +64,9 @@ func statsToJSON(s deck.Stats) StatsJSON {
 	}
 }
 
-// perCardMarginalToJSON flattens the ids.CardID-keyed marginal-stats map into a slice sorted
-// by Marginal descending, then by card name — matching the on-screen card-value table's
-// order so the JSON and the printout read in lockstep.
+// perCardMarginalToJSON flattens the ids.CardID-keyed marginal-stats map into a slice
+// sorted by Marginal descending, then by card name — matching the on-screen card-value
+// table's order.
 func perCardMarginalToJSON(m map[ids.CardID]deck.CardMarginalStats) []CardMarginalStatsJSON {
 	if len(m) == 0 {
 		return nil
@@ -92,15 +91,11 @@ func perCardMarginalToJSON(m map[ids.CardID]deck.CardMarginalStats) []CardMargin
 	return out
 }
 
-// bestTurnToJSON serialises deck.BestTurn.Log directly. The structured TurnSummary stays in
-// memory for the live computation but never crosses the JSON boundary — the structured Log
-// is the single source of truth on disk and feeds the formatter at print time.
+// bestTurnToJSON serialises the headline Value, returning the zero value on no recorded
+// best so omitempty drops the field.
 func bestTurnToJSON(b deck.BestTurn) BestTurnJSON {
-	if b.Log.IsEmpty() {
+	if len(b.BestLine) == 0 {
 		return BestTurnJSON{}
 	}
-	return BestTurnJSON{
-		Value: b.Value,
-		Log:   b.Log,
-	}
+	return BestTurnJSON{Value: b.Value}
 }

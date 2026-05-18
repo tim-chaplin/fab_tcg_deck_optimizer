@@ -30,7 +30,6 @@ func (e *Evaluator) evaluatePartition(
 	d *deck.Deck,
 	rolesBuf []deck.Role, n int, bufs *attackBufs,
 	mp Matchup, defenseSum int,
-	skipLog bool,
 ) (
 	attackDealt, defenseDealt int,
 	swung []string, winner *gameengine.GameState,
@@ -67,7 +66,6 @@ func (e *Evaluator) evaluatePartition(
 		masterState, weapons, a, defs, p, h, d, bufs,
 		mp, defenseSum,
 		arsenalInIdx, arsenalDefenderIdx, arsenalAtChainStart,
-		skipLog,
 	)
 	return
 }

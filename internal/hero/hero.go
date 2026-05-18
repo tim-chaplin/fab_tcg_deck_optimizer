@@ -3,10 +3,9 @@
 // live in the sibling internal/hero/heroes subpackage.
 //
 // The OnCardPlayed signature uses package-local GameEngine / Logger interfaces (declared
-// in interfaces.go) — narrow surfaces that *gameengine.GameEngine and *turnlogger.TurnLogger
-// satisfy structurally — so internal/hero doesn't depend on internal/card.GameEngine or internal/card.Logger.
-// The card-typed arguments and constants (CardType / TypeSet / Card) are foundational
-// identification types and remain imported from internal/card.
+// in interfaces.go) so internal/hero doesn't depend on internal/card.GameEngine or
+// internal/card.Logger. The card-typed arguments and constants (CardType / TypeSet / Card)
+// are foundational identification types and remain imported from internal/card.
 package hero
 
 import (

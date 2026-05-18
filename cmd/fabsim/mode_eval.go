@@ -41,56 +41,34 @@ func runEvalCmd(args []string) {
 	runEval(resolveDeckPath(fs.Arg(0)), *shuffles, *precision, sim.Matchup{IncomingDamage: *incoming, ArcaneIncomingDamage: *arcaneIncoming}, *seed, *printOnly, *brief, *debug)
 }
 
-// runEval loads the deck at outPath and prints its stats. Default behaviour (printOnly=false)
-// first re-simulates the deck for deepShuffles hands against incoming and writes the fresh
-// stats back to disk — both the JSON and the sibling fabrary .txt — so the on-disk copy
-// always reflects the latest binary's modelling. printOnly=true skips that step and just
-// loads-and-prints, which is what you want for a quick look at a saved deck without spending
-// shuffles or mutating the file. Both branches share the same load-and-print path so the
-// output is identical regardless of whether a sim ran first.
-//
-// Output shape is controlled by brief:
-//   - brief=false (default): full printBestDeck dump — summary, card list, best-turn block,
-//     per-card stats.
-//   - brief=true: score summary only. Good for scripted re-scoring where the card list and
-//     best turn are noise.
-//
-// debug=true prints extra telemetry to stderr after the run — currently the hand-eval
-// cache hit rate. Only meaningful when a fresh simulation actually ran (printOnly=false);
-// otherwise the Evaluator never spun up.
+// runEval loads the deck at outPath and prints its stats. With printOnly=false it first
+// re-simulates against mp and writes the fresh stats back to disk (.json + sibling fabrary
+// .txt). brief=true prints the score summary only; brief=false prints the full
+// printBestDeck dump. debug=true prints cache telemetry to stderr after a fresh sim.
 func runEval(outPath string, shuffles int, precision float64, mp sim.Matchup, seed int64, printOnly, brief, debug bool) {
 	if !printOnly {
-		evaluateAndPersist(outPath, shuffles, precision, mp, seed, debug)
+		// Print from the in-memory stats — the disk round-trip would drop Stats.PrintBest.
+		d, stats := evaluateAndPersist(outPath, shuffles, precision, mp, seed, debug)
+		printLoadedDeck(d, stats, brief)
+		return
 	}
 	d, stats := mustLoadDeck(outPath)
 	printLoadedDeck(d, stats, brief)
 }
 
-// evaluateAndPersist runs the deck eval — adaptive when shuffles is negative (capped at
-// adaptiveShufflesCap), fixed otherwise — then writes the fresh stats back to disk
-// (.json + sibling fabrary .txt). Returns the simulated deck so callers can print its
-// stats. The stderr summary lets the operator see the re-score happening before the
-// printed output appears.
-//
-// Always uses a dedicated Evaluator (rather than the package-level shared one) so the
-// per-Evaluator cache stats are always available. debug=true prints them after the run;
-// otherwise they're computed-but-discarded — the cache itself runs unconditionally because
-// it speeds up the eval regardless of whether the operator wants the telemetry.
+// evaluateAndPersist runs the eval (adaptive when shuffles<0, fixed otherwise), writes the
+// fresh stats back to disk (.json + sibling fabrary .txt), and returns the simulated deck +
+// stats. Prints a one-line before/after summary to stderr; debug=true also prints the
+// dedicated Evaluator's cache stats.
 func evaluateAndPersist(outPath string, shuffles int, precision float64, mp sim.Matchup, seed int64, debug bool) (*deck.Deck, deck.Stats) {
 	loaded, loadedStats := mustLoadDeck(outPath)
-	// Wrap the loaded hero/weapons/cards in a fresh Deck so the eval's stats start from zero
-	// instead of accumulating on top of the persisted ones. Sideboard and Equipment carry
-	// over verbatim — the sim ignores both, but the post-eval writeDeck round-trips them
-	// back to disk so the user's hand-managed lists aren't dropped by a re-score.
+	// Fresh Deck so the eval's stats start from zero; carry Sideboard and Equipment so
+	// writeDeck round-trips them back to disk verbatim.
 	d := loaded.Copy()
 	d.Sideboard = loaded.Sideboard
 	d.Equipment = loaded.Equipment
 	rng := rand.New(rand.NewSource(seed))
 	savedAvg := loadedStats.Mean()
-	// Parallel-shuffle eval: workers fan the shuffle loop across all available cores,
-	// sharing the cache via the RWMutex-protected lookup path. fabsim eval is the
-	// flagship single-deck workload — getting from 1.8s to ~0.5s on 8 workers cuts
-	// re-score wall-clock noticeably.
 	start := time.Now()
 	stats, ev := evaluateParallel(d, shuffles, precision, mp, rng)
 	elapsed := time.Since(start)
@@ -106,10 +84,7 @@ func evaluateAndPersist(outPath string, shuffles int, precision float64, mp sim.
 	return d, stats
 }
 
-// printCacheStats writes the hand-eval cache counters to stderr as a single annotated
-// line. Lives in this file because eval is the only mode that exposes per-Evaluator stats
-// today — iterate / anneal use a worker pool with one Evaluator per worker, so a single
-// cache-stats line wouldn't capture the workload.
+// printCacheStats writes the hand-eval cache counters to stderr as a single annotated line.
 func printCacheStats(s sim.CacheStats) {
 	total := s.Hits + s.Misses
 	if total == 0 {
@@ -125,8 +100,7 @@ func printCacheStats(s sim.CacheStats) {
 	)
 }
 
-// safePct returns num/denom or 0 when denom is 0. Spares the printCacheStats format string
-// from peppering checks at every call.
+// safePct returns num/denom, or 0 when denom is 0.
 func safePct(num, denom int) float64 {
 	if denom == 0 {
 		return 0
@@ -134,8 +108,7 @@ func safePct(num, denom int) float64 {
 	return float64(num) / float64(denom)
 }
 
-// printLoadedDeck dispatches between the brief summary and the full printBestDeck dump;
-// used by both the simulate path and -print-only.
+// printLoadedDeck dispatches between the brief summary and the full printBestDeck dump.
 func printLoadedDeck(d *deck.Deck, s deck.Stats, brief bool) {
 	if brief {
 		printDeckSummary(d, s)

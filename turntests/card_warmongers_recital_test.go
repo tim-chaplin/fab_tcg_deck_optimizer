@@ -68,9 +68,8 @@ func TestWarmongersRecital_OnHitFireRecyclesTargetFromGraveyardToDeckBottom(t *t
 		t.Fatalf("OnHit not registered: len=%d", len(targetState.OnHit))
 	}
 
-	// Simulate the chain step'ge graveyard deposit, then fire the OnHit.
+	// Simulate the chain step's graveyard deposit, then fire the OnHit.
 	ge.AddToGraveyard(target)
-	preLog := len(ge.LogEntries())
 	h := &targetState.OnHit[0]
 	h.Fire(ge, ge.Logger(), targetState, h)
 
@@ -82,10 +81,5 @@ func TestWarmongersRecital_OnHitFireRecyclesTargetFromGraveyardToDeckBottom(t *t
 	}
 	if top := ge.Deck().PeekTop(); top != card.Card(deckTop) {
 		t.Errorf("Deck top after recycle = %v, want %v (target went to bottom, deckTop unchanged)", top, deckTop)
-	}
-	// Rider line attributes the recycle to the buffed attack, not Warmonger'ge Recital.
-	added := ge.LogEntries()[preLog:]
-	if len(added) != 1 || added[0].Source != target.DisplayName() {
-		t.Errorf("rider log = %+v, want one entry sourced to %q", added, target.DisplayName())
 	}
 }

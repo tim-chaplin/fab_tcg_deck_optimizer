@@ -1,9 +1,9 @@
 package textio
 
-// JSON → runtime Deck decoding: Unmarshal is the public entry point; fromJSON /
-// perCardFromJSON / bestTurnFromJSON walk the decoded form, resolve every name through the
-// card / weapon / hero registries, and reassemble the Deck. Unknown names fail loudly so a
-// corrupted file doesn't produce silent nil-entry crashes downstream.
+// JSON → runtime Deck decoding. UnmarshalDeck is the public entry point; fromJSON /
+// perCardMarginalFromJSON / bestTurnFromJSON resolve every name through the card / weapon /
+// hero registries. Unknown names fail loudly so a corrupted file doesn't produce silent
+// nil-entry crashes downstream.
 
 import (
 	"encoding/json"
@@ -14,8 +14,8 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry"
 )
 
-// Unmarshal decodes JSON produced by Marshal into a *deck.Deck and the associated DeckStats.
-// Returns an error if any card, weapon, or hero name isn't recognized.
+// UnmarshalDeck decodes JSON produced by MarshalDeck into a *deck.Deck and its Stats.
+// Returns an error if any card, weapon, or hero name isn't recognised.
 func UnmarshalDeck(data []byte) (*deck.Deck, deck.Stats, error) {
 	var dj DeckJSON
 	if err := json.Unmarshal(data, &dj); err != nil {
@@ -54,9 +54,8 @@ func fromJSON(dj *DeckJSON) (*deck.Deck, deck.Stats, error) {
 		return nil, deck.Stats{}, err
 	}
 	d := deck.New(h, weapons, cs)
-	// Sideboard and Equipment are name-only lists — the optimizer doesn't read them and the
-	// registry isn't consulted (so the user can list equipment pieces or any other items
-	// the sim doesn't model). Copy the names through verbatim.
+	// Sideboard and Equipment are name-only lists — the registry isn't consulted, so the
+	// user can list equipment pieces or any other items the sim doesn't model.
 	if len(dj.Sideboard) > 0 {
 		d.Sideboard = append([]string(nil), dj.Sideboard...)
 	}
@@ -96,17 +95,11 @@ func perCardMarginalFromJSON(entries []CardMarginalStatsJSON) (map[ids.CardID]de
 	return out, nil
 }
 
-// bestTurnFromJSON restores the structured TurnLog plus the headline Value. Carryover
-// Auras and the structured TurnSummary fields (BestLine, SwungWeapons, StartOfTurnAuras,
-// TriggersFromLastTurn, State) aren't reconstructed — fabsim's print path renders Log
-// via sim.FormatTurnLog, which already encodes the rendered "Auras: ..." line.
-// Returns a zero BestTurn when the JSON has no log.
+// bestTurnFromJSON restores the headline Value, returning the zero BestTurn when none was
+// recorded.
 func bestTurnFromJSON(bj BestTurnJSON) (deck.BestTurn, error) {
-	if bj.Log.IsEmpty() {
+	if bj.Value == 0 {
 		return deck.BestTurn{}, nil
 	}
-	return deck.BestTurn{
-		Value: bj.Value,
-		Log:   bj.Log,
-	}, nil
+	return deck.BestTurn{Value: bj.Value}, nil
 }
