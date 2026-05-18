@@ -193,14 +193,11 @@ lines across `card/`, `weapon/`, `hand/` plus every weapon impl.
 
 ### Tech debt
 
-- sim_test package: get rid of these functional tests that require exposing internals of the sim (in exports_test.go; get rid of this too). The well-defined interface for larger-than-unit tests already exists (`(*Deck).EvalOneTurnForTesting` driving `turntests/`); migrate the remaining sim_test cases over and drop the re-exports.
-- TurnState, CarryState, and TurnSummary are all very conceptually overlapping; do we really need all 3?
-- move all the serialization, I/O type stuff into one package (deckformat, deckio, fabrary, mydecks)
-- move all the card definitions into one folder (cards, weapons, heroes)
-- move card/types.go to sim/card_types.go
-- move testutils/ package files to test.go files so they don't get compiled into the main binary
-- audit everything under sim/ package and see if it makes sense where it is
-- combine hand_aura_trigger_test.go and deck_aura_trigger_test.go into just aura_trigger_test.go, ditto for "mid_turn_draw_test"
-- fix all the docstrings that say "Package Foo is..." but are no longer in package Foo
-- get rid of the "dot import" eg: . "github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+- `internal/sim/exports_test.go`: drop the test-only re-exports. Migrate the remaining `internal/sim/*_test.go` cases that depend on them over to `turntests/` (which drives via `(*Deck).EvalOneTurnForTesting`) so the package stops exposing internals.
+- consolidate card definitions into a single top-level folder. Today they're split across `internal/card/cards/`, `internal/hero/heroes/`, `internal/weapon/weapons/` — three siblings under three different parent packages.
+- move `internal/card/types.go` (CardType / TypeSet bitfield) to `internal/sim/card_types.go` — it's a sim-side optimisation, not a card-interface concern.
+- move `internal/testutils/` files to `*_test.go` names so they don't get compiled into the main binary.
+- audit everything under `internal/sim/` and see if it makes sense where it is.
+- combine `internal/sim/hand_aura_test.go` and `internal/sim/deck_aura_test.go` into `internal/sim/aura_test.go`. Mid-turn-draw is split across packages (`internal/sim/hand_mid_turn_draw_test.go` + `turntests/deck_mid_turn_draw_test.go`); fold the sim-side cases into `turntests/` if possible.
 - remove the local `zeroDefenseAura` fake from `turntests/weeping_battleground_test.go` once `defendersDamage` seeds the defense-phase state graveyard from `priorGraveyard + defenders` (currently defenders-only, asymmetric with the attack-phase seed). After that, the test can put a real aura in `prior.Graveyard` instead of routing one through a 0-defense plain block.
+- clean stale `TurnState` references in `internal/sim/cardmeta.go` comments — the type was removed; only `TurnSummary` survives.
