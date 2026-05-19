@@ -306,6 +306,16 @@ func playOneTurn(
 ) (summary TurnSummary, snap *turnSnapshot) {
 	advanceToNextTurn(state)
 
+	// Sort the dealt hand before auras fire so handlers that read hand by index
+	// (PopHandAt / Discard / reveal-into-hand inserts) see a canonical order. Without
+	// this, two hands with the same multiset but different incoming order would take
+	// different aura branches and produce diverging post-aura state — but the cache key
+	// (built later from the sorted hand) would treat them as equivalent and return
+	// wrong cached results for the second hand.
+	hand := state.Hand()
+	sortHandByID(hand)
+	state.SetHand(hand)
+
 	if snapshot == nil {
 		snap = &turnSnapshot{
 			state: state.CopyPersistentState(),
@@ -315,7 +325,10 @@ func playOneTurn(
 	}
 
 	processAurasAtStartOfTurn(state, d)
-	hand := state.Hand()
+	// Re-sort: aura handlers can append (DrawOne) or remove (Discard) cards, leaving
+	// state.Hand out of canonical order. Re-sort so makeCacheKey reads the canonical
+	// multiset.
+	hand = state.Hand()
 	sortHandByID(hand)
 	if snapshot != nil {
 		summary = runReplayForTurn(snapshot, logger)
