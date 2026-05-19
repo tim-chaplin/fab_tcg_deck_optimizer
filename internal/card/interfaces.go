@@ -86,6 +86,9 @@ type GameEngine interface {
 	NonAttackActionPlayed() bool
 	OpponentMarked() bool
 	MarkOpponent()
+	// LastAttackHit reports whether the most recent finalised attack on this combat chain
+	// hit. False until the first attack finalises; each subsequent attack overwrites it.
+	LastAttackHit() bool
 
 	// Partition / matchup state.
 	RemainingUnblockedDamage() int
