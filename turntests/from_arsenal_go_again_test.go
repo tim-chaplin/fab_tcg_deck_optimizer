@@ -17,7 +17,7 @@ func TestFromArsenalGoAgain_GrantsOnArsenalCopyOnly(t *testing.T) {
 		notimpl.FrontlineScoutRed{}, notimpl.FrontlineScoutYellow{}, notimpl.FrontlineScoutBlue{},
 		cards.PerformanceBonusRed{}, cards.PerformanceBonusYellow{}, cards.PerformanceBonusBlue{},
 		notimpl.PromiseOfPlentyRed{}, notimpl.PromiseOfPlentyYellow{}, notimpl.PromiseOfPlentyBlue{},
-		notimpl.ScourTheBattlescapeRed{}, notimpl.ScourTheBattlescapeYellow{}, notimpl.ScourTheBattlescapeBlue{},
+		cards.ScourTheBattlescapeRed{}, cards.ScourTheBattlescapeYellow{}, cards.ScourTheBattlescapeBlue{},
 	}
 	for _, c := range cards {
 		hand := &card.CardState{Card: c}

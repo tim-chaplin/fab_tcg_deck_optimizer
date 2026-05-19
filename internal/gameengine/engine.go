@@ -107,6 +107,12 @@ func (ge *GameEngine) PrependToDeck(c card.Card) {
 	ge.deck.PutTop([]deck.Card{c})
 }
 
+// AppendToDeck inserts c at the bottom of the deck. Flips IsCacheable to false.
+func (ge *GameEngine) AppendToDeck(c card.Card) {
+	ge.cacheable = false
+	ge.deck.PutBottom([]deck.Card{c})
+}
+
 // RecycleToDeckBottom appends self.Card to the bottom of the deck and flags the chain
 // dispatcher to skip the usual non-persistent → graveyard append. Models the FaB clause
 // "put this on the bottom of its owner's deck". Flips IsCacheable.
