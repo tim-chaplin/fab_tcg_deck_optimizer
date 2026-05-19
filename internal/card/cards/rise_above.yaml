@@ -1,8 +1,8 @@
 name: Rise Above
-types: []
-cost: 2
-markers:
-    - NotImplemented
+types:
+    - Generic
+    - DefenseReaction
+cost: variable
 text: |-
     You may put a card from your hand on top of your deck rather than pay Rise Above's {r}
     cost.
