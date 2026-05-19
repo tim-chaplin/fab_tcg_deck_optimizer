@@ -13,15 +13,15 @@ import (
 // Tests that Pursue to the Pits of Despair's Play registers an OnHit handler that marks
 // the opposing hero when LikelyToHit fires.
 func TestPursueToThePitsOfDespair_OnHitMarksOpponent(t *testing.T) {
-	self := &card.CardState{Card: cards.PursueToThePitsOfDespairRed{}}
+	pc := &card.CardState{Card: cards.PursueToThePitsOfDespairRed{}}
 	ge := gameengine.New()
-	ge.ResolveChainStep(ge.Logger(), self)
-	if len(self.OnHit) != 1 {
-		t.Fatalf("OnHit handlers = %d, want 1", len(self.OnHit))
+	ge.ResolveChainStep(ge.Logger(), pc)
+	if len(pc.OnHit) != 1 {
+		t.Fatalf("OnHit handlers = %d, want 1", len(pc.OnHit))
 	}
 	// Printed 5{p} doesn't fit the 1/4/7 LikelyDamageHits window; bump to 7 to drain.
-	self.BonusAttack = 2
-	testutils.FireOnHitIfLikely(ge, ge.Logger(), self)
+	pc.BonusAttack = 2
+	testutils.FireOnHitIfLikely(ge, ge.Logger(), pc)
 	if !ge.OpponentMarked() {
 		t.Errorf("OpponentMarked = false after OnHit fires, want true")
 	}

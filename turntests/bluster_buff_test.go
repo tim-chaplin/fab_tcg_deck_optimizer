@@ -12,8 +12,8 @@ import (
 // Tests that mode 0 fires the -1{p} self-debuff before crediting attack damage.
 func TestBlusterBuff_Mode0DebuffsByOne(t *testing.T) {
 	ge := gameengine.New()
-	self := &card.CardState{Card: cards.BlusterBuffRed{}}
-	ge.ResolveChainStep(ge.Logger(), self)
+	pc := &card.CardState{Card: cards.BlusterBuffRed{}}
+	ge.ResolveChainStep(ge.Logger(), pc)
 	if ge.Value() != 5 {
 		t.Errorf("mode 0 Value = %d, want 5 (printed 6 - 1)", ge.Value())
 	}
@@ -22,8 +22,8 @@ func TestBlusterBuff_Mode0DebuffsByOne(t *testing.T) {
 // Tests that mode 1 keeps the printed power.
 func TestBlusterBuff_Mode1KeepsPrintedPower(t *testing.T) {
 	ge := gameengine.New()
-	self := &card.CardState{Card: cards.BlusterBuffRed{}, Mode: 1}
-	ge.ResolveChainStep(ge.Logger(), self)
+	pc := &card.CardState{Card: cards.BlusterBuffRed{}, Mode: 1}
+	ge.ResolveChainStep(ge.Logger(), pc)
 	if ge.Value() != 6 {
 		t.Errorf("mode 1 Value = %d, want 6 (printed)", ge.Value())
 	}

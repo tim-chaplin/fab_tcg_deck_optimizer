@@ -86,8 +86,8 @@ func (selfBuffStub) Play(ge card.GameEngine, l card.Logger, self *card.CardState
 
 func TestResolveChainStep_AttackCreditsEffectiveAttack(t *testing.T) {
 	ge := gameengine.New()
-	self := &card.CardState{Card: attackStub{}}
-	ge.ResolveChainStep(ge.Logger(), self)
+	pc := &card.CardState{Card: attackStub{}}
+	ge.ResolveChainStep(ge.Logger(), pc)
 	if ge.Value() != 3 {
 		t.Errorf("Value = %d, want 3 (printed attack)", ge.Value())
 	}
@@ -95,8 +95,8 @@ func TestResolveChainStep_AttackCreditsEffectiveAttack(t *testing.T) {
 
 func TestResolveChainStep_DefenseReactionCapsToIncomingDamage(t *testing.T) {
 	ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetIncomingDamage(2).Build()}
-	self := &card.CardState{Card: drStub{}}
-	ge.ResolveChainStep(ge.Logger(), self)
+	pc := &card.CardState{Card: drStub{}}
+	ge.ResolveChainStep(ge.Logger(), pc)
 	if ge.Value() != 2 {
 		t.Errorf("Value = %d, want 2 (capped at IncomingDamage)", ge.Value())
 	}
@@ -107,8 +107,8 @@ func TestResolveChainStep_DefenseReactionCapsToIncomingDamage(t *testing.T) {
 
 func TestResolveChainStep_DefenseReactionUncappedWhenIncomingExceedsDefense(t *testing.T) {
 	ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetIncomingDamage(10).Build()}
-	self := &card.CardState{Card: drStub{}}
-	ge.ResolveChainStep(ge.Logger(), self)
+	pc := &card.CardState{Card: drStub{}}
+	ge.ResolveChainStep(ge.Logger(), pc)
 	if ge.Value() != 4 {
 		t.Errorf("Value = %d, want 4 (printed defense, uncapped)", ge.Value())
 	}
@@ -120,8 +120,8 @@ func TestResolveChainStep_DefenseReactionUncappedWhenIncomingExceedsDefense(t *t
 func TestResolveChainStep_NonAttackContributesZero(t *testing.T) {
 	played := false
 	ge := gameengine.New()
-	self := &card.CardState{Card: nonAttackStub{played: &played}}
-	ge.ResolveChainStep(ge.Logger(), self)
+	pc := &card.CardState{Card: nonAttackStub{played: &played}}
+	ge.ResolveChainStep(ge.Logger(), pc)
 	if !played {
 		t.Error("non-attack Play body did not run")
 	}
@@ -132,8 +132,8 @@ func TestResolveChainStep_NonAttackContributesZero(t *testing.T) {
 
 func TestResolveChainStep_SelfBuffInPlayAppliesBeforeCredit(t *testing.T) {
 	ge := gameengine.New()
-	self := &card.CardState{Card: selfBuffStub{}}
-	ge.ResolveChainStep(ge.Logger(), self)
+	pc := &card.CardState{Card: selfBuffStub{}}
+	ge.ResolveChainStep(ge.Logger(), pc)
 	if ge.Value() != 3 {
 		t.Errorf("Value = %d, want 3 (printed 2 + Play'ge +1 BonusAttack)", ge.Value())
 	}

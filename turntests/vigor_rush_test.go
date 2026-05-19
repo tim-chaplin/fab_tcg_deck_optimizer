@@ -29,19 +29,19 @@ func TestVigorRush_NoNonAttackActionNoGoAgain(t *testing.T) {
 			SetCardsPlayed([]card.Card{testutils.GenericAttack(0, 0)}). // not non-attack
 			SetNonAttackActionPlayed(false).
 			Build()}
-		self := &card.CardState{Card: c}
-		ge.ResolveChainStep(ge.Logger(), self)
+		pc := &card.CardState{Card: c}
+		ge.ResolveChainStep(ge.Logger(), pc)
 		if got := ge.Value(); got != c.Attack() {
 			t.Errorf("%s: Play() = %d, want %d (base power)", c.Name(), got, c.Attack())
 		}
-		if self.GrantedGoAgain {
+		if pc.GrantedGoAgain {
 			t.Errorf("%s: GrantedGoAgain = true, want false (no non-attack action played)", c.Name())
 		}
 	}
 }
 
 // TestVigorRush_NonAttackActionGrantsGoAgain exercises the hit branch: a non-attack action played
-// earlier this turn flips self.GrantedGoAgain.
+// earlier this turn flips pc.GrantedGoAgain.
 func TestVigorRush_NonAttackActionGrantsGoAgain(t *testing.T) {
 	cases := []card.Card{cards.VigorRushRed{}, cards.VigorRushYellow{}, cards.VigorRushBlue{}}
 	for _, c := range cases {
@@ -49,9 +49,9 @@ func TestVigorRush_NonAttackActionGrantsGoAgain(t *testing.T) {
 			SetCardsPlayed([]card.Card{testutils.GenericAction()}).
 			SetNonAttackActionPlayed(true).
 			Build()}
-		self := &card.CardState{Card: c}
-		ge.ResolveChainStep(ge.Logger(), self)
-		if !self.GrantedGoAgain {
+		pc := &card.CardState{Card: c}
+		ge.ResolveChainStep(ge.Logger(), pc)
+		if !pc.GrantedGoAgain {
 			t.Errorf("%s: GrantedGoAgain = false, want true (non-attack action → go again)", c.Name())
 		}
 	}

@@ -19,10 +19,10 @@ func TestBrothersInArms_Mode0NoBonus(t *testing.T) {
 	for _, c := range cases {
 		blocker := c.(card.Blocker)
 		ge := gameengine.New()
-		self := &card.CardState{Card: c}
-		blocker.Block(ge, ge.Logger(), self)
-		if self.BonusDefense != 0 {
-			t.Errorf("%s: mode 0 BonusDefense = %d, want 0", c.Name(), self.BonusDefense)
+		pc := &card.CardState{Card: c}
+		blocker.Block(ge, ge.Logger(), pc)
+		if pc.BonusDefense != 0 {
+			t.Errorf("%s: mode 0 BonusDefense = %d, want 0", c.Name(), pc.BonusDefense)
 		}
 	}
 }
@@ -37,10 +37,10 @@ func TestBrothersInArms_Mode1FiresBonus(t *testing.T) {
 	for _, c := range cases {
 		blocker := c.(card.Blocker)
 		ge := gameengine.New()
-		self := &card.CardState{Card: c, Mode: 1}
-		blocker.Block(ge, ge.Logger(), self)
-		if self.BonusDefense != 2 {
-			t.Errorf("%s: mode 1 BonusDefense = %d, want 2", c.Name(), self.BonusDefense)
+		pc := &card.CardState{Card: c, Mode: 1}
+		blocker.Block(ge, ge.Logger(), pc)
+		if pc.BonusDefense != 2 {
+			t.Errorf("%s: mode 1 BonusDefense = %d, want 2", c.Name(), pc.BonusDefense)
 		}
 	}
 }

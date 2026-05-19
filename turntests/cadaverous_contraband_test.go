@@ -13,11 +13,11 @@ import (
 // Tests that Cadaverous Contraband's Play registers an OnHit handler.
 func TestCadaverousContraband_RegistersOnHit(t *testing.T) {
 	for _, c := range []card.Card{cards.CadaverousContrabandRed{}, cards.CadaverousContrabandYellow{}, cards.CadaverousContrabandBlue{}} {
-		self := &card.CardState{Card: c}
+		pc := &card.CardState{Card: c}
 		ge := gameengine.New()
-		ge.ResolveChainStep(ge.Logger(), self)
-		if len(self.OnHit) != 1 {
-			t.Errorf("%s [%d{p}]: OnHit handlers = %d, want 1", c.Name(), c.Pitch(), len(self.OnHit))
+		ge.ResolveChainStep(ge.Logger(), pc)
+		if len(pc.OnHit) != 1 {
+			t.Errorf("%s [%d{p}]: OnHit handlers = %d, want 1", c.Name(), c.Pitch(), len(pc.OnHit))
 		}
 	}
 }
@@ -30,10 +30,10 @@ func TestCadaverousContraband_OnHitRecyclesNonAttackToTop(t *testing.T) {
 		SetCards(deck).
 		SetGraveyard([]card.Card{non}).
 		Build()}
-	self := &card.CardState{Card: cards.CadaverousContrabandRed{}}
-	ge.ResolveChainStep(ge.Logger(), self)
-	self.BonusAttack = 1
-	testutils.FireOnHitIfLikely(ge, ge.Logger(), self)
+	pc := &card.CardState{Card: cards.CadaverousContrabandRed{}}
+	ge.ResolveChainStep(ge.Logger(), pc)
+	pc.BonusAttack = 1
+	testutils.FireOnHitIfLikely(ge, ge.Logger(), pc)
 	if got := ge.Deck().Size(); got != 2 {
 		t.Errorf("deck size after recycle = %d, want 2 (graveyard card moved onto the existing top)", got)
 	}
@@ -49,9 +49,9 @@ func TestCadaverousContraband_OnHitRecyclesNonAttackToTop(t *testing.T) {
 // graveyard and deck untouched.
 func TestCadaverousContraband_OnHitNoEligibleCardNoOp(t *testing.T) {
 	ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetGraveyard([]card.Card{testutils.RedAttack{}}).Build()}
-	self := &card.CardState{Card: cards.CadaverousContrabandRed{}}
-	ge.ResolveChainStep(ge.Logger(), self)
-	testutils.FireOnHitIfLikely(ge, ge.Logger(), self)
+	pc := &card.CardState{Card: cards.CadaverousContrabandRed{}}
+	ge.ResolveChainStep(ge.Logger(), pc)
+	testutils.FireOnHitIfLikely(ge, ge.Logger(), pc)
 	if len(ge.Graveyard()) != 1 {
 		t.Errorf("graveyard size = %d, want 1 (no eligible target, no recycle)", len(ge.Graveyard()))
 	}

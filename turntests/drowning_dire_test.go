@@ -14,10 +14,10 @@ import (
 // created earlier this turn.
 func TestDrowningDire_NoAuraNoDominate(t *testing.T) {
 	for _, c := range []card.Card{cards.DrowningDireRed{}, cards.DrowningDireYellow{}, cards.DrowningDireBlue{}} {
-		self := &card.CardState{Card: c}
+		pc := &card.CardState{Card: c}
 		ge := gameengine.New()
-		ge.ResolveChainStep(ge.Logger(), self)
-		if self.GrantedDominate {
+		ge.ResolveChainStep(ge.Logger(), pc)
+		if pc.GrantedDominate {
 			t.Errorf("%s [%d{p}]: GrantedDominate = true without prior aura, want false", c.Name(), c.Pitch())
 		}
 	}
@@ -30,9 +30,9 @@ func TestDrowningDire_AuraGrantsDominate(t *testing.T) {
 			SetCardsPlayed([]card.Card{testutils.Aura{}}).
 			SetAuraCreated(true).
 			Build()}
-		self := &card.CardState{Card: c}
-		ge.ResolveChainStep(ge.Logger(), self)
-		if !self.GrantedDominate {
+		pc := &card.CardState{Card: c}
+		ge.ResolveChainStep(ge.Logger(), pc)
+		if !pc.GrantedDominate {
 			t.Errorf("%s [%d{p}]: GrantedDominate = false after aura, want true", c.Name(), c.Pitch())
 		}
 	}
@@ -46,10 +46,10 @@ func TestDrowningDire_OnHitRecyclesNonAttackToBottom(t *testing.T) {
 		SetCards(deck).
 		SetGraveyard([]card.Card{non}).
 		Build()}
-	self := &card.CardState{Card: cards.DrowningDireRed{}}
-	ge.ResolveChainStep(ge.Logger(), self)
-	self.BonusAttack = 2
-	testutils.FireOnHitIfLikely(ge, ge.Logger(), self)
+	pc := &card.CardState{Card: cards.DrowningDireRed{}}
+	ge.ResolveChainStep(ge.Logger(), pc)
+	pc.BonusAttack = 2
+	testutils.FireOnHitIfLikely(ge, ge.Logger(), pc)
 	if got := ge.Deck().Size(); got != 2 {
 		t.Errorf("deck size after recycle = %d, want 2 (target appended to bottom)", got)
 	}

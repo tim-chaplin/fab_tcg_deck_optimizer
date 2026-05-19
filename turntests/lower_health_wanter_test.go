@@ -108,30 +108,30 @@ func TestLowerHealthWanter_NilHeroIsOff(t *testing.T) {
 	}
 }
 
-// Tests that Pound for Pound flips self.GrantedDominate iff the current hero opts into
+// Tests that Pound for Pound flips pc.GrantedDominate iff the current hero opts into
 // LowerHealthWanter.
 func TestLowerHealthWanter_PoundForPoundDominateGrant(t *testing.T) {
 	cards := []card.Card{cards.PoundForPoundRed{}, cards.PoundForPoundYellow{}, cards.PoundForPoundBlue{}}
 
 	for _, c := range cards {
-		self := &card.CardState{Card: c}
+		pc := &card.CardState{Card: c}
 		s := engineWithHero(stubLowHeroOff{})
-		s.ResolveChainStep(s.Logger(), self)
-		if self.GrantedDominate {
+		s.ResolveChainStep(s.Logger(), pc)
+		if pc.GrantedDominate {
 			t.Errorf("%s: GrantedDominate = true with hero off, want false", c.Name())
 		}
-		if self.EffectiveDominate() {
+		if pc.EffectiveDominate() {
 			t.Errorf("%s: EffectiveDominate = true with hero off, want false", c.Name())
 		}
 	}
 	for _, c := range cards {
-		self := &card.CardState{Card: c}
+		pc := &card.CardState{Card: c}
 		s := engineWithHero(stubLowHeroOn{})
-		s.ResolveChainStep(s.Logger(), self)
-		if !self.GrantedDominate {
+		s.ResolveChainStep(s.Logger(), pc)
+		if !pc.GrantedDominate {
 			t.Errorf("%s: GrantedDominate = false with hero on, want true", c.Name())
 		}
-		if !self.EffectiveDominate() {
+		if !pc.EffectiveDominate() {
 			t.Errorf("%s: EffectiveDominate = false with hero on, want true", c.Name())
 		}
 	}

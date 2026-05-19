@@ -51,16 +51,16 @@ func TestHitTheHighNotes_AuraCreatedTriggersBonus(t *testing.T) {
 	}
 }
 
-// Tests that the +2{p} rider flows through self.BonusAttack so EffectiveAttack and
+// Tests that the +2{p} rider flows through pc.BonusAttack so EffectiveAttack and
 // LikelyToHit see the buffed power.
 func TestHitTheHighNotes_BonusFlowsThroughBonusAttack(t *testing.T) {
 	ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetAuraCreated(true).Build()}
-	self := &card.CardState{Card: cards.HitTheHighNotesRed{}}
-	ge.ResolveChainStep(ge.Logger(), self)
-	if got := self.EffectiveAttack(); got != 6 {
+	pc := &card.CardState{Card: cards.HitTheHighNotesRed{}}
+	ge.ResolveChainStep(ge.Logger(), pc)
+	if got := pc.EffectiveAttack(); got != 6 {
 		t.Errorf("EffectiveAttack() = %d, want 6 (base 4 + 2 power buff)", got)
 	}
-	if ge.LikelyToHit(self) {
+	if ge.LikelyToHit(pc) {
 		t.Errorf("LikelyToHit = true at EffectiveAttack 6; want false (6 ∉ {1,4,7})")
 	}
 }

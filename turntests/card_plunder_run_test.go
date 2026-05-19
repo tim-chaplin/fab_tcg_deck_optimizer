@@ -14,8 +14,8 @@ import (
 func TestPlunderRun_FromHandQueuesTriggerNoBonus(t *testing.T) {
 	target := &card.CardState{Card: testutils.GenericAttack(0, 4)}
 	ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCardsRemaining([]*card.CardState{target}).Build()}
-	self := &card.CardState{Card: cards.PlunderRunRed{}}
-	ge.ResolveChainStep(ge.Logger(), self)
+	pc := &card.CardState{Card: cards.PlunderRunRed{}}
+	ge.ResolveChainStep(ge.Logger(), pc)
 	if got := triggerHitCount(ge); got != 1 {
 		t.Errorf("queued triggers = %d, want 1", got)
 	}
@@ -38,8 +38,8 @@ func TestPlunderRun_FromArsenalAddsBonusAttack(t *testing.T) {
 	for _, tc := range cases {
 		target := &card.CardState{Card: testutils.GenericAttack(0, 4)}
 		ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCardsRemaining([]*card.CardState{target}).Build()}
-		self := &card.CardState{Card: tc.c, FromArsenal: true}
-		ge.ResolveChainStep(ge.Logger(), self)
+		pc := &card.CardState{Card: tc.c, FromArsenal: true}
+		ge.ResolveChainStep(ge.Logger(), pc)
 		if got := triggerHitCount(ge); got != 1 {
 			t.Errorf("%s: queued triggers = %d, want 1", tc.c.Name(), got)
 		}

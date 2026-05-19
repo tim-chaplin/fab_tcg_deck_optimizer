@@ -32,11 +32,11 @@ func TestDeathlyDuet_BaseDamage(t *testing.T) {
 func TestDeathlyDuet_AttackAttributedAddsPower(t *testing.T) {
 	// Attack attributed → +2{p}.
 	ge := gameengine.New()
-	self := &card.CardState{
+	pc := &card.CardState{
 		Card:          cards.DeathlyDuetRed{},
 		PitchedToPlay: []card.Card{testutils.RunebladeAttack{}},
 	}
-	ge.ResolveChainStep(ge.Logger(), self)
+	ge.ResolveChainStep(ge.Logger(), pc)
 	if got := ge.Value(); got != 6 {
 		t.Errorf("Deathly Duet Red with attack attributed: Play() = %d, want 6", got)
 	}
@@ -47,11 +47,11 @@ func TestDeathlyDuet_NonAttackActionAttributedCreatesRunechants(t *testing.T) {
 	// Play returns base + 2 (Deathly Duet Red base 4 + 2 token credits = 6). state.Runechants=2
 	// for downstream consume bookkeeping.
 	ge := gameengine.New()
-	self := &card.CardState{
+	pc := &card.CardState{
 		Card:          cards.DeathlyDuetRed{},
 		PitchedToPlay: []card.Card{testutils.NonAttack{}},
 	}
-	ge.ResolveChainStep(ge.Logger(), self)
+	ge.ResolveChainStep(ge.Logger(), pc)
 	if got := ge.Value(); got != 6 {
 		t.Errorf("Deathly Duet Red with non-attack attributed: Play() = %d, want 6 (base 4 + 2 token credits)", got)
 	}
@@ -67,11 +67,11 @@ func TestDeathlyDuet_BothBranchesFire(t *testing.T) {
 	// Both an attack AND a non-attack action attributed → both riders fire: +2 power bonus,
 	// plus 2 Runechants credited +1 each at creation. Play returns base 4 + 2 power + 2 = 8.
 	ge := gameengine.New()
-	self := &card.CardState{
+	pc := &card.CardState{
 		Card:          cards.DeathlyDuetRed{},
 		PitchedToPlay: []card.Card{testutils.RunebladeAttack{}, testutils.NonAttack{}},
 	}
-	ge.ResolveChainStep(ge.Logger(), self)
+	ge.ResolveChainStep(ge.Logger(), pc)
 	if got := ge.Value(); got != 8 {
 		t.Errorf("Deathly Duet Red with both attributed: Play() = %d, want 8 (base 4 + 2 power + 2 token credits)", got)
 	}

@@ -13,10 +13,10 @@ const DiscardValue = 3
 // because Gold pays out on activation (see Gold token ability), not at creation.
 const GoldTokenValue = 0
 
-// LikelyToHit reports whether self's attack is likely to land past the opponent's blocks.
-// Folds self.EffectiveAttack() and self.EffectiveDominate() into the threshold check.
-func LikelyToHit(self *card.CardState) bool {
-	return LikelyDamageHits(self.EffectiveAttack(), self.EffectiveDominate())
+// LikelyToHit reports whether pc's attack is likely to land past the opponent's blocks.
+// Folds pc.EffectiveAttack() and pc.EffectiveDominate() into the threshold check.
+func LikelyToHit(pc *card.CardState) bool {
+	return LikelyDamageHits(pc.EffectiveAttack(), pc.EffectiveDominate())
 }
 
 // LikelyDamageHits is the raw-integer threshold check behind LikelyToHit. A typical FaB

@@ -11,8 +11,8 @@ import (
 // Mode 0 keeps the printed 4{p} — the optional cost is skipped.
 func TestFlex_Mode0PrintedAttack(t *testing.T) {
 	ge := gameengine.New()
-	self := &card.CardState{Card: cards.FlexRed{}}
-	ge.ResolveChainStep(ge.Logger(), self)
+	pc := &card.CardState{Card: cards.FlexRed{}}
+	ge.ResolveChainStep(ge.Logger(), pc)
 	if ge.Value() != 4 {
 		t.Errorf("mode 0 Value = %d, want 4 (printed)", ge.Value())
 	}
@@ -21,8 +21,8 @@ func TestFlex_Mode0PrintedAttack(t *testing.T) {
 // Mode 1 pays {r}{r} for +2{p}, giving the full 6{p} swing.
 func TestFlex_Mode1AddsTwo(t *testing.T) {
 	ge := gameengine.New()
-	self := &card.CardState{Card: cards.FlexRed{}, Mode: 1}
-	ge.ResolveChainStep(ge.Logger(), self)
+	pc := &card.CardState{Card: cards.FlexRed{}, Mode: 1}
+	ge.ResolveChainStep(ge.Logger(), pc)
 	if ge.Value() != 6 {
 		t.Errorf("mode 1 Value = %d, want 6 (4 printed + 2 bonus)", ge.Value())
 	}
