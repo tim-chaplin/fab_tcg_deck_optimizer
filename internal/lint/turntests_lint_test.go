@@ -152,7 +152,6 @@ var grandfatheredResolveChainStepFiles = []string{
 	"turntests/scout_the_periphery_test.go",
 	"turntests/seek_horizon_test.go",
 	"turntests/shrill_of_skullform_test.go",
-	"turntests/sigil_of_cycles_test.go",
 	"turntests/sigil_of_fyendal_test.go",
 	"turntests/sigil_of_protection_test.go",
 	"turntests/sigil_of_silphidae_test.go",

@@ -37,7 +37,8 @@ func PrintBestTurn(ev *Evaluator, snap *turnSnapshot, w io.Writer) {
 	fmt.Fprintf(w, "Best turn played (value %d):\n", snap.value)
 	writeSnapshotSummary(w, "Start of turn:", snap.state, snap.hand, snap.bestLine)
 
-	summary, _ := playOneTurn(snap.state, snap.hand, snap.deck, ev, snap, gameengine.NewStreamLogger(w))
+	snap.state.SetHand(snap.hand)
+	summary, _ := playOneTurn(snap.state, snap.deck, ev, snap, gameengine.NewStreamLogger(w))
 
 	writeSnapshotSummary(w, "End of turn:", summary.State, nil, snap.bestLine)
 }

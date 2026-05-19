@@ -5,8 +5,6 @@ types:
     - Aura
 cost: 0
 goAgain: true
-markers:
-    - NotImplemented
 text: |-
     **Go again** At the beginning of your action phase, destroy this. When this leaves the
     arena, discard a card then draw a card.

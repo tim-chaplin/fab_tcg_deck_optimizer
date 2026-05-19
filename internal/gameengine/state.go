@@ -283,11 +283,12 @@ func (gs *GameState) CopyPersistentStateFrom(src *GameState) {
 
 // ResetEphemeralState returns gs to its start-of-turn baseline: it discards every field
 // that playing out a turn accumulates, keeping only the cross-turn carryover (hero, deck,
-// arsenal, graveyard, banished, the aura / item lists, opponentMarked, and the matchup's
-// incoming-damage figures).
+// hand, arsenal, graveyard, banished, the aura / item lists, opponentMarked, and the
+// matchup's incoming-damage figures).
 //
 // What it resets, by category:
-//   - per-turn zones — hand, pitched, defenders
+//   - per-turn zones — pitched, defenders (hand persists; it was refilled at the end of
+//     the previous turn and is the dealt hand visible to start-of-turn aura handlers)
 //   - resolution scratch — the played / remaining lists, the one-shot trigger queue, the
 //     value accumulator and draw counter, action points, the block total, the current-step
 //     machinery, the "happened this resolution" flags, the cacheable bit, the logger
@@ -300,7 +301,6 @@ func (gs *GameState) CopyPersistentStateFrom(src *GameState) {
 // incomingDamage stays put — it's the constant matchup figure, carried over untouched.
 // damageBlocked (how much of it defense has absorbed so far) resets to zero.
 func (gs *GameState) ResetEphemeralState() {
-	gs.hand = nil
 	gs.pitched = nil
 	gs.defenders = nil
 	gs.cardsPlayed = nil

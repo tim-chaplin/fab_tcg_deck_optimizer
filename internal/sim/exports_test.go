@@ -130,7 +130,8 @@ func MeanStandardError(stats *deck.Stats) float64 { return meanStandardError(sta
 
 // ProcessAurasAtStartOfTurnForTest drives processAurasAtStartOfTurn against an arbitrary
 // aura queue and returns the post-tick (survivors, damage, revealedCards, graveyardedCards)
-// tuple. damage is gs.Value() post-call, since handlers write directly to it.
+// tuple. damage is gs.Value() post-call, since handlers write directly to it. Cards added
+// to state.Hand during firing (e.g. reveal-into-hand handlers) come back as `revealed`.
 func ProcessAurasAtStartOfTurnForTest(queued []gameengine.Aura, d *deck.Deck) (
 	survivors []gameengine.Aura,
 	damage int,
@@ -142,12 +143,15 @@ func ProcessAurasAtStartOfTurnForTest(queued []gameengine.Aura, d *deck.Deck) (
 		gs.CreateAura(a)
 	}
 	preGrav := len(gs.Graveyard())
-	var revealedBuf []card.Card
-	processAurasAtStartOfTurn(gs, d, &revealedBuf)
+	preHand := len(gs.Hand())
+	processAurasAtStartOfTurn(gs, d)
 	damage = gs.Value()
 	if newGrav := gs.Graveyard(); len(newGrav) > preGrav {
 		graveyarded = append([]card.Card(nil), newGrav[preGrav:]...)
 	}
+	if newHand := gs.Hand(); len(newHand) > preHand {
+		revealed = append([]card.Card(nil), newHand[preHand:]...)
+	}
 	survivors = append([]gameengine.Aura(nil), gs.Auras()...)
-	return survivors, damage, revealedBuf, graveyarded
+	return survivors, damage, revealed, graveyarded
 }
