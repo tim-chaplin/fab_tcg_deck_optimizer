@@ -4,8 +4,6 @@ types:
     - Action
     - Attack
 cost: 0
-markers:
-    - NotImplemented
 text: |-
     As an additional cost to play Seek Horizon, you may put a card from your hand on top of
     your deck. If you do, Seek Horizon gains **go again**.
