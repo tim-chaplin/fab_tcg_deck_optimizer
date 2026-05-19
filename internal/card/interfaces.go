@@ -28,6 +28,9 @@ type GameEngine interface {
 	PrependToDeck(Card)
 	AppendToDeck(Card)
 	AddToGraveyard(Card)
+	// Discard pops the first hand card and appends it to the graveyard. Returns the
+	// discarded card and true; returns (nil, false) when the hand is empty.
+	Discard() (Card, bool)
 
 	// Auras: per-trigger-type registration. Cards supply the handler and initial count;
 	// the engine builds the underlying aura. Source is derived from pc.Card. Handler

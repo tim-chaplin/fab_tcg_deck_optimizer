@@ -12,11 +12,10 @@ import (
 
 func tradeInPlay(ge card.GameEngine, l card.Logger, self *card.CardState) {
 	self.GrantGoAgainIfFromArsenal()
-	if len(ge.Hand()) == 0 {
+	discarded, ok := ge.Discard()
+	if !ok {
 		return
 	}
-	discarded := ge.PopHandAt(0)
-	ge.AddToGraveyard(discarded)
 	ge.DrawOne()
 	l.AppendPostTriggerf(self.Card.DisplayName(), 0, "Discarded %s and drew", discarded.DisplayName())
 }
