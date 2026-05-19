@@ -242,7 +242,8 @@ func runOneShuffle(masterDeck *deck.Deck, scratch *shuffleScratch, stats *deck.S
 	maxHands := 2 * handsPerCycle
 	for handIdx := 0; handIdx < maxHands; handIdx++ {
 		preDeckSize := d.Size()
-		summary, snap := playOneTurn(state, h, d, ev, nil, nil)
+		state.SetHand(h)
+		summary, snap := playOneTurn(state, d, ev, nil, nil)
 
 		if recordTurnStats(stats, summary, handIdx, handsPerCycle) {
 			recordBestTurnFromSnap(stats, summary, ev, snap)
@@ -298,7 +299,6 @@ func countPitched(bestLine []deck.CardAssignment) int {
 // returns the raw post-chain per-perm state without recycle / next-draw cleanup.
 func playOneTurn(
 	state *gameengine.GameState,
-	hand []card.Card,
 	d *deck.Deck,
 	ev *Evaluator,
 	snapshot *turnSnapshot,
@@ -310,11 +310,12 @@ func playOneTurn(
 		snap = &turnSnapshot{
 			state: state.CopyPersistentState(),
 			deck:  d.Copy(),
-			hand:  append([]card.Card(nil), hand...),
+			hand:  append([]card.Card(nil), state.Hand()...),
 		}
 	}
 
-	processAurasAtStartOfTurn(state, d, &hand)
+	processAurasAtStartOfTurn(state, d)
+	hand := state.Hand()
 	sortHandByID(hand)
 	if snapshot != nil {
 		summary = runReplayForTurn(snapshot, logger)
@@ -422,21 +423,17 @@ func recordTurnStats(stats *deck.Stats, summary TurnSummary, handIdx, handsPerCy
 const startOfTurnRevealRoom = 8
 
 // processAurasAtStartOfTurn fires every StartOfTurn aura handler queued on state. Handlers
-// write value gains directly to state.Value() and reveals append to h. Re-arms
-// FiredThisTurn. Callers must refill h to full size first so reveal handlers see the
-// post-draw deck top. Cascading reveals: a handler that pops d shrinks the view for the
-// next, so two reveal-capable auras see distinct tops.
-func processAurasAtStartOfTurn(state *gameengine.GameState, d *deck.Deck, h *[]card.Card) {
+// read and mutate state.Hand directly — both the dealt hand (visible at fire time per FaB
+// turn order: previous turn's end-step refill ran before this turn's start triggers) and
+// any reveals / discards / draws the handlers want to apply. Re-arms FiredThisTurn.
+// Cascading reveals: a handler that pops d shrinks the view for the next, so two
+// reveal-capable auras see distinct tops.
+func processAurasAtStartOfTurn(state *gameengine.GameState, d *deck.Deck) {
 	if len(state.Auras()) == 0 {
 		return
 	}
 	state.SetDeck(d)
-	preHand := len(state.Hand())
 	state.Engine().FireStartOfTurn()
-	if revealed := state.Hand(); len(revealed) > preHand {
-		*h = append(*h, revealed[preHand:]...)
-		state.SetHand(revealed[:preHand])
-	}
 	state.SetDeck(nil)
 }
 
