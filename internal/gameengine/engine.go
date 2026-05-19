@@ -113,6 +113,18 @@ func (ge *GameEngine) AppendToDeck(c card.Card) {
 	ge.deck.PutBottom([]deck.Card{c})
 }
 
+// Discard pops the first hand card and appends it to the graveyard. Returns the discarded
+// card and true; returns (nil, false) when the hand is empty. Flips IsCacheable via
+// PopHandAt.
+func (ge *GameEngine) Discard() (card.Card, bool) {
+	if len(ge.hand) == 0 {
+		return nil, false
+	}
+	c := ge.PopHandAt(0)
+	ge.graveyard = append(ge.graveyard, c)
+	return c, true
+}
+
 // RecycleToDeckBottom appends pc.Card to the bottom of the deck and flags the chain
 // dispatcher to skip the usual non-persistent → graveyard append. Models the FaB clause
 // "put this on the bottom of its owner's deck". Flips IsCacheable.
