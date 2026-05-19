@@ -48,6 +48,7 @@ type GameState struct {
 	opponentMarked        bool
 	auraCreated           bool
 	nonAttackActionPlayed bool
+	lastAttackHit         bool
 	currentAuraDestroyed  bool
 	currentStepRerouted   bool
 	cacheable             bool
@@ -318,6 +319,7 @@ func (gs *GameState) ResetEphemeralState() {
 	gs.cardBanished = false
 	gs.arcaneDamageDealt = false
 	gs.nonAttackActionPlayed = false
+	gs.lastAttackHit = false
 	gs.cacheable = true
 	gs.logger = NoopLogger{}
 	gs.auraCreated = len(gs.auras) > 0
@@ -477,6 +479,9 @@ func (gs *GameState) SetCardBanished(v bool) { gs.cardBanished = v }
 
 func (gs *GameState) NonAttackActionPlayed() bool     { return gs.nonAttackActionPlayed }
 func (gs *GameState) SetNonAttackActionPlayed(v bool) { gs.nonAttackActionPlayed = v }
+
+func (gs *GameState) LastAttackHit() bool     { return gs.lastAttackHit }
+func (gs *GameState) SetLastAttackHit(v bool) { gs.lastAttackHit = v }
 
 func (gs *GameState) CurrentStepRerouted() bool     { return gs.currentStepRerouted }
 func (gs *GameState) SetCurrentStepRerouted(v bool) { gs.currentStepRerouted = v }

@@ -769,7 +769,9 @@ func (ctx *sequenceContext) playSequenceWithMeta(n int) (damage int, futureValue
 		if activeAttack == nil {
 			return
 		}
-		if gameengine.LikelyToHit(activeAttack) {
+		hit := gameengine.LikelyToHit(activeAttack)
+		state.SetLastAttackHit(hit)
+		if hit {
 			for i := range activeAttack.OnHit {
 				h := &activeAttack.OnHit[i]
 				h.Fire(ge, state.Logger(), activeAttack, h)
