@@ -24,10 +24,10 @@ func TestRightBehindYou_BlockTogetherFiresBonus(t *testing.T) {
 			continue
 		}
 		ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetDefenders([]card.Card{c, testutils.GenericAttack(0, 1)}).Build()}
-		self := &card.CardState{Card: c}
-		blocker.Block(ge, ge.Logger(), self)
-		if self.BonusDefense != 1 {
-			t.Errorf("%s: BonusDefense = %d, want 1 (defending together)", c.Name(), self.BonusDefense)
+		pc := &card.CardState{Card: c}
+		blocker.Block(ge, ge.Logger(), pc)
+		if pc.BonusDefense != 1 {
+			t.Errorf("%s: BonusDefense = %d, want 1 (defending together)", c.Name(), pc.BonusDefense)
 		}
 	}
 }
@@ -36,9 +36,9 @@ func TestRightBehindYou_BlockTogetherFiresBonus(t *testing.T) {
 func TestRightBehindYou_BlockAloneNoBonus(t *testing.T) {
 	c := cards.RightBehindYouRed{}
 	ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetDefenders([]card.Card{c}).Build()}
-	self := &card.CardState{Card: c}
-	c.Block(ge, ge.Logger(), self)
-	if self.BonusDefense != 0 {
-		t.Errorf("BonusDefense = %d, want 0 (alone)", self.BonusDefense)
+	pc := &card.CardState{Card: c}
+	c.Block(ge, ge.Logger(), pc)
+	if pc.BonusDefense != 0 {
+		t.Errorf("BonusDefense = %d, want 0 (alone)", pc.BonusDefense)
 	}
 }

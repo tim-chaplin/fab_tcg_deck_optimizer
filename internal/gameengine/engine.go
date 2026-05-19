@@ -113,12 +113,12 @@ func (ge *GameEngine) AppendToDeck(c card.Card) {
 	ge.deck.PutBottom([]deck.Card{c})
 }
 
-// RecycleToDeckBottom appends self.Card to the bottom of the deck and flags the chain
+// RecycleToDeckBottom appends pc.Card to the bottom of the deck and flags the chain
 // dispatcher to skip the usual non-persistent → graveyard append. Models the FaB clause
 // "put this on the bottom of its owner's deck". Flips IsCacheable.
-func (ge *GameEngine) RecycleToDeckBottom(self *card.CardState) {
+func (ge *GameEngine) RecycleToDeckBottom(pc *card.CardState) {
 	ge.cacheable = false
-	ge.deck.PutBottom([]deck.Card{self.Card})
+	ge.deck.PutBottom([]deck.Card{pc.Card})
 	ge.currentStepRerouted = true
 }
 
@@ -209,8 +209,8 @@ func (ge *GameEngine) PonderDrawOne() bool {
 
 // === Rules-engine helpers cards reach through GameEngine ===
 
-// LikelyToHit reports whether self's attack is likely to land past the opponent's blocks.
-func (ge *GameEngine) LikelyToHit(self *card.CardState) bool { return LikelyToHit(self) }
+// LikelyToHit reports whether pc's attack is likely to land past the opponent's blocks.
+func (ge *GameEngine) LikelyToHit(pc *card.CardState) bool { return LikelyToHit(pc) }
 
 // LikelyDamageHits is the raw-integer threshold check behind LikelyToHit.
 func (ge *GameEngine) LikelyDamageHits(n int, dominate bool) bool {
@@ -501,38 +501,38 @@ func (ge *GameEngine) DestroyAura(addToGraveyard bool) {
 
 // === Chain-step resolution ===
 
-// ResolveChainStep runs card.Play on self and then applies the standard chain-step
-// resolution: attack-action / weapon-attack credit self.EffectiveAttack() to ge.value;
+// ResolveChainStep runs card.Play on pc and then applies the standard chain-step
+// resolution: attack-action / weapon-attack credit pc.EffectiveAttack() to ge.value;
 // defense-reaction (or DefensiveInstant) credits EffectiveDefense capped at the remaining
 // unblocked damage; everything else logs (+0). The "<DisplayName>: <VERB> (+N)" chain-step
 // entry is appended after Play returns so self-buffs Play applied are reflected in the
 // displayed delta.
-func (ge *GameEngine) ResolveChainStep(l card.Logger, self *card.CardState) {
-	self.Card.Play(ge, l, self)
-	types := self.Card.Types(nil)
+func (ge *GameEngine) ResolveChainStep(l card.Logger, pc *card.CardState) {
+	pc.Card.Play(ge, l, pc)
+	types := pc.Card.Types(nil)
 	if types.Has(card.TypeAura) {
 		ge.auraCreated = true
 	}
-	n := ge.chainStepDelta(self, types)
-	l.AppendChainStep(ChainStepText(self), n)
+	n := ge.chainStepDelta(pc, types)
+	l.AppendChainStep(ChainStepText(pc), n)
 }
 
 // PlayCard implements card.GameEngine.PlayCard — resolves another card mid-handler.
-func (ge *GameEngine) PlayCard(l card.Logger, self *card.CardState) {
-	ge.ResolveChainStep(l, self)
+func (ge *GameEngine) PlayCard(l card.Logger, pc *card.CardState) {
+	ge.ResolveChainStep(l, pc)
 }
 
 // chainStepDelta computes the chain step's display delta and applies the standard damage /
 // block side effects. Returns the (+N) value for the log line. types is the caller's
 // already-resolved Types(nil) so we skip a second interface dispatch.
-func (ge *GameEngine) chainStepDelta(self *card.CardState, types card.TypeSet) int {
+func (ge *GameEngine) chainStepDelta(pc *card.CardState, types card.TypeSet) int {
 	switch {
 	case types.IsAttackAction() || types.IsWeaponAttack():
-		n := self.EffectiveAttack()
+		n := pc.EffectiveAttack()
 		ge.value += n
 		return n
-	case types.IsDefenseReaction() || isDefensiveInstant(self.Card):
-		n := self.EffectiveDefense()
+	case types.IsDefenseReaction() || isDefensiveInstant(pc.Card):
+		n := pc.EffectiveDefense()
 		if rem := ge.incomingDamage - ge.damageBlocked; n > rem {
 			n = rem
 		}
@@ -557,8 +557,8 @@ func isDefensiveInstant(c card.Card) bool {
 // step log line. VERB picks WEAPON ATTACK for Weapon+Attack, ATTACK for attack-actions,
 // DEFENSE REACTION for DRs, and PLAY otherwise. Declared as a var so a memoised
 // implementation can be swapped in at init.
-var ChainStepText = func(self *card.CardState) string {
-	types := self.Card.Types(nil)
+var ChainStepText = func(pc *card.CardState) string {
+	types := pc.Card.Types(nil)
 	var verb string
 	switch {
 	case types.IsWeaponAttack():
@@ -570,10 +570,10 @@ var ChainStepText = func(self *card.CardState) string {
 	default:
 		verb = "PLAY"
 	}
-	if self.FromArsenal {
+	if pc.FromArsenal {
 		verb += " from arsenal"
 	}
-	return self.Card.DisplayName() + ": " + verb
+	return pc.Card.DisplayName() + ": " + verb
 }
 
 // === Arcane damage ===
@@ -608,14 +608,14 @@ var dealtArcaneText = [...]string{
 
 // AddHitTrigger registers a one-shot triggertype.Hit listener. filter narrows the qualifying
 // hits to a card-type predicate; nil = any hit qualifies.
-func (ge *GameEngine) AddHitTrigger(self *card.CardState, handler func(card.GameEngine, card.Logger, card.Trigger), filter func(card.TypeSet) bool) {
-	ge.CreateTrigger(trigger.NewFromCard(self.Card, triggertype.Hit, handler, filter))
+func (ge *GameEngine) AddHitTrigger(pc *card.CardState, handler func(card.GameEngine, card.Logger, card.Trigger), filter func(card.TypeSet) bool) {
+	ge.CreateTrigger(trigger.NewFromCard(pc.Card, triggertype.Hit, handler, filter))
 }
 
 // AddEndOfTurnTrigger registers a one-shot triggertype.EndOfTurn listener — fires
 // after the chain finishes resolving but before the carry-state snapshot.
-func (ge *GameEngine) AddEndOfTurnTrigger(self *card.CardState, handler func(card.GameEngine, card.Logger, card.Trigger)) {
-	ge.CreateTrigger(trigger.NewFromCard(self.Card, triggertype.EndOfTurn, handler, nil))
+func (ge *GameEngine) AddEndOfTurnTrigger(pc *card.CardState, handler func(card.GameEngine, card.Logger, card.Trigger)) {
+	ge.CreateTrigger(trigger.NewFromCard(pc.Card, triggertype.EndOfTurn, handler, nil))
 }
 
 // === Tokens ===

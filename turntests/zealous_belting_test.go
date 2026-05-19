@@ -16,12 +16,12 @@ import (
 func TestZealousBelting_NoQualifyingPitchNoGoAgain(t *testing.T) {
 	c := cards.ZealousBeltingRed{}
 	ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetPitched([]card.Card{testutils.GenericAttack(0, 5)}).Build()}
-	self := &card.CardState{Card: c}
-	ge.ResolveChainStep(ge.Logger(), self)
+	pc := &card.CardState{Card: c}
+	ge.ResolveChainStep(ge.Logger(), pc)
 	if got := ge.Value(); got != c.Attack() {
 		t.Errorf("Play() = %d, want %d (no qualifying pitch)", got, c.Attack())
 	}
-	if self.GrantedGoAgain {
+	if pc.GrantedGoAgain {
 		t.Errorf("GrantedGoAgain = true, want false (no pitched card with power > %d)", c.Attack())
 	}
 }
@@ -40,9 +40,9 @@ func TestZealousBelting_HigherPowerPitchGrantsGoAgain(t *testing.T) {
 	}
 	for _, tc := range cases {
 		ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetPitched([]card.Card{testutils.GenericAttack(0, tc.pitchPow)}).Build()}
-		self := &card.CardState{Card: tc.c}
-		ge.ResolveChainStep(ge.Logger(), self)
-		if !self.GrantedGoAgain {
+		pc := &card.CardState{Card: tc.c}
+		ge.ResolveChainStep(ge.Logger(), pc)
+		if !pc.GrantedGoAgain {
 			t.Errorf("%s: GrantedGoAgain = false, want true (pitched power %d > base)", tc.c.Name(), tc.pitchPow)
 		}
 	}

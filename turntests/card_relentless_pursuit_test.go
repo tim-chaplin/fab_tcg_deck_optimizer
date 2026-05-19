@@ -22,9 +22,9 @@ func TestRelentlessPursuit_MarksOpponent(t *testing.T) {
 // Tests that Play without a prior attack leaves the recycle clause off — the card
 // resolves normally and the deck stays empty.
 func TestRelentlessPursuit_NoRecycleWithoutPriorAttack(t *testing.T) {
-	self := &card.CardState{Card: cards.RelentlessPursuitBlue{}}
+	pc := &card.CardState{Card: cards.RelentlessPursuitBlue{}}
 	ge := gameengine.New()
-	ge.ResolveChainStep(ge.Logger(), self)
+	ge.ResolveChainStep(ge.Logger(), pc)
 	if got := ge.Deck().Size(); got != 0 {
 		t.Errorf("deck size = %d, want 0 (no recycle without prior attack)", got)
 	}
@@ -33,10 +33,10 @@ func TestRelentlessPursuit_NoRecycleWithoutPriorAttack(t *testing.T) {
 // Tests that Play after an attack-typed CardsPlayed entry recycles to the bottom of the
 // deck via RecycleToDeckBottom.
 func TestRelentlessPursuit_RecyclesAfterPriorAttack(t *testing.T) {
-	self := &card.CardState{Card: cards.RelentlessPursuitBlue{}}
+	pc := &card.CardState{Card: cards.RelentlessPursuitBlue{}}
 	ge := gameengine.New()
 	ge.SetCardsPlayed([]card.Card{testutils.GenericAttack(0, 3)})
-	ge.ResolveChainStep(ge.Logger(), self)
+	ge.ResolveChainStep(ge.Logger(), pc)
 	if got := ge.Deck().Size(); got != 1 {
 		t.Errorf("deck size after recycle = %d, want 1 (Relentless Pursuit went onto an empty deck)", got)
 	}

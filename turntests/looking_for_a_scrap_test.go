@@ -13,14 +13,14 @@ import (
 // Tests that with no banishable graveyard target the rider stays off.
 func TestLookingForAScrap_NoBanishableRiderOff(t *testing.T) {
 	for _, c := range []card.Card{cards.LookingForAScrapRed{}, cards.LookingForAScrapYellow{}, cards.LookingForAScrapBlue{}} {
-		self := &card.CardState{Card: c}
+		pc := &card.CardState{Card: c}
 		ge := gameengine.New()
-		ge.ResolveChainStep(ge.Logger(), self)
-		if self.GrantedGoAgain {
+		ge.ResolveChainStep(ge.Logger(), pc)
+		if pc.GrantedGoAgain {
 			t.Errorf("%s [%d{p}]: GrantedGoAgain = true with empty graveyard, want false", c.Name(), c.Pitch())
 		}
-		if self.BonusAttack != 0 {
-			t.Errorf("%s [%d{p}]: BonusAttack = %d with empty graveyard, want 0", c.Name(), c.Pitch(), self.BonusAttack)
+		if pc.BonusAttack != 0 {
+			t.Errorf("%s [%d{p}]: BonusAttack = %d with empty graveyard, want 0", c.Name(), c.Pitch(), pc.BonusAttack)
 		}
 	}
 }
@@ -30,13 +30,13 @@ func TestLookingForAScrap_NoBanishableRiderOff(t *testing.T) {
 func TestLookingForAScrap_BanishesOnePowerForBonus(t *testing.T) {
 	for _, c := range []card.Card{cards.LookingForAScrapRed{}, cards.LookingForAScrapYellow{}, cards.LookingForAScrapBlue{}} {
 		ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetGraveyard([]card.Card{testutils.GenericAttack(0, 1)}).Build()}
-		self := &card.CardState{Card: c}
-		ge.ResolveChainStep(ge.Logger(), self)
-		if !self.GrantedGoAgain {
+		pc := &card.CardState{Card: c}
+		ge.ResolveChainStep(ge.Logger(), pc)
+		if !pc.GrantedGoAgain {
 			t.Errorf("%s [%d{p}]: GrantedGoAgain = false after banish, want true", c.Name(), c.Pitch())
 		}
-		if self.BonusAttack != 1 {
-			t.Errorf("%s [%d{p}]: BonusAttack = %d after banish, want 1", c.Name(), c.Pitch(), self.BonusAttack)
+		if pc.BonusAttack != 1 {
+			t.Errorf("%s [%d{p}]: BonusAttack = %d after banish, want 1", c.Name(), c.Pitch(), pc.BonusAttack)
 		}
 	}
 }

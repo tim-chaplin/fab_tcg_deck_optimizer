@@ -16,8 +16,8 @@ func TestPushThePoint_LastAttackHitGrantsBonus(t *testing.T) {
 	for _, c := range []card.Card{cards.PushThePointRed{}, cards.PushThePointYellow{}, cards.PushThePointBlue{}} {
 		ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().Build()}
 		ge.SetLastAttackHit(true)
-		self := &card.CardState{Card: c}
-		ge.ResolveChainStep(ge.Logger(), self)
+		pc := &card.CardState{Card: c}
+		ge.ResolveChainStep(ge.Logger(), pc)
 		want := c.Attack() + 2
 		if ge.Value() != want {
 			t.Errorf("%s: Value = %d, want %d (printed + 2{p} bonus)", c.Name(), ge.Value(), want)
@@ -29,8 +29,8 @@ func TestPushThePoint_LastAttackHitGrantsBonus(t *testing.T) {
 func TestPushThePoint_NoPriorHitNoBonus(t *testing.T) {
 	for _, c := range []card.Card{cards.PushThePointRed{}, cards.PushThePointYellow{}, cards.PushThePointBlue{}} {
 		ge := gameengine.New()
-		self := &card.CardState{Card: c}
-		ge.ResolveChainStep(ge.Logger(), self)
+		pc := &card.CardState{Card: c}
+		ge.ResolveChainStep(ge.Logger(), pc)
 		if ge.Value() != c.Attack() {
 			t.Errorf("%s: Value = %d, want %d (printed power)", c.Name(), ge.Value(), c.Attack())
 		}

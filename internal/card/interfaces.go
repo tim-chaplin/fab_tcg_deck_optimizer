@@ -30,10 +30,10 @@ type GameEngine interface {
 	AddToGraveyard(Card)
 
 	// Auras: per-trigger-type registration. Cards supply the handler and initial count;
-	// the engine builds the underlying aura. Source is derived from self.Card. Handler
+	// the engine builds the underlying aura. Source is derived from pc.Card. Handler
 	// signatures are inlined to keep this package import-free of the concrete aura type.
-	CreateStartOfTurnAura(self *CardState, handler func(GameEngine, Logger, Aura), count int)
-	CreateOncePerTurnAttackActionAura(self *CardState, handler func(GameEngine, Logger, Aura), count int)
+	CreateStartOfTurnAura(pc *CardState, handler func(GameEngine, Logger, Aura), count int)
+	CreateOncePerTurnAttackActionAura(pc *CardState, handler func(GameEngine, Logger, Aura), count int)
 	// DestroyAura removes the aura currently being fired. addToGraveyard sends the
 	// originating card to the graveyard (token auras skip the append). Reached via the
 	// per-fire ctx's Destroy method; exposed on GameEngine so the ctx can route the call
@@ -43,8 +43,8 @@ type GameEngine interface {
 	// Triggers: one-shot, per-trigger-type. AddHitTrigger's filter narrows the firing event
 	// to a card-type predicate (typically TypeSet.IsAttack or TypeSet.IsAttackAction); nil
 	// = no filter. Handler signatures are inlined for the same reason as the aura methods.
-	AddHitTrigger(self *CardState, handler func(GameEngine, Logger, Trigger), filter func(TypeSet) bool)
-	AddEndOfTurnTrigger(self *CardState, handler func(GameEngine, Logger, Trigger))
+	AddHitTrigger(pc *CardState, handler func(GameEngine, Logger, Trigger), filter func(TypeSet) bool)
+	AddEndOfTurnTrigger(pc *CardState, handler func(GameEngine, Logger, Trigger))
 
 	// Token economy
 	CreateRunechants(int)
@@ -66,7 +66,7 @@ type GameEngine interface {
 
 	// Hit / damage heuristics. The card says "I attack for N"; the engine decides whether
 	// the attack lands.
-	LikelyToHit(self *CardState) bool
+	LikelyToHit(pc *CardState) bool
 	LikelyDamageHits(n int, dominate bool) bool
 
 	// Tempo verbs. Cards say "this card does X" (force a discard); the engine decides how
@@ -129,7 +129,7 @@ type GameEngine interface {
 	// Clash (top-of-deck power compare)
 	Clash(win, lose func())
 
-	// PlayCard runs Card.Play on self and emits the chain step. Used by cards that resolve
+	// PlayCard runs Card.Play on pc and emits the chain step. Used by cards that resolve
 	// another card mid-handler (Moon Wish tutoring Sun Kiss into play on go-again).
 	PlayCard(Logger, *CardState)
 

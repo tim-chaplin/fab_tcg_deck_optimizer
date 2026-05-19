@@ -11,8 +11,8 @@ import (
 // Mode 0 keeps the printed 2{p} — the optional cost is skipped.
 func TestPunchAboveYourWeight_Mode0PrintedAttack(t *testing.T) {
 	ge := gameengine.New()
-	self := &card.CardState{Card: cards.PunchAboveYourWeightRed{}}
-	ge.ResolveChainStep(ge.Logger(), self)
+	pc := &card.CardState{Card: cards.PunchAboveYourWeightRed{}}
+	ge.ResolveChainStep(ge.Logger(), pc)
 	if ge.Value() != 2 {
 		t.Errorf("mode 0 Value = %d, want 2 (printed)", ge.Value())
 	}
@@ -21,8 +21,8 @@ func TestPunchAboveYourWeight_Mode0PrintedAttack(t *testing.T) {
 // Mode 1 pays the {r}{r}{r} for +5{p}, giving the full 7{p} swing.
 func TestPunchAboveYourWeight_Mode1AddsFive(t *testing.T) {
 	ge := gameengine.New()
-	self := &card.CardState{Card: cards.PunchAboveYourWeightRed{}, Mode: 1}
-	ge.ResolveChainStep(ge.Logger(), self)
+	pc := &card.CardState{Card: cards.PunchAboveYourWeightRed{}, Mode: 1}
+	ge.ResolveChainStep(ge.Logger(), pc)
 	if ge.Value() != 7 {
 		t.Errorf("mode 1 Value = %d, want 7 (2 printed + 5 bonus)", ge.Value())
 	}

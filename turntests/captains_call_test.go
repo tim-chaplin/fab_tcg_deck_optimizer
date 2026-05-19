@@ -14,8 +14,8 @@ import (
 func TestCaptainsCall_Mode0BuffsBonusAttack(t *testing.T) {
 	target := &card.CardState{Card: testutils.GenericAttack(1, 4)}
 	ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCardsRemaining([]*card.CardState{target}).Build()}
-	self := &card.CardState{Card: cards.CaptainsCallRed{}, Mode: 0}
-	ge.ResolveChainStep(ge.Logger(), self)
+	pc := &card.CardState{Card: cards.CaptainsCallRed{}, Mode: 0}
+	ge.ResolveChainStep(ge.Logger(), pc)
 	if target.BonusAttack != 2 {
 		t.Errorf("target.BonusAttack = %d, want 2 (mode 0 grants +2{p})", target.BonusAttack)
 	}
@@ -28,8 +28,8 @@ func TestCaptainsCall_Mode0BuffsBonusAttack(t *testing.T) {
 func TestCaptainsCall_Mode1GrantsGoAgain(t *testing.T) {
 	target := &card.CardState{Card: testutils.GenericAttack(1, 4)}
 	ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCardsRemaining([]*card.CardState{target}).Build()}
-	self := &card.CardState{Card: cards.CaptainsCallRed{}, Mode: 1}
-	ge.ResolveChainStep(ge.Logger(), self)
+	pc := &card.CardState{Card: cards.CaptainsCallRed{}, Mode: 1}
+	ge.ResolveChainStep(ge.Logger(), pc)
 	if !target.GrantedGoAgain {
 		t.Errorf("target.GrantedGoAgain = false; mode 1 should grant go again")
 	}
@@ -42,8 +42,8 @@ func TestCaptainsCall_Mode1GrantsGoAgain(t *testing.T) {
 func TestCaptainsCall_BlueRejectsCostAboveZero(t *testing.T) {
 	target := &card.CardState{Card: testutils.GenericAttack(1, 4)}
 	ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCardsRemaining([]*card.CardState{target}).Build()}
-	self := &card.CardState{Card: cards.CaptainsCallBlue{}, Mode: 0}
-	ge.ResolveChainStep(ge.Logger(), self)
+	pc := &card.CardState{Card: cards.CaptainsCallBlue{}, Mode: 0}
+	ge.ResolveChainStep(ge.Logger(), pc)
 	if target.BonusAttack != 0 {
 		t.Errorf("Blue (cost cap 0) buffed a cost-1 attack; got BonusAttack = %d, want 0",
 			target.BonusAttack)

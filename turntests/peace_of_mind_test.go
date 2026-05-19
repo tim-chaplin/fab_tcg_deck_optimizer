@@ -21,8 +21,8 @@ func TestPeaceOfMind_PreventsByPrinting(t *testing.T) {
 	}
 	for _, tc := range cases {
 		ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetIncomingDamage(10).Build()}
-		self := &card.CardState{Card: tc.card}
-		ge.ResolveChainStep(ge.Logger(), self)
+		pc := &card.CardState{Card: tc.card}
+		ge.ResolveChainStep(ge.Logger(), pc)
 		if ge.Value() != tc.want {
 			t.Errorf("%s: Value = %d, want %d", tc.card.Name(), ge.Value(), tc.want)
 		}
@@ -33,8 +33,8 @@ func TestPeaceOfMind_PreventsByPrinting(t *testing.T) {
 func TestPeaceOfMind_CreatesPonder(t *testing.T) {
 	for _, c := range []card.Card{cards.PeaceOfMindRed{}, cards.PeaceOfMindYellow{}, cards.PeaceOfMindBlue{}} {
 		ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetIncomingDamage(10).Build()}
-		self := &card.CardState{Card: c}
-		ge.ResolveChainStep(ge.Logger(), self)
+		pc := &card.CardState{Card: c}
+		ge.ResolveChainStep(ge.Logger(), pc)
 		if got := ge.PonderCount(); got != 1 {
 			t.Errorf("%s: Ponders = %d, want 1", c.Name(), got)
 		}

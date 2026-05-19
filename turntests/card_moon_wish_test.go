@@ -42,9 +42,9 @@ func TestMoonWish_AltCostMovesHandCardToDeckTop(t *testing.T) {
 	other := testutils.GenericAttack(0, 0).WithName("deckTop")
 	ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCards([]card.Card{other}).Build()}
 	ge.SetHand([]card.Card{dr})
-	self := &card.CardState{Card: cards.MoonWishYellow{}}
-	ge.ResolveChainStep(ge.Logger(), self)
-	testutils.FireOnHitIfLikely(ge, ge.Logger(), self)
+	pc := &card.CardState{Card: cards.MoonWishYellow{}}
+	ge.ResolveChainStep(ge.Logger(), pc)
+	testutils.FireOnHitIfLikely(ge, ge.Logger(), pc)
 	if h := ge.Hand(); len(h) != 0 {
 		t.Errorf("Hand = %d entries, want 0 (alt cost should pop the only hand card)", len(h))
 	}
@@ -70,9 +70,9 @@ func TestMoonWish_TutorPrefersRedSunKissThenYellowThenBlue(t *testing.T) {
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
 			ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCards(append([]card.Card(nil), tc.deck...)).Build()}
-			self := &card.CardState{Card: cards.MoonWishYellow{}}
-			ge.ResolveChainStep(ge.Logger(), self)
-			testutils.FireOnHitIfLikely(ge, ge.Logger(), self)
+			pc := &card.CardState{Card: cards.MoonWishYellow{}}
+			ge.ResolveChainStep(ge.Logger(), pc)
+			testutils.FireOnHitIfLikely(ge, ge.Logger(), pc)
 			h := ge.Hand()
 			if len(h) != 1 || h[0].ID() != tc.want {
 				t.Errorf("Hand = %v, want first entry to be %v", h, tc.want)
@@ -86,9 +86,9 @@ func TestMoonWish_TutorPrefersRedSunKissThenYellowThenBlue(t *testing.T) {
 func TestMoonWish_TutorRequiresHit(t *testing.T) {
 	{
 		ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCards([]card.Card{cards.SunKissRed{}}).Build()}
-		self := &card.CardState{Card: cards.MoonWishYellow{}}
-		ge.ResolveChainStep(ge.Logger(), self)
-		testutils.FireOnHitIfLikely(ge, ge.Logger(), self)
+		pc := &card.CardState{Card: cards.MoonWishYellow{}}
+		ge.ResolveChainStep(ge.Logger(), pc)
+		testutils.FireOnHitIfLikely(ge, ge.Logger(), pc)
 		h := ge.Hand()
 		if len(h) != 1 || h[0].ID() != ids.SunKissRed {
 			t.Errorf("base hit: Hand = %v, want [Sun Kiss [R]]", h)
@@ -100,8 +100,8 @@ func TestMoonWish_TutorRequiresHit(t *testing.T) {
 	{
 		ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCards([]card.Card{cards.SunKissRed{}}).Build()}
 		// Drive EffectiveAttack down so LikelyToHit fails (4 - 4 = 0, clamped, not in window).
-		self := &card.CardState{Card: cards.MoonWishYellow{}, BonusAttack: -4}
-		ge.ResolveChainStep(ge.Logger(), self)
+		pc := &card.CardState{Card: cards.MoonWishYellow{}, BonusAttack: -4}
+		ge.ResolveChainStep(ge.Logger(), pc)
 		if h := ge.Hand(); len(h) != 0 {
 			t.Errorf("dampened: Hand = %v, want [] (no hit, no tutor)", h)
 		}
@@ -115,9 +115,9 @@ func TestMoonWish_TutorRequiresHit(t *testing.T) {
 func TestMoonWish_GoAgainPlaysSunKissImmediately(t *testing.T) {
 	{
 		ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCards([]card.Card{cards.SunKissRed{}}).Build()}
-		self := &card.CardState{Card: cards.MoonWishYellow{}, GrantedGoAgain: true}
-		ge.ResolveChainStep(ge.Logger(), self)
-		testutils.FireOnHitIfLikely(ge, ge.Logger(), self)
+		pc := &card.CardState{Card: cards.MoonWishYellow{}, GrantedGoAgain: true}
+		ge.ResolveChainStep(ge.Logger(), pc)
+		testutils.FireOnHitIfLikely(ge, ge.Logger(), pc)
 		dmg := ge.Value()
 		if dmg != 4+3 {
 			t.Errorf("with go-again: damage = %d, want 7 (Moon Wish 4 + Sun Kiss 3)", dmg)
@@ -132,9 +132,9 @@ func TestMoonWish_GoAgainPlaysSunKissImmediately(t *testing.T) {
 	}
 	{
 		ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCards([]card.Card{cards.SunKissRed{}}).Build()}
-		self := &card.CardState{Card: cards.MoonWishYellow{}}
-		ge.ResolveChainStep(ge.Logger(), self)
-		testutils.FireOnHitIfLikely(ge, ge.Logger(), self)
+		pc := &card.CardState{Card: cards.MoonWishYellow{}}
+		ge.ResolveChainStep(ge.Logger(), pc)
+		testutils.FireOnHitIfLikely(ge, ge.Logger(), pc)
 		dmg := ge.Value()
 		if dmg != 4 {
 			t.Errorf("no go-again: damage = %d, want 4 (Sun Kiss not played)", dmg)

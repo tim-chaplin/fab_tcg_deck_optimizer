@@ -55,8 +55,8 @@ func TestChainStepText_LazyBackfillForUnregisteredCards(t *testing.T) {
 	idx := chainStepCacheIndex(c.ID(), false)
 	chainStepCache[idx].Store(nil)
 
-	self := &card.CardState{Card: c}
-	got := cachedChainStepText(self)
+	pc := &card.CardState{Card: c}
+	got := cachedChainStepText(pc)
 	if want := "Unregistered: PLAY"; got != want {
 		t.Errorf("first call = %q, want %q", got, want)
 	}
@@ -85,8 +85,8 @@ func TestBuildChainStepText_VerbSelection(t *testing.T) {
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
 			c := testutils.NewStubCard("X").WithTypes(tc.types)
-			self := &card.CardState{Card: c, FromArsenal: tc.fromArsenal}
-			if got := bareChainStepText(self); got != tc.want {
+			pc := &card.CardState{Card: c, FromArsenal: tc.fromArsenal}
+			if got := bareChainStepText(pc); got != tc.want {
 				t.Errorf("bareChainStepText = %q, want %q", got, tc.want)
 			}
 		})

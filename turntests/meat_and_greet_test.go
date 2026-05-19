@@ -22,13 +22,13 @@ func TestMeatAndGreet_OnHitRunechantGatedByLikelyToHit(t *testing.T) {
 	}
 	for _, tc := range cases {
 		ge := gameengine.New()
-		self := &card.CardState{Card: tc.c}
-		ge.ResolveChainStep(ge.Logger(), self)
-		testutils.FireOnHitIfLikely(ge, ge.Logger(), self)
+		pc := &card.CardState{Card: tc.c}
+		ge.ResolveChainStep(ge.Logger(), pc)
+		testutils.FireOnHitIfLikely(ge, ge.Logger(), pc)
 		if got := ge.Value(); got != tc.wantDmg {
 			t.Errorf("%s: Play() = %d, want %d", tc.c.Name(), got, tc.wantDmg)
 		}
-		if self.GrantedGoAgain {
+		if pc.GrantedGoAgain {
 			t.Errorf("%s: GrantedGoAgain = true, want false (no prior arcane damage → no go again)", tc.c.Name())
 		}
 		// Card'ge printed GoAgain must also be false — the rider is the only source.
@@ -47,9 +47,9 @@ func TestMeatAndGreet_ArcaneDamageDealtGrantsGoAgain(t *testing.T) {
 	}
 	for _, c := range cases {
 		ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetArcaneDamageDealt(true).Build()}
-		self := &card.CardState{Card: c}
-		ge.ResolveChainStep(ge.Logger(), self)
-		if !self.GrantedGoAgain {
+		pc := &card.CardState{Card: c}
+		ge.ResolveChainStep(ge.Logger(), pc)
+		if !pc.GrantedGoAgain {
 			t.Errorf("%s: GrantedGoAgain = false, want true (ArcaneDamageDealt → go again)", c.Name())
 		}
 	}

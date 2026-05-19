@@ -23,13 +23,13 @@ func TestOverload_OnHitGoAgainEagerByLikelyToHit(t *testing.T) {
 	}
 	for _, tc := range cases {
 		ge := gameengine.New()
-		self := &card.CardState{Card: tc.c}
-		ge.ResolveChainStep(ge.Logger(), self)
+		pc := &card.CardState{Card: tc.c}
+		ge.ResolveChainStep(ge.Logger(), pc)
 		if got := ge.Value(); got != tc.wantDmg {
 			t.Errorf("%s: Play() Value = %d, want %d", tc.c.Name(), got, tc.wantDmg)
 		}
-		if self.GrantedGoAgain != tc.wantGA {
-			t.Errorf("%s: GrantedGoAgain = %v, want %v", tc.c.Name(), self.GrantedGoAgain, tc.wantGA)
+		if pc.GrantedGoAgain != tc.wantGA {
+			t.Errorf("%s: GrantedGoAgain = %v, want %v", tc.c.Name(), pc.GrantedGoAgain, tc.wantGA)
 		}
 		if tc.c.GoAgain(nil) {
 			t.Errorf("%s: GoAgain() = true, want false (rider is conditional, not printed)", tc.c.Name())
@@ -48,9 +48,9 @@ func TestOverload_BonusAttackPushesIntoHitWindow(t *testing.T) {
 	}
 	for _, tc := range cases {
 		ge := gameengine.New()
-		self := &card.CardState{Card: cards.OverloadRed{}, BonusAttack: tc.bonus}
-		ge.ResolveChainStep(ge.Logger(), self)
-		if !self.GrantedGoAgain {
+		pc := &card.CardState{Card: cards.OverloadRed{}, BonusAttack: tc.bonus}
+		ge.ResolveChainStep(ge.Logger(), pc)
+		if !pc.GrantedGoAgain {
 			t.Errorf("Red + BonusAttack %d: GrantedGoAgain = false, want true", tc.bonus)
 		}
 	}
