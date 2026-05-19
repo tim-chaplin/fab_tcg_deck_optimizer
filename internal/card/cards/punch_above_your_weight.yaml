@@ -4,8 +4,6 @@ types:
     - Action
     - Attack
 cost: 0
-markers:
-    - NotImplemented
 text: When this attacks, you may pay {r}{r}{r}. If you do, this gets +5{p}.
 variants:
     - id: PunchAboveYourWeightRed
