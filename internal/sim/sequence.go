@@ -791,7 +791,14 @@ func (ctx *sequenceContext) playSequenceWithMeta(n int) (damage int, futureValue
 			}
 			state.AddActionPoints(-1)
 		}
-		state.RemoveFromHand(pc.Card)
+		// RemoveFromHand returns false when an earlier chain step's Play moved this card
+		// out of hand (e.g. a hand-on-top alt cost via PopHandAt + PrependToDeck). The
+		// partition planned this card as a play / pitch using the pre-chain hand; if the
+		// card is no longer there the partition is no longer realisable — reject it so
+		// the optimiser doesn't credit a phantom play.
+		if !state.RemoveFromHand(pc.Card) {
+			return 0, 0, 0, nil, false
+		}
 		prevPitchIdx := pool.idx
 		contrib, ok := pool.pay(m.costAt(ge, pc.Mode))
 		if !ok {
@@ -799,7 +806,9 @@ func (ctx *sequenceContext) playSequenceWithMeta(n int) (damage int, futureValue
 		}
 		pc.PitchedToPlay = contrib
 		for k := prevPitchIdx; k < pool.idx; k++ {
-			state.RemoveFromHand(pool.perm[k])
+			if !state.RemoveFromHand(pool.perm[k]) {
+				return 0, 0, 0, nil, false
+			}
 		}
 		if m.types.IsAttackReaction() {
 			if m.hasPlayPrecondition {
