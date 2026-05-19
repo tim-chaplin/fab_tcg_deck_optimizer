@@ -26,6 +26,7 @@ type GameEngine interface {
 	PeekDeck() (Card, bool)
 	PeekTopN(int) []Card
 	PrependToDeck(Card)
+	AppendToDeck(Card)
 	AddToGraveyard(Card)
 
 	// Auras: per-trigger-type registration. Cards supply the handler and initial count;
