@@ -4,8 +4,6 @@ types:
     - Action
     - Attack
 cost: 0
-markers:
-    - NotImplemented
 text: When you attack or defend with Flex, you may pay {r}{r}. If you do, it gains +2{p}.
 variants:
     - id: FlexRed
