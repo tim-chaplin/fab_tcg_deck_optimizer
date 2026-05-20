@@ -24,3 +24,12 @@ func (ge *GameEngine) CreateStartOfTurnAura(pc *card.CardState, handler func(car
 func (ge *GameEngine) CreateOncePerTurnAttackActionAura(pc *card.CardState, handler func(card.GameEngine, card.Logger, card.Aura), count int) {
 	ge.CreateAura(aura.NewFromCard(pc.Card, triggertype.CardOrAbility, handler, count, true, card.TypeSet.IsAttackAction))
 }
+
+// CreateHitOrDamageTakenAura registers an aura that fires when an attack hits
+// (triggertype.Hit) or when the defense phase ends with damage unblocked
+// (triggertype.DamageTaken) — the "destroyed when you deal or are dealt damage" aura
+// shape. filter narrows the Hit side to a card-type predicate (nil = any hit); it never
+// gates DamageTaken, which has no triggering card.
+func (ge *GameEngine) CreateHitOrDamageTakenAura(pc *card.CardState, handler func(card.GameEngine, card.Logger, card.Aura), count int, filter func(card.TypeSet) bool) {
+	ge.CreateAura(aura.NewFromCard(pc.Card, triggertype.Hit|triggertype.DamageTaken, handler, count, false, filter))
+}

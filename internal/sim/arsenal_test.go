@@ -93,15 +93,15 @@ func TestBest_ArsenalInNonAttackActionPlays(t *testing.T) {
 	h := []card.Card{cards.MaleficIncantationBlue{}}
 	state := gameengine.GameStateBuilder().
 		SetHero(testutils.Hero{Intel: 4}).
-		SetArsenal(cards.ArcaneCussingRed{}).
+		SetArsenal(cards.HealingBalmRed{}).
 		Build()
 	got := Best(nil, h, nil, state)
 	if got.Value != 3 {
-		t.Fatalf("Value = %d, want 3 (Malefic pitched, arsenal Cussing played for 3). Roles=[%s]",
+		t.Fatalf("Value = %d, want 3 (Malefic pitched, arsenal Healing Balm played for 3{h}). Roles=[%s]",
 			got.Value, FormatBestLine(got.BestLine))
 	}
 	if got.State.Arsenal() != nil {
-		t.Errorf("ArsenalCard = %v, want nil (Cussing played out of arsenal)", got.State.Arsenal())
+		t.Errorf("ArsenalCard = %v, want nil (Healing Balm played out of arsenal)", got.State.Arsenal())
 	}
 }
 

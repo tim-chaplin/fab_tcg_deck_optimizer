@@ -5,15 +5,16 @@ import (
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card/cards"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/gameengine"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/token"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/triggertype"
 )
 
-// TestArcaneCussing_BlockCoversIncomingReturnsN confirms the aura's value is N when the
-// partition's block total meets or exceeds incoming damage — we don't take damage, the aura
-// survives to pay out later.
-func TestArcaneCussing_BlockCoversIncomingReturnsN(t *testing.T) {
+// Tests that Arcane Cussing, popped by an attack hitting during our turn, creates its N
+// Runechants — the printed "when this leaves the arena during your turn" clause.
+func TestArcaneCussing_HitOnOurTurnCreatesRunechants(t *testing.T) {
 	cases := []struct {
 		c card.Card
 		n int
@@ -24,103 +25,52 @@ func TestArcaneCussing_BlockCoversIncomingReturnsN(t *testing.T) {
 	}
 	for _, tc := range cases {
 		ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().
-			SetIncomingDamage(3).
-			SetBlockTotal(3).
+			CreateAuraFromCard(tc.c).
 			Build()}
-		ge.ResolveChainStep(ge.Logger(), &card.CardState{Card: tc.c})
-		if got := ge.Value(); got != tc.n {
-			t.Errorf("%s: Play() = %d, want %d (block == incoming)", tc.c.Name(), got, tc.n)
+		ge.SetIsMyTurn(true)
+		ge.FireTriggers(triggertype.Hit, testutils.AttackWithPower{Power: 4})
+		if got := ge.RunechantCount(); got != tc.n {
+			t.Errorf("%s: RunechantCount = %d, want %d (popped by a hit during our turn)", tc.c.Name(), got, tc.n)
+		}
+		if got := len(ge.Auras()); got != 1 {
+			t.Errorf("%s: Auras = %d, want 1 (Arcane Cussing destroyed, the Runechant aura created)", tc.c.Name(), got)
 		}
 	}
 }
 
-// TestArcaneCussing_OverBlockReturnsN pins that BlockTotal is uncapped — over-blocking still
-// counts as covering incoming.
-func TestArcaneCussing_OverBlockReturnsN(t *testing.T) {
+// Tests that Arcane Cussing popped by DamageTaken outside our turn — the defense phase — is
+// destroyed without creating Runechants. The payoff is "during your turn" only.
+func TestArcaneCussing_DamageTakenOffOurTurnCreatesNoRunechants(t *testing.T) {
 	ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().
-		SetIncomingDamage(3).
-		SetBlockTotal(7).
+		CreateAuraFromCard(cards.ArcaneCussingRed{}).
 		Build()}
-	ge.ResolveChainStep(ge.Logger(), &card.CardState{Card: cards.ArcaneCussingRed{}})
-	if got := ge.Value(); got != 3 {
-		t.Errorf("Play() = %d, want 3 (over-block still covers)", got)
+	ge.SetIsMyTurn(false)
+	ge.FireTriggers(triggertype.DamageTaken, nil)
+	if got := ge.RunechantCount(); got != 0 {
+		t.Errorf("RunechantCount = %d, want 0 (popped off our turn — no payoff)", got)
+	}
+	if got := len(ge.Auras()); got != 0 {
+		t.Errorf("Auras = %d, want 0 (Arcane Cussing destroyed, no Runechant aura)", got)
 	}
 }
 
-// TestArcaneCussing_BlockShortReturnsZero confirms the aura collapses to 0 when incoming damage
-// gets through — we take damage, aura dies without pay-out, no same-turn attack to save it.
-func TestArcaneCussing_BlockShortReturnsZero(t *testing.T) {
-	cases := []card.Card{
-		cards.ArcaneCussingRed{},
-		cards.ArcaneCussingYellow{},
-		cards.ArcaneCussingBlue{},
-	}
-	for _, c := range cases {
-		ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().
-			SetIncomingDamage(3).
-			SetBlockTotal(2).
-			Build()}
-		ge.ResolveChainStep(ge.Logger(), &card.CardState{Card: c})
-		if got := ge.Value(); got != 0 {
-			t.Errorf("%s: Play() = %d, want 0 (block < incoming, no same-turn pop)", c.Name(), got)
-		}
-	}
-}
+// Tests the defense-phase DamageTaken fire end to end: a carried-over Arcane Cussing aura is
+// destroyed — without paying out, since it isn't our turn — when incoming damage gets
+// through unblocked.
+func TestArcaneCussing_DamageTakenInDefensePhase(t *testing.T) {
+	prior := gameengine.GameStateBuilder().
+		CreateAuraFromCard(cards.ArcaneCussingRed{}).
+		SetIncomingDamage(7).
+		Build()
+	d := deck.New(testutils.Hero{Intel: 4}, nil, fillerDeck())
+	hand := []card.Card{testutils.BluePitch{}}
 
-// TestArcaneCussing_SameTurnPopBySalientAttack: even if we're taking damage, a later attack
-// with a likely-to-hit power pops the aura this turn for its full N.
-func TestArcaneCussing_SameTurnPopBySalientAttack(t *testing.T) {
-	ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().
-		SetIncomingDamage(3).
-		SetBlockTotal(0).
-		SetCardsRemaining([]*card.CardState{{Card: testutils.AttackWithPower{Power: 4}}}).
-		Build()}
-	ge.ResolveChainStep(ge.Logger(), &card.CardState{Card: cards.ArcaneCussingRed{}})
-	if got := ge.Value(); got != 3 {
-		t.Errorf("Play() = %d, want 3 (Attack=4 likely to hit, pops Cussing same turn)", got)
-	}
-}
+	summary := sim.EvalOneTurnForTesting(d, prior, hand)
 
-// Tests that Cussing's pop trigger fires off a likely-to-hit weapon swing.
-func TestArcaneCussing_SameTurnPopByWeaponSwing(t *testing.T) {
-	ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().
-		SetIncomingDamage(3).
-		SetBlockTotal(0).
-		SetCardsRemaining([]*card.CardState{{Card: testutils.RunebladeWeapon{}}}).
-		Build()}
-	ge.CreateAura(token.NewRunechant(1))
-	ge.ResolveChainStep(ge.Logger(), &card.CardState{Card: cards.ArcaneCussingRed{}})
-	if got := ge.Value(); got != 3 {
-		t.Errorf("Play() = %d, want 3 (1 Runechant fires with weapon, likely to hit)", got)
+	if got := summary.State.RunechantCount(); got != 0 {
+		t.Fatalf("end-of-turn RunechantCount = %d, want 0 (destroyed by DamageTaken, not our turn)", got)
 	}
-}
-
-// TestArcaneCussing_SameTurnPopByRunechantAlone: even an attack whose Attack value is a
-// multiple of 3 (blockable) pops the aura if a single Runechant fires alongside it.
-func TestArcaneCussing_SameTurnPopByRunechantAlone(t *testing.T) {
-	ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().
-		SetIncomingDamage(3).
-		SetBlockTotal(0).
-		SetCardsRemaining([]*card.CardState{{Card: testutils.AttackWithPower{Power: 6}}}).
-		Build()}
-	ge.CreateAura(token.NewRunechant(1))
-	ge.ResolveChainStep(ge.Logger(), &card.CardState{Card: cards.ArcaneCussingRed{}})
-	if got := ge.Value(); got != 3 {
-		t.Errorf("Play() = %d, want 3 (Attack=6 blockable, but 1 Runechant likely to slip through)", got)
-	}
-}
-
-// TestArcaneCussing_BlockableAttackNoRunechantReturnsZero: a following attack whose power is a
-// multiple of 3 (blockable) and no Runechants firing can't pop Cussing — and we're taking
-// damage, so value collapses to 0.
-func TestArcaneCussing_BlockableAttackNoRunechantReturnsZero(t *testing.T) {
-	ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().
-		SetIncomingDamage(3).
-		SetBlockTotal(0).
-		SetCardsRemaining([]*card.CardState{{Card: testutils.AttackWithPower{Power: 6}}}).
-		Build()}
-	ge.ResolveChainStep(ge.Logger(), &card.CardState{Card: cards.ArcaneCussingRed{}})
-	if got := ge.Value(); got != 0 {
-		t.Errorf("Play() = %d, want 0 (Attack=6 blockable, no Runechants, taking damage)", got)
+	if got := len(summary.State.Auras()); got != 0 {
+		t.Fatalf("end-of-turn Auras = %d, want 0 (Arcane Cussing destroyed in the defense phase)", got)
 	}
 }

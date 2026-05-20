@@ -117,6 +117,11 @@ func bestAttackWithWeapons(
 	defenseCacheableConst := true
 	if !hasModalBlocker && len(defenders) > 0 {
 		defenseDealtConst, defenseCacheableConst = ctx.runDefense(defenders, pitched, d, incoming, noBlockBudgetCap, arsenalDefenderIdx)
+	} else if !hasModalBlocker && incoming > 0 {
+		// No defenders, so runDefense doesn't run — but unblocked incoming damage still
+		// fires DamageTaken so auras destroyed by taking damage leave the arena.
+		ctx.leafState.SetIsMyTurn(false)
+		ctx.leafState.Engine().FireTriggers(triggertype.DamageTaken, nil)
 	}
 	ctx.leafState.SetDeck(nil)
 	defenseDealt := defenseDealtConst
@@ -409,6 +414,7 @@ func cloneCardSlice(src []card.Card) []card.Card {
 // proceeds while the matchup figure itself stays constant.
 func (ctx *sequenceContext) runDefense(defenders, pitched []card.Card, deckPile *deck.Deck, matchupIncomingDamage, blockBudget, arsenalDefenderIdx int) (int, bool) {
 	state := ctx.leafState
+	state.SetIsMyTurn(false)
 	if ctx.replayLogger != nil {
 		state.SetLogger(ctx.replayLogger)
 	}
@@ -471,6 +477,12 @@ func (ctx *sequenceContext) runDefense(defenders, pitched []card.Card, deckPile 
 	chainGraveyard = append(chainGraveyard, defenders...)
 	ctx.bufs.runDefenseChainGravBuf = chainGraveyard
 	state.SetGraveyard(chainGraveyard)
+
+	// Defense phase over: if any incoming damage got through, fire DamageTaken so auras
+	// destroyed by taking damage (Arcane Cussing, Bloodspill Invocation) leave the arena.
+	if state.RemainingUnblockedDamage() > 0 {
+		ge.FireTriggers(triggertype.DamageTaken, nil)
+	}
 
 	return total, cacheable
 }
@@ -734,6 +746,7 @@ func (ctx *sequenceContext) playSequenceWithMeta(n int) (damage int, totalCounte
 	}
 	played := ptrBuf[:n]
 	state := ctx.preparePermState(played, n)
+	state.SetIsMyTurn(true)
 	ge := ctx.permEngine(state)
 	pool := pitchPool{
 		perm:      ctx.attackPitchPerm,

@@ -7,12 +7,12 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card/cards"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/gameengine"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/token"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/triggertype"
 )
 
-// TestBloodspillInvocation_BlockCoversIncomingReturnsN: the aura survives the opponent's turn
-// when we block all incoming damage, and pays N on a future-turn pop.
-func TestBloodspillInvocation_BlockCoversIncomingReturnsN(t *testing.T) {
+// Tests that Bloodspill Invocation, popped by an attack action card hitting, creates its N
+// Runechants.
+func TestBloodspillInvocation_AttackActionHitCreatesRunechants(t *testing.T) {
 	cases := []struct {
 		c card.Card
 		n int
@@ -23,77 +23,41 @@ func TestBloodspillInvocation_BlockCoversIncomingReturnsN(t *testing.T) {
 	}
 	for _, tc := range cases {
 		ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().
-			SetIncomingDamage(3).
-			SetBlockTotal(3).
+			CreateAuraFromCard(tc.c).
 			Build()}
-		ge.ResolveChainStep(ge.Logger(), &card.CardState{Card: tc.c})
-		if got := ge.Value(); got != tc.n {
-			t.Errorf("%s: Play() = %d, want %d (block == incoming)", tc.c.Name(), got, tc.n)
+		ge.FireTriggers(triggertype.Hit, testutils.AttackWithPower{Power: 4})
+		if got := ge.RunechantCount(); got != tc.n {
+			t.Errorf("%s: RunechantCount = %d, want %d (popped by an attack action hit)", tc.c.Name(), got, tc.n)
 		}
 	}
 }
 
-// TestBloodspillInvocation_BlockShortReturnsZero: if we take damage and have no same-turn
-// attack action likely to hit, Bloodspill dies without creating Runechants.
-func TestBloodspillInvocation_BlockShortReturnsZero(t *testing.T) {
-	cases := []card.Card{
-		cards.BloodspillInvocationRed{},
-		cards.BloodspillInvocationYellow{},
-		cards.BloodspillInvocationBlue{},
+// Tests that a weapon swing hitting does not pop Bloodspill Invocation — its trigger is
+// gated on attack action cards, so the aura survives a weapon hit.
+func TestBloodspillInvocation_WeaponHitDoesNotPop(t *testing.T) {
+	ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().
+		CreateAuraFromCard(cards.BloodspillInvocationRed{}).
+		Build()}
+	ge.FireTriggers(triggertype.Hit, testutils.RunebladeWeapon{})
+	if got := ge.RunechantCount(); got != 0 {
+		t.Errorf("RunechantCount = %d, want 0 (a weapon hit doesn't trigger Bloodspill)", got)
 	}
-	for _, c := range cases {
-		ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().
-			SetIncomingDamage(3).
-			SetBlockTotal(2).
-			Build()}
-		ge.ResolveChainStep(ge.Logger(), &card.CardState{Card: c})
-		if got := ge.Value(); got != 0 {
-			t.Errorf("%s: Play() = %d, want 0 (block < incoming, no same-turn pop)", c.Name(), got)
-		}
+	if got := len(ge.Auras()); got != 1 {
+		t.Errorf("Auras = %d, want 1 (Bloodspill survives a weapon hit)", got)
 	}
 }
 
-// TestBloodspillInvocation_SameTurnPopBySalientAttackAction: a later attack action with a
-// likely-to-hit power pops Bloodspill this turn for its full N — even if we're taking damage.
-func TestBloodspillInvocation_SameTurnPopBySalientAttackAction(t *testing.T) {
+// Tests that Bloodspill Invocation popped by DamageTaken is destroyed without creating
+// Runechants — its create clause is bound to the attack-action-hit destroy only.
+func TestBloodspillInvocation_DamageTakenDestroysWithoutRunechants(t *testing.T) {
 	ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().
-		SetIncomingDamage(3).
-		SetBlockTotal(0).
-		SetCardsRemaining([]*card.CardState{{Card: testutils.AttackWithPower{Power: 4}}}).
+		CreateAuraFromCard(cards.BloodspillInvocationRed{}).
 		Build()}
-	ge.ResolveChainStep(ge.Logger(), &card.CardState{Card: cards.BloodspillInvocationRed{}})
-	if got := ge.Value(); got != 3 {
-		t.Errorf("Play() = %d, want 3 (Attack=4 attack action pops Bloodspill same turn)", got)
+	ge.FireTriggers(triggertype.DamageTaken, nil)
+	if got := ge.RunechantCount(); got != 0 {
+		t.Errorf("RunechantCount = %d, want 0 (DamageTaken destroy creates nothing)", got)
 	}
-}
-
-// TestBloodspillInvocation_WeaponDoesNotPop: Bloodspill's rider is gated on attack ACTION cards
-// hitting — a weapon swing that hits doesn't trigger its destruction, even with a Runechant
-// firing alongside.
-func TestBloodspillInvocation_WeaponDoesNotPop(t *testing.T) {
-	ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().
-		SetIncomingDamage(3).
-		SetBlockTotal(0).
-		SetCardsRemaining([]*card.CardState{{Card: testutils.RunebladeWeapon{}}}).
-		Build()}
-	ge.CreateAura(token.NewRunechant(1))
-	ge.ResolveChainStep(ge.Logger(), &card.CardState{Card: cards.BloodspillInvocationRed{}})
-	if got := ge.Value(); got != 0 {
-		t.Errorf("Play() = %d, want 0 (weapon hits don't trigger Bloodspill; under-block collapses value)", got)
-	}
-}
-
-// TestBloodspillInvocation_SameTurnPopByRunechant: a blockable attack action still pops
-// Bloodspill when a lone Runechant fires alongside — the 1 arcane is likely to slip through.
-func TestBloodspillInvocation_SameTurnPopByRunechant(t *testing.T) {
-	ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().
-		SetIncomingDamage(3).
-		SetBlockTotal(0).
-		SetCardsRemaining([]*card.CardState{{Card: testutils.AttackWithPower{Power: 6}}}).
-		Build()}
-	ge.CreateAura(token.NewRunechant(1))
-	ge.ResolveChainStep(ge.Logger(), &card.CardState{Card: cards.BloodspillInvocationRed{}})
-	if got := ge.Value(); got != 3 {
-		t.Errorf("Play() = %d, want 3 (Attack=6 blockable, 1 Runechant likely to hit)", got)
+	if got := len(ge.Auras()); got != 0 {
+		t.Errorf("Auras = %d, want 0 (Bloodspill destroyed by DamageTaken)", got)
 	}
 }

@@ -51,6 +51,7 @@ type GameState struct {
 	currentAuraDestroyed  bool
 	currentStepRerouted   bool
 	cacheable             bool
+	isMyTurn              bool
 }
 
 // Engine wraps s in a *GameEngine so the chain runner can drive Card.Play hooks against
@@ -476,6 +477,12 @@ func (gs *GameState) SetNonAttackActionPlayed(v bool) { gs.nonAttackActionPlayed
 
 func (gs *GameState) LastAttackHit() bool     { return gs.lastAttackHit }
 func (gs *GameState) SetLastAttackHit(v bool) { gs.lastAttackHit = v }
+
+// IsMyTurn reports whether the active phase is the owning player's action phase (true) or
+// the defense phase (false). The chain runner sets it; cards read it for "during your
+// turn" riders.
+func (gs *GameState) IsMyTurn() bool     { return gs.isMyTurn }
+func (gs *GameState) SetIsMyTurn(v bool) { gs.isMyTurn = v }
 
 func (gs *GameState) CurrentStepRerouted() bool     { return gs.currentStepRerouted }
 func (gs *GameState) SetCurrentStepRerouted(v bool) { gs.currentStepRerouted = v }
