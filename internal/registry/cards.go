@@ -382,6 +382,10 @@ var cardsByID = []Card{
 	ids.SnatchYellow: cards.SnatchYellow{},
 	ids.SnatchBlue:   cards.SnatchBlue{},
 
+	ids.SplinteringDeadwoodRed:    cards.SplinteringDeadwoodRed{},
+	ids.SplinteringDeadwoodYellow: cards.SplinteringDeadwoodYellow{},
+	ids.SplinteringDeadwoodBlue:   cards.SplinteringDeadwoodBlue{},
+
 	ids.SpringboardSomersaultYellow: cards.SpringboardSomersaultYellow{},
 
 	ids.SpringLoadRed:    cards.SpringLoadRed{},
