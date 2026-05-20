@@ -4,9 +4,10 @@
 // Text: "You may look at the defending hero's hand. If Frontline Scout is played from arsenal, it
 // gains **go again**."
 //
-// Modelling: hand-peek isn't modelled.
+// not implemented: opposing-hand-peek rider — the optimizer plays only our hero, so peeking the
+// defender's hand yields no tempo or damage.
 
-package notimplemented
+package cards
 
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
@@ -16,19 +17,13 @@ func frontlineScoutPlay(ge card.GameEngine, l card.Logger, self *card.CardState)
 	self.GrantGoAgainIfFromArsenal()
 }
 
-// not implemented: opposing-hand-peek rider
-
 func (FrontlineScoutRed) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
 	frontlineScoutPlay(ge, l, self)
 }
 
-// not implemented: opposing-hand-peek rider
-
 func (FrontlineScoutYellow) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
 	frontlineScoutPlay(ge, l, self)
 }
-
-// not implemented: opposing-hand-peek rider
 
 func (FrontlineScoutBlue) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
 	frontlineScoutPlay(ge, l, self)
