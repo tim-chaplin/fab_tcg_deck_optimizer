@@ -209,18 +209,9 @@ func (ge *GameEngine) AddToGraveyard(c card.Card) {
 }
 
 // DrawOne models a mid-turn draw: pop the top of the deck into the hand at its sorted
-// position. No-op on an empty deck. Inherits the IsCacheable flip via PopDeckTop.
-func (ge *GameEngine) DrawOne() {
-	c, ok := ge.PopDeckTop()
-	if !ok {
-		return
-	}
-	ge.insertHandSorted(c)
-}
-
-// PonderDrawOne pops the deck top into the hand at its sorted position and returns false
-// on an empty deck.
-func (ge *GameEngine) PonderDrawOne() bool {
+// position. Reports whether a card was drawn — false on an empty deck. Inherits the
+// IsCacheable flip via PopDeckTop.
+func (ge *GameEngine) DrawOne() bool {
 	c, ok := ge.PopDeckTop()
 	if !ok {
 		return false

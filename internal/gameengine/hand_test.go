@@ -7,8 +7,8 @@ import (
 )
 
 // Tests that AppendHand keeps the hand ordered by Card.ID() regardless of insertion order
-// — the canonical-multiset invariant the eval cache depends on. DrawOne / PonderDrawOne
-// share the same insertHandSorted path.
+// — the canonical-multiset invariant the eval cache depends on. DrawOne shares the same
+// insertHandSorted path.
 func TestAppendHand_KeepsHandSortedByID(t *testing.T) {
 	ge := New()
 	for _, id := range []ids.CardID{5, 2, 9, 2, 1, 7} {

@@ -119,7 +119,7 @@ type GameEngine interface {
 	AuraCount() int
 
 	// Mid-chain draw / tutoring / recycling — cards moving to different zones.
-	DrawOne()
+	DrawOne() bool
 	TutorFromDeck(func(Card) int) (Card, bool)
 	RecycleToDeckBottom(*CardState)
 	RecycleFromGraveyardToTop(func(Card) bool) (Card, bool)
