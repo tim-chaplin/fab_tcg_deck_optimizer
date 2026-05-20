@@ -27,11 +27,11 @@ func TestFireAttackActionAuras_FiresOnceWhenGated(t *testing.T) {
 		true, // oncePerTurn
 	))
 	trigger := FakeRedAttack{}
-	ge.FireAttackAction(trigger)
+	ge.FireTriggers(triggertype.AttackAction, trigger)
 	if ge.Value() != 1 {
 		t.Errorf("first fire Value = %d, want 1", ge.Value())
 	}
-	ge.FireAttackAction(trigger)
+	ge.FireTriggers(triggertype.AttackAction, trigger)
 	if ge.Value() != 1 {
 		t.Errorf("second fire Value = %d, want 1 (OncePerTurn gate kept second fire from crediting)", ge.Value())
 	}
@@ -61,7 +61,7 @@ func TestFireAttackActionAuras_GraveyardsExhaustedAura(t *testing.T) {
 		1,
 		false,
 	))
-	ge.FireAttackAction(FakeRedAttack{})
+	ge.FireTriggers(triggertype.AttackAction, FakeRedAttack{})
 	if len(ge.Auras()) != 0 {
 		t.Errorf("Auras = %+v, want empty (handler called Destroy)", ge.Auras())
 	}
@@ -83,7 +83,7 @@ func TestFireAttackActionAuras_PassesThroughNonAttackActionTriggers(t *testing.T
 		1,
 		false,
 	))
-	ge.FireAttackAction(FakeRedAttack{})
+	ge.FireTriggers(triggertype.AttackAction, FakeRedAttack{})
 	if ge.Value() != 0 {
 		t.Errorf("Value = %d, want 0 (start-of-turn aura doesn't fire on attack action)", ge.Value())
 	}

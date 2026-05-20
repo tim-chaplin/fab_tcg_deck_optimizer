@@ -7,6 +7,7 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/gameengine"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/hero"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/triggertype"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapon"
 )
 
@@ -58,7 +59,7 @@ func (s *SequenceContextForTest) BestSequence(attackers []card.Card) (int, int, 
 }
 
 // FireEndOfTurn re-exports the engine's end-of-turn fire for sim_test consumers.
-func FireEndOfTurn(ge *gameengine.GameEngine) { ge.FireEndOfTurn() }
+func FireEndOfTurn(ge *gameengine.GameEngine) { ge.FireTriggers(triggertype.EndOfTurn, nil) }
 
 // PromoteRandomHandCardToArsenal re-exports promoteRandomHandCardToArsenal.
 func PromoteRandomHandCardToArsenal(best *TurnSummary, startingHand []card.Card, arsenalCardIn card.Card) {

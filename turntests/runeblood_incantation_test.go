@@ -56,7 +56,7 @@ func TestRunebloodIncantation_HandlerCreatesOneRunechantPerFire(t *testing.T) {
 		play.ResolveChainStep(play.Logger(), &card.CardState{Card: c})
 		fire := gameengine.New()
 		fire.CreateAura(play.Auras()[0])
-		fire.FireStartOfTurn()
+		fire.FireTriggers(triggertype.StartOfTurn, nil)
 		if fire.Value() != 1 {
 			t.Errorf("%s: handler Value = %d, want 1", c.Name(), fire.Value())
 		}

@@ -23,6 +23,7 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/gameengine"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/hero"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/token"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/triggertype"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapon"
 )
 
@@ -573,7 +574,7 @@ func (ctx *sequenceContext) bestSequence(attackers []card.Card) (chainScore, *ga
 		permState := ctx.preparePermState(emptyAttackers, 0)
 		ge := ctx.permEngine(permState)
 		if ge.HasEndOfTurnFire() {
-			ge.FireEndOfTurn()
+			ge.FireTriggers(triggertype.EndOfTurn, nil)
 		}
 		ctx.promoteWinnerDeck(permState)
 		ctx.promoteWinnerState(permState)
@@ -742,10 +743,6 @@ func (ctx *sequenceContext) playSequenceWithMeta(n int) (damage int, totalCounte
 		attr:      ctx.bufs.pitchAttrBuf[:0],
 	}
 	var activeAttack *card.CardState
-	// activeAttackTypes is the cached TypeSet of the current activeAttack's Card. Set
-	// alongside activeAttack so finalize's FireHit skips an interface-dispatched Types
-	// call per finalized attack — meta[i].types already holds the same value.
-	var activeAttackTypes card.TypeSet
 	finalizeActiveAttack := func() {
 		if activeAttack == nil {
 			return
@@ -757,12 +754,7 @@ func (ctx *sequenceContext) playSequenceWithMeta(n int) (damage int, totalCounte
 				h := &activeAttack.OnHit[i]
 				h.Fire(ge, state.Logger(), activeAttack, h)
 			}
-			// triggeringCard is nil between chain steps (fireMatching clears it on exit
-			// and no chain-runner code sets it elsewhere) — clear directly instead of
-			// stashing-and-restoring a value we know is nil.
-			state.SetTriggeringCard(activeAttack.Card)
-			ge.FireHit(activeAttackTypes)
-			state.SetTriggeringCard(nil)
+			ge.FireTriggers(triggertype.Hit, activeAttack.Card)
 		}
 		activeAttack = nil
 	}
@@ -828,13 +820,12 @@ func (ctx *sequenceContext) playSequenceWithMeta(n int) (damage int, totalCounte
 		state.SetCurrentStepRerouted(false)
 		ge.ResolveChainStep(state.Logger(), pc)
 		if m.isAttack {
-			ge.FireAttack(pc.Card)
+			ge.FireTriggers(triggertype.Attack, pc.Card)
 			state.ClearOpponentMarked()
 			activeAttack = pc
-			activeAttackTypes = m.types
 		}
 		if m.isAttackAction {
-			ge.FireAttackAction(pc.Card)
+			ge.FireTriggers(triggertype.AttackAction, pc.Card)
 		}
 		state.AppendCardsPlayed(pc.Card)
 		if m.types.IsNonAttackAction() {
@@ -853,7 +844,7 @@ func (ctx *sequenceContext) playSequenceWithMeta(n int) (damage int, totalCounte
 		return 0, 0, 0, nil, false
 	}
 	if ge.HasEndOfTurnFire() {
-		ge.FireEndOfTurn()
+		ge.FireTriggers(triggertype.EndOfTurn, nil)
 	}
 	return state.Value(), pendingTotalCountersFromState(state), pool.remaining, state, true
 }

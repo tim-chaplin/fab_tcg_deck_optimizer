@@ -55,9 +55,8 @@ func TestMaleficIncantation_HandlerCreatesOneRunechantPerFire(t *testing.T) {
 		ge := gameengine.New()
 		ge.ResolveChainStep(ge.Logger(), &card.CardState{Card: c})
 		chain := gameengine.New()
-		chain.SetTriggeringCard(c)
 		chain.CreateAura(ge.Auras()[0])
-		chain.FireAttackAction(c)
+		chain.FireTriggers(triggertype.AttackAction, c)
 		if chain.Value() != 1 {
 			t.Errorf("%s: handler Value = %d, want 1", c.Name(), chain.Value())
 		}

@@ -18,7 +18,7 @@ func TestFireEndOfTurn_FiresOnceAndRemoves(t *testing.T) {
 		func(_ card.GameEngine, _ card.Logger, _ card.Trigger) { calls++ },
 		nil,
 	))
-	ge.FireEndOfTurn()
+	ge.FireTriggers(triggertype.EndOfTurn, nil)
 	if calls != 1 {
 		t.Fatalf("handler calls = %d, want 1", calls)
 	}
@@ -37,7 +37,7 @@ func TestFireEndOfTurn_LeavesNonMatchingType(t *testing.T) {
 		func(_ card.GameEngine, _ card.Logger, _ card.Trigger) { calls++ },
 		nil,
 	))
-	ge.FireEndOfTurn()
+	ge.FireTriggers(triggertype.EndOfTurn, nil)
 	if calls != 0 {
 		t.Fatalf("handler calls = %d, want 0 (TriggerAttack should not fire from end-of-turn walk)", calls)
 	}
@@ -66,14 +66,14 @@ func TestFireEndOfTurn_HandlerAddTriggerSafeReentry(t *testing.T) {
 		},
 		nil,
 	))
-	ge.FireEndOfTurn()
+	ge.FireTriggers(triggertype.EndOfTurn, nil)
 	if calls != 1 {
 		t.Fatalf("handler calls during first walk = %d, want 1 (handler-added trigger should not fire on the same pass)", calls)
 	}
 	if len(ge.Triggers()) != 1 {
 		t.Fatalf("triggers after fire = %d, want 1 (handler-added trigger preserved)", len(ge.Triggers()))
 	}
-	ge.FireEndOfTurn()
+	ge.FireTriggers(triggertype.EndOfTurn, nil)
 	if calls != 2 {
 		t.Fatalf("handler calls after second walk = %d, want 2 (queued trigger fires on next pass)", calls)
 	}
