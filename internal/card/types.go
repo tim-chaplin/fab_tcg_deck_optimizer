@@ -59,6 +59,12 @@ func NewTypeSet(types ...CardType) TypeSet {
 // Has reports whether s contains the given type.
 func (s TypeSet) Has(t CardType) bool { return s&TypeSet(t) != 0 }
 
+// IsAction reports whether s represents an action card — TypeAction present, covering
+// both attack actions and non-attack actions. Backs "action card" riders.
+func (s TypeSet) IsAction() bool {
+	return s&TypeSet(TypeAction) != 0
+}
+
 // IsNonAttackAction reports whether s represents an Action that is not also an Attack —
 // the bitmask check behind every "if a non-attack action card was played/pitched" rider.
 func (s TypeSet) IsNonAttackAction() bool {
