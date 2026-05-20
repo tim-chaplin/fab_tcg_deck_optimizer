@@ -11,9 +11,9 @@ import (
 )
 
 // leadTheChargePlay grants the deferred action point eagerly when an action card still
-// follows in the chain. Every action card has cost ≥ 0, so the printed "cost 0 or greater"
-// clause matches any scheduled action card. Fizzles silently when none follows — an
-// unspendable point would credit phantom tempo.
+// follows in the chain (every action card has cost ≥ 0, so the printed "cost 0 or greater"
+// clause always matches). Fizzles silently otherwise — an unspendable point would credit
+// phantom tempo.
 func leadTheChargePlay(ge card.GameEngine, l card.Logger, self *card.CardState) {
 	for _, pc := range ge.CardsRemaining() {
 		if pc.Card.Types(ge).Has(card.TypeAction) {
