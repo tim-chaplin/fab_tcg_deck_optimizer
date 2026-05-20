@@ -138,9 +138,9 @@ func newEvalCache() *evalCache {
 // makeCacheKey builds the comparable cache key from the inputs to Best. Returns ok=false
 // when the hand exceeds maxCachedHandSize, the weapon slot count exceeds maxCachedWeapons,
 // or the carryover-aura count exceeds maxCachedAuras; callers treat that as "skip caching
-// for this call." Hands arrive pre-sorted by Card.ID() — the deck-eval pipeline calls
-// sortHandByID before each Best so the key is multiset-invariant by construction; we
-// just copy the IDs into the fixed-size array. Aura entries are sorted by (SelfID,
+// for this call." Hands arrive pre-sorted by Card.ID() — every draw path keeps the hand
+// sorted, so the key is multiset-invariant by construction; we just copy the IDs into
+// the fixed-size array. Aura entries are sorted by (SelfID,
 // Count) so equivalent aura sets produce the same key regardless of trigger registration
 // order. Weapon IDs are NOT sorted because the weapon order is stable across calls (same
 // loadout, same slice header) and bestAttackWithWeapons enumerates weapon masks in slice
