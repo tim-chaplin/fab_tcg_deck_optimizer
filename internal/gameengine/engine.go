@@ -352,60 +352,7 @@ func panicIfOptViolatesMultiset(in, top, bottom []card.Card) {
 	}
 }
 
-// === Rules-orchestration methods. Each operates on the embedded *GameState's slices
-// but applies game-rule semantics (cursor iteration for handler-side splices,
-// OncePerTurn gating, FiredThisTurn accounting, post-fire trigger drainage).
-
-// FireAttack walks the aura entries with TriggerType()==triggertype.Attack and invokes
-// every one whose OncePerTurn gate is open. The triggering card is published on
-// triggeringCard so handlers can attribute log lines back to the source. Cursor-based
-// iteration so a handler-side splice (Destroy) advances only when the slice length
-// didn't change.
-func (ge *GameEngine) FireAttack(triggeringCard card.Card) {
-	ge.fireMatching(triggeringCard, triggertype.Attack)
-}
-
-// FireAttackAction is the triggertype.AttackAction counterpart to FireAttack: walks
-// the aura entries matching that type and fires those whose OncePerTurn gate is open.
-func (ge *GameEngine) FireAttackAction(triggeringCard card.Card) {
-	ge.fireMatching(triggeringCard, triggertype.AttackAction)
-}
-
-// fireMatching is the shared aura-fire walk for FireAttack / FireAttackAction /
-// FireEndOfTurn. Iterates auras with a cursor so handler-side splicing (Destroy
-// mutates the auras slice in place, shifting the next entry down to the cursor's
-// index) advances only when the slice length didn't change.
-//
-// triggeringCard is published on ge.triggeringCard once per call (lazily, only when an
-// aura actually fires) and cleared at the end; handler-side log calls
-// (ge.TriggeringCard()) read it during their Fire body. currentAuraIdx similarly
-// only resets to the -1 sentinel after the whole walk, since DestroyAura only matters
-// from within the active Fire call's stack.
-func (ge *GameEngine) fireMatching(triggeringCard card.Card, trigger triggertype.Type) {
-	fired := false
-	for i := 0; i < len(ge.auras); {
-		a := ge.auras[i]
-		if a.TriggerType() != trigger || (a.OncePerTurn() && a.FiredThisTurn()) {
-			i++
-			continue
-		}
-		if !fired {
-			ge.triggeringCard = triggeringCard
-			fired = true
-		}
-		ge.currentAuraIdx = i
-		ge.currentAuraDestroyed = false
-		a.Fire(ge, ge.logger)
-		if !ge.currentAuraDestroyed {
-			ge.auras[i].SetFiredThisTurn(true)
-			i++
-		}
-	}
-	if fired {
-		ge.currentAuraIdx = -1
-		ge.triggeringCard = nil
-	}
-}
+// === Trigger and aura dispatch ===
 
 // HasEndOfTurnFire reports whether either Auras or Triggers carries a
 // triggertype.EndOfTurn entry. Lets the chain runner skip the end-of-turn walk when
@@ -424,71 +371,65 @@ func (ge *GameEngine) HasEndOfTurnFire() bool {
 	return false
 }
 
-// FireEndOfTurn runs after the chain has finished resolving (and the legality gates
-// have passed) but before the carry state is captured. Walks Auras and Triggers in one
-// pass each:
+// FireTriggers fires every Aura and one-shot Trigger registered for trigger type t. It is
+// the single dispatch point for every triggertype.Type lifecycle event.
 //
-//   - Aura entries respect OncePerTurn / FiredThisTurn semantics; the handler owns
-//     destruction via the engine's destroyAura path.
-//   - Trigger entries are one-shot; fired entries are removed afterward. Snapshotting
-//     len(ge.triggers) before iterating keeps a handler that calls AddXxxTrigger from
-//     firing its newcomer on the same pass — newcomers stay queued for the next
-//     matching event.
-func (ge *GameEngine) FireEndOfTurn() {
-	ge.fireMatching(nil, triggertype.EndOfTurn)
-	n := len(ge.triggers)
-	for i := 0; i < n; i++ {
-		tr := ge.triggers[i]
-		if tr.TriggerType() != triggertype.EndOfTurn {
-			continue
-		}
-		tr.Fire(ge, ge.logger)
-	}
-	kept := ge.triggers[:0]
-	for i, tr := range ge.triggers {
-		if i < n && tr.TriggerType() == triggertype.EndOfTurn {
-			continue
-		}
-		kept = append(kept, tr)
-	}
-	ge.triggers = kept
-}
+// triggeringCard is the card whose resolution raised the event, or nil for turn-boundary
+// events. It is published on ge.triggeringCard so handlers can attribute log lines, and
+// its type set is what a Trigger's type filter matches against.
+//
+// Auras fire in a cursor walk so a handler-side Destroy splice doesn't skip the next
+// entry; an open OncePerTurn gate is required and FiredThisTurn is set after a fire. The
+// gate is re-armed at the turn boundary by ResetEphemeralState, not here.
+//
+// Triggers are one-shot. The queue length is snapshotted before firing so a handler that
+// queues a new trigger doesn't fire it on the same pass; fired entries are dropped after.
+func (ge *GameEngine) FireTriggers(t triggertype.Type, triggeringCard card.Card) {
+	ge.triggeringCard = triggeringCard
 
-// FireHit walks the one-shot trigger queue and invokes every triggertype.Hit entry
-// whose type filter matches the attacking card's types. Surviving entries (filter
-// mismatch) are kept; fired entries are removed.
-func (ge *GameEngine) FireHit(attackerTypes card.TypeSet) {
-	kept := ge.triggers[:0]
-	for i := range ge.triggers {
-		t := ge.triggers[i]
-		if t.TriggerType() != triggertype.Hit || !t.Matches(attackerTypes) {
-			kept = append(kept, t)
-			continue
-		}
-		t.Fire(ge, ge.logger)
-	}
-	ge.triggers = kept
-}
-
-// FireStartOfTurn walks ge.auras and invokes every triggertype.StartOfTurn entry. Auras
-// that destroy themselves splice out; FiredThisTurn resets on each fresh turn boundary.
-// Handlers write value gains directly to ge.value; callers read it via ge state.
-func (ge *GameEngine) FireStartOfTurn() {
 	for i := 0; i < len(ge.auras); {
 		a := ge.auras[i]
-		ge.auras[i].SetFiredThisTurn(false)
-		if a.TriggerType() != triggertype.StartOfTurn {
+		if a.TriggerType() != t || (a.OncePerTurn() && a.FiredThisTurn()) {
 			i++
 			continue
 		}
 		ge.currentAuraIdx = i
 		ge.currentAuraDestroyed = false
 		a.Fire(ge, ge.logger)
-		ge.currentAuraIdx = -1
 		if !ge.currentAuraDestroyed {
+			ge.auras[i].SetFiredThisTurn(true)
 			i++
 		}
 	}
+	ge.currentAuraIdx = -1
+
+	if n := len(ge.triggers); n > 0 {
+		var triggeringTypes card.TypeSet
+		if triggeringCard != nil {
+			triggeringTypes = triggeringCard.Types(ge)
+		}
+		firedAny := false
+		for i := 0; i < n; i++ {
+			tr := ge.triggers[i]
+			if tr.TriggerType() != t || !tr.Matches(triggeringTypes) {
+				continue
+			}
+			tr.Fire(ge, ge.logger)
+			firedAny = true
+		}
+		if firedAny {
+			kept := ge.triggers[:0]
+			for i, tr := range ge.triggers {
+				if i < n && tr.TriggerType() == t && tr.Matches(triggeringTypes) {
+					continue
+				}
+				kept = append(kept, tr)
+			}
+			ge.triggers = kept
+		}
+	}
+
+	ge.triggeringCard = nil
 }
 
 // DestroyAura removes the aura currently being fired and, when addToGraveyard==true, pushes

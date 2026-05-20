@@ -17,6 +17,7 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/gameengine"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/hero"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/ids"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/triggertype"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapon"
 )
 
@@ -459,7 +460,7 @@ func processAurasAtStartOfTurn(state *gameengine.GameState, d *deck.Deck) {
 		return
 	}
 	state.SetDeck(d)
-	state.Engine().FireStartOfTurn()
+	state.Engine().FireTriggers(triggertype.StartOfTurn, nil)
 	state.SetDeck(nil)
 }
 

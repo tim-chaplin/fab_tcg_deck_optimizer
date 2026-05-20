@@ -37,7 +37,7 @@ func TestSigilOfFyendal_TriggerHandlerCredits1Damage(t *testing.T) {
 	ge.ResolveChainStep(ge.Logger(), &card.CardState{Card: cards.SigilOfFyendalBlue{}})
 	fire := gameengine.New()
 	fire.CreateAura(ge.Auras()[0])
-	fire.FireStartOfTurn()
+	fire.FireTriggers(triggertype.StartOfTurn, nil)
 	if fire.Value() != 1 {
 		t.Errorf("Handler Value = %d, want 1", fire.Value())
 	}

@@ -420,7 +420,6 @@ func (gs *GameState) Logger() card.Logger     { return gs.logger }
 func (gs *GameState) SetLogger(l card.Logger) { gs.logger = l }
 
 func (gs *GameState) TriggeringCard() card.Card                  { return gs.triggeringCard }
-func (gs *GameState) SetTriggeringCard(c card.Card)              { gs.triggeringCard = c }
 func (gs *GameState) AttackReactionTarget() *card.CardState      { return gs.attackReactionTarget }
 func (gs *GameState) SetAttackReactionTarget(cs *card.CardState) { gs.attackReactionTarget = cs }
 

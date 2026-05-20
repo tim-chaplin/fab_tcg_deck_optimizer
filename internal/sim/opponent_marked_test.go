@@ -5,6 +5,7 @@ import (
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/gameengine"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/token"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/triggertype"
 )
 
 // Tests that the runechant aura handler leaves OpponentMarked alone — arcane damage
@@ -12,10 +13,9 @@ import (
 func TestRunechantAuraHandler_LeavesOpponentMarked(t *testing.T) {
 	ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetOpponentMarked(true).Build()}
 	ge.CreateAura(token.NewRunechant(1))
-	// Fire the runechant aura via the engine's TriggerAttack fire walk (the runechant aura
-	// is registered as TriggerAttack); pass a nil triggering card since the runechant
-	// handler doesn't read TriggeringCard.
-	ge.FireAttack(nil)
+	// The runechant aura is registered for triggertype.Attack; nil triggering card since
+	// its handler doesn't read TriggeringCard.
+	ge.FireTriggers(triggertype.Attack, nil)
 	if !ge.OpponentMarked() {
 		t.Error("OpponentMarked = false after runechant pop, want true (arcane doesn't clear mark)")
 	}
