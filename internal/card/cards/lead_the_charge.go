@@ -10,28 +10,28 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 )
 
-// leadTheChargePlay grants the deferred action point eagerly when an action card still
-// follows in the chain (every action card has cost ≥ 0, so the printed "cost 0 or greater"
-// clause always matches). Fizzles silently otherwise — an unspendable point would credit
-// phantom tempo.
-func leadTheChargePlay(ge card.GameEngine, l card.Logger, self *card.CardState) {
+// leadTheChargePlay grants Go again to the next action card scheduled this chain. Go again is
+// one action point, gained as that card resolves, so the point lands on the play of the next
+// action card rather than early — matching "the next time you play an action card ... gain 1
+// action point". Every action card has cost ≥ 0, so the "cost 0 or greater" clause always
+// matches. Fizzles when no action card follows.
+func leadTheChargePlay(ge card.GameEngine) {
 	for _, pc := range ge.CardsRemaining() {
-		if pc.Card.Types(ge).Has(card.TypeAction) {
-			ge.AddActionPoints(1)
-			l.AppendPostTriggerf(self.Card.DisplayName(), 0, "Granted 1 action point for %s", pc.Card.DisplayName())
+		if pc.Card.Types(nil).Has(card.TypeAction) {
+			pc.GrantedGoAgain = true
 			return
 		}
 	}
 }
 
 func (LeadTheChargeRed) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
-	leadTheChargePlay(ge, l, self)
+	leadTheChargePlay(ge)
 }
 
 func (LeadTheChargeYellow) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
-	leadTheChargePlay(ge, l, self)
+	leadTheChargePlay(ge)
 }
 
 func (LeadTheChargeBlue) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
-	leadTheChargePlay(ge, l, self)
+	leadTheChargePlay(ge)
 }
