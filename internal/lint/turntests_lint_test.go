@@ -73,7 +73,6 @@ func TestTurntests_NewTestsUseEvalNTurnsForTesting(t *testing.T) {
 // its entry from this list — the lint will then reject reintroduction.
 var grandfatheredResolveChainStepFiles = []string{
 	"turntests/aether_slash_test.go",
-	"turntests/arcane_cussing_test.go",
 	"turntests/arcane_polarity_test.go",
 	"turntests/arcanic_spike_test.go",
 	"turntests/blessing_of_occult_test.go",
@@ -143,7 +142,6 @@ var grandfatheredResolveChainStepFiles = []string{
 	"turntests/regurgitating_slog_test.go",
 	"turntests/restvine_elixir_test.go",
 	"turntests/rise_above_test.go",
-	"turntests/runeblood_incantation_test.go",
 	"turntests/runechant_on_play_test.go",
 	"turntests/runerager_swarm_test.go",
 	"turntests/runic_fellingsong_test.go",

@@ -37,6 +37,10 @@ type GameEngine interface {
 	// signatures are inlined to keep this package import-free of the concrete aura type.
 	CreateStartOfTurnAura(pc *CardState, handler func(GameEngine, Logger, Aura), count int)
 	CreateOncePerTurnAttackActionAura(pc *CardState, handler func(GameEngine, Logger, Aura), count int)
+	// CreateHitOrDamageTakenAura registers an aura that fires when an attack hits or when
+	// the defense phase ends with damage unblocked. filter narrows the hit side (nil = any
+	// hit); it never gates the damage-taken side.
+	CreateHitOrDamageTakenAura(pc *CardState, handler func(GameEngine, Logger, Aura), count int, filter func(TypeSet) bool)
 	// DestroyAura removes the aura currently being fired. addToGraveyard sends the
 	// originating card to the graveyard (token auras skip the append). Reached via the
 	// per-fire ctx's Destroy method; exposed on GameEngine so the ctx can route the call
@@ -98,6 +102,9 @@ type GameEngine interface {
 	// LastAttackHit reports whether the most recent finalised attack on this combat chain
 	// hit. False until the first attack finalises; each subsequent attack overwrites it.
 	LastAttackHit() bool
+	// IsMyTurn reports whether the active phase is the owning player's action phase (true)
+	// or the defense phase (false) — backs "during your turn" riders.
+	IsMyTurn() bool
 
 	// Partition / matchup state.
 	RemainingUnblockedDamage() int

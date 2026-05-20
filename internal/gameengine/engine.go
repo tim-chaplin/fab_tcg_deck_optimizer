@@ -363,12 +363,12 @@ func panicIfOptViolatesMultiset(in, top, bottom []card.Card) {
 // nothing would fire.
 func (ge *GameEngine) HasEndOfTurnFire() bool {
 	for _, a := range ge.auras {
-		if a.TriggerType() == triggertype.EndOfTurn {
+		if a.TriggerType()&triggertype.EndOfTurn != 0 {
 			return true
 		}
 	}
 	for _, t := range ge.triggers {
-		if t.TriggerType() == triggertype.EndOfTurn {
+		if t.TriggerType()&triggertype.EndOfTurn != 0 {
 			return true
 		}
 	}
@@ -387,10 +387,12 @@ func (ge *GameEngine) HasEndOfTurnFire() bool {
 // snapshot and is not fired on the same pass. With one CardOrAbility fire per chain step
 // that snapshot is the whole self-exclusion mechanism: a Runechant a card's play creates
 // is not consumed by that same card's fire. Auras walk a cursor so a handler-side Destroy
-// splice doesn't skip the next entry; an open OncePerTurn gate is required, the type
-// filter must match, and FiredThisTurn is set after a fire. The OncePerTurn gate is
-// re-armed at the turn boundary by ResetEphemeralState, not here. Fired one-shot triggers
-// are dropped after the pass.
+// splice doesn't skip the next entry; an open OncePerTurn gate is required, an aura /
+// trigger fires when t is among its trigger-type bits, and FiredThisTurn is set after a
+// fire. The type filter narrows card-raised events; turn-boundary events with no
+// triggeringCard (StartOfTurn, EndOfTurn, DamageTaken) skip the filter. The OncePerTurn
+// gate is re-armed at the turn boundary by ResetEphemeralState, not here. Fired one-shot
+// triggers are dropped after the pass.
 //
 // triggeringCard.Types is resolved lazily — only when an aura / trigger of the right type
 // is actually found — so the common per-card fire with no subscribers stays off the Types
@@ -416,7 +418,8 @@ func (ge *GameEngine) FireTriggers(t triggertype.Type, triggeringCard card.Card)
 	auraN := len(ge.auras)
 	for i := 0; i < auraN; {
 		a := ge.auras[i]
-		if a.TriggerType() != t || (a.OncePerTurn() && a.FiredThisTurn()) || !a.Matches(matchTypes()) {
+		if a.TriggerType()&t == 0 || (a.OncePerTurn() && a.FiredThisTurn()) ||
+			(triggeringCard != nil && !a.Matches(matchTypes())) {
 			i++
 			continue
 		}
@@ -437,7 +440,7 @@ func (ge *GameEngine) FireTriggers(t triggertype.Type, triggeringCard card.Card)
 		firedAny := false
 		for i := 0; i < n; i++ {
 			tr := ge.triggers[i]
-			if tr.TriggerType() != t || !tr.Matches(matchTypes()) {
+			if tr.TriggerType()&t == 0 || (triggeringCard != nil && !tr.Matches(matchTypes())) {
 				continue
 			}
 			tr.Fire(ge, ge.logger)
@@ -446,7 +449,7 @@ func (ge *GameEngine) FireTriggers(t triggertype.Type, triggeringCard card.Card)
 		if firedAny {
 			kept := ge.triggers[:0]
 			for i, tr := range ge.triggers {
-				if i < n && tr.TriggerType() == t && tr.Matches(matchTypes()) {
+				if i < n && tr.TriggerType()&t != 0 && (triggeringCard == nil || tr.Matches(matchTypes())) {
 					continue
 				}
 				kept = append(kept, tr)
