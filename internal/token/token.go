@@ -32,18 +32,20 @@ func NewCopper(n int) *item.Item {
 	return item.NewFromToken(c.Name(), ids.CopperTokenID, c, n)
 }
 
-// NewRunechant returns a fresh Runechant token aura at count n. Fires per attack
-// (triggertype.Attack): flips ArcaneDamageDealt when its count clears the damage-likely-
-// to-hit window, then destroys. Damage is credited at creation time inside
-// CreateRunechants; this handler is pure state cleanup.
+// NewRunechant returns a fresh Runechant token aura at count n. Fires when an attack is
+// played (triggertype.CardOrAbility, filtered to attacks): flips ArcaneDamageDealt when its
+// count clears the damage-likely-to-hit window, then destroys. The Runechant resolves
+// before the attack's own effect, so it can turn on that attack's "dealt arcane damage
+// this turn" rider. Damage is credited at creation time inside CreateRunechants; this
+// handler is pure state cleanup.
 func NewRunechant(n int) *aura.Aura {
-	return aura.NewFromToken("Runechant", ids.RunechantTokenID, triggertype.Attack,
+	return aura.NewFromToken("Runechant", ids.RunechantTokenID, triggertype.CardOrAbility,
 		func(engine card.GameEngine, _ card.Logger, ctx card.Aura) {
 			if engine.LikelyDamageHits(ctx.Count(), false) {
 				engine.(GameEngine).SetArcaneDamageDealt(true)
 			}
 			ctx.Destroy(false)
-		}, n)
+		}, n, card.TypeSet.IsAttack)
 }
 
 // NewPonder returns a fresh Ponder token aura at count n. Fires at end-of-turn
@@ -59,5 +61,5 @@ func NewPonder(n int) *aura.Aura {
 				}
 			}
 			ctx.Destroy(false)
-		}, n)
+		}, n, nil)
 }

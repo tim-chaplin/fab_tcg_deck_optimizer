@@ -818,14 +818,15 @@ func (ctx *sequenceContext) playSequenceWithMeta(n int) (damage int, totalCounte
 
 		ctx.hero.OnCardPlayed(pc.Card, ge, state.Logger())
 		state.SetCurrentStepRerouted(false)
+		// CardOrAbility fires once, before the card resolves: play-triggered effects (e.g.
+		// Malefic Incantation's Runechant) land ahead of the played card's own effect, and
+		// the fire's aura-list snapshot keeps a Runechant created here from being consumed
+		// by this same card. The aura / trigger type filters narrow it per subscriber.
+		ge.FireTriggers(triggertype.CardOrAbility, pc.Card)
 		ge.ResolveChainStep(state.Logger(), pc)
 		if m.isAttack {
-			ge.FireTriggers(triggertype.Attack, pc.Card)
 			state.ClearOpponentMarked()
 			activeAttack = pc
-		}
-		if m.isAttackAction {
-			ge.FireTriggers(triggertype.AttackAction, pc.Card)
 		}
 		state.AppendCardsPlayed(pc.Card)
 		if m.types.IsNonAttackAction() {

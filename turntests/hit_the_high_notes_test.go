@@ -6,7 +6,9 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card/cards"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/gameengine"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 )
 
@@ -62,5 +64,28 @@ func TestHitTheHighNotes_BonusFlowsThroughBonusAttack(t *testing.T) {
 	}
 	if ge.LikelyToHit(pc) {
 		t.Errorf("LikelyToHit = true at EffectiveAttack 6; want false (6 ∉ {1,4,7})")
+	}
+}
+
+// Tests that playing Hit the High Notes with a Malefic Incantation already in play turns on
+// its "played or created an aura this turn" rider: Malefic's play-triggered Runechant is
+// created before Hit the High Notes resolves. The Runechant must also survive — it is not
+// consumed by the very attack whose play triggered its creation.
+func TestHitTheHighNotes_SeesRunechantFromTriggeredMalefic(t *testing.T) {
+	prior := gameengine.GameStateBuilder().
+		CreateAuraFromCard(cards.MaleficIncantationRed{}).
+		SetIncomingDamage(0).
+		Build()
+	d := deck.New(testutils.Hero{Intel: 4}, nil, fillerDeck())
+	hand := []card.Card{testutils.BluePitch{}, cards.HitTheHighNotesRed{}}
+
+	summary := sim.EvalOneTurnForTesting(d, prior, hand)
+
+	if summary.Value != 7 {
+		t.Fatalf("Value = %d, want 7 (Hit the High Notes 6 = 4 base + 2 aura rider, plus 1 for Malefic's Runechant)\nBestLine: %s",
+			summary.Value, formatBestLine(summary.BestLine))
+	}
+	if got := summary.State.RunechantCount(); got != 1 {
+		t.Fatalf("end-of-turn RunechantCount = %d, want 1 (Malefic's Runechant must survive — not consumed by the attack that triggered it)", got)
 	}
 }

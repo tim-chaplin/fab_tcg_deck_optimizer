@@ -26,6 +26,7 @@ type Aura interface {
 	OncePerTurn() bool
 	FiredThisTurn() bool
 	SetFiredThisTurn(bool)
+	Matches(types card.TypeSet) bool
 	CardName() string
 	CardID() ids.CardID
 	SourceCard() any

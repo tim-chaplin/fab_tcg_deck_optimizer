@@ -31,10 +31,6 @@ type attackerMeta struct {
 	// isAttack is the "this chain step is an attack" test driving fireAttackAuras — true on
 	// any card carrying TypeAttack (attack action cards and weapon abilities both).
 	isAttack bool
-	// isAttackAction is the "attack action card" test (Action+Attack, no Weapon) gating
-	// TriggerAttackAction Auras like Malefic Incantation. Weapon abilities carry TypeAttack
-	// but aren't attack action CARDS, so they miss this gate.
-	isAttackAction bool
 	// isFreeChainStep is set on cards that resolve in the chain without paying an Action
 	// Point — Instants and Attack Reactions (both 0 AP per FaB rules). Action cards and
 	// weapon swings cost 1 AP and don't set this.
@@ -131,7 +127,6 @@ func buildAttackerMeta(c card.Card) attackerMeta {
 		types:               t,
 		card:                c,
 		isAttack:            t.Has(card.TypeAttack),
-		isAttackAction:      t.IsAttackAction(),
 		isFreeChainStep:     t.Has(card.TypeInstant) || t.IsAttackReaction(),
 		actsAsDR:            t.IsDefenseReaction() || isDefensiveInstant,
 		hasPlayPrecondition: hasPlayPre,

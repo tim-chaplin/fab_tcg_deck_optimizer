@@ -6,7 +6,11 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card/cards"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/gameengine"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/token"
 )
 
 // TestArcanicSpike_ArcaneDamageNotDealtReturnsBaseAttack covers the unsatisfied branch: when
@@ -48,5 +52,28 @@ func TestArcanicSpike_ArcaneDamageDealtTriggersBonus(t *testing.T) {
 		if got := ge.Value(); got != tc.want {
 			t.Errorf("%s: Play() = %d, want %d (attack + arcane bonus)", tc.c.Name(), got, tc.want)
 		}
+	}
+}
+
+// Tests that a Runechant already in play fires when Arcanic Spike is played — a Runechant
+// resolves before the attack that triggers it — so it self-destroys and flips
+// ArcaneDamageDealt, turning on Arcanic Spike's "dealt arcane damage this turn" +2{p}
+// rider. Companion to the Malefic Incantation test, which covers the create-side ordering.
+func TestArcanicSpike_RunechantFiresBeforeAttackAndTriggersRider(t *testing.T) {
+	prior := gameengine.GameStateBuilder().
+		AddAura(token.NewRunechant(1)).
+		SetIncomingDamage(0).
+		Build()
+	d := deck.New(testutils.Hero{Intel: 4}, nil, fillerDeck())
+	hand := []card.Card{testutils.BluePitch{}, cards.ArcanicSpikeRed{}}
+
+	summary := sim.EvalOneTurnForTesting(d, prior, hand)
+
+	if summary.Value != 7 {
+		t.Fatalf("Value = %d, want 7 (Arcanic Spike 5 + 2 arcane rider — the prior Runechant flipped ArcaneDamageDealt)\nBestLine: %s",
+			summary.Value, formatBestLine(summary.BestLine))
+	}
+	if got := summary.State.RunechantCount(); got != 0 {
+		t.Fatalf("end-of-turn RunechantCount = %d, want 0 (the Runechant fired and self-destroyed when Arcanic Spike was played)", got)
 	}
 }

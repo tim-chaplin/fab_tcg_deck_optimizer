@@ -29,6 +29,7 @@ func damageTrigger(self card.Card, damage int, calls *int) gameengine.Aura {
 		},
 		1,
 		false,
+		nil,
 	)
 }
 
@@ -76,6 +77,7 @@ func TestProcessAurasAtStartOfTurn_GraveyardsExhaustedAura(t *testing.T) {
 		},
 		1,
 		false,
+		nil,
 	)
 	first := aura.NewFromCard(
 		src,
@@ -85,6 +87,7 @@ func TestProcessAurasAtStartOfTurn_GraveyardsExhaustedAura(t *testing.T) {
 		},
 		1,
 		false,
+		nil,
 	)
 	_, _, _, _ = ProcessAurasAtStartOfTurnForTest([]gameengine.Aura{first, watcher}, DeckOf())
 	if len(seen) != 1 || seen[0] != src {

@@ -34,13 +34,13 @@ func TestFireEndOfTurn_LeavesNonMatchingType(t *testing.T) {
 	calls := 0
 	ge.CreateTrigger(trigger.NewFromCard(
 		stubCard{name: "src"},
-		triggertype.Attack,
+		triggertype.CardOrAbility,
 		func(_ card.GameEngine, _ card.Logger, _ card.Trigger) { calls++ },
 		nil,
 	))
 	ge.FireTriggers(triggertype.EndOfTurn, nil)
 	if calls != 0 {
-		t.Fatalf("handler calls = %d, want 0 (TriggerAttack should not fire from end-of-turn walk)", calls)
+		t.Fatalf("handler calls = %d, want 0 (a CardOrAbility trigger should not fire from end-of-turn walk)", calls)
 	}
 	if len(ge.Triggers()) != 1 {
 		t.Fatalf("triggers after fire = %d, want 1 (non-matching trigger preserved)", len(ge.Triggers()))
@@ -86,10 +86,11 @@ func TestResetEphemeralState_RearmsOncePerTurnAuras(t *testing.T) {
 	ge := New()
 	a := aura.NewFromCard(
 		stubCard{name: "src"},
-		triggertype.AttackAction,
+		triggertype.CardOrAbility,
 		func(card.GameEngine, card.Logger, card.Aura) {},
 		1,
 		true,
+		nil,
 	)
 	a.SetFiredThisTurn(true)
 	ge.CreateAura(a)

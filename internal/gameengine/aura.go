@@ -15,12 +15,12 @@ import (
 // CreateStartOfTurnAura registers a triggertype.StartOfTurn aura: the handler fires at
 // the start of each subsequent turn.
 func (ge *GameEngine) CreateStartOfTurnAura(pc *card.CardState, handler func(card.GameEngine, card.Logger, card.Aura), count int) {
-	ge.CreateAura(aura.NewFromCard(pc.Card, triggertype.StartOfTurn, handler, count, false))
+	ge.CreateAura(aura.NewFromCard(pc.Card, triggertype.StartOfTurn, handler, count, false, nil))
 }
 
-// CreateOncePerTurnAttackActionAura registers a triggertype.AttackAction aura with the
-// OncePerTurn gate set — fires at most once per turn regardless of how many attack
-// actions resolve.
+// CreateOncePerTurnAttackActionAura registers a triggertype.CardOrAbility aura filtered to
+// attack-action cards, with the OncePerTurn gate set — fires at most once per turn
+// regardless of how many attack actions resolve.
 func (ge *GameEngine) CreateOncePerTurnAttackActionAura(pc *card.CardState, handler func(card.GameEngine, card.Logger, card.Aura), count int) {
-	ge.CreateAura(aura.NewFromCard(pc.Card, triggertype.AttackAction, handler, count, true))
+	ge.CreateAura(aura.NewFromCard(pc.Card, triggertype.CardOrAbility, handler, count, true, card.TypeSet.IsAttackAction))
 }
