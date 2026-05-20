@@ -233,12 +233,13 @@ func runOneShuffle(masterDeck *deck.Deck, scratch *shuffleScratch, stats *deck.S
 		SetArcaneIncomingDamage(mp.ArcaneIncomingDamage).
 		Build()
 
-	// Initial hand drawn into the reusable handBuf.
+	// Initial hand drawn into the reusable handBuf, sorted so it is canonical from turn one.
 	handBuf := scratch.handBuf
 	h := handBuf[:handSize]
 	for i, c := range d.Draw(handSize) {
 		h[i] = c.(card.Card)
 	}
+	sortHandByID(h)
 
 	maxHands := 2 * handsPerCycle
 	for handIdx := 0; handIdx < maxHands; handIdx++ {
@@ -307,16 +308,6 @@ func playOneTurn(
 ) (summary TurnSummary, snap *turnSnapshot) {
 	advanceToNextTurn(state)
 
-	// Sort the dealt hand before auras fire so handlers that read hand by index
-	// (PopHandAt / Discard / reveal-into-hand inserts) see a canonical order. Without
-	// this, two hands with the same multiset but different incoming order would take
-	// different aura branches and produce diverging post-aura state — but the cache key
-	// (built later from the sorted hand) would treat them as equivalent and return
-	// wrong cached results for the second hand.
-	hand := state.Hand()
-	sortHandByID(hand)
-	state.SetHand(hand)
-
 	if snapshot == nil {
 		snap = &turnSnapshot{
 			state: state.CopyPersistentState(),
@@ -325,19 +316,16 @@ func playOneTurn(
 		}
 	}
 
+	// Hand stays sorted by Card.ID() through the aura handlers, so the chain runner and
+	// cache key see a canonical multiset.
 	processAurasAtStartOfTurn(state, d)
-	// Re-sort: aura handlers can append (DrawOne) or remove (Discard) cards, leaving
-	// state.Hand out of canonical order. Re-sort so makeCacheKey reads the canonical
-	// multiset.
-	hand = state.Hand()
-	sortHandByID(hand)
 	if snapshot != nil {
 		summary = runReplayForTurn(snapshot, logger)
 		// Skip end-of-turn cleanup so summary.State stays at the post-chain per-perm state
 		// the caller needs for its end-of-turn snapshot.
 		return summary, nil
 	}
-	summary = runBestForTurn(state.Weapons(), hand, d, state, ev)
+	summary = runBestForTurn(state.Weapons(), state.Hand(), d, state, ev)
 
 	// Chain ran on a shallow copy of d that may have drawn mid-turn; use the winner's
 	// post-chain deck for recycle / next-turn draw.
@@ -364,6 +352,8 @@ func playOneTurn(
 		for _, c := range postChainDeck.Draw(toDraw) {
 			nextHand = append(nextHand, c.(card.Card))
 		}
+		// Fresh draws arrive in deck order; sort so next turn's hand is canonical.
+		sortHandByID(nextHand)
 	}
 
 	summary.State.SetHand(nextHand)

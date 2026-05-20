@@ -53,9 +53,8 @@ func NewRunechant(n int) *aura.Aura {
 func NewPonder(n int) *aura.Aura {
 	return aura.NewFromToken("Ponder", ids.PonderTokenID, triggertype.EndOfTurn,
 		func(engine card.GameEngine, _ card.Logger, ctx card.Aura) {
-			eng := engine.(GameEngine)
 			for i := 0; i < ctx.Count(); i++ {
-				if !eng.PonderDrawOne() {
+				if !engine.DrawOne() {
 					break
 				}
 			}

@@ -2,6 +2,7 @@ package gameengine
 
 import (
 	"fmt"
+	"sort"
 	"strings"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
@@ -36,10 +37,21 @@ func (ge *GameEngine) Hand() []card.Card {
 	return ge.hand
 }
 
-// AppendHand appends c to the hand, flipping IsCacheable to false.
+// AppendHand inserts c into the hand at its Card.ID()-sorted position, flipping
+// IsCacheable to false.
 func (ge *GameEngine) AppendHand(c card.Card) {
+	ge.insertHandSorted(c)
+}
+
+// insertHandSorted inserts c at the position that keeps the hand ordered by Card.ID(),
+// flipping IsCacheable to false. Sorting on every insert keeps the hand a canonical
+// multiset, which the chain runner and the eval-cache key both depend on.
+func (ge *GameEngine) insertHandSorted(c card.Card) {
 	ge.cacheable = false
-	ge.hand = append(ge.hand, c)
+	i := sort.Search(len(ge.hand), func(j int) bool { return ge.hand[j].ID() > c.ID() })
+	ge.hand = append(ge.hand, nil)
+	copy(ge.hand[i+1:], ge.hand[i:])
+	ge.hand[i] = c
 }
 
 // PopHandAt removes and returns the card at index i, flipping IsCacheable to false.
@@ -196,23 +208,15 @@ func (ge *GameEngine) AddToGraveyard(c card.Card) {
 	ge.graveyard = append(ge.graveyard, c)
 }
 
-// DrawOne models a mid-turn draw: pop the top of the deck and append it to Hand. No-op
-// on an empty deck. Inherits the IsCacheable flip via PopDeckTop.
-func (ge *GameEngine) DrawOne() {
-	c, ok := ge.PopDeckTop()
-	if !ok {
-		return
-	}
-	ge.hand = append(ge.hand, c)
-}
-
-// PonderDrawOne pops the deck top into the hand and returns false on an empty deck.
-func (ge *GameEngine) PonderDrawOne() bool {
+// DrawOne models a mid-turn draw: pop the top of the deck into the hand at its sorted
+// position. Reports whether a card was drawn — false on an empty deck. Inherits the
+// IsCacheable flip via PopDeckTop.
+func (ge *GameEngine) DrawOne() bool {
 	c, ok := ge.PopDeckTop()
 	if !ok {
 		return false
 	}
-	ge.hand = append(ge.hand, c)
+	ge.insertHandSorted(c)
 	return true
 }
 
