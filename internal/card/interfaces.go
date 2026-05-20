@@ -48,6 +48,11 @@ type GameEngine interface {
 	// = no filter. Handler signatures are inlined for the same reason as the aura methods.
 	AddHitTrigger(pc *CardState, handler func(GameEngine, Logger, Trigger), filter func(TypeSet) bool)
 	AddEndOfTurnTrigger(pc *CardState, handler func(GameEngine, Logger, Trigger))
+	// AddCardOrAbilityTrigger fires a one-shot listener when the next card is played in
+	// the chain; filter narrows the firing card (nil = any). The registering card never
+	// fires it — the event resolves before a card's own effect, so the trigger isn't
+	// queued yet when its own card resolves.
+	AddCardOrAbilityTrigger(pc *CardState, handler func(GameEngine, Logger, Trigger), filter func(TypeSet) bool)
 
 	// Token economy
 	CreateRunechants(int)

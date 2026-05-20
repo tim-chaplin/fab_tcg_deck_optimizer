@@ -4,8 +4,6 @@ types:
     - Action
 cost: 0
 goAgain: true
-markers:
-    - NotImplemented
 text: |-
     The next time you play an action card with cost 0 or greater this turn, gain 1 action
     point. **Go again**
