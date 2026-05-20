@@ -95,7 +95,6 @@ var grandfatheredResolveChainStepFiles = []string{
 	"turntests/card_yinti_yanti_test.go",
 	"turntests/clearwater_elixir_test.go",
 	"turntests/come_to_fight_test.go",
-	"turntests/condemn_to_slaughter_test.go",
 	"turntests/consuming_volition_test.go",
 	"turntests/deathly_duet_test.go",
 	"turntests/demolition_crew_test.go",

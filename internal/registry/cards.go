@@ -202,6 +202,10 @@ var cardsByID = []Card{
 	ids.ComeToFightYellow: cards.ComeToFightYellow{},
 	ids.ComeToFightBlue:   cards.ComeToFightBlue{},
 
+	ids.CondemnToSlaughterRed:    cards.CondemnToSlaughterRed{},
+	ids.CondemnToSlaughterYellow: cards.CondemnToSlaughterYellow{},
+	ids.CondemnToSlaughterBlue:   cards.CondemnToSlaughterBlue{},
+
 	ids.CriticalStrikeRed:    cards.CriticalStrikeRed{},
 	ids.CriticalStrikeYellow: cards.CriticalStrikeYellow{},
 	ids.CriticalStrikeBlue:   cards.CriticalStrikeBlue{},

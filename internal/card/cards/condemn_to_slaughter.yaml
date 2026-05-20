@@ -4,12 +4,9 @@ types:
     - Action
 cost: 1
 goAgain: true
-markers:
-    - NotImplemented
 text: |-
     Your next Runeblade attack this turn gets +N{p}. You may destroy an aura you control. If
-    you do, each opponent destroys an aura permanent they control. Go again."
-    (Red N=3, Yellow N=2, Blue N=1.)
+    you do, each opponent destroys an aura permanent they control. Go again.
 variants:
     - id: CondemnToSlaughterRed
       pitch: 1
