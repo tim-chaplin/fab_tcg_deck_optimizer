@@ -20,8 +20,7 @@ func siftFiller(n int) []deck.Card {
 	return cs
 }
 
-// Tests that the hand cycle bottoms four spare hand cards: all four end up back in the
-// deck. The twelve-card filler keeps them past the mid-turn and end-of-turn draws.
+// Tests that Sift bottoms four spare hand cards into the deck.
 func TestSift_CyclesFourHandCardsToDeckBottom(t *testing.T) {
 	for _, c := range []card.Card{cards.SiftRed{}, cards.SiftYellow{}, cards.SiftBlue{}} {
 		spares := []card.Card{
@@ -35,8 +34,7 @@ func TestSift_CyclesFourHandCardsToDeckBottom(t *testing.T) {
 	}
 }
 
-// Tests that the cycle is capped at hand size: with a single spare only one card is
-// bottomed, not four.
+// Tests that Sift's cycle is capped at hand size when fewer than four spares are held.
 func TestSift_CapsCycleAtHandSize(t *testing.T) {
 	for _, c := range []card.Card{cards.SiftRed{}, cards.SiftYellow{}, cards.SiftBlue{}} {
 		spare := testutils.BluePitch{}
@@ -48,7 +46,7 @@ func TestSift_CapsCycleAtHandSize(t *testing.T) {
 	}
 }
 
-// Tests that an empty hand drops the rider cleanly: Sift resolves with no spare to cycle.
+// Tests that Sift resolves cleanly with an empty hand and nothing to cycle.
 func TestSift_EmptyHandResolves(t *testing.T) {
 	for _, c := range []card.Card{cards.SiftRed{}, cards.SiftYellow{}, cards.SiftBlue{}} {
 		d := deck.New(testutils.Hero{Intel: 4}, nil, siftFiller(12))

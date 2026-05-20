@@ -9,9 +9,8 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 )
 
-// siftPlay cycles up to 4 hand cards to the deck bottom, then draws that many. The "up to 4"
-// is an optional cost paid unconditionally per the dev-standards "Optional additional costs"
-// cycle — capped at 4 and at hand size, so an empty hand drops the rider cleanly.
+// siftPlay cycles up to 4 hand cards to the deck bottom, then draws that many — the printed
+// "up to 4" gate, capped at hand size.
 func siftPlay(ge card.GameEngine, l card.Logger, self *card.CardState) {
 	n := len(ge.Hand())
 	if n > 4 {
