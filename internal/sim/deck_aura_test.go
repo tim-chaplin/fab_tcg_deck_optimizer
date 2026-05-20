@@ -197,26 +197,3 @@ func TestEvaluate_TriggersFromLastTurnSurfacesInMean(t *testing.T) {
 		t.Errorf("Best.Value = %d, want at least 1 (Blessing carryover should land)", stats.Best.Value)
 	}
 }
-
-// Tests that the OncePerTurn FiredThisTurn flag is cleared at every turn boundary.
-func TestProcessAurasAtStartOfTurn_ReArmsOncePerTurnGate(t *testing.T) {
-	src := testutils.RedAttack{}
-	exhausted := aura.NewFromCard(
-		src,
-		triggertype.AttackAction,
-		func(card.GameEngine, card.Logger, card.Aura) {},
-		2,
-		true,
-	)
-	exhausted.SetFiredThisTurn(true)
-	survivors, _, _, _ := ProcessAurasAtStartOfTurnForTest([]gameengine.Aura{exhausted}, DeckOf())
-	if len(survivors) != 1 {
-		t.Fatalf("survivors len = %d, want 1 (AttackAction trigger passes through)", len(survivors))
-	}
-	if survivors[0].FiredThisTurn() {
-		t.Errorf("FiredThisTurn = true, want false (turn-boundary reset)")
-	}
-	if survivors[0].Count() != 2 {
-		t.Errorf("Count = %d, want 2 (only re-arm; don't tick)", survivors[0].Count())
-	}
-}

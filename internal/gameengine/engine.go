@@ -379,19 +379,13 @@ func (ge *GameEngine) HasEndOfTurnFire() bool {
 // its type set is what a Trigger's type filter matches against.
 //
 // Auras fire in a cursor walk so a handler-side Destroy splice doesn't skip the next
-// entry; an open OncePerTurn gate is required and FiredThisTurn is set after a fire. A
-// StartOfTurn event first re-arms every aura's OncePerTurn gate for the new turn.
+// entry; an open OncePerTurn gate is required and FiredThisTurn is set after a fire. The
+// gate is re-armed at the turn boundary by ResetEphemeralState, not here.
 //
 // Triggers are one-shot. The queue length is snapshotted before firing so a handler that
 // queues a new trigger doesn't fire it on the same pass; fired entries are dropped after.
 func (ge *GameEngine) FireTriggers(t triggertype.Type, triggeringCard card.Card) {
 	ge.triggeringCard = triggeringCard
-
-	if t == triggertype.StartOfTurn {
-		for i := range ge.auras {
-			ge.auras[i].SetFiredThisTurn(false)
-		}
-	}
 
 	for i := 0; i < len(ge.auras); {
 		a := ge.auras[i]

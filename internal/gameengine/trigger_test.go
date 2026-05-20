@@ -3,6 +3,7 @@ package gameengine
 import (
 	"testing"
 
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/aura"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/trigger"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/triggertype"
@@ -76,5 +77,24 @@ func TestFireEndOfTurn_HandlerAddTriggerSafeReentry(t *testing.T) {
 	ge.FireTriggers(triggertype.EndOfTurn, nil)
 	if calls != 2 {
 		t.Fatalf("handler calls after second walk = %d, want 2 (queued trigger fires on next pass)", calls)
+	}
+}
+
+// Tests that ResetEphemeralState re-arms the OncePerTurn gate, so an aura that fired last
+// turn can fire again on the next.
+func TestResetEphemeralState_RearmsOncePerTurnAuras(t *testing.T) {
+	ge := New()
+	a := aura.NewFromCard(
+		stubCard{name: "src"},
+		triggertype.AttackAction,
+		func(card.GameEngine, card.Logger, card.Aura) {},
+		1,
+		true,
+	)
+	a.SetFiredThisTurn(true)
+	ge.CreateAura(a)
+	ge.ResetEphemeralState()
+	if ge.Auras()[0].FiredThisTurn() {
+		t.Errorf("FiredThisTurn = true after ResetEphemeralState, want false (turn-boundary re-arm)")
 	}
 }
