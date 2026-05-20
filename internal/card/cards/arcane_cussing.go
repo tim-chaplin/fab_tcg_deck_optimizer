@@ -10,26 +10,37 @@ import (
 )
 
 func (ArcaneCussingRed) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
-	ge.CreateHitOrDamageTakenAura(self, arcaneCussingAuraHandler, 3, nil)
+	ge.CreateHitOrDamageTakenAura(self, selfDestructAuraHandler, 3, nil)
 }
 
 func (ArcaneCussingYellow) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
-	ge.CreateHitOrDamageTakenAura(self, arcaneCussingAuraHandler, 2, nil)
+	ge.CreateHitOrDamageTakenAura(self, selfDestructAuraHandler, 2, nil)
 }
 
 func (ArcaneCussingBlue) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
-	ge.CreateHitOrDamageTakenAura(self, arcaneCussingAuraHandler, 1, nil)
+	ge.CreateHitOrDamageTakenAura(self, selfDestructAuraHandler, 1, nil)
 }
 
-// arcaneCussingAuraHandler runs when Arcane Cussing leaves the arena — destroyed by you
-// dealing damage (a Hit) or being dealt damage (DamageTaken). The unfiltered Hit lets any
-// attacker pop it. It creates a.Count() Runechants only when the aura leaves during your
-// turn, then destroys the aura.
-func arcaneCussingAuraHandler(ge card.GameEngine, l card.Logger, a card.Aura) {
-	if ge.IsMyTurn() {
-		n := a.Count()
-		ge.CreateRunechants(n)
-		l.AppendPostTriggerf(a.CardName(), n, "Created %d runechants", n)
+// OnLeavesArena runs the "when this leaves the arena during your turn" clause.
+func (c ArcaneCussingRed) OnLeavesArena(g card.GameEngine, l card.Logger) {
+	arcaneCussingLeavesArena(g, l, c.DisplayName(), 3)
+}
+
+func (c ArcaneCussingYellow) OnLeavesArena(g card.GameEngine, l card.Logger) {
+	arcaneCussingLeavesArena(g, l, c.DisplayName(), 2)
+}
+
+func (c ArcaneCussingBlue) OnLeavesArena(g card.GameEngine, l card.Logger) {
+	arcaneCussingLeavesArena(g, l, c.DisplayName(), 1)
+}
+
+// arcaneCussingLeavesArena creates n Runechants when Arcane Cussing leaves the arena during
+// our turn — destroyed by an attack we land. Leaving off our turn (the defense phase,
+// destroyed by taking damage) doesn't satisfy the printed "during your turn" clause.
+func arcaneCussingLeavesArena(g card.GameEngine, l card.Logger, name string, n int) {
+	if !g.IsMyTurn() {
+		return
 	}
-	a.Destroy(true)
+	g.CreateRunechants(n)
+	l.AppendPostTriggerf(name, n, "Created %d runechants", n)
 }

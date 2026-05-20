@@ -4,8 +4,8 @@
 // If you do, deal 1 arcane damage to target hero. At the beginning of your action phase, destroy
 // this."
 //
-// Play resolves the enter trigger directly via banishAuraFromGraveyard. The start-of-turn
-// handler runs the leave trigger.
+// Play resolves the enter trigger directly via banishAuraFromGraveyard; OnLeavesArena runs
+// the leave trigger.
 
 package cards
 
@@ -15,12 +15,12 @@ import (
 
 func (SigilOfSilphidaeBlue) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
 	banishAuraFromGraveyard(ge, l, self.Card.DisplayName())
-	ge.CreateStartOfTurnAura(self, sigilOfSilphidaeAuraHandler, 1)
+	ge.CreateStartOfTurnAura(self, selfDestructAuraHandler, 1)
 }
 
-// sigilOfSilphidaeAuraHandler runs the leave trigger on the next turn: scans the graveyard
-// for an aura to banish and deals 1 arcane damage on success, then destroys the aura.
-func sigilOfSilphidaeAuraHandler(ge card.GameEngine, l card.Logger, a card.Aura) {
-	banishAuraFromGraveyard(ge, l, a.CardName())
-	a.Destroy(true)
+// OnLeavesArena runs the "when this leaves the arena" clause: banish another aura from the
+// graveyard and, if one was banished, deal 1 arcane damage. It runs before Sigil of
+// Silphidae itself reaches the graveyard, so the "another aura" restriction holds.
+func (c SigilOfSilphidaeBlue) OnLeavesArena(g card.GameEngine, l card.Logger) {
+	banishAuraFromGraveyard(g, l, c.DisplayName())
 }

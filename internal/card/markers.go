@@ -97,3 +97,12 @@ type Universal interface {
 type AttackReaction interface {
 	ARTargetAllowed(ge GameEngine, c Card, mode int8) bool
 }
+
+// LeavesArenaAura is the optional marker for an Aura card with a printed "when this leaves
+// the arena" clause. The engine calls OnLeavesArena when the card's aura is destroyed —
+// whether by the aura's own start-of-action-phase self-destroy or by another effect that
+// destroys it. The aura's trigger handler need only destroy the aura; the leave payoff
+// lives in OnLeavesArena so it fires on every path out of the arena.
+type LeavesArenaAura interface {
+	OnLeavesArena(g GameEngine, l Logger)
+}

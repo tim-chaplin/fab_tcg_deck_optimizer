@@ -8,6 +8,13 @@ import (
 
 // --- Aura helpers ---
 
+// selfDestructAuraHandler is the start-of-action-phase trigger handler for an Aura whose
+// only trigger clause is "destroy this". The leave payoff is the source card's
+// OnLeavesArena hook, which the engine fires from DestroyAura.
+func selfDestructAuraHandler(_ card.GameEngine, _ card.Logger, a card.Aura) {
+	a.Destroy(true)
+}
+
 // banishAuraFromGraveyard banishes the first aura-typed card in the graveyard and, on
 // success, deals 1 arcane damage from source. Returns true when an aura was banished.
 // Callers that also destroy the source card must run this BEFORE adding the source to

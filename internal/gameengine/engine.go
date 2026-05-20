@@ -461,21 +461,27 @@ func (ge *GameEngine) FireTriggers(t triggertype.Type, triggeringCard card.Card)
 	ge.triggeringCard = nil
 }
 
-// DestroyAura removes the aura currently being fired and, when addToGraveyard==true, pushes
-// the aura's source card into the graveyard (no-op for token auras with no source). Direct
-// splice with no cacheable flip — destruction is deterministic from the triggering event.
+// DestroyAura removes the aura currently being fired from the arena. It then fires the
+// source card's OnLeavesArena hook — the printed "when this leaves the arena" clause, when
+// the card implements card.LeavesArenaAura — and, when addToGraveyard==true, pushes the
+// source card into the graveyard (no-op for token auras with no source). OnLeavesArena runs
+// before the graveyard append so a "banish another aura from your graveyard" leave clause
+// doesn't see the just-left card. Direct splice with no cacheable flip — destruction is
+// deterministic from the triggering event.
 func (ge *GameEngine) DestroyAura(addToGraveyard bool) {
 	i := ge.currentAuraIdx
 	if i < 0 || i >= len(ge.auras) {
 		return
 	}
-	if addToGraveyard {
-		if src := ge.auras[i].SourceCard(); src != nil {
-			ge.AppendGraveyard(src.(card.Card))
-		}
-	}
+	src := ge.auras[i].SourceCard()
 	ge.auras = append(ge.auras[:i], ge.auras[i+1:]...)
 	ge.currentAuraDestroyed = true
+	if la, ok := src.(card.LeavesArenaAura); ok {
+		la.OnLeavesArena(ge, ge.logger)
+	}
+	if src != nil && addToGraveyard {
+		ge.AppendGraveyard(src.(card.Card))
+	}
 }
 
 // === Chain-step resolution ===
