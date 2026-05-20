@@ -4,8 +4,6 @@ types:
     - Action
     - Attack
 cost: 3
-markers:
-    - NotImplemented
 text: |-
     When this attacks or hits, you may destroy an aura you control. If you do, create a
     Runechant token.

@@ -484,6 +484,26 @@ func (ge *GameEngine) DestroyAura(addToGraveyard bool) {
 	}
 }
 
+// DestroyOwnedAura destroys one aura the player controls and reports whether it destroyed
+// one. It targets the first aura whose source card carries a leave-the-arena payoff
+// (card.LeavesArenaAura), fires that OnLeavesArena clause, and graveyards the card. Auras
+// with no leave payoff are skipped: destroying one to grant a bare Runechant is
+// net-neutral.
+func (ge *GameEngine) DestroyOwnedAura() bool {
+	for i, a := range ge.auras {
+		la, ok := a.SourceCard().(card.LeavesArenaAura)
+		if !ok {
+			continue
+		}
+		src := a.SourceCard().(card.Card)
+		ge.auras = append(ge.auras[:i], ge.auras[i+1:]...)
+		la.OnLeavesArena(ge, ge.logger)
+		ge.AppendGraveyard(src)
+		return true
+	}
+	return false
+}
+
 // === Chain-step resolution ===
 
 // ResolveChainStep runs card.Play on pc and then applies the standard chain-step

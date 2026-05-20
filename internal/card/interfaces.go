@@ -46,6 +46,9 @@ type GameEngine interface {
 	// per-fire ctx's Destroy method; exposed on GameEngine so the ctx can route the call
 	// through its stored engine reference.
 	DestroyAura(addToGraveyard bool)
+	// DestroyOwnedAura destroys one aura the player controls, reporting whether one was
+	// destroyed. See GameEngine.DestroyOwnedAura for targeting rules.
+	DestroyOwnedAura() bool
 
 	// Triggers: one-shot, per-trigger-type. AddHitTrigger's filter narrows the firing event
 	// to a card-type predicate (typically TypeSet.IsAttack or TypeSet.IsAttackAction); nil
