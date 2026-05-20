@@ -12,6 +12,21 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapon"
 )
 
+// partitionCard is one slot in the partition enumerator's working set: a hand (or
+// arsenal-in) card bundled with the role the recurse is currently assigning it and the
+// static per-card facts roleAllowed and the budget sums read. Bundling card and data into
+// one struct — rather than carrying role / pitch / defense / flag slices indexed in
+// parallel against the hand — keeps every card inseparable from its own data.
+type partitionCard struct {
+	card        card.Card
+	role        deck.Role
+	pitchVal    int
+	defenseVal  int
+	isDR        bool
+	canAttack   bool
+	fromArsenal bool
+}
+
 func (e *Evaluator) findBest(weapons []weapon.Weapon, hand []card.Card, d *deck.Deck, masterState *gameengine.GameState) TurnSummary {
 	var cacheKey evalCacheKey
 	cacheUsable := e.cache != nil
@@ -55,20 +70,15 @@ func (e *Evaluator) findBest(weapons []weapon.Weapon, hand []card.Card, d *deck.
 	var runningSeen bool
 	var runningScore chainScore
 
-	rolesBuf := bufs.rolesBuf[:totalN]
-	pvals := bufs.pitchVals[:totalN]
-	dvals := bufs.defenseVals[:totalN]
-	isDR := bufs.isDRBuf[:totalN]
-	canAttack := bufs.canAttackBuf[:totalN]
-
-	fillPartitionPerCardBufs(hand, n, totalN, arsenalCardIn, pvals, dvals, isDR, canAttack)
+	pcards := bufs.partitionCards[:totalN]
+	fillPartitionCards(hand, n, totalN, arsenalCardIn, pcards)
 
 	var recurse func(i, pitchSum, defenseSum int)
 	recurse = func(i, pitchSum, defenseSum int) {
 		if i == totalN {
 			attackDealt, defenseDealt, swung, winner, ok, leafCacheable, arsenalAtChainStart := e.evaluatePartition(
-				masterState, weapons, hand, d,
-				rolesBuf, n, bufs,
+				masterState, weapons, d,
+				pcards, n, bufs,
 				defenseSum,
 			)
 			if !leafCacheable {
@@ -90,28 +100,28 @@ func (e *Evaluator) findBest(weapons []weapon.Weapon, hand []card.Card, d *deck.
 			runningSeen = true
 			bestSwung = swung
 			for j := 0; j < totalN; j++ {
-				best.BestLine[j].Role = rolesBuf[j]
+				best.BestLine[j].Role = pcards[j].role
 			}
 			return
 		}
-		isArsenalSlot := i == n && arsenalCardIn != nil
+		pc := &pcards[i]
 		maxRole := deck.Held
-		if isArsenalSlot {
+		if pc.fromArsenal {
 			maxRole = deck.Arsenal
 		}
 		for r := deck.Role(0); r <= maxRole; r++ {
-			if !roleAllowed(r, isArsenalSlot, isDR[i], canAttack[i]) {
+			if !roleAllowed(r, pc.fromArsenal, pc.isDR, pc.canAttack) {
 				continue
 			}
 			if r == deck.Defend && incoming == 0 {
 				continue
 			}
-			rolesBuf[i] = r
+			pc.role = r
 			switch r {
 			case deck.Pitch:
-				recurse(i+1, pitchSum+pvals[i], defenseSum)
+				recurse(i+1, pitchSum+pc.pitchVal, defenseSum)
 			case deck.Defend:
-				recurse(i+1, pitchSum, defenseSum+dvals[i])
+				recurse(i+1, pitchSum, defenseSum+pc.defenseVal)
 			case deck.Attack, deck.Held, deck.Arsenal:
 				recurse(i+1, pitchSum, defenseSum)
 			}
@@ -201,37 +211,37 @@ func arsenalPromotionHash(startingHand, stateHand []card.Card, arsenalCardIn car
 	return h
 }
 
-// groupByRoleInto appends hand cards into caller-provided pitched/attackers/defenders
-// slices.
-func groupByRoleInto(hand []card.Card, roles []deck.Role, pitched, attackers, defenders []card.Card) ([]card.Card, []card.Card, []card.Card) {
-	for i, c := range hand {
-		switch roles[i] {
+// groupByRole appends each card to the caller-provided pitched / attackers / defenders
+// slice matching its enumerated role; Held and Arsenal cards are skipped.
+func groupByRole(pcards []partitionCard, pitched, attackers, defenders []card.Card) ([]card.Card, []card.Card, []card.Card) {
+	for _, pc := range pcards {
+		switch pc.role {
 		case deck.Pitch:
-			pitched = append(pitched, c)
+			pitched = append(pitched, pc.card)
 		case deck.Attack:
-			attackers = append(attackers, c)
+			attackers = append(attackers, pc.card)
 		case deck.Defend:
-			defenders = append(defenders, c)
+			defenders = append(defenders, pc.card)
 		}
 	}
 	return pitched, attackers, defenders
 }
 
-// gatherHeldCards appends every hand card with role Held into the caller-provided held slice.
-func gatherHeldCards(hand []card.Card, roles []deck.Role, held []card.Card) []card.Card {
-	for i, c := range hand {
-		if roles[i] == deck.Held {
-			held = append(held, c)
+// gatherHeldCards appends every card with role Held into the caller-provided held slice.
+func gatherHeldCards(pcards []partitionCard, held []card.Card) []card.Card {
+	for _, pc := range pcards {
+		if pc.role == deck.Held {
+			held = append(held, pc.card)
 		}
 	}
 	return held
 }
 
-// findArsenalCard returns the arsenal-in card when it stays in the arsenal slot, nil
-// otherwise.
-func findArsenalCard(rolesBuf []deck.Role, arsenalCardIn card.Card, n int) card.Card {
-	if arsenalCardIn != nil && rolesBuf[n] == deck.Arsenal {
-		return arsenalCardIn
+// findArsenalCard returns the arsenal-in card when its slot kept the Arsenal role, nil
+// otherwise (it was reassigned to Attack / Defend, or no card started in the arsenal).
+func findArsenalCard(pcards []partitionCard, n int) card.Card {
+	if len(pcards) > n && pcards[n].role == deck.Arsenal {
+		return pcards[n].card
 	}
 	return nil
 }

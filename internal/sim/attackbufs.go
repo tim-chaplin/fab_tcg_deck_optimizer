@@ -43,13 +43,11 @@ type attackBufs struct {
 	// prefix in activatedAbilities.
 	weaponAbilityCount int
 
-	// Partition-loop buffers, consumed by findBest. Sized handSize+1 to cover the optional
-	// arsenal-in slot the enumerator treats as index n.
-	rolesBuf           []deck.Role
-	pitchVals          []int
-	defenseVals        []int
-	isDRBuf            []bool
-	canAttackBuf       []bool
+	// Partition-loop buffer, consumed by findBest. Sized handSize+1 to cover the optional
+	// arsenal-in slot the enumerator treats as index n. Each partitionCard bundles a hand
+	// (or arsenal-in) card with its enumerated role and the static per-card facts the
+	// recurse reads.
+	partitionCards     []partitionCard
 	pitchedValsScratch []int
 	pitchedBuf         []card.Card
 	pitchPermBuf       []card.Card
@@ -160,11 +158,7 @@ func newAttackBufs(handSize, weaponCount int, weapons []weapon.Weapon) *attackBu
 		activatedAbilities:    activatedAbilities,
 		activatedAbilityCosts: activatedAbilityCosts,
 		weaponAbilityCount:    len(weapons),
-		rolesBuf:              make([]deck.Role, handSize+1),
-		pitchVals:             make([]int, handSize+1),
-		defenseVals:           make([]int, handSize+1),
-		isDRBuf:               make([]bool, handSize+1),
-		canAttackBuf:          make([]bool, handSize+1),
+		partitionCards:        make([]partitionCard, handSize+1),
 		pitchedValsScratch:    make([]int, 0, handSize+1),
 		pitchedBuf:            make([]card.Card, 0, handSize+1),
 		pitchPermBuf:          make([]card.Card, 0, handSize+1),
@@ -203,25 +197,29 @@ func sameWeapons(a, b []weapon.Weapon) bool {
 	return true
 }
 
-// fillPartitionPerCardBufs writes the per-card values the partition recurse reads at each
-// leaf: Pitch / Defense magnitudes, Defense-Reaction membership, and Attack-role
-// eligibility.
-func fillPartitionPerCardBufs(hand []card.Card, n, totalN int, arsenalCardIn card.Card, pvals, dvals []int, isDR, canAttack []bool) {
+// fillPartitionCards populates pcards[:totalN] from the hand and the optional arsenal-in
+// card: each card's static Pitch / Defense magnitudes, Defense-Reaction membership, and
+// Attack-role eligibility. The role field is left for the recurse to enumerate.
+func fillPartitionCards(hand []card.Card, n, totalN int, arsenalCardIn card.Card, pcards []partitionCard) {
 	for i := 0; i < totalN; i++ {
-		var c card.Card
-		if i < n {
+		fromArsenal := i == n
+		c := arsenalCardIn
+		if !fromArsenal {
 			c = hand[i]
-		} else {
-			c = arsenalCardIn
 		}
-		pvals[i] = c.Pitch()
-		dvals[i] = c.Defense()
-		if i == n {
-			dvals[i] += card.ArsenalDefenseBonusOf(c)
+		defenseVal := c.Defense()
+		if fromArsenal {
+			defenseVal += card.ArsenalDefenseBonusOf(c)
 		}
 		m := attackerMetaPtrFor(c)
 		ts := m.types
-		isDR[i] = m.actsAsDR
-		canAttack[i] = ts.Has(card.TypeAction) || ts.Has(card.TypeAttackReaction)
+		pcards[i] = partitionCard{
+			card:        c,
+			pitchVal:    c.Pitch(),
+			defenseVal:  defenseVal,
+			isDR:        m.actsAsDR,
+			canAttack:   ts.Has(card.TypeAction) || ts.Has(card.TypeAttackReaction),
+			fromArsenal: fromArsenal,
+		}
 	}
 }

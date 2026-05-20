@@ -15,13 +15,13 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapon"
 )
 
-// replayBest is the cache-hit body. Projects the cached BestLine onto the new call's hand
-// to fill rolesBuf, hands off to evaluatePartition for the chain run, then assembles the
-// TurnSummary. The cache key locks all inputs so the chain output here is byte-identical
-// to the original call.
+// replayBest is the cache-hit body. Builds the partitionCard set for the new call's hand,
+// maps the cached BestLine's roles onto it, hands off to evaluatePartition for the chain
+// run, then assembles the TurnSummary. The cache key locks all inputs so the chain output
+// here is byte-identical to the original call.
 //
 // Quirk: the cached entry may tag a hand card with Role=Arsenal (post-hoc promotion
-// target), but hand cards never have that role during the chain run. Flip the entry back
+// target), but hand cards never have that role during the chain run. Flip the slot back
 // to Held before evaluatePartition; re-stamp Arsenal on the BestLine afterward.
 func (e *Evaluator) replayBest(
 	entry evalCacheEntry,
@@ -37,22 +37,23 @@ func (e *Evaluator) replayBest(
 	}
 
 	bufs := e.getAttackBufs(n, weapons)
-	rolesBuf := bufs.rolesBuf[:totalN]
+	pcards := bufs.partitionCards[:totalN]
+	fillPartitionCards(hand, n, totalN, arsenalCardIn, pcards)
 	postPromotedFromHeld := -1
-	if !mapCachedRolesToHand(entry.line, hand, arsenalCardIn, rolesBuf, &postPromotedFromHeld) {
+	if !mapCachedRolesToHand(entry.line, pcards, n, &postPromotedFromHeld) {
 		panic(fmt.Sprintf("replayBest: mapCachedRolesToHand failed despite cache hit — cache invariant violated (hand=%d, cachedLine=%d, arsenal=%v)",
 			len(hand), len(entry.line), arsenalCardIn != nil))
 	}
 
 	if postPromotedFromHeld >= 0 {
-		rolesBuf[postPromotedFromHeld] = deck.Held
+		pcards[postPromotedFromHeld].role = deck.Held
 	}
 
-	defenseSum := defenseSumFromRoles(hand, arsenalCardIn, rolesBuf, n)
+	defenseSum := defenseSumFromRoles(pcards)
 
 	attackDealt, defenseDealt, swung, winner, ok, _, arsenalAtChainStart := e.evaluatePartition(
-		masterState, weapons, hand, d,
-		rolesBuf, n, bufs,
+		masterState, weapons, d,
+		pcards, n, bufs,
 		defenseSum,
 	)
 	if !ok {
@@ -61,7 +62,7 @@ func (e *Evaluator) replayBest(
 	}
 
 	if postPromotedFromHeld >= 0 {
-		rolesBuf[postPromotedFromHeld] = deck.Arsenal
+		pcards[postPromotedFromHeld].role = deck.Arsenal
 	}
 
 	winner.SetArsenal(arsenalAtChainStart)
@@ -74,10 +75,10 @@ func (e *Evaluator) replayBest(
 		State:          winner,
 	}
 	for i := 0; i < n; i++ {
-		best.BestLine[i] = deck.CardAssignment{Card: hand[i], Role: rolesBuf[i]}
+		best.BestLine[i] = deck.CardAssignment{Card: hand[i], Role: pcards[i].role}
 	}
 	if arsenalCardIn != nil {
-		best.BestLine[n] = deck.CardAssignment{Card: arsenalCardIn, Role: rolesBuf[n], FromArsenal: true}
+		best.BestLine[n] = deck.CardAssignment{Card: arsenalCardIn, Role: pcards[n].role, FromArsenal: true}
 	}
 	if best.State.Arsenal() == nil {
 		promoteRandomHandCardToArsenal(&best, hand, arsenalCardIn)
@@ -85,31 +86,27 @@ func (e *Evaluator) replayBest(
 	return best
 }
 
-// defenseSumFromRoles totals Defense() across every Defend-role card per the rolesBuf
-// assignment.
-func defenseSumFromRoles(hand []card.Card, arsenalCardIn card.Card, rolesBuf []deck.Role, n int) int {
+// defenseSumFromRoles totals the defenseVal of every Defend-role card.
+func defenseSumFromRoles(pcards []partitionCard) int {
 	sum := 0
-	for i := 0; i < n; i++ {
-		if rolesBuf[i] == deck.Defend {
-			sum += hand[i].Defense()
+	for _, pc := range pcards {
+		if pc.role == deck.Defend {
+			sum += pc.defenseVal
 		}
-	}
-	if arsenalCardIn != nil && rolesBuf[n] == deck.Defend {
-		sum += arsenalCardIn.Defense() + card.ArsenalDefenseBonusOf(arsenalCardIn)
 	}
 	return sum
 }
 
-// mapCachedRolesToHand walks entry.line and the new call's hand, assigning each hand /
-// arsenal-in card a role from the cached entry by ID. Returns false on multiset mismatch.
-func mapCachedRolesToHand(cachedLine []deck.CardAssignment, hand []card.Card, arsenalCardIn card.Card, rolesBuf []deck.Role, postPromotedFromHeld *int) bool {
+// mapCachedRolesToHand walks entry.line and assigns each partitionCard a role from the
+// cached entry by matching Card.ID(). Returns false on multiset mismatch.
+func mapCachedRolesToHand(cachedLine []deck.CardAssignment, pcards []partitionCard, n int, postPromotedFromHeld *int) bool {
 	*postPromotedFromHeld = -1
 	used := make([]bool, len(cachedLine))
-	if arsenalCardIn != nil {
+	if len(pcards) > n {
 		matched := false
 		for i, a := range cachedLine {
-			if a.FromArsenal && a.Card.ID() == arsenalCardIn.ID() {
-				rolesBuf[len(hand)] = a.Role
+			if a.FromArsenal && a.Card.ID() == pcards[n].card.ID() {
+				pcards[n].role = a.Role
 				used[i] = true
 				matched = true
 				break
@@ -119,13 +116,13 @@ func mapCachedRolesToHand(cachedLine []deck.CardAssignment, hand []card.Card, ar
 			return false
 		}
 	}
-	for hi, c := range hand {
+	for hi := 0; hi < n; hi++ {
 		matched := false
 		for i, a := range cachedLine {
-			if used[i] || a.Card.ID() != c.ID() || a.FromArsenal {
+			if used[i] || a.Card.ID() != pcards[hi].card.ID() || a.FromArsenal {
 				continue
 			}
-			rolesBuf[hi] = a.Role
+			pcards[hi].role = a.Role
 			used[i] = true
 			matched = true
 			if a.Role == deck.Arsenal {
