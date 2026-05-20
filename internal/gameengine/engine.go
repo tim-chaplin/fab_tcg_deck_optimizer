@@ -352,9 +352,7 @@ func panicIfOptViolatesMultiset(in, top, bottom []card.Card) {
 	}
 }
 
-// === Rules-orchestration methods. Each operates on the embedded *GameState's slices
-// but applies game-rule semantics (cursor iteration for handler-side splices,
-// OncePerTurn gating, FiredThisTurn accounting, post-fire trigger drainage).
+// === Trigger and aura dispatch ===
 
 // HasEndOfTurnFire reports whether either Auras or Triggers carries a
 // triggertype.EndOfTurn entry. Lets the chain runner skip the end-of-turn walk when
@@ -374,8 +372,7 @@ func (ge *GameEngine) HasEndOfTurnFire() bool {
 }
 
 // FireTriggers fires every Aura and one-shot Trigger registered for trigger type t. It is
-// the single dispatch point for every triggertype.Type lifecycle event — the eval loop
-// calls it once per event (StartOfTurn, AttackAction, Attack, Hit, EndOfTurn).
+// the single dispatch point for every triggertype.Type lifecycle event.
 //
 // triggeringCard is the card whose resolution raised the event, or nil for turn-boundary
 // events. It is published on ge.triggeringCard so handlers can attribute log lines, and
