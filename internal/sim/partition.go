@@ -13,10 +13,8 @@ import (
 )
 
 // partitionCard is one slot in the partition enumerator's working set: a hand (or
-// arsenal-in) card bundled with the role the recurse is currently assigning it and the
-// static per-card facts roleAllowed and the budget sums read. Bundling card and data into
-// one struct — rather than carrying role / pitch / defense / flag slices indexed in
-// parallel against the hand — keeps every card inseparable from its own data.
+// arsenal-in) card, the role the recurse is currently assigning it, and the static
+// per-card facts that roleAllowed and the budget sums read.
 type partitionCard struct {
 	card        card.Card
 	role        deck.Role

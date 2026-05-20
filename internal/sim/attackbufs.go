@@ -44,9 +44,7 @@ type attackBufs struct {
 	weaponAbilityCount int
 
 	// Partition-loop buffer, consumed by findBest. Sized handSize+1 to cover the optional
-	// arsenal-in slot the enumerator treats as index n. Each partitionCard bundles a hand
-	// (or arsenal-in) card with its enumerated role and the static per-card facts the
-	// recurse reads.
+	// arsenal-in slot the enumerator treats as index n.
 	partitionCards     []partitionCard
 	pitchedValsScratch []int
 	pitchedBuf         []card.Card
