@@ -294,8 +294,8 @@ func (gs *GameState) CopyPersistentStateFrom(src *GameState) {
 //   - aura gates — every aura's FiredThisTurn flag rearms, so OncePerTurn auras can fire
 //     again
 //
-// auraCreated lands at len(auras) > 0 — a state holding carryover auras reads as "an aura
-// is in play" for the cards that gate on it.
+// auraCreated resets to false — it means "an aura was played or created THIS turn", so
+// auras carried over from a previous turn must not satisfy it.
 //
 // incomingDamage stays put — it's the constant matchup figure, carried over untouched.
 // damageBlocked (how much of it defense has absorbed so far) resets to zero.
@@ -320,7 +320,7 @@ func (gs *GameState) ResetEphemeralState() {
 	gs.lastAttackHit = false
 	gs.cacheable = true
 	gs.logger = NoopLogger{}
-	gs.auraCreated = len(gs.auras) > 0
+	gs.auraCreated = false
 	for _, a := range gs.auras {
 		a.SetFiredThisTurn(false)
 	}

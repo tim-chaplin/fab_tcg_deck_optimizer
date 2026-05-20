@@ -13,8 +13,15 @@ import (
 // every Fire.
 type Handler func(card.GameEngine, card.Logger, card.Aura)
 
+// TypeFilter narrows the firing site to a card-type predicate. nil means any matching
+// event qualifies.
+type TypeFilter func(card.TypeSet) bool
+
 // Aura is the concrete entry the engine stores in its persistent hook list. source is
 // non-nil for card-backed auras; tokenName / tokenID are populated for token auras.
+//
+// typeFilter narrows the firing site when present (e.g. a CardOrAbility aura that only
+// fires for attack-action cards); nil means any matching event qualifies.
 //
 // activeEngine is set by Fire to the engine driving the current firing event so the
 // aura's own card.Aura-interface methods (Destroy) can route back without allocating a
@@ -26,6 +33,7 @@ type Aura struct {
 	source        card.Card
 	tokenName     string
 	tokenID       ids.CardID
+	typeFilter    TypeFilter
 	activeEngine  card.GameEngine
 	count         int
 	oncePerTurn   bool
@@ -34,25 +42,28 @@ type Aura struct {
 
 // NewFromCard builds a card-backed aura. source is the originating card — typically the
 // Card field of a CardState. SourceCard surfaces it back so engines can route it into the
-// graveyard on destroy.
-func NewFromCard(source card.Card, tt triggertype.Type, fire Handler, count int, oncePerTurn bool) *Aura {
+// graveyard on destroy. typeFilter narrows the firing site; pass nil for no filter.
+func NewFromCard(source card.Card, tt triggertype.Type, fire Handler, count int, oncePerTurn bool, typeFilter TypeFilter) *Aura {
 	return &Aura{
 		triggerType: tt,
 		fire:        fire,
 		source:      source,
+		typeFilter:  typeFilter,
 		count:       count,
 		oncePerTurn: oncePerTurn,
 	}
 }
 
 // NewFromToken builds a token aura — no originating card. CardName returns the supplied
-// name; CardID returns tokenID so cache keys distinguish each token kind.
-func NewFromToken(name string, tokenID ids.CardID, tt triggertype.Type, fire Handler, count int) *Aura {
+// name; CardID returns tokenID so cache keys distinguish each token kind. typeFilter
+// narrows the firing site; pass nil for no filter.
+func NewFromToken(name string, tokenID ids.CardID, tt triggertype.Type, fire Handler, count int, typeFilter TypeFilter) *Aura {
 	return &Aura{
 		triggerType: tt,
 		fire:        fire,
 		tokenName:   name,
 		tokenID:     tokenID,
+		typeFilter:  typeFilter,
 		count:       count,
 	}
 }
@@ -61,6 +72,14 @@ func (a *Aura) TriggerType() triggertype.Type { return a.triggerType }
 func (a *Aura) OncePerTurn() bool             { return a.oncePerTurn }
 func (a *Aura) FiredThisTurn() bool           { return a.firedThisTurn }
 func (a *Aura) SetFiredThisTurn(v bool)       { a.firedThisTurn = v }
+
+// Matches reports whether the aura's type filter accepts the firing event's type set.
+func (a *Aura) Matches(types card.TypeSet) bool {
+	if a.typeFilter == nil {
+		return true
+	}
+	return a.typeFilter(types)
+}
 
 func (a *Aura) CardName() string {
 	if a.source != nil {

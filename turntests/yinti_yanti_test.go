@@ -15,16 +15,17 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 )
 
-// Reduce to Runechant defends, creating a Runechant; Yinti Yanti's Play then sees the
-// aura and credits +1{p}. Red pitch funds Reduce's cost (no carryover Runechant — it'd
-// pollute the test by satisfying Yinti Yanti's gate before Reduce ever played).
-func TestYintiYanti_SeesRunechantFromReduceInDefense(t *testing.T) {
+// Reduce to Runechant defends, creating a Runechant. When Yinti Yanti is then played as an
+// attack the Runechant fires first — a Runechant resolves before the attack that triggers
+// it — and self-destroys, so Yinti Yanti's "while you control an aura" +1{p} does not see
+// it. Red pitch funds Reduce's cost.
+func TestYintiYanti_RunechantFromReduceFiresBeforeYintiResolves(t *testing.T) {
 	d := deck.New(heroes.Viserai{}, nil, fillerDeck())
 	hand := []card.Card{cards.YintiYantiRed{}, cards.ReduceToRunechantRed{}, testutils.RedPitch{}}
 	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingDamage(4).Build(), hand)
 	got := summary.Value
-	if got != 9 {
-		t.Fatalf("Value = %d, want 9 (Reduce defense 4 + Yinti Yanti 4 with +1 aura bonus + creation credit 1)", got)
+	if got != 8 {
+		t.Fatalf("Value = %d, want 8 (Reduce defense 4 + Yinti Yanti 3 with no aura bonus + creation credit 1)", got)
 	}
 }
 

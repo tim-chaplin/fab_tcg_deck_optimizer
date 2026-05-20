@@ -13,9 +13,9 @@ import (
 func TestRunechantAuraHandler_LeavesOpponentMarked(t *testing.T) {
 	ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetOpponentMarked(true).Build()}
 	ge.CreateAura(token.NewRunechant(1))
-	// The runechant aura is registered for triggertype.Attack; nil triggering card since
-	// its handler doesn't read TriggeringCard.
-	ge.FireTriggers(triggertype.Attack, nil)
+	// The Runechant aura fires on triggertype.CardOrAbility filtered to attacks, so the
+	// firing card must be an attack for its IsAttack filter to match.
+	ge.FireTriggers(triggertype.CardOrAbility, FakeRedAttack{})
 	if !ge.OpponentMarked() {
 		t.Error("OpponentMarked = false after runechant pop, want true (arcane doesn't clear mark)")
 	}

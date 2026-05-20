@@ -7,12 +7,13 @@ import (
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/gameengine"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/triggertype"
 )
 
-// Tests that Play credits 0 immediately and registers an OncePerTurn TriggerAttackAction
-// aura with the variant's Count.
-func TestMaleficIncantation_PlayRegistersAttackActionTrigger(t *testing.T) {
+// Tests that Play credits 0 immediately and registers an OncePerTurn CardOrAbility aura
+// with the variant's Count.
+func TestMaleficIncantation_PlayRegistersCardOrAbilityTrigger(t *testing.T) {
 	cases := []struct {
 		c card.Card
 		n int
@@ -37,8 +38,8 @@ func TestMaleficIncantation_PlayRegistersAttackActionTrigger(t *testing.T) {
 			t.Fatalf("%s: Auras len = %d, want 1", tc.c.Name(), len(ge.Auras()))
 		}
 		tr := ge.Auras()[0]
-		if tr.TriggerType() != triggertype.AttackAction {
-			t.Errorf("%s: trigger Type = %d, want TriggerAttackAction", tc.c.Name(), tr.TriggerType())
+		if tr.TriggerType() != triggertype.CardOrAbility {
+			t.Errorf("%s: trigger Type = %d, want CardOrAbility", tc.c.Name(), tr.TriggerType())
 		}
 		if !tr.OncePerTurn() {
 			t.Errorf("%s: OncePerTurn = false, want true", tc.c.Name())
@@ -49,14 +50,16 @@ func TestMaleficIncantation_PlayRegistersAttackActionTrigger(t *testing.T) {
 	}
 }
 
-// Tests that one handler invocation creates one Runechant and credits 1 damage.
+// Tests that one handler invocation creates one Runechant and credits 1 damage. The aura's
+// type filter narrows the fire to attack-action cards, so an attack action is passed as
+// the triggering card.
 func TestMaleficIncantation_HandlerCreatesOneRunechantPerFire(t *testing.T) {
 	for _, c := range []card.Card{cards.MaleficIncantationRed{}, cards.MaleficIncantationYellow{}, cards.MaleficIncantationBlue{}} {
 		ge := gameengine.New()
 		ge.ResolveChainStep(ge.Logger(), &card.CardState{Card: c})
 		chain := gameengine.New()
 		chain.CreateAura(ge.Auras()[0])
-		chain.FireTriggers(triggertype.AttackAction, c)
+		chain.FireTriggers(triggertype.CardOrAbility, testutils.RedAttack{})
 		if chain.Value() != 1 {
 			t.Errorf("%s: handler Value = %d, want 1", c.Name(), chain.Value())
 		}

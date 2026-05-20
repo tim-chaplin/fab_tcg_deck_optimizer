@@ -380,27 +380,53 @@ func (ge *GameEngine) HasEndOfTurnFire() bool {
 //
 // triggeringCard is the card whose resolution raised the event, or nil for turn-boundary
 // events. It is published on ge.triggeringCard so handlers can attribute log lines, and
-// its type set is what a Trigger's type filter matches against.
+// its type set is what an Aura's / Trigger's type filter matches against.
 //
-// Auras fire in a cursor walk so a handler-side Destroy splice doesn't skip the next
-// entry; an open OncePerTurn gate is required and FiredThisTurn is set after a fire. The
-// gate is re-armed at the turn boundary by ResetEphemeralState, not here.
+// Both the aura list and the one-shot trigger queue are snapshotted by length before
+// firing, so an aura or trigger a handler creates during this pass lands past the
+// snapshot and is not fired on the same pass. With one CardOrAbility fire per chain step
+// that snapshot is the whole self-exclusion mechanism: a Runechant a card's play creates
+// is not consumed by that same card's fire. Auras walk a cursor so a handler-side Destroy
+// splice doesn't skip the next entry; an open OncePerTurn gate is required, the type
+// filter must match, and FiredThisTurn is set after a fire. The OncePerTurn gate is
+// re-armed at the turn boundary by ResetEphemeralState, not here. Fired one-shot triggers
+// are dropped after the pass.
 //
-// Triggers are one-shot. The queue length is snapshotted before firing so a handler that
-// queues a new trigger doesn't fire it on the same pass; fired entries are dropped after.
+// triggeringCard.Types is resolved lazily — only when an aura / trigger of the right type
+// is actually found — so the common per-card fire with no subscribers stays off the Types
+// interface-dispatch path.
 func (ge *GameEngine) FireTriggers(t triggertype.Type, triggeringCard card.Card) {
+	if len(ge.auras) == 0 && len(ge.triggers) == 0 {
+		return
+	}
 	ge.triggeringCard = triggeringCard
 
-	for i := 0; i < len(ge.auras); {
+	var triggeringTypes card.TypeSet
+	typesResolved := false
+	matchTypes := func() card.TypeSet {
+		if !typesResolved {
+			if triggeringCard != nil {
+				triggeringTypes = triggeringCard.Types(ge)
+			}
+			typesResolved = true
+		}
+		return triggeringTypes
+	}
+
+	auraN := len(ge.auras)
+	for i := 0; i < auraN; {
 		a := ge.auras[i]
-		if a.TriggerType() != t || (a.OncePerTurn() && a.FiredThisTurn()) {
+		if a.TriggerType() != t || (a.OncePerTurn() && a.FiredThisTurn()) || !a.Matches(matchTypes()) {
 			i++
 			continue
 		}
 		ge.currentAuraIdx = i
 		ge.currentAuraDestroyed = false
 		a.Fire(ge, ge.logger)
-		if !ge.currentAuraDestroyed {
+		if ge.currentAuraDestroyed {
+			// The fired aura was spliced out; later snapshot entries shifted down.
+			auraN--
+		} else {
 			ge.auras[i].SetFiredThisTurn(true)
 			i++
 		}
@@ -408,14 +434,10 @@ func (ge *GameEngine) FireTriggers(t triggertype.Type, triggeringCard card.Card)
 	ge.currentAuraIdx = -1
 
 	if n := len(ge.triggers); n > 0 {
-		var triggeringTypes card.TypeSet
-		if triggeringCard != nil {
-			triggeringTypes = triggeringCard.Types(ge)
-		}
 		firedAny := false
 		for i := 0; i < n; i++ {
 			tr := ge.triggers[i]
-			if tr.TriggerType() != t || !tr.Matches(triggeringTypes) {
+			if tr.TriggerType() != t || !tr.Matches(matchTypes()) {
 				continue
 			}
 			tr.Fire(ge, ge.logger)
@@ -424,7 +446,7 @@ func (ge *GameEngine) FireTriggers(t triggertype.Type, triggeringCard card.Card)
 		if firedAny {
 			kept := ge.triggers[:0]
 			for i, tr := range ge.triggers {
-				if i < n && tr.TriggerType() == t && tr.Matches(triggeringTypes) {
+				if i < n && tr.TriggerType() == t && tr.Matches(matchTypes()) {
 					continue
 				}
 				kept = append(kept, tr)
@@ -637,7 +659,7 @@ func (ge *GameEngine) SilverCount() int    { return itemCountByName(ge.items, to
 func (ge *GameEngine) CopperCount() int    { return itemCountByName(ge.items, tokenNameCopper) }
 
 // bumpOrCreateAura increments an existing aura entry matching name on s, or appends
-// a fresh one built by build(n). Flips gs.auraCreated.
+// a new one built by build(n). Flips gs.auraCreated.
 func bumpOrCreateAura(s *GameState, name string, build func(int) Aura, n int) {
 	s.auraCreated = true
 	for i := range s.auras {
