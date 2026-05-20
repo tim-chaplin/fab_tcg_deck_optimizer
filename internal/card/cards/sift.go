@@ -9,8 +9,8 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 )
 
-// siftPlay cycles up to 4 hand cards to the deck bottom, then draws that many — the printed
-// "up to 4" gate, capped at hand size.
+// siftPlay cycles up to 4 hand cards to the deck bottom, then draws that many. The count is
+// capped at hand size.
 func siftPlay(ge card.GameEngine, l card.Logger, self *card.CardState) {
 	n := len(ge.Hand())
 	if n > 4 {
