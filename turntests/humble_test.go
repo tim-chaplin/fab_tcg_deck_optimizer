@@ -12,9 +12,7 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 )
 
-// Tests that each Humble variant contributes its printed power as damage when a pitch funds
-// its cost 2 — the hero-ability suppression rider is unmodelled, so it scores as a vanilla
-// attack.
+// Tests that each Humble variant scores its printed power when a pitch funds its cost.
 func TestHumble_ScoresPrintedPower(t *testing.T) {
 	for _, tc := range []struct {
 		c    card.Card
@@ -26,9 +24,11 @@ func TestHumble_ScoresPrintedPower(t *testing.T) {
 	} {
 		d := deck.New(heroes.Viserai{}, nil, fillerDeck())
 		hand := []card.Card{tc.c, testutils.BluePitch{}}
-		summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingDamage(0).Build(), hand)
+		state := gameengine.GameStateBuilder().SetIncomingDamage(0).Build()
+		summary := sim.EvalOneTurnForTesting(d, state, hand)
 		if got := summary.Value; got != tc.want {
-			t.Errorf("%s: Value = %d, want %d (printed power, BluePitch funds cost 2)", tc.c.Name(), got, tc.want)
+			t.Errorf("%s: Value = %d, want %d (printed power, BluePitch funds cost 2)",
+				tc.c.Name(), got, tc.want)
 		}
 	}
 }

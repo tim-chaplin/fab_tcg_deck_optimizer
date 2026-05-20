@@ -4,8 +4,9 @@
 // Text: "When this hits a hero, they lose all hero card abilities until the end of their next
 // turn."
 //
-// not implemented: the hero-ability suppression rider is an opponent-side debuff with no tempo or
-// damage value in this single-player optimizer, so Humble models as a vanilla attack.
+// The on-hit hero-ability suppression rider is not modelled: it's an opponent-side debuff with no
+// tempo or damage value to the card-vs-deck Value the simulator optimises, so Humble scores as a
+// vanilla attack.
 
 package cards
 
