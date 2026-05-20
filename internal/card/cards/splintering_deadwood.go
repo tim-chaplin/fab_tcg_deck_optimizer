@@ -4,7 +4,7 @@
 // Runechant token."
 //
 // The "you may destroy an aura you control" leg is optional, so the trade only happens when
-// it is worth a Runechant; see GameEngine.DestroyOwnedAura for which auras qualify.
+// it is worth a Runechant; see GameEngine.SacrificePayoffAura for which auras qualify.
 
 package cards
 
@@ -22,7 +22,7 @@ func splinteringDeadwoodPlay(ge card.GameEngine, l card.Logger, self *card.CardS
 // splinteringDeadwoodTrade runs one leg of the rider: destroy an owned aura, and when one
 // is destroyed, create the Runechant.
 func splinteringDeadwoodTrade(ge card.GameEngine, l card.Logger, self *card.CardState) {
-	if !ge.DestroyOwnedAura() {
+	if !ge.SacrificePayoffAura() {
 		return
 	}
 	ge.CreateRunechants(1)

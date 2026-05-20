@@ -484,12 +484,12 @@ func (ge *GameEngine) DestroyAura(addToGraveyard bool) {
 	}
 }
 
-// DestroyOwnedAura destroys one aura the player controls and reports whether it destroyed
-// one. It targets the first aura whose source card carries a leave-the-arena payoff
-// (card.LeavesArenaAura), fires that OnLeavesArena clause, and graveyards the card. Auras
-// with no leave payoff are skipped: destroying one to grant a bare Runechant is
-// net-neutral.
-func (ge *GameEngine) DestroyOwnedAura() bool {
+// SacrificePayoffAura destroys one aura the player controls and reports whether it
+// destroyed one. It targets the first aura whose source card carries a leave-the-arena
+// payoff (card.LeavesArenaAura), fires that OnLeavesArena clause, and graveyards the card.
+// Auras with no leave payoff are skipped — the method exists to cash a payoff on demand,
+// so there is nothing to gain from destroying one without it.
+func (ge *GameEngine) SacrificePayoffAura() bool {
 	for i, a := range ge.auras {
 		la, ok := a.SourceCard().(card.LeavesArenaAura)
 		if !ok {
