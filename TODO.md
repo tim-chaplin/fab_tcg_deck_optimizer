@@ -32,8 +32,6 @@ implemented` riders across the card roster.
   flat damage-equivalent. Each new token kind needs a `TokenType` enum entry in
   `internal/sim/tokens.go`, a handler describing the destroy condition, and a `s.CreateX`
   helper paired with the relevant card-mint sites.
-- **Action-point tracking.** The sim doesn't track action points; cards that grant them
-  drop the tempo payoff entirely.
 - **Marks and "attacked them this turn" tracking.** No per-hero mark state. Cards that gate
   on a marked defender / attacker fall back to credit-unconditionally or drop-unconditionally.
 - **Opponent hand / arsenal / banished-zone visibility.** The sim doesn't expose the
