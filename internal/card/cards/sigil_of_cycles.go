@@ -10,15 +10,16 @@ import (
 )
 
 func (SigilOfCyclesBlue) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
-	ge.CreateStartOfTurnAura(self, sigilOfCyclesAuraHandler, 1)
+	ge.CreateStartOfTurnAura(self, selfDestructAuraHandler, 1)
 }
 
-func sigilOfCyclesAuraHandler(ge card.GameEngine, l card.Logger, a card.Aura) {
-	a.Destroy(true)
-	discarded, ok := ge.Discard()
+// OnLeavesArena runs the "when this leaves the arena" clause: discard a card, then draw a
+// card. An empty hand drops the rider.
+func (c SigilOfCyclesBlue) OnLeavesArena(g card.GameEngine, l card.Logger) {
+	discarded, ok := g.Discard()
 	if !ok {
 		return
 	}
-	ge.DrawOne()
-	l.AppendPostTriggerf(a.CardName(), 0, "Discarded %s and drew", discarded.DisplayName())
+	g.DrawOne()
+	l.AppendPostTriggerf(c.DisplayName(), 0, "Discarded %s and drew", discarded.DisplayName())
 }

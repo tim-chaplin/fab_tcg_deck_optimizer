@@ -2,8 +2,6 @@
 // Only printed in Blue.
 // Text: "Go again. At the beginning of your action phase, destroy this. When this leaves the
 // arena, create a Runechant token."
-//
-// Handler creates 1 Runechant next turn.
 
 package cards
 
@@ -12,12 +10,11 @@ import (
 )
 
 func (SigilOfDeadwoodBlue) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
-	ge.CreateStartOfTurnAura(self, sigilOfDeadwoodAuraHandler, 1)
+	ge.CreateStartOfTurnAura(self, selfDestructAuraHandler, 1)
 }
 
-// sigilOfDeadwoodAuraHandler creates 1 runechant on the next-turn fire and destroys the aura.
-func sigilOfDeadwoodAuraHandler(ge card.GameEngine, l card.Logger, a card.Aura) {
-	ge.CreateRunechants(1)
-	l.AppendPostTrigger(a.CardName(), "Created a runechant", 1)
-	a.Destroy(true)
+// OnLeavesArena runs the "when this leaves the arena" clause: create 1 Runechant.
+func (c SigilOfDeadwoodBlue) OnLeavesArena(g card.GameEngine, l card.Logger) {
+	g.CreateRunechants(1)
+	l.AppendPostTrigger(c.DisplayName(), "Created a runechant", 1)
 }
