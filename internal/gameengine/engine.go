@@ -37,16 +37,15 @@ func (ge *GameEngine) Hand() []card.Card {
 	return ge.hand
 }
 
-// AppendHand inserts c into the hand, flipping IsCacheable to false. The hand is kept
-// sorted by Card.ID() at all times — see insertHandSorted.
+// AppendHand inserts c into the hand at its Card.ID()-sorted position, flipping
+// IsCacheable to false.
 func (ge *GameEngine) AppendHand(c card.Card) {
 	ge.insertHandSorted(c)
 }
 
-// insertHandSorted places c at the position that keeps the hand ordered by Card.ID(), and
-// flips IsCacheable to false. Keeping the hand sorted by construction means every draw —
-// start-of-turn aura, mid-chain DrawOne, end-of-turn refill — lands a canonical multiset,
-// so the chain runner and the eval cache never need a separate normalising sort.
+// insertHandSorted inserts c at the position that keeps the hand ordered by Card.ID(),
+// flipping IsCacheable to false. Sorting on every insert keeps the hand a canonical
+// multiset, which the chain runner and the eval-cache key both depend on.
 func (ge *GameEngine) insertHandSorted(c card.Card) {
 	ge.cacheable = false
 	i := sort.Search(len(ge.hand), func(j int) bool { return ge.hand[j].ID() > c.ID() })

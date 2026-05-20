@@ -10,14 +10,15 @@ import (
 // but the project prefers no testutils dependency at all so internal/card / internal/token / internal/trigger
 // tests (which would cycle through testutils) stay consistent with internal/gameengine.
 
-// stubCard is a minimal card.Card with configurable attack — exercises the fields each
-// test reads, zero values for the rest.
+// stubCard is a minimal card.Card with configurable id and attack — exercises the fields
+// each test reads, zero values for the rest. The zero-value id is ids.InvalidCard.
 type stubCard struct {
 	name   string
 	attack int
+	id     ids.CardID
 }
 
-func (c stubCard) ID() ids.CardID                                   { return ids.InvalidCard }
+func (c stubCard) ID() ids.CardID                                   { return c.id }
 func (c stubCard) Name() string                                     { return c.name }
 func (c stubCard) DisplayName() string                              { return c.name }
 func (stubCard) Cost(card.GameEngine) int                           { return 0 }

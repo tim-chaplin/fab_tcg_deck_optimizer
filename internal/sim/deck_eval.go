@@ -233,8 +233,7 @@ func runOneShuffle(masterDeck *deck.Deck, scratch *shuffleScratch, stats *deck.S
 		SetArcaneIncomingDamage(mp.ArcaneIncomingDamage).
 		Build()
 
-	// Initial hand drawn into the reusable handBuf, sorted so the hand-sorted invariant
-	// holds from turn one.
+	// Initial hand drawn into the reusable handBuf, sorted so it is canonical from turn one.
 	handBuf := scratch.handBuf
 	h := handBuf[:handSize]
 	for i, c := range d.Draw(handSize) {
@@ -317,9 +316,8 @@ func playOneTurn(
 		}
 	}
 
-	// The hand arrives sorted by Card.ID() (every draw path keeps it so) and
-	// processAurasAtStartOfTurn's reveal / draw / discard handlers preserve that order, so
-	// the chain runner and cache key see a canonical multiset with no normalising sort.
+	// Hand stays sorted by Card.ID() through the aura handlers, so the chain runner and
+	// cache key see a canonical multiset.
 	processAurasAtStartOfTurn(state, d)
 	if snapshot != nil {
 		summary = runReplayForTurn(snapshot, logger)
@@ -354,8 +352,7 @@ func playOneTurn(
 		for _, c := range postChainDeck.Draw(toDraw) {
 			nextHand = append(nextHand, c.(card.Card))
 		}
-		// Re-sort: held is already ordered, but the fresh draws are in deck order. The
-		// next turn relies on the hand arriving sorted.
+		// Fresh draws arrive in deck order; sort so next turn's hand is canonical.
 		sortHandByID(nextHand)
 	}
 
