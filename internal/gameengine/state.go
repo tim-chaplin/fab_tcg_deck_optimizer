@@ -36,7 +36,6 @@ type GameState struct {
 
 	actionPoints         int
 	value                int
-	cardsDrawn           int
 	incomingDamage       int
 	damageBlocked        int
 	arcaneIncomingDamage int
@@ -310,7 +309,6 @@ func (gs *GameState) ResetEphemeralState() {
 	gs.attackReactionTarget = nil
 	gs.actionPoints = 1
 	gs.value = 0
-	gs.cardsDrawn = 0
 	gs.damageBlocked = 0
 	gs.blockTotal = 0
 	gs.currentAuraDestroyed = false
@@ -433,9 +431,6 @@ func (gs *GameState) AddActionPoints(n int) { gs.actionPoints += n }
 func (gs *GameState) Value() int     { return gs.value }
 func (gs *GameState) SetValue(v int) { gs.value = v }
 func (gs *GameState) AddValue(n int) { gs.value += n }
-
-func (gs *GameState) CardsDrawn() int     { return gs.cardsDrawn }
-func (gs *GameState) SetCardsDrawn(n int) { gs.cardsDrawn = n }
 
 // RemainingUnblockedDamage returns the opponent damage still unblocked this turn — the
 // constant matchup figure minus everything defense has absorbed so far.

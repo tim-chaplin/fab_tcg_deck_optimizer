@@ -191,11 +191,13 @@ func (RedPitch) Types(card.GameEngine) card.TypeSet {
 func (RedPitch) GoAgain(card.GameEngine) bool                                 { return false }
 func (RedPitch) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {}
 
-// BluePitch is a pure-pitch generic non-attack action: pitches 3, no attack, no defense,
-// no go again. Tests at the blue-pitch tier prefer cards.TitaniumBaubleBlue (the printed
-// Resource-typed bauble), but a few tests need a pitch source with no defense — Titanium's
-// printed 3{d} would change the optimal partition. Use this when the test relies on the
-// pitch source being block-irrelevant.
+// BluePitch is a pure-pitch generic Resource: pitches 3, no attack, no defense, no go
+// again. Typed Resource so it can only be pitched or held — a playable 0-value card would
+// let a chain pad its cards-played count with a no-op, which can't happen in a real game.
+// Tests at the blue-pitch tier prefer cards.TitaniumBaubleBlue (a printed Resource-typed
+// bauble), but a few need a pitch source with no defense — Titanium's printed 3{d} would
+// change the optimal partition. Use this when the test relies on the pitch source being
+// block-irrelevant.
 type BluePitch struct{}
 
 func (BluePitch) ID() ids.CardID           { return FakeBluePitch }
@@ -206,7 +208,7 @@ func (BluePitch) Pitch() int               { return 3 }
 func (BluePitch) Attack() int              { return 0 }
 func (BluePitch) Defense() int             { return 0 }
 func (BluePitch) Types(card.GameEngine) card.TypeSet {
-	return card.NewTypeSet(card.TypeGeneric, card.TypeAction)
+	return card.NewTypeSet(card.TypeGeneric, card.TypeResource)
 }
 func (BluePitch) GoAgain(card.GameEngine) bool                                 { return false }
 func (BluePitch) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {}

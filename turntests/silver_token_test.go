@@ -31,11 +31,8 @@ func TestSilverToken_SpendsToFillArsenal(t *testing.T) {
 	if summary.State.SilverCount() != 0 {
 		t.Fatalf("Silver after turn = %d, want 0 (the only token spent)", summary.State.SilverCount())
 	}
-	if summary.State.CardsDrawn() != 1 {
-		t.Fatalf("CardsDrawn = %d, want 1 (Silver ability draws one card)", summary.State.CardsDrawn())
-	}
 	if summary.State.Arsenal() == nil {
-		t.Fatalf("Arsenal() = nil, want the drawn card promoted into the slot")
+		t.Fatalf("Arsenal() = nil, want the Silver-drawn card promoted into the slot")
 	}
 	if len(summary.State.Hand()) != d.Hero.(hero.Hero).Intelligence() {
 		t.Fatalf("Hand() size = %d, want %d (Silver-spend draw should leave enough deck for next turn's full deal)",
@@ -60,10 +57,7 @@ func TestSilverToken_SpendsAndSwings(t *testing.T) {
 	if summary.State.SilverCount() != 0 {
 		t.Fatalf("Silver after turn = %d, want 0 (the only token spent)", summary.State.SilverCount())
 	}
-	if summary.State.CardsDrawn() != 1 {
-		t.Fatalf("CardsDrawn = %d, want 1 (Silver ability draws one card)", summary.State.CardsDrawn())
-	}
 	if summary.State.Arsenal() == nil {
-		t.Fatalf("Arsenal() = nil, want the drawn card promoted into the slot")
+		t.Fatalf("Arsenal() = nil, want the Silver-drawn card promoted into the slot")
 	}
 }

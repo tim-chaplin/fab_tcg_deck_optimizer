@@ -53,7 +53,7 @@ func (e *Evaluator) findBest(weapons []weapon.Weapon, hand []card.Card, d *deck.
 	cacheable := true
 	var bestSwung []string
 	var runningSeen bool
-	var runningFutureValue int
+	var runningScore chainScore
 
 	rolesBuf := bufs.rolesBuf[:totalN]
 	pvals := bufs.pitchVals[:totalN]
@@ -79,25 +79,14 @@ func (e *Evaluator) findBest(weapons []weapon.Weapon, hand []card.Card, d *deck.
 			}
 
 			v := attackDealt + defenseDealt
-			futureValuePlayed := pendingFutureValueFromState(winner)
-			if runningSeen {
-				cmp := chainScoreCmp(v, winner.CardsDrawn(), futureValuePlayed,
-					best.Value, best.State.CardsDrawn(), runningFutureValue)
-				if cmp < 0 {
-					return
-				}
-				if cmp == 0 {
-					willOccupy := arsenalAtChainStart != nil || len(winner.Hand()) > 0
-					runningWillOccupy := best.State.Arsenal() != nil || len(best.State.Hand()) > 0
-					if !willOccupy || runningWillOccupy {
-						return
-					}
-				}
+			score := chainScoreOf(winner, v)
+			if runningSeen && score.cmp(runningScore) <= 0 {
+				return
 			}
 			winner.SetArsenal(arsenalAtChainStart)
 			best.State = winner
 			best.Value = v
-			runningFutureValue = futureValuePlayed
+			runningScore = score
 			runningSeen = true
 			bestSwung = swung
 			for j := 0; j < totalN; j++ {
@@ -423,26 +412,36 @@ func containsModalBlocker(cards []card.Card) bool {
 // modal blockers.
 const noBlockBudgetCap = 1 << 30
 
-// chainScoreCmp lexicographically compares two leaf scores by (value, cardsDrawn,
-// futureValue).
-func chainScoreCmp(aValue, aCardsDrawn, aFutureValue, bValue, bCardsDrawn, bFutureValue int) int {
-	if aValue != bValue {
-		if aValue > bValue {
+// chainScore is a leaf's comparable score. cmp ranks it lexicographically:
+//   - value: the chain-step damage / block credited this turn.
+//   - cardsPlayed: cards played this turn. A played card does something useful even when
+//     the payoff lands next turn (an aura ticks later, a token mints currency), so
+//     playing > holding when value ties.
+//   - totalCards: cards available next turn — the post-refill hand (held cards topped up
+//     to intellect) plus an occupied arsenal slot.
+//   - totalCounters: summed Count of every Aura plus every Item — pending aura fires +
+//     token stockpile, the weakest signal.
+type chainScore struct {
+	value         int
+	cardsPlayed   int
+	totalCards    int
+	totalCounters int
+}
+
+// cmp returns 1 when a outranks b, -1 when b outranks a, 0 when they tie.
+func (a chainScore) cmp(b chainScore) int {
+	for _, d := range [...]int{
+		a.value - b.value,
+		a.cardsPlayed - b.cardsPlayed,
+		a.totalCards - b.totalCards,
+		a.totalCounters - b.totalCounters,
+	} {
+		if d > 0 {
 			return 1
 		}
-		return -1
-	}
-	if aCardsDrawn != bCardsDrawn {
-		if aCardsDrawn > bCardsDrawn {
-			return 1
+		if d < 0 {
+			return -1
 		}
-		return -1
-	}
-	if aFutureValue != bFutureValue {
-		if aFutureValue > bFutureValue {
-			return 1
-		}
-		return -1
 	}
 	return 0
 }

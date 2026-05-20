@@ -258,46 +258,28 @@ func TestPromoteRandomHandCardToArsenal_EmptyHandIsNoop(t *testing.T) {
 	}
 }
 
-// Tests the BeatsBest tiebreaker: at equal Value+pendingFutureValue, arsenal-occupied wins.
-func TestBeatsBest_ArsenalOccupancyTiebreaker(t *testing.T) {
-	// Seed best: Value=10, no future-value plays, arsenal NOT occupied.
-	best := TurnSummary{Value: 10}
-	// Candidate with equal V/future-value but arsenal WILL be occupied — should beat.
-	if !BeatsBest(10, 0, true, best, 0, false) {
-		t.Error("willOccupy=true should beat a tied best with willOccupy=false")
+// Tests chainScore.cmp's lexicographic ranking: value, then cardsPlayed, then totalCards,
+// then totalCounters.
+func TestChainScore_Cmp(t *testing.T) {
+	cases := []struct {
+		name string
+		a, b chainScore
+		want int
+	}{
+		{"value outranks everything", chainScore{value: 10}, chainScore{value: 11, cardsPlayed: 9, totalCards: 9, totalCounters: 9}, -1},
+		{"cardsPlayed breaks a value tie", chainScore{value: 5, cardsPlayed: 2}, chainScore{value: 5, cardsPlayed: 1}, 1},
+		{"cardsPlayed outranks totalCards", chainScore{value: 5, cardsPlayed: 2}, chainScore{value: 5, cardsPlayed: 1, totalCards: 9}, 1},
+		{"totalCards breaks a cardsPlayed tie", chainScore{value: 5, cardsPlayed: 1, totalCards: 3}, chainScore{value: 5, cardsPlayed: 1, totalCards: 2}, 1},
+		{"totalCards outranks totalCounters", chainScore{value: 5, totalCards: 1}, chainScore{value: 5, totalCounters: 9}, 1},
+		{"totalCounters breaks a totalCards tie", chainScore{value: 5, totalCards: 2, totalCounters: 1}, chainScore{value: 5, totalCards: 2}, 1},
+		{"fully equal", chainScore{value: 5, cardsPlayed: 1, totalCards: 2}, chainScore{value: 5, cardsPlayed: 1, totalCards: 2}, 0},
 	}
-	// Candidate with equal V and arsenal NOT occupied — same as best, should NOT beat.
-	if BeatsBest(10, 0, false, best, 0, false) {
-		t.Error("willOccupy=false should not beat a tied best with willOccupy=false")
-	}
-	// Best already occupies; candidate also occupies — no advantage, should NOT beat.
-	if BeatsBest(10, 0, true, best, 0, true) {
-		t.Error("willOccupy=true should not beat a tied best that also has willOccupy=true")
-	}
-	// Strict-wins on Value still takes precedence over the occupancy tiebreaker.
-	if !BeatsBest(11, 0, false, best, 0, true) {
-		t.Error("higher Value should beat even when the candidate has no occupancy advantage")
-	}
-	// Strict-loses on Value — can't be rescued by occupancy.
-	if BeatsBest(9, 0, true, best, 0, false) {
-		t.Error("lower Value should lose regardless of occupancy advantage")
-	}
-}
-
-// Tests the BeatsBest tiebreaker: at equal Value, higher pendingFutureValue wins regardless
-// of arsenal occupancy.
-func TestBeatsBest_FutureValueTiebreaker(t *testing.T) {
-	best := TurnSummary{Value: 5}
-	// Candidate has higher pendingFutureValue, best has occupancy — candidate wins.
-	if !BeatsBest(5, 1, false, best, 0, true) {
-		t.Error("more pendingFutureValue should beat a tied best with occupancy advantage")
-	}
-	// Reverse: best has higher pendingFutureValue, candidate has occupancy — candidate loses.
-	if BeatsBest(5, 0, true, best, 1, false) {
-		t.Error("less pendingFutureValue should lose even with occupancy advantage")
-	}
-	// Strict-wins on Value still takes precedence over the future-value tiebreaker.
-	if !BeatsBest(6, 0, false, best, 5, false) {
-		t.Error("higher Value should beat even when the candidate has less pendingFutureValue")
+	for _, tc := range cases {
+		if got := tc.a.cmp(tc.b); got != tc.want {
+			t.Errorf("%s: a.cmp(b) = %d, want %d", tc.name, got, tc.want)
+		}
+		if got := tc.b.cmp(tc.a); got != -tc.want {
+			t.Errorf("%s: b.cmp(a) = %d, want %d (antisymmetric)", tc.name, got, -tc.want)
+		}
 	}
 }

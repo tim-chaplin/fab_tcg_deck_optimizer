@@ -197,19 +197,16 @@ func (ge *GameEngine) AddToGraveyard(c card.Card) {
 }
 
 // DrawOne models a mid-turn draw: pop the top of the deck and append it to Hand. No-op
-// on an empty deck. Bumps CardsDrawn so the partition tiebreaker can prefer chains with
-// more draws. Inherits the IsCacheable flip via PopDeckTop.
+// on an empty deck. Inherits the IsCacheable flip via PopDeckTop.
 func (ge *GameEngine) DrawOne() {
 	c, ok := ge.PopDeckTop()
 	if !ok {
 		return
 	}
 	ge.hand = append(ge.hand, c)
-	ge.cardsDrawn++
 }
 
-// PonderDrawOne pops the deck top into the hand without bumping CardsDrawn — Ponder draws
-// don't count as "draws" for the partition tiebreaker. Returns false on an empty deck.
+// PonderDrawOne pops the deck top into the hand and returns false on an empty deck.
 func (ge *GameEngine) PonderDrawOne() bool {
 	c, ok := ge.PopDeckTop()
 	if !ok {
