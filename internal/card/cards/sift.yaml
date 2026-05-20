@@ -4,8 +4,6 @@ types:
     - Action
 cost: 0
 goAgain: true
-markers:
-    - NotImplemented
 text: |-
     Put up to 4 cards from your hand on the bottom of your deck, then draw that many cards.
     **Go again**
