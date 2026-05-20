@@ -887,14 +887,19 @@ func chainScoreOf(winner *gameengine.GameState, value int) chainScore {
 	}
 }
 
-// pendingTotalCardsFromState reports len(hand) + 1-if-arsenal-set at end of chain — the
-// partition's primary tiebreaker after Value. Captures "real cards we'll have next turn
-// before refill".
+// pendingTotalCardsFromState projects the cards available next turn: the post-refill hand
+// (held cards topped up to intellect) plus an occupied arsenal. Scoring the post-refill
+// hand — not the bare end-of-chain hand — is what lets the tiebreaker credit a chain that
+// empties its hand into attacks and arsenals a card, since the emptied hand refills back
+// up regardless. The refill is projected uncapped: a near-decked-out chain is scored
+// slightly optimistically.
 func pendingTotalCardsFromState(gs *gameengine.GameState) int {
 	if gs == nil {
 		return 0
 	}
-	n := len(gs.Hand())
+	held := len(gs.Hand())
+	intellect := gs.Hero().(hero.Hero).Intelligence()
+	n := held + endOfTurnDraws(held, intellect)
 	if gs.Arsenal() != nil {
 		n++
 	}

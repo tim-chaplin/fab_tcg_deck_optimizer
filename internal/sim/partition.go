@@ -417,8 +417,8 @@ const noBlockBudgetCap = 1 << 30
 //   - cardsPlayed: cards played this turn. A played card does something useful even when
 //     the payoff lands next turn (an aura ticks later, a token mints currency), so
 //     playing > holding when value ties.
-//   - totalCards: len(hand) + 1-if-arsenal-set at chain end — concrete cards available
-//     next turn before refill.
+//   - totalCards: cards available next turn — the post-refill hand (held cards topped up
+//     to intellect) plus an occupied arsenal slot.
 //   - totalCounters: summed Count of every Aura plus every Item — pending aura fires +
 //     token stockpile, the weakest signal.
 type chainScore struct {

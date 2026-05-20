@@ -349,7 +349,8 @@ func playOneTurn(
 	postChainDeck.PutBottom(recycled)
 
 	held := summary.State.Hand()
-	toDraw := state.Hero().(hero.Hero).Intelligence() - len(held)
+	intellect := state.Hero().(hero.Hero).Intelligence()
+	toDraw := endOfTurnDraws(len(held), intellect)
 	if toDraw > postChainDeck.Size() {
 		toDraw = postChainDeck.Size()
 	}
@@ -366,6 +367,18 @@ func playOneTurn(
 
 	summary.State.SetHand(nextHand)
 	return summary, snap
+}
+
+// endOfTurnDraws reports how many cards the end-of-turn refill draws to bring a hand of
+// heldLen up to intellect (zero when the hand already meets it). Sole source of truth for
+// the refill target — the real refill and the partition's totalCards tiebreaker both
+// route through here so they cannot drift. The real refill caps the result at its
+// remaining deck size; the tiebreaker projects an uncapped refill.
+func endOfTurnDraws(heldLen, intellect int) int {
+	if n := intellect - heldLen; n > 0 {
+		return n
+	}
+	return 0
 }
 
 // advanceToNextTurn clears per-turn ephemerals (value, cardsPlayed, ...) and detaches any
