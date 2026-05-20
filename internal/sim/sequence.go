@@ -96,7 +96,7 @@ func newSequenceContext(
 }
 
 // bestAttackWithWeapons enumerates phase / weapon masks for one partition leaf and
-// returns the best (damage, futureValue, budget, swungWeapons, winnerState, legal,
+// returns the best (damage, defenseDealt, budget, swungWeapons, winnerState, legal,
 // cacheable) tuple. Each per-leaf state branches off via masterState.Copy().
 func bestAttackWithWeapons(
 	masterState *gameengine.GameState,
@@ -146,8 +146,7 @@ func bestAttackWithWeapons(
 
 	copy(bufs.attackerBuf, attackers)
 
-	bestDealt := 0
-	bestFutureValue := 0
+	var bestScore chainScore
 	var bestSwung []string
 	var bestBudget chainBudget
 	var bestWinner *gameengine.GameState
@@ -211,7 +210,7 @@ func bestAttackWithWeapons(
 					allAttackers = append(allAttackers, ab)
 				}
 			}
-			dealt, futureValue, winner, legal := ctx.bestSequence(allAttackers)
+			score, winner, legal := ctx.bestSequence(allAttackers)
 			if !legal {
 				continue
 			}
@@ -225,20 +224,8 @@ func bestAttackWithWeapons(
 			if phase.hasDefendPitches && phase.defendBudget-drCost >= phase.maxDefendPitch {
 				continue
 			}
-			candidateDrawn := winner.CardsDrawn()
-			var bestDrawn int
-			if bestWinner != nil {
-				bestDrawn = bestWinner.CardsDrawn()
-			}
-			candidateHand := len(winner.Hand())
-			var bestHand int
-			if bestWinner != nil {
-				bestHand = len(bestWinner.Hand())
-			}
-			cmp := chainScoreCmp(dealt, candidateDrawn, futureValue, bestDealt, bestDrawn, bestFutureValue)
-			if !foundFeasible || cmp > 0 || (cmp == 0 && candidateHand > bestHand) {
-				bestDealt = dealt
-				bestFutureValue = futureValue
+			if !foundFeasible || score.cmp(bestScore) > 0 {
+				bestScore = score
 				bestSwung = bufs.weaponNames[wmask&weaponBitsMask]
 				bestBudget = chainBudget{resource: phase.attackBudget, maxPitch: phase.maxAttackPitch, hasAttackPitches: phase.hasAttackPitches}
 				// Hand the superseded leaf-best to bufs.recycledState so the next
@@ -256,7 +243,7 @@ func bestAttackWithWeapons(
 	if !foundFeasible {
 		return 0, 0, chainBudget{}, nil, nil, false, defenseCacheable
 	}
-	return bestDealt, defenseDealt, bestBudget, bestSwung, bestWinner, true, ctx.cacheable && defenseCacheable
+	return bestScore.value, defenseDealt, bestBudget, bestSwung, bestWinner, true, ctx.cacheable && defenseCacheable
 }
 
 // drCostProbe returns the pooled *GameEngine seeded with a runechant aura at count
@@ -573,15 +560,14 @@ func (ctx *sequenceContext) preparePermState(playedAttackers []*card.CardState, 
 	return s
 }
 
-// bestSequence tries every ordering of attackers and returns the max total damage plus
-// the pendingFutureValue at the end of the winning permutation. legal=true when at
-// least one ordering is playable. Returns the winning *GameState via the third return
-// value.
-func (ctx *sequenceContext) bestSequence(attackers []card.Card) (int, int, *gameengine.GameState, bool) {
+// bestSequence tries every ordering of attackers and returns the winning permutation's
+// chainScore. legal=true when at least one ordering is playable. Returns the winning
+// *GameState via the second return value.
+func (ctx *sequenceContext) bestSequence(attackers []card.Card) (chainScore, *gameengine.GameState, bool) {
 	n := len(attackers)
 	if n == 0 {
 		if len(ctx.attackPitchPerm) > 0 {
-			return 0, 0, nil, false
+			return chainScore{}, nil, false
 		}
 		emptyAttackers := ctx.bufs.ptrBuf[:0]
 		permState := ctx.preparePermState(emptyAttackers, 0)
@@ -592,7 +578,7 @@ func (ctx *sequenceContext) bestSequence(attackers []card.Card) (int, int, *game
 		ctx.promoteWinnerDeck(permState)
 		ctx.promoteWinnerState(permState)
 		// permState.Value() carries the seeded baseline plus any EndOfTurn fire delta.
-		return permState.Value(), pendingFutureValueFromState(permState), permState, true
+		return chainScoreOf(permState, permState.Value()), permState, true
 	}
 	pcBuf := ctx.bufs.pcBuf[:n]
 	permMeta := ctx.bufs.permMeta[:n]
@@ -601,8 +587,7 @@ func (ctx *sequenceContext) bestSequence(attackers []card.Card) (int, int, *game
 		ctx.seedChainEntry(&pcBuf[idx], c, idx)
 	}
 
-	best := 0
-	bestFutureValue := 0
+	var bestScore chainScore
 	var bestWinner *gameengine.GameState
 	foundLegal := false
 	pitchPerm := ctx.attackPitchPerm
@@ -613,22 +598,18 @@ func (ctx *sequenceContext) bestSequence(attackers []card.Card) (int, int, *game
 		tupleCount *= int(permMeta[i].modes)
 	}
 	hasModal := tupleCount > 1
-	bestCardsDrawn := 0
 	tryPitchOrdering := func() {
 		tryOnce := func() {
-			dmg, futureValue, _, winner, legal := ctx.playSequenceWithMeta(n)
+			dmg, _, _, winner, legal := ctx.playSequenceWithMeta(n)
 			if !legal {
 				return
 			}
 			if ctx.cacheable && !winner.IsCacheable() {
 				ctx.cacheable = false
 			}
-			drawn := winner.CardsDrawn()
-			cmp := chainScoreCmp(dmg, drawn, futureValue, best, bestCardsDrawn, bestFutureValue)
-			if !foundLegal || cmp > 0 {
-				best = dmg
-				bestCardsDrawn = drawn
-				bestFutureValue = futureValue
+			score := chainScoreOf(winner, dmg)
+			if !foundLegal || score.cmp(bestScore) > 0 {
+				bestScore = score
 				foundLegal = true
 				// A prior best is superseded — hand its *GameState to bufs.recycledState so
 				// the next preparePermState reuses it instead of allocating a fresh struct.
@@ -698,14 +679,14 @@ func (ctx *sequenceContext) bestSequence(attackers []card.Card) (int, int, *game
 			i++
 		}
 	}
-	return best, bestFutureValue, bestWinner, foundLegal
+	return bestScore, bestWinner, foundLegal
 }
 
 // playSequence is a thin wrapper that builds permMeta and calls playSequenceWithMeta.
 // Records the last-played state on ctx.permState so the test-only PermEngine accessor can
 // inspect the chain run's final state; bestSequence's hot path skips this write since the
 // winner state is plumbed through return values instead.
-func (ctx *sequenceContext) playSequence(order []card.Card) (damage int, futureValue int, residualBudget int, legal bool) {
+func (ctx *sequenceContext) playSequence(order []card.Card) (damage int, totalCounters int, residualBudget int, legal bool) {
 	n := len(order)
 	pcBuf := ctx.bufs.pcBuf
 	meta := ctx.bufs.permMeta[:n]
@@ -713,9 +694,9 @@ func (ctx *sequenceContext) playSequence(order []card.Card) (damage int, futureV
 		meta[i] = attackerMetaPtrFor(c)
 		ctx.seedChainEntry(&pcBuf[i], c, i)
 	}
-	d, fv, rb, winner, lg := ctx.playSequenceWithMeta(n)
+	d, tc, rb, winner, lg := ctx.playSequenceWithMeta(n)
 	ctx.permState = winner
-	return d, fv, rb, lg
+	return d, tc, rb, lg
 }
 
 // seedChainEntry initialises one pcBuf slot for a fresh chain pass.
@@ -741,9 +722,9 @@ func resetPerPermChainStepFields(pc *card.CardState) {
 }
 
 // playSequenceWithMeta runs the permutation currently held in ctx.bufs.pcBuf[:n] with
-// aligned permMeta[:n]. Returns (damage, futureValue, residualBudget, winner, legal).
+// aligned permMeta[:n]. Returns (damage, totalCounters, residualBudget, winner, legal).
 // A nil winner indicates an infeasible permutation.
-func (ctx *sequenceContext) playSequenceWithMeta(n int) (damage int, futureValue int, residualBudget int, winner *gameengine.GameState, legal bool) {
+func (ctx *sequenceContext) playSequenceWithMeta(n int) (damage int, totalCounters int, residualBudget int, winner *gameengine.GameState, legal bool) {
 	pcBuf := ctx.bufs.pcBuf
 	ptrBuf := ctx.bufs.ptrBuf
 	meta := ctx.bufs.permMeta[:n]
@@ -874,12 +855,14 @@ func (ctx *sequenceContext) playSequenceWithMeta(n int) (damage int, futureValue
 	if ge.HasEndOfTurnFire() {
 		ge.FireEndOfTurn()
 	}
-	return state.Value(), pendingFutureValueFromState(state), pool.remaining, state, true
+	return state.Value(), pendingTotalCountersFromState(state), pool.remaining, state, true
 }
 
-// pendingFutureValueFromState sums the Count of every Aura plus every Item on the state
-// at end of chain — the partition tiebreaker's "hidden later-turn payoff" signal.
-func pendingFutureValueFromState(gs *gameengine.GameState) int {
+// pendingTotalCountersFromState sums the Count of every Aura plus every Item on the
+// state at end of chain — the partition's secondary tiebreaker. Counts pending aura
+// fires alongside token stockpile at 1:1 weight; structurally less valuable than a real
+// card in hand or arsenal (see pendingTotalCardsFromState).
+func pendingTotalCountersFromState(gs *gameengine.GameState) int {
 	if gs == nil {
 		return 0
 	}
@@ -891,4 +874,29 @@ func pendingFutureValueFromState(gs *gameengine.GameState) int {
 		total += it.Count()
 	}
 	return total
+}
+
+// chainScoreOf builds a leaf's chainScore from its end-of-chain winner state and the
+// damage / block value credited this turn.
+func chainScoreOf(winner *gameengine.GameState, value int) chainScore {
+	return chainScore{
+		value:         value,
+		cardsPlayed:   len(winner.CardsPlayed()),
+		totalCards:    pendingTotalCardsFromState(winner),
+		totalCounters: pendingTotalCountersFromState(winner),
+	}
+}
+
+// pendingTotalCardsFromState reports len(hand) + 1-if-arsenal-set at end of chain — the
+// partition's primary tiebreaker after Value. Captures "real cards we'll have next turn
+// before refill".
+func pendingTotalCardsFromState(gs *gameengine.GameState) int {
+	if gs == nil {
+		return 0
+	}
+	n := len(gs.Hand())
+	if gs.Arsenal() != nil {
+		n++
+	}
+	return n
 }

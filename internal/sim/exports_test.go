@@ -37,7 +37,7 @@ func NewSequenceContextForTest(h hero.Hero, pitched, deck []card.Card, resourceB
 }
 
 // PlaySequence wraps (*sequenceContext).playSequence.
-func (s *SequenceContextForTest) PlaySequence(order []card.Card) (damage int, futureValue int, residualBudget int, legal bool) {
+func (s *SequenceContextForTest) PlaySequence(order []card.Card) (damage int, totalCounters int, residualBudget int, legal bool) {
 	return s.ctx.playSequence(order)
 }
 
@@ -50,11 +50,11 @@ func (s *SequenceContextForTest) PermEngine() *gameengine.GameEngine {
 	return s.ctx.permState.Engine()
 }
 
-// BestSequence wraps (*sequenceContext).bestSequence and returns only the
-// damage / future-value / legal triplet.
+// BestSequence wraps (*sequenceContext).bestSequence and returns the winning leaf's
+// damage / totalCounters / legal triplet.
 func (s *SequenceContextForTest) BestSequence(attackers []card.Card) (int, int, bool) {
-	d, fv, _, ok := s.ctx.bestSequence(attackers)
-	return d, fv, ok
+	score, _, ok := s.ctx.bestSequence(attackers)
+	return score.value, score.totalCounters, ok
 }
 
 // FireEndOfTurn re-exports the engine's end-of-turn fire for sim_test consumers.
@@ -63,14 +63,6 @@ func FireEndOfTurn(ge *gameengine.GameEngine) { ge.FireEndOfTurn() }
 // PromoteRandomHandCardToArsenal re-exports promoteRandomHandCardToArsenal.
 func PromoteRandomHandCardToArsenal(best *TurnSummary, startingHand []card.Card, arsenalCardIn card.Card) {
 	promoteRandomHandCardToArsenal(best, startingHand, arsenalCardIn)
-}
-
-// BeatsBest exposes findBest's partition-tiebreaker policy for direct testing.
-func BeatsBest(v, futureValuePlayed int, willOccupyArsenal bool, best TurnSummary, bestFutureValuePlayed int, bestWillOccupyArsenal bool) bool {
-	if cmp := chainScoreCmp(v, 0, futureValuePlayed, best.Value, 0, bestFutureValuePlayed); cmp != 0 {
-		return cmp > 0
-	}
-	return willOccupyArsenal && !bestWillOccupyArsenal
 }
 
 // DefendersDamage re-exports defendersDamage with an unbounded block budget.

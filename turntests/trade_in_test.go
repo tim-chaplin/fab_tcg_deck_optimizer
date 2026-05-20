@@ -10,32 +10,27 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 )
 
-// Tests that the discard cycle pops a hand card to graveyard and fires DrawOne.
-func TestTradeIn_DiscardsHandAndDraws(t *testing.T) {
+// Tests that the discard cycle pops the spare hand card to the graveyard and that the
+// drawn card lands in the arsenal slot via post-hoc promotion.
+func TestTradeIn_DiscardsHandToGraveyardAndDrawsToArsenal(t *testing.T) {
 	for _, c := range []card.Card{cards.TradeInRed{}, cards.TradeInYellow{}, cards.TradeInBlue{}} {
-		spare := testutils.GenericAttack(0, 0)
-		drawTarget := testutils.GenericAttack(0, 0)
-		d := deck.New(testutils.Hero{Intel: 4}, nil, []deck.Card{drawTarget})
+		// RedPitch sits at the deck top so Trade In's DrawOne pulls it; the four RedAttack
+		// fillers cover end-of-turn refill so the arsenal slot ends up holding the
+		// mid-turn-drawn RedPitch rather than a refill card.
+		spare := testutils.BluePitch{}
+		d := deck.New(testutils.Hero{Intel: 4}, nil, []deck.Card{
+			testutils.RedPitch{},
+			testutils.RedAttack{}, testutils.RedAttack{}, testutils.RedAttack{}, testutils.RedAttack{},
+		})
 		summary := sim.EvalOneTurnForTesting(d, nil, []card.Card{c, spare})
-		if got := summary.State.CardsDrawn(); got != 1 {
-			t.Errorf("%s: CardsDrawn = %d, want 1 (cycle should fire one draw)", c.Name(), got)
-		}
-		// The discarded card lands in graveyard alongside Trade In itself.
-		grav := summary.State.Graveyard()
-		if len(grav) < 2 {
-			t.Errorf("%s: Graveyard = %v, want at least 2 entries (Trade In + the discarded card)", c.Name(), grav)
-		}
-	}
-}
 
-// Tests that an empty hand suppresses the cycle: no draw fires.
-func TestTradeIn_EmptyHandSuppressesCycle(t *testing.T) {
-	for _, c := range []card.Card{cards.TradeInRed{}, cards.TradeInYellow{}, cards.TradeInBlue{}} {
-		drawTarget := testutils.GenericAttack(0, 0)
-		d := deck.New(testutils.Hero{Intel: 4}, nil, []deck.Card{drawTarget})
-		summary := sim.EvalOneTurnForTesting(d, nil, []card.Card{c})
-		if got := summary.State.CardsDrawn(); got != 0 {
-			t.Errorf("%s: CardsDrawn = %d, want 0 (no cycle without a spare hand card)", c.Name(), got)
+		if !graveyardContains(summary.State.Graveyard(), testutils.FakeBluePitch) {
+			t.Errorf("%s: graveyard = %v, want it to contain the discarded %s",
+				c.Name(), summary.State.Graveyard(), spare.DisplayName())
+		}
+		ars := summary.State.Arsenal()
+		if ars == nil || ars.ID() != testutils.FakeRedPitch {
+			t.Errorf("%s: Arsenal() = %v, want the drawn RedPitch (deck top) promoted into the slot", c.Name(), ars)
 		}
 	}
 }

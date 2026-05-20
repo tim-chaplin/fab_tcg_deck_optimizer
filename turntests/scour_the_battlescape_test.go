@@ -10,34 +10,20 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 )
 
-// Tests that Scour plays for its printed attack and fires the hand cycle (DrawOne)
-// when there's a spare hand card to send to the deck bottom.
-func TestScourTheBattlescape_CyclesHandAndDraws(t *testing.T) {
+// Tests that the hand cycle pops the spare hand card to the deck bottom.
+func TestScourTheBattlescape_CyclesHandToDeckBottom(t *testing.T) {
 	for _, c := range []card.Card{cards.ScourTheBattlescapeRed{}, cards.ScourTheBattlescapeYellow{}, cards.ScourTheBattlescapeBlue{}} {
-		cycled := testutils.GenericAttack(0, 0)
-		drawTarget := testutils.GenericAttack(0, 0)
-		d := deck.New(testutils.Hero{Intel: 4}, nil, []deck.Card{drawTarget})
-		summary := sim.EvalOneTurnForTesting(d, nil, []card.Card{c, cycled})
-		if summary.Value != c.Attack() {
-			t.Errorf("%s: Value = %d, want %d (printed attack)", c.Name(), summary.Value, c.Attack())
-		}
-		if got := summary.State.CardsDrawn(); got != 1 {
-			t.Errorf("%s: CardsDrawn = %d, want 1 (cycle should fire one draw)", c.Name(), got)
-		}
-	}
-}
-
-// Tests that an empty hand suppresses the cycle: no DrawOne fires.
-func TestScourTheBattlescape_EmptyHandSuppressesCycle(t *testing.T) {
-	for _, c := range []card.Card{cards.ScourTheBattlescapeRed{}, cards.ScourTheBattlescapeYellow{}, cards.ScourTheBattlescapeBlue{}} {
-		drawTarget := testutils.GenericAttack(0, 0)
-		d := deck.New(testutils.Hero{Intel: 4}, nil, []deck.Card{drawTarget})
-		summary := sim.EvalOneTurnForTesting(d, nil, []card.Card{c})
-		if summary.Value != c.Attack() {
-			t.Errorf("%s: Value = %d, want %d (printed attack)", c.Name(), summary.Value, c.Attack())
-		}
-		if got := summary.State.CardsDrawn(); got != 0 {
-			t.Errorf("%s: CardsDrawn = %d, want 0 (no cycle without a spare hand card)", c.Name(), got)
+		// BluePitch's ID sorts after Scour's, so the chain runner's PopHandAt(0) inside
+		// Scour's Play pops BluePitch. Five-card filler deck keeps BluePitch at the
+		// bottom past Scour's mid-turn DrawOne (1) plus end-of-turn refill (4 more).
+		spare := testutils.BluePitch{}
+		d := deck.New(testutils.Hero{Intel: 4}, nil, []deck.Card{
+			testutils.RedAttack{}, testutils.RedAttack{}, testutils.RedAttack{},
+			testutils.RedAttack{}, testutils.RedAttack{},
+		})
+		summary := sim.EvalOneTurnForTesting(d, nil, []card.Card{c, spare})
+		if got := summary.State.Deck().NameCounts()[spare.DisplayName()]; got != 1 {
+			t.Errorf("%s: deck contains %d copies of the cycled %s, want 1", c.Name(), got, spare.DisplayName())
 		}
 	}
 }

@@ -30,11 +30,8 @@ func TestGoldToken_SpendsToFillArsenalAndSwings(t *testing.T) {
 	if summary.State.GoldCount() != 0 {
 		t.Fatalf("Gold after turn = %d, want 0 (the only token spent)", summary.State.GoldCount())
 	}
-	if summary.State.CardsDrawn() != 1 {
-		t.Fatalf("CardsDrawn = %d, want 1 (Gold ability draws one card)", summary.State.CardsDrawn())
-	}
 	if summary.State.Arsenal() == nil {
-		t.Fatalf("Arsenal() = nil, want the drawn card promoted into the slot")
+		t.Fatalf("Arsenal() = nil, want the Gold-drawn card promoted into the slot")
 	}
 	if len(summary.State.Hand()) != d.Hero.(hero.Hero).Intelligence() {
 		t.Fatalf("Hand() size = %d, want %d (Gold-spend draw should leave enough deck for next turn's full deal)",

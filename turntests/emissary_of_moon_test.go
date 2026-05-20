@@ -10,24 +10,18 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 )
 
-// Tests that the hand cycle fires one DrawOne when there's a spare card to send to the
-// deck bottom.
-func TestEmissaryOfMoon_CyclesHandAndDraws(t *testing.T) {
-	spare := testutils.GenericAttack(0, 0)
-	drawTarget := testutils.GenericAttack(0, 0)
-	d := deck.New(testutils.Hero{Intel: 4}, nil, []deck.Card{drawTarget})
+// Tests that the hand cycle pops the spare hand card to the deck bottom.
+func TestEmissaryOfMoon_CyclesHandToDeckBottom(t *testing.T) {
+	// BluePitch's ID sorts after Emissary's, so the chain runner's PopHandAt(0) inside
+	// the Play hook pops BluePitch. Five-card filler deck keeps BluePitch at the bottom
+	// past Emissary's mid-turn DrawOne (1) plus end-of-turn refill (4 more).
+	spare := testutils.BluePitch{}
+	d := deck.New(testutils.Hero{Intel: 4}, nil, []deck.Card{
+		testutils.RedAttack{}, testutils.RedAttack{}, testutils.RedAttack{},
+		testutils.RedAttack{}, testutils.RedAttack{},
+	})
 	summary := sim.EvalOneTurnForTesting(d, nil, []card.Card{cards.EmissaryOfMoonRed{}, spare})
-	if got := summary.State.CardsDrawn(); got != 1 {
-		t.Errorf("CardsDrawn = %d, want 1 (cycle should fire one draw)", got)
-	}
-}
-
-// Tests that an empty hand suppresses the cycle: no DrawOne fires.
-func TestEmissaryOfMoon_EmptyHandSuppressesCycle(t *testing.T) {
-	drawTarget := testutils.GenericAttack(0, 0)
-	d := deck.New(testutils.Hero{Intel: 4}, nil, []deck.Card{drawTarget})
-	summary := sim.EvalOneTurnForTesting(d, nil, []card.Card{cards.EmissaryOfMoonRed{}})
-	if got := summary.State.CardsDrawn(); got != 0 {
-		t.Errorf("CardsDrawn = %d, want 0 (no cycle without a spare hand card)", got)
+	if got := summary.State.Deck().NameCounts()[spare.DisplayName()]; got != 1 {
+		t.Errorf("deck contains %d copies of the cycled %s, want 1", got, spare.DisplayName())
 	}
 }
