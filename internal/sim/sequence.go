@@ -117,7 +117,7 @@ func bestAttackWithWeapons(
 	var defenseDealtConst int
 	defenseCacheableConst := true
 	if !hasModalBlocker && len(defenders) > 0 {
-		defenseDealtConst, defenseCacheableConst, ctx.handStart = ctx.runDefense(defenders, pitched, d, incoming, noBlockBudgetCap, arsenalDefenderIdx)
+		defenseDealtConst, defenseCacheableConst, ctx.handStart = ctx.runDefense(defenders, pitched, held, d, incoming, noBlockBudgetCap, arsenalDefenderIdx)
 	} else if !hasModalBlocker && incoming > 0 {
 		// No defenders, so runDefense doesn't run — but unblocked incoming damage still
 		// fires DamageTaken so auras destroyed by taking damage leave the arena.
@@ -201,6 +201,19 @@ func bestAttackWithWeapons(
 		ctx.attackPitchPerm = attackPitchPerm
 		ctx.attackPitchVals = attackPitchVals
 
+		if drCost > phase.defendBudget {
+			continue
+		}
+		if phase.hasDefendPitches && phase.defendBudget-drCost >= phase.maxDefendPitch {
+			continue
+		}
+		if hasModalBlocker {
+			// Defense resolves before the attack chain. A modal blocker's block depends on
+			// phase.defendBudget, so the defense pass runs once per phase here.
+			defenseDealt, defenseCacheable, ctx.handStart = ctx.runDefense(defenders, pitched, held, d, incoming, phase.defendBudget-drCost, arsenalDefenderIdx)
+			ctx.seedPoolGravBuf(len(attackers)+len(ctx.activatedAbilities), len(attackPitchPerm))
+		}
+
 		for wmask := 0; wmask < totalAbilityMasks; wmask++ {
 			abilityCost := 0
 			for j := range ctx.activatedAbilities {
@@ -219,16 +232,6 @@ func bestAttackWithWeapons(
 			}
 			score, winner, legal := ctx.bestSequence(allAttackers)
 			if !legal {
-				continue
-			}
-			if drCost > phase.defendBudget {
-				continue
-			}
-			if hasModalBlocker {
-				defenseDealt, defenseCacheable, _ = ctx.runDefense(defenders, pitched, d, incoming, phase.defendBudget-drCost, arsenalDefenderIdx)
-				ctx.seedPoolGravBuf(len(allAttackers), len(attackPitchPerm))
-			}
-			if phase.hasDefendPitches && phase.defendBudget-drCost >= phase.maxDefendPitch {
 				continue
 			}
 			if !foundFeasible || score.cmp(bestScore) > 0 {
@@ -383,8 +386,8 @@ func (ctx *sequenceContext) promoteWinnerState(winner *gameengine.GameState) {
 	// aliases the pooled leafState's [:n:n] backing. The next Best call's CopyFrom on the
 	// leafState pool or the next perm's preparePermState would trample them in place,
 	// so clone each into an independent backing here.
-	if h := winner.Hand(); len(h) > 0 {
-		winner.SetHand(cloneCardSlice(h))
+	if h := winner.HandStates(); len(h) > 0 {
+		winner.SetHandStates(cloneCardSlice(h))
 	}
 	if g := winner.Graveyard(); len(g) > 0 {
 		winner.SetGraveyard(cloneCardSlice(g))
@@ -399,8 +402,8 @@ func (ctx *sequenceContext) promoteWinnerState(winner *gameengine.GameState) {
 
 // cloneCardSlice returns an independent backing copy of src. Callers should gate on
 // len(src) > 0 when they want to preserve the field's existing slice header on empty.
-func cloneCardSlice(src []card.Card) []card.Card {
-	out := make([]card.Card, len(src))
+func cloneCardSlice[T any](src []T) []T {
+	out := make([]T, len(src))
 	copy(out, src)
 	return out
 }
@@ -415,11 +418,11 @@ func cloneCardSlice(src []card.Card) []card.Card {
 // so leafState.RemainingUnblockedDamage() reads the unblocked remainder as defense
 // proceeds while the matchup figure itself stays constant.
 //
-// Before the plain-block loop the genuine defense hand — held + attackers + pitched — is
-// installed, with Discard capped to the Held-card count so a Blocker's discard consumes only
-// a Held card. The surviving Held cards are returned: the caller shrinks handStart by what
-// was discarded, so the discard is a real cost the chain phase sees.
-func (ctx *sequenceContext) runDefense(defenders, pitched []card.Card, deckPile *deck.Deck, matchupIncomingDamage, blockBudget, arsenalDefenderIdx int) (int, bool, []card.Card) {
+// Before the plain-block loop the genuine role-tagged defense hand — held + attackers +
+// pitched — is installed; Discard consumes only a Held card. The surviving Held cards are
+// returned: the caller installs them as handStart so a defender's discard is a real cost
+// the attack chain then sees.
+func (ctx *sequenceContext) runDefense(defenders, pitched, held []card.Card, deckPile *deck.Deck, matchupIncomingDamage, blockBudget, arsenalDefenderIdx int) (int, bool, []card.Card) {
 	state := ctx.leafState
 	state.SetIsMyTurn(false)
 	if ctx.replayLogger != nil {
@@ -455,16 +458,22 @@ func (ctx *sequenceContext) runDefense(defenders, pitched []card.Card, deckPile 
 	}
 
 	// Plain blocks: walk surviving defenders, picking the best mode within blockBudget.
-	// Install the genuine defense hand (held + attackers + pitched, Held first) so a
-	// defender's Hand() reads true and Discard's cap covers only the Held cards.
+	// Install the genuine role-tagged defense hand (held + attackers + pitched) so a
+	// defender's Hand() reads true and Discard consumes only a Held card.
 	state.SetDefenders(defenders)
-	origHeld := ctx.handStart
-	defenseHand := append(ctx.bufs.runDefenseHandBuf[:0], origHeld...)
-	defenseHand = append(defenseHand, ctx.attackers...)
-	defenseHand = append(defenseHand, pitched...)
+	origHeld := held
+	defenseHand := ctx.bufs.runDefenseHandBuf[:0]
+	for _, c := range origHeld {
+		defenseHand = append(defenseHand, card.CardState{Card: c, Role: card.Held})
+	}
+	for _, c := range ctx.attackers {
+		defenseHand = append(defenseHand, card.CardState{Card: c, Role: card.Attack})
+	}
+	for _, c := range pitched {
+		defenseHand = append(defenseHand, card.CardState{Card: c, Role: card.Pitch})
+	}
 	ctx.bufs.runDefenseHandBuf = defenseHand
-	state.SetHand(defenseHand)
-	state.SetDiscardableHandCount(len(origHeld))
+	state.SetHandStates(defenseHand)
 	for _, def := range defenders {
 		if attackerMetaPtrFor(def).actsAsDR {
 			continue
@@ -486,7 +495,7 @@ func (ctx *sequenceContext) runDefense(defenders, pitched []card.Card, deckPile 
 	}
 
 	// A Blocker may have discarded leading Held cards; the survivors are origHeld's tail.
-	discarded := len(origHeld) - (len(state.Hand()) - len(ctx.attackers) - len(pitched))
+	discarded := len(origHeld) - (len(state.HandStates()) - len(ctx.attackers) - len(pitched))
 	survivingHeld := origHeld[discarded:]
 
 	// Leave state with graveyard = priorGraveyard + defenders + discarded cards for the
@@ -564,15 +573,17 @@ func (ctx *sequenceContext) preparePermState(playedAttackers []*card.CardState, 
 	s.SetDeck(bufs.pooledDeck)
 	needed := len(ctx.handStart) + n + len(ctx.attackPitchPerm)
 	if cap(bufs.pooledHandBuf) < needed {
-		bufs.pooledHandBuf = make([]card.Card, 0, needed)
+		bufs.pooledHandBuf = make([]card.CardState, 0, needed)
 	}
 	hand := bufs.pooledHandBuf[:0]
-	hand = append(hand, ctx.handStart...)
+	for _, c := range ctx.handStart {
+		hand = append(hand, card.CardState{Card: c, Role: card.Held})
+	}
 	for k := 0; k < n; k++ {
-		hand = append(hand, playedAttackers[k].Card)
+		hand = append(hand, card.CardState{Card: playedAttackers[k].Card, Role: card.Attack})
 	}
 	for _, c := range ctx.attackPitchPerm {
-		hand = append(hand, c)
+		hand = append(hand, card.CardState{Card: c, Role: card.Pitch})
 	}
 	bufs.pooledHandBuf = hand
 	// Seed cardsPlayed with the pooled backing. Headroom = n + len(attackPitchPerm)
@@ -585,7 +596,7 @@ func (ctx *sequenceContext) preparePermState(playedAttackers []*card.CardState, 
 	bufs.pooledCardsPlayedBuf = bufs.pooledCardsPlayedBuf[:0]
 	s.SetCardsPlayed(bufs.pooledCardsPlayedBuf)
 	s.SetPitched(ctx.pitched)
-	s.SetHand(hand)
+	s.SetHandStates(hand)
 	// ResetEphemeralState set s.logger to NoopLogger; PrintBestTurn-driven runs install
 	// a StreamLogger here so every emission streams to the writer inline.
 	if ctx.replayLogger != nil {
