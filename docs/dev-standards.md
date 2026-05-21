@@ -4,8 +4,8 @@ Shared conventions; rules cited across multiple files factor here so per-file co
 
 ## Card file layout
 
-Cards live in `internal/cards/` (and `internal/cards/notimplemented/` and
-`internal/cards/unplayable/` for the pool-excluded markers). Each card has three files
+Cards live in `internal/card/cards/` (and `internal/card/cards/notimplemented/` and
+`internal/card/cards/unplayable/` for the pool-excluded markers). Each card has three files
 sharing a basename:
 
 1. `<card>.yaml` — name, cost, types, go again, markers, printed text, and the
@@ -21,7 +21,7 @@ sharing a basename:
    `MinCost` / `MaxCost`, and dynamic `GoAgain` (when the body reads runtime state). The
    generator never touches this file.
 
-Editing a card: change the YAML, run `go generate ./internal/cards/...`. Adding a card:
+Editing a card: change the YAML, run `go generate ./internal/card/cards/...`. Adding a card:
 drop a `<card>.yaml`, regenerate, then add the hand-written `<card>.go` with `Play()`.
 
 Card data (name, cost, pitch, attack, defense, type line, printed text) is transcribed from
@@ -63,10 +63,10 @@ Card docstrings state only what's card-specific — the printed clause and any r
 
 Both exclude a card from random / mutation pools:
 
-- `sim.NotImplemented` — placeholder; card *would* be worth modelling. Pair with a `// not implemented: <one-line description>` comment above the `NotImplemented()` method. Files in `internal/cards/notimplemented/`.
-- `sim.Unplayable` — verdict; card too weak to want even if modelled. **No per-card rationale in the docstring.** Files in `internal/cards/unplayable/`.
+- `sim.NotImplemented` — placeholder; card *would* be worth modelling. Pair with a `// not implemented: <one-line description>` comment above the `NotImplemented()` method. Files in `internal/card/cards/notimplemented/`.
+- `sim.Unplayable` — verdict; card too weak to want even if modelled. **No per-card rationale in the docstring.** Files in `internal/card/cards/unplayable/`.
 
-`ls internal/cards/notimplemented/` is the live todo list. `TestLayout_MarkersStayInSubpackages` enforces the layout.
+`ls internal/card/cards/notimplemented/` is the live todo list. `TestLayout_MarkersStayInSubpackages` enforces the layout.
 
 ## Standard rider wiring
 
@@ -128,14 +128,14 @@ func aetherSlashApplyRider(g card.GameEngine, l card.Logger, self *card.CardStat
 
 ## Weapon activated abilities
 
-Weapons live in `internal/weapons/` as two paired Go types:
+Weapons live in `internal/weapon/weapons/` as two paired Go types:
 
 - A `sim.Weapon` permanent (`ID`, `Name`, `Types`, `Hands`, `Ability`) — the equipped permanent that sits in the arena and never enters the chain.
 - A `card.Card` activated ability (`<Weapon>Ability`) — what the chain runner enqueues when the player swings. Carries the printed Cost / Pitch / Attack / Defense / GoAgain / Play and the parent's `card.TypeSet` plus `card.TypeAttack` (so `IsAttack`, `IsWeaponAttack`, and — for Runeblade weapons — `IsRunebladeAttack` all fire).
 
 `Ability()` returns a package-level cached `card.Card` (each weapon file declares `var <weapon>Ability card.Card = <Weapon>Ability{}` and returns it). The chain runner only calls `Ability()` once per weapon at attackBufs construction today, but the cache keeps any future hot-loop caller alloc-free since Go's interface boxing of zero-size structs allocates per call when the result escapes. The ability `Name()` matches the weapon's so chain logs read `<Weapon>: WEAPON ATTACK`.
 
-IDs: weapon permanents take `WeaponID`; abilities take `CardID` and anchor in `internal/registry/ids/weapon_ids.go` past the last weapon-permanent ID. Token activated abilities (e.g. `GoldTokenAbilityID`) anchor past the last weapon-ability ID in the same file. Test fakes anchor past the last token-ability ID.
+IDs: weapon permanents take `WeaponID`; abilities take `CardID` and anchor in `internal/ids/weapon_ids.go` past the last weapon-permanent ID. Token activated abilities (e.g. `GoldTokenAbilityID`) anchor past the last weapon-ability ID in the same file. Test fakes anchor past the last token-ability ID.
 
 Card-attack predicates (`internal/card/types.go`) gate purely on `TypeAttack` (and `TypeWeapon` / `TypeRuneblade` where the rider needs the subtype). A bare weapon permanent — types only, no `TypeAttack` — never matches.
 
@@ -161,7 +161,7 @@ If a comment's rationale would otherwise cite "matches the pattern in foo.go, ba
 
 Two homes:
 
-- **Unit tests** next to the code (`internal/sim/foo_test.go` for `internal/sim/foo.go`, `internal/cards/foo_test.go` for `internal/cards/foo.go`). May use `package sim` or black-box `package sim_test`. May exercise unexported helpers via test exports — but only when no public entry point reaches the same behaviour. A card rider is better covered by a turn test exercising it through a real chain than by a `Play`-direct unit test.
+- **Unit tests** next to the code (`internal/sim/foo_test.go` for `internal/sim/foo.go`, `internal/card/cards/foo_test.go` for `internal/card/cards/foo.go`). May use `package sim` or black-box `package sim_test`. May exercise unexported helpers via test exports — but only when no public entry point reaches the same behaviour. A card rider is better covered by a turn test exercising it through a real chain than by a `Play`-direct unit test.
 - **Turn-level tests** in top-level `turntests/`. Public entry points only: `sim.EvalOneTurnForTesting` / `sim.EvalTwoTurnsForTesting` for chain evaluation, `(*Evaluator).Evaluate` for full multi-turn runs. Use real heroes from `internal/heroes` (e.g. `heroes.Viserai{}`) rather than package-private stubs. Anything that would otherwise need an `exports_test.go` re-export goes here. **New `turntests/` files must not call `ge.ResolveChainStep(...)` directly** — `internal/lint/turntests_lint_test.go` enforces this via an allowlist of grandfathered files from the v2 migration. To migrate one of the grandfathered files, rewrite it against the public Eval entry points (or move it to a same-package unit test) and remove its entry from the allowlist.
 
 `sim.Best` and `sim.BestWithTriggers` carry a "Test convention" doc paragraph pointing at `EvalOneTurnForTesting`. Not `// Deprecated:` because the simulator itself calls them; the convention is for new test code only.
