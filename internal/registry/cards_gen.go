@@ -128,10 +128,6 @@ var cardsByID = []Card{
 
 	ids.DodgeBlue: cards.DodgeBlue{},
 
-	ids.DownButNotOutRed:    cards.DownButNotOutRed{},
-	ids.DownButNotOutYellow: cards.DownButNotOutYellow{},
-	ids.DownButNotOutBlue:   cards.DownButNotOutBlue{},
-
 	ids.DragDownRed:    cards.DragDownRed{},
 	ids.DragDownYellow: cards.DragDownYellow{},
 	ids.DragDownBlue:   cards.DragDownBlue{},
