@@ -23,7 +23,7 @@ func TestEvalTwoTurns_SigilOfFyendalQueuesTrigger(t *testing.T) {
 	d := deck.New(heroes.Viserai{}, nil, nil)
 	turn1, turn2 := sim.EvalTwoTurnsForTesting(d, gameengine.GameStateBuilder().SetIncomingDamage(0).Build(), []card.Card{sigil})
 
-	if !bestLineHasRole(turn1.BestLine, ids.SigilOfFyendalBlue, deck.Attack) {
+	if !bestLineHasRole(turn1.BestLine, ids.SigilOfFyendalBlue, card.Attack) {
 		t.Errorf("turn 1 BestLine didn't play Sigil of Fyendal as Role=Attack: %+v", turn1.BestLine)
 	}
 	if turn2.Value != 1 {
@@ -51,10 +51,10 @@ func TestEvalTwoTurns_SigilOfTheArknightRevealsIntoHand(t *testing.T) {
 	})
 	turn1, turn2 := sim.EvalTwoTurnsForTesting(d, gameengine.GameStateBuilder().SetIncomingDamage(0).Build(), []card.Card{sigil})
 
-	if !bestLineHasRole(turn1.BestLine, ids.SigilOfTheArknightBlue, deck.Attack) {
+	if !bestLineHasRole(turn1.BestLine, ids.SigilOfTheArknightBlue, card.Attack) {
 		t.Errorf("turn 1 BestLine didn't play the sigil as Role=Attack: %+v", turn1.BestLine)
 	}
-	if !bestLineHasRole(turn2.BestLine, ids.AetherSlashRed, deck.Attack) {
+	if !bestLineHasRole(turn2.BestLine, ids.AetherSlashRed, card.Attack) {
 		t.Errorf("turn 2 BestLine didn't play the revealed Aether Slash: %+v", turn2.BestLine)
 	}
 	if !graveyardContains(turn2.State.Graveyard(), ids.SigilOfTheArknightBlue) {
@@ -74,7 +74,7 @@ func TestEvalTwoTurns_BlessingOfOccultCreatesRunesAtStartOfNextTurn(t *testing.T
 	if turn1.Value != 0 {
 		t.Errorf("turn 1 Value = %d, want 0 (Blessing's rune credit is deferred)", turn1.Value)
 	}
-	if !bestLineHasRole(turn1.BestLine, ids.BlessingOfOccultRed, deck.Attack) {
+	if !bestLineHasRole(turn1.BestLine, ids.BlessingOfOccultRed, card.Attack) {
 		t.Errorf("turn 1 BestLine didn't play Blessing as Role=Attack: %+v", turn1.BestLine)
 	}
 	if turn2.Value != 3 {
@@ -94,10 +94,10 @@ func TestEvalTwoTurns_MaleficIncantationOncePerTurnLimitsToOneRune(t *testing.T)
 	d := deck.New(heroes.Viserai{}, nil, nil)
 	turn1, turn2 := sim.EvalTwoTurnsForTesting(d, gameengine.GameStateBuilder().SetHero(heroes.Viserai{}).Build(), []card.Card{malefic, hocus})
 
-	if !bestLineHasRole(turn1.BestLine, ids.MaleficIncantationRed, deck.Attack) {
+	if !bestLineHasRole(turn1.BestLine, ids.MaleficIncantationRed, card.Attack) {
 		t.Errorf("turn 1 BestLine didn't play Malefic as Role=Attack: %+v", turn1.BestLine)
 	}
-	if !bestLineHasRole(turn1.BestLine, ids.HocusPocusRed, deck.Attack) {
+	if !bestLineHasRole(turn1.BestLine, ids.HocusPocusRed, card.Attack) {
 		t.Errorf("turn 1 BestLine didn't play Hocus Pocus as Role=Attack: %+v", turn1.BestLine)
 	}
 	if turn1.Value != 6 {
@@ -122,7 +122,7 @@ func TestEvalTwoTurns_RunebloodIncantationTicksAcrossTurns(t *testing.T) {
 	d := deck.New(heroes.Viserai{}, nil, nil)
 	turn1, turn2 := sim.EvalTwoTurnsForTesting(d, gameengine.GameStateBuilder().SetIncomingDamage(0).Build(), []card.Card{runeblood, pitch})
 
-	if !bestLineHasRole(turn1.BestLine, ids.RunebloodIncantationRed, deck.Attack) {
+	if !bestLineHasRole(turn1.BestLine, ids.RunebloodIncantationRed, card.Attack) {
 		t.Errorf("turn 1 BestLine didn't play Runeblood as Role=Attack: %+v", turn1.BestLine)
 	}
 	if turn1.Value != 0 {
@@ -139,7 +139,7 @@ func TestEvalTwoTurns_RunebloodIncantationTicksAcrossTurns(t *testing.T) {
 }
 
 // bestLineHasRole reports whether bestLine contains an entry for cardID with the given role.
-func bestLineHasRole(bestLine []deck.CardAssignment, cardID ids.CardID, role deck.Role) bool {
+func bestLineHasRole(bestLine []card.CardAssignment, cardID ids.CardID, role card.Role) bool {
 	for _, a := range bestLine {
 		if a.Card.ID() == cardID && a.Role == role {
 			return true

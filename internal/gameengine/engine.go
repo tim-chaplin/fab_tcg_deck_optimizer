@@ -30,11 +30,11 @@ type GameEngine struct {
 //     methods promoted from *GameState; the embedded versions stay reachable as
 //     ge.GameState.X when the engine internals need the non-flipping variant.
 
-// Hand returns the live hand slice and flips IsCacheable to false. Cards must not mutate
-// the returned slice; use AppendHand / PopHandAt for mutations.
+// Hand returns the cards in hand and flips IsCacheable to false. Use AppendHand /
+// PopHandAt for mutations.
 func (ge *GameEngine) Hand() []card.Card {
 	ge.cacheable = false
-	return ge.hand
+	return ge.GameState.Hand()
 }
 
 // AppendHand inserts c into the hand at its Card.ID()-sorted position, flipping
@@ -48,16 +48,16 @@ func (ge *GameEngine) AppendHand(c card.Card) {
 // multiset, which the chain runner and the eval-cache key both depend on.
 func (ge *GameEngine) insertHandSorted(c card.Card) {
 	ge.cacheable = false
-	i := sort.Search(len(ge.hand), func(j int) bool { return ge.hand[j].ID() > c.ID() })
-	ge.hand = append(ge.hand, nil)
+	i := sort.Search(len(ge.hand), func(j int) bool { return ge.hand[j].Card.ID() > c.ID() })
+	ge.hand = append(ge.hand, card.CardState{})
 	copy(ge.hand[i+1:], ge.hand[i:])
-	ge.hand[i] = c
+	ge.hand[i] = card.CardState{Card: c, Role: card.Held}
 }
 
 // PopHandAt removes and returns the card at index i, flipping IsCacheable to false.
 func (ge *GameEngine) PopHandAt(i int) card.Card {
 	ge.cacheable = false
-	c := ge.hand[i]
+	c := ge.hand[i].Card
 	ge.hand = append(ge.hand[:i], ge.hand[i+1:]...)
 	return c
 }
@@ -125,16 +125,19 @@ func (ge *GameEngine) AppendToDeck(c card.Card) {
 	ge.deck.PutBottom([]deck.Card{c})
 }
 
-// Discard pops the first hand card and appends it to the graveyard. Returns the discarded
-// card and true; returns (nil, false) when the hand is empty. Flips IsCacheable via
-// PopHandAt.
+// Discard removes a Held-role card from the hand and appends it to the graveyard. Returns
+// the discarded card and true; returns (nil, false) when the hand holds no Held card.
+// Only Held cards are discardable — a card already committed to attacking, pitching, or
+// blocking can't be spent again. Flips IsCacheable via PopHandAt.
 func (ge *GameEngine) Discard() (card.Card, bool) {
-	if len(ge.hand) == 0 {
-		return nil, false
+	for i := range ge.hand {
+		if ge.hand[i].Role == card.Held {
+			c := ge.PopHandAt(i)
+			ge.graveyard = append(ge.graveyard, c)
+			return c, true
+		}
 	}
-	c := ge.PopHandAt(0)
-	ge.graveyard = append(ge.graveyard, c)
-	return c, true
+	return nil, false
 }
 
 // RecycleToDeckBottom appends pc.Card to the bottom of the deck and flags the chain

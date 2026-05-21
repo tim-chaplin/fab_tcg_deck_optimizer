@@ -49,7 +49,7 @@ func TestOnHitGoAgain_TwoConsecutiveARsExtendToWeaponSwing(t *testing.T) {
 }
 
 // formatBestLine renders the chosen role assignment in chain order for failure messages.
-func formatBestLine(line []deck.CardAssignment) string {
+func formatBestLine(line []card.CardAssignment) string {
 	var parts []string
 	for _, a := range line {
 		parts = append(parts, a.Card.DisplayName()+":"+roleName(a.Role))
@@ -57,17 +57,17 @@ func formatBestLine(line []deck.CardAssignment) string {
 	return strings.Join(parts, ", ")
 }
 
-func roleName(r deck.Role) string {
+func roleName(r card.Role) string {
 	switch r {
-	case deck.Pitch:
+	case card.Pitch:
 		return "Pitch"
-	case deck.Attack:
+	case card.Attack:
 		return "Attack"
-	case deck.Defend:
+	case card.Defend:
 		return "Defend"
-	case deck.Held:
+	case card.Held:
 		return "Held"
-	case deck.Arsenal:
+	case card.Arsenal:
 		return "Arsenal"
 	}
 	return "Unknown"

@@ -5,6 +5,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card/cards"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/hero/heroes"
@@ -81,7 +82,7 @@ func TestEvaluate_HeldCardDefersDrawToNextTurn(t *testing.T) {
 	if len(stats.Best.BestLine) == 0 {
 		t.Fatalf("expected Best to be populated after at least one hand")
 	}
-	if stats.Best.BestLine[0].Role != deck.Arsenal {
+	if stats.Best.BestLine[0].Role != card.Arsenal {
 		t.Errorf("Best.Play.Roles[0] = %s, want ARSENAL (empty slot on turn 1 → Held promoted)", stats.Best.BestLine[0].Role)
 	}
 }

@@ -16,8 +16,8 @@ type GameState struct {
 	hero    Hero
 	weapons []weapon.Weapon // currently-equipped weapons; persistent across turns
 
-	hand      []card.Card
-	deck      *deck.Deck // owned scratch; refilled on Reset via CopyFrom
+	hand      []card.CardState // role-tagged; each entry carries its partition role
+	deck      *deck.Deck       // owned scratch; refilled on Reset via CopyFrom
 	arsenal   card.Card
 	graveyard []card.Card
 	banished  []card.Card
@@ -202,7 +202,7 @@ func copyItemsInto(pool, src []Item) []Item {
 // resetCardSlice returns a fresh slice header that aliases pooled when capacity permits,
 // or a freshly allocated backing sized to src. Empty src returns nil to match the Copy()
 // path's nil-on-empty semantics.
-func resetCardSlice(pooled, src []card.Card) []card.Card {
+func resetCardSlice[T any](pooled, src []T) []T {
 	if len(src) == 0 {
 		return nil
 	}
@@ -211,7 +211,7 @@ func resetCardSlice(pooled, src []card.Card) []card.Card {
 		copy(out, src)
 		return out
 	}
-	out := make([]card.Card, len(src))
+	out := make([]T, len(src))
 	copy(out, src)
 	return out
 }
@@ -338,10 +338,36 @@ func (gs *GameState) SetWeapons(w []weapon.Weapon) { gs.weapons = w }
 func (gs *GameState) IsCacheable() bool            { return gs.cacheable }
 func (gs *GameState) SetCacheable(v bool)          { gs.cacheable = v }
 
-func (gs *GameState) Hand() []card.Card     { return gs.hand }
-func (gs *GameState) SetHand(h []card.Card) { gs.hand = h }
+// Hand projects the role-tagged hand down to the bare cards. Callers needing the roles
+// (Discard, the chain runner) read HandStates.
+func (gs *GameState) Hand() []card.Card {
+	if len(gs.hand) == 0 {
+		return nil
+	}
+	out := make([]card.Card, len(gs.hand))
+	for i := range gs.hand {
+		out[i] = gs.hand[i].Card
+	}
+	return out
+}
+
+// HandStates returns the live role-tagged hand.
+func (gs *GameState) HandStates() []card.CardState { return gs.hand }
+
+// SetHand installs h as the hand with every card defaulting to the Held role. Role-aware
+// callers (the defense pass, the chain runner) use SetHandStates.
+func (gs *GameState) SetHand(h []card.Card) {
+	gs.hand = gs.hand[:0]
+	for _, c := range h {
+		gs.hand = append(gs.hand, card.CardState{Card: c, Role: card.Held})
+	}
+}
+
+// SetHandStates installs an already role-tagged hand.
+func (gs *GameState) SetHandStates(h []card.CardState) { gs.hand = h }
+
 func (gs *GameState) AppendHandRaw(c card.Card) {
-	gs.hand = append(gs.hand, c)
+	gs.hand = append(gs.hand, card.CardState{Card: c, Role: card.Held})
 }
 
 // RemoveFromHand removes the first matching card from the hand without flipping
@@ -350,7 +376,7 @@ func (gs *GameState) AppendHandRaw(c card.Card) {
 // reads hand by membership / length, not by index, so order doesn't matter.
 func (gs *GameState) RemoveFromHand(c card.Card) bool {
 	for i := range gs.hand {
-		if gs.hand[i] == c {
+		if gs.hand[i].Card == c {
 			last := len(gs.hand) - 1
 			gs.hand[i] = gs.hand[last]
 			gs.hand = gs.hand[:last]
@@ -531,7 +557,7 @@ func (gs *GameState) HasPlayedType(t card.CardType) bool {
 
 // appendCopy is the small slice-clone helper Copy uses. Inlined into its own helper so
 // each persistent slice's branch is a one-liner.
-func appendCopy(dst []card.Card, src []card.Card) []card.Card {
+func appendCopy[T any](dst []T, src []T) []T {
 	if len(src) == 0 {
 		return dst
 	}

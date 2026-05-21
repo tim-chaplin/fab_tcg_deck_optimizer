@@ -40,10 +40,10 @@ func (e *Evaluator) evaluatePartition(
 	arsenalDefenderIdx := -1
 	if len(pcards) > n {
 		switch arsenalPC := pcards[n]; arsenalPC.role {
-		case deck.Attack:
+		case card.Attack:
 			a = append(a, arsenalPC.card)
 			arsenalInIdx = len(a) - 1
-		case deck.Defend:
+		case card.Defend:
 			defs = append(defs, arsenalPC.card)
 			arsenalDefenderIdx = len(defs) - 1
 		}

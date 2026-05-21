@@ -277,10 +277,10 @@ func weaponsFromDeck(d *deck.Deck) []weapon.Weapon {
 
 // countPitched returns the number of Pitch-role entries in bestLine, excluding the arsenal
 // slot (which never recycles).
-func countPitched(bestLine []deck.CardAssignment) int {
+func countPitched(bestLine []card.CardAssignment) int {
 	n := 0
 	for _, a := range bestLine {
-		if a.Role == deck.Pitch && !a.FromArsenal {
+		if a.Role == card.Pitch && !a.FromArsenal {
 			n++
 		}
 	}
@@ -457,13 +457,13 @@ func processAurasAtStartOfTurn(state *gameengine.GameState, d *deck.Deck) {
 // pitchedFromBestLine returns BestLine's Pitch-role cards (excluding the arsenal-in slot,
 // which never recycles), sorted by ID so recycled decks stay byte-identical across cache
 // hits and from-scratch searches that pick different equally-optimal partitions.
-func pitchedFromBestLine(line []deck.CardAssignment) []card.Card {
+func pitchedFromBestLine(line []card.CardAssignment) []card.Card {
 	var out []card.Card
 	for _, a := range line {
 		if a.FromArsenal {
 			continue
 		}
-		if a.Role == deck.Pitch {
+		if a.Role == card.Pitch {
 			out = append(out, a.Card)
 		}
 	}
@@ -492,7 +492,7 @@ func sortHandByID(hand []card.Card) {
 // fills snap with the chain-produced bestLine / cardsPlayed / swungWeapons / value, and
 // attaches stats.PrintBest as the deferred replay closure.
 func recordBestTurnFromSnap(stats *deck.Stats, summary TurnSummary, ev *Evaluator, snap *turnSnapshot) {
-	lineCopy := make([]deck.CardAssignment, len(summary.BestLine))
+	lineCopy := make([]card.CardAssignment, len(summary.BestLine))
 	copy(lineCopy, summary.BestLine)
 	stats.Best = deck.BestTurn{
 		Value:    summary.Value,
@@ -512,7 +512,7 @@ func recordBestTurnFromSnap(stats *deck.Stats, summary TurnSummary, ev *Evaluato
 // covers both — each hand card has one entry, plus one FromArsenal entry for the arsenal
 // card. presentBuf is a scratch slice indexed parallel to marginalBuf; both are caller-
 // owned across turns to keep this path allocation-free.
-func tallyMarginalPresence(marginalBuf []deck.CardMarginalStats, idIndex map[ids.CardID]int, presentBuf []bool, bestLine []deck.CardAssignment, value float64) {
+func tallyMarginalPresence(marginalBuf []deck.CardMarginalStats, idIndex map[ids.CardID]int, presentBuf []bool, bestLine []card.CardAssignment, value float64) {
 	if len(marginalBuf) == 0 {
 		return
 	}

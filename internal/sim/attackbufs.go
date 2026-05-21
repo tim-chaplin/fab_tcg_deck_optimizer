@@ -79,7 +79,7 @@ type attackBufs struct {
 	// on the pool state; mid-chain growth allocates fresh backing without trampling these.
 	// promoteWinnerState clones the winner's hand and graveyard so the next reset can't
 	// scribble the winning state.
-	pooledHandBuf []card.Card
+	pooledHandBuf []card.CardState
 	pooledGravBuf []card.Card
 	// pooledCardsPlayedBuf backs the per-perm cardsPlayed accumulator. The chain runner
 	// appends to it via AppendCardsPlayed every chain step; pooling skips one allocation
@@ -93,6 +93,9 @@ type attackBufs struct {
 	// before the perm runs, so aliasing the leafState's slice to these buffers is safe.
 	runDefenseDRGravBuf    []card.Card
 	runDefenseChainGravBuf []card.Card
+	// runDefenseHandBuf backs the role-tagged defense hand (held + attackers + pitched)
+	// installed on leafState for the plain-block loop. Recycled across runDefense calls.
+	runDefenseHandBuf []card.CardState
 	// pooledLeafState is the per-Best leafState recycled across every call. bestAttackWithWeapons
 	// resets it from masterState via CopyFrom so the per-call masterState.Copy()
 	// allocation goes away. Defense mutations write through to this pool slot; preparePermState

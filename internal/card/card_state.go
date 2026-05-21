@@ -7,6 +7,9 @@ package card
 // as the `self` parameter to Play.
 type CardState struct {
 	Card Card
+	// Role is the card's partition-assigned role for this turn — Pitch / Attack / Defend /
+	// Held / Arsenal. Discard removes a Held-role entry from the hand.
+	Role Role
 	// GrantedGoAgain is set by a prior card's grant ("next X attack" riders) or by the
 	// card's own Play flipping self.GrantedGoAgain = true. Card.EffectiveGoAgain ORs this
 	// with Card.GoAgain().

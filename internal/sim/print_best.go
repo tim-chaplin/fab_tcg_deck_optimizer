@@ -20,7 +20,7 @@ type turnSnapshot struct {
 	state        *gameengine.GameState
 	deck         *deck.Deck
 	hand         []card.Card
-	bestLine     []deck.CardAssignment
+	bestLine     []card.CardAssignment
 	cardsPlayed  []card.Card
 	swungWeapons []string
 	value        int
@@ -55,8 +55,8 @@ func runReplayForTurn(snapshot *turnSnapshot, logger card.Logger) TurnSummary {
 	held := assignmentCards(parts.held)
 	arsenalAtChainStart := arsenalRoleCard(snapshot.bestLine)
 	arsenalCardIn := snapshot.state.Arsenal()
-	arsenalInIdx := matchedCardIndex(snapshot.cardsPlayed, arsenalCardIn, snapshot.bestLine, deck.Attack)
-	arsenalDefenderIdx := matchedCardIndex(defenders, arsenalCardIn, snapshot.bestLine, deck.Defend)
+	arsenalInIdx := matchedCardIndex(snapshot.cardsPlayed, arsenalCardIn, snapshot.bestLine, card.Attack)
+	arsenalDefenderIdx := matchedCardIndex(defenders, arsenalCardIn, snapshot.bestLine, card.Defend)
 
 	weapons := snapshot.state.Weapons()
 	bufs := newAttackBufs(len(snapshot.cardsPlayed), len(weapons), weapons)
@@ -70,7 +70,7 @@ func runReplayForTurn(snapshot *turnSnapshot, logger card.Logger) TurnSummary {
 	ctx.resourceBudget = 0
 
 	if len(defenders) > 0 {
-		ctx.runDefense(defenders, pitched, snapshot.deck, snapshot.state.IncomingDamage(), noBlockBudgetCap, arsenalDefenderIdx)
+		_, _, ctx.handStart = ctx.runDefense(defenders, pitched, held, snapshot.deck, snapshot.state.IncomingDamage(), noBlockBudgetCap, arsenalDefenderIdx)
 	}
 	ctx.leafState.SetDeck(nil)
 	ctx.seedPoolGravBuf(len(snapshot.cardsPlayed), len(ctx.attackPitchPerm))
@@ -90,7 +90,7 @@ func runReplayForTurn(snapshot *turnSnapshot, logger card.Logger) TurnSummary {
 // resolves arsenal-role tagging. dealtHand overrides state.Hand() when set (start-of-turn
 // uses the snapshot's hand because the post-tick master's hand is nil); when nil, we read
 // state.Hand() directly (end-of-turn case).
-func writeSnapshotSummary(w io.Writer, header string, state *gameengine.GameState, dealtHand []card.Card, bestLine []deck.CardAssignment) {
+func writeSnapshotSummary(w io.Writer, header string, state *gameengine.GameState, dealtHand []card.Card, bestLine []card.CardAssignment) {
 	if state == nil {
 		return
 	}
@@ -163,7 +163,7 @@ func itemsSummaryLine(state *gameengine.GameState) string {
 }
 
 // assignmentCards extracts the card.Card field from each assignment.
-func assignmentCards(as []deck.CardAssignment) []card.Card {
+func assignmentCards(as []card.CardAssignment) []card.Card {
 	if len(as) == 0 {
 		return nil
 	}
@@ -176,10 +176,10 @@ func assignmentCards(as []deck.CardAssignment) []card.Card {
 
 // arsenalAssignments returns the bestLine entries with Role=Arsenal so endingArsenalLine
 // can tag each with "(stayed)" / "(new)".
-func arsenalAssignments(line []deck.CardAssignment) []deck.CardAssignment {
-	var out []deck.CardAssignment
+func arsenalAssignments(line []card.CardAssignment) []card.CardAssignment {
+	var out []card.CardAssignment
 	for _, a := range line {
-		if a.Role == deck.Arsenal {
+		if a.Role == card.Arsenal {
 			out = append(out, a)
 		}
 	}
@@ -187,9 +187,9 @@ func arsenalAssignments(line []deck.CardAssignment) []deck.CardAssignment {
 }
 
 // arsenalRoleCard returns the bestLine entry tagged Role=Arsenal, or nil when none.
-func arsenalRoleCard(line []deck.CardAssignment) card.Card {
+func arsenalRoleCard(line []card.CardAssignment) card.Card {
 	for _, a := range line {
-		if a.Role == deck.Arsenal {
+		if a.Role == card.Arsenal {
 			return a.Card
 		}
 	}
@@ -198,7 +198,7 @@ func arsenalRoleCard(line []deck.CardAssignment) card.Card {
 
 // matchedCardIndex returns the index of arsenalCardIn within cards when the bestLine
 // tagged the arsenal-in card with role. -1 when no such assignment exists or no match.
-func matchedCardIndex(cards []card.Card, arsenalCardIn card.Card, line []deck.CardAssignment, role deck.Role) int {
+func matchedCardIndex(cards []card.Card, arsenalCardIn card.Card, line []card.CardAssignment, role card.Role) int {
 	if arsenalCardIn == nil {
 		return -1
 	}
@@ -221,7 +221,7 @@ func matchedCardIndex(cards []card.Card, arsenalCardIn card.Card, line []deck.Ca
 }
 
 // pitchValues returns the Pitch() values of each assignment.
-func pitchValues(as []deck.CardAssignment) []int {
+func pitchValues(as []card.CardAssignment) []int {
 	if len(as) == 0 {
 		return nil
 	}

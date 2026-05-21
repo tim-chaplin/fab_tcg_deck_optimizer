@@ -33,14 +33,14 @@ func TestEvalTwoTurns_EquippedWeaponPersistsAcrossTurns(t *testing.T) {
 	if turn1.Value != 2 {
 		t.Errorf("turn 1 Value = %d, want 2\nBestLine: %s", turn1.Value, formatBestLine(turn1.BestLine))
 	}
-	if !bestLineHasRole(turn1.BestLine, testutils.FakeBluePitch, deck.Pitch) {
+	if !bestLineHasRole(turn1.BestLine, testutils.FakeBluePitch, card.Pitch) {
 		t.Errorf("turn 1 BestLine missing BluePitch as Pitch: %s", formatBestLine(turn1.BestLine))
 	}
 	if turn2.Value != 2 {
 		t.Errorf("turn 2 Value = %d, want 2 (weapon should still be equipped)\nBestLine: %s",
 			turn2.Value, formatBestLine(turn2.BestLine))
 	}
-	if !bestLineHasRole(turn2.BestLine, testutils.FakeBluePitch, deck.Pitch) {
+	if !bestLineHasRole(turn2.BestLine, testutils.FakeBluePitch, card.Pitch) {
 		t.Errorf("turn 2 BestLine missing BluePitch as Pitch: %s", formatBestLine(turn2.BestLine))
 	}
 }
@@ -70,7 +70,7 @@ func TestEvalTwoTurns_GraveyardPersistsAcrossTurns(t *testing.T) {
 	if turn2.Value != 1 {
 		t.Errorf("turn 2 Value = %d, want 1\nBestLine: %s", turn2.Value, formatBestLine(turn2.BestLine))
 	}
-	if !bestLineHasRole(turn2.BestLine, ids.SigilOfSilphidaeBlue, deck.Attack) {
+	if !bestLineHasRole(turn2.BestLine, ids.SigilOfSilphidaeBlue, card.Attack) {
 		t.Errorf("turn 2 BestLine missing Sigil of Silphidae as Attack: %s",
 			formatBestLine(turn2.BestLine))
 	}
@@ -104,7 +104,7 @@ func TestEvalTwoTurns_DestroyedAuraSourceReachesGraveyard(t *testing.T) {
 		t.Errorf("turn 2 Value = %d, want 1 (destroyed Fyendal must persist in graveyard for Silphidae to banish)\nBestLine: %s",
 			turn2.Value, formatBestLine(turn2.BestLine))
 	}
-	if !bestLineHasRole(turn2.BestLine, ids.SigilOfSilphidaeBlue, deck.Attack) {
+	if !bestLineHasRole(turn2.BestLine, ids.SigilOfSilphidaeBlue, card.Attack) {
 		t.Errorf("turn 2 BestLine missing Sigil of Silphidae as Attack: %s",
 			formatBestLine(turn2.BestLine))
 	}
@@ -128,7 +128,7 @@ func TestEvalTwoTurns_OpponentMarkedPersistsAcrossTurns(t *testing.T) {
 		t.Errorf("turn 2 Value = %d, want 4 (Outed 3{p} + 1 marked-defender bonus must see the carried mark)\nBestLine: %s",
 			turn2.Value, formatBestLine(turn2.BestLine))
 	}
-	if !bestLineHasRole(turn2.BestLine, ids.OutedRed, deck.Attack) {
+	if !bestLineHasRole(turn2.BestLine, ids.OutedRed, card.Attack) {
 		t.Errorf("turn 2 BestLine missing Outed as Attack: %s", formatBestLine(turn2.BestLine))
 	}
 }

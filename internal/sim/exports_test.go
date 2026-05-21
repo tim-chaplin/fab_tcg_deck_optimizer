@@ -61,9 +61,10 @@ func (s *SequenceContextForTest) BestSequence(attackers []card.Card) (int, int, 
 // FireEndOfTurn re-exports the engine's end-of-turn fire for sim_test consumers.
 func FireEndOfTurn(ge *gameengine.GameEngine) { ge.FireTriggers(triggertype.EndOfTurn, nil) }
 
-// PromoteRandomHandCardToArsenal re-exports promoteRandomHandCardToArsenal.
+// PromoteRandomHandCardToArsenal promotes a Held card on best.State and reflects the pick
+// in best.BestLine.
 func PromoteRandomHandCardToArsenal(best *TurnSummary, startingHand []card.Card, arsenalCardIn card.Card) {
-	promoteRandomHandCardToArsenal(best, startingHand, arsenalCardIn)
+	markPromotedInBestLine(best.BestLine, promoteHeldToArsenal(best.State, startingHand, arsenalCardIn))
 }
 
 // DefendersDamage re-exports defendersDamage with an unbounded block budget.

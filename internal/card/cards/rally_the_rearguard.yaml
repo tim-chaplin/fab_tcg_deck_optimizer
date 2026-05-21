@@ -4,8 +4,6 @@ types:
     - Action
     - Attack
 cost: 2
-markers:
-    - NotImplemented
 text: |-
     **Once per Turn Instant** - Discard a card: This gets +3{d}. Activate this ability only
     while this is defending.
