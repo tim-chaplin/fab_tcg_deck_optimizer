@@ -5,7 +5,7 @@ types:
     - Attack
 cost: 3
 markers:
-    - NotImplemented
+    - Unplayable
 text: |-
     When this attacks a hero, if you have less {h} and control fewer equipment and tokens than
     them, this gets +3{p}, **overpower**, and "When this hits, create an Agility, Might, and Vigor
