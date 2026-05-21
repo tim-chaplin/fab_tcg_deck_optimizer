@@ -3,8 +3,6 @@ types:
     - Generic
     - Instant
 cost: 0
-markers:
-    - NotImplemented
 text: Target defending attack action card gains +4{d}.
 variants:
     - id: ReinforceTheLineRed
