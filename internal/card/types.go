@@ -132,3 +132,9 @@ func IsAttackAction(_ GameEngine, pc *CardState) bool {
 func IsRunebladeAttack(ge GameEngine, pc *CardState) bool {
 	return pc.Card.Types(ge).IsRunebladeAttack()
 }
+
+// IsWeaponAttack matches scheduled weapon-swing attacks — not attack action cards — for
+// "your next weapon attack" wording.
+func IsWeaponAttack(_ GameEngine, pc *CardState) bool {
+	return pc.Card.Types(nil).IsWeaponAttack()
+}

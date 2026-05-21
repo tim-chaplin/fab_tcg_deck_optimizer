@@ -5,8 +5,6 @@ types:
     - Attack
 cost: 1
 goAgain: true
-markers:
-    - NotImplemented
 text: If Brandish hits, your next weapon attack this turn gains +1{p}. **Go again**
 variants:
     - id: BrandishRed
