@@ -1,6 +1,6 @@
 // See ../generate.go for the codegen contract. Notimplemented cards live here so the
 // pool-exclusion marker isn't carried by anything in the main cards package.
 
-//go:generate go run ../../../cmd/cardgen .
+//go:generate go run ../../../../cmd/cardgen .
 
 package notimplemented
