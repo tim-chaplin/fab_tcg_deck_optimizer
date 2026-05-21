@@ -344,6 +344,14 @@ var cardsByID = []Card{
 	ids.RagingOnslaughtYellow: cards.RagingOnslaughtYellow{},
 	ids.RagingOnslaughtBlue:   cards.RagingOnslaughtBlue{},
 
+	ids.RallyTheCoastGuardRed:    cards.RallyTheCoastGuardRed{},
+	ids.RallyTheCoastGuardYellow: cards.RallyTheCoastGuardYellow{},
+	ids.RallyTheCoastGuardBlue:   cards.RallyTheCoastGuardBlue{},
+
+	ids.RallyTheRearguardRed:    cards.RallyTheRearguardRed{},
+	ids.RallyTheRearguardYellow: cards.RallyTheRearguardYellow{},
+	ids.RallyTheRearguardBlue:   cards.RallyTheRearguardBlue{},
+
 	ids.RavenousRabbleRed:    cards.RavenousRabbleRed{},
 	ids.RavenousRabbleYellow: cards.RavenousRabbleYellow{},
 	ids.RavenousRabbleBlue:   cards.RavenousRabbleBlue{},

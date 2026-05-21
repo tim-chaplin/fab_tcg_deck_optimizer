@@ -37,11 +37,12 @@ type PlayPrecondition interface {
 	PlayPrecondition(g GameEngine, self *CardState) bool
 }
 
-// Blocker is an optional interface for plain-block cards that need to react to other
-// defenders before contributing their block. Implementations scan g.Defenders() and flip
-// self.BonusDefense for conditional buffs ("+N{d} when defending alone", "+N{d} together
-// with another card"). Cards without block-time logic don't need to implement Blocker;
-// their plain-block contribution stays at the printed Defense().
+// Blocker is an optional interface for plain-block cards with block-time logic. Block runs
+// once for the card during defense resolution, before its block is counted. Implementations
+// scan g.Defenders() and flip self.BonusDefense for conditional buffs ("+N{d} when defending
+// alone", "+N{d} together with another card"), and may apply game-state side effects to pay
+// a block-time cost (e.g. discarding a card for +N{d}). Cards without block-time logic don't
+// need to implement Blocker; their plain-block contribution stays at the printed Defense().
 type Blocker interface {
 	Block(g GameEngine, l Logger, self *CardState)
 }

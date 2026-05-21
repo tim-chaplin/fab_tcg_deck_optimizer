@@ -41,6 +41,7 @@ type GameState struct {
 	arcaneIncomingDamage int
 	blockTotal           int
 	currentAuraIdx       int
+	discardableHandCount int // leading hand cards Discard may consume
 
 	cardBanished          bool
 	arcaneDamageDealt     bool
@@ -338,8 +339,14 @@ func (gs *GameState) SetWeapons(w []weapon.Weapon) { gs.weapons = w }
 func (gs *GameState) IsCacheable() bool            { return gs.cacheable }
 func (gs *GameState) SetCacheable(v bool)          { gs.cacheable = v }
 
-func (gs *GameState) Hand() []card.Card     { return gs.hand }
-func (gs *GameState) SetHand(h []card.Card) { gs.hand = h }
+func (gs *GameState) Hand() []card.Card { return gs.hand }
+func (gs *GameState) SetHand(h []card.Card) {
+	gs.hand = h
+	gs.discardableHandCount = len(h)
+}
+
+// SetDiscardableHandCount caps how many leading hand cards Discard may consume.
+func (gs *GameState) SetDiscardableHandCount(n int) { gs.discardableHandCount = n }
 func (gs *GameState) AppendHandRaw(c card.Card) {
 	gs.hand = append(gs.hand, c)
 }

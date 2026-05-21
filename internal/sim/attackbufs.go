@@ -93,6 +93,9 @@ type attackBufs struct {
 	// before the perm runs, so aliasing the leafState's slice to these buffers is safe.
 	runDefenseDRGravBuf    []card.Card
 	runDefenseChainGravBuf []card.Card
+	// runDefenseHandBuf backs the defense hand (held + attackers + pitched) installed on
+	// leafState for the plain-block loop. Recycled across runDefense calls.
+	runDefenseHandBuf []card.Card
 	// pooledLeafState is the per-Best leafState recycled across every call. bestAttackWithWeapons
 	// resets it from masterState via CopyFrom so the per-call masterState.Copy()
 	// allocation goes away. Defense mutations write through to this pool slot; preparePermState

@@ -126,13 +126,14 @@ func (ge *GameEngine) AppendToDeck(c card.Card) {
 }
 
 // Discard pops the first hand card and appends it to the graveyard. Returns the discarded
-// card and true; returns (nil, false) when the hand is empty. Flips IsCacheable via
-// PopHandAt.
+// card and true; returns (nil, false) when the hand is empty or no leading card is
+// discardable. Flips IsCacheable via PopHandAt.
 func (ge *GameEngine) Discard() (card.Card, bool) {
-	if len(ge.hand) == 0 {
+	if len(ge.hand) == 0 || ge.discardableHandCount == 0 {
 		return nil, false
 	}
 	c := ge.PopHandAt(0)
+	ge.discardableHandCount--
 	ge.graveyard = append(ge.graveyard, c)
 	return c, true
 }
