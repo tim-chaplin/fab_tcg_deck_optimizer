@@ -10,7 +10,7 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 )
 
-func riftingPlay(self *card.CardState) {
+func riftingPlay(ge card.GameEngine, l card.Logger, self *card.CardState) {
 	self.RegisterOnHit(riftingOnHit)
 }
 
@@ -20,6 +20,14 @@ func riftingOnHit(ge card.GameEngine, l card.Logger, self *card.CardState, _ *ca
 	GrantNextCardInstant(ge, card.IsNonAttackAction)
 }
 
-func (RiftingRed) Play(ge card.GameEngine, l card.Logger, self *card.CardState)    { riftingPlay(self) }
-func (RiftingYellow) Play(ge card.GameEngine, l card.Logger, self *card.CardState) { riftingPlay(self) }
-func (RiftingBlue) Play(ge card.GameEngine, l card.Logger, self *card.CardState)   { riftingPlay(self) }
+func (RiftingRed) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
+	riftingPlay(ge, l, self)
+}
+
+func (RiftingYellow) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
+	riftingPlay(ge, l, self)
+}
+
+func (RiftingBlue) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
+	riftingPlay(ge, l, self)
+}

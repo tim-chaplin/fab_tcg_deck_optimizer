@@ -846,8 +846,8 @@ func (ctx *sequenceContext) playSequenceWithMeta(n int) (damage int, totalCounte
 		}
 
 		finalizeActiveAttack()
-		// Checked after finalizeActiveAttack so the prior attack's on-hit grants have
-		// landed — a rider (e.g. Rifting) may have set this card's GrantedInstant.
+		// Runs after finalizeActiveAttack so an earlier attack's on-hit rider has had its
+		// chance to set this card's GrantedInstant.
 		if !m.isFreeChainStep && !pc.GrantedInstant {
 			if state.ActionPoints() <= 0 {
 				return 0, 0, 0, nil, false

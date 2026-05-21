@@ -11,8 +11,7 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 )
 
-// Tests that when Rifting hits, the next non-attack action card plays without an action
-// point — so it joins the chain even after Rifting has spent the turn's only AP.
+// Tests that a Rifting hit lets the next non-attack action card play without an action point.
 func TestRifting_HitLetsNextNonAttackActionPlayAsInstant(t *testing.T) {
 	d := deck.New(testutils.Hero{Intel: 4}, nil, fillerDeck())
 	prior := gameengine.GameStateBuilder().SetIncomingDamage(0).Build()
