@@ -366,6 +366,10 @@ var cardsByID = []Card{
 	ids.RegurgitatingSlogYellow: cards.RegurgitatingSlogYellow{},
 	ids.RegurgitatingSlogBlue:   cards.RegurgitatingSlogBlue{},
 
+	ids.ReinforceTheLineRed:    cards.ReinforceTheLineRed{},
+	ids.ReinforceTheLineYellow: cards.ReinforceTheLineYellow{},
+	ids.ReinforceTheLineBlue:   cards.ReinforceTheLineBlue{},
+
 	ids.RelentlessPursuitBlue: cards.RelentlessPursuitBlue{},
 
 	ids.RightBehindYouRed:    cards.RightBehindYouRed{},
