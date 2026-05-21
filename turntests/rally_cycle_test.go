@@ -11,8 +11,8 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 )
 
-// Tests that a defending Rally card discards a Held card for the printed +3{d} — blocking
-// all 5 incoming — and blocks only its base 2 when the hand holds nothing to discard.
+// Tests that a defending Rally card discards a Held card for the printed +3{d}, falling back
+// to its base 2 block when the hand holds nothing to discard.
 func TestRallyCycle_BlockDiscardsHeldCardForBonusDefense(t *testing.T) {
 	for _, rally := range []card.Card{cards.RallyTheCoastGuardRed{}, cards.RallyTheRearguardRed{}} {
 		d := deck.New(testutils.Hero{Intel: 4}, nil, fillerDeck())

@@ -416,9 +416,9 @@ func cloneCardSlice(src []card.Card) []card.Card {
 // proceeds while the matchup figure itself stays constant.
 //
 // Before the plain-block loop the genuine defense hand — held + attackers + pitched — is
-// installed, with Discard capped to the Held-card count so a Blocker's discard (Rally)
-// consumes only a Held card. The surviving Held cards are returned: the caller shrinks
-// handStart by what was discarded, so the discard is a real cost the chain phase sees.
+// installed, with Discard capped to the Held-card count so a Blocker's discard consumes only
+// a Held card. The surviving Held cards are returned: the caller shrinks handStart by what
+// was discarded, so the discard is a real cost the chain phase sees.
 func (ctx *sequenceContext) runDefense(defenders, pitched []card.Card, deckPile *deck.Deck, matchupIncomingDamage, blockBudget, arsenalDefenderIdx int) (int, bool, []card.Card) {
 	state := ctx.leafState
 	state.SetIsMyTurn(false)
