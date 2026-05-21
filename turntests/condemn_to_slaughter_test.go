@@ -3,64 +3,42 @@ package turntests
 import (
 	"testing"
 
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card/cards/notimplemented"
-
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card/cards"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/gameengine"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 )
 
-func TestCondemnToSlaughter_NoNextAttackReturnsZero(t *testing.T) {
-	// No Runeblade attack follows → rider doesn't fire, Play returns 0.
-	ge := gameengine.New()
-	ge.ResolveChainStep(ge.Logger(), &card.CardState{Card: notimplemented.CondemnToSlaughterRed{}})
-	if got := ge.Value(); got != 0 {
-		t.Errorf("Play() = %d, want 0 when CardsRemaining is empty", got)
+// Tests that Condemn to Slaughter sacrifices a carried Arcane Cussing, cashing its
+// 3-Runechant leave payoff during our turn.
+func TestCondemnToSlaughter_SacrificesArcaneCussing(t *testing.T) {
+	prior := gameengine.GameStateBuilder().
+		CreateAuraFromCard(cards.ArcaneCussingRed{}).
+		SetIncomingDamage(0).
+		Build()
+	d := deck.New(testutils.Hero{Intel: 4}, nil, fillerDeck())
+	hand := []card.Card{cards.CondemnToSlaughterRed{}, testutils.BluePitch{}}
+
+	summary := sim.EvalOneTurnForTesting(d, prior, hand)
+
+	if got := summary.State.RunechantCount(); got != 3 {
+		t.Fatalf("RunechantCount = %d, want 3 (Arcane Cussing cashed by the aura sacrifice)\nBestLine: %s",
+			got, formatBestLine(summary.BestLine))
 	}
 }
 
-func TestCondemnToSlaughter_NextAttackActionTriggers(t *testing.T) {
-	// A Runeblade attack action card in CardsRemaining picks up +N{p} on its BonusAttack;
-	// Play returns 0 (the +N attributes to the buffed attack, not Condemn).
-	cases := []struct {
-		c card.Card
-		n int
-	}{
-		{notimplemented.CondemnToSlaughterRed{}, 3},
-		{notimplemented.CondemnToSlaughterYellow{}, 2},
-		{notimplemented.CondemnToSlaughterBlue{}, 1},
-	}
-	for _, tc := range cases {
-		target := &card.CardState{Card: testutils.RunebladeAttack{}}
-		ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCardsRemaining([]*card.CardState{target}).Build()}
-		ge.ResolveChainStep(ge.Logger(), &card.CardState{Card: tc.c})
-		if got := ge.Value(); got != 0 {
-			t.Errorf("%s: Play() = %d, want 0 (granter returns 0; +N rides on target'ge BonusAttack)", tc.c.Name(), got)
-		}
-		if target.BonusAttack != tc.n {
-			t.Errorf("%s: target BonusAttack = %d, want %d", tc.c.Name(), target.BonusAttack, tc.n)
-		}
-	}
-}
+// Tests that Condemn to Slaughter buffs the next Runeblade attack: a 0-power Runeblade
+// attack lands for 1 only because of the Blue variant's +1{p}.
+func TestCondemnToSlaughter_BuffsNextRunebladeAttack(t *testing.T) {
+	d := deck.New(testutils.Hero{Intel: 4}, nil, fillerDeck())
+	hand := []card.Card{cards.CondemnToSlaughterBlue{}, testutils.RunebladeAttack{}, testutils.BluePitch{}}
 
-func TestCondemnToSlaughter_WeaponCountsAsNextAttack(t *testing.T) {
-	// Unlike Runic Reaping, Condemn'ge rider accepts weapon swings as the "next attack."
-	target := &card.CardState{Card: testutils.RunebladeWeapon{}}
-	ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCardsRemaining([]*card.CardState{target}).Build()}
-	ge.ResolveChainStep(ge.Logger(), &card.CardState{Card: notimplemented.CondemnToSlaughterRed{}})
-	if got := ge.Value(); got != 0 {
-		t.Errorf("Play() = %d, want 0 (granter returns 0; +N rides on target'ge BonusAttack)", got)
-	}
-	if target.BonusAttack != 3 {
-		t.Errorf("target BonusAttack = %d, want 3 (weapon should qualify)", target.BonusAttack)
-	}
-}
+	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingDamage(0).Build(), hand)
 
-func TestCondemnToSlaughter_NonRunebladeAttackDoesNotQualify(t *testing.T) {
-	// A Generic attack-action card later in the chain doesn't satisfy the Runeblade-only rider.
-	ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCardsRemaining([]*card.CardState{{Card: testutils.NonRunebladeAttack{}}}).Build()}
-	ge.ResolveChainStep(ge.Logger(), &card.CardState{Card: notimplemented.CondemnToSlaughterRed{}})
-	if got := ge.Value(); got != 0 {
-		t.Errorf("Play() = %d, want 0 (non-Runeblade attack shouldn't qualify)", got)
+	if got := summary.Value; got != 1 {
+		t.Fatalf("Value = %d, want 1 (Condemn's +1{p} turns the 0-power Runeblade attack into a 1-damage hit)\nBestLine: %s",
+			got, formatBestLine(summary.BestLine))
 	}
 }

@@ -167,13 +167,11 @@ See the full deck @ https://fabrary.net/decks/01KP1AZ5SAS425YN30WB779M41
 	if d.Size() == 0 {
 		t.Fatalf("expected deck cards, got none")
 	}
-	// NotImplemented cards live in internal/cards/notimplemented/ and aren't imported by the
-	// registry, so they're reported as skipped just like genuinely-unknown cards. The sample
-	// retains two such names (Condemn to Slaughter, Drowning Dire); Arcane Polarity has since
-	// been promoted to a fully-modelled card.
+	// NotImplemented cards aren't imported by the registry, so they're reported as skipped
+	// just like genuinely-unknown cards. Of the sample's cards, only Drowning Dire is
+	// NotImplemented.
 	wantSkipped := map[string]int{
-		"Condemn to Slaughter [R]": 2,
-		"Drowning Dire [R]":        2,
+		"Drowning Dire [R]": 2,
 	}
 	for name, count := range wantSkipped {
 		if skipped[name] != count {
