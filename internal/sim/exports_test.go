@@ -62,7 +62,7 @@ func (s *SequenceContextForTest) BestSequence(attackers []card.Card) (int, int, 
 func FireEndOfTurn(ge *gameengine.GameEngine) { ge.FireTriggers(triggertype.EndOfTurn, nil) }
 
 // PromoteRandomHandCardToArsenal promotes a Held card on best.State and reflects the pick
-// in best.BestLine — the per-leaf state move plus the best-line bookkeeping.
+// in best.BestLine.
 func PromoteRandomHandCardToArsenal(best *TurnSummary, startingHand []card.Card, arsenalCardIn card.Card) {
 	markPromotedInBestLine(best.BestLine, promoteHeldToArsenal(best.State, startingHand, arsenalCardIn))
 }

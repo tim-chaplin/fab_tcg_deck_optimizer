@@ -160,10 +160,10 @@ func (e *Evaluator) findBest(weapons []weapon.Weapon, hand []card.Card, d *deck.
 	return best
 }
 
-// promoteHeldToArsenal moves an eligible Held card from state's hand into its arsenal slot
-// and returns the promoted card, or nil when nothing is eligible. Eligible cards are those
-// that are neither a block nor a resource. The pick is deterministic per hand. Called per
-// leaf so the score sees the arsenal slot the leftover card fills.
+// promoteHeldToArsenal moves an arsenal-eligible Held card from state's hand into its empty
+// arsenal slot and returns it, or nil when nothing is eligible. The pick is deterministic per
+// hand. Called per leaf so the score sees the arsenal slot the leftover card fills. Mutates
+// state only; callers that track a best line mark the returned card via markPromotedInBestLine.
 func promoteHeldToArsenal(state *gameengine.GameState, startingHand []card.Card, arsenalCardIn card.Card) card.Card {
 	hand := state.HandStates()
 	eligible := 0
@@ -183,7 +183,10 @@ func promoteHeldToArsenal(state *gameengine.GameState, startingHand []card.Card,
 		if target == 0 {
 			chosen := hand[i].Card
 			state.SetArsenal(chosen)
-			state.SetHandStates(append(hand[:i], hand[i+1:]...))
+			// Swap-remove: the hand is read by membership / length, never by index.
+			last := len(hand) - 1
+			hand[i] = hand[last]
+			state.SetHandStates(hand[:last])
 			return chosen
 		}
 		target--
