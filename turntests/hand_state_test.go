@@ -12,7 +12,6 @@ import (
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card/cards"
-	notimpl "github.com/tim-chaplin/fab-deck-optimizer/internal/card/cards/notimplemented"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/gameengine"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/hero/heroes"
@@ -116,7 +115,7 @@ func TestHandState_DemolitionCrewSeesUncommittedPitchInHand(t *testing.T) {
 		cards.DemolitionCrewRed{},
 		cards.ToughenUpBlue{},
 		cards.DragDownYellow{},
-		notimpl.BrandishRed{},
+		cards.BrandishRed{},
 	}
 	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetArsenal(cards.FlyingHighRed{}).Build(), hand)
 	if got := summary.Value; got != 10 {

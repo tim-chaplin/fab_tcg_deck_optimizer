@@ -62,6 +62,10 @@ var cardsByID = []Card{
 
 	ids.BlusterBuffRed: cards.BlusterBuffRed{},
 
+	ids.BrandishRed:    cards.BrandishRed{},
+	ids.BrandishYellow: cards.BrandishYellow{},
+	ids.BrandishBlue:   cards.BrandishBlue{},
+
 	ids.BrothersInArmsRed:    cards.BrothersInArmsRed{},
 	ids.BrothersInArmsYellow: cards.BrothersInArmsYellow{},
 	ids.BrothersInArmsBlue:   cards.BrothersInArmsBlue{},
