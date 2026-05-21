@@ -90,6 +90,8 @@ var cardsByID = []Card{
 
 	ids.ChestPuffRed: cards.ChestPuffRed{},
 
+	ids.ClearwaterElixirRed: cards.ClearwaterElixirRed{},
+
 	ids.ComeToFightRed:    cards.ComeToFightRed{},
 	ids.ComeToFightYellow: cards.ComeToFightYellow{},
 	ids.ComeToFightBlue:   cards.ComeToFightBlue{},
@@ -374,6 +376,8 @@ var cardsByID = []Card{
 
 	ids.RelentlessPursuitBlue: cards.RelentlessPursuitBlue{},
 
+	ids.RestvineElixirRed: cards.RestvineElixirRed{},
+
 	ids.RightBehindYouRed:    cards.RightBehindYouRed{},
 	ids.RightBehindYouYellow: cards.RightBehindYouYellow{},
 	ids.RightBehindYouBlue:   cards.RightBehindYouBlue{},
@@ -401,6 +405,8 @@ var cardsByID = []Card{
 	ids.RunicReapingRed:    cards.RunicReapingRed{},
 	ids.RunicReapingYellow: cards.RunicReapingYellow{},
 	ids.RunicReapingBlue:   cards.RunicReapingBlue{},
+
+	ids.SapwoodElixirRed: cards.SapwoodElixirRed{},
 
 	ids.ScarForAScarRed:    cards.ScarForAScarRed{},
 	ids.ScarForAScarYellow: cards.ScarForAScarYellow{},
