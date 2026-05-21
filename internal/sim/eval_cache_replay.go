@@ -81,7 +81,7 @@ func (e *Evaluator) replayBest(
 		best.BestLine[n] = card.CardAssignment{Card: arsenalCardIn, Role: pcards[n].role, FromArsenal: true}
 	}
 	if best.State.Arsenal() == nil {
-		promoteRandomHandCardToArsenal(&best, hand, arsenalCardIn)
+		promoteHeldToArsenal(best.State, hand, arsenalCardIn)
 	}
 	return best
 }

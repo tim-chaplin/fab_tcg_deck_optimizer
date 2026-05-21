@@ -11,6 +11,11 @@ import (
 )
 
 func rallyTheCoastGuardBlock(ge card.GameEngine, self *card.CardState) {
+	// Spend a card on the +3{d} only when the base block leaves damage unblocked;
+	// over-blocking past the incoming damage would waste the discarded card.
+	if ge.RemainingUnblockedDamage() <= self.EffectiveDefense() {
+		return
+	}
 	if _, ok := ge.Discard(); ok {
 		self.BonusDefense += 3
 	}
