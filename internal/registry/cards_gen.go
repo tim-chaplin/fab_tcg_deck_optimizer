@@ -286,6 +286,8 @@ var cardsByID = []Card{
 	ids.OathOfTheArknightYellow: cards.OathOfTheArknightYellow{},
 	ids.OathOfTheArknightBlue:   cards.OathOfTheArknightBlue{},
 
+	ids.OnAKnifeEdgeYellow: cards.OnAKnifeEdgeYellow{},
+
 	ids.OnTheHorizonRed:    cards.OnTheHorizonRed{},
 	ids.OnTheHorizonYellow: cards.OnTheHorizonYellow{},
 	ids.OnTheHorizonBlue:   cards.OnTheHorizonBlue{},
