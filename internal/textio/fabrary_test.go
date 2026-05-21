@@ -167,21 +167,9 @@ See the full deck @ https://fabrary.net/decks/01KP1AZ5SAS425YN30WB779M41
 	if d.Size() == 0 {
 		t.Fatalf("expected deck cards, got none")
 	}
-	// NotImplemented cards aren't imported by the registry, so they're reported as skipped
-	// just like genuinely-unknown cards. Of the sample's cards, only Drowning Dire is
-	// NotImplemented.
-	wantSkipped := map[string]int{
-		"Drowning Dire [R]": 2,
-	}
-	for name, count := range wantSkipped {
-		if skipped[name] != count {
-			t.Errorf("skipped[%q] = %d, want %d", name, skipped[name], count)
-		}
-	}
-	for got := range skipped {
-		if _, ok := wantSkipped[got]; !ok {
-			t.Errorf("unexpected skipped card: %q", got)
-		}
+	// Every card in the sample is implemented and registered, so nothing is skipped.
+	if len(skipped) != 0 {
+		t.Errorf("unexpected skipped cards: %v", skipped)
 	}
 }
 
