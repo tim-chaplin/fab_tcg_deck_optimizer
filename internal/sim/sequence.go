@@ -419,9 +419,8 @@ func cloneCardSlice[T any](src []T) []T {
 // proceeds while the matchup figure itself stays constant.
 //
 // Before the plain-block loop the genuine role-tagged defense hand — held + attackers +
-// pitched — is installed; Discard consumes only a Held card. The surviving Held cards are
-// returned: the caller installs them as handStart so a defender's discard is a real cost
-// the attack chain then sees.
+// pitched — is installed; Discard consumes only a Held card. Returns the Held cards left
+// after any Blocker discards.
 func (ctx *sequenceContext) runDefense(defenders, pitched, held []card.Card, deckPile *deck.Deck, matchupIncomingDamage, blockBudget, arsenalDefenderIdx int) (int, bool, []card.Card) {
 	state := ctx.leafState
 	state.SetIsMyTurn(false)
@@ -934,7 +933,7 @@ func pendingTotalCardsFromState(gs *gameengine.GameState) int {
 	if gs == nil {
 		return 0
 	}
-	held := len(gs.Hand())
+	held := len(gs.HandStates())
 	intellect := gs.Hero().(hero.Hero).Intelligence()
 	n := held + endOfTurnDraws(held, intellect)
 	if gs.Arsenal() != nil {
