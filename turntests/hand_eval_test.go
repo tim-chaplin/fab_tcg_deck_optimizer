@@ -101,9 +101,9 @@ func TestBest_RespectsResourceConstraint(t *testing.T) {
 	var res, cost int
 	for i, c := range h {
 		switch summary.BestLine[i].Role {
-		case deck.Pitch:
+		case card.Pitch:
 			res += c.(card.Card).Pitch()
-		case deck.Attack:
+		case card.Attack:
 			cost += c.(card.Card).Cost(gameengine.New())
 		}
 	}
@@ -121,7 +121,7 @@ func TestBest_AllHeldWhenNoLegalPlay(t *testing.T) {
 	if summary.Value != 0 {
 		t.Fatalf("Value = %d, want 0", summary.Value)
 	}
-	if summary.BestLine[0].Role != deck.Arsenal {
+	if summary.BestLine[0].Role != card.Arsenal {
 		t.Errorf("role = %s, want ARSENAL (empty slot + Held card → promoted)", summary.BestLine[0].Role)
 	}
 	if summary.State.Arsenal() == nil || summary.State.Arsenal().ID() != ids.ToughenUpBlue {

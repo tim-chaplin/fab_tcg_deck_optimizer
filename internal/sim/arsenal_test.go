@@ -6,7 +6,6 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card/cards"
 	notimpl "github.com/tim-chaplin/fab-deck-optimizer/internal/card/cards/notimplemented"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/gameengine"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/hero/heroes"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/ids"
@@ -20,7 +19,7 @@ func TestBest_EmptyArsenalClaimsHeldCard(t *testing.T) {
 		SetHero(testutils.Hero{Intel: 4}).
 		SetIncomingDamage(4).
 		Build())
-	if got.BestLine[0].Role != deck.Arsenal {
+	if got.BestLine[0].Role != card.Arsenal {
 		t.Errorf("Roles[0] = %s, want ARSENAL", got.BestLine[0].Role)
 	}
 	if got.State.Arsenal() == nil || got.State.Arsenal().ID() != ids.ToughenUpBlue {
@@ -50,7 +49,7 @@ func TestBest_ArsenalInPlayDR(t *testing.T) {
 	if !hasArsenal || ai.Card.ID() != ids.ToughenUpBlue {
 		t.Errorf("ArsenalIn = %v, want Toughen Up Blue", ai)
 	}
-	if ai.Role != deck.Defend {
+	if ai.Role != card.Defend {
 		t.Errorf("ArsenalIn role = %s, want DEFEND", ai.Role)
 	}
 }
@@ -63,7 +62,7 @@ func TestBest_ArsenalInStayBlocksNewArsenal(t *testing.T) {
 		SetArsenal(cards.ToughenUpBlue{}).
 		Build()
 	got := Best(nil, h, nil, state)
-	if got.BestLine[0].Role != deck.Held {
+	if got.BestLine[0].Role != card.Held {
 		t.Errorf("Roles[0] = %s, want HELD (slot occupied by arsenal-in, can't promote)", got.BestLine[0].Role)
 	}
 	if got.State.Arsenal() == nil || got.State.Arsenal().ID() != ids.ToughenUpBlue {
@@ -167,9 +166,9 @@ func TestPromoteRandomHandCardToArsenal_SpreadsAcrossHands(t *testing.T) {
 	picks := map[ids.CardID]int{}
 	for _, h := range hands {
 		handCopy := append([]card.Card(nil), h...)
-		line := make([]deck.CardAssignment, len(handCopy))
+		line := make([]card.CardAssignment, len(handCopy))
 		for i, c := range handCopy {
-			line[i] = deck.CardAssignment{Card: c, Role: deck.Held}
+			line[i] = card.CardAssignment{Card: c, Role: card.Held}
 		}
 		best := TurnSummary{
 			BestLine: line,
@@ -194,11 +193,11 @@ func TestPromoteRandomHandCardToArsenal_DeterministicPerHand(t *testing.T) {
 	}
 	var firstID ids.CardID
 	for run := 0; run < 5; run++ {
-		line := []deck.CardAssignment{
-			{Card: hand[0], Role: deck.Held},
-			{Card: hand[1], Role: deck.Held},
-			{Card: hand[2], Role: deck.Held},
-			{Card: hand[3], Role: deck.Held},
+		line := []card.CardAssignment{
+			{Card: hand[0], Role: card.Held},
+			{Card: hand[1], Role: card.Held},
+			{Card: hand[2], Role: card.Held},
+			{Card: hand[3], Role: card.Held},
 		}
 		best := TurnSummary{
 			BestLine: line,
@@ -222,16 +221,16 @@ func TestPromoteRandomHandCardToArsenal_DeterministicPerHand(t *testing.T) {
 // Tests the n=1 edge: with one State.Hand entry the only candidate gets promoted.
 func TestPromoteRandomHandCardToArsenal_SingleCandidateAlwaysPicked(t *testing.T) {
 	hand := []card.Card{cards.WoundingBlowRed{}, cards.WoundingBlowBlue{}}
-	line := []deck.CardAssignment{
-		{Card: hand[0], Role: deck.Attack},
-		{Card: hand[1], Role: deck.Held},
+	line := []card.CardAssignment{
+		{Card: hand[0], Role: card.Attack},
+		{Card: hand[1], Role: card.Held},
 	}
 	best := TurnSummary{
 		BestLine: line,
 		State:    EngineWithHand([]card.Card{hand[1]}),
 	}
 	PromoteRandomHandCardToArsenal(&best, hand, nil)
-	if best.BestLine[1].Role != deck.Arsenal {
+	if best.BestLine[1].Role != card.Arsenal {
 		t.Errorf("Role[1] = %s, want Arsenal (only candidate)", best.BestLine[1].Role)
 	}
 	if best.State.Arsenal() == nil || best.State.Arsenal().ID() != hand[1].ID() {
@@ -242,14 +241,14 @@ func TestPromoteRandomHandCardToArsenal_SingleCandidateAlwaysPicked(t *testing.T
 // Tests that an empty State.Hand makes the promotion a no-op.
 func TestPromoteRandomHandCardToArsenal_EmptyHandIsNoop(t *testing.T) {
 	hand := []card.Card{cards.WoundingBlowRed{}, cards.WoundingBlowBlue{}}
-	line := []deck.CardAssignment{
-		{Card: hand[0], Role: deck.Attack},
-		{Card: hand[1], Role: deck.Pitch},
+	line := []card.CardAssignment{
+		{Card: hand[0], Role: card.Attack},
+		{Card: hand[1], Role: card.Pitch},
 	}
 	best := TurnSummary{BestLine: line, State: gameengine.GameStateBuilder().Build()}
 	PromoteRandomHandCardToArsenal(&best, hand, nil)
 	for i, a := range best.BestLine {
-		if a.Role == deck.Arsenal {
+		if a.Role == card.Arsenal {
 			t.Errorf("BestLine[%d].Role = Arsenal, want unchanged (no candidates)", i)
 		}
 	}

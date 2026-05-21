@@ -6,6 +6,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/hero"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/hero/heroes"
@@ -103,7 +104,7 @@ func TestRoundTrip_PreservesBestTurnValue(t *testing.T) {
 	stats := deck.Stats{
 		Best: deck.BestTurn{
 			Value:    21,
-			BestLine: []deck.CardAssignment{{Role: deck.Attack}},
+			BestLine: []card.CardAssignment{{Role: card.Attack}},
 		},
 	}
 

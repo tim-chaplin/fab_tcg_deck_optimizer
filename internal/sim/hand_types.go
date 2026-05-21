@@ -1,7 +1,7 @@
 package sim
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/gameengine"
 )
 
@@ -10,7 +10,7 @@ import (
 // recycled to deck bottom, next-turn hand drawn, accrued Value carried). Pure data, no
 // rules engine. deck.BestTurn persists only the durable fields.
 type TurnSummary struct {
-	BestLine       []deck.CardAssignment
+	BestLine       []card.CardAssignment
 	SwungWeapons   []string
 	Value          int
 	State          *gameengine.GameState
@@ -19,13 +19,13 @@ type TurnSummary struct {
 }
 
 // ArsenalIn returns the assignment for the card that started the turn in the arsenal.
-func (t TurnSummary) ArsenalIn() (deck.CardAssignment, bool) {
+func (t TurnSummary) ArsenalIn() (card.CardAssignment, bool) {
 	for _, a := range t.BestLine {
 		if a.FromArsenal {
 			return a, true
 		}
 	}
-	return deck.CardAssignment{}, false
+	return card.CardAssignment{}, false
 }
 
 // auraCountByNameInState scans the state's aura list for a token aura with the given

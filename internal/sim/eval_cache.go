@@ -20,7 +20,6 @@ import (
 	"sync/atomic"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/gameengine"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/ids"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapon"
@@ -87,7 +86,7 @@ type evalCacheKey struct {
 // list of swung weapon names. Value, State, and Log come from re-running the chain
 // against the cached partition.
 type evalCacheEntry struct {
-	line         []deck.CardAssignment
+	line         []card.CardAssignment
 	swungWeapons []string
 }
 

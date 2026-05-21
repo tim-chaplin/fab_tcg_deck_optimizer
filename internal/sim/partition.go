@@ -17,7 +17,7 @@ import (
 // per-card facts that roleAllowed and the budget sums read.
 type partitionCard struct {
 	card        card.Card
-	role        deck.Role
+	role        card.Role
 	pitchVal    int
 	defenseVal  int
 	isDR        bool
@@ -53,15 +53,15 @@ func (e *Evaluator) findBest(weapons []weapon.Weapon, hand []card.Card, d *deck.
 	}
 
 	best := TurnSummary{
-		BestLine:       make([]deck.CardAssignment, totalN),
+		BestLine:       make([]card.CardAssignment, totalN),
 		IncomingDamage: incoming,
 		Cacheable:      true,
 	}
 	for i := 0; i < n; i++ {
-		best.BestLine[i] = deck.CardAssignment{Card: hand[i], Role: deck.Held}
+		best.BestLine[i] = card.CardAssignment{Card: hand[i], Role: card.Held}
 	}
 	if arsenalCardIn != nil {
-		best.BestLine[n] = deck.CardAssignment{Card: arsenalCardIn, Role: deck.Arsenal, FromArsenal: true}
+		best.BestLine[n] = card.CardAssignment{Card: arsenalCardIn, Role: card.Arsenal, FromArsenal: true}
 	}
 	cacheable := true
 	var bestSwung []string
@@ -103,24 +103,24 @@ func (e *Evaluator) findBest(weapons []weapon.Weapon, hand []card.Card, d *deck.
 			return
 		}
 		pc := &pcards[i]
-		maxRole := deck.Held
+		maxRole := card.Held
 		if pc.fromArsenal {
-			maxRole = deck.Arsenal
+			maxRole = card.Arsenal
 		}
-		for r := deck.Role(0); r <= maxRole; r++ {
+		for r := card.Role(0); r <= maxRole; r++ {
 			if !roleAllowed(r, pc.fromArsenal, pc.isDR, pc.canAttack) {
 				continue
 			}
-			if r == deck.Defend && incoming == 0 {
+			if r == card.Defend && incoming == 0 {
 				continue
 			}
 			pc.role = r
 			switch r {
-			case deck.Pitch:
+			case card.Pitch:
 				recurse(i+1, pitchSum+pc.pitchVal, defenseSum)
-			case deck.Defend:
+			case card.Defend:
 				recurse(i+1, pitchSum, defenseSum+pc.defenseVal)
-			case deck.Attack, deck.Held, deck.Arsenal:
+			case card.Attack, card.Held, card.Arsenal:
 				recurse(i+1, pitchSum, defenseSum)
 			}
 		}
@@ -145,7 +145,7 @@ func (e *Evaluator) findBest(weapons []weapon.Weapon, hand []card.Card, d *deck.
 	if cacheUsable {
 		if best.Cacheable {
 			e.cache.store(cacheKey, evalCacheEntry{
-				line:         append([]deck.CardAssignment(nil), best.BestLine...),
+				line:         append([]card.CardAssignment(nil), best.BestLine...),
 				swungWeapons: append([]string(nil), best.SwungWeapons...),
 			})
 		} else {
@@ -180,8 +180,8 @@ func promoteRandomHandCardToArsenal(best *TurnSummary, startingHand []card.Card,
 	newHand := append(handState[:pick:pick], handState[pick+1:]...)
 	best.State.SetHand(newHand)
 	for i := range best.BestLine {
-		if best.BestLine[i].Role == deck.Held && best.BestLine[i].Card.ID() == chosen.ID() {
-			best.BestLine[i].Role = deck.Arsenal
+		if best.BestLine[i].Role == card.Held && best.BestLine[i].Card.ID() == chosen.ID() {
+			best.BestLine[i].Role = card.Arsenal
 			break
 		}
 	}
@@ -214,11 +214,11 @@ func arsenalPromotionHash(startingHand, stateHand []card.Card, arsenalCardIn car
 func groupByRole(pcards []partitionCard, pitched, attackers, defenders []card.Card) ([]card.Card, []card.Card, []card.Card) {
 	for _, pc := range pcards {
 		switch pc.role {
-		case deck.Pitch:
+		case card.Pitch:
 			pitched = append(pitched, pc.card)
-		case deck.Attack:
+		case card.Attack:
 			attackers = append(attackers, pc.card)
-		case deck.Defend:
+		case card.Defend:
 			defenders = append(defenders, pc.card)
 		}
 	}
@@ -228,7 +228,7 @@ func groupByRole(pcards []partitionCard, pitched, attackers, defenders []card.Ca
 // gatherHeldCards appends every card with role Held into the caller-provided held slice.
 func gatherHeldCards(pcards []partitionCard, held []card.Card) []card.Card {
 	for _, pc := range pcards {
-		if pc.role == deck.Held {
+		if pc.role == card.Held {
 			held = append(held, pc.card)
 		}
 	}
@@ -238,7 +238,7 @@ func gatherHeldCards(pcards []partitionCard, held []card.Card) []card.Card {
 // findArsenalCard returns the arsenal-in card when its slot kept the Arsenal role, nil
 // otherwise (it was reassigned to Attack / Defend, or no card started in the arsenal).
 func findArsenalCard(pcards []partitionCard, n int) card.Card {
-	if len(pcards) > n && pcards[n].role == deck.Arsenal {
+	if len(pcards) > n && pcards[n].role == card.Arsenal {
 		return pcards[n].card
 	}
 	return nil
@@ -246,19 +246,19 @@ func findArsenalCard(pcards []partitionCard, n int) card.Card {
 
 // roleAllowed decides whether the partition enumerator may assign role r to the current
 // card.
-func roleAllowed(r deck.Role, isArsenalSlot, isDefenseReaction, canAttack bool) bool {
+func roleAllowed(r card.Role, isArsenalSlot, isDefenseReaction, canAttack bool) bool {
 	if isArsenalSlot {
 		switch r {
-		case deck.Pitch, deck.Held:
+		case card.Pitch, card.Held:
 			return false
-		case deck.Attack:
+		case card.Attack:
 			return canAttack
-		case deck.Defend:
+		case card.Defend:
 			return isDefenseReaction
 		}
 		return true
 	}
-	return r != deck.Attack || canAttack
+	return r != card.Attack || canAttack
 }
 
 // defendersDamage tallies the total Value contribution of the partition's defense phase

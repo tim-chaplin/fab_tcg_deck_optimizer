@@ -22,7 +22,7 @@ func TestSigilOfCycles_DestroysAtStartOfNextTurnAndCyclesHand(t *testing.T) {
 	d := deck.New(testutils.Hero{Intel: 1}, nil, []deck.Card{testutils.RedAttack{}})
 	turn1, turn2 := sim.EvalTwoTurnsForTesting(d, gameengine.GameStateBuilder().SetIncomingDamage(0).Build(), []card.Card{sigil})
 
-	if !bestLineHasRole(turn1.BestLine, ids.SigilOfCyclesBlue, deck.Attack) {
+	if !bestLineHasRole(turn1.BestLine, ids.SigilOfCyclesBlue, card.Attack) {
 		t.Errorf("turn 1 BestLine didn't play Sigil of Cycles as Role=Attack: %+v", turn1.BestLine)
 	}
 	if !graveyardContains(turn2.State.Graveyard(), ids.SigilOfCyclesBlue) {

@@ -9,7 +9,6 @@ import (
 	"strings"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
 )
 
 // startingHandLine builds "Hand: A, B, C, D" from the turn's dealt hand. Names render in
@@ -27,7 +26,7 @@ func startingHandLine(dealtHand []card.Card) string {
 
 // startingArsenalLine returns "Arsenal: cardname" when the turn started with an arsenal-in
 // card (BestLine entry with FromArsenal=true), "" otherwise.
-func startingArsenalLine(line []deck.CardAssignment) string {
+func startingArsenalLine(line []card.CardAssignment) string {
 	for _, a := range line {
 		if a.FromArsenal {
 			return "Arsenal: " + a.Card.DisplayName()
@@ -62,7 +61,7 @@ func aurasLineFromNames(names []string, runechants, ponders int) string {
 // Arsenal-role entries. The tag derives from FromArsenal — the arsenal-in card kept the
 // slot when FromArsenal=true ("(stayed)"); any other origin (post-hoc Held promotion)
 // reads "(new)". Returns "" when arsenal ended empty.
-func endingArsenalLine(arsenal []deck.CardAssignment) string {
+func endingArsenalLine(arsenal []card.CardAssignment) string {
 	if len(arsenal) == 0 {
 		return ""
 	}

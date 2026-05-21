@@ -46,7 +46,7 @@ func (e *Evaluator) replayBest(
 	}
 
 	if postPromotedFromHeld >= 0 {
-		pcards[postPromotedFromHeld].role = deck.Held
+		pcards[postPromotedFromHeld].role = card.Held
 	}
 
 	defenseSum := defenseSumFromRoles(pcards)
@@ -62,12 +62,12 @@ func (e *Evaluator) replayBest(
 	}
 
 	if postPromotedFromHeld >= 0 {
-		pcards[postPromotedFromHeld].role = deck.Arsenal
+		pcards[postPromotedFromHeld].role = card.Arsenal
 	}
 
 	winner.SetArsenal(arsenalAtChainStart)
 	best := TurnSummary{
-		BestLine:       make([]deck.CardAssignment, totalN),
+		BestLine:       make([]card.CardAssignment, totalN),
 		Value:          attackDealt + defenseDealt,
 		SwungWeapons:   append([]string(nil), swung...),
 		IncomingDamage: masterState.IncomingDamage(),
@@ -75,10 +75,10 @@ func (e *Evaluator) replayBest(
 		State:          winner,
 	}
 	for i := 0; i < n; i++ {
-		best.BestLine[i] = deck.CardAssignment{Card: hand[i], Role: pcards[i].role}
+		best.BestLine[i] = card.CardAssignment{Card: hand[i], Role: pcards[i].role}
 	}
 	if arsenalCardIn != nil {
-		best.BestLine[n] = deck.CardAssignment{Card: arsenalCardIn, Role: pcards[n].role, FromArsenal: true}
+		best.BestLine[n] = card.CardAssignment{Card: arsenalCardIn, Role: pcards[n].role, FromArsenal: true}
 	}
 	if best.State.Arsenal() == nil {
 		promoteRandomHandCardToArsenal(&best, hand, arsenalCardIn)
@@ -90,7 +90,7 @@ func (e *Evaluator) replayBest(
 func defenseSumFromRoles(pcards []partitionCard) int {
 	sum := 0
 	for _, pc := range pcards {
-		if pc.role == deck.Defend {
+		if pc.role == card.Defend {
 			sum += pc.defenseVal
 		}
 	}
@@ -99,7 +99,7 @@ func defenseSumFromRoles(pcards []partitionCard) int {
 
 // mapCachedRolesToHand walks entry.line and assigns each partitionCard a role from the
 // cached entry by matching Card.ID(). Returns false on multiset mismatch.
-func mapCachedRolesToHand(cachedLine []deck.CardAssignment, pcards []partitionCard, n int, postPromotedFromHeld *int) bool {
+func mapCachedRolesToHand(cachedLine []card.CardAssignment, pcards []partitionCard, n int, postPromotedFromHeld *int) bool {
 	*postPromotedFromHeld = -1
 	used := make([]bool, len(cachedLine))
 	if len(pcards) > n {
@@ -125,7 +125,7 @@ func mapCachedRolesToHand(cachedLine []deck.CardAssignment, pcards []partitionCa
 			pcards[hi].role = a.Role
 			used[i] = true
 			matched = true
-			if a.Role == deck.Arsenal {
+			if a.Role == card.Arsenal {
 				*postPromotedFromHeld = hi
 			}
 			break
