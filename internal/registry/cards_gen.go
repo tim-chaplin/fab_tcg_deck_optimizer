@@ -532,6 +532,8 @@ var cardsByID = []Card{
 	ids.VigorRushYellow: cards.VigorRushYellow{},
 	ids.VigorRushBlue:   cards.VigorRushBlue{},
 
+	ids.VisitTheBlacksmithBlue: cards.VisitTheBlacksmithBlue{},
+
 	ids.WageGoldRed:    cards.WageGoldRed{},
 	ids.WageGoldYellow: cards.WageGoldYellow{},
 	ids.WageGoldBlue:   cards.WageGoldBlue{},
