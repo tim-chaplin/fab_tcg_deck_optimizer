@@ -4,8 +4,6 @@ types:
     - Action
     - Attack
 cost: 2
-markers:
-    - NotImplemented
 text: |-
     If Rifting hits, you may play your next 'non-attack' action card this turn as though it
     were an instant.

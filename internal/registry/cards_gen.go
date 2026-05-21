@@ -386,6 +386,10 @@ var cardsByID = []Card{
 
 	ids.RestvineElixirRed: cards.RestvineElixirRed{},
 
+	ids.RiftingRed:    cards.RiftingRed{},
+	ids.RiftingYellow: cards.RiftingYellow{},
+	ids.RiftingBlue:   cards.RiftingBlue{},
+
 	ids.RightBehindYouRed:    cards.RightBehindYouRed{},
 	ids.RightBehindYouYellow: cards.RightBehindYouYellow{},
 	ids.RightBehindYouBlue:   cards.RightBehindYouBlue{},
