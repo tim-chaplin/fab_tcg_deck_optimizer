@@ -1,297 +1,21 @@
-// cardgen reads every <basename>.yaml file in each directory passed on the command line
-// and emits a sibling <basename>_gen.go containing the static struct + method declarations.
-// Hand-written <basename>.go files in the same package supply Play() and any per-card
-// riders, costs, modal predicates, attack-reaction targeting, etc.; the generator never
-// touches them.
+// Command cardgen regenerates the <card>_gen.go files and the registry's cardsByID map
+// from the <card>.yaml data files, writing the output to disk. The generation logic and
+// yaml schema live in internal/cardgen.
 //
 // Usage:
 //
-//	go run ./cmd/cardgen internal/cards internal/cards/notimplemented internal/cards/unplayable
+//	go run ./cmd/cardgen [-registry <path>] <dir>...
 //
-// With -registry <path>, the run also emits that file with the registry's cardsByID map,
-// built from the cards-package directory's variants — so a newly added card is registered
-// for deck construction automatically, never by hand.
-//
-// Schema (one card per yaml file, e.g. internal/cards/aether_slash.yaml):
-//
-//	name: Aether Slash
-//	types: [Runeblade, Action, Attack]
-//	cost: 1                 # int constant; omit (or "variable") for VariableCost cards
-//	goAgain: false          # default false
-//	markers: [Dominator]    # NotImplemented, Unplayable, Dominator, NotSilverAgeLegal
-//	text: |
-//	  Printed rules text...
-//	variants:
-//	  - id: AetherSlashRed
-//	    pitch: 1
-//	    attack: 4
-//	    defense: 3
-//	  - id: AetherSlashYellow
-//	    pitch: 2
-//	    attack: 3
-//	    defense: 3
-//	  - id: AetherSlashBlue
-//	    pitch: 3
-//	    attack: 2
-//	    defense: 3
-//
-// The yaml's basename ("aether_slash") drives the gen file name; the package name comes
-// from the first .go file already in the directory. Variable cost: leave `cost:` unset or
-// set it to "variable"; the hand-written file supplies Cost(s), MinCost, MaxCost.
+// -registry <path> additionally emits the registry cardsByID file at that path.
 package main
 
 import (
-	"bytes"
 	"flag"
 	"fmt"
-	"go/format"
-	"go/parser"
-	"go/token"
-	"io/fs"
 	"os"
-	"path/filepath"
-	"sort"
-	"strings"
 
-	"gopkg.in/yaml.v3"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/cardgen"
 )
-
-// CardGroup is one card with its pitch variants. Cost, Go again, types, and the marker
-// flags hold uniform across every printing of a card today, so they live here at the
-// group level. Defense lives on Variant because plenty of cards (On the Horizon Red 4
-// vs Blue 2) print different defense values per pitch.
-type CardGroup struct {
-	Name           string    `yaml:"name"`
-	Types          []string  `yaml:"types"`
-	Universal      bool      `yaml:"universal,omitempty"` // OR the current hero's class into Types()
-	Cost           any       `yaml:"cost"`                // int (constant) or "variable" or nil (variable)
-	GoAgain        bool      `yaml:"goAgain,omitempty"`
-	DynamicGoAgain bool      `yaml:"dynamicGoAgain,omitempty"` // skip GoAgain in gen; hand file owns it
-	Markers        []string  `yaml:"markers,omitempty"`
-	Text           string    `yaml:"text,omitempty"`
-	Variants       []Variant `yaml:"variants"`
-}
-
-// Variant is one pitch printing of a card.
-type Variant struct {
-	ID      string `yaml:"id"`
-	Pitch   int    `yaml:"pitch"`
-	Attack  int    `yaml:"attack"`
-	Defense int    `yaml:"defense"`
-}
-
-// pitchTag maps an integer pitch value to the suffix the display name carries.
-func pitchTag(p int) string {
-	switch p {
-	case 1:
-		return " [R]"
-	case 2:
-		return " [Y]"
-	case 3:
-		return " [B]"
-	}
-	return ""
-}
-
-// typesVarName derives the package-level types var name shared across a card's variants.
-// Example: card name "Aether Slash" → "aetherSlashTypes". Punctuation is stripped so names
-// like "Money or Your Life?" produce a legal identifier.
-func typesVarName(cardName string) string {
-	parts := strings.FieldsFunc(cardName, func(r rune) bool {
-		return !(r >= 'a' && r <= 'z' || r >= 'A' && r <= 'Z' || r >= '0' && r <= '9')
-	})
-	var b strings.Builder
-	for i, p := range parts {
-		if i == 0 {
-			b.WriteString(strings.ToLower(p))
-		} else {
-			b.WriteString(strings.Title(p))
-		}
-	}
-	b.WriteString("Types")
-	return b.String()
-}
-
-// hasVariableCost reports whether this card group has variable cost (skip emitting Cost).
-func (g CardGroup) hasVariableCost() bool {
-	if g.Cost == nil {
-		return true
-	}
-	if s, ok := g.Cost.(string); ok && s == "variable" {
-		return true
-	}
-	return false
-}
-
-// constCost returns the constant cost value when the card has one; ok=false for variable.
-func (g CardGroup) constCost() (int, bool) {
-	if g.hasVariableCost() {
-		return 0, false
-	}
-	if n, ok := g.Cost.(int); ok {
-		return n, true
-	}
-	return 0, false
-}
-
-// emitGroup writes the _gen.go file for one CardGroup into dir.
-func emitGroup(dir, pkg, basename string, g CardGroup) error {
-	var buf bytes.Buffer
-
-	fmt.Fprintf(&buf, "// Code generated by cardgen. DO NOT EDIT.\n")
-	fmt.Fprintf(&buf, "\npackage %s\n\n", pkg)
-
-	fmt.Fprintf(&buf, "import (\n")
-	fmt.Fprintf(&buf, "\t\"github.com/tim-chaplin/fab-deck-optimizer/internal/ids\"\n")
-	fmt.Fprintf(&buf, "\t\"github.com/tim-chaplin/fab-deck-optimizer/internal/card\"\n")
-	fmt.Fprintf(&buf, ")\n\n")
-
-	tvar := typesVarName(g.Name)
-	typeArgs := make([]string, len(g.Types))
-	for i, t := range g.Types {
-		typeArgs[i] = "card.Type" + t
-	}
-	fmt.Fprintf(&buf, "var %s = card.NewTypeSet(%s)\n\n", tvar, strings.Join(typeArgs, ", "))
-
-	for _, v := range g.Variants {
-		display := g.Name + pitchTag(v.Pitch)
-		fmt.Fprintf(&buf, "type %s struct{}\n\n", v.ID)
-		fmt.Fprintf(&buf, "func (%s) ID() ids.CardID      { return ids.%s }\n", v.ID, v.ID)
-		fmt.Fprintf(&buf, "func (%s) Name() string        { return %q }\n", v.ID, g.Name)
-		fmt.Fprintf(&buf, "func (%s) DisplayName() string { return %q }\n", v.ID, display)
-		if c, ok := g.constCost(); ok {
-			fmt.Fprintf(&buf, "func (%s) Cost(card.GameEngine) int { return %d }\n", v.ID, c)
-		}
-		fmt.Fprintf(&buf, "func (%s) Pitch() int          { return %d }\n", v.ID, v.Pitch)
-		fmt.Fprintf(&buf, "func (%s) Attack() int         { return %d }\n", v.ID, v.Attack)
-		fmt.Fprintf(&buf, "func (%s) Defense() int        { return %d }\n", v.ID, v.Defense)
-		if g.Universal {
-			// Universal cards fold the active hero's class into their type-line. Passing
-			// nil (e.g. cardmeta lookups before a hero is set) returns the printed types
-			// only — class-independent predicates (IsAttack, IsAttackAction, …) still work.
-			fmt.Fprintf(&buf, "func (%s) Types(ge card.GameEngine) card.TypeSet {\n", v.ID)
-			fmt.Fprintf(&buf, "\tif ge == nil {\n\t\treturn %s\n\t}\n", tvar)
-			fmt.Fprintf(&buf, "\treturn %s | card.NewTypeSet(ge.CurrentHeroClass())\n", tvar)
-			fmt.Fprintf(&buf, "}\n")
-			fmt.Fprintf(&buf, "func (%s) Universal()           {}\n", v.ID)
-		} else {
-			fmt.Fprintf(&buf, "func (%s) Types(card.GameEngine) card.TypeSet { return %s }\n", v.ID, tvar)
-		}
-		if !g.DynamicGoAgain {
-			fmt.Fprintf(&buf, "func (%s) GoAgain(card.GameEngine) bool { return %v }\n", v.ID, g.GoAgain)
-		}
-		for _, m := range g.Markers {
-			fmt.Fprintf(&buf, "func (%s) %s()                {}\n", v.ID, m)
-		}
-		fmt.Fprintln(&buf)
-	}
-
-	formatted, err := format.Source(buf.Bytes())
-	if err != nil {
-		return fmt.Errorf("format %s: %w\n%s", basename, err, buf.String())
-	}
-	out := filepath.Join(dir, basename+"_gen.go")
-	return os.WriteFile(out, formatted, 0o644)
-}
-
-// emitRegistry writes the registry's cardsByID map to path: every variant of every group,
-// indexed by its ids.CardID. groups comes from the cards-package directory, so the map
-// stays in lockstep with the implemented card set and never drifts.
-func emitRegistry(path string, groups []CardGroup) error {
-	var buf bytes.Buffer
-	buf.WriteString("// Code generated by cardgen. DO NOT EDIT.\n\n")
-	buf.WriteString("package registry\n\n")
-	buf.WriteString("import (\n")
-	buf.WriteString("\t\"github.com/tim-chaplin/fab-deck-optimizer/internal/card/cards\"\n")
-	buf.WriteString("\t\"github.com/tim-chaplin/fab-deck-optimizer/internal/ids\"\n")
-	buf.WriteString(")\n\n")
-	buf.WriteString("// cardsByID holds every implemented card variant, indexed by ids.CardID; index 0\n")
-	buf.WriteString("// (Invalid) is nil. The deck-construction pool and every ID lookup read it.\n")
-	buf.WriteString("var cardsByID = []Card{\n")
-	buf.WriteString("\tids.InvalidCard: nil,\n")
-	for _, g := range groups {
-		buf.WriteString("\n")
-		for _, v := range g.Variants {
-			fmt.Fprintf(&buf, "\tids.%s: cards.%s{},\n", v.ID, v.ID)
-		}
-	}
-	buf.WriteString("}\n")
-
-	formatted, err := format.Source(buf.Bytes())
-	if err != nil {
-		return fmt.Errorf("format registry: %w\n%s", err, buf.String())
-	}
-	return os.WriteFile(path, formatted, 0o644)
-}
-
-// detectPackage reads the package name from any non-test, non-generated .go file in dir.
-// Empty when the directory has no such file (caller must have created the directory's
-// generate.go or similar before running cardgen).
-func detectPackage(dir string) (string, error) {
-	entries, err := os.ReadDir(dir)
-	if err != nil {
-		return "", err
-	}
-	fset := token.NewFileSet()
-	for _, e := range entries {
-		name := e.Name()
-		if e.IsDir() || !strings.HasSuffix(name, ".go") || strings.HasSuffix(name, "_test.go") {
-			continue
-		}
-		f, err := parser.ParseFile(fset, filepath.Join(dir, name), nil, parser.PackageClauseOnly)
-		if err != nil {
-			continue
-		}
-		return f.Name.Name, nil
-	}
-	return "", fmt.Errorf("%s: no .go file found to read package name from", dir)
-}
-
-// processDir emits a _gen.go for every card yaml in dir and returns the parsed groups
-// along with the directory's package name.
-func processDir(dir string) ([]CardGroup, string, error) {
-	pkg, err := detectPackage(dir)
-	if err != nil {
-		return nil, "", err
-	}
-
-	var yamlFiles []string
-	err = filepath.WalkDir(dir, func(path string, d fs.DirEntry, err error) error {
-		if err != nil {
-			return err
-		}
-		if d.IsDir() && path != dir {
-			return fs.SkipDir
-		}
-		if d.IsDir() || !strings.HasSuffix(path, ".yaml") {
-			return nil
-		}
-		yamlFiles = append(yamlFiles, path)
-		return nil
-	})
-	if err != nil {
-		return nil, "", err
-	}
-	sort.Strings(yamlFiles)
-
-	groups := make([]CardGroup, 0, len(yamlFiles))
-	for _, path := range yamlFiles {
-		data, err := os.ReadFile(path)
-		if err != nil {
-			return nil, "", err
-		}
-		var g CardGroup
-		if err := yaml.Unmarshal(data, &g); err != nil {
-			return nil, "", fmt.Errorf("%s: %w", path, err)
-		}
-		basename := strings.TrimSuffix(filepath.Base(path), ".yaml")
-		if err := emitGroup(dir, pkg, basename, g); err != nil {
-			return nil, "", err
-		}
-		groups = append(groups, g)
-	}
-	return groups, pkg, nil
-}
 
 func main() {
 	registryOut := flag.String("registry", "",
@@ -302,17 +26,16 @@ func main() {
 		fmt.Fprintln(os.Stderr, "usage: cardgen [-registry <path>] <dir>...")
 		os.Exit(2)
 	}
-	for _, dir := range dirs {
-		groups, pkg, err := processDir(dir)
-		if err != nil {
+
+	files, err := cardgen.Generate(dirs, *registryOut)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "cardgen: %v\n", err)
+		os.Exit(1)
+	}
+	for path, content := range files {
+		if err := os.WriteFile(path, content, 0o644); err != nil {
 			fmt.Fprintf(os.Stderr, "cardgen: %v\n", err)
 			os.Exit(1)
-		}
-		if *registryOut != "" && pkg == "cards" {
-			if err := emitRegistry(*registryOut, groups); err != nil {
-				fmt.Fprintf(os.Stderr, "cardgen: %v\n", err)
-				os.Exit(1)
-			}
 		}
 	}
 }

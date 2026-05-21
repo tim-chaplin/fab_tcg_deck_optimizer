@@ -90,6 +90,10 @@ var cardsByID = []Card{
 	ids.ComeToFightYellow: cards.ComeToFightYellow{},
 	ids.ComeToFightBlue:   cards.ComeToFightBlue{},
 
+	ids.CondemnToSlaughterRed:    cards.CondemnToSlaughterRed{},
+	ids.CondemnToSlaughterYellow: cards.CondemnToSlaughterYellow{},
+	ids.CondemnToSlaughterBlue:   cards.CondemnToSlaughterBlue{},
+
 	ids.ConsumingVolitionRed:    cards.ConsumingVolitionRed{},
 	ids.ConsumingVolitionYellow: cards.ConsumingVolitionYellow{},
 	ids.ConsumingVolitionBlue:   cards.ConsumingVolitionBlue{},
@@ -451,6 +455,10 @@ var cardsByID = []Card{
 	ids.SpellbladeStrikeRed:    cards.SpellbladeStrikeRed{},
 	ids.SpellbladeStrikeYellow: cards.SpellbladeStrikeYellow{},
 	ids.SpellbladeStrikeBlue:   cards.SpellbladeStrikeBlue{},
+
+	ids.SplinteringDeadwoodRed:    cards.SplinteringDeadwoodRed{},
+	ids.SplinteringDeadwoodYellow: cards.SplinteringDeadwoodYellow{},
+	ids.SplinteringDeadwoodBlue:   cards.SplinteringDeadwoodBlue{},
 
 	ids.SpringLoadRed:    cards.SpringLoadRed{},
 	ids.SpringLoadYellow: cards.SpringLoadYellow{},
