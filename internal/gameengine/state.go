@@ -52,6 +52,7 @@ type GameState struct {
 	currentStepRerouted   bool
 	cacheable             bool
 	isMyTurn              bool
+	heroTapped            bool
 }
 
 // Engine wraps s in a *GameEngine so the chain runner can drive Card.Play hooks against
@@ -319,6 +320,7 @@ func (gs *GameState) ResetEphemeralState() {
 	gs.arcaneDamageDealt = false
 	gs.nonAttackActionPlayed = false
 	gs.lastAttackHit = false
+	gs.heroTapped = false
 	gs.cacheable = true
 	gs.logger = NoopLogger{}
 	gs.auraCreated = false
@@ -483,6 +485,12 @@ func (gs *GameState) SetLastAttackHit(v bool) { gs.lastAttackHit = v }
 // turn" riders.
 func (gs *GameState) IsMyTurn() bool     { return gs.isMyTurn }
 func (gs *GameState) SetIsMyTurn(v bool) { gs.isMyTurn = v }
+
+// HeroTapped reports whether the hero is tapped.
+func (gs *GameState) HeroTapped() bool { return gs.heroTapped }
+
+// UntapHero untaps the hero — the printed "untap your hero" effect.
+func (gs *GameState) UntapHero() { gs.heroTapped = false }
 
 func (gs *GameState) CurrentStepRerouted() bool     { return gs.currentStepRerouted }
 func (gs *GameState) SetCurrentStepRerouted(v bool) { gs.currentStepRerouted = v }

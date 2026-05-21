@@ -356,6 +356,8 @@ var cardsByID = []Card{
 	ids.ReekOfCorruptionYellow: cards.ReekOfCorruptionYellow{},
 	ids.ReekOfCorruptionBlue:   cards.ReekOfCorruptionBlue{},
 
+	ids.RegainComposureBlue: cards.RegainComposureBlue{},
+
 	ids.RegurgitatingSlogRed:    cards.RegurgitatingSlogRed{},
 	ids.RegurgitatingSlogYellow: cards.RegurgitatingSlogYellow{},
 	ids.RegurgitatingSlogBlue:   cards.RegurgitatingSlogBlue{},

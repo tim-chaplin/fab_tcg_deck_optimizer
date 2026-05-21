@@ -137,7 +137,6 @@ var grandfatheredResolveChainStepFiles = []string{
 	"turntests/ravenous_rabble_test.go",
 	"turntests/reduce_to_runechant_test.go",
 	"turntests/reek_of_corruption_test.go",
-	"turntests/regain_composure_test.go",
 	"turntests/regurgitating_slog_test.go",
 	"turntests/restvine_elixir_test.go",
 	"turntests/rise_above_test.go",
