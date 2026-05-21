@@ -138,3 +138,10 @@ func IsRunebladeAttack(ge GameEngine, pc *CardState) bool {
 func IsWeaponAttack(_ GameEngine, pc *CardState) bool {
 	return pc.Card.Types(nil).IsWeaponAttack()
 }
+
+// IsSwordAttack matches scheduled Sword attacks — weapon swings or attack cards carrying
+// the Sword type — for "your next sword attack" wording.
+func IsSwordAttack(_ GameEngine, pc *CardState) bool {
+	t := pc.Card.Types(nil)
+	return t.Has(TypeAttack) && t.Has(TypeSword)
+}
