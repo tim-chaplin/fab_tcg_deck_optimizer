@@ -102,6 +102,8 @@ type GameEngine interface {
 	NonAttackActionPlayed() bool
 	OpponentMarked() bool
 	MarkOpponent()
+	// UntapHero untaps the owning player's hero — the printed "untap your hero" effect.
+	UntapHero()
 	// LastAttackHit reports whether the most recent finalised attack on this combat chain
 	// hit. False until the first attack finalises; each subsequent attack overwrites it.
 	LastAttackHit() bool
