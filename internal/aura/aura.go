@@ -15,16 +15,14 @@ import (
 type Handler func(card.GameEngine, card.Logger, card.Aura)
 
 // Aura is the concrete entry the engine stores in its persistent hook list. The embedded
-// trigger.Trigger holds the shared core; Aura adds the multi-fire count and OncePerTurn gate.
+// trigger.Trigger holds the shared core; Aura adds the multi-fire count.
 //
 // activeEngine is set by Fire to the engine driving the current firing event so Destroy can
 // route back without allocating a per-fire wrapper struct. Single-threaded per chain-runner.
 type Aura struct {
 	trigger.Trigger[card.Aura]
-	activeEngine  card.GameEngine
-	count         int
-	oncePerTurn   bool
-	firedThisTurn bool
+	activeEngine card.GameEngine
+	count        int
 }
 
 // NewFromCard builds a card-backed aura. source is the originating card — typically the
@@ -32,9 +30,8 @@ type Aura struct {
 // graveyard on destroy. typeFilter narrows the firing site; pass nil for no filter.
 func NewFromCard(source card.Card, tt triggertype.Type, fire Handler, count int, oncePerTurn bool, typeFilter trigger.TypeFilter) *Aura {
 	return &Aura{
-		Trigger:     trigger.FromCard[card.Aura](source, tt, fire, typeFilter),
-		count:       count,
-		oncePerTurn: oncePerTurn,
+		Trigger: trigger.FromCard[card.Aura](source, tt, fire, oncePerTurn, typeFilter),
+		count:   count,
 	}
 }
 
@@ -43,16 +40,13 @@ func NewFromCard(source card.Card, tt triggertype.Type, fire Handler, count int,
 // narrows the firing site; pass nil for no filter.
 func NewFromToken(name string, tokenID ids.CardID, tt triggertype.Type, fire Handler, count int, typeFilter trigger.TypeFilter) *Aura {
 	return &Aura{
-		Trigger: trigger.FromToken[card.Aura](name, tokenID, tt, fire, typeFilter),
+		Trigger: trigger.FromToken[card.Aura](name, tokenID, tt, fire, false, typeFilter),
 		count:   count,
 	}
 }
 
-func (a *Aura) OncePerTurn() bool       { return a.oncePerTurn }
-func (a *Aura) FiredThisTurn() bool     { return a.firedThisTurn }
-func (a *Aura) SetFiredThisTurn(v bool) { a.firedThisTurn = v }
-func (a *Aura) Count() int              { return a.count }
-func (a *Aura) SetCount(n int)          { a.count = n }
+func (a *Aura) Count() int     { return a.count }
+func (a *Aura) SetCount(n int) { a.count = n }
 func (a *Aura) DecrementCount() int {
 	a.count--
 	return a.count

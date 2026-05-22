@@ -19,28 +19,36 @@ type TypeFilter func(card.TypeSet) bool
 // handler receives — card.EphemeralTrigger, card.Aura, card.Item — so handlers stay typed
 // with no assertion. The embedding type supplies a Fire method that calls Invoke with
 // itself as the typed receiver.
+//
+// oncePerTurn caps the entry to one fire per turn; firedThisTurn is the gate, set after a
+// fire and re-armed at the turn boundary.
 type Trigger[T any] struct {
-	triggerType triggertype.Type
-	fire        func(card.GameEngine, card.Logger, T)
-	source      card.Card
-	tokenName   string
-	tokenID     ids.CardID
-	typeFilter  TypeFilter
+	triggerType   triggertype.Type
+	fire          func(card.GameEngine, card.Logger, T)
+	source        card.Card
+	tokenName     string
+	tokenID       ids.CardID
+	typeFilter    TypeFilter
+	oncePerTurn   bool
+	firedThisTurn bool
 }
 
-// FromCard builds a card-sourced Trigger core. typeFilter narrows the firing site; pass
-// nil for no filter.
-func FromCard[T any](source card.Card, tt triggertype.Type, fire func(card.GameEngine, card.Logger, T), typeFilter TypeFilter) Trigger[T] {
-	return Trigger[T]{triggerType: tt, fire: fire, source: source, typeFilter: typeFilter}
+// FromCard builds a card-sourced Trigger core. oncePerTurn caps it to one fire per turn;
+// typeFilter narrows the firing site, pass nil for no filter.
+func FromCard[T any](source card.Card, tt triggertype.Type, fire func(card.GameEngine, card.Logger, T), oncePerTurn bool, typeFilter TypeFilter) Trigger[T] {
+	return Trigger[T]{triggerType: tt, fire: fire, source: source, oncePerTurn: oncePerTurn, typeFilter: typeFilter}
 }
 
 // FromToken builds a token-sourced Trigger core — no originating card. CardName returns
 // the supplied name; CardID returns tokenID so cache keys distinguish each token kind.
-func FromToken[T any](name string, tokenID ids.CardID, tt triggertype.Type, fire func(card.GameEngine, card.Logger, T), typeFilter TypeFilter) Trigger[T] {
-	return Trigger[T]{triggerType: tt, fire: fire, tokenName: name, tokenID: tokenID, typeFilter: typeFilter}
+func FromToken[T any](name string, tokenID ids.CardID, tt triggertype.Type, fire func(card.GameEngine, card.Logger, T), oncePerTurn bool, typeFilter TypeFilter) Trigger[T] {
+	return Trigger[T]{triggerType: tt, fire: fire, tokenName: name, tokenID: tokenID, oncePerTurn: oncePerTurn, typeFilter: typeFilter}
 }
 
 func (t *Trigger[T]) TriggerType() triggertype.Type { return t.triggerType }
+func (t *Trigger[T]) OncePerTurn() bool             { return t.oncePerTurn }
+func (t *Trigger[T]) FiredThisTurn() bool           { return t.firedThisTurn }
+func (t *Trigger[T]) SetFiredThisTurn(v bool)       { t.firedThisTurn = v }
 
 // Matches reports whether the type filter accepts the firing event's type set.
 func (t *Trigger[T]) Matches(types card.TypeSet) bool {
@@ -88,7 +96,7 @@ type EphemeralTrigger struct {
 // NewFromCard builds a one-shot card-sourced ephemeral trigger. typeFilter narrows the
 // firing site (currently used only by triggertype.Hit); pass nil for no filter.
 func NewFromCard(source card.Card, tt triggertype.Type, fire func(card.GameEngine, card.Logger, card.EphemeralTrigger), typeFilter TypeFilter) *EphemeralTrigger {
-	return &EphemeralTrigger{Trigger: FromCard[card.EphemeralTrigger](source, tt, fire, typeFilter)}
+	return &EphemeralTrigger{Trigger: FromCard[card.EphemeralTrigger](source, tt, fire, false, typeFilter)}
 }
 
 // Fire invokes the stored handler with this trigger as the typed receiver.
