@@ -35,6 +35,7 @@ func GameStateBuilder() *StateBuilder {
 		gs: &GameState{
 			cacheable:      true,
 			currentAuraIdx: -1,
+			currentItemIdx: -1,
 			logger:         NoopLogger{},
 			deck:           deck.New(nil, nil, nil),
 			hero:           defaultHero{},

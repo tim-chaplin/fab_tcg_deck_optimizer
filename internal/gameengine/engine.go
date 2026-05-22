@@ -361,7 +361,7 @@ func panicIfOptViolatesMultiset(in, top, bottom []card.Card) {
 
 // === Trigger and aura dispatch ===
 
-// HasEndOfTurnFire reports whether either Auras or Triggers carries a
+// HasEndOfTurnFire reports whether any Aura, Trigger, or Item carries a
 // triggertype.EndOfTurn entry. Lets the chain runner skip the end-of-turn walk when
 // nothing would fire.
 func (ge *GameEngine) HasEndOfTurnFire() bool {
@@ -372,6 +372,11 @@ func (ge *GameEngine) HasEndOfTurnFire() bool {
 	}
 	for _, t := range ge.triggers {
 		if t.TriggerType()&triggertype.EndOfTurn != 0 {
+			return true
+		}
+	}
+	for _, it := range ge.items {
+		if it.TriggerType()&triggertype.EndOfTurn != 0 {
 			return true
 		}
 	}
@@ -401,7 +406,7 @@ func (ge *GameEngine) HasEndOfTurnFire() bool {
 // is actually found — so the common per-card fire with no subscribers stays off the Types
 // interface-dispatch path.
 func (ge *GameEngine) FireTriggers(t triggertype.Type, triggeringCard card.Card) {
-	if len(ge.auras) == 0 && len(ge.triggers) == 0 {
+	if len(ge.auras) == 0 && len(ge.triggers) == 0 && len(ge.items) == 0 {
 		return
 	}
 	ge.triggeringCard = triggeringCard
@@ -461,6 +466,27 @@ func (ge *GameEngine) FireTriggers(t triggertype.Type, triggeringCard card.Card)
 		}
 	}
 
+	itemN := len(ge.items)
+	for i := 0; i < itemN; {
+		it := ge.items[i]
+		if it.TriggerType()&t == 0 || (it.OncePerTurn() && it.FiredThisTurn()) ||
+			(triggeringCard != nil && !it.Matches(matchTypes())) {
+			i++
+			continue
+		}
+		ge.currentItemIdx = i
+		ge.currentItemDestroyed = false
+		it.Fire(ge, ge.logger)
+		if ge.currentItemDestroyed {
+			// The fired item was spliced out; later snapshot entries shifted down.
+			itemN--
+		} else {
+			ge.items[i].SetFiredThisTurn(true)
+			i++
+		}
+	}
+	ge.currentItemIdx = -1
+
 	ge.triggeringCard = nil
 }
 
@@ -482,6 +508,23 @@ func (ge *GameEngine) DestroyAura(addToGraveyard bool) {
 	if la, ok := src.(card.LeavesArenaAura); ok {
 		la.OnLeavesArena(ge, ge.logger)
 	}
+	if src != nil && addToGraveyard {
+		ge.AppendGraveyard(src.(card.Card))
+	}
+}
+
+// DestroyItem removes the item currently being fired from the arena and, when
+// addToGraveyard is true, pushes its source card into the graveyard (no-op for token
+// items with no source). The item counterpart of DestroyAura: direct splice with no
+// cacheable flip — destruction is deterministic from the triggering event.
+func (ge *GameEngine) DestroyItem(addToGraveyard bool) {
+	i := ge.currentItemIdx
+	if i < 0 || i >= len(ge.items) {
+		return
+	}
+	src := ge.items[i].SourceCard()
+	ge.items = append(ge.items[:i], ge.items[i+1:]...)
+	ge.currentItemDestroyed = true
 	if src != nil && addToGraveyard {
 		ge.AppendGraveyard(src.(card.Card))
 	}

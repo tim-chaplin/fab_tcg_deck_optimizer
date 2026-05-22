@@ -41,6 +41,7 @@ type GameState struct {
 	arcaneIncomingDamage int
 	blockTotal           int
 	currentAuraIdx       int
+	currentItemIdx       int
 
 	cardBanished          bool
 	arcaneDamageDealt     bool
@@ -49,6 +50,7 @@ type GameState struct {
 	nonAttackActionPlayed bool
 	lastAttackHit         bool
 	currentAuraDestroyed  bool
+	currentItemDestroyed  bool
 	currentStepRerouted   bool
 	cacheable             bool
 	isMyTurn              bool
@@ -314,8 +316,10 @@ func (gs *GameState) ResetEphemeralState() {
 	gs.damageBlocked = 0
 	gs.blockTotal = 0
 	gs.currentAuraDestroyed = false
+	gs.currentItemDestroyed = false
 	gs.currentStepRerouted = false
 	gs.currentAuraIdx = -1
+	gs.currentItemIdx = -1
 	gs.cardBanished = false
 	gs.arcaneDamageDealt = false
 	gs.nonAttackActionPlayed = false
@@ -326,6 +330,9 @@ func (gs *GameState) ResetEphemeralState() {
 	gs.auraCreated = false
 	for _, a := range gs.auras {
 		a.SetFiredThisTurn(false)
+	}
+	for _, it := range gs.items {
+		it.SetFiredThisTurn(false)
 	}
 }
 

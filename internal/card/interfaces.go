@@ -47,6 +47,9 @@ type GameEngine interface {
 	// per-fire ctx's Destroy method; exposed on GameEngine so the ctx can route the call
 	// through its stored engine reference.
 	DestroyAura(addToGraveyard bool)
+	// DestroyItem removes the item currently being fired. The item counterpart of
+	// DestroyAura — reached via the firing item's Destroy method.
+	DestroyItem(addToGraveyard bool)
 	// SacrificePayoffAura destroys one aura the player controls, reporting whether one was
 	// destroyed. See GameEngine.SacrificePayoffAura for targeting rules.
 	SacrificePayoffAura() bool
@@ -200,6 +203,18 @@ type Aura interface {
 // trigger. Today only CardName is needed; expand as more triggers appear.
 type EphemeralTrigger interface {
 	CardName() string
+}
+
+// Item is the minimal view cards' item trigger handlers see of the firing item. The
+// handler reads source-card identity and ends the item's life via Destroy.
+type Item interface {
+	// CardName is the originating card or token's display name — used for log attribution.
+	CardName() string
+	// CardID is the originating card's registry ID, or ids.InvalidCard for token items.
+	CardID() ids.CardID
+	// Destroy ends the item's life. addToGraveyard sends the originating card to the
+	// graveyard (token items with no originating card skip the append).
+	Destroy(addToGraveyard bool)
 }
 
 // Hero is the narrow view of the active hero internal/card needs (Class / Types only) so
