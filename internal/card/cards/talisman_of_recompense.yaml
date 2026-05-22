@@ -5,8 +5,6 @@ types:
     - Item
 cost: 0
 goAgain: true
-markers:
-    - NotImplemented
 text: |-
     **Go again** Whenever you pitch a card, if you would gain exactly one {r}, instead destroy
     Talisman of Recompense and gain {r}{r}{r}.

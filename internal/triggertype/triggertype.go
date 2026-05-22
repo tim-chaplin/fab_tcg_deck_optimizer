@@ -22,4 +22,8 @@ const (
 	// DamageTaken fires at the end of the defense phase when incoming damage got through
 	// unblocked.
 	DamageTaken
+	// Pitch fires as each card is pitched to fund a play during the attack phase. The
+	// triggering card is the pitched card; a handler reads its Pitch value and may boost
+	// the resources it yields via GameEngine.AddResourcePoints.
+	Pitch
 )
