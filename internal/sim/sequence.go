@@ -230,9 +230,8 @@ func bestAttackWithWeapons(
 					abilityCost += ctx.activatedAbilityCosts[j]
 				}
 			}
-			// A pitch-triggered item can raise what a pitch yields, so the printed
-			// attack budget is only a lower bound — skip the fast prune and let pay do
-			// the real funding check.
+			// Printed budget is only a lower bound with a pitch-triggered item; pay does
+			// the real funding check (see hasPitchTriggeredItem).
 			if !ctx.hasPitchTriggeredItem && attackersMinCost+abilityCost > phase.attackBudget {
 				continue
 			}
