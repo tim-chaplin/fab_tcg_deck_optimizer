@@ -147,6 +147,8 @@ Token items consolidate by `TokenType`: at most one `Item` per `TokenType` per `
 
 The chain runner builds `ctx.itemAbilities` by replicating each Item's `Ability` up to `perItemAbilityCap` times so the wmask can pick "play it 0..N times this turn"; the cap (`internal/sim/sequence.go`) bounds the 2^k mask explosion.
 
+An item can instead carry a trigger. `item.Item` embeds the shared `trigger.Trigger` core, so a card-sourced item built by `item.NewFromCard` fires a handler on a scheduled event exactly like an aura — `FireTriggers` walks items alongside auras, and a handler ends the item's life via `DestroyItem`. Token items leave the trigger zero-valued, so their trigger type never matches.
+
 ## Registry / sim split
 
 `internal/registry` is the master roster of every implemented card, weapon, and hero. It declares minimal `Card` / `Hero` / `Weapon` interfaces (identity + display name) so its surface stays decoupled from sim's richer contracts; concrete card / weapon / hero types satisfy both, and callers needing behaviour assert to `card.Card` / `sim.Weapon` / `sim.Hero` at the read site. Marker interfaces (`NotImplemented`, `Unplayable`, `NotSilverAgeLegal`) are declared locally in both packages and matched structurally — neither package imports the other.

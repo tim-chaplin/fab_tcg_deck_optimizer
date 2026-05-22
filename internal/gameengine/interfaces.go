@@ -40,23 +40,35 @@ type Aura interface {
 
 // EphemeralTrigger is the engine's view of a one-shot deferred handler. Like Aura, Fire
 // takes typed card.GameEngine / card.Logger arguments; Matches takes the firing card's
-// TypeSet directly.
+// TypeSet directly. The OncePerTurn / FiredThisTurn / SetFiredThisTurn trio is part of the
+// shared triggerHook surface fireHooks walks — ephemeral triggers never gate on it (they
+// fire once and are removed), so OncePerTurn is always false.
 type EphemeralTrigger interface {
 	TriggerType() triggertype.Type
 	CardName() string
 	Matches(types card.TypeSet) bool
+	OncePerTurn() bool
+	FiredThisTurn() bool
+	SetFiredThisTurn(bool)
 	Fire(engine card.GameEngine, logger card.Logger)
 }
 
-// Item is the engine's view of an in-play permanent with an activated ability. Ability
-// is returned as `any` so concrete Item impls (in internal/token) can satisfy this without
-// importing internal/card — engine and chain-runner callers assert back to card.Card.
+// Item is the engine's view of an in-play permanent. Token items carry an activated
+// ability (returned as `any`; callers assert back to card.Card); card-sourced items carry
+// a trigger FireTriggers dispatches through, mirroring Aura.
 type Item interface {
 	CardName() string
 	CardID() ids.CardID
 	Count() int
 	SetCount(int)
 	Ability() any
+	SourceCard() any
+	TriggerType() triggertype.Type
+	Matches(types card.TypeSet) bool
+	OncePerTurn() bool
+	FiredThisTurn() bool
+	SetFiredThisTurn(bool)
+	Fire(engine card.GameEngine, logger card.Logger)
 	Copy() any
 }
 
