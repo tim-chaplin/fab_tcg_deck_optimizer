@@ -35,7 +35,7 @@ type pitchPool struct {
 // payment lands in the returned slice — so pitching one 3-resource non-attack to fund
 // three 1-cost plays attributes the non-attack to all three, not just the one whose
 // payment popped it. Each newly popped card fires its triggertype.Pitch handlers; any
-// AddPitchBonus grant folds into that card's contribution. Returns ok=false if the pool
+// AddResourcePoints grant folds into that card's contribution. Returns ok=false if the pool
 // ran out of pitches mid-payment.
 func (p *pitchPool) pay(ge *gameengine.GameEngine, cost int) (contrib []card.Card, ok bool) {
 	attrStart := len(p.attr)

@@ -516,13 +516,13 @@ func (ge *GameEngine) DestroyItem(addToGraveyard bool) {
 	}
 }
 
-// AddPitchBonus adds n resources to the card currently being pitched. A triggertype.Pitch
+// AddResourcePoints adds n resources to the card currently being pitched. A triggertype.Pitch
 // handler calls it to boost what the pitched card yields beyond its printed Pitch value;
 // pay folds the total into the pitch pool. No effect outside a pitch fire.
-func (ge *GameEngine) AddPitchBonus(n int) { ge.pitchBonus += n }
+func (ge *GameEngine) AddResourcePoints(n int) { ge.pitchBonus += n }
 
 // FirePitchTriggers fires the triggertype.Pitch event for a just-pitched card and returns
-// the resource bonus its handlers granted via AddPitchBonus — the amount pay adds to the
+// the resource bonus its handlers granted via AddResourcePoints — the amount pay adds to the
 // pitched card's contribution on top of its printed Pitch value.
 func (ge *GameEngine) FirePitchTriggers(pitched card.Card) int {
 	ge.pitchBonus = 0

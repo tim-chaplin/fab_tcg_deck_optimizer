@@ -47,7 +47,7 @@ func TestTalismanOfRecompense_NoTalismanCannotFundAttack(t *testing.T) {
 
 	summary := sim.EvalOneTurnForTesting(recompenseDeck(), gameengine.GameStateBuilder().Build(), hand)
 
-	if summary.Value >= 4 {
-		t.Fatalf("Value = %d, want < 4 (without Recompense a red pitch funds only 1 resource)", summary.Value)
+	if summary.Value != 0 {
+		t.Fatalf("Value = %d, want 0 (a red pitch funds only 1 resource — the 3-cost attack can't be played)", summary.Value)
 	}
 }

@@ -16,7 +16,7 @@ func recompenseFire(ge card.GameEngine, l card.Logger, self card.Item) {
 	if ge.TriggeringCard().Pitch() != 1 {
 		return
 	}
-	ge.AddPitchBonus(2)
+	ge.AddResourcePoints(2)
 	self.Destroy(true)
 	l.AppendPostTrigger(self.CardName(), "Destroyed to make a 1-resource pitch yield 3", 2)
 }

@@ -149,7 +149,7 @@ The chain runner builds `ctx.itemAbilities` by replicating each Item's `Ability`
 
 An item can instead carry a trigger. `item.Item` embeds the shared `trigger.Trigger` core, so a card-sourced item built by `item.NewFromCard` fires a handler on a scheduled event exactly like an aura — `FireTriggers` walks items alongside auras, and a handler ends the item's life via `DestroyItem`. Token items leave the trigger zero-valued, so their trigger type never matches.
 
-The `triggertype.Pitch` event fires as each card is pitched (`pitchPool.pay`), with the pitched card as the triggering card — read it via `GameEngine.TriggeringCard()`. A Pitch handler raises what that pitch yields by calling `GameEngine.AddPitchBonus(n)`; the grant folds into the pitched card's resource contribution. A card whose printed text reads "Whenever you pitch a card, ..." registers a Pitch-triggered item from its `Play` via `GameEngine.CreatePitchTriggeredItem` — Talisman of Recompense is the model.
+The `triggertype.Pitch` event fires as each card is pitched (`pitchPool.pay`), with the pitched card as the triggering card — read it via `GameEngine.TriggeringCard()`. A Pitch handler raises what that pitch yields by calling `GameEngine.AddResourcePoints(n)`; the grant folds into the pitched card's resource contribution. A card whose printed text reads "Whenever you pitch a card, ..." registers a Pitch-triggered item from its `Play` via `GameEngine.CreatePitchTriggeredItem` — Talisman of Recompense is the model.
 
 ## Registry / sim split
 
