@@ -50,8 +50,7 @@ type EphemeralTrigger interface {
 
 // Item is the engine's view of an in-play permanent. Token items carry an activated
 // ability (returned as `any`; callers assert back to card.Card); card-sourced items carry
-// a trigger FireTriggers dispatches through, mirroring Aura. A token item leaves the
-// trigger fields zero so its TriggerType never matches a firing event.
+// a trigger FireTriggers dispatches through, mirroring Aura.
 type Item interface {
 	CardName() string
 	CardID() ids.CardID

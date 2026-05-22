@@ -26,8 +26,8 @@ type Item struct {
 }
 
 // NewFromToken builds a token-sourced item with the supplied name, identifier,
-// activated-ability card, and initial count. Token items carry no trigger. Production
-// callers reach for internal/token's NewGold / NewSilver / NewCopper.
+// activated-ability card, and initial count. Production callers reach for internal/token's
+// NewGold / NewSilver / NewCopper.
 func NewFromToken(name string, tokenID ids.CardID, ability any, count int) *Item {
 	return &Item{
 		Trigger: trigger.FromToken[card.Item](name, tokenID, 0, nil, false, nil),
@@ -53,8 +53,8 @@ func (i *Item) SetCount(n int) { i.count = n }
 // with no activated ability. Callers type-assert to their richer card type when invoking.
 func (i *Item) Ability() any { return i.ability }
 
-// Fire invokes the stored handler with this item as the typed receiver. activeEngine is
-// set so a handler-side Destroy routes through engine.DestroyItem, then cleared.
+// Fire invokes the stored handler with this item as the typed receiver. activeEngine is set
+// for the handler's duration and cleared afterward.
 func (i *Item) Fire(engine card.GameEngine, logger card.Logger) {
 	i.activeEngine = engine
 	i.Invoke(engine, logger, i)
