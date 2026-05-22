@@ -42,8 +42,9 @@ For cards that create an aura which fires later:
   splice the aura out of the arena and, when `addToGraveyard`, land `SourceCard` in the
   graveyard. Counter-based auras decrement `Count` and destroy at zero. The engine never
   mutates `Count` or graveyards on its own.
-- Handlers parallel `Card.Play`: `func(s, t, a)`, no return. Credit damage / life via
-  `g.AddValue(n)`; emit log lines via the post-trigger logger methods.
+- Handlers parallel `Card.Play`: `func(g card.GameEngine, l card.Logger, ctx card.Aura)`, no
+  return. Credit damage / life via `g.AddValue(n)`; emit log lines via the post-trigger
+  logger methods.
 
 The engine-side walk that fires aura handlers (`FireTriggers` / `fireHooks`) lives in
 `internal/gameengine` — see `internal/sim` and `internal/gameengine` for how the chain runner
@@ -51,15 +52,17 @@ and start-of-turn pass invoke it. `fireHooks` takes a length snapshot before fir
 aura created by a handler is not consumed in the same pass, and uses a cursor walk so a
 handler-side destroy doesn't skip the next entry.
 
-**Handlers must be top-level functions, not inline closures.** A closure assigned to
-`Aura.Handler` escapes to the heap (one allocation per `Play`); a top-level handler is a
-static function pointer. Per-variant payloads (R/Y/B rune counts, etc.) thread through
-`Aura.Count` so a single shared handler covers every variant:
+**Card-backed aura handlers must be top-level functions, not inline closures.** A closure
+passed to `NewFromCard` escapes to the heap — one allocation per `Play` — whereas a top-level
+handler is a static function pointer. Built-in token auras are exempt: their factories in
+`internal/token` construct the closure once at factory time, not per `Play`. Per-variant
+payloads (R/Y/B rune counts, etc.) thread through `Aura.Count` so a single shared handler
+covers every variant:
 
 ```go
-func mySigilAuraHandler(s *sim.TurnState, _ *sim.Trigger, a *sim.Aura) {
-    s.AddValue(1)
-    s.DestroyAura(a, true)
+func mySigilAuraHandler(g card.GameEngine, l card.Logger, ctx card.Aura) {
+    g.AddValue(1)
+    ctx.Destroy(true)
 }
 ```
 

@@ -18,10 +18,11 @@ production code — it exists to be run by `go test ./...`.
 
 - `turntests_lint_test.go` — new `turntests/` test files must not drive the chain via
   `ge.ResolveChainStep(...)` directly; they must use the public Eval entry points
-  (`sim.EvalOneTurnForTesting` / `sim.EvalTwoTurnsForTesting`). A `grandfatheredResolveChainStepFiles`
-  allowlist freezes the v2-migration backlog of files that still call `ResolveChainStep`;
-  migrating one means rewriting it against the public API (or moving it to a same-package
-  unit test) and removing its allowlist entry, after which the lint rejects reintroduction.
+  (`sim.EvalOneTurnForTesting` / `sim.EvalTwoTurnsForTesting`). A
+  `grandfatheredResolveChainStepFiles` allowlist freezes the v2-migration backlog of files
+  that still call `ResolveChainStep`; migrating one means rewriting it against the public API
+  (or moving it to a same-package unit test) and removing its allowlist entry, after which
+  the lint rejects reintroduction.
 - `card_markers_lint_test.go` — `NotImplemented` / `Unplayable` markers on cards appear
   only in the dedicated `notimplemented/` and `unplayable/` subpackages.
 - `test_package_lint_test.go` — test files use the production package name, not an

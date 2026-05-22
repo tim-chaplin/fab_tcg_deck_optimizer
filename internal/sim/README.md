@@ -144,8 +144,6 @@ func blusterBuffPlay(g card.GameEngine, l card.Logger, self *card.CardState) {
 
 ## Gotchas and invariants
 
-- `doc.go` predates the current file split and names types that have moved or been removed;
-  this README and the actual source are the live reference.
 - Hands are sorted by `Card.ID()` before search so cache-on and cache-off paths produce
   byte-identical results for matching multisets.
 - Each chain permutation runs against a fresh per-permutation `*GameState`; the winning copy's
