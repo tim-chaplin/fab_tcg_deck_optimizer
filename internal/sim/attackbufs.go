@@ -42,6 +42,9 @@ type attackBufs struct {
 	// weaponAbilityCount is len(weapons) at construction — the size of the cached weapon
 	// prefix in activatedAbilities.
 	weaponAbilityCount int
+	// maxResourceBonus bounds the resource points the turn's cards can add beyond printed
+	// pitch (see resourceBonusUpperBound); the attack-budget prune relaxes by it.
+	maxResourceBonus int
 
 	// Partition-loop buffer, consumed by findBest. Sized handSize+1 to cover the optional
 	// arsenal-in slot the enumerator treats as index n.

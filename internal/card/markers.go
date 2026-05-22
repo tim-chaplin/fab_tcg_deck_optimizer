@@ -76,6 +76,14 @@ type ArsenalDefenseBonus interface {
 	ArsenalDefenseBonus() int
 }
 
+// ResourceSource is the marker for a card that adds resource points beyond printed pitch.
+// MaxResourcePoints is a static upper bound on what it adds this turn; the attack-budget
+// prune relaxes by it so such a card is never wrongly pruned. A lint flags card files that
+// call GameEngine.AddResourcePoints without implementing this.
+type ResourceSource interface {
+	MaxResourcePoints() int
+}
+
 // Universal is the marker for cards whose printed type-line is "extended" by the active
 // hero's class. Universal cards ask the engine for the active hero's class inside their
 // own Types(g) body.
