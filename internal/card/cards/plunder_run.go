@@ -14,7 +14,7 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 )
 
-func plunderRunOnHitDraw(ge card.GameEngine, l card.Logger, t card.Trigger) {
+func plunderRunOnHitDraw(ge card.GameEngine, l card.Logger, t card.EphemeralTrigger) {
 	ge.DrawOne()
 	l.AppendPostTriggerf(ge.TriggeringCard().DisplayName(), 0,
 		"%s drew a card on attack-action hit", t.CardName())

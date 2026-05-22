@@ -1,6 +1,7 @@
 // Package card defines the Card interface every Flesh and Blood card implements, the
 // per-chain-step CardState wrapper that carries mutable flags between resolution phases,
-// and the narrow GameEngine / Logger / Aura / Trigger interfaces cards consume from the sim.
+// and the narrow GameEngine / Logger / Aura / EphemeralTrigger interfaces cards consume from
+// the sim.
 //
 // The package owns the contract; it does NOT import the sim. gameengine.GameEngine and
 // gameengine.NoopLogger satisfy these interfaces structurally.
@@ -53,13 +54,13 @@ type GameEngine interface {
 	// Triggers: one-shot, per-trigger-type. AddHitTrigger's filter narrows the firing event
 	// to a card-type predicate (typically TypeSet.IsAttack or TypeSet.IsAttackAction); nil
 	// = no filter. Handler signatures are inlined for the same reason as the aura methods.
-	AddHitTrigger(pc *CardState, handler func(GameEngine, Logger, Trigger), filter func(TypeSet) bool)
-	AddEndOfTurnTrigger(pc *CardState, handler func(GameEngine, Logger, Trigger))
+	AddHitTrigger(pc *CardState, handler func(GameEngine, Logger, EphemeralTrigger), filter func(TypeSet) bool)
+	AddEndOfTurnTrigger(pc *CardState, handler func(GameEngine, Logger, EphemeralTrigger))
 	// AddCardOrAbilityTrigger fires a one-shot listener when the next card is played in
 	// the chain; filter narrows the firing card (nil = any). The registering card never
 	// fires it — the event resolves before a card's own effect, so the trigger isn't
 	// queued yet when its own card resolves.
-	AddCardOrAbilityTrigger(pc *CardState, handler func(GameEngine, Logger, Trigger), filter func(TypeSet) bool)
+	AddCardOrAbilityTrigger(pc *CardState, handler func(GameEngine, Logger, EphemeralTrigger), filter func(TypeSet) bool)
 
 	// Token economy
 	CreateRunechants(int)
@@ -195,9 +196,9 @@ type Aura interface {
 	Destroy(addToGraveyard bool)
 }
 
-// Trigger is the minimal view cards' one-shot trigger handlers see of the firing
+// EphemeralTrigger is the minimal view cards' one-shot trigger handlers see of the firing
 // trigger. Today only CardName is needed; expand as more triggers appear.
-type Trigger interface {
+type EphemeralTrigger interface {
 	CardName() string
 }
 

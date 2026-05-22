@@ -10,17 +10,17 @@ import (
 
 // highStrikerOnHit{6,4,2} fire on the next hit matching the trigger's TypeFilter (any
 // attack per the printed wording). One handler per variant carries N in the function name.
-func highStrikerOnHit6(ge card.GameEngine, l card.Logger, t card.Trigger) {
+func highStrikerOnHit6(ge card.GameEngine, l card.Logger, t card.EphemeralTrigger) {
 	highStrikerCreate(ge, l, t, 6)
 }
-func highStrikerOnHit4(ge card.GameEngine, l card.Logger, t card.Trigger) {
+func highStrikerOnHit4(ge card.GameEngine, l card.Logger, t card.EphemeralTrigger) {
 	highStrikerCreate(ge, l, t, 4)
 }
-func highStrikerOnHit2(ge card.GameEngine, l card.Logger, t card.Trigger) {
+func highStrikerOnHit2(ge card.GameEngine, l card.Logger, t card.EphemeralTrigger) {
 	highStrikerCreate(ge, l, t, 2)
 }
 
-func highStrikerCreate(ge card.GameEngine, l card.Logger, t card.Trigger, n int) {
+func highStrikerCreate(ge card.GameEngine, l card.Logger, t card.EphemeralTrigger, n int) {
 	ge.CreateCopper(n)
 	l.AppendPostTriggerf(ge.TriggeringCard().DisplayName(), 0,
 		"%s created %d copper tokens on attack hit", t.CardName(), n)
