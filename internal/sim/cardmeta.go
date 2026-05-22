@@ -57,6 +57,12 @@ type attackerMeta struct {
 	modes int8
 }
 
+// verifyStaticCost arms the static-cost assertion in costAt. A divergence between the
+// re-probed Cost(ge) and the cached bound means the card varies cost with game state but
+// declares neither VariableCost nor ModalCost, so the attack-budget prune bounds it from a
+// wrong fixed cost and can skip a fundable line. Off in production to avoid the probe.
+var verifyStaticCost bool
+
 // costAt returns the card's effective cost given the current TurnState and chosen mode.
 // ModalCost cards dispatch on the mode index; static cards return the cached value
 // directly; VariableCost cards defer to Cost(s) so every game-state-dependent costing rule
@@ -67,6 +73,13 @@ func (m *attackerMeta) costAt(ge *gameengine.GameEngine, mode int8) int {
 	}
 	if m.isVariable {
 		return m.card.Cost(ge)
+	}
+	if verifyStaticCost {
+		if live := m.card.Cost(ge); live != m.maxCost {
+			panic(fmt.Sprintf("card %q varies Cost(g) with game state (cached %d, live %d) "+
+				"but implements neither VariableCost nor ModalCost — declare one so the "+
+				"attack-budget prune bounds it correctly", m.card.Name(), m.maxCost, live))
+		}
 	}
 	return m.maxCost
 }
