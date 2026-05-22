@@ -7,6 +7,7 @@ import (
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/item"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/token"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/trigger"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/triggertype"
@@ -24,6 +25,11 @@ import (
 // raw state.
 type GameEngine struct {
 	*GameState
+	// pitchBonus accumulates extra resources a triggertype.Pitch handler grants for the
+	// card currently being pitched. FirePitchTriggers zeroes it before the fire and reads
+	// it after; it lives on the engine wrapper (not GameState) since it never outlives a
+	// single pitch and so must not be copied per permutation.
+	pitchBonus int
 }
 
 // === Cards-facing zone accessors that flip cacheable. These shadow the same-name
@@ -508,6 +514,27 @@ func (ge *GameEngine) DestroyItem(addToGraveyard bool) {
 	if src != nil && addToGraveyard {
 		ge.AppendGraveyard(src.(card.Card))
 	}
+}
+
+// AddPitchBonus adds n resources to the card currently being pitched. A triggertype.Pitch
+// handler calls it to boost what the pitched card yields beyond its printed Pitch value;
+// pay folds the total into the pitch pool. No effect outside a pitch fire.
+func (ge *GameEngine) AddPitchBonus(n int) { ge.pitchBonus += n }
+
+// FirePitchTriggers fires the triggertype.Pitch event for a just-pitched card and returns
+// the resource bonus its handlers granted via AddPitchBonus — the amount pay adds to the
+// pitched card's contribution on top of its printed Pitch value.
+func (ge *GameEngine) FirePitchTriggers(pitched card.Card) int {
+	ge.pitchBonus = 0
+	ge.FireTriggers(triggertype.Pitch, pitched)
+	return ge.pitchBonus
+}
+
+// CreatePitchTriggeredItem puts a card-sourced item into play whose handler fires on
+// triggertype.Pitch — as each card is pitched. Backs items printed "Whenever you pitch a
+// card, ...".
+func (ge *GameEngine) CreatePitchTriggeredItem(pc *card.CardState, fire func(card.GameEngine, card.Logger, card.Item)) {
+	ge.CreateItem(item.NewFromCard(pc.Card, triggertype.Pitch, fire, false))
 }
 
 // SacrificePayoffAura destroys one aura the player controls and reports whether it

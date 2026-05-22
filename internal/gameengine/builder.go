@@ -69,10 +69,23 @@ func (b *StateBuilder) AddAura(auras ...Aura) *StateBuilder {
 // Runeblood Incantation, Blessing of Occult, etc.); cards whose Play has additional side
 // effects (graveyard banishes, on-hit registration, immediate value credit) run those too.
 func (b *StateBuilder) CreateAuraFromCard(c card.Card) *StateBuilder {
-	ge := &GameEngine{GameState: b.gs}
-	cs := &card.CardState{Card: c}
-	c.Play(ge, NoopLogger{}, cs)
+	b.playForCarryover(c)
 	return b
+}
+
+// CreateItemFromCard is the item counterpart of CreateAuraFromCard: it plays c so the
+// card's Play lands its in-play item on b.gs. Used to seed a card-sourced item (e.g.
+// Talisman of Recompense) as start-of-turn carryover.
+func (b *StateBuilder) CreateItemFromCard(c card.Card) *StateBuilder {
+	b.playForCarryover(c)
+	return b
+}
+
+// playForCarryover runs c.Play against an ephemeral *GameEngine wrapping b.gs so the
+// card's own Play body lands its carryover state (aura, item) on the state being built.
+func (b *StateBuilder) playForCarryover(c card.Card) {
+	ge := &GameEngine{GameState: b.gs}
+	c.Play(ge, NoopLogger{}, &card.CardState{Card: c})
 }
 
 // AddItem appends items to the carryover item list.

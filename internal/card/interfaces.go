@@ -50,6 +50,12 @@ type GameEngine interface {
 	// DestroyItem removes the item currently being fired. The item counterpart of
 	// DestroyAura — reached via the firing item's Destroy method.
 	DestroyItem(addToGraveyard bool)
+	// CreatePitchTriggeredItem puts a card-sourced item into play whose handler fires on
+	// each pitch (triggertype.Pitch). Backs items printed "Whenever you pitch a card, ...".
+	CreatePitchTriggeredItem(pc *CardState, handler func(GameEngine, Logger, Item))
+	// AddPitchBonus adds n resources to the card currently being pitched — a Pitch handler
+	// calls it to boost what that pitched card yields. No effect outside a pitch fire.
+	AddPitchBonus(n int)
 	// SacrificePayoffAura destroys one aura the player controls, reporting whether one was
 	// destroyed. See GameEngine.SacrificePayoffAura for targeting rules.
 	SacrificePayoffAura() bool

@@ -2,6 +2,7 @@ package sim
 
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/gameengine"
 )
 
 // pitchPool tracks the state of the attack-phase pitch pool during a single chain run:
@@ -33,8 +34,10 @@ type pitchPool struct {
 // front exhausts. Every pitched card whose resources contribute even partially to this
 // payment lands in the returned slice — so pitching one 3-resource non-attack to fund
 // three 1-cost plays attributes the non-attack to all three, not just the one whose
-// payment popped it. Returns ok=false if the pool ran out of pitches mid-payment.
-func (p *pitchPool) pay(cost int) (contrib []card.Card, ok bool) {
+// payment popped it. Each newly popped card fires its triggertype.Pitch handlers, whose
+// AddPitchBonus grants fold into that card's contribution. Returns ok=false if the pool
+// ran out of pitches mid-payment.
+func (p *pitchPool) pay(ge *gameengine.GameEngine, cost int) (contrib []card.Card, ok bool) {
 	attrStart := len(p.attr)
 	remaining := cost
 	for remaining > 0 {
@@ -45,6 +48,7 @@ func (p *pitchPool) pay(cost int) (contrib []card.Card, ok bool) {
 			p.front = p.perm[p.idx]
 			p.remaining = p.vals[p.idx]
 			p.idx++
+			p.remaining += ge.FirePitchTriggers(p.front)
 		}
 		if p.front != nil {
 			p.attr = append(p.attr, p.front)
