@@ -11,9 +11,9 @@ type EphemeralTrigger struct {
 	Trigger[card.EphemeralTrigger]
 }
 
-// NewFromCard builds a one-shot card-sourced ephemeral trigger. typeFilter narrows the
-// firing site (currently used only by triggertype.Hit); pass nil for no filter.
-func NewFromCard(source card.Card, tt triggertype.Type, fire func(card.GameEngine, card.Logger, card.EphemeralTrigger), typeFilter TypeFilter) *EphemeralTrigger {
+// NewEphemeralTrigger builds a one-shot card-sourced ephemeral trigger. typeFilter narrows
+// the firing site (currently used only by triggertype.Hit); pass nil for no filter.
+func NewEphemeralTrigger(source card.Card, tt triggertype.Type, fire func(card.GameEngine, card.Logger, card.EphemeralTrigger), typeFilter TypeFilter) *EphemeralTrigger {
 	return &EphemeralTrigger{Trigger: FromCard[card.EphemeralTrigger](source, tt, fire, false, typeFilter)}
 }
 

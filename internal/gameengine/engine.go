@@ -617,13 +617,13 @@ var dealtArcaneText = [...]string{
 // AddHitTrigger registers a one-shot triggertype.Hit listener. filter narrows the qualifying
 // hits to a card-type predicate; nil = any hit qualifies.
 func (ge *GameEngine) AddHitTrigger(pc *card.CardState, handler func(card.GameEngine, card.Logger, card.EphemeralTrigger), filter func(card.TypeSet) bool) {
-	ge.CreateTrigger(trigger.NewFromCard(pc.Card, triggertype.Hit, handler, filter))
+	ge.CreateTrigger(trigger.NewEphemeralTrigger(pc.Card, triggertype.Hit, handler, filter))
 }
 
 // AddEndOfTurnTrigger registers a one-shot triggertype.EndOfTurn listener — fires
 // after the chain finishes resolving but before the carry-state snapshot.
 func (ge *GameEngine) AddEndOfTurnTrigger(pc *card.CardState, handler func(card.GameEngine, card.Logger, card.EphemeralTrigger)) {
-	ge.CreateTrigger(trigger.NewFromCard(pc.Card, triggertype.EndOfTurn, handler, nil))
+	ge.CreateTrigger(trigger.NewEphemeralTrigger(pc.Card, triggertype.EndOfTurn, handler, nil))
 }
 
 // AddCardOrAbilityTrigger registers a one-shot triggertype.CardOrAbility listener — fires
@@ -631,7 +631,7 @@ func (ge *GameEngine) AddEndOfTurnTrigger(pc *card.CardState, handler func(card.
 // predicate; nil = any card. The event fires before a card's own effect, so a card
 // registering this from its own Play is never triggered by itself.
 func (ge *GameEngine) AddCardOrAbilityTrigger(pc *card.CardState, handler func(card.GameEngine, card.Logger, card.EphemeralTrigger), filter func(card.TypeSet) bool) {
-	ge.CreateTrigger(trigger.NewFromCard(pc.Card, triggertype.CardOrAbility, handler, filter))
+	ge.CreateTrigger(trigger.NewEphemeralTrigger(pc.Card, triggertype.CardOrAbility, handler, filter))
 }
 
 // === Tokens ===

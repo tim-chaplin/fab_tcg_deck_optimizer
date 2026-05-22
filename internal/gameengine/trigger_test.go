@@ -13,7 +13,7 @@ import (
 func TestFireEndOfTurn_FiresOnceAndRemoves(t *testing.T) {
 	ge := New()
 	calls := 0
-	ge.CreateTrigger(trigger.NewFromCard(
+	ge.CreateTrigger(trigger.NewEphemeralTrigger(
 		stubCard{name: "src"},
 		triggertype.EndOfTurn,
 		func(_ card.GameEngine, _ card.Logger, _ card.EphemeralTrigger) { calls++ },
@@ -32,7 +32,7 @@ func TestFireEndOfTurn_FiresOnceAndRemoves(t *testing.T) {
 func TestFireEndOfTurn_LeavesNonMatchingType(t *testing.T) {
 	ge := New()
 	calls := 0
-	ge.CreateTrigger(trigger.NewFromCard(
+	ge.CreateTrigger(trigger.NewEphemeralTrigger(
 		stubCard{name: "src"},
 		triggertype.CardOrAbility,
 		func(_ card.GameEngine, _ card.Logger, _ card.EphemeralTrigger) { calls++ },
@@ -52,13 +52,13 @@ func TestFireEndOfTurn_LeavesNonMatchingType(t *testing.T) {
 func TestFireEndOfTurn_HandlerAddTriggerSafeReentry(t *testing.T) {
 	ge := New()
 	calls := 0
-	ge.CreateTrigger(trigger.NewFromCard(
+	ge.CreateTrigger(trigger.NewEphemeralTrigger(
 		stubCard{name: "src"},
 		triggertype.EndOfTurn,
 		func(engine card.GameEngine, _ card.Logger, _ card.EphemeralTrigger) {
 			calls++
 			ts := engine.(*GameEngine)
-			ts.CreateTrigger(trigger.NewFromCard(
+			ts.CreateTrigger(trigger.NewEphemeralTrigger(
 				stubCard{name: "added"},
 				triggertype.EndOfTurn,
 				func(_ card.GameEngine, _ card.Logger, _ card.EphemeralTrigger) { calls++ },
