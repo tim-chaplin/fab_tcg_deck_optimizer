@@ -6,7 +6,7 @@ types:
 cost: 0
 goAgain: true
 markers:
-    - NotImplemented
+    - Unplayable
 text: |-
     **Go again** At the beginning of your end phase, if you have less cards in arsenal than an
     opposing hero, destroy Talisman of Balance and put the top card of your deck into an empty

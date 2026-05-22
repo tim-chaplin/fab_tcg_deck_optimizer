@@ -4,13 +4,11 @@
 // opposing hero, destroy Talisman of Balance and put the top card of your deck into an empty
 // arsenal zone you control."
 
-package notimplemented
+package unplayable
 
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 )
-
-// not implemented: end-phase arsenal-fill from top of deck if behind on arsenal count
 
 func (TalismanOfBalanceBlue) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
 }

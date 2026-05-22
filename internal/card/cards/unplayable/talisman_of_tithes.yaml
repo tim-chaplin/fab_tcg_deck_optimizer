@@ -6,7 +6,7 @@ types:
 cost: 0
 goAgain: true
 markers:
-    - NotImplemented
+    - Unplayable
 text: |-
     **Go again** If an opponent would draw 1 or more cards during your action phase, instead
     destroy Talisman of Tithes and they draw that many cards minus 1.
