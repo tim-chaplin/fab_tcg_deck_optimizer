@@ -52,3 +52,15 @@ func GrantNextCardBonusAttack(ge card.GameEngine, n int, match func(card.GameEng
 		}
 	}
 }
+
+// GrantNextCardInstant flags the first scheduled card in CardsRemaining for which match
+// returns true to play as though it were an instant — paying no action point — then stops.
+// Lands "play your next X as an instant" riders. Fizzles silently when no target follows.
+func GrantNextCardInstant(ge card.GameEngine, match func(card.GameEngine, *card.CardState) bool) {
+	for _, pc := range ge.CardsRemaining() {
+		if match(ge, pc) {
+			pc.GrantedInstant = true
+			return
+		}
+	}
+}

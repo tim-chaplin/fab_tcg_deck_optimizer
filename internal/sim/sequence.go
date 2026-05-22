@@ -804,12 +804,6 @@ func (ctx *sequenceContext) playSequenceWithMeta(n int) (damage int, totalCounte
 	}
 	for i, pc := range played {
 		m := meta[i]
-		if !m.isFreeChainStep {
-			if state.ActionPoints() <= 0 {
-				return 0, 0, 0, nil, false
-			}
-			state.AddActionPoints(-1)
-		}
 		// RemoveFromHand returns false when an earlier chain step's Play moved this card
 		// out of hand (e.g. a hand-on-top alt cost via PopHandAt + PrependToDeck). The
 		// partition planned this card as a play / pitch using the pre-chain hand; if the
@@ -852,6 +846,14 @@ func (ctx *sequenceContext) playSequenceWithMeta(n int) (damage int, totalCounte
 		}
 
 		finalizeActiveAttack()
+		// Runs after finalizeActiveAttack so an earlier attack's on-hit rider has had its
+		// chance to set this card's GrantedInstant.
+		if !m.isFreeChainStep && !pc.GrantedInstant {
+			if state.ActionPoints() <= 0 {
+				return 0, 0, 0, nil, false
+			}
+			state.AddActionPoints(-1)
+		}
 		if m.hasPlayPrecondition {
 			if !pc.Card.(card.PlayPrecondition).PlayPrecondition(ge, pc) {
 				return 0, 0, 0, nil, false

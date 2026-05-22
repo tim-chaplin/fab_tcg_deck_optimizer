@@ -145,3 +145,9 @@ func IsSwordAttack(_ GameEngine, pc *CardState) bool {
 	t := pc.Card.Types(nil)
 	return t.Has(TypeAttack) && t.Has(TypeSword)
 }
+
+// IsNonAttackAction matches scheduled non-attack action cards — Actions that are not
+// Attacks — for "your next non-attack action card" wording.
+func IsNonAttackAction(_ GameEngine, pc *CardState) bool {
+	return pc.Card.Types(nil).IsNonAttackAction()
+}

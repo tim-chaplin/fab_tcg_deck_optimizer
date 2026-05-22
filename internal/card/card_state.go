@@ -22,6 +22,9 @@ type CardState struct {
 	// block model accounts for it), so the flag is the rules-text record for cards that
 	// read "this has Overpower".
 	GrantedOverpower bool
+	// GrantedInstant marks a card a prior effect lets you play "as though it were an
+	// instant" — it pays no action point this turn, exactly like an innate Instant.
+	GrantedInstant bool
 	// FromArsenal flags the single CardState whose Card came from the arsenal slot at start
 	// of turn. Cards gate "if this is played from arsenal" riders on self.FromArsenal.
 	FromArsenal bool
