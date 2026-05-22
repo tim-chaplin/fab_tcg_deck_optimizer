@@ -13,6 +13,9 @@ import (
 
 // Test-only exports.
 
+// Arm the static-cost assertion for the whole sim test binary.
+func init() { verifyStaticCost = true }
+
 // Best re-exports the package-private best. state carries the matchup figures (set via
 // SetIncomingDamage) and any other carryover.
 func Best(weapons []weapon.Weapon, hand []card.Card, d *deck.Deck, state *gameengine.GameState) TurnSummary {
