@@ -1,24 +1,21 @@
-// Package sim evaluates the value of a hand of Flesh and Blood cards played in isolation,
-// then folds per-hand results into per-deck statistics.
+// Package sim is the hand-and-deck evaluator at the heart of the optimizer.
 //
-// Entry points are Best / BestWithTriggers (evaluator.go): they partition a hand across five
-// roles (Pitch, Attack, Defend, Held, Arsenal) and return the TurnSummary with the highest
-// Value.
+// Given a deck it shuffles, walks hands, and for each hand brute-forces the optimal turn:
+// the partition of the hand into roles (Pitch, Attack, Defend, Held, Arsenal) and the
+// attack-chain ordering that maximises turn value (damage dealt plus damage prevented).
 //
 // The search runs in two layers:
 //
 //   - Partition enumeration (partition.go) walks every role assignment and hands each leaf
-//     to bestAttackWithWeapons.
+//     to the attack-chain search.
 //   - Attack-chain search (sequence.go) enumerates phase / weapon masks and permutes the
 //     resulting attackers via playSequenceWithMeta, replaying one ordering through a pooled
-//     TurnState while firing hero triggers, Aura handlers, and OnHit closures. Per-card
-//     damage / block / pitch attribution is read off the chain's LogEntry stream.
+//     GameState while firing triggers, Aura handlers, and OnHit closures.
 //
-// The Evaluator type owns per-goroutine scratch buffers (attackbufs.go) so concurrent
-// callers each get their own alloc-free state. Per-card metadata (cardmeta.go) is cached
-// lazily into a uint16-keyed table so the chain inner loop avoids interface dispatch.
+// Best (hand_eval.go) is the single-turn entry point; Evaluate (deck_eval.go) folds per-hand
+// results into deck.Stats. EvalOneTurnForTesting / EvalTwoTurnsForTesting are the public
+// test entry points. The Evaluator type owns per-goroutine scratch buffers (attackbufs.go)
+// so concurrent callers each get their own alloc-free state.
 //
-// Format-layer helpers render the winning BestLine for display: FormatBestLine is the
-// compact one-liner. PrintBestTurn re-runs Best against an eval-time snapshot and streams
-// the sectioned play-order printout to an io.Writer.
+// See README.md in this directory for the full walkthrough.
 package sim
