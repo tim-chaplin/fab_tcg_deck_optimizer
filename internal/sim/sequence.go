@@ -103,6 +103,16 @@ func newSequenceContext(
 		bufs.pooledLeafState.CopyFrom(masterState)
 	}
 	ctx.leafState = bufs.pooledLeafState
+	// pooledState / recycledState are mutable per-perm scratch. A prior Best call's winner
+	// threads in as the next turn's masterState with no intervening copy, so a pooled slot
+	// can still alias this call's masterState. Drop the alias here so preparePermState
+	// allocates a fresh state rather than mutating the caller's live state in place.
+	if bufs.pooledState == masterState {
+		bufs.pooledState = nil
+	}
+	if bufs.recycledState == masterState {
+		bufs.recycledState = nil
+	}
 	return ctx
 }
 
@@ -119,6 +129,8 @@ func bestAttackWithWeapons(
 	arsenalAtChainStart card.Card,
 ) (int, int, chainBudget, []string, *gameengine.GameState, bool, bool) {
 	ctx := newSequenceContext(masterState, weapons, attackers, defenders, pitched, held, d, bufs, blockTotal, arsenalInIdx, arsenalAtChainStart)
+	// Cleared up front so a partition with no defenders leaves an empty defender capture.
+	bufs.defModes = bufs.defModes[:0]
 	hasDRs := containsDefenseReaction(defenders)
 	hasModalBlocker := containsModalBlocker(defenders)
 	incoming := masterState.IncomingDamage()
@@ -126,7 +138,7 @@ func bestAttackWithWeapons(
 	var defenseDealtConst int
 	defenseCacheableConst := true
 	if !hasModalBlocker && len(defenders) > 0 {
-		defenseDealtConst, defenseCacheableConst, ctx.handStart = ctx.runDefense(defenders, pitched, held, d, incoming, noBlockBudgetCap, arsenalDefenderIdx)
+		defenseDealtConst, defenseCacheableConst, ctx.handStart = ctx.runDefense(defenders, pitched, held, d, incoming, noBlockBudgetCap, arsenalDefenderIdx, nil)
 	} else if !hasModalBlocker && incoming > 0 {
 		// No defenders, so runDefense doesn't run — but unblocked incoming damage still
 		// fires DamageTaken so auras destroyed by taking damage leave the arena.
@@ -219,7 +231,7 @@ func bestAttackWithWeapons(
 		if hasModalBlocker {
 			// Defense resolves before the attack chain. A modal blocker's block depends on
 			// phase.defendBudget, so the defense pass runs once per phase here.
-			defenseDealt, defenseCacheable, ctx.handStart = ctx.runDefense(defenders, pitched, held, d, incoming, phase.defendBudget-drCost, arsenalDefenderIdx)
+			defenseDealt, defenseCacheable, ctx.handStart = ctx.runDefense(defenders, pitched, held, d, incoming, phase.defendBudget-drCost, arsenalDefenderIdx, nil)
 			ctx.seedPoolGravBuf(len(attackers)+len(ctx.activatedAbilities), len(attackPitchPerm))
 		}
 
@@ -257,6 +269,10 @@ func bestAttackWithWeapons(
 				}
 				bestWinner = winner
 				foundFeasible = true
+				sol := &bufs.partSolution
+				sol.attack = append(sol.attack[:0], bufs.seqAttack...)
+				sol.pitch = append(sol.pitch[:0], bufs.seqPitch...)
+				sol.defenders = append(sol.defenders[:0], bufs.defModes...)
 			}
 		}
 	}
@@ -436,7 +452,9 @@ func cloneCardSlice[T any](src []T) []T {
 // Before the plain-block loop the genuine role-tagged defense hand — held + attackers +
 // pitched — is installed; Discard consumes only a Held card. Returns the Held cards left
 // after any Blocker discards.
-func (ctx *sequenceContext) runDefense(defenders, pitched, held []card.Card, deckPile *deck.Deck, matchupIncomingDamage, blockBudget, arsenalDefenderIdx int) (int, bool, []card.Card) {
+// cachedModes, when non-nil, supplies each plain blocker's mode (parallel to defenders) so
+// a cache replay skips the pickBlockerMode search; nil drives the normal mode pick.
+func (ctx *sequenceContext) runDefense(defenders, pitched, held []card.Card, deckPile *deck.Deck, matchupIncomingDamage, blockBudget, arsenalDefenderIdx int, cachedModes []playedCard) (int, bool, []card.Card) {
 	state := ctx.leafState
 	state.SetIsMyTurn(false)
 	if ctx.replayLogger != nil {
@@ -446,6 +464,13 @@ func (ctx *sequenceContext) runDefense(defenders, pitched, held []card.Card, dec
 	state.SetIncomingDamage(matchupIncomingDamage)
 	ge := state.Engine()
 	cs := &ctx.bufs.drCardStateScratch
+
+	// defModes captures each defender's resolved blocker mode, parallel to defenders. DRs
+	// resolve at mode 0.
+	if cap(ctx.bufs.defModes) < len(defenders) {
+		ctx.bufs.defModes = make([]playedCard, len(defenders))
+	}
+	ctx.bufs.defModes = ctx.bufs.defModes[:len(defenders)]
 
 	total := 0
 	cacheable := true
@@ -458,6 +483,7 @@ func (ctx *sequenceContext) runDefense(defenders, pitched, held []card.Card, dec
 		if !attackerMetaPtrFor(def).actsAsDR {
 			continue
 		}
+		ctx.bufs.defModes[i] = playedCard{card: def}
 		state.SetGraveyard(drGraveyard)
 		state.SetPitched(pitched)
 		state.SetDefenders(defenders)
@@ -488,12 +514,19 @@ func (ctx *sequenceContext) runDefense(defenders, pitched, held []card.Card, dec
 	}
 	ctx.bufs.runDefenseHandBuf = defenseHand
 	state.SetHandStates(defenseHand)
-	for _, def := range defenders {
+	for i, def := range defenders {
 		if attackerMetaPtrFor(def).actsAsDR {
 			continue
 		}
-		bestMode, bestCost := pickBlockerMode(def, ge, cs, blockBudget)
-		blockBudget -= bestCost
+		var bestMode int8
+		if cachedModes != nil {
+			bestMode = cachedModes[i].mode
+		} else {
+			var bestCost int
+			bestMode, bestCost = pickBlockerMode(def, ge, cs, blockBudget)
+			blockBudget -= bestCost
+		}
+		ctx.bufs.defModes[i] = playedCard{card: def, mode: bestMode}
 		*cs = card.CardState{Card: def, Mode: bestMode}
 		if b, ok := def.(card.Blocker); ok {
 			b.Block(ge, state.Logger(), cs)
@@ -619,6 +652,20 @@ func (ctx *sequenceContext) preparePermState(playedAttackers []*card.CardState, 
 	return s
 }
 
+// captureWinningSeq records the winning permutation's attacker order+modes and attack-pitch
+// ordering into attackBufs scratch. Called at each new best, so when the search finishes
+// the scratch describes the winning sequence — the raw material for a verbatim cache replay.
+func (ctx *sequenceContext) captureWinningSeq(pcBuf []card.CardState, pitchPerm []card.Card) {
+	b := ctx.bufs
+	b.seqAttack = b.seqAttack[:0]
+	for i := range pcBuf {
+		b.seqAttack = append(b.seqAttack, playedCard{
+			card: pcBuf[i].Card, mode: pcBuf[i].Mode, fromArsenal: pcBuf[i].FromArsenal,
+		})
+	}
+	b.seqPitch = append(b.seqPitch[:0], pitchPerm...)
+}
+
 // bestSequence tries every ordering of attackers and returns the winning permutation's
 // chainScore. legal=true when at least one ordering is playable. Returns the winning
 // *GameState via the second return value.
@@ -634,6 +681,7 @@ func (ctx *sequenceContext) bestSequence(attackers []card.Card) (chainScore, *ga
 		if ge.HasEndOfTurnFire() {
 			ge.FireTriggers(triggertype.EndOfTurn, nil)
 		}
+		ctx.captureWinningSeq(nil, nil)
 		ctx.promoteWinnerDeck(permState)
 		ctx.promoteWinnerState(permState)
 		// permState.Value() carries the seeded baseline plus any EndOfTurn fire delta.
@@ -678,6 +726,7 @@ func (ctx *sequenceContext) bestSequence(attackers []card.Card) (chainScore, *ga
 					ctx.bufs.recycledState = bestWinner
 				}
 				bestWinner = winner
+				ctx.captureWinningSeq(pcBuf, pitchPerm)
 				ctx.promoteWinnerDeck(winner)
 				ctx.promoteWinnerState(winner)
 			}
@@ -752,6 +801,24 @@ func (ctx *sequenceContext) playSequence(order []card.Card) (damage int, totalCo
 	for i, c := range order {
 		meta[i] = attackerMetaPtrFor(c)
 		ctx.seedChainEntry(&pcBuf[i], c, i)
+	}
+	d, tc, rb, winner, lg := ctx.playSequenceWithMeta(n)
+	ctx.permState = winner
+	return d, tc, rb, lg
+}
+
+// playSequenceModal is playSequence for a cache replay: it seeds each chain step from a
+// playedCard, applying the cached modal Mode rather than the default 0. The winning state
+// lands on ctx.permState.
+func (ctx *sequenceContext) playSequenceModal(order []playedCard) (damage int, totalCounters int, residualBudget int, legal bool) {
+	n := len(order)
+	pcBuf := ctx.bufs.pcBuf
+	meta := ctx.bufs.permMeta[:n]
+	for i, pc := range order {
+		meta[i] = attackerMetaPtrFor(pc.card)
+		ctx.seedChainEntry(&pcBuf[i], pc.card, i)
+		pcBuf[i].Mode = pc.mode
+		pcBuf[i].FromArsenal = pc.fromArsenal
 	}
 	d, tc, rb, winner, lg := ctx.playSequenceWithMeta(n)
 	ctx.permState = winner
