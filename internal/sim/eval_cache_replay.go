@@ -37,6 +37,8 @@ func (e *Evaluator) replayBest(
 	}
 
 	bufs := e.getAttackBufs(n, weapons)
+	// maxResourceBonus is left unset: it feeds only the attack-budget prune, which the
+	// verbatim replay path never runs.
 	pcards := bufs.partitionCards[:totalN]
 	fillPartitionCards(hand, n, totalN, arsenalCardIn, pcards)
 	postPromotedFromHeld := -1

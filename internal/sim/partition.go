@@ -25,6 +25,29 @@ type partitionCard struct {
 	fromArsenal bool
 }
 
+// resourceBonusUpperBound sums MaxResourcePoints over every card.ResourceSource among the
+// turn's cards — hand, the arsenal-in card, and in-play items' source cards.
+func resourceBonusUpperBound(hand []card.Card, arsenalIn card.Card, items []gameengine.Item) int {
+	sum := 0
+	add := func(c card.Card) {
+		if rs, ok := c.(card.ResourceSource); ok {
+			sum += rs.MaxResourcePoints()
+		}
+	}
+	for _, c := range hand {
+		add(c)
+	}
+	if arsenalIn != nil {
+		add(arsenalIn)
+	}
+	for _, it := range items {
+		if sc, ok := it.SourceCard().(card.Card); ok {
+			add(sc)
+		}
+	}
+	return sum
+}
+
 func (e *Evaluator) findBest(weapons []weapon.Weapon, hand []card.Card, d *deck.Deck, masterState *gameengine.GameState) TurnSummary {
 	var cacheKey evalCacheKey
 	cacheUsable := e.cache != nil
@@ -47,6 +70,7 @@ func (e *Evaluator) findBest(weapons []weapon.Weapon, hand []card.Card, d *deck.
 	// Cleared so a Best with no feasible partition stores an empty solution, not a stale one.
 	bufs.bestSolution.reset()
 	arsenalCardIn := masterState.Arsenal()
+	bufs.maxResourceBonus = resourceBonusUpperBound(hand, arsenalCardIn, masterState.Items())
 	incoming := masterState.IncomingDamage()
 	n := len(hand)
 	totalN := n

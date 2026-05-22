@@ -72,9 +72,6 @@ func newSequenceContext(
 	abilities := bufs.activatedAbilities[:bufs.weaponAbilityCount]
 	abilityCosts := bufs.activatedAbilityCosts[:bufs.weaponAbilityCount]
 	for _, it := range masterState.Items() {
-		if it.TriggerType()&triggertype.Pitch != 0 {
-			ctx.hasPitchTriggeredItem = true
-		}
 		ability := it.Ability()
 		if ability == nil {
 			// A triggered item (e.g. Talisman of Recompense) has no activated ability —
@@ -242,9 +239,10 @@ func bestAttackWithWeapons(
 					abilityCost += ctx.activatedAbilityCosts[j]
 				}
 			}
-			// Printed budget is only a lower bound with a pitch-triggered item; pay does
-			// the real funding check (see hasPitchTriggeredItem).
-			if !ctx.hasPitchTriggeredItem && attackersMinCost+abilityCost > phase.attackBudget {
+			// A resource-producing card lifts the budget above printed pitch, so the prune
+			// relaxes by maxResourceBonus (the declared upper bound); pay does the exact
+			// funding check.
+			if attackersMinCost+abilityCost > phase.attackBudget+bufs.maxResourceBonus {
 				continue
 			}
 			allAttackers := bufs.attackerBuf[:len(attackers)]
@@ -327,10 +325,6 @@ type sequenceContext struct {
 	activatedAbilityCosts []int
 	defenders             []card.Card
 	leafState             *gameengine.GameState
-	// hasPitchTriggeredItem is set when an item in play subscribes to triggertype.Pitch.
-	// Such an item can raise the resources a pitch yields beyond its printed value, so the
-	// up-front attack-budget prune is skipped — pay does the real funding check.
-	hasPitchTriggeredItem bool
 	// startOfTurnValue is masterState.Value() captured at construction and re-seeded into
 	// each per-perm state after ResetEphemeralState. Chain accumulators ride on top of the
 	// start-of-action-phase aura tick, so summary.Value from Best includes that baseline.

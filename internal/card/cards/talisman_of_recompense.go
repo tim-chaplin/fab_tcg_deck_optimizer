@@ -24,3 +24,6 @@ func recompenseFire(ge card.GameEngine, l card.Logger, self card.Item) {
 func (TalismanOfRecompenseYellow) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
 	ge.CreatePitchTriggeredItem(self, recompenseFire)
 }
+
+// MaxResourcePoints: one qualifying pitch yields {r}{r}{r} instead of {r}, adding two.
+func (TalismanOfRecompenseYellow) MaxResourcePoints() int { return 2 }
