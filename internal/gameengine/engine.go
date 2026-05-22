@@ -390,17 +390,12 @@ func (ge *GameEngine) HasEndOfTurnFire() bool {
 // events. It is published on ge.triggeringCard so handlers can attribute log lines, and
 // its type set is what an Aura's / EphemeralTrigger's type filter matches against.
 //
-// The aura list, item list, and one-shot trigger queue are each snapshotted by length
-// before firing, so an aura, item, or trigger a handler creates during this pass lands
-// past the snapshot and is not fired on the same pass. With one CardOrAbility fire per
-// chain step that snapshot is the whole self-exclusion mechanism: a Runechant a card's
-// play creates is not consumed by that same card's fire. The aura and item passes walk a
-// cursor so a handler-side destroy splice doesn't skip the next entry; an open OncePerTurn
-// gate is required, an entry fires when t is among its trigger-type bits, and FiredThisTurn
-// is set after a fire. The type filter narrows card-raised events; turn-boundary events with no
-// triggeringCard (StartOfTurn, EndOfTurn, DamageTaken) skip the filter. The OncePerTurn
-// gate is re-armed at the turn boundary by ResetEphemeralState, not here. Fired one-shot
-// triggers are dropped after the pass.
+// Auras, ephemeral triggers, and items are each fired by fireHooks — see there for the
+// snapshot / cursor / filter mechanics. The per-list length snapshot is the self-exclusion
+// mechanism: with one CardOrAbility fire per chain step, a Runechant a card's play creates
+// lands past the snapshot and is not consumed by that same card's fire. Turn-boundary
+// events with no triggeringCard (StartOfTurn, EndOfTurn, DamageTaken) skip the type filter;
+// the OncePerTurn gate is re-armed at the turn boundary by ResetEphemeralState, not here.
 //
 // triggeringCard.Types is resolved lazily — only when an aura / trigger of the right type
 // is actually found — so the common per-card fire with no subscribers stays off the Types
@@ -423,38 +418,16 @@ func (ge *GameEngine) FireTriggers(t triggertype.Type, triggeringCard card.Card)
 		return triggeringTypes
 	}
 
-	firePersistentHooks(ge, &ge.auras, t, triggeringCard, matchTypes, &ge.currentHookIdx, &ge.currentHookDestroyed)
-
-	if n := len(ge.triggers); n > 0 {
-		firedAny := false
-		for i := 0; i < n; i++ {
-			tr := ge.triggers[i]
-			if tr.TriggerType()&t == 0 || (triggeringCard != nil && !tr.Matches(matchTypes())) {
-				continue
-			}
-			tr.Fire(ge, ge.logger)
-			firedAny = true
-		}
-		if firedAny {
-			kept := ge.triggers[:0]
-			for i, tr := range ge.triggers {
-				if i < n && tr.TriggerType()&t != 0 && (triggeringCard == nil || tr.Matches(matchTypes())) {
-					continue
-				}
-				kept = append(kept, tr)
-			}
-			ge.triggers = kept
-		}
-	}
-
-	firePersistentHooks(ge, &ge.items, t, triggeringCard, matchTypes, &ge.currentHookIdx, &ge.currentHookDestroyed)
+	fireHooks(ge, &ge.auras, t, triggeringCard, matchTypes, false)
+	fireHooks(ge, &ge.triggers, t, triggeringCard, matchTypes, true)
+	fireHooks(ge, &ge.items, t, triggeringCard, matchTypes, false)
 
 	ge.triggeringCard = nil
 }
 
-// persistentHook is the firing surface FireTriggers needs from a persistent arena entry.
-// Aura and Item both satisfy it through the embedded trigger.Trigger.
-type persistentHook interface {
+// triggerHook is the firing surface FireTriggers needs from an arena entry — Aura, Item,
+// and EphemeralTrigger all satisfy it through the embedded trigger.Trigger.
+type triggerHook interface {
 	TriggerType() triggertype.Type
 	OncePerTurn() bool
 	FiredThisTurn() bool
@@ -463,14 +436,15 @@ type persistentHook interface {
 	Fire(card.GameEngine, card.Logger)
 }
 
-// firePersistentHooks fires every entry of *hooks subscribed to event t: an open
-// once-per-turn gate is required, and card-raised events additionally need the entry's
-// type filter to accept triggeringCard. The snapshot length is taken up front so an entry
-// a handler creates lands past it and isn't fired this pass. A cursor walk keeps a
-// handler-side destroy from skipping the next entry — idx is published before each Fire so
-// the entry's Destroy splices the right slot and sets *destroyed, which shortens the walk.
-// idx is reset to -1 on return.
-func firePersistentHooks[H persistentHook](ge *GameEngine, hooks *[]H, t triggertype.Type, triggeringCard card.Card, matchTypes func() card.TypeSet, idx *int, destroyed *bool) {
+// fireHooks fires every entry of *hooks subscribed to event t: an open once-per-turn gate
+// is required, and card-raised events additionally need the entry's type filter to accept
+// triggeringCard. The snapshot length is taken up front so an entry a handler creates
+// lands past it and isn't fired this pass. A cursor walk keeps a handler-side destroy from
+// skipping the next entry — currentHookIdx is published before each Fire so the entry's
+// Destroy splices the right slot and sets currentHookDestroyed, which shortens the walk.
+// removeAfterFire splices every fired entry unconditionally: the one-shot semantics of
+// ephemeral triggers, which the engine drops once they fire.
+func fireHooks[H triggerHook](ge *GameEngine, hooks *[]H, t triggertype.Type, triggeringCard card.Card, matchTypes func() card.TypeSet, removeAfterFire bool) {
 	n := len(*hooks)
 	for i := 0; i < n; {
 		h := (*hooks)[i]
@@ -479,17 +453,21 @@ func firePersistentHooks[H persistentHook](ge *GameEngine, hooks *[]H, t trigger
 			i++
 			continue
 		}
-		*idx = i
-		*destroyed = false
+		ge.currentHookIdx = i
+		ge.currentHookDestroyed = false
 		h.Fire(ge, ge.logger)
-		if *destroyed {
+		switch {
+		case ge.currentHookDestroyed:
 			n--
-		} else {
+		case removeAfterFire:
+			*hooks = append((*hooks)[:i], (*hooks)[i+1:]...)
+			n--
+		default:
 			(*hooks)[i].SetFiredThisTurn(true)
 			i++
 		}
 	}
-	*idx = -1
+	ge.currentHookIdx = -1
 }
 
 // DestroyAura removes the aura currently being fired from the arena. It then fires the

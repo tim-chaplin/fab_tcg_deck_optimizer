@@ -40,11 +40,16 @@ type Aura interface {
 
 // EphemeralTrigger is the engine's view of a one-shot deferred handler. Like Aura, Fire
 // takes typed card.GameEngine / card.Logger arguments; Matches takes the firing card's
-// TypeSet directly.
+// TypeSet directly. The OncePerTurn / FiredThisTurn / SetFiredThisTurn trio is part of the
+// shared triggerHook surface fireHooks walks — ephemeral triggers never gate on it (they
+// fire once and are removed), so OncePerTurn is always false.
 type EphemeralTrigger interface {
 	TriggerType() triggertype.Type
 	CardName() string
 	Matches(types card.TypeSet) bool
+	OncePerTurn() bool
+	FiredThisTurn() bool
+	SetFiredThisTurn(bool)
 	Fire(engine card.GameEngine, logger card.Logger)
 }
 
