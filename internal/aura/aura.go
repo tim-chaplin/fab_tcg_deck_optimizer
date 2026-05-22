@@ -15,13 +15,10 @@ import (
 type Handler func(card.GameEngine, card.Logger, card.Aura)
 
 // Aura is the concrete entry the engine stores in its persistent hook list. The embedded
-// trigger.Trigger holds the firing event, the handler, the source / token identity, and
-// the optional type filter; Aura adds the multi-fire count and the OncePerTurn gate.
+// trigger.Trigger holds the shared core; Aura adds the multi-fire count and OncePerTurn gate.
 //
-// activeEngine is set by Fire to the engine driving the current firing event so the aura's
-// own card.Aura-interface method (Destroy) can route back without allocating a per-fire
-// wrapper struct. Single-threaded per chain-runner; a copied aura clears activeEngine via
-// Copy.
+// activeEngine is set by Fire to the engine driving the current firing event so Destroy can
+// route back without allocating a per-fire wrapper struct. Single-threaded per chain-runner.
 type Aura struct {
 	trigger.Trigger[card.Aura]
 	activeEngine  card.GameEngine
@@ -61,10 +58,9 @@ func (a *Aura) DecrementCount() int {
 	return a.count
 }
 
-// Fire invokes the stored handler with this aura as the typed receiver. activeEngine is
-// set so a handler-side Destroy routes back through engine.DestroyAura without allocating
-// a per-fire wrapper. Cleared after the handler returns so a stray reference to the aura
-// outside its firing window can't accidentally call into a stale engine.
+// Fire invokes the stored handler with this aura as the typed receiver. activeEngine is set
+// for the handler's duration and cleared afterward so a Destroy outside the firing window
+// can't call into a stale engine.
 func (a *Aura) Fire(engine card.GameEngine, logger card.Logger) {
 	a.activeEngine = engine
 	a.Invoke(engine, logger, a)
@@ -72,8 +68,7 @@ func (a *Aura) Fire(engine card.GameEngine, logger card.Logger) {
 }
 
 // Copy returns a deep copy boxed as any so the consumer interface can avoid referencing
-// its own concrete type. activeEngine is cleared on the copy so a per-permutation aura
-// clone starts with no stale firing-engine pointer.
+// its own concrete type. activeEngine is cleared on the copy.
 func (a *Aura) Copy() any {
 	out := *a
 	out.activeEngine = nil
@@ -96,9 +91,8 @@ func (a *Aura) CopyInto(dst any) any {
 // Compile-time check that *Aura satisfies card.Aura.
 var _ card.Aura = (*Aura)(nil)
 
-// Destroy ends the aura currently being fired. Routed through the engine reference Fire
-// installed in activeEngine; calling Destroy outside a Fire window panics deterministically
-// rather than silently no-oping.
+// Destroy ends the aura currently being fired, routed through activeEngine. Calling it
+// outside a Fire window panics deterministically rather than silently no-oping.
 func (a *Aura) Destroy(addToGraveyard bool) {
 	a.activeEngine.DestroyAura(addToGraveyard)
 }

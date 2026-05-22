@@ -15,8 +15,7 @@ import (
 // event qualifies.
 type TypeFilter func(card.TypeSet) bool
 
-// Trigger is the embeddable core a triggered entry carries: the firing event, the handler,
-// the source / token identity, and an optional type filter. T is the concrete surface the
+// Trigger is the embeddable core a triggered entry carries. T is the concrete surface the
 // handler receives — card.EphemeralTrigger, card.Aura, card.Item — so handlers stay typed
 // with no assertion. The embedding type supplies a Fire method that calls Invoke with
 // itself as the typed receiver.
@@ -75,14 +74,13 @@ func (t *Trigger[T]) SourceCard() any {
 	return t.source
 }
 
-// Invoke runs the handler, passing self as the typed receiver. The embedding type's Fire
-// method calls this with itself.
+// Invoke runs the handler, passing self as the typed receiver.
 func (t *Trigger[T]) Invoke(engine card.GameEngine, logger card.Logger, self T) {
 	t.fire(engine, logger, self)
 }
 
 // EphemeralTrigger is the one-shot trigger: the engine fires it on the next matching event
-// and then drops it from the queue. It carries nothing beyond the shared core.
+// and drops it from the queue. It carries nothing beyond the shared core.
 type EphemeralTrigger struct {
 	Trigger[card.EphemeralTrigger]
 }
