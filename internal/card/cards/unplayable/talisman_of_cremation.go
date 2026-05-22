@@ -3,14 +3,11 @@
 // Text: "**Go again** When you play a card from your banished zone, destroy Talisman of Cremation
 // and name a card. Banish all cards with the chosen name from each opposing hero's graveyard."
 
-package notimplemented
+package unplayable
 
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 )
-
-// not implemented: self-destroys on play-from-banished → banish a named card from opposing
-// graveyards
 
 func (TalismanOfCremationBlue) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
 }

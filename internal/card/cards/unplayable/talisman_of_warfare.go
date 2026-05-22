@@ -3,13 +3,11 @@
 // Text: "**Go again** When a source you control deals exactly 2 damage to an opposing hero, destroy
 // Talisman of Warfare and all cards in all arsenals."
 
-package notimplemented
+package unplayable
 
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 )
-
-// not implemented: self-destroys + wipes all arsenals on a 2-damage hit
 
 func (TalismanOfWarfareYellow) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
 }
