@@ -423,7 +423,7 @@ func (ge *GameEngine) FireTriggers(t triggertype.Type, triggeringCard card.Card)
 		return triggeringTypes
 	}
 
-	firePersistentHooks(ge, &ge.auras, t, triggeringCard, matchTypes, &ge.currentAuraIdx, &ge.currentAuraDestroyed)
+	firePersistentHooks(ge, &ge.auras, t, triggeringCard, matchTypes, &ge.currentHookIdx, &ge.currentHookDestroyed)
 
 	if n := len(ge.triggers); n > 0 {
 		firedAny := false
@@ -447,7 +447,7 @@ func (ge *GameEngine) FireTriggers(t triggertype.Type, triggeringCard card.Card)
 		}
 	}
 
-	firePersistentHooks(ge, &ge.items, t, triggeringCard, matchTypes, &ge.currentItemIdx, &ge.currentItemDestroyed)
+	firePersistentHooks(ge, &ge.items, t, triggeringCard, matchTypes, &ge.currentHookIdx, &ge.currentHookDestroyed)
 
 	ge.triggeringCard = nil
 }
@@ -500,13 +500,13 @@ func firePersistentHooks[H persistentHook](ge *GameEngine, hooks *[]H, t trigger
 // doesn't see the just-left card. Direct splice with no cacheable flip — destruction is
 // deterministic from the triggering event.
 func (ge *GameEngine) DestroyAura(addToGraveyard bool) {
-	i := ge.currentAuraIdx
+	i := ge.currentHookIdx
 	if i < 0 || i >= len(ge.auras) {
 		return
 	}
 	src := ge.auras[i].SourceCard()
 	ge.auras = append(ge.auras[:i], ge.auras[i+1:]...)
-	ge.currentAuraDestroyed = true
+	ge.currentHookDestroyed = true
 	if la, ok := src.(card.LeavesArenaAura); ok {
 		la.OnLeavesArena(ge, ge.logger)
 	}
@@ -520,13 +520,13 @@ func (ge *GameEngine) DestroyAura(addToGraveyard bool) {
 // items with no source). The item counterpart of DestroyAura: direct splice with no
 // cacheable flip — destruction is deterministic from the triggering event.
 func (ge *GameEngine) DestroyItem(addToGraveyard bool) {
-	i := ge.currentItemIdx
+	i := ge.currentHookIdx
 	if i < 0 || i >= len(ge.items) {
 		return
 	}
 	src := ge.items[i].SourceCard()
 	ge.items = append(ge.items[:i], ge.items[i+1:]...)
-	ge.currentItemDestroyed = true
+	ge.currentHookDestroyed = true
 	if src != nil && addToGraveyard {
 		ge.AppendGraveyard(src.(card.Card))
 	}

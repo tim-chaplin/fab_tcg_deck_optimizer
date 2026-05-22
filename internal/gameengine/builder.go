@@ -12,7 +12,7 @@ import (
 // through the rules engine.
 //
 // The builder starts from the chain-locals defaults a just-constructed *GameState
-// carries (cacheable=true, currentAuraIdx=-1, empty logger) so callers only set the
+// carries (cacheable=true, currentHookIdx=-1, empty logger) so callers only set the
 // fields they care about.
 type StateBuilder struct {
 	gs *GameState
@@ -26,7 +26,7 @@ func New() *GameEngine {
 }
 
 // GameStateBuilder returns a fresh *StateBuilder pre-populated with the defaults a
-// just-constructed *GameState carries: cacheable=true, currentAuraIdx=-1, a no-op logger
+// just-constructed *GameState carries: cacheable=true, currentHookIdx=-1, a no-op logger
 // (NoopLogger), a non-nil empty *deck.Deck (so cards that recycle into the deck don't
 // panic on a zero-card state), and a no-ability fallback hero (20 health, 4 Intelligence).
 // SetDeck / SetCards overrides the empty deck; SetHero overrides the default hero.
@@ -34,8 +34,7 @@ func GameStateBuilder() *StateBuilder {
 	return &StateBuilder{
 		gs: &GameState{
 			cacheable:      true,
-			currentAuraIdx: -1,
-			currentItemIdx: -1,
+			currentHookIdx: -1,
 			logger:         NoopLogger{},
 			deck:           deck.New(nil, nil, nil),
 			hero:           defaultHero{},
