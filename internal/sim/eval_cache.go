@@ -81,13 +81,55 @@ type evalCacheKey struct {
 	opponentMarked bool
 }
 
-// evalCacheEntry is the cached winning-partition shape. Stores only what's needed to
-// replay: the BestLine roles (each Card paired with its Role + FromArsenal flag) and the
-// list of swung weapon names. Value, State, and Log come from re-running the chain
-// against the cached partition.
+// playedCard is one resolved card in a cached solution: the card, the modal Mode it
+// resolved with, and whether it was played from the arsenal slot. A cache replay seeds
+// each chain step from these directly, so neither is re-derived.
+type playedCard struct {
+	card        card.Card
+	mode        int8
+	fromArsenal bool
+}
+
+// cacheSolution is the in-flight winning solution the search assembles before it is stored
+// into an evalCacheEntry. Its slices alias reusable attackBufs scratch, kept allocation-free
+// across hand-offs.
+type cacheSolution struct {
+	attack    []playedCard
+	pitch     []card.Card
+	defenders []playedCard
+}
+
+// copyFrom rewrites s to match src, reusing s's backing slices.
+func (s *cacheSolution) copyFrom(src *cacheSolution) {
+	s.attack = append(s.attack[:0], src.attack...)
+	s.pitch = append(s.pitch[:0], src.pitch...)
+	s.defenders = append(s.defenders[:0], src.defenders...)
+}
+
+// reset empties s, keeping its backing slices for reuse.
+func (s *cacheSolution) reset() {
+	s.attack = s.attack[:0]
+	s.pitch = s.pitch[:0]
+	s.defenders = s.defenders[:0]
+}
+
+// evalCacheEntry is the cached winning solution — everything needed to rebuild the
+// TurnSummary by replaying the winning line verbatim, with no search:
+//
+//   - line: the BestLine roles (each Card paired with its Role + FromArsenal flag).
+//   - swungWeapons: the swung-weapon names, for TurnSummary display only.
+//   - attackOrder: the winning attacker permutation in resolution order, each with its
+//     chosen modal Mode. Includes weapon / item ability cards at their chain positions.
+//   - pitchOrder: the winning attack-phase pitch ordering — the sequence the pitch pool
+//     pops, which fixes pitched-to-play attribution. Its membership also identifies which
+//     pitch-role cards funded the attack; the rest funded the defense phase.
+//   - defenders: the winning defender list, each with its chosen blocker Mode.
 type evalCacheEntry struct {
 	line         []card.CardAssignment
 	swungWeapons []string
+	attackOrder  []playedCard
+	pitchOrder   []card.Card
+	defenders    []playedCard
 }
 
 // evalCache holds cached Best results plus the running stats counters the debug printout

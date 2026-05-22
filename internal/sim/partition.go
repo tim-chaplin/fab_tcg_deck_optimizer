@@ -44,6 +44,8 @@ func (e *Evaluator) findBest(weapons []weapon.Weapon, hand []card.Card, d *deck.
 	}
 
 	bufs := e.getAttackBufs(len(hand), weapons)
+	// Cleared so a Best with no feasible partition stores an empty solution, not a stale one.
+	bufs.bestSolution.reset()
 	arsenalCardIn := masterState.Arsenal()
 	incoming := masterState.IncomingDamage()
 	n := len(hand)
@@ -101,6 +103,7 @@ func (e *Evaluator) findBest(weapons []weapon.Weapon, hand []card.Card, d *deck.
 			runningScore = score
 			runningSeen = true
 			bestSwung = swung
+			bufs.bestSolution.copyFrom(&bufs.partSolution)
 			for j := 0; j < totalN; j++ {
 				best.BestLine[j].Role = pcards[j].role
 			}
@@ -152,6 +155,9 @@ func (e *Evaluator) findBest(weapons []weapon.Weapon, hand []card.Card, d *deck.
 			e.cache.store(cacheKey, evalCacheEntry{
 				line:         append([]card.CardAssignment(nil), best.BestLine...),
 				swungWeapons: append([]string(nil), best.SwungWeapons...),
+				attackOrder:  append([]playedCard(nil), bufs.bestSolution.attack...),
+				pitchOrder:   append([]card.Card(nil), bufs.bestSolution.pitch...),
+				defenders:    append([]playedCard(nil), bufs.bestSolution.defenders...),
 			})
 		} else {
 			e.cache.uncacheable.Add(1)

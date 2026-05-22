@@ -120,6 +120,14 @@ type attackBufs struct {
 	// can be recycled into pooledState without trampling any live state. preparePermState
 	// drains this slot before falling back to leafState.CopyPersistentState().
 	recycledState *gameengine.GameState
+	// Cache-solution scratch: seqAttack/seqPitch hold the winning attacker order+modes and
+	// pitch order, defModes the per-defender blocker modes. partSolution folds them in for
+	// the winning partition; bestSolution holds the overall winner for the cache store.
+	seqAttack    []playedCard
+	seqPitch     []card.Card
+	defModes     []playedCard
+	partSolution cacheSolution
+	bestSolution cacheSolution
 }
 
 func newAttackBufs(handSize, weaponCount int, weapons []weapon.Weapon) *attackBufs {
