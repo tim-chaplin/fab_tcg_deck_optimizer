@@ -1,68 +1,102 @@
-// Package trigger owns the concrete one-shot Trigger type — a deferred handler that fires
-// on the next matching event (typically triggertype.Hit or triggertype.EndOfTurn) and is
-// then removed from the engine's trigger queue.
-//
-// *Trigger itself satisfies card.Trigger, so Fire passes the trigger directly to the
-// handler with zero allocation.
+// Package trigger owns the shared trigger machinery. Trigger[T] is the embeddable core
+// every triggered entry carries — one-shot ephemeral triggers, auras, and items — pairing
+// a firing event with a typed handler, the source identity, and an optional type filter.
+// EphemeralTrigger is the one-shot kind: the engine fires it on the next matching event
+// and then drops it from the queue.
 package trigger
 
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/ids"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/triggertype"
 )
-
-// Handler is the typed trigger handler signature: the func stored on each Trigger and
-// called at every Fire.
-type Handler func(card.GameEngine, card.Logger, card.Trigger)
 
 // TypeFilter narrows the firing site to a card-type predicate. nil means any matching
 // event qualifies.
 type TypeFilter func(card.TypeSet) bool
 
-// Trigger is one-shot — the engine fires it on the next matching event, then drops it from
-// the queue. typeFilter narrows the firing site when present (e.g. Mauvrion Skies's hit
-// trigger "only on attack-action hits"); nil means any matching event qualifies.
-type Trigger struct {
+// Trigger is the embeddable core a triggered entry carries: the firing event, the handler,
+// the source / token identity, and an optional type filter. T is the concrete surface the
+// handler receives — card.EphemeralTrigger, card.Aura, card.Item — so handlers stay typed
+// with no assertion. The embedding type supplies a Fire method that calls Invoke with
+// itself as the typed receiver.
+type Trigger[T any] struct {
 	triggerType triggertype.Type
-	fire        Handler
+	fire        func(card.GameEngine, card.Logger, T)
 	source      card.Card
+	tokenName   string
+	tokenID     ids.CardID
 	typeFilter  TypeFilter
 }
 
-// NewFromCard builds a one-shot trigger whose source is the supplied card. typeFilter
-// narrows the firing site (currently used only by triggertype.Hit); pass nil for no filter.
-func NewFromCard(source card.Card, tt triggertype.Type, fire Handler, typeFilter TypeFilter) *Trigger {
-	return &Trigger{
-		triggerType: tt,
-		fire:        fire,
-		source:      source,
-		typeFilter:  typeFilter,
-	}
+// FromCard builds a card-sourced Trigger core. typeFilter narrows the firing site; pass
+// nil for no filter.
+func FromCard[T any](source card.Card, tt triggertype.Type, fire func(card.GameEngine, card.Logger, T), typeFilter TypeFilter) Trigger[T] {
+	return Trigger[T]{triggerType: tt, fire: fire, source: source, typeFilter: typeFilter}
 }
 
-func (t *Trigger) TriggerType() triggertype.Type { return t.triggerType }
-
-func (t *Trigger) CardName() string {
-	if t.source != nil {
-		return t.source.DisplayName()
-	}
-	return ""
+// FromToken builds a token-sourced Trigger core — no originating card. CardName returns
+// the supplied name; CardID returns tokenID so cache keys distinguish each token kind.
+func FromToken[T any](name string, tokenID ids.CardID, tt triggertype.Type, fire func(card.GameEngine, card.Logger, T), typeFilter TypeFilter) Trigger[T] {
+	return Trigger[T]{triggerType: tt, fire: fire, tokenName: name, tokenID: tokenID, typeFilter: typeFilter}
 }
 
-// Matches reports whether the trigger's type filter accepts the firing event's type set.
-func (t *Trigger) Matches(types card.TypeSet) bool {
+func (t *Trigger[T]) TriggerType() triggertype.Type { return t.triggerType }
+
+// Matches reports whether the type filter accepts the firing event's type set.
+func (t *Trigger[T]) Matches(types card.TypeSet) bool {
 	if t.typeFilter == nil {
 		return true
 	}
 	return t.typeFilter(types)
 }
 
-// Fire invokes the stored handler. *Trigger itself satisfies card.Trigger via its
-// CardName method, so the handler receives the typed surface directly with no per-fire
-// wrapper allocation.
-func (t *Trigger) Fire(engine card.GameEngine, logger card.Logger) {
-	t.fire(engine, logger, t)
+// CardName is the originating card or token's display name — used for log attribution.
+func (t *Trigger[T]) CardName() string {
+	if t.source != nil {
+		return t.source.DisplayName()
+	}
+	return t.tokenName
 }
 
-// Compile-time check that *Trigger satisfies card.Trigger.
-var _ card.Trigger = (*Trigger)(nil)
+// CardID is the originating card's registry ID, or the token ID for token-sourced entries.
+func (t *Trigger[T]) CardID() ids.CardID {
+	if t.source != nil {
+		return t.source.ID()
+	}
+	return t.tokenID
+}
+
+// SourceCard returns the originating card boxed as any, or nil for token-sourced entries.
+func (t *Trigger[T]) SourceCard() any {
+	if t.source == nil {
+		return nil
+	}
+	return t.source
+}
+
+// Invoke runs the handler, passing self as the typed receiver. The embedding type's Fire
+// method calls this with itself.
+func (t *Trigger[T]) Invoke(engine card.GameEngine, logger card.Logger, self T) {
+	t.fire(engine, logger, self)
+}
+
+// EphemeralTrigger is the one-shot trigger: the engine fires it on the next matching event
+// and then drops it from the queue. It carries nothing beyond the shared core.
+type EphemeralTrigger struct {
+	Trigger[card.EphemeralTrigger]
+}
+
+// NewFromCard builds a one-shot card-sourced ephemeral trigger. typeFilter narrows the
+// firing site (currently used only by triggertype.Hit); pass nil for no filter.
+func NewFromCard(source card.Card, tt triggertype.Type, fire func(card.GameEngine, card.Logger, card.EphemeralTrigger), typeFilter TypeFilter) *EphemeralTrigger {
+	return &EphemeralTrigger{Trigger: FromCard[card.EphemeralTrigger](source, tt, fire, typeFilter)}
+}
+
+// Fire invokes the stored handler with this trigger as the typed receiver.
+func (e *EphemeralTrigger) Fire(engine card.GameEngine, logger card.Logger) {
+	e.Invoke(engine, logger, e)
+}
+
+// Compile-time check that *EphemeralTrigger satisfies card.EphemeralTrigger.
+var _ card.EphemeralTrigger = (*EphemeralTrigger)(nil)

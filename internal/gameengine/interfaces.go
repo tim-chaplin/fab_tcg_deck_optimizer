@@ -38,10 +38,10 @@ type Aura interface {
 	CopyInto(dst any) any
 }
 
-// Trigger is the engine's view of a one-shot deferred handler. Like Aura, Fire takes
-// typed card.GameEngine / card.Logger arguments; Matches takes the firing card's
+// EphemeralTrigger is the engine's view of a one-shot deferred handler. Like Aura, Fire
+// takes typed card.GameEngine / card.Logger arguments; Matches takes the firing card's
 // TypeSet directly.
-type Trigger interface {
+type EphemeralTrigger interface {
 	TriggerType() triggertype.Type
 	CardName() string
 	Matches(types card.TypeSet) bool

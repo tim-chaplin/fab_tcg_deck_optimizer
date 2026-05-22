@@ -22,7 +22,7 @@ type GameState struct {
 	graveyard []card.Card
 	banished  []card.Card
 	auras     []Aura
-	triggers  []Trigger
+	triggers  []EphemeralTrigger
 	items     []Item
 
 	cardsPlayed    []card.Card
@@ -84,7 +84,7 @@ func (gs *GameState) Copy() *GameState {
 	}
 	out.auras = copyAurasInto(nil, gs.auras)
 	if len(gs.triggers) > 0 {
-		out.triggers = append([]Trigger(nil), gs.triggers...)
+		out.triggers = append([]EphemeralTrigger(nil), gs.triggers...)
 	} else {
 		out.triggers = nil
 	}
@@ -132,7 +132,7 @@ func (gs *GameState) CopyFrom(src *GameState) {
 		if cap(pooledTriggers) >= n {
 			gs.triggers = pooledTriggers[:n]
 		} else {
-			gs.triggers = make([]Trigger, n)
+			gs.triggers = make([]EphemeralTrigger, n)
 		}
 		copy(gs.triggers, src.triggers)
 	} else {
@@ -399,12 +399,12 @@ func (gs *GameState) SetArsenal(c card.Card) { gs.arsenal = c }
 func (gs *GameState) Banished() []card.Card     { return gs.banished }
 func (gs *GameState) SetBanished(b []card.Card) { gs.banished = b }
 
-func (gs *GameState) Auras() []Aura       { return gs.auras }
-func (gs *GameState) ClearAuras()         { gs.auras = nil }
-func (gs *GameState) Triggers() []Trigger { return gs.triggers }
-func (gs *GameState) ClearTriggers()      { gs.triggers = nil }
-func (gs *GameState) Items() []Item       { return gs.items }
-func (gs *GameState) ClearItems()         { gs.items = nil }
+func (gs *GameState) Auras() []Aura                { return gs.auras }
+func (gs *GameState) ClearAuras()                  { gs.auras = nil }
+func (gs *GameState) Triggers() []EphemeralTrigger { return gs.triggers }
+func (gs *GameState) ClearTriggers()               { gs.triggers = nil }
+func (gs *GameState) Items() []Item                { return gs.items }
+func (gs *GameState) ClearItems()                  { gs.items = nil }
 
 // CreateAura appends a to the aura list. Flips AuraCreated so same-turn "if you've
 // played or created an aura" riders see the entry.
@@ -414,7 +414,7 @@ func (gs *GameState) CreateAura(a Aura) {
 }
 
 // CreateTrigger appends t to the one-shot trigger queue.
-func (gs *GameState) CreateTrigger(t Trigger) { gs.triggers = append(gs.triggers, t) }
+func (gs *GameState) CreateTrigger(t EphemeralTrigger) { gs.triggers = append(gs.triggers, t) }
 
 // CreateItem appends i to the item list.
 func (gs *GameState) CreateItem(i Item) { gs.items = append(gs.items, i) }

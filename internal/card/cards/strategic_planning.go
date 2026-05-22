@@ -12,7 +12,7 @@ import (
 
 // drawOneAtEndOfTurn is the end-of-turn TriggerHandler that fires Strategic Planning's
 // deferred draw.
-func drawOneAtEndOfTurn(ge card.GameEngine, l card.Logger, _ card.Trigger) {
+func drawOneAtEndOfTurn(ge card.GameEngine, l card.Logger, _ card.EphemeralTrigger) {
 	ge.DrawOne()
 }
 
