@@ -16,8 +16,8 @@ type WeaponID = CardID
 const InvalidWeapon WeaponID = 0
 
 // Weapon IDs. Anchored after the last real card so weapons don't share cache slots with
-// cards in the shared CardID space. Test-fake card IDs (testutils.FakeRedAttack, …) anchor
-// past the last weapon ability ID so they don't collide either.
+// cards in the shared CardID space. Test fakes return InvalidCard / InvalidWeapon and rely
+// on the per-ID caches' Invalid-slot bypass instead of consuming production ID slots.
 const (
 	AnnalsOfSutcliffeID WeaponID = ZealousBeltingBlue + iota + 1
 	NebulaBladeID

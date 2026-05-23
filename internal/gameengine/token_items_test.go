@@ -21,7 +21,7 @@ func deckOf(cs ...card.Card) *deck.Deck {
 // Tests that cards.GoldToken.Play decrements Count and removes the entry at zero.
 func TestGoldToken_PlaysDecrementsAndDestroys(t *testing.T) {
 	ge := New()
-	ge.SetDeck(deckOf(stubCard{name: "filler"}))
+	ge.SetDeck(deckOf(fakeCard{name: "filler"}))
 	ge.CreateGold(1)
 	ge.ResolveChainStep(ge.Logger(), &card.CardState{Card: cards.GoldToken{}})
 	if ge.GoldCount() != 0 {
@@ -38,7 +38,7 @@ func TestGoldToken_PlaysDecrementsAndDestroys(t *testing.T) {
 // Tests that spending one of multiple Gold tokens leaves the entry at decremented Count.
 func TestGoldToken_PlayDecrementsCountWhenMultiple(t *testing.T) {
 	ge := New()
-	ge.SetDeck(deckOf(stubCard{name: "filler"}))
+	ge.SetDeck(deckOf(fakeCard{name: "filler"}))
 	ge.CreateGold(3)
 	ge.ResolveChainStep(ge.Logger(), &card.CardState{Card: cards.GoldToken{}})
 	if ge.GoldCount() != 2 {
@@ -49,7 +49,7 @@ func TestGoldToken_PlayDecrementsCountWhenMultiple(t *testing.T) {
 // Tests cards.SilverToken.Play decrement + draw behaviour.
 func TestSilverToken_PlaysDecrementsAndDestroys(t *testing.T) {
 	ge := New()
-	ge.SetDeck(deckOf(stubCard{name: "filler"}))
+	ge.SetDeck(deckOf(fakeCard{name: "filler"}))
 	ge.CreateSilver(1)
 	ge.ResolveChainStep(ge.Logger(), &card.CardState{Card: cards.SilverToken{}})
 	if ge.SilverCount() != 0 {
@@ -66,7 +66,7 @@ func TestSilverToken_PlaysDecrementsAndDestroys(t *testing.T) {
 // Tests cards.CopperToken.Play decrement + draw behaviour.
 func TestCopperToken_PlaysDecrementsAndDestroys(t *testing.T) {
 	ge := New()
-	ge.SetDeck(deckOf(stubCard{name: "filler"}))
+	ge.SetDeck(deckOf(fakeCard{name: "filler"}))
 	ge.CreateCopper(1)
 	ge.ResolveChainStep(ge.Logger(), &card.CardState{Card: cards.CopperToken{}})
 	if ge.CopperCount() != 0 {
@@ -100,9 +100,9 @@ func TestCreateSilverCopper_BumpsExistingEntry(t *testing.T) {
 // Tests that a CopyPersistentState snapshot's graveyard view is unaffected by an in-place
 // splice on the source.
 func TestCopyPersistentState_GraveyardIsolatedFromSpliceOnSource(t *testing.T) {
-	a := stubCard{name: "A"}
-	b := stubCard{name: "B"}
-	c := stubCard{name: "C"}
+	a := fakeCard{name: "A"}
+	b := fakeCard{name: "B"}
+	c := fakeCard{name: "C"}
 	gs := &GameState{}
 	gs.graveyard = []card.Card{a, b, c}
 

@@ -57,7 +57,7 @@ func TestForceSight_NextAttackReturnsBonus(t *testing.T) {
 // Tests that Force Sight played from hand returns Value 0 — the arsenal-gated Opt rider
 // doesn't fire in this path, and Force Sight isn't an attack so no damage is credited.
 func TestForceSight_HandPlayValueZero(t *testing.T) {
-	a, b := testutils.NewStubCard("a"), testutils.NewStubCard("b")
+	a, b := testutils.NewFakeCard("a"), testutils.NewFakeCard("b")
 	for _, c := range []card.Card{cards.ForceSightRed{}, cards.ForceSightYellow{}, cards.ForceSightBlue{}} {
 		ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCards([]card.Card{a, b}).Build()}
 		ge.ResolveChainStep(ge.Logger(), &card.CardState{Card: c})
@@ -70,7 +70,7 @@ func TestForceSight_HandPlayValueZero(t *testing.T) {
 // Tests that Force Sight played from arsenal returns Value 0 (the rider's effect is the
 // deck reshape, not a value credit).
 func TestForceSight_ArsenalPlayValueZero(t *testing.T) {
-	a, b := testutils.NewStubCard("a"), testutils.NewStubCard("b")
+	a, b := testutils.NewFakeCard("a"), testutils.NewFakeCard("b")
 	for _, c := range []card.Card{cards.ForceSightRed{}, cards.ForceSightYellow{}, cards.ForceSightBlue{}} {
 		ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCards([]card.Card{a, b}).Build()}
 		ge.ResolveChainStep(ge.Logger(), &card.CardState{Card: c, FromArsenal: true})

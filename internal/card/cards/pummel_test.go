@@ -28,7 +28,7 @@ func TestPummel_Mode0RejectsOtherTargets(t *testing.T) {
 // Tests that mode 0 rejects a club-typed attack action card — the printed text says
 // "weapon attack", so an action card sharing the Club subtype shouldn't qualify.
 func TestPummel_Mode0RejectsClubAttackActionCard(t *testing.T) {
-	clubAction := testutils.NewStubCard("club action").
+	clubAction := testutils.NewFakeCard("club action").
 		WithTypes(card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack, card.TypeClub))
 	if (PummelRed{}).ARTargetAllowed(nil, clubAction, 0) {
 		t.Error("mode 0 should reject a club attack action card (only weapon attacks qualify)")

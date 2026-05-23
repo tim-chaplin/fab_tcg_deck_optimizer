@@ -6,33 +6,33 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/ids"
 )
 
-// stubCard is a minimal Card with the fields these tests read. Inline (rather than from
+// fakeCard is a minimal Card with the fields these tests read. Inline (rather than from
 // a shared testutils package) to keep internal/card free of test-only outside imports — the
 // alternative would force an external package_test, which the project doesn't use.
-type stubCard struct {
+type fakeCard struct {
 	name    string
 	attack  int
 	goAgain bool
 }
 
-func (c stubCard) ID() ids.CardID                    { return ids.InvalidCard }
-func (c stubCard) Name() string                      { return c.name }
-func (c stubCard) DisplayName() string               { return c.name }
-func (stubCard) Cost(GameEngine) int                 { return 0 }
-func (stubCard) Pitch() int                          { return 0 }
-func (c stubCard) Attack() int                       { return c.attack }
-func (stubCard) Defense() int                        { return 0 }
-func (stubCard) Types(GameEngine) TypeSet            { return 0 }
-func (c stubCard) GoAgain(GameEngine) bool           { return c.goAgain }
-func (stubCard) Play(GameEngine, Logger, *CardState) {}
+func (c fakeCard) ID() ids.CardID                    { return ids.InvalidCard }
+func (c fakeCard) Name() string                      { return c.name }
+func (c fakeCard) DisplayName() string               { return c.name }
+func (fakeCard) Cost(GameEngine) int                 { return 0 }
+func (fakeCard) Pitch() int                          { return 0 }
+func (c fakeCard) Attack() int                       { return c.attack }
+func (fakeCard) Defense() int                        { return 0 }
+func (fakeCard) Types(GameEngine) TypeSet            { return 0 }
+func (c fakeCard) GoAgain(GameEngine) bool           { return c.goAgain }
+func (fakeCard) Play(GameEngine, Logger, *CardState) {}
 
-// dominatingStub is a stubCard with the Dominator marker — exercises the printed-
+// dominatingFake is a fakeCard with the Dominator marker — exercises the printed-
 // Dominate branches of EffectiveDominate / HasDominate.
-type dominatingStub struct {
-	stubCard
+type dominatingFake struct {
+	fakeCard
 }
 
-func (dominatingStub) Dominate() {}
+func (dominatingFake) Dominate() {}
 
 // TestCardState_EffectiveGoAgain: printed GoAgain OR a mid-chain grant qualifies the card
 // for Go again. Neither printed nor granted -> false.
@@ -50,7 +50,7 @@ func TestCardState_EffectiveGoAgain(t *testing.T) {
 	}
 	for _, tc := range cases {
 		p := &CardState{
-			Card:           stubCard{name: tc.name, goAgain: tc.printed},
+			Card:           fakeCard{name: tc.name, goAgain: tc.printed},
 			GrantedGoAgain: tc.granted,
 		}
 		if got := p.EffectiveGoAgain(nil); got != tc.want {
@@ -62,8 +62,8 @@ func TestCardState_EffectiveGoAgain(t *testing.T) {
 // TestCardState_EffectiveDominate: the Dominator marker OR a mid-chain grant (a "gains
 // dominate" rider flipping self.GrantedDominate) each qualifies the attack as dominating.
 func TestCardState_EffectiveDominate(t *testing.T) {
-	plain := stubCard{name: "plain"}
-	dominator := dominatingStub{stubCard{name: "printed"}}
+	plain := fakeCard{name: "plain"}
+	dominator := dominatingFake{fakeCard{name: "printed"}}
 
 	cases := []struct {
 		name    string
@@ -87,10 +87,10 @@ func TestCardState_EffectiveDominate(t *testing.T) {
 // TestHasDominate_MatchesMarker: the free helper is the static printed-keyword check;
 // type assertion to Dominator decides.
 func TestHasDominate_MatchesMarker(t *testing.T) {
-	if HasDominate(stubCard{name: "plain"}) {
+	if HasDominate(fakeCard{name: "plain"}) {
 		t.Error("HasDominate(plain) = true, want false")
 	}
-	if !HasDominate(dominatingStub{}) {
+	if !HasDominate(dominatingFake{}) {
 		t.Error("HasDominate(dominator) = false, want true")
 	}
 }
@@ -113,7 +113,7 @@ func TestCardState_EffectiveAttack(t *testing.T) {
 	}
 	for _, tc := range cases {
 		p := &CardState{
-			Card:        stubCard{name: tc.name, attack: tc.printed},
+			Card:        fakeCard{name: tc.name, attack: tc.printed},
 			BonusAttack: tc.bonusAttack,
 		}
 		if got := p.EffectiveAttack(); got != tc.want {

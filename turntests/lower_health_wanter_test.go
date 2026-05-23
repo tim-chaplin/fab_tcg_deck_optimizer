@@ -10,39 +10,39 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/triggertype"
 )
 
-// stubLowHeroOn implements gameengine.LowerHealthWanter — used to exercise the "hero opts
+// fakeLowHeroOn implements gameengine.LowerHealthWanter — used to exercise the "hero opts
 // in" branch.
-type stubLowHeroOn struct{}
+type fakeLowHeroOn struct{}
 
-func (stubLowHeroOn) ID() ids.HeroID                                  { return ids.InvalidHero }
-func (stubLowHeroOn) Name() string                                    { return "stubLowHeroOn" }
-func (stubLowHeroOn) Intelligence() int                               { return 4 }
-func (stubLowHeroOn) Types() card.TypeSet                             { return 0 }
-func (stubLowHeroOn) Class() card.CardType                            { return 0 }
-func (stubLowHeroOn) Opt(cards []card.Card) (top, bottom []card.Card) { return cards, nil }
-func (stubLowHeroOn) WantsLowerHealth()                               {}
-func (stubLowHeroOn) TriggerType() triggertype.Type                   { return 0 }
-func (stubLowHeroOn) OncePerTurn() bool                               { return false }
-func (stubLowHeroOn) FiredThisTurn() bool                             { return false }
-func (stubLowHeroOn) SetFiredThisTurn(bool)                           {}
-func (stubLowHeroOn) Matches(card.TypeSet) bool                       { return false }
-func (stubLowHeroOn) Fire(card.GameEngine, card.Logger)               {}
+func (fakeLowHeroOn) ID() ids.HeroID                                  { return ids.InvalidHero }
+func (fakeLowHeroOn) Name() string                                    { return "fakeLowHeroOn" }
+func (fakeLowHeroOn) Intelligence() int                               { return 4 }
+func (fakeLowHeroOn) Types() card.TypeSet                             { return 0 }
+func (fakeLowHeroOn) Class() card.CardType                            { return 0 }
+func (fakeLowHeroOn) Opt(cards []card.Card) (top, bottom []card.Card) { return cards, nil }
+func (fakeLowHeroOn) WantsLowerHealth()                               {}
+func (fakeLowHeroOn) TriggerType() triggertype.Type                   { return 0 }
+func (fakeLowHeroOn) OncePerTurn() bool                               { return false }
+func (fakeLowHeroOn) FiredThisTurn() bool                             { return false }
+func (fakeLowHeroOn) SetFiredThisTurn(bool)                           {}
+func (fakeLowHeroOn) Matches(card.TypeSet) bool                       { return false }
+func (fakeLowHeroOn) Fire(card.GameEngine, card.Logger)               {}
 
-// stubLowHeroOff does NOT implement gameengine.LowerHealthWanter — the default branch.
-type stubLowHeroOff struct{}
+// fakeLowHeroOff does NOT implement gameengine.LowerHealthWanter — the default branch.
+type fakeLowHeroOff struct{}
 
-func (stubLowHeroOff) ID() ids.HeroID                                  { return ids.InvalidHero }
-func (stubLowHeroOff) Name() string                                    { return "stubLowHeroOff" }
-func (stubLowHeroOff) Intelligence() int                               { return 4 }
-func (stubLowHeroOff) Types() card.TypeSet                             { return 0 }
-func (stubLowHeroOff) Class() card.CardType                            { return 0 }
-func (stubLowHeroOff) Opt(cards []card.Card) (top, bottom []card.Card) { return cards, nil }
-func (stubLowHeroOff) TriggerType() triggertype.Type                   { return 0 }
-func (stubLowHeroOff) OncePerTurn() bool                               { return false }
-func (stubLowHeroOff) FiredThisTurn() bool                             { return false }
-func (stubLowHeroOff) SetFiredThisTurn(bool)                           {}
-func (stubLowHeroOff) Matches(card.TypeSet) bool                       { return false }
-func (stubLowHeroOff) Fire(card.GameEngine, card.Logger)               {}
+func (fakeLowHeroOff) ID() ids.HeroID                                  { return ids.InvalidHero }
+func (fakeLowHeroOff) Name() string                                    { return "fakeLowHeroOff" }
+func (fakeLowHeroOff) Intelligence() int                               { return 4 }
+func (fakeLowHeroOff) Types() card.TypeSet                             { return 0 }
+func (fakeLowHeroOff) Class() card.CardType                            { return 0 }
+func (fakeLowHeroOff) Opt(cards []card.Card) (top, bottom []card.Card) { return cards, nil }
+func (fakeLowHeroOff) TriggerType() triggertype.Type                   { return 0 }
+func (fakeLowHeroOff) OncePerTurn() bool                               { return false }
+func (fakeLowHeroOff) FiredThisTurn() bool                             { return false }
+func (fakeLowHeroOff) SetFiredThisTurn(bool)                           {}
+func (fakeLowHeroOff) Matches(card.TypeSet) bool                       { return false }
+func (fakeLowHeroOff) Fire(card.GameEngine, card.Logger)               {}
 
 // engineWithHero returns a fresh empty engine with hero installed.
 func engineWithHero(h gameengine.Hero) *gameengine.GameEngine {
@@ -71,12 +71,12 @@ func TestLowerHealthWanter_DamageRiders(t *testing.T) {
 		{"FyendalsFightingSpiritBlue +1h", cards.FyendalsFightingSpiritBlue{}, 5, 5 + 1},
 	}
 	for _, tc := range cases {
-		sOff := engineWithHero(stubLowHeroOff{})
+		sOff := engineWithHero(fakeLowHeroOff{})
 		sOff.ResolveChainStep(sOff.Logger(), &card.CardState{Card: tc.card})
 		if got := sOff.Value(); got != tc.wantOff {
 			t.Errorf("%s: Play() off = %d, want %d (hero does not opt in)", tc.name, got, tc.wantOff)
 		}
-		sOn := engineWithHero(stubLowHeroOn{})
+		sOn := engineWithHero(fakeLowHeroOn{})
 		sOn.ResolveChainStep(sOn.Logger(), &card.CardState{Card: tc.card})
 		if got := sOn.Value(); got != tc.wantOn {
 			t.Errorf("%s: Play() on = %d, want %d (hero opts in)", tc.name, got, tc.wantOn)
@@ -92,13 +92,13 @@ func TestLowerHealthWanter_GoAgainRiders(t *testing.T) {
 		cards.BlowForABlowRed{},
 		cards.LifeForALifeRed{}, cards.LifeForALifeYellow{}, cards.LifeForALifeBlue{},
 	}
-	gOff := engineWithHero(stubLowHeroOff{})
+	gOff := engineWithHero(fakeLowHeroOff{})
 	for _, c := range cards {
 		if c.GoAgain(gOff) {
 			t.Errorf("%s: GoAgain() = true with hero off, want false", c.Name())
 		}
 	}
-	gOn := engineWithHero(stubLowHeroOn{})
+	gOn := engineWithHero(fakeLowHeroOn{})
 	for _, c := range cards {
 		if !c.GoAgain(gOn) {
 			t.Errorf("%s: GoAgain() = false with hero on, want true", c.Name())
@@ -125,7 +125,7 @@ func TestLowerHealthWanter_PoundForPoundDominateGrant(t *testing.T) {
 
 	for _, c := range cards {
 		pc := &card.CardState{Card: c}
-		s := engineWithHero(stubLowHeroOff{})
+		s := engineWithHero(fakeLowHeroOff{})
 		s.ResolveChainStep(s.Logger(), pc)
 		if pc.GrantedDominate {
 			t.Errorf("%s: GrantedDominate = true with hero off, want false", c.Name())
@@ -136,7 +136,7 @@ func TestLowerHealthWanter_PoundForPoundDominateGrant(t *testing.T) {
 	}
 	for _, c := range cards {
 		pc := &card.CardState{Card: c}
-		s := engineWithHero(stubLowHeroOn{})
+		s := engineWithHero(fakeLowHeroOn{})
 		s.ResolveChainStep(s.Logger(), pc)
 		if !pc.GrantedDominate {
 			t.Errorf("%s: GrantedDominate = false with hero on, want true", c.Name())

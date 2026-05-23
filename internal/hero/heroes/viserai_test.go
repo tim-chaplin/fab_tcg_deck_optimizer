@@ -12,70 +12,70 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/triggertype"
 )
 
-// stubRuneAttack is a minimal Runeblade attack-action card.
-type stubRuneAttack struct{}
+// fakeRuneAttack is a minimal Runeblade attack-action card.
+type fakeRuneAttack struct{}
 
-func (stubRuneAttack) ID() ids.CardID           { return ids.InvalidCard }
-func (stubRuneAttack) Name() string             { return "StubRuneAttack" }
-func (stubRuneAttack) DisplayName() string      { return "StubRuneAttack" }
-func (stubRuneAttack) Cost(card.GameEngine) int { return 0 }
-func (stubRuneAttack) Pitch() int               { return 0 }
-func (stubRuneAttack) Attack() int              { return 0 }
-func (stubRuneAttack) Defense() int             { return 0 }
-func (stubRuneAttack) Types(card.GameEngine) card.TypeSet {
+func (fakeRuneAttack) ID() ids.CardID           { return ids.InvalidCard }
+func (fakeRuneAttack) Name() string             { return "StubRuneAttack" }
+func (fakeRuneAttack) DisplayName() string      { return "StubRuneAttack" }
+func (fakeRuneAttack) Cost(card.GameEngine) int { return 0 }
+func (fakeRuneAttack) Pitch() int               { return 0 }
+func (fakeRuneAttack) Attack() int              { return 0 }
+func (fakeRuneAttack) Defense() int             { return 0 }
+func (fakeRuneAttack) Types(card.GameEngine) card.TypeSet {
 	return card.NewTypeSet(card.TypeRuneblade, card.TypeAction, card.TypeAttack)
 }
-func (stubRuneAttack) GoAgain(card.GameEngine) bool                       { return true }
-func (stubRuneAttack) Play(card.GameEngine, card.Logger, *card.CardState) {}
+func (fakeRuneAttack) GoAgain(card.GameEngine) bool                       { return true }
+func (fakeRuneAttack) Play(card.GameEngine, card.Logger, *card.CardState) {}
 
-// stubRuneAura is a minimal Runeblade non-attack action (an Aura).
-type stubRuneAura struct{}
+// fakeRuneAura is a minimal Runeblade non-attack action (an Aura).
+type fakeRuneAura struct{}
 
-func (stubRuneAura) ID() ids.CardID           { return ids.InvalidCard }
-func (stubRuneAura) Name() string             { return "StubRuneAura" }
-func (stubRuneAura) DisplayName() string      { return "StubRuneAura" }
-func (stubRuneAura) Cost(card.GameEngine) int { return 0 }
-func (stubRuneAura) Pitch() int               { return 0 }
-func (stubRuneAura) Attack() int              { return 0 }
-func (stubRuneAura) Defense() int             { return 0 }
-func (stubRuneAura) Types(card.GameEngine) card.TypeSet {
+func (fakeRuneAura) ID() ids.CardID           { return ids.InvalidCard }
+func (fakeRuneAura) Name() string             { return "StubRuneAura" }
+func (fakeRuneAura) DisplayName() string      { return "StubRuneAura" }
+func (fakeRuneAura) Cost(card.GameEngine) int { return 0 }
+func (fakeRuneAura) Pitch() int               { return 0 }
+func (fakeRuneAura) Attack() int              { return 0 }
+func (fakeRuneAura) Defense() int             { return 0 }
+func (fakeRuneAura) Types(card.GameEngine) card.TypeSet {
 	return card.NewTypeSet(card.TypeRuneblade, card.TypeAction, card.TypeAura)
 }
-func (stubRuneAura) GoAgain(card.GameEngine) bool                       { return true }
-func (stubRuneAura) Play(card.GameEngine, card.Logger, *card.CardState) {}
+func (fakeRuneAura) GoAgain(card.GameEngine) bool                       { return true }
+func (fakeRuneAura) Play(card.GameEngine, card.Logger, *card.CardState) {}
 
-// stubNonRuneblade is an Action-Attack with no Runeblade type — should never trigger Viserai.
-type stubNonRuneblade struct{}
+// fakeNonRuneblade is an Action-Attack with no Runeblade type — should never trigger Viserai.
+type fakeNonRuneblade struct{}
 
-func (stubNonRuneblade) ID() ids.CardID           { return ids.InvalidCard }
-func (stubNonRuneblade) Name() string             { return "StubGeneric" }
-func (stubNonRuneblade) DisplayName() string      { return "StubGeneric" }
-func (stubNonRuneblade) Cost(card.GameEngine) int { return 0 }
-func (stubNonRuneblade) Pitch() int               { return 0 }
-func (stubNonRuneblade) Attack() int              { return 0 }
-func (stubNonRuneblade) Defense() int             { return 0 }
-func (stubNonRuneblade) Types(card.GameEngine) card.TypeSet {
+func (fakeNonRuneblade) ID() ids.CardID           { return ids.InvalidCard }
+func (fakeNonRuneblade) Name() string             { return "StubGeneric" }
+func (fakeNonRuneblade) DisplayName() string      { return "StubGeneric" }
+func (fakeNonRuneblade) Cost(card.GameEngine) int { return 0 }
+func (fakeNonRuneblade) Pitch() int               { return 0 }
+func (fakeNonRuneblade) Attack() int              { return 0 }
+func (fakeNonRuneblade) Defense() int             { return 0 }
+func (fakeNonRuneblade) Types(card.GameEngine) card.TypeSet {
 	return card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 }
-func (stubNonRuneblade) GoAgain(card.GameEngine) bool                       { return true }
-func (stubNonRuneblade) Play(card.GameEngine, card.Logger, *card.CardState) {}
+func (fakeNonRuneblade) GoAgain(card.GameEngine) bool                       { return true }
+func (fakeNonRuneblade) Play(card.GameEngine, card.Logger, *card.CardState) {}
 
-// stubRuneWeapon is a Runeblade weapon — tagged with Types["Weapon"] so Viserai should NOT
+// fakeRuneWeapon is a Runeblade weapon — tagged with Types["Weapon"] so Viserai should NOT
 // trigger when it swings.
-type stubRuneWeapon struct{}
+type fakeRuneWeapon struct{}
 
-func (stubRuneWeapon) ID() ids.CardID           { return ids.InvalidCard }
-func (stubRuneWeapon) Name() string             { return "StubRuneWeapon" }
-func (stubRuneWeapon) DisplayName() string      { return "StubRuneWeapon" }
-func (stubRuneWeapon) Cost(card.GameEngine) int { return 0 }
-func (stubRuneWeapon) Pitch() int               { return 0 }
-func (stubRuneWeapon) Attack() int              { return 0 }
-func (stubRuneWeapon) Defense() int             { return 0 }
-func (stubRuneWeapon) Types(card.GameEngine) card.TypeSet {
+func (fakeRuneWeapon) ID() ids.CardID           { return ids.InvalidCard }
+func (fakeRuneWeapon) Name() string             { return "StubRuneWeapon" }
+func (fakeRuneWeapon) DisplayName() string      { return "StubRuneWeapon" }
+func (fakeRuneWeapon) Cost(card.GameEngine) int { return 0 }
+func (fakeRuneWeapon) Pitch() int               { return 0 }
+func (fakeRuneWeapon) Attack() int              { return 0 }
+func (fakeRuneWeapon) Defense() int             { return 0 }
+func (fakeRuneWeapon) Types(card.GameEngine) card.TypeSet {
 	return card.NewTypeSet(card.TypeRuneblade, card.TypeWeapon, card.TypeAttack)
 }
-func (stubRuneWeapon) GoAgain(card.GameEngine) bool                       { return true }
-func (stubRuneWeapon) Play(card.GameEngine, card.Logger, *card.CardState) {}
+func (fakeRuneWeapon) GoAgain(card.GameEngine) bool                       { return true }
+func (fakeRuneWeapon) Play(card.GameEngine, card.Logger, *card.CardState) {}
 
 // viseraiTriggerEngine returns a *GameEngine with Viserai installed and the played-this-
 // turn flags pre-seeded so a FireTriggers(CardOrAbility, played) exercises the trigger
@@ -94,8 +94,8 @@ func viseraiTriggerEngine(prior []card.Card, nonAttackActionPlayed bool) *gameen
 // filter is IsAttack and this triggering card is an attack), so the surviving aura count
 // is 0 even though the value credit lands.
 func TestViserai_RunebladeAttackAfterNonAttackActionTriggers(t *testing.T) {
-	ge := viseraiTriggerEngine([]card.Card{stubRuneAura{}}, true)
-	ge.FireTriggers(triggertype.CardOrAbility, stubRuneAttack{})
+	ge := viseraiTriggerEngine([]card.Card{fakeRuneAura{}}, true)
+	ge.FireTriggers(triggertype.CardOrAbility, fakeRuneAttack{})
 	if got := ge.Value(); got != 1 {
 		t.Fatalf("expected +1 value from CreateRunechants, got %d", got)
 	}
@@ -106,8 +106,8 @@ func TestViserai_RunebladeAttackAfterNonAttackActionTriggers(t *testing.T) {
 // own type filter (IsAttack) blocks it from immediately firing on the non-attack card —
 // so the surviving aura count is 1.
 func TestViserai_RunebladeNonAttackAfterNonAttackActionTriggers(t *testing.T) {
-	ge := viseraiTriggerEngine([]card.Card{stubRuneAura{}}, true)
-	ge.FireTriggers(triggertype.CardOrAbility, stubRuneAura{})
+	ge := viseraiTriggerEngine([]card.Card{fakeRuneAura{}}, true)
+	ge.FireTriggers(triggertype.CardOrAbility, fakeRuneAura{})
 	if got := ge.Value(); got != 1 {
 		t.Fatalf("expected +1 value from CreateRunechants, got %d", got)
 	}
@@ -119,8 +119,8 @@ func TestViserai_RunebladeNonAttackAfterNonAttackActionTriggers(t *testing.T) {
 // TestViserai_NoPriorNonAttackAction confirms the handler's NonAttackActionPlayed gate
 // suppresses the Runechant when the only prior play was an attack.
 func TestViserai_NoPriorNonAttackAction(t *testing.T) {
-	ge := viseraiTriggerEngine([]card.Card{stubRuneAttack{}}, false)
-	ge.FireTriggers(triggertype.CardOrAbility, stubRuneAttack{})
+	ge := viseraiTriggerEngine([]card.Card{fakeRuneAttack{}}, false)
+	ge.FireTriggers(triggertype.CardOrAbility, fakeRuneAttack{})
 	if got := ge.Value(); got != 0 {
 		t.Fatalf("expected 0 value (no non-attack action this turn), got %d", got)
 	}
@@ -129,8 +129,8 @@ func TestViserai_NoPriorNonAttackAction(t *testing.T) {
 // TestViserai_NonRunebladePlayed confirms the type filter blocks non-Runeblade cards
 // before the handler runs.
 func TestViserai_NonRunebladePlayed(t *testing.T) {
-	ge := viseraiTriggerEngine([]card.Card{stubRuneAura{}}, true)
-	ge.FireTriggers(triggertype.CardOrAbility, stubNonRuneblade{})
+	ge := viseraiTriggerEngine([]card.Card{fakeRuneAura{}}, true)
+	ge.FireTriggers(triggertype.CardOrAbility, fakeNonRuneblade{})
 	if got := ge.Value(); got != 0 {
 		t.Fatalf("expected 0 value (non-Runeblade played), got %d", got)
 	}
@@ -139,8 +139,8 @@ func TestViserai_NonRunebladePlayed(t *testing.T) {
 // TestViserai_WeaponSwingFiltered confirms the type filter blocks Runeblade weapon
 // swings — equipping or swinging a weapon isn't "playing a card".
 func TestViserai_WeaponSwingFiltered(t *testing.T) {
-	ge := viseraiTriggerEngine([]card.Card{stubRuneAura{}}, true)
-	ge.FireTriggers(triggertype.CardOrAbility, stubRuneWeapon{})
+	ge := viseraiTriggerEngine([]card.Card{fakeRuneAura{}}, true)
+	ge.FireTriggers(triggertype.CardOrAbility, fakeRuneWeapon{})
 	if got := ge.Value(); got != 0 {
 		t.Fatalf("expected 0 value for weapon swing, got %d", got)
 	}
@@ -150,7 +150,7 @@ func TestViserai_WeaponSwingFiltered(t *testing.T) {
 // trigger on.
 func TestViserai_EmptyTurn(t *testing.T) {
 	ge := viseraiTriggerEngine(nil, false)
-	ge.FireTriggers(triggertype.CardOrAbility, stubRuneAura{})
+	ge.FireTriggers(triggertype.CardOrAbility, fakeRuneAura{})
 	if got := ge.Value(); got != 0 {
 		t.Fatalf("expected 0 value on empty turn, got %d", got)
 	}
@@ -166,25 +166,25 @@ var (
 // nonAttackEnablerCard returns a non-attack action — fills only the non-attack-enabler
 // slot (red pitch, no defense, has Go again so it doesn't extend into other slots).
 func nonAttackEnablerCard(name string) card.Card {
-	return testutils.NewStubCard(name).WithTypes(genericActionTypes).WithGoAgain()
+	return testutils.NewFakeCard(name).WithTypes(genericActionTypes).WithGoAgain()
 }
 
 // defenderCard returns a Defense Reaction with positive defense — fills only the
 // defender slot (red pitch, no Action subtype).
 func defenderCard(name string, defense int) card.Card {
-	return testutils.NewStubCard(name).WithTypes(defenseReactionTypes).WithDefense(defense).WithPitch(1)
+	return testutils.NewFakeCard(name).WithTypes(defenseReactionTypes).WithDefense(defense).WithPitch(1)
 }
 
 // bluePitchOnlyCard returns a non-action card with blue pitch — fills only the
 // blue-pitch slot.
 func bluePitchOnlyCard(name string) card.Card {
-	return testutils.NewStubCard(name).WithTypes(card.NewTypeSet(card.TypeGeneric)).WithPitch(3)
+	return testutils.NewFakeCard(name).WithTypes(card.NewTypeSet(card.TypeGeneric)).WithPitch(3)
 }
 
 // noSlotCard returns an attack action with Go again, red pitch, no defense — none of the
 // Viserai slots apply.
 func noSlotCard(name string) card.Card {
-	return testutils.NewStubCard(name).WithTypes(actionAttackTypes).WithGoAgain().WithPitch(1)
+	return testutils.NewFakeCard(name).WithTypes(actionAttackTypes).WithGoAgain().WithPitch(1)
 }
 
 // Tests that Opt(1) always tops the only revealed card.
@@ -230,7 +230,7 @@ func TestViseraiOpt_MultiSlotCardBottomedWhenAllCovered(t *testing.T) {
 	a := nonAttackEnablerCard("a")
 	bluePitch := bluePitchOnlyCard("blue")
 	// b spans the non-attack-enabler and blue-pitch slots — both already covered.
-	b := testutils.NewStubCard("b").WithTypes(genericActionTypes).WithGoAgain().WithPitch(3)
+	b := testutils.NewFakeCard("b").WithTypes(genericActionTypes).WithGoAgain().WithPitch(3)
 	top, bottom := Viserai.Opt([]card.Card{a, bluePitch, b})
 	if !reflect.DeepEqual(top, []card.Card{a, bluePitch}) {
 		t.Errorf("top = %v, want [%v %v]", top, a, bluePitch)
@@ -247,7 +247,7 @@ func TestViseraiOpt_MultiSlotCardBottomedOnAnyOverlap(t *testing.T) {
 	bluePitch := bluePitchOnlyCard("blue")
 	// b is non-attack-enabler (uncovered) AND blue-pitch (covered). Bottomed because
 	// blue-pitch overlaps even though the enabler slot is fresh.
-	b := testutils.NewStubCard("b").WithTypes(genericActionTypes).WithGoAgain().WithPitch(3)
+	b := testutils.NewFakeCard("b").WithTypes(genericActionTypes).WithGoAgain().WithPitch(3)
 	top, bottom := Viserai.Opt([]card.Card{bluePitch, b})
 	if !reflect.DeepEqual(top, []card.Card{bluePitch}) {
 		t.Errorf("top = %v, want [%v]", top, bluePitch)
@@ -316,7 +316,7 @@ func TestViseraiOpt_EmptyInput(t *testing.T) {
 func TestViseraiOpt_DefenseValueAloneDoesNotFillDefenderSlot(t *testing.T) {
 	// attackWithDefense is an attack action with positive Defense — represents the typical
 	// FaB attack that doubles as a block. Should not key the defender slot.
-	attackWithDefense := testutils.NewStubCard("atkWithDef").
+	attackWithDefense := testutils.NewFakeCard("atkWithDef").
 		WithTypes(actionAttackTypes).
 		WithDefense(3).
 		WithPitch(1)
@@ -333,7 +333,7 @@ func TestViseraiOpt_DefenseValueAloneDoesNotFillDefenderSlot(t *testing.T) {
 // Tests that a Block-typed card fills the defender slot alongside Defense Reactions.
 func TestViseraiOpt_BlockTypeFillsDefenderSlot(t *testing.T) {
 	dr := defenderCard("dr", 3)
-	blocker := testutils.NewStubCard("block").
+	blocker := testutils.NewFakeCard("block").
 		WithTypes(card.NewTypeSet(card.TypeGeneric, card.TypeBlock)).
 		WithDefense(3).
 		WithPitch(1)

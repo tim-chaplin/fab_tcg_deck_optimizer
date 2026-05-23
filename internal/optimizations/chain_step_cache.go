@@ -49,8 +49,8 @@ func chainStepCacheIndex(id ids.CardID, fromArsenal bool) uint32 {
 
 // chainStepTextSlow computes the chain-step prefix string and stores it in chainStepCache
 // at idx. Used both by WarmChainStepCache (to populate) and by cachedChainStepText's
-// miss path (to backfill on first sighting of an unregistered card — fakes / test stubs
-// created outside the cards registry).
+// miss path (to backfill on first sighting of an unregistered card — test fakes created
+// outside the cards registry).
 //
 // Multiple goroutines computing the same entry race-safely converge on the first writer's
 // string — every writer produces the same value, so reads after a race still match spec.
@@ -63,8 +63,8 @@ func chainStepTextSlow(self *card.CardState, idx uint32) string {
 // WarmChainStepCache populates the chain-step text cache for every non-nil card in cards
 // by writing both the in-hand ((id, false)) and from-arsenal ((id, true)) entries.
 // Idempotent. The registry package's init calls this once with the registry slice so the
-// runtime hot path is pure cache reads — fakes/test stubs created without registration
-// still work via cachedChainStepText's lazy backfill.
+// runtime hot path is pure cache reads — test fakes created without registration still
+// work via cachedChainStepText's lazy backfill.
 func WarmChainStepCache(cards []card.Card) {
 	var self card.CardState
 	for _, c := range cards {

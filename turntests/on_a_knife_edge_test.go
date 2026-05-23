@@ -15,7 +15,7 @@ import (
 // Tests that On a Knife Edge grants go again to the next sword attack, funding a second swing.
 func TestOnAKnifeEdge_GrantsGoAgainToSwordAttack(t *testing.T) {
 	d := deck.New(testutils.Hero{Intel: 4}, []deck.Weapon{weapons.ReapingBlade{}}, nil)
-	hand := []card.Card{cards.OnAKnifeEdgeYellow{}, testutils.NoGoAgainAttackStub{}, testutils.BluePitch{}}
+	hand := []card.Card{cards.OnAKnifeEdgeYellow{}, testutils.FakeNoGoAgainAttack{}, testutils.BluePitch{}}
 
 	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingDamage(0).Build(), hand)
 

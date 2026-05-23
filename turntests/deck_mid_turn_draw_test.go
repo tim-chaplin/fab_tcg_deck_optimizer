@@ -1,7 +1,6 @@
 package turntests
 
 import (
-	"reflect"
 	"testing"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
@@ -41,7 +40,7 @@ func TestEvalOneTurn_MidTurnDrawArsenalsWhenSlotEmpty(t *testing.T) {
 		testutils.BlueAttack{},
 		testutils.YellowAttack{},
 	}
-	if !reflect.DeepEqual(summary.State.Hand(), wantHand) {
+	if !containsSameCards(summary.State.Hand(), wantHand) {
 		t.Errorf("turn 2 hand = %v, want %v (full 4-card refill; Yellow at slot 3 proves drawn card arsenaled rather than held)", summary.State.Hand(), wantHand)
 	}
 
@@ -83,7 +82,7 @@ func TestEvalOneTurn_TwoMidTurnDraws_OneArsenalsOneHeld(t *testing.T) {
 		testutils.BlueAttack{},
 		testutils.BlueAttack{},
 	}
-	if !reflect.DeepEqual(summary.State.Hand(), wantHand) {
+	if !containsSameCards(summary.State.Hand(), wantHand) {
 		t.Errorf("turn 2 hand = %v, want %v (one beacon held + 3 fresh Blues; two beacons here would mean neither got arsenaled, a Yellow would mean the sim over-drew)", summary.State.Hand(), wantHand)
 	}
 
@@ -124,7 +123,7 @@ func TestEvalOneTurn_ThreeMidTurnDraws_ArsenalFromDrawnPool(t *testing.T) {
 		testutils.BlueAttack{},
 		testutils.BlueAttack{},
 	}
-	if !reflect.DeepEqual(summary.State.Hand(), wantHand) {
+	if !containsSameCards(summary.State.Hand(), wantHand) {
 		t.Errorf("turn 2 hand = %v, want %v (two beacons held + 2 fresh Blues; a Yellow here would indicate the sim pulled more than 2 refill cards)", summary.State.Hand(), wantHand)
 	}
 
@@ -164,7 +163,7 @@ func TestEvalOneTurn_MidTurnDrawHeldWhenArsenalFull(t *testing.T) {
 		testutils.BlueAttack{},
 		testutils.BlueAttack{},
 	}
-	if !reflect.DeepEqual(summary.State.Hand(), wantHand) {
+	if !containsSameCards(summary.State.Hand(), wantHand) {
 		t.Errorf("turn 2 hand = %v, want %v (beacon held + 3 fresh Blues; a Yellow here means the sim over-drew past the 3-card budget)", summary.State.Hand(), wantHand)
 	}
 
@@ -221,7 +220,7 @@ func TestEvalOneTurn_MidTurnDrawSansGoAgainStaysHeld(t *testing.T) {
 		testutils.BlueAttack{},
 		testutils.BlueAttack{},
 	}
-	if !reflect.DeepEqual(summary.State.Hand(), wantHand) {
+	if !containsSameCards(summary.State.Hand(), wantHand) {
 		t.Errorf("turn 2 hand = %v, want %v", summary.State.Hand(), wantHand)
 	}
 

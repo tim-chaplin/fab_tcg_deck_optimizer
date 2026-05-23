@@ -212,7 +212,7 @@ func TestBestSequence_CardStateGrantsDontLeakAcrossPermutations(t *testing.T) {
 // Tests that a non-Go-again attack followed by a non-Instant card rejects the chain — the
 // AP pool drains to 0 on the first card and the second can't pay its 1 AP cost.
 func TestPlaySequence_NonGoAgainStopsChain(t *testing.T) {
-	order := []card.Card{testutils.NoGoAgainAttackStub{}, testutils.NoGoAgainAttackStub{}}
+	order := []card.Card{testutils.FakeNoGoAgainAttack{}, testutils.FakeNoGoAgainAttack{}}
 	ctx := NewSequenceContextForTest(testutils.Hero{Intel: 4}, nil, nil, 1_000_000, 0, len(order))
 	if _, _, _, legal := ctx.PlaySequence(order); legal {
 		t.Fatalf("ordering %v should be illegal (no Go again grant after card 0)", testutils.CardNamesSim(order))
@@ -222,7 +222,7 @@ func TestPlaySequence_NonGoAgainStopsChain(t *testing.T) {
 // Tests that an Instant follow-up after a non-Go-again card resolves legally — Instants cost
 // 0 AP so the empty pool isn't a barrier.
 func TestPlaySequence_InstantBypassesAPRequirement(t *testing.T) {
-	order := []card.Card{testutils.NoGoAgainAttackStub{}, testutils.InstantStub{}}
+	order := []card.Card{testutils.FakeNoGoAgainAttack{}, testutils.FakeInstant{}}
 	ctx := NewSequenceContextForTest(testutils.Hero{Intel: 4}, nil, nil, 1_000_000, 0, len(order))
 	dmg, _, _, legal := ctx.PlaySequence(order)
 	if !legal {
@@ -237,7 +237,7 @@ func TestPlaySequence_InstantBypassesAPRequirement(t *testing.T) {
 // at 1 the whole way, and a non-Instant follow-up still works (which would fail if Instants
 // had silently consumed AP).
 func TestPlaySequence_InstantsDontConsumeAP(t *testing.T) {
-	order := []card.Card{testutils.InstantStub{}, testutils.InstantStub{}, testutils.NoGoAgainAttackStub{}}
+	order := []card.Card{testutils.FakeInstant{}, testutils.FakeInstant{}, testutils.FakeNoGoAgainAttack{}}
 	ctx := NewSequenceContextForTest(testutils.Hero{Intel: 4}, nil, nil, 1_000_000, 0, len(order))
 	dmg, _, _, legal := ctx.PlaySequence(order)
 	if !legal {

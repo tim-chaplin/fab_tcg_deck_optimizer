@@ -24,12 +24,12 @@ func TestTradeIn_DiscardsHandToGraveyardAndDrawsToArsenal(t *testing.T) {
 		})
 		summary := sim.EvalOneTurnForTesting(d, nil, []card.Card{c, spare})
 
-		if !graveyardContains(summary.State.Graveyard(), testutils.FakeBluePitch) {
+		if !graveyardContains(summary.State.Graveyard(), testutils.BluePitch{}) {
 			t.Errorf("%s: graveyard = %v, want it to contain the discarded %s",
 				c.Name(), summary.State.Graveyard(), spare.DisplayName())
 		}
 		ars := summary.State.Arsenal()
-		if ars == nil || ars.ID() != testutils.FakeRedPitch {
+		if ars == nil || ars.Name() != (testutils.RedPitch{}).Name() {
 			t.Errorf("%s: Arsenal() = %v, want the drawn RedPitch (deck top) promoted into the slot", c.Name(), ars)
 		}
 	}

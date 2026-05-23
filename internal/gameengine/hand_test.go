@@ -12,7 +12,7 @@ import (
 func TestAppendHand_KeepsHandSortedByID(t *testing.T) {
 	ge := New()
 	for _, id := range []ids.CardID{5, 2, 9, 2, 1, 7} {
-		ge.AppendHand(stubCard{id: id})
+		ge.AppendHand(fakeCard{id: id})
 	}
 	got := ge.Hand()
 	if len(got) != 6 {

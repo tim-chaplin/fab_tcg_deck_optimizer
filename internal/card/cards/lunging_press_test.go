@@ -24,7 +24,7 @@ func TestLungingPress_RejectsNonAttackAction(t *testing.T) {
 // Tests that the predicate rejects weapons (printed text is "attack action card", not
 // "attack").
 func TestLungingPress_RejectsWeapon(t *testing.T) {
-	weapon := testutils.NewStubCard("weapon").
+	weapon := testutils.NewFakeCard("weapon").
 		WithTypes(card.NewTypeSet(card.TypeGeneric, card.TypeWeapon))
 	if (LungingPressBlue{}).ARTargetAllowed(nil, weapon, 0) {
 		t.Error("weapon should be rejected")

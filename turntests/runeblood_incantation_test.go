@@ -7,7 +7,6 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card/cards"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/gameengine"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/ids"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 )
@@ -46,13 +45,13 @@ func TestRunebloodIncantation_LastVerseSpentThenDestroyedNextTurn(t *testing.T) 
 	if got := turn1.State.RunechantCount(); got != 1 {
 		t.Fatalf("turn 1 RunechantCount = %d, want 1 (last verse counter spent on a Runechant)", got)
 	}
-	if graveyardContains(turn1.State.Graveyard(), ids.RunebloodIncantationBlue) {
+	if graveyardContains(turn1.State.Graveyard(), cards.RunebloodIncantationBlue{}) {
 		t.Fatalf("turn 1 graveyard has Runeblood Incantation — it should survive the turn its last counter is removed")
 	}
 	if got := turn2.State.RunechantCount(); got != 1 {
 		t.Fatalf("turn 2 RunechantCount = %d, want 1 (no verse counter left — no new Runechant)", got)
 	}
-	if !graveyardContains(turn2.State.Graveyard(), ids.RunebloodIncantationBlue) {
+	if !graveyardContains(turn2.State.Graveyard(), cards.RunebloodIncantationBlue{}) {
 		t.Fatalf("turn 2 graveyard = %v, want Runeblood Incantation destroyed (no verse counter to remove)",
 			turn2.State.Graveyard())
 	}
