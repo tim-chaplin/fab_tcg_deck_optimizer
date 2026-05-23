@@ -196,6 +196,8 @@ var cardsByID = []Card{
 	ids.GravekeepingYellow: cards.GravekeepingYellow{},
 	ids.GravekeepingBlue:   cards.GravekeepingBlue{},
 
+	ids.HandBehindThePenRed: cards.HandBehindThePenRed{},
+
 	ids.HealingBalmRed:    cards.HealingBalmRed{},
 	ids.HealingBalmYellow: cards.HealingBalmYellow{},
 	ids.HealingBalmBlue:   cards.HealingBalmBlue{},
