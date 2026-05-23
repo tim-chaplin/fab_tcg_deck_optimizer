@@ -476,6 +476,8 @@ var cardsByID = []Card{
 	ids.SloggismYellow: cards.SloggismYellow{},
 	ids.SloggismBlue:   cards.SloggismBlue{},
 
+	ids.SmashUpRed: cards.SmashUpRed{},
+
 	ids.SnatchRed:    cards.SnatchRed{},
 	ids.SnatchYellow: cards.SnatchYellow{},
 	ids.SnatchBlue:   cards.SnatchBlue{},
