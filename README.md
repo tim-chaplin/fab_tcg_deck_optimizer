@@ -220,15 +220,5 @@ go test ./...
 
 ## Layout
 
-```
-.github/workflows/   GitHub Actions (anneal-sweep: parallel matrix run)
-cmd/fabsim/          CLI entry point
-cmd/parsecarddb/     Card-database parser / filter
-internal/card/       Card interface, TurnState, and card implementations
-internal/deck/       Deck construction and parallel anneal round driver
-internal/deckio/     JSON serialisation / deserialisation
-internal/hand/       Optimal-play solver for a single hand
-internal/hero/       Hero definitions and on-play triggers
-internal/weapon/     Weapon definitions
-scripts/             PowerShell wrappers for multi-restart and reanneal sweeps
-```
+See `docs/codebase-map.md` for the full directory map with a one-line description of every
+package. Each package directory also carries its own `README.md` with detailed docs.
