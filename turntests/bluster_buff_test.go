@@ -3,29 +3,34 @@ package turntests
 import (
 	"testing"
 
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card/cards"
-
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card/cards"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/gameengine"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 )
 
-// Tests that mode 0 fires the -1{p} self-debuff before crediting attack damage.
+// Tests that mode 0 fires the -1{p} self-debuff before crediting attack damage. With only
+// 1 pitch resource available the runner can't afford Mode 1's extra {r}, so it falls back
+// to the printed-mode swing minus the self-debuff.
 func TestBlusterBuff_Mode0DebuffsByOne(t *testing.T) {
-	ge := gameengine.New()
-	pc := &card.CardState{Card: cards.BlusterBuffRed{}}
-	ge.ResolveChainStep(ge.Logger(), pc)
-	if ge.Value() != 5 {
-		t.Errorf("mode 0 Value = %d, want 5 (printed 6 - 1)", ge.Value())
+	d := deck.New(testutils.Hero{Intel: 4}, nil, fillerDeck())
+	hand := []card.Card{cards.BlusterBuffRed{}, testutils.RedAttack{}}
+	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingDamage(0).Build(), hand)
+	if summary.Value != 5 {
+		t.Errorf("Value = %d, want 5 (Mode 0: printed 6 - 1 self-debuff)", summary.Value)
 	}
 }
 
-// Tests that mode 1 keeps the printed power.
+// Tests that mode 1 keeps the printed power when enough pitch is available to fund the
+// extra {r}.
 func TestBlusterBuff_Mode1KeepsPrintedPower(t *testing.T) {
-	ge := gameengine.New()
-	pc := &card.CardState{Card: cards.BlusterBuffRed{}, Mode: 1}
-	ge.ResolveChainStep(ge.Logger(), pc)
-	if ge.Value() != 6 {
-		t.Errorf("mode 1 Value = %d, want 6 (printed)", ge.Value())
+	d := deck.New(testutils.Hero{Intel: 4}, nil, fillerDeck())
+	hand := []card.Card{cards.BlusterBuffRed{}, testutils.BluePitch{}}
+	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingDamage(0).Build(), hand)
+	if summary.Value != 6 {
+		t.Errorf("Value = %d, want 6 (Mode 1: printed)", summary.Value)
 	}
 }
 

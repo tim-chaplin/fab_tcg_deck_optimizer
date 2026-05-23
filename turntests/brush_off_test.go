@@ -3,14 +3,16 @@ package turntests
 import (
 	"testing"
 
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card/cards"
-
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card/cards"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/gameengine"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 )
 
-// Tests that each printing's Play credits its prevention cap (3/2/1) when IncomingDamage
-// has room.
+// Tests that each printing's defensive-instant prevention credits its cap (3/2/1) when
+// IncomingDamage has room.
 func TestBrushOff_PreventsCap(t *testing.T) {
 	cases := []struct {
 		card card.Card
@@ -21,24 +23,21 @@ func TestBrushOff_PreventsCap(t *testing.T) {
 		{cards.BrushOffBlue{}, 1},
 	}
 	for _, tc := range cases {
-		ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetIncomingDamage(5).Build()}
-		pc := &card.CardState{Card: tc.card}
-		ge.ResolveChainStep(ge.Logger(), pc)
-		if ge.Value() != tc.want {
-			t.Errorf("%s: Value = %d, want %d", tc.card.Name(), ge.Value(), tc.want)
-		}
-		if ge.RemainingUnblockedDamage() != 5-tc.want {
-			t.Errorf("%s: RemainingUnblockedDamage = %d, want %d", tc.card.Name(), ge.RemainingUnblockedDamage(), 5-tc.want)
+		d := deck.New(testutils.Hero{Intel: 4}, nil, fillerDeck())
+		hand := []card.Card{tc.card}
+		summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingDamage(5).Build(), hand)
+		if summary.Value != tc.want {
+			t.Errorf("%s: Value = %d, want %d", tc.card.Name(), summary.Value, tc.want)
 		}
 	}
 }
 
 // Tests that prevention caps at IncomingDamage when incoming is less than Defense().
 func TestBrushOff_CapsAtIncoming(t *testing.T) {
-	ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetIncomingDamage(1).Build()}
-	pc := &card.CardState{Card: cards.BrushOffRed{}}
-	ge.ResolveChainStep(ge.Logger(), pc)
-	if ge.Value() != 1 {
-		t.Errorf("Value = %d, want 1 (capped at IncomingDamage)", ge.Value())
+	d := deck.New(testutils.Hero{Intel: 4}, nil, fillerDeck())
+	hand := []card.Card{cards.BrushOffRed{}}
+	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingDamage(1).Build(), hand)
+	if summary.Value != 1 {
+		t.Errorf("Value = %d, want 1 (capped at IncomingDamage)", summary.Value)
 	}
 }

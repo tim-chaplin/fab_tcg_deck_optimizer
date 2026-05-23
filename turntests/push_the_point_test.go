@@ -11,16 +11,17 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 )
 
-// Tests that Push the Point gains +2{p} when the last attack on this chain hit.
+// Tests that Push the Point gains +2{p} when the last attack on this chain hit. The
+// preceding BlueAttack lands first, flipping LastAttackHit, so Push the Point reads it on
+// the next chain step.
 func TestPushThePoint_LastAttackHitGrantsBonus(t *testing.T) {
 	for _, c := range []card.Card{cards.PushThePointRed{}, cards.PushThePointYellow{}, cards.PushThePointBlue{}} {
-		ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().Build()}
-		ge.SetLastAttackHit(true)
-		pc := &card.CardState{Card: c}
-		ge.ResolveChainStep(ge.Logger(), pc)
-		want := c.Attack() + 2
-		if ge.Value() != want {
-			t.Errorf("%s: Value = %d, want %d (printed + 2{p} bonus)", c.Name(), ge.Value(), want)
+		d := deck.New(testutils.Hero{Intel: 4}, nil, fillerDeck())
+		hand := []card.Card{testutils.BlueAttack{}, c, testutils.BluePitch{}, testutils.BluePitch{}}
+		summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingDamage(0).Build(), hand)
+		want := testutils.BlueAttack{}.Attack() + c.Attack() + 2
+		if summary.Value != want {
+			t.Errorf("%s: Value = %d, want %d (BlueAttack + printed + 2{p} bonus)", c.Name(), summary.Value, want)
 		}
 	}
 }
@@ -28,25 +29,11 @@ func TestPushThePoint_LastAttackHitGrantsBonus(t *testing.T) {
 // Tests that Push the Point stays at printed power when no prior attack hit.
 func TestPushThePoint_NoPriorHitNoBonus(t *testing.T) {
 	for _, c := range []card.Card{cards.PushThePointRed{}, cards.PushThePointYellow{}, cards.PushThePointBlue{}} {
-		ge := gameengine.New()
-		pc := &card.CardState{Card: c}
-		ge.ResolveChainStep(ge.Logger(), pc)
-		if ge.Value() != c.Attack() {
-			t.Errorf("%s: Value = %d, want %d (printed power)", c.Name(), ge.Value(), c.Attack())
+		d := deck.New(testutils.Hero{Intel: 4}, nil, fillerDeck())
+		hand := []card.Card{c, testutils.BluePitch{}}
+		summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingDamage(0).Build(), hand)
+		if summary.Value != c.Attack() {
+			t.Errorf("%s: Value = %d, want %d (printed power)", c.Name(), summary.Value, c.Attack())
 		}
-	}
-}
-
-// Tests that finalizeActiveAttack records the hit and Push the Point reads it on the
-// next chain step.
-func TestPushThePoint_ChainRunnerWiresPriorHit(t *testing.T) {
-	d := deck.New(testutils.Hero{Intel: 4}, nil, nil)
-	summary := sim.EvalOneTurnForTesting(
-		d,
-		gameengine.GameStateBuilder().SetIncomingDamage(0).Build(),
-		[]card.Card{testutils.BlueAttack{}, cards.PushThePointRed{}, testutils.BluePitch{}},
-	)
-	if summary.Value != 7 {
-		t.Errorf("Value = %d, want 7 (BlueAttack 1 + PushThePoint 4 + LastAttackHit bonus 2)", summary.Value)
 	}
 }

@@ -5,7 +5,10 @@ import (
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card/cards"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/gameengine"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 )
 
 // Tests that each printing prevents its full Defense() amount (4/3/2) and that the
@@ -20,21 +23,25 @@ func TestOasisRespite_PreventsAndLifeRider(t *testing.T) {
 		{cards.OasisRespiteBlue{}, 2, 3},
 	}
 	for _, tc := range cases {
-		sOff := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().
+		hand := []card.Card{tc.card, testutils.BluePitch{}}
+		dOff := deck.New(testutils.Hero{Intel: 4}, nil, fillerDeck())
+		sOff := gameengine.GameStateBuilder().
 			SetHero(stubLowHeroOff{}).
 			SetIncomingDamage(10).
-			Build()}
-		sOff.ResolveChainStep(sOff.Logger(), &card.CardState{Card: tc.card})
-		if sOff.Value() != tc.wantOff {
-			t.Errorf("%s: hero off Value = %d, want %d", tc.card.Name(), sOff.Value(), tc.wantOff)
+			Build()
+		summary := sim.EvalOneTurnForTesting(dOff, sOff, hand)
+		if summary.Value != tc.wantOff {
+			t.Errorf("%s: hero off Value = %d, want %d", tc.card.Name(), summary.Value, tc.wantOff)
 		}
-		sOn := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().
+
+		dOn := deck.New(testutils.Hero{Intel: 4}, nil, fillerDeck())
+		sOn := gameengine.GameStateBuilder().
 			SetHero(stubLowHeroOn{}).
 			SetIncomingDamage(10).
-			Build()}
-		sOn.ResolveChainStep(sOn.Logger(), &card.CardState{Card: tc.card})
-		if sOn.Value() != tc.wantOn {
-			t.Errorf("%s: hero on Value = %d, want %d", tc.card.Name(), sOn.Value(), tc.wantOn)
+			Build()
+		summary = sim.EvalOneTurnForTesting(dOn, sOn, hand)
+		if summary.Value != tc.wantOn {
+			t.Errorf("%s: hero on Value = %d, want %d", tc.card.Name(), summary.Value, tc.wantOn)
 		}
 	}
 }

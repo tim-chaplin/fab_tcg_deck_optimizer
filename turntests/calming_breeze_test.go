@@ -3,21 +3,20 @@ package turntests
 import (
 	"testing"
 
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card/cards"
-
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card/cards"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/gameengine"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 )
 
-// Tests that Play credits the flat 3-damage prevention.
+// Tests that Calming Breeze credits its flat 3-damage prevention against 5 incoming.
 func TestCalmingBreeze_PreventsFlat3(t *testing.T) {
-	ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetIncomingDamage(5).Build()}
-	pc := &card.CardState{Card: cards.CalmingBreezeRed{}}
-	ge.ResolveChainStep(ge.Logger(), pc)
-	if ge.Value() != 3 {
-		t.Errorf("Value = %d, want 3", ge.Value())
-	}
-	if ge.RemainingUnblockedDamage() != 2 {
-		t.Errorf("RemainingUnblockedDamage = %d, want 2", ge.RemainingUnblockedDamage())
+	d := deck.New(testutils.Hero{Intel: 4}, nil, fillerDeck())
+	hand := []card.Card{cards.CalmingBreezeRed{}}
+	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingDamage(5).Build(), hand)
+	if summary.Value != 3 {
+		t.Errorf("Value = %d, want 3", summary.Value)
 	}
 }

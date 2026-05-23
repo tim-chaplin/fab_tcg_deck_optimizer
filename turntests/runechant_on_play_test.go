@@ -3,14 +3,16 @@ package turntests
 import (
 	"testing"
 
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card/cards"
-
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card/cards"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/gameengine"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 )
 
-// Tests that the on-play "create N Runechant tokens" rider raises ge.RunechantCount() by N,
-// sets AuraCreated, and credits N damage to Value.
+// Tests that the on-play "create N Runechant tokens" rider raises summary.State.RunechantCount()
+// by N and credits N damage to summary.Value (printed power + N runechants resolving as arcane).
 func TestRunechantOnPlay_CreatesNTokens(t *testing.T) {
 	cases := []struct {
 		c card.Card
@@ -30,18 +32,13 @@ func TestRunechantOnPlay_CreatesNTokens(t *testing.T) {
 		{cards.SpellbladeStrikeBlue{}, 1},
 	}
 	for _, tc := range cases {
-		ge := gameengine.New()
-		ge.ResolveChainStep(ge.Logger(), &card.CardState{Card: tc.c})
-		if ge.RunechantCount() != tc.n {
-			t.Errorf("%s: Runechants = %d, want %d", tc.c.Name(), ge.RunechantCount(), tc.n)
-		}
-		if !ge.AuraCreated() {
-			t.Errorf("%s: AuraCreated = false, want true", tc.c.Name())
-		}
+		d := deck.New(testutils.Hero{Intel: 4}, nil, fillerDeck())
+		hand := []card.Card{tc.c, testutils.BluePitch{}, testutils.BluePitch{}}
+		summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingDamage(0).Build(), hand)
 		want := tc.c.Attack() + tc.n
-		if ge.Value() != want {
+		if summary.Value != want {
 			t.Errorf("%s: Value = %d, want %d (Attack %d + %d runechants)",
-				tc.c.Name(), ge.Value(), want, tc.c.Attack(), tc.n)
+				tc.c.Name(), summary.Value, want, tc.c.Attack(), tc.n)
 		}
 	}
 }

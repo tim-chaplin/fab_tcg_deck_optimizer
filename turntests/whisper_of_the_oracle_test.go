@@ -3,10 +3,11 @@ package turntests
 import (
 	"testing"
 
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card/cards"
-
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card/cards"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/gameengine"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 )
 
@@ -19,14 +20,12 @@ var whisperOfTheOracleVariants = []card.Card{
 // Tests that every variant returns Value 0 (the Opt 4 rider reshapes the deck, doesn't
 // credit damage).
 func TestWhisperOfTheOracle_PlayCallsOpt4(t *testing.T) {
-	a, b, c, d := testutils.NewStubCard("a"), testutils.NewStubCard("b"),
-		testutils.NewStubCard("c"), testutils.NewStubCard("d")
-
 	for _, variant := range whisperOfTheOracleVariants {
-		ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCards([]card.Card{a, b, c, d}).Build()}
-		ge.ResolveChainStep(ge.Logger(), &card.CardState{Card: variant})
-		if ge.Value() != 0 {
-			t.Errorf("%s: Play() Value = %d, want 0", variant.Name(), ge.Value())
+		d := deck.New(testutils.Hero{Intel: 4}, nil, fillerDeck())
+		hand := []card.Card{variant}
+		summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingDamage(0).Build(), hand)
+		if summary.Value != 0 {
+			t.Errorf("%s: Value = %d, want 0", variant.Name(), summary.Value)
 		}
 	}
 }

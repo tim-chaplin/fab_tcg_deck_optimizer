@@ -5,26 +5,30 @@ import (
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card/cards"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/gameengine"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 )
 
-// Mode 0 keeps the printed 4{p} — the optional cost is skipped.
+// With no extra pitch the runner can't afford Mode 1's {r}{r} cost, so it falls back to
+// Mode 0 — the printed 4{p} swing.
 func TestFlex_Mode0PrintedAttack(t *testing.T) {
-	ge := gameengine.New()
-	pc := &card.CardState{Card: cards.FlexRed{}}
-	ge.ResolveChainStep(ge.Logger(), pc)
-	if ge.Value() != 4 {
-		t.Errorf("mode 0 Value = %d, want 4 (printed)", ge.Value())
+	d := deck.New(testutils.Hero{Intel: 4}, nil, fillerDeck())
+	hand := []card.Card{cards.FlexRed{}}
+	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingDamage(0).Build(), hand)
+	if summary.Value != 4 {
+		t.Errorf("Value = %d, want 4 (Mode 0 fallback when no pitch funds Mode 1)", summary.Value)
 	}
 }
 
-// Mode 1 pays {r}{r} for +2{p}, giving the full 6{p} swing.
+// With 3 pitch available the runner pays {r}{r} for +2{p}, giving the full 6{p} swing.
 func TestFlex_Mode1AddsTwo(t *testing.T) {
-	ge := gameengine.New()
-	pc := &card.CardState{Card: cards.FlexRed{}, Mode: 1}
-	ge.ResolveChainStep(ge.Logger(), pc)
-	if ge.Value() != 6 {
-		t.Errorf("mode 1 Value = %d, want 6 (4 printed + 2 bonus)", ge.Value())
+	d := deck.New(testutils.Hero{Intel: 4}, nil, fillerDeck())
+	hand := []card.Card{cards.FlexRed{}, testutils.BluePitch{}}
+	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingDamage(0).Build(), hand)
+	if summary.Value != 6 {
+		t.Errorf("Value = %d, want 6 (4 printed + 2 Mode 1 bonus)", summary.Value)
 	}
 }
 
