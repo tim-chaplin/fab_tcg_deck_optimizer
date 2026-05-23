@@ -330,6 +330,9 @@ func (gs *GameState) ResetEphemeralState() {
 	for _, it := range gs.items {
 		it.SetFiredThisTurn(false)
 	}
+	if gs.hero != nil && gs.hero.OncePerTurn() {
+		gs.hero.SetFiredThisTurn(false)
+	}
 }
 
 // === Pure state accessors. No cacheable flips; sim uses these to drive the chain runner. ===

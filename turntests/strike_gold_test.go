@@ -14,7 +14,7 @@ import (
 
 // Tests that Strike Gold's on-hit rider lands a Gold token in Items when the attack hits.
 func TestStrikeGold_OnHitCreatesGoldToken(t *testing.T) {
-	d := deck.New(heroes.Viserai{}, nil, fillerDeck())
+	d := deck.New(heroes.Viserai, nil, fillerDeck())
 	hand := []card.Card{
 		cards.StrikeGoldRed{},
 		testutils.BluePitch{},
@@ -33,7 +33,7 @@ func TestStrikeGold_OnHitCreatesGoldToken(t *testing.T) {
 
 // Tests that Strike Gold's on-hit rider does not fire when the attack misses LikelyToHit.
 func TestStrikeGold_BlockableMissDoesNotCreateGold(t *testing.T) {
-	d := deck.New(heroes.Viserai{}, nil, fillerDeck())
+	d := deck.New(heroes.Viserai, nil, fillerDeck())
 	hand := []card.Card{
 		cards.StrikeGoldYellow{},
 		testutils.BluePitch{},
@@ -68,7 +68,7 @@ func TestStrikeGold_GoldTokenPlayableNextTurn(t *testing.T) {
 		testutils.BlueAttack{}, testutils.BlueAttack{},
 		testutils.BlueAttack{}, testutils.BlueAttack{},
 	}
-	d := deck.New(heroes.Viserai{}, nil, deckCards)
+	d := deck.New(heroes.Viserai, nil, deckCards)
 	summary := sim.EvalOneTurnForTesting(d, nil, hand)
 	if summary.State.GoldCount() != 1 {
 		t.Fatalf("after turn 1: Gold = %d, want 1 (Strike Gold Red on-hit)", summary.State.GoldCount())

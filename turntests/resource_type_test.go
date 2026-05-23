@@ -15,7 +15,7 @@ import (
 // Action subtype so they can't be played, but they can still defend like any non-Action
 // hand card.
 func TestResource_TitaniumBaubleBlocks(t *testing.T) {
-	d := deck.New(heroes.Viserai{}, nil, fillerDeck())
+	d := deck.New(heroes.Viserai, nil, fillerDeck())
 	hand := []card.Card{cards.TitaniumBaubleBlue{}}
 	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingDamage(5).Build(), hand)
 	got := summary.Value
@@ -26,7 +26,7 @@ func TestResource_TitaniumBaubleBlocks(t *testing.T) {
 
 // Tests that a sole Resource card in hand at end of turn isn't promoted to arsenal.
 func TestResource_DoesNotPromoteToArsenal(t *testing.T) {
-	d := deck.New(heroes.Viserai{}, nil, fillerDeck())
+	d := deck.New(heroes.Viserai, nil, fillerDeck())
 	hand := []card.Card{cards.TitaniumBaubleBlue{}}
 	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingDamage(0).Build(), hand)
 	if summary.State.Arsenal() != nil {
@@ -38,7 +38,7 @@ func TestResource_DoesNotPromoteToArsenal(t *testing.T) {
 // arsenal-in slot's only legal Block move is via Defense Reaction, so a pure Block card
 // would lock there forever.
 func TestArsenalPromotion_SkipsPureBlock(t *testing.T) {
-	d := deck.New(heroes.Viserai{}, nil, fillerDeck())
+	d := deck.New(heroes.Viserai, nil, fillerDeck())
 	hand := []card.Card{cards.OnTheHorizonRed{}}
 	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingDamage(0).Build(), hand)
 	if summary.State.Arsenal() != nil {

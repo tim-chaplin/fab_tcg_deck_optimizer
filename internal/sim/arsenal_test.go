@@ -139,7 +139,7 @@ func TestBest_ArsenalInSmashingGoodTimeGatesOnlyArsenalCopy(t *testing.T) {
 		cards.HocusPocusRed{},
 	}
 	state := gameengine.GameStateBuilder().
-		SetHero(heroes.Viserai{}).
+		SetHero(heroes.Viserai).
 		SetArsenal(notimpl.SmashingGoodTimeRed{}).
 		Build()
 	got := Best(nil, h, nil, state)

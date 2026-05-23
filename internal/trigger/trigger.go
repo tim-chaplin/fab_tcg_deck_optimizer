@@ -45,6 +45,13 @@ func FromToken[T any](name string, tokenID ids.CardID, tt triggertype.Type, fire
 	return Trigger[T]{triggerType: tt, fire: fire, tokenName: name, tokenID: tokenID, oncePerTurn: oncePerTurn, typeFilter: typeFilter}
 }
 
+// FromHero builds a Trigger core for a hero ability — no card or token identity. The
+// embedding Hero type owns its own ID / Name, so the source / token slots stay zero;
+// CardName returns "" and CardID returns 0 on a hero-sourced trigger.
+func FromHero[T any](tt triggertype.Type, fire func(card.GameEngine, card.Logger, T), oncePerTurn bool, typeFilter TypeFilter) Trigger[T] {
+	return Trigger[T]{triggerType: tt, fire: fire, oncePerTurn: oncePerTurn, typeFilter: typeFilter}
+}
+
 func (t *Trigger[T]) TriggerType() triggertype.Type { return t.triggerType }
 func (t *Trigger[T]) OncePerTurn() bool             { return t.oncePerTurn }
 func (t *Trigger[T]) FiredThisTurn() bool           { return t.firedThisTurn }

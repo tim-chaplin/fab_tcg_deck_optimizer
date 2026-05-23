@@ -22,7 +22,7 @@ func TestHumble_ScoresPrintedPower(t *testing.T) {
 		{cards.HumbleYellow{}, 5},
 		{cards.HumbleBlue{}, 4},
 	} {
-		d := deck.New(heroes.Viserai{}, nil, fillerDeck())
+		d := deck.New(heroes.Viserai, nil, fillerDeck())
 		hand := []card.Card{tc.c, testutils.BluePitch{}}
 		state := gameengine.GameStateBuilder().SetIncomingDamage(0).Build()
 		summary := sim.EvalOneTurnForTesting(d, state, hand)

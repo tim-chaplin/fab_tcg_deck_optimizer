@@ -15,8 +15,8 @@ import (
 // Tests that a non-attack pitch funding Aether Slash activates the +1 arcane rider.
 func TestPitchAttribution_AetherSlashSingleNonAttackPitchFiresRider(t *testing.T) {
 	hand := []card.Card{cards.AetherSlashRed{}, cards.MaleficIncantationBlue{}}
-	d := deck.New(heroes.Viserai{}, nil, fillerDeck())
-	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetHero(heroes.Viserai{}).Build(), hand)
+	d := deck.New(heroes.Viserai, nil, fillerDeck())
+	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetHero(heroes.Viserai).Build(), hand)
 	if summary.Value != 5 {
 		t.Fatalf("Value = %d, want 5 (Aether Slash 4 + rider 1)", summary.Value)
 	}
@@ -25,8 +25,8 @@ func TestPitchAttribution_AetherSlashSingleNonAttackPitchFiresRider(t *testing.T
 // Tests that an attack-typed pitch funding Aether Slash does not activate the rider.
 func TestPitchAttribution_AetherSlashAttackPitchDoesNotFireRider(t *testing.T) {
 	hand := []card.Card{cards.AetherSlashRed{}, testutils.YellowAttack{}}
-	d := deck.New(heroes.Viserai{}, nil, fillerDeck())
-	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetHero(heroes.Viserai{}).Build(), hand)
+	d := deck.New(heroes.Viserai, nil, fillerDeck())
+	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetHero(heroes.Viserai).Build(), hand)
 	if summary.Value != 4 {
 		t.Fatalf("Value = %d, want 4 (Aether Slash base power, no rider)", summary.Value)
 	}
@@ -34,13 +34,13 @@ func TestPitchAttribution_AetherSlashAttackPitchDoesNotFireRider(t *testing.T) {
 
 // Tests that Deathly Duet fires both riders when funded by one attack and one non-attack action.
 func TestPitchAttribution_DeathlyDuetBothRidersFireFromMixedFunding(t *testing.T) {
-	d := deck.New(heroes.Viserai{}, nil, fillerDeck())
+	d := deck.New(heroes.Viserai, nil, fillerDeck())
 	hand := []card.Card{
 		cards.DeathlyDuetRed{},
 		cards.AetherSlashRed{},
 		cards.MaleficIncantationBlue{},
 	}
-	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetHero(heroes.Viserai{}).Build(), hand)
+	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetHero(heroes.Viserai).Build(), hand)
 	if got := summary.Value; got != 8 {
 		t.Fatalf("Value = %d, want 8 (Deathly Duet 4 + attack rider 2 + 2 runechants)", got)
 	}
@@ -48,14 +48,14 @@ func TestPitchAttribution_DeathlyDuetBothRidersFireFromMixedFunding(t *testing.T
 
 // Tests that a single pitch paying for multiple Aether Slashes activates the bonus on each.
 func TestPitchAttribution_OneNonAttackPitchFundsMultipleAetherSlashes(t *testing.T) {
-	d := deck.New(heroes.Viserai{}, nil, fillerDeck())
+	d := deck.New(heroes.Viserai, nil, fillerDeck())
 
 	withNonAttack := []card.Card{
 		cards.MauvrionSkiesRed{},
 		cards.AetherSlashRed{}, cards.AetherSlashRed{},
 		cards.MaleficIncantationBlue{},
 	}
-	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetHero(heroes.Viserai{}).Build(), withNonAttack)
+	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetHero(heroes.Viserai).Build(), withNonAttack)
 	if got := summary.Value; got != 15 {
 		t.Errorf("non-attack pitch: Value = %d, want 15", got)
 	}
@@ -65,7 +65,7 @@ func TestPitchAttribution_OneNonAttackPitchFundsMultipleAetherSlashes(t *testing
 		cards.AetherSlashRed{}, cards.AetherSlashRed{},
 		testutils.BlueAttack{},
 	}
-	summary = sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetHero(heroes.Viserai{}).Build(), withAttack)
+	summary = sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetHero(heroes.Viserai).Build(), withAttack)
 	if got := summary.Value; got != 13 {
 		t.Errorf("attack pitch: Value = %d, want 13", got)
 	}

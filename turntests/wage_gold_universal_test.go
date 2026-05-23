@@ -14,14 +14,14 @@ import (
 
 // Tests that Wage Gold's Universal keyword triggers Viserai's Runeblade hero ability.
 func TestWageGold_UniversalTriggersViseraiOnPlay(t *testing.T) {
-	d := deck.New(heroes.Viserai{}, nil, fillerDeck())
+	d := deck.New(heroes.Viserai, nil, fillerDeck())
 	hand := []card.Card{
 		cards.HighStrikerBlue{},
 		cards.WageGoldRed{},
 		testutils.BluePitch{},
 		testutils.BluePitch{},
 	}
-	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetHero(heroes.Viserai{}).Build(), hand)
+	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetHero(heroes.Viserai).Build(), hand)
 	if summary.Value != 8 {
 		t.Fatalf("Value = %d, want 8 (Wage Gold 7 + Viserai-via-Universal runechant +1)\nBestLine: %s",
 			summary.Value, formatBestLine(summary.BestLine))

@@ -7,8 +7,8 @@ package sim
 
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/hero"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/ids"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/triggertype"
 )
 
 // FakeCard is a configurable Card stand-in. Tests construct it via NewFakeCard plus
@@ -71,14 +71,21 @@ type FakeHero struct {
 	OptStrategy func(cs []card.Card) (top, bottom []card.Card)
 }
 
-func (FakeHero) ID() ids.HeroID                                           { return ids.InvalidHero }
-func (FakeHero) Name() string                                             { return "FakeHero" }
-func (FakeHero) DisplayName() string                                      { return "FakeHero" }
-func (FakeHero) Health() int                                              { return 20 }
-func (h FakeHero) Intelligence() int                                      { return h.Intel }
-func (FakeHero) Types() card.TypeSet                                      { return 0 }
-func (FakeHero) Class() card.CardType                                     { return 0 }
-func (FakeHero) OnCardPlayed(card.Card, hero.GameEngine, hero.Logger) int { return 0 }
+func (FakeHero) ID() ids.HeroID       { return ids.InvalidHero }
+func (FakeHero) Name() string         { return "FakeHero" }
+func (FakeHero) DisplayName() string  { return "FakeHero" }
+func (FakeHero) Health() int          { return 20 }
+func (h FakeHero) Intelligence() int  { return h.Intel }
+func (FakeHero) Types() card.TypeSet  { return 0 }
+func (FakeHero) Class() card.CardType { return 0 }
+
+// No triggered ability — TriggerType == 0 makes FireTriggers skip the hero.
+func (FakeHero) TriggerType() triggertype.Type     { return 0 }
+func (FakeHero) OncePerTurn() bool                 { return false }
+func (FakeHero) FiredThisTurn() bool               { return false }
+func (FakeHero) SetFiredThisTurn(bool)             {}
+func (FakeHero) Matches(card.TypeSet) bool         { return false }
+func (FakeHero) Fire(card.GameEngine, card.Logger) {}
 
 // Opt dispatches to OptStrategy when set; otherwise keeps every revealed card on top
 // of the deck in input order (no reshape).

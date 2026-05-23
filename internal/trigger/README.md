@@ -5,8 +5,9 @@
 `trigger` owns the shared trigger machinery: the embeddable `Trigger[T]` core that every
 triggered entry carries, and the one-shot `EphemeralTrigger` kind. A trigger pairs a firing
 event with a typed handler, the source identity, and an optional type filter. Auras
-(`internal/aura`) and items (`internal/item`) embed `Trigger[T]` for their shared behaviour;
-`EphemeralTrigger` is the standalone one-shot listener the engine fires once and drops.
+(`internal/aura`), items (`internal/item`), and triggered heroes (`internal/hero/heroes`)
+embed `Trigger[T]` for their shared behaviour; `EphemeralTrigger` is the standalone
+one-shot listener the engine fires once and drops.
 
 ## Key types
 
@@ -27,6 +28,9 @@ event with a typed handler, the source identity, and an optional type filter. Au
   / `CardID` resolve from the source card.
 - `FromToken[T](name, tokenID, tt, fire, oncePerTurn, typeFilter)` — a token-sourced core
   with no originating card; `CardName` / `CardID` return the supplied token identity.
+- `FromHero[T](tt, fire, oncePerTurn, typeFilter)` — a hero-sourced core with no card
+  or token identity. The embedding `Hero` type owns its own `ID` / `Name`, so the source /
+  token slots stay zero and `CardName` / `CardID` return zero values on this core.
 - `NewEphemeralTrigger(source, tt, fire, typeFilter)` — a one-shot card-sourced trigger.
 
 ## How it is used / how to extend it

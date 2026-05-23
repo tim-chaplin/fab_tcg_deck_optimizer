@@ -15,7 +15,7 @@ import (
 // Tests that Relentless Pursuit recycles to the bottom of the deck (rather than the
 // graveyard) when an attack has already resolved this turn.
 func TestRelentlessPursuit_RecyclesToDeckBottomAfterAttack(t *testing.T) {
-	d := deck.New(heroes.Viserai{}, nil, fillerDeck())
+	d := deck.New(heroes.Viserai, nil, fillerDeck())
 	hand := []card.Card{
 		testutils.RedAttack{},         // attack first to satisfy the recycle gate
 		cards.RelentlessPursuitBlue{}, // resolves second; recycles to deck bottom
@@ -37,7 +37,7 @@ func TestRelentlessPursuit_RecyclesToDeckBottomAfterAttack(t *testing.T) {
 // Tests that Relentless Pursuit goes to the graveyard normally when it resolves before any
 // attack this turn (no prior attack to recycle).
 func TestRelentlessPursuit_GoesToGraveyardWithoutPriorAttack(t *testing.T) {
-	d := deck.New(heroes.Viserai{}, nil, fillerDeck())
+	d := deck.New(heroes.Viserai, nil, fillerDeck())
 	hand := []card.Card{cards.RelentlessPursuitBlue{}, cards.OutedRed{}}
 	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingDamage(0).Build(), hand)
 	if summary.Value != 4 {

@@ -16,7 +16,7 @@ import (
 func TestPlaySequence_DrawDoesNotPoisonSubsequentPermutations(t *testing.T) {
 	top := testutils.RedAttack{}
 	deck := []card.Card{top, testutils.BlueAttack{}, testutils.RedAttack{}}
-	ctx := NewSequenceContextForTest(heroes.Viserai{}, nil, deck, 10, 0, 1)
+	ctx := NewSequenceContextForTest(heroes.Viserai, nil, deck, 10, 0, 1)
 
 	// First permutation: Snatch fires, DrawOne pops the top of the deck into Hand.
 	_, _, _, _ = ctx.PlaySequence([]card.Card{cards.SnatchRed{}})
@@ -48,8 +48,8 @@ func TestBest_DrawRiderSeesActualDeck(t *testing.T) {
 	deckA := DeckOf(testutils.RedAttack{})
 	deckB := DeckOf(testutils.BlueAttack{})
 
-	resA := Best(nil, h, deckA, gameengine.GameStateBuilder().SetHero(heroes.Viserai{}).Build())
-	resB := Best(nil, h, deckB, gameengine.GameStateBuilder().SetHero(heroes.Viserai{}).Build())
+	resA := Best(nil, h, deckA, gameengine.GameStateBuilder().SetHero(heroes.Viserai).Build())
+	resB := Best(nil, h, deckB, gameengine.GameStateBuilder().SetHero(heroes.Viserai).Build())
 
 	containsID := func(cs []card.Card, id ids.CardID) bool {
 		for _, c := range cs {

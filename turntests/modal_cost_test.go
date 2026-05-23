@@ -15,7 +15,7 @@ import (
 // Tests that Bluster Buff picks mode 1 (pay extra {r} for full 6{p}) when the partition's
 // pitch supply has the resource to spare.
 func TestModalCost_BlusterBuffPicksMode1WhenAffordable(t *testing.T) {
-	d := deck.New(heroes.Viserai{}, nil, fillerDeck())
+	d := deck.New(heroes.Viserai, nil, fillerDeck())
 	hand := []card.Card{
 		cards.BlusterBuffRed{},
 		testutils.BluePitch{},
@@ -30,7 +30,7 @@ func TestModalCost_BlusterBuffPicksMode1WhenAffordable(t *testing.T) {
 // Tests that Bluster Buff falls back to mode 0 (5{p}, no extra cost) when only the
 // printed 1{r} is available.
 func TestModalCost_BlusterBuffPicksMode0WhenBudgetTight(t *testing.T) {
-	d := deck.New(heroes.Viserai{}, nil, fillerDeck())
+	d := deck.New(heroes.Viserai, nil, fillerDeck())
 	hand := []card.Card{
 		cards.BlusterBuffRed{},
 		cards.BlusterBuffRed{},
@@ -46,7 +46,7 @@ func TestModalCost_BlusterBuffPicksMode0WhenBudgetTight(t *testing.T) {
 
 // Tests that Look Tuff picks mode 1 when the partition has 4{r} of pitch (printed 3 + extra 1).
 func TestModalCost_LookTuffPicksMode1WhenAffordable(t *testing.T) {
-	d := deck.New(heroes.Viserai{}, nil, fillerDeck())
+	d := deck.New(heroes.Viserai, nil, fillerDeck())
 	hand := []card.Card{
 		cards.LookTuffRed{},
 		testutils.BluePitch{},

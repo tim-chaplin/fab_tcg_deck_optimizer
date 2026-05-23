@@ -17,7 +17,7 @@ values, runs one of the public Eval entry points, and asserts on the returned
 
 ```go
 func TestDefensiveInstant_BrushOffRedAlone(t *testing.T) {
-    d := deck.New(heroes.Viserai{}, nil, fillerDeck())
+    d := deck.New(heroes.Viserai, nil, fillerDeck())
     hand := []card.Card{cards.BrushOffRed{}}
     summary := sim.EvalOneTurnForTesting(d,
         gameengine.GameStateBuilder().SetIncomingDamage(5).Build(), hand)
@@ -31,7 +31,7 @@ func TestDefensiveInstant_BrushOffRedAlone(t *testing.T) {
 
 1. Create `turntests/<card>_test.go` in `package turntests`.
 2. Build a `deck.Deck` with a real hero from `internal/hero/heroes` (e.g.
-   `heroes.Viserai{}`) and a hand of the cards under test, mixing in `internal/testutils`
+   `heroes.Viserai`) and a hand of the cards under test, mixing in `internal/testutils`
    fakes for filler / known-value cards.
 3. Drive the turn through a public Eval entry point only:
    - `sim.EvalOneTurnForTesting(deck, gameState, hand)` for one turn.

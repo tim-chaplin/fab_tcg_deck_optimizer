@@ -15,7 +15,7 @@ import (
 // recompenseDeck is five fillers — enough to deal a full hand next turn. This turn draws
 // no cards, so deck contents don't affect the line under test.
 func recompenseDeck() *deck.Deck {
-	return deck.New(heroes.Viserai{}, nil, []deck.Card{
+	return deck.New(heroes.Viserai, nil, []deck.Card{
 		testutils.RedAttack{}, testutils.RedAttack{}, testutils.RedAttack{},
 		testutils.RedAttack{}, testutils.RedAttack{},
 	})

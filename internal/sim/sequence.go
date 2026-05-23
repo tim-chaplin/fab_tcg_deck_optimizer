@@ -52,7 +52,6 @@ func newSequenceContext(
 		bufs.pooledSequenceCtx = ctx
 	}
 	*ctx = sequenceContext{
-		hero:                masterState.Hero().(hero.Hero),
 		pitched:             pitched,
 		attackers:           attackers,
 		deck:                d,
@@ -305,7 +304,6 @@ func (ctx *sequenceContext) drCostProbe(runechants int) *gameengine.GameEngine {
 
 // sequenceContext carries the stable per-partition-leaf environment.
 type sequenceContext struct {
-	hero                  hero.Hero
 	pitched               []card.Card
 	attackers             []card.Card
 	deck                  *deck.Deck
@@ -593,8 +591,8 @@ func (ctx *sequenceContext) preparePermState(playedAttackers []*card.CardState, 
 	s.ResetEphemeralState()
 	s.SetValue(ctx.startOfTurnValue)
 	// Hero and opponentMarked already mirror leafState (via the CopyPersistentStateFrom
-	// above or the freshly-allocated copy) and leafState's values match ctx.hero /
-	// ctx.priorOpponentMarked respectively — they all root back to masterState. Only
+	// above or the freshly-allocated copy) and leafState's values match masterState's
+	// (which leafState was copied from) and ctx.priorOpponentMarked respectively. Only
 	// arsenal and blockTotal need explicit setting: arsenal may have been promoted out
 	// of the leaf via findArsenalCard (nil-ed when the slot was reassigned to Attack/
 	// Defend), and blockTotal is zeroed by ResetEphemeralState.
@@ -909,7 +907,7 @@ func (ctx *sequenceContext) playSequenceWithMeta(n int) (damage int, totalCounte
 			if !ok || activeAttack == nil || !ar.ARTargetAllowed(ge, activeAttack.Card, pc.Mode) {
 				return 0, 0, 0, nil, false
 			}
-			ctx.hero.OnCardPlayed(pc.Card, ge, state.Logger())
+			ge.FireTriggers(triggertype.CardOrAbility, pc.Card)
 			state.SetAttackReactionTarget(activeAttack)
 			ge.ResolveChainStep(state.Logger(), pc)
 			state.SetAttackReactionTarget(nil)
@@ -938,12 +936,9 @@ func (ctx *sequenceContext) playSequenceWithMeta(n int) (damage int, totalCounte
 
 		state.SetCardsRemaining(played[i+1:])
 
-		ctx.hero.OnCardPlayed(pc.Card, ge, state.Logger())
 		state.SetCurrentStepRerouted(false)
-		// CardOrAbility fires once, before the card resolves: play-triggered effects (e.g.
-		// Malefic Incantation's Runechant) land ahead of the played card's own effect, and
-		// the fire's aura-list snapshot keeps a Runechant created here from being consumed
-		// by this same card. The aura / trigger type filters narrow it per subscriber.
+		// CardOrAbility fires once before the card resolves so play-triggered effects
+		// land ahead of the played card's own effect.
 		ge.FireTriggers(triggertype.CardOrAbility, pc.Card)
 		ge.ResolveChainStep(state.Logger(), pc)
 		if m.isAttack {

@@ -8,7 +8,6 @@ package gameengine
 
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/hero"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/ids"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/triggertype"
 )
@@ -72,18 +71,22 @@ type Item interface {
 	Copy() any
 }
 
-// Hero is the engine's view of the active hero. OnCardPlayed takes hero.GameEngine and
-// hero.Logger — narrow surfaces concrete heroes consume directly so internal/hero doesn't
-// reference internal/card.GameEngine / internal/card.Logger. *GameEngine satisfies hero.GameEngine
-// structurally.
+// Hero is the engine's view of the active hero. The trigger-dispatch surface mirrors
+// the methods Aura and Item expose through their embedded trigger — FireTriggers walks
+// the hero through the same path.
 type Hero interface {
 	ID() ids.HeroID
 	Name() string
 	Class() card.CardType
 	Types() card.TypeSet
 	Intelligence() int
-	OnCardPlayed(played card.Card, ge hero.GameEngine, l hero.Logger) int
 	Opt(cards []card.Card) (top, bottom []card.Card)
+	TriggerType() triggertype.Type
+	OncePerTurn() bool
+	FiredThisTurn() bool
+	SetFiredThisTurn(bool)
+	Matches(types card.TypeSet) bool
+	Fire(engine card.GameEngine, logger card.Logger)
 }
 
 // LowerHealthWanter is a Hero marker. Heroes whose strategy revolves around staying at

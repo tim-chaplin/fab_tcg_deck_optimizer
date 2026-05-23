@@ -20,7 +20,7 @@ func TestGoldToken_SpendsToFillArsenalAndSwings(t *testing.T) {
 		testutils.RedAttack{}, testutils.RedAttack{}, testutils.RedAttack{},
 		testutils.RedAttack{}, testutils.RedAttack{},
 	}
-	d := deck.New(heroes.Viserai{}, []deck.Weapon{weapons.ReapingBlade{}}, cards)
+	d := deck.New(heroes.Viserai, []deck.Weapon{weapons.ReapingBlade{}}, cards)
 	hand := []card.Card{testutils.BluePitch{}}
 	priorItems := []*item.Item{token.NewGold(1)}
 	summary := sim.EvalOneTurnForTesting(d, stateWithItems(priorItems...), hand)

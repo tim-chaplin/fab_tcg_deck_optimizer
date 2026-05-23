@@ -30,7 +30,7 @@ func TestCopperToken_NotEnoughResourceSkipsSpend(t *testing.T) {
 		testutils.RedAttack{}, testutils.RedAttack{}, testutils.RedAttack{},
 		testutils.RedAttack{}, testutils.RedAttack{},
 	}
-	d := deck.New(heroes.Viserai{}, nil, cards)
+	d := deck.New(heroes.Viserai, nil, cards)
 	hand := []card.Card{testutils.BluePitch{}}
 	priorItems := []*item.Item{token.NewCopper(1)}
 	summary := sim.EvalOneTurnForTesting(d, stateWithItems(priorItems...), hand)
@@ -47,7 +47,7 @@ func TestCopperToken_SpendsAndSwings(t *testing.T) {
 		testutils.RedAttack{}, testutils.RedAttack{}, testutils.RedAttack{},
 		testutils.RedAttack{}, testutils.RedAttack{},
 	}
-	d := deck.New(heroes.Viserai{}, []deck.Weapon{weapons.ReapingBlade{}}, cards)
+	d := deck.New(heroes.Viserai, []deck.Weapon{weapons.ReapingBlade{}}, cards)
 	hand := []card.Card{testutils.BluePitch{}, testutils.BluePitch{}}
 	priorItems := []*item.Item{token.NewCopper(1)}
 	summary := sim.EvalOneTurnForTesting(d, stateWithItems(priorItems...), hand)

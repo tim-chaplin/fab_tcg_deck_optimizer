@@ -20,7 +20,7 @@ import (
 // Sigil of Fyendal's start-of-turn trigger credits 1{h} and exhausts to graveyard.
 func TestEvalTwoTurns_SigilOfFyendalQueuesTrigger(t *testing.T) {
 	sigil := cards.SigilOfFyendalBlue{}
-	d := deck.New(heroes.Viserai{}, nil, nil)
+	d := deck.New(heroes.Viserai, nil, nil)
 	turn1, turn2 := sim.EvalTwoTurnsForTesting(d, gameengine.GameStateBuilder().SetIncomingDamage(0).Build(), []card.Card{sigil})
 
 	if !bestLineHasRole(turn1.BestLine, ids.SigilOfFyendalBlue, card.Attack) {
@@ -42,7 +42,7 @@ func TestEvalTwoTurns_SigilOfFyendalQueuesTrigger(t *testing.T) {
 func TestEvalTwoTurns_SigilOfTheArknightRevealsIntoHand(t *testing.T) {
 	sigil := cards.SigilOfTheArknightBlue{}
 	reveal := cards.AetherSlashRed{}
-	d := deck.New(heroes.Viserai{}, nil, []deck.Card{
+	d := deck.New(heroes.Viserai, nil, []deck.Card{
 		testutils.BluePitch{},
 		testutils.BluePitch{},
 		testutils.BluePitch{},
@@ -68,7 +68,7 @@ func TestEvalTwoTurns_SigilOfTheArknightRevealsIntoHand(t *testing.T) {
 func TestEvalTwoTurns_BlessingOfOccultCreatesRunesAtStartOfNextTurn(t *testing.T) {
 	blessing := cards.BlessingOfOccultRed{}
 	pitch := testutils.BluePitch{}
-	d := deck.New(heroes.Viserai{}, nil, nil)
+	d := deck.New(heroes.Viserai, nil, nil)
 	turn1, turn2 := sim.EvalTwoTurnsForTesting(d, gameengine.GameStateBuilder().SetIncomingDamage(0).Build(), []card.Card{blessing, pitch})
 
 	if turn1.Value != 0 {
@@ -91,8 +91,8 @@ func TestEvalTwoTurns_BlessingOfOccultCreatesRunesAtStartOfNextTurn(t *testing.T
 func TestEvalTwoTurns_MaleficIncantationOncePerTurnLimitsToOneRune(t *testing.T) {
 	malefic := cards.MaleficIncantationRed{}
 	hocus := cards.HocusPocusRed{}
-	d := deck.New(heroes.Viserai{}, nil, nil)
-	turn1, turn2 := sim.EvalTwoTurnsForTesting(d, gameengine.GameStateBuilder().SetHero(heroes.Viserai{}).Build(), []card.Card{malefic, hocus})
+	d := deck.New(heroes.Viserai, nil, nil)
+	turn1, turn2 := sim.EvalTwoTurnsForTesting(d, gameengine.GameStateBuilder().SetHero(heroes.Viserai).Build(), []card.Card{malefic, hocus})
 
 	if !bestLineHasRole(turn1.BestLine, ids.MaleficIncantationRed, card.Attack) {
 		t.Errorf("turn 1 BestLine didn't play Malefic as Role=Attack: %+v", turn1.BestLine)
@@ -119,7 +119,7 @@ func TestEvalTwoTurns_MaleficIncantationOncePerTurnLimitsToOneRune(t *testing.T)
 func TestEvalTwoTurns_RunebloodIncantationTicksAcrossTurns(t *testing.T) {
 	runeblood := cards.RunebloodIncantationRed{}
 	pitch := testutils.BluePitch{}
-	d := deck.New(heroes.Viserai{}, nil, nil)
+	d := deck.New(heroes.Viserai, nil, nil)
 	turn1, turn2 := sim.EvalTwoTurnsForTesting(d, gameengine.GameStateBuilder().SetIncomingDamage(0).Build(), []card.Card{runeblood, pitch})
 
 	if !bestLineHasRole(turn1.BestLine, ids.RunebloodIncantationRed, card.Attack) {

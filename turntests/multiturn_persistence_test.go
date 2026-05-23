@@ -23,7 +23,7 @@ import (
 // 1 base + 1 on-hit Runechant = 2. Expected turn1.Value == turn2.Value == 2; if the
 // weapon is lost across the turn boundary, turn2.Value drops to 0.
 func TestEvalTwoTurns_EquippedWeaponPersistsAcrossTurns(t *testing.T) {
-	d := deck.New(heroes.Viserai{}, []deck.Weapon{weapons.NebulaBlade{}}, []deck.Card{
+	d := deck.New(heroes.Viserai, []deck.Weapon{weapons.NebulaBlade{}}, []deck.Card{
 		testutils.BluePitch{},
 	})
 	hand := []card.Card{testutils.BluePitch{}}
@@ -51,7 +51,7 @@ func TestEvalTwoTurns_EquippedWeaponPersistsAcrossTurns(t *testing.T) {
 // another aura from the graveyard for 1 arcane. Expected turn1.Value == 0, turn2.Value == 1;
 // if the graveyard is wiped between turns, the banish finds nothing and turn2.Value == 0.
 func TestEvalTwoTurns_GraveyardPersistsAcrossTurns(t *testing.T) {
-	d := deck.New(heroes.Viserai{}, nil, []deck.Card{
+	d := deck.New(heroes.Viserai, nil, []deck.Card{
 		cards.SigilOfSilphidaeBlue{},
 	})
 	initial := gameengine.GameStateBuilder().
@@ -83,7 +83,7 @@ func TestEvalTwoTurns_GraveyardPersistsAcrossTurns(t *testing.T) {
 // whose on-enter banishes Fyendal from the graveyard for 1 arcane. Expected turn1.Value ==
 // turn2.Value == 1; if destroyed aura sources don't reach the graveyard, turn2.Value == 0.
 func TestEvalTwoTurns_DestroyedAuraSourceReachesGraveyard(t *testing.T) {
-	d := deck.New(heroes.Viserai{}, nil, []deck.Card{
+	d := deck.New(heroes.Viserai, nil, []deck.Card{
 		cards.SigilOfSilphidaeBlue{},
 	})
 	initial := gameengine.GameStateBuilder().
@@ -113,7 +113,7 @@ func TestEvalTwoTurns_DestroyedAuraSourceReachesGraveyard(t *testing.T) {
 // Tests that an OpponentMarked flag carried over from turn 1 is still set when turn 2's
 // marked-defender riders run.
 func TestEvalTwoTurns_OpponentMarkedPersistsAcrossTurns(t *testing.T) {
-	d := deck.New(heroes.Viserai{}, nil, []deck.Card{
+	d := deck.New(heroes.Viserai, nil, []deck.Card{
 		cards.OutedRed{},
 	})
 	initial := gameengine.GameStateBuilder().SetOpponentMarked(true).Build()
@@ -136,7 +136,7 @@ func TestEvalTwoTurns_OpponentMarkedPersistsAcrossTurns(t *testing.T) {
 // Tests that a token item (Gold) in play at the start of turn 1 is still on the items list
 // at the start of turn 2 when neither turn can fund its ability cost.
 func TestEvalTwoTurns_ItemTokenPersistsAcrossTurns(t *testing.T) {
-	d := deck.New(heroes.Viserai{}, nil, nil)
+	d := deck.New(heroes.Viserai, nil, nil)
 	initial := gameengine.GameStateBuilder().AddItem(token.NewGold(1)).Build()
 
 	turn1, turn2 := sim.EvalTwoTurnsForTesting(d, initial, nil)

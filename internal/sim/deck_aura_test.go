@@ -193,7 +193,7 @@ func TestEvaluate_TriggersFromLastTurnSurfacesInMean(t *testing.T) {
 	for i := 0; i < 6; i++ {
 		deckCards = append(deckCards, testutils.BlueAttack{})
 	}
-	d := deck.New(heroes.Viserai{}, nil, deckCards)
+	d := deck.New(heroes.Viserai, nil, deckCards)
 	rng := rand.New(rand.NewSource(42))
 	stats := NewEvaluator().Evaluate(d, 20, Matchup{}, rng)
 	if stats.Best.Value < 1 {
