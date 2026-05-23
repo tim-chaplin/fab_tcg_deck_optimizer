@@ -11,11 +11,12 @@ package cards
 
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/triggertype"
 )
 
 func (SigilOfSilphidaeBlue) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
 	banishAuraFromGraveyard(ge, l, self.Card.DisplayName())
-	ge.CreateStartOfTurnAura(self, selfDestructAuraHandler, 1)
+	ge.CreateAura(self.Card, triggertype.StartOfTurn, selfDestructAuraHandler, 1, false, nil)
 }
 
 // OnLeavesArena runs the "when this leaves the arena" clause: banish another aura from the

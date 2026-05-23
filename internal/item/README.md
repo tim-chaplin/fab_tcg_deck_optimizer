@@ -19,8 +19,9 @@ firing event.
 
 - `NewFromToken(name, tokenID, ability, count)` — a token-sourced item. Production callers
   reach for `internal/token`'s `NewGold` / `NewSilver` / `NewCopper`.
-- `NewFromCard(source, tt, fire, oncePerTurn)` — a card-sourced triggered item whose handler
-  fires when an event of type `tt` resolves; `count` starts at 1.
+- `NewFromCard(source, tt, fire, oncePerTurn, typeFilter)` — a card-sourced triggered item
+  whose handler fires when an event of type `tt` resolves; `count` starts at 1; `typeFilter`
+  narrows the firing site (pass `nil` for no filter).
 - `(*Item).Fire` — invokes the stored handler with the item as typed receiver; sets
   `activeEngine` for the handler's duration so a handler-side `Destroy` routes back through
   `engine.DestroyItem`.
@@ -54,8 +55,8 @@ The `triggertype.Pitch` event fires as each card is pitched, with the pitched ca
 triggering card (read it via `GameEngine.TriggeringCard()`). A `Pitch` handler raises what
 that pitch yields by calling `GameEngine.AddResourcePoints(n)`; the grant folds into the
 pitched card's resource contribution. A card whose printed text reads "Whenever you pitch a
-card, …" registers a `Pitch`-triggered item from its `Play` via
-`GameEngine.CreatePitchTriggeredItem` — Talisman of Recompense is the model.
+card, …" registers a `Pitch`-triggered item via `GameEngine.CreateItem`; Talisman of
+Recompense is the model.
 
 ## Important file
 

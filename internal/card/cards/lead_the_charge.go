@@ -8,6 +8,7 @@ package cards
 
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/triggertype"
 )
 
 // leadTheChargePlay registers a one-shot trigger that grants 1 action point when the next
@@ -15,7 +16,7 @@ import (
 // action card, so the filter is a plain action-card test. The point fizzles harmlessly
 // when no action card follows — an unspent action point credits no value.
 func leadTheChargePlay(ge card.GameEngine, self *card.CardState) {
-	ge.AddCardOrAbilityTrigger(self, func(g card.GameEngine, l card.Logger, t card.EphemeralTrigger) {
+	ge.CreateTrigger(self.Card, triggertype.CardOrAbility, func(g card.GameEngine, l card.Logger, t card.EphemeralTrigger) {
 		g.AddActionPoints(1)
 		l.AppendPostTrigger(t.CardName(), "Gained 1 action point", 0)
 	}, card.TypeSet.IsAction)

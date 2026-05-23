@@ -106,7 +106,8 @@ any modelling fudge, never the wiring itself.
   from `Play` — the chain runner owns the gate so AR buffs propagate. Use a top-level handler,
   not an inline closure, so registration stays allocation-free.
 - **`NextHit` triggers** (Plunder Run, High Striker, …): cards reading "the next time an X you
-  control hits this turn, do Y" register via `g.AddHitTrigger(self, handler, filter)`. The
+  control hits this turn, do Y" register via
+  `g.CreateTrigger(self.Card, triggertype.Hit, handler, filter)`. The
   `filter func(card.TypeSet) bool` narrows qualifying hits — `card.TypeSet.IsAttackAction` for
   "attack action card" wording, `card.TypeSet.IsAttack` for the broader "attack" wording that
   includes weapon swings. The chain runner drains matching triggers on each `LikelyToHit`

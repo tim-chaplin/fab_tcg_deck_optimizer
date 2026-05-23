@@ -3,33 +3,29 @@ package gameengine
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/aura"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/item"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/trigger"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/triggertype"
 )
 
-// Card-facing aura creation methods on *GameEngine. Cards call these via the
-// internal/card.GameEngine interface; the methods construct the concrete *aura.Aura directly.
-//
-// Compile-time bridge: assigning the inline handler type to aura.Handler below makes the
-// two independently-declared func types check-equal — drift makes this file stop compiling.
+// Card-facing aura / item / trigger registration. Cards call these via the
+// internal/card.GameEngine interface; each method constructs the concrete entry from the
+// supplied primitives and appends it onto the engine's hook lists. Tests that need to
+// install a pre-built entry (token auras, carry-over from a prior turn, sim's pooled DR
+// probe aura) reach for StateBuilder.AddAura or set the slice directly.
 
-// CreateStartOfTurnAura registers a triggertype.StartOfTurn aura: the handler fires at
-// the start of each subsequent turn.
-func (ge *GameEngine) CreateStartOfTurnAura(pc *card.CardState, handler func(card.GameEngine, card.Logger, card.Aura), count int) {
-	ge.CreateAura(aura.NewFromCard(pc.Card, triggertype.StartOfTurn, handler, count, false, nil))
+// CreateAura registers a card-sourced aura.
+func (gs *GameState) CreateAura(source card.Card, tt triggertype.Type, handler func(card.GameEngine, card.Logger, card.Aura), count int, oncePerTurn bool, filter func(card.TypeSet) bool) {
+	gs.auras = append(gs.auras, aura.NewFromCard(source, tt, handler, count, oncePerTurn, filter))
+	gs.auraCreated = true
 }
 
-// CreateOncePerTurnAttackActionAura registers a triggertype.CardOrAbility aura filtered to
-// attack-action cards, with the OncePerTurn gate set — fires at most once per turn
-// regardless of how many attack actions resolve.
-func (ge *GameEngine) CreateOncePerTurnAttackActionAura(pc *card.CardState, handler func(card.GameEngine, card.Logger, card.Aura), count int) {
-	ge.CreateAura(aura.NewFromCard(pc.Card, triggertype.CardOrAbility, handler, count, true, card.TypeSet.IsAttackAction))
+// CreateItem registers a card-sourced triggered item.
+func (gs *GameState) CreateItem(source card.Card, tt triggertype.Type, handler func(card.GameEngine, card.Logger, card.Item), oncePerTurn bool, filter func(card.TypeSet) bool) {
+	gs.items = append(gs.items, item.NewFromCard(source, tt, handler, oncePerTurn, filter))
 }
 
-// CreateHitOrDamageTakenAura registers an aura that fires when an attack hits
-// (triggertype.Hit) or when the defense phase ends with damage unblocked
-// (triggertype.DamageTaken) — the "destroyed when you deal or are dealt damage" aura
-// shape. filter narrows the Hit side to a card-type predicate (nil = any hit); it never
-// gates DamageTaken, which has no triggering card.
-func (ge *GameEngine) CreateHitOrDamageTakenAura(pc *card.CardState, handler func(card.GameEngine, card.Logger, card.Aura), count int, filter func(card.TypeSet) bool) {
-	ge.CreateAura(aura.NewFromCard(pc.Card, triggertype.Hit|triggertype.DamageTaken, handler, count, false, filter))
+// CreateTrigger registers a card-sourced one-shot ephemeral trigger.
+func (gs *GameState) CreateTrigger(source card.Card, tt triggertype.Type, handler func(card.GameEngine, card.Logger, card.EphemeralTrigger), filter func(card.TypeSet) bool) {
+	gs.triggers = append(gs.triggers, trigger.NewEphemeralTrigger(source, tt, handler, filter))
 }

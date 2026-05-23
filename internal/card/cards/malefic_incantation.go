@@ -12,18 +12,19 @@ package cards
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/ids"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/triggertype"
 )
 
 func (MaleficIncantationRed) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
-	ge.CreateOncePerTurnAttackActionAura(self, maleficAuraHandler, 3)
+	ge.CreateAura(self.Card, triggertype.CardOrAbility, maleficAuraHandler, 3, true, card.TypeSet.IsAttackAction)
 }
 
 func (MaleficIncantationYellow) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
-	ge.CreateOncePerTurnAttackActionAura(self, maleficAuraHandler, 2)
+	ge.CreateAura(self.Card, triggertype.CardOrAbility, maleficAuraHandler, 2, true, card.TypeSet.IsAttackAction)
 }
 
 func (MaleficIncantationBlue) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
-	ge.CreateOncePerTurnAttackActionAura(self, maleficAuraHandler, 1)
+	ge.CreateAura(self.Card, triggertype.CardOrAbility, maleficAuraHandler, 1, true, card.TypeSet.IsAttackAction)
 }
 
 // maleficCreatedRunechantText is the precomputed rider line for each Malefic Incantation

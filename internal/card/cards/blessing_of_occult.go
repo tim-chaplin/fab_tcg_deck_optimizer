@@ -9,6 +9,7 @@ package cards
 
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/triggertype"
 )
 
 // blessingOfOccultTriggerText pre-formats the trigger log text for each Runechant count
@@ -20,15 +21,15 @@ var blessingOfOccultTriggerText = [...]string{
 }
 
 func (BlessingOfOccultRed) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
-	ge.CreateStartOfTurnAura(self, blessingOfOccultHandler, 3)
+	ge.CreateAura(self.Card, triggertype.StartOfTurn, blessingOfOccultHandler, 3, false, nil)
 }
 
 func (BlessingOfOccultYellow) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
-	ge.CreateStartOfTurnAura(self, blessingOfOccultHandler, 2)
+	ge.CreateAura(self.Card, triggertype.StartOfTurn, blessingOfOccultHandler, 2, false, nil)
 }
 
 func (BlessingOfOccultBlue) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
-	ge.CreateStartOfTurnAura(self, blessingOfOccultHandler, 1)
+	ge.CreateAura(self.Card, triggertype.StartOfTurn, blessingOfOccultHandler, 1, false, nil)
 }
 
 // blessingOfOccultHandler creates a.Count() Runechants and destroys the aura. Count carries

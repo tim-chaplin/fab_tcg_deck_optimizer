@@ -7,6 +7,7 @@ package cards
 
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/triggertype"
 )
 
 // recompenseFire is the pitch-trigger handler: a pitch that would yield exactly one
@@ -22,7 +23,7 @@ func recompenseFire(ge card.GameEngine, l card.Logger, self card.Item) {
 }
 
 func (TalismanOfRecompenseYellow) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
-	ge.CreatePitchTriggeredItem(self, recompenseFire)
+	ge.CreateItem(self.Card, triggertype.Pitch, recompenseFire, false, nil)
 }
 
 // MaxResourcePoints: one qualifying pitch yields {r}{r}{r} instead of {r}, adding two.

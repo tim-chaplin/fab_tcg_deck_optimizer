@@ -292,12 +292,14 @@ func (ctx *sequenceContext) drCostProbe(runechants int) *gameengine.GameEngine {
 		ge = gameengine.New()
 		bufs.pooledDRCostProbe = ge
 		bufs.pooledDRProbeAura = token.NewRunechant(0)
+		bufs.pooledDRProbeAuras = []gameengine.Aura{bufs.pooledDRProbeAura}
 	}
 	gs := ge.GameState
-	gs.ClearAuras()
 	if runechants > 0 {
 		bufs.pooledDRProbeAura.SetCount(runechants)
-		gs.CreateAura(bufs.pooledDRProbeAura)
+		gs.SetAuras(bufs.pooledDRProbeAuras)
+	} else {
+		gs.ClearAuras()
 	}
 	return ge
 }

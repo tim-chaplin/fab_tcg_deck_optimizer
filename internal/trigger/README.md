@@ -35,10 +35,9 @@ one-shot listener the engine fires once and drops.
 
 ## How it is used / how to extend it
 
-The engine drives ephemeral triggers via `GameEngine.AddHitTrigger`,
-`AddEndOfTurnTrigger`, and `AddCardOrAbilityTrigger`, each of which wraps a card's handler in
-an `EphemeralTrigger` and queues it. `FireTriggers` walks the queue per event and splices out
-every fired entry.
+The engine drives ephemeral triggers via `GameEngine.CreateTrigger`, which wraps a card's
+handler in an `EphemeralTrigger` and queues it. `FireTriggers` walks the queue per event
+and splices out every fired entry.
 
 A new triggered-entry kind (beyond aura / item / ephemeral) embeds `Trigger[T]` for the
 chosen handler surface and supplies a `Fire` method calling `Invoke`. A new firing event adds

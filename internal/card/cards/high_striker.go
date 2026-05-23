@@ -6,6 +6,7 @@ package cards
 
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/triggertype"
 )
 
 // highStrikerOnHit{6,4,2} fire on the next hit matching the trigger's TypeFilter (any
@@ -27,13 +28,13 @@ func highStrikerCreate(ge card.GameEngine, l card.Logger, t card.EphemeralTrigge
 }
 
 func (c HighStrikerRed) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
-	ge.AddHitTrigger(self, highStrikerOnHit6, card.TypeSet.IsAttack)
+	ge.CreateTrigger(self.Card, triggertype.Hit, highStrikerOnHit6, card.TypeSet.IsAttack)
 }
 
 func (c HighStrikerYellow) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
-	ge.AddHitTrigger(self, highStrikerOnHit4, card.TypeSet.IsAttack)
+	ge.CreateTrigger(self.Card, triggertype.Hit, highStrikerOnHit4, card.TypeSet.IsAttack)
 }
 
 func (c HighStrikerBlue) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
-	ge.AddHitTrigger(self, highStrikerOnHit2, card.TypeSet.IsAttack)
+	ge.CreateTrigger(self.Card, triggertype.Hit, highStrikerOnHit2, card.TypeSet.IsAttack)
 }

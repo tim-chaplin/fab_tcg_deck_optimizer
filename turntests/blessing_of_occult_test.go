@@ -3,10 +3,12 @@ package turntests
 import (
 	"testing"
 
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card/cards"
-
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card/cards"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/gameengine"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/triggertype"
 )
 
@@ -45,9 +47,9 @@ func TestBlessingOfOccult_PlayCreatesAuraNoThisTurnRunes(t *testing.T) {
 	}
 }
 
-// TestBlessingOfOccult_TriggerHandlerCreatesNRunes: invoking the trigger's handler on a
-// fresh TurnState creates N live Runechants and credits matching damage.
-func TestBlessingOfOccult_TriggerHandlerCreatesNRunes(t *testing.T) {
+// Tests that a carried Blessing of Occult fires at the start of the next turn, creating N
+// Runechants (R=3, Y=2, B=1) and destroying itself.
+func TestBlessingOfOccult_StartOfTurnCreatesNRunes(t *testing.T) {
 	cases := []struct {
 		c card.Card
 		n int
@@ -57,17 +59,18 @@ func TestBlessingOfOccult_TriggerHandlerCreatesNRunes(t *testing.T) {
 		{cards.BlessingOfOccultBlue{}, 1},
 	}
 	for _, tc := range cases {
-		play := gameengine.New()
-		play.ResolveChainStep(play.Logger(), &card.CardState{Card: tc.c})
-		next := gameengine.New()
-		next.CreateAura(play.Auras()[0])
-		next.FireTriggers(triggertype.StartOfTurn, nil)
-		if next.Value() != tc.n {
-			t.Errorf("%s: handler Value = %d, want %d", tc.c.Name(), next.Value(), tc.n)
+		prior := gameengine.GameStateBuilder().CreateAuraFromCard(tc.c).Build()
+		d := deck.New(testutils.Hero{Intel: 4}, nil, fillerDeck())
+		hand := []card.Card{testutils.BluePitch{}}
+
+		summary := sim.EvalOneTurnForTesting(d, prior, hand)
+
+		if got := summary.State.RunechantCount(); got != tc.n {
+			t.Errorf("%s: Runechants = %d, want %d (start-of-turn handler created them)", tc.c.Name(), got, tc.n)
 		}
-		if next.RunechantCount() != tc.n {
-			t.Errorf("%s: Runechants = %d, want %d (live tokens on next turn)",
-				tc.c.Name(), next.RunechantCount(), tc.n)
+		if got := len(summary.State.Auras()); got != 1 {
+			t.Errorf("%s: Auras = %d, want 1 (Blessing destroyed itself, leaving only the consolidated Runechant entry)",
+				tc.c.Name(), got)
 		}
 	}
 }

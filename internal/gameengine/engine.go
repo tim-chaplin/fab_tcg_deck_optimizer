@@ -7,7 +7,6 @@ import (
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/item"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/token"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/trigger"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/triggertype"
@@ -513,13 +512,6 @@ func (ge *GameEngine) FirePitchTriggers(pitched card.Card) int {
 	return ge.pitchBonus
 }
 
-// CreatePitchTriggeredItem puts a card-sourced item into play whose handler fires on
-// triggertype.Pitch — as each card is pitched. Backs items printed "Whenever you pitch a
-// card, ...".
-func (ge *GameEngine) CreatePitchTriggeredItem(pc *card.CardState, fire func(card.GameEngine, card.Logger, card.Item)) {
-	ge.CreateItem(item.NewFromCard(pc.Card, triggertype.Pitch, fire, false))
-}
-
 // SacrificePayoffAura destroys one aura the player controls and reports whether it
 // destroyed one. It targets the first aura whose source card carries a leave-the-arena
 // payoff (card.LeavesArenaAura), fires that OnLeavesArena clause, and graveyards the card.
@@ -643,28 +635,6 @@ var dealtArcaneText = [...]string{
 	2: "Dealt 2 arcane damage",
 	3: "Dealt 3 arcane damage",
 	4: "Dealt 4 arcane damage",
-}
-
-// === Trigger registration ===
-
-// AddHitTrigger registers a one-shot triggertype.Hit listener. filter narrows the qualifying
-// hits to a card-type predicate; nil = any hit qualifies.
-func (ge *GameEngine) AddHitTrigger(pc *card.CardState, handler func(card.GameEngine, card.Logger, card.EphemeralTrigger), filter func(card.TypeSet) bool) {
-	ge.CreateTrigger(trigger.NewEphemeralTrigger(pc.Card, triggertype.Hit, handler, filter))
-}
-
-// AddEndOfTurnTrigger registers a one-shot triggertype.EndOfTurn listener — fires
-// after the chain finishes resolving but before the carry-state snapshot.
-func (ge *GameEngine) AddEndOfTurnTrigger(pc *card.CardState, handler func(card.GameEngine, card.Logger, card.EphemeralTrigger)) {
-	ge.CreateTrigger(trigger.NewEphemeralTrigger(pc.Card, triggertype.EndOfTurn, handler, nil))
-}
-
-// AddCardOrAbilityTrigger registers a one-shot triggertype.CardOrAbility listener — fires
-// when the next card is played in the chain. filter narrows the firing card to a card-type
-// predicate; nil = any card. The event fires before a card's own effect, so a card
-// registering this from its own Play is never triggered by itself.
-func (ge *GameEngine) AddCardOrAbilityTrigger(pc *card.CardState, handler func(card.GameEngine, card.Logger, card.EphemeralTrigger), filter func(card.TypeSet) bool) {
-	ge.CreateTrigger(trigger.NewEphemeralTrigger(pc.Card, triggertype.CardOrAbility, handler, filter))
 }
 
 // === Tokens ===

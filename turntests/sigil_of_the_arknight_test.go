@@ -3,10 +3,11 @@ package turntests
 import (
 	"testing"
 
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card/cards"
-
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card/cards"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/gameengine"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/triggertype"
 )
@@ -28,57 +29,64 @@ func TestSigilOfTheArknight_PlayOnlySetsAuraCreated(t *testing.T) {
 	}
 }
 
-// TestSigilOfTheArknight_TriggerRevealsAttackActionIntoHand: the post-draw deck's top card
-// is an attack action → the handler draws it into the hand and pops the deck. Damage
-// stays 0 (tempo is captured by the extra card, not a flat credit).
-func TestSigilOfTheArknight_TriggerRevealsAttackActionIntoHand(t *testing.T) {
-	play := gameengine.New()
-	play.ResolveChainStep(play.Logger(), &card.CardState{Card: cards.SigilOfTheArknightBlue{}})
-	top := testutils.RunebladeAttack{}
-	next := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCards([]card.Card{top, testutils.NonAttack{}}).Build()}
-	next.CreateAura(play.Auras()[0])
-	next.FireTriggers(triggertype.StartOfTurn, nil)
-	if next.Value() != 0 {
-		t.Errorf("handler Value = %d, want 0 (tempo credited via the draw, not damage)", next.Value())
+// Tests that a carried Sigil of the Arknight whose post-self-destruct deck top is an
+// attack action draws it into the hand — the drawn attack then plays this turn, observable
+// as its damage contribution to Value (the hand otherwise carries no attack).
+func TestSigilOfTheArknight_StartOfTurnRevealsAttackActionIntoHand(t *testing.T) {
+	revealed := testutils.AttackWithPower{Power: 7}
+	prior := gameengine.GameStateBuilder().
+		CreateAuraFromCard(cards.SigilOfTheArknightBlue{}).
+		Build()
+	deckCards := []deck.Card{revealed}
+	deckCards = append(deckCards, fillerDeck()...)
+	d := deck.New(testutils.Hero{Intel: 4}, nil, deckCards)
+	hand := []card.Card{testutils.BluePitch{}}
+
+	summary := sim.EvalOneTurnForTesting(d, prior, hand)
+
+	if got := summary.Value; got != 7 {
+		t.Errorf("Value = %d, want 7 (revealed attack landed for 7)", got)
 	}
-	if h := next.Hand(); len(h) != 1 || h[0] != top {
-		t.Errorf("Hand = %v, want [%v] (top of post-draw deck)", h, top)
-	}
-	if d := next.Deck(); d.Size() != 1 || d.PeekTop().(card.Card) != (testutils.NonAttack{}) {
-		t.Errorf("Deck = %v, want top popped leaving [testutils.NonAttack]", d)
+	if got := len(summary.State.Auras()); got != 0 {
+		t.Errorf("Auras = %d, want 0 (Sigil self-destructed)", got)
 	}
 }
 
-// TestSigilOfTheArknight_TriggerRevealsNonAttack: top card is non-attack → Hand stays
-// empty and Deck is untouched (the card stays on top of the deck in the real game).
-func TestSigilOfTheArknight_TriggerRevealsNonAttack(t *testing.T) {
-	play := gameengine.New()
-	play.ResolveChainStep(play.Logger(), &card.CardState{Card: cards.SigilOfTheArknightBlue{}})
-	next := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCards([]card.Card{testutils.Aura{}, testutils.RunebladeAttack{}}).Build()}
-	next.CreateAura(play.Auras()[0])
-	next.FireTriggers(triggertype.StartOfTurn, nil)
-	if next.Value() != 0 {
-		t.Errorf("handler Value = %d, want 0", next.Value())
+// Tests that a carried Sigil of the Arknight whose post-self-destruct deck top is a
+// non-attack-action card draws nothing — the turn's value stays at zero because no attack
+// was revealed and the hand carries none.
+func TestSigilOfTheArknight_StartOfTurnRevealsNonAttackDoesNotDraw(t *testing.T) {
+	top := testutils.NonAttack{}
+	prior := gameengine.GameStateBuilder().
+		CreateAuraFromCard(cards.SigilOfTheArknightBlue{}).
+		Build()
+	deckCards := []deck.Card{top}
+	deckCards = append(deckCards, fillerDeck()...)
+	d := deck.New(testutils.Hero{Intel: 4}, nil, deckCards)
+	hand := []card.Card{testutils.BluePitch{}}
+
+	summary := sim.EvalOneTurnForTesting(d, prior, hand)
+
+	if got := summary.Value; got != 0 {
+		t.Errorf("Value = %d, want 0 (non-attack top isn't drawn)", got)
 	}
-	if h := next.Hand(); h != nil {
-		t.Errorf("Hand = %v, want nil (non-attack top, no draw)", h)
-	}
-	if d := next.Deck(); d.Size() != 2 {
-		t.Errorf("Deck size = %d, want 2 (non-attack tops aren't moved)", d.Size())
+	if got := len(summary.State.Auras()); got != 0 {
+		t.Errorf("Auras = %d, want 0 (Sigil self-destructs even when reveal whiffs)", got)
 	}
 }
 
-// TestSigilOfTheArknight_TriggerEmptyDeck: nothing to reveal → zero result, Hand stays empty.
-func TestSigilOfTheArknight_TriggerEmptyDeck(t *testing.T) {
-	play := gameengine.New()
-	play.ResolveChainStep(play.Logger(), &card.CardState{Card: cards.SigilOfTheArknightBlue{}})
-	next := gameengine.New()
-	next.CreateAura(play.Auras()[0])
-	next.FireTriggers(triggertype.StartOfTurn, nil)
-	if next.Value() != 0 {
-		t.Errorf("handler Value = %d, want 0", next.Value())
-	}
-	if h := next.Hand(); h != nil {
-		t.Errorf("Hand = %v, want nil (empty deck)", h)
+// Tests that a carried Sigil of the Arknight with an empty deck still self-destructs at
+// start of turn — the reveal is a silent no-op.
+func TestSigilOfTheArknight_StartOfTurnEmptyDeckSelfDestructs(t *testing.T) {
+	prior := gameengine.GameStateBuilder().
+		CreateAuraFromCard(cards.SigilOfTheArknightBlue{}).
+		Build()
+	d := deck.New(testutils.Hero{Intel: 4}, nil, nil)
+	hand := []card.Card{testutils.BluePitch{}}
+
+	summary := sim.EvalOneTurnForTesting(d, prior, hand)
+
+	if got := len(summary.State.Auras()); got != 0 {
+		t.Errorf("Auras = %d, want 0 (Sigil self-destructs even with empty deck)", got)
 	}
 }

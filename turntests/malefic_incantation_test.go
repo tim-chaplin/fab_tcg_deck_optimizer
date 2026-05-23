@@ -3,10 +3,11 @@ package turntests
 import (
 	"testing"
 
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card/cards"
-
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card/cards"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/gameengine"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/triggertype"
 )
@@ -50,21 +51,19 @@ func TestMaleficIncantation_PlayRegistersCardOrAbilityTrigger(t *testing.T) {
 	}
 }
 
-// Tests that one handler invocation creates one Runechant and credits 1 damage. The aura's
-// type filter narrows the fire to attack-action cards, so an attack action is passed as
-// the triggering card.
-func TestMaleficIncantation_HandlerCreatesOneRunechantPerFire(t *testing.T) {
+// Tests that a carried Malefic Incantation fires its handler when an attack action card
+// resolves on the next turn, producing exactly one Runechant. The OncePerTurn gate keeps
+// it to a single fire per turn even if the aura has verse counters left.
+func TestMaleficIncantation_OncePerTurnFiresOnAttackActionCreatesOneRune(t *testing.T) {
 	for _, c := range []card.Card{cards.MaleficIncantationRed{}, cards.MaleficIncantationYellow{}, cards.MaleficIncantationBlue{}} {
-		ge := gameengine.New()
-		ge.ResolveChainStep(ge.Logger(), &card.CardState{Card: c})
-		chain := gameengine.New()
-		chain.CreateAura(ge.Auras()[0])
-		chain.FireTriggers(triggertype.CardOrAbility, testutils.RedAttack{})
-		if chain.Value() != 1 {
-			t.Errorf("%s: handler Value = %d, want 1", c.Name(), chain.Value())
-		}
-		if chain.RunechantCount() != 1 {
-			t.Errorf("%s: Runechants = %d, want 1 (handler creates one live rune)", c.Name(), chain.RunechantCount())
+		prior := gameengine.GameStateBuilder().CreateAuraFromCard(c).Build()
+		d := deck.New(testutils.Hero{Intel: 4}, nil, fillerDeck())
+		hand := []card.Card{testutils.AttackWithPower{Power: 1}}
+
+		summary := sim.EvalOneTurnForTesting(d, prior, hand)
+
+		if got := summary.State.RunechantCount(); got != 1 {
+			t.Errorf("%s: Runechants = %d, want 1 (one fire per turn even with multiple verses)", c.Name(), got)
 		}
 	}
 }

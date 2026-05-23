@@ -8,18 +8,19 @@ package cards
 
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/triggertype"
 )
 
 func (BloodspillInvocationRed) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
-	ge.CreateHitOrDamageTakenAura(self, bloodspillInvocationAuraHandler, 3, card.TypeSet.IsAttackAction)
+	ge.CreateAura(self.Card, triggertype.Hit|triggertype.DamageTaken, bloodspillInvocationAuraHandler, 3, false, card.TypeSet.IsAttackAction)
 }
 
 func (BloodspillInvocationYellow) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
-	ge.CreateHitOrDamageTakenAura(self, bloodspillInvocationAuraHandler, 2, card.TypeSet.IsAttackAction)
+	ge.CreateAura(self.Card, triggertype.Hit|triggertype.DamageTaken, bloodspillInvocationAuraHandler, 2, false, card.TypeSet.IsAttackAction)
 }
 
 func (BloodspillInvocationBlue) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
-	ge.CreateHitOrDamageTakenAura(self, bloodspillInvocationAuraHandler, 1, card.TypeSet.IsAttackAction)
+	ge.CreateAura(self.Card, triggertype.Hit|triggertype.DamageTaken, bloodspillInvocationAuraHandler, 1, false, card.TypeSet.IsAttackAction)
 }
 
 // bloodspillInvocationAuraHandler runs when Bloodspill Invocation leaves the arena. The
