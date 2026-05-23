@@ -14,8 +14,8 @@ import (
 func TestItemTrigger_FiresAndStays(t *testing.T) {
 	ge := New()
 	fired := 0
-	ge.CreateItem(item.NewFromCard(stubCard{name: "Test Talisman"}, triggertype.Hit,
-		func(_ card.GameEngine, _ card.Logger, _ card.Item) { fired++ }, false))
+	ge.AppendItem(item.NewFromCard(stubCard{name: "Test Talisman"}, triggertype.Hit,
+		func(_ card.GameEngine, _ card.Logger, _ card.Item) { fired++ }, false, nil))
 
 	ge.FireTriggers(triggertype.Hit, stubCard{name: "attacker"})
 
@@ -31,8 +31,8 @@ func TestItemTrigger_FiresAndStays(t *testing.T) {
 func TestItemTrigger_SkipsNonMatchingEvent(t *testing.T) {
 	ge := New()
 	fired := 0
-	ge.CreateItem(item.NewFromCard(stubCard{name: "Test Talisman"}, triggertype.Hit,
-		func(_ card.GameEngine, _ card.Logger, _ card.Item) { fired++ }, false))
+	ge.AppendItem(item.NewFromCard(stubCard{name: "Test Talisman"}, triggertype.Hit,
+		func(_ card.GameEngine, _ card.Logger, _ card.Item) { fired++ }, false, nil))
 
 	ge.FireTriggers(triggertype.EndOfTurn, nil)
 
@@ -46,8 +46,8 @@ func TestItemTrigger_SkipsNonMatchingEvent(t *testing.T) {
 func TestItemTrigger_SelfDestructRemovesItemAndGraveyards(t *testing.T) {
 	ge := New()
 	src := stubCard{name: "Test Talisman"}
-	ge.CreateItem(item.NewFromCard(src, triggertype.Hit,
-		func(_ card.GameEngine, _ card.Logger, self card.Item) { self.Destroy(true) }, false))
+	ge.AppendItem(item.NewFromCard(src, triggertype.Hit,
+		func(_ card.GameEngine, _ card.Logger, self card.Item) { self.Destroy(true) }, false, nil))
 
 	ge.FireTriggers(triggertype.Hit, stubCard{name: "attacker"})
 
@@ -62,7 +62,7 @@ func TestItemTrigger_SelfDestructRemovesItemAndGraveyards(t *testing.T) {
 // Tests that a token item carries no trigger, so FireTriggers never fires or destroys it.
 func TestItemTrigger_TokenItemNeverFires(t *testing.T) {
 	ge := New()
-	ge.CreateItem(token.NewGold(1))
+	ge.AppendItem(token.NewGold(1))
 
 	ge.FireTriggers(triggertype.Hit, stubCard{name: "attacker"})
 	ge.FireTriggers(triggertype.EndOfTurn, nil)

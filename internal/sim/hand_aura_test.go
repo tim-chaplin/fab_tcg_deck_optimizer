@@ -15,7 +15,7 @@ func TestFireCardOrAbilityAuras_FiresOnceWhenGated(t *testing.T) {
 	src := FakeRedAttack{}
 	calls := 0
 	ge := gameengine.New()
-	ge.CreateAura(aura.NewFromCard(
+	ge.AppendAura(aura.NewFromCard(
 		src,
 		triggertype.CardOrAbility,
 		func(ge card.GameEngine, l card.Logger, _ card.Aura) {
@@ -52,7 +52,7 @@ func TestFireCardOrAbilityAuras_FiresOnceWhenGated(t *testing.T) {
 func TestFireCardOrAbilityAuras_GraveyardsExhaustedAura(t *testing.T) {
 	src := FakeRedAttack{}
 	ge := gameengine.New()
-	ge.CreateAura(aura.NewFromCard(
+	ge.AppendAura(aura.NewFromCard(
 		src,
 		triggertype.CardOrAbility,
 		func(ge card.GameEngine, _ card.Logger, a card.Aura) {
@@ -78,7 +78,7 @@ func TestFireCardOrAbilityAuras_PassesThroughNonCardOrAbilityTriggers(t *testing
 	src := FakeRedAttack{}
 	calls := 0
 	ge := gameengine.New()
-	ge.CreateAura(aura.NewFromCard(
+	ge.AppendAura(aura.NewFromCard(
 		src,
 		triggertype.StartOfTurn,
 		func(card.GameEngine, card.Logger, card.Aura) { calls++ },

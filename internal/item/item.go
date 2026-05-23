@@ -38,10 +38,11 @@ func NewFromToken(name string, tokenID ids.CardID, ability any, count int) *Item
 
 // NewFromCard builds a card-sourced triggered item — an in-play permanent whose handler
 // fires when an event of type tt resolves. count starts at 1; oncePerTurn caps it to one
-// fire per turn.
-func NewFromCard(source card.Card, tt triggertype.Type, fire func(card.GameEngine, card.Logger, card.Item), oncePerTurn bool) *Item {
+// fire per turn; typeFilter narrows the firing site to a card-type predicate, pass nil
+// for no filter.
+func NewFromCard(source card.Card, tt triggertype.Type, fire func(card.GameEngine, card.Logger, card.Item), oncePerTurn bool, typeFilter trigger.TypeFilter) *Item {
 	return &Item{
-		Trigger: trigger.FromCard[card.Item](source, tt, fire, oncePerTurn, nil),
+		Trigger: trigger.FromCard[card.Item](source, tt, fire, oncePerTurn, typeFilter),
 		count:   1,
 	}
 }

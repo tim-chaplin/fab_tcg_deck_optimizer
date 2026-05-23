@@ -8,6 +8,7 @@ package cards
 
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/triggertype"
 )
 
 // drawOneAtEndOfTurn is the end-of-turn TriggerHandler that fires Strategic Planning's
@@ -22,7 +23,7 @@ func strategicPlanningPlay(ge card.GameEngine, l card.Logger, self *card.CardSta
 	}); ok {
 		l.AppendPostTrigger(self.Card.DisplayName(), "Recycled an action card to bottom of deck", 0)
 	}
-	ge.AddEndOfTurnTrigger(self, drawOneAtEndOfTurn)
+	ge.AddTrigger(self, triggertype.EndOfTurn, drawOneAtEndOfTurn, nil)
 	l.AppendPostTrigger(self.Card.DisplayName(), "End-phase draw queued", 0)
 }
 

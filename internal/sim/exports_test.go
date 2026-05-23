@@ -137,7 +137,7 @@ func ProcessAurasAtStartOfTurnForTest(queued []gameengine.Aura, d *deck.Deck) (
 ) {
 	gs := gameengine.GameStateBuilder().Build()
 	for _, a := range queued {
-		gs.CreateAura(a)
+		gs.AppendAura(a)
 	}
 	preGrav := len(gs.Graveyard())
 	preHand := len(gs.Hand())

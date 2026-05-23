@@ -7,10 +7,11 @@ package cards
 
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/triggertype"
 )
 
 func (SigilOfFyendalBlue) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
-	ge.CreateStartOfTurnAura(self, selfDestructAuraHandler, 1)
+	ge.CreateAura(self, triggertype.StartOfTurn, selfDestructAuraHandler, 1, false, nil)
 }
 
 // OnLeavesArena runs the "when this leaves the arena" clause: gain 1{h}, valued 1-to-1 with

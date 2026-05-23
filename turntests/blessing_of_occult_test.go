@@ -60,7 +60,7 @@ func TestBlessingOfOccult_TriggerHandlerCreatesNRunes(t *testing.T) {
 		play := gameengine.New()
 		play.ResolveChainStep(play.Logger(), &card.CardState{Card: tc.c})
 		next := gameengine.New()
-		next.CreateAura(play.Auras()[0])
+		next.AppendAura(play.Auras()[0])
 		next.FireTriggers(triggertype.StartOfTurn, nil)
 		if next.Value() != tc.n {
 			t.Errorf("%s: handler Value = %d, want %d", tc.c.Name(), next.Value(), tc.n)

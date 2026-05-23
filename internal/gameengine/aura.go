@@ -6,30 +6,16 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/triggertype"
 )
 
-// Card-facing aura creation methods on *GameEngine. Cards call these via the
-// internal/card.GameEngine interface; the methods construct the concrete *aura.Aura directly.
+// CreateAura is the card-facing aura registration method on *GameEngine. Cards call it
+// via the internal/card.GameEngine interface; the method constructs the concrete
+// *aura.Aura and appends it via AppendAura. Source is taken from pc.Card; pass
+// triggertype bits OR'd together for multi-event auras (e.g.
+// triggertype.Hit|triggertype.DamageTaken). filter narrows the firing site to a
+// card-type predicate (nil = any); it is ignored on turn-boundary and DamageTaken
+// events that have no triggering card.
 //
-// Compile-time bridge: assigning the inline handler type to aura.Handler below makes the
-// two independently-declared func types check-equal — drift makes this file stop compiling.
-
-// CreateStartOfTurnAura registers a triggertype.StartOfTurn aura: the handler fires at
-// the start of each subsequent turn.
-func (ge *GameEngine) CreateStartOfTurnAura(pc *card.CardState, handler func(card.GameEngine, card.Logger, card.Aura), count int) {
-	ge.CreateAura(aura.NewFromCard(pc.Card, triggertype.StartOfTurn, handler, count, false, nil))
-}
-
-// CreateOncePerTurnAttackActionAura registers a triggertype.CardOrAbility aura filtered to
-// attack-action cards, with the OncePerTurn gate set — fires at most once per turn
-// regardless of how many attack actions resolve.
-func (ge *GameEngine) CreateOncePerTurnAttackActionAura(pc *card.CardState, handler func(card.GameEngine, card.Logger, card.Aura), count int) {
-	ge.CreateAura(aura.NewFromCard(pc.Card, triggertype.CardOrAbility, handler, count, true, card.TypeSet.IsAttackAction))
-}
-
-// CreateHitOrDamageTakenAura registers an aura that fires when an attack hits
-// (triggertype.Hit) or when the defense phase ends with damage unblocked
-// (triggertype.DamageTaken) — the "destroyed when you deal or are dealt damage" aura
-// shape. filter narrows the Hit side to a card-type predicate (nil = any hit); it never
-// gates DamageTaken, which has no triggering card.
-func (ge *GameEngine) CreateHitOrDamageTakenAura(pc *card.CardState, handler func(card.GameEngine, card.Logger, card.Aura), count int, filter func(card.TypeSet) bool) {
-	ge.CreateAura(aura.NewFromCard(pc.Card, triggertype.Hit|triggertype.DamageTaken, handler, count, false, filter))
+// Compile-time bridge: the inline handler type assigns cleanly to aura.Handler — drift
+// between the two declarations would break this call.
+func (ge *GameEngine) CreateAura(pc *card.CardState, tt triggertype.Type, handler func(card.GameEngine, card.Logger, card.Aura), count int, oncePerTurn bool, filter func(card.TypeSet) bool) {
+	ge.AppendAura(aura.NewFromCard(pc.Card, tt, handler, count, oncePerTurn, filter))
 }

@@ -55,7 +55,7 @@ func (b *StateBuilder) SetWeapons(w []weapon.Weapon) *StateBuilder { b.gs.weapon
 // SetArsenal installs c into the arsenal slot.
 func (b *StateBuilder) SetArsenal(c card.Card) *StateBuilder { b.gs.arsenal = c; return b }
 
-// AddAura appends auras to the carryover aura list. Unlike GameState.CreateAura it does
+// AddAura appends auras to the carryover aura list. Unlike GameState.AppendAura it does
 // not flip the auraCreated flag — builder auras are pre-turn carryover, not auras created
 // during this turn's chain; reach for SetAuraCreated to set that flag explicitly.
 func (b *StateBuilder) AddAura(auras ...Aura) *StateBuilder {

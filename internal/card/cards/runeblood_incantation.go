@@ -11,18 +11,19 @@ package cards
 
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/triggertype"
 )
 
 func (RunebloodIncantationRed) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
-	ge.CreateStartOfTurnAura(self, runebloodAuraHandler, 3)
+	ge.CreateAura(self, triggertype.StartOfTurn, runebloodAuraHandler, 3, false, nil)
 }
 
 func (RunebloodIncantationYellow) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
-	ge.CreateStartOfTurnAura(self, runebloodAuraHandler, 2)
+	ge.CreateAura(self, triggertype.StartOfTurn, runebloodAuraHandler, 2, false, nil)
 }
 
 func (RunebloodIncantationBlue) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
-	ge.CreateStartOfTurnAura(self, runebloodAuraHandler, 1)
+	ge.CreateAura(self, triggertype.StartOfTurn, runebloodAuraHandler, 1, false, nil)
 }
 
 // runebloodAuraHandler removes a verse counter each fire to create a runechant; a fire

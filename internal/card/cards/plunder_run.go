@@ -12,6 +12,7 @@ package cards
 
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/triggertype"
 )
 
 func plunderRunOnHitDraw(ge card.GameEngine, l card.Logger, t card.EphemeralTrigger) {
@@ -21,7 +22,7 @@ func plunderRunOnHitDraw(ge card.GameEngine, l card.Logger, t card.EphemeralTrig
 }
 
 func plunderRunPlay(ge card.GameEngine, l card.Logger, self *card.CardState, n int) {
-	ge.AddHitTrigger(self, plunderRunOnHitDraw, card.TypeSet.IsAttackAction)
+	ge.AddTrigger(self, triggertype.Hit, plunderRunOnHitDraw, card.TypeSet.IsAttackAction)
 	if self.FromArsenal {
 		GrantNextCardBonusAttack(ge, n, card.IsAttackAction)
 	}

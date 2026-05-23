@@ -67,7 +67,7 @@ func TestConsumingVolition_BlockableBaseSuppressesDiscard(t *testing.T) {
 // this card's own damage.
 func TestConsumingVolition_RunechantsDontRescue(t *testing.T) {
 	ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetArcaneDamageDealt(true).Build()}
-	ge.CreateAura(token.NewRunechant(1))
+	ge.AppendAura(token.NewRunechant(1))
 	c := cards.ConsumingVolitionYellow{}
 	ge.ResolveChainStep(ge.Logger(), &card.CardState{Card: c})
 	if got := ge.Value(); got != 3 {

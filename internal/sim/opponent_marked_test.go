@@ -12,7 +12,7 @@ import (
 // doesn't strip the mark, only physical attacks do.
 func TestRunechantAuraHandler_LeavesOpponentMarked(t *testing.T) {
 	ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetOpponentMarked(true).Build()}
-	ge.CreateAura(token.NewRunechant(1))
+	ge.AppendAura(token.NewRunechant(1))
 	// The Runechant aura fires on triggertype.CardOrAbility filtered to attacks, so the
 	// firing card must be an attack for its IsAttack filter to match.
 	ge.FireTriggers(triggertype.CardOrAbility, FakeRedAttack{})

@@ -80,7 +80,7 @@ func TestReekOfCorruption_BlockableBaseSuppressesDiscard(t *testing.T) {
 // this card's own damage.
 func TestReekOfCorruption_RunechantsDontRescue(t *testing.T) {
 	ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetAuraCreated(true).Build()}
-	ge.CreateAura(token.NewRunechant(1))
+	ge.AppendAura(token.NewRunechant(1))
 	c := cards.ReekOfCorruptionYellow{}
 	ge.ResolveChainStep(ge.Logger(), &card.CardState{Card: c})
 	if got := ge.Value(); got != 3 {
