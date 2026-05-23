@@ -670,9 +670,7 @@ func (ctx *sequenceContext) bestSequence(attackers []card.Card) (chainScore, *ga
 		emptyAttackers := ctx.bufs.ptrBuf[:0]
 		permState := ctx.preparePermState(emptyAttackers, 0)
 		ge := ctx.permEngine(permState)
-		if ge.HasEndOfTurnFire() {
-			ge.FireTriggers(triggertype.EndOfTurn, nil)
-		}
+		ge.FireTriggers(triggertype.EndOfTurn, nil)
 		ctx.captureWinningSeq(nil, nil)
 		ctx.promoteWinnerDeck(permState)
 		ctx.promoteWinnerState(permState)
@@ -961,9 +959,7 @@ func (ctx *sequenceContext) playSequenceWithMeta(n int) (damage int, totalCounte
 	if pool.idx < pool.n {
 		return 0, 0, 0, nil, false
 	}
-	if ge.HasEndOfTurnFire() {
-		ge.FireTriggers(triggertype.EndOfTurn, nil)
-	}
+	ge.FireTriggers(triggertype.EndOfTurn, nil)
 	return state.Value(), pendingTotalCountersFromState(state), pool.remaining, state, true
 }
 

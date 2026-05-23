@@ -367,31 +367,6 @@ func panicIfOptViolatesMultiset(in, top, bottom []card.Card) {
 
 // === Trigger and aura dispatch ===
 
-// HasEndOfTurnFire reports whether anything subscribed to triggertype.EndOfTurn —
-// hero, Aura, Trigger, or Item. Lets the chain runner skip the end-of-turn walk when
-// nothing would fire.
-func (ge *GameEngine) HasEndOfTurnFire() bool {
-	if ge.hero != nil && ge.hero.TriggerType()&triggertype.EndOfTurn != 0 {
-		return true
-	}
-	for _, a := range ge.auras {
-		if a.TriggerType()&triggertype.EndOfTurn != 0 {
-			return true
-		}
-	}
-	for _, t := range ge.triggers {
-		if t.TriggerType()&triggertype.EndOfTurn != 0 {
-			return true
-		}
-	}
-	for _, it := range ge.items {
-		if it.TriggerType()&triggertype.EndOfTurn != 0 {
-			return true
-		}
-	}
-	return false
-}
-
 // FireTriggers fires the hero plus every Aura, EphemeralTrigger, and Item registered for
 // trigger type t. It is the single dispatch point for every triggertype.Type lifecycle
 // event.
