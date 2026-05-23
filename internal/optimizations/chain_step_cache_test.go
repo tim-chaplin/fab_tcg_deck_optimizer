@@ -9,10 +9,10 @@ import (
 )
 
 // Tests that WarmChainStepCache fills both the (id, false) and (id, true) cells per card
-// so the runtime hot path is pure reads.
+// so the runtime hot path is pure reads. Cards return ids.InvalidCard so both rows land in
+// slot 0 (in-hand) and slot 1<<16 (from-arsenal); the test asserts both rows are populated.
 func TestWarmChainStepCache_PopulatesBothFromArsenalRows(t *testing.T) {
-	c := testutils.NewStubCard("Test").
-		WithID(testutils.FakeRedAttack).
+	c := testutils.NewFakeCard("Test").
 		WithTypes(card.NewTypeSet(card.TypeAttack, card.TypeAction))
 	chainStepCache[chainStepCacheIndex(c.ID(), false)].Store(nil)
 	chainStepCache[chainStepCacheIndex(c.ID(), true)].Store(nil)
@@ -37,8 +37,10 @@ func TestWarmChainStepCache_PopulatesBothFromArsenalRows(t *testing.T) {
 }
 
 // TestWarmChainStepCache_SkipsNil: the registry slice has nil at index 0 (Invalid).
-// Passing it through must not panic and must leave that slot untouched.
+// Passing it through must not panic and must leave that slot untouched. Slot 0 is shared
+// with every InvalidCard fake so we clear it first to isolate the assertion.
 func TestWarmChainStepCache_SkipsNil(t *testing.T) {
+	chainStepCache[0].Store(nil)
 	WarmChainStepCache([]card.Card{nil})
 	if got := chainStepCache[0].Load(); got != nil {
 		t.Errorf("nil entry should leave slot 0 empty, got %q", *got)
@@ -49,8 +51,7 @@ func TestWarmChainStepCache_SkipsNil(t *testing.T) {
 // entry point. A card never seen by WarmChainStepCache (test fakes, ad-hoc stubs) must
 // still produce the right string and populate the cache so the next call is a hit.
 func TestChainStepText_LazyBackfillForUnregisteredCards(t *testing.T) {
-	c := testutils.NewStubCard("Unregistered").
-		WithID(testutils.FakeHugeAttack).
+	c := testutils.NewFakeCard("Unregistered").
 		WithTypes(card.NewTypeSet(card.TypeAction))
 	idx := chainStepCacheIndex(c.ID(), false)
 	chainStepCache[idx].Store(nil)
@@ -84,7 +85,7 @@ func TestBuildChainStepText_VerbSelection(t *testing.T) {
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
-			c := testutils.NewStubCard("X").WithTypes(tc.types)
+			c := testutils.NewFakeCard("X").WithTypes(tc.types)
 			pc := &card.CardState{Card: c, FromArsenal: tc.fromArsenal}
 			if got := bareChainStepText(pc); got != tc.want {
 				t.Errorf("bareChainStepText = %q, want %q", got, tc.want)

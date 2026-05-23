@@ -165,10 +165,11 @@ different from cards (they're never played, drawn from the deck, pitched, etc.).
 should really be treated as a completely separate type. However, parts of the sim currently
 treat Weapons as Cards, so that will have to be carefully disentangled.
 
-`internal/registry/ids/weapon_ids.go` aliases `WeaponID = CardID` and anchors the weapon
-constants at `FakeHugeAttack + iota + 1` so they don't collide with card / fake IDs in the
-shared cache slots. Ideally weapons would have their own `WeaponID uint16` type starting at
-1, separate from `CardID`. Blocked by depth: every weapon swing flows through the same
+`internal/ids/weapon_ids.go` aliases `WeaponID = CardID` and anchors the weapon constants
+past the last real card so they don't collide in the shared cache slots. Test fakes return
+`InvalidCard` / `InvalidWeapon` and rely on the per-ID caches' Invalid-slot bypass.
+Ideally weapons would have their own `WeaponID uint16` type starting at 1, separate from
+`CardID`. Blocked by depth: every weapon swing flows through the same
 chain runner as deck cards (`bestSequence` permutes one `[]card.Card` slice; weapons rely
 on `*card.CardState` for `BonusAttack` / `GrantedGoAgain` and call helpers like
 `s.ApplyAndLogEffectiveAttack(self)` / `s.ApplyAndLogRiderOnPlay(self, …)` that read

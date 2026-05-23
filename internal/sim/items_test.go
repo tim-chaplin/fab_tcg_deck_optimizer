@@ -4,17 +4,20 @@ import (
 	"testing"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card/cards"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/gameengine"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/hero/heroes"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/item"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/token"
 )
 
 // Tests that the eval cache fingerprints priorItems so calls with different gold counts
-// don't collide.
+// don't collide. Uses real cards / hero (not testutils fakes) so the cache key path actually
+// runs — the cache bails out on InvalidCard / InvalidHero inputs.
 func TestEvalCache_PriorItemsKeyedDistinctly(t *testing.T) {
-	hand := []card.Card{FakeRedAttack{}}
+	hand := []card.Card{cards.AetherSlashRed{}}
 	ev := NewEvaluator()
-	h := FakeHero{Intel: 4}
+	h := heroes.Viserai
 	stateWithItems := func(items []*item.Item) *gameengine.GameState {
 		b := gameengine.GameStateBuilder().SetHero(h)
 		for _, it := range items {

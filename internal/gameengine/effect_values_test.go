@@ -55,9 +55,9 @@ func TestLikelyToHit_FoldsEffectiveAttackAndDominate(t *testing.T) {
 		{"printed 4, +1 bonus, granted Dominate -> still in 1/4/7 OR 5+", 4, 1, true, false, true},
 	}
 	for _, tc := range cases {
-		var c card.Card = stubCard{name: tc.name, attack: tc.printed}
+		var c card.Card = fakeCard{name: tc.name, attack: tc.printed}
 		if tc.printedDom {
-			c = dominatingStub{stubCard{name: tc.name, attack: tc.printed}}
+			c = dominatingFake{fakeCard{name: tc.name, attack: tc.printed}}
 		}
 		p := &card.CardState{Card: c, BonusAttack: tc.bonusAttack, GrantedDominate: tc.grantedDom}
 		if got := LikelyToHit(p); got != tc.want {

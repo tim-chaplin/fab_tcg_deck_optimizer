@@ -10,29 +10,29 @@ import (
 // but the project prefers no testutils dependency at all so internal/card / internal/token / internal/trigger
 // tests (which would cycle through testutils) stay consistent with internal/gameengine.
 
-// stubCard is a minimal card.Card with configurable id and attack — exercises the fields
+// fakeCard is a minimal card.Card with configurable id and attack — exercises the fields
 // each test reads, zero values for the rest. The zero-value id is ids.InvalidCard.
-type stubCard struct {
+type fakeCard struct {
 	name   string
 	attack int
 	id     ids.CardID
 }
 
-func (c stubCard) ID() ids.CardID                                   { return c.id }
-func (c stubCard) Name() string                                     { return c.name }
-func (c stubCard) DisplayName() string                              { return c.name }
-func (stubCard) Cost(card.GameEngine) int                           { return 0 }
-func (stubCard) Pitch() int                                         { return 0 }
-func (c stubCard) Attack() int                                      { return c.attack }
-func (stubCard) Defense() int                                       { return 0 }
-func (stubCard) Types(card.GameEngine) card.TypeSet                 { return 0 }
-func (stubCard) GoAgain(card.GameEngine) bool                       { return false }
-func (stubCard) Play(card.GameEngine, card.Logger, *card.CardState) {}
+func (c fakeCard) ID() ids.CardID                                   { return c.id }
+func (c fakeCard) Name() string                                     { return c.name }
+func (c fakeCard) DisplayName() string                              { return c.name }
+func (fakeCard) Cost(card.GameEngine) int                           { return 0 }
+func (fakeCard) Pitch() int                                         { return 0 }
+func (c fakeCard) Attack() int                                      { return c.attack }
+func (fakeCard) Defense() int                                       { return 0 }
+func (fakeCard) Types(card.GameEngine) card.TypeSet                 { return 0 }
+func (fakeCard) GoAgain(card.GameEngine) bool                       { return false }
+func (fakeCard) Play(card.GameEngine, card.Logger, *card.CardState) {}
 
-// dominatingStub is a stubCard plus the card.Dominator marker — exercises the printed-
+// dominatingFake is a fakeCard plus the card.Dominator marker — exercises the printed-
 // Dominate branch of LikelyToHit.
-type dominatingStub struct {
-	stubCard
+type dominatingFake struct {
+	fakeCard
 }
 
-func (dominatingStub) Dominate() {}
+func (dominatingFake) Dominate() {}

@@ -1,5 +1,5 @@
-// Test-only Weapon and weapon-ability stubs. The card pool currently lacks Club and Hammer
-// printings, but ARs like Pummel mode 0 gate on those types — these stubs let turntests
+// Test-only Weapon and weapon-ability fakes. The card pool currently lacks Club and Hammer
+// printings, but ARs like Pummel mode 0 gate on those types — these fakes let turntests
 // pin the predicate and the buff plumbing end-to-end without waiting on a real printing.
 
 package testutils
@@ -14,7 +14,7 @@ var clubWeaponTypes = card.NewTypeSet(card.TypeGeneric, card.TypeWeapon, card.Ty
 // ClubWeapon is a 1-handed Club weapon: swing cost 0, attack 1, no on-hit rider.
 type ClubWeapon struct{}
 
-func (ClubWeapon) ID() ids.WeaponID    { return FakeClubWeapon }
+func (ClubWeapon) ID() ids.WeaponID    { return ids.InvalidWeapon }
 func (ClubWeapon) Name() string        { return "test.ClubWeapon" }
 func (ClubWeapon) DisplayName() string { return "test.ClubWeapon" }
 func (ClubWeapon) Types() card.TypeSet { return clubWeaponTypes }
@@ -29,7 +29,7 @@ var clubWeaponAbilityTypes = card.NewTypeSet(card.TypeGeneric, card.TypeWeapon, 
 // ClubWeaponAbility is the activated-ability Card for ClubWeapon: cost 0, power 1, no rider.
 type ClubWeaponAbility struct{}
 
-func (ClubWeaponAbility) ID() ids.CardID                     { return FakeClubWeaponAbility }
+func (ClubWeaponAbility) ID() ids.CardID                     { return ids.InvalidCard }
 func (ClubWeaponAbility) Name() string                       { return "test.ClubWeapon" }
 func (ClubWeaponAbility) DisplayName() string                { return "test.ClubWeapon" }
 func (ClubWeaponAbility) Cost(card.GameEngine) int           { return 0 }
@@ -48,7 +48,7 @@ var hammerWeaponAbilityTypes = card.NewTypeSet(card.TypeGeneric, card.TypeWeapon
 // weapon printing to back it.
 type HammerWeaponAbility struct{}
 
-func (HammerWeaponAbility) ID() ids.CardID                     { return FakeHammerWeaponAbility }
+func (HammerWeaponAbility) ID() ids.CardID                     { return ids.InvalidCard }
 func (HammerWeaponAbility) Name() string                       { return "test.HammerWeapon" }
 func (HammerWeaponAbility) DisplayName() string                { return "test.HammerWeapon" }
 func (HammerWeaponAbility) Cost(card.GameEngine) int           { return 0 }

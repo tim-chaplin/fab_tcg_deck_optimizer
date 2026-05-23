@@ -8,6 +8,7 @@ import (
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/gameengine"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 )
 
 // captureStdout redirects os.Stdout into a pipe for the duration of fn and returns whatever
@@ -36,12 +37,12 @@ func captureStdout(t *testing.T, fn func()) string {
 // Tests that gameengine.OptDebug=true makes Opt print a one-line summary of the outcome to stdout,
 // and gameengine.OptDebug=false stays quiet.
 func TestOptDebug_PrintsOnlyWhenSet(t *testing.T) {
-	a := NewFakeCard("a")
-	b := NewFakeCard("b")
+	a := testutils.NewFakeCard("a")
+	b := testutils.NewFakeCard("b")
 	prev := gameengine.OptDebug
 	defer func() { gameengine.OptDebug = prev }()
 
-	withOptHero(t, FakeHero{
+	withOptHero(t, testutils.Hero{
 		OptStrategy: func(cards []card.Card) (top, bottom []card.Card) {
 			return []card.Card{cards[1]}, []card.Card{cards[0]} // swap: bottom a, keep b on top
 		},

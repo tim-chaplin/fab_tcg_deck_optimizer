@@ -1,10 +1,10 @@
-// Package testutils provides Card stubs and fake card implementations shared by tests in
-// multiple packages (card, cards, deck, hand, sim). The configurable Card stub framework
-// (Card, GenericAttack, RunebladeAttack, …) builds CardsRemaining / CardsPlayed / Pitched
-// lists with specific type, cost, power, and pitch shapes so predicate / lookahead tests
-// have predictable inputs. The fixed-stat-line fakes (RedAttack, BlueAttack, YellowAttack,
-// …) are deliberately simple attack actions tests use as deck contents when partition /
-// ordering assertions need known optimal values.
+// Package testutils provides fake Card and Hero implementations shared by tests in
+// multiple packages (card, cards, deck, hand, sim). The configurable fakes (Card,
+// FakeCard, GenericAttack, RunebladeAttack, …) build CardsRemaining / CardsPlayed /
+// Pitched lists with specific type, cost, power, and pitch shapes so predicate /
+// lookahead tests have predictable inputs. The fixed-stat-line fakes (RedAttack,
+// BlueAttack, YellowAttack, …) are deliberately simple attack actions tests use as deck
+// contents when partition / ordering assertions need known optimal values.
 package testutils
 
 import (
@@ -28,7 +28,7 @@ func (s Card) Name() string        { return s.name }
 func (s Card) DisplayName() string { return s.name }
 
 // WithName returns a copy of s with its display name overridden. Lets cross-package tests
-// distinguish multiple Card stubs in log assertions even though `name` is unexported.
+// distinguish multiple Card fakes in log assertions even though `name` is unexported.
 func (s Card) WithName(name string) Card { s.name = name; return s }
 
 func (s Card) Cost(card.GameEngine) int                         { return s.cost }
@@ -39,7 +39,7 @@ func (s Card) Types(card.GameEngine) card.TypeSet               { return s.types
 func (s Card) GoAgain(card.GameEngine) bool                     { return false }
 func (Card) Play(card.GameEngine, card.Logger, *card.CardState) {}
 
-// GenericAttack returns a Generic Action - Attack stub with the given cost and base power.
+// GenericAttack returns a Generic Action - Attack fake with the given cost and base power.
 // Pitch defaults to 1; override via GenericAttackPitch if a test cares.
 func GenericAttack(cost, power int) Card {
 	return Card{
@@ -59,7 +59,7 @@ func GenericAttackPitch(cost, power, pitch int) Card {
 	return s
 }
 
-// GenericAction returns a Generic Action (non-attack) stub for attack-typed-lookahead
+// GenericAction returns a Generic Action (non-attack) fake for attack-typed-lookahead
 // rejection cases.
 func GenericAction() Card {
 	return Card{
@@ -68,7 +68,7 @@ func GenericAction() Card {
 	}
 }
 
-// Shared stub Cards. Each is a zero-value struct with a fixed type line; tests mix and match to
+// Shared fake Cards. Each is a zero-value struct with a fixed type line; tests mix and match to
 // exercise lookahead / predicate logic on card effects.
 
 // RunebladeAttack is a minimal Runeblade Action-Attack card — satisfies "next Runeblade
@@ -178,7 +178,7 @@ var genericAttackTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card
 // resource without the partition having to repurpose the card as an attacker or blocker.
 type RedPitch struct{}
 
-func (RedPitch) ID() ids.CardID           { return FakeRedPitch }
+func (RedPitch) ID() ids.CardID           { return ids.InvalidCard }
 func (RedPitch) Name() string             { return "cardtest.RedPitch" }
 func (RedPitch) DisplayName() string      { return "cardtest.RedPitch [R]" }
 func (RedPitch) Cost(card.GameEngine) int { return 0 }
@@ -200,7 +200,7 @@ func (RedPitch) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {}
 // block-irrelevant.
 type BluePitch struct{}
 
-func (BluePitch) ID() ids.CardID           { return FakeBluePitch }
+func (BluePitch) ID() ids.CardID           { return ids.InvalidCard }
 func (BluePitch) Name() string             { return "cardtest.BluePitch" }
 func (BluePitch) DisplayName() string      { return "cardtest.BluePitch [B]" }
 func (BluePitch) Cost(card.GameEngine) int { return 0 }
@@ -216,7 +216,7 @@ func (BluePitch) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
 // BlueAttack is a generic blue attack action: pitches 3, defends 3, attacks 1, costs 1.
 type BlueAttack struct{}
 
-func (BlueAttack) ID() ids.CardID                     { return FakeBlueAttack }
+func (BlueAttack) ID() ids.CardID                     { return ids.InvalidCard }
 func (BlueAttack) Name() string                       { return "cardtest.BlueAttack" }
 func (BlueAttack) DisplayName() string                { return "cardtest.BlueAttack [B]" }
 func (BlueAttack) Cost(card.GameEngine) int           { return 1 }
@@ -231,7 +231,7 @@ func (BlueAttack) Play(ge card.GameEngine, l card.Logger, self *card.CardState) 
 // RedAttack is a generic red attack action: pitches 1, defends 1, attacks 3, costs 1.
 type RedAttack struct{}
 
-func (RedAttack) ID() ids.CardID                     { return FakeRedAttack }
+func (RedAttack) ID() ids.CardID                     { return ids.InvalidCard }
 func (RedAttack) Name() string                       { return "cardtest.RedAttack" }
 func (RedAttack) DisplayName() string                { return "cardtest.RedAttack [R]" }
 func (RedAttack) Cost(card.GameEngine) int           { return 1 }
@@ -246,7 +246,7 @@ func (RedAttack) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
 // YellowAttack is a generic yellow attack action: pitches 2, defends 2, attacks 2, costs 1.
 type YellowAttack struct{}
 
-func (YellowAttack) ID() ids.CardID                     { return FakeYellowAttack }
+func (YellowAttack) ID() ids.CardID                     { return ids.InvalidCard }
 func (YellowAttack) Name() string                       { return "cardtest.YellowAttack" }
 func (YellowAttack) DisplayName() string                { return "cardtest.YellowAttack [Y]" }
 func (YellowAttack) Cost(card.GameEngine) int           { return 1 }
@@ -268,7 +268,7 @@ var genericActionTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction)
 // onto a drawn-later attack.
 type CostlyDraw struct{}
 
-func (CostlyDraw) ID() ids.CardID                     { return FakeCostlyDraw }
+func (CostlyDraw) ID() ids.CardID                     { return ids.InvalidCard }
 func (CostlyDraw) Name() string                       { return "cardtest.CostlyDraw" }
 func (CostlyDraw) DisplayName() string                { return "cardtest.CostlyDraw [R]" }
 func (CostlyDraw) Cost(card.GameEngine) int           { return 1 }
@@ -285,7 +285,7 @@ func (CostlyDraw) Play(ge card.GameEngine, l card.Logger, self *card.CardState) 
 // the mid-turn-draw determinism test weighs against CostlyDraw.
 type CostlyAttack struct{}
 
-func (CostlyAttack) ID() ids.CardID                     { return FakeCostlyAttack }
+func (CostlyAttack) ID() ids.CardID                     { return ids.InvalidCard }
 func (CostlyAttack) Name() string                       { return "cardtest.CostlyAttack" }
 func (CostlyAttack) DisplayName() string                { return "cardtest.CostlyAttack [R]" }
 func (CostlyAttack) Cost(card.GameEngine) int           { return 1 }
@@ -303,7 +303,7 @@ var genericDefenseReactionTypes = card.NewTypeSet(card.TypeGeneric, card.TypeDef
 // can pitch it (contributing 1 resource) to fund another 1-cost card without also playing it.
 type PitchOneDR struct{}
 
-func (PitchOneDR) ID() ids.CardID                     { return FakePitchOneDR }
+func (PitchOneDR) ID() ids.CardID                     { return ids.InvalidCard }
 func (PitchOneDR) Name() string                       { return "cardtest.PitchOneDR" }
 func (PitchOneDR) DisplayName() string                { return "cardtest.PitchOneDR [R]" }
 func (PitchOneDR) Cost(card.GameEngine) int           { return 0 }
@@ -323,7 +323,7 @@ type HugeAttack struct{}
 
 const hugeAttackDamage = 1_000_000
 
-func (HugeAttack) ID() ids.CardID                     { return FakeHugeAttack }
+func (HugeAttack) ID() ids.CardID                     { return ids.InvalidCard }
 func (HugeAttack) Name() string                       { return "cardtest.HugeAttack" }
 func (HugeAttack) DisplayName() string                { return "cardtest.HugeAttack [R]" }
 func (HugeAttack) Cost(card.GameEngine) int           { return 0 }
@@ -335,13 +335,12 @@ func (HugeAttack) GoAgain(card.GameEngine) bool       { return false }
 func (HugeAttack) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
 }
 
-// StubCard is a minimal card.Card. Tests construct it via NewStubCard plus the With…
+// FakeCard is a minimal card.Card. Tests construct it via NewFakeCard plus the With…
 // builder methods so call sites only set the fields they care about — every other field
-// returns a zero value through the Card interface methods. ID defaults to InvalidCard;
-// tests that reach into ID-keyed caches (cardMetaCache, chainStepCache) should attach a
-// distinct ID via WithID(testutils.FakeX) to avoid sharing slot 0.
-type StubCard struct {
-	id      ids.CardID
+// returns a zero value through the Card interface methods. ID() returns ids.InvalidCard;
+// the per-ID caches (cardMetaCache, chainStepCache) bypass / share slot 0 for InvalidCard
+// so multiple FakeCards in one test do not interfere.
+type FakeCard struct {
 	name    string
 	types   card.TypeSet
 	attack  int
@@ -350,72 +349,69 @@ type StubCard struct {
 	goAgain bool
 }
 
-// NewStubCard returns a StubCard with just a name set. Use the With… mutators below to
+// NewFakeCard returns a FakeCard with just a name set. Use the With… mutators below to
 // attach additional fields.
-func NewStubCard(name string) StubCard { return StubCard{name: name} }
-
-// WithID returns a copy of c with id set.
-func (c StubCard) WithID(id ids.CardID) StubCard { c.id = id; return c }
+func NewFakeCard(name string) FakeCard { return FakeCard{name: name} }
 
 // WithTypes returns a copy of c with types set.
-func (c StubCard) WithTypes(t card.TypeSet) StubCard { c.types = t; return c }
+func (c FakeCard) WithTypes(t card.TypeSet) FakeCard { c.types = t; return c }
 
 // WithAttack returns a copy of c with the printed attack value set.
-func (c StubCard) WithAttack(a int) StubCard { c.attack = a; return c }
+func (c FakeCard) WithAttack(a int) FakeCard { c.attack = a; return c }
 
 // WithPitch returns a copy of c with the printed pitch value set (1=red, 2=yellow, 3=blue).
-func (c StubCard) WithPitch(p int) StubCard { c.pitch = p; return c }
+func (c FakeCard) WithPitch(p int) FakeCard { c.pitch = p; return c }
 
 // WithDefense returns a copy of c with the printed defense value set.
-func (c StubCard) WithDefense(d int) StubCard { c.defense = d; return c }
+func (c FakeCard) WithDefense(d int) FakeCard { c.defense = d; return c }
 
 // WithGoAgain returns a copy of c with goAgain=true.
-func (c StubCard) WithGoAgain() StubCard { c.goAgain = true; return c }
+func (c FakeCard) WithGoAgain() FakeCard { c.goAgain = true; return c }
 
-func (c StubCard) ID() ids.CardID                                   { return c.id }
-func (c StubCard) Name() string                                     { return c.name }
-func (c StubCard) DisplayName() string                              { return c.name }
-func (StubCard) Cost(card.GameEngine) int                           { return 0 }
-func (c StubCard) Pitch() int                                       { return c.pitch }
-func (c StubCard) Attack() int                                      { return c.attack }
-func (c StubCard) Defense() int                                     { return c.defense }
-func (c StubCard) Types(card.GameEngine) card.TypeSet               { return c.types }
-func (c StubCard) GoAgain(card.GameEngine) bool                     { return c.goAgain }
-func (StubCard) Play(card.GameEngine, card.Logger, *card.CardState) {}
+func (c FakeCard) ID() ids.CardID                                   { return ids.InvalidCard }
+func (c FakeCard) Name() string                                     { return c.name }
+func (c FakeCard) DisplayName() string                              { return c.name }
+func (FakeCard) Cost(card.GameEngine) int                           { return 0 }
+func (c FakeCard) Pitch() int                                       { return c.pitch }
+func (c FakeCard) Attack() int                                      { return c.attack }
+func (c FakeCard) Defense() int                                     { return c.defense }
+func (c FakeCard) Types(card.GameEngine) card.TypeSet               { return c.types }
+func (c FakeCard) GoAgain(card.GameEngine) bool                     { return c.goAgain }
+func (FakeCard) Play(card.GameEngine, card.Logger, *card.CardState) {}
 
-// InstantStub is a 0-cost, 0-power Generic Action - Instant card with no Go again.
+// FakeInstant is a 0-cost, 0-power Generic Action - Instant card with no Go again.
 // Tests chain-runner behaviour around the Action Point debit: an Instant after a
 // non-Go-again card should still resolve because Instants cost 0 AP.
-type InstantStub struct{}
+type FakeInstant struct{}
 
-func (InstantStub) ID() ids.CardID           { return FakeInstant }
-func (InstantStub) Name() string             { return "InstantStub" }
-func (InstantStub) DisplayName() string      { return "InstantStub" }
-func (InstantStub) Cost(card.GameEngine) int { return 0 }
-func (InstantStub) Pitch() int               { return 0 }
-func (InstantStub) Attack() int              { return 0 }
-func (InstantStub) Defense() int             { return 0 }
-func (InstantStub) Types(card.GameEngine) card.TypeSet {
+func (FakeInstant) ID() ids.CardID           { return ids.InvalidCard }
+func (FakeInstant) Name() string             { return "FakeInstant" }
+func (FakeInstant) DisplayName() string      { return "FakeInstant" }
+func (FakeInstant) Cost(card.GameEngine) int { return 0 }
+func (FakeInstant) Pitch() int               { return 0 }
+func (FakeInstant) Attack() int              { return 0 }
+func (FakeInstant) Defense() int             { return 0 }
+func (FakeInstant) Types(card.GameEngine) card.TypeSet {
 	return card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeInstant)
 }
-func (InstantStub) GoAgain(card.GameEngine) bool                                 { return false }
-func (InstantStub) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {}
+func (FakeInstant) GoAgain(card.GameEngine) bool                                 { return false }
+func (FakeInstant) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {}
 
-// NoGoAgainAttackStub is a 0-cost, 1-power Generic Action - Attack card with no Go again.
+// FakeNoGoAgainAttack is a 0-cost, 1-power Generic Action - Attack card with no Go again.
 // Tests chain-runner behaviour after the AP pool runs out: a non-Instant follow-up
 // should be rejected.
-type NoGoAgainAttackStub struct{}
+type FakeNoGoAgainAttack struct{}
 
-func (NoGoAgainAttackStub) ID() ids.CardID                     { return FakeNoGoAgainAttack }
-func (NoGoAgainAttackStub) Name() string                       { return "NoGoAgainAttack" }
-func (NoGoAgainAttackStub) DisplayName() string                { return "NoGoAgainAttack" }
-func (NoGoAgainAttackStub) Cost(card.GameEngine) int           { return 0 }
-func (NoGoAgainAttackStub) Pitch() int                         { return 0 }
-func (NoGoAgainAttackStub) Attack() int                        { return 1 }
-func (NoGoAgainAttackStub) Defense() int                       { return 0 }
-func (NoGoAgainAttackStub) Types(card.GameEngine) card.TypeSet { return genericAttackTypes }
-func (NoGoAgainAttackStub) GoAgain(card.GameEngine) bool       { return false }
-func (NoGoAgainAttackStub) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
+func (FakeNoGoAgainAttack) ID() ids.CardID                     { return ids.InvalidCard }
+func (FakeNoGoAgainAttack) Name() string                       { return "FakeNoGoAgainAttack" }
+func (FakeNoGoAgainAttack) DisplayName() string                { return "FakeNoGoAgainAttack" }
+func (FakeNoGoAgainAttack) Cost(card.GameEngine) int           { return 0 }
+func (FakeNoGoAgainAttack) Pitch() int                         { return 0 }
+func (FakeNoGoAgainAttack) Attack() int                        { return 1 }
+func (FakeNoGoAgainAttack) Defense() int                       { return 0 }
+func (FakeNoGoAgainAttack) Types(card.GameEngine) card.TypeSet { return genericAttackTypes }
+func (FakeNoGoAgainAttack) GoAgain(card.GameEngine) bool       { return false }
+func (FakeNoGoAgainAttack) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
 }
 
 // GrantAll is a Runeblade attack-action card that flips GrantedGoAgain=true on every

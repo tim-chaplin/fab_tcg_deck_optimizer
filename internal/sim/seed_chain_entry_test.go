@@ -8,20 +8,20 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/ids"
 )
 
-// stubCardForSeed is a minimal Card implementation used solely to seed a CardState — its
+// fakeCardForSeed is a minimal Card implementation used solely to seed a CardState — its
 // behavior is never exercised; we only need a non-nil Card value the reset can write.
-type stubCardForSeed struct{}
+type fakeCardForSeed struct{}
 
-func (stubCardForSeed) ID() ids.CardID                                     { return ids.InvalidCard }
-func (stubCardForSeed) Name() string                                       { return "stubCardForSeed" }
-func (stubCardForSeed) DisplayName() string                                { return "stubCardForSeed" }
-func (stubCardForSeed) Cost(card.GameEngine) int                           { return 0 }
-func (stubCardForSeed) Pitch() int                                         { return 0 }
-func (stubCardForSeed) Attack() int                                        { return 0 }
-func (stubCardForSeed) Defense() int                                       { return 0 }
-func (stubCardForSeed) Types(card.GameEngine) card.TypeSet                 { return 0 }
-func (stubCardForSeed) GoAgain(card.GameEngine) bool                       { return false }
-func (stubCardForSeed) Play(card.GameEngine, card.Logger, *card.CardState) {}
+func (fakeCardForSeed) ID() ids.CardID                                     { return ids.InvalidCard }
+func (fakeCardForSeed) Name() string                                       { return "fakeCardForSeed" }
+func (fakeCardForSeed) DisplayName() string                                { return "fakeCardForSeed" }
+func (fakeCardForSeed) Cost(card.GameEngine) int                           { return 0 }
+func (fakeCardForSeed) Pitch() int                                         { return 0 }
+func (fakeCardForSeed) Attack() int                                        { return 0 }
+func (fakeCardForSeed) Defense() int                                       { return 0 }
+func (fakeCardForSeed) Types(card.GameEngine) card.TypeSet                 { return 0 }
+func (fakeCardForSeed) GoAgain(card.GameEngine) bool                       { return false }
+func (fakeCardForSeed) Play(card.GameEngine, card.Logger, *card.CardState) {}
 
 // seedChainEntryAllowlist names the CardState fields seedChainEntry binds to per-permutation
 // values rather than zeroing — i.e. fields that legitimately carry information across a
@@ -53,7 +53,7 @@ var seedChainEntryAllowlist = map[string]bool{
 // or added to the allowlist with a comment explaining why.
 func TestSeedChainEntry_ResetsEveryPerPermutationField(t *testing.T) {
 	pc := card.CardState{
-		Card:             stubCardForSeed{},
+		Card:             fakeCardForSeed{},
 		GrantedGoAgain:   true,
 		GrantedDominate:  true,
 		GrantedOverpower: true,
@@ -61,11 +61,11 @@ func TestSeedChainEntry_ResetsEveryPerPermutationField(t *testing.T) {
 		Mode:             5,
 		BonusAttack:      99,
 		BonusDefense:     99,
-		PitchedToPlay:    []card.Card{stubCardForSeed{}},
+		PitchedToPlay:    []card.Card{fakeCardForSeed{}},
 		OnHit:            []card.OnHitHandler{{N: 1}},
 	}
 	ctx := &sequenceContext{arsenalInIdx: -1}
-	ctx.seedChainEntry(&pc, stubCardForSeed{}, 0)
+	ctx.seedChainEntry(&pc, fakeCardForSeed{}, 0)
 
 	v := reflect.ValueOf(pc)
 	tp := v.Type()

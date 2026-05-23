@@ -9,7 +9,7 @@ import (
 
 // Tests that Thrust's predicate accepts a sword attack action card.
 func TestThrust_AcceptsSwordAttackAction(t *testing.T) {
-	swordAction := testutils.NewStubCard("SwordAction").
+	swordAction := testutils.NewFakeCard("SwordAction").
 		WithTypes(card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack, card.TypeSword))
 	if !(ThrustRed{}).ARTargetAllowed(nil, swordAction, 0) {
 		t.Error("sword action card should be a legal target")
@@ -18,7 +18,7 @@ func TestThrust_AcceptsSwordAttackAction(t *testing.T) {
 
 // Tests that Thrust's predicate accepts a Sword weapon swing.
 func TestThrust_AcceptsSwordWeapon(t *testing.T) {
-	swordSwing := testutils.NewStubCard("SwordWeaponAbility").
+	swordSwing := testutils.NewFakeCard("SwordWeaponAbility").
 		WithTypes(card.NewTypeSet(card.TypeGeneric, card.TypeWeapon, card.TypeSword, card.TypeAttack))
 	if !(ThrustRed{}).ARTargetAllowed(nil, swordSwing, 0) {
 		t.Error("sword weapon swing should be a legal target")

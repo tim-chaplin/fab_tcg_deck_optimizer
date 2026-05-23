@@ -7,19 +7,20 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/gameengine"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 )
 
 // withOptHero is a no-op stub kept for source compatibility — tests now set the hero on
 // each engine directly. Retained so the per-test call shape doesn't need updating.
-func withOptHero(t *testing.T, h FakeHero, fn func()) {
+func withOptHero(t *testing.T, h testutils.Hero, fn func()) {
 	t.Helper()
 	currentOptTestHero = h
-	defer func() { currentOptTestHero = FakeHero{} }()
+	defer func() { currentOptTestHero = testutils.Hero{} }()
 	fn()
 }
 
 // currentOptTestHero is the hero installed on each engine built inside withOptHero.
-var currentOptTestHero FakeHero
+var currentOptTestHero testutils.Hero
 
 // newOptTestEngine builds a *gameengine.GameEngine with the deck seeded and the
 // withOptHero-installed currentOptTestHero attached.
@@ -35,11 +36,11 @@ func newOptTestEngine(deckCards, graveyard []card.Card) *gameengine.GameEngine {
 // Tests that Opt with the default passthrough handler keeps the deck order unchanged —
 // every revealed card returns to the top in input order, none move to the bottom.
 func TestTurnStateOpt_PassthroughKeepsDeckOrder(t *testing.T) {
-	a := NewFakeCard("a")
-	b := NewFakeCard("b")
-	c := NewFakeCard("c")
-	d := NewFakeCard("d")
-	withOptHero(t, FakeHero{Intel: 4}, func() {
+	a := testutils.NewFakeCard("a")
+	b := testutils.NewFakeCard("b")
+	c := testutils.NewFakeCard("c")
+	d := testutils.NewFakeCard("d")
+	withOptHero(t, testutils.Hero{Intel: 4}, func() {
 		s := newOptTestEngine([]card.Card{a, b, c, d}, nil)
 		s.Opt(s.Logger(), 2)
 		got := s.Deck()
@@ -54,10 +55,10 @@ func TestTurnStateOpt_PassthroughKeepsDeckOrder(t *testing.T) {
 // first revealed card and keeps the second on top; the un-opted tail of the deck stays
 // in place, and the bottomed card lands at the end.
 func TestTurnStateOpt_BottomsHandlerSpecifiedCards(t *testing.T) {
-	a := NewFakeCard("a")
-	b := NewFakeCard("b")
-	c := NewFakeCard("c")
-	withOptHero(t, FakeHero{
+	a := testutils.NewFakeCard("a")
+	b := testutils.NewFakeCard("b")
+	c := testutils.NewFakeCard("c")
+	withOptHero(t, testutils.Hero{
 		OptStrategy: func(cards []card.Card) (top, bottom []card.Card) {
 			// Bottom cards[0] (a), keep cards[1] (b) on top.
 			return []card.Card{cards[1]}, []card.Card{cards[0]}
@@ -76,10 +77,10 @@ func TestTurnStateOpt_BottomsHandlerSpecifiedCards(t *testing.T) {
 
 // Tests that the handler can re-order cards on top in addition to bottoming.
 func TestTurnStateOpt_HandlerReorderCanReverseTop(t *testing.T) {
-	a := NewFakeCard("a")
-	b := NewFakeCard("b")
-	c := NewFakeCard("c")
-	withOptHero(t, FakeHero{
+	a := testutils.NewFakeCard("a")
+	b := testutils.NewFakeCard("b")
+	c := testutils.NewFakeCard("c")
+	withOptHero(t, testutils.Hero{
 		OptStrategy: func(cards []card.Card) (top, bottom []card.Card) {
 			return []card.Card{cards[1], cards[0]}, nil
 		},
@@ -98,9 +99,9 @@ func TestTurnStateOpt_HandlerReorderCanReverseTop(t *testing.T) {
 // The handler sees only the available cards and reshapes them; the empty-tail-deck
 // remains empty.
 func TestTurnStateOpt_ClampsNToDeckLength(t *testing.T) {
-	a := NewFakeCard("a")
-	b := NewFakeCard("b")
-	withOptHero(t, FakeHero{
+	a := testutils.NewFakeCard("a")
+	b := testutils.NewFakeCard("b")
+	withOptHero(t, testutils.Hero{
 		OptStrategy: func(cards []card.Card) (top, bottom []card.Card) {
 			if len(cards) != 2 {
 				t.Errorf("handler saw %d cards, want 2 (clamp)", len(cards))
@@ -121,7 +122,7 @@ func TestTurnStateOpt_ClampsNToDeckLength(t *testing.T) {
 // Tests that Opt on an empty deck never invokes the handler and is a safe no-op.
 func TestTurnStateOpt_EmptyDeckSkipsHandler(t *testing.T) {
 	called := false
-	withOptHero(t, FakeHero{
+	withOptHero(t, testutils.Hero{
 		OptStrategy: func(cards []card.Card) (top, bottom []card.Card) {
 			called = true
 			return cards, nil
@@ -140,13 +141,13 @@ func TestTurnStateOpt_EmptyDeckSkipsHandler(t *testing.T) {
 func TestTurnStateOpt_NonPositiveNSkipsHandler(t *testing.T) {
 	for _, n := range []int{0, -1, -42} {
 		called := false
-		withOptHero(t, FakeHero{
+		withOptHero(t, testutils.Hero{
 			OptStrategy: func(cards []card.Card) (top, bottom []card.Card) {
 				called = true
 				return cards, nil
 			},
 		}, func() {
-			s := newOptTestEngine([]card.Card{NewFakeCard("x")}, nil)
+			s := newOptTestEngine([]card.Card{testutils.NewFakeCard("x")}, nil)
 			s.Opt(s.Logger(), n)
 			if called {
 				t.Errorf("Opt(%d) called the handler, want skip", n)
@@ -164,11 +165,11 @@ func TestTurnStateOpt_AlwaysFlipsCacheable(t *testing.T) {
 		deck []card.Card
 		n    int
 	}{
-		{"populated deck", []card.Card{NewFakeCard("x")}, 1},
+		{"populated deck", []card.Card{testutils.NewFakeCard("x")}, 1},
 		{"empty deck", nil, 3},
-		{"zero n", []card.Card{NewFakeCard("x")}, 0},
+		{"zero n", []card.Card{testutils.NewFakeCard("x")}, 0},
 	}
-	withOptHero(t, FakeHero{}, func() {
+	withOptHero(t, testutils.Hero{}, func() {
 		for _, tc := range cases {
 			s := newOptTestEngine(tc.deck, nil)
 			if !s.IsCacheable() {
@@ -184,22 +185,22 @@ func TestTurnStateOpt_AlwaysFlipsCacheable(t *testing.T) {
 
 // Tests that a handler returning fewer cards than received panics.
 func TestTurnStateOpt_PanicsOnDroppedCard(t *testing.T) {
-	withOptHero(t, FakeHero{
+	withOptHero(t, testutils.Hero{
 		OptStrategy: func(cards []card.Card) (top, bottom []card.Card) {
 			return []card.Card{cards[0]}, nil // drops cards[1]
 		},
 	}, func() {
-		s := newOptTestEngine([]card.Card{NewFakeCard("a"), NewFakeCard("b")}, nil)
+		s := newOptTestEngine([]card.Card{testutils.NewFakeCard("a"), testutils.NewFakeCard("b")}, nil)
 		assertPanics(t, "dropped card", "Opt:", func() { s.Opt(s.Logger(), 2) })
 	})
 }
 
 // Tests that a handler returning more cards than received panics.
 func TestTurnStateOpt_PanicsOnExtraCard(t *testing.T) {
-	a := NewFakeCard("a")
-	b := NewFakeCard("b")
-	foreign := NewFakeCard("foreign")
-	withOptHero(t, FakeHero{
+	a := testutils.NewFakeCard("a")
+	b := testutils.NewFakeCard("b")
+	foreign := testutils.NewFakeCard("foreign")
+	withOptHero(t, testutils.Hero{
 		OptStrategy: func(cards []card.Card) (top, bottom []card.Card) {
 			return []card.Card{a, b, foreign}, nil
 		},
@@ -212,10 +213,10 @@ func TestTurnStateOpt_PanicsOnExtraCard(t *testing.T) {
 // Tests that a handler substituting one input card for a non-input card panics — the
 // length check passes but the multiset check trips on the foreign card.
 func TestTurnStateOpt_PanicsOnSubstitutedCard(t *testing.T) {
-	a := NewFakeCard("a")
-	b := NewFakeCard("b")
-	foreign := NewFakeCard("foreign")
-	withOptHero(t, FakeHero{
+	a := testutils.NewFakeCard("a")
+	b := testutils.NewFakeCard("b")
+	foreign := testutils.NewFakeCard("foreign")
+	withOptHero(t, testutils.Hero{
 		OptStrategy: func(cards []card.Card) (top, bottom []card.Card) {
 			return []card.Card{a, foreign}, nil
 		},
@@ -229,9 +230,9 @@ func TestTurnStateOpt_PanicsOnSubstitutedCard(t *testing.T) {
 // Multiset check catches the over-count of the duplicate before the leftover dropped
 // card surfaces in the post-loop count.
 func TestTurnStateOpt_PanicsOnDuplicatedCard(t *testing.T) {
-	a := NewFakeCard("a")
-	b := NewFakeCard("b")
-	withOptHero(t, FakeHero{
+	a := testutils.NewFakeCard("a")
+	b := testutils.NewFakeCard("b")
+	withOptHero(t, testutils.Hero{
 		OptStrategy: func(cards []card.Card) (top, bottom []card.Card) {
 			return []card.Card{a, a}, nil // duplicates a, drops b
 		},

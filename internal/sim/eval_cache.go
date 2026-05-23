@@ -200,13 +200,25 @@ func makeCacheKey(
 		return evalCacheKey{}, false
 	}
 	var key evalCacheKey
+	// Fakes (testutils.*) return ids.InvalidCard / InvalidWeapon / InvalidHero. Distinct
+	// fakes would collide on the same key so any Invalid-id input bails out — production
+	// cards / weapons / heroes always carry a unique non-zero ID, so these branches are
+	// test-only.
 	key.handLen = len(hand)
 	for i, c := range hand {
-		key.handIDs[i] = c.ID()
+		id := c.ID()
+		if id == ids.InvalidCard {
+			return evalCacheKey{}, false
+		}
+		key.handIDs[i] = id
 	}
 	key.weaponLen = len(weapons)
 	for i, w := range weapons {
-		key.weaponIDs[i] = w.ID()
+		id := w.ID()
+		if id == ids.InvalidWeapon {
+			return evalCacheKey{}, false
+		}
+		key.weaponIDs[i] = id
 	}
 	// Persistent-in-play entries get insertion-sorted by (CardID, Count) so the cache key
 	// stays multiset-invariant across registration order. Token kinds are distinguished
@@ -214,20 +226,32 @@ func makeCacheKey(
 	// TokenType discriminator is needed.
 	key.auraLen = len(auras)
 	for i, t := range auras {
+		if t.CardID() == ids.InvalidCard {
+			return evalCacheKey{}, false
+		}
 		insertPersistentEntry(key.auras[:i+1], persistentCacheKey{
 			CardID: t.CardID(), Count: t.Count(),
 		})
 	}
 	key.itemLen = len(items)
 	for i, it := range items {
+		if it.CardID() == ids.InvalidCard {
+			return evalCacheKey{}, false
+		}
 		insertPersistentEntry(key.items[:i+1], persistentCacheKey{
 			CardID: it.CardID(), Count: it.Count(),
 		})
 	}
 	if h := masterState.Hero(); h != nil {
+		if h.ID() == ids.InvalidHero {
+			return evalCacheKey{}, false
+		}
 		key.heroID = h.ID()
 	}
 	if arsenal := masterState.Arsenal(); arsenal != nil {
+		if arsenal.ID() == ids.InvalidCard {
+			return evalCacheKey{}, false
+		}
 		key.arsenalID = arsenal.ID()
 	}
 	key.opponentMarked = masterState.OpponentMarked()

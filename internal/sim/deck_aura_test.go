@@ -105,7 +105,7 @@ func TestProcessAurasAtStartOfTurn_IgnoresPonder(t *testing.T) {
 
 // TestFireEndOfTurn_PonderPopsDeckTopIntoHand.
 func TestFireEndOfTurn_PonderPopsDeckTopIntoHand(t *testing.T) {
-	a, b, c := testutils.NewStubCard("a"), testutils.NewStubCard("b"), testutils.NewStubCard("c")
+	a, b, c := testutils.NewFakeCard("a"), testutils.NewFakeCard("b"), testutils.NewFakeCard("c")
 	ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().
 		SetCards([]card.Card{a, b, c}).
 		AddAura(token.NewPonder(2)).

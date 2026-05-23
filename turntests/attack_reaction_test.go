@@ -96,7 +96,7 @@ func TestAttackReaction_BladeFlashGoAgainExtendsChain(t *testing.T) {
 	hand := []card.Card{
 		cards.BladeFlashBlue{},
 		cards.ToughenUpBlue{},
-		testutils.NoGoAgainAttackStub{},
+		testutils.FakeNoGoAgainAttack{},
 	}
 	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingDamage(0).Build(), hand)
 	got := summary.Value
@@ -110,7 +110,7 @@ func TestAttackReaction_NebulaSwingWithoutBladeFlashCantChain(t *testing.T) {
 	d := deck.New(heroes.Viserai, []deck.Weapon{weapons.NebulaBlade{}}, nil)
 	hand := []card.Card{
 		cards.ToughenUpBlue{},
-		testutils.NoGoAgainAttackStub{},
+		testutils.FakeNoGoAgainAttack{},
 	}
 	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingDamage(0).Build(), hand)
 	got := summary.Value

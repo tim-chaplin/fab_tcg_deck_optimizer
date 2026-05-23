@@ -55,7 +55,7 @@ internal/
   optimizations/   Hot-path performance caches over the simulator
   textio/          On-disk deck encodings (JSON deck+stats, fabrary text)
   lint/            Repo-wide convention tests
-  testutils/       Card / hero / weapon stubs shared across tests
+  testutils/       Card / hero / weapon fakes shared across tests
 turntests/         Turn-level tests driving full turns through public entry points
 data_sources/      Upstream card.csv, comprehensive rules, banlist
 docs/              This map + dev-standards.md
@@ -139,5 +139,5 @@ mydecks/           Local working deck files (untracked by git)
 - **internal/lint** — Repo-wide convention tests that each walk the whole tree and assert one
   structural rule (marker placement, generated-file staleness, registry coverage, turntests
   entry-point discipline).
-- **internal/testutils** — Configurable card, hero, and weapon stubs shared across package
+- **internal/testutils** — Configurable card, hero, and weapon fakes shared across package
   tests so predicate, partition, and chain-runner assertions have controllable inputs.
