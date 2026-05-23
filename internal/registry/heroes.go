@@ -6,7 +6,7 @@ import "github.com/tim-chaplin/fab-deck-optimizer/internal/hero/heroes"
 // truth for the hero roster; serialization packages look up heroes here.
 var heroesByName = func() map[string]Hero {
 	all := []Hero{
-		heroes.Viserai{},
+		heroes.Viserai,
 	}
 	m := make(map[string]Hero, len(all))
 	for _, h := range all {

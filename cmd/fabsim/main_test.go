@@ -200,7 +200,7 @@ func TestDefaultDeckNameFor(t *testing.T) {
 		{SilverAge, 4, "viserai_silver_age_4_incoming"},
 	}
 	for _, c := range cases {
-		if got := defaultDeckNameFor(heroes.Viserai{}, c.f, c.in); got != c.want {
+		if got := defaultDeckNameFor(heroes.Viserai, c.f, c.in); got != c.want {
 			t.Errorf("defaultDeckNameFor(Viserai, %q, %d) = %q, want %q", c.f, c.in, got, c.want)
 		}
 	}

@@ -367,25 +367,21 @@ func panicIfOptViolatesMultiset(in, top, bottom []card.Card) {
 
 // === Trigger and aura dispatch ===
 
-// FireTriggers fires every Aura, EphemeralTrigger, and Item registered for trigger type t.
-// It is the single dispatch point for every triggertype.Type lifecycle event.
+// FireTriggers fires the hero plus every Aura, EphemeralTrigger, and Item registered for
+// trigger type t. It is the single dispatch point for every triggertype.Type lifecycle
+// event.
 //
 // triggeringCard is the card whose resolution raised the event, or nil for turn-boundary
 // events. It is published on ge.triggeringCard so handlers can attribute log lines, and
-// its type set is what an Aura's / EphemeralTrigger's type filter matches against.
+// its type set is what each entry's type filter matches against. The hero fires first,
+// then auras, ephemeral triggers, and items.
 //
-// Auras, ephemeral triggers, and items are each fired by fireHooks — see there for the
-// snapshot / cursor / filter mechanics. The per-list length snapshot is the self-exclusion
-// mechanism: with one CardOrAbility fire per chain step, a Runechant a card's play creates
-// lands past the snapshot and is not consumed by that same card's fire. Turn-boundary
-// events with no triggeringCard (StartOfTurn, EndOfTurn, DamageTaken) skip the type filter;
-// the OncePerTurn gate is re-armed at the turn boundary by ResetEphemeralState, not here.
-//
-// triggeringCard.Types is resolved lazily — only when an aura / trigger of the right type
+// triggeringCard.Types is resolved lazily — only when an entry of the right trigger type
 // is actually found — so the common per-card fire with no subscribers stays off the Types
 // interface-dispatch path.
 func (ge *GameEngine) FireTriggers(t triggertype.Type, triggeringCard card.Card) {
-	if len(ge.auras) == 0 && len(ge.triggers) == 0 && len(ge.items) == 0 {
+	heroFires := ge.hero != nil && ge.hero.TriggerType()&t != 0
+	if !heroFires && len(ge.auras) == 0 && len(ge.triggers) == 0 && len(ge.items) == 0 {
 		return
 	}
 	ge.triggeringCard = triggeringCard
@@ -402,6 +398,9 @@ func (ge *GameEngine) FireTriggers(t triggertype.Type, triggeringCard card.Card)
 		return triggeringTypes
 	}
 
+	if heroFires {
+		fireHero(ge, triggeringCard, matchTypes)
+	}
 	fireHooks(ge, &ge.auras, t, triggeringCard, matchTypes, false)
 	fireHooks(ge, &ge.triggers, t, triggeringCard, matchTypes, true)
 	fireHooks(ge, &ge.items, t, triggeringCard, matchTypes, false)
@@ -409,15 +408,21 @@ func (ge *GameEngine) FireTriggers(t triggertype.Type, triggeringCard card.Card)
 	ge.triggeringCard = nil
 }
 
-// triggerHook is the firing surface FireTriggers needs from an arena entry — Aura, Item,
-// and EphemeralTrigger all satisfy it through the embedded trigger.Trigger.
-type triggerHook interface {
-	TriggerType() triggertype.Type
-	OncePerTurn() bool
-	FiredThisTurn() bool
-	SetFiredThisTurn(bool)
-	Matches(card.TypeSet) bool
-	Fire(card.GameEngine, card.Logger)
+// fireHero applies the OncePerTurn / Matches gates and invokes the hero handler. The
+// hero is singular (no slice splicing, no removeAfterFire) so it bypasses fireHooks's
+// cursor walk. The TriggerType bit-and check is done at the caller.
+func fireHero(ge *GameEngine, triggeringCard card.Card, matchTypes func() card.TypeSet) {
+	h := ge.hero
+	if h.OncePerTurn() && h.FiredThisTurn() {
+		return
+	}
+	if triggeringCard != nil && !h.Matches(matchTypes()) {
+		return
+	}
+	h.Fire(ge, ge.logger)
+	if h.OncePerTurn() {
+		h.SetFiredThisTurn(true)
+	}
 }
 
 // fireHooks fires every entry of *hooks subscribed to event t: an open once-per-turn gate
@@ -428,7 +433,7 @@ type triggerHook interface {
 // Destroy splices the right slot and sets currentHookDestroyed, which shortens the walk.
 // removeAfterFire splices every fired entry unconditionally: the one-shot semantics of
 // ephemeral triggers, which the engine drops once they fire.
-func fireHooks[H triggerHook](ge *GameEngine, hooks *[]H, t triggertype.Type, triggeringCard card.Card, matchTypes func() card.TypeSet, removeAfterFire bool) {
+func fireHooks[H trigger.Hook](ge *GameEngine, hooks *[]H, t triggertype.Type, triggeringCard card.Card, matchTypes func() card.TypeSet, removeAfterFire bool) {
 	n := len(*hooks)
 	for i := 0; i < n; {
 		h := (*hooks)[i]

@@ -16,7 +16,7 @@ import (
 // {3} → Jack Be Quick (banishes Nimblism, +1{p} and go again, deals 4) → Tremor (cost 1,
 // deals 4 + 2 bonus = 6). Total 10.
 func TestTremorOfIArathael_SameTurnBanishActivatesBonus(t *testing.T) {
-	d := deck.New(heroes.Viserai{}, nil, fillerDeck())
+	d := deck.New(heroes.Viserai, nil, fillerDeck())
 	hand := []card.Card{
 		cards.TremorOfIArathaelRed{},
 		cards.JackBeQuickRed{},
@@ -34,7 +34,7 @@ func TestTremorOfIArathael_SameTurnBanishActivatesBonus(t *testing.T) {
 // flip CardBanished — Tremor plays at its base power. Hand: Tremor, Bauble. Initial
 // banish has one card seeded; CardBanished stays false. Total 4.
 func TestTremorOfIArathael_PriorTurnBanishedZoneDoesNotActivate(t *testing.T) {
-	d := deck.New(heroes.Viserai{}, nil, fillerDeck())
+	d := deck.New(heroes.Viserai, nil, fillerDeck())
 	hand := []card.Card{cards.TremorOfIArathaelRed{}, cards.TitaniumBaubleBlue{}}
 	initial := gameengine.GameStateBuilder().SetBanished([]card.Card{cards.NimblismRed{}}).Build()
 	summary := sim.EvalOneTurnForTesting(d, initial, hand)

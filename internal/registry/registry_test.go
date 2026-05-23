@@ -12,7 +12,7 @@ import (
 // Registry.
 func TestRegistry_DrivesDeckRandom(t *testing.T) {
 	rng := rand.New(rand.NewSource(7))
-	d := deck.Random(heroes.Viserai{}, 40, 2, rng, Registry{})
+	d := deck.Random(heroes.Viserai, 40, 2, rng, Registry{})
 	if d.Size() != 40 {
 		t.Errorf("len(Cards) = %d, want 40", d.Size())
 	}

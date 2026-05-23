@@ -27,7 +27,6 @@ func newSequenceContextForTest(h hero.Hero, pitched, deckCards []card.Card, reso
 		leafState.CreateAura(token.NewRunechant(runechantCarryover))
 	}
 	return &sequenceContext{
-		hero:               h,
 		pitched:            pitched,
 		deck:               d,
 		bufs:               bufs,

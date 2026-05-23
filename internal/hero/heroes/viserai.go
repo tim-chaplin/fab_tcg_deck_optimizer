@@ -6,39 +6,58 @@ package heroes
 
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/hero"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/ids"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/trigger"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/triggertype"
 )
 
 var viseraiTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeHero, card.TypeYoung)
 
+// viserai embeds trigger.Trigger[card.Hero] so Viserai's Runechant ability is
+// dispatched through the engine's normal trigger walk.
+type viserai struct {
+	trigger.Trigger[card.Hero]
+}
+
 // Viserai is Young Viserai.
-type Viserai struct{}
+var Viserai = &viserai{
+	Trigger: trigger.FromHero[card.Hero](
+		triggertype.CardOrAbility,
+		viseraiOnCardPlayed,
+		false,
+		viseraiTypeFilter,
+	),
+}
 
-func (Viserai) ID() ids.HeroID       { return ids.ViseraiID }
-func (Viserai) Name() string         { return "Viserai" }
-func (Viserai) Health() int          { return 20 }
-func (Viserai) Intelligence() int    { return 4 }
-func (Viserai) Types() card.TypeSet  { return viseraiTypes }
-func (Viserai) Class() card.CardType { return card.TypeRuneblade }
+func (*viserai) ID() ids.HeroID       { return ids.ViseraiID }
+func (*viserai) Name() string         { return "Viserai" }
+func (*viserai) Health() int          { return 20 }
+func (*viserai) Intelligence() int    { return 4 }
+func (*viserai) Types() card.TypeSet  { return viseraiTypes }
+func (*viserai) Class() card.CardType { return card.TypeRuneblade }
 
-// OnCardPlayed implements Viserai's hero ability: whenever a Runeblade card is played, if a
-// non-attack action (Action without Attack) has been played this turn, create a Runechant
-// token. The played.Types call wants the richer card.GameEngine (for Universal-class
-// folding) so we type-assert past the narrow GameEngine — *gameengine.GameEngine satisfies
-// both.
-func (Viserai) OnCardPlayed(played card.Card, ge hero.GameEngine, l hero.Logger) int {
-	t := played.Types(ge.(card.GameEngine))
-	// Weapon swings aren't "playing a card" and don't trigger Viserai.
-	if !t.Has(card.TypeRuneblade) || t.Has(card.TypeWeapon) {
-		return 0
+func (v *viserai) Fire(engine card.GameEngine, logger card.Logger) {
+	v.Invoke(engine, logger, v)
+}
+
+// viseraiTypeFilter narrows the trigger's firing site to Runeblade-typed cards that
+// aren't weapons — equipping or swinging a weapon isn't "playing a card" so a
+// Runeblade weapon swing must not credit a Runechant.
+func viseraiTypeFilter(t card.TypeSet) bool {
+	return t.Has(card.TypeRuneblade) && !t.Has(card.TypeWeapon)
+}
+
+// viseraiOnCardPlayed implements Viserai's "Whenever you play a Runeblade card, if you
+// have played another non-attack action card this turn, create a Runechant" trigger.
+// The type filter above already gates on "Runeblade card, not weapon"; this handler
+// adds the non-attack-action precondition and credits the Runechant via the engine.
+func viseraiOnCardPlayed(ge card.GameEngine, l card.Logger, _ card.Hero) {
+	if !ge.NonAttackActionPlayed() {
+		return
 	}
-	if ge.NonAttackActionPlayed() {
-		ge.CreateRunechants(1)
-		l.AppendPreTrigger(played.DisplayName(), "Viserai created a runechant", 1)
-		return 1
-	}
-	return 0
+	played := ge.TriggeringCard()
+	ge.CreateRunechants(1)
+	l.AppendPreTrigger(played.DisplayName(), "Viserai created a runechant", 1)
 }
 
 // Opt is the Viserai-specific Opt heuristic: keep one card per "slot category" and
@@ -67,7 +86,7 @@ func (Viserai) OnCardPlayed(played card.Card, ge hero.GameEngine, l hero.Logger)
 //
 // Opt(1) always tops the only revealed card: with one input the slot tracker starts
 // empty, so no slot the card might provide can already be covered.
-func (Viserai) Opt(cards []card.Card) (top, bottom []card.Card) {
+func (*viserai) Opt(cards []card.Card) (top, bottom []card.Card) {
 	var covered viseraiOptSlots
 	top = make([]card.Card, 0, len(cards))
 	for _, c := range cards {

@@ -107,7 +107,7 @@ func runAnnealCmd(args []string) {
 
 	name := *deckName
 	if name == "" {
-		name = defaultDeckNameFor(heroes.Viserai{}, fmtValue, *incoming)
+		name = defaultDeckNameFor(heroes.Viserai, fmtValue, *incoming)
 	}
 	outPath, err := textio.MydecksPath(name)
 	if err != nil {
@@ -389,7 +389,7 @@ func prepareBaseline(cfg annealConfig, rng *rand.Rand) (*deck.Deck, deck.Stats, 
 	}
 	if best == nil {
 		fmt.Fprintf(os.Stderr, "no deck at %s; generating a random starting deck\n", cfg.outPath)
-		best = deck.Random(heroes.Viserai{}, cfg.deckSize, cfg.maxCopies, rng, registry.Registry{})
+		best = deck.Random(heroes.Viserai, cfg.deckSize, cfg.maxCopies, rng, registry.Registry{})
 		bestStats = baselineEvaluate(best, cfg, rng)
 		bestAvg := bestStats.Mean()
 		if err := writeDeck(best, bestStats, cfg.outPath); err != nil {

@@ -32,7 +32,7 @@ func TestEvalOneTurn_MidTurnDrawArsenalsWhenSlotEmpty(t *testing.T) {
 		testutils.YellowAttack{},
 		testutils.YellowAttack{},
 	}
-	d := deck.New(heroes.Viserai{}, nil, deckCards)
+	d := deck.New(heroes.Viserai, nil, deckCards)
 	summary := sim.EvalOneTurnForTesting(d, nil, hand)
 
 	wantHand := []card.Card{
@@ -72,7 +72,7 @@ func TestEvalOneTurn_TwoMidTurnDraws_OneArsenalsOneHeld(t *testing.T) {
 		testutils.BlueAttack{},
 		testutils.YellowAttack{},
 	}
-	d := deck.New(heroes.Viserai{}, nil, deckCards)
+	d := deck.New(heroes.Viserai, nil, deckCards)
 	summary := sim.EvalOneTurnForTesting(d, nil, hand)
 
 	// One beacon arsenaled, the other held at slot 0; the remaining three slots are the
@@ -114,7 +114,7 @@ func TestEvalOneTurn_ThreeMidTurnDraws_ArsenalFromDrawnPool(t *testing.T) {
 		testutils.BlueAttack{},
 		testutils.YellowAttack{},
 	}
-	d := deck.New(heroes.Viserai{}, nil, deckCards)
+	d := deck.New(heroes.Viserai, nil, deckCards)
 	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetArsenal(arsenalIn).Build(), hand)
 
 	// Two held beacons plus two fresh Blues from the remaining deck.
@@ -155,7 +155,7 @@ func TestEvalOneTurn_MidTurnDrawHeldWhenArsenalFull(t *testing.T) {
 		testutils.YellowAttack{},
 		testutils.YellowAttack{},
 	}
-	d := deck.New(heroes.Viserai{}, nil, deckCards)
+	d := deck.New(heroes.Viserai, nil, deckCards)
 	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetArsenal(arsenalIn).Build(), hand)
 
 	wantHand := []card.Card{
@@ -190,7 +190,7 @@ func TestEvalOneTurn_MidTurnDrawSansGoAgainStaysHeld(t *testing.T) {
 		testutils.BlueAttack{},
 		testutils.BlueAttack{},
 	}
-	d := deck.New(heroes.Viserai{}, nil, deckCards)
+	d := deck.New(heroes.Viserai, nil, deckCards)
 	summary := sim.EvalOneTurnForTesting(d, nil, initialHand)
 
 	// Turn 1 damage: Snatch alone for 4 (no chain extension, no Viserai trigger — Snatch isn't
@@ -239,7 +239,7 @@ func TestEvalOneTurn_MidTurnDrawSansGoAgainStaysHeld(t *testing.T) {
 // Tests that DrawOne against an empty deck is a no-op (no panic, no spurious draw).
 func TestEvalOneTurn_DrawOneOnEmptyDeckIsNoop(t *testing.T) {
 	initialHand := []card.Card{cards.SnatchRed{}}
-	d := deck.New(heroes.Viserai{}, nil, nil)
+	d := deck.New(heroes.Viserai, nil, nil)
 	summary := sim.EvalOneTurnForTesting(d, nil, initialHand)
 
 	if summary.Value != 4 {

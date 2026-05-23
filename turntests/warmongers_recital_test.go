@@ -17,7 +17,7 @@ import (
 // Strike (power 7, hits, OnHit pulls from graveyard onto deck). The turn-2 refill draws
 // the lone deck card, so we look across Hand/Deck/Arsenal.
 func TestWarmongersRecital_OnHitRecyclesToDeck(t *testing.T) {
-	d := deck.New(heroes.Viserai{}, nil, nil)
+	d := deck.New(heroes.Viserai, nil, nil)
 	hand := []card.Card{
 		cards.TitaniumBaubleBlue{},
 		cards.WarmongersRecitalRed{},

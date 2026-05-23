@@ -15,6 +15,20 @@ import (
 // event qualifies.
 type TypeFilter func(card.TypeSet) bool
 
+// Hook is the trigger-dispatch surface every triggered entry exposes — auras, items,
+// one-shot triggers, and the hero. Concrete entries get it for free by embedding
+// Trigger[T] (whose pointer-receiver methods cover everything except Fire); each entry
+// type supplies its own Fire that calls Invoke with itself as the typed receiver. The
+// engine's dispatch loop walks entries through this interface.
+type Hook interface {
+	TriggerType() triggertype.Type
+	OncePerTurn() bool
+	FiredThisTurn() bool
+	SetFiredThisTurn(bool)
+	Matches(types card.TypeSet) bool
+	Fire(engine card.GameEngine, logger card.Logger)
+}
+
 // Trigger is the embeddable core a triggered entry carries. T is the concrete surface the
 // handler receives — card.EphemeralTrigger, card.Aura, card.Item — so handlers stay typed
 // with no assertion. The embedding type supplies a Fire method that calls Invoke with
@@ -43,6 +57,13 @@ func FromCard[T any](source card.Card, tt triggertype.Type, fire func(card.GameE
 // the supplied name; CardID returns tokenID so cache keys distinguish each token kind.
 func FromToken[T any](name string, tokenID ids.CardID, tt triggertype.Type, fire func(card.GameEngine, card.Logger, T), oncePerTurn bool, typeFilter TypeFilter) Trigger[T] {
 	return Trigger[T]{triggerType: tt, fire: fire, tokenName: name, tokenID: tokenID, oncePerTurn: oncePerTurn, typeFilter: typeFilter}
+}
+
+// FromHero builds a Trigger core for a hero ability — no card or token identity. The
+// embedding Hero type owns its own ID / Name, so the source / token slots stay zero;
+// CardName returns "" and CardID returns 0 on a hero-sourced trigger.
+func FromHero[T any](tt triggertype.Type, fire func(card.GameEngine, card.Logger, T), oncePerTurn bool, typeFilter TypeFilter) Trigger[T] {
+	return Trigger[T]{triggerType: tt, fire: fire, oncePerTurn: oncePerTurn, typeFilter: typeFilter}
 }
 
 func (t *Trigger[T]) TriggerType() triggertype.Type { return t.triggerType }

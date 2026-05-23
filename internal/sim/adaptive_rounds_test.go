@@ -33,7 +33,7 @@ func TestAdaptive_RoundsToConverge(t *testing.T) {
 	// different variance profiles).
 	for _, seed := range []int64{1, 2, 3, 42, 123, 999} {
 		setupRNG := rand.New(rand.NewSource(seed))
-		baseline := deck.Random(heroes.Viserai{}, deckSize, maxCopies, setupRNG, registry.Registry{})
+		baseline := deck.Random(heroes.Viserai, deckSize, maxCopies, setupRNG, registry.Registry{})
 		d := baseline.Copy()
 		ev := NewEvaluatorParallel(numWorkers)
 		stats := ev.EvaluateAdaptive(d, 0.1, Matchup{IncomingDamage: incoming}, rand.New(rand.NewSource(99)))
