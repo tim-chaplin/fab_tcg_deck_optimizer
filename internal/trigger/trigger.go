@@ -15,6 +15,20 @@ import (
 // event qualifies.
 type TypeFilter func(card.TypeSet) bool
 
+// Hook is the trigger-dispatch surface every triggered entry exposes — auras, items,
+// one-shot triggers, and the hero. Concrete entries get it for free by embedding
+// Trigger[T] (whose pointer-receiver methods cover everything except Fire); each entry
+// type supplies its own Fire that calls Invoke with itself as the typed receiver. The
+// engine's dispatch loop walks entries through this interface.
+type Hook interface {
+	TriggerType() triggertype.Type
+	OncePerTurn() bool
+	FiredThisTurn() bool
+	SetFiredThisTurn(bool)
+	Matches(types card.TypeSet) bool
+	Fire(engine card.GameEngine, logger card.Logger)
+}
+
 // Trigger is the embeddable core a triggered entry carries. T is the concrete surface the
 // handler receives — card.EphemeralTrigger, card.Aura, card.Item — so handlers stay typed
 // with no assertion. The embedding type supplies a Fire method that calls Invoke with

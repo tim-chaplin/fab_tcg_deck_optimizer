@@ -13,14 +13,14 @@ import (
 
 var viseraiTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeHero, card.TypeYoung)
 
-// viseraiHero embeds trigger.Trigger[card.Hero] so Viserai's Runechant ability is
+// viserai embeds trigger.Trigger[card.Hero] so Viserai's Runechant ability is
 // dispatched through the engine's normal trigger walk.
-type viseraiHero struct {
+type viserai struct {
 	trigger.Trigger[card.Hero]
 }
 
 // Viserai is Young Viserai.
-var Viserai = &viseraiHero{
+var Viserai = &viserai{
 	Trigger: trigger.FromHero[card.Hero](
 		triggertype.CardOrAbility,
 		viseraiOnCardPlayed,
@@ -29,14 +29,14 @@ var Viserai = &viseraiHero{
 	),
 }
 
-func (*viseraiHero) ID() ids.HeroID       { return ids.ViseraiID }
-func (*viseraiHero) Name() string         { return "Viserai" }
-func (*viseraiHero) Health() int          { return 20 }
-func (*viseraiHero) Intelligence() int    { return 4 }
-func (*viseraiHero) Types() card.TypeSet  { return viseraiTypes }
-func (*viseraiHero) Class() card.CardType { return card.TypeRuneblade }
+func (*viserai) ID() ids.HeroID       { return ids.ViseraiID }
+func (*viserai) Name() string         { return "Viserai" }
+func (*viserai) Health() int          { return 20 }
+func (*viserai) Intelligence() int    { return 4 }
+func (*viserai) Types() card.TypeSet  { return viseraiTypes }
+func (*viserai) Class() card.CardType { return card.TypeRuneblade }
 
-func (v *viseraiHero) Fire(engine card.GameEngine, logger card.Logger) {
+func (v *viserai) Fire(engine card.GameEngine, logger card.Logger) {
 	v.Invoke(engine, logger, v)
 }
 
@@ -86,7 +86,7 @@ func viseraiOnCardPlayed(ge card.GameEngine, l card.Logger, _ card.Hero) {
 //
 // Opt(1) always tops the only revealed card: with one input the slot tracker starts
 // empty, so no slot the card might provide can already be covered.
-func (*viseraiHero) Opt(cards []card.Card) (top, bottom []card.Card) {
+func (*viserai) Opt(cards []card.Card) (top, bottom []card.Card) {
 	var covered viseraiOptSlots
 	top = make([]card.Card, 0, len(cards))
 	for _, c := range cards {

@@ -9,7 +9,7 @@ package gameengine
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/ids"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/triggertype"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/trigger"
 )
 
 // Aura is the engine's view of a persistent hook entry. Fire takes typed
@@ -21,53 +21,37 @@ import (
 // the prior perm it hands the existing concrete value back as `any` so the implementation
 // can rewrite that value's fields in place and return it boxed without allocating.
 type Aura interface {
-	TriggerType() triggertype.Type
-	OncePerTurn() bool
-	FiredThisTurn() bool
-	SetFiredThisTurn(bool)
-	Matches(types card.TypeSet) bool
+	trigger.Hook
 	CardName() string
 	CardID() ids.CardID
 	SourceCard() any
 	Count() int
 	SetCount(int)
 	DecrementCount() int
-	Fire(engine card.GameEngine, logger card.Logger)
 	Copy() any
 	CopyInto(dst any) any
 }
 
-// EphemeralTrigger is the engine's view of a one-shot deferred handler. Like Aura, Fire
-// takes typed card.GameEngine / card.Logger arguments; Matches takes the firing card's
-// TypeSet directly. The OncePerTurn / FiredThisTurn / SetFiredThisTurn trio is part of the
-// shared triggerHook surface fireHooks walks — ephemeral triggers never gate on it (they
-// fire once and are removed), so OncePerTurn is always false.
+// EphemeralTrigger is the engine's view of a one-shot deferred handler. The trigger.Hook
+// trio (OncePerTurn / FiredThisTurn / SetFiredThisTurn) is part of the shared dispatch
+// surface fireHooks walks — ephemeral triggers never gate on it (they fire once and are
+// removed), so OncePerTurn is always false.
 type EphemeralTrigger interface {
-	TriggerType() triggertype.Type
+	trigger.Hook
 	CardName() string
-	Matches(types card.TypeSet) bool
-	OncePerTurn() bool
-	FiredThisTurn() bool
-	SetFiredThisTurn(bool)
-	Fire(engine card.GameEngine, logger card.Logger)
 }
 
 // Item is the engine's view of an in-play permanent. Token items carry an activated
 // ability (returned as `any`; callers assert back to card.Card); card-sourced items carry
 // a trigger FireTriggers dispatches through, mirroring Aura.
 type Item interface {
+	trigger.Hook
 	CardName() string
 	CardID() ids.CardID
 	Count() int
 	SetCount(int)
 	Ability() any
 	SourceCard() any
-	TriggerType() triggertype.Type
-	Matches(types card.TypeSet) bool
-	OncePerTurn() bool
-	FiredThisTurn() bool
-	SetFiredThisTurn(bool)
-	Fire(engine card.GameEngine, logger card.Logger)
 	Copy() any
 }
 
@@ -75,18 +59,13 @@ type Item interface {
 // the methods Aura and Item expose through their embedded trigger — FireTriggers walks
 // the hero through the same path.
 type Hero interface {
+	trigger.Hook
 	ID() ids.HeroID
 	Name() string
 	Class() card.CardType
 	Types() card.TypeSet
 	Intelligence() int
 	Opt(cards []card.Card) (top, bottom []card.Card)
-	TriggerType() triggertype.Type
-	OncePerTurn() bool
-	FiredThisTurn() bool
-	SetFiredThisTurn(bool)
-	Matches(types card.TypeSet) bool
-	Fire(engine card.GameEngine, logger card.Logger)
 }
 
 // LowerHealthWanter is a Hero marker. Heroes whose strategy revolves around staying at

@@ -450,17 +450,6 @@ func fireHero(ge *GameEngine, triggeringCard card.Card, matchTypes func() card.T
 	}
 }
 
-// triggerHook is the firing surface FireTriggers needs from an arena entry — Aura, Item,
-// and EphemeralTrigger all satisfy it through the embedded trigger.Trigger.
-type triggerHook interface {
-	TriggerType() triggertype.Type
-	OncePerTurn() bool
-	FiredThisTurn() bool
-	SetFiredThisTurn(bool)
-	Matches(card.TypeSet) bool
-	Fire(card.GameEngine, card.Logger)
-}
-
 // fireHooks fires every entry of *hooks subscribed to event t: an open once-per-turn gate
 // is required, and card-raised events additionally need the entry's type filter to accept
 // triggeringCard. The snapshot length is taken up front so an entry a handler creates
@@ -469,7 +458,7 @@ type triggerHook interface {
 // Destroy splices the right slot and sets currentHookDestroyed, which shortens the walk.
 // removeAfterFire splices every fired entry unconditionally: the one-shot semantics of
 // ephemeral triggers, which the engine drops once they fire.
-func fireHooks[H triggerHook](ge *GameEngine, hooks *[]H, t triggertype.Type, triggeringCard card.Card, matchTypes func() card.TypeSet, removeAfterFire bool) {
+func fireHooks[H trigger.Hook](ge *GameEngine, hooks *[]H, t triggertype.Type, triggeringCard card.Card, matchTypes func() card.TypeSet, removeAfterFire bool) {
 	n := len(*hooks)
 	for i := 0; i < n; {
 		h := (*hooks)[i]
