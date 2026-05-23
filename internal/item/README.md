@@ -55,8 +55,7 @@ The `triggertype.Pitch` event fires as each card is pitched, with the pitched ca
 triggering card (read it via `GameEngine.TriggeringCard()`). A `Pitch` handler raises what
 that pitch yields by calling `GameEngine.AddResourcePoints(n)`; the grant folds into the
 pitched card's resource contribution. A card whose printed text reads "Whenever you pitch a
-card, …" registers a `Pitch`-triggered item from its `Play` via
-`GameEngine.CreateItem(self, triggertype.Pitch, handler, false, nil)` — Talisman of
+card, …" registers a `Pitch`-triggered item via `GameEngine.CreateItem`; Talisman of
 Recompense is the model.
 
 ## Important file

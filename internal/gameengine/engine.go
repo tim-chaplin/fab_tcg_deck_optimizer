@@ -513,10 +513,7 @@ func (ge *GameEngine) FirePitchTriggers(pitched card.Card) int {
 	return ge.pitchBonus
 }
 
-// CreateItem is the card-facing item registration method on *GameEngine. It puts a
-// card-sourced item into play whose handler fires on every event in tt's bit set.
-// oncePerTurn caps it to one fire per turn; filter narrows the firing site to a
-// card-type predicate (nil = any).
+// CreateItem implements card.GameEngine.CreateItem.
 func (ge *GameEngine) CreateItem(pc *card.CardState, tt triggertype.Type, handler func(card.GameEngine, card.Logger, card.Item), oncePerTurn bool, filter func(card.TypeSet) bool) {
 	ge.AppendItem(item.NewFromCard(pc.Card, tt, handler, oncePerTurn, filter))
 }
@@ -648,12 +645,7 @@ var dealtArcaneText = [...]string{
 
 // === Trigger registration ===
 
-// AddTrigger is the card-facing one-shot trigger registration method on *GameEngine. The
-// engine fires it on the next event matching tt's bit set and then drops it from the
-// queue. filter narrows the firing site to a card-type predicate (nil = any); it is
-// consulted only when the triggering event has a triggering card. A trigger registered
-// from a card's own Play is never triggered by that card — the CardOrAbility event has
-// already resolved by the time Play runs.
+// AddTrigger implements card.GameEngine.AddTrigger.
 func (ge *GameEngine) AddTrigger(pc *card.CardState, tt triggertype.Type, handler func(card.GameEngine, card.Logger, card.EphemeralTrigger), filter func(card.TypeSet) bool) {
 	ge.AppendTrigger(trigger.NewEphemeralTrigger(pc.Card, tt, handler, filter))
 }
