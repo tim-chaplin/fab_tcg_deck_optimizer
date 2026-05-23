@@ -19,7 +19,7 @@ func TestSplinteringDeadwood_SacrificesArcaneCussingForRunechants(t *testing.T) 
 		SetIncomingDamage(0).
 		Build()
 	d := deck.New(testutils.Hero{Intel: 4}, nil, nil)
-	hand := []card.Card{cards.SplinteringDeadwoodRed{}, testutils.BluePitch{}}
+	hand := []card.Card{cards.SplinteringDeadwoodRed{}, testutils.FakeBlueResource()}
 
 	summary := sim.EvalOneTurnForTesting(d, prior, hand)
 
@@ -37,7 +37,7 @@ func TestSplinteringDeadwood_SacrificesArcaneCussingForRunechants(t *testing.T) 
 func TestSplinteringDeadwood_NoAuraGrantsNoRunechant(t *testing.T) {
 	prior := gameengine.GameStateBuilder().SetIncomingDamage(0).Build()
 	d := deck.New(testutils.Hero{Intel: 4}, nil, nil)
-	hand := []card.Card{cards.SplinteringDeadwoodRed{}, testutils.BluePitch{}}
+	hand := []card.Card{cards.SplinteringDeadwoodRed{}, testutils.FakeBlueResource()}
 
 	summary := sim.EvalOneTurnForTesting(d, prior, hand)
 
@@ -60,7 +60,7 @@ func TestSplinteringDeadwood_HitLegCashesSecondAura(t *testing.T) {
 		SetIncomingDamage(0).
 		Build()
 	d := deck.New(testutils.Hero{Intel: 4}, nil, nil)
-	hand := []card.Card{cards.SplinteringDeadwoodRed{}, testutils.BluePitch{}}
+	hand := []card.Card{cards.SplinteringDeadwoodRed{}, testutils.FakeBlueResource()}
 
 	summary := sim.EvalOneTurnForTesting(d, prior, hand)
 

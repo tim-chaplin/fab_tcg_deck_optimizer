@@ -25,7 +25,7 @@ func TestFlex_Mode0PrintedAttack(t *testing.T) {
 // With 3 pitch available the runner pays {r}{r} for +2{p}, giving the full 6{p} swing.
 func TestFlex_Mode1AddsTwo(t *testing.T) {
 	d := deck.New(testutils.Hero{Intel: 4}, nil, nil)
-	hand := []card.Card{cards.FlexRed{}, testutils.BluePitch{}}
+	hand := []card.Card{cards.FlexRed{}, testutils.FakeBlueResource()}
 	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingDamage(0).Build(), hand)
 	if summary.Value != 6 {
 		t.Errorf("Value = %d, want 6 (4 printed + 2 Mode 1 bonus)", summary.Value)

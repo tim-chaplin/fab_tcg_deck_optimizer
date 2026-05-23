@@ -29,7 +29,7 @@ func TestLookingForAScrap_NoBanishableRiderOff(t *testing.T) {
 // go-again rider.
 func TestLookingForAScrap_BanishesOnePowerForBonus(t *testing.T) {
 	for _, c := range []card.Card{cards.LookingForAScrapRed{}, cards.LookingForAScrapYellow{}, cards.LookingForAScrapBlue{}} {
-		ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetGraveyard([]card.Card{testutils.GenericAttack(0, 1)}).Build()}
+		ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetGraveyard([]card.Card{testutils.FakeRedAttack().WithPower(1)}).Build()}
 		pc := &card.CardState{Card: c}
 		ge.ResolveChainStep(ge.Logger(), pc)
 		if !pc.GrantedGoAgain {

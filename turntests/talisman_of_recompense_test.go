@@ -16,8 +16,18 @@ import (
 // no cards, so deck contents don't affect the line under test.
 func recompenseDeck() *deck.Deck {
 	return deck.New(heroes.Viserai, nil, []deck.Card{
-		testutils.RedAttack{}, testutils.RedAttack{}, testutils.RedAttack{},
-		testutils.RedAttack{}, testutils.RedAttack{},
+		testutils.FakeRedAttack().
+			WithCost(1).
+			WithPower(3), testutils.FakeRedAttack().
+			WithCost(1).
+			WithPower(3), testutils.FakeRedAttack().
+			WithCost(1).
+			WithPower(3),
+		testutils.FakeRedAttack().
+			WithCost(1).
+			WithPower(3), testutils.FakeRedAttack().
+			WithCost(1).
+			WithPower(3),
 	})
 }
 
@@ -25,7 +35,9 @@ func recompenseDeck() *deck.Deck {
 // pitch into three resources — enough to fund a 3-cost attack the hand can't otherwise
 // afford. The optimal line pitches the red card and plays the attack for 4.
 func TestTalismanOfRecompense_RedPitchFundsThreeCostAttack(t *testing.T) {
-	hand := []card.Card{testutils.RedPitch{}, testutils.GenericAttack(3, 4)}
+	hand := []card.Card{testutils.FakeRedAction(), testutils.FakeRedAttack().
+		WithCost(3).
+		WithPower(4)}
 	state := gameengine.GameStateBuilder().
 		CreateItemFromCard(cards.TalismanOfRecompenseYellow{}).
 		Build()
@@ -43,7 +55,9 @@ func TestTalismanOfRecompense_RedPitchFundsThreeCostAttack(t *testing.T) {
 // Control: with no Talisman in play the same hand can't fund the 3-cost attack — a red
 // pitch yields only one resource — so the line can't reach 4.
 func TestTalismanOfRecompense_NoTalismanCannotFundAttack(t *testing.T) {
-	hand := []card.Card{testutils.RedPitch{}, testutils.GenericAttack(3, 4)}
+	hand := []card.Card{testutils.FakeRedAction(), testutils.FakeRedAttack().
+		WithCost(3).
+		WithPower(4)}
 
 	summary := sim.EvalOneTurnForTesting(recompenseDeck(), gameengine.GameStateBuilder().Build(), hand)
 

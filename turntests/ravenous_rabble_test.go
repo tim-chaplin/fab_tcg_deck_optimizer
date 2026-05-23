@@ -43,17 +43,17 @@ func TestRavenousRabble_TopPitchSubtracted(t *testing.T) {
 		{"pitch 3", 3, 2, 1, 0},
 	}
 	for _, tc := range cases {
-		sRed := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCards([]card.Card{testutils.GenericAttackPitch(0, 0, tc.topPitch)}).Build()}
+		sRed := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCards([]card.Card{testutils.FakeRedAttack().WithPitch(tc.topPitch)}).Build()}
 		sRed.ResolveChainStep(sRed.Logger(), &card.CardState{Card: cards.RavenousRabbleRed{}})
 		if got := sRed.Value(); got != tc.red {
 			t.Errorf("%s Red: Play() = %d, want %d", tc.name, got, tc.red)
 		}
-		sYellow := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCards([]card.Card{testutils.GenericAttackPitch(0, 0, tc.topPitch)}).Build()}
+		sYellow := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCards([]card.Card{testutils.FakeRedAttack().WithPitch(tc.topPitch)}).Build()}
 		sYellow.ResolveChainStep(sYellow.Logger(), &card.CardState{Card: cards.RavenousRabbleYellow{}})
 		if got := sYellow.Value(); got != tc.yellow {
 			t.Errorf("%s Yellow: Play() = %d, want %d", tc.name, got, tc.yellow)
 		}
-		sBlue := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCards([]card.Card{testutils.GenericAttackPitch(0, 0, tc.topPitch)}).Build()}
+		sBlue := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCards([]card.Card{testutils.FakeRedAttack().WithPitch(tc.topPitch)}).Build()}
 		sBlue.ResolveChainStep(sBlue.Logger(), &card.CardState{Card: cards.RavenousRabbleBlue{}})
 		if got := sBlue.Value(); got != tc.blue {
 			t.Errorf("%s Blue: Play() = %d, want %d", tc.name, got, tc.blue)
@@ -65,7 +65,7 @@ func TestRavenousRabble_TopPitchSubtracted(t *testing.T) {
 // Verify the floor explicitly by reducing well past zero: Blue vs a (hypothetical) pitch-5 card
 // should still return 0, not a negative number that'd turn into negative damage downstream.
 func TestRavenousRabble_FloorsAtZero(t *testing.T) {
-	ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCards([]card.Card{testutils.GenericAttackPitch(0, 0, 5)}).Build()}
+	ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCards([]card.Card{testutils.FakeRedAttack().WithPitch(5)}).Build()}
 	ge.ResolveChainStep(ge.Logger(), &card.CardState{Card: cards.RavenousRabbleBlue{}})
 	if got := ge.Value(); got != 0 {
 		t.Errorf("Blue vs pitch-5 top: Play() = %d, want 0 (floor)", got)
@@ -76,9 +76,9 @@ func TestRavenousRabble_FloorsAtZero(t *testing.T) {
 // affect the result.
 func TestRavenousRabble_OnlyFirstDeckCardMatters(t *testing.T) {
 	ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCards([]card.Card{
-		testutils.GenericAttackPitch(0, 0, 1),
-		testutils.GenericAttackPitch(0, 0, 3),
-		testutils.GenericAttackPitch(0, 0, 3),
+		testutils.FakeRedAttack(),
+		testutils.FakeBlueAttack(),
+		testutils.FakeBlueAttack(),
 	}).Build()}
 	ge.ResolveChainStep(ge.Logger(), &card.CardState{Card: cards.RavenousRabbleRed{}})
 	if got := ge.Value(); got != 4 {

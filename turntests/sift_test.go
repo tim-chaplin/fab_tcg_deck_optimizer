@@ -15,7 +15,7 @@ import (
 func siftFiller(n int) []deck.Card {
 	cs := make([]deck.Card, n)
 	for i := range cs {
-		cs[i] = testutils.RedAttack{}
+		cs[i] = testutils.FakeRedAttack()
 	}
 	return cs
 }
@@ -24,11 +24,11 @@ func siftFiller(n int) []deck.Card {
 func TestSift_CyclesFourHandCardsToDeckBottom(t *testing.T) {
 	for _, c := range []card.Card{cards.SiftRed{}, cards.SiftYellow{}, cards.SiftBlue{}} {
 		spares := []card.Card{
-			testutils.BluePitch{}, testutils.BluePitch{}, testutils.BluePitch{}, testutils.BluePitch{},
+			testutils.FakeBlueResource(), testutils.FakeBlueResource(), testutils.FakeBlueResource(), testutils.FakeBlueResource(),
 		}
 		d := deck.New(testutils.Hero{Intel: 4}, nil, siftFiller(12))
 		summary := sim.EvalOneTurnForTesting(d, nil, append([]card.Card{c}, spares...))
-		if got := summary.State.Deck().NameCounts()[testutils.BluePitch{}.DisplayName()]; got != 4 {
+		if got := summary.State.Deck().NameCounts()[testutils.FakeBlueResource().DisplayName()]; got != 4 {
 			t.Errorf("%s: deck holds %d copies of the cycled card, want 4", c.Name(), got)
 		}
 	}
@@ -37,7 +37,7 @@ func TestSift_CyclesFourHandCardsToDeckBottom(t *testing.T) {
 // Tests that Sift's cycle is capped at hand size when fewer than four spares are held.
 func TestSift_CapsCycleAtHandSize(t *testing.T) {
 	for _, c := range []card.Card{cards.SiftRed{}, cards.SiftYellow{}, cards.SiftBlue{}} {
-		spare := testutils.BluePitch{}
+		spare := testutils.FakeBlueResource()
 		d := deck.New(testutils.Hero{Intel: 4}, nil, siftFiller(12))
 		summary := sim.EvalOneTurnForTesting(d, nil, []card.Card{c, spare})
 		if got := summary.State.Deck().NameCounts()[spare.DisplayName()]; got != 1 {
@@ -51,7 +51,7 @@ func TestSift_EmptyHandResolves(t *testing.T) {
 	for _, c := range []card.Card{cards.SiftRed{}, cards.SiftYellow{}, cards.SiftBlue{}} {
 		d := deck.New(testutils.Hero{Intel: 4}, nil, siftFiller(12))
 		summary := sim.EvalOneTurnForTesting(d, nil, []card.Card{c})
-		if got := summary.State.Deck().NameCounts()[testutils.BluePitch{}.DisplayName()]; got != 0 {
+		if got := summary.State.Deck().NameCounts()[testutils.FakeBlueResource().DisplayName()]; got != 0 {
 			t.Errorf("%s: deck holds %d copies of BluePitch, want 0 (none were in hand)", c.Name(), got)
 		}
 	}

@@ -31,7 +31,7 @@ func TestOathOfTheArknight_RunebladeAttackInRemaining(t *testing.T) {
 		{cards.OathOfTheArknightBlue{}, 1},
 	}
 	for _, tc := range cases {
-		target := &card.CardState{Card: testutils.RunebladeAttack{}}
+		target := &card.CardState{Card: testutils.FakeRedAttack().WithTypes(card.TypeRuneblade)}
 		ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCardsRemaining([]*card.CardState{target}).Build()}
 		ge.ResolveChainStep(ge.Logger(), &card.CardState{Card: tc.c})
 		if got := ge.Value(); got != 1 {
@@ -44,7 +44,7 @@ func TestOathOfTheArknight_RunebladeAttackInRemaining(t *testing.T) {
 }
 
 func TestOathOfTheArknight_WeaponCountsAsAttack(t *testing.T) {
-	target := &card.CardState{Card: testutils.RunebladeWeapon{}}
+	target := &card.CardState{Card: testutils.FakeWeaponSwing().WithTypes(card.TypeRuneblade)}
 	ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCardsRemaining([]*card.CardState{target}).Build()}
 	ge.ResolveChainStep(ge.Logger(), &card.CardState{Card: cards.OathOfTheArknightRed{}})
 	if got := ge.Value(); got != 1 {
@@ -56,7 +56,7 @@ func TestOathOfTheArknight_WeaponCountsAsAttack(t *testing.T) {
 }
 
 func TestOathOfTheArknight_NonRunebladeAttackDoesNotQualify(t *testing.T) {
-	ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCardsRemaining([]*card.CardState{{Card: testutils.NonRunebladeAttack{}}}).Build()}
+	ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCardsRemaining([]*card.CardState{{Card: testutils.FakeRedAttack()}}).Build()}
 	ge.ResolveChainStep(ge.Logger(), &card.CardState{Card: cards.OathOfTheArknightRed{}})
 	if got := ge.Value(); got != 1 {
 		t.Errorf("Play() = %d, want 1 (non-Runeblade attack shouldn't trigger bonus)", got)
@@ -65,7 +65,7 @@ func TestOathOfTheArknight_NonRunebladeAttackDoesNotQualify(t *testing.T) {
 
 func TestOathOfTheArknight_RunebladeNonAttackDoesNotQualify(t *testing.T) {
 	// Read the Runes is Runeblade + Action but NOT Attack or Weapon.
-	ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCardsRemaining([]*card.CardState{{Card: testutils.NonAttack{}}}).Build()}
+	ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCardsRemaining([]*card.CardState{{Card: testutils.FakeRedAction()}}).Build()}
 	ge.ResolveChainStep(ge.Logger(), &card.CardState{Card: cards.OathOfTheArknightRed{}})
 	if got := ge.Value(); got != 1 {
 		t.Errorf("Play() = %d, want 1 (non-attack Runeblade card shouldn't trigger bonus)", got)

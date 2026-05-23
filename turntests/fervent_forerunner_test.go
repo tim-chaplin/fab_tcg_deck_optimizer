@@ -30,7 +30,7 @@ func TestFerventForerunner_BaseGoAgainFalse(t *testing.T) {
 // reshape, which TestFerventForerunner_OnHitOptReshapeIntoDeck pins separately via the
 // post-Opt deck order.
 func TestFerventForerunner_PlayCreditsPrintedPower(t *testing.T) {
-	a, b := testutils.NewFakeCard("a"), testutils.NewFakeCard("b")
+	a, b := testutils.FakeRedAction().WithName("a"), testutils.FakeRedAction().WithName("b")
 	cases := []struct {
 		c       card.Card
 		printed int
@@ -53,7 +53,7 @@ func TestFerventForerunner_PlayCreditsPrintedPower(t *testing.T) {
 
 // Tests that a +1{p} grant bumps Red's effective power so Play credits the buffed total.
 func TestFerventForerunner_OnHitOptFiresWithBonusAttackInWindow(t *testing.T) {
-	a, b := testutils.NewFakeCard("a"), testutils.NewFakeCard("b")
+	a, b := testutils.FakeRedAction().WithName("a"), testutils.FakeRedAction().WithName("b")
 	c := cards.FerventForerunnerRed{}
 	ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCards([]card.Card{a, b}).Build()}
 	cs := &card.CardState{Card: c, BonusAttack: 1}

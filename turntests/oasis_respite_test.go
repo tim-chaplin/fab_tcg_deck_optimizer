@@ -23,7 +23,7 @@ func TestOasisRespite_PreventsAndLifeRider(t *testing.T) {
 		{cards.OasisRespiteBlue{}, 2, 3},
 	}
 	for _, tc := range cases {
-		hand := []card.Card{tc.card, testutils.BluePitch{}}
+		hand := []card.Card{tc.card, testutils.FakeBlueResource()}
 		dOff := deck.New(testutils.Hero{Intel: 4}, nil, nil)
 		sOff := gameengine.GameStateBuilder().
 			SetHero(fakeLowHeroOff{}).

@@ -15,7 +15,7 @@ import (
 // inside the LikelyDamageHits window so the on-hit ping fires.
 func TestBlowForABlow_LikelyHitCreditsPing(t *testing.T) {
 	d := deck.New(testutils.Hero{Intel: 4}, nil, nil)
-	hand := []card.Card{cards.BlowForABlowRed{}, testutils.BluePitch{}}
+	hand := []card.Card{cards.BlowForABlowRed{}, testutils.FakeBlueResource()}
 	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingDamage(0).Build(), hand)
 	if summary.Value != 4+1 {
 		t.Errorf("Value = %d, want 5 (4 likely-hit + 1 ping)", summary.Value)

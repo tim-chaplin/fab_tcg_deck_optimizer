@@ -17,11 +17,11 @@ import (
 func TestGoldToken_SpendsToFillArsenalAndSwings(t *testing.T) {
 	cards := []deck.Card{
 		// Five fillers covers the gold-spend draw plus next-turn's 4 dealt cards.
-		testutils.RedAttack{}, testutils.RedAttack{}, testutils.RedAttack{},
-		testutils.RedAttack{}, testutils.RedAttack{},
+		testutils.FakeRedAttack(), testutils.FakeRedAttack(), testutils.FakeRedAttack(),
+		testutils.FakeRedAttack(), testutils.FakeRedAttack(),
 	}
 	d := deck.New(heroes.Viserai, []deck.Weapon{weapons.ReapingBlade{}}, cards)
-	hand := []card.Card{testutils.BluePitch{}}
+	hand := []card.Card{testutils.FakeBlueResource()}
 	priorItems := []*item.Item{token.NewGold(1)}
 	summary := sim.EvalOneTurnForTesting(d, stateWithItems(priorItems...), hand)
 	if summary.Value != 3 {

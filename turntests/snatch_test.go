@@ -13,7 +13,7 @@ import (
 // Tests that the on-hit DrawOne fires on a likely-hit attack, popping the deck top into
 // hand.
 func TestSnatch_LikelyHitFiresDrawOne(t *testing.T) {
-	top := testutils.GenericAttack(0, 3)
+	top := testutils.FakeRedAttack()
 	ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCards([]card.Card{top}).Build()}
 	c := cards.SnatchRed{}
 	cs := &card.CardState{Card: c}
@@ -22,7 +22,7 @@ func TestSnatch_LikelyHitFiresDrawOne(t *testing.T) {
 	if got := ge.Value(); got != 4 {
 		t.Errorf("Red: Play() = %d, want 4", got)
 	}
-	if h := ge.Hand(); len(h) != 1 || h[0] != top {
+	if h := ge.Hand(); len(h) != 1 || h[0].Name() != top.Name() {
 		t.Errorf("Hand = %v, want [top-of-deck]", h)
 	}
 	if d := ge.Deck(); d.Size() != 0 {
@@ -40,7 +40,7 @@ func TestSnatch_BlockableSuppressesDraw(t *testing.T) {
 		{cards.SnatchBlue{}, 2},
 	}
 	for _, tc := range cases {
-		top := testutils.GenericAttack(0, 3)
+		top := testutils.FakeRedAttack()
 		ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCards([]card.Card{top}).Build()}
 		ge.ResolveChainStep(ge.Logger(), &card.CardState{Card: tc.c})
 		if got := ge.Value(); got != tc.want {

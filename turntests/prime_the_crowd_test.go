@@ -23,7 +23,7 @@ func TestPrimeTheCrowd_NoAttackReturnsZero(t *testing.T) {
 
 // TestPrimeTheCrowd_NonAttackInRemainingFizzles: non-attack action fails the predicate.
 func TestPrimeTheCrowd_NonAttackInRemainingFizzles(t *testing.T) {
-	ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCardsRemaining([]*card.CardState{{Card: testutils.GenericAction()}}).Build()}
+	ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCardsRemaining([]*card.CardState{{Card: testutils.FakeRedAction()}}).Build()}
 	ge.ResolveChainStep(ge.Logger(), &card.CardState{Card: notimplemented.PrimeTheCrowdRed{}})
 	if got := ge.Value(); got != 0 {
 		t.Errorf("Play() = %d, want 0 (non-attack skipped)", got)
@@ -42,7 +42,7 @@ func TestPrimeTheCrowd_NextAttackReturnsBonus(t *testing.T) {
 		{notimplemented.PrimeTheCrowdBlue{}, 2},
 	}
 	for _, tc := range cases {
-		target := &card.CardState{Card: testutils.GenericAttack(0, 0)}
+		target := &card.CardState{Card: testutils.FakeRedAttack()}
 		ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCardsRemaining([]*card.CardState{target}).Build()}
 		ge.ResolveChainStep(ge.Logger(), &card.CardState{Card: tc.c})
 		if got := ge.Value(); got != 0 {

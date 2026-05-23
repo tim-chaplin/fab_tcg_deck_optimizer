@@ -74,6 +74,110 @@ func TestGameStateBuilder_MultiLineWhenMultiSetter(t *testing.T) {
 	}
 }
 
+// TestFakeCardBuilder_MultiLineWhenMultiWither mirrors the GameStateBuilder rule for
+// testutils' Fake-card builder chains: a chain rooted at a testutils.FakeXxx() /
+// NewFakeCard / NewGrantAll / NewGrantSpy constructor that carries two or more With*
+// calls must be broken one call per line. Single-With chains stay inline.
+func TestFakeCardBuilder_MultiLineWhenMultiWither(t *testing.T) {
+	root := RepoRoot(t)
+	fset := token.NewFileSet()
+	err := filepath.WalkDir(root, func(path string, d os.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+		if d.IsDir() {
+			if name := d.Name(); path != root && strings.HasPrefix(name, ".") {
+				return filepath.SkipDir
+			}
+			return nil
+		}
+		if !strings.HasSuffix(path, ".go") {
+			return nil
+		}
+		f, perr := parser.ParseFile(fset, path, nil, parser.SkipObjectResolution)
+		if perr != nil {
+			return perr
+		}
+		// seen marks the inner CallExprs of a chain so the outer ast.Inspect doesn't
+		// re-report a chain once from each With node along it.
+		seen := map[*ast.CallExpr]bool{}
+		ast.Inspect(f, func(n ast.Node) bool {
+			call, isCall := n.(*ast.CallExpr)
+			if !isCall || seen[call] {
+				return true
+			}
+			lines, isFake := fakeBuilderChainLines(fset, call, seen)
+			if !isFake {
+				return true
+			}
+			// lines holds [WithN, ..., With1, FakeRoot]; subtract the root.
+			if len(lines)-1 < 2 {
+				return true
+			}
+			seenLine := make(map[int]bool, len(lines))
+			for _, ln := range lines {
+				if seenLine[ln] {
+					pos := fset.Position(call.Lparen)
+					t.Errorf("%s: testutils.Fake-card chain with %d With* calls must be broken one call per line",
+						pos, len(lines)-1)
+					break
+				}
+				seenLine[ln] = true
+			}
+			return true
+		})
+		return nil
+	})
+	if err != nil {
+		t.Fatalf("walk: %v", err)
+	}
+}
+
+// fakeBuilderChainLines walks inward from call. If the chain bottoms out at a
+// testutils.FakeXxx() / NewFakeCard() / NewGrant... constructor, returns the source
+// line of every method selector in the chain ordered outer→inner. seen is mutated to
+// mark every intermediate CallExpr so the outer ast.Inspect skips them.
+func fakeBuilderChainLines(fset *token.FileSet, call *ast.CallExpr, seen map[*ast.CallExpr]bool) ([]int, bool) {
+	var lines []int
+	cur := ast.Expr(call)
+	for {
+		c, isCall := cur.(*ast.CallExpr)
+		if !isCall {
+			return nil, false
+		}
+		switch fn := c.Fun.(type) {
+		case *ast.SelectorExpr:
+			seen[c] = true
+			lines = append(lines, fset.Position(fn.Sel.NamePos).Line)
+			if strings.HasPrefix(fn.Sel.Name, "With") {
+				cur = fn.X
+				continue
+			}
+			// Root call. Accept testutils.FakeXxx / NewFakeCard / NewGrantAll / NewGrantSpy.
+			if pkg, ok := fn.X.(*ast.Ident); ok && pkg.Name == "testutils" && isFakeConstructorName(fn.Sel.Name) {
+				return lines, true
+			}
+			return nil, false
+		case *ast.Ident:
+			// Unqualified constructor — calls from inside package testutils.
+			if isFakeConstructorName(fn.Name) {
+				seen[c] = true
+				lines = append(lines, fset.Position(fn.NamePos).Line)
+				return lines, true
+			}
+			return nil, false
+		default:
+			return nil, false
+		}
+	}
+}
+
+// isFakeConstructorName reports whether name is one of the testutils.FakeXxx() /
+// NewGrant... constructor names that root a Fake-card builder chain.
+func isFakeConstructorName(name string) bool {
+	return strings.HasPrefix(name, "Fake") || strings.HasPrefix(name, "NewGrant")
+}
+
 // gameStateBuilderChainLines reports whether call is the terminal .Build() of a
 // GameStateBuilder() chain. When it is, it returns the source line of every method
 // selector in the chain ordered outer→inner ([Build, SetN, ..., Set1, GameStateBuilder]);

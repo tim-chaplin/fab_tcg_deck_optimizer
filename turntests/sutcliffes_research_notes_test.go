@@ -20,9 +20,9 @@ func TestSutcliffesResearchNotes_EmptyDeck(t *testing.T) {
 
 func TestSutcliffesResearchNotes_CountsRunebladeAttackActions(t *testing.T) {
 	deck := []card.Card{
-		testutils.RunebladeAttack{},
-		testutils.NonAttack{},
-		testutils.RunebladeAttack{},
+		testutils.FakeRedAttack().WithTypes(card.TypeRuneblade),
+		testutils.FakeRedAction(),
+		testutils.FakeRedAttack().WithTypes(card.TypeRuneblade),
 	}
 	ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCards(deck).Build()}
 	ge.ResolveChainStep(ge.Logger(), &card.CardState{Card: cards.SutcliffesResearchNotesRed{}})
@@ -35,7 +35,7 @@ func TestSutcliffesResearchNotes_CountsRunebladeAttackActions(t *testing.T) {
 }
 
 func TestSutcliffesResearchNotes_DeckShorterThanRevealCount(t *testing.T) {
-	deck := []card.Card{testutils.RunebladeAttack{}}
+	deck := []card.Card{testutils.FakeRedAttack().WithTypes(card.TypeRuneblade)}
 	ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCards(deck).Build()}
 	ge.ResolveChainStep(ge.Logger(), &card.CardState{Card: cards.SutcliffesResearchNotesRed{}})
 	if got := ge.Value(); got != 1 {
@@ -56,7 +56,7 @@ func TestSutcliffesResearchNotes_RunebladeNonAttackIgnored(t *testing.T) {
 
 func TestSutcliffesResearchNotes_NonRunebladeAttackIgnored(t *testing.T) {
 	// An attack action that isn't Runeblade-classed shouldn't count.
-	deck := []card.Card{testutils.NonRunebladeAttack{}}
+	deck := []card.Card{testutils.FakeRedAttack()}
 	ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCards(deck).Build()}
 	ge.ResolveChainStep(ge.Logger(), &card.CardState{Card: cards.SutcliffesResearchNotesRed{}})
 	if got := ge.Value(); got != 0 {
@@ -66,9 +66,9 @@ func TestSutcliffesResearchNotes_NonRunebladeAttackIgnored(t *testing.T) {
 
 func TestSutcliffesResearchNotes_VariantRevealCounts(t *testing.T) {
 	deck := []card.Card{
-		testutils.RunebladeAttack{},
-		testutils.RunebladeAttack{},
-		testutils.RunebladeAttack{},
+		testutils.FakeRedAttack().WithTypes(card.TypeRuneblade),
+		testutils.FakeRedAttack().WithTypes(card.TypeRuneblade),
+		testutils.FakeRedAttack().WithTypes(card.TypeRuneblade),
 	}
 	cases := []struct {
 		c    card.Card

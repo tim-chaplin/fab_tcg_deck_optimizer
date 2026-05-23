@@ -2,49 +2,74 @@
 
 ## Purpose
 
-Card, hero, and weapon fakes shared by tests in multiple packages (card, cards, deck, hand,
-sim, turntests). It provides predictable, controllable implementations so predicate,
+Fake Card, Hero, and Weapon implementations shared by tests in multiple packages (card,
+cards, deck, hand, sim, turntests). Predictable, controllable fakes so predicate,
 lookahead, partition, and chain-runner tests have known inputs without pulling in real
 cards whose printed effects would perturb the measured value.
 
 ## Key types
 
-- `Card` — a configurable `card.Card` fake. Zero-value fields mean "don't care"; tests set
-  only the type / cost / power / pitch the helper under test predicates on. `GenericAttack`,
-  `GenericAttackPitch`, `GenericAction` build common shapes.
-- `FakeCard` — a fluent-builder card fake: `NewFakeCard(name)` plus `WithTypes` /
-  `WithAttack` / `WithPitch` / `WithDefense` / `WithGoAgain`.
-- Fixed-stat-line attack fakes — `RedAttack`, `YellowAttack`, `BlueAttack` (and pitch-only
-  `RedPitch`, `BluePitch`) — deliberately simple cards used as deck contents when partition
-  / ordering assertions need known optimal values.
-- Typed predicate fakes — `RunebladeAttack`, `RunebladeWeapon`, `NonAttack`,
-  `NonRunebladeAttack`, `AttackWithPower`, `Aura`, `FakeInstant`, `FakeNoGoAgainAttack` —
-  each a fixed type line for one lookahead / predicate case.
-- `Hero` — a minimal no-op hero with a configurable `Intel` (hand-draw size) and an
+- `Fake` — single configurable `card.Card` implementation. Constructed via one of the
+  colour-and-shape constructors below plus chained `With...` methods so every attribute
+  the test cares about is visible at the call site.
+- Colour-and-shape constructors — pitch is encoded in the constructor name (Red=1,
+  Yellow=2, Blue=3) and shape (Attack / Action / Resource / DR / Instant / Aura) seeds
+  the right base TypeSet. Defaults: cost=0, power=0, defense=0, no Go again, no Play
+  side effect.
+  - `FakeRedAttack` / `FakeYellowAttack` / `FakeBlueAttack` — generic Action-Attack.
+  - `FakeRedAction` / `FakeYellowAction` / `FakeBlueAction` — generic non-attack action.
+  - `FakeRedResource` / `FakeYellowResource` / `FakeBlueResource` — TypeResource (can
+    only pitch, never plays).
+  - `FakeRedDR` / `FakeYellowDR` / `FakeBlueDR` — defense reactions.
+  - `FakeRedInstant` / `FakeYellowInstant` / `FakeBlueInstant` — generic instants.
+  - `FakeRedAura` / `FakeYellowAura` / `FakeBlueAura` — auras.
+  - `FakeRedBlocker` / `FakeYellowBlocker` / `FakeBlueBlocker` — Generic + Block, no
+    Action / Attack / DefenseReaction (used by Opt-strategy tests that need a TypeBlock
+    card competing with DRs for the defender slot).
+  - `FakeWeaponSwing` — Generic Weapon+Attack base, no pitch; subtypes via `WithTypes`
+    (Club, Hammer, Sword, …).
+- Builder methods on `Fake` — `WithPower`, `WithCost`, `WithDefense`, `WithGoAgain`,
+  `WithTypes(types ...card.CardType)` (variadic; ORs the given subtypes into the
+  existing TypeSet — additive, for tagging on Runeblade / Hammer / Sword / …),
+  `WithName` (override default name for log-assertion disambiguation), `WithPitch`
+  (override the constructor's pitch; only for tests that iterate pitch dynamically),
+  `WithPlay` (custom Play body), `WithDrawOne` (convenience for "this card draws on
+  resolution").
+- `Hero` — a minimal no-op hero with configurable `Intel` (hand-draw size) and an
   injectable `OptStrategy`.
-- `ClubWeapon` / `ClubWeaponAbility` / `HammerWeaponAbility` — weapon and weapon-ability
-  fakes for types the real card pool lacks (Club, Hammer), so AR predicates that gate on
-  those types can be exercised end-to-end.
+- `ClubWeapon` — a 1-handed Club weapon (Weapon interface) whose `Ability()` returns a
+  `FakeWeaponSwing` with Club + OneHand types. Used by turn-level tests that need an
+  equipped weapon of a Club/Hammer type the card pool doesn't print.
 - `GrantAll` / `GrantSpy` — a paired probe for detecting cross-permutation `CardState`
-  wrapper leakage in the chain runner.
-- `FireOnHitIfLikely` — fires every `OnHit` handler on a card when `LikelyToHit`, so a unit
-  test that calls `Play` directly can exercise on-hit riders without the full chain runner.
+  wrapper leakage in the chain runner. Build via `NewGrantAll()` / `NewGrantSpy(&saw)`.
+- `FireOnHitIfLikely` — fires every `OnHit` handler on a card when `LikelyToHit`, so a
+  unit test that calls `Play` directly can exercise on-hit riders without the full
+  chain runner.
 
 ## How to use / extend
 
-Import the package from a test, pick the fake matching the case under test, and set only
-the fields the assertion depends on. To add a fake, follow the existing pattern: a struct
-implementing `card.Card` (or `sim.Weapon`) whose `ID()` returns `ids.InvalidCard`.
+Import the package from a test, pick the constructor matching the card shape under
+test, and chain `With...` to set the attributes the assertion depends on. To add a new
+shape (e.g. a printed-keyword card category), add one constructor per colour to
+`fakes.go` seeded with the right base TypeSet.
 
 ## Important files
 
-- `cards.go` — the `Card` / `FakeCard` framework and every card fake.
+- `fakes.go` — the `Fake` builder type and every colour-and-shape constructor.
+- `cards.go` — `GrantAll` / `GrantSpy` behaviour spies and shared helpers
+  (`CardNamesSim`, `FireOnHitIfLikely`).
 - `hero.go` — the `Hero` fake.
-- `weapons.go` — the Club / Hammer weapon and ability fakes.
+- `weapons.go` — the `ClubWeapon` weapon fake.
 
 ## Gotchas
 
-- Every fake returns `ids.InvalidCard` (or `InvalidWeapon` / `InvalidHero`) from `ID()`.
-  Per-ID caches (`cardMetaCache`, `chainStepCache`) special-case `InvalidCard` so multiple
-  fakes in one test don't interfere; the eval cache bails out whenever any input has an
-  Invalid id (production cards always carry a unique non-zero ID).
+- Every fake returns `ids.InvalidCard` (or `InvalidWeapon` / `InvalidHero`) from
+  `ID()`. Per-ID caches (`cardMetaCache`, `chainStepCache`) special-case `InvalidCard`
+  so multiple fakes in one test don't interfere; the eval cache bails out whenever any
+  input has an Invalid id (production cards always carry a unique non-zero ID).
+- `Fake` is comparable (`a == b` works) — the play hook is stored behind a pointer so
+  the struct itself stays comparable. The engine uses `==` in places like
+  `RemoveFromHand`; if you write a fake outside the builder, keep that invariant.
+- The colour constructors imply pitch (Red=1, Yellow=2, Blue=3). Real FaB cards all
+  have pitch 1/2/3 so this covers the realistic space; tests that need an
+  off-spectrum pitch override with `WithPitch(n)`.

@@ -24,7 +24,7 @@ func TestComeToFight_NoAttackReturnsZero(t *testing.T) {
 // TestComeToFight_NonAttackInRemainingFizzles: only an action (no attack) in CardsRemaining — the
 // attack-action predicate rejects it.
 func TestComeToFight_NonAttackInRemainingFizzles(t *testing.T) {
-	ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCardsRemaining([]*card.CardState{{Card: testutils.GenericAction()}}).Build()}
+	ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCardsRemaining([]*card.CardState{{Card: testutils.FakeRedAction()}}).Build()}
 	ge.ResolveChainStep(ge.Logger(), &card.CardState{Card: cards.ComeToFightRed{}})
 	if got := ge.Value(); got != 0 {
 		t.Errorf("Play() = %d, want 0 (non-attack skipped)", got)
@@ -43,7 +43,7 @@ func TestComeToFight_NextAttackReturnsBonus(t *testing.T) {
 		{cards.ComeToFightBlue{}, 1},
 	}
 	for _, tc := range cases {
-		target := &card.CardState{Card: testutils.GenericAttack(0, 0)}
+		target := &card.CardState{Card: testutils.FakeRedAttack()}
 		ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCardsRemaining([]*card.CardState{target}).Build()}
 		ge.ResolveChainStep(ge.Logger(), &card.CardState{Card: tc.c})
 		if got := ge.Value(); got != 0 {

@@ -15,7 +15,7 @@ import (
 // Tests that Brandish on hit grants +1{p} to the next weapon attack.
 func TestBrandish_OnHitBuffsNextWeaponAttack(t *testing.T) {
 	d := deck.New(testutils.Hero{Intel: 4}, []deck.Weapon{weapons.ReapingBlade{}}, nil)
-	hand := []card.Card{cards.BrandishBlue{}, testutils.BluePitch{}}
+	hand := []card.Card{cards.BrandishBlue{}, testutils.FakeBlueResource()}
 
 	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingDamage(0).Build(), hand)
 
@@ -28,7 +28,7 @@ func TestBrandish_OnHitBuffsNextWeaponAttack(t *testing.T) {
 // Tests that Brandish's rider fizzles when no weapon swing follows.
 func TestBrandish_NoWeaponRiderFizzles(t *testing.T) {
 	d := deck.New(testutils.Hero{Intel: 4}, nil, nil)
-	hand := []card.Card{cards.BrandishBlue{}, testutils.BluePitch{}}
+	hand := []card.Card{cards.BrandishBlue{}, testutils.FakeBlueResource()}
 
 	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingDamage(0).Build(), hand)
 

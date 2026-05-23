@@ -15,7 +15,7 @@ func TestRunicReaping_NoNextAttackReturnsZero(t *testing.T) {
 	ge := gameengine.New()
 	(cards.RunicReapingRed{}).Play(ge, ge.Logger(), &card.CardState{
 		Card:          cards.RunicReapingRed{},
-		PitchedToPlay: []card.Card{testutils.AttackWithPower{Power: 4}},
+		PitchedToPlay: []card.Card{testutils.FakeRedAttack().WithTypes(card.TypeRuneblade)},
 	})
 	if got := ge.Value(); got != 0 {
 		t.Fatalf("Play() = %d, want 0", got)
@@ -27,7 +27,7 @@ func TestRunicReaping_NoNextAttackReturnsZero(t *testing.T) {
 
 // Tests that a Runeblade weapon as the next attack does not satisfy either rider.
 func TestRunicReaping_WeaponNextDoesNotQualify(t *testing.T) {
-	target := &card.CardState{Card: testutils.RunebladeWeapon{}}
+	target := &card.CardState{Card: testutils.FakeWeaponSwing().WithTypes(card.TypeRuneblade)}
 	ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCardsRemaining([]*card.CardState{target}).Build()}
 	ge.ResolveChainStep(ge.Logger(), &card.CardState{Card: cards.RunicReapingRed{}})
 	if got := ge.Value(); got != 0 {
@@ -44,11 +44,11 @@ func TestRunicReaping_WeaponNextDoesNotQualify(t *testing.T) {
 // Tests that an attack-action target with attack-attributed funding gets +1{p} and registers the
 // on-hit trigger.
 func TestRunicReaping_RegistersTriggerAndGrantsPitchedAttackBonus(t *testing.T) {
-	target := &card.CardState{Card: testutils.AttackWithPower{Power: 3}}
+	target := &card.CardState{Card: testutils.FakeRedAttack().WithTypes(card.TypeRuneblade)}
 	ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCardsRemaining([]*card.CardState{target}).Build()}
 	(cards.RunicReapingRed{}).Play(ge, ge.Logger(), &card.CardState{
 		Card:          cards.RunicReapingRed{},
-		PitchedToPlay: []card.Card{testutils.RunebladeAttack{}},
+		PitchedToPlay: []card.Card{testutils.FakeRedAttack().WithTypes(card.TypeRuneblade)},
 	})
 	if got := ge.Value(); got != 0 {
 		t.Fatalf("Play() = %d, want 0 (Runechant rider deferred to target'ge OnHit)", got)
@@ -64,11 +64,11 @@ func TestRunicReaping_RegistersTriggerAndGrantsPitchedAttackBonus(t *testing.T) 
 // Tests that without an attack attributed, the +1{p} rider skips but the on-hit Runechant trigger
 // still registers.
 func TestRunicReaping_NoPitchedAttackSkipsBonusButRegistersTrigger(t *testing.T) {
-	target := &card.CardState{Card: testutils.AttackWithPower{Power: 4}}
+	target := &card.CardState{Card: testutils.FakeRedAttack().WithTypes(card.TypeRuneblade)}
 	ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCardsRemaining([]*card.CardState{target}).Build()}
 	(cards.RunicReapingRed{}).Play(ge, ge.Logger(), &card.CardState{
 		Card:          cards.RunicReapingRed{},
-		PitchedToPlay: []card.Card{testutils.NonAttack{}},
+		PitchedToPlay: []card.Card{testutils.FakeRedAction()},
 	})
 	if got := ge.Value(); got != 0 {
 		t.Fatalf("Play() = %d, want 0", got)

@@ -24,13 +24,19 @@ func TestRallyCycle_DiscardsHeldCardOnlyWhenWorthIt(t *testing.T) {
 	}{
 		// Discarding the 2-power spare for +3{d} blocks all 5 (value 5); playing it instead
 		// blocks 2 and deals 2 (value 4). The discard wins.
-		{"discards a weak spare", 5, testutils.GenericAttack(0, 2), 5, false},
+		{"discards a weak spare", 5, testutils.FakeRedAttack().
+			WithCost(0).
+			WithPower(2), 5, false},
 		// Keeping the 4-power spare blocks 2 and deals 4 (value 6); discarding it blocks 5
 		// (value 5). Keeping it to attack wins.
-		{"keeps a strong spare to attack", 5, testutils.GenericAttack(0, 4), 6, false},
+		{"keeps a strong spare to attack", 5, testutils.FakeRedAttack().
+			WithCost(0).
+			WithPower(4), 6, false},
 		// A cost-3 spare can't be funded, and the base 2 block already covers the 2 incoming.
 		// The +3{d} would be dead weight, so the spare is held — promoted to the arsenal.
-		{"holds an unplayable spare", 2, testutils.GenericAttack(3, 2), 2, true},
+		{"holds an unplayable spare", 2, testutils.FakeRedAttack().
+			WithCost(3).
+			WithPower(2), 2, true},
 	}
 	for _, rally := range []card.Card{cards.RallyTheCoastGuardRed{}, cards.RallyTheRearguardRed{}} {
 		for _, c := range cases {

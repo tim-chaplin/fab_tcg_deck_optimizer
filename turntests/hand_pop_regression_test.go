@@ -14,7 +14,7 @@ import (
 // Tests that a card moved out of hand by an alt-cost Play (Seek Horizon's hand-on-top
 // rider) can't be replayed later in the same chain.
 func TestChainRunner_AltCostPoppedCardCannotPhantomPlay(t *testing.T) {
-	bigAttack := testutils.GenericAttack(0, 5)
+	bigAttack := testutils.FakeRedAttack()
 	d := deck.New(testutils.Hero{Intel: 4}, nil, nil)
 	summary := sim.EvalOneTurnForTesting(
 		d,

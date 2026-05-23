@@ -23,7 +23,7 @@ func TestFlyingHigh_NoAttackReturnsZero(t *testing.T) {
 // TestFlyingHigh_NonAttackInRemainingFizzles confirms a non-attack action in CardsRemaining is
 // skipped by the attack-action predicate.
 func TestFlyingHigh_NonAttackInRemainingFizzles(t *testing.T) {
-	skipped := &card.CardState{Card: testutils.GenericAction()}
+	skipped := &card.CardState{Card: testutils.FakeRedAction()}
 	ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCardsRemaining([]*card.CardState{skipped}).Build()}
 	ge.ResolveChainStep(ge.Logger(), &card.CardState{Card: cards.FlyingHighRed{}})
 	if got := ge.Value(); got != 0 {
@@ -52,7 +52,7 @@ func TestFlyingHigh_ColorMatchGrantsBonus(t *testing.T) {
 			pitch int
 			want  int
 		}{{1, tc.wantRed}, {2, tc.wantYellow}, {3, tc.wantBlue}} {
-			pc := &card.CardState{Card: testutils.GenericAttackPitch(0, 0, target.pitch)}
+			pc := &card.CardState{Card: testutils.FakeRedAttack().WithPitch(target.pitch)}
 			ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCardsRemaining([]*card.CardState{pc}).Build()}
 			ge.ResolveChainStep(ge.Logger(), &card.CardState{Card: tc.c})
 			if got := ge.Value(); got != 0 {
@@ -74,7 +74,7 @@ func TestFlyingHigh_ColorMatchGrantsBonus(t *testing.T) {
 // Tests that "your next attack" grants go again to a weapon swing target, with no +1{p}
 // rider (weapons have no pitch).
 func TestFlyingHigh_GrantsGoAgainToWeaponSwing(t *testing.T) {
-	pc := &card.CardState{Card: testutils.RunebladeWeapon{}}
+	pc := &card.CardState{Card: testutils.FakeWeaponSwing().WithTypes(card.TypeRuneblade)}
 	ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCardsRemaining([]*card.CardState{pc}).Build()}
 	ge.ResolveChainStep(ge.Logger(), &card.CardState{Card: cards.FlyingHighRed{}})
 	if !pc.GrantedGoAgain {

@@ -29,7 +29,7 @@ func TestBest_MauvrionAloneFizzlesWithoutDamage(t *testing.T) {
 // Tests that a Runeblade weapon swing doesn't satisfy Mauvrion's predicate (attack action
 // only).
 func TestBest_MauvrionBladeOnlyFizzles(t *testing.T) {
-	h := []card.Card{cards.MauvrionSkiesRed{}, testutils.YellowAttack{}}
+	h := []card.Card{cards.MauvrionSkiesRed{}, testutils.FakeYellowAttack().WithPower(2)}
 	ws := []deck.Weapon{weapons.ReapingBlade{}}
 	d := deck.New(testutils.Hero{Intel: 4}, ws, nil)
 	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingDamage(0).Build(), h)
@@ -43,7 +43,7 @@ func TestBest_MauvrionBladeOnlyFizzles(t *testing.T) {
 
 // Tests that a Generic (non-Runeblade) attack action doesn't satisfy Mauvrion's predicate.
 func TestBest_MauvrionNonRunebladeAttackFizzles(t *testing.T) {
-	h := []card.Card{cards.MauvrionSkiesRed{}, testutils.RedAttack{}, testutils.YellowAttack{}}
+	h := []card.Card{cards.MauvrionSkiesRed{}, testutils.FakeRedAttack().WithPower(3), testutils.FakeYellowAttack().WithPower(2)}
 	d := deck.New(testutils.Hero{Intel: 4}, nil, nil)
 	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingDamage(0).Build(), h)
 	// Pitch YellowAttack (2 res) → play Mauvrion (cost 0, go again) → play fake RedAttack
@@ -60,7 +60,7 @@ func TestBest_MauvrionLikelyHitRunebladeAttackCreditsRider(t *testing.T) {
 	h := []card.Card{
 		cards.MauvrionSkiesRed{},
 		cards.ShrillOfSkullformRed{},
-		testutils.YellowAttack{},
+		testutils.FakeYellowAttack().WithPower(2),
 	}
 	d := deck.New(testutils.Hero{Intel: 4}, nil, nil)
 	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingDamage(0).Build(), h)
@@ -80,7 +80,7 @@ func TestBest_MauvrionBlockableRunebladeAttackDropsRider(t *testing.T) {
 	h := []card.Card{
 		cards.MauvrionSkiesRed{},
 		cards.ShrillOfSkullformBlue{},
-		testutils.YellowAttack{},
+		testutils.FakeYellowAttack().WithPower(2),
 	}
 	d := deck.New(testutils.Hero{Intel: 4}, nil, nil)
 	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingDamage(0).Build(), h)

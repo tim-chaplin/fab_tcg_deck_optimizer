@@ -65,7 +65,7 @@ func TestArcanicSpike_RunechantFiresBeforeAttackAndTriggersRider(t *testing.T) {
 		SetIncomingDamage(0).
 		Build()
 	d := deck.New(testutils.Hero{Intel: 4}, nil, nil)
-	hand := []card.Card{testutils.BluePitch{}, cards.ArcanicSpikeRed{}}
+	hand := []card.Card{testutils.FakeBlueResource(), cards.ArcanicSpikeRed{}}
 
 	summary := sim.EvalOneTurnForTesting(d, prior, hand)
 

@@ -16,7 +16,7 @@ import (
 // swing (base 3) lands for 4.
 func TestVisitTheBlacksmith_BuffsNextSwordAttack(t *testing.T) {
 	d := deck.New(testutils.Hero{Intel: 4}, []deck.Weapon{weapons.ReapingBlade{}}, nil)
-	hand := []card.Card{cards.VisitTheBlacksmithBlue{}, testutils.BluePitch{}}
+	hand := []card.Card{cards.VisitTheBlacksmithBlue{}, testutils.FakeBlueResource()}
 
 	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingDamage(0).Build(), hand)
 

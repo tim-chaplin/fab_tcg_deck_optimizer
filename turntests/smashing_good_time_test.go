@@ -23,7 +23,7 @@ func TestSmashingGoodTime_NoAttackReturnsZero(t *testing.T) {
 
 // TestSmashingGoodTime_NonAttackInRemainingFizzles: non-attack action fails the predicate.
 func TestSmashingGoodTime_NonAttackInRemainingFizzles(t *testing.T) {
-	ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCardsRemaining([]*card.CardState{{Card: testutils.GenericAction()}}).Build()}
+	ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCardsRemaining([]*card.CardState{{Card: testutils.FakeRedAction()}}).Build()}
 	ge.ResolveChainStep(ge.Logger(), &card.CardState{Card: notimplemented.SmashingGoodTimeRed{}})
 	if got := ge.Value(); got != 0 {
 		t.Errorf("Play() = %d, want 0 (non-attack skipped)", got)
@@ -43,7 +43,7 @@ func TestSmashingGoodTime_NextAttackGrantsBonusAttack(t *testing.T) {
 		{notimplemented.SmashingGoodTimeBlue{}, 1},
 	}
 	for _, tc := range cases {
-		target := &card.CardState{Card: testutils.GenericAttack(0, 0)}
+		target := &card.CardState{Card: testutils.FakeRedAttack()}
 		ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCardsRemaining([]*card.CardState{target}).Build()}
 		pc := &card.CardState{Card: tc.c, FromArsenal: true}
 		ge.ResolveChainStep(ge.Logger(), pc)
@@ -59,7 +59,7 @@ func TestSmashingGoodTime_NextAttackGrantsBonusAttack(t *testing.T) {
 // TestSmashingGoodTime_HandPlayedFizzles: hand-played copy fails the from-arsenal gate.
 func TestSmashingGoodTime_HandPlayedFizzles(t *testing.T) {
 	for _, c := range []card.Card{notimplemented.SmashingGoodTimeRed{}, notimplemented.SmashingGoodTimeYellow{}, notimplemented.SmashingGoodTimeBlue{}} {
-		ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCardsRemaining([]*card.CardState{{Card: testutils.GenericAttack(0, 0)}}).Build()}
+		ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCardsRemaining([]*card.CardState{{Card: testutils.FakeRedAttack()}}).Build()}
 		pc := &card.CardState{Card: c}
 		ge.ResolveChainStep(ge.Logger(), pc)
 		if got := ge.Value(); got != 0 {

@@ -22,8 +22,8 @@ func TestMemorialGround_NoEligibleNoOp(t *testing.T) {
 // Tests that Memorial Ground recycles a cost-2-or-less attack action card from the
 // graveyard to the top of the deck.
 func TestMemorialGround_RecyclesEligibleAttackActionToTop(t *testing.T) {
-	target := testutils.GenericAttack(2, 4)
-	deck := []card.Card{testutils.BlueAttack{}}
+	target := testutils.FakeRedAttack().WithCost(2)
+	deck := []card.Card{testutils.FakeBlueAttack().WithCost(1)}
 	ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().
 		SetCards(deck).
 		SetGraveyard([]card.Card{target}).
@@ -43,7 +43,7 @@ func TestMemorialGround_RecyclesEligibleAttackActionToTop(t *testing.T) {
 // Tests that a graveyard with only an over-cost or non-attack-action card leaves Memorial
 // Ground unable to recycle.
 func TestMemorialGround_IgnoresIneligibleCards(t *testing.T) {
-	ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetGraveyard([]card.Card{testutils.GenericAttack(3, 5), testutils.GenericAction()}).Build()}
+	ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetGraveyard([]card.Card{testutils.FakeRedAttack().WithCost(3), testutils.FakeRedAction()}).Build()}
 	ge.ResolveChainStep(ge.Logger(), &card.CardState{Card: cards.MemorialGroundRed{}})
 	if ge.Deck().Size() != 0 {
 		t.Errorf("deck size = %d, want 0 (no eligible target)", ge.Deck().Size())

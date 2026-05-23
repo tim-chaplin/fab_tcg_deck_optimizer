@@ -27,11 +27,11 @@ func stateWithItems(items ...*item.Item) *gameengine.GameState {
 // Tests that the Copper token ability stays unspent when the chain can't fund its {4} cost.
 func TestCopperToken_NotEnoughResourceSkipsSpend(t *testing.T) {
 	cards := []deck.Card{
-		testutils.RedAttack{}, testutils.RedAttack{}, testutils.RedAttack{},
-		testutils.RedAttack{}, testutils.RedAttack{},
+		testutils.FakeRedAttack(), testutils.FakeRedAttack(), testutils.FakeRedAttack(),
+		testutils.FakeRedAttack(), testutils.FakeRedAttack(),
 	}
 	d := deck.New(heroes.Viserai, nil, cards)
-	hand := []card.Card{testutils.BluePitch{}}
+	hand := []card.Card{testutils.FakeBlueResource()}
 	priorItems := []*item.Item{token.NewCopper(1)}
 	summary := sim.EvalOneTurnForTesting(d, stateWithItems(priorItems...), hand)
 	if summary.State.CopperCount() != 1 {
@@ -44,11 +44,11 @@ func TestCopperToken_NotEnoughResourceSkipsSpend(t *testing.T) {
 // Blade swing ({1}), with 1 res to spare.
 func TestCopperToken_SpendsAndSwings(t *testing.T) {
 	cards := []deck.Card{
-		testutils.RedAttack{}, testutils.RedAttack{}, testutils.RedAttack{},
-		testutils.RedAttack{}, testutils.RedAttack{},
+		testutils.FakeRedAttack(), testutils.FakeRedAttack(), testutils.FakeRedAttack(),
+		testutils.FakeRedAttack(), testutils.FakeRedAttack(),
 	}
 	d := deck.New(heroes.Viserai, []deck.Weapon{weapons.ReapingBlade{}}, cards)
-	hand := []card.Card{testutils.BluePitch{}, testutils.BluePitch{}}
+	hand := []card.Card{testutils.FakeBlueResource(), testutils.FakeBlueResource()}
 	priorItems := []*item.Item{token.NewCopper(1)}
 	summary := sim.EvalOneTurnForTesting(d, stateWithItems(priorItems...), hand)
 	if summary.Value != 3 {

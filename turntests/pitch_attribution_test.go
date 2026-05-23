@@ -24,7 +24,7 @@ func TestPitchAttribution_AetherSlashSingleNonAttackPitchFiresRider(t *testing.T
 
 // Tests that an attack-typed pitch funding Aether Slash does not activate the rider.
 func TestPitchAttribution_AetherSlashAttackPitchDoesNotFireRider(t *testing.T) {
-	hand := []card.Card{cards.AetherSlashRed{}, testutils.YellowAttack{}}
+	hand := []card.Card{cards.AetherSlashRed{}, testutils.FakeYellowAttack()}
 	d := deck.New(heroes.Viserai, nil, fillerDeck())
 	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetHero(heroes.Viserai).Build(), hand)
 	if summary.Value != 4 {
@@ -63,7 +63,7 @@ func TestPitchAttribution_OneNonAttackPitchFundsMultipleAetherSlashes(t *testing
 	withAttack := []card.Card{
 		cards.MauvrionSkiesRed{},
 		cards.AetherSlashRed{}, cards.AetherSlashRed{},
-		testutils.BlueAttack{},
+		testutils.FakeBlueAttack(),
 	}
 	summary = sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetHero(heroes.Viserai).Build(), withAttack)
 	if got := summary.Value; got != 13 {
@@ -80,9 +80,9 @@ func TestPitchAttribution_OneNonAttackPitchFundsMultipleAetherSlashes(t *testing
 // pass nil directly.
 func fillerDeck() []deck.Card {
 	return []deck.Card{
-		testutils.BlueAttack{}, testutils.BlueAttack{},
-		testutils.BlueAttack{}, testutils.BlueAttack{},
-		testutils.BlueAttack{}, testutils.BlueAttack{},
-		testutils.BlueAttack{}, testutils.BlueAttack{},
+		testutils.FakeBlueAttack(), testutils.FakeBlueAttack(),
+		testutils.FakeBlueAttack(), testutils.FakeBlueAttack(),
+		testutils.FakeBlueAttack(), testutils.FakeBlueAttack(),
+		testutils.FakeBlueAttack(), testutils.FakeBlueAttack(),
 	}
 }

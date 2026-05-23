@@ -34,7 +34,7 @@ func TestHitTheHighNotes_NoAuraReturnsBase(t *testing.T) {
 func TestHitTheHighNotes_AuraPlayedTriggersBonus(t *testing.T) {
 	// An Aura-typed card earlier in the turn'ge CardsPlayed → +2 power.
 	ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().
-		SetCardsPlayed([]card.Card{testutils.Aura{}}).
+		SetCardsPlayed([]card.Card{testutils.FakeRedAura()}).
 		SetAuraCreated(true).
 		Build()}
 	ge.ResolveChainStep(ge.Logger(), &card.CardState{Card: cards.HitTheHighNotesRed{}})
@@ -77,7 +77,7 @@ func TestHitTheHighNotes_SeesRunechantFromTriggeredMalefic(t *testing.T) {
 		SetIncomingDamage(0).
 		Build()
 	d := deck.New(testutils.Hero{Intel: 4}, nil, nil)
-	hand := []card.Card{testutils.BluePitch{}, cards.HitTheHighNotesRed{}}
+	hand := []card.Card{testutils.FakeBlueResource(), cards.HitTheHighNotesRed{}}
 
 	summary := sim.EvalOneTurnForTesting(d, prior, hand)
 

@@ -17,9 +17,12 @@ import (
 func TestRelentlessPursuit_RecyclesToDeckBottomAfterAttack(t *testing.T) {
 	d := deck.New(heroes.Viserai, nil, fillerDeck())
 	hand := []card.Card{
-		testutils.RedAttack{},         // attack first to satisfy the recycle gate
+		testutils.FakeRedAttack().
+			WithCost(1).
+			WithPower(3).
+			WithGoAgain(), // attack first to satisfy the recycle gate
 		cards.RelentlessPursuitBlue{}, // resolves second; recycles to deck bottom
-		testutils.RedPitch{},          // funds RedAttack's cost-1
+		testutils.FakeRedAction(),     // funds RedAttack's cost-1
 	}
 	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingDamage(0).Build(), hand)
 	rp := cards.RelentlessPursuitBlue{}

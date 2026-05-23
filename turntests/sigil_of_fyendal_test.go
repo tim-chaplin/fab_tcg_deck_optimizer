@@ -39,7 +39,7 @@ func TestSigilOfFyendal_StartOfTurnCredits1Damage(t *testing.T) {
 		CreateAuraFromCard(cards.SigilOfFyendalBlue{}).
 		Build()
 	d := deck.New(testutils.Hero{Intel: 4}, nil, nil)
-	hand := []card.Card{testutils.BluePitch{}}
+	hand := []card.Card{testutils.FakeBlueResource()}
 
 	summary := sim.EvalOneTurnForTesting(d, prior, hand)
 

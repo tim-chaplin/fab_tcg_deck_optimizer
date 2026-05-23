@@ -406,12 +406,12 @@ func (gs *GameState) Banished() []card.Card     { return gs.banished }
 func (gs *GameState) SetBanished(b []card.Card) { gs.banished = b }
 
 func (gs *GameState) Auras() []Aura                { return gs.auras }
-func (gs *GameState) SetAuras(a []Aura)             { gs.auras = a }
-func (gs *GameState) ClearAuras()                   { gs.auras = nil }
-func (gs *GameState) Triggers() []EphemeralTrigger  { return gs.triggers }
-func (gs *GameState) ClearTriggers()                { gs.triggers = nil }
-func (gs *GameState) Items() []Item                 { return gs.items }
-func (gs *GameState) ClearItems()                   { gs.items = nil }
+func (gs *GameState) SetAuras(a []Aura)            { gs.auras = a }
+func (gs *GameState) ClearAuras()                  { gs.auras = nil }
+func (gs *GameState) Triggers() []EphemeralTrigger { return gs.triggers }
+func (gs *GameState) ClearTriggers()               { gs.triggers = nil }
+func (gs *GameState) Items() []Item                { return gs.items }
+func (gs *GameState) ClearItems()                  { gs.items = nil }
 
 // AuraCount returns the count of live auras. Used by gates like Yinti Yanti's "while you
 // control an aura" rider.

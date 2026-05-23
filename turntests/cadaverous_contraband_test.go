@@ -24,8 +24,8 @@ func TestCadaverousContraband_RegistersOnHit(t *testing.T) {
 
 // Tests that the on-hit recycle moves a non-attack action card from graveyard to top of deck.
 func TestCadaverousContraband_OnHitRecyclesNonAttackToTop(t *testing.T) {
-	non := testutils.GenericAction()
-	deck := []card.Card{testutils.RedAttack{}}
+	non := testutils.FakeRedAction()
+	deck := []card.Card{testutils.FakeRedAttack()}
 	ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().
 		SetCards(deck).
 		SetGraveyard([]card.Card{non}).
@@ -48,7 +48,7 @@ func TestCadaverousContraband_OnHitRecyclesNonAttackToTop(t *testing.T) {
 // Tests that with no non-attack action card in the graveyard, the on-hit recycle leaves the
 // graveyard and deck untouched.
 func TestCadaverousContraband_OnHitNoEligibleCardNoOp(t *testing.T) {
-	ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetGraveyard([]card.Card{testutils.RedAttack{}}).Build()}
+	ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetGraveyard([]card.Card{testutils.FakeRedAttack()}).Build()}
 	pc := &card.CardState{Card: cards.CadaverousContrabandRed{}}
 	ge.ResolveChainStep(ge.Logger(), pc)
 	testutils.FireOnHitIfLikely(ge, ge.Logger(), pc)

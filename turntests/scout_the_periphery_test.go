@@ -24,7 +24,7 @@ func TestScoutThePeriphery_NoAttackReturnsZero(t *testing.T) {
 // TestScoutThePeriphery_NonAttackInRemainingFizzles: non-attack action (even from arsenal)
 // fails the predicate — only attack actions count as the rider's target.
 func TestScoutThePeriphery_NonAttackInRemainingFizzles(t *testing.T) {
-	ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCardsRemaining([]*card.CardState{{Card: testutils.GenericAction(), FromArsenal: true}}).Build()}
+	ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCardsRemaining([]*card.CardState{{Card: testutils.FakeRedAction(), FromArsenal: true}}).Build()}
 	ge.ResolveChainStep(ge.Logger(), &card.CardState{Card: cards.ScoutThePeripheryRed{}})
 	if got := ge.Value(); got != 0 {
 		t.Errorf("Play() = %d, want 0 (non-attack skipped)", got)
@@ -34,7 +34,7 @@ func TestScoutThePeriphery_NonAttackInRemainingFizzles(t *testing.T) {
 // TestScoutThePeriphery_HandPlayedAttackFizzles: queued attack action that wasn't played from
 // arsenal fails the rider's "next attack action card you play from arsenal" target gate.
 func TestScoutThePeriphery_HandPlayedAttackFizzles(t *testing.T) {
-	ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCardsRemaining([]*card.CardState{{Card: testutils.GenericAttack(0, 0)}}).Build()}
+	ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCardsRemaining([]*card.CardState{{Card: testutils.FakeRedAttack()}}).Build()}
 	ge.ResolveChainStep(ge.Logger(), &card.CardState{Card: cards.ScoutThePeripheryRed{}})
 	if got := ge.Value(); got != 0 {
 		t.Errorf("Play() = %d, want 0 (target attack not from arsenal)", got)
@@ -53,7 +53,7 @@ func TestScoutThePeriphery_NextArsenalAttackReturnsBonus(t *testing.T) {
 		{cards.ScoutThePeripheryBlue{}, 1},
 	}
 	for _, tc := range cases {
-		target := &card.CardState{Card: testutils.GenericAttack(0, 0), FromArsenal: true}
+		target := &card.CardState{Card: testutils.FakeRedAttack(), FromArsenal: true}
 		ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCardsRemaining([]*card.CardState{target}).Build()}
 		ge.ResolveChainStep(ge.Logger(), &card.CardState{Card: tc.c})
 		if got := ge.Value(); got != 0 {

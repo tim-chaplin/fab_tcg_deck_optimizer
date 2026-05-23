@@ -56,7 +56,7 @@ func TestSigilOfSilphidae_StartOfTurnFizzlesWithoutAnotherAura(t *testing.T) {
 		CreateAuraFromCard(cards.SigilOfSilphidaeBlue{}).
 		Build()
 	d := deck.New(testutils.Hero{Intel: 4}, nil, nil)
-	hand := []card.Card{testutils.BluePitch{}}
+	hand := []card.Card{testutils.FakeBlueResource()}
 
 	summary := sim.EvalOneTurnForTesting(d, prior, hand)
 
@@ -80,7 +80,7 @@ func TestSigilOfSilphidae_StartOfTurnBanishesAnotherAura(t *testing.T) {
 		SetGraveyard([]card.Card{other}).
 		Build()
 	d := deck.New(testutils.Hero{Intel: 4}, nil, nil)
-	hand := []card.Card{testutils.BluePitch{}}
+	hand := []card.Card{testutils.FakeBlueResource()}
 
 	summary := sim.EvalOneTurnForTesting(d, prior, hand)
 

@@ -21,7 +21,7 @@ import (
 // it. Red pitch funds Reduce's cost.
 func TestYintiYanti_RunechantFromReduceFiresBeforeYintiResolves(t *testing.T) {
 	d := deck.New(heroes.Viserai, nil, nil)
-	hand := []card.Card{cards.YintiYantiRed{}, cards.ReduceToRunechantRed{}, testutils.RedPitch{}}
+	hand := []card.Card{cards.YintiYantiRed{}, cards.ReduceToRunechantRed{}, testutils.FakeRedAction()}
 	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingDamage(4).Build(), hand)
 	got := summary.Value
 	if got != 8 {
@@ -33,7 +33,7 @@ func TestYintiYanti_RunechantFromReduceFiresBeforeYintiResolves(t *testing.T) {
 // credits +1{p}. Blue pitch funds Peace of Mind's cost.
 func TestYintiYanti_SeesPonderFromPeaceOfMindInDefense(t *testing.T) {
 	d := deck.New(heroes.Viserai, nil, nil)
-	hand := []card.Card{cards.YintiYantiRed{}, cards.PeaceOfMindRed{}, testutils.BluePitch{}}
+	hand := []card.Card{cards.YintiYantiRed{}, cards.PeaceOfMindRed{}, testutils.FakeBlueResource()}
 	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingDamage(4).Build(), hand)
 	got := summary.Value
 	if got != 8 {
@@ -45,7 +45,7 @@ func TestYintiYanti_SeesPonderFromPeaceOfMindInDefense(t *testing.T) {
 // Runechant when its Block runs (DRs run first, populating auras before plain-block).
 func TestYintiYanti_BlueBlockSeesRunechantFromReduceInDefense(t *testing.T) {
 	d := deck.New(heroes.Viserai, nil, nil)
-	hand := []card.Card{cards.YintiYantiBlue{}, cards.ReduceToRunechantRed{}, testutils.RedPitch{}}
+	hand := []card.Card{cards.YintiYantiBlue{}, cards.ReduceToRunechantRed{}, testutils.FakeRedAction()}
 	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingDamage(7).Build(), hand)
 	got := summary.Value
 	if got != 8 {
@@ -57,7 +57,7 @@ func TestYintiYanti_BlueBlockSeesRunechantFromReduceInDefense(t *testing.T) {
 // DR puts in auras (DR runs first, populating auras before the plain-block hook).
 func TestYintiYanti_BlueBlockSeesPonderFromPeaceOfMindInDefense(t *testing.T) {
 	d := deck.New(heroes.Viserai, nil, nil)
-	hand := []card.Card{cards.YintiYantiBlue{}, cards.PeaceOfMindRed{}, testutils.BluePitch{}}
+	hand := []card.Card{cards.YintiYantiBlue{}, cards.PeaceOfMindRed{}, testutils.FakeBlueResource()}
 	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingDamage(7).Build(), hand)
 	got := summary.Value
 	if got != 7 {

@@ -18,7 +18,7 @@ func TestRunebloodIncantation_StartOfTurnFireCreatesRunechant(t *testing.T) {
 		CreateAuraFromCard(cards.RunebloodIncantationRed{}).
 		Build()
 	d := deck.New(testutils.Hero{Intel: 4}, nil, nil)
-	hand := []card.Card{testutils.BluePitch{}}
+	hand := []card.Card{testutils.FakeBlueResource()}
 
 	summary := sim.EvalOneTurnForTesting(d, prior, hand)
 
@@ -38,7 +38,7 @@ func TestRunebloodIncantation_LastVerseSpentThenDestroyedNextTurn(t *testing.T) 
 		SetIncomingDamage(0).
 		Build()
 	d := deck.New(testutils.Hero{Intel: 4}, nil, nil)
-	hand := []card.Card{testutils.BluePitch{}}
+	hand := []card.Card{testutils.FakeBlueResource()}
 
 	turn1, turn2 := sim.EvalTwoTurnsForTesting(d, prior, hand)
 

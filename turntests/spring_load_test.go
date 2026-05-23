@@ -14,7 +14,7 @@ import (
 func TestSpringLoad_BasePower(t *testing.T) {
 	for _, c := range []card.Card{cards.SpringLoadRed{}, cards.SpringLoadYellow{}, cards.SpringLoadBlue{}} {
 		ge := gameengine.New()
-		ge.SetHand([]card.Card{testutils.GenericAttack(0, 0)})
+		ge.SetHand([]card.Card{testutils.FakeRedAttack()})
 		ge.ResolveChainStep(ge.Logger(), &card.CardState{Card: c})
 		if got := ge.Value(); got != 2 {
 			t.Errorf("%s: Play() with non-empty hand = %d, want 2", c.Name(), got)

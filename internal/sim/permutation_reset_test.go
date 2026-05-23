@@ -88,7 +88,7 @@ func (s flipsAndReadsBonusDefense) Play(_ card.GameEngine, _ card.Logger, self *
 // observes a stale-true value from an earlier permutation.
 func TestBestSequence_GrantedDominateResetPerPermutation(t *testing.T) {
 	saw := 0
-	attackers := []card.Card{flipsAndReadsDominate{saw: &saw}, testutils.RedAttack{}}
+	attackers := []card.Card{flipsAndReadsDominate{saw: &saw}, testutils.FakeRedAttack()}
 	ctx := NewSequenceContextForTest(testutils.Hero{Intel: 4}, nil, nil, 10, 0, len(attackers))
 	ctx.BestSequence(attackers)
 	if saw != 0 {
@@ -99,7 +99,7 @@ func TestBestSequence_GrantedDominateResetPerPermutation(t *testing.T) {
 // TestBestSequence_GrantedOverpowerResetPerPermutation: ditto for GrantedOverpower.
 func TestBestSequence_GrantedOverpowerResetPerPermutation(t *testing.T) {
 	saw := 0
-	attackers := []card.Card{flipsAndReadsOverpower{saw: &saw}, testutils.RedAttack{}}
+	attackers := []card.Card{flipsAndReadsOverpower{saw: &saw}, testutils.FakeRedAttack()}
 	ctx := NewSequenceContextForTest(testutils.Hero{Intel: 4}, nil, nil, 10, 0, len(attackers))
 	ctx.BestSequence(attackers)
 	if saw != 0 {
@@ -111,7 +111,7 @@ func TestBestSequence_GrantedOverpowerResetPerPermutation(t *testing.T) {
 // permutations or a card incrementing it would accumulate across the N! enumeration.
 func TestBestSequence_BonusDefenseResetPerPermutation(t *testing.T) {
 	maxSeen := 0
-	attackers := []card.Card{flipsAndReadsBonusDefense{maxSeen: &maxSeen}, testutils.RedAttack{}}
+	attackers := []card.Card{flipsAndReadsBonusDefense{maxSeen: &maxSeen}, testutils.FakeRedAttack()}
 	ctx := NewSequenceContextForTest(testutils.Hero{Intel: 4}, nil, nil, 10, 0, len(attackers))
 	ctx.BestSequence(attackers)
 	if maxSeen != 1 {

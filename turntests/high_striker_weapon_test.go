@@ -17,9 +17,9 @@ func TestHighStriker_WeaponHitCreatesCopper(t *testing.T) {
 	d := deck.New(heroes.Viserai, []deck.Weapon{testutils.ClubWeapon{}}, nil)
 	hand := []card.Card{
 		cards.HighStrikerRed{},
-		testutils.BluePitch{},
-		testutils.BluePitch{},
-		testutils.BluePitch{},
+		testutils.FakeBlueResource(),
+		testutils.FakeBlueResource(),
+		testutils.FakeBlueResource(),
 	}
 	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingDamage(0).Build(), hand)
 	if got := summary.State.CopperCount(); got != 6 {

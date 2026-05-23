@@ -19,7 +19,7 @@ func TestArcaneCussing_PoppedUnblockedCreatesNoRunechants(t *testing.T) {
 		SetIncomingDamage(3).
 		Build()
 	d := deck.New(testutils.Hero{Intel: 4}, nil, nil)
-	hand := []card.Card{testutils.BluePitch{}}
+	hand := []card.Card{testutils.FakeBlueResource()}
 
 	summary := sim.EvalOneTurnForTesting(d, prior, hand)
 
@@ -39,7 +39,7 @@ func TestArcaneCussing_FullyBlockedDoesNotPop(t *testing.T) {
 		SetIncomingDamage(3).
 		Build()
 	d := deck.New(testutils.Hero{Intel: 4}, nil, nil)
-	hand := []card.Card{testutils.PitchOneDR{}}
+	hand := []card.Card{testutils.FakeRedDR().WithDefense(3)}
 
 	summary := sim.EvalOneTurnForTesting(d, prior, hand)
 
@@ -59,7 +59,9 @@ func TestArcaneCussing_PoppedByOwnAttackCreatesRunechants(t *testing.T) {
 		SetIncomingDamage(3).
 		Build()
 	d := deck.New(testutils.Hero{Intel: 4}, nil, nil)
-	hand := []card.Card{testutils.PitchOneDR{}, testutils.AttackWithPower{Power: 4}}
+	hand := []card.Card{testutils.FakeRedDR().WithDefense(3), testutils.FakeRedAttack().
+		WithPower(4).
+		WithTypes(card.TypeRuneblade)}
 
 	summary := sim.EvalOneTurnForTesting(d, prior, hand)
 

@@ -17,18 +17,18 @@ func TestRifting_HitLetsNextNonAttackActionPlayAsInstant(t *testing.T) {
 	prior := gameengine.GameStateBuilder().SetIncomingDamage(0).Build()
 	// Rifting (Blue, power 4) hits; BluePitch funds its cost 2; NonAttack is the non-attack
 	// action that, with no AP left after Rifting, can only be played via the instant grant.
-	hand := []card.Card{cards.RiftingBlue{}, testutils.NonAttack{}, testutils.BluePitch{}}
+	hand := []card.Card{cards.RiftingBlue{}, testutils.FakeRedAction(), testutils.FakeBlueResource()}
 
 	summary := sim.EvalOneTurnForTesting(d, prior, hand)
 
 	played := false
 	for _, a := range summary.BestLine {
-		if _, ok := a.Card.(testutils.NonAttack); ok && a.Role == card.Attack {
+		if a.Card.Name() == "FakeRedAction" && a.Role == card.Attack {
 			played = true
 		}
 	}
 	if !played {
-		t.Errorf("NonAttack not played — Rifting's instant grant didn't let it into the chain\nBestLine: %s",
+		t.Errorf("FakeRedAction not played — Rifting's instant grant didn't let it into the chain\nBestLine: %s",
 			formatBestLine(summary.BestLine))
 	}
 }

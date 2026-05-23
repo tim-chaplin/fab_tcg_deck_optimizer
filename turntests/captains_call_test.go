@@ -12,7 +12,7 @@ import (
 
 // Tests that mode 0 grants +2{p} to the next cost-≤N attack action card.
 func TestCaptainsCall_Mode0BuffsBonusAttack(t *testing.T) {
-	target := &card.CardState{Card: testutils.GenericAttack(1, 4)}
+	target := &card.CardState{Card: testutils.FakeRedAttack().WithCost(1)}
 	ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCardsRemaining([]*card.CardState{target}).Build()}
 	pc := &card.CardState{Card: cards.CaptainsCallRed{}, Mode: 0}
 	ge.ResolveChainStep(ge.Logger(), pc)
@@ -26,7 +26,7 @@ func TestCaptainsCall_Mode0BuffsBonusAttack(t *testing.T) {
 
 // Tests that mode 1 grants go again to the next cost-≤N attack action card.
 func TestCaptainsCall_Mode1GrantsGoAgain(t *testing.T) {
-	target := &card.CardState{Card: testutils.GenericAttack(1, 4)}
+	target := &card.CardState{Card: testutils.FakeRedAttack().WithCost(1)}
 	ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCardsRemaining([]*card.CardState{target}).Build()}
 	pc := &card.CardState{Card: cards.CaptainsCallRed{}, Mode: 1}
 	ge.ResolveChainStep(ge.Logger(), pc)
@@ -40,7 +40,7 @@ func TestCaptainsCall_Mode1GrantsGoAgain(t *testing.T) {
 
 // Tests that the cost cap rejects too-expensive attack action cards.
 func TestCaptainsCall_BlueRejectsCostAboveZero(t *testing.T) {
-	target := &card.CardState{Card: testutils.GenericAttack(1, 4)}
+	target := &card.CardState{Card: testutils.FakeRedAttack().WithCost(1)}
 	ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCardsRemaining([]*card.CardState{target}).Build()}
 	pc := &card.CardState{Card: cards.CaptainsCallBlue{}, Mode: 0}
 	ge.ResolveChainStep(ge.Logger(), pc)

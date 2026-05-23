@@ -42,10 +42,10 @@ func TestEvalTwoTurns_SigilOfTheArknightRevealsIntoHand(t *testing.T) {
 	sigil := cards.SigilOfTheArknightBlue{}
 	reveal := cards.AetherSlashRed{}
 	d := deck.New(heroes.Viserai, nil, []deck.Card{
-		testutils.BluePitch{},
-		testutils.BluePitch{},
-		testutils.BluePitch{},
-		testutils.BluePitch{},
+		testutils.FakeBlueResource(),
+		testutils.FakeBlueResource(),
+		testutils.FakeBlueResource(),
+		testutils.FakeBlueResource(),
 		reveal,
 	})
 	turn1, turn2 := sim.EvalTwoTurnsForTesting(d, gameengine.GameStateBuilder().SetIncomingDamage(0).Build(), []card.Card{sigil})
@@ -66,7 +66,7 @@ func TestEvalTwoTurns_SigilOfTheArknightRevealsIntoHand(t *testing.T) {
 // Turn 1 needs a pitch card to fund Blessing's cost.
 func TestEvalTwoTurns_BlessingOfOccultCreatesRunesAtStartOfNextTurn(t *testing.T) {
 	blessing := cards.BlessingOfOccultRed{}
-	pitch := testutils.BluePitch{}
+	pitch := testutils.FakeBlueResource()
 	d := deck.New(heroes.Viserai, nil, nil)
 	turn1, turn2 := sim.EvalTwoTurnsForTesting(d, gameengine.GameStateBuilder().SetIncomingDamage(0).Build(), []card.Card{blessing, pitch})
 
@@ -117,7 +117,7 @@ func TestEvalTwoTurns_MaleficIncantationOncePerTurnLimitsToOneRune(t *testing.T)
 // Turn 1 needs a pitch card to fund Runeblood's cost.
 func TestEvalTwoTurns_RunebloodIncantationTicksAcrossTurns(t *testing.T) {
 	runeblood := cards.RunebloodIncantationRed{}
-	pitch := testutils.BluePitch{}
+	pitch := testutils.FakeBlueResource()
 	d := deck.New(heroes.Viserai, nil, nil)
 	turn1, turn2 := sim.EvalTwoTurnsForTesting(d, gameengine.GameStateBuilder().SetIncomingDamage(0).Build(), []card.Card{runeblood, pitch})
 

@@ -25,7 +25,7 @@ func TestSeekHorizon_EmptyHandNoGoAgain(t *testing.T) {
 func TestSeekHorizon_PaysAltCostAndGrantsGoAgain(t *testing.T) {
 	for _, c := range []card.Card{cards.SeekHorizonRed{}, cards.SeekHorizonYellow{}, cards.SeekHorizonBlue{}} {
 		ge := gameengine.New()
-		spare := testutils.GenericAttack(0, 1)
+		spare := testutils.FakeRedAttack()
 		ge.GameState.AppendHandRaw(spare)
 		pc := &card.CardState{Card: c}
 		ge.ResolveChainStep(ge.Logger(), pc)
@@ -37,7 +37,7 @@ func TestSeekHorizon_PaysAltCostAndGrantsGoAgain(t *testing.T) {
 			t.Errorf("%s [%d{p}]: hand size = %d after alt cost, want 0 (card moved to deck top)", c.Name(), c.Pitch(), len(ge.Hand()))
 		}
 		top, ok := ge.PeekDeck()
-		if !ok || top != spare {
+		if !ok || top.Name() != spare.Name() {
 			t.Errorf("%s [%d{p}]: deck top = %v, want %v (the popped hand card)", c.Name(), c.Pitch(), top, spare)
 		}
 	}

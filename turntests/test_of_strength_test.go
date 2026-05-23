@@ -14,7 +14,7 @@ import (
 // (top power ≥ 6 vs opponent's modelled 5).
 func TestTestOfStrength_WinCreatesGold(t *testing.T) {
 	for _, power := range []int{6, 7} {
-		ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCards([]card.Card{testutils.GenericAttack(0, power)}).Build()}
+		ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCards([]card.Card{testutils.FakeRedAttack().WithPower(power)}).Build()}
 		ge.ResolveChainStep(ge.Logger(), &card.CardState{Card: cards.TestOfStrengthRed{}})
 		if ge.GoldCount() != 1 {
 			t.Errorf("top power %d: Gold = %d, want 1 (clash win)", power, ge.GoldCount())
@@ -24,7 +24,7 @@ func TestTestOfStrength_WinCreatesGold(t *testing.T) {
 
 // Tests that a tied clash (top power == 5) creates no Gold token.
 func TestTestOfStrength_TieNoGold(t *testing.T) {
-	ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCards([]card.Card{testutils.GenericAttack(0, 5)}).Build()}
+	ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCards([]card.Card{testutils.FakeRedAttack().WithPower(5)}).Build()}
 	ge.ResolveChainStep(ge.Logger(), &card.CardState{Card: cards.TestOfStrengthRed{}})
 	if ge.GoldCount() != 0 {
 		t.Errorf("top power 5: Gold = %d, want 0 (tie)", ge.GoldCount())
@@ -35,7 +35,7 @@ func TestTestOfStrength_TieNoGold(t *testing.T) {
 // to reflect the opponent's Gold token.
 func TestTestOfStrength_LossNoGoldAndDocksValue(t *testing.T) {
 	for _, power := range []int{0, 1, 2, 3, 4} {
-		ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCards([]card.Card{testutils.GenericAttack(0, power)}).Build()}
+		ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCards([]card.Card{testutils.FakeRedAttack().WithPower(power)}).Build()}
 		valueBefore := ge.Value()
 		ge.ResolveChainStep(ge.Logger(), &card.CardState{Card: cards.TestOfStrengthRed{}})
 		if ge.GoldCount() != 0 {
