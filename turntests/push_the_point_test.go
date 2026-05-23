@@ -16,7 +16,7 @@ import (
 // the next chain step.
 func TestPushThePoint_LastAttackHitGrantsBonus(t *testing.T) {
 	for _, c := range []card.Card{cards.PushThePointRed{}, cards.PushThePointYellow{}, cards.PushThePointBlue{}} {
-		d := deck.New(testutils.Hero{Intel: 4}, nil, fillerDeck())
+		d := deck.New(testutils.Hero{Intel: 4}, nil, nil)
 		hand := []card.Card{testutils.BlueAttack{}, c, testutils.BluePitch{}, testutils.BluePitch{}}
 		summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingDamage(0).Build(), hand)
 		want := testutils.BlueAttack{}.Attack() + c.Attack() + 2
@@ -29,7 +29,7 @@ func TestPushThePoint_LastAttackHitGrantsBonus(t *testing.T) {
 // Tests that Push the Point stays at printed power when no prior attack hit.
 func TestPushThePoint_NoPriorHitNoBonus(t *testing.T) {
 	for _, c := range []card.Card{cards.PushThePointRed{}, cards.PushThePointYellow{}, cards.PushThePointBlue{}} {
-		d := deck.New(testutils.Hero{Intel: 4}, nil, fillerDeck())
+		d := deck.New(testutils.Hero{Intel: 4}, nil, nil)
 		hand := []card.Card{c, testutils.BluePitch{}}
 		summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingDamage(0).Build(), hand)
 		if summary.Value != c.Attack() {

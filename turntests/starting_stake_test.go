@@ -16,7 +16,7 @@ import (
 // is in play and the hand has nothing more profitable to do — solo Starting Stake in
 // hand picks the create line over the Held alternative.
 func TestStartingStake_CreatesGoldViaChain(t *testing.T) {
-	d := deck.New(heroes.Viserai, nil, fillerDeck())
+	d := deck.New(heroes.Viserai, nil, nil)
 	hand := []card.Card{cards.StartingStakeYellow{}}
 	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingDamage(0).Build(), hand)
 	if summary.State.GoldCount() != 1 {

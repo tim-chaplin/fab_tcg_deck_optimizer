@@ -13,7 +13,7 @@ import (
 
 // Tests that Lead the Charge's action-point grant lets a second action card chain off it.
 func TestLeadTheCharge_GrantsActionPointForNextAction(t *testing.T) {
-	d := deck.New(testutils.Hero{Intel: 4}, nil, fillerDeck())
+	d := deck.New(testutils.Hero{Intel: 4}, nil, nil)
 	hand := []card.Card{
 		cards.LeadTheChargeRed{},
 		testutils.BluePitch{},
@@ -29,7 +29,7 @@ func TestLeadTheCharge_GrantsActionPointForNextAction(t *testing.T) {
 
 // Tests that Lead the Charge's grant fizzles when no action card follows.
 func TestLeadTheCharge_NoExtraPointWithoutFollowingAction(t *testing.T) {
-	d := deck.New(testutils.Hero{Intel: 4}, nil, fillerDeck())
+	d := deck.New(testutils.Hero{Intel: 4}, nil, nil)
 	hand := []card.Card{
 		cards.LeadTheChargeRed{},
 		testutils.CostlyAttack{},
@@ -44,7 +44,7 @@ func TestLeadTheCharge_NoExtraPointWithoutFollowingAction(t *testing.T) {
 // Tests that the granted action point stacks with the next action card's own go again — it
 // is a real action point, not a redundant copy of that card's Go again keyword.
 func TestLeadTheCharge_ActionPointStacksWithGoAgain(t *testing.T) {
-	d := deck.New(testutils.Hero{Intel: 4}, nil, fillerDeck())
+	d := deck.New(testutils.Hero{Intel: 4}, nil, nil)
 	hand := []card.Card{
 		cards.LeadTheChargeRed{},
 		testutils.AttackWithPower{Power: 3},

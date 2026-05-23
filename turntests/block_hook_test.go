@@ -14,7 +14,7 @@ import (
 
 // Tests that Battlefront Bastion's +1 alone-bonus fires when it's the only plain blocker.
 func TestBlock_BattlefrontBastionAloneFiresBonus(t *testing.T) {
-	d := deck.New(heroes.Viserai, nil, fillerDeck())
+	d := deck.New(heroes.Viserai, nil, nil)
 	hand := []card.Card{cards.BattlefrontBastionRed{}}
 	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingDamage(5).Build(), hand)
 	got := summary.Value
@@ -26,7 +26,7 @@ func TestBlock_BattlefrontBastionAloneFiresBonus(t *testing.T) {
 // Tests that a DR blocking alongside Battlefront Bastion doesn't cancel its alone-bonus —
 // only a second simultaneous plain block does.
 func TestBlock_BattlefrontBastionAloneFiresBesideDR(t *testing.T) {
-	d := deck.New(heroes.Viserai, nil, fillerDeck())
+	d := deck.New(heroes.Viserai, nil, nil)
 	hand := []card.Card{
 		cards.BattlefrontBastionRed{},
 		cards.ToughenUpBlue{},
@@ -42,7 +42,7 @@ func TestBlock_BattlefrontBastionAloneFiresBesideDR(t *testing.T) {
 // Tests that another Block-typed card (On the Horizon) alongside Battlefront Bastion
 // counts as a second plain blocker — so BB's alone-bonus does NOT fire.
 func TestBlock_BattlefrontBastionAloneCancelledByBlockCard(t *testing.T) {
-	d := deck.New(heroes.Viserai, nil, fillerDeck())
+	d := deck.New(heroes.Viserai, nil, nil)
 	hand := []card.Card{cards.BattlefrontBastionRed{}, cards.OnTheHorizonRed{}}
 	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingDamage(10).Build(), hand)
 	got := summary.Value
@@ -54,7 +54,7 @@ func TestBlock_BattlefrontBastionAloneCancelledByBlockCard(t *testing.T) {
 // Tests that a second plain blocker cancels Battlefront Bastion's alone-bonus while
 // firing Right Behind You's together-bonus on the same chain.
 func TestBlock_BattlefrontBastionAloneCancelledByPlainBlocker(t *testing.T) {
-	d := deck.New(heroes.Viserai, nil, fillerDeck())
+	d := deck.New(heroes.Viserai, nil, nil)
 	hand := []card.Card{cards.BattlefrontBastionRed{}, cards.RightBehindYouRed{}}
 	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingDamage(5).Build(), hand)
 	got := summary.Value
@@ -66,7 +66,7 @@ func TestBlock_BattlefrontBastionAloneCancelledByPlainBlocker(t *testing.T) {
 // Tests that Right Behind You's together-bonus stays silent when no other plain blocker
 // shares the defenders slot.
 func TestBlock_RightBehindYouAloneNoBonus(t *testing.T) {
-	d := deck.New(heroes.Viserai, nil, fillerDeck())
+	d := deck.New(heroes.Viserai, nil, nil)
 	hand := []card.Card{cards.RightBehindYouRed{}}
 	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingDamage(5).Build(), hand)
 	got := summary.Value

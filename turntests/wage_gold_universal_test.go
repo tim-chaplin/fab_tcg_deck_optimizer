@@ -14,7 +14,7 @@ import (
 
 // Tests that Wage Gold's Universal keyword triggers Viserai's Runeblade hero ability.
 func TestWageGold_UniversalTriggersViseraiOnPlay(t *testing.T) {
-	d := deck.New(heroes.Viserai, nil, fillerDeck())
+	d := deck.New(heroes.Viserai, nil, nil)
 	hand := []card.Card{
 		cards.HighStrikerBlue{},
 		cards.WageGoldRed{},

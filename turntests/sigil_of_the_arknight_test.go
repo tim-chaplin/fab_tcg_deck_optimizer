@@ -38,7 +38,7 @@ func TestSigilOfTheArknight_StartOfTurnRevealsAttackActionIntoHand(t *testing.T)
 		CreateAuraFromCard(cards.SigilOfTheArknightBlue{}).
 		Build()
 	deckCards := []deck.Card{revealed}
-	deckCards = append(deckCards, fillerDeck()...)
+	deckCards = append(deckCards, nil...)
 	d := deck.New(testutils.Hero{Intel: 4}, nil, deckCards)
 	hand := []card.Card{testutils.BluePitch{}}
 
@@ -61,7 +61,7 @@ func TestSigilOfTheArknight_StartOfTurnRevealsNonAttackDoesNotDraw(t *testing.T)
 		CreateAuraFromCard(cards.SigilOfTheArknightBlue{}).
 		Build()
 	deckCards := []deck.Card{top}
-	deckCards = append(deckCards, fillerDeck()...)
+	deckCards = append(deckCards, nil...)
 	d := deck.New(testutils.Hero{Intel: 4}, nil, deckCards)
 	hand := []card.Card{testutils.BluePitch{}}
 

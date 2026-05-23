@@ -14,7 +14,7 @@ import (
 
 // Tests that Strike Gold's on-hit rider lands a Gold token in Items when the attack hits.
 func TestStrikeGold_OnHitCreatesGoldToken(t *testing.T) {
-	d := deck.New(heroes.Viserai, nil, fillerDeck())
+	d := deck.New(heroes.Viserai, nil, nil)
 	hand := []card.Card{
 		cards.StrikeGoldRed{},
 		testutils.BluePitch{},
@@ -33,7 +33,7 @@ func TestStrikeGold_OnHitCreatesGoldToken(t *testing.T) {
 
 // Tests that Strike Gold's on-hit rider does not fire when the attack misses LikelyToHit.
 func TestStrikeGold_BlockableMissDoesNotCreateGold(t *testing.T) {
-	d := deck.New(heroes.Viserai, nil, fillerDeck())
+	d := deck.New(heroes.Viserai, nil, nil)
 	hand := []card.Card{
 		cards.StrikeGoldYellow{},
 		testutils.BluePitch{},

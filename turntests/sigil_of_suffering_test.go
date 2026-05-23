@@ -22,7 +22,7 @@ func TestSigilOfSuffering_FullCreditWhenIncomingAbsorbsBoost(t *testing.T) {
 		{cards.SigilOfSufferingBlue{}, 3},   // 1 block + 1 boost + 1 arcane
 	}
 	for _, tc := range cases {
-		d := deck.New(testutils.Hero{Intel: 4}, nil, fillerDeck())
+		d := deck.New(testutils.Hero{Intel: 4}, nil, nil)
 		hand := []card.Card{tc.c}
 		summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingDamage(10).Build(), hand)
 		if summary.Value != tc.want {
@@ -45,7 +45,7 @@ func TestSigilOfSuffering_BoostWastedWhenIncomingMatchesDefense(t *testing.T) {
 		{cards.SigilOfSufferingBlue{}, 1, 2},   // 1 block + 1 arcane
 	}
 	for _, tc := range cases {
-		d := deck.New(testutils.Hero{Intel: 4}, nil, fillerDeck())
+		d := deck.New(testutils.Hero{Intel: 4}, nil, nil)
 		hand := []card.Card{tc.c}
 		summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingDamage(tc.incoming).Build(), hand)
 		if summary.Value != tc.want {

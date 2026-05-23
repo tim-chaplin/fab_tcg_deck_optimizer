@@ -15,7 +15,7 @@ import (
 // Tests that Plunder Run's "next time an attack action card hits" trigger waits across a
 // missed attack and fires on the next attack action card that lands.
 func TestPlunderRun_TriggerWaitsAcrossMissAndFiresOnHit(t *testing.T) {
-	d := deck.New(heroes.Viserai, nil, fillerDeck())
+	d := deck.New(heroes.Viserai, nil, nil)
 	hand := []card.Card{
 		testutils.BluePitch{},
 		cards.PlunderRunRed{},

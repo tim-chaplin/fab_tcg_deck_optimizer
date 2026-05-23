@@ -14,7 +14,7 @@ import (
 // Tests that the on-hit 1{h} gain credits +1 on a likely-hit attack — Red lands its 4{p}
 // inside the LikelyDamageHits window so the on-hit heal fires.
 func TestLifeForALife_LikelyHitCreditsHeal(t *testing.T) {
-	d := deck.New(testutils.Hero{Intel: 4}, nil, fillerDeck())
+	d := deck.New(testutils.Hero{Intel: 4}, nil, nil)
 	hand := []card.Card{cards.LifeForALifeRed{}, testutils.BluePitch{}}
 	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingDamage(0).Build(), hand)
 	if summary.Value != 5 {
@@ -33,7 +33,7 @@ func TestLifeForALife_BlockableSuppressesHeal(t *testing.T) {
 		{cards.LifeForALifeBlue{}, 2},
 	}
 	for _, tc := range cases {
-		d := deck.New(testutils.Hero{Intel: 4}, nil, fillerDeck())
+		d := deck.New(testutils.Hero{Intel: 4}, nil, nil)
 		hand := []card.Card{tc.c, testutils.BluePitch{}}
 		summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingDamage(0).Build(), hand)
 		if summary.Value != tc.want {

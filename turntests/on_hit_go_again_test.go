@@ -17,7 +17,7 @@ import (
 // Pins on-hit-go-again chain extension through a weapon swing: Nimblism + Razor Reflex
 // buff Critical Strike to 7, RR's on-hit go-again grants AP for Reaping Blade (3).
 func TestOnHitGoAgain_RazorReflexExtendsToWeaponSwing(t *testing.T) {
-	d := deck.New(heroes.Viserai, []deck.Weapon{weapons.ReapingBlade{}}, fillerDeck())
+	d := deck.New(heroes.Viserai, []deck.Weapon{weapons.ReapingBlade{}}, nil)
 	hand := []card.Card{
 		testutils.BluePitch{},
 		cards.CriticalStrikeRed{},
@@ -34,7 +34,7 @@ func TestOnHitGoAgain_RazorReflexExtendsToWeaponSwing(t *testing.T) {
 // Pins two consecutive attack reactions stacking on a single attack: 2x Razor Reflex
 // buff Snatch to 4, the second RR's on-hit go-again grants AP for Reaping Blade (3).
 func TestOnHitGoAgain_TwoConsecutiveARsExtendToWeaponSwing(t *testing.T) {
-	d := deck.New(heroes.Viserai, []deck.Weapon{weapons.ReapingBlade{}}, fillerDeck())
+	d := deck.New(heroes.Viserai, []deck.Weapon{weapons.ReapingBlade{}}, nil)
 	hand := []card.Card{
 		testutils.BluePitch{},
 		cards.SnatchBlue{},

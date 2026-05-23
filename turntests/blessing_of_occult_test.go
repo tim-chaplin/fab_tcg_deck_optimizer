@@ -60,7 +60,7 @@ func TestBlessingOfOccult_StartOfTurnCreatesNRunes(t *testing.T) {
 	}
 	for _, tc := range cases {
 		prior := gameengine.GameStateBuilder().CreateAuraFromCard(tc.c).Build()
-		d := deck.New(testutils.Hero{Intel: 4}, nil, fillerDeck())
+		d := deck.New(testutils.Hero{Intel: 4}, nil, nil)
 		hand := []card.Card{testutils.BluePitch{}}
 
 		summary := sim.EvalOneTurnForTesting(d, prior, hand)

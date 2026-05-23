@@ -57,7 +57,7 @@ func TestMaleficIncantation_PlayRegistersCardOrAbilityTrigger(t *testing.T) {
 func TestMaleficIncantation_OncePerTurnFiresOnAttackActionCreatesOneRune(t *testing.T) {
 	for _, c := range []card.Card{cards.MaleficIncantationRed{}, cards.MaleficIncantationYellow{}, cards.MaleficIncantationBlue{}} {
 		prior := gameengine.GameStateBuilder().CreateAuraFromCard(c).Build()
-		d := deck.New(testutils.Hero{Intel: 4}, nil, fillerDeck())
+		d := deck.New(testutils.Hero{Intel: 4}, nil, nil)
 		hand := []card.Card{testutils.AttackWithPower{Power: 1}}
 
 		summary := sim.EvalOneTurnForTesting(d, prior, hand)

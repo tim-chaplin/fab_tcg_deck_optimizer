@@ -21,7 +21,7 @@ var whisperOfTheOracleVariants = []card.Card{
 // credit damage).
 func TestWhisperOfTheOracle_PlayCallsOpt4(t *testing.T) {
 	for _, variant := range whisperOfTheOracleVariants {
-		d := deck.New(testutils.Hero{Intel: 4}, nil, fillerDeck())
+		d := deck.New(testutils.Hero{Intel: 4}, nil, nil)
 		hand := []card.Card{variant}
 		summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingDamage(0).Build(), hand)
 		if summary.Value != 0 {

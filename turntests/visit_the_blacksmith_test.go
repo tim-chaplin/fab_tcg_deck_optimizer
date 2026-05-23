@@ -15,7 +15,7 @@ import (
 // Tests that Visit the Blacksmith grants +1{p} to the next sword attack — a Reaping Blade
 // swing (base 3) lands for 4.
 func TestVisitTheBlacksmith_BuffsNextSwordAttack(t *testing.T) {
-	d := deck.New(testutils.Hero{Intel: 4}, []deck.Weapon{weapons.ReapingBlade{}}, fillerDeck())
+	d := deck.New(testutils.Hero{Intel: 4}, []deck.Weapon{weapons.ReapingBlade{}}, nil)
 	hand := []card.Card{cards.VisitTheBlacksmithBlue{}, testutils.BluePitch{}}
 
 	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingDamage(0).Build(), hand)
@@ -28,7 +28,7 @@ func TestVisitTheBlacksmith_BuffsNextSwordAttack(t *testing.T) {
 
 // Tests that Visit the Blacksmith's grant fizzles with no sword attack to buff.
 func TestVisitTheBlacksmith_NoSwordAttackFizzles(t *testing.T) {
-	d := deck.New(testutils.Hero{Intel: 4}, nil, fillerDeck())
+	d := deck.New(testutils.Hero{Intel: 4}, nil, nil)
 	hand := []card.Card{cards.VisitTheBlacksmithBlue{}}
 
 	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingDamage(0).Build(), hand)

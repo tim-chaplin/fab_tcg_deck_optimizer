@@ -13,7 +13,7 @@ import (
 
 // Tests that a Rifting hit lets the next non-attack action card play without an action point.
 func TestRifting_HitLetsNextNonAttackActionPlayAsInstant(t *testing.T) {
-	d := deck.New(testutils.Hero{Intel: 4}, nil, fillerDeck())
+	d := deck.New(testutils.Hero{Intel: 4}, nil, nil)
 	prior := gameengine.GameStateBuilder().SetIncomingDamage(0).Build()
 	// Rifting (Blue, power 4) hits; BluePitch funds its cost 2; NonAttack is the non-attack
 	// action that, with no AP left after Rifting, can only be played via the instant grant.

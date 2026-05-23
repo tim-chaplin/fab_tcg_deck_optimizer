@@ -23,7 +23,7 @@ func TestBrushOff_PreventsCap(t *testing.T) {
 		{cards.BrushOffBlue{}, 1},
 	}
 	for _, tc := range cases {
-		d := deck.New(testutils.Hero{Intel: 4}, nil, fillerDeck())
+		d := deck.New(testutils.Hero{Intel: 4}, nil, nil)
 		hand := []card.Card{tc.card}
 		summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingDamage(5).Build(), hand)
 		if summary.Value != tc.want {
@@ -34,7 +34,7 @@ func TestBrushOff_PreventsCap(t *testing.T) {
 
 // Tests that prevention caps at IncomingDamage when incoming is less than Defense().
 func TestBrushOff_CapsAtIncoming(t *testing.T) {
-	d := deck.New(testutils.Hero{Intel: 4}, nil, fillerDeck())
+	d := deck.New(testutils.Hero{Intel: 4}, nil, nil)
 	hand := []card.Card{cards.BrushOffRed{}}
 	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingDamage(1).Build(), hand)
 	if summary.Value != 1 {

@@ -18,7 +18,7 @@ func TestElixirCycle_BuffsNextAttack(t *testing.T) {
 		cards.RestvineElixirRed{},
 		cards.SapwoodElixirRed{},
 	} {
-		d := deck.New(testutils.Hero{Intel: 4}, nil, fillerDeck())
+		d := deck.New(testutils.Hero{Intel: 4}, nil, nil)
 		hand := []card.Card{elixir, testutils.RunebladeAttack{}, testutils.BluePitch{}}
 
 		summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingDamage(0).Build(), hand)

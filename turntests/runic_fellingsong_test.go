@@ -15,7 +15,7 @@ import (
 // rider, so summary.Value is just Attack().
 func TestRunicFellingsong_NoAuraCreditsPrintedPowerOnly(t *testing.T) {
 	c := cards.RunicFellingsongRed{}
-	d := deck.New(testutils.Hero{Intel: 4}, nil, fillerDeck())
+	d := deck.New(testutils.Hero{Intel: 4}, nil, nil)
 	hand := []card.Card{c, testutils.BluePitch{}}
 	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingDamage(0).Build(), hand)
 	if summary.Value != c.Attack() {
@@ -28,7 +28,7 @@ func TestRunicFellingsong_NoAuraCreditsPrintedPowerOnly(t *testing.T) {
 func TestRunicFellingsong_AuraInGraveyardFiresBanishRider(t *testing.T) {
 	aura := cards.BlessingOfOccultRed{}
 	c := cards.RunicFellingsongRed{}
-	d := deck.New(testutils.Hero{Intel: 4}, nil, fillerDeck())
+	d := deck.New(testutils.Hero{Intel: 4}, nil, nil)
 	prior := gameengine.GameStateBuilder().
 		SetGraveyard([]card.Card{aura}).
 		SetIncomingDamage(0).
