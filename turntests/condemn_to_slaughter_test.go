@@ -18,7 +18,7 @@ func TestCondemnToSlaughter_SacrificesArcaneCussing(t *testing.T) {
 		CreateAuraFromCard(cards.ArcaneCussingRed{}).
 		SetIncomingDamage(0).
 		Build()
-	d := deck.New(testutils.Hero{Intel: 4}, nil, fillerDeck())
+	d := deck.New(testutils.Hero{Intel: 4}, nil, nil)
 	hand := []card.Card{cards.CondemnToSlaughterRed{}, testutils.BluePitch{}}
 
 	summary := sim.EvalOneTurnForTesting(d, prior, hand)
@@ -32,7 +32,7 @@ func TestCondemnToSlaughter_SacrificesArcaneCussing(t *testing.T) {
 // Tests that Condemn to Slaughter buffs the next Runeblade attack: a 0-power Runeblade
 // attack lands for 1 only because of the Blue variant's +1{p}.
 func TestCondemnToSlaughter_BuffsNextRunebladeAttack(t *testing.T) {
-	d := deck.New(testutils.Hero{Intel: 4}, nil, fillerDeck())
+	d := deck.New(testutils.Hero{Intel: 4}, nil, nil)
 	hand := []card.Card{cards.CondemnToSlaughterBlue{}, testutils.RunebladeAttack{}, testutils.BluePitch{}}
 
 	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingDamage(0).Build(), hand)

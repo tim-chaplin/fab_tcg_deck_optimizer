@@ -17,7 +17,7 @@ import (
 
 // Tests that a free defensive instant prevents up to its Defense() value.
 func TestDefensiveInstant_BrushOffRedAlone(t *testing.T) {
-	d := deck.New(heroes.Viserai, nil, fillerDeck())
+	d := deck.New(heroes.Viserai, nil, nil)
 	hand := []card.Card{cards.BrushOffRed{}}
 	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingDamage(5).Build(), hand)
 	if got := summary.Value; got != 3 {
@@ -27,7 +27,7 @@ func TestDefensiveInstant_BrushOffRedAlone(t *testing.T) {
 
 // Tests the Yellow / Blue printings cap at their lower thresholds.
 func TestDefensiveInstant_BrushOffYellowAndBlueAlone(t *testing.T) {
-	d := deck.New(heroes.Viserai, nil, fillerDeck())
+	d := deck.New(heroes.Viserai, nil, nil)
 	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingDamage(5).Build(), []card.Card{cards.BrushOffYellow{}})
 	if got := summary.Value; got != 2 {
 		t.Fatalf("Yellow Value = %d, want 2", got)
@@ -41,7 +41,7 @@ func TestDefensiveInstant_BrushOffYellowAndBlueAlone(t *testing.T) {
 // Tests Calming Breeze's collapsed-prevention model (3 events × 1 = 3 against the single
 // IncomingDamage bucket).
 func TestDefensiveInstant_CalmingBreezeAlone(t *testing.T) {
-	d := deck.New(heroes.Viserai, nil, fillerDeck())
+	d := deck.New(heroes.Viserai, nil, nil)
 	hand := []card.Card{cards.CalmingBreezeRed{}}
 	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingDamage(5).Build(), hand)
 	if got := summary.Value; got != 3 {
@@ -52,7 +52,7 @@ func TestDefensiveInstant_CalmingBreezeAlone(t *testing.T) {
 // Tests that prevention caps at IncomingDamage — Oasis Respite Red has Defense 4 but only
 // 1 incoming damage, so the sim's chain-step resolver credits 1.
 func TestDefensiveInstant_PreventionCapsAtIncoming(t *testing.T) {
-	d := deck.New(heroes.Viserai, nil, fillerDeck())
+	d := deck.New(heroes.Viserai, nil, nil)
 	hand := []card.Card{cards.OasisRespiteRed{}, testutils.BluePitch{}}
 	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingDamage(1).Build(), hand)
 	if got := summary.Value; got != 1 {
@@ -63,7 +63,7 @@ func TestDefensiveInstant_PreventionCapsAtIncoming(t *testing.T) {
 // Tests that a defensive instant with a real cost requires defense-phase pitch funding, and
 // that pitch resources can't carry between attack and defense phases.
 func TestDefensiveInstant_PeaceOfMindWithCost(t *testing.T) {
-	d := deck.New(heroes.Viserai, nil, fillerDeck())
+	d := deck.New(heroes.Viserai, nil, nil)
 	hand := []card.Card{cards.PeaceOfMindRed{}, testutils.BluePitch{}, cards.CriticalStrikeBlue{}}
 	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingDamage(4).Build(), hand)
 	if got := summary.Value; got != 4 {
@@ -74,7 +74,7 @@ func TestDefensiveInstant_PeaceOfMindWithCost(t *testing.T) {
 // Tests that a defensive instant resolves alongside a printed DR — both go through the
 // DR loop in defendersDamage and contribute their full prevention up to IncomingDamage.
 func TestDefensiveInstant_StacksWithDR(t *testing.T) {
-	d := deck.New(heroes.Viserai, nil, fillerDeck())
+	d := deck.New(heroes.Viserai, nil, nil)
 	hand := []card.Card{cards.BrushOffRed{}, cards.DodgeBlue{}}
 	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingDamage(5).Build(), hand)
 	if got := summary.Value; got != 5 {
@@ -84,7 +84,7 @@ func TestDefensiveInstant_StacksWithDR(t *testing.T) {
 
 // Tests that a defensive instant in the arsenal slot can take Defend role.
 func TestDefensiveInstant_DefendsFromArsenal(t *testing.T) {
-	d := deck.New(heroes.Viserai, nil, fillerDeck())
+	d := deck.New(heroes.Viserai, nil, nil)
 	hand := []card.Card{testutils.BluePitch{}}
 	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().
 		SetArsenal(cards.BrushOffRed{}).

@@ -38,7 +38,7 @@ func TestSigilOfFyendal_StartOfTurnCredits1Damage(t *testing.T) {
 	prior := gameengine.GameStateBuilder().
 		CreateAuraFromCard(cards.SigilOfFyendalBlue{}).
 		Build()
-	d := deck.New(testutils.Hero{Intel: 4}, nil, fillerDeck())
+	d := deck.New(testutils.Hero{Intel: 4}, nil, nil)
 	hand := []card.Card{testutils.BluePitch{}}
 
 	summary := sim.EvalOneTurnForTesting(d, prior, hand)

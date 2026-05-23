@@ -13,7 +13,7 @@ import (
 
 // Tests that Pursue to the Edge of Oblivion's on-hit rider marks the opposing hero.
 func TestPursueToTheEdgeOfOblivion_MarksOpponentOnHit(t *testing.T) {
-	d := deck.New(heroes.Viserai, nil, fillerDeck())
+	d := deck.New(heroes.Viserai, nil, nil)
 	hand := []card.Card{cards.PursueToTheEdgeOfOblivionRed{}}
 	summary := sim.EvalOneTurnForTesting(d, nil, hand)
 	if !summary.State.OpponentMarked() {
@@ -24,7 +24,7 @@ func TestPursueToTheEdgeOfOblivion_MarksOpponentOnHit(t *testing.T) {
 // Tests that with the opponent already marked, Pursue's attack strips the prior mark and
 // its on-hit rider reapplies it — net end-of-chain mark stays on.
 func TestPursueToTheEdgeOfOblivion_PreservesMarkWhenOpponentAlreadyMarked(t *testing.T) {
-	d := deck.New(heroes.Viserai, nil, fillerDeck())
+	d := deck.New(heroes.Viserai, nil, nil)
 	hand := []card.Card{cards.PursueToTheEdgeOfOblivionRed{}}
 	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetOpponentMarked(true).Build(), hand)
 	if !summary.State.OpponentMarked() {
@@ -34,7 +34,7 @@ func TestPursueToTheEdgeOfOblivion_PreservesMarkWhenOpponentAlreadyMarked(t *tes
 
 // Tests that Outed against an unmarked opponent gets no marked-defender bonus.
 func TestOuted_NoBonusWhenOpponentUnmarked(t *testing.T) {
-	d := deck.New(heroes.Viserai, nil, fillerDeck())
+	d := deck.New(heroes.Viserai, nil, nil)
 	hand := []card.Card{cards.OutedRed{}}
 	summary := sim.EvalOneTurnForTesting(d, nil, hand)
 	if summary.Value != 3 {
@@ -45,7 +45,7 @@ func TestOuted_NoBonusWhenOpponentUnmarked(t *testing.T) {
 // Tests that Outed against a pre-marked opponent self-buffs +1{p} for the marked-defender
 // rider.
 func TestOuted_BonusWhenOpponentAlreadyMarked(t *testing.T) {
-	d := deck.New(heroes.Viserai, nil, fillerDeck())
+	d := deck.New(heroes.Viserai, nil, nil)
 	hand := []card.Card{cards.OutedRed{}}
 	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetOpponentMarked(true).Build(), hand)
 	if summary.Value != 4 {

@@ -14,7 +14,7 @@ import (
 // With no extra pitch the runner can't afford Mode 1's {r}{r} cost, so it falls back to
 // Mode 0 — the printed 4{p} swing.
 func TestFlex_Mode0PrintedAttack(t *testing.T) {
-	d := deck.New(testutils.Hero{Intel: 4}, nil, fillerDeck())
+	d := deck.New(testutils.Hero{Intel: 4}, nil, nil)
 	hand := []card.Card{cards.FlexRed{}}
 	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingDamage(0).Build(), hand)
 	if summary.Value != 4 {
@@ -24,7 +24,7 @@ func TestFlex_Mode0PrintedAttack(t *testing.T) {
 
 // With 3 pitch available the runner pays {r}{r} for +2{p}, giving the full 6{p} swing.
 func TestFlex_Mode1AddsTwo(t *testing.T) {
-	d := deck.New(testutils.Hero{Intel: 4}, nil, fillerDeck())
+	d := deck.New(testutils.Hero{Intel: 4}, nil, nil)
 	hand := []card.Card{cards.FlexRed{}, testutils.BluePitch{}}
 	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingDamage(0).Build(), hand)
 	if summary.Value != 6 {

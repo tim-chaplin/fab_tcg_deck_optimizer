@@ -14,7 +14,7 @@ import (
 // Tests that the on-hit 1-damage rider credits +1 on a likely-hit attack. Red lands its 4{p}
 // inside the LikelyDamageHits window so the on-hit ping fires.
 func TestBlowForABlow_LikelyHitCreditsPing(t *testing.T) {
-	d := deck.New(testutils.Hero{Intel: 4}, nil, fillerDeck())
+	d := deck.New(testutils.Hero{Intel: 4}, nil, nil)
 	hand := []card.Card{cards.BlowForABlowRed{}, testutils.BluePitch{}}
 	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingDamage(0).Build(), hand)
 	if summary.Value != 4+1 {

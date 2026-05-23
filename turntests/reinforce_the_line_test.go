@@ -15,7 +15,7 @@ import (
 // present: a 3-defense attack action blocks 3 and Reinforce the Line prevents the other 4.
 func TestReinforceTheLine_PreventsDamageWithAttackActionDefender(t *testing.T) {
 	prior := gameengine.GameStateBuilder().SetIncomingDamage(7).Build()
-	d := deck.New(testutils.Hero{Intel: 4}, nil, fillerDeck())
+	d := deck.New(testutils.Hero{Intel: 4}, nil, nil)
 	hand := []card.Card{cards.ReinforceTheLineRed{}, testutils.BlueAttack{}}
 
 	summary := sim.EvalOneTurnForTesting(d, prior, hand)
@@ -30,7 +30,7 @@ func TestReinforceTheLine_PreventsDamageWithAttackActionDefender(t *testing.T) {
 // present — only the defense reaction's own block scores.
 func TestReinforceTheLine_NoAttackActionDefenderPreventsNothing(t *testing.T) {
 	prior := gameengine.GameStateBuilder().SetIncomingDamage(3).Build()
-	d := deck.New(testutils.Hero{Intel: 4}, nil, fillerDeck())
+	d := deck.New(testutils.Hero{Intel: 4}, nil, nil)
 	hand := []card.Card{cards.ReinforceTheLineRed{}, testutils.PitchOneDR{}}
 
 	summary := sim.EvalOneTurnForTesting(d, prior, hand)

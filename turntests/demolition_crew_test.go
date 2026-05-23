@@ -54,7 +54,7 @@ func TestDemolitionCrew_PlayAttacksForPrintedPower(t *testing.T) {
 		{cards.DemolitionCrewBlue{}, 4},
 	}
 	for _, tc := range cases {
-		d := deck.New(testutils.Hero{Intel: 4}, nil, fillerDeck())
+		d := deck.New(testutils.Hero{Intel: 4}, nil, nil)
 		hand := []card.Card{tc.c, testutils.GenericAttack(2, 0), testutils.BluePitch{}}
 		summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingDamage(0).Build(), hand)
 		if summary.Value != tc.want {

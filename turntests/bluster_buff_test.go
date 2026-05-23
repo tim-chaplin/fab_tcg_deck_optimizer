@@ -15,7 +15,7 @@ import (
 // 1 pitch resource available the runner can't afford Mode 1's extra {r}, so it falls back
 // to the printed-mode swing minus the self-debuff.
 func TestBlusterBuff_Mode0DebuffsByOne(t *testing.T) {
-	d := deck.New(testutils.Hero{Intel: 4}, nil, fillerDeck())
+	d := deck.New(testutils.Hero{Intel: 4}, nil, nil)
 	hand := []card.Card{cards.BlusterBuffRed{}, testutils.RedAttack{}}
 	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingDamage(0).Build(), hand)
 	if summary.Value != 5 {
@@ -26,7 +26,7 @@ func TestBlusterBuff_Mode0DebuffsByOne(t *testing.T) {
 // Tests that mode 1 keeps the printed power when enough pitch is available to fund the
 // extra {r}.
 func TestBlusterBuff_Mode1KeepsPrintedPower(t *testing.T) {
-	d := deck.New(testutils.Hero{Intel: 4}, nil, fillerDeck())
+	d := deck.New(testutils.Hero{Intel: 4}, nil, nil)
 	hand := []card.Card{cards.BlusterBuffRed{}, testutils.BluePitch{}}
 	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingDamage(0).Build(), hand)
 	if summary.Value != 6 {

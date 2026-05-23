@@ -15,7 +15,7 @@ import (
 // Tests that Regain Composure buffs the next attack: a 0-power attack lands for 1 only
 // because of the +1{p} grant.
 func TestRegainComposure_BuffsNextAttack(t *testing.T) {
-	d := deck.New(testutils.Hero{Intel: 4}, nil, fillerDeck())
+	d := deck.New(testutils.Hero{Intel: 4}, nil, nil)
 	hand := []card.Card{cards.RegainComposureBlue{}, testutils.RunebladeAttack{}}
 
 	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingDamage(0).Build(), hand)
@@ -28,7 +28,7 @@ func TestRegainComposure_BuffsNextAttack(t *testing.T) {
 
 // Tests that Regain Composure's grant fizzles when no attack follows it.
 func TestRegainComposure_NoAttackGrantsNothing(t *testing.T) {
-	d := deck.New(testutils.Hero{Intel: 4}, nil, fillerDeck())
+	d := deck.New(testutils.Hero{Intel: 4}, nil, nil)
 	hand := []card.Card{cards.RegainComposureBlue{}}
 
 	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingDamage(0).Build(), hand)
@@ -42,7 +42,7 @@ func TestRegainComposure_NoAttackGrantsNothing(t *testing.T) {
 // Tests that Regain Composure's +1{p} reaches a weapon attack: a Reaping Blade swing
 // (base 3) misses on its own but lands for 4 once buffed.
 func TestRegainComposure_BuffsWeaponAttack(t *testing.T) {
-	d := deck.New(testutils.Hero{Intel: 4}, []deck.Weapon{weapons.ReapingBlade{}}, fillerDeck())
+	d := deck.New(testutils.Hero{Intel: 4}, []deck.Weapon{weapons.ReapingBlade{}}, nil)
 	hand := []card.Card{cards.RegainComposureBlue{}, testutils.BluePitch{}}
 
 	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingDamage(0).Build(), hand)

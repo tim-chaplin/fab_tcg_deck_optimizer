@@ -24,7 +24,7 @@ func TestOasisRespite_PreventsAndLifeRider(t *testing.T) {
 	}
 	for _, tc := range cases {
 		hand := []card.Card{tc.card, testutils.BluePitch{}}
-		dOff := deck.New(testutils.Hero{Intel: 4}, nil, fillerDeck())
+		dOff := deck.New(testutils.Hero{Intel: 4}, nil, nil)
 		sOff := gameengine.GameStateBuilder().
 			SetHero(stubLowHeroOff{}).
 			SetIncomingDamage(10).
@@ -34,7 +34,7 @@ func TestOasisRespite_PreventsAndLifeRider(t *testing.T) {
 			t.Errorf("%s: hero off Value = %d, want %d", tc.card.Name(), summary.Value, tc.wantOff)
 		}
 
-		dOn := deck.New(testutils.Hero{Intel: 4}, nil, fillerDeck())
+		dOn := deck.New(testutils.Hero{Intel: 4}, nil, nil)
 		sOn := gameengine.GameStateBuilder().
 			SetHero(stubLowHeroOn{}).
 			SetIncomingDamage(10).

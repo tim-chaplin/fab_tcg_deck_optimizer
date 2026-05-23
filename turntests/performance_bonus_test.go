@@ -16,7 +16,7 @@ import (
 // chain runner. Solo Blue printing in hand: cost 0, power 1 sits in the LikelyToHit
 // window, on-hit fires.
 func TestPerformanceBonus_OnHitCreatesGold(t *testing.T) {
-	d := deck.New(heroes.Viserai, nil, fillerDeck())
+	d := deck.New(heroes.Viserai, nil, nil)
 	hand := []card.Card{cards.PerformanceBonusBlue{}}
 	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingDamage(0).Build(), hand)
 	if summary.Value != 1 {

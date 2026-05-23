@@ -14,7 +14,7 @@ import (
 
 // Tests that On a Knife Edge grants go again to the next sword attack, funding a second swing.
 func TestOnAKnifeEdge_GrantsGoAgainToSwordAttack(t *testing.T) {
-	d := deck.New(testutils.Hero{Intel: 4}, []deck.Weapon{weapons.ReapingBlade{}}, fillerDeck())
+	d := deck.New(testutils.Hero{Intel: 4}, []deck.Weapon{weapons.ReapingBlade{}}, nil)
 	hand := []card.Card{cards.OnAKnifeEdgeYellow{}, testutils.NoGoAgainAttackStub{}, testutils.BluePitch{}}
 
 	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingDamage(0).Build(), hand)
@@ -27,7 +27,7 @@ func TestOnAKnifeEdge_GrantsGoAgainToSwordAttack(t *testing.T) {
 
 // Tests that On a Knife Edge's grant fizzles with no sword attack to receive it.
 func TestOnAKnifeEdge_NoSwordAttackFizzles(t *testing.T) {
-	d := deck.New(testutils.Hero{Intel: 4}, nil, fillerDeck())
+	d := deck.New(testutils.Hero{Intel: 4}, nil, nil)
 	hand := []card.Card{cards.OnAKnifeEdgeYellow{}}
 
 	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingDamage(0).Build(), hand)

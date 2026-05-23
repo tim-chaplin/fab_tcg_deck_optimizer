@@ -13,7 +13,7 @@ import (
 
 // Tests that a plain-block card lands in the graveyard after defending.
 func TestPlainBlock_LandsInGraveyard(t *testing.T) {
-	d := deck.New(heroes.Viserai, nil, fillerDeck())
+	d := deck.New(heroes.Viserai, nil, nil)
 	hand := []card.Card{cards.OnTheHorizonRed{}}
 	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingDamage(4).Build(), hand)
 	if summary.Value != 4 {
