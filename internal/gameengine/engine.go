@@ -7,7 +7,6 @@ import (
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/item"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/token"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/trigger"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/triggertype"
@@ -513,11 +512,6 @@ func (ge *GameEngine) FirePitchTriggers(pitched card.Card) int {
 	return ge.pitchBonus
 }
 
-// CreateItem implements card.GameEngine.CreateItem.
-func (ge *GameEngine) CreateItem(pc *card.CardState, tt triggertype.Type, handler func(card.GameEngine, card.Logger, card.Item), oncePerTurn bool, filter func(card.TypeSet) bool) {
-	ge.AppendItem(item.NewFromCard(pc.Card, tt, handler, oncePerTurn, filter))
-}
-
 // SacrificePayoffAura destroys one aura the player controls and reports whether it
 // destroyed one. It targets the first aura whose source card carries a leave-the-arena
 // payoff (card.LeavesArenaAura), fires that OnLeavesArena clause, and graveyards the card.
@@ -641,13 +635,6 @@ var dealtArcaneText = [...]string{
 	2: "Dealt 2 arcane damage",
 	3: "Dealt 3 arcane damage",
 	4: "Dealt 4 arcane damage",
-}
-
-// === Trigger registration ===
-
-// AddTrigger implements card.GameEngine.AddTrigger.
-func (ge *GameEngine) AddTrigger(pc *card.CardState, tt triggertype.Type, handler func(card.GameEngine, card.Logger, card.EphemeralTrigger), filter func(card.TypeSet) bool) {
-	ge.AppendTrigger(trigger.NewEphemeralTrigger(pc.Card, tt, handler, filter))
 }
 
 // === Tokens ===

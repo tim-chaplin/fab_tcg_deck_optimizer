@@ -16,7 +16,7 @@ import (
 
 func (SigilOfSilphidaeBlue) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
 	banishAuraFromGraveyard(ge, l, self.Card.DisplayName())
-	ge.CreateAura(self, triggertype.StartOfTurn, selfDestructAuraHandler, 1, false, nil)
+	ge.CreateAura(self.Card, triggertype.StartOfTurn, selfDestructAuraHandler, 1, false, nil)
 }
 
 // OnLeavesArena runs the "when this leaves the arena" clause: banish another aura from the

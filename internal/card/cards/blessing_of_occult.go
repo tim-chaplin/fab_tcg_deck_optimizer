@@ -21,15 +21,15 @@ var blessingOfOccultTriggerText = [...]string{
 }
 
 func (BlessingOfOccultRed) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
-	ge.CreateAura(self, triggertype.StartOfTurn, blessingOfOccultHandler, 3, false, nil)
+	ge.CreateAura(self.Card, triggertype.StartOfTurn, blessingOfOccultHandler, 3, false, nil)
 }
 
 func (BlessingOfOccultYellow) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
-	ge.CreateAura(self, triggertype.StartOfTurn, blessingOfOccultHandler, 2, false, nil)
+	ge.CreateAura(self.Card, triggertype.StartOfTurn, blessingOfOccultHandler, 2, false, nil)
 }
 
 func (BlessingOfOccultBlue) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
-	ge.CreateAura(self, triggertype.StartOfTurn, blessingOfOccultHandler, 1, false, nil)
+	ge.CreateAura(self.Card, triggertype.StartOfTurn, blessingOfOccultHandler, 1, false, nil)
 }
 
 // blessingOfOccultHandler creates a.Count() Runechants and destroys the aura. Count carries

@@ -15,15 +15,15 @@ import (
 )
 
 func (RunebloodIncantationRed) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
-	ge.CreateAura(self, triggertype.StartOfTurn, runebloodAuraHandler, 3, false, nil)
+	ge.CreateAura(self.Card, triggertype.StartOfTurn, runebloodAuraHandler, 3, false, nil)
 }
 
 func (RunebloodIncantationYellow) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
-	ge.CreateAura(self, triggertype.StartOfTurn, runebloodAuraHandler, 2, false, nil)
+	ge.CreateAura(self.Card, triggertype.StartOfTurn, runebloodAuraHandler, 2, false, nil)
 }
 
 func (RunebloodIncantationBlue) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
-	ge.CreateAura(self, triggertype.StartOfTurn, runebloodAuraHandler, 1, false, nil)
+	ge.CreateAura(self.Card, triggertype.StartOfTurn, runebloodAuraHandler, 1, false, nil)
 }
 
 // runebloodAuraHandler removes a verse counter each fire to create a runechant; a fire

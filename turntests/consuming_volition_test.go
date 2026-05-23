@@ -66,8 +66,10 @@ func TestConsumingVolition_BlockableBaseSuppressesDiscard(t *testing.T) {
 // Tests that co-firing runechants don't rescue a blockable variant — "this hits" reads only
 // this card's own damage.
 func TestConsumingVolition_RunechantsDontRescue(t *testing.T) {
-	ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetArcaneDamageDealt(true).Build()}
-	ge.AppendAura(token.NewRunechant(1))
+	ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().
+		SetArcaneDamageDealt(true).
+		AddAura(token.NewRunechant(1)).
+		Build()}
 	c := cards.ConsumingVolitionYellow{}
 	ge.ResolveChainStep(ge.Logger(), &card.CardState{Card: c})
 	if got := ge.Value(); got != 3 {

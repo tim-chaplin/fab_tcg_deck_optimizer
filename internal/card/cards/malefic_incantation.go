@@ -16,15 +16,15 @@ import (
 )
 
 func (MaleficIncantationRed) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
-	ge.CreateAura(self, triggertype.CardOrAbility, maleficAuraHandler, 3, true, card.TypeSet.IsAttackAction)
+	ge.CreateAura(self.Card, triggertype.CardOrAbility, maleficAuraHandler, 3, true, card.TypeSet.IsAttackAction)
 }
 
 func (MaleficIncantationYellow) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
-	ge.CreateAura(self, triggertype.CardOrAbility, maleficAuraHandler, 2, true, card.TypeSet.IsAttackAction)
+	ge.CreateAura(self.Card, triggertype.CardOrAbility, maleficAuraHandler, 2, true, card.TypeSet.IsAttackAction)
 }
 
 func (MaleficIncantationBlue) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
-	ge.CreateAura(self, triggertype.CardOrAbility, maleficAuraHandler, 1, true, card.TypeSet.IsAttackAction)
+	ge.CreateAura(self.Card, triggertype.CardOrAbility, maleficAuraHandler, 1, true, card.TypeSet.IsAttackAction)
 }
 
 // maleficCreatedRunechantText is the precomputed rider line for each Malefic Incantation

@@ -3,10 +3,12 @@ package turntests
 import (
 	"testing"
 
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card/cards"
-
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card/cards"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/gameengine"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/triggertype"
 )
 
@@ -30,15 +32,21 @@ func TestSigilOfFyendal_PlayRegistersStartOfTurnTrigger(t *testing.T) {
 	}
 }
 
-// TestSigilOfFyendal_TriggerHandlerCredits1Damage: the registered handler credits +1 damage
-// (the 1{h} gain, valued 1-to-1 with damage).
-func TestSigilOfFyendal_TriggerHandlerCredits1Damage(t *testing.T) {
-	ge := gameengine.New()
-	ge.ResolveChainStep(ge.Logger(), &card.CardState{Card: cards.SigilOfFyendalBlue{}})
-	fire := gameengine.New()
-	fire.AppendAura(ge.Auras()[0])
-	fire.FireTriggers(triggertype.StartOfTurn, nil)
-	if fire.Value() != 1 {
-		t.Errorf("Handler Value = %d, want 1", fire.Value())
+// Tests that a carried Sigil of Fyendal fires at the start of the next turn, crediting the
+// 1{h} gain (worth 1 damage) and self-destructing.
+func TestSigilOfFyendal_StartOfTurnCredits1Damage(t *testing.T) {
+	prior := gameengine.GameStateBuilder().
+		CreateAuraFromCard(cards.SigilOfFyendalBlue{}).
+		Build()
+	d := deck.New(testutils.Hero{Intel: 4}, nil, fillerDeck())
+	hand := []card.Card{testutils.BluePitch{}}
+
+	summary := sim.EvalOneTurnForTesting(d, prior, hand)
+
+	if got := summary.Value; got != 1 {
+		t.Errorf("Value = %d, want 1 (start-of-turn 1{h} gain)", got)
+	}
+	if got := len(summary.State.Auras()); got != 0 {
+		t.Errorf("Auras = %d, want 0 (Sigil of Fyendal self-destructed after firing)", got)
 	}
 }

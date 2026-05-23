@@ -23,7 +23,7 @@ func strategicPlanningPlay(ge card.GameEngine, l card.Logger, self *card.CardSta
 	}); ok {
 		l.AppendPostTrigger(self.Card.DisplayName(), "Recycled an action card to bottom of deck", 0)
 	}
-	ge.AddTrigger(self, triggertype.EndOfTurn, drawOneAtEndOfTurn, nil)
+	ge.CreateTrigger(self.Card, triggertype.EndOfTurn, drawOneAtEndOfTurn, nil)
 	l.AppendPostTrigger(self.Card.DisplayName(), "End-phase draw queued", 0)
 }
 

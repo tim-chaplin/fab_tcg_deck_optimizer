@@ -406,25 +406,12 @@ func (gs *GameState) Banished() []card.Card     { return gs.banished }
 func (gs *GameState) SetBanished(b []card.Card) { gs.banished = b }
 
 func (gs *GameState) Auras() []Aura                { return gs.auras }
-func (gs *GameState) ClearAuras()                  { gs.auras = nil }
-func (gs *GameState) Triggers() []EphemeralTrigger { return gs.triggers }
-func (gs *GameState) ClearTriggers()               { gs.triggers = nil }
-func (gs *GameState) Items() []Item                { return gs.items }
-func (gs *GameState) ClearItems()                  { gs.items = nil }
-
-// AppendAura appends a to the aura list. Flips AuraCreated so same-turn "if you've
-// played or created an aura" riders see the entry. Card-facing entry point: GameEngine.CreateAura.
-func (gs *GameState) AppendAura(a Aura) {
-	gs.auras = append(gs.auras, a)
-	gs.auraCreated = true
-}
-
-// AppendTrigger appends t to the one-shot trigger queue. Card-facing entry point:
-// GameEngine.AddTrigger.
-func (gs *GameState) AppendTrigger(t EphemeralTrigger) { gs.triggers = append(gs.triggers, t) }
-
-// AppendItem appends i to the item list. Card-facing entry point: GameEngine.CreateItem.
-func (gs *GameState) AppendItem(i Item) { gs.items = append(gs.items, i) }
+func (gs *GameState) SetAuras(a []Aura)             { gs.auras = a }
+func (gs *GameState) ClearAuras()                   { gs.auras = nil }
+func (gs *GameState) Triggers() []EphemeralTrigger  { return gs.triggers }
+func (gs *GameState) ClearTriggers()                { gs.triggers = nil }
+func (gs *GameState) Items() []Item                 { return gs.items }
+func (gs *GameState) ClearItems()                   { gs.items = nil }
 
 // AuraCount returns the count of live auras. Used by gates like Yinti Yanti's "while you
 // control an aura" rider.

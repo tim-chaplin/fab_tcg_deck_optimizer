@@ -28,13 +28,13 @@ func highStrikerCreate(ge card.GameEngine, l card.Logger, t card.EphemeralTrigge
 }
 
 func (c HighStrikerRed) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
-	ge.AddTrigger(self, triggertype.Hit, highStrikerOnHit6, card.TypeSet.IsAttack)
+	ge.CreateTrigger(self.Card, triggertype.Hit, highStrikerOnHit6, card.TypeSet.IsAttack)
 }
 
 func (c HighStrikerYellow) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
-	ge.AddTrigger(self, triggertype.Hit, highStrikerOnHit4, card.TypeSet.IsAttack)
+	ge.CreateTrigger(self.Card, triggertype.Hit, highStrikerOnHit4, card.TypeSet.IsAttack)
 }
 
 func (c HighStrikerBlue) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
-	ge.AddTrigger(self, triggertype.Hit, highStrikerOnHit2, card.TypeSet.IsAttack)
+	ge.CreateTrigger(self.Card, triggertype.Hit, highStrikerOnHit2, card.TypeSet.IsAttack)
 }

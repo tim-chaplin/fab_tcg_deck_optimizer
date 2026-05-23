@@ -11,15 +11,15 @@ import (
 )
 
 func (ArcaneCussingRed) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
-	ge.CreateAura(self, triggertype.Hit|triggertype.DamageTaken, selfDestructAuraHandler, 3, false, nil)
+	ge.CreateAura(self.Card, triggertype.Hit|triggertype.DamageTaken, selfDestructAuraHandler, 3, false, nil)
 }
 
 func (ArcaneCussingYellow) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
-	ge.CreateAura(self, triggertype.Hit|triggertype.DamageTaken, selfDestructAuraHandler, 2, false, nil)
+	ge.CreateAura(self.Card, triggertype.Hit|triggertype.DamageTaken, selfDestructAuraHandler, 2, false, nil)
 }
 
 func (ArcaneCussingBlue) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
-	ge.CreateAura(self, triggertype.Hit|triggertype.DamageTaken, selfDestructAuraHandler, 1, false, nil)
+	ge.CreateAura(self.Card, triggertype.Hit|triggertype.DamageTaken, selfDestructAuraHandler, 1, false, nil)
 }
 
 // OnLeavesArena runs the "when this leaves the arena during your turn" clause.

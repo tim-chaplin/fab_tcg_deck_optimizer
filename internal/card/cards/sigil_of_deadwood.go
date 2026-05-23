@@ -11,7 +11,7 @@ import (
 )
 
 func (SigilOfDeadwoodBlue) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
-	ge.CreateAura(self, triggertype.StartOfTurn, selfDestructAuraHandler, 1, false, nil)
+	ge.CreateAura(self.Card, triggertype.StartOfTurn, selfDestructAuraHandler, 1, false, nil)
 }
 
 // OnLeavesArena runs the "when this leaves the arena" clause: create 1 Runechant.

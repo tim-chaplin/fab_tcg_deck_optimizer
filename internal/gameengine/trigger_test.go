@@ -3,9 +3,7 @@ package gameengine
 import (
 	"testing"
 
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/aura"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/trigger"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/triggertype"
 )
 
@@ -13,12 +11,8 @@ import (
 func TestFireEndOfTurn_FiresOnceAndRemoves(t *testing.T) {
 	ge := New()
 	calls := 0
-	ge.AppendTrigger(trigger.NewEphemeralTrigger(
-		stubCard{name: "src"},
-		triggertype.EndOfTurn,
-		func(_ card.GameEngine, _ card.Logger, _ card.EphemeralTrigger) { calls++ },
-		nil,
-	))
+	ge.CreateTrigger(stubCard{name: "src"}, triggertype.EndOfTurn,
+		func(_ card.GameEngine, _ card.Logger, _ card.EphemeralTrigger) { calls++ }, nil)
 	ge.FireTriggers(triggertype.EndOfTurn, nil)
 	if calls != 1 {
 		t.Fatalf("handler calls = %d, want 1", calls)
@@ -32,12 +26,8 @@ func TestFireEndOfTurn_FiresOnceAndRemoves(t *testing.T) {
 func TestFireEndOfTurn_LeavesNonMatchingType(t *testing.T) {
 	ge := New()
 	calls := 0
-	ge.AppendTrigger(trigger.NewEphemeralTrigger(
-		stubCard{name: "src"},
-		triggertype.CardOrAbility,
-		func(_ card.GameEngine, _ card.Logger, _ card.EphemeralTrigger) { calls++ },
-		nil,
-	))
+	ge.CreateTrigger(stubCard{name: "src"}, triggertype.CardOrAbility,
+		func(_ card.GameEngine, _ card.Logger, _ card.EphemeralTrigger) { calls++ }, nil)
 	ge.FireTriggers(triggertype.EndOfTurn, nil)
 	if calls != 0 {
 		t.Fatalf("handler calls = %d, want 0 (a CardOrAbility trigger should not fire from end-of-turn walk)", calls)
@@ -52,21 +42,12 @@ func TestFireEndOfTurn_LeavesNonMatchingType(t *testing.T) {
 func TestFireEndOfTurn_HandlerAddTriggerSafeReentry(t *testing.T) {
 	ge := New()
 	calls := 0
-	ge.AppendTrigger(trigger.NewEphemeralTrigger(
-		stubCard{name: "src"},
-		triggertype.EndOfTurn,
+	ge.CreateTrigger(stubCard{name: "src"}, triggertype.EndOfTurn,
 		func(engine card.GameEngine, _ card.Logger, _ card.EphemeralTrigger) {
 			calls++
-			ts := engine.(*GameEngine)
-			ts.AppendTrigger(trigger.NewEphemeralTrigger(
-				stubCard{name: "added"},
-				triggertype.EndOfTurn,
-				func(_ card.GameEngine, _ card.Logger, _ card.EphemeralTrigger) { calls++ },
-				nil,
-			))
-		},
-		nil,
-	))
+			engine.CreateTrigger(stubCard{name: "added"}, triggertype.EndOfTurn,
+				func(_ card.GameEngine, _ card.Logger, _ card.EphemeralTrigger) { calls++ }, nil)
+		}, nil)
 	ge.FireTriggers(triggertype.EndOfTurn, nil)
 	if calls != 1 {
 		t.Fatalf("handler calls during first walk = %d, want 1 (handler-added trigger should not fire on the same pass)", calls)
@@ -84,16 +65,9 @@ func TestFireEndOfTurn_HandlerAddTriggerSafeReentry(t *testing.T) {
 // turn can fire again on the next.
 func TestResetEphemeralState_RearmsOncePerTurnAuras(t *testing.T) {
 	ge := New()
-	a := aura.NewFromCard(
-		stubCard{name: "src"},
-		triggertype.CardOrAbility,
-		func(card.GameEngine, card.Logger, card.Aura) {},
-		1,
-		true,
-		nil,
-	)
-	a.SetFiredThisTurn(true)
-	ge.AppendAura(a)
+	ge.CreateAura(stubCard{name: "src"}, triggertype.CardOrAbility,
+		func(card.GameEngine, card.Logger, card.Aura) {}, 1, true, nil)
+	ge.Auras()[0].SetFiredThisTurn(true)
 	ge.ResetEphemeralState()
 	if ge.Auras()[0].FiredThisTurn() {
 		t.Errorf("FiredThisTurn = true after ResetEphemeralState, want false (turn-boundary re-arm)")

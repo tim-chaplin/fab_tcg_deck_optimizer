@@ -3,10 +3,12 @@ package turntests
 import (
 	"testing"
 
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card/cards"
-
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card/cards"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/gameengine"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/triggertype"
 )
 
@@ -47,33 +49,45 @@ func TestSigilOfSilphidae_PlayBanishesAuraForOneArcane(t *testing.T) {
 	}
 }
 
-// TestSigilOfSilphidae_StartOfTurnHandlerFizzlesWithoutAnotherAura: with nothing else in the
-// start-of-turn graveyard, the leave trigger has no OTHER aura to banish — handler returns
-// 0 damage.
-func TestSigilOfSilphidae_StartOfTurnHandlerFizzlesWithoutAnotherAura(t *testing.T) {
-	play := gameengine.New()
-	play.ResolveChainStep(play.Logger(), &card.CardState{Card: cards.SigilOfSilphidaeBlue{}})
-	next := gameengine.New()
-	next.AppendAura(play.Auras()[0])
-	next.FireTriggers(triggertype.StartOfTurn, nil)
-	if next.Value() != 0 {
-		t.Errorf("handler Value = %d, want 0 (no other aura to banish)", next.Value())
+// Tests that a carried Sigil of Silphidae with an empty graveyard self-destructs at start
+// of turn but its leave trigger fizzles — no arcane damage, no banish.
+func TestSigilOfSilphidae_StartOfTurnFizzlesWithoutAnotherAura(t *testing.T) {
+	prior := gameengine.GameStateBuilder().
+		CreateAuraFromCard(cards.SigilOfSilphidaeBlue{}).
+		Build()
+	d := deck.New(testutils.Hero{Intel: 4}, nil, fillerDeck())
+	hand := []card.Card{testutils.BluePitch{}}
+
+	summary := sim.EvalOneTurnForTesting(d, prior, hand)
+
+	if got := summary.Value; got != 0 {
+		t.Errorf("Value = %d, want 0 (leave trigger fizzles with empty graveyard)", got)
+	}
+	if got := len(summary.State.Banished()); got != 0 {
+		t.Errorf("Banished = %d, want 0", got)
+	}
+	if got := len(summary.State.Auras()); got != 0 {
+		t.Errorf("Auras = %d, want 0 (Sigil self-destructed)", got)
 	}
 }
 
-// TestSigilOfSilphidae_StartOfTurnHandlerBanishesAnotherAura: with another aura already in
-// the start-of-turn graveyard, the leave trigger banishes it for 1 arcane.
-func TestSigilOfSilphidae_StartOfTurnHandlerBanishesAnotherAura(t *testing.T) {
-	play := gameengine.New()
-	play.ResolveChainStep(play.Logger(), &card.CardState{Card: cards.SigilOfSilphidaeBlue{}})
+// Tests that a carried Sigil of Silphidae with a banishable aura in the graveyard banishes
+// it for 1 arcane damage when it self-destructs at start of turn.
+func TestSigilOfSilphidae_StartOfTurnBanishesAnotherAura(t *testing.T) {
 	other := cards.BlessingOfOccultRed{}
-	next := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetGraveyard([]card.Card{other}).Build()}
-	next.AppendAura(play.Auras()[0])
-	next.FireTriggers(triggertype.StartOfTurn, nil)
-	if next.Value() != 1 {
-		t.Errorf("handler Value = %d, want 1 (banished another aura)", next.Value())
+	prior := gameengine.GameStateBuilder().
+		CreateAuraFromCard(cards.SigilOfSilphidaeBlue{}).
+		SetGraveyard([]card.Card{other}).
+		Build()
+	d := deck.New(testutils.Hero{Intel: 4}, nil, fillerDeck())
+	hand := []card.Card{testutils.BluePitch{}}
+
+	summary := sim.EvalOneTurnForTesting(d, prior, hand)
+
+	if got := summary.Value; got != 1 {
+		t.Errorf("Value = %d, want 1 (leave trigger banished another aura for 1 arcane)", got)
 	}
-	if len(next.Banished()) != 1 || next.Banished()[0].ID() != other.ID() {
-		t.Errorf("Banish = %v, want [Blessing]", next.Banished())
+	if b := summary.State.Banished(); len(b) != 1 || b[0].ID() != other.ID() {
+		t.Errorf("Banished = %v, want [Blessing]", b)
 	}
 }

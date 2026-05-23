@@ -6,7 +6,6 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card/cards"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/token"
 )
 
 // deckOf builds a *deck.Deck whose draw order is the supplied cards. Used to seed a
@@ -23,7 +22,7 @@ func deckOf(cs ...card.Card) *deck.Deck {
 func TestGoldToken_PlaysDecrementsAndDestroys(t *testing.T) {
 	ge := New()
 	ge.SetDeck(deckOf(stubCard{name: "filler"}))
-	ge.AppendItem(token.NewGold(1))
+	ge.CreateGold(1)
 	ge.ResolveChainStep(ge.Logger(), &card.CardState{Card: cards.GoldToken{}})
 	if ge.GoldCount() != 0 {
 		t.Fatalf("Gold = %d after spending the only token, want 0", ge.GoldCount())
@@ -40,7 +39,7 @@ func TestGoldToken_PlaysDecrementsAndDestroys(t *testing.T) {
 func TestGoldToken_PlayDecrementsCountWhenMultiple(t *testing.T) {
 	ge := New()
 	ge.SetDeck(deckOf(stubCard{name: "filler"}))
-	ge.AppendItem(token.NewGold(3))
+	ge.CreateGold(3)
 	ge.ResolveChainStep(ge.Logger(), &card.CardState{Card: cards.GoldToken{}})
 	if ge.GoldCount() != 2 {
 		t.Fatalf("Gold = %d after spending 1 of 3, want 2", ge.GoldCount())
@@ -51,7 +50,7 @@ func TestGoldToken_PlayDecrementsCountWhenMultiple(t *testing.T) {
 func TestSilverToken_PlaysDecrementsAndDestroys(t *testing.T) {
 	ge := New()
 	ge.SetDeck(deckOf(stubCard{name: "filler"}))
-	ge.AppendItem(token.NewSilver(1))
+	ge.CreateSilver(1)
 	ge.ResolveChainStep(ge.Logger(), &card.CardState{Card: cards.SilverToken{}})
 	if ge.SilverCount() != 0 {
 		t.Fatalf("Silver = %d after spending the only token, want 0", ge.SilverCount())
@@ -68,7 +67,7 @@ func TestSilverToken_PlaysDecrementsAndDestroys(t *testing.T) {
 func TestCopperToken_PlaysDecrementsAndDestroys(t *testing.T) {
 	ge := New()
 	ge.SetDeck(deckOf(stubCard{name: "filler"}))
-	ge.AppendItem(token.NewCopper(1))
+	ge.CreateCopper(1)
 	ge.ResolveChainStep(ge.Logger(), &card.CardState{Card: cards.CopperToken{}})
 	if ge.CopperCount() != 0 {
 		t.Fatalf("Copper = %d after spending the only token, want 0", ge.CopperCount())
