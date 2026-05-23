@@ -25,7 +25,7 @@ func TestBloodspillInvocation_AttackActionHitCreatesRunechants(t *testing.T) {
 		ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().
 			CreateAuraFromCard(tc.c).
 			Build()}
-		ge.FireTriggers(triggertype.Hit, testutils.AttackWithPower{Power: 4})
+		ge.FireTriggers(triggertype.Hit, testutils.FakeRedAttack().WithTypes(card.TypeRuneblade))
 		if got := ge.RunechantCount(); got != tc.n {
 			t.Errorf("%s: RunechantCount = %d, want %d (popped by an attack action hit)", tc.c.Name(), got, tc.n)
 		}
@@ -38,7 +38,7 @@ func TestBloodspillInvocation_WeaponHitDoesNotPop(t *testing.T) {
 	ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().
 		CreateAuraFromCard(cards.BloodspillInvocationRed{}).
 		Build()}
-	ge.FireTriggers(triggertype.Hit, testutils.RunebladeWeapon{})
+	ge.FireTriggers(triggertype.Hit, testutils.FakeWeaponSwing().WithTypes(card.TypeRuneblade))
 	if got := ge.RunechantCount(); got != 0 {
 		t.Errorf("RunechantCount = %d, want 0 (a weapon hit doesn't trigger Bloodspill)", got)
 	}

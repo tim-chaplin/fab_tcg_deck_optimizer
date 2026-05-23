@@ -23,23 +23,23 @@ import (
 // weapon is lost across the turn boundary, turn2.Value drops to 0.
 func TestEvalTwoTurns_EquippedWeaponPersistsAcrossTurns(t *testing.T) {
 	d := deck.New(heroes.Viserai, []deck.Weapon{weapons.NebulaBlade{}}, []deck.Card{
-		testutils.BluePitch{},
+		testutils.FakeBlueResource(),
 	})
-	hand := []card.Card{testutils.BluePitch{}}
+	hand := []card.Card{testutils.FakeBlueResource()}
 
 	turn1, turn2 := sim.EvalTwoTurnsForTesting(d, nil, hand)
 
 	if turn1.Value != 2 {
 		t.Errorf("turn 1 Value = %d, want 2\nBestLine: %s", turn1.Value, formatBestLine(turn1.BestLine))
 	}
-	if !bestLineHasRole(turn1.BestLine, testutils.BluePitch{}, card.Pitch) {
+	if !bestLineHasRole(turn1.BestLine, testutils.FakeBlueResource(), card.Pitch) {
 		t.Errorf("turn 1 BestLine missing BluePitch as Pitch: %s", formatBestLine(turn1.BestLine))
 	}
 	if turn2.Value != 2 {
 		t.Errorf("turn 2 Value = %d, want 2 (weapon should still be equipped)\nBestLine: %s",
 			turn2.Value, formatBestLine(turn2.BestLine))
 	}
-	if !bestLineHasRole(turn2.BestLine, testutils.BluePitch{}, card.Pitch) {
+	if !bestLineHasRole(turn2.BestLine, testutils.FakeBlueResource(), card.Pitch) {
 		t.Errorf("turn 2 BestLine missing BluePitch as Pitch: %s", formatBestLine(turn2.BestLine))
 	}
 }

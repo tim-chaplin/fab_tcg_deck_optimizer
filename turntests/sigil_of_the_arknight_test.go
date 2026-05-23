@@ -16,7 +16,7 @@ import (
 // flips AuraCreated, registers a TriggerStartOfTurn entry, and returns 0. The deck peek
 // happens when the sim fires the trigger next turn.
 func TestSigilOfTheArknight_PlayOnlySetsAuraCreated(t *testing.T) {
-	ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCards([]card.Card{testutils.RunebladeAttack{}}).Build()}
+	ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCards([]card.Card{testutils.FakeRedAttack().WithTypes(card.TypeRuneblade)}).Build()}
 	ge.ResolveChainStep(ge.Logger(), &card.CardState{Card: cards.SigilOfTheArknightBlue{}})
 	if got := ge.Value(); got != 0 {
 		t.Errorf("Play() = %d, want 0 (reveal deferred to trigger)", got)
@@ -33,14 +33,16 @@ func TestSigilOfTheArknight_PlayOnlySetsAuraCreated(t *testing.T) {
 // attack action draws it into the hand — the drawn attack then plays this turn, observable
 // as its damage contribution to Value (the hand otherwise carries no attack).
 func TestSigilOfTheArknight_StartOfTurnRevealsAttackActionIntoHand(t *testing.T) {
-	revealed := testutils.AttackWithPower{Power: 7}
+	revealed := testutils.FakeRedAttack().
+		WithPower(7).
+		WithTypes(card.TypeRuneblade)
 	prior := gameengine.GameStateBuilder().
 		CreateAuraFromCard(cards.SigilOfTheArknightBlue{}).
 		Build()
 	deckCards := []deck.Card{revealed}
 	deckCards = append(deckCards, nil...)
 	d := deck.New(testutils.Hero{Intel: 4}, nil, deckCards)
-	hand := []card.Card{testutils.BluePitch{}}
+	hand := []card.Card{testutils.FakeBlueResource()}
 
 	summary := sim.EvalOneTurnForTesting(d, prior, hand)
 
@@ -56,14 +58,14 @@ func TestSigilOfTheArknight_StartOfTurnRevealsAttackActionIntoHand(t *testing.T)
 // non-attack-action card draws nothing — the turn's value stays at zero because no attack
 // was revealed and the hand carries none.
 func TestSigilOfTheArknight_StartOfTurnRevealsNonAttackDoesNotDraw(t *testing.T) {
-	top := testutils.NonAttack{}
+	top := testutils.FakeRedAction()
 	prior := gameengine.GameStateBuilder().
 		CreateAuraFromCard(cards.SigilOfTheArknightBlue{}).
 		Build()
 	deckCards := []deck.Card{top}
 	deckCards = append(deckCards, nil...)
 	d := deck.New(testutils.Hero{Intel: 4}, nil, deckCards)
-	hand := []card.Card{testutils.BluePitch{}}
+	hand := []card.Card{testutils.FakeBlueResource()}
 
 	summary := sim.EvalOneTurnForTesting(d, prior, hand)
 
@@ -82,7 +84,7 @@ func TestSigilOfTheArknight_StartOfTurnEmptyDeckSelfDestructs(t *testing.T) {
 		CreateAuraFromCard(cards.SigilOfTheArknightBlue{}).
 		Build()
 	d := deck.New(testutils.Hero{Intel: 4}, nil, nil)
-	hand := []card.Card{testutils.BluePitch{}}
+	hand := []card.Card{testutils.FakeBlueResource()}
 
 	summary := sim.EvalOneTurnForTesting(d, prior, hand)
 

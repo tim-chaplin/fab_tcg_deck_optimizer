@@ -143,7 +143,10 @@ func TestBest_ViseraiMauvrionPredictsDrowningDireDominate(t *testing.T) {
 	h := []card.Card{
 		cards.MauvrionSkiesRed{},
 		cards.DrowningDireRed{},
-		testutils.YellowAttack{},
+		testutils.FakeYellowAttack().
+			WithCost(1).
+			WithPower(2).
+			WithGoAgain(),
 	}
 	got := Best(nil, h, nil, gameengine.GameStateBuilder().SetHero(heroes.Viserai).Build())
 	if got.Value != 9 {
@@ -189,7 +192,19 @@ func TestBest_ViseraiMauvrionChainsShrillIntoRuneragerIntoWeapon(t *testing.T) {
 
 // Tests that state.Value equals the summed Play returns (no double-counting or drops).
 func TestBest_StateValueMatchesSummedReturns(t *testing.T) {
-	h := []card.Card{testutils.BlueAttack{}, testutils.BlueAttack{}, testutils.RedAttack{}, testutils.RedAttack{}}
+	h := []card.Card{testutils.FakeBlueAttack().
+		WithCost(1).
+		WithPower(1).
+		WithGoAgain(), testutils.FakeBlueAttack().
+		WithCost(1).
+		WithPower(1).
+		WithGoAgain(), testutils.FakeRedAttack().
+		WithCost(1).
+		WithPower(3).
+		WithGoAgain(), testutils.FakeRedAttack().
+		WithCost(1).
+		WithPower(3).
+		WithGoAgain()}
 	got := Best(nil, h, nil, gameengine.GameStateBuilder().SetHero(testutils.Hero{Intel: 4}).Build())
 	if got.Value != 7 {
 		t.Errorf("Value = %d, want 7 (Blue 1 + Red 3 + Red 3 chain off one Blue pitch). Roles=[%s]",
@@ -201,7 +216,7 @@ func TestBest_StateValueMatchesSummedReturns(t *testing.T) {
 // applied in one permutation can't leak into a later permutation's checks.
 func TestBestSequence_CardStateGrantsDontLeakAcrossPermutations(t *testing.T) {
 	var sawLeak bool
-	attackers := []card.Card{testutils.GrantAll{}, testutils.GrantSpy{Saw: &sawLeak}, testutils.GrantAll{}}
+	attackers := []card.Card{testutils.NewGrantAll(), testutils.NewGrantSpy(&sawLeak), testutils.NewGrantAll()}
 	ctx := NewSequenceContextForTest(testutils.Hero{Intel: 4}, nil, nil, 1_000_000, 0, len(attackers))
 	_, _, _ = ctx.BestSequence(attackers)
 	if sawLeak {
@@ -212,7 +227,7 @@ func TestBestSequence_CardStateGrantsDontLeakAcrossPermutations(t *testing.T) {
 // Tests that a non-Go-again attack followed by a non-Instant card rejects the chain — the
 // AP pool drains to 0 on the first card and the second can't pay its 1 AP cost.
 func TestPlaySequence_NonGoAgainStopsChain(t *testing.T) {
-	order := []card.Card{testutils.FakeNoGoAgainAttack{}, testutils.FakeNoGoAgainAttack{}}
+	order := []card.Card{testutils.FakeRedAttack().WithPower(1), testutils.FakeRedAttack().WithPower(1)}
 	ctx := NewSequenceContextForTest(testutils.Hero{Intel: 4}, nil, nil, 1_000_000, 0, len(order))
 	if _, _, _, legal := ctx.PlaySequence(order); legal {
 		t.Fatalf("ordering %v should be illegal (no Go again grant after card 0)", testutils.CardNamesSim(order))
@@ -222,7 +237,7 @@ func TestPlaySequence_NonGoAgainStopsChain(t *testing.T) {
 // Tests that an Instant follow-up after a non-Go-again card resolves legally — Instants cost
 // 0 AP so the empty pool isn't a barrier.
 func TestPlaySequence_InstantBypassesAPRequirement(t *testing.T) {
-	order := []card.Card{testutils.FakeNoGoAgainAttack{}, testutils.FakeInstant{}}
+	order := []card.Card{testutils.FakeRedAttack().WithPower(1), testutils.FakeRedInstant()}
 	ctx := NewSequenceContextForTest(testutils.Hero{Intel: 4}, nil, nil, 1_000_000, 0, len(order))
 	dmg, _, _, legal := ctx.PlaySequence(order)
 	if !legal {
@@ -237,7 +252,7 @@ func TestPlaySequence_InstantBypassesAPRequirement(t *testing.T) {
 // at 1 the whole way, and a non-Instant follow-up still works (which would fail if Instants
 // had silently consumed AP).
 func TestPlaySequence_InstantsDontConsumeAP(t *testing.T) {
-	order := []card.Card{testutils.FakeInstant{}, testutils.FakeInstant{}, testutils.FakeNoGoAgainAttack{}}
+	order := []card.Card{testutils.FakeRedInstant(), testutils.FakeRedInstant(), testutils.FakeRedAttack().WithPower(1)}
 	ctx := NewSequenceContextForTest(testutils.Hero{Intel: 4}, nil, nil, 1_000_000, 0, len(order))
 	dmg, _, _, legal := ctx.PlaySequence(order)
 	if !legal {

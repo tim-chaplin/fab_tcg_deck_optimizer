@@ -17,7 +17,7 @@ func TestMoonWish_VariableCost(t *testing.T) {
 	cases := []card.Card{cards.MoonWishRed{}, cards.MoonWishYellow{}, cards.MoonWishBlue{}}
 	for _, c := range cases {
 		held := gameengine.New()
-		held.SetHand([]card.Card{testutils.GenericAttack(0, 0)})
+		held.SetHand([]card.Card{testutils.FakeRedAttack()})
 		if got := c.Cost(held); got != 0 {
 			t.Errorf("%s: Cost(Hand) = %d, want 0", c.Name(), got)
 		}
@@ -38,8 +38,8 @@ func TestMoonWish_VariableCost(t *testing.T) {
 
 // Tests that the alt cost pops a hand card and prepends it to the deck.
 func TestMoonWish_AltCostMovesHandCardToDeckTop(t *testing.T) {
-	dr := testutils.GenericAttack(0, 0).WithName("dr")
-	other := testutils.GenericAttack(0, 0).WithName("deckTop")
+	dr := testutils.FakeRedAttack().WithName("dr")
+	other := testutils.FakeRedAttack().WithName("deckTop")
 	ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCards([]card.Card{other}).Build()}
 	ge.SetHand([]card.Card{dr})
 	pc := &card.CardState{Card: cards.MoonWishYellow{}}

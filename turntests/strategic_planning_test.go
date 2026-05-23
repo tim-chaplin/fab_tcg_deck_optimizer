@@ -33,8 +33,8 @@ func TestStrategicPlanning_QueuesEndOfTurnTrigger(t *testing.T) {
 
 // Tests that an eligible graveyard action is recycled to the bottom of the deck.
 func TestStrategicPlanning_RecyclesEligibleActionToBottom(t *testing.T) {
-	target := testutils.GenericAction()
-	deck := []card.Card{testutils.BlueAttack{}}
+	target := testutils.FakeRedAction()
+	deck := []card.Card{testutils.FakeBlueAttack()}
 	ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().
 		SetCards(deck).
 		SetGraveyard([]card.Card{target}).
@@ -43,7 +43,7 @@ func TestStrategicPlanning_RecyclesEligibleActionToBottom(t *testing.T) {
 	if got := ge.Deck().Size(); got != 2 {
 		t.Errorf("deck size after recycle = %d, want 2 (target appended to bottom)", got)
 	}
-	if top := ge.Deck().PeekTop(); top != (testutils.BlueAttack{}) {
+	if top := ge.Deck().PeekTop(); top.DisplayName() != "FakeBlueAttack" {
 		t.Errorf("deck top after recycle = %v, want BlueAttack still on top (target went to bottom)", top)
 	}
 }

@@ -17,9 +17,9 @@ func TestWageGold_OnHitCreatesGoldToken(t *testing.T) {
 	d := deck.New(heroes.Viserai, nil, nil)
 	hand := []card.Card{
 		cards.WageGoldRed{},
-		testutils.BluePitch{},
-		testutils.BluePitch{},
-		testutils.BluePitch{},
+		testutils.FakeBlueResource(),
+		testutils.FakeBlueResource(),
+		testutils.FakeBlueResource(),
 	}
 	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingDamage(0).Build(), hand)
 	if summary.Value != 7 {
@@ -36,9 +36,9 @@ func TestWageGold_BlockableMissDoesNotCreateGold(t *testing.T) {
 	d := deck.New(heroes.Viserai, nil, nil)
 	hand := []card.Card{
 		cards.WageGoldBlue{},
-		testutils.BluePitch{},
-		testutils.BluePitch{},
-		testutils.BluePitch{},
+		testutils.FakeBlueResource(),
+		testutils.FakeBlueResource(),
+		testutils.FakeBlueResource(),
 	}
 	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingDamage(0).Build(), hand)
 	if summary.Value != 5 {

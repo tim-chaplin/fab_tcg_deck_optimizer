@@ -14,13 +14,13 @@ import (
 // Tests that state.deck and state.hand are reset between permutations so a draw in one
 // permutation doesn't poison the next.
 func TestPlaySequence_DrawDoesNotPoisonSubsequentPermutations(t *testing.T) {
-	top := testutils.RedAttack{}
-	deck := []card.Card{top, testutils.BlueAttack{}, testutils.RedAttack{}}
+	top := testutils.FakeRedAttack()
+	deck := []card.Card{top, testutils.FakeBlueAttack(), testutils.FakeRedAttack()}
 	ctx := NewSequenceContextForTest(heroes.Viserai, nil, deck, 10, 0, 1)
 
 	// First permutation: Snatch fires, DrawOne pops the top of the deck into Hand.
 	_, _, _, _ = ctx.PlaySequence([]card.Card{cards.SnatchRed{}})
-	if h := ctx.PermEngine().Hand(); len(h) != 1 || h[0] != top {
+	if h := ctx.PermEngine().Hand(); len(h) != 1 || h[0].Name() != top.Name() {
 		t.Fatalf("after first permutation: Hand = %v, want [top]", h)
 	}
 	if got := ctx.PermEngine().Deck().Size(); got != len(deck)-1 {
@@ -30,7 +30,7 @@ func TestPlaySequence_DrawDoesNotPoisonSubsequentPermutations(t *testing.T) {
 
 	// Second permutation: plain attack, no draw. The reset at the top of playSequenceWithMeta
 	// must restore state.deck to the original and clear state.hand before this call runs.
-	_, _, _, _ = ctx.PlaySequence([]card.Card{testutils.RedAttack{}})
+	_, _, _, _ = ctx.PlaySequence([]card.Card{testutils.FakeRedAttack()})
 	if h := ctx.PermEngine().Hand(); len(h) != 0 {
 		t.Errorf("after second permutation: Hand = %v, want empty (reset lost)", h)
 	}
@@ -45,8 +45,8 @@ func TestPlaySequence_DrawDoesNotPoisonSubsequentPermutations(t *testing.T) {
 // decks must report distinct end-of-turn State.Hand contents (the cards drawn off the top).
 func TestBest_DrawRiderSeesActualDeck(t *testing.T) {
 	h := []card.Card{cards.SnatchRed{}}
-	deckA := DeckOf(testutils.RedAttack{})
-	deckB := DeckOf(testutils.BlueAttack{})
+	deckA := DeckOf(testutils.FakeRedAttack())
+	deckB := DeckOf(testutils.FakeBlueAttack())
 
 	resA := Best(nil, h, deckA, gameengine.GameStateBuilder().SetHero(heroes.Viserai).Build())
 	resB := Best(nil, h, deckB, gameengine.GameStateBuilder().SetHero(heroes.Viserai).Build())
@@ -59,11 +59,11 @@ func TestBest_DrawRiderSeesActualDeck(t *testing.T) {
 		}
 		return false
 	}
-	if !containsID(resA.State.Hand(), (testutils.RedAttack{}).ID()) && resA.State.Arsenal() == nil {
+	if !containsID(resA.State.Hand(), (testutils.FakeRedAttack()).ID()) && resA.State.Arsenal() == nil {
 		t.Errorf("deck A: drawn RedAttack didn't surface in State.Hand or State.Arsenal: hand=%v arsenal=%v",
 			resA.State.Hand(), resA.State.Arsenal())
 	}
-	if !containsID(resB.State.Hand(), (testutils.BlueAttack{}).ID()) && resB.State.Arsenal() == nil {
+	if !containsID(resB.State.Hand(), (testutils.FakeBlueAttack()).ID()) && resB.State.Arsenal() == nil {
 		t.Errorf("deck B: drawn BlueAttack didn't surface in State.Hand or State.Arsenal: hand=%v arsenal=%v",
 			resB.State.Hand(), resB.State.Arsenal())
 	}
@@ -72,9 +72,9 @@ func TestBest_DrawRiderSeesActualDeck(t *testing.T) {
 // Tests an information-leak invariant: with a hand containing a "draw a card" action, the
 // chosen hand roles must not depend on Deck[0] — the player commits before seeing the draw.
 func TestBest_DeckOrderDoesNotAffectHandRoles(t *testing.T) {
-	h := []card.Card{testutils.CostlyDraw{}, testutils.CostlyAttack{}, testutils.PitchOneDR{}}
-	deckA := DeckOf(testutils.HugeAttack{}, testutils.PitchOneDR{})
-	deckB := DeckOf(testutils.PitchOneDR{}, testutils.HugeAttack{})
+	h := []card.Card{testutils.FakeRedAction().WithDrawOne(), testutils.FakeRedAttack(), testutils.FakeRedDR()}
+	deckA := DeckOf(testutils.FakeRedAttack(), testutils.FakeRedDR())
+	deckB := DeckOf(testutils.FakeRedDR(), testutils.FakeRedAttack())
 
 	rolesFor := func(summary TurnSummary) map[ids.CardID]card.Role {
 		m := make(map[ids.CardID]card.Role, len(summary.BestLine))

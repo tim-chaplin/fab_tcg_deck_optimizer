@@ -26,7 +26,7 @@ func TestVigorRush_NoNonAttackActionNoGoAgain(t *testing.T) {
 	cases := []card.Card{cards.VigorRushRed{}, cards.VigorRushYellow{}, cards.VigorRushBlue{}}
 	for _, c := range cases {
 		ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().
-			SetCardsPlayed([]card.Card{testutils.GenericAttack(0, 0)}). // not non-attack
+			SetCardsPlayed([]card.Card{testutils.FakeRedAttack()}). // not non-attack
 			SetNonAttackActionPlayed(false).
 			Build()}
 		pc := &card.CardState{Card: c}
@@ -46,7 +46,7 @@ func TestVigorRush_NonAttackActionGrantsGoAgain(t *testing.T) {
 	cases := []card.Card{cards.VigorRushRed{}, cards.VigorRushYellow{}, cards.VigorRushBlue{}}
 	for _, c := range cases {
 		ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().
-			SetCardsPlayed([]card.Card{testutils.GenericAction()}).
+			SetCardsPlayed([]card.Card{testutils.FakeRedAction()}).
 			SetNonAttackActionPlayed(true).
 			Build()}
 		pc := &card.CardState{Card: c}

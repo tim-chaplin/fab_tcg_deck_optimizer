@@ -86,7 +86,7 @@ func (c grantBonusAttackWeapon) Play(ge card.GameEngine, l card.Logger, self *ca
 // Tests that a granter writes BonusAttack on the target's CardState and the chain total
 // reflects printed-attack + bonus.
 func TestPlaySequence_BonusAttackAppliedToTargetDamage(t *testing.T) {
-	order := []card.Card{grantBonusAttack{n: 3}, testutils.RedAttack{}}
+	order := []card.Card{grantBonusAttack{n: 3}, testutils.FakeRedAttack().WithPower(3)}
 	ctx := NewSequenceContextForTest(testutils.Hero{Intel: 4}, nil, nil, 10, 0, len(order))
 	dmg, _, _, legal := ctx.PlaySequence(order)
 	if !legal {
@@ -117,7 +117,7 @@ func TestPlaySequence_BonusAttackNoTargetFizzles(t *testing.T) {
 // TestPlaySequence_BonusAttackStacksAcrossGranters pins that two granters in front of the
 // same target both write to BonusAttack; the field accumulates rather than overwriting.
 func TestPlaySequence_BonusAttackStacksAcrossGranters(t *testing.T) {
-	order := []card.Card{grantBonusAttack{n: 3}, grantBonusAttack{n: 2}, testutils.RedAttack{}}
+	order := []card.Card{grantBonusAttack{n: 3}, grantBonusAttack{n: 2}, testutils.FakeRedAttack().WithPower(3)}
 	ctx := NewSequenceContextForTest(testutils.Hero{Intel: 4}, nil, nil, 10, 0, len(order))
 	dmg, _, _, legal := ctx.PlaySequence(order)
 	if !legal {
@@ -148,7 +148,7 @@ func TestPlaySequence_BonusAttackAppliesToWeapon(t *testing.T) {
 // Tests that a negative BonusAttack clamps the target's contribution at 0 (FaB attack-power
 // floor) — a 1-power attack with a -3 grant deals 0, not -2.
 func TestPlaySequence_BonusAttackNegativeClampsAtZero(t *testing.T) {
-	order := []card.Card{grantBonusAttack{n: -3}, testutils.BlueAttack{}}
+	order := []card.Card{grantBonusAttack{n: -3}, testutils.FakeBlueAttack().WithPower(1)}
 	ctx := NewSequenceContextForTest(testutils.Hero{Intel: 4}, nil, nil, 10, 0, len(order))
 	dmg, _, _, legal := ctx.PlaySequence(order)
 	if !legal {
@@ -165,7 +165,7 @@ func TestPlaySequence_BonusAttackNegativeClampsAtZero(t *testing.T) {
 // grant that doesn't drive the target below 0 reduces the contribution by the full bonus,
 // no clamp.
 func TestPlaySequence_BonusAttackNegativePartialReduction(t *testing.T) {
-	order := []card.Card{grantBonusAttack{n: -2}, testutils.RedAttack{}}
+	order := []card.Card{grantBonusAttack{n: -2}, testutils.FakeRedAttack().WithPower(3)}
 	ctx := NewSequenceContextForTest(testutils.Hero{Intel: 4}, nil, nil, 10, 0, len(order))
 	dmg, _, _, legal := ctx.PlaySequence(order)
 	if !legal {
@@ -194,7 +194,7 @@ func TestPlaySequence_BonusAttackNoAttackTargetFizzles(t *testing.T) {
 // Tests the per-permutation BonusAttack reset: two back-to-back playSequence calls produce
 // the same total, never a leaked-bonus regression.
 func TestPlaySequence_BonusAttackPerPermutationReset(t *testing.T) {
-	order := []card.Card{grantBonusAttack{n: 3}, testutils.RedAttack{}}
+	order := []card.Card{grantBonusAttack{n: 3}, testutils.FakeRedAttack().WithPower(3)}
 	ctx := NewSequenceContextForTest(testutils.Hero{Intel: 4}, nil, nil, 10, 0, len(order))
 	first, _, _, _ := ctx.PlaySequence(order)
 	second, _, _, _ := ctx.PlaySequence(order)

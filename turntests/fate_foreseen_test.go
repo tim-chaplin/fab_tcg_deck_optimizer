@@ -22,7 +22,7 @@ func TestFateForeseen_BlocksAndCallsOpt1(t *testing.T) {
 	}
 
 	for _, tc := range cases {
-		top := testutils.NewFakeCard("top")
+		top := testutils.FakeRedAction().WithName("top")
 		ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCards([]card.Card{top}).Build()}
 		ge.SetIncomingDamage(10)
 		ge.ResolveChainStep(ge.Logger(), &card.CardState{Card: tc.c})

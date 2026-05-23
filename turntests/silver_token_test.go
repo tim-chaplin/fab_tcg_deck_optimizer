@@ -18,11 +18,11 @@ import (
 // drawn card promotes into arsenal.
 func TestSilverToken_SpendsToFillArsenal(t *testing.T) {
 	cards := []deck.Card{
-		testutils.RedAttack{}, testutils.RedAttack{}, testutils.RedAttack{},
-		testutils.RedAttack{}, testutils.RedAttack{},
+		testutils.FakeRedAttack(), testutils.FakeRedAttack(), testutils.FakeRedAttack(),
+		testutils.FakeRedAttack(), testutils.FakeRedAttack(),
 	}
 	d := deck.New(heroes.Viserai, nil, cards)
-	hand := []card.Card{testutils.BluePitch{}}
+	hand := []card.Card{testutils.FakeBlueResource()}
 	priorItems := []*item.Item{token.NewSilver(1)}
 	summary := sim.EvalOneTurnForTesting(d, stateWithItems(priorItems...), hand)
 	if summary.Value != 0 {
@@ -44,11 +44,11 @@ func TestSilverToken_SpendsToFillArsenal(t *testing.T) {
 // both costs.
 func TestSilverToken_SpendsAndSwings(t *testing.T) {
 	cards := []deck.Card{
-		testutils.RedAttack{}, testutils.RedAttack{}, testutils.RedAttack{},
-		testutils.RedAttack{}, testutils.RedAttack{},
+		testutils.FakeRedAttack(), testutils.FakeRedAttack(), testutils.FakeRedAttack(),
+		testutils.FakeRedAttack(), testutils.FakeRedAttack(),
 	}
 	d := deck.New(heroes.Viserai, []deck.Weapon{weapons.ReapingBlade{}}, cards)
-	hand := []card.Card{testutils.BluePitch{}, testutils.BluePitch{}}
+	hand := []card.Card{testutils.FakeBlueResource(), testutils.FakeBlueResource()}
 	priorItems := []*item.Item{token.NewSilver(1)}
 	summary := sim.EvalOneTurnForTesting(d, stateWithItems(priorItems...), hand)
 	if summary.Value != 3 {

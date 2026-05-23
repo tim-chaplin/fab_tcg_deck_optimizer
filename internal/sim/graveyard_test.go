@@ -14,7 +14,7 @@ import (
 // TestGraveyard_AttackChainAppends: every attacker in the chain lands in state.Graveyard, in
 // play order. Confirms the solver actually populates the list as cards resolve.
 func TestGraveyard_AttackChainAppends(t *testing.T) {
-	order := []card.Card{testutils.RedAttack{}, testutils.RedAttack{}, testutils.RedAttack{}}
+	order := []card.Card{testutils.FakeRedAttack().WithGoAgain(), testutils.FakeRedAttack().WithGoAgain(), testutils.FakeRedAttack().WithGoAgain()}
 	ctx := NewSequenceContextForTest(testutils.Hero{Intel: 4}, nil, nil, 1_000_000, 0, len(order))
 	if _, _, _, legal := ctx.PlaySequence(order); !legal {
 		t.Fatalf("playSequence rejected the chain")
@@ -34,7 +34,7 @@ func TestGraveyard_AttackChainAppends(t *testing.T) {
 // chain but stays equipped (PersistsInPlay via TypeWeapon); the adjacent action-attack
 // still lands in the graveyard.
 func TestGraveyard_WeaponSwingDoesNotEnterGraveyard(t *testing.T) {
-	attack := testutils.RedAttack{}
+	attack := testutils.FakeRedAttack().WithGoAgain()
 	swing := weapons.ReapingBlade{}.Ability()
 	order := []card.Card{attack, swing}
 	ctx := NewSequenceContextForTest(testutils.Hero{Intel: 4}, nil, nil, 1_000_000, 0, len(order))
@@ -119,8 +119,8 @@ func TestGraveyard_PlainBlockEntersGraveyardRegardlessOfType(t *testing.T) {
 
 // Tests that Graveyard resets between back-to-back playSequence calls (no double-up).
 func TestGraveyard_PermutationReset(t *testing.T) {
-	first := []card.Card{testutils.RedAttack{}, testutils.RedAttack{}, testutils.RedAttack{}}
-	second := []card.Card{testutils.RedAttack{}}
+	first := []card.Card{testutils.FakeRedAttack().WithGoAgain(), testutils.FakeRedAttack().WithGoAgain(), testutils.FakeRedAttack().WithGoAgain()}
+	second := []card.Card{testutils.FakeRedAttack().WithGoAgain()}
 	ctx := NewSequenceContextForTest(testutils.Hero{Intel: 4}, nil, nil, 1_000_000, 0, len(first))
 
 	if _, _, _, legal := ctx.PlaySequence(first); !legal {

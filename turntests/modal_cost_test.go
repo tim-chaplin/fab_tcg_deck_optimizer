@@ -18,7 +18,7 @@ func TestModalCost_BlusterBuffPicksMode1WhenAffordable(t *testing.T) {
 	d := deck.New(heroes.Viserai, nil, nil)
 	hand := []card.Card{
 		cards.BlusterBuffRed{},
-		testutils.BluePitch{},
+		testutils.FakeBlueResource(),
 	}
 	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingDamage(0).Build(), hand)
 	got := summary.Value
@@ -49,7 +49,7 @@ func TestModalCost_LookTuffPicksMode1WhenAffordable(t *testing.T) {
 	d := deck.New(heroes.Viserai, nil, nil)
 	hand := []card.Card{
 		cards.LookTuffRed{},
-		testutils.BluePitch{},
+		testutils.FakeBlueResource(),
 		cards.LookTuffRed{}, // pitch supply: BluePitch 3 + 1 = 4
 	}
 	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingDamage(0).Build(), hand)

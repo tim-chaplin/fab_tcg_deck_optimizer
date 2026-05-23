@@ -27,7 +27,7 @@ func TestDrowningDire_NoAuraNoDominate(t *testing.T) {
 func TestDrowningDire_AuraGrantsDominate(t *testing.T) {
 	for _, c := range []card.Card{cards.DrowningDireRed{}, cards.DrowningDireYellow{}, cards.DrowningDireBlue{}} {
 		ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().
-			SetCardsPlayed([]card.Card{testutils.Aura{}}).
+			SetCardsPlayed([]card.Card{testutils.FakeRedAura()}).
 			SetAuraCreated(true).
 			Build()}
 		pc := &card.CardState{Card: c}
@@ -40,8 +40,8 @@ func TestDrowningDire_AuraGrantsDominate(t *testing.T) {
 
 // Tests that the on-hit recycle moves a non-attack action card from graveyard to bottom of deck.
 func TestDrowningDire_OnHitRecyclesNonAttackToBottom(t *testing.T) {
-	non := testutils.GenericAction()
-	deck := []card.Card{testutils.RedAttack{}}
+	non := testutils.FakeRedAction()
+	deck := []card.Card{testutils.FakeRedAttack()}
 	ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().
 		SetCards(deck).
 		SetGraveyard([]card.Card{non}).
@@ -53,7 +53,7 @@ func TestDrowningDire_OnHitRecyclesNonAttackToBottom(t *testing.T) {
 	if got := ge.Deck().Size(); got != 2 {
 		t.Errorf("deck size after recycle = %d, want 2 (target appended to bottom)", got)
 	}
-	if top := ge.Deck().PeekTop(); top != (testutils.RedAttack{}) {
+	if top := ge.Deck().PeekTop(); top.DisplayName() != "FakeRedAttack" {
 		t.Errorf("deck top after recycle = %v, want RedAttack still on top (target went to bottom)", top)
 	}
 }

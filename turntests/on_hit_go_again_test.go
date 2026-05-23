@@ -19,7 +19,7 @@ import (
 func TestOnHitGoAgain_RazorReflexExtendsToWeaponSwing(t *testing.T) {
 	d := deck.New(heroes.Viserai, []deck.Weapon{weapons.ReapingBlade{}}, nil)
 	hand := []card.Card{
-		testutils.BluePitch{},
+		testutils.FakeBlueResource(),
 		cards.CriticalStrikeRed{},
 		cards.RazorReflexBlue{},
 		cards.NimblismBlue{},
@@ -36,7 +36,7 @@ func TestOnHitGoAgain_RazorReflexExtendsToWeaponSwing(t *testing.T) {
 func TestOnHitGoAgain_TwoConsecutiveARsExtendToWeaponSwing(t *testing.T) {
 	d := deck.New(heroes.Viserai, []deck.Weapon{weapons.ReapingBlade{}}, nil)
 	hand := []card.Card{
-		testutils.BluePitch{},
+		testutils.FakeBlueResource(),
 		cards.SnatchBlue{},
 		cards.RazorReflexBlue{},
 		cards.RazorReflexBlue{},

@@ -23,7 +23,7 @@ func TestSloggism_NoAttackReturnsZero(t *testing.T) {
 
 // TestSloggism_LowCostFilteredOut: a cost-1 attack is seen but the cost>=2 filter rejects it.
 func TestSloggism_LowCostFilteredOut(t *testing.T) {
-	ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCardsRemaining([]*card.CardState{{Card: testutils.GenericAttack(1, 0)}}).Build()}
+	ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCardsRemaining([]*card.CardState{{Card: testutils.FakeRedAttack().WithCost(1)}}).Build()}
 	ge.ResolveChainStep(ge.Logger(), &card.CardState{Card: cards.SloggismRed{}})
 	if got := ge.Value(); got != 0 {
 		t.Errorf("Play() = %d, want 0 (cost 1 < 2)", got)
@@ -42,7 +42,7 @@ func TestSloggism_HighCostReturnsBonus(t *testing.T) {
 		{cards.SloggismBlue{}, 4},
 	}
 	for _, tc := range cases {
-		target := &card.CardState{Card: testutils.GenericAttack(2, 0)}
+		target := &card.CardState{Card: testutils.FakeRedAttack().WithCost(2)}
 		ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCardsRemaining([]*card.CardState{target}).Build()}
 		ge.ResolveChainStep(ge.Logger(), &card.CardState{Card: tc.c})
 		if got := ge.Value(); got != 0 {

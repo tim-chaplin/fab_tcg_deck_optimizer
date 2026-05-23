@@ -16,7 +16,7 @@ import (
 func TestReinforceTheLine_PreventsDamageWithAttackActionDefender(t *testing.T) {
 	prior := gameengine.GameStateBuilder().SetIncomingDamage(7).Build()
 	d := deck.New(testutils.Hero{Intel: 4}, nil, nil)
-	hand := []card.Card{cards.ReinforceTheLineRed{}, testutils.BlueAttack{}}
+	hand := []card.Card{cards.ReinforceTheLineRed{}, testutils.FakeBlueAttack().WithDefense(3)}
 
 	summary := sim.EvalOneTurnForTesting(d, prior, hand)
 
@@ -31,7 +31,7 @@ func TestReinforceTheLine_PreventsDamageWithAttackActionDefender(t *testing.T) {
 func TestReinforceTheLine_NoAttackActionDefenderPreventsNothing(t *testing.T) {
 	prior := gameengine.GameStateBuilder().SetIncomingDamage(3).Build()
 	d := deck.New(testutils.Hero{Intel: 4}, nil, nil)
-	hand := []card.Card{cards.ReinforceTheLineRed{}, testutils.PitchOneDR{}}
+	hand := []card.Card{cards.ReinforceTheLineRed{}, testutils.FakeRedDR().WithDefense(3)}
 
 	summary := sim.EvalOneTurnForTesting(d, prior, hand)
 

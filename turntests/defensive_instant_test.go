@@ -53,7 +53,7 @@ func TestDefensiveInstant_CalmingBreezeAlone(t *testing.T) {
 // 1 incoming damage, so the sim's chain-step resolver credits 1.
 func TestDefensiveInstant_PreventionCapsAtIncoming(t *testing.T) {
 	d := deck.New(heroes.Viserai, nil, nil)
-	hand := []card.Card{cards.OasisRespiteRed{}, testutils.BluePitch{}}
+	hand := []card.Card{cards.OasisRespiteRed{}, testutils.FakeBlueResource()}
 	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingDamage(1).Build(), hand)
 	if got := summary.Value; got != 1 {
 		t.Fatalf("Value = %d, want 1 (Oasis Respite caps at IncomingDamage=1)", got)
@@ -64,7 +64,7 @@ func TestDefensiveInstant_PreventionCapsAtIncoming(t *testing.T) {
 // that pitch resources can't carry between attack and defense phases.
 func TestDefensiveInstant_PeaceOfMindWithCost(t *testing.T) {
 	d := deck.New(heroes.Viserai, nil, nil)
-	hand := []card.Card{cards.PeaceOfMindRed{}, testutils.BluePitch{}, cards.CriticalStrikeBlue{}}
+	hand := []card.Card{cards.PeaceOfMindRed{}, testutils.FakeBlueResource(), cards.CriticalStrikeBlue{}}
 	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingDamage(4).Build(), hand)
 	if got := summary.Value; got != 4 {
 		t.Fatalf("Value = %d, want 4 (PoM 4; pitch can't fund both phases)", got)
@@ -85,7 +85,7 @@ func TestDefensiveInstant_StacksWithDR(t *testing.T) {
 // Tests that a defensive instant in the arsenal slot can take Defend role.
 func TestDefensiveInstant_DefendsFromArsenal(t *testing.T) {
 	d := deck.New(heroes.Viserai, nil, nil)
-	hand := []card.Card{testutils.BluePitch{}}
+	hand := []card.Card{testutils.FakeBlueResource()}
 	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().
 		SetArsenal(cards.BrushOffRed{}).
 		SetIncomingDamage(3).
@@ -98,16 +98,16 @@ func TestDefensiveInstant_DefendsFromArsenal(t *testing.T) {
 // Tests that Peace of Mind's end-of-turn Ponder draws a card that fills an empty arsenal
 // via post-hoc promotion.
 func TestPonder_PeaceOfMindFillsEmptyArsenalNextTurn(t *testing.T) {
-	beacon := testutils.RedAttack{}
+	beacon := testutils.FakeRedAttack()
 	deckCards := []deck.Card{
 		beacon,
-		testutils.BlueAttack{}, testutils.BlueAttack{}, testutils.BlueAttack{},
-		testutils.BlueAttack{}, testutils.BlueAttack{}, testutils.BlueAttack{},
+		testutils.FakeBlueAttack(), testutils.FakeBlueAttack(), testutils.FakeBlueAttack(),
+		testutils.FakeBlueAttack(), testutils.FakeBlueAttack(), testutils.FakeBlueAttack(),
 	}
 	d := deck.New(heroes.Viserai, nil, deckCards)
-	hand := []card.Card{cards.PeaceOfMindRed{}, testutils.BluePitch{}}
+	hand := []card.Card{cards.PeaceOfMindRed{}, testutils.FakeBlueResource()}
 	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingDamage(4).Build(), hand)
-	if summary.State.Arsenal() != beacon {
+	if summary.State.Arsenal().Name() != beacon.Name() {
 		t.Errorf("turn 2 arsenal = %v, want %v (Ponder draw should fill empty arsenal from deck top)",
 			summary.State.Arsenal(), beacon)
 	}

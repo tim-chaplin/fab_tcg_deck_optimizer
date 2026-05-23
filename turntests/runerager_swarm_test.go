@@ -37,7 +37,7 @@ func TestRuneragerSwarm_AuraPlayedGrantsGoAgain(t *testing.T) {
 	// An aura in CardsPlayed satisfies the "played an aura this turn" condition.
 	for _, c := range []card.Card{cards.RuneragerSwarmRed{}, cards.RuneragerSwarmYellow{}, cards.RuneragerSwarmBlue{}} {
 		ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().
-			SetCardsPlayed([]card.Card{testutils.Aura{}}).
+			SetCardsPlayed([]card.Card{testutils.FakeRedAura()}).
 			SetAuraCreated(true).
 			Build()}
 		pc := &card.CardState{Card: c}

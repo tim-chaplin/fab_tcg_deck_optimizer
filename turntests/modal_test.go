@@ -67,7 +67,7 @@ func TestModal_RazorReflexMode1BuffAndOnHitGoAgainExtendChain(t *testing.T) {
 		cards.RazorReflexRed{},
 		cards.SnatchRed{},
 		cards.SnatchRed{},
-		testutils.BlueAttack{},
+		testutils.FakeBlueAttack(),
 	}
 	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingDamage(0).Build(), hand)
 	got := summary.Value
@@ -83,8 +83,8 @@ func TestModal_PummelMode1BuffsAndDiscardsOnHit(t *testing.T) {
 	hand := []card.Card{
 		cards.PummelBlue{},
 		cards.AdrenalineRushBlue{},
-		testutils.BlueAttack{},
-		testutils.BlueAttack{},
+		testutils.FakeBlueAttack(),
+		testutils.FakeBlueAttack(),
 	}
 	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingDamage(0).Build(), hand)
 	got := summary.Value

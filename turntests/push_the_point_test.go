@@ -17,9 +17,13 @@ import (
 func TestPushThePoint_LastAttackHitGrantsBonus(t *testing.T) {
 	for _, c := range []card.Card{cards.PushThePointRed{}, cards.PushThePointYellow{}, cards.PushThePointBlue{}} {
 		d := deck.New(testutils.Hero{Intel: 4}, nil, nil)
-		hand := []card.Card{testutils.BlueAttack{}, c, testutils.BluePitch{}, testutils.BluePitch{}}
+		hand := []card.Card{testutils.FakeBlueAttack().
+			WithPower(1).
+			WithGoAgain(), c, testutils.FakeBlueResource(), testutils.FakeBlueResource()}
 		summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingDamage(0).Build(), hand)
-		want := testutils.BlueAttack{}.Attack() + c.Attack() + 2
+		want := testutils.FakeBlueAttack().
+			WithPower(1).
+			WithGoAgain().Attack() + c.Attack() + 2
 		if summary.Value != want {
 			t.Errorf("%s: Value = %d, want %d (BlueAttack + printed + 2{p} bonus)", c.Name(), summary.Value, want)
 		}
@@ -30,7 +34,7 @@ func TestPushThePoint_LastAttackHitGrantsBonus(t *testing.T) {
 func TestPushThePoint_NoPriorHitNoBonus(t *testing.T) {
 	for _, c := range []card.Card{cards.PushThePointRed{}, cards.PushThePointYellow{}, cards.PushThePointBlue{}} {
 		d := deck.New(testutils.Hero{Intel: 4}, nil, nil)
-		hand := []card.Card{c, testutils.BluePitch{}}
+		hand := []card.Card{c, testutils.FakeBlueResource()}
 		summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingDamage(0).Build(), hand)
 		if summary.Value != c.Attack() {
 			t.Errorf("%s: Value = %d, want %d (printed power)", c.Name(), summary.Value, c.Attack())

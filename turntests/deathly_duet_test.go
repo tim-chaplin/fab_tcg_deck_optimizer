@@ -34,7 +34,7 @@ func TestDeathlyDuet_AttackAttributedAddsPower(t *testing.T) {
 	ge := gameengine.New()
 	pc := &card.CardState{
 		Card:          cards.DeathlyDuetRed{},
-		PitchedToPlay: []card.Card{testutils.RunebladeAttack{}},
+		PitchedToPlay: []card.Card{testutils.FakeRedAttack().WithTypes(card.TypeRuneblade)},
 	}
 	ge.ResolveChainStep(ge.Logger(), pc)
 	if got := ge.Value(); got != 6 {
@@ -49,7 +49,7 @@ func TestDeathlyDuet_NonAttackActionAttributedCreatesRunechants(t *testing.T) {
 	ge := gameengine.New()
 	pc := &card.CardState{
 		Card:          cards.DeathlyDuetRed{},
-		PitchedToPlay: []card.Card{testutils.NonAttack{}},
+		PitchedToPlay: []card.Card{testutils.FakeRedAction()},
 	}
 	ge.ResolveChainStep(ge.Logger(), pc)
 	if got := ge.Value(); got != 6 {
@@ -69,7 +69,7 @@ func TestDeathlyDuet_BothBranchesFire(t *testing.T) {
 	ge := gameengine.New()
 	pc := &card.CardState{
 		Card:          cards.DeathlyDuetRed{},
-		PitchedToPlay: []card.Card{testutils.RunebladeAttack{}, testutils.NonAttack{}},
+		PitchedToPlay: []card.Card{testutils.FakeRedAttack().WithTypes(card.TypeRuneblade), testutils.FakeRedAction()},
 	}
 	ge.ResolveChainStep(ge.Logger(), pc)
 	if got := ge.Value(); got != 8 {

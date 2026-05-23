@@ -34,5 +34,5 @@ func TestStartingStake_NoOpWhenGoldInPlay(t *testing.T) {
 	if ge.GoldCount() != 2 {
 		t.Fatalf("Gold = %d, want 2 (already had Gold, Starting Stake is a no-op)", ge.GoldCount())
 	}
-	_ = testutils.RedAttack{}
+	_ = testutils.FakeRedAttack()
 }

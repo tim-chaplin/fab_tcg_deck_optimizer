@@ -23,7 +23,7 @@ func TestRightBehindYou_BlockTogetherFiresBonus(t *testing.T) {
 			t.Errorf("%s: missing card.Blocker hook", c.Name())
 			continue
 		}
-		ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetDefenders([]card.Card{c, testutils.GenericAttack(0, 1)}).Build()}
+		ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetDefenders([]card.Card{c, testutils.FakeRedAttack()}).Build()}
 		pc := &card.CardState{Card: c}
 		blocker.Block(ge, ge.Logger(), pc)
 		if pc.BonusDefense != 1 {

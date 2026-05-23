@@ -13,7 +13,7 @@ import (
 func TestRiseAbove_VariableCost(t *testing.T) {
 	for _, c := range []card.Card{cards.RiseAboveRed{}, cards.RiseAboveYellow{}, cards.RiseAboveBlue{}} {
 		held := gameengine.New()
-		held.SetHand([]card.Card{testutils.GenericAttack(0, 0)})
+		held.SetHand([]card.Card{testutils.FakeRedAttack()})
 		if got := c.Cost(held); got != 0 {
 			t.Errorf("%s: Cost(Hand) = %d, want 0", c.Name(), got)
 		}
@@ -35,7 +35,7 @@ func TestRiseAbove_VariableCost(t *testing.T) {
 // Tests that the alt cost pops a hand card and prepends it to the deck.
 func TestRiseAbove_AltCostMovesHandCardToDeckTop(t *testing.T) {
 	for _, c := range []card.Card{cards.RiseAboveRed{}, cards.RiseAboveYellow{}, cards.RiseAboveBlue{}} {
-		spare := testutils.GenericAttack(0, 1)
+		spare := testutils.FakeRedAttack()
 		ge := gameengine.New()
 		ge.SetHand([]card.Card{spare})
 		pc := &card.CardState{Card: c}
@@ -44,7 +44,7 @@ func TestRiseAbove_AltCostMovesHandCardToDeckTop(t *testing.T) {
 			t.Errorf("%s: Hand = %d entries, want 0", c.Name(), len(ge.Hand()))
 		}
 		top, ok := ge.PeekDeck()
-		if !ok || top != spare {
+		if !ok || top.Name() != spare.Name() {
 			t.Errorf("%s: deck top = %v, want %v", c.Name(), top, spare)
 		}
 	}

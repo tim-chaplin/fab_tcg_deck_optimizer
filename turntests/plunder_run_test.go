@@ -17,7 +17,7 @@ import (
 func TestPlunderRun_TriggerWaitsAcrossMissAndFiresOnHit(t *testing.T) {
 	d := deck.New(heroes.Viserai, nil, nil)
 	hand := []card.Card{
-		testutils.BluePitch{},
+		testutils.FakeBlueResource(),
 		cards.PlunderRunRed{},
 		cards.RuneragerSwarmRed{},
 		cards.CriticalStrikeYellow{},

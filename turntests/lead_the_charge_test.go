@@ -16,9 +16,9 @@ func TestLeadTheCharge_GrantsActionPointForNextAction(t *testing.T) {
 	d := deck.New(testutils.Hero{Intel: 4}, nil, nil)
 	hand := []card.Card{
 		cards.LeadTheChargeRed{},
-		testutils.BluePitch{},
-		testutils.CostlyAttack{},
-		testutils.CostlyAttack{},
+		testutils.FakeBlueResource(),
+		testutils.FakeRedAttack().WithPower(3),
+		testutils.FakeRedAttack().WithPower(3),
 	}
 	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingDamage(0).Build(), hand)
 	if summary.Value != 6 {
@@ -32,7 +32,7 @@ func TestLeadTheCharge_NoExtraPointWithoutFollowingAction(t *testing.T) {
 	d := deck.New(testutils.Hero{Intel: 4}, nil, nil)
 	hand := []card.Card{
 		cards.LeadTheChargeRed{},
-		testutils.CostlyAttack{},
+		testutils.FakeRedAttack().WithPower(3),
 	}
 	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingDamage(0).Build(), hand)
 	if summary.Value != 3 {
@@ -47,10 +47,13 @@ func TestLeadTheCharge_ActionPointStacksWithGoAgain(t *testing.T) {
 	d := deck.New(testutils.Hero{Intel: 4}, nil, nil)
 	hand := []card.Card{
 		cards.LeadTheChargeRed{},
-		testutils.AttackWithPower{Power: 3},
-		testutils.BluePitch{},
-		testutils.CostlyAttack{},
-		testutils.CostlyAttack{},
+		testutils.FakeRedAttack().
+			WithPower(3).
+			WithGoAgain().
+			WithTypes(card.TypeRuneblade),
+		testutils.FakeBlueResource(),
+		testutils.FakeRedAttack().WithPower(3),
+		testutils.FakeRedAttack().WithPower(3),
 	}
 	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingDamage(0).Build(), hand)
 	if summary.Value != 9 {

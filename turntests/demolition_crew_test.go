@@ -15,7 +15,7 @@ import (
 func TestDemolitionCrew_PreconditionPassesWithEligibleReveal(t *testing.T) {
 	for _, c := range []card.Card{cards.DemolitionCrewRed{}, cards.DemolitionCrewYellow{}, cards.DemolitionCrewBlue{}} {
 		ge := gameengine.New()
-		ge.SetHand([]card.Card{testutils.GenericAttack(2, 0)})
+		ge.SetHand([]card.Card{testutils.FakeRedAttack().WithCost(2)})
 		if ok := c.(card.PlayPrecondition).PlayPrecondition(ge, &card.CardState{Card: c}); !ok {
 			t.Errorf("%s: PlayPrecondition with cost-2 card in hand returned false, want true", c.Name())
 		}
@@ -26,7 +26,7 @@ func TestDemolitionCrew_PreconditionPassesWithEligibleReveal(t *testing.T) {
 func TestDemolitionCrew_PreconditionFailsWithoutEligibleReveal(t *testing.T) {
 	for _, c := range []card.Card{cards.DemolitionCrewRed{}, cards.DemolitionCrewYellow{}, cards.DemolitionCrewBlue{}} {
 		ge := gameengine.New()
-		ge.SetHand([]card.Card{testutils.GenericAttack(1, 0)})
+		ge.SetHand([]card.Card{testutils.FakeRedAttack().WithCost(1)})
 		if ok := c.(card.PlayPrecondition).PlayPrecondition(ge, &card.CardState{Card: c}); ok {
 			t.Errorf("%s: PlayPrecondition with no cost-2 card returned true, want false", c.Name())
 		}
@@ -55,7 +55,7 @@ func TestDemolitionCrew_PlayAttacksForPrintedPower(t *testing.T) {
 	}
 	for _, tc := range cases {
 		d := deck.New(testutils.Hero{Intel: 4}, nil, nil)
-		hand := []card.Card{tc.c, testutils.GenericAttack(2, 0), testutils.BluePitch{}}
+		hand := []card.Card{tc.c, testutils.FakeRedAttack().WithCost(2), testutils.FakeBlueResource()}
 		summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingDamage(0).Build(), hand)
 		if summary.Value != tc.want {
 			t.Errorf("%s: Value = %d, want %d", tc.c.Name(), summary.Value, tc.want)

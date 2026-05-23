@@ -20,7 +20,7 @@ func TestModalBlock_BrothersInArmsPicksMode1WhenAffordable(t *testing.T) {
 	hand := []card.Card{
 		cards.BrothersInArmsRed{},
 		cards.ToughenUpBlue{},
-		testutils.BluePitch{},
+		testutils.FakeBlueResource(),
 	}
 	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingDamage(10).Build(), hand)
 	got := summary.Value

@@ -30,7 +30,7 @@ func TestBlock_BattlefrontBastionAloneFiresBesideDR(t *testing.T) {
 	hand := []card.Card{
 		cards.BattlefrontBastionRed{},
 		cards.ToughenUpBlue{},
-		testutils.BluePitch{},
+		testutils.FakeBlueResource(),
 	}
 	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingDamage(10).Build(), hand)
 	got := summary.Value

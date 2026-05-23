@@ -1,6 +1,6 @@
-// Test-only Weapon and weapon-ability fakes. The card pool currently lacks Club and Hammer
-// printings, but ARs like Pummel mode 0 gate on those types — these fakes let turntests
-// pin the predicate and the buff plumbing end-to-end without waiting on a real printing.
+// Test-only Weapon fake. The card pool currently lacks Club and Hammer printings, but
+// ARs like Pummel mode 0 gate on those types — ClubWeapon lets a turn-level test pin the
+// predicate and the buff plumbing end-to-end without waiting on a real printing.
 
 package testutils
 
@@ -11,7 +11,7 @@ import (
 
 var clubWeaponTypes = card.NewTypeSet(card.TypeGeneric, card.TypeWeapon, card.TypeClub, card.TypeOneHand)
 
-// ClubWeapon is a 1-handed Club weapon: swing cost 0, attack 1, no on-hit rider.
+// ClubWeapon is a 1-handed Club weapon whose swing ability deals 1, no on-hit rider.
 type ClubWeapon struct{}
 
 func (ClubWeapon) ID() ids.WeaponID    { return ids.InvalidWeapon }
@@ -22,40 +22,8 @@ func (ClubWeapon) Hands() int          { return 1 }
 func (ClubWeapon) Ability() card.Card  { return clubWeaponAbility }
 
 // Cached at package init so the chain runner's per-Best w.Ability() lookup is alloc-free.
-var clubWeaponAbility card.Card = ClubWeaponAbility{}
-
-var clubWeaponAbilityTypes = card.NewTypeSet(card.TypeGeneric, card.TypeWeapon, card.TypeClub, card.TypeOneHand, card.TypeAttack)
-
-// ClubWeaponAbility is the activated-ability Card for ClubWeapon: cost 0, power 1, no rider.
-type ClubWeaponAbility struct{}
-
-func (ClubWeaponAbility) ID() ids.CardID                     { return ids.InvalidCard }
-func (ClubWeaponAbility) Name() string                       { return "test.ClubWeapon" }
-func (ClubWeaponAbility) DisplayName() string                { return "test.ClubWeapon" }
-func (ClubWeaponAbility) Cost(card.GameEngine) int           { return 0 }
-func (ClubWeaponAbility) Pitch() int                         { return 0 }
-func (ClubWeaponAbility) Attack() int                        { return 1 }
-func (ClubWeaponAbility) Defense() int                       { return 0 }
-func (ClubWeaponAbility) Types(card.GameEngine) card.TypeSet { return clubWeaponAbilityTypes }
-func (ClubWeaponAbility) GoAgain(card.GameEngine) bool       { return false }
-func (ClubWeaponAbility) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
-}
-
-var hammerWeaponAbilityTypes = card.NewTypeSet(card.TypeGeneric, card.TypeWeapon, card.TypeHammer, card.TypeOneHand, card.TypeAttack)
-
-// HammerWeaponAbility is a stand-alone activated-ability Card with the Hammer + Weapon type
-// line so Hammer-gated AR predicates (e.g. Pummel mode 0) can be exercised without a real
-// weapon printing to back it.
-type HammerWeaponAbility struct{}
-
-func (HammerWeaponAbility) ID() ids.CardID                     { return ids.InvalidCard }
-func (HammerWeaponAbility) Name() string                       { return "test.HammerWeapon" }
-func (HammerWeaponAbility) DisplayName() string                { return "test.HammerWeapon" }
-func (HammerWeaponAbility) Cost(card.GameEngine) int           { return 0 }
-func (HammerWeaponAbility) Pitch() int                         { return 0 }
-func (HammerWeaponAbility) Attack() int                        { return 1 }
-func (HammerWeaponAbility) Defense() int                       { return 0 }
-func (HammerWeaponAbility) Types(card.GameEngine) card.TypeSet { return hammerWeaponAbilityTypes }
-func (HammerWeaponAbility) GoAgain(card.GameEngine) bool       { return false }
-func (HammerWeaponAbility) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
-}
+// The ability is a FakeWeaponSwing with Club + OneHand sub-types and power 1.
+var clubWeaponAbility card.Card = FakeWeaponSwing().
+	WithName("test.ClubWeapon").
+	WithPower(1).
+	WithTypes(card.TypeClub, card.TypeOneHand)

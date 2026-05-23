@@ -72,10 +72,14 @@ func TestBest_ArsenalInStayBlocksNewArsenal(t *testing.T) {
 
 // Tests the arsenal-card-played-as-attack branch (arsenal Red funded by pitching hand Red).
 func TestBest_ArsenalInPlayAttack(t *testing.T) {
-	h := []card.Card{testutils.RedAttack{}}
+	h := []card.Card{testutils.FakeRedAttack().
+		WithCost(1).
+		WithPower(3)}
 	state := gameengine.GameStateBuilder().
 		SetHero(testutils.Hero{Intel: 4}).
-		SetArsenal(testutils.RedAttack{}).
+		SetArsenal(testutils.FakeRedAttack().
+			WithCost(1).
+			WithPower(3)).
 		Build()
 	got := Best(nil, h, nil, state)
 	if got.Value != 3 {

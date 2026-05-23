@@ -13,8 +13,8 @@ import (
 
 // Tests that the hand cycle fires and the granted go-again chains an arsenal play.
 func TestEmissaryOfWind_CyclesHandAndChainsArsenal(t *testing.T) {
-	spare := testutils.GenericAttack(0, 0)
-	arsenalAttack := testutils.GenericAttack(0, 3)
+	spare := testutils.FakeRedAttack().WithPower(0)
+	arsenalAttack := testutils.FakeRedAttack().WithPower(3)
 	d := deck.New(testutils.Hero{Intel: 4}, nil, nil)
 	state := gameengine.GameStateBuilder().SetArsenal(arsenalAttack).Build()
 	summary := sim.EvalOneTurnForTesting(d, state, []card.Card{cards.EmissaryOfWindRed{}, spare})
@@ -25,7 +25,7 @@ func TestEmissaryOfWind_CyclesHandAndChainsArsenal(t *testing.T) {
 
 // Tests that an empty hand suppresses the granted go-again.
 func TestEmissaryOfWind_EmptyHandSuppressesGoAgain(t *testing.T) {
-	arsenalAttack := testutils.GenericAttack(0, 3)
+	arsenalAttack := testutils.FakeRedAttack().WithPower(3)
 	d := deck.New(testutils.Hero{Intel: 4}, nil, nil)
 	state := gameengine.GameStateBuilder().SetArsenal(arsenalAttack).Build()
 	summary := sim.EvalOneTurnForTesting(d, state, []card.Card{cards.EmissaryOfWindRed{}})

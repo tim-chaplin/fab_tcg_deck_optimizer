@@ -24,7 +24,7 @@ func TestMinnowism_NoAttackReturnsZero(t *testing.T) {
 // TestMinnowism_HighPowerFilteredOut: a power-4 attack is seen but the power<=3 filter rejects it,
 // so the rider fizzles without falling through to a later match.
 func TestMinnowism_HighPowerFilteredOut(t *testing.T) {
-	ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCardsRemaining([]*card.CardState{{Card: testutils.GenericAttack(0, 4)}}).Build()}
+	ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCardsRemaining([]*card.CardState{{Card: testutils.FakeRedAttack()}}).Build()}
 	ge.ResolveChainStep(ge.Logger(), &card.CardState{Card: cards.MinnowismRed{}})
 	if got := ge.Value(); got != 0 {
 		t.Errorf("Play() = %d, want 0 (power 4 > 3)", got)
@@ -43,7 +43,7 @@ func TestMinnowism_LowPowerReturnsBonus(t *testing.T) {
 		{cards.MinnowismBlue{}, 1},
 	}
 	for _, tc := range cases {
-		target := &card.CardState{Card: testutils.GenericAttack(0, 3)}
+		target := &card.CardState{Card: testutils.FakeRedAttack()}
 		ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCardsRemaining([]*card.CardState{target}).Build()}
 		ge.ResolveChainStep(ge.Logger(), &card.CardState{Card: tc.c})
 		if got := ge.Value(); got != 0 {

@@ -12,7 +12,7 @@ import (
 
 // Tests that Emissary of Tides cycles a hand card to the deck bottom and credits +2{p}.
 func TestEmissaryOfTides_CyclesHandForBonus(t *testing.T) {
-	cycled := testutils.GenericAttack(0, 0)
+	cycled := testutils.FakeRedAttack()
 	d := deck.New(testutils.Hero{Intel: 4}, nil, nil)
 	summary := sim.EvalOneTurnForTesting(d, nil, []card.Card{cards.EmissaryOfTidesRed{}, cycled})
 	if summary.Value != 6 {

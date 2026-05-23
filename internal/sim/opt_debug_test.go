@@ -37,8 +37,8 @@ func captureStdout(t *testing.T, fn func()) string {
 // Tests that gameengine.OptDebug=true makes Opt print a one-line summary of the outcome to stdout,
 // and gameengine.OptDebug=false stays quiet.
 func TestOptDebug_PrintsOnlyWhenSet(t *testing.T) {
-	a := testutils.NewFakeCard("a")
-	b := testutils.NewFakeCard("b")
+	a := testutils.FakeRedAction().WithName("a")
+	b := testutils.FakeRedAction().WithName("b")
 	prev := gameengine.OptDebug
 	defer func() { gameengine.OptDebug = prev }()
 

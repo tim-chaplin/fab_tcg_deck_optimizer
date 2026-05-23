@@ -12,7 +12,7 @@ import (
 
 // Plunder Run from hand registers the on-hit-draw trigger and skips the +N{p} grant.
 func TestPlunderRun_FromHandQueuesTriggerNoBonus(t *testing.T) {
-	target := &card.CardState{Card: testutils.GenericAttack(0, 4)}
+	target := &card.CardState{Card: testutils.FakeRedAttack()}
 	ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCardsRemaining([]*card.CardState{target}).Build()}
 	pc := &card.CardState{Card: cards.PlunderRunRed{}}
 	ge.ResolveChainStep(ge.Logger(), pc)
@@ -36,7 +36,7 @@ func TestPlunderRun_FromArsenalAddsBonusAttack(t *testing.T) {
 		{cards.PlunderRunBlue{}, 1},
 	}
 	for _, tc := range cases {
-		target := &card.CardState{Card: testutils.GenericAttack(0, 4)}
+		target := &card.CardState{Card: testutils.FakeRedAttack()}
 		ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCardsRemaining([]*card.CardState{target}).Build()}
 		pc := &card.CardState{Card: tc.c, FromArsenal: true}
 		ge.ResolveChainStep(ge.Logger(), pc)

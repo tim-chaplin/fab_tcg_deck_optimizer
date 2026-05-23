@@ -36,7 +36,7 @@ func TestBattlefrontBastion_BlockAloneFiresPrevention(t *testing.T) {
 // the defenders slot.
 func TestBattlefrontBastion_BlockWithOtherPlainBlockerNoBonus(t *testing.T) {
 	c := cards.BattlefrontBastionRed{}
-	ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetDefenders([]card.Card{c, testutils.GenericAttack(0, 1)}).Build()}
+	ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetDefenders([]card.Card{c, testutils.FakeRedAttack()}).Build()}
 	pc := &card.CardState{Card: c}
 	c.Block(ge, ge.Logger(), pc)
 	if pc.BonusDefense != 0 {

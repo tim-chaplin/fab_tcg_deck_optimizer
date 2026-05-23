@@ -18,7 +18,7 @@ func TestSigilOfCycles_DestroysAtStartOfNextTurnAndCyclesHand(t *testing.T) {
 	// Hero Intel=1 + single-card deck makes turn 2's dealt hand exactly [RedAttack], so
 	// the aura's Discard target is deterministic and the resulting graveyard membership
 	// distinguishes "rider fired" from "rider was a no-op".
-	d := deck.New(testutils.Hero{Intel: 1}, nil, []deck.Card{testutils.RedAttack{}})
+	d := deck.New(testutils.Hero{Intel: 1}, nil, []deck.Card{testutils.FakeRedAttack()})
 	turn1, turn2 := sim.EvalTwoTurnsForTesting(d, gameengine.GameStateBuilder().SetIncomingDamage(0).Build(), []card.Card{sigil})
 
 	if !bestLineHasRole(turn1.BestLine, cards.SigilOfCyclesBlue{}, card.Attack) {
@@ -28,7 +28,7 @@ func TestSigilOfCycles_DestroysAtStartOfNextTurnAndCyclesHand(t *testing.T) {
 		t.Errorf("turn 2 graveyard = %v, want it to contain Sigil of Cycles (start-of-action-phase handler destroys it)",
 			turn2.State.Graveyard())
 	}
-	if !graveyardContains(turn2.State.Graveyard(), testutils.RedAttack{}) {
+	if !graveyardContains(turn2.State.Graveyard(), testutils.FakeRedAttack()) {
 		t.Errorf("turn 2 graveyard = %v, want it to contain the RedAttack the leave-arena rider discarded",
 			turn2.State.Graveyard())
 	}

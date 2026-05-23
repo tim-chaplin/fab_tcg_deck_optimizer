@@ -36,7 +36,7 @@ func damageTrigger(self card.Card, damage int, calls *int) gameengine.Aura {
 // TestProcessAurasAtStartOfTurn_FiresEachQueuedTriggerOnce verifies every queued
 // start-of-turn trigger's handler is invoked exactly once per pass.
 func TestProcessAurasAtStartOfTurn_FiresEachQueuedTriggerOnce(t *testing.T) {
-	src := testutils.RedAttack{}
+	src := testutils.FakeRedAttack()
 	var callsA, callsB int
 	queue := []gameengine.Aura{damageTrigger(src, 2, &callsA), damageTrigger(src, 3, &callsB)}
 	survivors, total, _, _ := ProcessAurasAtStartOfTurnForTest(queue, DeckOf())
@@ -66,10 +66,10 @@ func TestProcessAurasAtStartOfTurn_EmptyQueue(t *testing.T) {
 // TestProcessAurasAtStartOfTurn_GraveyardsExhaustedAura: a handler that calls Destroy
 // lands Self in the graveyard before subsequent handlers run.
 func TestProcessAurasAtStartOfTurn_GraveyardsExhaustedAura(t *testing.T) {
-	src := testutils.RedAttack{}
+	src := testutils.FakeRedAttack()
 	var seen []card.Card
 	watcher := aura.NewFromCard(
-		testutils.YellowAttack{},
+		testutils.FakeYellowAttack(),
 		triggertype.StartOfTurn,
 		func(ge card.GameEngine, _ card.Logger, _ card.Aura) {
 			eng := ge.(*gameengine.GameEngine)
@@ -90,7 +90,7 @@ func TestProcessAurasAtStartOfTurn_GraveyardsExhaustedAura(t *testing.T) {
 		nil,
 	)
 	_, _, _, _ = ProcessAurasAtStartOfTurnForTest([]gameengine.Aura{first, watcher}, DeckOf())
-	if len(seen) != 1 || seen[0] != src {
+	if len(seen) != 1 || seen[0].Name() != src.Name() {
 		t.Errorf("second handler saw Graveyard = %v, want [%v]", seen, src)
 	}
 }
@@ -105,7 +105,7 @@ func TestProcessAurasAtStartOfTurn_IgnoresPonder(t *testing.T) {
 
 // TestFireEndOfTurn_PonderPopsDeckTopIntoHand.
 func TestFireEndOfTurn_PonderPopsDeckTopIntoHand(t *testing.T) {
-	a, b, c := testutils.NewFakeCard("a"), testutils.NewFakeCard("b"), testutils.NewFakeCard("c")
+	a, b, c := testutils.FakeRedAction().WithName("a"), testutils.FakeRedAction().WithName("b"), testutils.FakeRedAction().WithName("c")
 	ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().
 		SetCards([]card.Card{a, b, c}).
 		AddAura(token.NewPonder(2)).
@@ -113,7 +113,7 @@ func TestFireEndOfTurn_PonderPopsDeckTopIntoHand(t *testing.T) {
 	FireEndOfTurn(ge)
 
 	h := ge.Hand()
-	if len(h) != 2 || h[0] != a || h[1] != b {
+	if len(h) != 2 || h[0].Name() != a.Name() || h[1].Name() != b.Name() {
 		t.Errorf("Hand = %v, want [a, b]", h)
 	}
 	if got := ge.Deck().Size(); got != 1 {
@@ -194,7 +194,7 @@ func TestEvaluate_TriggersFromLastTurnSurfacesInMean(t *testing.T) {
 		deckCards = append(deckCards, slash)
 	}
 	for i := 0; i < 6; i++ {
-		deckCards = append(deckCards, testutils.BlueAttack{})
+		deckCards = append(deckCards, testutils.FakeBlueAttack())
 	}
 	d := deck.New(heroes.Viserai, nil, deckCards)
 	rng := rand.New(rand.NewSource(42))

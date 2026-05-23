@@ -16,35 +16,35 @@ import (
 // Tests that a mid-turn-drawn card fills an empty arsenal slot at end of turn rather than
 // being held into turn 2.
 func TestEvalOneTurn_MidTurnDrawArsenalsWhenSlotEmpty(t *testing.T) {
-	beacon := testutils.RedAttack{}
+	beacon := testutils.FakeRedAttack().WithGoAgain()
 	hand := []card.Card{
 		cards.SnatchRed{},
-		testutils.BlueAttack{},
-		testutils.BlueAttack{},
-		testutils.BlueAttack{},
+		testutils.FakeBlueAttack().WithGoAgain(),
+		testutils.FakeBlueAttack().WithGoAgain(),
+		testutils.FakeBlueAttack().WithGoAgain(),
 	}
 	deckCards := []deck.Card{
 		beacon, // Snatch draws this mid-turn.
-		testutils.BlueAttack{},
-		testutils.BlueAttack{},
-		testutils.BlueAttack{},
-		testutils.YellowAttack{},
-		testutils.YellowAttack{},
+		testutils.FakeBlueAttack().WithGoAgain(),
+		testutils.FakeBlueAttack().WithGoAgain(),
+		testutils.FakeBlueAttack().WithGoAgain(),
+		testutils.FakeYellowAttack().WithGoAgain(),
+		testutils.FakeYellowAttack().WithGoAgain(),
 	}
 	d := deck.New(heroes.Viserai, nil, deckCards)
 	summary := sim.EvalOneTurnForTesting(d, nil, hand)
 
 	wantHand := []card.Card{
-		testutils.BlueAttack{},
-		testutils.BlueAttack{},
-		testutils.BlueAttack{},
-		testutils.YellowAttack{},
+		testutils.FakeBlueAttack().WithGoAgain(),
+		testutils.FakeBlueAttack().WithGoAgain(),
+		testutils.FakeBlueAttack().WithGoAgain(),
+		testutils.FakeYellowAttack().WithGoAgain(),
 	}
 	if !containsSameCards(summary.State.Hand(), wantHand) {
 		t.Errorf("turn 2 hand = %v, want %v (full 4-card refill; Yellow at slot 3 proves drawn card arsenaled rather than held)", summary.State.Hand(), wantHand)
 	}
 
-	if summary.State.Arsenal() != beacon {
+	if summary.State.Arsenal().Name() != beacon.Name() {
 		t.Errorf("turn 2 arsenal = %v, want %v (drawn card should take the empty arsenal slot)", summary.State.Arsenal(), beacon)
 	}
 
@@ -56,7 +56,7 @@ func TestEvalOneTurn_MidTurnDrawArsenalsWhenSlotEmpty(t *testing.T) {
 // Tests that with 2 mid-turn draws and an empty arsenal, exactly one drawn card arsenals and
 // the other stays Held into turn 2.
 func TestEvalOneTurn_TwoMidTurnDraws_OneArsenalsOneHeld(t *testing.T) {
-	beacon := testutils.RedAttack{}
+	beacon := testutils.FakeRedAttack().WithGoAgain()
 	hand := []card.Card{
 		cards.FlyingHighRed{},
 		cards.FlyingHighRed{},
@@ -66,10 +66,10 @@ func TestEvalOneTurn_TwoMidTurnDraws_OneArsenalsOneHeld(t *testing.T) {
 	deckCards := []deck.Card{
 		beacon, // Snatch #1 draws this.
 		beacon, // Snatch #2 draws this.
-		testutils.BlueAttack{},
-		testutils.BlueAttack{},
-		testutils.BlueAttack{},
-		testutils.YellowAttack{},
+		testutils.FakeBlueAttack().WithGoAgain(),
+		testutils.FakeBlueAttack().WithGoAgain(),
+		testutils.FakeBlueAttack().WithGoAgain(),
+		testutils.FakeYellowAttack().WithGoAgain(),
 	}
 	d := deck.New(heroes.Viserai, nil, deckCards)
 	summary := sim.EvalOneTurnForTesting(d, nil, hand)
@@ -78,15 +78,15 @@ func TestEvalOneTurn_TwoMidTurnDraws_OneArsenalsOneHeld(t *testing.T) {
 	// fresh refill from the remaining Blues.
 	wantHand := []card.Card{
 		beacon,
-		testutils.BlueAttack{},
-		testutils.BlueAttack{},
-		testutils.BlueAttack{},
+		testutils.FakeBlueAttack().WithGoAgain(),
+		testutils.FakeBlueAttack().WithGoAgain(),
+		testutils.FakeBlueAttack().WithGoAgain(),
 	}
 	if !containsSameCards(summary.State.Hand(), wantHand) {
 		t.Errorf("turn 2 hand = %v, want %v (one beacon held + 3 fresh Blues; two beacons here would mean neither got arsenaled, a Yellow would mean the sim over-drew)", summary.State.Hand(), wantHand)
 	}
 
-	if summary.State.Arsenal() != beacon {
+	if summary.State.Arsenal().Name() != beacon.Name() {
 		t.Errorf("turn 2 arsenal = %v, want %v (one of the two drawn beacons should fill the empty slot)", summary.State.Arsenal(), beacon)
 	}
 
@@ -97,7 +97,7 @@ func TestEvalOneTurn_TwoMidTurnDraws_OneArsenalsOneHeld(t *testing.T) {
 
 // Tests 3 mid-turn draws filling a slot vacated by arsenal-in: one arsenals, two stay Held.
 func TestEvalOneTurn_ThreeMidTurnDraws_ArsenalFromDrawnPool(t *testing.T) {
-	beacon := testutils.RedAttack{}
+	beacon := testutils.FakeRedAttack().WithGoAgain()
 	arsenalIn := cards.SnatchRed{}
 	hand := []card.Card{
 		cards.FlyingHighRed{},
@@ -109,9 +109,9 @@ func TestEvalOneTurn_ThreeMidTurnDraws_ArsenalFromDrawnPool(t *testing.T) {
 		beacon, // Drawn by arsenal-in Snatch.
 		beacon, // Drawn by hand Snatch #1.
 		beacon, // Drawn by hand Snatch #2.
-		testutils.BlueAttack{},
-		testutils.BlueAttack{},
-		testutils.YellowAttack{},
+		testutils.FakeBlueAttack().WithGoAgain(),
+		testutils.FakeBlueAttack().WithGoAgain(),
+		testutils.FakeYellowAttack().WithGoAgain(),
 	}
 	d := deck.New(heroes.Viserai, nil, deckCards)
 	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetArsenal(arsenalIn).Build(), hand)
@@ -120,14 +120,14 @@ func TestEvalOneTurn_ThreeMidTurnDraws_ArsenalFromDrawnPool(t *testing.T) {
 	wantHand := []card.Card{
 		beacon,
 		beacon,
-		testutils.BlueAttack{},
-		testutils.BlueAttack{},
+		testutils.FakeBlueAttack().WithGoAgain(),
+		testutils.FakeBlueAttack().WithGoAgain(),
 	}
 	if !containsSameCards(summary.State.Hand(), wantHand) {
 		t.Errorf("turn 2 hand = %v, want %v (two beacons held + 2 fresh Blues; a Yellow here would indicate the sim pulled more than 2 refill cards)", summary.State.Hand(), wantHand)
 	}
 
-	if summary.State.Arsenal() != beacon {
+	if summary.State.Arsenal().Name() != beacon.Name() {
 		t.Errorf("turn 2 arsenal = %v, want %v (one of the three drawn beacons should fill the slot vacated by arsenal-in Snatch)", summary.State.Arsenal(), beacon)
 	}
 
@@ -138,36 +138,36 @@ func TestEvalOneTurn_ThreeMidTurnDraws_ArsenalFromDrawnPool(t *testing.T) {
 
 // Tests that with an occupied arsenal slot, a mid-turn-drawn card stays Held into turn 2.
 func TestEvalOneTurn_MidTurnDrawHeldWhenArsenalFull(t *testing.T) {
-	beacon := testutils.RedAttack{}
+	beacon := testutils.FakeRedAttack().WithGoAgain()
 	arsenalIn := cards.ToughenUpBlue{} // DR, cost 2, defense 4 — stays in arsenal with incoming 0
 	hand := []card.Card{
 		cards.SnatchRed{},
-		testutils.BlueAttack{},
-		testutils.BlueAttack{},
-		testutils.BlueAttack{},
+		testutils.FakeBlueAttack().WithGoAgain(),
+		testutils.FakeBlueAttack().WithGoAgain(),
+		testutils.FakeBlueAttack().WithGoAgain(),
 	}
 	deckCards := []deck.Card{
 		beacon, // Snatch draws this mid-turn.
-		testutils.BlueAttack{},
-		testutils.BlueAttack{},
-		testutils.BlueAttack{},
-		testutils.YellowAttack{},
-		testutils.YellowAttack{},
+		testutils.FakeBlueAttack().WithGoAgain(),
+		testutils.FakeBlueAttack().WithGoAgain(),
+		testutils.FakeBlueAttack().WithGoAgain(),
+		testutils.FakeYellowAttack().WithGoAgain(),
+		testutils.FakeYellowAttack().WithGoAgain(),
 	}
 	d := deck.New(heroes.Viserai, nil, deckCards)
 	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetArsenal(arsenalIn).Build(), hand)
 
 	wantHand := []card.Card{
 		beacon,
-		testutils.BlueAttack{},
-		testutils.BlueAttack{},
-		testutils.BlueAttack{},
+		testutils.FakeBlueAttack().WithGoAgain(),
+		testutils.FakeBlueAttack().WithGoAgain(),
+		testutils.FakeBlueAttack().WithGoAgain(),
 	}
 	if !containsSameCards(summary.State.Hand(), wantHand) {
 		t.Errorf("turn 2 hand = %v, want %v (beacon held + 3 fresh Blues; a Yellow here means the sim over-drew past the 3-card budget)", summary.State.Hand(), wantHand)
 	}
 
-	if summary.State.Arsenal() != arsenalIn {
+	if summary.State.Arsenal().Name() != arsenalIn.Name() {
 		t.Errorf("turn 2 arsenal = %v, want %v (arsenal-in should remain untouched when no better candidate beats it)", summary.State.Arsenal(), arsenalIn)
 	}
 
@@ -185,9 +185,9 @@ func TestEvalOneTurn_MidTurnDrawSansGoAgainStaysHeld(t *testing.T) {
 	}
 	deckCards := []deck.Card{
 		cards.AetherSlashRed{},
-		testutils.BlueAttack{},
-		testutils.BlueAttack{},
-		testutils.BlueAttack{},
+		testutils.FakeBlueAttack().WithGoAgain(),
+		testutils.FakeBlueAttack().WithGoAgain(),
+		testutils.FakeBlueAttack().WithGoAgain(),
 	}
 	d := deck.New(heroes.Viserai, nil, deckCards)
 	summary := sim.EvalOneTurnForTesting(d, nil, initialHand)
@@ -216,9 +216,9 @@ func TestEvalOneTurn_MidTurnDrawSansGoAgainStaysHeld(t *testing.T) {
 	}
 	wantHand := []card.Card{
 		wantAnchor,
-		testutils.BlueAttack{},
-		testutils.BlueAttack{},
-		testutils.BlueAttack{},
+		testutils.FakeBlueAttack().WithGoAgain(),
+		testutils.FakeBlueAttack().WithGoAgain(),
+		testutils.FakeBlueAttack().WithGoAgain(),
 	}
 	if !containsSameCards(summary.State.Hand(), wantHand) {
 		t.Errorf("turn 2 hand = %v, want %v", summary.State.Hand(), wantHand)

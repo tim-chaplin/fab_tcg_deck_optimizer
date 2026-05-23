@@ -16,7 +16,7 @@ import (
 func TestRunicFellingsong_NoAuraCreditsPrintedPowerOnly(t *testing.T) {
 	c := cards.RunicFellingsongRed{}
 	d := deck.New(testutils.Hero{Intel: 4}, nil, nil)
-	hand := []card.Card{c, testutils.BluePitch{}}
+	hand := []card.Card{c, testutils.FakeBlueResource()}
 	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingDamage(0).Build(), hand)
 	if summary.Value != c.Attack() {
 		t.Errorf("Value = %d, want %d (Attack only; banish fizzles)", summary.Value, c.Attack())
@@ -33,7 +33,7 @@ func TestRunicFellingsong_AuraInGraveyardFiresBanishRider(t *testing.T) {
 		SetGraveyard([]card.Card{aura}).
 		SetIncomingDamage(0).
 		Build()
-	hand := []card.Card{c, testutils.BluePitch{}}
+	hand := []card.Card{c, testutils.FakeBlueResource()}
 	summary := sim.EvalOneTurnForTesting(d, prior, hand)
 	if want := c.Attack() + 1; summary.Value != want {
 		t.Errorf("Value = %d, want %d (Attack + banish rider)", summary.Value, want)

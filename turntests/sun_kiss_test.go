@@ -23,7 +23,7 @@ func TestSunKiss_SoloIsHealOnly(t *testing.T) {
 		{cards.SunKissBlue{}, 1},
 	}
 	for _, tc := range cases {
-		ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCards([]card.Card{testutils.GenericAttack(0, 0)}).Build()}
+		ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCards([]card.Card{testutils.FakeRedAttack()}).Build()}
 		pc := &card.CardState{Card: tc.c}
 		ge.ResolveChainStep(ge.Logger(), pc)
 		got := ge.Value()
@@ -52,7 +52,7 @@ func TestSunKiss_SynergyFiresOnPriorMoonWish(t *testing.T) {
 			{cards.SunKissYellow{}, 2},
 			{cards.SunKissBlue{}, 1},
 		} {
-			ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCards([]card.Card{testutils.GenericAttack(0, 0)}).Build()}
+			ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCards([]card.Card{testutils.FakeRedAttack()}).Build()}
 			ge.SetCardsPlayed([]card.Card{mw})
 			pc := &card.CardState{Card: sk.c}
 			ge.ResolveChainStep(ge.Logger(), pc)
@@ -74,8 +74,8 @@ func TestSunKiss_SynergyFiresOnPriorMoonWish(t *testing.T) {
 
 // Tests that the Sun Kiss synergy only fires on a Moon Wish printing, not any prior attack.
 func TestSunKiss_SynergyDoesNotFireOnUnrelatedAttacks(t *testing.T) {
-	notMoonWish := testutils.GenericAttackPitch(0, 0, 1)
-	ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCards([]card.Card{testutils.GenericAttack(0, 0)}).Build()}
+	notMoonWish := testutils.FakeRedAttack()
+	ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCards([]card.Card{testutils.FakeRedAttack()}).Build()}
 	ge.SetCardsPlayed([]card.Card{notMoonWish})
 	pc := &card.CardState{Card: cards.SunKissRed{}}
 	ge.ResolveChainStep(ge.Logger(), pc)

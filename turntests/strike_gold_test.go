@@ -17,9 +17,9 @@ func TestStrikeGold_OnHitCreatesGoldToken(t *testing.T) {
 	d := deck.New(heroes.Viserai, nil, nil)
 	hand := []card.Card{
 		cards.StrikeGoldRed{},
-		testutils.BluePitch{},
-		testutils.BluePitch{},
-		testutils.BluePitch{},
+		testutils.FakeBlueResource(),
+		testutils.FakeBlueResource(),
+		testutils.FakeBlueResource(),
 	}
 	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingDamage(0).Build(), hand)
 	if summary.Value != 4 {
@@ -36,9 +36,9 @@ func TestStrikeGold_BlockableMissDoesNotCreateGold(t *testing.T) {
 	d := deck.New(heroes.Viserai, nil, nil)
 	hand := []card.Card{
 		cards.StrikeGoldYellow{},
-		testutils.BluePitch{},
-		testutils.BluePitch{},
-		testutils.BluePitch{},
+		testutils.FakeBlueResource(),
+		testutils.FakeBlueResource(),
+		testutils.FakeBlueResource(),
 	}
 	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingDamage(0).Build(), hand)
 	if summary.Value != 3 {
@@ -54,19 +54,19 @@ func TestStrikeGold_BlockableMissDoesNotCreateGold(t *testing.T) {
 func TestStrikeGold_GoldTokenPlayableNextTurn(t *testing.T) {
 	hand := []card.Card{
 		cards.StrikeGoldRed{},
-		testutils.BluePitch{},
-		testutils.BluePitch{},
-		testutils.BluePitch{},
+		testutils.FakeBlueResource(),
+		testutils.FakeBlueResource(),
+		testutils.FakeBlueResource(),
 	}
 	deckCards := []deck.Card{
 		// Turn 2 hand: red pitches to fund the Gold ability ({2}).
-		testutils.RedAttack{},
-		testutils.RedAttack{},
-		testutils.RedAttack{},
-		testutils.RedAttack{},
+		testutils.FakeRedAttack(),
+		testutils.FakeRedAttack(),
+		testutils.FakeRedAttack(),
+		testutils.FakeRedAttack(),
 		// Filler so the turn-2 refill has cards to pull from.
-		testutils.BlueAttack{}, testutils.BlueAttack{},
-		testutils.BlueAttack{}, testutils.BlueAttack{},
+		testutils.FakeBlueAttack(), testutils.FakeBlueAttack(),
+		testutils.FakeBlueAttack(), testutils.FakeBlueAttack(),
 	}
 	d := deck.New(heroes.Viserai, nil, deckCards)
 	summary := sim.EvalOneTurnForTesting(d, nil, hand)

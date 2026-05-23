@@ -31,7 +31,7 @@ func TestHighStriker_TriggersOnNextAttackActionHit(t *testing.T) {
 			hand := []card.Card{
 				tc.striker,
 				cards.CriticalStrikeYellow{},
-				testutils.BluePitch{},
+				testutils.FakeBlueResource(),
 			}
 			summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingDamage(0).Build(), hand)
 			if summary.State.CopperCount() != tc.wantCopper {

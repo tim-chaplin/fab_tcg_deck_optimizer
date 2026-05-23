@@ -12,7 +12,7 @@ import (
 // Tests that an OncePerTurn CardOrAbility aura fires on the first call and is gated by
 // FiredThisTurn on the second within the same turn.
 func TestFireCardOrAbilityAuras_FiresOnceWhenGated(t *testing.T) {
-	src := testutils.RedAttack{}
+	src := testutils.FakeRedAttack()
 	calls := 0
 	ge := gameengine.New()
 	ge.CreateAura(src, triggertype.CardOrAbility,
@@ -21,7 +21,7 @@ func TestFireCardOrAbilityAuras_FiresOnceWhenGated(t *testing.T) {
 			ge.AddValue(1)
 			l.AppendPreTriggerf("TestCard", 1, "test trigger fired")
 		}, 3, true, nil)
-	trigger := testutils.RedAttack{}
+	trigger := testutils.FakeRedAttack()
 	ge.FireTriggers(triggertype.CardOrAbility, trigger)
 	if ge.Value() != 1 {
 		t.Errorf("first fire Value = %d, want 1", ge.Value())
@@ -44,32 +44,32 @@ func TestFireCardOrAbilityAuras_FiresOnceWhenGated(t *testing.T) {
 // Tests that a handler calling Destroy drops the entry from Auras and lands Self in the
 // graveyard.
 func TestFireCardOrAbilityAuras_GraveyardsExhaustedAura(t *testing.T) {
-	src := testutils.RedAttack{}
+	src := testutils.FakeRedAttack()
 	ge := gameengine.New()
 	ge.CreateAura(src, triggertype.CardOrAbility,
 		func(ge card.GameEngine, _ card.Logger, a card.Aura) {
 			ge.AddValue(1)
 			a.Destroy(true)
 		}, 1, false, nil)
-	ge.FireTriggers(triggertype.CardOrAbility, testutils.RedAttack{})
+	ge.FireTriggers(triggertype.CardOrAbility, testutils.FakeRedAttack())
 	if len(ge.Auras()) != 0 {
 		t.Errorf("Auras = %+v, want empty (handler called Destroy)", ge.Auras())
 	}
 	g := ge.Graveyard()
-	if len(g) != 1 || g[0] != src {
+	if len(g) != 1 || g[0].Name() != src.Name() {
 		t.Errorf("Graveyard = %v, want [src]", g)
 	}
 }
 
 // Tests that a StartOfTurn aura is left untouched by a CardOrAbility fire.
 func TestFireCardOrAbilityAuras_PassesThroughNonCardOrAbilityTriggers(t *testing.T) {
-	src := testutils.RedAttack{}
+	src := testutils.FakeRedAttack()
 	calls := 0
 	ge := gameengine.New()
 	ge.CreateAura(src, triggertype.StartOfTurn,
 		func(card.GameEngine, card.Logger, card.Aura) { calls++ },
 		1, false, nil)
-	ge.FireTriggers(triggertype.CardOrAbility, testutils.RedAttack{})
+	ge.FireTriggers(triggertype.CardOrAbility, testutils.FakeRedAttack())
 	if ge.Value() != 0 {
 		t.Errorf("Value = %d, want 0 (start-of-turn aura doesn't fire on a card played)", ge.Value())
 	}

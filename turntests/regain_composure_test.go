@@ -16,7 +16,7 @@ import (
 // because of the +1{p} grant.
 func TestRegainComposure_BuffsNextAttack(t *testing.T) {
 	d := deck.New(testutils.Hero{Intel: 4}, nil, nil)
-	hand := []card.Card{cards.RegainComposureBlue{}, testutils.RunebladeAttack{}}
+	hand := []card.Card{cards.RegainComposureBlue{}, testutils.FakeRedAttack().WithTypes(card.TypeRuneblade)}
 
 	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingDamage(0).Build(), hand)
 
@@ -43,7 +43,7 @@ func TestRegainComposure_NoAttackGrantsNothing(t *testing.T) {
 // (base 3) misses on its own but lands for 4 once buffed.
 func TestRegainComposure_BuffsWeaponAttack(t *testing.T) {
 	d := deck.New(testutils.Hero{Intel: 4}, []deck.Weapon{weapons.ReapingBlade{}}, nil)
-	hand := []card.Card{cards.RegainComposureBlue{}, testutils.BluePitch{}}
+	hand := []card.Card{cards.RegainComposureBlue{}, testutils.FakeBlueResource()}
 
 	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingDamage(0).Build(), hand)
 

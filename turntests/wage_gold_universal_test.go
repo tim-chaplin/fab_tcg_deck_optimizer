@@ -18,8 +18,8 @@ func TestWageGold_UniversalTriggersViseraiOnPlay(t *testing.T) {
 	hand := []card.Card{
 		cards.HighStrikerBlue{},
 		cards.WageGoldRed{},
-		testutils.BluePitch{},
-		testutils.BluePitch{},
+		testutils.FakeBlueResource(),
+		testutils.FakeBlueResource(),
 	}
 	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetHero(heroes.Viserai).Build(), hand)
 	if summary.Value != 8 {

@@ -35,7 +35,7 @@ func TestRelentlessPursuit_NoRecycleWithoutPriorAttack(t *testing.T) {
 func TestRelentlessPursuit_RecyclesAfterPriorAttack(t *testing.T) {
 	pc := &card.CardState{Card: cards.RelentlessPursuitBlue{}}
 	ge := gameengine.New()
-	ge.SetCardsPlayed([]card.Card{testutils.GenericAttack(0, 3)})
+	ge.SetCardsPlayed([]card.Card{testutils.FakeRedAttack()})
 	ge.ResolveChainStep(ge.Logger(), pc)
 	if got := ge.Deck().Size(); got != 1 {
 		t.Errorf("deck size after recycle = %d, want 1 (Relentless Pursuit went onto an empty deck)", got)

@@ -23,7 +23,7 @@ func TestForceSight_NoAttackReturnsZero(t *testing.T) {
 
 // TestForceSight_NonAttackInRemainingFizzles: non-attack action fails the predicate.
 func TestForceSight_NonAttackInRemainingFizzles(t *testing.T) {
-	ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCardsRemaining([]*card.CardState{{Card: testutils.GenericAction()}}).Build()}
+	ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCardsRemaining([]*card.CardState{{Card: testutils.FakeRedAction()}}).Build()}
 	ge.ResolveChainStep(ge.Logger(), &card.CardState{Card: cards.ForceSightRed{}})
 	if got := ge.Value(); got != 0 {
 		t.Errorf("Play() = %d, want 0 (non-attack skipped)", got)
@@ -42,7 +42,7 @@ func TestForceSight_NextAttackReturnsBonus(t *testing.T) {
 		{cards.ForceSightBlue{}, 1},
 	}
 	for _, tc := range cases {
-		target := &card.CardState{Card: testutils.GenericAttack(0, 0)}
+		target := &card.CardState{Card: testutils.FakeRedAttack()}
 		ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCardsRemaining([]*card.CardState{target}).Build()}
 		ge.ResolveChainStep(ge.Logger(), &card.CardState{Card: tc.c})
 		if got := ge.Value(); got != 0 {
@@ -57,7 +57,7 @@ func TestForceSight_NextAttackReturnsBonus(t *testing.T) {
 // Tests that Force Sight played from hand returns Value 0 — the arsenal-gated Opt rider
 // doesn't fire in this path, and Force Sight isn't an attack so no damage is credited.
 func TestForceSight_HandPlayValueZero(t *testing.T) {
-	a, b := testutils.NewFakeCard("a"), testutils.NewFakeCard("b")
+	a, b := testutils.FakeRedAction().WithName("a"), testutils.FakeRedAction().WithName("b")
 	for _, c := range []card.Card{cards.ForceSightRed{}, cards.ForceSightYellow{}, cards.ForceSightBlue{}} {
 		ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCards([]card.Card{a, b}).Build()}
 		ge.ResolveChainStep(ge.Logger(), &card.CardState{Card: c})
@@ -70,7 +70,7 @@ func TestForceSight_HandPlayValueZero(t *testing.T) {
 // Tests that Force Sight played from arsenal returns Value 0 (the rider's effect is the
 // deck reshape, not a value credit).
 func TestForceSight_ArsenalPlayValueZero(t *testing.T) {
-	a, b := testutils.NewFakeCard("a"), testutils.NewFakeCard("b")
+	a, b := testutils.FakeRedAction().WithName("a"), testutils.FakeRedAction().WithName("b")
 	for _, c := range []card.Card{cards.ForceSightRed{}, cards.ForceSightYellow{}, cards.ForceSightBlue{}} {
 		ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCards([]card.Card{a, b}).Build()}
 		ge.ResolveChainStep(ge.Logger(), &card.CardState{Card: c, FromArsenal: true})

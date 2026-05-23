@@ -12,8 +12,7 @@ import (
 // so the runtime hot path is pure reads. Cards return ids.InvalidCard so both rows land in
 // slot 0 (in-hand) and slot 1<<16 (from-arsenal); the test asserts both rows are populated.
 func TestWarmChainStepCache_PopulatesBothFromArsenalRows(t *testing.T) {
-	c := testutils.NewFakeCard("Test").
-		WithTypes(card.NewTypeSet(card.TypeAttack, card.TypeAction))
+	c := testutils.FakeRedAttack().WithName("Test")
 	chainStepCache[chainStepCacheIndex(c.ID(), false)].Store(nil)
 	chainStepCache[chainStepCacheIndex(c.ID(), true)].Store(nil)
 
@@ -51,8 +50,7 @@ func TestWarmChainStepCache_SkipsNil(t *testing.T) {
 // entry point. A card never seen by WarmChainStepCache (test fakes, ad-hoc stubs) must
 // still produce the right string and populate the cache so the next call is a hit.
 func TestChainStepText_LazyBackfillForUnregisteredCards(t *testing.T) {
-	c := testutils.NewFakeCard("Unregistered").
-		WithTypes(card.NewTypeSet(card.TypeAction))
+	c := testutils.FakeRedAction().WithName("Unregistered")
 	idx := chainStepCacheIndex(c.ID(), false)
 	chainStepCache[idx].Store(nil)
 
@@ -73,20 +71,19 @@ func TestChainStepText_LazyBackfillForUnregisteredCards(t *testing.T) {
 func TestBuildChainStepText_VerbSelection(t *testing.T) {
 	cases := []struct {
 		name        string
-		types       card.TypeSet
+		card        testutils.Fake
 		fromArsenal bool
 		want        string
 	}{
-		{"weapon ability", card.NewTypeSet(card.TypeWeapon, card.TypeAttack), false, "X: WEAPON ATTACK"},
-		{"attack action", card.NewTypeSet(card.TypeAttack, card.TypeAction), false, "X: ATTACK"},
-		{"defense reaction", card.NewTypeSet(card.TypeDefenseReaction), false, "X: DEFENSE REACTION"},
-		{"non-attack action", card.NewTypeSet(card.TypeAction), false, "X: PLAY"},
-		{"from arsenal suffix", card.NewTypeSet(card.TypeAction), true, "X: PLAY from arsenal"},
+		{"weapon ability", testutils.FakeWeaponSwing().WithName("X"), false, "X: WEAPON ATTACK"},
+		{"attack action", testutils.FakeRedAttack().WithName("X"), false, "X: ATTACK"},
+		{"defense reaction", testutils.FakeRedDR().WithName("X"), false, "X: DEFENSE REACTION"},
+		{"non-attack action", testutils.FakeRedAction().WithName("X"), false, "X: PLAY"},
+		{"from arsenal suffix", testutils.FakeRedAction().WithName("X"), true, "X: PLAY from arsenal"},
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
-			c := testutils.NewFakeCard("X").WithTypes(tc.types)
-			pc := &card.CardState{Card: c, FromArsenal: tc.fromArsenal}
+			pc := &card.CardState{Card: tc.card, FromArsenal: tc.fromArsenal}
 			if got := bareChainStepText(pc); got != tc.want {
 				t.Errorf("bareChainStepText = %q, want %q", got, tc.want)
 			}

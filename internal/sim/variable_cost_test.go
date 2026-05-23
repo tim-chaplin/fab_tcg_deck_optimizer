@@ -17,7 +17,7 @@ import (
 // Tests that playSequence flips ArcaneDamageDealt before calling Play when Runechants are
 // live, and leaves it false otherwise.
 func TestPlaySequence_SetsArcaneDamageDealtWhenRunechantsFire(t *testing.T) {
-	order := []card.Card{testutils.RedAttack{}}
+	order := []card.Card{testutils.FakeRedAttack()}
 
 	// No runechants → flag stays false.
 	ctx := NewSequenceContextForTest(heroes.Viserai, nil, nil, 10, 0, len(order))
@@ -196,7 +196,7 @@ func TestBest_ReduceToRunechantUnaffordableWithoutCarryover(t *testing.T) {
 // Tests that a variable-cost attack pays its full printed cost by pitch when no runechants
 // are available.
 func TestBest_DiscountAttackerPaysByPitchWithoutCarryover(t *testing.T) {
-	h := []card.Card{cards.AmplifyTheArknightRed{}, testutils.BlueAttack{}}
+	h := []card.Card{cards.AmplifyTheArknightRed{}, testutils.FakeBlueAttack()}
 	got := Best(nil, h, nil, gameengine.GameStateBuilder().SetHero(testutils.Hero{Intel: 4}).Build())
 	if got.Value != 6 {
 		t.Errorf("Value = %d, want 6", got.Value)
@@ -205,7 +205,7 @@ func TestBest_DiscountAttackerPaysByPitchWithoutCarryover(t *testing.T) {
 
 // Tests that runechants cover part of the printed cost and a tight pitch covers the rest.
 func TestBest_DiscountAttackerPaysByPartialCarryoverAndTightPitch(t *testing.T) {
-	h := []card.Card{cards.AmplifyTheArknightRed{}, testutils.RedAttack{}}
+	h := []card.Card{cards.AmplifyTheArknightRed{}, testutils.FakeRedAttack()}
 	got := Best(nil, h, nil, stateWithRunechants(testutils.Hero{Intel: 4}, 2))
 	if got.Value != 6 {
 		t.Errorf("Value = %d, want 6", got.Value)
@@ -215,7 +215,7 @@ func TestBest_DiscountAttackerPaysByPartialCarryoverAndTightPitch(t *testing.T) 
 // Tests that a variable-cost defense reaction pays its full printed cost by pitch when no
 // runechants are available.
 func TestBest_DiscountDefenderPaysByPitchWithoutCarryover(t *testing.T) {
-	h := []card.Card{cards.ReduceToRunechantRed{}, testutils.RedAttack{}}
+	h := []card.Card{cards.ReduceToRunechantRed{}, testutils.FakeRedAttack()}
 	got := Best(nil, h, nil, gameengine.GameStateBuilder().
 		SetHero(testutils.Hero{Intel: 4}).
 		SetIncomingDamage(4).

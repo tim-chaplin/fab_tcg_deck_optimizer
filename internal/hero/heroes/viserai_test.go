@@ -156,35 +156,35 @@ func TestViserai_EmptyTurn(t *testing.T) {
 	}
 }
 
-// Type-set vars that back the slot-classification fixtures below.
-var (
-	genericActionTypes   = card.NewTypeSet(card.TypeGeneric, card.TypeAction)
-	actionAttackTypes    = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
-	defenseReactionTypes = card.NewTypeSet(card.TypeGeneric, card.TypeDefenseReaction)
-)
-
+// Type tag slices that back the slot-classification fixtures below. Slices (not
 // nonAttackEnablerCard returns a non-attack action — fills only the non-attack-enabler
 // slot (red pitch, no defense, has Go again so it doesn't extend into other slots).
 func nonAttackEnablerCard(name string) card.Card {
-	return testutils.NewFakeCard(name).WithTypes(genericActionTypes).WithGoAgain()
+	return testutils.FakeRedAction().
+		WithName(name).
+		WithGoAgain()
 }
 
 // defenderCard returns a Defense Reaction with positive defense — fills only the
 // defender slot (red pitch, no Action subtype).
 func defenderCard(name string, defense int) card.Card {
-	return testutils.NewFakeCard(name).WithTypes(defenseReactionTypes).WithDefense(defense).WithPitch(1)
+	return testutils.FakeRedDR().
+		WithName(name).
+		WithDefense(defense)
 }
 
 // bluePitchOnlyCard returns a non-action card with blue pitch — fills only the
 // blue-pitch slot.
 func bluePitchOnlyCard(name string) card.Card {
-	return testutils.NewFakeCard(name).WithTypes(card.NewTypeSet(card.TypeGeneric)).WithPitch(3)
+	return testutils.FakeBlueResource().WithName(name)
 }
 
 // noSlotCard returns an attack action with Go again, red pitch, no defense — none of the
 // Viserai slots apply.
 func noSlotCard(name string) card.Card {
-	return testutils.NewFakeCard(name).WithTypes(actionAttackTypes).WithGoAgain().WithPitch(1)
+	return testutils.FakeRedAttack().
+		WithName(name).
+		WithGoAgain()
 }
 
 // Tests that Opt(1) always tops the only revealed card.
@@ -230,7 +230,9 @@ func TestViseraiOpt_MultiSlotCardBottomedWhenAllCovered(t *testing.T) {
 	a := nonAttackEnablerCard("a")
 	bluePitch := bluePitchOnlyCard("blue")
 	// b spans the non-attack-enabler and blue-pitch slots — both already covered.
-	b := testutils.NewFakeCard("b").WithTypes(genericActionTypes).WithGoAgain().WithPitch(3)
+	b := testutils.FakeBlueAction().
+		WithName("b").
+		WithGoAgain()
 	top, bottom := Viserai.Opt([]card.Card{a, bluePitch, b})
 	if !reflect.DeepEqual(top, []card.Card{a, bluePitch}) {
 		t.Errorf("top = %v, want [%v %v]", top, a, bluePitch)
@@ -247,7 +249,9 @@ func TestViseraiOpt_MultiSlotCardBottomedOnAnyOverlap(t *testing.T) {
 	bluePitch := bluePitchOnlyCard("blue")
 	// b is non-attack-enabler (uncovered) AND blue-pitch (covered). Bottomed because
 	// blue-pitch overlaps even though the enabler slot is fresh.
-	b := testutils.NewFakeCard("b").WithTypes(genericActionTypes).WithGoAgain().WithPitch(3)
+	b := testutils.FakeBlueAction().
+		WithName("b").
+		WithGoAgain()
 	top, bottom := Viserai.Opt([]card.Card{bluePitch, b})
 	if !reflect.DeepEqual(top, []card.Card{bluePitch}) {
 		t.Errorf("top = %v, want [%v]", top, bluePitch)
@@ -316,10 +320,9 @@ func TestViseraiOpt_EmptyInput(t *testing.T) {
 func TestViseraiOpt_DefenseValueAloneDoesNotFillDefenderSlot(t *testing.T) {
 	// attackWithDefense is an attack action with positive Defense — represents the typical
 	// FaB attack that doubles as a block. Should not key the defender slot.
-	attackWithDefense := testutils.NewFakeCard("atkWithDef").
-		WithTypes(actionAttackTypes).
-		WithDefense(3).
-		WithPitch(1)
+	attackWithDefense := testutils.FakeRedAttack().
+		WithName("atkWithDef").
+		WithDefense(3)
 	defender := defenderCard("dr", 3)
 	top, bottom := Viserai.Opt([]card.Card{attackWithDefense, defender})
 	if !reflect.DeepEqual(top, []card.Card{attackWithDefense, defender}) {
@@ -333,10 +336,9 @@ func TestViseraiOpt_DefenseValueAloneDoesNotFillDefenderSlot(t *testing.T) {
 // Tests that a Block-typed card fills the defender slot alongside Defense Reactions.
 func TestViseraiOpt_BlockTypeFillsDefenderSlot(t *testing.T) {
 	dr := defenderCard("dr", 3)
-	blocker := testutils.NewFakeCard("block").
-		WithTypes(card.NewTypeSet(card.TypeGeneric, card.TypeBlock)).
-		WithDefense(3).
-		WithPitch(1)
+	blocker := testutils.FakeRedBlocker().
+		WithName("block").
+		WithDefense(3)
 	top, bottom := Viserai.Opt([]card.Card{dr, blocker})
 	if !reflect.DeepEqual(top, []card.Card{dr}) {
 		t.Errorf("top = %v, want [%v]", top, dr)

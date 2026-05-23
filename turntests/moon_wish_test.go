@@ -21,8 +21,8 @@ import (
 func TestEvalOneTurn_MoonWishAltCostTutorsSunKissAndConsumesDeck(t *testing.T) {
 	deckCards := []deck.Card{
 		cards.SunKissRed{},
-		testutils.RedAttack{}, testutils.RedAttack{}, testutils.RedAttack{},
-		testutils.RedAttack{}, testutils.RedAttack{},
+		testutils.FakeRedAttack(), testutils.FakeRedAttack(), testutils.FakeRedAttack(),
+		testutils.FakeRedAttack(), testutils.FakeRedAttack(),
 	}
 	d := deck.New(testutils.Hero{Intel: 4}, nil, deckCards)
 	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingDamage(0).Build(), []card.Card{
@@ -53,8 +53,8 @@ func TestEvalOneTurn_MoonWishAltCostTutorsSunKissAndConsumesDeck(t *testing.T) {
 // recycles the DR, and arsenal stays empty.
 func TestEvalOneTurn_MoonWishAltCostTutorFizzlesWithoutSunKiss(t *testing.T) {
 	deckCards := []deck.Card{
-		testutils.RedAttack{}, testutils.RedAttack{}, testutils.RedAttack{},
-		testutils.RedAttack{}, testutils.RedAttack{}, testutils.RedAttack{},
+		testutils.FakeRedAttack(), testutils.FakeRedAttack(), testutils.FakeRedAttack(),
+		testutils.FakeRedAttack(), testutils.FakeRedAttack(), testutils.FakeRedAttack(),
 	}
 	d := deck.New(testutils.Hero{Intel: 4}, nil, deckCards)
 	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingDamage(0).Build(), []card.Card{
@@ -82,9 +82,9 @@ func TestEvalOneTurn_MoonWishAltCostTutorFizzlesWithoutSunKiss(t *testing.T) {
 // buf-removal path is exercised — a blind head-advance would consume the wrong slot.
 func TestEvalOneTurn_MoonWishWithFlyingHighPlaysTutoredSunKiss(t *testing.T) {
 	deckCards := []deck.Card{
-		testutils.RedAttack{}, testutils.RedAttack{},
+		testutils.FakeRedAttack(), testutils.FakeRedAttack(),
 		cards.SunKissRed{},
-		testutils.RedAttack{}, testutils.RedAttack{}, testutils.RedAttack{}, testutils.RedAttack{},
+		testutils.FakeRedAttack(), testutils.FakeRedAttack(), testutils.FakeRedAttack(), testutils.FakeRedAttack(),
 	}
 	d := deck.New(testutils.Hero{Intel: 4}, nil, deckCards)
 	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingDamage(0).Build(), []card.Card{

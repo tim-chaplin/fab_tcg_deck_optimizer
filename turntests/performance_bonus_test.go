@@ -26,5 +26,5 @@ func TestPerformanceBonus_OnHitCreatesGold(t *testing.T) {
 	if summary.State.GoldCount() != 1 {
 		t.Fatalf("Gold = %d, want 1 (on-hit token)", summary.State.GoldCount())
 	}
-	_ = testutils.RedAttack{}
+	_ = testutils.FakeRedAttack()
 }
