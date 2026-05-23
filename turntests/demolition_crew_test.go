@@ -3,10 +3,11 @@ package turntests
 import (
 	"testing"
 
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card/cards"
-
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card/cards"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/gameengine"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 )
 
@@ -40,7 +41,9 @@ func TestDemolitionCrew_PreconditionFailsOnEmptyHand(t *testing.T) {
 	}
 }
 
-// Tests that Play attacks for printed power once the precondition has been satisfied.
+// Tests that Play attacks for printed power once the precondition has been satisfied (a
+// second cost-2 card in hand serves as the reveal) and the chain has enough pitch to fund
+// the cost.
 func TestDemolitionCrew_PlayAttacksForPrintedPower(t *testing.T) {
 	cases := []struct {
 		c    card.Card
@@ -51,10 +54,11 @@ func TestDemolitionCrew_PlayAttacksForPrintedPower(t *testing.T) {
 		{cards.DemolitionCrewBlue{}, 4},
 	}
 	for _, tc := range cases {
-		ge := gameengine.New()
-		ge.ResolveChainStep(ge.Logger(), &card.CardState{Card: tc.c})
-		if got := ge.Value(); got != tc.want {
-			t.Errorf("%s: Play() = %d, want %d", tc.c.Name(), got, tc.want)
+		d := deck.New(testutils.Hero{Intel: 4}, nil, fillerDeck())
+		hand := []card.Card{tc.c, testutils.GenericAttack(2, 0), testutils.BluePitch{}}
+		summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingDamage(0).Build(), hand)
+		if summary.Value != tc.want {
+			t.Errorf("%s: Value = %d, want %d", tc.c.Name(), summary.Value, tc.want)
 		}
 	}
 }
