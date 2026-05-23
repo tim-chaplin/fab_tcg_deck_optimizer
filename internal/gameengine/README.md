@@ -55,8 +55,7 @@ front (so an entry a handler creates lands past it and is not fired this pass â€
 self-exclusion mechanism); honours the once-per-turn gate; applies each entry's type filter
 against the triggering card's type set; and uses a cursor walk so a handler-side destroy
 doesn't skip the next entry. Ephemeral triggers are spliced out unconditionally after firing
-(one-shot). `HasEndOfTurnFire` lets the chain runner skip the end-of-turn walk when nothing
-subscribes.
+(one-shot).
 
 ## Chain-step resolution
 
