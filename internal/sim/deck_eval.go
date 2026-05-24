@@ -343,18 +343,20 @@ func playOneTurn(
 	if toDraw > postChainDeck.Size() {
 		toDraw = postChainDeck.Size()
 	}
-	nextHand := held
+	// Always allocate a fresh nextHand and sort it: held aliases the chain's per-perm hand
+	// buffer (the next playOneTurn would otherwise overwrite it), and the chain's
+	// RemoveFromHand reorders via swap-with-last so held isn't sorted by ID. The cache key
+	// relies on the hand being canonical at findBest entry, so the sort must run on every
+	// path — including the toDraw == 0 case where the previous code left the order at
+	// whatever the chain produced.
+	nextHand := make([]card.Card, len(held), len(held)+toDraw)
+	copy(nextHand, held)
 	if toDraw > 0 {
-		// Allocate fresh: held aliases the chain's per-perm hand buffer, which the next
-		// playOneTurn call may overwrite.
-		nextHand = make([]card.Card, len(held), len(held)+toDraw)
-		copy(nextHand, held)
 		for _, c := range postChainDeck.Draw(toDraw) {
 			nextHand = append(nextHand, c.(card.Card))
 		}
-		// Fresh draws arrive in deck order; sort so next turn's hand is canonical.
-		sortHandByID(nextHand)
 	}
+	sortHandByID(nextHand)
 
 	summary.State.SetHand(nextHand)
 	return summary, snap
