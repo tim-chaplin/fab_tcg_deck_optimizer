@@ -57,6 +57,7 @@ func TestSeedChainEntry_ResetsEveryPerPermutationField(t *testing.T) {
 		GrantedGoAgain:   true,
 		GrantedDominate:  true,
 		GrantedOverpower: true,
+		GrantedInstant:   true,
 		FromArsenal:      true,
 		Mode:             5,
 		BonusAttack:      99,

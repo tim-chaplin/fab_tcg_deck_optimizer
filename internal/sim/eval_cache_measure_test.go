@@ -17,6 +17,7 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
+	"time"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/hero/heroes"
@@ -191,6 +192,10 @@ func TestEvalCache_PerHandEquivalence(t *testing.T) {
 
 // Tests that the cache-replay path produces summary numbers equal (within driftTolerance)
 // to a from-scratch search at the deck-eval-loop level.
+//
+// Single fixed setup seed for the always-on suite. The manual-only fuzz variant
+// TestEvalCache_EquivalenceWithUncached_FuzzManual sweeps random setup seeds for ~10 min
+// to surface cache-divergence bugs that need a specific deck shape to trigger.
 func TestEvalCache_EquivalenceWithUncached(t *testing.T) {
 	const (
 		deckSize  = 40
@@ -219,6 +224,50 @@ func TestEvalCache_EquivalenceWithUncached(t *testing.T) {
 		t.Errorf("mean drift %.6f exceeds tolerance %.6f (cached=%.6f uncached=%.6f)",
 			drift, driftTolerance, cachedStats.Mean(), uncachedStats.Mean())
 	}
+}
+
+// TestEvalCache_EquivalenceWithUncached_FuzzManual sweeps random setup seeds, running
+// cached vs uncached Evaluate side-by-side; fails on the first seed whose Hands or
+// TotalValue diverge. Runs until the deadline (10 minutes) or the first divergence,
+// whichever comes first.
+//
+// Manual-only: skipped under `go test ./...`. Run explicitly with
+// `go test -run TestEvalCache_EquivalenceWithUncached_FuzzManual -timeout 11m`.
+// The single-seed always-on companion above pins a regression once one is found here;
+// this sweep exists to KEEP finding new ones as the engine gains cards / mutation paths.
+func TestEvalCache_EquivalenceWithUncached_FuzzManual(t *testing.T) {
+	if os.Getenv("RUN_FUZZ") == "" {
+		t.Skip("manual-only; rerun with RUN_FUZZ=1 to sweep random setup seeds for 10 minutes")
+	}
+	const (
+		deckSize  = 40
+		maxCopies = 2
+		incoming  = 7
+		shuffles  = 100
+		runFor    = 10 * time.Minute
+	)
+	deadline := time.Now().Add(runFor)
+	seedGen := rand.New(rand.NewSource(time.Now().UnixNano()))
+	tested := 0
+	for time.Now().Before(deadline) {
+		setupSeed := seedGen.Int63()
+		setupRNG := rand.New(rand.NewSource(setupSeed))
+		baseline := deck.Random(heroes.Viserai, deckSize, maxCopies, setupRNG, registry.Registry{})
+
+		cachedStats := NewEvaluator().Evaluate(baseline.Copy(), shuffles, Matchup{IncomingDamage: incoming}, rand.New(rand.NewSource(99)))
+		uncachedStats := NewEvaluatorWithoutCache().Evaluate(baseline.Copy(), shuffles, Matchup{IncomingDamage: incoming}, rand.New(rand.NewSource(99)))
+		tested++
+
+		if cachedStats.Hands != uncachedStats.Hands {
+			t.Fatalf("setupSeed=%d: Hands diverge: cached=%d uncached=%d (after %d seeds)",
+				setupSeed, cachedStats.Hands, uncachedStats.Hands, tested)
+		}
+		if cachedStats.TotalValue != uncachedStats.TotalValue {
+			t.Fatalf("setupSeed=%d: TotalValue diverge: cached=%.0f uncached=%.0f (after %d seeds)",
+				setupSeed, cachedStats.TotalValue, uncachedStats.TotalValue, tested)
+		}
+	}
+	t.Logf("swept %d random setup seeds in %v with no divergence", tested, runFor)
 }
 
 // BenchmarkEvalCache_SingleDeck compares one full Evaluate of viserai_v4 (a high-quality

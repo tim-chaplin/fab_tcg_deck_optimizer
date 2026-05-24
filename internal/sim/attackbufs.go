@@ -73,6 +73,13 @@ type attackBufs struct {
 	// to alias ctx.deck. The winning perm's wrapper is cloned out via promoteWinnerDeck so
 	// the next perm can rebind safely.
 	pooledDeck *deck.Deck
+	// pooledLeafDeck is the per-leaf scratch *Deck wrapper. ShallowCopied from the master
+	// deck at the start of each leaf (and per pmask in the modal-blocker path) before
+	// runDefense, so DR Plays that mutate the deck (Rise Above's PrependToDeck, an Opt-ing
+	// DR, etc.) hit this wrapper instead of the master shared across leaves. ctx.deck is
+	// rebound to point at this wrapper so preparePermState's ShallowCopyFrom propagates the
+	// post-DR deck state into the per-perm chain.
+	pooledLeafDeck *deck.Deck
 	// pooledEngine wraps the active permState; rebound per perm so chain runs use a single
 	// engine wrapper. The wrapper holds no state of its own; no caller stashes ge across
 	// perms.
