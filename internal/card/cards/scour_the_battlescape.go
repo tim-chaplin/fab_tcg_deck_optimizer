@@ -12,7 +12,7 @@ import (
 
 func scourTheBattlescapePlay(ge card.GameEngine, l card.Logger, self *card.CardState) {
 	self.GrantGoAgainIfFromArsenal()
-	if len(ge.Hand()) == 0 {
+	if len(ge.HeldHand()) == 0 {
 		return
 	}
 	cycled := ge.PopHandAt(0)

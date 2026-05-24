@@ -25,20 +25,20 @@ const moonWishPrintedCost = 2
 // else the printed cost. Shared across all three pitch variants since the alt cost is
 // identical.
 func moonWishCost(ge card.GameEngine) int {
-	if ge != nil && len(ge.Hand()) > 0 {
+	if ge != nil && len(ge.HeldHand()) > 0 {
 		return 0
 	}
 	return moonWishPrintedCost
 }
 
-// moonWishPlay pays the alt cost (when a hand card is available) and registers an OnHit
-// that tutors Sun Kiss. Tutored Sun Kiss plays immediately when self has go-again granted;
-// otherwise it lands in hand for next turn.
+// moonWishPlay pays the alt cost (when a Held hand card is available) and registers an
+// OnHit that tutors Sun Kiss. Tutored Sun Kiss plays immediately when self has go-again
+// granted; otherwise it lands in hand for next turn.
 func moonWishPlay(c card.Card, ge card.GameEngine, l card.Logger, self *card.CardState) {
 	name := c.DisplayName()
-	// Alt cost: pop a hand card and prepend it to the deck.
+	// Alt cost: pop a Held hand card and prepend it to the deck.
 	var returned card.Card
-	if len(ge.Hand()) > 0 {
+	if len(ge.HeldHand()) > 0 {
 		returned = ge.PopHandAt(0)
 		ge.PrependToDeck(returned)
 	}

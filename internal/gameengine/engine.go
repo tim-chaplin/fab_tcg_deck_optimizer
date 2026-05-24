@@ -35,11 +35,47 @@ type GameEngine struct {
 //     methods promoted from *GameState; the embedded versions stay reachable as
 //     ge.GameState.X when the engine internals need the non-flipping variant.
 
-// Hand returns the cards in hand and flips IsCacheable to false. Use AppendHand /
-// PopHandAt for mutations.
+// Hand returns the cards in hand — INCLUDING entries tagged Pitch / Attack roles by the
+// partition. Cards reading "a card in your hand" (Demolition Crew's precondition, Spring
+// Load's no-cards-in-hand rider) must see these scheduled-but-not-yet-committed entries
+// to match FaB rules; the in-hand → pitch-zone transition happens at the moment a card
+// actually pays its cost, not at partition-decision time. Use HeldHand() when you need
+// to gate on "is there a card I can remove from hand"; use PopHandAt(i) to actually
+// remove one (Held-only, structurally safe). Flips IsCacheable to false.
 func (ge *GameEngine) Hand() []card.Card {
 	ge.cacheable = false
 	return ge.GameState.Hand()
+}
+
+// HeldHand returns the Held-role subset of the hand — the cards a removing effect
+// (alt-cost "put a card from your hand on top of your deck", cycle, etc.) may target.
+// Pitch- and Attack-role entries are excluded: those are scheduled to pitch / play in
+// the chain, and letting an effect divert them would silently invalidate the partition's
+// pitch list without updating downstream recycle / pay accounting. Flips IsCacheable.
+func (ge *GameEngine) HeldHand() []card.Card {
+	ge.cacheable = false
+	return heldHandSlice(ge.GameState.HandStates())
+}
+
+// heldHandSlice projects a role-tagged hand down to just the Held-role cards. Returns
+// nil when there are none. Used by HeldHand and the PopHandAt held-index scan.
+func heldHandSlice(states []card.CardState) []card.Card {
+	n := 0
+	for i := range states {
+		if states[i].Role == card.Held {
+			n++
+		}
+	}
+	if n == 0 {
+		return nil
+	}
+	out := make([]card.Card, 0, n)
+	for i := range states {
+		if states[i].Role == card.Held {
+			out = append(out, states[i].Card)
+		}
+	}
+	return out
 }
 
 // AppendHand inserts c into the hand at its Card.ID()-sorted position, flipping
@@ -59,12 +95,27 @@ func (ge *GameEngine) insertHandSorted(c card.Card) {
 	ge.hand[i] = card.CardState{Card: c, Role: card.Held}
 }
 
-// PopHandAt removes and returns the card at index i, flipping IsCacheable to false.
+// PopHandAt removes and returns the i-th Held-role card from hand and flips IsCacheable
+// to false. i indexes into the Held subset surfaced by HeldHand() — Pitch and Attack
+// role entries are skipped, since a card committed to pitching or attacking isn't in the
+// hand zone for purposes of removing effects (the partition has scheduled it, and
+// silently diverting it would desync downstream pay / recycle accounting). Panics when
+// i is out of range of the held cards; callers must len(HeldHand())-check first.
 func (ge *GameEngine) PopHandAt(i int) card.Card {
 	ge.cacheable = false
-	c := ge.hand[i].Card
-	ge.hand = append(ge.hand[:i], ge.hand[i+1:]...)
-	return c
+	held := 0
+	for rawIdx := range ge.hand {
+		if ge.hand[rawIdx].Role != card.Held {
+			continue
+		}
+		if held == i {
+			c := ge.hand[rawIdx].Card
+			ge.hand = append(ge.hand[:rawIdx], ge.hand[rawIdx+1:]...)
+			return c
+		}
+		held++
+	}
+	panic(fmt.Sprintf("PopHandAt: index %d out of range of %d held cards", i, held))
 }
 
 // Graveyard returns the live graveyard slice and flips IsCacheable to false.
@@ -133,14 +184,17 @@ func (ge *GameEngine) AppendToDeck(c card.Card) {
 // Discard removes a Held-role card from the hand and appends it to the graveyard. Returns
 // the discarded card and true; returns (nil, false) when the hand holds no Held card.
 // Only Held cards are discardable — a card already committed to attacking, pitching, or
-// blocking can't be spent again. Flips IsCacheable via PopHandAt.
+// blocking can't be spent again. Flips IsCacheable.
 func (ge *GameEngine) Discard() (card.Card, bool) {
-	for i := range ge.hand {
-		if ge.hand[i].Role == card.Held {
-			c := ge.PopHandAt(i)
-			ge.graveyard = append(ge.graveyard, c)
-			return c, true
+	for rawIdx := range ge.hand {
+		if ge.hand[rawIdx].Role != card.Held {
+			continue
 		}
+		ge.cacheable = false
+		c := ge.hand[rawIdx].Card
+		ge.hand = append(ge.hand[:rawIdx], ge.hand[rawIdx+1:]...)
+		ge.graveyard = append(ge.graveyard, c)
+		return c, true
 	}
 	return nil, false
 }
