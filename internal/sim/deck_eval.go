@@ -325,7 +325,8 @@ func playOneTurn(
 		// the caller needs for its end-of-turn snapshot.
 		return summary, nil
 	}
-	summary = runBestForTurn(state.Weapons(), state.Hand(), d, state, ev)
+	preChainHand := state.Hand()
+	summary = runBestForTurn(state.Weapons(), preChainHand, d, state, ev)
 
 	// Chain ran on a shallow copy of d that may have drawn mid-turn; use the winner's
 	// post-chain deck for recycle / next-turn draw.
@@ -359,6 +360,7 @@ func playOneTurn(
 	sortHandByID(nextHand)
 
 	summary.State.SetHand(nextHand)
+	verifyTurnInvariants(snap, preChainHand, summary)
 	return summary, snap
 }
 
