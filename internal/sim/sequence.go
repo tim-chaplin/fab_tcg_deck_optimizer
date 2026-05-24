@@ -747,7 +747,11 @@ func (ctx *sequenceContext) bestSequence(attackers []card.Card) (chainScore, *ga
 	foundLegal := false
 	pitchPerm := ctx.attackPitchPerm
 	pitchVals := ctx.attackPitchVals
-	pn := len(pitchPerm)
+	// Canonicalise ascending by card ID so the lex-next-permutation enumerators visit
+	// each distinct ordering exactly once — hands with duplicate cards (or duplicate
+	// pitches) skip redundant swaps.
+	sortAttackersByID(pcBuf, permMeta)
+	sortPitchByID(pitchPerm, pitchVals)
 	tupleCount := 1
 	for i := 0; i < n; i++ {
 		tupleCount *= int(permMeta[i].modes)
@@ -794,48 +798,108 @@ func (ctx *sequenceContext) bestSequence(attackers []card.Card) (chainScore, *ga
 		}
 	}
 	eval := func() {
+		// nextPermPitches leaves pitchPerm in lex-max state; reset to ascending so the
+		// enumeration re-enters from the start for each attacker permutation.
+		sortPitchByID(pitchPerm, pitchVals)
 		tryPitchOrdering()
-		var pc [8]int
-		pi := 0
-		for pi < pn {
-			if pc[pi] < pi {
-				if pi&1 == 0 {
-					pitchPerm[0], pitchPerm[pi] = pitchPerm[pi], pitchPerm[0]
-					pitchVals[0], pitchVals[pi] = pitchVals[pi], pitchVals[0]
-				} else {
-					pitchPerm[pc[pi]], pitchPerm[pi] = pitchPerm[pi], pitchPerm[pc[pi]]
-					pitchVals[pc[pi]], pitchVals[pi] = pitchVals[pi], pitchVals[pc[pi]]
-				}
-				tryPitchOrdering()
-				pc[pi]++
-				pi = 0
-			} else {
-				pc[pi] = 0
-				pi++
-			}
+		for nextPermPitches(pitchPerm, pitchVals) {
+			tryPitchOrdering()
 		}
 	}
 	eval()
-	var c [8]int
-	i := 0
-	for i < n {
-		if c[i] < i {
-			if i&1 == 0 {
-				pcBuf[0], pcBuf[i] = pcBuf[i], pcBuf[0]
-				permMeta[0], permMeta[i] = permMeta[i], permMeta[0]
-			} else {
-				pcBuf[c[i]], pcBuf[i] = pcBuf[i], pcBuf[c[i]]
-				permMeta[c[i]], permMeta[i] = permMeta[i], permMeta[c[i]]
-			}
-			eval()
-			c[i]++
-			i = 0
-		} else {
-			c[i] = 0
-			i++
-		}
+	for nextPermAttackers(pcBuf, permMeta) {
+		eval()
 	}
 	return bestScore, bestWinner, foundLegal
+}
+
+// attackerKey is the composite sort/permutation key for a pcBuf entry: (Card.ID,
+// FromArsenal). Same-ID entries can still differ on FromArsenal (cost / rider changes
+// when played from arsenal), so the symmetry break must keep them distinguishable.
+// Packed into a uint32 for single-op comparison.
+func attackerKey(pc *card.CardState) uint32 {
+	k := uint32(pc.Card.ID()) << 1
+	if pc.FromArsenal {
+		k |= 1
+	}
+	return k
+}
+
+// sortAttackersByID insertion-sorts pcBuf and permMeta in lockstep, ascending by
+// (Card.ID, FromArsenal). n is small (≤ 8 attackers), so insertion sort beats
+// sort.Slice's closure-allocation overhead.
+func sortAttackersByID(pcBuf []card.CardState, permMeta []*attackerMeta) {
+	for i := 1; i < len(pcBuf); i++ {
+		for j := i; j > 0 && attackerKey(&pcBuf[j]) < attackerKey(&pcBuf[j-1]); j-- {
+			pcBuf[j-1], pcBuf[j] = pcBuf[j], pcBuf[j-1]
+			permMeta[j-1], permMeta[j] = permMeta[j], permMeta[j-1]
+		}
+	}
+}
+
+// sortPitchByID is sortAttackersByID for the (pitchPerm, pitchVals) parallel slices.
+func sortPitchByID(perm []card.Card, vals []int) {
+	for i := 1; i < len(perm); i++ {
+		for j := i; j > 0 && perm[j].ID() < perm[j-1].ID(); j-- {
+			perm[j-1], perm[j] = perm[j], perm[j-1]
+			vals[j-1], vals[j] = vals[j], vals[j-1]
+		}
+	}
+}
+
+// nextPermAttackers advances (pcBuf, permMeta) in lockstep to the lex-next permutation by
+// attackerKey, returning false once the slice is in descending order. Equal-key entries
+// skip the redundant swap, so duplicates yield each distinct ordering exactly once.
+func nextPermAttackers(pcBuf []card.CardState, permMeta []*attackerMeta) bool {
+	n := len(pcBuf)
+	if n < 2 {
+		return false
+	}
+	i := n - 2
+	for i >= 0 && attackerKey(&pcBuf[i]) >= attackerKey(&pcBuf[i+1]) {
+		i--
+	}
+	if i < 0 {
+		return false
+	}
+	pivot := attackerKey(&pcBuf[i])
+	j := n - 1
+	for attackerKey(&pcBuf[j]) <= pivot {
+		j--
+	}
+	pcBuf[i], pcBuf[j] = pcBuf[j], pcBuf[i]
+	permMeta[i], permMeta[j] = permMeta[j], permMeta[i]
+	for l, r := i+1, n-1; l < r; l, r = l+1, r-1 {
+		pcBuf[l], pcBuf[r] = pcBuf[r], pcBuf[l]
+		permMeta[l], permMeta[r] = permMeta[r], permMeta[l]
+	}
+	return true
+}
+
+// nextPermPitches is nextPermAttackers for the (pitchPerm, pitchVals) parallel slices.
+func nextPermPitches(perm []card.Card, vals []int) bool {
+	n := len(perm)
+	if n < 2 {
+		return false
+	}
+	i := n - 2
+	for i >= 0 && perm[i].ID() >= perm[i+1].ID() {
+		i--
+	}
+	if i < 0 {
+		return false
+	}
+	j := n - 1
+	for perm[j].ID() <= perm[i].ID() {
+		j--
+	}
+	perm[i], perm[j] = perm[j], perm[i]
+	vals[i], vals[j] = vals[j], vals[i]
+	for l, r := i+1, n-1; l < r; l, r = l+1, r-1 {
+		perm[l], perm[r] = perm[r], perm[l]
+		vals[l], vals[r] = vals[r], vals[l]
+	}
+	return true
 }
 
 // playSequence is a thin wrapper that builds permMeta and calls playSequenceWithMeta.
