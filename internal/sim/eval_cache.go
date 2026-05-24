@@ -139,25 +139,32 @@ type evalCacheEntry struct {
 // each Evaluator's per-call scratch (attackBufs) is goroutine-local but the cache lookup
 // and store are concurrency-safe, which lets a shuffle-parallel worker pool reuse the
 // same Cache across all workers.
+//
+// capacity is the maximum entry count before eviction kicks in (0 = unbounded). When
+// store finds the map at cap it evicts a single random entry (Go map iteration order,
+// no bookkeeping). Random eviction keeps the lookup hot path RLock-only.
 type evalCache struct {
-	mu      sync.RWMutex
-	entries map[evalCacheKey]evalCacheEntry
+	mu       sync.RWMutex
+	entries  map[evalCacheKey]evalCacheEntry
+	capacity int
 	// hits / misses count cache lookup outcomes (every Best call increments exactly one).
 	// uncacheable counts misses where the search ran but Cacheable=false at the end so
 	// the result wasn't stored — useful for quantifying how much hidden-state reading
-	// we'd need to remove to bump the hit rate further. Atomic so the lookup path bumps
-	// them without taking the map lock.
-	hits, misses, uncacheable atomic.Int64
+	// we'd need to remove to bump the hit rate further. evictions counts entries dropped
+	// by the capacity policy. Atomic so the lookup path bumps them without taking the
+	// map lock.
+	hits, misses, uncacheable, evictions atomic.Int64
 }
 
 // CacheStats is the public snapshot of an Evaluator's cache counters, returned by
 // Evaluator.CacheStats. Hits + Misses is the total Best-call count; Uncacheable is a
 // subset of Misses (the searches that ran but produced uncacheable results so weren't
-// stored).
+// stored). Evictions counts entries dropped by the capacity policy.
 type CacheStats struct {
 	Hits        int
 	Misses      int
 	Uncacheable int
+	Evictions   int
 	Entries     int
 }
 
@@ -171,9 +178,19 @@ func (s CacheStats) HitRate() float64 {
 	return float64(s.Hits) / float64(total)
 }
 
-// newEvalCache returns a fresh cache. Entries grows lazily on first store.
+// newEvalCache returns a fresh unbounded cache. Entries grows lazily on first store.
 func newEvalCache() *evalCache {
 	return &evalCache{}
+}
+
+// newEvalCacheBounded returns a cache that evicts a random entry on store when the
+// entry count reaches capacity. capacity <= 0 disables eviction (equivalent to
+// newEvalCache).
+func newEvalCacheBounded(capacity int) *evalCache {
+	if capacity < 0 {
+		capacity = 0
+	}
+	return &evalCache{capacity: capacity}
 }
 
 // makeCacheKey builds the comparable cache key from the inputs to Best. Returns ok=false
@@ -296,10 +313,22 @@ func (c *evalCache) lookup(key evalCacheKey) (evalCacheEntry, bool) {
 // store inserts entry under key, lazily allocating the backing map. Takes the write lock;
 // concurrent miss-then-store from sibling workers may both store the same key (the second
 // write overwrites identical data) but never observes a partially-constructed map.
+//
+// When capacity > 0 and the map is at cap on insert of a new key, one entry is evicted;
+// Go randomises map iteration so this is random eviction with no bookkeeping.
 func (c *evalCache) store(key evalCacheKey, entry evalCacheEntry) {
 	c.mu.Lock()
 	if c.entries == nil {
 		c.entries = make(map[evalCacheKey]evalCacheEntry)
+	}
+	if c.capacity > 0 && len(c.entries) >= c.capacity {
+		if _, exists := c.entries[key]; !exists {
+			for k := range c.entries {
+				delete(c.entries, k)
+				c.evictions.Add(1)
+				break
+			}
+		}
 	}
 	c.entries[key] = entry
 	c.mu.Unlock()
@@ -307,7 +336,7 @@ func (c *evalCache) store(key evalCacheKey, entry evalCacheEntry) {
 
 // reset drops the entries map (lazy realloc on next store) under the write lock so a
 // concurrent reader/writer can never see a half-cleared state. Stats counters survive
-// the reset — see Evaluator.ResetCache for the rationale.
+// the reset so cumulative hit-rate measurement spans resets.
 func (c *evalCache) reset() {
 	c.mu.Lock()
 	c.entries = nil
