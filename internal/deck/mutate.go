@@ -60,12 +60,17 @@ type Mutation struct {
 // candidate list — both single-slot and pair generators emit cap-blind candidates and the
 // shared filter strips any whose result deck exceeds the per-printing limit.
 //
+// includePairs gates the pair-swap layer; pass false to skip it entirely and emit only
+// weapon-loadout and single-swap mutations.
+//
 // Returned decks share no backing slices with d or each other.
-func AllMutations(d *Deck, maxCopies int, reg Registry) []Mutation {
+func AllMutations(d *Deck, maxCopies int, includePairs bool, reg Registry) []Mutation {
 	pool := buildLegalByID(reg)
 	out := weaponLoadoutMutations(d, reg)
 	out = append(out, singleSwapMutations(d, pool)...)
-	out = append(out, pairSwapMutations(d, CardPairs, pool)...)
+	if includePairs {
+		out = append(out, pairSwapMutations(d, CardPairs, pool)...)
+	}
 	return filterMaxCopiesViolations(out, maxCopies)
 }
 

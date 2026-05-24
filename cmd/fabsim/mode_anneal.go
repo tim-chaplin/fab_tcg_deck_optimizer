@@ -53,6 +53,9 @@ type annealConfig struct {
 	// hits Enter). The deadline aborts the same way the stdin watcher does, so any outstanding
 	// round finishes evaluating before the loop exits and the deck still saves.
 	maxDuration time.Duration
+	// pairMutations gates the pair-swap layer in AllMutations. See the -pair-mutations flag
+	// help for when to enable it.
+	pairMutations bool
 }
 
 // defaultDeckNameFor returns the deck name when -deck isn't supplied, keyed by hero, format, and
@@ -85,6 +88,7 @@ func runAnnealCmd(args []string) {
 	cpuprofile := fs.String("cpuprofile", "", "if set, write a CPU profile to this path covering the entire anneal run. Pair with -max-duration for a time-boxed profile-driven optimization pass.")
 	memprofile := fs.String("memprofile", "", "if set, write a heap profile to this path at exit (after a runtime.GC()).")
 	maxDuration := fs.Duration("max-duration", 0, "cap wall-clock duration; the run aborts cleanly at the deadline like a stdin Enter. Zero (default) runs until the user hits Enter.")
+	pairMutations := fs.Bool("pair-mutations", false, "include the synergy-pair (-1/-1, +1/+1) swap layer in each round's mutation pool. Off by default because the layer multiplies per-round candidates substantially for little acceptance yield. Flip on when introducing a new synergy pair to give it a chance to land.")
 	_ = parseFlagsAnywhere(fs, args)
 	if fs.NArg() > 0 {
 		die("anneal: unexpected positional argument(s): %v (did you mean -deck %s?)", fs.Args(), fs.Args()[0])
@@ -130,6 +134,7 @@ func runAnnealCmd(args []string) {
 		minImprovement: *minImprovement,
 		quietLoad:      *quietLoad,
 		maxDuration:    *maxDuration,
+		pairMutations:  *pairMutations,
 	}
 
 	// Run inside a wrapper that owns the profile lifecycle: deferred StopCPUProfile / heap dump
@@ -278,7 +283,7 @@ func runAnneal(cfg annealConfig) annealResult {
 // disproportionately, and what keeps the probabilistic SA gate from concentrating its
 // acceptances on a fixed slice of the solution space.
 func buildRoundMutations(cfg annealConfig, rng *rand.Rand, current *deck.Deck) []deck.Mutation {
-	mutations := deck.AllMutations(current, cfg.maxCopies, registry.Registry{})
+	mutations := deck.AllMutations(current, cfg.maxCopies, cfg.pairMutations, registry.Registry{})
 	rng.Shuffle(len(mutations), func(i, j int) {
 		mutations[i], mutations[j] = mutations[j], mutations[i]
 	})
