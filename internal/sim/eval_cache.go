@@ -124,12 +124,16 @@ func (s *cacheSolution) reset() {
 //     pops, which fixes pitched-to-play attribution. Its membership also identifies which
 //     pitch-role cards funded the attack; the rest funded the defense phase.
 //   - defenders: the winning defender list, each with its chosen blocker Mode.
+//   - cardsRemovedFromDeck: how many cards the cached chain pulled off the deck (draws,
+//     tutors, opts). Replay refuses to run when the caller's deck has fewer cards left,
+//     since the cached chain wouldn't be reproducible.
 type evalCacheEntry struct {
-	line         []card.CardAssignment
-	swungWeapons []string
-	attackOrder  []playedCard
-	pitchOrder   []card.Card
-	defenders    []playedCard
+	line                 []card.CardAssignment
+	swungWeapons         []string
+	attackOrder          []playedCard
+	pitchOrder           []card.Card
+	defenders            []playedCard
+	cardsRemovedFromDeck int
 }
 
 // evalCache holds cached Best results plus the running stats counters the debug printout

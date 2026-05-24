@@ -62,6 +62,12 @@ type ephemeral struct {
 	damageBlocked  int
 	blockTotal     int
 	currentHookIdx int
+	// cardsRemovedFromDeck counts deck → non-deck card movements during this chain
+	// resolution (mid-chain draws, tutors, deck-top peek-and-banish, etc.). The
+	// hand-eval cache stores this count alongside the cached chain and refuses to
+	// replay against a deck shallower than the count — the cached chain consumed N
+	// cards from deck, so any replay needs at least N to remain identical.
+	cardsRemovedFromDeck int
 
 	cardBanished          bool
 	arcaneDamageDealt     bool
@@ -345,6 +351,15 @@ func (gs *GameState) Weapons() []weapon.Weapon     { return gs.weapons }
 func (gs *GameState) SetWeapons(w []weapon.Weapon) { gs.weapons = w }
 func (gs *GameState) IsCacheable() bool            { return gs.cacheable }
 func (gs *GameState) SetCacheable(v bool)          { gs.cacheable = v }
+
+// CardsRemovedFromDeck reports how many cards have been moved out of the deck during
+// this chain resolution (mid-chain draws, tutors, peek-and-banish, etc.).
+func (gs *GameState) CardsRemovedFromDeck() int { return gs.cardsRemovedFromDeck }
+
+// noteDeckRemoval increments the deck-removal counter; called by every helper that
+// pops a card off the deck. Package-private — only the engine knows when a removal
+// has happened.
+func (gs *GameState) noteDeckRemoval(n int) { gs.cardsRemovedFromDeck += n }
 
 // Hand projects the role-tagged hand down to the bare cards. Callers needing the roles
 // (Discard, the chain runner) read HandStates.
