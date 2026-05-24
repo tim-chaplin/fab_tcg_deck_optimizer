@@ -59,7 +59,7 @@ func TestLikelyToHit_FoldsEffectiveAttackAndDominate(t *testing.T) {
 		if tc.printedDom {
 			c = dominatingFake{fakeCard{name: tc.name, attack: tc.printed}}
 		}
-		p := &card.CardState{Card: c, BonusAttack: tc.bonusAttack, GrantedDominate: tc.grantedDom}
+		p := &card.CardState{Card: c, PerPerm: card.PerPerm{BonusAttack: tc.bonusAttack, GrantedDominate: tc.grantedDom}}
 		if got := LikelyToHit(p); got != tc.want {
 			t.Errorf("%s: LikelyToHit() = %v, want %v", tc.name, got, tc.want)
 		}

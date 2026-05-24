@@ -33,8 +33,8 @@ func TestDeathlyDuet_AttackAttributedAddsPower(t *testing.T) {
 	// Attack attributed → +2{p}.
 	ge := gameengine.New()
 	pc := &card.CardState{
-		Card:          cards.DeathlyDuetRed{},
-		PitchedToPlay: []card.Card{testutils.FakeRedAttack().WithTypes(card.TypeRuneblade)},
+		Card:    cards.DeathlyDuetRed{},
+		PerPerm: card.PerPerm{PitchedToPlay: []card.Card{testutils.FakeRedAttack().WithTypes(card.TypeRuneblade)}},
 	}
 	ge.ResolveChainStep(ge.Logger(), pc)
 	if got := ge.Value(); got != 6 {
@@ -48,8 +48,8 @@ func TestDeathlyDuet_NonAttackActionAttributedCreatesRunechants(t *testing.T) {
 	// for downstream consume bookkeeping.
 	ge := gameengine.New()
 	pc := &card.CardState{
-		Card:          cards.DeathlyDuetRed{},
-		PitchedToPlay: []card.Card{testutils.FakeRedAction()},
+		Card:    cards.DeathlyDuetRed{},
+		PerPerm: card.PerPerm{PitchedToPlay: []card.Card{testutils.FakeRedAction()}},
 	}
 	ge.ResolveChainStep(ge.Logger(), pc)
 	if got := ge.Value(); got != 6 {
@@ -68,8 +68,8 @@ func TestDeathlyDuet_BothBranchesFire(t *testing.T) {
 	// plus 2 Runechants credited +1 each at creation. Play returns base 4 + 2 power + 2 = 8.
 	ge := gameengine.New()
 	pc := &card.CardState{
-		Card:          cards.DeathlyDuetRed{},
-		PitchedToPlay: []card.Card{testutils.FakeRedAttack().WithTypes(card.TypeRuneblade), testutils.FakeRedAction()},
+		Card:    cards.DeathlyDuetRed{},
+		PerPerm: card.PerPerm{PitchedToPlay: []card.Card{testutils.FakeRedAttack().WithTypes(card.TypeRuneblade), testutils.FakeRedAction()}},
 	}
 	ge.ResolveChainStep(ge.Logger(), pc)
 	if got := ge.Value(); got != 8 {

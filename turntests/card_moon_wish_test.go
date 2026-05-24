@@ -100,7 +100,7 @@ func TestMoonWish_TutorRequiresHit(t *testing.T) {
 	{
 		ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCards([]card.Card{cards.SunKissRed{}}).Build()}
 		// Drive EffectiveAttack down so LikelyToHit fails (4 - 4 = 0, clamped, not in window).
-		pc := &card.CardState{Card: cards.MoonWishYellow{}, BonusAttack: -4}
+		pc := &card.CardState{Card: cards.MoonWishYellow{}, PerPerm: card.PerPerm{BonusAttack: -4}}
 		ge.ResolveChainStep(ge.Logger(), pc)
 		if h := ge.Hand(); len(h) != 0 {
 			t.Errorf("dampened: Hand = %v, want [] (no hit, no tutor)", h)
@@ -115,7 +115,7 @@ func TestMoonWish_TutorRequiresHit(t *testing.T) {
 func TestMoonWish_GoAgainPlaysSunKissImmediately(t *testing.T) {
 	{
 		ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCards([]card.Card{cards.SunKissRed{}}).Build()}
-		pc := &card.CardState{Card: cards.MoonWishYellow{}, GrantedGoAgain: true}
+		pc := &card.CardState{Card: cards.MoonWishYellow{}, PerPerm: card.PerPerm{GrantedGoAgain: true}}
 		ge.ResolveChainStep(ge.Logger(), pc)
 		testutils.FireOnHitIfLikely(ge, ge.Logger(), pc)
 		dmg := ge.Value()

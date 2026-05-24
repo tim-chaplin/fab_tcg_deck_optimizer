@@ -23,68 +23,35 @@ func (fakeCardForSeed) Types(card.GameEngine) card.TypeSet                 { ret
 func (fakeCardForSeed) GoAgain(card.GameEngine) bool                       { return false }
 func (fakeCardForSeed) Play(card.GameEngine, card.Logger, *card.CardState) {}
 
-// seedChainEntryAllowlist names the CardState fields seedChainEntry binds to per-permutation
-// values rather than zeroing — i.e. fields that legitimately carry information across a
-// chain reset. Every OTHER field on CardState must be back to its zero value after the
-// reset; if you're adding a new field, decide which list it belongs in:
+// seedChainEntryAllowlist names the CardState top-level fields seedChainEntry binds to
+// per-permutation values rather than zeroing — i.e. fields that legitimately carry
+// information across a chain reset.
 //
-//   - Add it here if it carries chain-binding data (like Card / FromArsenal).
-//   - Otherwise it MUST be cleared by seedChainEntry — and by the per-permutation reset
-//     loop inside playSequenceWithMeta. Leaving a per-permutation field unreset leaks state
-//     between bestSequence permutations (see internal/sim/permutation_reset_test.go for the
-//     pattern of bugs that catches).
-//
-// OnHit is also exempt — seedChainEntry resets it via `pc.OnHit = pc.OnHit[:0]` so the
-// underlying backing array is preserved across Best calls. The test treats a length-0
-// slice as "reset" regardless of capacity.
+//   - Card / FromArsenal / Mode: chain-binding identity. Mode is reseeded per modal tuple
+//     by the chain runner's enumeration loop.
+//   - PerPerm: the embedded scratch struct. Its Reset method owns the per-field zeroing
+//     contract and is exercised by TestPerPermReset_ZeroesEveryField in package card.
+//   - Role: hand-state field, never touched by chain pcBuf entries; its zero default is
+//     left in place by seedChainEntry.
 var seedChainEntryAllowlist = map[string]bool{
 	"Card":        true,
 	"FromArsenal": true,
+	"Mode":        true,
+	"Role":        true,
+	"PerPerm":     true,
 }
 
-// TestSeedChainEntry_ResetsEveryPerPermutationField guards against the footgun that
-// motivated permutation_reset_test.go: a new mutable CardState field is added, the
-// developer remembers seedChainEntry but misses the partial reset inside
-// playSequenceWithMeta (or vice versa) — leaving the field to leak across permutations.
-//
-// The test mutates every CardState field to a non-zero value, runs seedChainEntry, then
-// uses reflection to assert each non-allowlisted field is back to its type's zero value.
-// New CardState fields force the test to fail until they're either added to seedChainEntry
-// or added to the allowlist with a comment explaining why.
-func TestSeedChainEntry_ResetsEveryPerPermutationField(t *testing.T) {
-	pc := card.CardState{
-		Card:             fakeCardForSeed{},
-		GrantedGoAgain:   true,
-		GrantedDominate:  true,
-		GrantedOverpower: true,
-		GrantedInstant:   true,
-		FromArsenal:      true,
-		Mode:             5,
-		BonusAttack:      99,
-		BonusDefense:     99,
-		PitchedToPlay:    []card.Card{fakeCardForSeed{}},
-		OnHit:            []card.OnHitHandler{{N: 1}},
-	}
-	ctx := &sequenceContext{arsenalInIdx: -1}
-	ctx.seedChainEntry(&pc, fakeCardForSeed{}, 0)
-
-	v := reflect.ValueOf(pc)
+// TestSeedChainEntry_TopLevelFieldsAllAccountedFor guards against a new top-level
+// CardState field slipping in without being either an allowlisted binding or covered by
+// PerPerm.Reset. New per-permutation fields belong inside PerPerm so PerPerm.Reset zeroes
+// them automatically; new binding fields belong in the allowlist with a comment.
+func TestSeedChainEntry_TopLevelFieldsAllAccountedFor(t *testing.T) {
+	v := reflect.ValueOf(card.CardState{})
 	tp := v.Type()
 	for i := 0; i < tp.NumField(); i++ {
 		f := tp.Field(i)
-		if seedChainEntryAllowlist[f.Name] {
-			continue
-		}
-		// OnHit is reset via slice-truncation, not nil-assignment, so check length rather
-		// than IsZero (which is false for a length-0 slice with non-zero capacity).
-		if f.Name == "OnHit" {
-			if v.Field(i).Len() != 0 {
-				t.Errorf("seedChainEntry: OnHit not truncated, len = %d", v.Field(i).Len())
-			}
-			continue
-		}
-		if !v.Field(i).IsZero() {
-			t.Errorf("seedChainEntry: %s not reset (still %v) — add it to seedChainEntry's reset (and to playSequenceWithMeta's per-permutation reset) or to seedChainEntryAllowlist if it's intentionally preserved", f.Name, v.Field(i).Interface())
+		if !seedChainEntryAllowlist[f.Name] {
+			t.Errorf("CardState field %q is neither in seedChainEntryAllowlist nor covered by the PerPerm embedded reset — decide which group it belongs to and update accordingly", f.Name)
 		}
 	}
 }

@@ -873,27 +873,15 @@ func (ctx *sequenceContext) playSequenceModal(order []playedCard) (damage int, t
 	return d, tc, rb, lg
 }
 
-// seedChainEntry initialises one pcBuf slot for a fresh chain pass.
+// seedChainEntry initialises one pcBuf slot for a fresh chain pass: bind the partition's
+// chain-identity fields (Card, FromArsenal, Mode) and zero every per-permutation mutable
+// field via PerPerm.Reset. Mode is reseeded per modal tuple by the chain runner; the
+// initial 0 here covers non-modal attackers.
 func (ctx *sequenceContext) seedChainEntry(pc *card.CardState, c card.Card, idx int) {
 	pc.Card = c
 	pc.FromArsenal = idx == ctx.arsenalInIdx
 	pc.Mode = 0
-	resetPerPermChainStepFields(pc)
-}
-
-// resetPerPermChainStepFields zeroes the resolution-scratch fields a per-perm chain run
-// dirties on a *CardState — granted keywords, bonus accumulators, OnHit registrations, and
-// the pitch-to-play list. Card / FromArsenal / Mode are left alone since they ride the
-// permutation's identity and are reseeded by the outer permutation loop.
-func resetPerPermChainStepFields(pc *card.CardState) {
-	pc.GrantedGoAgain = false
-	pc.GrantedDominate = false
-	pc.GrantedOverpower = false
-	pc.GrantedInstant = false
-	pc.BonusAttack = 0
-	pc.BonusDefense = 0
-	pc.PitchedToPlay = nil
-	pc.OnHit = pc.OnHit[:0]
+	pc.PerPerm.Reset()
 }
 
 // playSequenceWithMeta runs the permutation currently held in ctx.bufs.pcBuf[:n] with
@@ -904,7 +892,7 @@ func (ctx *sequenceContext) playSequenceWithMeta(n int) (damage int, totalCounte
 	ptrBuf := ctx.bufs.ptrBuf
 	meta := ctx.bufs.permMeta[:n]
 	for i := 0; i < n; i++ {
-		resetPerPermChainStepFields(&pcBuf[i])
+		pcBuf[i].PerPerm.Reset()
 	}
 	played := ptrBuf[:n]
 	state := ctx.preparePermState(played, n)

@@ -5,11 +5,33 @@ package card
 // that chain. Effects that grant keywords to "the next X" scan TurnState.CardsRemaining and
 // flip flags on the matching entry; the card currently resolving receives its own CardState
 // as the `self` parameter to Play.
+//
+// Fields split into two groups: identity (Card / Role / FromArsenal) that the chain runner
+// binds once per permutation, and PerPerm (anonymously embedded) holding every field the
+// chain runner can dirty during resolution. PerPerm.Reset zeroes the whole group in one
+// statement so a new mutable field can't silently leak between permutations.
 type CardState struct {
 	Card Card
 	// Role is the card's partition-assigned role for this turn — Pitch / Attack / Defend /
 	// Held / Arsenal. Discard removes a Held-role entry from the hand.
 	Role Role
+	// FromArsenal flags the single CardState whose Card came from the arsenal slot at start
+	// of turn. Cards gate "if this is played from arsenal" riders on self.FromArsenal.
+	FromArsenal bool
+	// Mode is the chosen mode for a Modal ("Choose 1") card. The chain runner's modal-tuple
+	// enumeration writes Mode before each permutation; Play reads it. Sized int8 so it
+	// packs into the bool block's padding.
+	Mode int8
+	// PerPerm groups every field a chain-step Play can mutate during one permutation's
+	// resolution. Anonymous embedding so callers keep writing pc.GrantedGoAgain /
+	// pc.BonusAttack / etc. directly; struct literals must address the group explicitly
+	// (e.g. CardState{Card: c, PerPerm: PerPerm{GrantedGoAgain: true}}).
+	PerPerm
+}
+
+// PerPerm is the per-permutation-mutable subset of CardState. Reset zeroes the whole struct
+// in a single statement; every new mutable per-perm field added here gets cleared for free.
+type PerPerm struct {
 	// GrantedGoAgain is set by a prior card's grant ("next X attack" riders) or by the
 	// card's own Play flipping self.GrantedGoAgain = true. Card.EffectiveGoAgain ORs this
 	// with Card.GoAgain().
@@ -25,13 +47,6 @@ type CardState struct {
 	// GrantedInstant marks a card a prior effect lets you play "as though it were an
 	// instant" — it pays no action point this turn, exactly like an innate Instant.
 	GrantedInstant bool
-	// FromArsenal flags the single CardState whose Card came from the arsenal slot at start
-	// of turn. Cards gate "if this is played from arsenal" riders on self.FromArsenal.
-	FromArsenal bool
-	// Mode is the chosen mode for a Modal ("Choose 1") card, set by the chain runner before
-	// Play. Always 0 for non-modal cards. Sized int8 so it packs into the bool block's
-	// padding.
-	Mode int8
 	// BonusAttack is the +{p} this card has accumulated from "next attack +N{p}" riders or
 	// self-riders. EffectiveAttack folds it into hit-likelihood checks — a +N buff can bump
 	// a 4-power attack into the 5+ dominate window. Negative grants (defender-side debuffs)
@@ -49,6 +64,14 @@ type CardState struct {
 	// (function pointer + small data payload) rather than closures so registration is
 	// alloc-free.
 	OnHit []OnHitHandler
+}
+
+// Reset zeroes p, preserving OnHit's backing array so per-Best reuse stays allocation-free.
+// PitchedToPlay's backing is owned by the chain runner's pitch pool; nilling it here drops
+// the alias so the next permutation's chain runner installs a fresh contrib slice.
+func (p *PerPerm) Reset() {
+	onHit := p.OnHit[:0]
+	*p = PerPerm{OnHit: onHit}
 }
 
 // OnHitHandler is one registered on-hit rider on a CardState. The chain runner fires Fire

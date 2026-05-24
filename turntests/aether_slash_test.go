@@ -43,7 +43,7 @@ func TestAetherSlash_NonAttackActionAttributedFiresRider(t *testing.T) {
 	}
 	for _, tc := range cases {
 		ge := gameengine.New()
-		pc := &card.CardState{Card: tc.c, PitchedToPlay: []card.Card{testutils.FakeRedAction()}}
+		pc := &card.CardState{Card: tc.c, PerPerm: card.PerPerm{PitchedToPlay: []card.Card{testutils.FakeRedAction()}}}
 		ge.ResolveChainStep(ge.Logger(), pc)
 		if got := ge.Value(); got != tc.want {
 			t.Errorf("%s: Play() = %d, want %d", tc.c.Name(), got, tc.want)
@@ -56,8 +56,8 @@ func TestAetherSlash_AttackAttributedDoesNotFireRider(t *testing.T) {
 	// even if a non-attack action is present in the broader pitch bag (ge.Pitched()), only the
 	// cards funded specifically to play this Aether Slash (PitchedToPlay) count.
 	pc := &card.CardState{
-		Card:          cards.AetherSlashRed{},
-		PitchedToPlay: []card.Card{testutils.FakeRedAttack().WithTypes(card.TypeRuneblade)},
+		Card:    cards.AetherSlashRed{},
+		PerPerm: card.PerPerm{PitchedToPlay: []card.Card{testutils.FakeRedAttack().WithTypes(card.TypeRuneblade)}},
 	}
 	ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetPitched([]card.Card{testutils.FakeRedAttack().WithTypes(card.TypeRuneblade), testutils.FakeRedAction()}).Build()}
 	ge.ResolveChainStep(ge.Logger(), pc)
@@ -75,7 +75,7 @@ func TestAetherSlash_FlagsArcaneDamageDealtOnlyWhenTriggered(t *testing.T) {
 		t.Error("ArcaneDamageDealt = true with no qualifying pitch attribution; want false")
 	}
 	ge = gameengine.New()
-	pc := &card.CardState{Card: cards.AetherSlashRed{}, PitchedToPlay: []card.Card{testutils.FakeRedAction()}}
+	pc := &card.CardState{Card: cards.AetherSlashRed{}, PerPerm: card.PerPerm{PitchedToPlay: []card.Card{testutils.FakeRedAction()}}}
 	ge.ResolveChainStep(ge.Logger(), pc)
 	if !ge.ArcaneDamageDealt() {
 		t.Error("ArcaneDamageDealt = false with non-attack action attributed; want true")
