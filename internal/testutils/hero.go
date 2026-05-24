@@ -19,14 +19,15 @@ import (
 type Hero struct {
 	Intel       int
 	OptStrategy func(cards []card.Card) (top, bottom []card.Card)
+	TypeSet     card.TypeSet
 }
 
-func (Hero) ID() ids.HeroID       { return ids.InvalidHero }
-func (Hero) Name() string         { return "testutils.Hero" }
-func (Hero) DisplayName() string  { return "testutils.Hero" }
-func (h Hero) Intelligence() int  { return h.Intel }
-func (Hero) Types() card.TypeSet  { return 0 }
-func (Hero) Class() card.CardType { return 0 }
+func (Hero) ID() ids.HeroID        { return ids.InvalidHero }
+func (Hero) Name() string          { return "testutils.Hero" }
+func (Hero) DisplayName() string   { return "testutils.Hero" }
+func (h Hero) Intelligence() int   { return h.Intel }
+func (h Hero) Types() card.TypeSet { return h.TypeSet }
+func (Hero) Class() card.CardType  { return 0 }
 
 // No triggered ability — TriggerType == 0 makes FireTriggers skip the hero.
 func (Hero) TriggerType() triggertype.Type     { return 0 }

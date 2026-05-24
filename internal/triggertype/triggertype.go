@@ -26,4 +26,10 @@ const (
 	// triggering card is the pitched card; a handler reads its Pitch value and may boost
 	// the resources it yields via GameEngine.AddResourcePoints.
 	Pitch
+	// CrowdCheer fires when the crowd cheers your hero, raised by GameState.CrowdCheer.
+	// Used by "whenever the crowd cheers you" handlers; "if you've been cheered this turn"
+	// gates instead read GameState.HasCrowdCheered.
+	CrowdCheer
+	// CrowdBoo is the boo-side counterpart to CrowdCheer.
+	CrowdBoo
 )

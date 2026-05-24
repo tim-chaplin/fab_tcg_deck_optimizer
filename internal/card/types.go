@@ -23,6 +23,8 @@ const (
 	TypeItem                                 // "Item"
 	TypeOneHand                              // "1H"
 	TypeResource                             // "Resource"
+	TypeRevered                              // "Revered" — hero-only; Rosetta crowd-cheer keyword
+	TypeReviled                              // "Reviled" — hero-only; Rosetta crowd-boo keyword
 	TypeRuneblade                            // "Runeblade"
 	TypeScepter                              // "Scepter"
 	TypeSword                                // "Sword"

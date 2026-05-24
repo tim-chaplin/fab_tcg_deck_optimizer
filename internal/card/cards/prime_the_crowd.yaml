@@ -4,8 +4,6 @@ types:
     - Action
 cost: 2
 goAgain: true
-markers:
-    - NotImplemented
 text: |-
     The next attack action card you play this turn gets +N{p}. **The crowd cheers** each
     Revered hero. **The crowd boos** each Reviled hero. **Go again**" (Red N=4, Yellow N=3, Blue
