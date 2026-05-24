@@ -21,6 +21,10 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/textio"
 )
 
+// annealCacheCapacity caps the persistent hand-eval cache across rounds so multi-hour
+// anneal runs stay within memory.
+const annealCacheCapacity = 200_000
+
 // annealConfig bundles the knobs runAnneal needs. Built by runAnnealCmd from its flag.FlagSet.
 type annealConfig struct {
 	// shuffles is the per-eval shuffle budget when adaptive is false (apples-to-apples
@@ -224,6 +228,9 @@ func runAnneal(cfg annealConfig) annealResult {
 			cfg.startTemp, cfg.tempDecay, cfg.minTemp)
 	}
 
+	// Persistent hand-eval cache shared across rounds — see sim.NewCacheBounded.
+	roundCache := sim.NewCacheBounded(annealCacheCapacity)
+
 	round := 0
 	acceptances := 0
 	start := time.Now()
@@ -245,7 +252,7 @@ func runAnneal(cfg annealConfig) annealResult {
 		d, dStats, avg, idx, found := sim.RunMutationRound(
 			ctx, mutations, currentAvg, temperature, cfg.minImprovement,
 			cfg.shuffles, cfg.matchup, 0, 0,
-			rng.Int63(), &completed, cfg.adaptive, cfg.minImprovement,
+			rng.Int63(), &completed, cfg.adaptive, cfg.minImprovement, roundCache,
 		)
 		stopTicker()
 

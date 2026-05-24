@@ -86,12 +86,14 @@ func NewEvaluatorWithoutCache() *Evaluator {
 // a read lock (concurrent readers don't serialise); store and reset take the write lock.
 type Cache = evalCache
 
-// NewCache returns a fresh shared cache.
+// NewCache returns a fresh unbounded shared cache.
 func NewCache() *Cache { return newEvalCache() }
 
-// ResetCache drops the cached entries while preserving the stats counters. Use between
-// distinct decks when reusing one Evaluator across many: entries from one deck rarely
-// help another, so dropping them at deck boundaries caps memory at one deck's worth.
+// NewCacheBounded returns a shared cache that evicts a random entry on store once
+// capacity is reached. capacity <= 0 disables eviction.
+func NewCacheBounded(capacity int) *Cache { return newEvalCacheBounded(capacity) }
+
+// ResetCache drops the cached entries while preserving the stats counters.
 // No-op when caching is disabled.
 func (e *Evaluator) ResetCache() {
 	if e.cache != nil {
@@ -114,6 +116,7 @@ func (e *Evaluator) CacheStats() CacheStats {
 		Hits:        int(e.cache.hits.Load()),
 		Misses:      int(e.cache.misses.Load()),
 		Uncacheable: int(e.cache.uncacheable.Load()),
+		Evictions:   int(e.cache.evictions.Load()),
 		Entries:     entries,
 	}
 }

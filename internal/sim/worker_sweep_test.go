@@ -138,7 +138,7 @@ func BenchmarkAnnealWorkerSweep(b *testing.B) {
 				_, _, _, _, found := RunMutationRound(
 					context.Background(), mutations, unreachableBaseline, 0, 0,
 					0, Matchup{IncomingDamage: incoming}, c.mut, c.shuf,
-					iterRNG.Int63(), nil, true, 0.1,
+					iterRNG.Int63(), nil, true, 0.1, nil,
 				)
 				if found {
 					b.Fatalf("iter %d: unreachable baseline was beaten — bench setup is wrong", n)
