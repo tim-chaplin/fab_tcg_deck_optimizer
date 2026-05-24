@@ -15,14 +15,14 @@ import (
 const riseAbovePrintedCost = 2
 
 func riseAboveCost(ge card.GameEngine) int {
-	if ge != nil && len(ge.Hand()) > 0 {
+	if ge != nil && len(ge.HeldHand()) > 0 {
 		return 0
 	}
 	return riseAbovePrintedCost
 }
 
 func riseAbovePlay(ge card.GameEngine, l card.Logger, self *card.CardState) {
-	if len(ge.Hand()) == 0 {
+	if len(ge.HeldHand()) == 0 {
 		return
 	}
 	returned := ge.PopHandAt(0)

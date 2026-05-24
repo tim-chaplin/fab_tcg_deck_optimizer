@@ -9,10 +9,11 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 )
 
-// siftPlay cycles up to 4 hand cards to the deck bottom, then draws that many. The count is
-// capped at hand size.
+// siftPlay cycles up to 4 Held hand cards to the deck bottom, then draws that many.
+// "From your hand" targets Held-role cards only — pitch- and attack-role entries that the
+// partition has scheduled remain in place.
 func siftPlay(ge card.GameEngine, l card.Logger, self *card.CardState) {
-	n := len(ge.Hand())
+	n := len(ge.HeldHand())
 	if n > 4 {
 		n = 4
 	}

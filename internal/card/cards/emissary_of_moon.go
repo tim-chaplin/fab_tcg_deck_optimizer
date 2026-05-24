@@ -11,7 +11,7 @@ import (
 )
 
 func (EmissaryOfMoonRed) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
-	if len(ge.Hand()) == 0 {
+	if len(ge.HeldHand()) == 0 {
 		return
 	}
 	cycled := ge.PopHandAt(0)

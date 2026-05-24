@@ -23,7 +23,18 @@ import (
 type GameEngine interface {
 	// Zones
 	Hand() []Card
+	// HeldHand returns the Held-role subset of the hand: the cards a removing effect
+	// ("put a card from your hand on top of your deck", cycle, etc.) may target. Hand()
+	// surfaces every entry (including pitch- and attack-scheduled cards that "your hand"
+	// rules treat as in-hand for reading); HeldHand filters to the safely-removable set
+	// — Pitch / Attack role entries are scheduled to commit downstream and must not be
+	// silently diverted by a card effect.
+	HeldHand() []Card
 	AppendHand(Card)
+	// PopHandAt removes and returns the i-th Held-role card from hand. i indexes into
+	// the Held subset surfaced by HeldHand(); callers gate on len(HeldHand()) before
+	// calling. Pitch- and Attack-role entries are never popped — see HeldHand's doc for
+	// the rationale.
 	PopHandAt(int) Card
 	PeekDeck() (Card, bool)
 	PeekTopN(int) []Card
