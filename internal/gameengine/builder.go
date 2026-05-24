@@ -33,11 +33,13 @@ func New() *GameEngine {
 func GameStateBuilder() *StateBuilder {
 	return &StateBuilder{
 		gs: &GameState{
-			cacheable:      true,
-			currentHookIdx: -1,
-			logger:         NoopLogger{},
-			deck:           deck.New(nil, nil, nil),
-			hero:           defaultHero{},
+			ephemeral: ephemeral{
+				cacheable:      true,
+				currentHookIdx: -1,
+				logger:         NoopLogger{},
+			},
+			deck: deck.New(nil, nil, nil),
+			hero: defaultHero{},
 		},
 	}
 }
