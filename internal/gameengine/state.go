@@ -12,6 +12,13 @@ import (
 // *GameState because it cares about the data, not the rules. GameEngine wraps a
 // *GameState and adds the rules-engine API cards see; the unexported fields stay
 // package-private so external callers can only touch them through methods.
+//
+// Fields split into two groups: cross-turn carryover (hero, weapons, hand, deck, arsenal,
+// graveyard, banished, auras, items, opponentMarked, isMyTurn, incomingDamage,
+// arcaneIncomingDamage) and the ephemeral struct holding every per-turn-resolution scratch
+// field. ephemeral.reset zeroes the whole group in one statement (with the four
+// non-zero-reset defaults baked in) so a new per-turn field added to ephemeral can't leak
+// across turn boundaries.
 type GameState struct {
 	hero    Hero
 	weapons []weapon.Weapon // currently-equipped weapons; persistent across turns
@@ -22,37 +29,62 @@ type GameState struct {
 	graveyard []card.Card
 	banished  []card.Card
 	auras     []Aura
-	triggers  []EphemeralTrigger
 	items     []Item
 
+	incomingDamage       int
+	arcaneIncomingDamage int
+
+	opponentMarked bool
+	isMyTurn       bool
+
+	ephemeral
+}
+
+// ephemeral groups per-turn-resolution scratch — every field a chain run accumulates or
+// overwrites. reset zeroes the whole struct in a single statement; the four fields whose
+// reset value is non-zero (actionPoints, currentHookIdx, cacheable, logger) get reseated
+// in the same literal. Adding a new ephemeral field is a one-line change here — there's
+// nowhere to forget.
+type ephemeral struct {
 	cardsPlayed    []card.Card
 	cardsRemaining []*card.CardState
 	pitched        []card.Card
 	defenders      []card.Card
 
-	logger               card.Logger
+	triggers             []EphemeralTrigger
 	triggeringCard       card.Card
 	attackReactionTarget *card.CardState
 
-	actionPoints         int
-	value                int
-	incomingDamage       int
-	damageBlocked        int
-	arcaneIncomingDamage int
-	blockTotal           int
-	currentHookIdx       int
+	logger card.Logger
+
+	actionPoints   int
+	value          int
+	damageBlocked  int
+	blockTotal     int
+	currentHookIdx int
 
 	cardBanished          bool
 	arcaneDamageDealt     bool
-	opponentMarked        bool
 	auraCreated           bool
 	nonAttackActionPlayed bool
 	lastAttackHit         bool
 	currentHookDestroyed  bool
 	currentStepRerouted   bool
 	cacheable             bool
-	isMyTurn              bool
 	heroTapped            bool
+}
+
+// reset returns e to its start-of-turn baseline: every field zero except the four with
+// non-zero defaults (actionPoints=1, currentHookIdx=-1, cacheable=true, logger=NoopLogger).
+// Aura / item FiredThisTurn flags live on the aura / item entries themselves and are
+// rearmed by GameState.ResetEphemeralState's separate loop.
+func (e *ephemeral) reset() {
+	*e = ephemeral{
+		actionPoints:   1,
+		currentHookIdx: -1,
+		cacheable:      true,
+		logger:         NoopLogger{},
+	}
 }
 
 // Engine wraps s in a *GameEngine so the chain runner can drive Card.Play hooks against
@@ -284,46 +316,14 @@ func (gs *GameState) CopyPersistentStateFrom(src *GameState) {
 
 // ResetEphemeralState returns gs to its start-of-turn baseline: it discards every field
 // that playing out a turn accumulates, keeping only the cross-turn carryover (hero, deck,
-// hand, arsenal, graveyard, banished, the aura / item lists, opponentMarked, and the
-// matchup's incoming-damage figures).
+// hand, arsenal, graveyard, banished, the aura / item lists, opponentMarked, isMyTurn,
+// and the matchup's incoming-damage figures).
 //
-// What it resets, by category:
-//   - per-turn zones — pitched, defenders (hand persists; it was refilled at the end of
-//     the previous turn and is the dealt hand visible to start-of-turn aura handlers)
-//   - resolution scratch — the played / remaining lists, the one-shot trigger queue, the
-//     value accumulator and draw counter, action points, the block total, the current-step
-//     machinery, the "happened this resolution" flags, the cacheable bit, the logger
-//   - aura gates — every aura's FiredThisTurn flag rearms, so OncePerTurn auras can fire
-//     again
-//
-// auraCreated resets to false — it means "an aura was played or created THIS turn", so
-// auras carried over from a previous turn must not satisfy it.
-//
-// incomingDamage stays put — it's the constant matchup figure, carried over untouched.
-// damageBlocked (how much of it defense has absorbed so far) resets to zero.
+// gs.ephemeral.reset wipes every per-turn scratch field in one struct assignment. The
+// aura / item / hero FiredThisTurn flags live on those entries themselves, not in
+// ephemeral, so they get their own rearm loop here so OncePerTurn auras can fire again.
 func (gs *GameState) ResetEphemeralState() {
-	gs.pitched = nil
-	gs.defenders = nil
-	gs.cardsPlayed = nil
-	gs.cardsRemaining = nil
-	gs.triggers = nil
-	gs.triggeringCard = nil
-	gs.attackReactionTarget = nil
-	gs.actionPoints = 1
-	gs.value = 0
-	gs.damageBlocked = 0
-	gs.blockTotal = 0
-	gs.currentHookDestroyed = false
-	gs.currentStepRerouted = false
-	gs.currentHookIdx = -1
-	gs.cardBanished = false
-	gs.arcaneDamageDealt = false
-	gs.nonAttackActionPlayed = false
-	gs.lastAttackHit = false
-	gs.heroTapped = false
-	gs.cacheable = true
-	gs.logger = NoopLogger{}
-	gs.auraCreated = false
+	gs.ephemeral.reset()
 	for _, a := range gs.auras {
 		a.SetFiredThisTurn(false)
 	}
