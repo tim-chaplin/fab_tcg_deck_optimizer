@@ -449,6 +449,32 @@ func cloneCardSlice[T any](src []T) []T {
 	return out
 }
 
+// appendExcludingMultiset appends every entry in src to dst, except for the first
+// occurrence of each card that appears in exclude (treated as a multiset). When exclude
+// is empty the inner loop short-circuits to a single append. Used by runDefense to keep
+// defenders that DRs banished out of the post-defense chain graveyard.
+func appendExcludingMultiset(dst, src, exclude []card.Card) []card.Card {
+	if len(exclude) == 0 {
+		return append(dst, src...)
+	}
+	// Defender lists are tiny (<= handSize+1) so an alloc-free linear scan beats a map.
+	skip := make([]bool, len(exclude))
+	for _, c := range src {
+		excluded := false
+		for j, e := range exclude {
+			if !skip[j] && e == c {
+				skip[j] = true
+				excluded = true
+				break
+			}
+		}
+		if !excluded {
+			dst = append(dst, c)
+		}
+	}
+	return dst
+}
+
 // runDefense mutates ctx.leafState through the defender list, accumulating per-DR Value
 // into total. Auras grow with any DR-added entries; graveyard is left as priorGraveyard
 // + defenders for the chain phase. Chain-locals (value, action points, …) get reset
@@ -556,11 +582,15 @@ func (ctx *sequenceContext) runDefense(defenders, pitched, held []card.Card, dec
 	survivingHeld := origHeld[discarded:]
 
 	// Leave state with graveyard = priorGraveyard + defenders + discarded cards for the
-	// chain phase. runDefenseChainGravBuf is recycled across runDefense calls;
-	// preparePermState copies the installed slice into bufs.pooledGravBuf before each perm
-	// so the aliasing on leafState's graveyard is safe.
+	// chain phase, EXCLUDING any defender a DR banished during the defense pass — those
+	// cards moved to the banished zone and must not also appear in the graveyard, or
+	// subsequent BanishFromGraveyard / RecycleFromGraveyard scans would see a phantom
+	// copy (and the total card count across all zones would drift). runDefenseChainGravBuf
+	// is recycled across runDefense calls; preparePermState copies the installed slice into
+	// bufs.pooledGravBuf before each perm so the aliasing on leafState's graveyard is safe.
 	chainGraveyard := append(ctx.bufs.runDefenseChainGravBuf[:0], ctx.priorGraveyard...)
-	chainGraveyard = append(chainGraveyard, defenders...)
+	drBanished := state.Banished()[len(ctx.priorBanish):]
+	chainGraveyard = appendExcludingMultiset(chainGraveyard, defenders, drBanished)
 	chainGraveyard = append(chainGraveyard, origHeld[:discarded]...)
 	ctx.bufs.runDefenseChainGravBuf = chainGraveyard
 	state.SetGraveyard(chainGraveyard)
