@@ -23,27 +23,35 @@ import (
 type GameEngine interface {
 	// Zones
 	Hand() []Card
-	// HeldHand returns the Held-role subset of the hand: the cards a removing effect
-	// ("put a card from your hand on top of your deck", cycle, etc.) may target. Hand()
-	// surfaces every entry (including pitch- and attack-scheduled cards that "your hand"
-	// rules treat as in-hand for reading); HeldHand filters to the safely-removable set
-	// — Pitch / Attack role entries are scheduled to commit downstream and must not be
-	// silently diverted by a card effect.
+	// HandSize reports the total number of cards in hand, including drawn cards. Prefer
+	// this over len(Hand()) for emptiness / size gates: it doesn't flip IsCacheable.
+	HandSize() int
+	// HandHasMatching reports whether any non-drawn hand entry satisfies pred. Drawn
+	// entries are skipped — their identity is opaque mid-chain. Doesn't flip IsCacheable.
+	HandHasMatching(pred func(Card) bool) bool
+	// HeldHandSize reports the total Held-role entry count (Pitch / Attack excluded),
+	// including drawn entries. Counting alone doesn't reveal drawn-card attributes, so
+	// this accessor doesn't flip IsCacheable.
+	HeldHandSize() int
+	// HeldHand returns the Held subset of the hand (Pitch / Attack excluded, drawn
+	// entries included). Flips IsCacheable since iterating the slice exposes attributes.
 	HeldHand() []Card
 	AppendHand(Card)
-	// PopHandAt removes and returns the i-th Held-role card from hand. i indexes into
-	// the Held subset surfaced by HeldHand(); callers gate on len(HeldHand()) before
-	// calling. Pitch- and Attack-role entries are never popped — see HeldHand's doc for
-	// the rationale.
-	PopHandAt(int) Card
 	PeekDeck() (Card, bool)
 	PeekTopN(int) []Card
 	PrependToDeck(Card)
 	AppendToDeck(Card)
 	AddToGraveyard(Card)
-	// Discard pops the first hand card and appends it to the graveyard. Returns the
-	// discarded card and true; returns (nil, false) when the hand is empty.
-	Discard() (Card, bool)
+	// Discard pops the first Held card to the graveyard and logs under source.
+	// Returns true on success; false when no Held card exists. Cache-safe — the
+	// discarded identity never escapes the engine.
+	Discard(source string) bool
+	// DiscardToTopOfDeck pops the first Held card to the top of the deck and logs
+	// under source. Returns true on success. Cache-safe.
+	DiscardToTopOfDeck(source string) bool
+	// DiscardToBottomOfDeck pops the first Held card to the bottom of the deck and
+	// logs under source. Returns true on success. Cache-safe.
+	DiscardToBottomOfDeck(source string) bool
 
 	// CreateAura registers a multi-fire aura sourced from source (typically the playing
 	// card's self.Card) that fires on every event in tt's bit set. oncePerTurn caps it to

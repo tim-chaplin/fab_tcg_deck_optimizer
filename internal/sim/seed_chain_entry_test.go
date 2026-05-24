@@ -29,6 +29,8 @@ func (fakeCardForSeed) Play(card.GameEngine, card.Logger, *card.CardState) {}
 //
 //   - Card / FromArsenal / Mode: chain-binding identity. Mode is reseeded per modal tuple
 //     by the chain runner's enumeration loop.
+//   - FromDraw: set only by mid-chain DrawOne inserts; pcBuf entries are planned
+//     attackers, so this stays zero.
 //   - Ephemeral: the embedded short-lived state. Its Reset method owns the per-field
 //     zeroing contract and is exercised by TestEphemeralReset_ZeroesEveryField in package
 //     card.
@@ -37,6 +39,7 @@ func (fakeCardForSeed) Play(card.GameEngine, card.Logger, *card.CardState) {}
 var seedChainEntryAllowlist = map[string]bool{
 	"Card":        true,
 	"FromArsenal": true,
+	"FromDraw":    true,
 	"Mode":        true,
 	"Role":        true,
 	"Ephemeral":   true,

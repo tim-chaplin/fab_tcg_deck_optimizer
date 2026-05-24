@@ -12,15 +12,10 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 )
 
-// demolitionCrewPrecondition is the shared additional-cost check across all 3 pitch
-// variants.
+// demolitionCrewPrecondition is the shared additional-cost reveal check across all 3
+// pitch variants.
 func demolitionCrewPrecondition(ge card.GameEngine) bool {
-	for _, c := range ge.Hand() {
-		if c.Cost(ge) >= 2 {
-			return true
-		}
-	}
-	return false
+	return ge.HandHasMatching(func(c card.Card) bool { return c.Cost(ge) >= 2 })
 }
 
 func (DemolitionCrewRed) Dominate() {}

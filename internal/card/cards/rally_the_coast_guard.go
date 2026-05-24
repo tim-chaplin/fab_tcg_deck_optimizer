@@ -16,7 +16,7 @@ func rallyTheCoastGuardBlock(ge card.GameEngine, self *card.CardState) {
 	if ge.RemainingUnblockedDamage() <= self.EffectiveDefense() {
 		return
 	}
-	if _, ok := ge.Discard(); ok {
+	if ge.Discard(self.Card.DisplayName()) {
 		self.BonusDefense += 3
 	}
 }

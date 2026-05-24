@@ -28,12 +28,11 @@ func TestHeldHand_FiltersOutPitchAndAttackRoles(t *testing.T) {
 	}
 }
 
-// Tests that ge.PopHandAt(i) indexes into the Held subset, NOT the raw role-tagged
-// slice. Pre-fix, PopHandAt popped raw[i], so cards like Rise Above / the Emissary cycle
-// could accidentally remove a Pitch-role card that the partition had scheduled to pay
-// for a chain cost — leaving the cost unpaid downstream OR double-counting that card
-// (once via the divert effect, once via the end-of-turn pitch recycle).
-func TestPopHandAt_OnlyPopsHeldRole(t *testing.T) {
+// Tests that Discard / DiscardToTopOfDeck / DiscardToBottomOfDeck pop only Held-role
+// hand entries, skipping Pitch / Attack entries the partition has scheduled to commit
+// to chain costs. A bug here would let a card like Rise Above or the Emissary cycle
+// silently remove a Pitch-role card, leaving its cost unpaid downstream.
+func TestDiscard_OnlyPopsHeldRole(t *testing.T) {
 	ge := New()
 	ge.SetHandStates([]card.CardState{
 		{Card: fakeCard{id: 1}, Role: card.Pitch},
@@ -41,22 +40,18 @@ func TestPopHandAt_OnlyPopsHeldRole(t *testing.T) {
 		{Card: fakeCard{id: 3}, Role: card.Attack},
 		{Card: fakeCard{id: 4}, Role: card.Held},
 	})
-	// PopHandAt(0) should pop the FIRST Held entry (id=2), not the raw index 0 (id=1, Pitch).
-	got := ge.PopHandAt(0)
-	if got.ID() != 2 {
-		t.Errorf("PopHandAt(0) = ID %d, want 2 (first Held entry, skipping Pitch at raw index 0)", got.ID())
+	if !ge.Discard("test") {
+		t.Fatal("Discard returned false despite 2 Held entries present")
 	}
-	// The Pitch entry must remain untouched.
 	remaining := ge.GameState.HandStates()
 	if len(remaining) != 3 {
 		t.Fatalf("hand size = %d, want 3 (only Held entry removed)", len(remaining))
 	}
 	for _, s := range remaining {
-		if s.Role == card.Held && s.Card.ID() == 2 {
-			t.Errorf("Held card 2 still present after PopHandAt(0)")
+		if s.Card.ID() == 2 {
+			t.Errorf("Held card 2 still present after Discard — Pitch / Attack ahead of it should not have been targeted")
 		}
 	}
-	// The remaining Pitch entry must still carry Pitch role (not accidentally re-tagged).
 	foundPitch := false
 	for _, s := range remaining {
 		if s.Card.ID() == 1 && s.Role == card.Pitch {
@@ -67,17 +62,12 @@ func TestPopHandAt_OnlyPopsHeldRole(t *testing.T) {
 		t.Errorf("Pitch entry with ID 1 missing or re-tagged: %+v", remaining)
 	}
 
-	// PopHandAt(0) again should pop ID 4 (the other Held). Pitch and Attack stay.
-	got = ge.PopHandAt(0)
-	if got.ID() != 4 {
-		t.Errorf("PopHandAt(0) second call = ID %d, want 4", got.ID())
+	// Second discard should pop ID 4 (the other Held).
+	if !ge.Discard("test") {
+		t.Fatal("second Discard returned false despite 1 Held entry remaining")
 	}
-
-	// PopHandAt(0) with no Held cards left must panic — callers gate on len(HeldHand()).
-	defer func() {
-		if r := recover(); r == nil {
-			t.Errorf("PopHandAt with no Held cards did not panic")
-		}
-	}()
-	ge.PopHandAt(0)
+	// Third call should return false — no Held entries left.
+	if ge.Discard("test") {
+		t.Errorf("Discard with no Held cards returned true, want false")
+	}
 }

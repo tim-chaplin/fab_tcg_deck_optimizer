@@ -11,7 +11,7 @@ import (
 
 // springLoadPlay applies the +3{p} 'no cards in hand' rider.
 func springLoadPlay(ge card.GameEngine, l card.Logger, self *card.CardState) {
-	if len(ge.Hand()) == 0 {
+	if ge.HandSize() == 0 {
 		self.BonusAttack += 3
 	}
 }

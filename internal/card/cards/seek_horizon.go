@@ -11,13 +11,11 @@ import (
 )
 
 func seekHorizonPlay(ge card.GameEngine, l card.Logger, self *card.CardState) {
-	if len(ge.HeldHand()) == 0 {
+	if !ge.DiscardToTopOfDeck(self.Card.DisplayName()) {
 		return
 	}
-	returned := ge.PopHandAt(0)
-	ge.PrependToDeck(returned)
 	self.GrantedGoAgain = true
-	l.AppendPostTriggerf(self.Card.DisplayName(), 0, "Returned %s to top of deck, +go again", returned.DisplayName())
+	l.AppendPostTriggerf(self.Card.DisplayName(), 0, "+go again")
 }
 
 func (SeekHorizonRed) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {

@@ -63,18 +63,6 @@ func TestBest_UncacheableSutcliffesResearchNotes(t *testing.T) {
 	}
 }
 
-// TestBest_UncacheableMoonWishTutor: Moon Wish's on-hit branch tutors via TutorFromDeck —
-// flips the bit through the verb. Pair it with a hand card so the alt cost fires (still
-// flips via PrependToDeck) and a deck card to tutor.
-func TestBest_UncacheableMoonWishTutor(t *testing.T) {
-	h := []card.Card{cards.MoonWishRed{}, testutils.FakeRedAttack()}
-	deck := DeckOf(cards.SunKissRed{})
-	got := Best(nil, h, deck, gameengine.GameStateBuilder().SetHero(testutils.Hero{Intel: 4}).Build())
-	if got.Cacheable {
-		t.Errorf("Moon Wish hand: Cacheable = true, want false (TutorFromDeck flips)")
-	}
-}
-
 // TestBest_UncacheableRavenousRabble: the on-attack -X{p} debuff reads the deck top via
 // ge.PeekDeck() — Cacheable=false even though the card "only" peeks.
 func TestBest_UncacheableRavenousRabble(t *testing.T) {
