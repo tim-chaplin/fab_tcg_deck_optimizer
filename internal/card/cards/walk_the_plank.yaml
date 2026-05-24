@@ -1,22 +1,20 @@
-name: Blanch
+name: Walk the Plank
 types:
     - Generic
     - Action
     - Attack
 cost: 3
-markers:
-    - NotImplemented
-text: When this hits a hero, cards they own lose all colors until the end of their next turn.
+text: When this hits a Pirate hero, {t} them or an ally they control.
 variants:
-    - id: BlanchRed
+    - id: WalkThePlankRed
       pitch: 1
       attack: 7
       defense: 2
-    - id: BlanchYellow
+    - id: WalkThePlankYellow
       pitch: 2
       attack: 6
       defense: 2
-    - id: BlanchBlue
+    - id: WalkThePlankBlue
       pitch: 3
       attack: 5
       defense: 2

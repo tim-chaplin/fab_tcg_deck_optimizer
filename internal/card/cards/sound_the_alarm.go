@@ -4,14 +4,15 @@
 // Text: "When this attacks a hero, they reveal their hand. If an attack reaction card is revealed
 // this way, you may search your deck for a defense reaction card, reveal it, then shuffle and put
 // it on top."
+//
+// Neither clause is modelled: the single-turn solver doesn't track the opponent's hand, so the
+// attack-reaction gate is never satisfiable and the defense-reaction tutor never fires. Modelled
+// as the printed attack.
 
-package notimplemented
+package cards
 
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 )
 
-// not implemented: opponent hand reveal, defense-reaction deck search
-
-func (c SoundTheAlarmRed) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
-}
+func (SoundTheAlarmRed) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {}

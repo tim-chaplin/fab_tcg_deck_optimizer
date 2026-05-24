@@ -4,8 +4,6 @@ types:
     - Action
     - Attack
 cost: 2
-markers:
-    - NotImplemented
 text: |-
     Defense reactions can't be played to this chain link. When this hits a hero, you may turn
     a card in their arsenal face up, then destroy a defense reaction in their arsenal.

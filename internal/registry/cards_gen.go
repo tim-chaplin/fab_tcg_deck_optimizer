@@ -50,6 +50,10 @@ var cardsByID = []Card{
 
 	ids.BladeFlashBlue: cards.BladeFlashBlue{},
 
+	ids.BlanchRed:    cards.BlanchRed{},
+	ids.BlanchYellow: cards.BlanchYellow{},
+	ids.BlanchBlue:   cards.BlanchBlue{},
+
 	ids.BlessingOfOccultRed:    cards.BlessingOfOccultRed{},
 	ids.BlessingOfOccultYellow: cards.BlessingOfOccultYellow{},
 	ids.BlessingOfOccultBlue:   cards.BlessingOfOccultBlue{},
@@ -105,6 +109,10 @@ var cardsByID = []Card{
 	ids.ConsumingVolitionBlue:   cards.ConsumingVolitionBlue{},
 
 	ids.CrackedBaubleYellow: cards.CrackedBaubleYellow{},
+
+	ids.CrashDownTheGatesRed:    cards.CrashDownTheGatesRed{},
+	ids.CrashDownTheGatesYellow: cards.CrashDownTheGatesYellow{},
+	ids.CrashDownTheGatesBlue:   cards.CrashDownTheGatesBlue{},
 
 	ids.CriticalStrikeRed:    cards.CriticalStrikeRed{},
 	ids.CriticalStrikeYellow: cards.CriticalStrikeYellow{},
@@ -490,6 +498,8 @@ var cardsByID = []Card{
 	ids.SnatchYellow: cards.SnatchYellow{},
 	ids.SnatchBlue:   cards.SnatchBlue{},
 
+	ids.SoundTheAlarmRed: cards.SoundTheAlarmRed{},
+
 	ids.SpellbladeAssaultRed:    cards.SpellbladeAssaultRed{},
 	ids.SpellbladeAssaultYellow: cards.SpellbladeAssaultYellow{},
 	ids.SpellbladeAssaultBlue:   cards.SpellbladeAssaultBlue{},
@@ -578,6 +588,10 @@ var cardsByID = []Card{
 	ids.WageGoldYellow: cards.WageGoldYellow{},
 	ids.WageGoldBlue:   cards.WageGoldBlue{},
 
+	ids.WalkThePlankRed:    cards.WalkThePlankRed{},
+	ids.WalkThePlankYellow: cards.WalkThePlankYellow{},
+	ids.WalkThePlankBlue:   cards.WalkThePlankBlue{},
+
 	ids.WarmongersRecitalRed:    cards.WarmongersRecitalRed{},
 	ids.WarmongersRecitalYellow: cards.WarmongersRecitalYellow{},
 	ids.WarmongersRecitalBlue:   cards.WarmongersRecitalBlue{},
@@ -601,6 +615,10 @@ var cardsByID = []Card{
 	ids.WoundingBlowRed:    cards.WoundingBlowRed{},
 	ids.WoundingBlowYellow: cards.WoundingBlowYellow{},
 	ids.WoundingBlowBlue:   cards.WoundingBlowBlue{},
+
+	ids.WreckHavocRed:    cards.WreckHavocRed{},
+	ids.WreckHavocYellow: cards.WreckHavocYellow{},
+	ids.WreckHavocBlue:   cards.WreckHavocBlue{},
 
 	ids.YintiYantiRed:    cards.YintiYantiRed{},
 	ids.YintiYantiYellow: cards.YintiYantiYellow{},
