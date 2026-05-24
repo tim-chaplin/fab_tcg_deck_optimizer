@@ -152,6 +152,10 @@ var cardsByID = []Card{
 
 	ids.ExposedBlue: cards.ExposedBlue{},
 
+	ids.FactFindingMissionRed:    cards.FactFindingMissionRed{},
+	ids.FactFindingMissionYellow: cards.FactFindingMissionYellow{},
+	ids.FactFindingMissionBlue:   cards.FactFindingMissionBlue{},
+
 	ids.FateForeseenRed:    cards.FateForeseenRed{},
 	ids.FateForeseenYellow: cards.FateForeseenYellow{},
 	ids.FateForeseenBlue:   cards.FateForeseenBlue{},
