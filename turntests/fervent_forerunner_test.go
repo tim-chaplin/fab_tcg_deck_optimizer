@@ -56,7 +56,7 @@ func TestFerventForerunner_OnHitOptFiresWithBonusAttackInWindow(t *testing.T) {
 	a, b := testutils.FakeRedAction().WithName("a"), testutils.FakeRedAction().WithName("b")
 	c := cards.FerventForerunnerRed{}
 	ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCards([]card.Card{a, b}).Build()}
-	cs := &card.CardState{Card: c, BonusAttack: 1}
+	cs := &card.CardState{Card: c, Ephemeral: card.Ephemeral{BonusAttack: 1}}
 	ge.ResolveChainStep(ge.Logger(), cs)
 	testutils.FireOnHitIfLikely(ge, ge.Logger(), cs)
 	want := 3 + 1

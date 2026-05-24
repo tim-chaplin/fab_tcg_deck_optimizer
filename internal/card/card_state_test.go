@@ -50,8 +50,8 @@ func TestCardState_EffectiveGoAgain(t *testing.T) {
 	}
 	for _, tc := range cases {
 		p := &CardState{
-			Card:           fakeCard{name: tc.name, goAgain: tc.printed},
-			GrantedGoAgain: tc.granted,
+			Card:    fakeCard{name: tc.name, goAgain: tc.printed},
+			Ephemeral: Ephemeral{GrantedGoAgain: tc.granted},
 		}
 		if got := p.EffectiveGoAgain(nil); got != tc.want {
 			t.Errorf("%s: EffectiveGoAgain() = %v, want %v", tc.name, got, tc.want)
@@ -77,7 +77,7 @@ func TestCardState_EffectiveDominate(t *testing.T) {
 		{"both", dominator, true, true},
 	}
 	for _, tc := range cases {
-		p := &CardState{Card: tc.card, GrantedDominate: tc.granted}
+		p := &CardState{Card: tc.card, Ephemeral: Ephemeral{GrantedDominate: tc.granted}}
 		if got := p.EffectiveDominate(); got != tc.want {
 			t.Errorf("%s: EffectiveDominate() = %v, want %v", tc.name, got, tc.want)
 		}
@@ -113,8 +113,8 @@ func TestCardState_EffectiveAttack(t *testing.T) {
 	}
 	for _, tc := range cases {
 		p := &CardState{
-			Card:        fakeCard{name: tc.name, attack: tc.printed},
-			BonusAttack: tc.bonusAttack,
+			Card:    fakeCard{name: tc.name, attack: tc.printed},
+			Ephemeral: Ephemeral{BonusAttack: tc.bonusAttack},
 		}
 		if got := p.EffectiveAttack(); got != tc.want {
 			t.Errorf("%s: EffectiveAttack() = %d, want %d", tc.name, got, tc.want)

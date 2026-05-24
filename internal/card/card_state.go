@@ -5,11 +5,37 @@ package card
 // that chain. Effects that grant keywords to "the next X" scan TurnState.CardsRemaining and
 // flip flags on the matching entry; the card currently resolving receives its own CardState
 // as the `self` parameter to Play.
+//
+// Fields split into two groups: identity (Card / Role / FromArsenal / Mode) that's stable
+// across the card's play, and Ephemeral (anonymously embedded) — the granted keywords,
+// accumulated bonuses, registered handlers, and pitch attribution that build up or get
+// assigned around the card's play. Ephemeral.Reset zeroes the whole group in one statement
+// so a new mutable field can't silently carry over when the slot is reused.
 type CardState struct {
 	Card Card
 	// Role is the card's partition-assigned role for this turn — Pitch / Attack / Defend /
 	// Held / Arsenal. Discard removes a Held-role entry from the hand.
 	Role Role
+	// FromArsenal flags the single CardState whose Card came from the arsenal slot at start
+	// of turn. Cards gate "if this is played from arsenal" riders on self.FromArsenal.
+	FromArsenal bool
+	// Mode is the chosen mode for a Modal ("Choose 1") card. The chain runner's modal-tuple
+	// enumeration writes Mode before each permutation; Play reads it. Sized int8 so it
+	// packs into the bool block's padding.
+	Mode int8
+	// Ephemeral groups every field whose value can change during this card's chain-step
+	// resolution: granted keywords, bonus accumulators, the pitch-attribution slice, and
+	// the on-hit handler queue. Anonymous embedding so callers keep writing pc.GrantedGoAgain
+	// / pc.BonusAttack / etc. directly; struct literals must address the group explicitly
+	// (e.g. CardState{Card: c, Ephemeral: Ephemeral{GrantedGoAgain: true}}).
+	Ephemeral
+}
+
+// Ephemeral is the short-lived state attached to a CardState — granted keywords, bonus
+// accumulators, registered on-hit handlers, and pitch attribution that build up around a
+// card's play and don't survive the slot being reused. Reset zeroes the whole struct in a
+// single statement; every new mutable field added here gets cleared for free.
+type Ephemeral struct {
 	// GrantedGoAgain is set by a prior card's grant ("next X attack" riders) or by the
 	// card's own Play flipping self.GrantedGoAgain = true. Card.EffectiveGoAgain ORs this
 	// with Card.GoAgain().
@@ -25,13 +51,6 @@ type CardState struct {
 	// GrantedInstant marks a card a prior effect lets you play "as though it were an
 	// instant" — it pays no action point this turn, exactly like an innate Instant.
 	GrantedInstant bool
-	// FromArsenal flags the single CardState whose Card came from the arsenal slot at start
-	// of turn. Cards gate "if this is played from arsenal" riders on self.FromArsenal.
-	FromArsenal bool
-	// Mode is the chosen mode for a Modal ("Choose 1") card, set by the chain runner before
-	// Play. Always 0 for non-modal cards. Sized int8 so it packs into the bool block's
-	// padding.
-	Mode int8
 	// BonusAttack is the +{p} this card has accumulated from "next attack +N{p}" riders or
 	// self-riders. EffectiveAttack folds it into hit-likelihood checks — a +N buff can bump
 	// a 4-power attack into the 5+ dominate window. Negative grants (defender-side debuffs)
@@ -49,6 +68,14 @@ type CardState struct {
 	// (function pointer + small data payload) rather than closures so registration is
 	// alloc-free.
 	OnHit []OnHitHandler
+}
+
+// Reset zeroes r, preserving OnHit's backing array so per-Best reuse stays allocation-free.
+// PitchedToPlay's backing is owned by the chain runner's pitch pool; nilling it here drops
+// the alias so the next resolution receives a fresh contrib slice.
+func (r *Ephemeral) Reset() {
+	onHit := r.OnHit[:0]
+	*r = Ephemeral{OnHit: onHit}
 }
 
 // OnHitHandler is one registered on-hit rider on a CardState. The chain runner fires Fire
