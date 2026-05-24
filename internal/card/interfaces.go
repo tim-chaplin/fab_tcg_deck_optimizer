@@ -119,6 +119,15 @@ type GameEngine interface {
 	NonAttackActionPlayed() bool
 	OpponentMarked() bool
 	MarkOpponent()
+	// CrowdCheer / CrowdBoo land a crowd reaction on the active hero: flips the
+	// HasCrowdCheered / HasCrowdBooed flag and fires the CrowdCheer / CrowdBoo trigger.
+	// Callers gate on the source-side rule (e.g. "each Revered hero") themselves.
+	CrowdCheer()
+	CrowdBoo()
+	// HasCrowdCheered / HasCrowdBooed reports whether a crowd reaction has landed on the
+	// active hero this turn.
+	HasCrowdCheered() bool
+	HasCrowdBooed() bool
 	// UntapHero untaps the owning player's hero — the printed "untap your hero" effect.
 	UntapHero()
 	// LastAttackHit reports whether the most recent finalised attack on this combat chain
@@ -139,8 +148,11 @@ type GameEngine interface {
 	// LowerHealthWanter marker (proxy for "less {h} than the opponent" riders).
 	// CurrentHeroClass returns the hero's primary class; Universal cards fold this into
 	// their own Types(g) so class-gated triggers see the right type-line.
+	// HeroHasType reports whether the active hero's type line contains t — used by cards
+	// that gate on hero-only keywords like TypeRevered / TypeReviled.
 	HeroWantsLowerHealth() bool
 	CurrentHeroClass() CardType
+	HeroHasType(t CardType) bool
 
 	// Chain queries
 	HasPlayedType(CardType) bool

@@ -5,7 +5,8 @@
 // Revered hero. **The crowd boos** each Reviled hero. **Go again**" (Red N=4, Yellow N=3, Blue
 // N=2.)
 //
-// Crowd cheers / Crowd boos are hero-state riders the single-turn solver doesn't model.
+// Crowd reactions land only on the active hero in this solver — opposing heroes aren't
+// modelled, so cheers/boos targeting them have no observable effect and are skipped.
 
 package cards
 
@@ -13,14 +14,24 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 )
 
+func primeTheCrowdPlay(ge card.GameEngine, bonus int) {
+	if ge.HeroHasType(card.TypeRevered) {
+		ge.CrowdCheer()
+	}
+	if ge.HeroHasType(card.TypeReviled) {
+		ge.CrowdBoo()
+	}
+	GrantNextCardBonusAttack(ge, bonus, card.IsAttackAction)
+}
+
 func (PrimeTheCrowdRed) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
-	GrantNextCardBonusAttack(ge, 4, card.IsAttackAction)
+	primeTheCrowdPlay(ge, 4)
 }
 
 func (PrimeTheCrowdYellow) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
-	GrantNextCardBonusAttack(ge, 3, card.IsAttackAction)
+	primeTheCrowdPlay(ge, 3)
 }
 
 func (PrimeTheCrowdBlue) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
-	GrantNextCardBonusAttack(ge, 2, card.IsAttackAction)
+	primeTheCrowdPlay(ge, 2)
 }

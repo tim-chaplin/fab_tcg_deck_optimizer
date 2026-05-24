@@ -681,6 +681,23 @@ func (ge *GameEngine) DealArcaneDamage(l card.Logger, source string, n int) {
 	l.AppendPostTriggerf(source, n, "Dealt %d arcane damage", n)
 }
 
+// === Crowd reactions ===
+
+// CrowdCheer flips hasCrowdCheered and fires the CrowdCheer trigger so "if you've been
+// cheered this turn" gates and "whenever the crowd cheers you" handlers both see this
+// turn's cheer. Source-side gating (which heroes are Revered / Reviled) belongs to the
+// caller; this method only records the cheer landing on your hero.
+func (ge *GameEngine) CrowdCheer() {
+	ge.hasCrowdCheered = true
+	ge.FireTriggers(triggertype.CrowdCheer, nil)
+}
+
+// CrowdBoo is the boo-side counterpart to CrowdCheer.
+func (ge *GameEngine) CrowdBoo() {
+	ge.hasCrowdBooed = true
+	ge.FireTriggers(triggertype.CrowdBoo, nil)
+}
+
 // dealtArcaneText is the pre-built rider-line cache indexed by arcane-damage count, keeping
 // DealArcaneDamage alloc-free on the hot path. Extend if a new card prints higher arcane.
 var dealtArcaneText = [...]string{

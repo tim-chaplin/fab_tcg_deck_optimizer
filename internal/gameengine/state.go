@@ -72,6 +72,8 @@ type ephemeral struct {
 	currentStepRerouted   bool
 	cacheable             bool
 	heroTapped            bool
+	hasCrowdCheered       bool
+	hasCrowdBooed         bool
 }
 
 // reset returns e to its start-of-turn baseline: every field zero except the four with
@@ -483,6 +485,14 @@ func (gs *GameState) SetBlockTotal(n int) { gs.blockTotal = n }
 func (gs *GameState) ArcaneDamageDealt() bool     { return gs.arcaneDamageDealt }
 func (gs *GameState) SetArcaneDamageDealt(v bool) { gs.arcaneDamageDealt = v }
 
+// HasCrowdCheered / HasCrowdBooed report whether the crowd has cheered / booed your hero
+// at any point during the current turn. Used by "if you've been cheered this turn" gates;
+// "whenever the crowd cheers you" handlers subscribe to triggertype.CrowdCheer / CrowdBoo
+// instead. Both flip together with the trigger fire via GameState.CrowdCheer / CrowdBoo
+// methods on the engine wrapper.
+func (gs *GameState) HasCrowdCheered() bool { return gs.hasCrowdCheered }
+func (gs *GameState) HasCrowdBooed() bool   { return gs.hasCrowdBooed }
+
 func (gs *GameState) OpponentMarked() bool     { return gs.opponentMarked }
 func (gs *GameState) SetOpponentMarked(v bool) { gs.opponentMarked = v }
 func (gs *GameState) MarkOpponent()            { gs.opponentMarked = true }
@@ -535,6 +545,16 @@ func (gs *GameState) CurrentHeroClass() card.CardType {
 		return 0
 	}
 	return gs.hero.Class()
+}
+
+// HeroHasType reports whether the active hero's type line contains t. Returns false when
+// no hero is set. Used by cards that gate on hero-only type keywords (TypeRevered /
+// TypeReviled, etc.).
+func (gs *GameState) HeroHasType(t card.CardType) bool {
+	if gs.hero == nil {
+		return false
+	}
+	return gs.hero.Types().Has(t)
 }
 
 // HasPlayedType reports whether any card played this turn has the given type. Universal
