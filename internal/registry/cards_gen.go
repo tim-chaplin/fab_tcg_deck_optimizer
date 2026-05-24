@@ -534,6 +534,8 @@ var cardsByID = []Card{
 
 	ids.TitaniumBaubleBlue: cards.TitaniumBaubleBlue{},
 
+	ids.TongueTiedRed: cards.TongueTiedRed{},
+
 	ids.ToughenUpBlue: cards.ToughenUpBlue{},
 
 	ids.TradeInRed:    cards.TradeInRed{},
