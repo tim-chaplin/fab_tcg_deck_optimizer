@@ -12,13 +12,11 @@ import (
 
 func scourTheBattlescapePlay(ge card.GameEngine, l card.Logger, self *card.CardState) {
 	self.GrantGoAgainIfFromArsenal()
-	if len(ge.HeldHand()) == 0 {
+	if !ge.DiscardToBottomOfDeck(self.Card.DisplayName()) {
 		return
 	}
-	cycled := ge.PopHandAt(0)
-	ge.AppendToDeck(cycled)
 	ge.DrawOne()
-	l.AppendPostTriggerf(self.Card.DisplayName(), 0, "Cycled %s to deck bottom and drew", cycled.DisplayName())
+	l.AppendPostTriggerf(self.Card.DisplayName(), 0, "Drew a card")
 }
 
 func (ScourTheBattlescapeRed) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {

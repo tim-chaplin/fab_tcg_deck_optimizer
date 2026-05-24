@@ -19,7 +19,7 @@ import (
 func TestEndOfTurnHand_SortedEvenWithZeroDraws(t *testing.T) {
 	// Trade In Red (ID 486) is the only attack action — it plays, and its Play discards
 	// a Held card (via ge.Discard, which scans for the first Held slot, index 0). Discard
-	// is a swap-with-last PopHandAt, so removing the lowest-ID held card brings the
+	// is a swap-with-last pop, so removing the lowest-ID held card brings the
 	// highest-ID held card to index 0, leaving held = [OasisRespite (319), BrushOff (153)]
 	// — UNSORTED. Intel=2 with 2 held survivors makes toDraw == 0, the empty deck removes
 	// any mid-chain draw confound, and the pre-fix code skipped the sort on that path.

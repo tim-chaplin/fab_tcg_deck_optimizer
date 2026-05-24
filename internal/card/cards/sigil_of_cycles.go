@@ -17,10 +17,9 @@ func (SigilOfCyclesBlue) Play(ge card.GameEngine, l card.Logger, self *card.Card
 // OnLeavesArena runs the "when this leaves the arena" clause: discard a card, then draw a
 // card. An empty hand drops the rider.
 func (c SigilOfCyclesBlue) OnLeavesArena(g card.GameEngine, l card.Logger) {
-	discarded, ok := g.Discard()
-	if !ok {
+	if !g.Discard(c.DisplayName()) {
 		return
 	}
 	g.DrawOne()
-	l.AppendPostTriggerf(c.DisplayName(), 0, "Discarded %s and drew", discarded.DisplayName())
+	l.AppendPostTriggerf(c.DisplayName(), 0, "Drew a card")
 }

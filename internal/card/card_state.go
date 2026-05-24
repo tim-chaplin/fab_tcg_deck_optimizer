@@ -19,6 +19,10 @@ type CardState struct {
 	// FromArsenal flags the single CardState whose Card came from the arsenal slot at start
 	// of turn. Cards gate "if this is played from arsenal" riders on self.FromArsenal.
 	FromArsenal bool
+	// FromDraw flags entries added to the hand by a mid-chain DrawOne. The optimizer
+	// treats drawn cards as a black box: they count toward HandSize but their identity
+	// is hidden from in-chain attribute reads (HandHasMatching / HeldHandSize skip them).
+	FromDraw bool
 	// Mode is the chosen mode for a Modal ("Choose 1") card. The chain runner's modal-tuple
 	// enumeration writes Mode before each permutation; Play reads it. Sized int8 so it
 	// packs into the bool block's padding.

@@ -36,29 +36,26 @@ type GameEngine struct {
 //     ge.GameState.X when the engine internals need the non-flipping variant.
 
 // Hand returns the cards in hand — INCLUDING entries tagged Pitch / Attack roles by the
-// partition. Cards reading "a card in your hand" (Demolition Crew's precondition, Spring
-// Load's no-cards-in-hand rider) must see these scheduled-but-not-yet-committed entries
-// to match FaB rules; the in-hand → pitch-zone transition happens at the moment a card
-// actually pays its cost, not at partition-decision time. Use HeldHand() when you need
-// to gate on "is there a card I can remove from hand"; use PopHandAt(i) to actually
-// remove one (Held-only, structurally safe). Flips IsCacheable to false.
+// partition. The in-hand → pitch-zone transition is rules-modelled at the moment a card
+// actually pays its cost, so "a card in your hand" reads must see scheduled-but-not-yet-
+// committed entries. Flips IsCacheable; for non-mutating size / predicate gates prefer
+// HandSize / HandHasMatching / HeldHandSize.
 func (ge *GameEngine) Hand() []card.Card {
 	ge.cacheable = false
 	return ge.GameState.Hand()
 }
 
-// HeldHand returns the Held-role subset of the hand — the cards a removing effect
-// (alt-cost "put a card from your hand on top of your deck", cycle, etc.) may target.
-// Pitch- and Attack-role entries are excluded: those are scheduled to pitch / play in
-// the chain, and letting an effect divert them would silently invalidate the partition's
-// pitch list without updating downstream recycle / pay accounting. Flips IsCacheable.
+// HeldHand returns the Held subset of the hand — Pitch / Attack entries are excluded
+// (scheduled to commit downstream and not divertible). Drawn entries are included so
+// the slice's length agrees with HeldHandSize. Flips IsCacheable since iterating the
+// slice exposes each entry's attributes.
 func (ge *GameEngine) HeldHand() []card.Card {
 	ge.cacheable = false
 	return heldHandSlice(ge.GameState.HandStates())
 }
 
-// heldHandSlice projects a role-tagged hand down to just the Held-role cards. Returns
-// nil when there are none. Used by HeldHand and the PopHandAt held-index scan.
+// heldHandSlice projects a role-tagged hand down to the Held-role cards (Pitch / Attack
+// entries skipped; drawn entries included). Returns nil when there are none.
 func heldHandSlice(states []card.CardState) []card.Card {
 	n := 0
 	for i := range states {
@@ -95,28 +92,6 @@ func (ge *GameEngine) insertHandSorted(c card.Card) {
 	ge.hand[i] = card.CardState{Card: c, Role: card.Held}
 }
 
-// PopHandAt removes and returns the i-th Held-role card from hand and flips IsCacheable
-// to false. i indexes into the Held subset surfaced by HeldHand() — Pitch and Attack
-// role entries are skipped, since a card committed to pitching or attacking isn't in the
-// hand zone for purposes of removing effects (the partition has scheduled it, and
-// silently diverting it would desync downstream pay / recycle accounting). Panics when
-// i is out of range of the held cards; callers must len(HeldHand())-check first.
-func (ge *GameEngine) PopHandAt(i int) card.Card {
-	ge.cacheable = false
-	held := 0
-	for rawIdx := range ge.hand {
-		if ge.hand[rawIdx].Role != card.Held {
-			continue
-		}
-		if held == i {
-			c := ge.hand[rawIdx].Card
-			ge.hand = append(ge.hand[:rawIdx], ge.hand[rawIdx+1:]...)
-			return c
-		}
-		held++
-	}
-	panic(fmt.Sprintf("PopHandAt: index %d out of range of %d held cards", i, held))
-}
 
 // Graveyard returns the live graveyard slice and flips IsCacheable to false.
 func (ge *GameEngine) Graveyard() []card.Card {
@@ -172,31 +147,67 @@ func (ge *GameEngine) PeekDeck() (card.Card, bool) {
 	return top.(card.Card), true
 }
 
-// PrependToDeck inserts c at the top of the deck. Flips IsCacheable to false.
+// PrependToDeck inserts c at the top of the deck. The caller supplies c, so the write
+// is reproducible from the cache key + chain order; doesn't flip IsCacheable.
 func (ge *GameEngine) PrependToDeck(c card.Card) {
-	ge.cacheable = false
 	ge.deck.PutTop([]deck.Card{c})
 }
 
-// AppendToDeck inserts c at the bottom of the deck. Flips IsCacheable to false.
+// AppendToDeck inserts c at the bottom of the deck. Cache-friendly for the same reason
+// as PrependToDeck.
 func (ge *GameEngine) AppendToDeck(c card.Card) {
-	ge.cacheable = false
 	ge.deck.PutBottom([]deck.Card{c})
 }
 
-// Discard removes a Held-role card from the hand and appends it to the graveyard. Returns
-// the discarded card and true; returns (nil, false) when the hand holds no Held card.
-// Only Held cards are discardable — a card already committed to attacking, pitching, or
-// blocking can't be spent again. Flips IsCacheable.
-func (ge *GameEngine) Discard() (card.Card, bool) {
+// Discard pops the first Held-role hand card to the graveyard and logs the action
+// under source. Returns true on success; false when no Held card exists. Cache-safe:
+// the discarded card's identity never escapes the engine, so the caller can't branch
+// on it and the cache can't diverge across replays with different drawn cards.
+func (ge *GameEngine) Discard(source string) bool {
+	c, ok := ge.popFirstHeldCard()
+	if !ok {
+		return false
+	}
+	ge.graveyard = append(ge.graveyard, c)
+	ge.logger.AppendPostTriggerf(source, 0, "Discarded a card")
+	return true
+}
+
+// DiscardToTopOfDeck pops the first Held-role hand card to the top of the deck and
+// logs under source. Returns true on success. Cache-safe for the same reason as
+// Discard — identity never escapes.
+func (ge *GameEngine) DiscardToTopOfDeck(source string) bool {
+	c, ok := ge.popFirstHeldCard()
+	if !ok {
+		return false
+	}
+	ge.deck.PutTop([]deck.Card{c})
+	ge.logger.AppendPostTriggerf(source, 0, "Cycled a card to top of deck")
+	return true
+}
+
+// DiscardToBottomOfDeck pops the first Held-role hand card to the bottom of the deck
+// and logs under source. Returns true on success. Cache-safe.
+func (ge *GameEngine) DiscardToBottomOfDeck(source string) bool {
+	c, ok := ge.popFirstHeldCard()
+	if !ok {
+		return false
+	}
+	ge.deck.PutBottom([]deck.Card{c})
+	ge.logger.AppendPostTriggerf(source, 0, "Cycled a card to bottom of deck")
+	return true
+}
+
+// popFirstHeldCard removes the first Held-role hand entry and returns its Card. Drawn
+// entries are eligible — they're indistinguishable to the caller of the no-return
+// accessors above, so identity leakage isn't a concern at this layer.
+func (ge *GameEngine) popFirstHeldCard() (card.Card, bool) {
 	for rawIdx := range ge.hand {
 		if ge.hand[rawIdx].Role != card.Held {
 			continue
 		}
-		ge.cacheable = false
 		c := ge.hand[rawIdx].Card
 		ge.hand = append(ge.hand[:rawIdx], ge.hand[rawIdx+1:]...)
-		ge.graveyard = append(ge.graveyard, c)
 		return c, true
 	}
 	return nil, false
@@ -204,9 +215,9 @@ func (ge *GameEngine) Discard() (card.Card, bool) {
 
 // RecycleToDeckBottom appends pc.Card to the bottom of the deck and flags the chain
 // dispatcher to skip the usual non-persistent → graveyard append. Models the FaB clause
-// "put this on the bottom of its owner's deck". Flips IsCacheable.
+// "put this on the bottom of its owner's deck". Doesn't flip IsCacheable — the caller
+// supplies pc, so the write is reproducible from the cache key + chain order.
 func (ge *GameEngine) RecycleToDeckBottom(pc *card.CardState) {
-	ge.cacheable = false
 	ge.deck.PutBottom([]deck.Card{pc.Card})
 	ge.currentStepRerouted = true
 }
@@ -266,11 +277,10 @@ func (ge *GameEngine) recycleFromGraveyard(pred func(card.Card) bool, toTop bool
 	return nil, false
 }
 
-// AddToGraveyard appends c to graveyard so later-resolving cards see it. Card-facing entry
-// point — flips IsCacheable to false. Framework-internal callers use the promoted
-// AppendGraveyard, which appends without the cacheable flip.
+// AddToGraveyard appends c to graveyard so later-resolving cards see it. Doesn't flip
+// IsCacheable — the caller supplies c (a card whose identity is already known to the
+// caller), so the write is reproducible from the cache key + chain order.
 func (ge *GameEngine) AddToGraveyard(c card.Card) {
-	ge.cacheable = false
 	ge.graveyard = append(ge.graveyard, c)
 }
 
@@ -290,7 +300,7 @@ func (ge *GameEngine) DrawOne() bool {
 	i := sort.Search(len(ge.hand), func(j int) bool { return ge.hand[j].Card.ID() > c.ID() })
 	ge.hand = append(ge.hand, card.CardState{})
 	copy(ge.hand[i+1:], ge.hand[i:])
-	ge.hand[i] = card.CardState{Card: c, Role: card.Held}
+	ge.hand[i] = card.CardState{Card: c, Role: card.Held, FromDraw: true}
 	return true
 }
 

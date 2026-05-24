@@ -377,6 +377,40 @@ func (gs *GameState) Hand() []card.Card {
 // HandStates returns the live role-tagged hand.
 func (gs *GameState) HandStates() []card.CardState { return gs.hand }
 
+// HandSize reports the total number of cards in the hand zone, including entries added
+// by mid-chain DrawOne. The value is determined by partition + chain progress alone, so
+// this accessor doesn't flip IsCacheable.
+func (gs *GameState) HandSize() int { return len(gs.hand) }
+
+// HandHasMatching reports whether any non-drawn hand entry satisfies pred. FromDraw
+// entries are skipped: their identity is unknown to in-chain attribute reads. Doesn't
+// flip IsCacheable — the starting-hand multiset is already part of the cache key.
+func (gs *GameState) HandHasMatching(pred func(card.Card) bool) bool {
+	for i := range gs.hand {
+		if gs.hand[i].FromDraw {
+			continue
+		}
+		if pred(gs.hand[i].Card) {
+			return true
+		}
+	}
+	return false
+}
+
+// HeldHandSize reports the total Held-role hand-entry count, including drawn entries.
+// Counting alone doesn't reveal drawn-card attributes, so this accessor stays
+// cacheable; an actual pop that lands on a drawn entry flips IsCacheable in PopHandAt
+// because the popped card's identity then leaks out.
+func (gs *GameState) HeldHandSize() int {
+	n := 0
+	for i := range gs.hand {
+		if gs.hand[i].Role == card.Held {
+			n++
+		}
+	}
+	return n
+}
+
 // SetHand installs h as the hand with every card defaulting to the Held role. Role-aware
 // callers (the defense pass, the chain runner) use SetHandStates.
 func (gs *GameState) SetHand(h []card.Card) {

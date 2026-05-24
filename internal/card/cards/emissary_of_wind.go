@@ -11,11 +11,9 @@ import (
 )
 
 func (EmissaryOfWindRed) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
-	if len(ge.HeldHand()) == 0 {
+	if !ge.DiscardToBottomOfDeck(self.Card.DisplayName()) {
 		return
 	}
-	cycled := ge.PopHandAt(0)
-	ge.AppendToDeck(cycled)
 	self.GrantedGoAgain = true
-	l.AppendPostTriggerf(self.Card.DisplayName(), 0, "Cycled %s to deck bottom, +go again", cycled.DisplayName())
+	l.AppendPostTriggerf(self.Card.DisplayName(), 0, "+go again")
 }

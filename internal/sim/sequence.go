@@ -512,8 +512,8 @@ func (ctx *sequenceContext) runDefense(defenders, pitched, held []card.Card, dec
 	cacheable := true
 
 	// Install the role-tagged defense hand before the DR loop so HeldHand() /
-	// PopHandAt() (variable-cost DR Plays use these to remove a Held card) see only
-	// the partition's Held subset, not masterState's full hand defaulted to Held.
+	// DiscardToTopOfDeck (variable-cost DR Plays use these to remove a Held card)
+	// see only the partition's Held subset, not masterState's full hand defaulted to Held.
 	state.SetDefenders(defenders)
 	defenseHand := ctx.bufs.runDefenseHandBuf[:0]
 	for _, c := range held {
@@ -988,7 +988,7 @@ func (ctx *sequenceContext) playSequenceWithMeta(n int) (damage int, totalCounte
 	for i, pc := range played {
 		m := meta[i]
 		// RemoveFromHand returns false when an earlier chain step's Play moved this card
-		// out of hand (e.g. a hand-on-top alt cost via PopHandAt + PrependToDeck). The
+		// out of hand (e.g. a hand-on-top alt cost via DiscardToTopOfDeck). The
 		// partition planned this card as a play / pitch using the pre-chain hand; if the
 		// card is no longer there the partition is no longer realisable — reject it so
 		// the optimiser doesn't credit a phantom play.

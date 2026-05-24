@@ -15,19 +15,14 @@ import (
 const riseAbovePrintedCost = 2
 
 func riseAboveCost(ge card.GameEngine) int {
-	if ge != nil && len(ge.HeldHand()) > 0 {
+	if ge != nil && ge.HeldHandSize() > 0 {
 		return 0
 	}
 	return riseAbovePrintedCost
 }
 
 func riseAbovePlay(ge card.GameEngine, l card.Logger, self *card.CardState) {
-	if len(ge.HeldHand()) == 0 {
-		return
-	}
-	returned := ge.PopHandAt(0)
-	ge.PrependToDeck(returned)
-	l.AppendPostTriggerf(self.Card.DisplayName(), 0, "Returned %s to top of deck (alt cost)", returned.DisplayName())
+	ge.DiscardToTopOfDeck(self.Card.DisplayName())
 }
 
 func (RiseAboveRed) Cost(ge card.GameEngine) int { return riseAboveCost(ge) }

@@ -11,11 +11,9 @@ import (
 )
 
 func (EmissaryOfTidesRed) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
-	if len(ge.HeldHand()) == 0 {
+	if !ge.DiscardToBottomOfDeck(self.Card.DisplayName()) {
 		return
 	}
-	cycled := ge.PopHandAt(0)
-	ge.AppendToDeck(cycled)
 	self.BonusAttack += 2
-	l.AppendPostTriggerf(self.Card.DisplayName(), 0, "Cycled %s to deck bottom, +2{p}", cycled.DisplayName())
+	l.AppendPostTriggerf(self.Card.DisplayName(), 0, "+2{p}")
 }

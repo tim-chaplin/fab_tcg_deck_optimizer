@@ -13,18 +13,19 @@ import (
 // "From your hand" targets Held-role cards only — pitch- and attack-role entries that the
 // partition has scheduled remain in place.
 func siftPlay(ge card.GameEngine, l card.Logger, self *card.CardState) {
-	n := len(ge.HeldHand())
+	name := self.Card.DisplayName()
+	n := ge.HeldHandSize()
 	if n > 4 {
 		n = 4
 	}
 	for i := 0; i < n; i++ {
-		ge.AppendToDeck(ge.PopHandAt(0))
+		ge.DiscardToBottomOfDeck(name)
 	}
 	for i := 0; i < n; i++ {
 		ge.DrawOne()
 	}
 	if n > 0 {
-		l.AppendPostTriggerf(self.Card.DisplayName(), 0, "Cycled %d cards to deck bottom and drew", n)
+		l.AppendPostTriggerf(name, 0, "Drew %d cards", n)
 	}
 }
 
