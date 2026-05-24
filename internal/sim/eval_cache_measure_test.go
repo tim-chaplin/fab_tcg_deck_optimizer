@@ -96,40 +96,57 @@ func max1(n int) int {
 	return n
 }
 
-// Tests that the parallel-shuffle and sequential paths agree on per-turn-mean within a
-// small tolerance — parallel derives per-worker seeds, so the streams differ but converge.
+// Tests that NewEvaluatorParallel and NewEvaluator return identical Hands / TotalValue /
+// Runs when fed RNG streams seeded the same way.
 func TestEvalCache_ParallelEquivalentToSequential(t *testing.T) {
 	const (
-		deckSize  = 40
-		maxCopies = 2
-		incoming  = 7
-		shuffles  = 1000
-		// drift bound: per-turn-mean across 1k shuffles is empirically ±0.1 between
-		// parallel and sequential RNG streams. 0.5 leaves plenty of headroom while
-		// catching a real correctness regression (which would shift by ≥1 unit).
-		driftTolerance = 0.5
+		deckSize   = 40
+		maxCopies  = 2
+		incoming   = 7
+		masterSeed = int64(99)
+		numWorkers = 4
 	)
 	setupRNG := rand.New(rand.NewSource(123))
 	baseline := deck.Random(heroes.Viserai, deckSize, maxCopies, setupRNG, registry.Registry{})
 
-	seq := baseline.Copy()
-	seqStats := NewEvaluator().Evaluate(seq, shuffles, Matchup{IncomingDamage: incoming}, rand.New(rand.NewSource(99)))
-
-	par := baseline.Copy()
-	parStats := NewEvaluatorParallel(4).Evaluate(par, shuffles, Matchup{IncomingDamage: incoming}, rand.New(rand.NewSource(99)))
-
-	// Hands counts can differ slightly because parallel and sequential consume different
-	// per-shuffle RNG streams: a shuffle that runs out of deck cards on hand 7 in one
-	// stream might deal hand 8 in the other. Empirically <1% drift on 1k-shuffle runs.
-	handsRatio := float64(seqStats.Hands-parStats.Hands) / float64(seqStats.Hands)
-	if handsRatio < -0.02 || handsRatio > 0.02 {
-		t.Errorf("Hands count drift %.4f exceeds 2%% (seq=%d par=%d)", handsRatio, seqStats.Hands, parStats.Hands)
+	// Parallel pulls a per-worker seed from rng.Int63() before each worker's goroutine;
+	// pre-extract the same int64s so the per-worker RNGs are byte-identical and the
+	// sequential aggregate matches one chunk of parallel exactly. Scoped to one chunk
+	// (numShuffles == numWorkers) so the per-chunk seed extraction doesn't repeat;
+	// concurrent-cache safety lives in the worker_sweep + -race path.
+	mirrorMaster := rand.New(rand.NewSource(masterSeed))
+	workerSeeds := make([]int64, numWorkers)
+	for i := range workerSeeds {
+		workerSeeds[i] = mirrorMaster.Int63()
 	}
-	drift := seqStats.Mean() - parStats.Mean()
-	if drift < -driftTolerance || drift > driftTolerance {
-		t.Errorf("mean drift %.6f exceeds tolerance %.6f (seq=%.6f par=%.6f)",
-			drift, driftTolerance, seqStats.Mean(), parStats.Mean())
+
+	var seqStats deck.Stats
+	for _, seed := range workerSeeds {
+		workerRNG := rand.New(rand.NewSource(seed))
+		workerStats := NewEvaluator().Evaluate(baseline.Copy(), 1, Matchup{IncomingDamage: incoming}, workerRNG)
+		mergeStats(&seqStats, workerStats)
 	}
+
+	parRNG := rand.New(rand.NewSource(masterSeed))
+	parStats := NewEvaluatorParallel(numWorkers).Evaluate(baseline.Copy(), numWorkers, Matchup{IncomingDamage: incoming}, parRNG)
+
+	if seqStats.Hands != parStats.Hands {
+		t.Errorf("Hands: seq=%d par=%d", seqStats.Hands, parStats.Hands)
+	}
+	if seqStats.TotalValue != parStats.TotalValue {
+		t.Errorf("TotalValue: seq=%.0f par=%.0f delta=%.0f",
+			seqStats.TotalValue, parStats.TotalValue, parStats.TotalValue-seqStats.TotalValue)
+	}
+	if seqStats.Runs != parStats.Runs {
+		t.Errorf("Runs: seq=%d par=%d", seqStats.Runs, parStats.Runs)
+	}
+}
+
+// mergeStats sums Hands, Runs, and TotalValue from src into dst.
+func mergeStats(dst *deck.Stats, src deck.Stats) {
+	dst.Hands += src.Hands
+	dst.Runs += src.Runs
+	dst.TotalValue += src.TotalValue
 }
 
 // Tests that ResetCache drops cache entries while preserving the hit/miss counters.
@@ -190,22 +207,14 @@ func TestEvalCache_PerHandEquivalence(t *testing.T) {
 	}
 }
 
-// Tests that the cache-replay path produces summary numbers equal (within driftTolerance)
-// to a from-scratch search at the deck-eval-loop level.
-//
-// Single fixed setup seed for the always-on suite. The manual-only fuzz variant
-// TestEvalCache_EquivalenceWithUncached_FuzzManual sweeps random setup seeds for ~10 min
-// to surface cache-divergence bugs that need a specific deck shape to trigger.
+// Tests that cache-replay Evaluate and from-scratch Evaluate agree on Hands and
+// TotalValue for matching RNG seeds.
 func TestEvalCache_EquivalenceWithUncached(t *testing.T) {
 	const (
 		deckSize  = 40
 		maxCopies = 2
 		incoming  = 7
 		shuffles  = 100
-		// driftTolerance bounds the per-turn-mean absolute difference. Empirically <0.001
-		// for the workloads we care about; 0.05 leaves substantial headroom while still
-		// catching a real correctness regression (which would be orders of magnitude larger).
-		driftTolerance = 0.05
 	)
 	setupRNG := rand.New(rand.NewSource(123))
 	baseline := deck.Random(heroes.Viserai, deckSize, maxCopies, setupRNG, registry.Registry{})
@@ -219,10 +228,8 @@ func TestEvalCache_EquivalenceWithUncached(t *testing.T) {
 	if cachedStats.Hands != uncachedStats.Hands {
 		t.Errorf("Hands: cached=%d uncached=%d", cachedStats.Hands, uncachedStats.Hands)
 	}
-	drift := cachedStats.Mean() - uncachedStats.Mean()
-	if drift < -driftTolerance || drift > driftTolerance {
-		t.Errorf("mean drift %.6f exceeds tolerance %.6f (cached=%.6f uncached=%.6f)",
-			drift, driftTolerance, cachedStats.Mean(), uncachedStats.Mean())
+	if cachedStats.TotalValue != uncachedStats.TotalValue {
+		t.Errorf("TotalValue: cached=%.0f uncached=%.0f delta=%.0f", cachedStats.TotalValue, uncachedStats.TotalValue, cachedStats.TotalValue-uncachedStats.TotalValue)
 	}
 }
 
