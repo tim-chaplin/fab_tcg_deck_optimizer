@@ -55,7 +55,7 @@ func TestRunMutationRound_RunsWithoutPanic(t *testing.T) {
 	rng := rand.New(rand.NewSource(42))
 	baseline := deck.Random(heroes.Viserai, 40, 2, rng, registry.Registry{})
 	baseAvg := NewEvaluator().Evaluate(baseline, 10, Matchup{}, rng).Mean()
-	mutations := deck.AllMutations(baseline, 2, registry.Registry{})
+	mutations := deck.AllMutations(baseline, 2, true, registry.Registry{})
 	// Cap mutations so the test stays under a second; full list is thousands of entries.
 	if len(mutations) > 40 {
 		mutations = mutations[:40]
@@ -96,7 +96,7 @@ func TestRunMutationRound_AbortsOnContextCancel(t *testing.T) {
 	rng := rand.New(rand.NewSource(42))
 	baseline := deck.Random(heroes.Viserai, 40, 2, rng, registry.Registry{})
 	baseAvg := NewEvaluator().Evaluate(baseline, 10, Matchup{}, rng).Mean()
-	mutations := deck.AllMutations(baseline, 2, registry.Registry{})
+	mutations := deck.AllMutations(baseline, 2, true, registry.Registry{})
 
 	ctx, cancel := context.WithCancel(context.Background())
 	cancel() // pre-cancel so no mutation ever completes its shallow eval
@@ -135,7 +135,7 @@ func TestRunMutationRound_AbortsOnContextCancel(t *testing.T) {
 func TestRunMutationRound_TerminatesWithNoImprovement(t *testing.T) {
 	rng := rand.New(rand.NewSource(42))
 	baseline := deck.Random(heroes.Viserai, 40, 2, rng, registry.Registry{})
-	mutations := deck.AllMutations(baseline, 2, registry.Registry{})
+	mutations := deck.AllMutations(baseline, 2, true, registry.Registry{})
 	// Cap the mutation list so the test stays well under the hang-regression threshold even on
 	// slower CI runners. Full mutation list is thousands of entries.
 	if len(mutations) > 40 {

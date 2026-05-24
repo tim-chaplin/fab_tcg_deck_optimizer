@@ -113,7 +113,7 @@ func TestAllMutations_CountsAndShape(t *testing.T) {
 	d := New(fakeHero{}, []Weapon{reg.weapons[0], reg.weapons[1]},
 		[]Card{reg.cards[0], reg.cards[0], reg.cards[1], reg.cards[1]})
 
-	muts := AllMutations(d, 2, reg)
+	muts := AllMutations(d, 2, true, reg)
 
 	loadouts := weaponLoadouts(reg.LegalWeapons())
 	wantWeaponMuts := len(loadouts) - 1
@@ -147,8 +147,8 @@ func TestAllMutations_OddCountsAllowed(t *testing.T) {
 	// At maxCopies=3, each of the 2 in-deck cards (c1, c2) is below the cap, so
 	// "remove c1, add c2" (and the mirror) become legal. That's 2 more card mutations than
 	// the maxCopies=2 case.
-	mutsLow := AllMutations(d, 2, reg)
-	mutsHigh := AllMutations(d, 3, reg)
+	mutsLow := AllMutations(d, 2, true, reg)
+	mutsHigh := AllMutations(d, 3, true, reg)
 	if len(mutsHigh)-len(mutsLow) != 2 {
 		t.Errorf("maxCopies=3 should produce exactly 2 more mutations than maxCopies=2; got diff=%d",
 			len(mutsHigh)-len(mutsLow))
@@ -190,7 +190,7 @@ func TestAllMutations_PreservesSideboard(t *testing.T) {
 		[]Card{reg.cards[0], reg.cards[0], reg.cards[1], reg.cards[1]})
 	d.Sideboard = []string{"sb-x", "sb-y", "sb-y"}
 
-	muts := AllMutations(d, 2, reg)
+	muts := AllMutations(d, 2, true, reg)
 	if len(muts) == 0 {
 		t.Fatal("expected at least one mutation")
 	}
@@ -218,8 +218,8 @@ func TestAllMutations_Deterministic(t *testing.T) {
 	d := New(fakeHero{}, []Weapon{reg.weapons[0], reg.weapons[1]},
 		[]Card{reg.cards[0], reg.cards[0], reg.cards[1], reg.cards[1]})
 
-	first := AllMutations(d, 2, reg)
-	second := AllMutations(d, 2, reg)
+	first := AllMutations(d, 2, true, reg)
+	second := AllMutations(d, 2, true, reg)
 
 	if len(first) != len(second) {
 		t.Fatalf("mutation counts differ between calls: %d vs %d", len(first), len(second))
@@ -249,7 +249,7 @@ func TestAllMutations_NoDuplicateOfSource(t *testing.T) {
 	d := New(fakeHero{}, []Weapon{reg.weapons[0], reg.weapons[1]},
 		[]Card{reg.cards[0], reg.cards[0], reg.cards[0], reg.cards[0]})
 	srcKey := d.Fingerprint()
-	for i, m := range AllMutations(d, 2, reg) {
+	for i, m := range AllMutations(d, 2, true, reg) {
 		if m.Deck.Fingerprint() == srcKey {
 			t.Errorf("mutation %d equals the source deck", i)
 		}

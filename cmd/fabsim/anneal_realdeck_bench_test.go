@@ -46,7 +46,7 @@ func BenchmarkAnnealRoundOnViseraiV4(b *testing.B) {
 		b.Fatalf("unmarshal deck: %v", err)
 	}
 	baseline := loaded.Copy()
-	all := deck.AllMutations(baseline, maxCopies, registry.Registry{})
+	all := deck.AllMutations(baseline, maxCopies, true, registry.Registry{})
 	if len(all) < sampleSize {
 		b.Fatalf("mutation pool size %d < sample size %d", len(all), sampleSize)
 	}
