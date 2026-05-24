@@ -318,6 +318,10 @@ var cardsByID = []Card{
 	ids.PerformanceBonusYellow: cards.PerformanceBonusYellow{},
 	ids.PerformanceBonusBlue:   cards.PerformanceBonusBlue{},
 
+	ids.PickACardAnyCardRed:    cards.PickACardAnyCardRed{},
+	ids.PickACardAnyCardYellow: cards.PickACardAnyCardYellow{},
+	ids.PickACardAnyCardBlue:   cards.PickACardAnyCardBlue{},
+
 	ids.PlunderRunRed:    cards.PlunderRunRed{},
 	ids.PlunderRunYellow: cards.PlunderRunYellow{},
 	ids.PlunderRunBlue:   cards.PlunderRunBlue{},

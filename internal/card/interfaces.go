@@ -90,6 +90,7 @@ type GameEngine interface {
 	CreateRunechants(int)
 	CreatePonders(int)
 	CreateGold(int)
+	CreateSilver(int)
 	CreateCopper(int)
 	RunechantCount() int
 	GoldCount() int
