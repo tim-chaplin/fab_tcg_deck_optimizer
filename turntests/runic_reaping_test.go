@@ -15,7 +15,7 @@ func TestRunicReaping_NoNextAttackReturnsZero(t *testing.T) {
 	ge := gameengine.New()
 	(cards.RunicReapingRed{}).Play(ge, ge.Logger(), &card.CardState{
 		Card:    cards.RunicReapingRed{},
-		PerPerm: card.PerPerm{PitchedToPlay: []card.Card{testutils.FakeRedAttack().WithTypes(card.TypeRuneblade)}},
+		Ephemeral: card.Ephemeral{PitchedToPlay: []card.Card{testutils.FakeRedAttack().WithTypes(card.TypeRuneblade)}},
 	})
 	if got := ge.Value(); got != 0 {
 		t.Fatalf("Play() = %d, want 0", got)
@@ -48,7 +48,7 @@ func TestRunicReaping_RegistersTriggerAndGrantsPitchedAttackBonus(t *testing.T) 
 	ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCardsRemaining([]*card.CardState{target}).Build()}
 	(cards.RunicReapingRed{}).Play(ge, ge.Logger(), &card.CardState{
 		Card:    cards.RunicReapingRed{},
-		PerPerm: card.PerPerm{PitchedToPlay: []card.Card{testutils.FakeRedAttack().WithTypes(card.TypeRuneblade)}},
+		Ephemeral: card.Ephemeral{PitchedToPlay: []card.Card{testutils.FakeRedAttack().WithTypes(card.TypeRuneblade)}},
 	})
 	if got := ge.Value(); got != 0 {
 		t.Fatalf("Play() = %d, want 0 (Runechant rider deferred to target'ge OnHit)", got)
@@ -68,7 +68,7 @@ func TestRunicReaping_NoPitchedAttackSkipsBonusButRegistersTrigger(t *testing.T)
 	ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCardsRemaining([]*card.CardState{target}).Build()}
 	(cards.RunicReapingRed{}).Play(ge, ge.Logger(), &card.CardState{
 		Card:    cards.RunicReapingRed{},
-		PerPerm: card.PerPerm{PitchedToPlay: []card.Card{testutils.FakeRedAction()}},
+		Ephemeral: card.Ephemeral{PitchedToPlay: []card.Card{testutils.FakeRedAction()}},
 	})
 	if got := ge.Value(); got != 0 {
 		t.Fatalf("Play() = %d, want 0", got)

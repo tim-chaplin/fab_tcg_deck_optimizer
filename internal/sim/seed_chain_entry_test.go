@@ -29,8 +29,9 @@ func (fakeCardForSeed) Play(card.GameEngine, card.Logger, *card.CardState) {}
 //
 //   - Card / FromArsenal / Mode: chain-binding identity. Mode is reseeded per modal tuple
 //     by the chain runner's enumeration loop.
-//   - PerPerm: the embedded scratch struct. Its Reset method owns the per-field zeroing
-//     contract and is exercised by TestPerPermReset_ZeroesEveryField in package card.
+//   - Ephemeral: the embedded short-lived state. Its Reset method owns the per-field
+//     zeroing contract and is exercised by TestEphemeralReset_ZeroesEveryField in package
+//     card.
 //   - Role: hand-state field, never touched by chain pcBuf entries; its zero default is
 //     left in place by seedChainEntry.
 var seedChainEntryAllowlist = map[string]bool{
@@ -38,12 +39,12 @@ var seedChainEntryAllowlist = map[string]bool{
 	"FromArsenal": true,
 	"Mode":        true,
 	"Role":        true,
-	"PerPerm":     true,
+	"Ephemeral":   true,
 }
 
 // TestSeedChainEntry_TopLevelFieldsAllAccountedFor guards against a new top-level
 // CardState field slipping in without being either an allowlisted binding or covered by
-// PerPerm.Reset. New per-permutation fields belong inside PerPerm so PerPerm.Reset zeroes
+// Ephemeral.Reset. New mutable fields belong inside Ephemeral so Ephemeral.Reset zeroes
 // them automatically; new binding fields belong in the allowlist with a comment.
 func TestSeedChainEntry_TopLevelFieldsAllAccountedFor(t *testing.T) {
 	v := reflect.ValueOf(card.CardState{})
@@ -51,7 +52,7 @@ func TestSeedChainEntry_TopLevelFieldsAllAccountedFor(t *testing.T) {
 	for i := 0; i < tp.NumField(); i++ {
 		f := tp.Field(i)
 		if !seedChainEntryAllowlist[f.Name] {
-			t.Errorf("CardState field %q is neither in seedChainEntryAllowlist nor covered by the PerPerm embedded reset — decide which group it belongs to and update accordingly", f.Name)
+			t.Errorf("CardState field %q is neither in seedChainEntryAllowlist nor covered by the Ephemeral embedded reset — decide which group it belongs to and update accordingly", f.Name)
 		}
 	}
 }
