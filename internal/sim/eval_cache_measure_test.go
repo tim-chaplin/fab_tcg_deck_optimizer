@@ -226,26 +226,22 @@ func TestEvalCache_EquivalenceWithUncached(t *testing.T) {
 	}
 }
 
-// TestEvalCache_EquivalenceWithUncached_FuzzManual sweeps random setup seeds, running
-// cached vs uncached Evaluate side-by-side; fails on the first seed whose Hands or
-// TotalValue diverge. Runs until the deadline (10 minutes) or the first divergence,
-// whichever comes first.
-//
-// Manual-only: skipped under `go test ./...`. Run explicitly with
-// `go test -run TestEvalCache_EquivalenceWithUncached_FuzzManual -timeout 11m`.
-// The single-seed always-on companion above pins a regression once one is found here;
-// this sweep exists to KEEP finding new ones as the engine gains cards / mutation paths.
-func TestEvalCache_EquivalenceWithUncached_FuzzManual(t *testing.T) {
-	if os.Getenv("RUN_FUZZ") == "" {
-		t.Skip("manual-only; rerun with RUN_FUZZ=1 to sweep random setup seeds for 10 minutes")
-	}
+// Sweeps random setup seeds within a time budget, failing the first seed whose cached
+// vs uncached Evaluate diverge on Hands or TotalValue. Set EVAL_FUZZ_SECONDS=N to extend.
+func TestEvalCache_EquivalenceWithUncached_FuzzAutomatic(t *testing.T) {
 	const (
-		deckSize  = 40
-		maxCopies = 2
-		incoming  = 7
-		shuffles  = 100
-		runFor    = 10 * time.Minute
+		deckSize      = 40
+		maxCopies     = 2
+		incoming      = 7
+		shuffles      = 20
+		defaultRunFor = 10 * time.Second
 	)
+	runFor := defaultRunFor
+	if s := os.Getenv("EVAL_FUZZ_SECONDS"); s != "" {
+		if n, err := time.ParseDuration(s + "s"); err == nil {
+			runFor = n
+		}
+	}
 	deadline := time.Now().Add(runFor)
 	seedGen := rand.New(rand.NewSource(time.Now().UnixNano()))
 	tested := 0
