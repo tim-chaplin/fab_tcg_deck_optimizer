@@ -511,6 +511,23 @@ func (ctx *sequenceContext) runDefense(defenders, pitched, held []card.Card, dec
 	total := 0
 	cacheable := true
 
+	// Install the role-tagged defense hand before the DR loop so HeldHand() /
+	// PopHandAt() (variable-cost DR Plays use these to remove a Held card) see only
+	// the partition's Held subset, not masterState's full hand defaulted to Held.
+	state.SetDefenders(defenders)
+	defenseHand := ctx.bufs.runDefenseHandBuf[:0]
+	for _, c := range held {
+		defenseHand = append(defenseHand, card.CardState{Card: c, Role: card.Held})
+	}
+	for _, c := range ctx.attackers {
+		defenseHand = append(defenseHand, card.CardState{Card: c, Role: card.Attack})
+	}
+	for _, c := range pitched {
+		defenseHand = append(defenseHand, card.CardState{Card: c, Role: card.Pitch})
+	}
+	ctx.bufs.runDefenseHandBuf = defenseHand
+	state.SetHandStates(defenseHand)
+
 	// Per-DR view: graveyard = defenders so DRs that scan graveyard see the defender
 	// set. runDefenseDRGravBuf is recycled across runDefense calls.
 	drGraveyard := append(ctx.bufs.runDefenseDRGravBuf[:0], defenders...)
@@ -534,22 +551,15 @@ func (ctx *sequenceContext) runDefense(defenders, pitched, held []card.Card, dec
 	}
 
 	// Plain blocks: walk surviving defenders, picking the best mode within blockBudget.
-	// Install the genuine role-tagged defense hand (held + attackers + pitched) so a
-	// defender's Hand() reads true and Discard consumes only a Held card.
-	state.SetDefenders(defenders)
-	origHeld := held
-	defenseHand := ctx.bufs.runDefenseHandBuf[:0]
-	for _, c := range origHeld {
-		defenseHand = append(defenseHand, card.CardState{Card: c, Role: card.Held})
+	// origHeld is the Held-role slice of the post-DR HandStates; any card a DR Play
+	// removed from hand drops out automatically.
+	origHeld := ctx.bufs.runDefensePostDRHeldBuf[:0]
+	for _, hs := range state.HandStates() {
+		if hs.Role == card.Held {
+			origHeld = append(origHeld, hs.Card)
+		}
 	}
-	for _, c := range ctx.attackers {
-		defenseHand = append(defenseHand, card.CardState{Card: c, Role: card.Attack})
-	}
-	for _, c := range pitched {
-		defenseHand = append(defenseHand, card.CardState{Card: c, Role: card.Pitch})
-	}
-	ctx.bufs.runDefenseHandBuf = defenseHand
-	state.SetHandStates(defenseHand)
+	ctx.bufs.runDefensePostDRHeldBuf = origHeld
 	for i, def := range defenders {
 		if attackerMetaPtrFor(def).actsAsDR {
 			continue
