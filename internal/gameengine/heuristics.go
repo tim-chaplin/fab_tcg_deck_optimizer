@@ -13,6 +13,23 @@ const DiscardValue = 3
 // because Gold pays out on activation (see Gold token ability), not at creation.
 const GoldTokenValue = 0
 
+// FrailtyValue / InertiaValue / BloodrotPoxValue are the damage-equivalents credited when
+// the matching status token is created under the opponent's control. We don't track
+// opposing status-token state — these are flat heuristic stand-ins for the future-turn
+// tempo each token costs the opponent.
+//
+// Inertia: 3, somewhat optimistic — the opponent has to skip arsenal at end of turn, which
+// generally costs them a card slot, but doesn't always cash out.
+// Bloodrot Pox: 2, assumes the opponent chooses to take the damage rather than its other
+// in-game options.
+// Frailty: 2, middle-of-the-road — worth more against opponents that attack 3+ times,
+// less against opponents that attack 0-1 times.
+const (
+	FrailtyValue     = 2
+	InertiaValue     = 3
+	BloodrotPoxValue = 2
+)
+
 // LikelyToHit reports whether pc's attack is likely to land past the opponent's blocks.
 // Folds pc.EffectiveAttack() and pc.EffectiveDominate() into the threshold check.
 func LikelyToHit(pc *card.CardState) bool {

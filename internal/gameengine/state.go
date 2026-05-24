@@ -478,6 +478,14 @@ func (gs *GameState) GoldCount() int      { return itemCountByName(gs.items, tok
 func (gs *GameState) SilverCount() int    { return itemCountByName(gs.items, tokenNameSilver) }
 func (gs *GameState) CopperCount() int    { return itemCountByName(gs.items, tokenNameCopper) }
 
+// FrailtyCount / InertiaCount / BloodrotPoxCount return zero — no card currently grants
+// self-side status tokens, so we don't track state for them. The readers exist so
+// "if you control a Frailty token" gates have a stable surface to call. When a future card
+// mints these for us, swap these stubs for a real per-token counter on GameState.
+func (gs *GameState) FrailtyCount() int     { return 0 }
+func (gs *GameState) InertiaCount() int     { return 0 }
+func (gs *GameState) BloodrotPoxCount() int { return 0 }
+
 func (gs *GameState) Pitched() []card.Card     { return gs.pitched }
 func (gs *GameState) SetPitched(p []card.Card) { gs.pitched = p }
 

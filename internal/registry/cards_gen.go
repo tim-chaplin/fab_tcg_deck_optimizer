@@ -222,6 +222,10 @@ var cardsByID = []Card{
 	ids.HumbleYellow: cards.HumbleYellow{},
 	ids.HumbleBlue:   cards.HumbleBlue{},
 
+	ids.InfectiousHostRed:    cards.InfectiousHostRed{},
+	ids.InfectiousHostYellow: cards.InfectiousHostYellow{},
+	ids.InfectiousHostBlue:   cards.InfectiousHostBlue{},
+
 	ids.JackBeNimbleRed: cards.JackBeNimbleRed{},
 
 	ids.JackBeQuickRed: cards.JackBeQuickRed{},

@@ -92,7 +92,6 @@ func (ge *GameEngine) insertHandSorted(c card.Card) {
 	ge.hand[i] = card.CardState{Card: c, Role: card.Held}
 }
 
-
 // Graveyard returns the live graveyard slice and flips IsCacheable to false.
 func (ge *GameEngine) Graveyard() []card.Card {
 	ge.cacheable = false
@@ -794,6 +793,21 @@ func (ge *GameEngine) PonderCount() int    { return auraCountByName(ge.auras, to
 func (ge *GameEngine) GoldCount() int      { return itemCountByName(ge.items, tokenNameGold) }
 func (ge *GameEngine) SilverCount() int    { return itemCountByName(ge.items, tokenNameSilver) }
 func (ge *GameEngine) CopperCount() int    { return itemCountByName(ge.items, tokenNameCopper) }
+
+// FrailtyCount / InertiaCount / BloodrotPoxCount return the self-side status-token count.
+// Currently no card grants these so they return zero — the wrappers exist so the
+// card-facing GameEngine interface has the same shape it will once a self-side granter lands.
+func (ge *GameEngine) FrailtyCount() int     { return ge.GameState.FrailtyCount() }
+func (ge *GameEngine) InertiaCount() int     { return ge.GameState.InertiaCount() }
+func (ge *GameEngine) BloodrotPoxCount() int { return ge.GameState.BloodrotPoxCount() }
+
+// CreateFrailtyForOpponent / CreateInertiaForOpponent / CreateBloodrotPoxForOpponent credit
+// the matching damage-equivalent heuristic when a status token is created under the
+// opponent's control. We don't track opposing status-token state, so these are flat value
+// credits — see heuristics.go for the per-token rationale.
+func (ge *GameEngine) CreateFrailtyForOpponent()     { ge.AddValue(FrailtyValue) }
+func (ge *GameEngine) CreateInertiaForOpponent()     { ge.AddValue(InertiaValue) }
+func (ge *GameEngine) CreateBloodrotPoxForOpponent() { ge.AddValue(BloodrotPoxValue) }
 
 // bumpOrCreateAura increments an existing aura entry matching name on s, or appends
 // a new one built by build(n). Flips gs.auraCreated.
