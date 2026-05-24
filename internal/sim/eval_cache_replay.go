@@ -56,6 +56,7 @@ func (e *Evaluator) replayBest(
 		panic(fmt.Sprintf("replayBest: cached solution is infeasible — cache invariant violated (hand=%d, incoming=%d)",
 			len(hand), masterState.IncomingDamage()))
 	}
+	bufs.pooledSequenceCtx.promoteWinnerState(winner)
 
 	if postPromotedFromHeld >= 0 {
 		pcards[postPromotedFromHeld].role = card.Arsenal
