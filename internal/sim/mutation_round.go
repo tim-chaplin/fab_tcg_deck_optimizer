@@ -89,6 +89,9 @@ type deckEvalConfig struct {
 //
 // Returns (acceptedDeck, acceptedStats, acceptedAvg, acceptedIndex, true) on first
 // acceptance, or (nil, zero, bestAvg, -1, false) on no-acceptance or ctx cancellation.
+//
+// cache, when non-nil, is the hand-eval cache used by every shuffle in this round.
+// Nil constructs a fresh per-round cache.
 func RunMutationRound(
 	ctx context.Context,
 	mutations []deck.Mutation,
@@ -102,6 +105,7 @@ func RunMutationRound(
 	completed *atomic.Int64,
 	adaptive bool,
 	precision float64,
+	cache *Cache,
 ) (*deck.Deck, deck.Stats, float64, int, bool) {
 	if mutationWorkers <= 0 {
 		// 1 mutation worker is the empirical default — see the BenchmarkAnnealWorkerSweep
@@ -130,6 +134,9 @@ func RunMutationRound(
 	}
 	close(jobs)
 
+	if cache == nil {
+		cache = NewCache()
+	}
 	cfg := deckEvalConfig{
 		mutations:      mutations,
 		bestAvg:        bestAvg,
@@ -140,7 +147,7 @@ func RunMutationRound(
 		shuffleWorkers: shuffleWorkers,
 		seed:           seed,
 		completed:      completed,
-		cache:          NewCache(),
+		cache:          cache,
 		adaptive:       adaptive,
 		precision:      precision,
 	}

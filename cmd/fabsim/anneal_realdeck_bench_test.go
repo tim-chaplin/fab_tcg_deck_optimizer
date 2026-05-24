@@ -64,12 +64,77 @@ func BenchmarkAnnealRoundOnViseraiV4(b *testing.B) {
 		_, _, _, _, found := sim.RunMutationRound(
 			context.Background(), mutations, unreachableBaseline, 0, 0,
 			0, sim.Matchup{IncomingDamage: incoming}, 0, 0,
-			iterRNG.Int63(), nil, true, 0.1,
+			iterRNG.Int63(), nil, true, 0.1, nil,
 		)
 		if found {
 			b.Fatalf("iter %d: unreachable baseline was beaten — bench setup is wrong", n)
 		}
 	}
+}
+
+// Measures the gain from a persistent hand-eval cache across consecutive anneal rounds
+// on viserai_v4.
+func BenchmarkAnnealMultiRoundOnViseraiV4(b *testing.B) {
+	const (
+		maxCopies           = 2
+		incoming            = 7
+		unreachableBaseline = 1_000_000.0
+		sampleSize          = 2
+		shuffles            = 100
+		rounds              = 5
+		capacity            = annealCacheCapacity
+	)
+	path := findRepoFile(b, filepath.Join("mydecks", "viserai_v4.json"))
+	if path == "" {
+		b.Skip("mydecks/viserai_v4.json not found")
+	}
+	data, err := os.ReadFile(path)
+	if err != nil {
+		b.Fatalf("read deck: %v", err)
+	}
+	loaded, _, err := textio.UnmarshalDeck(data)
+	if err != nil {
+		b.Fatalf("unmarshal deck: %v", err)
+	}
+	all := deck.AllMutations(loaded.Copy(), maxCopies, true, registry.Registry{})
+	if len(all) < sampleSize {
+		b.Fatalf("mutation pool size %d < sample size %d", len(all), sampleSize)
+	}
+	mutations := all[:sampleSize]
+
+	runRound := func(cache *sim.Cache, seed int64) {
+		_, _, _, _, _ = sim.RunMutationRound(
+			context.Background(), mutations, unreachableBaseline, 0, 0,
+			shuffles, sim.Matchup{IncomingDamage: incoming}, 0, 0,
+			seed, nil, false, 0.1, cache,
+		)
+	}
+
+	b.Run("fresh", func(b *testing.B) {
+		b.ReportAllocs()
+		b.ResetTimer()
+		for n := 0; n < b.N; n++ {
+			b.StopTimer()
+			iterRNG := rand.New(rand.NewSource(42))
+			b.StartTimer()
+			for r := 0; r < rounds; r++ {
+				runRound(nil, iterRNG.Int63())
+			}
+		}
+	})
+	b.Run("persistent", func(b *testing.B) {
+		b.ReportAllocs()
+		b.ResetTimer()
+		for n := 0; n < b.N; n++ {
+			b.StopTimer()
+			iterRNG := rand.New(rand.NewSource(42))
+			cache := sim.NewCacheBounded(capacity)
+			b.StartTimer()
+			for r := 0; r < rounds; r++ {
+				runRound(cache, iterRNG.Int63())
+			}
+		}
+	})
 }
 
 // BenchmarkAnnealRoundOnViseraiV4_Quick is the PR-validation sibling of
@@ -114,7 +179,7 @@ func BenchmarkAnnealRoundOnViseraiV4_Quick(b *testing.B) {
 		_, _, _, _, found := sim.RunMutationRound(
 			context.Background(), mutations, unreachableBaseline, 0, 0,
 			shuffles, sim.Matchup{IncomingDamage: incoming}, 0, 0,
-			iterRNG.Int63(), nil, false, 0.1,
+			iterRNG.Int63(), nil, false, 0.1, nil,
 		)
 		if found {
 			b.Fatalf("iter %d: unreachable baseline was beaten — bench setup is wrong", n)
