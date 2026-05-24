@@ -322,6 +322,10 @@ var cardsByID = []Card{
 	ids.PoundForPoundYellow: cards.PoundForPoundYellow{},
 	ids.PoundForPoundBlue:   cards.PoundForPoundBlue{},
 
+	ids.PrimeTheCrowdRed:    cards.PrimeTheCrowdRed{},
+	ids.PrimeTheCrowdYellow: cards.PrimeTheCrowdYellow{},
+	ids.PrimeTheCrowdBlue:   cards.PrimeTheCrowdBlue{},
+
 	ids.PublicBountyRed:    cards.PublicBountyRed{},
 	ids.PublicBountyYellow: cards.PublicBountyYellow{},
 	ids.PublicBountyBlue:   cards.PublicBountyBlue{},
