@@ -149,12 +149,15 @@ func (ge *GameEngine) PeekTopN(n int) []card.Card {
 }
 
 // PopDeckTop removes the top card of the deck and returns it. Returns (nil, false) when
-// the deck is empty. Flips IsCacheable to false.
+// the deck is empty. Flips IsCacheable to false (the caller observes the popped card's
+// identity), and notes the deck removal so the eval cache's depth check stays accurate
+// even on uncacheable paths.
 func (ge *GameEngine) PopDeckTop() (card.Card, bool) {
 	ge.cacheable = false
 	if ge.deck.Size() == 0 {
 		return nil, false
 	}
+	ge.noteDeckRemoval(1)
 	return ge.deck.Draw(1)[0].(card.Card), true
 }
 
@@ -216,6 +219,7 @@ func (ge *GameEngine) TutorFromDeck(score func(card.Card) int) (card.Card, bool)
 	if !ok {
 		return nil, false
 	}
+	ge.noteDeckRemoval(1)
 	return got.(card.Card), true
 }
 
@@ -271,14 +275,22 @@ func (ge *GameEngine) AddToGraveyard(c card.Card) {
 }
 
 // DrawOne models a mid-turn draw: pop the top of the deck into the hand at its sorted
-// position. Reports whether a card was drawn — false on an empty deck. Inherits the
-// IsCacheable flip via PopDeckTop.
+// position. Reports whether a card was drawn; false on an empty deck. Doesn't flip
+// IsCacheable — the cached chain runs DrawOne again on replay against the caller's
+// current deck, so the drawn card's identity is naturally re-resolved per call. Chain
+// steps that read the drawn card's attributes via Hand / HeldHand / PeekTopN still
+// flip IsCacheable through those accessors, so a Hand-reader downstream of DrawOne
+// remains uncacheable.
 func (ge *GameEngine) DrawOne() bool {
-	c, ok := ge.PopDeckTop()
-	if !ok {
+	if ge.deck == nil || ge.deck.Size() == 0 {
 		return false
 	}
-	ge.insertHandSorted(c)
+	c := ge.deck.Draw(1)[0].(card.Card)
+	ge.noteDeckRemoval(1)
+	i := sort.Search(len(ge.hand), func(j int) bool { return ge.hand[j].Card.ID() > c.ID() })
+	ge.hand = append(ge.hand, card.CardState{})
+	copy(ge.hand[i+1:], ge.hand[i:])
+	ge.hand[i] = card.CardState{Card: c, Role: card.Held}
 	return true
 }
 
@@ -341,6 +353,7 @@ func (ge *GameEngine) Opt(l card.Logger, n int) {
 		n = ge.deck.Size()
 	}
 	drawn := ge.deck.Draw(n)
+	ge.noteDeckRemoval(n)
 	cards := make([]card.Card, len(drawn))
 	for i, c := range drawn {
 		cards[i] = c.(card.Card)

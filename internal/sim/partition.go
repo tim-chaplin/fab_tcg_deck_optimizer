@@ -60,8 +60,13 @@ func (e *Evaluator) findBest(weapons []weapon.Weapon, hand []card.Card, d *deck.
 	}
 	if cacheUsable {
 		if entry, ok := e.cache.lookup(cacheKey); ok {
-			e.cache.hits.Add(1)
-			return e.replayBest(entry, weapons, hand, d, masterState)
+			// Replay the cached chain only if the caller's deck has at least as many
+			// cards as the chain consumed during caching; otherwise the replay would
+			// hit a deck-empty branch the originating call didn't and diverge.
+			if d == nil || d.Size() >= entry.cardsRemovedFromDeck {
+				e.cache.hits.Add(1)
+				return e.replayBest(entry, weapons, hand, d, masterState)
+			}
 		}
 		e.cache.misses.Add(1)
 	}
@@ -176,12 +181,17 @@ func (e *Evaluator) findBest(weapons []weapon.Weapon, hand []card.Card, d *deck.
 	}
 	if cacheUsable {
 		if best.Cacheable {
+			cardsRemoved := 0
+			if best.State != nil {
+				cardsRemoved = best.State.CardsRemovedFromDeck()
+			}
 			e.cache.store(cacheKey, evalCacheEntry{
-				line:         append([]card.CardAssignment(nil), best.BestLine...),
-				swungWeapons: append([]string(nil), best.SwungWeapons...),
-				attackOrder:  append([]playedCard(nil), bufs.bestSolution.attack...),
-				pitchOrder:   append([]card.Card(nil), bufs.bestSolution.pitch...),
-				defenders:    append([]playedCard(nil), bufs.bestSolution.defenders...),
+				line:                 append([]card.CardAssignment(nil), best.BestLine...),
+				swungWeapons:         append([]string(nil), best.SwungWeapons...),
+				attackOrder:          append([]playedCard(nil), bufs.bestSolution.attack...),
+				pitchOrder:           append([]card.Card(nil), bufs.bestSolution.pitch...),
+				defenders:            append([]playedCard(nil), bufs.bestSolution.defenders...),
+				cardsRemovedFromDeck: cardsRemoved,
 			})
 		} else {
 			e.cache.uncacheable.Add(1)

@@ -85,13 +85,13 @@ func TestBest_UncacheableRavenousRabble(t *testing.T) {
 	}
 }
 
-// Tests that DrawOne's PopDeckTop flips Cacheable when an on-hit DrawOne fires (Snatch hits).
-func TestBest_UncacheableSnatchHitDrawsViaDrawOne(t *testing.T) {
+// Tests that a Snatch hit's on-hit DrawOne leaves the chain Cacheable.
+func TestBest_CacheableSnatchHitDrawsViaDrawOne(t *testing.T) {
 	h := []card.Card{cards.SnatchRed{}}
 	deck := DeckOf(testutils.FakeRedAttack())
 	got := Best(nil, h, deck, gameengine.GameStateBuilder().SetHero(testutils.Hero{Intel: 4}).Build())
-	if got.Cacheable {
-		t.Errorf("Snatch [R] hand: Cacheable = true, want false (DrawOne flips via PopDeckTop)")
+	if !got.Cacheable {
+		t.Errorf("Snatch [R] hand: Cacheable = false, want true (DrawOne no longer flips cacheable)")
 	}
 }
 
