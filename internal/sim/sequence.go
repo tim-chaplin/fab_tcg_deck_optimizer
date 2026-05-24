@@ -112,6 +112,20 @@ func newSequenceContext(
 	return ctx
 }
 
+// installLeafDeck refreshes bufs.pooledLeafDeck from the master deck d and rebinds
+// ctx.deck to it. Run before runDefense so DR Plays (Rise Above's PrependToDeck, an Opt-ing
+// DR, ...) mutate the leaf-scoped wrapper rather than the master shared across leaves; the
+// chain phase then reads the post-DR leaf deck via preparePermState's ShallowCopyFrom on
+// ctx.deck. The wrapper itself is recycled across leaves; only its slice headers reset.
+func installLeafDeck(ctx *sequenceContext, bufs *attackBufs, d *deck.Deck) {
+	if bufs.pooledLeafDeck == nil {
+		bufs.pooledLeafDeck = d.ShallowCopy()
+	} else {
+		bufs.pooledLeafDeck.ShallowCopyFrom(d)
+	}
+	ctx.deck = bufs.pooledLeafDeck
+}
+
 // bestAttackWithWeapons enumerates phase / weapon masks for one partition leaf and
 // returns the best (damage, defenseDealt, budget, swungWeapons, winnerState, legal,
 // cacheable) tuple. Each per-leaf state branches off via masterState.Copy().
@@ -134,7 +148,8 @@ func bestAttackWithWeapons(
 	var defenseDealtConst int
 	defenseCacheableConst := true
 	if !hasModalBlocker && len(defenders) > 0 {
-		defenseDealtConst, defenseCacheableConst, ctx.handStart = ctx.runDefense(defenders, pitched, held, d, incoming, noBlockBudgetCap, arsenalDefenderIdx, nil)
+		installLeafDeck(ctx, bufs, d)
+		defenseDealtConst, defenseCacheableConst, ctx.handStart = ctx.runDefense(defenders, pitched, held, ctx.deck, incoming, noBlockBudgetCap, arsenalDefenderIdx, nil)
 	} else if !hasModalBlocker && incoming > 0 {
 		// No defenders, so runDefense doesn't run — but unblocked incoming damage still
 		// fires DamageTaken so auras destroyed by taking damage leave the arena.
@@ -227,7 +242,8 @@ func bestAttackWithWeapons(
 		if hasModalBlocker {
 			// Defense resolves before the attack chain. A modal blocker's block depends on
 			// phase.defendBudget, so the defense pass runs once per phase here.
-			defenseDealt, defenseCacheable, ctx.handStart = ctx.runDefense(defenders, pitched, held, d, incoming, phase.defendBudget-drCost, arsenalDefenderIdx, nil)
+			installLeafDeck(ctx, bufs, d)
+			defenseDealt, defenseCacheable, ctx.handStart = ctx.runDefense(defenders, pitched, held, ctx.deck, incoming, phase.defendBudget-drCost, arsenalDefenderIdx, nil)
 			ctx.seedPoolGravBuf(len(attackers)+len(ctx.activatedAbilities), len(attackPitchPerm))
 		}
 
@@ -833,6 +849,7 @@ func resetPerPermChainStepFields(pc *card.CardState) {
 	pc.GrantedGoAgain = false
 	pc.GrantedDominate = false
 	pc.GrantedOverpower = false
+	pc.GrantedInstant = false
 	pc.BonusAttack = 0
 	pc.BonusDefense = 0
 	pc.PitchedToPlay = nil

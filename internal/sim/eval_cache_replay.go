@@ -102,7 +102,8 @@ func (e *Evaluator) replaySolution(
 
 	incoming := masterState.IncomingDamage()
 	if len(defs) > 0 {
-		defenseDealt, _, ctx.handStart = ctx.runDefense(defs, p, h, d, incoming, noBlockBudgetCap, arsenalDefenderIdx, entry.defenders)
+		installLeafDeck(ctx, bufs, d)
+		defenseDealt, _, ctx.handStart = ctx.runDefense(defs, p, h, ctx.deck, incoming, noBlockBudgetCap, arsenalDefenderIdx, entry.defenders)
 	} else if incoming > 0 {
 		ctx.leafState.SetIsMyTurn(false)
 		ctx.leafState.Engine().FireTriggers(triggertype.DamageTaken, nil)
@@ -111,6 +112,12 @@ func (e *Evaluator) replaySolution(
 	ctx.seedPoolGravBuf(len(entry.attackOrder), len(ctx.attackPitchPerm))
 
 	attackDealt, _, _, _ = ctx.playSequenceModal(entry.attackOrder)
+	// Clone the winner's deck wrapper out of bufs.pooledDeck so the caller's d on the next
+	// turn doesn't alias the per-Best pooled buffer the next leaf would reset. The search
+	// path takes the same hand-off via promoteWinnerDeck inside bestSequence; replay must
+	// match it or the next turn's installLeafDeck shallow-copies a pooled wrapper that
+	// later leaves' chain mutations corrupt under the caller's nose.
+	ctx.promoteWinnerDeck(ctx.permState)
 	return attackDealt, defenseDealt, ctx.permState, arsenalAtChainStart
 }
 
