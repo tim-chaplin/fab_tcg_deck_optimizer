@@ -21,9 +21,12 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/textio"
 )
 
-// annealCacheCapacity caps the persistent hand-eval cache across rounds so multi-hour
-// anneal runs stay within memory.
-const annealCacheCapacity = 200_000
+// annealCacheCapacity caps the persistent hand-eval cache across rounds. At ~760
+// bytes / entry (measured via TestEvalCache_MemoryPerEntry), 2M ≈ 1.5 GB resident,
+// which is comfortable on a 16 GB+ workstation and large enough that multi-hour
+// anneal sessions don't hit eviction in practice — keeping cumulative hit rate
+// where it would be with an unbounded cache.
+const annealCacheCapacity = 2_000_000
 
 // annealConfig bundles the knobs runAnneal needs. Built by runAnnealCmd from its flag.FlagSet.
 type annealConfig struct {
