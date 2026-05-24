@@ -104,8 +104,14 @@ type attackBufs struct {
 	runDefenseDRGravBuf    []card.Card
 	runDefenseChainGravBuf []card.Card
 	// runDefenseHandBuf backs the role-tagged defense hand (held + attackers + pitched)
-	// installed on leafState for the plain-block loop. Recycled across runDefense calls.
+	// installed on leafState for the DR + plain-block phases. Recycled across runDefense
+	// calls.
 	runDefenseHandBuf []card.CardState
+	// runDefensePostDRHeldBuf backs the post-DR Held-only view of state.HandStates().
+	// The plain-block survivingHeld computation and the chain phase's handStart both
+	// consume this slice, so a Held card a DR Play removed is automatically absent
+	// from both. Recycled across runDefense calls.
+	runDefensePostDRHeldBuf []card.Card
 	// pooledLeafState is the per-Best leafState recycled across every call. bestAttackWithWeapons
 	// resets it from masterState via CopyFrom so the per-call masterState.Copy()
 	// allocation goes away. Defense mutations write through to this pool slot; preparePermState
