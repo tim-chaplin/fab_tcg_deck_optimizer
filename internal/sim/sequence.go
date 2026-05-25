@@ -1051,7 +1051,14 @@ func (ctx *sequenceContext) playSequenceWithMeta(n int) (damage int, totalCounte
 		ge.FireTriggers(triggertype.CardOrAbility, pc.Card)
 		ge.ResolveChainStep(state.Logger(), pc)
 		if m.isAttack {
-			state.ClearOpponentMarked()
+			// Mark is consumed only when the marked hero takes damage. A 0-effective-power
+			// swing (e.g. Tip-Off mode 1's Instant-discard activation, which zeroes the
+			// attack via BonusAttack) deals no damage and can't strip the mark — gate the
+			// clear on positive EffectiveAttack so downstream chain steps can still read the
+			// mark.
+			if pc.EffectiveAttack() > 0 {
+				state.ClearOpponentMarked()
+			}
 			activeAttack = pc
 		}
 		state.AppendCardsPlayed(pc.Card)
