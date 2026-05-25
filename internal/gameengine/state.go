@@ -281,24 +281,14 @@ func (gs *GameState) CopyPersistentState() *GameState {
 // CopyPersistentStateFrom overwrites *gs in place to match what CopyPersistentState(src)
 // would produce. Reuses gs's auras / items slice backing when capacity permits, avoiding
 // the per-permutation slice allocation in the chain runner's hot loop. The chain runner
-// follows with ResetEphemeralState which wipes the same ephemeral fields CopyPersistentState
-// left nil, so this path mirrors CopyPersistentState exactly — only the persistent
-// carryover fields and the aura / item per-entry copies are load-bearing here.
+// follows with ResetEphemeralState which wipes ephemeral fields, so this only needs to
+// touch the persistent carryover; the chain-step pool slot's ephemeral content gets
+// thrown out either way.
 func (gs *GameState) CopyPersistentStateFrom(src *GameState) {
-	// Stash the pool's existing slice backings before *gs = *src aliases them onto src.
-	// copyAurasInto / copyItemsInto then write per-entry copies into the pooled backings
-	// without trampling the source the leafState pool keeps.
-	pooledAuras := gs.auras
-	pooledItems := gs.items
-	*gs = *src
-	gs.hand = nil
-	gs.pitched = nil
-	gs.defenders = nil
-	gs.cardsPlayed = nil
-	gs.cardsRemaining = nil
-	gs.triggers = nil
-	gs.deck = nil
-	gs.logger = NoopLogger{}
+	gs.hero = src.hero
+	gs.heroTriggerType = src.heroTriggerType
+	gs.weapons = src.weapons
+	gs.arsenal = src.arsenal
 	if n := len(src.graveyard); n > 0 {
 		gs.graveyard = src.graveyard[:n:n]
 	} else {
@@ -309,8 +299,12 @@ func (gs *GameState) CopyPersistentStateFrom(src *GameState) {
 	} else {
 		gs.banished = nil
 	}
-	gs.auras = copyAurasInto(pooledAuras, src.auras)
-	gs.items = copyItemsInto(pooledItems, src.items)
+	gs.auras = copyAurasInto(gs.auras, src.auras)
+	gs.items = copyItemsInto(gs.items, src.items)
+	gs.incomingDamage = src.incomingDamage
+	gs.arcaneIncomingDamage = src.arcaneIncomingDamage
+	gs.opponentMarked = src.opponentMarked
+	gs.isMyTurn = src.isMyTurn
 }
 
 // ResetEphemeralState returns gs to its start-of-turn baseline: it discards every field
