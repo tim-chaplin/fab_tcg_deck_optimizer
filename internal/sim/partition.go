@@ -1,9 +1,8 @@
 package sim
 
-// Top-level hand enumeration: findBest walks every partition (Pitch / Attack / Defend /
-// Held / Arsenal assignment) and delegates each leaf's chain-feasibility check to
-// bestAttackWithWeapons. Post-enumeration helpers decide how an empty arsenal slot gets
-// filled, plus the roleAllowed policy function that shapes the partition tree.
+// Top-level hand enumeration: findBest walks every Pitch / Attack / Defend / Held / Arsenal
+// assignment and delegates each leaf to bestAttackWithWeapons. Plus roleAllowed (the
+// partition-tree shape policy) and the empty-arsenal-promotion helpers.
 
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
@@ -60,9 +59,8 @@ func (e *Evaluator) findBest(weapons []weapon.Weapon, hand []card.Card, d *deck.
 	}
 	if cacheUsable {
 		if entry, ok := e.cache.lookup(cacheKey); ok {
-			// Replay the cached chain only if the caller's deck has at least as many
-			// cards as the chain consumed during caching; otherwise the replay would
-			// hit a deck-empty branch the originating call didn't and diverge.
+			// Replay only when the caller's deck is at least as deep as the chain consumed
+			// during caching; a shallower deck would hit a deck-empty branch and diverge.
 			if d == nil || d.Size() >= entry.cardsRemovedFromDeck {
 				e.cache.hits.Add(1)
 				return e.replayBest(entry, weapons, hand, d, masterState)
@@ -170,10 +168,9 @@ func (e *Evaluator) findBest(weapons []weapon.Weapon, hand []card.Card, d *deck.
 	best.SwungWeapons = bestSwung
 	best.Cacheable = cacheable
 	if best.State == nil {
-		// No feasible partition was found — synthesise an "untouched" trailing state
-		// that holds the starting hand and prior values, so callers can read end-of-turn
-		// fields off a non-nil State. Carry masterState.Value() onto best.Value so the
-		// no-chain path still credits any start-of-action-phase aura tick.
+		// No feasible partition — synthesise an untouched trailing state holding the starting
+		// hand and prior values so callers can read end-of-turn fields off a non-nil State.
+		// best.Value carries masterState.Value() to credit any start-of-action-phase aura tick.
 		fallback := masterState.Copy()
 		fallback.SetHand(append([]card.Card(nil), hand...))
 		fallback.SetArsenal(arsenalCardIn)
@@ -205,9 +202,8 @@ func (e *Evaluator) findBest(weapons []weapon.Weapon, hand []card.Card, d *deck.
 }
 
 // promoteHeldToArsenal moves an arsenal-eligible Held card from state's hand into its empty
-// arsenal slot and returns it, or nil when nothing is eligible. The pick is deterministic per
-// hand. Called per leaf so the score sees the arsenal slot the leftover card fills. Mutates
-// state only; callers that track a best line mark the returned card via markPromotedInBestLine.
+// arsenal slot and returns it, or nil when none are eligible. The pick is deterministic per
+// hand. Callers tracking a best line mark the returned card via markPromotedInBestLine.
 func promoteHeldToArsenal(state *gameengine.GameState, startingHand []card.Card, arsenalCardIn card.Card) card.Card {
 	hand := state.HandStates()
 	eligible := 0
@@ -332,19 +328,11 @@ func roleAllowed(r card.Role, isArsenalSlot, isDefenseReaction, canAttack bool) 
 	return r != card.Attack || canAttack
 }
 
-// defendersDamage tallies the total Value contribution of the partition's defense phase
-// against the caller-supplied state engine. DRs resolve first; plain blocks then consume
-// whatever incoming damage is left, capped per card. The engine is mutated in place: the
-// matchup figure rides in via SetIncomingDamage (which zeroes the damage-blocked
-// accumulator), each DR's resolution and each plain block bank into that accumulator, and
-// the chain phase reads the post-defense graveyard via the engine's left-behind state.
-//
-// blockBudget is the remaining defense-phase pitch supply after the caller has subtracted
-// DR costs. Modal blockers enumerate their modes within blockBudget and pick the one
-// yielding the highest BonusDefense; non-modal Blockers run their hook unchanged.
-//
-// Returns the per-DR cacheable status as a sticky bit — once a DR reads deck or graveyard,
-// the partition's defense-phase output isn't safe to cache.
+// defendersDamage tallies the defense phase's total Value contribution against the supplied
+// engine. DRs resolve first; plain blocks then consume whatever incoming damage is left,
+// capped per card. blockBudget is the resource pool the modal-blocker mode pick spends from.
+// Returns the sticky cacheable bit — once a DR reads deck or graveyard, the partition's
+// defense output is uncacheable.
 func defendersDamage(defenders, pitched []card.Card, deckPile *deck.Deck, ge *gameengine.GameEngine, gravBuf []card.Card, cs *card.CardState, incomingDamage, blockBudget, arsenalDefenderIdx int) (int, []card.Card, bool) {
 	total := 0
 	cacheable := true
@@ -491,15 +479,12 @@ func containsModalBlocker(cards []card.Card) bool {
 // modal blockers.
 const noBlockBudgetCap = 1 << 30
 
-// chainScore is a leaf's comparable score. cmp ranks it lexicographically:
-//   - value: the chain-step damage / block credited this turn.
-//   - cardsPlayed: cards played this turn. A played card does something useful even when
-//     the payoff lands next turn (an aura ticks later, a token mints currency), so
-//     playing > holding when value ties.
-//   - totalCards: cards available next turn — the post-refill hand (held cards topped up
-//     to intellect) plus an occupied arsenal slot.
-//   - totalCounters: summed Count of every Aura plus every Item — pending aura fires +
-//     token stockpile, the weakest signal.
+// chainScore ranks leaves lexicographically:
+//   - value: chain-step damage / block credited this turn.
+//   - cardsPlayed: tiebreaker favouring "play > hold" when payoff lands next turn (aura ticks,
+//     minted tokens).
+//   - totalCards: post-refill hand + arsenal slot available next turn.
+//   - totalCounters: summed Aura + Item Count — the weakest signal.
 type chainScore struct {
 	value         int
 	cardsPlayed   int

@@ -8,16 +8,11 @@ import (
 	"testing"
 )
 
-// TestTurntests_NewTestsUseEvalNTurnsForTesting rejects new turntests/ test files that
-// drive the chain via ge.ResolveChainStep(...) directly. Per docs/dev-standards.md "Test
-// layout", turntests/ is for public-entry-point tests only: sim.EvalOneTurnForTesting and
-// sim.EvalTwoTurnsForTesting.
-//
-// The grandfatheredResolveChainStepFiles list freezes the v2-migration backlog: every
-// file currently using ResolveChainStep is allow-listed. Migrating one of those files to
-// EvalOneTurnForTesting (or moving it to a same-package unit test) means removing it
-// from the list — the lint will then reject re-introduction. New files using
-// ResolveChainStep fail immediately.
+// TestTurntests_NewTestsUseEvalNTurnsForTesting rejects new turntests/ test files driving
+// the chain via ge.ResolveChainStep(...) directly. Per docs/dev-standards.md "Test layout",
+// turntests/ is for public-entry-point tests only: sim.EvalOneTurnForTesting /
+// sim.EvalTwoTurnsForTesting. grandfatheredResolveChainStepFiles is the allow-list of
+// existing offenders; remove an entry to lock in its migration.
 func TestTurntests_NewTestsUseEvalNTurnsForTesting(t *testing.T) {
 	root := RepoRoot(t)
 	turntestsDir := filepath.Join(root, "turntests")
@@ -66,11 +61,10 @@ func TestTurntests_NewTestsUseEvalNTurnsForTesting(t *testing.T) {
 	}
 }
 
-// grandfatheredResolveChainStepFiles freezes the v2-migration backlog. Files were dropped
-// into turntests/ during the v2 reorganisation but still drive ResolveChainStep directly;
-// they need a future home (same-package unit tests, or rewritten against the public Eval
-// entry points). See TODO.md "Tech debt" for the migration plan. To migrate a file, remove
-// its entry from this list — the lint will then reject reintroduction.
+// grandfatheredResolveChainStepFiles is the allow-list of existing turntests/ files driving
+// ResolveChainStep directly. They need migrating to same-package unit tests or the public
+// Eval entry points. To migrate, remove the entry — the lint then rejects reintroduction.
+// See TODO.md "Tech debt" for the migration plan.
 var grandfatheredResolveChainStepFiles = []string{
 	"turntests/aether_slash_test.go",
 	"turntests/arcane_polarity_test.go",

@@ -1,15 +1,11 @@
 package sim
 
-// Cache hit-rate measurement. Loads a high-quality saved Viserai deck (mydecks/viserai_v4)
-// and runs it through Evaluate at production shuffle counts, printing per-Evaluator cache
-// stats. Annealed decks have far higher trigger-skip rates than randomly-generated shapes
-// because Viserai's archetype is trigger-driven (Sigil of Silphidae, Malefic Incantation,
-// etc. carry across turns); using a real annealed list gives a realistic picture of what
-// the cache buys in production.
+// Cache hit-rate measurement. Loads mydecks/viserai_v4 and runs it through Evaluate at
+// production shuffle counts, printing per-Evaluator cache stats. A real annealed list gives
+// a realistic hit rate because Viserai's archetype is trigger-driven (cross-turn auras).
 //
-// Run with: `go test -run TestEvalCache_HitRateMeasurement -v`. Skipped in short mode so
-// it doesn't bloat normal `go test` runs. Skipped when mydecks/viserai_v4.json is absent
-// so go test ./... still passes on a fresh checkout that doesn't carry the saved deck.
+// Run with: `go test -run TestEvalCache_HitRateMeasurement -v`. Skipped in short mode and
+// when mydecks/viserai_v4.json is absent.
 
 import (
 	"fmt"
@@ -29,10 +25,8 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/gameengine"
 )
 
-// loadRealDeck reads mydecks/viserai_v4.json from somewhere up the directory tree.
-// Returns nil when the file isn't found so callers can b.Skip / t.Skip cleanly. Mirrors
-// cmd/fabsim/eval_realdeck_bench_test.go's findRepoFile helper but specialised to the
-// load path so the cache tests have one self-contained loader.
+// loadRealDeck reads mydecks/viserai_v4.json by walking up the directory tree. Returns nil
+// when not found so callers can b.Skip / t.Skip cleanly.
 func loadRealDeck(tb testing.TB) *deck.Deck {
 	tb.Helper()
 	dir, err := os.Getwd()
@@ -58,9 +52,8 @@ func loadRealDeck(tb testing.TB) *deck.Deck {
 	return nil
 }
 
-// TestEvalCache_HitRateMeasurement loads viserai_v4 (a high-quality annealed list) and
-// runs it through Evaluate at the production 10k shuffle count, printing the cache stats.
-// Not an assertion test — the t.Logf output is the deliverable.
+// Runs viserai_v4 through Evaluate at 10k shuffles and logs the cache stats. Output-only;
+// no assertions.
 func TestEvalCache_HitRateMeasurement(t *testing.T) {
 	if testing.Short() {
 		t.Skip("hit-rate measurement uses production shuffle counts; -short skips it")
@@ -109,11 +102,9 @@ func TestEvalCache_ParallelEquivalentToSequential(t *testing.T) {
 	setupRNG := rand.New(rand.NewSource(123))
 	baseline := deck.Random(heroes.Viserai, deckSize, maxCopies, setupRNG, registry.Registry{})
 
-	// Parallel pulls a per-worker seed from rng.Int63() before each worker's goroutine;
-	// pre-extract the same int64s so the per-worker RNGs are byte-identical and the
-	// sequential aggregate matches one chunk of parallel exactly. Scoped to one chunk
-	// (numShuffles == numWorkers) so the per-chunk seed extraction doesn't repeat;
-	// concurrent-cache safety lives in the worker_sweep + -race path.
+	// Parallel pulls a per-worker seed from rng.Int63(); pre-extract the same int64s so the
+	// per-worker RNGs are byte-identical and the sequential aggregate matches one parallel
+	// chunk exactly. Scoped to one chunk so the seed extraction doesn't repeat.
 	mirrorMaster := rand.New(rand.NewSource(masterSeed))
 	workerSeeds := make([]int64, numWorkers)
 	for i := range workerSeeds {
@@ -177,8 +168,7 @@ func TestEvalCache_ResetCache(t *testing.T) {
 		t.Errorf("stats wiped by ResetCache: pre=%+v post=%+v", preStats, post)
 	}
 
-	// Same hand after reset is now a miss — confirms entries are actually gone, not just
-	// the count reading wrong.
+	// Same hand after reset is now a miss — confirms entries are actually gone.
 	ev.Best(nil, hand, nil, gameengine.GameStateBuilder().SetHero(heroes.Viserai).Build())
 	if got := ev.CacheStats().Misses; got != post.Misses+1 {
 		t.Errorf("missed = %d, want %d (one new miss after reset)", got, post.Misses+1)
@@ -273,11 +263,8 @@ func TestEvalCache_EquivalenceWithUncached_FuzzAutomatic(t *testing.T) {
 	t.Logf("swept %d random setup seeds in %v with no divergence", tested, runFor)
 }
 
-// BenchmarkEvalCache_SingleDeck compares one full Evaluate of viserai_v4 (a high-quality
-// annealed Viserai list) with the cache enabled vs disabled. Real annealed decks are the
-// production target — random Viserai shapes have a different cache-hit profile because
-// they don't carry the trigger-heavy archetype synergies that drive Viserai's actual
-// gameplay. Skipped when the saved deck is absent.
+// BenchmarkEvalCache_SingleDeck compares one full Evaluate of viserai_v4 with the cache
+// enabled vs disabled. Skipped when the saved deck is absent.
 func BenchmarkEvalCache_SingleDeck(b *testing.B) {
 	const (
 		incoming = 7
@@ -314,9 +301,8 @@ func BenchmarkEvalCache_SingleDeck(b *testing.B) {
 	})
 }
 
-// BenchmarkEvalCache_ParallelDeck mirrors BenchmarkEvalCache_SingleDeck but runs the
-// shuffle loop across multiple workers via NewEvaluatorParallel. Compares to the existing
-// single-threaded with-cache run as the baseline.
+// BenchmarkEvalCache_ParallelDeck runs viserai_v4 across NewEvaluatorParallel at varying
+// worker counts; compare against BenchmarkEvalCache_SingleDeck's with-cache run.
 func BenchmarkEvalCache_ParallelDeck(b *testing.B) {
 	const (
 		incoming = 7

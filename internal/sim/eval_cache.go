@@ -1,19 +1,16 @@
 package sim
 
 // Hand-eval cache. Keyed on the (hand multiset, runechantCarryover, arsenalCardIn, auras)
-// tuple. Stores the winning partition's role assignments only; on a hit the chain replays
-// against that one partition to rebuild the full TurnSummary, skipping the exponential
-// partition search.
+// tuple. Stores the winning partition's role assignments; on a hit, the chain replays that
+// partition to rebuild the full TurnSummary, skipping the exponential partition search.
 //
-// Caching is gated on best.Cacheable=true: if any sibling partition read deck or graveyard
-// via an accessor, the result depends on hidden state and can't be reused.
+// Caching is gated on best.Cacheable=true: if any sibling partition read deck or graveyard,
+// the result depends on hidden state and can't be reused.
 //
-// Hand order doesn't affect Best's optimal result. The cache key sorts hand IDs into a
-// canonical multiset so any ordering hits the same entry; on a hit, the cached role-multiset
-// is remapped onto the new hand's ordering.
-//
-// Auras feed into the key as a sorted multiset of (SelfID, Count) pairs — Handler closures
-// aren't hashable, but Handler behaviour is fully determined by SelfID.
+// Hand order doesn't affect Best, so the key sorts hand IDs into a canonical multiset; on a
+// hit, the cached role-multiset is remapped onto the new hand's ordering. Auras key as a
+// sorted (SelfID, Count) multiset — Handler closures aren't hashable, but Handler behaviour
+// is fully determined by SelfID.
 
 import (
 	"sync"
@@ -25,33 +22,27 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapon"
 )
 
-// maxCachedHandSize caps how big a hand the cache will fingerprint. Adult heroes deal up
-// to 4 cards plus the arsenal-in slot (5); 10 leaves headroom for any reveal handler that
-// pads the hand at start of turn. Hands beyond this size skip the cache (treated as
-// always-miss and never stored) — the cache key is the dealt hand, which is bounded by
-// hero intelligence, so the cap doesn't apply to mid-chain growth.
+// maxCachedHandSize caps the hand size the cache fingerprints. Adult heroes deal 4 cards +
+// arsenal-in (5); 10 leaves headroom for reveal handlers that pad the hand at start of turn.
+// Hands beyond this skip the cache. The cap is on the dealt hand only — bounded by hero
+// intelligence — not mid-chain growth.
 const maxCachedHandSize = 10
 
 // maxCachedWeapons caps the weapon slot count the cache fingerprints. Heroes carry at most
 // 2 weapons (1H + 1H) plus the occasional off-hand item; 4 leaves headroom.
 const maxCachedWeapons = 4
 
-// maxCachedAuras caps how many aura triggers the cache will fingerprint. Real Viserai
-// hands rarely have more than 2-3 simultaneous auras (Sigil of Silphidae + Malefic
-// Incantation + the occasional charge counter); 8 leaves headroom for archetypes that
-// stack more.
+// maxCachedAuras caps fingerprinted aura triggers. Real Viserai hands run 2-3 simultaneous
+// auras; 8 leaves headroom for aura-stacking archetypes.
 const maxCachedAuras = 8
 
-// maxCachedItems caps how many items the cache will fingerprint. Matches maxCachedAuras
-// since both fingerprint the same persistent-in-play surface; 8 leaves headroom for an
-// archetype that stacks multiple token types alongside any card-based items.
+// maxCachedItems caps fingerprinted items. Matches maxCachedAuras (same persistent-in-play
+// surface).
 const maxCachedItems = 8
 
-// persistentCacheKey is one fingerprinted entry for a persistent-in-play permanent —
-// shared by both Aura and Item entries since they have the same identifying surface.
-// CardID identifies the originating card (or token kind — token IDs come from the
-// engine's reserved range, see ids.RunechantTokenID etc.). Count is the per-entry
-// counter (token copies, charges, fires remaining).
+// persistentCacheKey is one fingerprinted persistent-in-play permanent (Aura or Item).
+// CardID identifies the source card (or token kind via the engine's reserved CardID range).
+// Count is the per-entry counter (token copies, charges, fires remaining).
 //
 // Aura's TriggerType / OncePerTurn / FiredThisTurn aren't captured: no production card
 // registers multiple triggers from the same source with different types or gates.
@@ -60,13 +51,10 @@ type persistentCacheKey struct {
 	Count  int
 }
 
-// evalCacheKey is the comparable map key for the hand-eval cache. Fixed-size arrays are
-// zero-padded with explicit length fields so a shorter input can't collide with a longer one
-// on its prefix. heroID and weaponIDs key the loadout (different loadouts produce different
-// optimal partitions for the same hand).
-//
-// Matchup is intentionally NOT in the key — an Evaluator's lifetime spans calls at a constant
-// Matchup in production. Tests that mix matchup values must use NewEvaluatorWithoutCache.
+// evalCacheKey is the comparable map key. Fixed-size arrays carry explicit length fields so
+// a shorter input can't collide with a longer one on its prefix. heroID + weaponIDs key the
+// loadout. Matchup is NOT in the key — an Evaluator's lifetime spans calls at a constant
+// Matchup; tests mixing matchups must use NewEvaluatorWithoutCache.
 type evalCacheKey struct {
 	handIDs        [maxCachedHandSize]ids.CardID
 	weaponIDs      [maxCachedWeapons]ids.WeaponID
@@ -81,18 +69,17 @@ type evalCacheKey struct {
 	opponentMarked bool
 }
 
-// playedCard is one resolved card in a cached solution: the card, the modal Mode it
-// resolved with, and whether it was played from the arsenal slot. A cache replay seeds
-// each chain step from these directly, so neither is re-derived.
+// playedCard is one resolved card in a cached solution: the card, its modal Mode, and
+// whether it was played from arsenal. A cache replay seeds each chain step directly from
+// these.
 type playedCard struct {
 	card        card.Card
 	mode        int8
 	fromArsenal bool
 }
 
-// cacheSolution is the in-flight winning solution the search assembles before it is stored
-// into an evalCacheEntry. Its slices alias reusable attackBufs scratch, kept allocation-free
-// across hand-offs.
+// cacheSolution is the in-flight winning solution before it stores into an evalCacheEntry.
+// Slices alias attackBufs scratch, kept alloc-free across hand-offs.
 type cacheSolution struct {
 	attack    []playedCard
 	pitch     []card.Card
@@ -113,20 +100,18 @@ func (s *cacheSolution) reset() {
 	s.defenders = s.defenders[:0]
 }
 
-// evalCacheEntry is the cached winning solution — everything needed to rebuild the
-// TurnSummary by replaying the winning line verbatim, with no search:
+// evalCacheEntry is the cached winning solution — everything needed to rebuild a
+// TurnSummary by replaying the winning line verbatim:
 //
-//   - line: the BestLine roles (each Card paired with its Role + FromArsenal flag).
-//   - swungWeapons: the swung-weapon names, for TurnSummary display only.
-//   - attackOrder: the winning attacker permutation in resolution order, each with its
-//     chosen modal Mode. Includes weapon / item ability cards at their chain positions.
-//   - pitchOrder: the winning attack-phase pitch ordering — the sequence the pitch pool
-//     pops, which fixes pitched-to-play attribution. Its membership also identifies which
-//     pitch-role cards funded the attack; the rest funded the defense phase.
-//   - defenders: the winning defender list, each with its chosen blocker Mode.
-//   - cardsRemovedFromDeck: how many cards the cached chain pulled off the deck (draws,
-//     tutors, opts). Replay refuses to run when the caller's deck has fewer cards left,
-//     since the cached chain wouldn't be reproducible.
+//   - line: BestLine roles (Card + Role + FromArsenal).
+//   - swungWeapons: swung-weapon names, for TurnSummary display only.
+//   - attackOrder: winning attacker permutation in resolution order, each with its chosen
+//     modal Mode. Includes weapon / item ability cards at their chain positions.
+//   - pitchOrder: winning attack-phase pitch ordering — the pitch-pool pop sequence (also
+//     identifying which pitch cards funded the attack vs defense phase).
+//   - defenders: winning defender list, each with its blocker Mode.
+//   - cardsRemovedFromDeck: cards the cached chain pulled off the deck. Replay refuses to
+//     run when the caller's deck has fewer cards left.
 type evalCacheEntry struct {
 	line                 []card.CardAssignment
 	swungWeapons         []string
@@ -136,34 +121,26 @@ type evalCacheEntry struct {
 	cardsRemovedFromDeck int
 }
 
-// evalCache holds cached Best results plus the running stats counters the debug printout
-// reads. Thread-safe: mu guards entries (map writes use Lock; reads use RLock); hits /
-// misses / uncacheable are atomic so the lookup hot path bumps them without contending
-// with the entries lock. A single evalCache can be shared across multiple Evaluators —
-// each Evaluator's per-call scratch (attackBufs) is goroutine-local but the cache lookup
-// and store are concurrency-safe, which lets a shuffle-parallel worker pool reuse the
-// same Cache across all workers.
+// evalCache holds cached Best results plus running stats. Thread-safe: mu guards entries
+// (writes Lock, reads RLock); hits / misses / uncacheable are atomic so the lookup path
+// bumps them without contending. A single cache can be shared across Evaluators — per-call
+// scratch is goroutine-local, lookup and store are concurrency-safe.
 //
-// capacity is the maximum entry count before eviction kicks in (0 = unbounded). When
-// store finds the map at cap it evicts a single random entry (Go map iteration order,
-// no bookkeeping). Random eviction keeps the lookup hot path RLock-only.
+// capacity is the entry cap before eviction kicks in (0 = unbounded). At cap, store evicts
+// one random entry (Go map iteration order, no bookkeeping) so lookup stays RLock-only.
 type evalCache struct {
 	mu       sync.RWMutex
 	entries  map[evalCacheKey]evalCacheEntry
 	capacity int
-	// hits / misses count cache lookup outcomes (every Best call increments exactly one).
-	// uncacheable counts misses where the search ran but Cacheable=false at the end so
-	// the result wasn't stored — useful for quantifying how much hidden-state reading
-	// we'd need to remove to bump the hit rate further. evictions counts entries dropped
-	// by the capacity policy. Atomic so the lookup path bumps them without taking the
-	// map lock.
+	// hits / misses count lookup outcomes (one increment per Best). uncacheable counts
+	// misses where the search ran but Cacheable=false, so the result wasn't stored —
+	// useful for quantifying hidden-state reads. evictions counts entries dropped by the
+	// capacity policy. Atomic so the lookup path bumps them without the map lock.
 	hits, misses, uncacheable, evictions atomic.Int64
 }
 
-// CacheStats is the public snapshot of an Evaluator's cache counters, returned by
-// Evaluator.CacheStats. Hits + Misses is the total Best-call count; Uncacheable is a
-// subset of Misses (the searches that ran but produced uncacheable results so weren't
-// stored). Evictions counts entries dropped by the capacity policy.
+// CacheStats is the public snapshot of an Evaluator's cache counters. Hits + Misses equals
+// total Best calls; Uncacheable is a subset of Misses (search ran but didn't store).
 type CacheStats struct {
 	Hits        int
 	Misses      int
@@ -197,17 +174,11 @@ func newEvalCacheBounded(capacity int) *evalCache {
 	return &evalCache{capacity: capacity}
 }
 
-// makeCacheKey builds the comparable cache key from the inputs to Best. Returns ok=false
-// when the hand exceeds maxCachedHandSize, the weapon slot count exceeds maxCachedWeapons,
-// or the carryover-aura count exceeds maxCachedAuras; callers treat that as "skip caching
-// for this call." Hands arrive pre-sorted by Card.ID(), so the key is multiset-invariant
-// by construction; we just copy the IDs into the fixed-size array. Aura entries are
-// sorted by (SelfID, Count) so equivalent aura sets produce the same key regardless of
-// trigger registration order. Weapon IDs are NOT sorted because the weapon order is
-// stable across calls (same loadout, same slice header) and bestAttackWithWeapons
-// enumerates weapon masks in slice order; reordering would still produce the same Value
-// but the cached BestLine's swung-weapon names would drift, so we just preserve the input
-// order. Matchup is omitted — see evalCacheKey doc.
+// makeCacheKey builds the comparable cache key. Returns ok=false when hand / weapons / auras
+// / items exceed their maxCached* caps — callers skip caching. Hands arrive pre-sorted by
+// Card.ID() so the key is multiset-invariant. Aura / item entries insertion-sort by
+// (CardID, Count) for the same reason. Weapon IDs are NOT sorted: weapon order is stable
+// across calls, and reordering would drift the cached BestLine's swung-weapon names.
 func makeCacheKey(
 	weapons []weapon.Weapon, hand []card.Card,
 	masterState *gameengine.GameState,
@@ -221,10 +192,8 @@ func makeCacheKey(
 		return evalCacheKey{}, false
 	}
 	var key evalCacheKey
-	// Fakes (testutils.*) return ids.InvalidCard / InvalidWeapon / InvalidHero. Distinct
-	// fakes would collide on the same key so any Invalid-id input bails out — production
-	// cards / weapons / heroes always carry a unique non-zero ID, so these branches are
-	// test-only.
+	// Test fakes return Invalid IDs which would collide on the same key. Bail on any
+	// Invalid input — production entities always carry a unique non-zero ID.
 	key.handLen = len(hand)
 	for i, c := range hand {
 		id := c.ID()
@@ -241,10 +210,8 @@ func makeCacheKey(
 		}
 		key.weaponIDs[i] = id
 	}
-	// Persistent-in-play entries get insertion-sorted by (CardID, Count) so the cache key
-	// stays multiset-invariant across registration order. Token kinds are distinguished
-	// via their reserved CardID range (RunechantTokenID, PonderTokenID, …) so no separate
-	// TokenType discriminator is needed.
+	// Insertion-sort by (CardID, Count) so the key stays multiset-invariant across
+	// registration order. Token kinds are distinguished by their reserved CardID range.
 	key.auraLen = len(auras)
 	for i, t := range auras {
 		if t.CardID() == ids.InvalidCard {
@@ -279,11 +246,8 @@ func makeCacheKey(
 	return key, true
 }
 
-// insertPersistentEntry places entry into dst in sorted order, shifting any greater
-// elements right by one. dst is a slice over the key array's first (n+1) slots; the
-// caller calls this once per source entry with i+1 as the slice length, so the prefix
-// dst[:n] is already sorted and dst[n] is the new write position. Sort key:
-// (SelfID, TokenType, Count) ascending.
+// insertPersistentEntry places entry into dst in sorted order, shifting greater elements
+// right. dst[:n] is already sorted; dst[n] is the write position. Sort key: (CardID, Count).
 func insertPersistentEntry(dst []persistentCacheKey, entry persistentCacheKey) {
 	j := len(dst) - 1
 	for j > 0 && persistentEntryLess(entry, dst[j-1]) {
@@ -302,11 +266,9 @@ func persistentEntryLess(a, b persistentCacheKey) bool {
 	return a.Count < b.Count
 }
 
-// lookup returns the cached entry for key, or (zero, false) on miss. Doesn't bump the
-// stats counters — the caller does after confirming a hit / miss. Holds the read lock for
-// the map access only; the lock is released before the caller bumps counters or runs any
-// further work, which keeps lookup contention minimal under a parallel-shuffle worker
-// pool reading the same cache.
+// lookup returns the cached entry for key, or (zero, false) on miss. Doesn't bump stats —
+// the caller does. Holds the read lock for the map access only; released before counter
+// work so lookup contention stays minimal under shuffle-parallel readers.
 func (c *evalCache) lookup(key evalCacheKey) (evalCacheEntry, bool) {
 	c.mu.RLock()
 	e, ok := c.entries[key]
@@ -314,12 +276,9 @@ func (c *evalCache) lookup(key evalCacheKey) (evalCacheEntry, bool) {
 	return e, ok
 }
 
-// store inserts entry under key, lazily allocating the backing map. Takes the write lock;
-// concurrent miss-then-store from sibling workers may both store the same key (the second
-// write overwrites identical data) but never observes a partially-constructed map.
-//
-// When capacity > 0 and the map is at cap on insert of a new key, one entry is evicted;
-// Go randomises map iteration so this is random eviction with no bookkeeping.
+// store inserts entry under key, lazily allocating the backing map under the write lock.
+// Sibling workers racing to store the same key write identical data twice (harmless).
+// At capacity, evicts one entry via Go's randomised map iteration order.
 func (c *evalCache) store(key evalCacheKey, entry evalCacheEntry) {
 	c.mu.Lock()
 	if c.entries == nil {
@@ -338,9 +297,8 @@ func (c *evalCache) store(key evalCacheKey, entry evalCacheEntry) {
 	c.mu.Unlock()
 }
 
-// reset drops the entries map (lazy realloc on next store) under the write lock so a
-// concurrent reader/writer can never see a half-cleared state. Stats counters survive
-// the reset so cumulative hit-rate measurement spans resets.
+// reset drops the entries map under the write lock; stats counters survive so cumulative
+// hit-rate measurement spans resets.
 func (c *evalCache) reset() {
 	c.mu.Lock()
 	c.entries = nil

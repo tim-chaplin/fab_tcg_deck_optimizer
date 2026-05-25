@@ -21,11 +21,9 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/textio"
 )
 
-// annealCacheCapacity caps the persistent hand-eval cache across rounds. At ~760
-// bytes / entry (measured via TestEvalCache_MemoryPerEntry), 2M ≈ 1.5 GB resident,
-// which is comfortable on a 16 GB+ workstation and large enough that multi-hour
-// anneal sessions don't hit eviction in practice — keeping cumulative hit rate
-// where it would be with an unbounded cache.
+// annealCacheCapacity caps the cross-round hand-eval cache. At ~760 bytes / entry
+// (TestEvalCache_MemoryPerEntry), 2M ≈ 1.5 GB resident — comfortable on a 16 GB+
+// workstation and large enough that multi-hour sessions don't hit eviction.
 const annealCacheCapacity = 2_000_000
 
 // annealConfig bundles the knobs runAnneal needs. Built by runAnnealCmd from its flag.FlagSet.
@@ -42,38 +40,32 @@ type annealConfig struct {
 	outPath    string
 	debug      bool
 	reevaluate bool
-	// startTemp / tempDecay / minTemp are the simulated-annealing knobs. startTemp of 0
-	// degenerates to the classical hill-climb (strict > baseline acceptance).
+	// startTemp / tempDecay / minTemp are the SA knobs. startTemp=0 is a classical hill climb.
 	startTemp float64
 	tempDecay float64
 	minTemp   float64
-	// minImprovement is the noise-floor a strict (T==0) acceptance must clear: avg must
-	// exceed bestAvg by more than this margin. Guards against infinite acceptance loops where
-	// shuffle noise lets a stream of near-zero "wins" keep firing. The probabilistic SA gate
-	// ignores this floor so annealing can still cross ties / dips.
+	// minImprovement is the strict (T==0) noise floor: avg must exceed bestAvg by more than
+	// this margin. Guards against infinite-loop acceptance of within-noise wins. The
+	// probabilistic SA gate ignores it so annealing can still cross ties / dips.
 	minImprovement float64
-	// quietLoad suppresses the baseline card-list dump in prepareBaseline. Set by wrapper
-	// scripts that re-invoke anneal repeatedly on the same deck; the listing is unchanging
-	// noise after the first pass.
+	// quietLoad suppresses the baseline card-list dump in prepareBaseline — useful for
+	// wrapper scripts that re-invoke anneal repeatedly on the same deck.
 	quietLoad bool
-	// maxDuration caps the run's wall-clock time. Zero means no cap (anneal runs until the user
-	// hits Enter). The deadline aborts the same way the stdin watcher does, so any outstanding
-	// round finishes evaluating before the loop exits and the deck still saves.
+	// maxDuration caps wall-clock time; zero means no cap (until user hits Enter). The
+	// deadline aborts like stdin Enter — outstanding round finishes and the deck still saves.
 	maxDuration time.Duration
 	// pairMutations gates the pair-swap layer in AllMutations. See the -pair-mutations flag
 	// help for when to enable it.
 	pairMutations bool
 }
 
-// defaultDeckNameFor returns the deck name when -deck isn't supplied, keyed by hero, format, and
-// -incoming. Different regimes produce different optimal decks, so each gets its own file to
-// avoid hill-climbing one regime's best under another regime's objective.
+// defaultDeckNameFor keys the default deck filename on (hero, format, incoming) so different
+// regimes don't hill-climb one another's optimum.
 func defaultDeckNameFor(h hero.Hero, f GameplayFormat, incoming int) string {
 	return fmt.Sprintf("%s_%s_%d_incoming", strings.ToLower(h.Name()), f, incoming)
 }
 
-// runAnnealCmd parses anneal's flags from args and dispatches to runAnneal. Every anneal-only
-// knob lives on this FlagSet so `fabsim anneal -help` shows exactly the flags that apply here.
+// runAnnealCmd parses anneal's flags from args and dispatches to runAnneal.
 func runAnnealCmd(args []string) {
 	fs := flag.NewFlagSet("anneal", flag.ExitOnError)
 	deckName := fs.String("deck", "", "deck name; resolved to mydecks/<name>.json (\".json\" suffix optional). Defaults to <hero>_<format>_<incoming>_incoming so different (hero, format, -incoming) regimes keep separate deck files. When the named deck exists, anneal resumes from it as a checkpoint.")
@@ -109,9 +101,8 @@ func runAnnealCmd(args []string) {
 
 	gameengine.OptDebug = *debug
 
-	// -finalize bundles the high-precision overrides — pinned shuffle count plus a tighter
-	// noise floor so sub-0.1 wins land that the default 0.1 -min-improvement gate would reject.
-	// Applied as a post-parse override so it composes cleanly with explicit per-flag values.
+	// -finalize tightens the noise floor so sub-0.1 wins land that the default 0.1
+	// -min-improvement gate would reject. Applied post-parse so it composes with explicit flags.
 	if *finalize {
 		*minImprovement = 0.01
 	}
@@ -144,19 +135,18 @@ func runAnnealCmd(args []string) {
 		pairMutations:  *pairMutations,
 	}
 
-	// Run inside a wrapper that owns the profile lifecycle: deferred StopCPUProfile / heap dump
-	// must fire on every exit path (clean finish OR abort) but os.Exit skips defers, so do the
-	// exit-code dispatch only after the wrapper returns.
+	// Wrap in a function that owns the profile lifecycle so deferred StopCPUProfile / heap
+	// dump fire on every exit path (clean finish OR abort). os.Exit skips defers, so dispatch
+	// the exit code only after the wrapper returns.
 	aborted := runAnnealWithProfiling(cfg, *cpuprofile, *memprofile)
 	if aborted {
 		os.Exit(130)
 	}
 }
 
-// runAnnealWithProfiling wraps runAnneal with optional CPU + heap profile capture. CPU profile
-// runs across the entire anneal session; heap profile snapshots once at exit after a forced GC
-// so live-only allocations dominate the result. Returns the aborted flag so the caller can
-// pick the right exit code.
+// runAnnealWithProfiling wraps runAnneal with optional CPU + heap profile capture. CPU
+// profile runs across the whole session; heap profile snapshots once at exit after a forced
+// GC so live-only allocations dominate.
 func runAnnealWithProfiling(cfg annealConfig, cpuprofile, memprofile string) bool {
 	if cpuprofile != "" {
 		f, err := os.Create(cpuprofile)
@@ -187,9 +177,8 @@ func runAnnealWithProfiling(cfg annealConfig, cpuprofile, memprofile string) boo
 }
 
 // annealResult carries the outcome of a single runAnneal pass. aborted is true when the
-// user hit Enter (stdin watcher fired) — callers propagate this up to main so the process
-// exits non-zero and wrapper scripts like anneal-reanneal.ps1 stop their outer loop instead
-// of immediately launching another pass.
+// user hit Enter; callers propagate this to main so the process exits non-zero and wrapper
+// scripts stop their outer loop instead of relaunching.
 type annealResult struct {
 	bestEverAvg float64
 	startingAvg float64
@@ -200,10 +189,9 @@ func runAnneal(cfg annealConfig) annealResult {
 	rng := rand.New(rand.NewSource(cfg.seed))
 
 	current, currentStats, currentAvg := prepareBaseline(cfg, rng)
-	// All-time best tracks the highest-avg deck (and its stats) seen since runAnneal started.
-	// The saved JSON mirrors this — simulated annealing intentionally walks through worse
-	// states to escape local maxima, but the on-disk artifact should always reflect the peak
-	// reached so far.
+	// All-time best tracks the highest-avg deck since runAnneal started; the saved JSON
+	// mirrors it. SA walks through worse states to escape local maxima, but the on-disk
+	// artifact always reflects the peak.
 	bestEver := current
 	bestEverStats := currentStats
 	bestEverAvg := currentAvg
@@ -221,10 +209,8 @@ func runAnneal(cfg annealConfig) annealResult {
 	watchStdinForAbort(cancel)
 
 	temperature := cfg.startTemp
-	// verbose gates the noisy per-round headers and per-mutation acceptance lines. Classical
-	// hill-climb (T==0) keeps them on because the log is the user's progress indicator; under
-	// annealing they flood the terminal with hundreds of near-identical lines, so they're
-	// suppressed unless -debug asked for them.
+	// verbose gates the per-round / per-mutation acceptance lines. Classical hill-climb
+	// keeps them on as progress indicator; SA suppresses them unless -debug asked.
 	verbose := temperature == 0 || cfg.debug
 	if temperature > 0 {
 		fmt.Fprintf(os.Stderr, "Simulated annealing: startTemp=%.3f decay=%.3f minTemp=%.3f\n",
@@ -246,8 +232,7 @@ func runAnneal(cfg annealConfig) annealResult {
 				round, len(mutations), currentAvg, tempLabel, bestEverAvg)
 		}
 
-		// Round-scoped start so the ticker's elapsed/ETA reflect this round's progress
-		// rather than the cumulative session.
+		// Round-scoped start so the ticker's elapsed/ETA reflect this round, not the session.
 		var completed atomic.Int64
 		roundStart := time.Now()
 		stopTicker := startRoundTicker(round, len(mutations), roundStart, &completed,
@@ -266,10 +251,9 @@ func runAnneal(cfg annealConfig) annealResult {
 				true)
 		}
 		if !found {
-			// A full round with zero acceptances means every mutation — including the
-			// probabilistically-accepted worse ones — failed the gate. At any T > 0 with
-			// thousands of mutations this is vanishingly unlikely unless we've genuinely
-			// converged, so treat it as a local maximum regardless of the current temperature.
+			// Full round with zero acceptances means every mutation (including
+			// probabilistically-accepted worse ones) failed. At any T > 0 with thousands of
+			// candidates this is vanishingly unlikely unless converged, so treat as local max.
 			return finishAnnealRun(cfg, bestEver, bestEverStats, bestEverAvg, startingAvg,
 				fmt.Sprintf("Local maximum reached after %d rounds / %d acceptances in %s",
 					round, acceptances, time.Since(start).Truncate(time.Second)),
@@ -285,13 +269,8 @@ func runAnneal(cfg annealConfig) annealResult {
 	}
 }
 
-// buildRoundMutations produces the per-round mutation list: enumerates every
-// single-card/weapon mutation and shuffles the order so exploration is unbiased.
-//
-// AllMutations returns a ids.CardID-sorted slice for stability; the unconditional shuffle here
-// is what keeps the first-improvement classical climb from sampling the head of the slice
-// disproportionately, and what keeps the probabilistic SA gate from concentrating its
-// acceptances on a fixed slice of the solution space.
+// buildRoundMutations enumerates every single-card / weapon mutation and shuffles the
+// result so first-improvement climb and SA acceptance don't concentrate on a fixed slice.
 func buildRoundMutations(cfg annealConfig, rng *rand.Rand, current *deck.Deck) []deck.Mutation {
 	mutations := deck.AllMutations(current, cfg.maxCopies, cfg.pairMutations, registry.Registry{})
 	rng.Shuffle(len(mutations), func(i, j int) {
@@ -300,8 +279,7 @@ func buildRoundMutations(cfg annealConfig, rng *rand.Rand, current *deck.Deck) [
 	return mutations
 }
 
-// formatTempLabel is the " (T=…)" suffix the round header and acceptance lines share. Empty
-// string when temperature is 0 so classical hill-climb logs stay clean.
+// formatTempLabel is the " (T=…)" suffix; empty string when temperature is 0.
 func formatTempLabel(temperature float64) string {
 	if temperature <= 0 {
 		return ""
@@ -309,11 +287,9 @@ func formatTempLabel(temperature float64) string {
 	return fmt.Sprintf(" (T=%.4f)", temperature)
 }
 
-// applyAcceptedMutation runs the after-success branch of a round: logs the acceptance (against
-// the pre-mutation currentAvg so the "improvement" / "annealing step" label reflects whether
-// this specific step walked uphill), logs a new all-time best in non-verbose mode, persists
-// the deck to disk when avg exceeds bestEverAvg, and returns the possibly-updated bestEver /
-// bestEverAvg. The current deck and its avg stay owned by the caller.
+// applyAcceptedMutation runs the after-success branch: logs the acceptance, logs a new
+// all-time best in non-verbose mode, persists the deck when avg exceeds bestEverAvg, and
+// returns the possibly-updated bestEver / bestEverAvg.
 func applyAcceptedMutation(cfg annealConfig, round int, verbose bool, tempLabel string,
 	idx, total int, mut deck.Mutation, d *deck.Deck, dStats deck.Stats, avg, currentAvg float64,
 	bestEver *deck.Deck, bestEverStats deck.Stats, bestEverAvg float64) (*deck.Deck, deck.Stats, float64) {
@@ -329,10 +305,9 @@ func applyAcceptedMutation(cfg annealConfig, round int, verbose bool, tempLabel 
 		return bestEver, bestEverStats, bestEverAvg
 	}
 	if !verbose {
-		// Surface every new all-time best in non-verbose annealing mode so long
-		// reanneal sessions still show visible forward motion without the per-round
-		// spam. \r + trailing padding overwrites the ticker line cleanly; the \n at
-		// the end promotes this to a persistent entry above the next round's ticker.
+		// Surface new all-time bests in non-verbose mode so long reanneal sessions show
+		// forward motion. \r + padding overwrites the ticker line; the trailing \n promotes
+		// the entry above the next round's ticker.
 		fmt.Fprintf(os.Stderr, "\r[round %d] new best %.3f (was %.3f, +%.3f)%s                                \n",
 			round, avg, bestEverAvg, avg-bestEverAvg, tempLabel)
 	}
@@ -342,10 +317,8 @@ func applyAcceptedMutation(cfg annealConfig, round int, verbose bool, tempLabel 
 	return d, dStats, avg
 }
 
-// finishAnnealRun emits the terminal status line (abort / converged), optionally prints the
-// full best-ever deck listing, and builds the annealResult the top-level command surfaces as
-// exit code and session summary. aborted is threaded through as-is because runAnnealCmd keys
-// exit code 130 off it.
+// finishAnnealRun emits the terminal status line, optionally prints the best-ever deck
+// listing, and builds the annealResult that drives the command's exit code and summary.
 func finishAnnealRun(cfg annealConfig, bestEver *deck.Deck, bestEverStats deck.Stats, bestEverAvg, startingAvg float64,
 	statusLine string, aborted bool) annealResult {
 	fmt.Fprintln(os.Stderr, "\n"+statusLine)

@@ -10,8 +10,8 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 )
 
-// withOptHero is a no-op stub kept for source compatibility — tests now set the hero on
-// each engine directly. Retained so the per-test call shape doesn't need updating.
+// withOptHero installs h on currentOptTestHero for the duration of fn so newOptTestEngine
+// reads it when assembling each test engine.
 func withOptHero(t *testing.T, h testutils.Hero, fn func()) {
 	t.Helper()
 	currentOptTestHero = h
@@ -33,8 +33,8 @@ func newOptTestEngine(deckCards, graveyard []card.Card) *gameengine.GameEngine {
 	return ge
 }
 
-// Tests that Opt with the default passthrough handler keeps the deck order unchanged —
-// every revealed card returns to the top in input order, none move to the bottom.
+// Tests that Opt with the passthrough handler returns every revealed card to the top in
+// input order.
 func TestTurnStateOpt_PassthroughKeepsDeckOrder(t *testing.T) {
 	a := testutils.FakeRedAction().WithName("a")
 	b := testutils.FakeRedAction().WithName("b")
@@ -51,9 +51,8 @@ func TestTurnStateOpt_PassthroughKeepsDeckOrder(t *testing.T) {
 	})
 }
 
-// Tests that the handler can move cards to the bottom of the deck. Handler bottoms the
-// first revealed card and keeps the second on top; the un-opted tail of the deck stays
-// in place, and the bottomed card lands at the end.
+// Tests that the handler can bottom cards: first revealed goes to the bottom, second stays
+// on top, un-opted tail stays in place.
 func TestTurnStateOpt_BottomsHandlerSpecifiedCards(t *testing.T) {
 	a := testutils.FakeRedAction().WithName("a")
 	b := testutils.FakeRedAction().WithName("b")

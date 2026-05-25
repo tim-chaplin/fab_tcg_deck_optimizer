@@ -1,10 +1,10 @@
 package sim
 
 // Cache-hit replay: rebuild a TurnSummary by replaying the cached winning solution
-// verbatim — the captured attacker order, modal modes, pitch ordering, and blocker modes
-// run as a single chain, with no partition search and no permutation enumeration. The
-// post-hoc arsenal promotion + Hand carryover bookkeeping still run, so the resulting
-// summary is byte-identical to a from-scratch Best call.
+// verbatim — captured attacker order, modal modes, pitch ordering, blocker modes run as
+// a single chain, no partition search, no permutation enumeration. Post-hoc arsenal
+// promotion + Hand carryover still run, so the summary is byte-identical to a from-scratch
+// Best call.
 
 import (
 	"fmt"
@@ -16,13 +16,12 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapon"
 )
 
-// replayBest is the cache-hit body. Builds the partitionCard set for the new call's hand,
-// maps the cached BestLine's roles onto it, hands off to replaySolution for the verbatim
-// chain run, then assembles the TurnSummary.
+// replayBest is the cache-hit body. Builds the partitionCard set, maps the cached BestLine's
+// roles onto it, runs replaySolution for the verbatim chain, then assembles the TurnSummary.
 //
-// Quirk: the cached entry may tag a hand card with Role=Arsenal (post-hoc promotion
-// target), but hand cards never have that role during the chain run. Flip the slot back
-// to Held before replaySolution; re-stamp Arsenal on the BestLine afterward.
+// Quirk: a cached entry may tag a hand card with Role=Arsenal (post-hoc promotion target),
+// but hand cards never carry that role during the chain run. Flip it to Held before
+// replaySolution; re-stamp Arsenal on the BestLine afterward.
 func (e *Evaluator) replayBest(
 	entry evalCacheEntry,
 	weapons []weapon.Weapon, hand []card.Card,
@@ -37,8 +36,7 @@ func (e *Evaluator) replayBest(
 	}
 
 	bufs := e.getAttackBufs(n, weapons)
-	// maxResourceBonus is left unset: it feeds only the attack-budget prune, which the
-	// verbatim replay path never runs.
+	// maxResourceBonus is unset: it feeds only the attack-budget prune, which replay skips.
 	pcards := bufs.partitionCards[:totalN]
 	fillPartitionCards(hand, n, totalN, arsenalCardIn, pcards)
 	postPromotedFromHeld := -1
@@ -83,10 +81,9 @@ func (e *Evaluator) replayBest(
 	return best
 }
 
-// replaySolution replays a cached winning solution verbatim — no search, no prune. It
-// groups the role-assigned partition, runs the defense phase with the cached blocker
-// modes, and runs the single winning attack sequence with the cached order + modes. The
-// chain output is byte-identical to the from-scratch Best call that produced the entry.
+// replaySolution replays a cached winning solution verbatim — no search, no prune. Groups
+// the role-assigned partition, runs defense with the cached blocker modes, then runs the
+// single winning attack sequence. Output is byte-identical to the originating Best call.
 func (e *Evaluator) replaySolution(
 	masterState *gameengine.GameState, weapons []weapon.Weapon, d *deck.Deck,
 	entry evalCacheEntry, pcards []partitionCard, n int, bufs *attackBufs,
@@ -113,11 +110,9 @@ func (e *Evaluator) replaySolution(
 	ctx.seedPoolGravBuf(len(entry.attackOrder), len(ctx.attackPitchPerm))
 
 	attackDealt, _, _, _ = ctx.playSequenceModal(entry.attackOrder)
-	// Clone the winner's deck wrapper out of bufs.pooledDeck so the caller's d on the next
-	// turn doesn't alias the per-Best pooled buffer the next leaf would reset. The search
-	// path takes the same hand-off via promoteWinnerDeck inside bestSequence; replay must
-	// match it or the next turn's installLeafDeck shallow-copies a pooled wrapper that
-	// later leaves' chain mutations corrupt under the caller's nose.
+	// Clone the winner's deck wrapper out of bufs.pooledDeck so the caller's next-turn d
+	// doesn't alias the pooled buffer (the next leaf would reset it). The search path takes
+	// the same hand-off via promoteWinnerDeck; replay must match.
 	ctx.promoteWinnerDeck(ctx.permState)
 	return attackDealt, defenseDealt, ctx.permState, arsenalAtChainStart
 }

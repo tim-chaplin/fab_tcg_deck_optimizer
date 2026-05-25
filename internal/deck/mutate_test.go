@@ -8,23 +8,15 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/ids"
 )
 
-// Mutation-enumeration tests pinned against the package's hand-rolled fakes (fakeCard,
-// fakeWeapon, fakeRegistry — declared in deck_test.go) plus the fake CardPair fixture
-// below, so this file's dependencies stay scoped to internal/deck and registry/ids. No
-// production registry, cards, weapons, heroes, or sim package. Every algorithmic property
-// the production enumerator promises is exercised through these fakes; the production
-// CardPairs registry is only relied on by AllMutations behind the scenes (and the "no
-// fake card collides with a real pair half" fixture invariant ensures AllMutations
-// contributes zero pair mutations to the count assertions below).
+// Mutation-enumeration tests use the package-local fakes from deck_test.go plus the
+// CardPair fixture below; no production registry / cards / sim. Fake IDs sit near the top
+// of the uint16 range so AllMutations finds no fake in any production CardPair half — pair
+// contribution is zero by construction.
 
-// fakeHero is the Hero (any) stub used by every test deck. A typed empty struct
-// keeps interface equality stable across mutated decks.
+// fakeHero is the Hero stub used by every test deck.
 type fakeHero struct{}
 
-// Fake card IDs are picked near the top of the uint16 range so AllMutations' iteration
-// over the real CardPairs registry never finds a fake ID in any pair half — the pair
-// generator emits zero mutations for these decks, and the AllMutations count assertions
-// don't have to predict the production pair contribution.
+// Fake card IDs — see file preamble for the "no production pair collision" guarantee.
 const (
 	fakeC1 ids.CardID = 60001
 	fakeC2 ids.CardID = 60002
@@ -98,16 +90,8 @@ var fakeMoonSunPair = []CardPair{
 	},
 }
 
-// TestAllMutations_CountsAndShape pins the total mutation count against a deck of
-// (weapons=[A, B], cards=[c1, c1, c2, c2]) over a 2-weapon / 5-card roster:
-//   - WeaponLoadouts emits {(A,A), (A,B), (B,B)} = 3 loadouts; the deck holds (A, B), so
-//     2 alternative loadouts remain.
-//   - singleSwapMutations emits 2 unique removals × (5 pool − self − other-at-cap) =
-//     2 × 3 = 6 candidates at maxCopies=2.
-//   - pairSwapMutations emits 0 because no fake-card ID appears in CardPairs.
-//
-// Total: 8 mutations. Every result deck keeps its 4-card shape and shared hero, with a
-// non-empty description.
+// Tests that AllMutations enumerates the expected weapon + single-card swaps and that
+// every result keeps its 4-card shape, shared hero, and non-empty description.
 func TestAllMutations_CountsAndShape(t *testing.T) {
 	reg := allMutationsFixture()
 	d := New(fakeHero{}, []Weapon{reg.weapons[0], reg.weapons[1]},
@@ -180,10 +164,8 @@ func TestAllMutations_OddCountsAllowed(t *testing.T) {
 	}
 }
 
-// TestAllMutations_PreservesSideboard pins that every derived mutation inherits the
-// source deck's Sideboard verbatim. Without this guarantee an anneal round would silently
-// drop the user's hand-managed sideboard as soon as it accepted a mutation and wrote the
-// deck back.
+// Tests that every derived mutation inherits the source deck's Sideboard verbatim — anneal
+// would otherwise drop the user-managed sideboard the first time a mutation was accepted.
 func TestAllMutations_PreservesSideboard(t *testing.T) {
 	reg := allMutationsFixture()
 	d := New(fakeHero{}, []Weapon{reg.weapons[0], reg.weapons[1]},
@@ -241,9 +223,7 @@ func TestAllMutations_Deterministic(t *testing.T) {
 	}
 }
 
-// Every emitted mutation has a different Fingerprint than the source deck. Defensive
-// against an enumerator regression that lets a no-op (same multiset, same loadout) slip
-// through.
+// Tests that no emitted mutation collides with the source deck's Fingerprint.
 func TestAllMutations_NoDuplicateOfSource(t *testing.T) {
 	reg := allMutationsFixture()
 	d := New(fakeHero{}, []Weapon{reg.weapons[0], reg.weapons[1]},
@@ -426,9 +406,7 @@ func TestPairSwapMutations_HandlesUnbalancedHalfCounts(t *testing.T) {
 	}
 }
 
-// Every emitted pair mutation produces a deck with a different card multiset than the
-// source. Defensive against a future bug where the overlap-suppression check misses a
-// path that ends up at the source composition.
+// Tests that every emitted pair mutation lands on a card multiset distinct from the source.
 func TestPairSwapMutations_ResultDifferentFromSource(t *testing.T) {
 	reg := pairFixture()
 	a, b := makeFakeCard(fakeC1), makeFakeCard(fakeC2)
@@ -535,9 +513,7 @@ func TestFilterMaxCopiesViolations_StripsCapViolators(t *testing.T) {
 	}
 }
 
-// RespectsMaxCopies returns false immediately when a count exceeds the cap, without
-// scanning the full slice. Sentinel for the inner-loop fast path in
-// FilterMaxCopiesViolations.
+// Tests that respectsMaxCopies returns false as soon as a count exceeds the cap.
 func TestRespectsMaxCopies_ShortCircuits(t *testing.T) {
 	a := makeFakeCard(fakeC1)
 	cs := []Card{a, a, a}
