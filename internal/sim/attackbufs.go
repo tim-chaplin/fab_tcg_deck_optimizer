@@ -122,13 +122,17 @@ type attackBufs struct {
 	// alloc goes away. Sole users are bestAttackWithWeapons and the one-shot replay path;
 	// neither retains the ctx past its call, so pool reuse is safe.
 	pooledSequenceCtx *sequenceContext
-	// recycledState is a *GameState handed back to the pool after a prior best-winner is
-	// superseded by a better permutation. Its hand/graveyard/cardsPlayed/banished are the
-	// independent clones promoteWinnerState produced for the prior winner, so the struct
-	// can be recycled into pooledState without trampling any live state. preparePermState
-	// drains this slot before falling back to a zero-struct allocation seeded via
-	// CopyPersistentStateFrom.
-	recycledState *gameengine.GameState
+	// recycledStates is a fixed-size LIFO of *GameState slots handed back to the pool after
+	// each best-winner promotion. Each entry's hand/graveyard/cardsPlayed/banished are
+	// independent clones produced by promoteWinnerState, so any slot can be recycled into
+	// pooledState without trampling live state. preparePermState pops the top slot before
+	// falling back to a zero-struct allocation. Holding more than one slot absorbs runs of
+	// consecutive wins: each win leaves a prior bestWinner that needs a pool home, and a
+	// single recycle slot forces preparePermState to allocate fresh on every second win in
+	// a row. The bound stays small (worst-case = chain depth) and lives inline so no slice
+	// header allocation happens.
+	recycledStates [3]*gameengine.GameState
+	recycledTop    int
 	// Cache-solution scratch: seqAttack/seqPitch hold the winning attacker order+modes and
 	// pitch order, defModes the per-defender blocker modes. partSolution folds them in for
 	// the winning partition; bestSolution holds the overall winner for the cache store.
@@ -137,6 +141,42 @@ type attackBufs struct {
 	defModes     []playedCard
 	partSolution cacheSolution
 	bestSolution cacheSolution
+}
+
+// pushRecycledState pushes s onto the recycled-states stack. Returns true when the slot
+// was accepted; false when the stack is full (caller drops the state).
+func (b *attackBufs) pushRecycledState(s *gameengine.GameState) bool {
+	if b.recycledTop >= len(b.recycledStates) {
+		return false
+	}
+	b.recycledStates[b.recycledTop] = s
+	b.recycledTop++
+	return true
+}
+
+// popRecycledState removes and returns the top of the recycled stack, or nil when empty.
+func (b *attackBufs) popRecycledState() *gameengine.GameState {
+	if b.recycledTop == 0 {
+		return nil
+	}
+	b.recycledTop--
+	s := b.recycledStates[b.recycledTop]
+	b.recycledStates[b.recycledTop] = nil
+	return s
+}
+
+// dropRecycledStateIf removes any stack entry pointing at target. Used to detach the
+// incoming masterState alias in newSequenceContext so preparePermState doesn't recycle
+// the caller's live state.
+func (b *attackBufs) dropRecycledStateIf(target *gameengine.GameState) {
+	for i := 0; i < b.recycledTop; i++ {
+		if b.recycledStates[i] == target {
+			b.recycledTop--
+			b.recycledStates[i] = b.recycledStates[b.recycledTop]
+			b.recycledStates[b.recycledTop] = nil
+			i--
+		}
+	}
 }
 
 func newAttackBufs(handSize, weaponCount int, weapons []weapon.Weapon) *attackBufs {

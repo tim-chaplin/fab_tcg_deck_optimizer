@@ -102,9 +102,7 @@ func newSequenceContext(
 	if bufs.pooledState == masterState {
 		bufs.pooledState = nil
 	}
-	if bufs.recycledState == masterState {
-		bufs.recycledState = nil
-	}
+	bufs.dropRecycledStateIf(masterState)
 	return ctx
 }
 
@@ -275,10 +273,10 @@ func bestAttackWithWeapons(
 				bestDefenseCacheable = defenseCacheable
 				bestSwung = bufs.weaponNames[wmask&weaponBitsMask]
 				bestBudget = chainBudget{resource: phase.attackBudget, maxPitch: phase.maxAttackPitch, hasAttackPitches: phase.hasAttackPitches}
-				// Hand the superseded leaf-best to bufs.recycledState so the next
-				// preparePermState reuses it instead of allocating fresh.
-				if bestWinner != nil && bufs.recycledState == nil {
-					bufs.recycledState = bestWinner
+				// Push the superseded leaf-best onto the recycled stack so the next
+				// preparePermState pops it instead of allocating fresh.
+				if bestWinner != nil {
+					bufs.pushRecycledState(bestWinner)
 				}
 				bestWinner = winner
 				foundFeasible = true
@@ -612,12 +610,11 @@ func (ctx *sequenceContext) runDefense(defenders, pitched, held []card.Card, dec
 func (ctx *sequenceContext) preparePermState(playedAttackers []*card.CardState, n int) *gameengine.GameState {
 	bufs := ctx.bufs
 	if bufs.pooledState == nil {
-		// Drain the recycled slot before allocating fresh: superseded best-winners (handed
+		// Drain the recycled stack before allocating fresh: superseded best-winners (handed
 		// off when a better perm displaces them) carry independent slice backings, so
 		// CopyPersistentStateFrom can rewrite the struct without leaking a prior reference.
-		if bufs.recycledState != nil {
-			bufs.pooledState = bufs.recycledState
-			bufs.recycledState = nil
+		if r := bufs.popRecycledState(); r != nil {
+			bufs.pooledState = r
 		} else {
 			// Zero-struct + CopyPersistentStateFrom skips the graveyard / banished deep
 			// clones CopyPersistentState would do. The hot path overwrites graveyard via
@@ -745,11 +742,11 @@ func (ctx *sequenceContext) bestSequence(attackers []card.Card) (chainScore, *ga
 			if !foundLegal || score.cmp(bestScore) > 0 {
 				bestScore = score
 				foundLegal = true
-				// Hand the superseded prior best to bufs.recycledState for next perm's reuse.
-				// promoteWinnerState already cloned its slices, so the recycle backings are
-				// independent.
-				if bestWinner != nil && ctx.bufs.recycledState == nil {
-					ctx.bufs.recycledState = bestWinner
+				// Push the superseded prior best onto the recycled stack for next perm's
+				// reuse. promoteWinnerState already cloned its slices, so each entry's
+				// backings are independent.
+				if bestWinner != nil {
+					ctx.bufs.pushRecycledState(bestWinner)
 				}
 				bestWinner = winner
 				ctx.captureWinningSeq(pcBuf, pitchPerm)
