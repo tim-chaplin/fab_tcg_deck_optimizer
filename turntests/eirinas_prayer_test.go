@@ -76,6 +76,25 @@ func TestEirinasPrayerYellow_UsesN5(t *testing.T) {
 	}
 }
 
+// Pure arcane-only matchup: Eirina's Prayer prevents arcane damage when IncomingDamage
+// is zero. The partition recurse must let Defend role through whenever any incoming
+// damage (physical or arcane) could be prevented.
+func TestEirinasPrayer_ArcaneOnlyMatchup(t *testing.T) {
+	d := deck.New(heroes.Viserai, nil, []deck.Card{testutils.FakeYellowResource()})
+	hand := []card.Card{cards.EirinasPrayerRed{}, testutils.FakeBlueResource()}
+	initial := gameengine.GameStateBuilder().
+		SetIncomingDamage(0).
+		SetArcaneIncomingDamage(5).
+		Build()
+
+	summary := sim.EvalOneTurnForTesting(d, initial, hand)
+
+	if summary.Value != 4 {
+		t.Errorf("Value = %d, want 4 (X=6-2=4 arcane prevented, deck-top pitch 2)\nBestLine: %s",
+			summary.Value, formatBestLine(summary.BestLine))
+	}
+}
+
 // Tests the per-color N value: Blue uses N=4. Deck top pitch 1 → X = 4 - 1 = 3.
 func TestEirinasPrayerBlue_UsesN4(t *testing.T) {
 	d := deck.New(heroes.Viserai, nil, []deck.Card{testutils.FakeRedResource()})
