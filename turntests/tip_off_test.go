@@ -8,6 +8,7 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/hero/heroes"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 )
 
 // Tests that Tip-Off's Instant-discard mode wins the partition when a same-chain
@@ -32,5 +33,34 @@ func TestTipOff_InstantModeMarksOpponentForSameChainOutedBonus(t *testing.T) {
 	}
 	if !bestLineHasRole(summary.BestLine, cards.OutedRed{}, card.Attack) {
 		t.Errorf("BestLine missing Outed as Attack: %s", formatBestLine(summary.BestLine))
+	}
+}
+
+// Tests that a "next attack action card +4" buff does NOT land on Tip-Off in mode 1 —
+// mode 1's type-line is Generic Instant, so the buff scanning CardsRemaining for an
+// attack action skips past Tip-Off. Hand is Tip-Off Blue + a fake red Go-Again
+// non-attack action whose Play grants +4 to the next attack action. The only feasible
+// path that scores is "pitch the fake red for 1{r}, play Tip-Off Blue mode 0 for 3{p}" =
+// 3. Playing the fake red (queueing the +4) and then Tip-Off mode 1 deals 0 (mode 1 is
+// Instant, so the buff doesn't apply and it credits no attack damage); mode 0 isn't
+// fundable in that branch because the fake red was played rather than pitched. If the
+// engine were treating mode 1 as an attack action regardless of the per-mode dispatch,
+// the +4 would land and Value would jump to 4.
+func TestTipOff_InstantModeDoesNotConsumeAttackActionBuff(t *testing.T) {
+	buff := testutils.FakeRedAction().
+		WithName("FakeBuffPlus4").
+		WithGoAgain().
+		WithPlay(func(ge card.GameEngine, _ card.Logger, _ *card.CardState) {
+			cards.GrantNextCardBonusAttack(ge, 4, card.IsAttackAction)
+		})
+
+	d := deck.New(heroes.Viserai, nil, nil)
+	hand := []card.Card{cards.TipOffBlue{}, buff}
+
+	summary := sim.EvalOneTurnForTesting(d, nil, hand)
+
+	if summary.Value != 3 {
+		t.Errorf("Value = %d, want 3 (mode 0 path: pitch buff, play Tip-Off Blue for 3{p}). A jump to 4 means the +4 buff is leaking onto mode 1 despite its Generic Instant type-line.\nBestLine: %s",
+			summary.Value, formatBestLine(summary.BestLine))
 	}
 }
