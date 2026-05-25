@@ -52,7 +52,6 @@ internal/
   ids/             Stable integer ID allocation for cards / heroes / weapons
   registry/        Master roster of every card / weapon / hero
   sim/             Hand-and-deck evaluator and attack-chain search
-  optimizations/   Hot-path performance caches over the simulator
   textio/          On-disk deck encodings (JSON deck+stats, fabrary text)
   lint/            Repo-wide convention tests
   testutils/       Card / hero / weapon fakes shared across tests
@@ -121,8 +120,6 @@ mydecks/           Local working deck files (untracked by git)
 - **internal/textio** — Durable on-disk text encodings: the canonical `mydecks/*.json`
   deck-plus-stats format and the fabrary.net plain-text import/export format, plus `mydecks/`
   path resolution.
-- **internal/optimizations** — Hot-path performance caches that wrap the simulator without
-  changing behaviour, currently a memoised chain-step text table.
 
 ### CLI and tooling
 

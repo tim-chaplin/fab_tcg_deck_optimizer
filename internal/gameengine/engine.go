@@ -4,9 +4,11 @@ import (
 	"fmt"
 	"sort"
 	"strings"
+	"sync/atomic"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/ids"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/token"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/trigger"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/triggertype"
@@ -680,9 +682,33 @@ func isDefensiveInstant(c card.Card) bool {
 // ChainStepText returns the "<DisplayName>: <VERB>[ from arsenal]" prefix for the chain-
 // step log line. VERB picks WEAPON ATTACK for Weapon+Attack, ATTACK for attack-actions,
 // DEFENSE REACTION for DRs, and PLAY otherwise. EffectiveTypes dispatches on mode so
-// ModalTypes cards (Tip-Off mode 1) log under the mode-correct verb. Declared as a var
-// so a memoised implementation can be swapped in at init.
-var ChainStepText = func(pc *card.CardState) string {
+// ModalTypes cards (Tip-Off mode 1) log under the mode-correct verb.
+//
+// Output is memoised on (Card.ID, FromArsenal) — DisplayName / type-line / verb are all
+// static per ID — so the per-Play DisplayName concat happens at most twice per card kind
+// for the whole process. ModalTypes cards (their type-line shifts with self.Mode) bypass
+// the cache and rebuild every call. Tests using a Card with ids.InvalidCard hit the same
+// no-cache path.
+func ChainStepText(pc *card.CardState) string {
+	if _, ok := pc.Card.(card.ModalTypes); ok {
+		return buildChainStepText(pc)
+	}
+	id := pc.Card.ID()
+	if id == ids.InvalidCard {
+		return buildChainStepText(pc)
+	}
+	idx := chainStepCacheIndex(id, pc.FromArsenal)
+	if s := chainStepCache[idx].Load(); s != nil {
+		return *s
+	}
+	out := buildChainStepText(pc)
+	chainStepCache[idx].Store(&out)
+	return out
+}
+
+// buildChainStepText is the uncached renderer; the cached path falls through to it on
+// miss and ModalTypes / InvalidCard inputs route here every call.
+func buildChainStepText(pc *card.CardState) string {
 	types := pc.EffectiveTypes(nil)
 	var verb string
 	switch {
@@ -699,6 +725,25 @@ var ChainStepText = func(pc *card.CardState) string {
 		verb += " from arsenal"
 	}
 	return pc.Card.DisplayName() + ": " + verb
+}
+
+// chainStepCache memoises ChainStepText results keyed by (Card.ID, FromArsenal). Two rows
+// per card cover the in-hand and from-arsenal verb suffixes. Sized for the full uint16 ID
+// space (~1 MB) so lookups are direct bounds-checked array reads. Multiple goroutines
+// computing the same entry produce the same string, so racing writers converge.
+const chainStepCacheSize = 1 << 17 // 2 entries per ID × 65536 IDs
+
+var chainStepCache [chainStepCacheSize]atomic.Pointer[string]
+
+// chainStepCacheIndex packs (id, fromArsenal) into a single uint32 cache index. Bit 16 is
+// the FromArsenal flag, bits 0-15 are the card ID — keeps the in-hand and from-arsenal
+// variants in adjacent halves so the hot path is a plain array read.
+func chainStepCacheIndex(id ids.CardID, fromArsenal bool) uint32 {
+	idx := uint32(id)
+	if fromArsenal {
+		idx |= 1 << 16
+	}
+	return idx
 }
 
 // === Arcane damage ===

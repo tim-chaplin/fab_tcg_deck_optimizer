@@ -11,22 +11,8 @@ import (
 	"os"
 	"strings"
 
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/optimizations"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/textio"
 )
-
-// Warms the chain-step text cache from the registry so the runtime hot path is pure
-// cache reads. See docs/dev-standards.md "Registry / sim split".
-func init() {
-	ids := registry.AllCards()
-	cards := make([]card.Card, 0, len(ids))
-	for _, id := range ids {
-		cards = append(cards, registry.GetCard(id).(card.Card))
-	}
-	optimizations.WarmChainStepCache(cards)
-}
 
 // defaultMaxCopies is the shared fallback for every subcommand's -max-copies flag so the
 // anneal hill-climb and any future caller agree on "how many copies of one printing is a
