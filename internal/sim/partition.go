@@ -99,6 +99,10 @@ func (e *Evaluator) findBest(weapons []weapon.Weapon, hand []card.Card, d *deck.
 	var runningSeen bool
 	var runningScore chainScore
 
+	// Defend role is valid whenever any incoming damage — physical or arcane — could be
+	// prevented.
+	anyIncoming := incoming > 0 || masterState.ArcaneIncomingDamage() > 0
+
 	pcards := bufs.partitionCards[:totalN]
 	fillPartitionCards(hand, n, totalN, arsenalCardIn, pcards)
 
@@ -148,7 +152,7 @@ func (e *Evaluator) findBest(weapons []weapon.Weapon, hand []card.Card, d *deck.
 			if !roleAllowed(r, pc.fromArsenal, pc.isDR, pc.canAttack) {
 				continue
 			}
-			if r == card.Defend && incoming == 0 {
+			if r == card.Defend && !anyIncoming {
 				continue
 			}
 			pc.role = r
