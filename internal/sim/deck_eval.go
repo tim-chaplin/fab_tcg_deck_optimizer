@@ -328,8 +328,20 @@ func playOneTurn(
 	preChainHand := state.Hand()
 	summary = runBestForTurn(state.Weapons(), preChainHand, d, state, ev)
 
-	// Chain ran on a shallow copy of d that may have drawn mid-turn; use the winner's
-	// post-chain deck for recycle / next-turn draw.
+	postChainDeck := recyclePitchedToDeckBottom(summary)
+	intellect := state.Hero().(hero.Hero).Intelligence()
+	nextHand := drawNextHand(postChainDeck, summary.State.Hand(), intellect)
+
+	summary.State.SetHand(nextHand)
+	verifyTurnInvariants(snap, preChainHand, summary)
+	return summary, snap
+}
+
+// recyclePitchedToDeckBottom pushes the turn's pitched cards (excluding the arsenal-in
+// slot, which never recycles) onto the bottom of the post-chain deck and returns that
+// deck. The chain ran on a shallow copy of the master deck that may have drawn mid-turn,
+// so summary.State.Deck() — not the original d — is the deck the next turn inherits.
+func recyclePitchedToDeckBottom(summary TurnSummary) *deck.Deck {
 	postChainDeck := summary.State.Deck()
 	pitched := pitchedFromBestLine(summary.BestLine)
 	recycled := make([]deck.Card, len(pitched))
@@ -337,19 +349,23 @@ func playOneTurn(
 		recycled[i] = c
 	}
 	postChainDeck.PutBottom(recycled)
+	return postChainDeck
+}
 
-	held := summary.State.Hand()
-	intellect := state.Hero().(hero.Hero).Intelligence()
+// drawNextHand assembles the hand the next turn will see: starts from held (the chain's
+// post-chain hand), tops it up with end-of-turn draws from postChainDeck (capped at the
+// deck's remaining size), and returns the result sorted by Card.ID() so findBest's cache
+// key sees a canonical multiset.
+//
+// A fresh slice is always allocated: held aliases the chain's per-perm hand buffer (which
+// the next playOneTurn would overwrite) and the chain's RemoveFromHand reorders via
+// swap-with-last so held isn't sorted by ID. The sort must run on every path, including
+// the toDraw == 0 case where the chain's output order would otherwise leak through.
+func drawNextHand(postChainDeck *deck.Deck, held []card.Card, intellect int) []card.Card {
 	toDraw := endOfTurnDraws(len(held), intellect)
 	if toDraw > postChainDeck.Size() {
 		toDraw = postChainDeck.Size()
 	}
-	// Always allocate a fresh nextHand and sort it: held aliases the chain's per-perm hand
-	// buffer (the next playOneTurn would otherwise overwrite it), and the chain's
-	// RemoveFromHand reorders via swap-with-last so held isn't sorted by ID. The cache key
-	// relies on the hand being canonical at findBest entry, so the sort must run on every
-	// path — including the toDraw == 0 case where the previous code left the order at
-	// whatever the chain produced.
 	nextHand := make([]card.Card, len(held), len(held)+toDraw)
 	copy(nextHand, held)
 	if toDraw > 0 {
@@ -358,10 +374,7 @@ func playOneTurn(
 		}
 	}
 	sortHandByID(nextHand)
-
-	summary.State.SetHand(nextHand)
-	verifyTurnInvariants(snap, preChainHand, summary)
-	return summary, snap
+	return nextHand
 }
 
 // endOfTurnDraws reports how many cards the end-of-turn refill draws to bring a hand of
