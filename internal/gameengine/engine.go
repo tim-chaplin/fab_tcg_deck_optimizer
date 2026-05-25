@@ -321,6 +321,25 @@ func (ge *GameEngine) OpponentDiscard(n int) int {
 	return v
 }
 
+// PreventArcaneDamage caps incoming arcane damage by up to n. Returns the amount actually
+// prevented — the lesser of n and the remaining ArcaneIncomingDamage, clamped at 0.
+// Mutates ArcaneIncomingDamage so a second prevention call this turn sees the reduced
+// figure. The caller AddValues the returned amount to credit the prevention.
+func (ge *GameEngine) PreventArcaneDamage(n int) int {
+	if n <= 0 {
+		return 0
+	}
+	rem := ge.arcaneIncomingDamage
+	if rem <= 0 {
+		return 0
+	}
+	if n > rem {
+		n = rem
+	}
+	ge.arcaneIncomingDamage = rem - n
+	return n
+}
+
 // TurnFaceUp flips pc.FaceUp = true on the specific CardState the caller passes — found
 // by scanning CardsRemaining for an in-chain target, or held directly when the target is
 // the arsenal-in or another known CardState pointer — then fires pc.Card.OnFaceUp if

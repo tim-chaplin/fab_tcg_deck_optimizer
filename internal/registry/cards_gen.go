@@ -152,6 +152,10 @@ var cardsByID = []Card{
 	ids.DrowningDireYellow: cards.DrowningDireYellow{},
 	ids.DrowningDireBlue:   cards.DrowningDireBlue{},
 
+	ids.EirinasPrayerRed:    cards.EirinasPrayerRed{},
+	ids.EirinasPrayerYellow: cards.EirinasPrayerYellow{},
+	ids.EirinasPrayerBlue:   cards.EirinasPrayerBlue{},
+
 	ids.EmissaryOfMoonRed: cards.EmissaryOfMoonRed{},
 
 	ids.EmissaryOfTidesRed: cards.EmissaryOfTidesRed{},
