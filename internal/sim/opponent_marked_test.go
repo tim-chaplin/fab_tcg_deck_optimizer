@@ -9,8 +9,8 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/triggertype"
 )
 
-// Tests that the runechant aura handler leaves OpponentMarked alone — arcane damage
-// doesn't strip the mark, only physical attacks do.
+// Tests that the runechant aura handler leaves OpponentMarked alone — only physical
+// damage (a hit) consumes the mark, arcane doesn't.
 func TestRunechantAuraHandler_LeavesOpponentMarked(t *testing.T) {
 	ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().
 		SetOpponentMarked(true).

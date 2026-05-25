@@ -27,6 +27,16 @@ type ModalCost interface {
 	ModalCost(mode int8) int
 }
 
+// ModalTypes is an optional add-on to Modal for cards whose type-line varies by mode (e.g.
+// Tip-Off: Generic Action - Attack in the printed-attack mode, Generic Instant in the
+// Instant-discard mode). Implementers return the TypeSet for the given mode index. Cards
+// reading another card's type via CardState should use CardState.EffectiveTypes so the
+// mode-aware dispatch lands; the chain runner's cardmeta cache stores a per-mode slice
+// and dispatches the AP / mark / attack-clear gates on the live mode.
+type ModalTypes interface {
+	TypesForMode(g GameEngine, mode int8) TypeSet
+}
+
 // PlayPrecondition is a marker for cards whose printed text imposes a non-resource
 // additional cost beyond Cost(). Implementers return false when THIS play can't legally
 // happen (e.g. "reveal a card in your hand with cost 2 or greater" with no eligible

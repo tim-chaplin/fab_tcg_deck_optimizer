@@ -14,8 +14,8 @@ import (
 )
 
 // scoutThePeripheryIsTarget gates the rider on attack action cards played from arsenal.
-func scoutThePeripheryIsTarget(_ card.GameEngine, pc *card.CardState) bool {
-	return pc.FromArsenal && pc.Card.Types(nil).IsAttackAction()
+func scoutThePeripheryIsTarget(ge card.GameEngine, pc *card.CardState) bool {
+	return pc.FromArsenal && pc.EffectiveTypes(ge).IsAttackAction()
 }
 
 func (ScoutThePeripheryRed) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {

@@ -17,11 +17,12 @@ import (
 // +1 attributes to the target's slot, not Flying High'g.
 func flyingHighApplySideEffect(ge card.GameEngine, matchPitch int) {
 	for _, pc := range ge.CardsRemaining() {
-		if !pc.Card.Types(nil).IsAttack() {
+		t := pc.EffectiveTypes(ge)
+		if !t.IsAttack() {
 			continue
 		}
 		pc.GrantedGoAgain = true
-		if pc.Card.Types(nil).IsAttackAction() && pc.Card.Pitch() == matchPitch {
+		if t.IsAttackAction() && pc.Card.Pitch() == matchPitch {
 			pc.BonusAttack++
 		}
 		return

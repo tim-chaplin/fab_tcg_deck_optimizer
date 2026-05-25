@@ -618,7 +618,10 @@ func (ge *GameEngine) SacrificePayoffAura() bool {
 // displayed delta.
 func (ge *GameEngine) ResolveChainStep(l card.Logger, pc *card.CardState) {
 	pc.Card.Play(ge, l, pc)
-	types := pc.Card.Types(nil)
+	// EffectiveTypes routes through ModalTypes for cards whose type-line shifts per mode
+	// (Tip-Off mode 1 reads as Generic Instant, not Generic Action - Attack), so the
+	// downstream aura-create flip and chain-step delta land on the mode-correct TypeSet.
+	types := pc.EffectiveTypes(ge)
 	if types.Has(card.TypeAura) {
 		ge.auraCreated = true
 	}
@@ -664,10 +667,11 @@ func isDefensiveInstant(c card.Card) bool {
 
 // ChainStepText returns the "<DisplayName>: <VERB>[ from arsenal]" prefix for the chain-
 // step log line. VERB picks WEAPON ATTACK for Weapon+Attack, ATTACK for attack-actions,
-// DEFENSE REACTION for DRs, and PLAY otherwise. Declared as a var so a memoised
-// implementation can be swapped in at init.
+// DEFENSE REACTION for DRs, and PLAY otherwise. EffectiveTypes dispatches on mode so
+// ModalTypes cards (Tip-Off mode 1) log under the mode-correct verb. Declared as a var
+// so a memoised implementation can be swapped in at init.
 var ChainStepText = func(pc *card.CardState) string {
-	types := pc.Card.Types(nil)
+	types := pc.EffectiveTypes(nil)
 	var verb string
 	switch {
 	case types.IsWeaponAttack():
@@ -690,7 +694,8 @@ var ChainStepText = func(pc *card.CardState) string {
 // DealArcaneDamage credits n arcane damage to Value, writes a "Dealt n arcane damage" rider
 // line under source, and flips ArcaneDamageDealt when LikelyDamageHits(n, false) approves
 // so same-turn triggers reading "if you've dealt arcane damage this turn" fire. Routes
-// through dealtArcaneText to avoid per-call fmt.Sprintf and variadic-int boxing.
+// through dealtArcaneText to avoid per-call fmt.Sprintf and variadic-int boxing. Doesn't
+// touch OpponentMarked — only physical hits consume the mark.
 func (ge *GameEngine) DealArcaneDamage(l card.Logger, source string, n int) {
 	ge.AddValue(n)
 	if ge.LikelyDamageHits(n, false) {

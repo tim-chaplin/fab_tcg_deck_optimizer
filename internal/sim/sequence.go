@@ -1006,7 +1006,7 @@ func (ctx *sequenceContext) playSequenceWithMeta(n int) (damage int, totalCounte
 				return 0, 0, 0, nil, false
 			}
 		}
-		if m.types.IsAttackReaction() {
+		if m.typesWithMode(pc.Mode).IsAttackReaction() {
 			if m.hasPlayPrecondition {
 				if !pc.Card.(card.PlayPrecondition).PlayPrecondition(ge, pc) {
 					return 0, 0, 0, nil, false
@@ -1030,8 +1030,9 @@ func (ctx *sequenceContext) playSequenceWithMeta(n int) (damage int, totalCounte
 
 		finalizeActiveAttack()
 		// Runs after finalizeActiveAttack so an earlier attack's on-hit rider has had its
-		// chance to set this card's GrantedInstant.
-		if !m.isFreeChainStep && !pc.GrantedInstant {
+		// chance to set this card's GrantedInstant. The free-chain-step check dispatches
+		// per-mode for ModalTypes cards (e.g. Tip-Off mode 1 reads as Instant → 0 AP).
+		if !m.isFreeChainStepWithMode(pc.Mode) && !pc.GrantedInstant {
 			if state.ActionPoints() <= 0 {
 				return 0, 0, 0, nil, false
 			}
@@ -1050,15 +1051,24 @@ func (ctx *sequenceContext) playSequenceWithMeta(n int) (damage int, totalCounte
 		// land ahead of the played card's own effect.
 		ge.FireTriggers(triggertype.CardOrAbility, pc.Card)
 		ge.ResolveChainStep(state.Logger(), pc)
-		if m.isAttack {
-			state.ClearOpponentMarked()
+		// Per-mode type-line dispatch: ModalTypes cards (Tip-Off) read different is-attack /
+		// type-line values depending on self.Mode. Resolve once here and route the
+		// subsequent attack / non-attack-action / persistence checks off the same TypeSet.
+		modeTypes := m.typesWithMode(pc.Mode)
+		if modeTypes.Has(card.TypeAttack) {
+			// Mark is consumed only when the marked hero takes damage. A 0-effective-power
+			// swing deals no damage and can't strip the mark — gate the clear on positive
+			// EffectiveAttack so downstream chain steps can still read the mark.
+			if pc.EffectiveAttack() > 0 {
+				state.ClearOpponentMarked()
+			}
 			activeAttack = pc
 		}
 		state.AppendCardsPlayed(pc.Card)
-		if m.types.IsNonAttackAction() {
+		if modeTypes.IsNonAttackAction() {
 			state.SetNonAttackActionPlayed(true)
 		}
-		if !m.types.PersistsInPlay() && !state.CurrentStepRerouted() {
+		if !modeTypes.PersistsInPlay() && !state.CurrentStepRerouted() {
 			state.AppendGraveyard(pc.Card)
 		}
 		if pc.EffectiveGoAgain(ge) {

@@ -19,8 +19,12 @@ func init() {
 // cachedChainStepText is the memoised ChainStepText installed over gameengine.ChainStepText at
 // init. The text depends only on (Card.ID, FromArsenal) — DisplayName, types, and the
 // verb selection are all static — so results live in a pre-warmed table; the per-Play
-// string concat / DisplayName allocation disappears on the hot path.
+// string concat / DisplayName allocation disappears on the hot path. ModalTypes cards
+// bypass the cache because their type-line (and therefore the verb) shifts with self.Mode.
 func cachedChainStepText(self *card.CardState) string {
+	if _, ok := self.Card.(card.ModalTypes); ok {
+		return bareChainStepText(self)
+	}
 	idx := chainStepCacheIndex(self.Card.ID(), self.FromArsenal)
 	if s := chainStepCache[idx].Load(); s != nil {
 		return *s
