@@ -33,20 +33,17 @@ func NewCopper(n int) *item.Item {
 }
 
 // NewRunechant returns a fresh Runechant token aura at count n. Fires when an attack is
-// played (triggertype.CardOrAbility, filtered to attacks): flips ArcaneDamageDealt when
-// the count clears the damage-likely-to-hit window, clears OpponentMarked unconditionally
-// (any positive arcane damage strips the mark, gated the same way as physical attacks),
-// then destroys. The Runechant resolves before the attack's own effect, so it can turn on
-// that attack's "dealt arcane damage this turn" rider. Damage is credited at creation
-// time inside CreateRunechants; this handler is pure state cleanup.
+// played (triggertype.CardOrAbility, filtered to attacks): flips ArcaneDamageDealt when its
+// count clears the damage-likely-to-hit window, then destroys. The Runechant resolves
+// before the attack's own effect, so it can turn on that attack's "dealt arcane damage
+// this turn" rider. Damage is credited at creation time inside CreateRunechants; this
+// handler is pure state cleanup.
 func NewRunechant(n int) *aura.Aura {
 	return aura.NewFromToken("Runechant", ids.RunechantTokenID, triggertype.CardOrAbility,
 		func(engine card.GameEngine, _ card.Logger, ctx card.Aura) {
-			tge := engine.(GameEngine)
 			if engine.LikelyDamageHits(ctx.Count(), false) {
-				tge.SetArcaneDamageDealt(true)
+				engine.(GameEngine).SetArcaneDamageDealt(true)
 			}
-			tge.ClearOpponentMarked()
 			ctx.Destroy(false)
 		}, n, card.TypeSet.IsAttack)
 }

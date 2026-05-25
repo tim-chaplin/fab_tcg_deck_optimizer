@@ -9,10 +9,9 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/triggertype"
 )
 
-// Tests that a Runechant pop strips OpponentMarked — arcane damage consumes the mark like
-// any other damage, gated the same way as physical attacks (any positive damage, not
-// LikelyDamageHits).
-func TestRunechantAuraHandler_ClearsOpponentMarkedOnPop(t *testing.T) {
+// Tests that the runechant aura handler leaves OpponentMarked alone — only physical
+// damage (a hit) consumes the mark, arcane doesn't.
+func TestRunechantAuraHandler_LeavesOpponentMarked(t *testing.T) {
 	ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().
 		SetOpponentMarked(true).
 		AddAura(token.NewRunechant(1)).
@@ -20,7 +19,7 @@ func TestRunechantAuraHandler_ClearsOpponentMarkedOnPop(t *testing.T) {
 	// The Runechant aura fires on triggertype.CardOrAbility filtered to attacks, so the
 	// firing card must be an attack for its IsAttack filter to match.
 	ge.FireTriggers(triggertype.CardOrAbility, testutils.FakeRedAttack())
-	if ge.OpponentMarked() {
-		t.Error("OpponentMarked = true after Runechant pop, want false (arcane damage strips the mark)")
+	if !ge.OpponentMarked() {
+		t.Error("OpponentMarked = false after runechant pop, want true (arcane doesn't clear mark)")
 	}
 }
