@@ -5,9 +5,10 @@
 // zone from your deck, gain 1 action point."
 //
 // Modelled as a card.FaceUpHook: when another effect calls GameEngine.TurnFaceUp on this
-// card, the engine fires OnFaceUp and we grant +1 action point. The "from your deck"
-// qualifier doesn't translate cleanly — we credit the AP on any face-up flip; in practice
-// no implemented card flips face-up except from-deck contexts so the looser gate is fine.
+// card's CardState (typically the arsenal slot's, or one scanned out of CardsRemaining),
+// the engine fires OnFaceUp and we grant +1 action point. The "from your deck" qualifier
+// doesn't translate cleanly — we credit the AP on any face-up flip; in practice no
+// implemented effect flips face-up except from-deck contexts so the looser gate is fine.
 
 package cards
 

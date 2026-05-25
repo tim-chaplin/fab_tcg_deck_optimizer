@@ -321,17 +321,14 @@ func (ge *GameEngine) OpponentDiscard(n int) int {
 	return v
 }
 
-// TurnFaceUp flips every CardState in CardsRemaining whose Card == c to FaceUp = true,
-// then fires c.OnFaceUp if c implements card.FaceUpHook. A card with no scheduled
-// CardState (not in the current chain) still gets the hook fired so triggers gated on
-// "when <self> turns face up" land regardless of zone.
-func (ge *GameEngine) TurnFaceUp(c card.Card) {
-	for _, pc := range ge.cardsRemaining {
-		if pc.Card == c {
-			pc.FaceUp = true
-		}
-	}
-	if hook, ok := c.(card.FaceUpHook); ok {
+// TurnFaceUp flips pc.FaceUp = true on the specific CardState the caller passes — found
+// by scanning CardsRemaining for an in-chain target, or held directly when the target is
+// the arsenal-in or another known CardState pointer — then fires pc.Card.OnFaceUp if
+// pc.Card implements card.FaceUpHook. Touches a single instance rather than every
+// scheduled copy with the same identity; the caller picks the target.
+func (ge *GameEngine) TurnFaceUp(pc *card.CardState) {
+	pc.FaceUp = true
+	if hook, ok := pc.Card.(card.FaceUpHook); ok {
 		hook.OnFaceUp(ge, ge.logger)
 	}
 }
