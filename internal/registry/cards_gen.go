@@ -234,6 +234,8 @@ var cardsByID = []Card{
 
 	ids.JackBeQuickRed: cards.JackBeQuickRed{},
 
+	ids.LayLowYellow: cards.LayLowYellow{},
+
 	ids.LeadTheChargeRed:    cards.LeadTheChargeRed{},
 	ids.LeadTheChargeYellow: cards.LeadTheChargeYellow{},
 	ids.LeadTheChargeBlue:   cards.LeadTheChargeBlue{},

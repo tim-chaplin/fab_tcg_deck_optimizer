@@ -1,8 +1,8 @@
 name: Lay Low
-types: []
+types:
+    - Generic
+    - DefenseReaction
 cost: 0
-markers:
-    - NotImplemented
 text: |-
     If you are marked, you can't play this. If the defending hero is marked, their next attack
     this turn gets -1{p}.
