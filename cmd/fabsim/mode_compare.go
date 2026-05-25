@@ -10,11 +10,8 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
 
-// runCompareCmd parses compare's flags and dispatches to runCompare. Both decks are positional
-// args; simulation knobs (-deep-shuffles, -incoming, -seed, -format, -max-copies) are accepted
-// so both decks can be re-scored under matched conditions before comparison. -incoming is
-// required because comparing decks scored against different incoming-damage assumptions would
-// be apples to oranges.
+// runCompareCmd parses compare's flags and dispatches to runCompare. Both decks are
+// positional args; -incoming is required so comparison runs against matched assumptions.
 func runCompareCmd(args []string) {
 	fs := flag.NewFlagSet("compare", flag.ExitOnError)
 	fs.Usage = func() {
@@ -41,12 +38,9 @@ func runCompareCmd(args []string) {
 	runCompare(fs.Arg(0), fs.Arg(1), *shuffles, sim.Matchup{IncomingDamage: *incoming, ArcaneIncomingDamage: *arcaneIncoming}, *maxCopies, *seed, fmtValue)
 }
 
-// runCompare re-evaluates both decks under identical (shuffles, incoming) settings so the
-// printed stats are apples to apples regardless of what conditions either deck happened to be
-// scored under last, then prints a stat-by-stat side-by-side comparison: pitch counts, mean
-// hand value, per-cycle means, the hand-value histograms, and finally the per-card count
-// delta. The header line at the top of the output records the (shuffles, incoming)
-// settings so the per-section rows don't have to repeat them.
+// runCompare re-evaluates both decks under identical (shuffles, incoming) settings and
+// prints a side-by-side comparison: pitch counts, mean hand value, per-cycle means, hand-
+// value histograms, and per-card count delta. The header records the matched settings.
 func runCompare(name1, name2 string, shuffles int, mp sim.Matchup, maxCopies int, seed int64, fmtValue GameplayFormat) {
 	// compare always uses a fixed -shuffles count so the two decks are scored under matched
 	// conditions. Adaptive stop would let one deck terminate at a different shuffle count

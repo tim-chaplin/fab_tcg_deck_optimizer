@@ -12,8 +12,8 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry"
 )
 
-// TestMarshalUnmarshalRoundTrip exercises a random deck through Marshal → Unmarshal and checks
-// that weapons, cards, and hero all come back intact (stats are intentionally not round-tripped).
+// Tests that Marshal → Unmarshal preserves weapons, cards, and hero (stats are intentionally
+// not round-tripped).
 func TestFabrary_MarshalUnmarshalRoundTrip(t *testing.T) {
 	rng := rand.New(rand.NewSource(1))
 	d := deck.Random(heroes.Viserai, 40, 2, rng, registry.Registry{})
@@ -41,9 +41,8 @@ func TestFabrary_MarshalUnmarshalRoundTrip(t *testing.T) {
 	}
 }
 
-// TestMarshalFormat pins the output shape: header, Arena section, Deck section, lowercase color
-// suffix, and sorted card lines. A change here means downstream fabrary compatibility may break —
-// update consciously.
+// Tests the MarshalFabrary output shape: header, Arena / Deck sections, lowercase pitch
+// color suffix. A change risks downstream fabrary compatibility — update consciously.
 func TestMarshalFormat(t *testing.T) {
 	rng := rand.New(rand.NewSource(1))
 	d := deck.Random(heroes.Viserai, 40, 2, rng, registry.Registry{})
@@ -62,11 +61,8 @@ func TestMarshalFormat(t *testing.T) {
 	}
 }
 
-// Tests that Marshal carries ApplyDefaults' equipment in Arena and sideboard entries in
-// Sideboard verbatim. The defaults here are a fixture local to the test — fabsim's real
-// Viserai defaults live alongside the writeDeck call site, but Marshal's job is simply to
-// surface whatever defaults a caller applied, so test coverage here only needs an arbitrary
-// non-empty Defaults to exercise the pass-through.
+// Tests that Marshal carries applied equipment into the Arena section and sideboard entries
+// into Sideboard verbatim.
 func TestMarshalRendersAppliedDefaults(t *testing.T) {
 	d := &deck.Deck{Hero: heroes.Viserai}
 	d.ApplyDefaults(deck.Defaults{

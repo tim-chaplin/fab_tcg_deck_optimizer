@@ -34,9 +34,8 @@ func TestPlaySequence_SetsArcaneDamageDealtWhenRunechantsFire(t *testing.T) {
 	}
 }
 
-// TestPlaySequence_DiscountRejectsInsufficientBudget verifies that a variable-cost card
-// fails its per-play cost check when the sequence's resource budget can't cover the effective
-// cost.
+// Tests that a variable-cost card fails its per-play cost check when the budget can't
+// cover the effective cost.
 func TestPlaySequence_DiscountRejectsInsufficientBudget(t *testing.T) {
 	order := []card.Card{cards.AmplifyTheArknightRed{}} // printed cost 3, MinCost 0
 	ctx := NewSequenceContextForTest(heroes.Viserai, nil, nil, 0, 0, len(order))
@@ -47,8 +46,7 @@ func TestPlaySequence_DiscountRejectsInsufficientBudget(t *testing.T) {
 	}
 }
 
-// TestPlaySequence_DiscountAffordableWithBudget shows the same card becomes legal once the
-// budget covers its printed cost.
+// Tests that the same variable-cost card becomes legal once the budget covers its cost.
 func TestPlaySequence_DiscountAffordableWithBudget(t *testing.T) {
 	order := []card.Card{cards.AmplifyTheArknightRed{}}
 	ctx := NewSequenceContextForTest(heroes.Viserai, nil, nil, 3, 0, len(order))
@@ -66,8 +64,7 @@ func TestPlaySequence_DiscountAffordableWithBudget(t *testing.T) {
 	}
 }
 
-// TestPlaySequence_DiscountUsesCarryoverRunechants shows the discount applies from carryover
-// tokens — no resource budget needed when there are enough runechants already in play.
+// Tests that the discount applies from carryover runechants without spending budget.
 func TestPlaySequence_DiscountUsesCarryoverRunechants(t *testing.T) {
 	order := []card.Card{cards.AmplifyTheArknightRed{}}
 	ctx := NewSequenceContextForTest(heroes.Viserai, nil, nil, 0, 3, len(order))
@@ -86,8 +83,8 @@ func TestPlaySequence_DiscountUsesCarryoverRunechants(t *testing.T) {
 	}
 }
 
-// TestPlaySequence_LeftoverFromNonAttackAction confirms that runechants created by a non-attack
-// action with no following attack persist as leftover, and that their creation credits damage.
+// Tests that runechants from a non-attack action with no following attack persist as
+// leftover, and their creation credits damage.
 func TestPlaySequence_LeftoverFromNonAttackAction(t *testing.T) {
 	order := []card.Card{cards.ReadTheRunesRed{}} // creates 3 runechants, not an attack
 	ctx := NewSequenceContextForTest(heroes.Viserai, nil, nil, 0, 0, len(order))

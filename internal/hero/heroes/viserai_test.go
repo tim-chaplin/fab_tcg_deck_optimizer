@@ -88,11 +88,8 @@ func viseraiTriggerEngine(prior []card.Card, nonAttackActionPlayed bool) *gameen
 		Build()}
 }
 
-// TestViserai_RunebladeAttackAfterNonAttackActionTriggers fires the trigger on a
-// Runeblade attack played after a non-attack action and asserts Viserai credits +1 value
-// via CreateRunechants. The Runechant aura it creates immediately fires (Runechant's own
-// filter is IsAttack and this triggering card is an attack), so the surviving aura count
-// is 0 even though the value credit lands.
+// Tests that a Runeblade attack after a non-attack action fires Viserai's +1 Runechant. The
+// aura immediately consumes itself on the attack, so the +1 value lands but no aura survives.
 func TestViserai_RunebladeAttackAfterNonAttackActionTriggers(t *testing.T) {
 	ge := viseraiTriggerEngine([]card.Card{fakeRuneAura{}}, true)
 	ge.FireTriggers(triggertype.CardOrAbility, fakeRuneAttack{})
@@ -101,10 +98,8 @@ func TestViserai_RunebladeAttackAfterNonAttackActionTriggers(t *testing.T) {
 	}
 }
 
-// TestViserai_RunebladeNonAttackAfterNonAttackActionTriggers fires the trigger on a
-// Runeblade non-attack card. Viserai still creates a Runechant, but the Runechant aura's
-// own type filter (IsAttack) blocks it from immediately firing on the non-attack card —
-// so the surviving aura count is 1.
+// Tests that a Runeblade non-attack triggering card still mints a Runechant, but the
+// Runechant aura survives because its IsAttack filter blocks immediate self-consumption.
 func TestViserai_RunebladeNonAttackAfterNonAttackActionTriggers(t *testing.T) {
 	ge := viseraiTriggerEngine([]card.Card{fakeRuneAura{}}, true)
 	ge.FireTriggers(triggertype.CardOrAbility, fakeRuneAura{})
@@ -116,8 +111,8 @@ func TestViserai_RunebladeNonAttackAfterNonAttackActionTriggers(t *testing.T) {
 	}
 }
 
-// TestViserai_NoPriorNonAttackAction confirms the handler's NonAttackActionPlayed gate
-// suppresses the Runechant when the only prior play was an attack.
+// Tests that the NonAttackActionPlayed gate suppresses the trigger when the only prior play
+// was an attack.
 func TestViserai_NoPriorNonAttackAction(t *testing.T) {
 	ge := viseraiTriggerEngine([]card.Card{fakeRuneAttack{}}, false)
 	ge.FireTriggers(triggertype.CardOrAbility, fakeRuneAttack{})
@@ -126,8 +121,7 @@ func TestViserai_NoPriorNonAttackAction(t *testing.T) {
 	}
 }
 
-// TestViserai_NonRunebladePlayed confirms the type filter blocks non-Runeblade cards
-// before the handler runs.
+// Tests that the type filter blocks non-Runeblade cards from triggering Viserai.
 func TestViserai_NonRunebladePlayed(t *testing.T) {
 	ge := viseraiTriggerEngine([]card.Card{fakeRuneAura{}}, true)
 	ge.FireTriggers(triggertype.CardOrAbility, fakeNonRuneblade{})
@@ -136,8 +130,7 @@ func TestViserai_NonRunebladePlayed(t *testing.T) {
 	}
 }
 
-// TestViserai_WeaponSwingFiltered confirms the type filter blocks Runeblade weapon
-// swings — equipping or swinging a weapon isn't "playing a card".
+// Tests that the type filter blocks Runeblade weapon swings — a swing isn't "playing a card".
 func TestViserai_WeaponSwingFiltered(t *testing.T) {
 	ge := viseraiTriggerEngine([]card.Card{fakeRuneAura{}}, true)
 	ge.FireTriggers(triggertype.CardOrAbility, fakeRuneWeapon{})
@@ -146,8 +139,7 @@ func TestViserai_WeaponSwingFiltered(t *testing.T) {
 	}
 }
 
-// TestViserai_EmptyTurn confirms the first card of a turn doesn't fire — nothing to
-// trigger on.
+// Tests that the first card of a turn doesn't fire — nothing prior to trigger on.
 func TestViserai_EmptyTurn(t *testing.T) {
 	ge := viseraiTriggerEngine(nil, false)
 	ge.FireTriggers(triggertype.CardOrAbility, fakeRuneAura{})
@@ -156,9 +148,8 @@ func TestViserai_EmptyTurn(t *testing.T) {
 	}
 }
 
-// Type tag slices that back the slot-classification fixtures below. Slices (not
-// nonAttackEnablerCard returns a non-attack action — fills only the non-attack-enabler
-// slot (red pitch, no defense, has Go again so it doesn't extend into other slots).
+// nonAttackEnablerCard returns a non-attack action that fills only the non-attack-enabler
+// slot (red pitch, no defense, Go again so it doesn't extend into other slots).
 func nonAttackEnablerCard(name string) card.Card {
 	return testutils.FakeRedAction().
 		WithName(name).
@@ -243,8 +234,7 @@ func TestViseraiOpt_MultiSlotCardBottomedWhenAllCovered(t *testing.T) {
 }
 
 // Tests that a multi-slot card is bottomed if ANY of its slots overlaps a covered slot,
-// even when other slots are still uncovered. Over-filling a slot wastes hand space even
-// in trade for a fresh slot fill — Viserai prefers redundancy elsewhere.
+// even when other slots are still uncovered.
 func TestViseraiOpt_MultiSlotCardBottomedOnAnyOverlap(t *testing.T) {
 	bluePitch := bluePitchOnlyCard("blue")
 	// b is non-attack-enabler (uncovered) AND blue-pitch (covered). Bottomed because
@@ -314,9 +304,8 @@ func TestViseraiOpt_EmptyInput(t *testing.T) {
 	}
 }
 
-// Tests that the defender slot keys on the type line, not on Defense > 0 — an attack
-// action with a printed defense value (most attack actions in the game) doesn't fill
-// the slot, so a real defender behind it still gets kept on top.
+// Tests that the defender slot keys on type line, not Defense > 0: an attack action with a
+// printed defense value doesn't fill the slot, so a real DR behind it stays on top.
 func TestViseraiOpt_DefenseValueAloneDoesNotFillDefenderSlot(t *testing.T) {
 	// attackWithDefense is an attack action with positive Defense — represents the typical
 	// FaB attack that doubles as a block. Should not key the defender slot.

@@ -1,8 +1,8 @@
 package sim
 
-// Per-card metadata cache: scalar attributes (types, cost bounds, GoAgain, attack-action
-// membership) that playSequence reads in its hot inner loop, hoisted out of interface-dispatch
-// via a lazily-populated table sized for the full card-ID space.
+// Per-card metadata cache: scalar attributes (types, cost bounds, GoAgain, attack-action)
+// playSequence reads in its hot loop, hoisted out of interface dispatch via a lazily-
+// populated table sized for the full card-ID space.
 
 import (
 	"fmt"
@@ -14,14 +14,12 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/ids"
 )
 
-// attackerMeta caches the scalar card attributes playSequence reads on every permutation. With
-// this hoisted to a per-attacker lookup, the hot inner loop skips Types / GoAgain interface
-// dispatch; the one meta build amortises across all N! permutations.
+// attackerMeta caches the scalar card attributes playSequence reads per permutation. The
+// hot loop skips Types / GoAgain interface dispatch; one meta build amortises across N!.
 //
-// minCost / maxCost are static bounds on Card.Cost(s). For cards implementing VariableCost
-// the solver uses them for O(1) partition pre-screens and falls through to Cost(state) in
-// the chain inner loop. For non-VariableCost cards, minCost == maxCost == Cost(&TurnState{})
-// and the cached value is used directly (no interface call per play).
+// minCost / maxCost are static bounds on Card.Cost. VariableCost cards: solver uses them
+// for O(1) partition pre-screens, then falls through to Cost(state) in the chain loop.
+// Non-VariableCost: minCost == maxCost == Cost(&TurnState{}), used directly.
 type attackerMeta struct {
 	types      card.TypeSet
 	card       card.Card // held for variable-cost / modal-cost chain-time Cost calls
@@ -115,9 +113,9 @@ func (m *attackerMeta) costAt(ge *gameengine.GameEngine, mode int8) int {
 	return m.maxCost
 }
 
-// cardMetaCache / cardMetaReady are shared, read-only-after-init card metadata tables. Populated
-// lazily via cardMetaSlowPath on first encounter, then read from all goroutines without sync.
-// Sized for the full uint16 ID space so lookups are plain bounds-checked reads (~2 MB total).
+// cardMetaCache / cardMetaReady are read-only-after-init metadata tables, populated lazily
+// by cardMetaSlowPath. Sized for the full uint16 ID space so lookups are bounds-checked
+// reads (~2 MB total).
 const cardMetaCacheSize = 1 << 16
 
 var (
@@ -126,14 +124,12 @@ var (
 	cardMetaMu    sync.Mutex
 )
 
-// attackerMetaPtrFor returns a pointer to cached metadata for c, populating on first encounter.
-// Hands back a direct pointer into the global cache so permutation swaps move 8 bytes instead of
-// a full attackerMeta struct. The target is read-only after initialisation. Safe from multiple
-// goroutines: the first writer per ID holds the mutex, later readers see the ready flag set with
-// a release barrier and read the immutable meta entry directly.
+// attackerMetaPtrFor returns a cache pointer for c, populating on first encounter. Direct
+// pointer return lets perm swaps move 8 bytes instead of a full struct. Read-only post-init,
+// safe from multiple goroutines via the cardMetaReady atomic flag.
 //
-// Test-only cards sharing ids.InvalidCard collide on cache slot 0; the InvalidCard branch
-// builds a fresh meta inline so each gets its own. Production never sees InvalidCard.
+// Test-only cards sharing ids.InvalidCard would collide on slot 0; that branch builds a
+// fresh meta inline. Production never sees InvalidCard.
 func attackerMetaPtrFor(c card.Card) *attackerMeta {
 	id := c.ID()
 	if id == ids.InvalidCard {

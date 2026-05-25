@@ -33,8 +33,7 @@ func damageTrigger(self card.Card, damage int, calls *int) gameengine.Aura {
 	)
 }
 
-// TestProcessAurasAtStartOfTurn_FiresEachQueuedTriggerOnce verifies every queued
-// start-of-turn trigger's handler is invoked exactly once per pass.
+// Tests that every queued start-of-turn trigger's handler is invoked exactly once per pass.
 func TestProcessAurasAtStartOfTurn_FiresEachQueuedTriggerOnce(t *testing.T) {
 	src := testutils.FakeRedAttack()
 	var callsA, callsB int
@@ -51,7 +50,7 @@ func TestProcessAurasAtStartOfTurn_FiresEachQueuedTriggerOnce(t *testing.T) {
 	}
 }
 
-// TestProcessAurasAtStartOfTurn_EmptyQueue short-circuits.
+// Tests that ProcessAurasAtStartOfTurn short-circuits on an empty queue.
 func TestProcessAurasAtStartOfTurn_EmptyQueue(t *testing.T) {
 	survivors, total, revealed, _ := ProcessAurasAtStartOfTurnForTest(nil, DeckOf())
 	if total != 0 {
@@ -63,8 +62,8 @@ func TestProcessAurasAtStartOfTurn_EmptyQueue(t *testing.T) {
 	}
 }
 
-// TestProcessAurasAtStartOfTurn_GraveyardsExhaustedAura: a handler that calls Destroy
-// lands Self in the graveyard before subsequent handlers run.
+// Tests that a Destroy-calling handler lands Self in the graveyard before subsequent
+// handlers run.
 func TestProcessAurasAtStartOfTurn_GraveyardsExhaustedAura(t *testing.T) {
 	src := testutils.FakeRedAttack()
 	var seen []card.Card

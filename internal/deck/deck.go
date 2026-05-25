@@ -1,8 +1,6 @@
-// Package deck represents a candidate FaB deck — hero, weapons, cards, plus the user's
-// sideboard / equipment lists. Search code creates many Decks via Random and edits them via
-// ApplyDefaults. Simulation lives elsewhere; deck depends only on the narrow Hero / Weapon
-// / Card / Registry contracts declared in this package, so a caller can swap in any concrete
-// card / weapon / hero / registry implementation.
+// Package deck represents a candidate FaB deck — hero, weapons, cards, plus sideboard /
+// equipment lists. Depends only on the narrow Hero / Weapon / Card / Registry contracts
+// declared here, so callers can swap in any concrete implementation.
 package deck
 
 import (
@@ -14,38 +12,31 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/ids"
 )
 
-// Deck is a hero, equipped weapons, and a deck of cards. Sideboard is the reserve-card
-// list the user manages for sideboarding between games; Equipment is the non-weapon arena
-// loadout (head, chest, arms, legs). Both round-trip through the persistence layer; the
-// simulator never reads either, so mutations leave them alone.
+// Deck is a hero, equipped weapons, and a deck of cards. Sideboard is the user-managed
+// reserve-card list; Equipment is the non-weapon arena loadout (head, chest, arms, legs).
+// Both round-trip through persistence; the simulator never reads them.
 //
-// Sideboard and Equipment are []string rather than []Card: equipment pieces and other items
-// the user wants on their sideboard list (e.g. Nullrune cycle) aren't in the card registry,
-// so a registry-backed field would force the user's data through a lossy lookup.
+// Sideboard and Equipment are []string rather than []Card so non-registry entries (equipment
+// pieces, Nullrune cycle, ...) round-trip without a lossy registry lookup.
 //
 // cards doubles as the runtime deck: Shuffle / Draw / PeekTop / PutBottom / PutTop / Tutor
-// mutate it directly. Callers running an evaluation trial should Copy() the master deck first
-// so their deck mutations don't disturb the master — see deck.Copy. The field is unexported
-// so external callers can't peek the runtime order; composition-level inspection goes through
-// UniqueIDs / NameCounts / DisplayNames / PitchCounts.
+// mutate it directly. Evaluation trials should Copy() first to keep the master shareable.
+// The field is unexported; composition inspection goes through UniqueIDs / NameCounts /
+// DisplayNames / PitchCounts.
 type Deck struct {
 	Hero      Hero
 	Weapons   []Weapon
 	cards     []Card
 	Sideboard []string
 	Equipment []string
-	// mustNotShuffle marks wrappers that share slice backing with another *Deck
-	// (produced by ShallowCopy). Shuffle would rearrange the shared backing and
-	// silently corrupt every peer wrapper, so it panics on these. Cards that need
-	// to shuffle mid-turn would trip this — if that ever happens, the
-	// shallow-copy optimization needs to revert to a deep Copy at the call site.
+	// mustNotShuffle marks wrappers that share slice backing with another *Deck (produced by
+	// ShallowCopy). Shuffle panics on these to prevent silently corrupting peer wrappers.
 	mustNotShuffle bool
 }
 
-// UniqueIDs returns the distinct card IDs in deck order of first appearance plus a
-// position-lookup map keyed by ID. The simulator pre-builds this once per Evaluate run to
-// drive its per-shuffle hand-presence accounting (the parallel marginal-stats buffers are
-// indexed by position so shuffles can tally without growing maps in the inner loop).
+// UniqueIDs returns the distinct card IDs in first-appearance order plus a position-lookup
+// map keyed by ID. The simulator pre-builds this so per-shuffle hand-presence accounting
+// can index into slice buffers without growing maps in the inner loop.
 func (d *Deck) UniqueIDs() ([]ids.CardID, map[ids.CardID]int) {
 	if d == nil {
 		return nil, nil
@@ -71,9 +62,8 @@ func New(h Hero, weapons []Weapon, cards []Card) *Deck {
 	return &Deck{Hero: h, Weapons: weapons, cards: cards}
 }
 
-// Size reports the number of cards in the deck. Excludes Sideboard and Equipment, which are
-// reserve / arena lists the simulator never reads. Nil-safe: a nil Deck reports 0 so
-// callers holding a zero-value TurnState (no deck attached) read empty without a guard.
+// Size reports the number of cards in the deck (Sideboard / Equipment excluded). Nil-safe:
+// a nil Deck reports 0.
 func (d *Deck) Size() int {
 	if d == nil {
 		return 0
@@ -81,11 +71,9 @@ func (d *Deck) Size() int {
 	return len(d.cards)
 }
 
-// Fingerprint returns a comparable summary of the deck for equality checks: the weapon
-// loadout (names sorted) and a sorted card-count histogram. Two decks with the same cards
-// in different orders, or with weapons listed in different orders, produce equal
-// fingerprints — so callers can compare a mutation result against a baseline without
-// caring about positional shuffles.
+// Fingerprint returns a comparable summary of the deck — sorted weapon names and sorted
+// card-count histogram — so order-insensitive equality checks compare mutated decks against
+// a baseline without caring about positional shuffles.
 func (d *Deck) Fingerprint() string {
 	var b strings.Builder
 	weaponNames := sortedWeaponNames(d.Weapons)
@@ -112,9 +100,8 @@ func (d *Deck) Fingerprint() string {
 }
 
 // Copy returns a fresh Deck with independent backing slices for Weapons, Cards, Sideboard,
-// and Equipment. Hero is shared (heroes are stateless concrete types). Used by the parallel
-// evaluator: each worker calls master.Copy() before its trial so Shuffle / Draw / Reset /
-// PutBottom mutations land on the worker's local copy and the master deck stays sharable.
+// and Equipment. Hero is shared (heroes are stateless). Per-worker trials Copy() first so
+// the master stays sharable across goroutines.
 func (d *Deck) Copy() *Deck {
 	if d == nil {
 		return &Deck{}
@@ -136,12 +123,9 @@ func (d *Deck) Copy() *Deck {
 }
 
 // ShallowCopy returns a fresh *Deck wrapper that shares slice backing with the receiver.
-// The cards and Weapons slices are reproduced with cap=len (via the 3-arg slice form) so
-// any future append on the copy allocates a fresh backing rather than writing past the
-// shared region. Read paths and the mutating methods that allocate fresh backings on
-// every call (PutTop, PutBottom, Tutor) stay safe; Shuffle (which mutates in place)
-// does not, so ShallowCopy is only safe when the caller never Shuffles the result.
-// The per-permutation chain runner uses this to skip the per-permutation deep copy.
+// cards / Weapons are sliced with cap=len so any future append allocates fresh rather than
+// writing past the shared region. Safe with read paths and copy-on-write mutators (PutTop /
+// PutBottom / Tutor); unsafe with Shuffle, which mutates in place and panics here.
 func (d *Deck) ShallowCopy() *Deck {
 	if d == nil {
 		return &Deck{}
@@ -158,13 +142,9 @@ func (d *Deck) ShallowCopy() *Deck {
 	return out
 }
 
-// ShallowCopyFrom resets d to mirror src using shared slice backings — equivalent to what
-// ShallowCopy would have returned, but writing into the receiver instead of allocating a
-// fresh wrapper. The cards and Weapons slices are reproduced with cap=len (3-arg slice
-// form) so any future append on d allocates a fresh backing rather than writing past the
-// shared region. Same safety contract as ShallowCopy: only call when d will never be
-// Shuffle()d. Used by the per-permutation chain runner to recycle one *Deck wrapper
-// across all losing permutations; the winner clones the deck out before next perm runs.
+// ShallowCopyFrom resets d to mirror src with shared slice backings, writing into the
+// receiver instead of allocating. cards / Weapons are sliced with cap=len so future appends
+// allocate fresh. Same Shuffle-safety contract as ShallowCopy.
 func (d *Deck) ShallowCopyFrom(src *Deck) {
 	if src == nil {
 		d.Hero = nil
@@ -216,13 +196,9 @@ func (d *Deck) CopyFrom(src *Deck) {
 	}
 }
 
-// Shuffle randomises the deck in place via Fisher-Yates. Mutates the receiver — callers
-// running independent trials should Copy() the master deck first.
-//
-// Panics on wrappers produced by ShallowCopy (where mustNotShuffle is set): those share
-// slice backing with peer wrappers and an in-place shuffle would silently corrupt them.
-// A card calling Shuffle mid-turn is the most likely tripper — if that's now intentional,
-// drop the shallow-copy optimization at the per-permutation call site and use a deep Copy.
+// Shuffle randomises the deck in place via Fisher-Yates. Mutates the receiver. Panics on
+// wrappers produced by ShallowCopy (mustNotShuffle set): in-place shuffle would silently
+// corrupt peer wrappers sharing the same slice backing.
 func (d *Deck) Shuffle(rng *rand.Rand) {
 	if d.mustNotShuffle {
 		panic("deck: Shuffle called on a ShallowCopy-produced wrapper — a card mutated the per-permutation deck via Shuffle, which would corrupt sibling permutations sharing the same slice backing")
@@ -233,11 +209,9 @@ func (d *Deck) Shuffle(rng *rand.Rand) {
 	}
 }
 
-// PeekTop returns the top card of the deck without removing it, or nil when the deck is
-// empty. Used by cards that get a buff based on the top card's type / cost / etc.
-// (e.g. "if the top card of your deck is an attack action, this gets +1{p}"). Tests
-// reading the whole deck should drive Draw / PutBottom instead of reaching for a Peek-all
-// API — the deck is meant to be a black box past its top.
+// PeekTop returns the top card of the deck without removing it, or nil when empty. Used by
+// cards that read the top card to compute a buff. The deck is otherwise a black box past
+// its top — tests reading the full deck should drive Draw / PutBottom instead.
 func (d *Deck) PeekTop() Card {
 	if d == nil || len(d.cards) == 0 {
 		return nil
@@ -245,11 +219,9 @@ func (d *Deck) PeekTop() Card {
 	return d.cards[0]
 }
 
-// PeekTopN returns the top n cards of the deck (top first) without removing them, or
-// fewer when the deck has < n cards. Reserved for cards whose printed effect literally
-// reads "reveal the top N cards" (Sutcliffe's Research Notes and similar) — not for tests
-// that want a back-door view of the deck's full contents. The returned slice aliases the
-// deck's backing storage; mutating it would corrupt the deck.
+// PeekTopN returns the top n cards (top first) without removing them; fewer when the deck
+// has < n. Reserved for cards whose printed effect reveals the top N — not a back-door
+// inspection API. The returned slice aliases the deck's backing storage; do not mutate.
 func (d *Deck) PeekTopN(n int) []Card {
 	if d == nil {
 		return nil
@@ -272,9 +244,8 @@ func (d *Deck) Draw(n int) []Card {
 	return out
 }
 
-// PutBottom appends cards to the bottom of the deck, preserving the relative order
-// passed in. Used by the per-turn loop to recycle pitched cards onto the deck bottom per
-// FaB's end-of-turn pitch-zone-to-deck rule.
+// PutBottom appends cards to the bottom of the deck, preserving the input order. Used by
+// the end-of-turn loop to recycle pitched cards per FaB's pitch-zone-to-deck rule.
 func (d *Deck) PutBottom(cards []Card) {
 	d.cards = append(d.cards, cards...)
 }
@@ -338,13 +309,10 @@ type Defaults struct {
 // normal deck-construction max.
 const SideboardCopyCap = 2
 
-// ApplyDefaults tops d.Equipment and d.Sideboard up toward the supplied defaults so
-// persisted decks always carry the common "every deck runs these" slots the caller picks
-// for this hero / format. Idempotent: running it twice is a no-op because each entry is
-// only added when the current count falls below its target. Equipment targets 1 copy per
-// entry; sideboard targets each entry's Count, clamped by SideboardCopyCap against
-// main-deck + sideboard copies so the merge never pushes a card past the deck-construction
-// limit.
+// ApplyDefaults tops d.Equipment and d.Sideboard up toward the supplied defaults. Idempotent:
+// each entry is only added when the current count is below target. Equipment targets 1 copy
+// per entry; sideboard targets each entry's Count, clamped by SideboardCopyCap against
+// main-deck + sideboard copies so the merge never breaches the deck-construction limit.
 func (d *Deck) ApplyDefaults(defaults Defaults) {
 	equipCounts := map[string]int{}
 	for _, name := range d.Equipment {

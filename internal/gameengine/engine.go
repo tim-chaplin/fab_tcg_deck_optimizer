@@ -12,50 +12,39 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/triggertype"
 )
 
-// GameEngine is the rules-engine wrapper around a *GameState. Cards play against this type
-// via internal/card.GameEngine. The method surface mixes (a) cacheable-aware accessors that
-// flip cacheable as a side effect of touching hidden state and (b) rules-orchestration
-// methods (Fire*, ResolveChainStep, Opt, Clash, DealArcaneDamage, token economy).
-//
-// *GameState is embedded so every pure accessor and the Copy / Reset utilities promote
-// automatically. Methods declared below override the embedded ones to add cacheable-flipping
-// or rules logic. GameState owns the data; GameEngine owns the rules. The split lets
-// internal machinery pass around a *GameState pointer when it just needs to read or copy
-// raw state.
+// GameEngine is the rules-engine wrapper around a *GameState (which is embedded so pure
+// accessors and Copy / Reset promote automatically). GameState owns the data; GameEngine
+// owns the rules. The methods below override the embedded ones to add either
+// cacheable-flipping (for accessors that touch hidden state) or rules orchestration
+// (Fire*, ResolveChainStep, Opt, Clash, DealArcaneDamage, token economy).
 type GameEngine struct {
 	*GameState
 	// pitchBonus accumulates extra resources a triggertype.Pitch handler grants for the
-	// card currently being pitched. FirePitchTriggers zeroes it before the fire and reads
-	// it after; it lives on the engine wrapper (not GameState) since it never outlives a
-	// single pitch and so must not be copied per permutation.
+	// current pitch. FirePitchTriggers zeroes it before the fire and reads it after.
+	// Lives on the wrapper (not GameState) so it doesn't get copied per permutation.
 	pitchBonus int
 }
 
-// === Cards-facing zone accessors that flip cacheable. These shadow the same-name
-//     methods promoted from *GameState; the embedded versions stay reachable as
-//     ge.GameState.X when the engine internals need the non-flipping variant.
+// === Cards-facing zone accessors that flip cacheable. Shadow the *GameState methods;
+//     ge.GameState.X reaches the non-flipping variant when engine internals need it.
 
-// Hand returns the cards in hand — INCLUDING entries tagged Pitch / Attack roles by the
-// partition. The in-hand → pitch-zone transition is rules-modelled at the moment a card
-// actually pays its cost, so "a card in your hand" reads must see scheduled-but-not-yet-
-// committed entries. Flips IsCacheable; for non-mutating size / predicate gates prefer
-// HandSize / HandHasMatching / HeldHandSize.
+// Hand returns the cards in hand — INCLUDING entries tagged Pitch / Attack by the
+// partition. The hand→pitch-zone transition is rules-modelled at pay time, so "a card in
+// your hand" reads must see scheduled-but-uncommitted entries. Flips IsCacheable; prefer
+// HandSize / HandHasMatching / HeldHandSize for non-mutating gates.
 func (ge *GameEngine) Hand() []card.Card {
 	ge.cacheable = false
 	return ge.GameState.Hand()
 }
 
-// HeldHand returns the Held subset of the hand — Pitch / Attack entries are excluded
-// (scheduled to commit downstream and not divertible). Drawn entries are included so
-// the slice's length agrees with HeldHandSize. Flips IsCacheable since iterating the
-// slice exposes each entry's attributes.
+// HeldHand returns the Held subset of the hand — Pitch / Attack entries excluded. Drawn
+// entries are included so length agrees with HeldHandSize. Flips IsCacheable.
 func (ge *GameEngine) HeldHand() []card.Card {
 	ge.cacheable = false
 	return heldHandSlice(ge.GameState.HandStates())
 }
 
-// heldHandSlice projects a role-tagged hand down to the Held-role cards (Pitch / Attack
-// entries skipped; drawn entries included). Returns nil when there are none.
+// heldHandSlice projects a role-tagged hand to its Held cards. Returns nil when empty.
 func heldHandSlice(states []card.CardState) []card.Card {
 	n := 0
 	for i := range states {
@@ -81,9 +70,8 @@ func (ge *GameEngine) AppendHand(c card.Card) {
 	ge.insertHandSorted(c)
 }
 
-// insertHandSorted inserts c at the position that keeps the hand ordered by Card.ID(),
-// flipping IsCacheable to false. Sorting on every insert keeps the hand a canonical
-// multiset, which the chain runner and the eval-cache key both depend on.
+// insertHandSorted inserts c at the Card.ID()-sorted position, flipping IsCacheable. The
+// canonical multiset ordering is required by the chain runner and the eval-cache key.
 func (ge *GameEngine) insertHandSorted(c card.Card) {
 	ge.cacheable = false
 	i := sort.Search(len(ge.hand), func(j int) bool { return ge.hand[j].Card.ID() > c.ID() })
@@ -98,10 +86,9 @@ func (ge *GameEngine) Graveyard() []card.Card {
 	return ge.graveyard
 }
 
-// Deck returns the chain-runner deck for read-only inspection and flips IsCacheable to
-// false. Card handlers should not mutate the returned *deck.Deck directly; route
-// mutations through PopDeckTop / PrependToDeck / Opt / TutorFromDeck /
-// RecycleToDeckBottom.
+// Deck returns the chain-runner deck for read-only inspection and flips IsCacheable.
+// Card handlers must not mutate it directly — route through PopDeckTop / PrependToDeck /
+// Opt / TutorFromDeck / RecycleToDeckBottom.
 func (ge *GameEngine) Deck() *deck.Deck {
 	ge.cacheable = false
 	return ge.deck
@@ -122,10 +109,9 @@ func (ge *GameEngine) PeekTopN(n int) []card.Card {
 	return out
 }
 
-// PopDeckTop removes the top card of the deck and returns it. Returns (nil, false) when
-// the deck is empty. Flips IsCacheable to false (the caller observes the popped card's
-// identity), and notes the deck removal so the eval cache's depth check stays accurate
-// even on uncacheable paths.
+// PopDeckTop removes and returns the top card, (nil, false) when empty. Flips IsCacheable
+// (caller observes identity) and notes the removal so the eval cache's depth check stays
+// accurate even on uncacheable paths.
 func (ge *GameEngine) PopDeckTop() (card.Card, bool) {
 	ge.cacheable = false
 	if ge.deck.Size() == 0 {
@@ -146,22 +132,19 @@ func (ge *GameEngine) PeekDeck() (card.Card, bool) {
 	return top.(card.Card), true
 }
 
-// PrependToDeck inserts c at the top of the deck. The caller supplies c, so the write
-// is reproducible from the cache key + chain order; doesn't flip IsCacheable.
+// PrependToDeck inserts c at the top of the deck. Doesn't flip IsCacheable — caller
+// supplied c, so the write is reproducible from cache key + chain order.
 func (ge *GameEngine) PrependToDeck(c card.Card) {
 	ge.deck.PutTop([]deck.Card{c})
 }
 
-// AppendToDeck inserts c at the bottom of the deck. Cache-friendly for the same reason
-// as PrependToDeck.
+// AppendToDeck inserts c at the bottom of the deck. Cache-friendly like PrependToDeck.
 func (ge *GameEngine) AppendToDeck(c card.Card) {
 	ge.deck.PutBottom([]deck.Card{c})
 }
 
-// Discard pops the first Held-role hand card to the graveyard and logs the action
-// under source. Returns true on success; false when no Held card exists. Cache-safe:
-// the discarded card's identity never escapes the engine, so the caller can't branch
-// on it and the cache can't diverge across replays with different drawn cards.
+// Discard pops the first Held-role hand card to the graveyard and logs under source. Cache-
+// safe: discarded card's identity never escapes the engine, so cache can't diverge.
 func (ge *GameEngine) Discard(source string) bool {
 	c, ok := ge.popFirstHeldCard()
 	if !ok {
@@ -172,9 +155,8 @@ func (ge *GameEngine) Discard(source string) bool {
 	return true
 }
 
-// DiscardToTopOfDeck pops the first Held-role hand card to the top of the deck and
-// logs under source. Returns true on success. Cache-safe for the same reason as
-// Discard — identity never escapes.
+// DiscardToTopOfDeck pops the first Held-role hand card to the top of the deck and logs
+// under source. Cache-safe like Discard.
 func (ge *GameEngine) DiscardToTopOfDeck(source string) bool {
 	c, ok := ge.popFirstHeldCard()
 	if !ok {
@@ -185,8 +167,8 @@ func (ge *GameEngine) DiscardToTopOfDeck(source string) bool {
 	return true
 }
 
-// DiscardToBottomOfDeck pops the first Held-role hand card to the bottom of the deck
-// and logs under source. Returns true on success. Cache-safe.
+// DiscardToBottomOfDeck pops the first Held-role hand card to the bottom of the deck and
+// logs under source. Cache-safe.
 func (ge *GameEngine) DiscardToBottomOfDeck(source string) bool {
 	c, ok := ge.popFirstHeldCard()
 	if !ok {
@@ -198,8 +180,7 @@ func (ge *GameEngine) DiscardToBottomOfDeck(source string) bool {
 }
 
 // popFirstHeldCard removes the first Held-role hand entry and returns its Card. Drawn
-// entries are eligible — they're indistinguishable to the caller of the no-return
-// accessors above, so identity leakage isn't a concern at this layer.
+// entries are eligible — indistinguishable to no-return-card callers.
 func (ge *GameEngine) popFirstHeldCard() (card.Card, bool) {
 	for rawIdx := range ge.hand {
 		if ge.hand[rawIdx].Role != card.Held {

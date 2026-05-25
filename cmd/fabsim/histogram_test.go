@@ -6,9 +6,8 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
 )
 
-// TestBuildHistogramColumns_Stretch verifies the stretch regime: each integer value places a
-// single one-char bar at col (v-min)*slot, with slot-1 empty cols between bars so adjacent
-// values don't fuse into a solid block. Bar positions are uniform regardless of rng.
+// Tests the stretch regime: each integer value places one bar at col (v-min)*slot, with
+// slot-1 empty cols between so adjacent values don't fuse.
 func TestBuildHistogramColumns_Stretch(t *testing.T) {
 	// Three distinct values (min=0, max=2, range=3) at slot=3 → bars at cols 0, 3, 6 within
 	// the natural 7-wide stretch chart.
@@ -25,9 +24,7 @@ func TestBuildHistogramColumns_Stretch(t *testing.T) {
 	}
 }
 
-// TestBuildHistogramColumns_StretchSingleValueCentred covers the rng=1 edge: a deck that
-// only ever produced one distinct hand value has no range to distribute across, so the
-// lone bar renders centred rather than at col 0.
+// Tests that a single-value histogram renders its lone bar centred rather than at col 0.
 func TestBuildHistogramColumns_StretchSingleValueCentred(t *testing.T) {
 	hist := map[int]int{42: 7}
 	counts, peak := buildHistogramColumns(hist, 42, 42, 6)
@@ -46,8 +43,7 @@ func TestBuildHistogramColumns_StretchSingleValueCentred(t *testing.T) {
 	}
 }
 
-// TestBuildHistogramColumns_Compress verifies the "range > width" regime: when the data spans
-// more distinct integers than the chart is wide, adjacent values aggregate into the same
+// Tests that when value range exceeds chart width, adjacent values aggregate into the same
 // column so the chart stays a fixed width without dropping data.
 func TestBuildHistogramColumns_Compress(t *testing.T) {
 	// Values 0..9 across a 5-wide chart — each column aggregates two adjacent integers.
@@ -64,9 +60,7 @@ func TestBuildHistogramColumns_Compress(t *testing.T) {
 	}
 }
 
-// TestBuildHistogramColumns_EmptyRange covers the pre-evaluation guard: a deck with no hands
-// (min/max both zero, hist empty) gets a zero-filled column slice and a zero peak, so the
-// caller can short-circuit cleanly instead of divide-by-zero on peak.
+// Tests that an empty histogram returns a zero-filled column slice and zero peak.
 func TestBuildHistogramColumns_EmptyRange(t *testing.T) {
 	counts, peak := buildHistogramColumns(map[int]int{}, 0, 0, 5)
 	if peak != 0 {
@@ -80,10 +74,8 @@ func TestBuildHistogramColumns_EmptyRange(t *testing.T) {
 	}
 }
 
-// TestScaleBarHeights_ZeroStaysZero_NonZeroRoundsUp pins the visibility-floor contract: any
-// column with a non-zero count renders at least one row tall, even if its count would
-// proportionally round down to zero next to a much larger peak, so long-tail buckets don't
-// silently disappear.
+// Tests the visibility floor: any non-zero count renders at least one row, so long-tail
+// buckets next to a much larger peak don't disappear into 0-row rounding.
 func TestScaleBarHeights_ZeroStaysZero_NonZeroRoundsUp(t *testing.T) {
 	counts := []int{0, 1, 50, 100}
 	bars := scaleBarHeights(counts, 100, 10)
@@ -105,9 +97,8 @@ func TestScaleBarHeights_ZeroStaysZero_NonZeroRoundsUp(t *testing.T) {
 	}
 }
 
-// TestXAxisTicks_FullFiveOnWideRange verifies the happy path: a large-enough range across
-// the full chart width produces five ticks (min, lower quartile, midpoint, upper quartile,
-// max) in left-to-right order. min and max always anchor the ends.
+// Tests that a wide range across the full chart width yields five ticks (min, lower quartile,
+// midpoint, upper quartile, max) in left-to-right order.
 func TestXAxisTicks_FullFiveOnWideRange(t *testing.T) {
 	ticks := xAxisTicks(0, 59, 60)
 	if len(ticks) != 5 {
@@ -148,9 +139,8 @@ func TestXAxisTicks_DedupesNarrowRange(t *testing.T) {
 	}
 }
 
-// TestXAxisTickRow_LayoutCentresLabels pins the label placement: each tick label is centred on
-// its column (with edge ticks clipped inward to fit), and when labels would collide the
-// interior tick is dropped so min and max always render.
+// Tests that tick labels are centred on their columns, with edge ticks clipped inward and
+// colliding interior ticks dropped so min and max always render.
 func TestXAxisTickRow_LayoutCentresLabels(t *testing.T) {
 	ticks := xAxisTicks(0, 59, 60)
 	got := xAxisTickRow(ticks, 60)
@@ -166,9 +156,8 @@ func TestXAxisTickRow_LayoutCentresLabels(t *testing.T) {
 	}
 }
 
-// TestXAxisBaseline_MarksTickPositions covers the bottom-axis rendering: the leading "+"
-// sits under the y-axis, the body is dashes, and each interior tick gets an additional "+"
-// anchor aligned under its label.
+// Tests the bottom-axis rendering: leading "+" under the y-axis, dashes for the body, and a
+// "+" anchor at each interior tick position.
 func TestXAxisBaseline_MarksTickPositions(t *testing.T) {
 	ticks := xAxisTicks(0, 59, 60)
 	base := xAxisBaseline(ticks, 60)
@@ -190,9 +179,7 @@ func TestXAxisBaseline_MarksTickPositions(t *testing.T) {
 	}
 }
 
-// TestYAxisTickLabels_FourRowsOnTallPeak verifies that a peak comfortably above the height
-// emits the expected four-row label set: row 0 at the peak plus three interior quartile
-// rows at 3/4, 1/2, 1/4 of the peak.
+// Tests that a tall peak emits four label rows: the peak itself plus 3/4, 1/2, 1/4 of it.
 func TestYAxisTickLabels_FourRowsOnTallPeak(t *testing.T) {
 	ticks := yAxisTickLabels(1200, 12)
 	want := map[int]int{0: 1200, 3: 900, 6: 600, 9: 300}
@@ -206,10 +193,8 @@ func TestYAxisTickLabels_FourRowsOnTallPeak(t *testing.T) {
 	}
 }
 
-// TestColForValue_MatchesBarPositions pins the shared col-to-value mapping used by both
-// buildHistogramColumns (to place bars) and xAxisTicks (to place labels): identical math
-// in both callers is what keeps tick labels sitting directly under their bars rather than
-// drifting one or two columns off.
+// Tests colForValue across stretch, compress, and degenerate regimes so labels stay aligned
+// with their bars.
 func TestColForValue_MatchesBarPositions(t *testing.T) {
 	// Stretch regime: 15 distinct values at slot=3 → natural width 43, bars at (v-min)*3.
 	// minV lands at col 0 and maxV at col 42 = (rng-1)*slot.
@@ -229,9 +214,7 @@ func TestColForValue_MatchesBarPositions(t *testing.T) {
 	}
 }
 
-// TestYAxisTickLabels_CollapsesTinyPeak pins the dedup contract: when the peak is small
-// enough that multiple quartile rows would report the same integer value, only the first
-// occurrence is kept so the axis never prints duplicates.
+// Tests that a tiny peak collapses to a single label rather than printing duplicates.
 func TestYAxisTickLabels_CollapsesTinyPeak(t *testing.T) {
 	// Peak=1 over height=12: all interior quartiles compute to 0, so only row 0 survives.
 	ticks := yAxisTickLabels(1, 12)
@@ -243,10 +226,8 @@ func TestYAxisTickLabels_CollapsesTinyPeak(t *testing.T) {
 	}
 }
 
-// TestHistChartWidth pins the width-picking contract: stretch widens the chart to
-// (rng-1)*slot+1 cols so bars get a fixed slot-1 gap, ranges that would exceed
-// histMaxStretchWidth fall back to histWidth and the compress regime, and the single-value
-// range (rng <= 1) returns the full histWidth.
+// Tests histChartWidth across stretch, compress fallback, single-value, and degenerate
+// inputs.
 func TestHistChartWidth(t *testing.T) {
 	// Short range (15 values): stretch to 14*3+1 = 43 cols.
 	if got := histChartWidth(15); got != 43 {
@@ -270,10 +251,7 @@ func TestHistChartWidth(t *testing.T) {
 	}
 }
 
-// TestXAxisTicks_GuardsDegenerateInputs pins the two guard clauses: a zero-or-negative width
-// and an empty range (minV > maxV) both short-circuit to nil so upstream callers don't walk
-// a bogus tick slice. Neither case can occur today given histWidth=60 and the non-empty
-// Histogram check in printHistogram, but pinning it keeps future refactors honest.
+// Tests that xAxisTicks short-circuits to nil for non-positive width or empty range.
 func TestXAxisTicks_GuardsDegenerateInputs(t *testing.T) {
 	if ticks := xAxisTicks(0, 10, 0); ticks != nil {
 		t.Errorf("width=0 returned %v, want nil", ticks)
@@ -283,10 +261,8 @@ func TestXAxisTicks_GuardsDegenerateInputs(t *testing.T) {
 	}
 }
 
-// TestXAxisTickRow_CollisionDropsInteriorWinsMinMax pins the label-priority contract: when
-// a hand-crafted interior tick collides with min or max, the interior tick is dropped rather
-// than overwriting the anchor. min (col 0) and max (col width-1) are added to the buffer
-// first so their characters win any overlap.
+// Tests that an interior tick colliding with min or max is dropped rather than overwriting
+// the anchor.
 func TestXAxisTickRow_CollisionDropsInteriorWinsMinMax(t *testing.T) {
 	// Interior tick value deliberately placed at col 1 with a label wide enough to overlap
 	// the 4-character "1234" label anchored at col 0. width=10 leaves just enough room for
@@ -309,11 +285,8 @@ func TestXAxisTickRow_CollisionDropsInteriorWinsMinMax(t *testing.T) {
 	}
 }
 
-// TestUnionHistogramScale_StretchesAxesToCoverBoth pins the union math compare relies on for
-// matching axes: minV is the smaller of the two mins, maxV the larger, and peak the larger of
-// the two binned peaks under the union range. Each deck individually has a different range
-// and peak; the union spans both so the side-by-side charts can be read against identical
-// scales.
+// Tests that unionHistogramScale picks the wider min/max range and the larger of the two
+// peaks so side-by-side charts share identical scales.
 func TestUnionHistogramScale_StretchesAxesToCoverBoth(t *testing.T) {
 	// d1: values 9..21, peak 32135 — narrower range, taller peak.
 	// d2: values 7..27, peak 19723 — wider range, shorter peak.
@@ -338,9 +311,8 @@ func TestUnionHistogramScale_StretchesAxesToCoverBoth(t *testing.T) {
 	}
 }
 
-// TestCenterLabel centres a label within the chart width so the title reads under the centre
-// of the bar area. Labels longer than the width pass through unchanged rather than overflow
-// left.
+// Tests centerLabel: centred when shorter than width, left-biased on odd leftover, passed
+// through verbatim when longer.
 func TestCenterLabel(t *testing.T) {
 	if got := centerLabel("hi", 6); got != "  hi" {
 		t.Errorf("centerLabel(\"hi\", 6) = %q, want %q", got, "  hi")

@@ -8,11 +8,10 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapon"
 )
 
-// Pre-allocated scratch buffers threaded through the attack-evaluation pipeline (findBest
-// partition loop, bestAttackWithWeapons phase/weapon masks, bestSequence permutation
-// search). Pooled on the Evaluator so one sizing amortises across every hand a long-running
-// iterate pass evaluates. The engine state itself isn't pooled — each permutation runs
-// against a fresh leafEngine.Copy() so per-permutation mutations stay isolated.
+// Pre-allocated scratch threaded through the attack-evaluation pipeline (findBest, the
+// pmask/wmask loop, bestSequence). Pooled on the Evaluator so one sizing amortises across
+// every hand. Engine state isn't pooled — each permutation runs against a fresh leaf copy
+// so per-perm mutations stay isolated.
 
 // attackBufs holds the partition-level + chain-permutation scratch slices the search reuses
 // across calls. Sized at construction; the slice headers re-slice to [:n] per call.
@@ -20,10 +19,9 @@ type attackBufs struct {
 	// Chain-permutation scratch — pcBuf / ptrBuf back each chain step's CardState.
 	pcBuf  []card.CardState
 	ptrBuf []*card.CardState
-	// permMeta parallels pcBuf: each entry points into the global cardMetaCache so
-	// playSequence's inner loop skips interface dispatch on Types / GoAgain and reads
-	// cached cost bounds. Pointer-valued so bestSequence's permutation swaps move 8 bytes
-	// instead of a full struct.
+	// permMeta parallels pcBuf, each entry pointing into cardMetaCache so playSequence's
+	// inner loop skips interface dispatch on Types / GoAgain. Pointer-valued so perm swaps
+	// move 8 bytes instead of a full struct.
 	permMeta []*attackerMeta
 	// attackerBuf is the per-mask-combo working slice that bestAttackWithWeapons fills
 	// with the partition's attackers + the weapon-mask's selected weapons before handing
@@ -34,9 +32,8 @@ type attackBufs struct {
 	// weapon-prefix bits of the wmask, used for SwungWeapons display.
 	weaponNames [][]string
 	// activatedAbilities is the unified activated-ability list — weapons (positions
-	// 0..len(weapons)-1) materialised at construction; items appended per Best call from
-	// priorItems. Per-Best assembly re-slices back to the weapon prefix length before
-	// appending items, leaving the cached weapon entries reusable across calls.
+	// 0..len(weapons)-1) materialised at construction; items appended per Best call. Per-Best
+	// assembly re-slices to the weapon prefix before appending items.
 	activatedAbilities    []card.Card
 	activatedAbilityCosts []int
 	// weaponAbilityCount is len(weapons) at construction — the size of the cached weapon
@@ -61,40 +58,32 @@ type attackBufs struct {
 	defenseGravScratch []card.Card
 	// drCardStateScratch is a pooled *CardState handed to DR Card.Play calls.
 	drCardStateScratch card.CardState
-	// Per-permutation scratch recycled across every partition leaf the Best call evaluates.
-	// Each preparePermState rebinds these to the active leaf's state shape, so a single set
-	// of backings amortises across the whole findBest pass instead of per-leaf reallocation.
-	// pooledState is the active recycled *GameState; preparePermState calls
-	// CopyPersistentStateFrom(leafState) to rewrite it for the current leaf's perm. The
-	// promoteWinnerState path clears this so the next perm allocates a fresh state and the
-	// winner stays untouched.
+	// Per-permutation scratch recycled across every partition leaf. preparePermState rebinds
+	// these to the active leaf's state shape so backings amortise across findBest.
+	// pooledState is the active recycled *GameState; promoteWinnerState clears it so the
+	// next perm allocates a fresh state and the winner stays untouched.
 	pooledState *gameengine.GameState
 	// pooledDeck is the recycled *Deck wrapper; preparePermState rebinds its slice headers
 	// to alias ctx.deck. The winning perm's wrapper is cloned out via promoteWinnerDeck so
 	// the next perm can rebind safely.
 	pooledDeck *deck.Deck
-	// pooledLeafDeck is the per-leaf scratch *Deck wrapper. ShallowCopied from the master
-	// deck at the start of each leaf (and per pmask in the modal-blocker path) before
-	// runDefense, so DR Plays that mutate the deck (Rise Above's PrependToDeck, an Opt-ing
-	// DR, etc.) hit this wrapper instead of the master shared across leaves. ctx.deck is
-	// rebound to point at this wrapper so preparePermState's ShallowCopyFrom propagates the
-	// post-DR deck state into the per-perm chain.
+	// pooledLeafDeck is the per-leaf scratch *Deck wrapper, ShallowCopied from the master
+	// deck before runDefense so DR Plays (Rise Above's PrependToDeck, an Opt-ing DR, …)
+	// mutate it instead of the shared master. ctx.deck rebinds to this wrapper so
+	// preparePermState's ShallowCopyFrom propagates the post-DR state into the per-perm chain.
 	pooledLeafDeck *deck.Deck
-	// pooledEngine wraps the active permState; rebound per perm so chain runs use a single
-	// engine wrapper. The wrapper holds no state of its own; no caller stashes ge across
-	// perms.
+	// pooledEngine wraps the active permState; rebound per perm. The wrapper itself holds
+	// no state, and no caller stashes ge across perms.
 	pooledEngine *gameengine.GameEngine
-	// pooledHandBuf / pooledGravBuf back the per-perm hand and graveyard slices.
-	// preparePermState rebuilds them via append into [:0] and SetHand / SetGraveyard them
-	// on the pool state; mid-chain growth allocates fresh backing without trampling these.
-	// promoteWinnerState clones the winner's hand and graveyard so the next reset can't
-	// scribble the winning state.
+	// pooledHandBuf / pooledGravBuf back the per-perm hand / graveyard. preparePermState
+	// rebuilds them via append into [:0] and installs them on the pool state; mid-chain
+	// growth allocates fresh. promoteWinnerState clones the winner's slices so the next
+	// reset can't scribble them.
 	pooledHandBuf []card.CardState
 	pooledGravBuf []card.Card
-	// pooledCardsPlayedBuf backs the per-perm cardsPlayed accumulator. The chain runner
-	// appends to it via AppendCardsPlayed every chain step; pooling skips one allocation
-	// per perm (first append spawns a fresh backing otherwise) plus growth events.
-	// promoteWinnerState clones the winner's slice when the winner aliases this backing.
+	// pooledCardsPlayedBuf backs the per-perm cardsPlayed accumulator (AppendCardsPlayed
+	// per step). Pooling skips one allocation per perm plus growth. promoteWinnerState
+	// clones it when the winner aliases this backing.
 	pooledCardsPlayedBuf []card.Card
 	// runDefenseDRGravBuf and runDefenseChainGravBuf back the two graveyard views the
 	// defense pass installs on leafState: the DR-loop view (just defenders) and the

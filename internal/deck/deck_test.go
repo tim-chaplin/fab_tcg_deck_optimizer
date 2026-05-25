@@ -158,10 +158,8 @@ func TestRandom_BuildsLegalDeckWithinCopyBudget(t *testing.T) {
 	}
 }
 
-// TestShuffle_RandomisesCardsInPlace pins Shuffle's two-part contract: the post-shuffle
-// multiset equals the pre-shuffle multiset (no card additions or losses), and at least
-// one position changes between two seeds (proving the shuffle isn't a no-op). Mutation
-// in place means callers expecting the old order must Copy() first.
+// Tests Shuffle's two-part contract: post-shuffle multiset equals the pre-shuffle multiset,
+// and at least one position changes between two seeds (proving it isn't a no-op).
 func TestShuffle_RandomisesCardsInPlace(t *testing.T) {
 	master := New(nil, nil, []Card{
 		fakeCard{id: 1}, fakeCard{id: 2}, fakeCard{id: 3}, fakeCard{id: 4},

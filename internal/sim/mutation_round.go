@@ -1,22 +1,15 @@
 package sim
 
-// Mutation-round runner: RunMutationRound walks a list of candidate mutations and applies
-// the Metropolis acceptance rule on each, returning the first acceptance. The function is
-// generic — any "evaluate this batch of decks under SA-style acceptance" workload fits.
+// Mutation-round runner: RunMutationRound walks candidate mutations and applies the
+// Metropolis acceptance rule, returning the first acceptance.
 //
-// Two independent parallelism knobs:
-//
-//   - mutationWorkers fans the mutation queue across N goroutines pulling from a shared
-//     FIFO channel; each worker evaluates one mutation end-to-end. The round's Cache is
-//     shared so lookup work pools across mutations.
+// Two parallelism knobs:
+//   - mutationWorkers fans the mutation queue across N goroutines (shared FIFO channel);
+//     each worker evaluates one mutation end-to-end. Round Cache is shared.
 //   - shuffleWorkers fans every per-mutation Evaluate's shuffle loop across W goroutines.
 //
-// (mutationWorkers, shuffleWorkers) shapes:
-//   - (1, W): mutations run sequentially, shuffles fan across W. Single-deck workloads.
-//   - (M, 1): mutations run in parallel, each shuffle-single-threaded. Anneal default
-//     when M independent evals fit the core count.
-//   - (M, W): both layers active. M×W can exceed core count — oversubscription useful
-//     when shuffle workers stall on a barrier and free up cores for sibling mutations.
+// Shapes: (1, W) for single-deck workloads, (M, 1) for parallel mutations, (M, W) for both
+// (oversubscription helps when shuffle workers stall on a barrier).
 
 import (
 	"context"
@@ -56,42 +49,32 @@ type deckEvalConfig struct {
 	precision      float64
 }
 
-// RunMutationRound runs one mutation-round pass. mutationWorkers goroutines pull mutation
-// indices from a shared FIFO queue, evaluate each with a per-worker Evaluator pointing at
-// the round's shared Cache, and apply the Metropolis acceptance gate. The first worker to
-// land an acceptable mutation wins; the others are cancelled.
+// RunMutationRound runs one mutation-round pass. mutationWorkers pull indices from a shared
+// FIFO queue, evaluate each via a per-worker Evaluator on the round's shared Cache, and
+// apply the Metropolis acceptance gate. First acceptance wins; the others cancel.
 //
-// Defaults (passed as 0): mutationWorkers=1, shuffleWorkers=DefaultWorkers(). The
-// (1, DefaultWorkers()) shape wins the worker_sweep benchmark on adaptive Viserai by
-// ~20% over (DefaultWorkers(), 1) — sequential mutations let the cache fill with one
-// deck's hand multisets at a time (~70% hit rate within a mutation), and the per-shuffle
-// barrier balances variance better than the per-mutation queue.
+// Defaults (0): mutationWorkers=1, shuffleWorkers=DefaultWorkers(). The (1, DefaultWorkers())
+// shape wins the worker_sweep benchmark on adaptive Viserai by ~20% — sequential mutations
+// let the cache fill with one deck's hand multisets at a time (~70% hit rate within a
+// mutation), and the per-shuffle barrier balances variance better than per-mutation queues.
 //
-// Cache: every worker shares one round-scoped Cache, so cross-mutation hand multisets
-// share work. The cache's RWMutex serialises stores but lookups remain parallel. The
-// cache is dropped when the function returns, capping memory at one round's worth.
+// Cache is round-scoped and shared across workers, then dropped on return. RWMutex
+// serialises stores; lookups remain parallel.
 //
-// Annealing: at temperature == 0 only strict improvements clearing the minImprovement
-// margin are accepted (hill climb with noise floor). At temperature > 0 worse mutations
-// are also accepted with probability exp((avg - baseline) / temperature) — the
-// Metropolis-style SA gate bypasses minImprovement so the SA walk retains its
-// escape-local-maxima behaviour even when the floor is non-zero.
+// Annealing: at temperature == 0 only strict improvements clearing minImprovement pass
+// (hill climb with noise floor). At temperature > 0, worse mutations pass with probability
+// exp((avg - baseline) / temperature) — the SA gate bypasses minImprovement to keep
+// escape-local-maxima behaviour. minImprovement=0 disables the floor.
 //
-// minImprovement is the noise floor on strict improvements. Pass 0 to disable.
+// FIFO pull order makes earliest-position-wins usually hold, but a stuck early worker
+// doesn't block later positions from occasionally winning first.
 //
-// FIFO pull order makes earliest-position-wins generally hold, but a stuck worker at
-// position 20 doesn't block position 25 — a later position can occasionally win first.
-//
-// bestAvg is the SA "current state" (not the all-time best). seed is a base; worker w uses
-// a derived stream. completed is an optional live-progress counter. adaptive=true stops
-// per-mutation evals early at the requested precision (SE ≤ precision/4), capped by
-// deck.adaptiveShufflesCap. precision is ignored when adaptive=false.
+// bestAvg is the SA current state (not all-time best). adaptive=true stops per-mutation
+// evals early at precision (SE ≤ precision/4), capped by deck.adaptiveShufflesCap. cache,
+// when non-nil, is the hand-eval cache for every shuffle this round; nil allocates one.
 //
 // Returns (acceptedDeck, acceptedStats, acceptedAvg, acceptedIndex, true) on first
-// acceptance, or (nil, zero, bestAvg, -1, false) on no-acceptance or ctx cancellation.
-//
-// cache, when non-nil, is the hand-eval cache used by every shuffle in this round.
-// Nil constructs a fresh per-round cache.
+// acceptance, or (nil, zero, bestAvg, -1, false) on no acceptance / cancellation.
 func RunMutationRound(
 	ctx context.Context,
 	mutations []deck.Mutation,
@@ -108,8 +91,7 @@ func RunMutationRound(
 	cache *Cache,
 ) (*deck.Deck, deck.Stats, float64, int, bool) {
 	if mutationWorkers <= 0 {
-		// 1 mutation worker is the empirical default — see the BenchmarkAnnealWorkerSweep
-		// table on the RunMutationRound docstring for the rationale.
+		// 1 worker is the empirical default — see the RunMutationRound docstring.
 		mutationWorkers = 1
 	}
 	if shuffleWorkers <= 0 {
@@ -122,10 +104,8 @@ func RunMutationRound(
 	innerCtx, cancel := context.WithCancel(ctx)
 	defer cancel()
 
-	// Buffer sized to mutationWorkers so every worker can land an acceptance without
-	// blocking even if all of them race past cancellation simultaneously — only the
-	// first one drained by the coordinator's select wins, the rest are GC'd with the
-	// channel.
+	// Buffer = mutationWorkers so every worker can land an acceptance without blocking
+	// even if all race past cancellation; only the first drain by the coordinator wins.
 	improvementCh := make(chan mutationImprovement, mutationWorkers)
 
 	jobs := make(chan int, len(mutations))
@@ -182,10 +162,9 @@ func RunMutationRound(
 	}
 }
 
-// runDeckEvalWorker pulls mutation indices from jobs, evaluates the corresponding deck,
-// and on a passing result sends a mutationImprovement and cancels the shared context.
-// Each worker owns private scratch but shares the round's Cache. Returns when jobs is
-// drained or the context is cancelled.
+// runDeckEvalWorker pulls mutation indices from jobs, evaluates each deck, and on a passing
+// result sends a mutationImprovement and cancels the shared context. Private scratch,
+// shared cache. Returns on jobs drain or context cancellation.
 func runDeckEvalWorker(
 	ctx context.Context,
 	cancel context.CancelFunc,
@@ -229,10 +208,9 @@ func runDeckEvalWorker(
 	}
 }
 
-// DefaultWorkers returns the recommended worker count for this CPU-bound workload. Capping
-// at physical cores beats defaulting to GOMAXPROCS by ~20% on a typical consumer CPU (SMT
-// siblings fight for cache and execution units rather than adding throughput). Clamped by
-// GOMAXPROCS so a lower user/cgroup override wins.
+// DefaultWorkers returns the recommended worker count: physical cores (SMT siblings cost
+// ~20% throughput on this CPU-bound workload), clamped by GOMAXPROCS so user / cgroup
+// overrides win.
 func DefaultWorkers() int { return defaultWorkers() }
 
 func defaultWorkers() int {
@@ -244,14 +222,12 @@ func defaultWorkers() int {
 	return physical
 }
 
-// acceptMutation implements the Metropolis acceptance rule with a noise-floor guard.
-// Strict improvements clearing the minImprovement margin always pass. Worse-or-marginal
-// mutations pass with probability exp((deepAvg - bestAvg) / T) when T > 0; at T == 0
-// they're rejected (hill-climb).
+// acceptMutation is the Metropolis acceptance rule with a noise-floor guard. Strict
+// improvements clearing minImprovement always pass. Worse / marginal pass with
+// probability exp((deepAvg - bestAvg) / T) when T > 0, else rejected.
 //
-// minImprovement guards against shuffle-noise infinite loops where repeated near-zero
-// "wins" keep accepting. The probabilistic gate intentionally ignores it so SA can still
-// walk through ties / shallow dips to escape local maxima.
+// minImprovement guards against shuffle-noise loops of near-zero "wins". The probabilistic
+// gate ignores it so SA can still walk through ties / shallow dips.
 func acceptMutation(deepAvg, bestAvg, temperature, minImprovement float64, rng *rand.Rand) bool {
 	if deepAvg > bestAvg+minImprovement {
 		return true

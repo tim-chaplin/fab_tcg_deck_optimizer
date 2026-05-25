@@ -6,19 +6,15 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapon"
 )
 
-// GameState owns the raw per-turn data — every slice, every scalar, every flag the
-// engine reads or writes during a chain run. Internal machinery (sim's per-permutation
-// scratch, snapshots that carry into the next turn, the find-best winning pointer) holds
-// *GameState because it cares about the data, not the rules. GameEngine wraps a
-// *GameState and adds the rules-engine API cards see; the unexported fields stay
-// package-private so external callers can only touch them through methods.
+// GameState owns the raw per-turn data — every slice, scalar, and flag the engine reads or
+// writes during a chain run. Internal machinery (per-permutation scratch, cross-turn
+// snapshots, the find-best winning pointer) holds *GameState; GameEngine wraps it and adds
+// the rules-engine API cards see. Unexported fields are touched only through methods.
 //
-// Fields split into two groups: cross-turn carryover (hero, weapons, hand, deck, arsenal,
-// graveyard, banished, auras, items, opponentMarked, isMyTurn, incomingDamage,
-// arcaneIncomingDamage) and the ephemeral struct holding every per-turn-resolution scratch
-// field. ephemeral.reset zeroes the whole group in one statement (with the four
-// non-zero-reset defaults baked in) so a new per-turn field added to ephemeral can't leak
-// across turn boundaries.
+// Fields split into cross-turn carryover (hero, weapons, hand, deck, arsenal, graveyard,
+// banished, auras, items, opponentMarked, isMyTurn, incomingDamage, arcaneIncomingDamage)
+// and the ephemeral struct of per-turn-resolution scratch. ephemeral.reset zeroes that
+// group in one statement, so a new per-turn field can't leak across turn boundaries.
 type GameState struct {
 	hero    Hero
 	weapons []weapon.Weapon // currently-equipped weapons; persistent across turns
@@ -41,10 +37,8 @@ type GameState struct {
 }
 
 // ephemeral groups per-turn-resolution scratch — every field a chain run accumulates or
-// overwrites. reset zeroes the whole struct in a single statement; the four fields whose
-// reset value is non-zero (actionPoints, currentHookIdx, cacheable, logger) get reseated
-// in the same literal. Adding a new ephemeral field is a one-line change here — there's
-// nowhere to forget.
+// overwrites. reset zeroes the whole struct in one statement, with the four non-zero
+// defaults (actionPoints, currentHookIdx, cacheable, logger) reseated in the same literal.
 type ephemeral struct {
 	cardsPlayed    []card.Card
 	cardsRemaining []*card.CardState
@@ -62,11 +56,9 @@ type ephemeral struct {
 	damageBlocked  int
 	blockTotal     int
 	currentHookIdx int
-	// cardsRemovedFromDeck counts deck → non-deck card movements during this chain
-	// resolution (mid-chain draws, tutors, deck-top peek-and-banish, etc.). The
-	// hand-eval cache stores this count alongside the cached chain and refuses to
-	// replay against a deck shallower than the count — the cached chain consumed N
-	// cards from deck, so any replay needs at least N to remain identical.
+	// cardsRemovedFromDeck counts deck → non-deck movements during this chain (draws,
+	// tutors, peek-and-banish, etc.). The hand-eval cache stores it and refuses to replay
+	// against a shallower deck — the cached chain consumed N cards, so replay needs ≥ N.
 	cardsRemovedFromDeck int
 
 	cardBanished          bool
@@ -82,10 +74,9 @@ type ephemeral struct {
 	hasCrowdBooed         bool
 }
 
-// reset returns e to its start-of-turn baseline: every field zero except the four with
-// non-zero defaults (actionPoints=1, currentHookIdx=-1, cacheable=true, logger=NoopLogger).
-// Aura / item FiredThisTurn flags live on the aura / item entries themselves and are
-// rearmed by GameState.ResetEphemeralState's separate loop.
+// reset returns e to its start-of-turn baseline: every field zero except actionPoints=1,
+// currentHookIdx=-1, cacheable=true, logger=NoopLogger. Aura / item FiredThisTurn flags
+// live on the entries themselves and are rearmed by ResetEphemeralState's separate loop.
 func (e *ephemeral) reset() {
 	*e = ephemeral{
 		actionPoints:   1,
@@ -101,11 +92,9 @@ func (e *ephemeral) reset() {
 func (gs *GameState) Engine() *GameEngine { return &GameEngine{GameState: gs} }
 
 // Copy returns a deep copy of gs. Slice and *deck.Deck fields get fresh backing storage;
-// Aura / Item entries are deep-copied via their Copy() methods so per-permutation
-// Count / FiredThisTurn mutations stay isolated. Triggers are effectively immutable after
-// construction, so only the slice header is duplicated. Logger is reset to nil — the
-// caller installs a fresh per-clone logger when recording, leaving find-best copies
-// allocation-free.
+// Aura / Item entries are deep-copied so per-permutation Count / FiredThisTurn mutations
+// stay isolated. Triggers are effectively immutable, so only the slice header duplicates.
+// Logger resets to nil — the caller installs a fresh per-clone logger when recording.
 func (gs *GameState) Copy() *GameState {
 	out := *gs
 	out.hand = appendCopy(nil, gs.hand)
@@ -133,11 +122,10 @@ func (gs *GameState) Copy() *GameState {
 	return &out
 }
 
-// CopyFrom rewrites *gs in place to match what src.Copy() would produce. Reuses
-// the receiver's slice and *deck.Deck backings when capacity permits so a pool slot can
-// stand in for repeated per-Best masterState.Copy() allocations. Auras and items are
-// deep-copied per entry via CopyInto on the pooled slot when present, so the pool
-// amortises both the *GameState alloc and the per-entry *Aura / *Item allocs.
+// CopyFrom rewrites *gs in place to match what src.Copy() would produce. Reuses the
+// receiver's slice / deck backings when capacity permits so a pool slot stands in for
+// repeated masterState.Copy() allocations. Auras / items deep-copy per entry into the
+// pool, amortising both the *GameState alloc and the per-entry *Aura / *Item allocs.
 func (gs *GameState) CopyFrom(src *GameState) {
 	pooledHand := gs.hand
 	pooledGrav := gs.graveyard
@@ -192,11 +180,10 @@ func (gs *GameState) CopyFrom(src *GameState) {
 	}
 }
 
-// copyAurasInto returns a per-entry deep copy of src, reusing pool's backing slice when
-// capacity permits and reaching for CopyInto on each prior-slot entry so concrete *Aura
-// allocations are rewritten in place rather than replaced. Empty src returns nil to match
-// the Copy() path's nil-on-empty semantics; a nil pool falls through to a fresh Copy()
-// per entry (CopyInto's contract on a nil dst).
+// copyAurasInto returns a per-entry deep copy of src, reusing pool's backing when capacity
+// permits and calling CopyInto on each prior-slot entry to rewrite *Aura allocations in
+// place. Empty src returns nil (matches Copy()'s nil-on-empty); a nil pool falls through
+// to a fresh Copy() per entry.
 func copyAurasInto(pool, src []Aura) []Aura {
 	n := len(src)
 	if n == 0 {

@@ -216,12 +216,9 @@ type GameEngine interface {
 }
 
 // Logger is the cards-facing log sink the chain runner threads through every Card hook.
-//
-// Cards use AppendPostTrigger / AppendPostTriggerf for self-riders ("Created a runechant"),
-// AppendPreTrigger for hero or aura attack-action triggers. The AppendChainStep /
-// AppendChainStepf / AmendLastChainStepN trio is sim-internal — used by ResolveChainStep,
-// the Opt helper, and GrantAttackReactionBuff — but lives on Logger so both call sites
-// share the same value.
+// Cards use AppendPostTrigger* for self-riders and AppendPreTrigger* for hero / aura
+// attack-action triggers. AppendChainStep* / AmendLastChainStepN are sim-internal but live
+// here so both call sites share one value.
 type Logger interface {
 	AppendChainStep(text string, n int)
 	AppendChainStepf(n int, format string, args ...any)

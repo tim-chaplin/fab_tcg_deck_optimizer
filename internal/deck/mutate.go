@@ -1,24 +1,15 @@
 package deck
 
-// Mutation enumeration for the anneal-mode hill climb. Every alternative weapon loadout,
-// every (remove one, add one) single-card swap, and every paired (-1/-1, +1/+1) synergy
-// swap a deck admits. Ordering is by ascending ids.CardID for stability — no value-based
-// bias. The anneal driver shuffles the returned slice each round so exploration order is
-// unbiased.
+// Mutation enumeration for the anneal hill climb. Emits every alternative weapon loadout,
+// every (remove one, add one) single-card swap, and every (-1/-1, +1/+1) synergy pair swap
+// a deck admits. Order is ascending ids.CardID for stability; the anneal driver shuffles
+// the returned slice each round to debias exploration.
 //
-// CARD PAIRS:
-// A pair is two CardGroups (variant lists). The pair generator enumerates the cross-product
-// of (deck-index pair) × (firstVariant, secondVariant) — every position pair in the deck
-// times every variant combination — so duplicate cards at distinct positions can both be
-// removed in one mutation (e.g. a deck of [HocusPocusBlue, HocusPocusBlue] swapping both
-// copies for a Sun Kiss / Moon Wish pair). Single-slot remains the primary mutation source;
-// pair mutations add the orthogonal "atomic 2-for-2 swap" the single-slot generator can't
-// express.
-//
-// Sun Kiss / Moon Wish is the pilot pairing: the synergy reads any Moon Wish printing in
-// CardsPlayed by name prefix, so any (Moon Wish variant, Sun Kiss variant) combination is
-// a legal pair entry; we register both card groups and let the cross-product enumeration
-// cover all 9 variant pairings.
+// CARD PAIRS: a pair is two CardGroups (variant lists). The pair generator enumerates the
+// cross-product of (deck-index pair) × (firstVariant, secondVariant), so duplicates at
+// distinct positions can both be removed in one mutation. Pair mutations express the
+// "atomic 2-for-2 swap" the single-slot generator can't, the escape hatch for synergies
+// whose halves are individually weaker than competitors. See CardPairs.
 
 import (
 	"fmt"
@@ -36,34 +27,17 @@ type Mutation struct {
 }
 
 // AllMutations returns every single-card and pair mutation of d in a deterministic order:
-// first every alternative weapon loadout (sorted by loadout key), then every (removeID,
-// addID) pair where one copy of removeID is dropped and one copy of addID is added, then
-// the synergy-pair "swap two for two" mutations. removeID must be in the deck. Pairs with
-// removeID == addID are skipped.
+// alternative weapon loadouts (sorted), then (removeID, addID) single swaps, then synergy
+// pair swaps. removeID must be in the deck; removeID==addID is skipped. Ascending-CardID
+// ordering for stability — anneal shuffles the result.
 //
-// Card-mutation ordering is by ascending ids.CardID for stability — no value-based bias.
-// The anneal driver shuffles the returned slice each round so neither the first-found
-// classical climb nor the probabilistic SA gate disproportionately samples the head of the
-// slice.
+// Single-card swaps let the climber reach odd per-card counts (1×X + 3×Y at maxCopies=3).
+// The pair layer is the orthogonal escape hatch for synergies whose halves are weaker than
+// competitors individually.
 //
-// Single-card swaps (not paired swaps) let the hill climber reach decks with odd per-card
-// counts (e.g. 1× X + 3× Y at maxCopies=3). The pair-swap layer is the orthogonal escape
-// hatch for synergies whose halves are individually weaker than competitors and would never
-// enter the deck via single-slot mutations alone — see CardPairs.
-//
-// reg supplies the legal card and weapon rosters; legal optionally filters reg's cards
-// (format ban check). Removal targets aren't filtered — a deck that entered the climb
-// holding a banned card can still have it swapped out. legal=nil disables the format
-// filter.
-//
-// maxCopies is enforced by filterMaxCopiesViolations as a final post-pass over the combined
-// candidate list — both single-slot and pair generators emit cap-blind candidates and the
-// shared filter strips any whose result deck exceeds the per-printing limit.
-//
-// includePairs gates the pair-swap layer; pass false to skip it entirely and emit only
-// weapon-loadout and single-swap mutations.
-//
-// Returned decks share no backing slices with d or each other.
+// reg supplies the legal pool; banned cards in the deck can still be swapped out. maxCopies
+// is enforced by a final post-pass — both generators emit cap-blind candidates. includePairs
+// gates the pair layer. Returned decks share no backing slices.
 func AllMutations(d *Deck, maxCopies int, includePairs bool, reg Registry) []Mutation {
 	pool := buildLegalByID(reg)
 	out := weaponLoadoutMutations(d, reg)
@@ -74,9 +48,8 @@ func AllMutations(d *Deck, maxCopies int, includePairs bool, reg Registry) []Mut
 	return filterMaxCopiesViolations(out, maxCopies)
 }
 
-// buildLegalByID materialises the registry's legal pool as an ID→Card map plus the IDs
-// in ascending order for stable iteration. The map gives the mutation generators an O(1)
-// "is this swap-in eligible" check without re-scanning the registry on every candidate.
+// buildLegalByID materialises the registry's legal pool as an ID→Card map plus IDs in
+// ascending order. The map gives generators O(1) "is this swap-in eligible" checks.
 func buildLegalByID(reg Registry) legalCardPool {
 	cards := reg.LegalCards()
 	pool := legalCardPool{
@@ -90,9 +63,8 @@ func buildLegalByID(reg Registry) legalCardPool {
 	return pool
 }
 
-// legalCardPool is the materialised view of the registry's legal pool the per-mutation
-// generators iterate over. ids is the ascending-ID list for stable enumeration; byID
-// resolves an ID to its Card for the swap-in side of every emitted mutation.
+// legalCardPool is the materialised view of the registry's legal pool. ids is the
+// ascending-ID list for stable enumeration; byID resolves an ID for the swap-in side.
 type legalCardPool struct {
 	byID map[ids.CardID]Card
 	ids  []ids.CardID
