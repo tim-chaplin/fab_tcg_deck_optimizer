@@ -47,8 +47,9 @@ func GameStateBuilder() *StateBuilder {
 // Build returns the configured *GameState.
 func (b *StateBuilder) Build() *GameState { return b.gs }
 
-// SetHero installs h as the active hero.
-func (b *StateBuilder) SetHero(h Hero) *StateBuilder { b.gs.hero = h; return b }
+// SetHero installs h as the active hero. Routes through GameState.SetHero so the cached
+// heroTriggerType stays in sync.
+func (b *StateBuilder) SetHero(h Hero) *StateBuilder { b.gs.SetHero(h); return b }
 
 // SetWeapons installs the equipped weapons. Persistent across turns; mid-game equip /
 // unequip card abilities mutate via GameState.SetWeapons.
