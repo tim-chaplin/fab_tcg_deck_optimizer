@@ -477,7 +477,7 @@ func (ctx *sequenceContext) runDefense(defenders, pitched, held []card.Card, dec
 	}
 	state.SetDeck(deckPile)
 	state.SetIncomingDamage(matchupIncomingDamage)
-	ge := state.Engine()
+	ge := ctx.permEngine(state)
 	cs := &ctx.bufs.drCardStateScratch
 
 	// defModes captures each defender's resolved blocker mode, parallel to defenders. DRs
