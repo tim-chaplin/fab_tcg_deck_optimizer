@@ -10,8 +10,8 @@ import (
 )
 
 // minnowismIsTarget gates the rider on attack action cards with printed power 3 or less.
-func minnowismIsTarget(_ card.GameEngine, pc *card.CardState) bool {
-	return pc.Card.Types(nil).IsAttackAction() && pc.Card.Attack() <= 3
+func minnowismIsTarget(ge card.GameEngine, pc *card.CardState) bool {
+	return pc.EffectiveTypes(ge).IsAttackAction() && pc.Card.Attack() <= 3
 }
 
 func (MinnowismRed) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {

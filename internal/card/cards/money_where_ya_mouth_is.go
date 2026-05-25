@@ -20,7 +20,7 @@ func moneyWhereYaMouthIsWagerOnHit(ge card.GameEngine, l card.Logger, target *ca
 func moneyWhereYaMouthIsPlay(ge card.GameEngine, l card.Logger, self *card.CardState, source card.Card, n int) {
 	GrantNextCardBonusAttack(ge, n, card.IsAttack)
 	for _, pc := range ge.CardsRemaining() {
-		if pc.Card.Types(nil).IsAttack() {
+		if pc.EffectiveTypes(ge).IsAttack() {
 			pc.OnHit = append(pc.OnHit, card.OnHitHandler{
 				Fire:   moneyWhereYaMouthIsWagerOnHit,
 				Source: source,

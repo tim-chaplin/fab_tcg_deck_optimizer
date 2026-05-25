@@ -117,39 +117,40 @@ func (s TypeSet) IsResource() bool {
 
 // IsAttack matches any scheduled attack — action card OR weapon swing — for "your next
 // attack" wording. Pairs with helpers that take a `func(GameEngine, *CardState) bool`
-// predicate.
-func IsAttack(_ GameEngine, pc *CardState) bool {
-	return pc.Card.Types(nil).IsAttack()
+// predicate. Uses EffectiveTypes so ModalTypes cards (Tip-Off mode 1) report their mode-
+// resolved type-line, not the static printed one.
+func IsAttack(ge GameEngine, pc *CardState) bool {
+	return pc.EffectiveTypes(ge).IsAttack()
 }
 
 // IsAttackAction matches scheduled attack action cards (excludes weapon swings) for "the
 // next attack action card" wording.
-func IsAttackAction(_ GameEngine, pc *CardState) bool {
-	return pc.Card.Types(nil).IsAttackAction()
+func IsAttackAction(ge GameEngine, pc *CardState) bool {
+	return pc.EffectiveTypes(ge).IsAttackAction()
 }
 
 // IsRunebladeAttack matches scheduled Runeblade attacks (action or weapon) for "your next
 // Runeblade attack" wording. Engine threaded through so Universal cards fold the active
 // hero's class into their Types.
 func IsRunebladeAttack(ge GameEngine, pc *CardState) bool {
-	return pc.Card.Types(ge).IsRunebladeAttack()
+	return pc.EffectiveTypes(ge).IsRunebladeAttack()
 }
 
 // IsWeaponAttack matches scheduled weapon-swing attacks — not attack action cards — for
 // "your next weapon attack" wording.
-func IsWeaponAttack(_ GameEngine, pc *CardState) bool {
-	return pc.Card.Types(nil).IsWeaponAttack()
+func IsWeaponAttack(ge GameEngine, pc *CardState) bool {
+	return pc.EffectiveTypes(ge).IsWeaponAttack()
 }
 
 // IsSwordAttack matches scheduled Sword attacks — weapon swings or attack cards carrying
 // the Sword type — for "your next sword attack" wording.
-func IsSwordAttack(_ GameEngine, pc *CardState) bool {
-	t := pc.Card.Types(nil)
+func IsSwordAttack(ge GameEngine, pc *CardState) bool {
+	t := pc.EffectiveTypes(ge)
 	return t.Has(TypeAttack) && t.Has(TypeSword)
 }
 
 // IsNonAttackAction matches scheduled non-attack action cards — Actions that are not
 // Attacks — for "your next non-attack action card" wording.
-func IsNonAttackAction(_ GameEngine, pc *CardState) bool {
-	return pc.Card.Types(nil).IsNonAttackAction()
+func IsNonAttackAction(ge GameEngine, pc *CardState) bool {
+	return pc.EffectiveTypes(ge).IsNonAttackAction()
 }

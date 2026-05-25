@@ -13,7 +13,7 @@ import (
 // gated on base power 3 or less.
 func trotAlongApplySideEffect(ge card.GameEngine) {
 	for _, pc := range ge.CardsRemaining() {
-		if !pc.Card.Types(nil).IsAttack() {
+		if !pc.EffectiveTypes(ge).IsAttack() {
 			continue
 		}
 		if pc.Card.Attack() <= 3 {

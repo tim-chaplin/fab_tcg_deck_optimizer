@@ -3,12 +3,12 @@
 //
 // Text: "**Instant** - Discard this: **Mark** target opposing hero."
 //
-// Modal modelling of the Instant activation: mode 0 is the printed attack (cost 1, full
-// power); mode 1 is the Instant-discard activation, modelled as cost 0, zeroes the attack
-// damage (via BonusAttack), marks the opponent, and grants Go Again so the action point is
-// refunded (so the chain slot is effectively free). The mark survives the chain-runner's
-// per-attack OpponentMarked clear because that clear is gated on the attack having positive
-// EffectiveAttack — mode 1's 0-damage swing leaves the mark intact for downstream readers.
+// Modelled as a two-mode card where mode 1's type-line is "Generic Instant" instead of the
+// printed "Generic Action - Attack" (via card.ModalTypes). The engine reads the per-mode
+// type-line: mode 1 pays 0 AP (Instant is a free chain step), credits no attack damage,
+// doesn't clear OpponentMarked, and won't match "next attack action card" predicates
+// scanning CardsRemaining. Play just marks the opponent — the rest falls out of the type
+// dispatch.
 
 package cards
 
@@ -16,13 +16,20 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 )
 
+var tipOffInstantTypes = card.NewTypeSet(card.TypeGeneric, card.TypeInstant)
+
+func tipOffTypesForMode(_ card.GameEngine, mode int8) card.TypeSet {
+	if mode == 0 {
+		return tipOffTypes
+	}
+	return tipOffInstantTypes
+}
+
 func tipOffPlay(ge card.GameEngine, l card.Logger, self *card.CardState) {
 	if self.Mode == 0 {
 		return
 	}
-	self.BonusAttack -= self.Card.Attack()
 	ge.MarkOpponent()
-	self.GrantedGoAgain = true
 }
 
 func tipOffModalCost(mode int8) int {
@@ -34,18 +41,27 @@ func tipOffModalCost(mode int8) int {
 
 func (TipOffRed) Modes() int              { return 2 }
 func (TipOffRed) ModalCost(mode int8) int { return tipOffModalCost(mode) }
+func (TipOffRed) TypesForMode(g card.GameEngine, m int8) card.TypeSet {
+	return tipOffTypesForMode(g, m)
+}
 func (TipOffRed) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
 	tipOffPlay(ge, l, self)
 }
 
 func (TipOffYellow) Modes() int              { return 2 }
 func (TipOffYellow) ModalCost(mode int8) int { return tipOffModalCost(mode) }
+func (TipOffYellow) TypesForMode(g card.GameEngine, m int8) card.TypeSet {
+	return tipOffTypesForMode(g, m)
+}
 func (TipOffYellow) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
 	tipOffPlay(ge, l, self)
 }
 
 func (TipOffBlue) Modes() int              { return 2 }
 func (TipOffBlue) ModalCost(mode int8) int { return tipOffModalCost(mode) }
+func (TipOffBlue) TypesForMode(g card.GameEngine, m int8) card.TypeSet {
+	return tipOffTypesForMode(g, m)
+}
 func (TipOffBlue) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
 	tipOffPlay(ge, l, self)
 }

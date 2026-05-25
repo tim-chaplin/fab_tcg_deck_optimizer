@@ -130,6 +130,18 @@ func (p *CardState) GrantGoAgainIfFromArsenal() {
 	}
 }
 
+// EffectiveTypes returns the type-line this CardState resolves with for its chosen mode.
+// Cards that implement ModalTypes (per-mode type-line) get the mode-dispatched TypeSet;
+// every other card falls back to the static Card.Types(g). Use this whenever a predicate
+// reads types from a *CardState — buffers scanning CardsRemaining, predicates inspecting
+// the actively-resolving card, etc. — so the mode-aware result lands.
+func (p *CardState) EffectiveTypes(g GameEngine) TypeSet {
+	if mt, ok := p.Card.(ModalTypes); ok {
+		return mt.TypesForMode(g, p.Mode)
+	}
+	return p.Card.Types(g)
+}
+
 // EffectiveAttack returns Attack() + BonusAttack, clamped at 0. An attack's power can't
 // be reduced below 0 in FaB. Cards with "if this hits" clauses pass this into LikelyToHit
 // so the rider fires off the post-clamp value.
