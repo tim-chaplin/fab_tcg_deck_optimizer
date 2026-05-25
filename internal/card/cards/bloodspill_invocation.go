@@ -30,9 +30,7 @@ func (BloodspillInvocationBlue) Play(ge card.GameEngine, l card.Logger, self *ca
 // on DamageTaken — then destroys the aura.
 func bloodspillInvocationAuraHandler(ge card.GameEngine, l card.Logger, a card.Aura) {
 	if ge.TriggeringCard() != nil {
-		n := a.Count()
-		ge.CreateRunechants(n)
-		l.AppendPostTriggerf(a.CardName(), n, "Created %d runechants", n)
+		createRunechantsAndLog(ge, l, a.CardName(), a.Count())
 	}
 	a.Destroy(true)
 }

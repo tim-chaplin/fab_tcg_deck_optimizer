@@ -9,16 +9,13 @@ import (
 )
 
 func (SpellbladeAssaultRed) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
-	ge.CreateRunechants(2)
-	l.AppendPostTrigger(self.Card.DisplayName(), "Created 2 runechants", 2)
+	createRunechantsAndLog(ge, l, self.Card.DisplayName(), 2)
 }
 
 func (SpellbladeAssaultYellow) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
-	ge.CreateRunechants(2)
-	l.AppendPostTrigger(self.Card.DisplayName(), "Created 2 runechants", 2)
+	createRunechantsAndLog(ge, l, self.Card.DisplayName(), 2)
 }
 
 func (SpellbladeAssaultBlue) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
-	ge.CreateRunechants(2)
-	l.AppendPostTrigger(self.Card.DisplayName(), "Created 2 runechants", 2)
+	createRunechantsAndLog(ge, l, self.Card.DisplayName(), 2)
 }

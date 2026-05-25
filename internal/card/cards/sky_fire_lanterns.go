@@ -19,8 +19,7 @@ func skyFireLanternsPlay(ge card.GameEngine, l card.Logger, self *card.CardState
 	if !ok || top.Pitch() != selfPitch {
 		return
 	}
-	ge.CreateRunechants(1)
-	l.AppendPostTrigger(self.Card.DisplayName(), "Created a runechant", 1)
+	createRunechantsAndLog(ge, l, self.Card.DisplayName(), 1)
 }
 
 func (c SkyFireLanternsRed) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {

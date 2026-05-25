@@ -16,6 +16,5 @@ func (SigilOfDeadwoodBlue) Play(ge card.GameEngine, l card.Logger, self *card.Ca
 
 // OnLeavesArena runs the "when this leaves the arena" clause: create 1 Runechant.
 func (c SigilOfDeadwoodBlue) OnLeavesArena(g card.GameEngine, l card.Logger) {
-	g.CreateRunechants(1)
-	l.AppendPostTrigger(c.DisplayName(), "Created a runechant", 1)
+	createRunechantsAndLog(g, l, c.DisplayName(), 1)
 }

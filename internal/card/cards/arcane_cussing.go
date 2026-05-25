@@ -42,6 +42,5 @@ func arcaneCussingLeavesArena(g card.GameEngine, l card.Logger, name string, n i
 	if !g.IsMyTurn() {
 		return
 	}
-	g.CreateRunechants(n)
-	l.AppendPostTriggerf(name, n, "Created %d runechants", n)
+	createRunechantsAndLog(g, l, name, n)
 }

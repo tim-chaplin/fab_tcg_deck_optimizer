@@ -29,8 +29,7 @@ func (ReduceToRunechantRed) MinCost() int                { return 0 }
 func (ReduceToRunechantRed) MaxCost() int                { return reduceToRunechantPrintedCost }
 
 func (ReduceToRunechantRed) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
-	ge.CreateRunechants(1)
-	l.AppendPostTrigger(self.Card.DisplayName(), "Created a runechant", 1)
+	createRunechantsAndLog(ge, l, self.Card.DisplayName(), 1)
 }
 
 func (ReduceToRunechantYellow) Cost(ge card.GameEngine) int { return reduceToRunechantCost(ge) }
@@ -38,8 +37,7 @@ func (ReduceToRunechantYellow) MinCost() int                { return 0 }
 func (ReduceToRunechantYellow) MaxCost() int                { return reduceToRunechantPrintedCost }
 
 func (ReduceToRunechantYellow) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
-	ge.CreateRunechants(1)
-	l.AppendPostTrigger(self.Card.DisplayName(), "Created a runechant", 1)
+	createRunechantsAndLog(ge, l, self.Card.DisplayName(), 1)
 }
 
 func (ReduceToRunechantBlue) Cost(ge card.GameEngine) int { return reduceToRunechantCost(ge) }
@@ -47,6 +45,5 @@ func (ReduceToRunechantBlue) MinCost() int                { return 0 }
 func (ReduceToRunechantBlue) MaxCost() int                { return reduceToRunechantPrintedCost }
 
 func (ReduceToRunechantBlue) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
-	ge.CreateRunechants(1)
-	l.AppendPostTrigger(self.Card.DisplayName(), "Created a runechant", 1)
+	createRunechantsAndLog(ge, l, self.Card.DisplayName(), 1)
 }

@@ -11,16 +11,13 @@ import (
 )
 
 func (ReadTheRunesRed) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
-	ge.CreateRunechants(3)
-	l.AppendPostTrigger(self.Card.DisplayName(), "Created 3 runechants", 3)
+	createRunechantsAndLog(ge, l, self.Card.DisplayName(), 3)
 }
 
 func (ReadTheRunesYellow) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
-	ge.CreateRunechants(2)
-	l.AppendPostTrigger(self.Card.DisplayName(), "Created 2 runechants", 2)
+	createRunechantsAndLog(ge, l, self.Card.DisplayName(), 2)
 }
 
 func (ReadTheRunesBlue) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
-	ge.CreateRunechants(1)
-	l.AppendPostTrigger(self.Card.DisplayName(), "Created a runechant", 1)
+	createRunechantsAndLog(ge, l, self.Card.DisplayName(), 1)
 }

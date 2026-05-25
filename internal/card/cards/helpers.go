@@ -64,3 +64,20 @@ func GrantNextCardInstant(ge card.GameEngine, match func(card.GameEngine, *card.
 		}
 	}
 }
+
+// --- Runechant helpers ---
+
+// createRunechantsAndLog creates n Runechants and emits the canonical "Created [a|N]
+// runechant[s]" post-trigger line attributed to source. No-op when n <= 0, matching
+// GameEngine.CreateRunechants so callers can pass a computed count without guarding.
+func createRunechantsAndLog(ge card.GameEngine, l card.Logger, source string, n int) {
+	if n <= 0 {
+		return
+	}
+	ge.CreateRunechants(n)
+	if n == 1 {
+		l.AppendPostTrigger(source, "Created a runechant", 1)
+		return
+	}
+	l.AppendPostTriggerf(source, n, "Created %d runechants", n)
+}

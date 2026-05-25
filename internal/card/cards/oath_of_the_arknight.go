@@ -24,6 +24,5 @@ func (OathOfTheArknightBlue) Play(ge card.GameEngine, l card.Logger, self *card.
 // oathPlay grants +n to the first scheduled Runeblade attack, then creates one Runechant.
 func oathPlay(ge card.GameEngine, l card.Logger, self *card.CardState, bonus int) {
 	GrantNextCardBonusAttack(ge, bonus, card.IsRunebladeAttack)
-	ge.CreateRunechants(1)
-	l.AppendPostTrigger(self.Card.DisplayName(), "Created a runechant", 1)
+	createRunechantsAndLog(ge, l, self.Card.DisplayName(), 1)
 }

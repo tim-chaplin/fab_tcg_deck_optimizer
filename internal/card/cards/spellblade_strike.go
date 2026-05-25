@@ -9,16 +9,13 @@ import (
 )
 
 func (SpellbladeStrikeRed) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
-	ge.CreateRunechants(1)
-	l.AppendPostTrigger(self.Card.DisplayName(), "Created a runechant", 1)
+	createRunechantsAndLog(ge, l, self.Card.DisplayName(), 1)
 }
 
 func (SpellbladeStrikeYellow) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
-	ge.CreateRunechants(1)
-	l.AppendPostTrigger(self.Card.DisplayName(), "Created a runechant", 1)
+	createRunechantsAndLog(ge, l, self.Card.DisplayName(), 1)
 }
 
 func (SpellbladeStrikeBlue) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
-	ge.CreateRunechants(1)
-	l.AppendPostTrigger(self.Card.DisplayName(), "Created a runechant", 1)
+	createRunechantsAndLog(ge, l, self.Card.DisplayName(), 1)
 }

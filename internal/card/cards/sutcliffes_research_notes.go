@@ -23,8 +23,7 @@ func sutcliffesResearchNotesPlay(ge card.GameEngine, l card.Logger, self *card.C
 			count++
 		}
 	}
-	ge.CreateRunechants(count)
-	l.AppendPostTriggerf(self.Card.DisplayName(), count, "Created %d runechants", count)
+	createRunechantsAndLog(ge, l, self.Card.DisplayName(), count)
 }
 
 func (SutcliffesResearchNotesRed) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {

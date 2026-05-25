@@ -41,7 +41,6 @@ func deathlyDuetApplyRiders(ge card.GameEngine, l card.Logger, self *card.CardSt
 		self.BonusAttack += 2
 	}
 	if nonAttackActionPitched {
-		ge.CreateRunechants(2)
-		l.AppendPostTrigger(self.Card.DisplayName(), "Created 2 runechants", 2)
+		createRunechantsAndLog(ge, l, self.Card.DisplayName(), 2)
 	}
 }
