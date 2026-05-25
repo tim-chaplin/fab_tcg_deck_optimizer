@@ -144,7 +144,7 @@ func bestAttackWithWeapons(
 		// No defenders, so runDefense doesn't run — but unblocked incoming damage still
 		// fires DamageTaken so auras destroyed by taking damage leave the arena.
 		ctx.leafState.SetIsMyTurn(false)
-		ctx.leafState.Engine().FireTriggers(triggertype.DamageTaken, nil)
+		ctx.permEngine(ctx.leafState).FireTriggers(triggertype.DamageTaken, nil)
 	}
 	ctx.leafState.SetDeck(nil)
 	defenseDealt := defenseDealtConst

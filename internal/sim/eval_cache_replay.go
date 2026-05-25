@@ -104,7 +104,7 @@ func (e *Evaluator) replaySolution(
 		defenseDealt, _, ctx.handStart = ctx.runDefense(defs, p, h, ctx.deck, incoming, noBlockBudgetCap, arsenalDefenderIdx, entry.defenders)
 	} else if incoming > 0 {
 		ctx.leafState.SetIsMyTurn(false)
-		ctx.leafState.Engine().FireTriggers(triggertype.DamageTaken, nil)
+		ctx.permEngine(ctx.leafState).FireTriggers(triggertype.DamageTaken, nil)
 	}
 	ctx.leafState.SetDeck(nil)
 	ctx.seedPoolGravBuf(len(entry.attackOrder), len(ctx.attackPitchPerm))
