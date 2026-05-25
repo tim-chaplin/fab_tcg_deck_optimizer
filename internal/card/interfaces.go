@@ -96,8 +96,9 @@ type GameEngine interface {
 	SilverCount() int
 	CopperCount() int
 
-	// Status tokens on our hero. Opposing-side state isn't tracked — the For-Opponent
-	// mints credit a flat heuristic value via AddValue instead of touching state.
+	// Status tokens. Self-side readers; opposing-side state isn't tracked, so the
+	// For-Opponent mints credit a flat heuristic value via AddValue instead of touching
+	// state.
 	FrailtyCount() int
 	InertiaCount() int
 	BloodrotPoxCount() int
