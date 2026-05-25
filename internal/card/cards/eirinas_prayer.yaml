@@ -5,7 +5,8 @@ types:
 cost: 1
 text: |-
     Reveal the top card of your deck. Prevent the next X arcane damage that would be dealt to
-    your hero this turn, where X is 6 minus the pitch value of the card revealed this way.
+    your hero this turn, where X is N minus the pitch value of the card revealed this way.
+    (Red N=6, Yellow N=5, Blue N=4.)
 variants:
     - id: EirinasPrayerRed
       pitch: 1

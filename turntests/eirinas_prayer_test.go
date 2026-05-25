@@ -57,3 +57,38 @@ func TestEirinasPrayer_PreventionCapsAtRemainingArcane(t *testing.T) {
 			summary.Value, formatBestLine(summary.BestLine))
 	}
 }
+
+// Tests the per-color N value: Yellow uses N=5 (not the Red N=6). Deck top pitch 2 →
+// X = 5 - 2 = 3; arcane incoming = 5 → prevented = 3.
+func TestEirinasPrayerYellow_UsesN5(t *testing.T) {
+	d := deck.New(heroes.Viserai, nil, []deck.Card{testutils.FakeYellowResource()})
+	hand := []card.Card{cards.EirinasPrayerYellow{}, testutils.FakeBlueResource()}
+	initial := gameengine.GameStateBuilder().
+		SetIncomingDamage(2).
+		SetArcaneIncomingDamage(5).
+		Build()
+
+	summary := sim.EvalOneTurnForTesting(d, initial, hand)
+
+	if summary.Value != 3 {
+		t.Errorf("Value = %d, want 3 (Yellow N=5, deck-top pitch 2 → X=3)\nBestLine: %s",
+			summary.Value, formatBestLine(summary.BestLine))
+	}
+}
+
+// Tests the per-color N value: Blue uses N=4. Deck top pitch 1 → X = 4 - 1 = 3.
+func TestEirinasPrayerBlue_UsesN4(t *testing.T) {
+	d := deck.New(heroes.Viserai, nil, []deck.Card{testutils.FakeRedResource()})
+	hand := []card.Card{cards.EirinasPrayerBlue{}, testutils.FakeBlueResource()}
+	initial := gameengine.GameStateBuilder().
+		SetIncomingDamage(2).
+		SetArcaneIncomingDamage(5).
+		Build()
+
+	summary := sim.EvalOneTurnForTesting(d, initial, hand)
+
+	if summary.Value != 3 {
+		t.Errorf("Value = %d, want 3 (Blue N=4, deck-top pitch 1 → X=3)\nBestLine: %s",
+			summary.Value, formatBestLine(summary.BestLine))
+	}
+}
