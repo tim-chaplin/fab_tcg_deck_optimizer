@@ -690,13 +690,16 @@ var ChainStepText = func(pc *card.CardState) string {
 // DealArcaneDamage credits n arcane damage to Value, writes a "Dealt n arcane damage" rider
 // line under source, and flips ArcaneDamageDealt when LikelyDamageHits(n, false) approves
 // so same-turn triggers reading "if you've dealt arcane damage this turn" fire. Routes
-// through dealtArcaneText to avoid per-call fmt.Sprintf and variadic-int boxing. When the
-// damage lands it also clears OpponentMarked — mark is consumed by any damage the marked
-// hero takes, arcane included.
+// through dealtArcaneText to avoid per-call fmt.Sprintf and variadic-int boxing. Any
+// positive arcane damage also clears OpponentMarked — mark is consumed by any damage the
+// marked hero takes, gated the same way as the physical-attack clear (positive damage,
+// not LikelyDamageHits).
 func (ge *GameEngine) DealArcaneDamage(l card.Logger, source string, n int) {
 	ge.AddValue(n)
 	if ge.LikelyDamageHits(n, false) {
 		ge.arcaneDamageDealt = true
+	}
+	if n > 0 {
 		ge.opponentMarked = false
 	}
 	if n >= 0 && n < len(dealtArcaneText) {
