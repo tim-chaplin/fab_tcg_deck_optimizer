@@ -77,15 +77,6 @@ func (m *attackerMeta) typesWithMode(mode int8) card.TypeSet {
 	return m.types
 }
 
-// isAttackWithMode reports whether the card-at-mode is an attack chain step. Reads the
-// per-mode TypeSet for ModalTypes cards; falls through to the cached isAttack otherwise.
-func (m *attackerMeta) isAttackWithMode(mode int8) bool {
-	if m.isModalTypes {
-		return m.typesByMode[mode].Has(card.TypeAttack)
-	}
-	return m.isAttack
-}
-
 // isFreeChainStepWithMode reports whether the card-at-mode resolves without paying an
 // AP. Reads the per-mode TypeSet for ModalTypes cards; falls through to the cached
 // isFreeChainStep otherwise.

@@ -149,9 +149,6 @@ func (b *StateBuilder) SetArcaneIncomingDamage(n int) *StateBuilder {
 	return b
 }
 
-// SetBlockTotal replaces the partition's uncapped defense sum.
-func (b *StateBuilder) SetBlockTotal(n int) *StateBuilder { b.gs.blockTotal = n; return b }
-
 // SetAttackReactionTarget installs the buff target for the AR resolving next.
 func (b *StateBuilder) SetAttackReactionTarget(cs *card.CardState) *StateBuilder {
 	b.gs.attackReactionTarget = cs
