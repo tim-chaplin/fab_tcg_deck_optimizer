@@ -4,8 +4,6 @@ types:
     - Action
 cost: 0
 goAgain: true
-markers:
-    - NotImplemented
 text: |-
     Look at target opponent's hand then name a card. Choose a random card from their hand and
     reveal it. If it's the named card, create a Silver token. Repeat this process thrice. **Go
