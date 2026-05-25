@@ -92,7 +92,6 @@ func (ge *GameEngine) insertHandSorted(c card.Card) {
 	ge.hand[i] = card.CardState{Card: c, Role: card.Held}
 }
 
-
 // Graveyard returns the live graveyard slice and flips IsCacheable to false.
 func (ge *GameEngine) Graveyard() []card.Card {
 	ge.cacheable = false
@@ -691,11 +690,14 @@ var ChainStepText = func(pc *card.CardState) string {
 // DealArcaneDamage credits n arcane damage to Value, writes a "Dealt n arcane damage" rider
 // line under source, and flips ArcaneDamageDealt when LikelyDamageHits(n, false) approves
 // so same-turn triggers reading "if you've dealt arcane damage this turn" fire. Routes
-// through dealtArcaneText to avoid per-call fmt.Sprintf and variadic-int boxing.
+// through dealtArcaneText to avoid per-call fmt.Sprintf and variadic-int boxing. When the
+// damage lands it also clears OpponentMarked — mark is consumed by any damage the marked
+// hero takes, arcane included.
 func (ge *GameEngine) DealArcaneDamage(l card.Logger, source string, n int) {
 	ge.AddValue(n)
 	if ge.LikelyDamageHits(n, false) {
 		ge.arcaneDamageDealt = true
+		ge.opponentMarked = false
 	}
 	if n >= 0 && n < len(dealtArcaneText) {
 		l.AppendPostTrigger(source, dealtArcaneText[n], n)
