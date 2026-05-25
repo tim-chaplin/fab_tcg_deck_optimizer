@@ -96,12 +96,8 @@ type GameEngine interface {
 	SilverCount() int
 	CopperCount() int
 
-	// Status tokens. Self-side readers; opposing-side state isn't tracked, so the
-	// For-Opponent mints credit a flat heuristic value via AddValue instead of touching
-	// state.
-	FrailtyCount() int
-	InertiaCount() int
-	BloodrotPoxCount() int
+	// Status-token mints under the opponent's control. Opposing-side state isn't tracked
+	// — these credit a flat heuristic value via AddValue instead of touching state.
 	CreateFrailtyForOpponent()
 	CreateInertiaForOpponent()
 	CreateBloodrotPoxForOpponent()

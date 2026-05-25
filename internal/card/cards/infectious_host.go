@@ -4,11 +4,12 @@
 // Text: "When this attacks a hero, if you control a Frailty token, create a Frailty token under
 // their control, then repeat for Inertia and Bloodrot Pox."
 //
-// Each clause gates on us controlling the matching status token and mints the same kind on
-// the opponent. CreateXForOpponent credits a flat heuristic value via AddValue; we don't
-// track opposing-side status-token state. Today no card grants self-side Frailty / Inertia /
-// Bloodrot Pox, so all three gates start false — the framework is in place for future
-// self-side granters.
+// The spread rider isn't modelled: no implemented card grants the active player Frailty,
+// Inertia, or Bloodrot Pox tokens (it's a sideboard answer to opponents that play them),
+// so the gates never fire and the card behaves like a vanilla 4/3/2 attack. The opposing-
+// side mint plumbing (CreateFrailtyForOpponent / CreateInertiaForOpponent /
+// CreateBloodrotPoxForOpponent) exists for cards that mint these tokens directly on the
+// opponent.
 
 package cards
 
@@ -16,30 +17,6 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 )
 
-func infectiousHostPlay(ge card.GameEngine, l card.Logger, self *card.CardState) {
-	source := self.Card.DisplayName()
-	if ge.FrailtyCount() > 0 {
-		ge.CreateFrailtyForOpponent()
-		l.AppendPostTrigger(source, "Spread a Frailty token to opponent", 0)
-	}
-	if ge.InertiaCount() > 0 {
-		ge.CreateInertiaForOpponent()
-		l.AppendPostTrigger(source, "Spread an Inertia token to opponent", 0)
-	}
-	if ge.BloodrotPoxCount() > 0 {
-		ge.CreateBloodrotPoxForOpponent()
-		l.AppendPostTrigger(source, "Spread a Bloodrot Pox token to opponent", 0)
-	}
-}
-
-func (InfectiousHostRed) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
-	infectiousHostPlay(ge, l, self)
-}
-
-func (InfectiousHostYellow) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
-	infectiousHostPlay(ge, l, self)
-}
-
-func (InfectiousHostBlue) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
-	infectiousHostPlay(ge, l, self)
-}
+func (InfectiousHostRed) Play(ge card.GameEngine, l card.Logger, self *card.CardState)    {}
+func (InfectiousHostYellow) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {}
+func (InfectiousHostBlue) Play(ge card.GameEngine, l card.Logger, self *card.CardState)   {}

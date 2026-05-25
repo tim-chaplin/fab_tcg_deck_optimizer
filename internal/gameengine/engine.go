@@ -794,13 +794,6 @@ func (ge *GameEngine) GoldCount() int      { return itemCountByName(ge.items, to
 func (ge *GameEngine) SilverCount() int    { return itemCountByName(ge.items, tokenNameSilver) }
 func (ge *GameEngine) CopperCount() int    { return itemCountByName(ge.items, tokenNameCopper) }
 
-// FrailtyCount / InertiaCount / BloodrotPoxCount return the self-side status-token count.
-// Currently no card grants these so they return zero — the wrappers exist so the
-// card-facing GameEngine interface has the same shape it will once a self-side granter lands.
-func (ge *GameEngine) FrailtyCount() int     { return ge.GameState.FrailtyCount() }
-func (ge *GameEngine) InertiaCount() int     { return ge.GameState.InertiaCount() }
-func (ge *GameEngine) BloodrotPoxCount() int { return ge.GameState.BloodrotPoxCount() }
-
 // CreateFrailtyForOpponent / CreateInertiaForOpponent / CreateBloodrotPoxForOpponent credit
 // the matching damage-equivalent heuristic when a status token is created under the
 // opponent's control. We don't track opposing status-token state, so these are flat value
