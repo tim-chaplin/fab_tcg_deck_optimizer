@@ -3,12 +3,10 @@
 // Text: "**Go again** When this enters the arena, {t} target Pirate hero or ally. It can't {u}
 // while this is in the arena. At the start of your turn, destroy this."
 
-package notimplemented
+package unplayable
 
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 )
-
-// not implemented: passive tap-target Pirate; can't unfreeze; self-destroys at start of turn
 
 func (ClapEmInIronsBlue) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {}
