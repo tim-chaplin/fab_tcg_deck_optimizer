@@ -406,9 +406,9 @@ func (ctx *sequenceContext) promoteWinnerDeck(winner *gameengine.GameState) {
 
 // promoteWinnerState hands off ctx.bufs.pooledState to bestWinner so the next permutation's
 // CopyPersistentStateFrom doesn't trample it. The pool pointer is cleared; next perm
-// reallocates a fresh state via CopyPersistentState. Wins are rare relative to losses
-// (best-of-N! permutations), so the recycled-on-loss path is the common case and the
-// allocation only happens once per new best.
+// reallocates a fresh state via new(GameState) + CopyPersistentStateFrom. Wins are rare
+// relative to losses (best-of-N! permutations), so the recycled-on-loss path is the common
+// case and the allocation only happens once per new best.
 //
 // Also clones the winner's hand and graveyard so the next preparePermState's reseed
 // can't trample the winning permutation's recorded state. The clones are unconditional
@@ -638,13 +638,15 @@ func (ctx *sequenceContext) preparePermState(playedAttackers []*card.CardState, 
 		if bufs.recycledState != nil {
 			bufs.pooledState = bufs.recycledState
 			bufs.recycledState = nil
-			bufs.pooledState.CopyPersistentStateFrom(ctx.leafState)
 		} else {
-			bufs.pooledState = ctx.leafState.CopyPersistentState()
+			// Zero-struct + CopyPersistentStateFrom skips the graveyard / banished deep
+			// clones CopyPersistentState would do. The hot path overwrites graveyard via
+			// SetGraveyard below, and banished's [:n:n] alias forces a fresh backing on
+			// the first BanishFromGraveyard append.
+			bufs.pooledState = new(gameengine.GameState)
 		}
-	} else {
-		bufs.pooledState.CopyPersistentStateFrom(ctx.leafState)
 	}
+	bufs.pooledState.CopyPersistentStateFrom(ctx.leafState)
 	s := bufs.pooledState
 	s.ResetEphemeralState()
 	s.SetValue(ctx.startOfTurnValue)

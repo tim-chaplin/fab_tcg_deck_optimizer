@@ -137,7 +137,8 @@ type attackBufs struct {
 	// superseded by a better permutation. Its hand/graveyard/cardsPlayed/banished are the
 	// independent clones promoteWinnerState produced for the prior winner, so the struct
 	// can be recycled into pooledState without trampling any live state. preparePermState
-	// drains this slot before falling back to leafState.CopyPersistentState().
+	// drains this slot before falling back to a zero-struct allocation seeded via
+	// CopyPersistentStateFrom.
 	recycledState *gameengine.GameState
 	// Cache-solution scratch: seqAttack/seqPitch hold the winning attacker order+modes and
 	// pitch order, defModes the per-defender blocker modes. partSolution folds them in for
