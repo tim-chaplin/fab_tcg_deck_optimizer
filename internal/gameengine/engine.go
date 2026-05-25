@@ -467,7 +467,7 @@ func panicIfOptViolatesMultiset(in, top, bottom []card.Card) {
 // is actually found — so the common per-card fire with no subscribers stays off the Types
 // interface-dispatch path.
 func (ge *GameEngine) FireTriggers(t triggertype.Type, triggeringCard card.Card) {
-	heroFires := ge.hero != nil && ge.hero.TriggerType()&t != 0
+	heroFires := ge.heroTriggerType&t != 0
 	if !heroFires && len(ge.auras) == 0 && len(ge.triggers) == 0 && len(ge.items) == 0 {
 		return
 	}

@@ -3,6 +3,7 @@ package gameengine
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/triggertype"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapon"
 )
 
@@ -16,8 +17,11 @@ import (
 // and the ephemeral struct of per-turn-resolution scratch. ephemeral.reset zeroes that
 // group in one statement, so a new per-turn field can't leak across turn boundaries.
 type GameState struct {
-	hero    Hero
-	weapons []weapon.Weapon // currently-equipped weapons; persistent across turns
+	hero Hero
+	// heroTriggerType caches hero.TriggerType() so FireTriggers can gate the hero fire on a
+	// field read instead of a per-event interface dispatch. SetHero keeps it in sync.
+	heroTriggerType triggertype.Type
+	weapons         []weapon.Weapon // currently-equipped weapons; persistent across turns
 
 	hand      []card.CardState // role-tagged; each entry carries its partition role
 	deck      *deck.Deck       // owned scratch; refilled on Reset via CopyFrom
@@ -333,7 +337,14 @@ func (gs *GameState) ResetEphemeralState() {
 // === Pure state accessors. No cacheable flips; sim uses these to drive the chain runner. ===
 
 func (gs *GameState) Hero() Hero                   { return gs.hero }
-func (gs *GameState) SetHero(h Hero)               { gs.hero = h }
+func (gs *GameState) SetHero(h Hero) {
+	gs.hero = h
+	if h != nil {
+		gs.heroTriggerType = h.TriggerType()
+	} else {
+		gs.heroTriggerType = 0
+	}
+}
 func (gs *GameState) Weapons() []weapon.Weapon     { return gs.weapons }
 func (gs *GameState) SetWeapons(w []weapon.Weapon) { gs.weapons = w }
 func (gs *GameState) IsCacheable() bool            { return gs.cacheable }
