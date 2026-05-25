@@ -158,12 +158,6 @@ func bestAttackWithWeapons(
 	bestDefenseDealt := defenseDealtConst
 	bestDefenseCacheable := defenseCacheableConst
 
-	// Seed pooledGravBuf's prefix with leafState's graveyard once per Best call. The chain
-	// runner only appends past the prefix so it stays intact across perms; preparePermState
-	// just re-slices to the prefix length. Modal-blocker leaves re-seed inside the wmask
-	// loop after each runDefense rewrites leafGrav. Sized for worst-case mid-chain growth.
-	ctx.seedPoolGravBuf(len(attackers)+len(ctx.activatedAbilities), len(pitched))
-
 	pitchedVals := bufs.pitchedValsScratch[:0]
 	for _, c := range pitched {
 		pitchedVals = append(pitchedVals, c.Pitch())
@@ -238,7 +232,6 @@ func bestAttackWithWeapons(
 			// phase.defendBudget, so the defense pass runs once per phase here.
 			installLeafDeck(ctx, bufs, d)
 			defenseDealt, defenseCacheable, ctx.handStart = ctx.runDefense(defenders, pitched, held, ctx.deck, incoming, phase.defendBudget-drCost, arsenalDefenderIdx, nil)
-			ctx.seedPoolGravBuf(len(attackers)+len(ctx.activatedAbilities), len(attackPitchPerm))
 		}
 
 		for wmask := 0; wmask < totalAbilityMasks; wmask++ {
@@ -355,23 +348,6 @@ type sequenceContext struct {
 	permState *gameengine.GameState
 }
 
-// seedPoolGravBuf grows bufs.pooledGravBuf if needed, copies leafState.Graveyard() into its
-// prefix, and slices to that length. preparePermState reuses the prefix verbatim across all
-// permutations. maxChainAttackers + maxPitchPerm size the trailing headroom required to keep
-// AppendGraveyard alloc-free.
-func (ctx *sequenceContext) seedPoolGravBuf(maxChainAttackers, maxPitchPerm int) {
-	bufs := ctx.bufs
-	leafGrav := ctx.leafState.Graveyard()
-	gravNeeded := len(leafGrav) + maxChainAttackers + maxPitchPerm
-	if cap(bufs.pooledGravBuf) < gravNeeded {
-		bufs.pooledGravBuf = make([]card.Card, len(leafGrav), gravNeeded)
-		copy(bufs.pooledGravBuf, leafGrav)
-		return
-	}
-	bufs.pooledGravBuf = bufs.pooledGravBuf[:len(leafGrav)]
-	copy(bufs.pooledGravBuf, leafGrav)
-}
-
 // permEngine returns ctx.bufs.pooledEngine with its embedded *GameState rebound to state.
 // Lazily allocates the wrapper on first call.
 func (ctx *sequenceContext) permEngine(state *gameengine.GameState) *gameengine.GameEngine {
@@ -395,33 +371,6 @@ func (ctx *sequenceContext) promoteWinnerDeck(winner *gameengine.GameState) {
 		return
 	}
 	winner.SetDeck(winnerDeck.ShallowCopy())
-}
-
-// promoteWinnerState clones the winner's graveyard / banished into independent backings
-// so the next preparePermState — which would rewrite the shared graveyard scratch the
-// winner aliases (and leafState's banished [:n:n] alias) — can't trample them.
-//
-// Hand and cardsPlayed already live on the winner's own pooled GameState backing (see
-// preparePermState) and the statePool keeps the winner out of circulation until the
-// consumer drops it, so neither needs a per-promotion clone.
-func (ctx *sequenceContext) promoteWinnerState(winner *gameengine.GameState) {
-	if winner == nil {
-		return
-	}
-	if g := winner.Graveyard(); len(g) > 0 {
-		winner.SetGraveyard(cloneCardSlice(g))
-	}
-	if b := winner.Banished(); len(b) > 0 {
-		winner.SetBanished(cloneCardSlice(b))
-	}
-}
-
-// cloneCardSlice returns an independent backing copy of src. Callers should gate on
-// len(src) > 0 when they want to preserve the field's existing slice header on empty.
-func cloneCardSlice[T any](src []T) []T {
-	out := make([]T, len(src))
-	copy(out, src)
-	return out
 }
 
 // appendExcludingMultiset appends src to dst, skipping the first occurrence of each card in
@@ -571,7 +520,8 @@ func (ctx *sequenceContext) runDefense(defenders, pitched, held []card.Card, dec
 	// phase, EXCLUDING any defender a DR banished — those cards already moved to banished, and
 	// duplicating them in graveyard would let BanishFromGraveyard / RecycleFromGraveyard see
 	// a phantom copy. runDefenseChainGravBuf is recycled across runDefense calls; per-perm
-	// the slice gets copied into bufs.pooledGravBuf so leafState's aliasing is safe.
+	// preparePermState's CopyPersistentStateFrom copies this slice into the perm slot's own
+	// graveyard backing, so the alias here only outlives the defense pass.
 	chainGraveyard := append(ctx.bufs.runDefenseChainGravBuf[:0], ctx.priorGraveyard...)
 	drBanished := state.Banished()[len(ctx.priorBanish):]
 	chainGraveyard = appendExcludingMultiset(chainGraveyard, defenders, drBanished)
@@ -609,11 +559,8 @@ func (ctx *sequenceContext) preparePermState(playedAttackers []*card.CardState, 
 	// the leaf via findArsenalCard, and blockTotal is zeroed by ResetEphemeralState.
 	s.SetArsenal(ctx.arsenalAtChainStart)
 	s.SetBlockTotal(ctx.blockTotal)
-	// pooledGravBuf's prefix was seeded with leafState.Graveyard() by bestAttackWithWeapons
-	// / runDefense (modal path); the chain runner only appends past the prefix, so per perm
-	// we just re-slice back to the prefix length.
-	grav := bufs.pooledGravBuf
-	s.SetGraveyard(grav)
+	// graveyard / banished arrived via CopyPersistentStateFrom, copied into s's own
+	// prewarmed backing — chain-runner appends mutate this slot's storage only.
 	if bufs.pooledDeck == nil {
 		bufs.pooledDeck = ctx.deck.ShallowCopy()
 	} else {
@@ -683,7 +630,6 @@ func (ctx *sequenceContext) bestSequence(attackers []card.Card) (chainScore, *ga
 		ge.FireTriggers(triggertype.EndOfTurn, nil)
 		ctx.captureWinningSeq(nil, nil)
 		ctx.promoteWinnerDeck(permState)
-		ctx.promoteWinnerState(permState)
 		// permState.Value() carries the seeded baseline plus any EndOfTurn fire delta.
 		return chainScoreOf(permState, permState.Value()), permState, true
 	}
@@ -722,13 +668,12 @@ func (ctx *sequenceContext) bestSequence(attackers []card.Card) (chainScore, *ga
 				bestScore = score
 				foundLegal = true
 				// Hand the superseded prior best back to the pool so the next perm's
-				// preparePermState reuses it. promoteWinnerState already cloned its slices,
-				// so the recycled state has independent backings.
+				// preparePermState reuses it; each pool slot owns its own graveyard /
+				// banished / hand backings, so no per-promotion clone is needed.
 				ctx.bufs.statePool.Put(bestWinner)
 				bestWinner = winner
 				ctx.captureWinningSeq(pcBuf, pitchPerm)
 				ctx.promoteWinnerDeck(winner)
-				ctx.promoteWinnerState(winner)
 			} else {
 				// Loser: state is no longer referenced — return to the pool so the next
 				// perm reuses it instead of allocating fresh.

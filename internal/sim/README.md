@@ -146,11 +146,11 @@ func blusterBuffPlay(g card.GameEngine, l card.Logger, self *card.CardState) {
 
 - Hands are sorted by `Card.ID()` before search so cache-on and cache-off paths produce
   byte-identical results for matching multisets.
-- Each chain permutation runs against a fresh per-permutation `*GameState`; the winning copy's
-  pointer becomes the partition's result. The pooled `*GameState` slots are handed off (not
-  copied) to the winner via `promoteWinnerState` / `promoteWinnerDeck`, which clone the
-  winner's hand/graveyard/cardsPlayed/banished so the next permutation's reset can't trample
-  recorded state.
+- Each chain permutation runs against a fresh per-permutation `*GameState` borrowed from
+  the Evaluator's prewarmed pool. Each pool slot owns its own hand / cardsPlayed /
+  graveyard / banished backings, so the winning slot's state survives unmolested when the
+  next permutation borrows a different slot. `promoteWinnerDeck` is the only escape-clone
+  still needed — it shallow-copies the winner's deck wrapper out of the shared scratch.
 - The attack-budget prune relaxes by `maxResourceBonus` (the declared upper bound of
   resource-producing cards) so resource cards aren't pruned out; `pitchPool.pay` does the
   exact funding check.
