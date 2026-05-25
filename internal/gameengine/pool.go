@@ -1,5 +1,7 @@
 package gameengine
 
+import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+
 // Pool is a fixed-capacity recycler of *GameState values. All cap slots are built
 // eagerly by factory at NewPool time; Get / Put cycle the same pointers forever with no
 // further allocation. Single-goroutine; Get / Put are O(1) unlocked slice-stack ops.
@@ -90,4 +92,36 @@ func (p *Pool) HighWaterMark() int {
 		peak = p.peakSinceFree
 	}
 	return peak
+}
+
+// Worst-case sizes for pooled GameState slice backings. Bounded by FaB hero intellect
+// (handSize ≤ 7), equipment slots (weapons ≤ 4), and chain-runner mid-turn-drawn
+// headroom (32 extra attacker slots). The hand slice carries (held + chain + pitch);
+// cardsPlayed grows for rider plays / aura fires through the chain.
+const (
+	maxHandSize           = 7
+	maxWeapons            = 4
+	maxDrawnExtra         = 32
+	maxAttackers          = maxHandSize + maxWeapons + 1 + maxDrawnExtra
+	defaultHandCap        = 2*maxHandSize + maxAttackers
+	defaultCardsPlayedCap = 2 * (maxHandSize + maxAttackers)
+	// defaultPoolCap is the prewarmed Pool size. Measured peak in-flight on a 200-shuffle
+	// Viserai run is 6; this cap leaves headroom for higher-fanout decks.
+	defaultPoolCap = 24
+)
+
+// NewPrewarmedState returns a zero-value *GameState with hand and cardsPlayed slice
+// backings pre-allocated to worst-case sizes, so the chain runner's per-permutation
+// fills never need to grow past the pool slot's existing cap.
+func NewPrewarmedState() *GameState {
+	s := new(GameState)
+	s.SetHandStates(make([]card.CardState, 0, defaultHandCap))
+	s.SetCardsPlayed(make([]card.Card, 0, defaultCardsPlayedCap))
+	return s
+}
+
+// NewPrewarmedPool returns a Pool of prewarmed GameStates sized for the chain runner's
+// worst case. The standard entry point for sim Evaluators.
+func NewPrewarmedPool() *Pool {
+	return NewPool(defaultPoolCap, NewPrewarmedState)
 }

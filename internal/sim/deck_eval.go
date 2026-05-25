@@ -167,7 +167,7 @@ func (ev *Evaluator) evaluateParallelImpl(d *deck.Deck, maxRuns int, mp Matchup,
 			wg.Add(1)
 			go func(seed int64, runs int) {
 				defer wg.Done()
-				workerEv := &Evaluator{cache: ev.cache, statePool: newStatePool()}
+				workerEv := &Evaluator{cache: ev.cache, statePool: gameengine.NewPrewarmedPool()}
 				workerRNG := rand.New(rand.NewSource(seed))
 				scratch := newShuffleScratch(len(d.Weapons), deckSize, handSize, len(uniqueIDs))
 				var local deck.Stats

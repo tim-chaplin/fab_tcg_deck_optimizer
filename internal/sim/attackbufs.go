@@ -10,7 +10,7 @@ import (
 
 // Pre-allocated scratch threaded through the attack-evaluation pipeline (findBest, the
 // pmask/wmask loop, bestSequence). Pooled on the Evaluator so one sizing amortises across
-// every hand. All *GameState instances come from statePool — see newStatePool.
+// every hand. All *GameState instances come from statePool (gameengine.NewPrewarmedPool).
 
 // attackBufs holds the partition-level + chain-permutation scratch slices the search reuses
 // across calls. Sized at construction; the slice headers re-slice to [:n] per call.
@@ -115,34 +115,6 @@ type attackBufs struct {
 	defModes     []playedCard
 	partSolution cacheSolution
 	bestSolution cacheSolution
-}
-
-// statePoolCap sizes the per-Evaluator *GameState pool. Measured peak in-flight on a
-// 200-shuffle Viserai run is 6; this cap leaves headroom for higher-fanout decks.
-// Out-of-budget runs panic via the Pool's Get check — raise this constant.
-const statePoolCap = 24
-
-// Pooled-state slice prealloc caps. Sized to worst-case across all heroes (FaB
-// intellect ceiling + chain-runner mid-turn-drawn headroom). preparePermState panics
-// rather than allocate if a fill outgrows these — raise the constant.
-const (
-	pooledStateMaxHandSize    = 7
-	pooledStateMaxWeapons     = 4
-	pooledStateMaxDrawnExtra  = 32
-	pooledStateMaxAttackers   = pooledStateMaxHandSize + pooledStateMaxWeapons + 1 + pooledStateMaxDrawnExtra
-	pooledStateHandCap        = 2*pooledStateMaxHandSize + pooledStateMaxAttackers
-	pooledStateCardsPlayedCap = 2 * (pooledStateMaxHandSize + pooledStateMaxAttackers)
-)
-
-// newStatePool returns a prewarmed pool of statePoolCap GameStates with hand /
-// cardsPlayed backings sized to worst-case so per-perm fills never reallocate.
-func newStatePool() *gameengine.Pool {
-	return gameengine.NewPool(statePoolCap, func() *gameengine.GameState {
-		s := new(gameengine.GameState)
-		s.SetHandStates(make([]card.CardState, 0, pooledStateHandCap))
-		s.SetCardsPlayed(make([]card.Card, 0, pooledStateCardsPlayedCap))
-		return s
-	})
 }
 
 func newAttackBufs(handSize, weaponCount int, weapons []weapon.Weapon, statePool *gameengine.Pool) *attackBufs {

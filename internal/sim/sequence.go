@@ -621,12 +621,12 @@ func (ctx *sequenceContext) preparePermState(playedAttackers []*card.CardState, 
 	}
 	s.SetDeck(bufs.pooledDeck)
 	// Build the per-perm hand into s's prewarmed backing. A cap shortfall means the
-	// workload outgrew pooledStateHandCap — bump it rather than fall back to per-call
-	// alloc.
+	// workload outgrew gameengine's defaultHandCap — bump it rather than fall back to
+	// per-call alloc.
 	needed := len(ctx.handStart) + n + len(ctx.attackPitchPerm)
 	hand := s.HandStates()
 	if cap(hand) < needed {
-		panic("sim: pooled state hand backing too small; raise pooledStateHandCap")
+		panic("sim: pooled state hand backing too small; raise gameengine.defaultHandCap")
 	}
 	hand = hand[:0]
 	for _, c := range ctx.handStart {
@@ -643,7 +643,7 @@ func (ctx *sequenceContext) preparePermState(playedAttackers []*card.CardState, 
 	cpNeeded := n + len(ctx.attackPitchPerm)
 	cp := s.CardsPlayed()
 	if cap(cp) < cpNeeded {
-		panic("sim: pooled state cardsPlayed backing too small; raise pooledStateCardsPlayedCap")
+		panic("sim: pooled state cardsPlayed backing too small; raise gameengine.defaultCardsPlayedCap")
 	}
 	s.SetCardsPlayed(cp[:0])
 	s.SetPitched(ctx.pitched)

@@ -67,25 +67,25 @@ type Evaluator struct {
 // NewEvaluator returns a fresh Evaluator with its own private cache, shuffle loop
 // single-threaded. One instance per goroutine.
 func NewEvaluator() *Evaluator {
-	return &Evaluator{cache: newEvalCache(), statePool: newStatePool()}
+	return &Evaluator{cache: newEvalCache(), statePool: gameengine.NewPrewarmedPool()}
 }
 
 // NewEvaluatorParallel returns an Evaluator fanning the shuffle loop across numWorkers
 // goroutines, each with its own per-worker Evaluator and statePool.
 func NewEvaluatorParallel(numWorkers int) *Evaluator {
-	return &Evaluator{cache: newEvalCache(), statePool: newStatePool(), numWorkers: numWorkers}
+	return &Evaluator{cache: newEvalCache(), statePool: gameengine.NewPrewarmedPool(), numWorkers: numWorkers}
 }
 
 // NewEvaluatorWithCache returns an Evaluator pointing at an existing shared Cache so a
 // worker pool can pool lookup work. Single-threaded shuffle; set numWorkers on the result
 // to layer shuffle parallelism on top.
 func NewEvaluatorWithCache(c *Cache) *Evaluator {
-	return &Evaluator{cache: c, statePool: newStatePool()}
+	return &Evaluator{cache: c, statePool: gameengine.NewPrewarmedPool()}
 }
 
 // NewEvaluatorWithoutCache returns a fresh Evaluator with the hand-eval cache disabled.
 func NewEvaluatorWithoutCache() *Evaluator {
-	return &Evaluator{statePool: newStatePool()}
+	return &Evaluator{statePool: gameengine.NewPrewarmedPool()}
 }
 
 // Cache is the thread-safe hand-eval cache shareable across Evaluators. Lookups take a

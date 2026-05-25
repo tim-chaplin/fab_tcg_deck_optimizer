@@ -87,7 +87,7 @@ type AttackBufs = attackBufs
 
 // NewAttackBufs re-exports newAttackBufs, wiring a fresh statePool for the buf.
 func NewAttackBufs(handSize, weaponCount int, weapons []weapon.Weapon) *AttackBufs {
-	return newAttackBufs(handSize, weaponCount, weapons, newStatePool())
+	return newAttackBufs(handSize, weaponCount, weapons, gameengine.NewPrewarmedPool())
 }
 
 // DefenseGravScratch / DRCardStateScratch expose unexported attackBufs fields. State()

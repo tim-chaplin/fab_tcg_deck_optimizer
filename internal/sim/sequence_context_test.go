@@ -13,7 +13,7 @@ import (
 // on the leaf state so playSequence reads the count off the live aura set, matching
 // production.
 func newSequenceContextForTest(h hero.Hero, pitched, deckCards []card.Card, resourceBudget, runechantCarryover, chainLen int) *sequenceContext {
-	bufs := newAttackBufs(chainLen, 0, nil, newStatePool())
+	bufs := newAttackBufs(chainLen, 0, nil, gameengine.NewPrewarmedPool())
 	dc := make([]deck.Card, len(deckCards))
 	for i, c := range deckCards {
 		dc[i] = c
