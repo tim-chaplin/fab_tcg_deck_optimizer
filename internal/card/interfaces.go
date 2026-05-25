@@ -124,6 +124,13 @@ type GameEngine interface {
 	// AP (chain-step controls cards grant).
 	AddActionPoints(int)
 
+	// TurnFaceUp flips c's scheduled CardState in CardsRemaining to FaceUp = true and, if
+	// c implements card.FaceUpHook, fires c.OnFaceUp. Used by effects that put a card
+	// face up into a zone (tutors, deck reveals). Cards with no scheduled CardState (not
+	// in the current chain) still fire their OnFaceUp hook; the FaceUp flag write is a
+	// no-op in that case.
+	TurnFaceUp(c Card)
+
 	// Sticky flags cards read to gate their effects. Setters are implicit side effects of
 	// engine verbs: DealArcaneDamage flips ArcaneDamageDealt; Create*Aura flips AuraCreated;
 	// MarkOpponent flips OpponentMarked. NonAttackActionPlayed and CardBanished are

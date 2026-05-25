@@ -321,6 +321,21 @@ func (ge *GameEngine) OpponentDiscard(n int) int {
 	return v
 }
 
+// TurnFaceUp flips every CardState in CardsRemaining whose Card == c to FaceUp = true,
+// then fires c.OnFaceUp if c implements card.FaceUpHook. A card with no scheduled
+// CardState (not in the current chain) still gets the hook fired so triggers gated on
+// "when <self> turns face up" land regardless of zone.
+func (ge *GameEngine) TurnFaceUp(c card.Card) {
+	for _, pc := range ge.cardsRemaining {
+		if pc.Card == c {
+			pc.FaceUp = true
+		}
+	}
+	if hook, ok := c.(card.FaceUpHook); ok {
+		hook.OnFaceUp(ge, ge.logger)
+	}
+}
+
 // Clash models a clash (rule 8.5.45): we and the opponent reveal the top card of our
 // decks and the higher {p} wins. We model from our side only — our deck's top is read
 // via PeekDeck; the opponent's top is approximated as 5-power. On a win (our top ≥ 6),

@@ -125,3 +125,13 @@ type AttackReaction interface {
 type LeavesArenaAura interface {
 	OnLeavesArena(g GameEngine, l Logger)
 }
+
+// FaceUpHook is the optional marker for cards that react to being turned face up by an
+// effect (e.g. "If an activated ability or action card effect puts <self> face up into a
+// zone from your deck, gain 1 action point"). The engine calls OnFaceUp from
+// GameEngine.TurnFaceUp after setting the target CardState's FaceUp flag. Implementers
+// shouldn't gate on FaceUp themselves — TurnFaceUp only fires the hook when the flip
+// happens, not on every Play.
+type FaceUpHook interface {
+	OnFaceUp(g GameEngine, l Logger)
+}
