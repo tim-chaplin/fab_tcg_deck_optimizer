@@ -85,9 +85,9 @@ func DefendersDamageWithBudget(defenders, pitched []card.Card, d *deck.Deck, ge 
 // AttackBufs is the exported alias of attackBufs.
 type AttackBufs = attackBufs
 
-// NewAttackBufs re-exports newAttackBufs.
+// NewAttackBufs re-exports newAttackBufs, wiring a fresh statePool for the buf.
 func NewAttackBufs(handSize, weaponCount int, weapons []weapon.Weapon) *AttackBufs {
-	return newAttackBufs(handSize, weaponCount, weapons)
+	return newAttackBufs(handSize, weaponCount, weapons, newStatePool())
 }
 
 // DefenseGravScratch / DRCardStateScratch expose unexported attackBufs fields. State()

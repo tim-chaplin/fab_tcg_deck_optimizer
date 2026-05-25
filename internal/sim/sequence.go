@@ -85,18 +85,25 @@ func newSequenceContext(
 	ctx.activatedAbilities = abilities
 	ctx.activatedAbilityCosts = abilityCosts
 
-	if bufs.pooledLeafState == nil {
-		bufs.pooledLeafState = masterState.Copy()
-	} else {
-		// CopyPersistentStateFrom skips masterState's hand / deck / pitched / defenders /
-		// cardsPlayed / cardsRemaining / triggers — leafState consumers (runDefense,
-		// installLeafDeck, the no-defender DamageTaken branch, preparePermState's per-perm
-		// hand build) install all of those from bufs scratch before reading them, so the
-		// deep copies CopyFrom does are pure waste here.
-		bufs.pooledLeafState.CopyPersistentStateFrom(masterState)
-	}
-	ctx.leafState = bufs.pooledLeafState
+	// leafState borrows a slot from bufs.statePool. ResetEphemeralState rearms per-turn
+	// state before CopyPersistentStateFrom rewrites cross-turn carryover. The defense
+	// pass installs hand / deck / pitched / defenders from bufs scratch before reading,
+	// so CopyPersistentState's nil-out of those fields is fine. Caller must pair with
+	// releaseLeafState (typically `defer ctx.releaseLeafState()`).
+	leaf := bufs.statePool.Get()
+	leaf.ResetEphemeralState()
+	leaf.CopyPersistentStateFrom(masterState)
+	ctx.leafState = leaf
 	return ctx
+}
+
+// releaseLeafState returns the borrowed leafState slot to the pool. Safe on a nil slot.
+func (ctx *sequenceContext) releaseLeafState() {
+	if ctx.leafState == nil {
+		return
+	}
+	ctx.bufs.statePool.Put(ctx.leafState)
+	ctx.leafState = nil
 }
 
 // installLeafDeck refreshes bufs.pooledLeafDeck from the master deck d and rebinds ctx.deck.
@@ -125,6 +132,7 @@ func bestAttackWithWeapons(
 	arsenalAtChainStart card.Card,
 ) (int, int, chainBudget, []string, *gameengine.GameState, bool, bool) {
 	ctx := newSequenceContext(masterState, weapons, attackers, defenders, pitched, held, d, bufs, blockTotal, arsenalInIdx, arsenalAtChainStart)
+	defer ctx.releaseLeafState()
 	// Cleared up front so a partition with no defenders leaves an empty defender capture.
 	bufs.defModes = bufs.defModes[:0]
 	hasDRs := containsDefenseReaction(defenders)
@@ -479,8 +487,9 @@ func (ctx *sequenceContext) runDefense(defenders, pitched, held []card.Card, dec
 	// Install the role-tagged defense hand before the DR loop so HeldHand() /
 	// DiscardToTopOfDeck (variable-cost DR Plays use these to remove a Held card)
 	// see only the partition's Held subset, not masterState's full hand defaulted to Held.
+	// Built into the slot's own prewarmed hand backing so the cap survives Put → Get.
 	state.SetDefenders(defenders)
-	defenseHand := ctx.bufs.runDefenseHandBuf[:0]
+	defenseHand := state.HandStates()[:0]
 	for _, c := range held {
 		defenseHand = append(defenseHand, card.CardState{Card: c, Role: card.Held})
 	}
@@ -490,7 +499,6 @@ func (ctx *sequenceContext) runDefense(defenders, pitched, held []card.Card, dec
 	for _, c := range pitched {
 		defenseHand = append(defenseHand, card.CardState{Card: c, Role: card.Pitch})
 	}
-	ctx.bufs.runDefenseHandBuf = defenseHand
 	state.SetHandStates(defenseHand)
 
 	// Per-DR view: graveyard = defenders so DRs that scan graveyard see the defender
@@ -592,9 +600,6 @@ func (ctx *sequenceContext) runDefense(defenders, pitched, held []card.Card, dec
 // promoteWinnerDeck clones the wrapper out before the next perm runs, so this slot is free.
 func (ctx *sequenceContext) preparePermState(playedAttackers []*card.CardState, n int) *gameengine.GameState {
 	bufs := ctx.bufs
-	// Get hands back the last Put state (typically the prior perm's loser or the displaced
-	// best-winner) or allocates fresh when the pool's empty. Either way the returned state's
-	// slice backings persist, so CopyPersistentStateFrom's cap-checks reuse them.
 	s := bufs.statePool.Get()
 	s.CopyPersistentStateFrom(ctx.leafState)
 	s.ResetEphemeralState()
@@ -615,17 +620,15 @@ func (ctx *sequenceContext) preparePermState(playedAttackers []*card.CardState, 
 		bufs.pooledDeck.ShallowCopyFrom(ctx.deck)
 	}
 	s.SetDeck(bufs.pooledDeck)
-	// Build the per-perm hand directly into s's own backing — pooled GameStates retain
-	// their slice backings across Put → Get, so the second-and-later uses of this state
-	// reuse the existing cap. First-use allocates fresh inside append. No clone needed
-	// at promotion time since the winning state owns its hand backing outright.
+	// Build the per-perm hand into s's prewarmed backing. A cap shortfall means the
+	// workload outgrew pooledStateHandCap — bump it rather than fall back to per-call
+	// alloc.
 	needed := len(ctx.handStart) + n + len(ctx.attackPitchPerm)
 	hand := s.HandStates()
 	if cap(hand) < needed {
-		hand = make([]card.CardState, 0, needed)
-	} else {
-		hand = hand[:0]
+		panic("sim: pooled state hand backing too small; raise pooledStateHandCap")
 	}
+	hand = hand[:0]
 	for _, c := range ctx.handStart {
 		hand = append(hand, card.CardState{Card: c, Role: card.Held})
 	}
@@ -636,13 +639,11 @@ func (ctx *sequenceContext) preparePermState(playedAttackers []*card.CardState, 
 		hand = append(hand, card.CardState{Card: c, Role: card.Pitch})
 	}
 	s.SetHandStates(hand)
-	// CardsPlayed starts empty; size s's own backing for the chain step headroom so
-	// per-step AppendCardsPlayed doesn't allocate mid-chain. Promotion-time clone no
-	// longer needed since the winner owns its cardsPlayed backing.
+	// CardsPlayed is similarly prewarmed; the cap check guards mid-chain growth.
 	cpNeeded := n + len(ctx.attackPitchPerm)
 	cp := s.CardsPlayed()
 	if cap(cp) < cpNeeded {
-		cp = make([]card.Card, 0, cpNeeded)
+		panic("sim: pooled state cardsPlayed backing too small; raise pooledStateCardsPlayedCap")
 	}
 	s.SetCardsPlayed(cp[:0])
 	s.SetPitched(ctx.pitched)

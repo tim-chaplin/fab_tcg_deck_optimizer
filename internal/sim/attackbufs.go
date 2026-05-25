@@ -10,8 +10,7 @@ import (
 
 // Pre-allocated scratch threaded through the attack-evaluation pipeline (findBest, the
 // pmask/wmask loop, bestSequence). Pooled on the Evaluator so one sizing amortises across
-// every hand. Engine state isn't pooled — each permutation runs against a fresh leaf copy
-// so per-perm mutations stay isolated.
+// every hand. All *GameState instances come from statePool — see newStatePool.
 
 // attackBufs holds the partition-level + chain-permutation scratch slices the search reuses
 // across calls. Sized at construction; the slice headers re-slice to [:n] per call.
@@ -58,13 +57,9 @@ type attackBufs struct {
 	defenseGravScratch []card.Card
 	// drCardStateScratch is a pooled *CardState handed to DR Card.Play calls.
 	drCardStateScratch card.CardState
-	// statePool hands out per-permutation *GameState scratch. preparePermState pulls a state
-	// out (and CopyPersistentStateFrom seeds it from the leaf); losing perms / wmasks /
-	// partitions and displaced best-winners are returned via Put so the same handful of
-	// states cycle through the chain runner without re-allocating. runOneShuffle calls
-	// FreeAll at end of shuffle to release the per-turn winner chain that escaped the pool.
-	// Pointer-valued so a zero-value attackBufs literal isn't a usable Pool — callers
-	// must build via newAttackBufs which seeds the cap.
+	// statePool aliases the Evaluator's single *GameState pool. Every attackBufs the
+	// Evaluator caches shares the same pointer, so all *GameState borrows (leafState,
+	// per-perm chain scratch, per-shuffle carry) draw from one fixed budget.
 	statePool *gameengine.Pool
 	// pooledDeck is the recycled *Deck wrapper; preparePermState rebinds its slice headers
 	// to alias ctx.deck. The winning perm's wrapper is cloned out via promoteWinnerDeck so
@@ -91,20 +86,11 @@ type attackBufs struct {
 	// before the perm runs, so aliasing the leafState's slice to these buffers is safe.
 	runDefenseDRGravBuf    []card.Card
 	runDefenseChainGravBuf []card.Card
-	// runDefenseHandBuf backs the role-tagged defense hand (held + attackers + pitched)
-	// installed on leafState for the DR + plain-block phases. Recycled across runDefense
-	// calls.
-	runDefenseHandBuf []card.CardState
 	// runDefensePostDRHeldBuf backs the post-DR Held-only view of state.HandStates().
 	// The plain-block survivingHeld computation and the chain phase's handStart both
 	// consume this slice, so a Held card a DR Play removed is automatically absent
 	// from both. Recycled across runDefense calls.
 	runDefensePostDRHeldBuf []card.Card
-	// pooledLeafState is the per-Best leafState recycled across every call. bestAttackWithWeapons
-	// resets it from masterState via CopyFrom so the per-call masterState.Copy()
-	// allocation goes away. Defense mutations write through to this pool slot; preparePermState
-	// then ResetForPermutationFrom this slot per perm.
-	pooledLeafState *gameengine.GameState
 	// pooledDRCostProbe is the recycled empty *GameEngine the variable-cost DR cost path
 	// reads RunechantCount off. Lazy-init on first DR-cost call; per call we rewrite the
 	// aura count rather than allocating a fresh engine + aura per probe.
@@ -132,13 +118,34 @@ type attackBufs struct {
 }
 
 // statePoolCap sizes the per-Evaluator *GameState pool. Measured peak in-flight on a
-// 200-shuffle Viserai run with all Put-back sites + FreeAll-per-shuffle is 16; the cap
-// here adds ~50% headroom for higher-fanout decks. Out-of-budget runs panic via the
-// Pool's Get check — that's a hard signal to raise this constant rather than silently
-// degrade into per-call allocation.
+// 200-shuffle Viserai run is 6; this cap leaves headroom for higher-fanout decks.
+// Out-of-budget runs panic via the Pool's Get check — raise this constant.
 const statePoolCap = 24
 
-func newAttackBufs(handSize, weaponCount int, weapons []weapon.Weapon) *attackBufs {
+// Pooled-state slice prealloc caps. Sized to worst-case across all heroes (FaB
+// intellect ceiling + chain-runner mid-turn-drawn headroom). preparePermState panics
+// rather than allocate if a fill outgrows these — raise the constant.
+const (
+	pooledStateMaxHandSize    = 7
+	pooledStateMaxWeapons     = 4
+	pooledStateMaxDrawnExtra  = 32
+	pooledStateMaxAttackers   = pooledStateMaxHandSize + pooledStateMaxWeapons + 1 + pooledStateMaxDrawnExtra
+	pooledStateHandCap        = 2*pooledStateMaxHandSize + pooledStateMaxAttackers
+	pooledStateCardsPlayedCap = 2 * (pooledStateMaxHandSize + pooledStateMaxAttackers)
+)
+
+// newStatePool returns a prewarmed pool of statePoolCap GameStates with hand /
+// cardsPlayed backings sized to worst-case so per-perm fills never reallocate.
+func newStatePool() *gameengine.Pool {
+	return gameengine.NewPool(statePoolCap, func() *gameengine.GameState {
+		s := new(gameengine.GameState)
+		s.SetHandStates(make([]card.CardState, 0, pooledStateHandCap))
+		s.SetCardsPlayed(make([]card.Card, 0, pooledStateCardsPlayedCap))
+		return s
+	})
+}
+
+func newAttackBufs(handSize, weaponCount int, weapons []weapon.Weapon, statePool *gameengine.Pool) *attackBufs {
 	// +1 reserves a slot for the arsenal-in card; +maxDrawnExtensions leaves headroom for
 	// mid-turn-drawn cards that play as chain extensions.
 	const maxDrawnExtensions = 32
@@ -175,7 +182,7 @@ func newAttackBufs(handSize, weaponCount int, weapons []weapon.Weapon) *attackBu
 		activatedAbilities:    activatedAbilities,
 		activatedAbilityCosts: activatedAbilityCosts,
 		weaponAbilityCount:    len(weapons),
-		statePool:             gameengine.NewPool(statePoolCap),
+		statePool:             statePool,
 		partitionCards:        make([]partitionCard, handSize+1),
 		pitchedValsScratch:    make([]int, 0, handSize+1),
 		pitchedBuf:            make([]card.Card, 0, handSize+1),
@@ -195,7 +202,7 @@ func (e *Evaluator) getAttackBufs(handSize int, weapons []weapon.Weapon) *attack
 	if e.cachedBufs != nil && e.cachedHandSize == handSize && sameWeapons(e.cachedWeapons, weapons) {
 		return e.cachedBufs
 	}
-	e.cachedBufs = newAttackBufs(handSize, len(weapons), weapons)
+	e.cachedBufs = newAttackBufs(handSize, len(weapons), weapons, e.statePool)
 	e.cachedHandSize = handSize
 	e.cachedWeapons = append(e.cachedWeapons[:0], weapons...)
 	return e.cachedBufs

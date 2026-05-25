@@ -167,7 +167,7 @@ func (ev *Evaluator) evaluateParallelImpl(d *deck.Deck, maxRuns int, mp Matchup,
 			wg.Add(1)
 			go func(seed int64, runs int) {
 				defer wg.Done()
-				workerEv := &Evaluator{cache: ev.cache}
+				workerEv := &Evaluator{cache: ev.cache, statePool: newStatePool()}
 				workerRNG := rand.New(rand.NewSource(seed))
 				scratch := newShuffleScratch(len(d.Weapons), deckSize, handSize, len(uniqueIDs))
 				var local deck.Stats
@@ -226,12 +226,10 @@ func runOneShuffle(masterDeck *deck.Deck, scratch *shuffleScratch, stats *deck.S
 	d := masterDeck.Copy()
 	d.Shuffle(rng)
 
-	state := gameengine.GameStateBuilder().
-		SetHero(d.Hero.(hero.Hero)).
-		SetWeapons(weaponsFromDeck(d)).
-		SetIncomingDamage(mp.IncomingDamage).
-		SetArcaneIncomingDamage(mp.ArcaneIncomingDamage).
-		Build()
+	// Carry state borrows one pool slot; playOneTurn / Best mutate it in place across
+	// turns. Put back at shuffle end before FreeAll.
+	state := ev.statePool.Get()
+	state.Reset(d.Hero.(hero.Hero), weaponsFromDeck(d), mp.IncomingDamage, mp.ArcaneIncomingDamage)
 
 	// Initial hand drawn into the reusable handBuf, sorted so it is canonical from turn one.
 	handBuf := scratch.handBuf
@@ -263,12 +261,8 @@ func runOneShuffle(masterDeck *deck.Deck, scratch *shuffleScratch, stats *deck.S
 			break
 		}
 	}
-	// Per-shuffle reset of the state pool. The Best winners that escaped this shuffle's
-	// turns chain together via runOneShuffle's loop, but once we exit, neither stats nor
-	// the caller retains references — every state the pool ever handed out is dead.
-	if ev.cachedBufs != nil {
-		ev.cachedBufs.statePool.FreeAll()
-	}
+	ev.statePool.Put(state)
+	ev.statePool.FreeAll()
 }
 
 // weaponsFromDeck widens d.Weapons (typed as []deck.Weapon) into the []weapon.Weapon the
@@ -326,7 +320,7 @@ func playOneTurn(
 	// cache key see a canonical multiset.
 	processAurasAtStartOfTurn(state, d)
 	if snapshot != nil {
-		summary = runReplayForTurn(snapshot, logger)
+		summary = runReplayForTurn(snapshot, ev, logger)
 		// Skip end-of-turn cleanup so summary.State stays at the post-chain per-perm state
 		// the caller needs for its end-of-turn snapshot.
 		return summary, nil

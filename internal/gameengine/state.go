@@ -341,9 +341,34 @@ func (gs *GameState) ResetEphemeralState() {
 	}
 }
 
+// Reset re-seeds gs with the given hero / weapons / incoming-damage values, preserving
+// pre-allocated slice backings (hand, graveyard, banished, auras, items, ephemeral).
+// Lets a pooled GameState start a fresh shuffle without losing prewarmed backings.
+func (gs *GameState) Reset(h Hero, weapons []weapon.Weapon, incoming, arcaneIncoming int) {
+	hand := gs.hand[:0]
+	graveyard := gs.graveyard[:0]
+	banished := gs.banished[:0]
+	auras := gs.auras[:0]
+	items := gs.items[:0]
+	eph := gs.ephemeral
+	*gs = GameState{
+		hand:                 hand,
+		graveyard:            graveyard,
+		banished:             banished,
+		auras:                auras,
+		items:                items,
+		weapons:              weapons,
+		incomingDamage:       incoming,
+		arcaneIncomingDamage: arcaneIncoming,
+		ephemeral:            eph,
+	}
+	gs.ephemeral.reset()
+	gs.SetHero(h)
+}
+
 // === Pure state accessors. No cacheable flips; sim uses these to drive the chain runner. ===
 
-func (gs *GameState) Hero() Hero                   { return gs.hero }
+func (gs *GameState) Hero() Hero { return gs.hero }
 func (gs *GameState) SetHero(h Hero) {
 	gs.hero = h
 	if h != nil {
