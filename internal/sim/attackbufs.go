@@ -58,11 +58,14 @@ type attackBufs struct {
 	defenseGravScratch []card.Card
 	// drCardStateScratch is a pooled *CardState handed to DR Card.Play calls.
 	drCardStateScratch card.CardState
-	// Per-permutation scratch recycled across every partition leaf. preparePermState rebinds
-	// these to the active leaf's state shape so backings amortise across findBest.
-	// pooledState is the active recycled *GameState; promoteWinnerState clears it so the
-	// next perm allocates a fresh state and the winner stays untouched.
-	pooledState *gameengine.GameState
+	// statePool hands out per-permutation *GameState scratch. preparePermState pulls a state
+	// out (and CopyPersistentStateFrom seeds it from the leaf); losing perms / wmasks /
+	// partitions and displaced best-winners are returned via Put so the same handful of
+	// states cycle through the chain runner without re-allocating. runOneShuffle calls
+	// FreeAll at end of shuffle to release the per-turn winner chain that escaped the pool.
+	// Pointer-valued so a zero-value attackBufs literal isn't a usable Pool — callers
+	// must build via newAttackBufs which seeds the cap.
+	statePool *gameengine.Pool
 	// pooledDeck is the recycled *Deck wrapper; preparePermState rebinds its slice headers
 	// to alias ctx.deck. The winning perm's wrapper is cloned out via promoteWinnerDeck so
 	// the next perm can rebind safely.
@@ -122,17 +125,6 @@ type attackBufs struct {
 	// alloc goes away. Sole users are bestAttackWithWeapons and the one-shot replay path;
 	// neither retains the ctx past its call, so pool reuse is safe.
 	pooledSequenceCtx *sequenceContext
-	// recycledStates is a fixed-size LIFO of *GameState slots handed back to the pool after
-	// each best-winner promotion. Each entry's hand/graveyard/cardsPlayed/banished are
-	// independent clones produced by promoteWinnerState, so any slot can be recycled into
-	// pooledState without trampling live state. preparePermState pops the top slot before
-	// falling back to a zero-struct allocation. Holding more than one slot absorbs runs of
-	// consecutive wins: each win leaves a prior bestWinner that needs a pool home, and a
-	// single recycle slot forces preparePermState to allocate fresh on every second win in
-	// a row. The bound stays small (worst-case = chain depth) and lives inline so no slice
-	// header allocation happens.
-	recycledStates [3]*gameengine.GameState
-	recycledTop    int
 	// Cache-solution scratch: seqAttack/seqPitch hold the winning attacker order+modes and
 	// pitch order, defModes the per-defender blocker modes. partSolution folds them in for
 	// the winning partition; bestSolution holds the overall winner for the cache store.
@@ -143,41 +135,12 @@ type attackBufs struct {
 	bestSolution cacheSolution
 }
 
-// pushRecycledState pushes s onto the recycled-states stack. Returns true when the slot
-// was accepted; false when the stack is full (caller drops the state).
-func (b *attackBufs) pushRecycledState(s *gameengine.GameState) bool {
-	if b.recycledTop >= len(b.recycledStates) {
-		return false
-	}
-	b.recycledStates[b.recycledTop] = s
-	b.recycledTop++
-	return true
-}
-
-// popRecycledState removes and returns the top of the recycled stack, or nil when empty.
-func (b *attackBufs) popRecycledState() *gameengine.GameState {
-	if b.recycledTop == 0 {
-		return nil
-	}
-	b.recycledTop--
-	s := b.recycledStates[b.recycledTop]
-	b.recycledStates[b.recycledTop] = nil
-	return s
-}
-
-// dropRecycledStateIf removes any stack entry pointing at target. Used to detach the
-// incoming masterState alias in newSequenceContext so preparePermState doesn't recycle
-// the caller's live state.
-func (b *attackBufs) dropRecycledStateIf(target *gameengine.GameState) {
-	for i := 0; i < b.recycledTop; i++ {
-		if b.recycledStates[i] == target {
-			b.recycledTop--
-			b.recycledStates[i] = b.recycledStates[b.recycledTop]
-			b.recycledStates[b.recycledTop] = nil
-			i--
-		}
-	}
-}
+// statePoolCap sizes the per-Evaluator *GameState pool. Measured peak in-flight on a
+// 200-shuffle Viserai run with all Put-back sites + FreeAll-per-shuffle is 16; the cap
+// here adds ~50% headroom for higher-fanout decks. Out-of-budget runs panic via the
+// Pool's Get check — that's a hard signal to raise this constant rather than silently
+// degrade into per-call allocation.
+const statePoolCap = 24
 
 func newAttackBufs(handSize, weaponCount int, weapons []weapon.Weapon) *attackBufs {
 	// +1 reserves a slot for the arsenal-in card; +maxDrawnExtensions leaves headroom for
@@ -216,6 +179,7 @@ func newAttackBufs(handSize, weaponCount int, weapons []weapon.Weapon) *attackBu
 		activatedAbilities:    activatedAbilities,
 		activatedAbilityCosts: activatedAbilityCosts,
 		weaponAbilityCount:    len(weapons),
+		statePool:             gameengine.NewPool(statePoolCap),
 		partitionCards:        make([]partitionCard, handSize+1),
 		pitchedValsScratch:    make([]int, 0, handSize+1),
 		pitchedBuf:            make([]card.Card, 0, handSize+1),

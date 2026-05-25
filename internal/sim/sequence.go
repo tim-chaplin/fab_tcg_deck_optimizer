@@ -96,13 +96,6 @@ func newSequenceContext(
 		bufs.pooledLeafState.CopyPersistentStateFrom(masterState)
 	}
 	ctx.leafState = bufs.pooledLeafState
-	// Drop any pooledState / recycledState alias to the incoming masterState (a prior
-	// winner threads through as the next turn's master). Without this, preparePermState
-	// would mutate the caller's live state in place.
-	if bufs.pooledState == masterState {
-		bufs.pooledState = nil
-	}
-	bufs.dropRecycledStateIf(masterState)
 	return ctx
 }
 
@@ -273,17 +266,19 @@ func bestAttackWithWeapons(
 				bestDefenseCacheable = defenseCacheable
 				bestSwung = bufs.weaponNames[wmask&weaponBitsMask]
 				bestBudget = chainBudget{resource: phase.attackBudget, maxPitch: phase.maxAttackPitch, hasAttackPitches: phase.hasAttackPitches}
-				// Push the superseded leaf-best onto the recycled stack so the next
-				// preparePermState pops it instead of allocating fresh.
-				if bestWinner != nil {
-					bufs.pushRecycledState(bestWinner)
-				}
+				// Hand the superseded leaf-best back to the pool so the next preparePermState
+				// reuses its struct + slice backings.
+				bufs.statePool.Put(bestWinner)
 				bestWinner = winner
 				foundFeasible = true
 				sol := &bufs.partSolution
 				sol.attack = append(sol.attack[:0], bufs.seqAttack...)
 				sol.pitch = append(sol.pitch[:0], bufs.seqPitch...)
 				sol.defenders = append(sol.defenders[:0], bufs.defModes...)
+			} else {
+				// Losing wmask: return its winner to the pool so the next pmask × wmask iter
+				// reuses it.
+				bufs.statePool.Put(winner)
 			}
 		}
 	}
@@ -394,19 +389,14 @@ func (ctx *sequenceContext) promoteWinnerDeck(winner *gameengine.GameState) {
 	winner.SetDeck(winnerDeck.ShallowCopy())
 }
 
-// promoteWinnerState hands off ctx.bufs.pooledState to bestWinner so the next perm doesn't
-// trample it. Wins are rare relative to losses, so the recycle-on-loss path is the common
-// case and the fresh allocation only happens once per new best.
-//
-// Also unconditionally clones the winner's hand / graveyard / cardsPlayed / banished into
-// independent backings, since any of them may still alias pooled per-perm buffers that the
-// next reset will rewrite.
+// promoteWinnerState clones the winner's hand / graveyard / cardsPlayed / banished into
+// independent backings so the next preparePermState — which would rewrite the shared
+// per-perm scratch backings the winner currently aliases — can't trample them. The
+// statePool's Get / Put lifecycle handles the *GameState struct's recycling separately:
+// callers don't Put the winner, so it stays out of the pool until the consumer drops it.
 func (ctx *sequenceContext) promoteWinnerState(winner *gameengine.GameState) {
 	if winner == nil {
 		return
-	}
-	if winner == ctx.bufs.pooledState {
-		ctx.bufs.pooledState = nil
 	}
 	// Hand / Graveyard / CardsPlayed alias per-perm scratch; Banished aliases leafState's
 	// [:n:n] backing. The next Best call's CopyFrom on the leafState pool or the next perm's
@@ -609,22 +599,11 @@ func (ctx *sequenceContext) runDefense(defenders, pitched, held []card.Card, dec
 // promoteWinnerDeck clones the wrapper out before the next perm runs, so this slot is free.
 func (ctx *sequenceContext) preparePermState(playedAttackers []*card.CardState, n int) *gameengine.GameState {
 	bufs := ctx.bufs
-	if bufs.pooledState == nil {
-		// Drain the recycled stack before allocating fresh: superseded best-winners (handed
-		// off when a better perm displaces them) carry independent slice backings, so
-		// CopyPersistentStateFrom can rewrite the struct without leaking a prior reference.
-		if r := bufs.popRecycledState(); r != nil {
-			bufs.pooledState = r
-		} else {
-			// Zero-struct + CopyPersistentStateFrom skips the graveyard / banished deep
-			// clones CopyPersistentState would do. The hot path overwrites graveyard via
-			// SetGraveyard below, and banished's [:n:n] alias forces a fresh backing on
-			// the first BanishFromGraveyard append.
-			bufs.pooledState = new(gameengine.GameState)
-		}
-	}
-	bufs.pooledState.CopyPersistentStateFrom(ctx.leafState)
-	s := bufs.pooledState
+	// Get hands back the last Put state (typically the prior perm's loser or the displaced
+	// best-winner) or allocates fresh when the pool's empty. Either way the returned state's
+	// slice backings persist, so CopyPersistentStateFrom's cap-checks reuse them.
+	s := bufs.statePool.Get()
+	s.CopyPersistentStateFrom(ctx.leafState)
 	s.ResetEphemeralState()
 	s.SetValue(ctx.startOfTurnValue)
 	// Hero / opponentMarked already mirror leafState (which mirrors masterState). Only
@@ -742,16 +721,18 @@ func (ctx *sequenceContext) bestSequence(attackers []card.Card) (chainScore, *ga
 			if !foundLegal || score.cmp(bestScore) > 0 {
 				bestScore = score
 				foundLegal = true
-				// Push the superseded prior best onto the recycled stack for next perm's
-				// reuse. promoteWinnerState already cloned its slices, so each entry's
-				// backings are independent.
-				if bestWinner != nil {
-					ctx.bufs.pushRecycledState(bestWinner)
-				}
+				// Hand the superseded prior best back to the pool so the next perm's
+				// preparePermState reuses it. promoteWinnerState already cloned its slices,
+				// so the recycled state has independent backings.
+				ctx.bufs.statePool.Put(bestWinner)
 				bestWinner = winner
 				ctx.captureWinningSeq(pcBuf, pitchPerm)
 				ctx.promoteWinnerDeck(winner)
 				ctx.promoteWinnerState(winner)
+			} else {
+				// Loser: state is no longer referenced — return to the pool so the next
+				// perm reuses it instead of allocating fresh.
+				ctx.bufs.statePool.Put(winner)
 			}
 		}
 		if !hasModal {
@@ -929,6 +910,13 @@ func (ctx *sequenceContext) playSequenceWithMeta(n int) (damage int, totalCounte
 	state := ctx.preparePermState(played, n)
 	state.SetIsMyTurn(true)
 	ge := ctx.permEngine(state)
+	// infeasible returns state to the pool and surfaces the legal=false signal. Used at
+	// every early-return below — the caller (bestSequence) only handles Put for legal
+	// outcomes (winner / loser), so the infeasible Put is owned here.
+	infeasible := func() (int, int, int, *gameengine.GameState, bool) {
+		ctx.bufs.statePool.Put(state)
+		return 0, 0, 0, nil, false
+	}
 	pool := pitchPool{
 		perm:      ctx.attackPitchPerm,
 		vals:      ctx.attackPitchVals,
@@ -959,28 +947,28 @@ func (ctx *sequenceContext) playSequenceWithMeta(n int) (damage int, totalCounte
 		// pre-chain hand; if the card is gone, reject so the optimiser doesn't credit a
 		// phantom play.
 		if !state.RemoveFromHand(pc.Card) {
-			return 0, 0, 0, nil, false
+			return infeasible()
 		}
 		prevPitchIdx := pool.idx
 		contrib, ok := pool.pay(ge, m.costAt(ge, pc.Mode))
 		if !ok {
-			return 0, 0, 0, nil, false
+			return infeasible()
 		}
 		pc.PitchedToPlay = contrib
 		for k := prevPitchIdx; k < pool.idx; k++ {
 			if !state.RemoveFromHand(pool.perm[k]) {
-				return 0, 0, 0, nil, false
+				return infeasible()
 			}
 		}
 		if m.typesWithMode(pc.Mode).IsAttackReaction() {
 			if m.hasPlayPrecondition {
 				if !pc.Card.(card.PlayPrecondition).PlayPrecondition(ge, pc) {
-					return 0, 0, 0, nil, false
+					return infeasible()
 				}
 			}
 			ar, ok := pc.Card.(card.AttackReaction)
 			if !ok || activeAttack == nil || !ar.ARTargetAllowed(ge, activeAttack.Card, pc.Mode) {
-				return 0, 0, 0, nil, false
+				return infeasible()
 			}
 			ge.FireTriggers(triggertype.CardOrAbility, pc.Card)
 			state.SetAttackReactionTarget(activeAttack)
@@ -1000,13 +988,13 @@ func (ctx *sequenceContext) playSequenceWithMeta(n int) (damage int, totalCounte
 		// ModalTypes cards (Tip-Off mode 1 reads as Instant → 0 AP).
 		if !m.isFreeChainStepWithMode(pc.Mode) && !pc.GrantedInstant {
 			if state.ActionPoints() <= 0 {
-				return 0, 0, 0, nil, false
+				return infeasible()
 			}
 			state.AddActionPoints(-1)
 		}
 		if m.hasPlayPrecondition {
 			if !pc.Card.(card.PlayPrecondition).PlayPrecondition(ge, pc) {
-				return 0, 0, 0, nil, false
+				return infeasible()
 			}
 		}
 
@@ -1043,7 +1031,7 @@ func (ctx *sequenceContext) playSequenceWithMeta(n int) (damage int, totalCounte
 	finalizeActiveAttack()
 
 	if pool.idx < pool.n {
-		return 0, 0, 0, nil, false
+		return infeasible()
 	}
 	ge.FireTriggers(triggertype.EndOfTurn, nil)
 	return state.Value(), pendingTotalCountersFromState(state), pool.remaining, state, true

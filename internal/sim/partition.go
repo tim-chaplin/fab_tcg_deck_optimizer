@@ -127,8 +127,13 @@ func (e *Evaluator) findBest(weapons []weapon.Weapon, hand []card.Card, d *deck.
 			}
 			score := chainScoreOf(winner, v)
 			if runningSeen && score.cmp(runningScore) <= 0 {
+				// Losing partition: hand its winner back to the pool so the next leaf's
+				// preparePermState reuses it rather than allocating fresh.
+				bufs.statePool.Put(winner)
 				return
 			}
+			// Displacing the running best: the prior best.State is no longer needed.
+			bufs.statePool.Put(best.State)
 			best.State = winner
 			best.Value = v
 			runningScore = score
