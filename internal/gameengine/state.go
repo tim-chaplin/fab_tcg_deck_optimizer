@@ -78,11 +78,24 @@ type ephemeral struct {
 	hasCrowdBooed         bool
 }
 
-// reset returns e to its start-of-turn baseline: every field zero except actionPoints=1,
-// currentHookIdx=-1, cacheable=true, logger=NoopLogger. Aura / item FiredThisTurn flags
-// live on the entries themselves and are rearmed by ResetEphemeralState's separate loop.
+// reset returns e to its start-of-turn baseline: scalars zero except actionPoints=1,
+// currentHookIdx=-1, cacheable=true, logger=NoopLogger; slice fields keep their backing
+// but truncate to zero length so the per-perm chain runner's appends (notably
+// AppendCardsPlayed) reuse the cap instead of allocating fresh each iteration. Aura /
+// item FiredThisTurn flags live on the entries themselves and are rearmed by
+// ResetEphemeralState's separate loop.
 func (e *ephemeral) reset() {
+	cardsPlayed := e.cardsPlayed[:0]
+	cardsRemaining := e.cardsRemaining[:0]
+	pitched := e.pitched[:0]
+	defenders := e.defenders[:0]
+	triggers := e.triggers[:0]
 	*e = ephemeral{
+		cardsPlayed:    cardsPlayed,
+		cardsRemaining: cardsRemaining,
+		pitched:        pitched,
+		defenders:      defenders,
+		triggers:       triggers,
 		actionPoints:   1,
 		currentHookIdx: -1,
 		cacheable:      true,
