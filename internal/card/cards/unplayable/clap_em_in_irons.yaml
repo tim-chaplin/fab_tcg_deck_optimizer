@@ -6,7 +6,7 @@ types:
 cost: 0
 goAgain: true
 markers:
-    - NotImplemented
+    - Unplayable
 text: |-
     **Go again** When this enters the arena, {t} target Pirate hero or ally. It can't {u}
     while this is in the arena. At the start of your turn, destroy this.
