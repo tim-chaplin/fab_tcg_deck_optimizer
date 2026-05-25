@@ -263,6 +263,12 @@ func runOneShuffle(masterDeck *deck.Deck, scratch *shuffleScratch, stats *deck.S
 			break
 		}
 	}
+	// Per-shuffle reset of the state pool. The Best winners that escaped this shuffle's
+	// turns chain together via runOneShuffle's loop, but once we exit, neither stats nor
+	// the caller retains references — every state the pool ever handed out is dead.
+	if ev.cachedBufs != nil {
+		ev.cachedBufs.statePool.FreeAll()
+	}
 }
 
 // weaponsFromDeck widens d.Weapons (typed as []deck.Weapon) into the []weapon.Weapon the
