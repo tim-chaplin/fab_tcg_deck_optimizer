@@ -106,11 +106,13 @@ const (
 	maxAttackers          = maxHandSize + maxWeapons + 1 + maxDrawnExtra
 	defaultHandCap        = 2*maxHandSize + maxAttackers
 	defaultCardsPlayedCap = 2 * (maxHandSize + maxAttackers)
-	// Late-shuffle graveyards reach ~60 cards (post-mulligan, multi-cycle decks); cap
-	// doubles that for headroom. Banished is bounded by per-turn banish triggers which
-	// realistically stay well under maxAttackers; 32 is safe over the expected range.
-	defaultGraveyardCap = 2 * 60
-	defaultBanishedCap  = maxAttackers
+	// maxDeckSize bounds the worst-case deck the sim runs against — Classic Constructed
+	// is 60 minimum with no formal max; 80 leaves headroom for oversized lists. Graveyard
+	// and banished can only ever hold cards that originated in the deck (plus a handful
+	// of starting equipment), so both share the same bound.
+	maxDeckSize         = 80
+	defaultGraveyardCap = maxDeckSize + 10
+	defaultBanishedCap  = maxDeckSize + 10
 	// defaultPoolCap is the prewarmed Pool size. Measured peak in-flight on a 200-shuffle
 	// Viserai run is 6; this cap leaves headroom for higher-fanout decks.
 	defaultPoolCap = 24
