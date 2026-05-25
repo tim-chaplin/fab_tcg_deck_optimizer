@@ -88,7 +88,12 @@ func newSequenceContext(
 	if bufs.pooledLeafState == nil {
 		bufs.pooledLeafState = masterState.Copy()
 	} else {
-		bufs.pooledLeafState.CopyFrom(masterState)
+		// CopyPersistentStateFrom skips masterState's hand / deck / pitched / defenders /
+		// cardsPlayed / cardsRemaining / triggers — leafState consumers (runDefense,
+		// installLeafDeck, the no-defender DamageTaken branch, preparePermState's per-perm
+		// hand build) install all of those from bufs scratch before reading them, so the
+		// deep copies CopyFrom does are pure waste here.
+		bufs.pooledLeafState.CopyPersistentStateFrom(masterState)
 	}
 	ctx.leafState = bufs.pooledLeafState
 	// Drop any pooledState / recycledState alias to the incoming masterState (a prior
