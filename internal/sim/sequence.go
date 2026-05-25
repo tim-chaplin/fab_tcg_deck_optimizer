@@ -159,6 +159,10 @@ func bestAttackWithWeapons(
 	ctx.leafState.SetDeck(nil)
 	defenseDealt := defenseDealtConst
 	defenseCacheable := defenseCacheableConst
+	// Stay paired with bestWinner / sol.defenders; the loop-scoped defenseDealt is
+	// clobbered every modal-blocker pmask iteration.
+	bestDefenseDealt := defenseDealtConst
+	bestDefenseCacheable := defenseCacheableConst
 
 	// Seed bufs.pooledGravBuf's prefix with leafState's current graveyard once per Best
 	// call. preparePermState re-slices the pool to len(leafGrav) per perm; the chain
@@ -185,7 +189,7 @@ func bestAttackWithWeapons(
 
 	copy(bufs.attackerBuf, attackers)
 
-	var bestScore chainScore
+	var bestScore, bestTotalScore chainScore
 	var bestSwung []string
 	var bestBudget chainBudget
 	var bestWinner *gameengine.GameState
@@ -270,8 +274,15 @@ func bestAttackWithWeapons(
 			if !legal {
 				continue
 			}
-			if !foundFeasible || score.cmp(bestScore) > 0 {
+			// Rank pmasks by attack + defense, not attack alone, so a pmask funding a stronger
+			// modal blocker can win on equal attack.
+			totalScore := score
+			totalScore.value += defenseDealt
+			if !foundFeasible || totalScore.cmp(bestTotalScore) > 0 {
 				bestScore = score
+				bestTotalScore = totalScore
+				bestDefenseDealt = defenseDealt
+				bestDefenseCacheable = defenseCacheable
 				bestSwung = bufs.weaponNames[wmask&weaponBitsMask]
 				bestBudget = chainBudget{resource: phase.attackBudget, maxPitch: phase.maxAttackPitch, hasAttackPitches: phase.hasAttackPitches}
 				// Hand the superseded leaf-best to bufs.recycledState so the next
@@ -293,7 +304,7 @@ func bestAttackWithWeapons(
 	if !foundFeasible {
 		return 0, 0, chainBudget{}, nil, nil, false, defenseCacheable
 	}
-	return bestScore.value, defenseDealt, bestBudget, bestSwung, bestWinner, true, ctx.cacheable && defenseCacheable
+	return bestScore.value, bestDefenseDealt, bestBudget, bestSwung, bestWinner, true, ctx.cacheable && bestDefenseCacheable
 }
 
 // drCostProbe returns the pooled *GameEngine seeded with a runechant aura at count
@@ -529,9 +540,10 @@ func (ctx *sequenceContext) runDefense(defenders, pitched, held []card.Card, dec
 	state.SetHandStates(defenseHand)
 
 	// Per-DR view: graveyard = defenders so DRs that scan graveyard see the defender
-	// set. runDefenseDRGravBuf is recycled across runDefense calls.
+	// set. runDefenseDRGravBuf is recycled across runDefense calls. drGraveyard carries
+	// across the DR loop so a banish or destroy by an earlier DR is reflected in the
+	// view the next DR scans.
 	drGraveyard := append(ctx.bufs.runDefenseDRGravBuf[:0], defenders...)
-	ctx.bufs.runDefenseDRGravBuf = drGraveyard
 	for i, def := range defenders {
 		if !attackerMetaPtrFor(def).actsAsDR {
 			continue
@@ -548,7 +560,9 @@ func (ctx *sequenceContext) runDefense(defenders, pitched, held []card.Card, dec
 		if !state.IsCacheable() {
 			cacheable = false
 		}
+		drGraveyard = state.Graveyard()
 	}
+	ctx.bufs.runDefenseDRGravBuf = drGraveyard
 
 	// Plain blocks: walk surviving defenders, picking the best mode within blockBudget.
 	// origHeld is the Held-role slice of the post-DR HandStates; any card a DR Play
