@@ -4,23 +4,29 @@
 // Text: "**Instant** - Discard this: **Mark** target opposing hero."
 //
 // Modal modelling of the Instant activation: mode 0 is the printed attack (cost 1, full
-// power); mode 1 is the Instant-discard activation, modelled as cost 0, marks the opponent,
-// zeroes the attack damage (via BonusAttack), and grants Go Again to refund the action point
-// (so the chain slot is effectively free). Mode 1 collapses the "discard from hand" cost to
-// the chain slot we already pay for playing the card.
+// power); mode 1 is the Instant-discard activation, modelled as cost 0, zeroes the attack
+// damage (via BonusAttack), schedules the mark via an end-of-turn trigger (the chain
+// runner's per-attack ClearOpponentMarked would strip an immediate mark before any rider
+// could read it; the deferred mark lands after the chain and carries to next turn), and
+// grants Go Again so the action point is refunded (so the chain slot is effectively free).
 
 package cards
 
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/triggertype"
 )
+
+func tipOffMarkAtEndOfTurn(ge card.GameEngine, _ card.Logger, _ card.EphemeralTrigger) {
+	ge.MarkOpponent()
+}
 
 func tipOffPlay(ge card.GameEngine, l card.Logger, self *card.CardState) {
 	if self.Mode == 0 {
 		return
 	}
 	self.BonusAttack -= self.Card.Attack()
-	ge.MarkOpponent()
+	ge.CreateTrigger(self.Card, triggertype.EndOfTurn, tipOffMarkAtEndOfTurn, nil)
 	self.GrantedGoAgain = true
 }
 
