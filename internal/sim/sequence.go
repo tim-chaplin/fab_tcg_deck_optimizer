@@ -389,26 +389,19 @@ func (ctx *sequenceContext) promoteWinnerDeck(winner *gameengine.GameState) {
 	winner.SetDeck(winnerDeck.ShallowCopy())
 }
 
-// promoteWinnerState clones the winner's hand / graveyard / cardsPlayed / banished into
-// independent backings so the next preparePermState — which would rewrite the shared
-// per-perm scratch backings the winner currently aliases — can't trample them. The
-// statePool's Get / Put lifecycle handles the *GameState struct's recycling separately:
-// callers don't Put the winner, so it stays out of the pool until the consumer drops it.
+// promoteWinnerState clones the winner's graveyard / banished into independent backings
+// so the next preparePermState — which would rewrite the shared graveyard scratch the
+// winner aliases (and leafState's banished [:n:n] alias) — can't trample them.
+//
+// Hand and cardsPlayed already live on the winner's own pooled GameState backing (see
+// preparePermState) and the statePool keeps the winner out of circulation until the
+// consumer drops it, so neither needs a per-promotion clone.
 func (ctx *sequenceContext) promoteWinnerState(winner *gameengine.GameState) {
 	if winner == nil {
 		return
 	}
-	// Hand / Graveyard / CardsPlayed alias per-perm scratch; Banished aliases leafState's
-	// [:n:n] backing. The next Best call's CopyFrom on the leafState pool or the next perm's
-	// preparePermState would trample them — clone into independent backings.
-	if h := winner.HandStates(); len(h) > 0 {
-		winner.SetHandStates(cloneCardSlice(h))
-	}
 	if g := winner.Graveyard(); len(g) > 0 {
 		winner.SetGraveyard(cloneCardSlice(g))
-	}
-	if cp := winner.CardsPlayed(); len(cp) > 0 {
-		winner.SetCardsPlayed(cloneCardSlice(cp))
 	}
 	if b := winner.Banished(); len(b) > 0 {
 		winner.SetBanished(cloneCardSlice(b))
@@ -622,11 +615,17 @@ func (ctx *sequenceContext) preparePermState(playedAttackers []*card.CardState, 
 		bufs.pooledDeck.ShallowCopyFrom(ctx.deck)
 	}
 	s.SetDeck(bufs.pooledDeck)
+	// Build the per-perm hand directly into s's own backing — pooled GameStates retain
+	// their slice backings across Put → Get, so the second-and-later uses of this state
+	// reuse the existing cap. First-use allocates fresh inside append. No clone needed
+	// at promotion time since the winning state owns its hand backing outright.
 	needed := len(ctx.handStart) + n + len(ctx.attackPitchPerm)
-	if cap(bufs.pooledHandBuf) < needed {
-		bufs.pooledHandBuf = make([]card.CardState, 0, needed)
+	hand := s.HandStates()
+	if cap(hand) < needed {
+		hand = make([]card.CardState, 0, needed)
+	} else {
+		hand = hand[:0]
 	}
-	hand := bufs.pooledHandBuf[:0]
 	for _, c := range ctx.handStart {
 		hand = append(hand, card.CardState{Card: c, Role: card.Held})
 	}
@@ -636,17 +635,17 @@ func (ctx *sequenceContext) preparePermState(playedAttackers []*card.CardState, 
 	for _, c := range ctx.attackPitchPerm {
 		hand = append(hand, card.CardState{Card: c, Role: card.Pitch})
 	}
-	bufs.pooledHandBuf = hand
-	// Seed cardsPlayed with the pooled backing. Headroom = n + len(attackPitchPerm) covers
-	// per-step appends; rare mid-chain free steps grow the buffer normally.
-	cpNeeded := n + len(ctx.attackPitchPerm)
-	if cap(bufs.pooledCardsPlayedBuf) < cpNeeded {
-		bufs.pooledCardsPlayedBuf = make([]card.Card, 0, cpNeeded)
-	}
-	bufs.pooledCardsPlayedBuf = bufs.pooledCardsPlayedBuf[:0]
-	s.SetCardsPlayed(bufs.pooledCardsPlayedBuf)
-	s.SetPitched(ctx.pitched)
 	s.SetHandStates(hand)
+	// CardsPlayed starts empty; size s's own backing for the chain step headroom so
+	// per-step AppendCardsPlayed doesn't allocate mid-chain. Promotion-time clone no
+	// longer needed since the winner owns its cardsPlayed backing.
+	cpNeeded := n + len(ctx.attackPitchPerm)
+	cp := s.CardsPlayed()
+	if cap(cp) < cpNeeded {
+		cp = make([]card.Card, 0, cpNeeded)
+	}
+	s.SetCardsPlayed(cp[:0])
+	s.SetPitched(ctx.pitched)
 	// ResetEphemeralState set s.logger to NoopLogger; PrintBestTurn runs install a
 	// StreamLogger so emissions stream to the writer inline.
 	if ctx.replayLogger != nil {

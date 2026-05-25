@@ -9,17 +9,17 @@ import (
 
 // TestEphemeralReset_MatchesExpectedShape mutates every ephemeral field to a non-zero
 // value, calls reset, and field-by-field asserts the result equals the expected reset
-// shape — every field zero except actionPoints=1, currentHookIdx=-1, cacheable=true,
-// logger=NoopLogger{}. A new ephemeral field added to the struct is zeroed for free by
-// *e = ephemeral{}; this test enforces that contract structurally so a forgotten field
-// can't silently leak across turn boundaries.
+// shape — scalars zero except actionPoints=1, currentHookIdx=-1, cacheable=true,
+// logger=NoopLogger{}; slice fields truncated to length 0 but with their backings
+// preserved (so per-perm appends like AppendCardsPlayed reuse the cap instead of
+// allocating fresh each call).
 func TestEphemeralReset_MatchesExpectedShape(t *testing.T) {
 	dirty := ephemeral{
-		cardsPlayed:           []card.Card{nil},
-		cardsRemaining:        []*card.CardState{nil},
-		pitched:               []card.Card{nil},
-		defenders:             []card.Card{nil},
-		triggers:              []EphemeralTrigger{nil},
+		cardsPlayed:           []card.Card{nil, nil, nil},
+		cardsRemaining:        []*card.CardState{nil, nil},
+		pitched:               []card.Card{nil, nil},
+		defenders:             []card.Card{nil, nil},
+		triggers:              []EphemeralTrigger{nil, nil},
 		attackReactionTarget:  &card.CardState{},
 		logger:                &StreamLogger{},
 		actionPoints:          99,
@@ -37,6 +37,13 @@ func TestEphemeralReset_MatchesExpectedShape(t *testing.T) {
 		cacheable:             false,
 		heroTapped:            true,
 	}
+	wantCaps := map[string]int{
+		"cardsPlayed":    cap(dirty.cardsPlayed),
+		"cardsRemaining": cap(dirty.cardsRemaining),
+		"pitched":        cap(dirty.pitched),
+		"defenders":      cap(dirty.defenders),
+		"triggers":       cap(dirty.triggers),
+	}
 	dirty.reset()
 
 	want := ephemeral{
@@ -51,12 +58,12 @@ func TestEphemeralReset_MatchesExpectedShape(t *testing.T) {
 	for i := 0; i < tp.NumField(); i++ {
 		f := tp.Field(i)
 		gotF := got.Field(i)
-		// Slices aren't reflect.Value.Equal-comparable; IsZero (true when nil & len 0)
-		// is the right check for reset. No slice field has a non-zero reset value, so
-		// the want side doesn't need a slice-specific path.
 		if gotF.Kind() == reflect.Slice {
-			if !gotF.IsZero() {
-				t.Errorf("reset: %s slice not cleared (len=%d)", f.Name, gotF.Len())
+			if gotF.Len() != 0 {
+				t.Errorf("reset: %s slice len = %d, want 0", f.Name, gotF.Len())
+			}
+			if wantCap, ok := wantCaps[f.Name]; ok && gotF.Cap() != wantCap {
+				t.Errorf("reset: %s slice cap = %d, want %d (backing should be preserved across reset for cap reuse)", f.Name, gotF.Cap(), wantCap)
 			}
 			continue
 		}
