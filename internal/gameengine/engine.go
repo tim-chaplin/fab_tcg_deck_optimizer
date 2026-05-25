@@ -640,6 +640,11 @@ func (ge *GameEngine) ResolveChainStep(l card.Logger, pc *card.CardState) {
 		ge.auraCreated = true
 	}
 	n := ge.chainStepDelta(pc, types)
+	// NoopLogger discards the text, so skip the cached-string lookup and the AppendChainStep
+	// dispatch entirely on the eval hot path — every chain-step resolution hits this.
+	if _, isNoop := l.(NoopLogger); isNoop {
+		return
+	}
 	l.AppendChainStep(ChainStepText(pc), n)
 }
 
