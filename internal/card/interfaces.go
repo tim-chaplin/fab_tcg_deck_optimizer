@@ -121,6 +121,12 @@ type GameEngine interface {
 	// value it credited so cards can attribute the rider line.
 	OpponentDiscard(n int) int
 
+	// PreventArcaneDamage caps incoming arcane damage by up to n, returning the amount
+	// actually prevented (clamped at the remaining arcane). Mutates ArcaneIncomingDamage
+	// so downstream readers see the reduced figure. Callers AddValue the returned amount
+	// to credit the prevention.
+	PreventArcaneDamage(n int) int
+
 	// AP (chain-step controls cards grant).
 	AddActionPoints(int)
 
