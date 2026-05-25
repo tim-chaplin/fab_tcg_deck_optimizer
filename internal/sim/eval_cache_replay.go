@@ -90,6 +90,7 @@ func (e *Evaluator) replaySolution(
 ) (attackDealt, defenseDealt int, winner *gameengine.GameState, arsenalAtChainStart card.Card) {
 	p, a, defs, h, arsenalInIdx, arsenalDefenderIdx, arsenalAtChainStart := groupPartition(pcards, n, bufs)
 	ctx := newSequenceContext(masterState, weapons, a, defs, p, h, d, bufs, defenseSumFromRoles(pcards), arsenalInIdx, arsenalAtChainStart)
+	defer ctx.releaseLeafState()
 
 	ctx.attackPitchPerm = entry.pitchOrder
 	ctx.attackPitchVals = bufs.pitchPermValsBuf[:0]

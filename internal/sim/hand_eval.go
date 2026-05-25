@@ -26,14 +26,29 @@ func best(weapons []weapon.Weapon, hand []card.Card, d *deck.Deck, master *gamee
 	return sharedEvaluator.Best(weapons, hand, d, master)
 }
 
-// Best is the method form of the package-level Best.
+// Best returns the optimal TurnSummary for the given hand and lands the winning chain's
+// post-resolution state into master in place. Returned summary.State == master, so the
+// caller's ownership of master is unchanged; the borrowed pool slot is returned here.
 func (e *Evaluator) Best(weapons []weapon.Weapon, hand []card.Card, d *deck.Deck, master *gameengine.GameState) TurnSummary {
-	return e.findBest(weapons, hand, d, master)
+	summary := e.findBest(weapons, hand, d, master)
+	winner := summary.State
+	if winner == nil || winner == master {
+		return summary
+	}
+	// Transfer the winner's deck pointer; its wrapper is already an owned shallow copy.
+	winnerDeck := winner.Deck()
+	winner.SetDeck(nil)
+	master.CopyFrom(winner)
+	master.SetDeck(winnerDeck)
+	e.statePool.Put(winner)
+	summary.State = master
+	return summary
 }
 
 // Evaluator caches per-goroutine scratch across Best calls. First call allocates attackBufs
-// sized for (handSize, weapons); subsequent same-shape calls reuse it. Not safe for
-// concurrent use — one Evaluator per goroutine.
+// sized for (handSize, weapons); subsequent same-shape calls reuse it. statePool is the
+// single *GameState pool every borrow site shares, prewarmed at construction. Not safe
+// for concurrent use — one Evaluator per goroutine.
 //
 // cache (nil to disable) memoizes the optimal partition per evalCacheKey. On a hit, Best
 // replays the chain against the cached BestLine; on a miss, the search runs and the result
@@ -43,6 +58,7 @@ type Evaluator struct {
 	cachedHandSize int
 	cachedWeapons  []weapon.Weapon
 	cache          *evalCache
+	statePool      *gameengine.Pool
 	// numWorkers controls Evaluate's shuffle-loop fan-out. 0 or 1 runs sequentially; >1
 	// spawns N workers sharing the cache, each with its own attackBufs scratch.
 	numWorkers int
@@ -51,25 +67,25 @@ type Evaluator struct {
 // NewEvaluator returns a fresh Evaluator with its own private cache, shuffle loop
 // single-threaded. One instance per goroutine.
 func NewEvaluator() *Evaluator {
-	return &Evaluator{cache: newEvalCache()}
+	return &Evaluator{cache: newEvalCache(), statePool: gameengine.NewPrewarmedPool()}
 }
 
 // NewEvaluatorParallel returns an Evaluator fanning the shuffle loop across numWorkers
-// goroutines, each with its own attackBufs sharing the Evaluator's private cache.
+// goroutines, each with its own per-worker Evaluator and statePool.
 func NewEvaluatorParallel(numWorkers int) *Evaluator {
-	return &Evaluator{cache: newEvalCache(), numWorkers: numWorkers}
+	return &Evaluator{cache: newEvalCache(), statePool: gameengine.NewPrewarmedPool(), numWorkers: numWorkers}
 }
 
 // NewEvaluatorWithCache returns an Evaluator pointing at an existing shared Cache so a
 // worker pool can pool lookup work. Single-threaded shuffle; set numWorkers on the result
 // to layer shuffle parallelism on top.
 func NewEvaluatorWithCache(c *Cache) *Evaluator {
-	return &Evaluator{cache: c}
+	return &Evaluator{cache: c, statePool: gameengine.NewPrewarmedPool()}
 }
 
 // NewEvaluatorWithoutCache returns a fresh Evaluator with the hand-eval cache disabled.
 func NewEvaluatorWithoutCache() *Evaluator {
-	return &Evaluator{}
+	return &Evaluator{statePool: gameengine.NewPrewarmedPool()}
 }
 
 // Cache is the thread-safe hand-eval cache shareable across Evaluators. Lookups take a

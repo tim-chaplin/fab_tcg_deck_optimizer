@@ -46,7 +46,7 @@ func PrintBestTurn(ev *Evaluator, snap *turnSnapshot, w io.Writer) {
 // runReplayForTurn drives the chain through snapshot's known role assignment + cardsPlayed
 // order with logger installed on every per-perm state, skipping Best's partition
 // enumeration. Called after start-of-turn auras have fired against snapshot.state / .deck.
-func runReplayForTurn(snapshot *turnSnapshot, logger card.Logger) TurnSummary {
+func runReplayForTurn(snapshot *turnSnapshot, ev *Evaluator, logger card.Logger) TurnSummary {
 	parts := partitionBestLineForDisplay(snapshot.bestLine)
 	defensePitches, attackPitches := splitPitchesByPhase(parts.pitched, parts.drCost)
 
@@ -59,8 +59,9 @@ func runReplayForTurn(snapshot *turnSnapshot, logger card.Logger) TurnSummary {
 	arsenalDefenderIdx := matchedCardIndex(defenders, arsenalCardIn, snapshot.bestLine, card.Defend)
 
 	weapons := snapshot.state.Weapons()
-	bufs := newAttackBufs(len(snapshot.cardsPlayed), len(weapons), weapons)
+	bufs := newAttackBufs(len(snapshot.cardsPlayed), len(weapons), weapons, ev.statePool)
 	ctx := newSequenceContext(snapshot.state, weapons, snapshot.cardsPlayed, defenders, pitched, held, snapshot.deck, bufs, 0, arsenalInIdx, arsenalAtChainStart)
+	defer ctx.releaseLeafState()
 	ctx.replayLogger = logger
 	ctx.attackPitchPerm = assignmentCards(attackPitches)
 	ctx.attackPitchVals = pitchValues(attackPitches)
