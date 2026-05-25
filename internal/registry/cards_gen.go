@@ -40,6 +40,10 @@ var cardsByID = []Card{
 	ids.ArcanicSpikeYellow: cards.ArcanicSpikeYellow{},
 	ids.ArcanicSpikeBlue:   cards.ArcanicSpikeBlue{},
 
+	ids.BackAlleyBreaklineRed:    cards.BackAlleyBreaklineRed{},
+	ids.BackAlleyBreaklineYellow: cards.BackAlleyBreaklineYellow{},
+	ids.BackAlleyBreaklineBlue:   cards.BackAlleyBreaklineBlue{},
+
 	ids.BarragingBrawnhideRed:    cards.BarragingBrawnhideRed{},
 	ids.BarragingBrawnhideYellow: cards.BarragingBrawnhideYellow{},
 	ids.BarragingBrawnhideBlue:   cards.BarragingBrawnhideBlue{},
