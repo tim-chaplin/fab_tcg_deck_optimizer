@@ -68,6 +68,11 @@ type Ephemeral struct {
 	// was pitched to play this" iterate this slice instead of the unordered g.Pitched bag.
 	// Empty for cards whose cost was fully paid by carry from a prior pitch.
 	PitchedToPlay []Card
+	// FaceUp is set to true when GameEngine.TurnFaceUp flips this scheduled card's CardState
+	// face-up earlier in the chain. Lives in Ephemeral because we don't yet model FaceUp
+	// across the turn boundary (no card consumes the persistent flag); cards reading
+	// self.FaceUp see the in-chain TurnFaceUp result.
+	FaceUp bool
 	// OnHit holds "if this hits" handlers registered during Play. Stored as struct values
 	// (function pointer + small data payload) rather than closures so registration is
 	// alloc-free.

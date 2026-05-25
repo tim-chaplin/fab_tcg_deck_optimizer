@@ -340,6 +340,18 @@ func (ge *GameEngine) PreventArcaneDamage(n int) int {
 	return n
 }
 
+// TurnFaceUp flips pc.FaceUp = true on the specific CardState the caller passes — found
+// by scanning CardsRemaining for an in-chain target, or held directly when the target is
+// the arsenal-in or another known CardState pointer — then fires pc.Card.OnFaceUp if
+// pc.Card implements card.FaceUpHook. Touches a single instance rather than every
+// scheduled copy with the same identity; the caller picks the target.
+func (ge *GameEngine) TurnFaceUp(pc *card.CardState) {
+	pc.FaceUp = true
+	if hook, ok := pc.Card.(card.FaceUpHook); ok {
+		hook.OnFaceUp(ge, ge.logger)
+	}
+}
+
 // Clash models a clash (rule 8.5.45): we and the opponent reveal the top card of our
 // decks and the higher {p} wins. We model from our side only — our deck's top is read
 // via PeekDeck; the opponent's top is approximated as 5-power. On a win (our top ≥ 6),
