@@ -5,23 +5,7 @@ import (
 	"testing"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/ids"
 )
-
-// fakeCardForSeed is a minimal Card implementation used solely to seed a CardState — its
-// behavior is never exercised; we only need a non-nil Card value the reset can write.
-type fakeCardForSeed struct{}
-
-func (fakeCardForSeed) ID() ids.CardID                                     { return ids.InvalidCard }
-func (fakeCardForSeed) Name() string                                       { return "fakeCardForSeed" }
-func (fakeCardForSeed) DisplayName() string                                { return "fakeCardForSeed" }
-func (fakeCardForSeed) Cost(card.GameEngine) int                           { return 0 }
-func (fakeCardForSeed) Pitch() int                                         { return 0 }
-func (fakeCardForSeed) Attack() int                                        { return 0 }
-func (fakeCardForSeed) Defense() int                                       { return 0 }
-func (fakeCardForSeed) Types(card.GameEngine) card.TypeSet                 { return 0 }
-func (fakeCardForSeed) GoAgain(card.GameEngine) bool                       { return false }
-func (fakeCardForSeed) Play(card.GameEngine, card.Logger, *card.CardState) {}
 
 // seedChainEntryAllowlist names the CardState top-level fields seedChainEntry binds to
 // per-permutation values rather than zeroing — i.e. fields that legitimately carry
