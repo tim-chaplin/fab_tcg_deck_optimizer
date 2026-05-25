@@ -27,10 +27,9 @@ hero types satisfy both, and callers needing behaviour assert to `card.Card` / `
 structurally — neither package imports the other.
 
 Callers that need cards / weapons / heroes import `internal/registry` directly and assert to
-`card.Card` / `sim.Weapon` / `sim.Hero` at the read site. `cmd/fabsim` warms
-`optimizations.WarmChainStepCache` from registry data in a small `init` so the runtime hot
-path is pure cache reads; other callers rely on the lazy backfill in
-`optimizations.cachedChainStepText`.
+`card.Card` / `sim.Weapon` / `sim.Hero` at the read site. `gameengine.ChainStepText`
+memoises results on `(Card.ID, FromArsenal)` and lazily backfills on the first call per
+card kind, so no caller needs to pre-warm the cache.
 
 ## How to use
 
