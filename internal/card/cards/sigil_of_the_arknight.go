@@ -8,11 +8,10 @@ package cards
 
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/triggertype"
 )
 
 func (SigilOfTheArknightBlue) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
-	ge.CreateAura(self.Card, triggertype.StartOfTurn, selfDestructAuraHandler, 1, false, nil)
+	installSigilSelfDestructAura(ge, self.Card)
 }
 
 // OnLeavesArena runs the "when this leaves the arena" clause: reveal the top card of the

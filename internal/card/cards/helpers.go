@@ -4,6 +4,7 @@ package cards
 
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/triggertype"
 )
 
 // --- Aura helpers ---
@@ -13,6 +14,14 @@ import (
 // OnLeavesArena hook, which the engine fires from DestroyAura.
 func selfDestructAuraHandler(_ card.GameEngine, _ card.Logger, a card.Aura) {
 	a.Destroy(true)
+}
+
+// installSigilSelfDestructAura registers the Sigil-cycle aura: a one-count card-sourced
+// aura that destroys itself at the start of the owner's next action phase, deferring all
+// payoff to the source card's OnLeavesArena clause. Every Sigil printed with the cycle's
+// "At the beginning of your action phase, destroy this" wording installs through here.
+func installSigilSelfDestructAura(ge card.GameEngine, source card.Card) {
+	ge.CreateAura(source, triggertype.StartOfTurn, selfDestructAuraHandler, 1, false, nil)
 }
 
 // banishAuraFromGraveyard banishes the first aura-typed card in the graveyard and, on
