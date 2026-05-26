@@ -61,6 +61,10 @@ func (g GrantSpy) Play(ge card.GameEngine, _ card.Logger, _ *card.CardState) {
 	}
 }
 
+// AsCardState wraps c in a fresh *card.CardState for tests that need to pass a triggering
+// CardState (e.g. ge.FireTriggers) where a raw Card was previously accepted.
+func AsCardState(c card.Card) *card.CardState { return &card.CardState{Card: c} }
+
 // CardNamesSim is the []card.Card overload of CardNames so tests holding sim slices
 // don't have to widen at the call site.
 func CardNamesSim(cs []card.Card) []string {

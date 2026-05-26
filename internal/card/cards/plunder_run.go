@@ -17,7 +17,7 @@ import (
 
 func plunderRunOnHitDraw(ge card.GameEngine, l card.Logger, t card.EphemeralTrigger, _ triggertype.Type) {
 	ge.DrawOne()
-	l.AppendPostTriggerf(ge.TriggeringCard().DisplayName(), 0,
+	l.AppendPostTriggerf(ge.TriggeringCard().Card.DisplayName(), 0,
 		"%s drew a card on attack-action hit", t.CardName())
 }
 

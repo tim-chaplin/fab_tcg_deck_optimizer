@@ -23,7 +23,7 @@ func highStrikerOnHit2(ge card.GameEngine, l card.Logger, t card.EphemeralTrigge
 
 func highStrikerCreate(ge card.GameEngine, l card.Logger, t card.EphemeralTrigger, n int) {
 	ge.CreateCopper(n)
-	l.AppendPostTriggerf(ge.TriggeringCard().DisplayName(), 0,
+	l.AppendPostTriggerf(ge.TriggeringCard().Card.DisplayName(), 0,
 		"%s created %d copper tokens on attack hit", t.CardName(), n)
 }
 

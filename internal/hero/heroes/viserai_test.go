@@ -92,7 +92,7 @@ func viseraiTriggerEngine(prior []card.Card, nonAttackActionPlayed bool) *gameen
 // aura immediately consumes itself on the attack, so the +1 value lands but no aura survives.
 func TestViserai_RunebladeAttackAfterNonAttackActionTriggers(t *testing.T) {
 	ge := viseraiTriggerEngine([]card.Card{fakeRuneAura{}}, true)
-	ge.FireTriggers(triggertype.CardOrAbility, fakeRuneAttack{})
+	ge.FireTriggers(triggertype.CardOrAbility, &card.CardState{Card: fakeRuneAttack{}})
 	if got := ge.Value(); got != 1 {
 		t.Fatalf("expected +1 value from CreateRunechants, got %d", got)
 	}
@@ -102,7 +102,7 @@ func TestViserai_RunebladeAttackAfterNonAttackActionTriggers(t *testing.T) {
 // Runechant aura survives because its IsAttack filter blocks immediate self-consumption.
 func TestViserai_RunebladeNonAttackAfterNonAttackActionTriggers(t *testing.T) {
 	ge := viseraiTriggerEngine([]card.Card{fakeRuneAura{}}, true)
-	ge.FireTriggers(triggertype.CardOrAbility, fakeRuneAura{})
+	ge.FireTriggers(triggertype.CardOrAbility, &card.CardState{Card: fakeRuneAura{}})
 	if got := ge.Value(); got != 1 {
 		t.Fatalf("expected +1 value from CreateRunechants, got %d", got)
 	}
@@ -115,7 +115,7 @@ func TestViserai_RunebladeNonAttackAfterNonAttackActionTriggers(t *testing.T) {
 // was an attack.
 func TestViserai_NoPriorNonAttackAction(t *testing.T) {
 	ge := viseraiTriggerEngine([]card.Card{fakeRuneAttack{}}, false)
-	ge.FireTriggers(triggertype.CardOrAbility, fakeRuneAttack{})
+	ge.FireTriggers(triggertype.CardOrAbility, &card.CardState{Card: fakeRuneAttack{}})
 	if got := ge.Value(); got != 0 {
 		t.Fatalf("expected 0 value (no non-attack action this turn), got %d", got)
 	}
@@ -124,7 +124,7 @@ func TestViserai_NoPriorNonAttackAction(t *testing.T) {
 // Tests that the type filter blocks non-Runeblade cards from triggering Viserai.
 func TestViserai_NonRunebladePlayed(t *testing.T) {
 	ge := viseraiTriggerEngine([]card.Card{fakeRuneAura{}}, true)
-	ge.FireTriggers(triggertype.CardOrAbility, fakeNonRuneblade{})
+	ge.FireTriggers(triggertype.CardOrAbility, &card.CardState{Card: fakeNonRuneblade{}})
 	if got := ge.Value(); got != 0 {
 		t.Fatalf("expected 0 value (non-Runeblade played), got %d", got)
 	}
@@ -133,7 +133,7 @@ func TestViserai_NonRunebladePlayed(t *testing.T) {
 // Tests that the type filter blocks Runeblade weapon swings — a swing isn't "playing a card".
 func TestViserai_WeaponSwingFiltered(t *testing.T) {
 	ge := viseraiTriggerEngine([]card.Card{fakeRuneAura{}}, true)
-	ge.FireTriggers(triggertype.CardOrAbility, fakeRuneWeapon{})
+	ge.FireTriggers(triggertype.CardOrAbility, &card.CardState{Card: fakeRuneWeapon{}})
 	if got := ge.Value(); got != 0 {
 		t.Fatalf("expected 0 value for weapon swing, got %d", got)
 	}
@@ -142,7 +142,7 @@ func TestViserai_WeaponSwingFiltered(t *testing.T) {
 // Tests that the first card of a turn doesn't fire — nothing prior to trigger on.
 func TestViserai_EmptyTurn(t *testing.T) {
 	ge := viseraiTriggerEngine(nil, false)
-	ge.FireTriggers(triggertype.CardOrAbility, fakeRuneAura{})
+	ge.FireTriggers(triggertype.CardOrAbility, &card.CardState{Card: fakeRuneAura{}})
 	if got := ge.Value(); got != 0 {
 		t.Fatalf("expected 0 value on empty turn, got %d", got)
 	}

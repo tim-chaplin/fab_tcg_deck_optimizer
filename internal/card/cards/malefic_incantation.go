@@ -48,7 +48,7 @@ func maleficAuraHandler(ge card.GameEngine, l card.Logger, a card.Aura, _ trigge
 	cardID := a.CardID()
 	lastVerse := a.DecrementCount() <= 0
 	ge.CreateRunechants(1)
-	l.AppendPostTrigger(ge.TriggeringCard().DisplayName(), maleficCreatedRunechantText[cardID], 1)
+	l.AppendPostTrigger(ge.TriggeringCard().Card.DisplayName(), maleficCreatedRunechantText[cardID], 1)
 	if lastVerse {
 		a.Destroy(true)
 	}

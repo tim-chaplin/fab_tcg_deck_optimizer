@@ -57,7 +57,7 @@ func viseraiOnCardPlayed(ge card.GameEngine, l card.Logger, _ card.Hero, _ trigg
 	}
 	played := ge.TriggeringCard()
 	ge.CreateRunechants(1)
-	l.AppendPreTrigger(played.DisplayName(), "Viserai created a runechant", 1)
+	l.AppendPreTrigger(played.Card.DisplayName(), "Viserai created a runechant", 1)
 }
 
 // Opt is the Viserai-specific Opt heuristic: keep one card per "slot category" and
