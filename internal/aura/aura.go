@@ -90,3 +90,21 @@ var _ card.Aura = (*Aura)(nil)
 func (a *Aura) Destroy(addToGraveyard bool) {
 	a.activeEngine.DestroyAura(addToGraveyard)
 }
+
+// SetFromCard rewrites a in place for reuse as a card-sourced aura — the entry the
+// gameengine aura pool hands back to a CreateAura caller after locating a free slot.
+// Clears activeEngine and firedThisTurn so the recycled slot fires cleanly.
+func (a *Aura) SetFromCard(source card.Card, tt triggertype.Type, fire Handler, count int, oncePerTurn bool, typeFilter trigger.TypeFilter) {
+	a.Trigger.SetFromCard(source, tt, fire, oncePerTurn, typeFilter)
+	a.count = count
+	a.activeEngine = nil
+}
+
+// Clear zeros every field so the slot reads as "free" for the gameengine aura pool's
+// next-free-slot scan. SourceCard() == nil and Count() == 0 are the canonical dead-slot
+// tests pool readers gate on.
+func (a *Aura) Clear() {
+	a.Trigger.Clear()
+	a.count = 0
+	a.activeEngine = nil
+}

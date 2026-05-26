@@ -107,3 +107,24 @@ func (t *Trigger[T]) SourceCard() any {
 func (t *Trigger[T]) Invoke(engine card.GameEngine, logger card.Logger, self T) {
 	t.fire(engine, logger, self)
 }
+
+// SetFromCard rewrites t in place as a fresh card-sourced trigger. firedThisTurn
+// re-arms so a reused pool slot fires cleanly. Token-identity fields zero out — a slot
+// returned to the card-aura pool stops claiming any token name / ID.
+func (t *Trigger[T]) SetFromCard(source card.Card, tt triggertype.Type, fire func(card.GameEngine, card.Logger, T), oncePerTurn bool, typeFilter TypeFilter) {
+	t.triggerType = tt
+	t.fire = fire
+	t.source = source
+	t.tokenName = ""
+	t.tokenID = 0
+	t.typeFilter = typeFilter
+	t.oncePerTurn = oncePerTurn
+	t.firedThisTurn = false
+}
+
+// Clear zeros every field so the slot reads as "free" for pool reuse. SourceCard()
+// returning nil is the canonical "dead slot" test the gameengine aura pool keys on.
+func (t *Trigger[T]) Clear() {
+	var zero Trigger[T]
+	*t = zero
+}

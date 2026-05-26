@@ -633,7 +633,12 @@ func (ge *GameEngine) DestroyAura(addToGraveyard bool) {
 	if i < 0 || i >= len(ge.auras) {
 		return
 	}
-	src := ge.auras[i].SourceCard()
+	dying := ge.auras[i]
+	src := dying.SourceCard()
+	// Clear the underlying pool slot (SourceCard()==nil, Count()==0) so the next
+	// CreateAura's free-slot scan can reuse it. Splicing ge.auras alone leaves the
+	// pool slot occupied with stale fields.
+	dying.Clear()
 	ge.auras = append(ge.auras[:i], ge.auras[i+1:]...)
 	ge.currentHookDestroyed = true
 	if la, ok := src.(card.LeavesArenaAura); ok {
@@ -693,6 +698,7 @@ func (ge *GameEngine) SacrificePayoffAura() bool {
 			continue
 		}
 		src := a.SourceCard().(card.Card)
+		a.Clear()
 		ge.auras = append(ge.auras[:i], ge.auras[i+1:]...)
 		la.OnLeavesArena(ge, ge.logger)
 		ge.AppendGraveyard(src)

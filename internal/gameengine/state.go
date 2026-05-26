@@ -1,11 +1,20 @@
 package gameengine
 
 import (
+	"unsafe"
+
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/aura"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/triggertype"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapon"
 )
+
+// auraPoolSize caps the number of simultaneously-live card-backed auras a single
+// GameState supports. Real Viserai / Iyslander / Briar decks run 2-5 live card auras
+// at a peak; 20 leaves 4x headroom. CreateAura panics on overflow so a regression that
+// inflates aura count fails loud instead of silently slow-pathing onto the heap.
+const auraPoolSize = 20
 
 // GameState owns the raw per-turn data — every slice, scalar, and flag the engine reads or
 // writes during an attack turn run. Internal machinery (per-permutation scratch, cross-turn
@@ -28,8 +37,15 @@ type GameState struct {
 	arsenal   card.Card
 	graveyard []card.Card
 	banished  []card.Card
-	auras     []Aura // card-backed auras only — tokens live in tokenAuras
-	items     []Item // card-backed items only — tokens live in tokenItems
+	// auras holds interface boxes pointing into auraPool. Splicing on Destroy keeps the
+	// slice live-only; the corresponding pool slot has its fields zeroed (SourceCard()
+	// == nil) so CreateAura's next-free-slot scan picks it up for reuse.
+	auras []Aura
+	// auraPool is the per-GameState pre-allocated backing for card-backed auras.
+	// CreateAura overwrites the next free slot in place; per-creation allocations are
+	// gone. Pool exhaustion (>auraPoolSize simultaneously live) panics.
+	auraPool [auraPoolSize]aura.Aura
+	items    []Item // card-backed items only — tokens live in tokenItems
 
 	// Token slots — one pre-allocated Aura / Item per kind, count=0 means "not in
 	// play." Pointer identity stable for the GameState's lifetime, so trigger
@@ -141,7 +157,10 @@ func (gs *GameState) Copy() *GameState {
 	} else {
 		out.cardsRemaining = nil
 	}
-	out.auras = copyAurasInto(nil, gs.auras)
+	// out := *gs memcopied gs.auraPool byte-identically. Rebuild out.auras so its
+	// interface values point into out.auraPool (not gs.auraPool) at the same pool
+	// indices src.auras occupied.
+	out.auras = rebuildPooledAurasAfterMemcpy(&out, gs.auras, &gs.auraPool[0], nil)
 	if len(gs.triggers) > 0 {
 		out.triggers = append([]EphemeralTrigger(nil), gs.triggers...)
 	} else {
@@ -233,7 +252,10 @@ func (gs *GameState) CopyFrom(src *GameState) {
 	} else {
 		gs.triggers = nil
 	}
-	gs.auras = copyAurasInto(pooledAuras, src.auras)
+	// *gs = *src memcopied gs.auraPool byte-identically from src. Rebuild gs.auras so
+	// its interface values point into gs.auraPool (not src.auraPool) at the same pool
+	// indices src.auras occupied.
+	gs.auras = rebuildPooledAurasAfterMemcpy(gs, src.auras, &src.auraPool[0], pooledAuras)
 	gs.items = copyItemsInto(pooledItems, src.items)
 	if pooledDeck != nil {
 		// Receiver owns a wrapper (pool slot prewarm); rebind its slice headers to src's
@@ -246,35 +268,43 @@ func (gs *GameState) CopyFrom(src *GameState) {
 	}
 }
 
-// copyAurasInto returns a per-entry deep copy of src, reusing pool's backing when capacity
-// permits and calling CopyInto on each prior-slot entry to rewrite *Aura allocations in
-// place. Empty src returns nil (matches Copy()'s nil-on-empty); a nil pool falls through
-// to a fresh Copy() per entry.
-func copyAurasInto(pool, src []Aura) []Aura {
-	n := len(src)
-	if n == 0 {
-		return nil
-	}
-	var out []Aura
-	if cap(pool) >= n {
-		out = pool[:n]
-	} else {
-		out = make([]Aura, n)
-	}
-	priorLen := len(pool)
-	for i, a := range src {
-		var prev any
-		if i < priorLen {
-			prev = pool[i]
+// rebuildPooledAurasAfterMemcpy translates each entry in srcAuras from its src-pool
+// index to the equivalent slot in dst.auraPool via pointer arithmetic. Precondition:
+// dst.auraPool was just memcopied from src.auraPool, so the live entries' data is
+// already in place — the helper just rewires dst.auras's interface values to point
+// into dst's own pool. CopyInto clears activeEngine on each receiver slot for hygiene.
+// `pooled` is the receiver's prior auras-slice backing (reused when cap permits).
+// Panics if an aura's pointer falls outside the source pool — the auras list is
+// pool-only by invariant; a stray heap-allocated entry would silently corrupt the
+// adjacent aura field on indexed write.
+func rebuildPooledAurasAfterMemcpy(dst *GameState, srcAuras []Aura, srcPoolBase *aura.Aura, pooled []Aura) []Aura {
+	if len(srcAuras) == 0 {
+		if pooled == nil {
+			return nil
 		}
-		out[i] = a.CopyInto(prev).(Aura)
+		return pooled[:0]
+	}
+	out := pooled[:0]
+	if cap(pooled) < len(srcAuras) {
+		out = make([]Aura, 0, auraPoolSize)
+	}
+	auraSize := unsafe.Sizeof(aura.Aura{})
+	base := unsafe.Pointer(srcPoolBase)
+	for _, srcA := range srcAuras {
+		srcPtr := unsafe.Pointer(srcA.(*aura.Aura))
+		idx := (uintptr(srcPtr) - uintptr(base)) / auraSize
+		if idx >= auraPoolSize {
+			panic("rebuildPooledAurasAfterMemcpy: aura outside the source pool — only pool slots may appear in gs.auras")
+		}
+		srcA.CopyInto(&dst.auraPool[idx])
+		out = append(out, &dst.auraPool[idx])
 	}
 	return out
 }
 
-// copyItemsInto is the items counterpart of copyAurasInto. Item doesn't expose CopyInto
-// today (no in-place reset surface), so the per-entry path always allocates via Copy().
-// The pool's slice backing is still reused when capacity permits.
+// copyItemsInto returns a per-entry copy of src, reusing pool's slice backing when
+// capacity permits. Each entry is duplicated through Item.Copy (always allocates a
+// fresh *item.Item — Item has no in-place reset surface today).
 func copyItemsInto(pool, src []Item) []Item {
 	n := len(src)
 	if n == 0 {
@@ -335,7 +365,9 @@ func (gs *GameState) CopyPersistentState() *GameState {
 	if n := len(gs.banished); n > 0 {
 		out.banished = append([]card.Card(nil), gs.banished...)
 	}
-	out.auras = copyAurasInto(nil, gs.auras)
+	// out := *gs memcopied out.auraPool from gs. Rebuild out.auras so its interface
+	// values point into out.auraPool at the same pool indices gs.auras occupied.
+	out.auras = rebuildPooledAurasAfterMemcpy(&out, gs.auras, &gs.auraPool[0], nil)
 	out.items = copyItemsInto(nil, gs.items)
 	// Token slots: out := *gs copied the slot pointers, aliasing src. Give out its own
 	// instances so the snapshot's counts can't drift if src's slots mutate.
@@ -368,7 +400,11 @@ func (gs *GameState) CopyPersistentStateFrom(src *GameState) {
 	gs.arsenal = src.arsenal
 	gs.graveyard = resetCardSlice(gs.graveyard, src.graveyard)
 	gs.banished = resetCardSlice(gs.banished, src.banished)
-	gs.auras = copyAurasInto(gs.auras, src.auras)
+	// Carry src's pool data over byte-identically, then rebuild gs.auras with pointers
+	// into gs.auraPool at the same indices src.auras occupied. CopyPersistentStateFrom
+	// is field-by-field elsewhere, so the pool memcpy is explicit here.
+	gs.auraPool = src.auraPool
+	gs.auras = rebuildPooledAurasAfterMemcpy(gs, src.auras, &src.auraPool[0], gs.auras)
 	gs.items = copyItemsInto(gs.items, src.items)
 	for i := range gs.tokenAuras {
 		if gs.tokenAuras[i] == nil || src.tokenAuras[i] == nil {
