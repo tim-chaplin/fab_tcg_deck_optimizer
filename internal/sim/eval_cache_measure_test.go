@@ -12,6 +12,7 @@ import (
 	"math/rand"
 	"os"
 	"path/filepath"
+	"strconv"
 	"testing"
 	"time"
 
@@ -239,11 +240,27 @@ func TestEvalCache_EquivalenceWithUncached_FuzzAutomatic(t *testing.T) {
 			runFor = n
 		}
 	}
+	// EVAL_FUZZ_SETUP_SEED pins setupSeed to a specific value and runs exactly one
+	// iteration — used to repro a divergence the random sweep surfaced. The reproduction
+	// recipe printed in reportFuzzDivergence sets this variable to the failing seed.
+	var pinnedSeed int64
+	pinned := false
+	if s := os.Getenv("EVAL_FUZZ_SETUP_SEED"); s != "" {
+		if n, err := strconv.ParseInt(s, 10, 64); err == nil {
+			pinnedSeed = n
+			pinned = true
+		}
+	}
 	deadline := time.Now().Add(runFor)
 	seedGen := rand.New(rand.NewSource(time.Now().UnixNano()))
 	tested := 0
 	for time.Now().Before(deadline) {
-		setupSeed := seedGen.Int63()
+		var setupSeed int64
+		if pinned {
+			setupSeed = pinnedSeed
+		} else {
+			setupSeed = seedGen.Int63()
+		}
 		setupRNG := rand.New(rand.NewSource(setupSeed))
 		baseline := deck.Random(heroes.Viserai, deckSize, maxCopies, setupRNG, registry.Registry{})
 
@@ -251,16 +268,35 @@ func TestEvalCache_EquivalenceWithUncached_FuzzAutomatic(t *testing.T) {
 		uncachedStats := NewEvaluatorWithoutCache().Evaluate(baseline.Copy(), shuffles, Matchup{IncomingDamage: incoming}, rand.New(rand.NewSource(99)))
 		tested++
 
-		if cachedStats.Hands != uncachedStats.Hands {
-			t.Fatalf("setupSeed=%d: Hands diverge: cached=%d uncached=%d (after %d seeds)",
-				setupSeed, cachedStats.Hands, uncachedStats.Hands, tested)
+		if cachedStats.Hands != uncachedStats.Hands || cachedStats.TotalValue != uncachedStats.TotalValue {
+			reportFuzzDivergence(t, setupSeed, tested, cachedStats, uncachedStats)
 		}
-		if cachedStats.TotalValue != uncachedStats.TotalValue {
-			t.Fatalf("setupSeed=%d: TotalValue diverge: cached=%.0f uncached=%.0f (after %d seeds)",
-				setupSeed, cachedStats.TotalValue, uncachedStats.TotalValue, tested)
+		if pinned {
+			break
 		}
 	}
 	t.Logf("swept %d random setup seeds in %v with no divergence", tested, runFor)
+}
+
+// reportFuzzDivergence formats a divergence as a t.Fatalf with the reproduction recipe
+// surfaced up top. The leading banner exists because randomized fuzz failures are easy
+// to mis-read as transient when a follow-up run passes — the divergence is real and
+// pinned to the seed printed here, not to the runtime conditions of either run.
+func reportFuzzDivergence(t *testing.T, setupSeed int64, tested int, cached, uncached deck.Stats) {
+	t.Helper()
+	t.Fatalf(`THIS IS NOT A TRANSIENT ERROR, even if rerunning this test succeeds; this intentionally tests different sets of inputs on every run.
+
+To repeat this failure, run:
+
+  EVAL_FUZZ_SETUP_SEED=%d go test -count=1 -run TestEvalCache_EquivalenceWithUncached_FuzzAutomatic ./internal/sim/
+
+Divergence at setupSeed=%d (after %d seeds):
+  Hands:      cached=%d  uncached=%d
+  TotalValue: cached=%.0f uncached=%.0f`,
+		setupSeed, setupSeed, tested,
+		cached.Hands, uncached.Hands,
+		cached.TotalValue, uncached.TotalValue,
+	)
 }
 
 // BenchmarkEvalCache_SingleDeck compares one full Evaluate of viserai_v4 with the cache
