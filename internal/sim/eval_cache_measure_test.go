@@ -13,6 +13,7 @@ import (
 	"os"
 	"path/filepath"
 	"strconv"
+	"strings"
 	"testing"
 	"time"
 
@@ -269,7 +270,8 @@ func TestEvalCache_EquivalenceWithUncached_FuzzAutomatic(t *testing.T) {
 		tested++
 
 		if cachedStats.Hands != uncachedStats.Hands || cachedStats.TotalValue != uncachedStats.TotalValue {
-			reportFuzzDivergence(t, setupSeed, tested, cachedStats, uncachedStats)
+			reportFuzzDivergence(t, setupSeed, tested, cachedStats, uncachedStats,
+				baseline, deckSize, maxCopies, incoming, shuffles)
 		}
 		if pinned {
 			break
@@ -282,8 +284,23 @@ func TestEvalCache_EquivalenceWithUncached_FuzzAutomatic(t *testing.T) {
 // surfaced up top. The leading banner exists because randomized fuzz failures are easy
 // to mis-read as transient when a follow-up run passes — the divergence is real and
 // pinned to the seed printed here, not to the runtime conditions of either run.
-func reportFuzzDivergence(t *testing.T, setupSeed int64, tested int, cached, uncached deck.Stats) {
+func reportFuzzDivergence(t *testing.T, setupSeed int64, tested int, cached, uncached deck.Stats,
+	baseline *deck.Deck, deckSize, maxCopies, incoming, shuffles int) {
 	t.Helper()
+	divergeAt, cAtK, uAtK := bisectDivergentShuffle(baseline, incoming, shuffles)
+	var narrowing strings.Builder
+	if divergeAt <= 0 {
+		fmt.Fprintf(&narrowing, "Bisection failed: re-run did not reproduce divergence at any shuffle count up to %d.\n", shuffles)
+	} else {
+		fmt.Fprintf(&narrowing, "Bisection: divergence first appears at shuffles=%d (cached.TotalValue=%.0f uncached.TotalValue=%.0f delta=%.0f).\n",
+			divergeAt, cAtK.TotalValue, uAtK.TotalValue, cAtK.TotalValue-uAtK.TotalValue)
+		if divergeAt == 1 {
+			fmt.Fprintf(&narrowing, "The bug surfaces in the very first shuffle; investigate by tracing per-Best behaviour through shuffle 1 on a fresh evaluator.\n")
+		} else {
+			fmt.Fprintf(&narrowing, "Shuffles 1..%d are clean; the bug surfaces during shuffle %d's turns. Investigate by tracing per-Best behaviour through that shuffle on a fresh evaluator.\n", divergeAt-1, divergeAt)
+		}
+	}
+
 	t.Fatalf(`THIS IS NOT A TRANSIENT ERROR, even if rerunning this test succeeds; this intentionally tests different sets of inputs on every run.
 
 To repeat this failure, run:
@@ -292,12 +309,47 @@ To repeat this failure, run:
 
 Divergence at setupSeed=%d (after %d seeds):
   Hands:      cached=%d  uncached=%d
-  TotalValue: cached=%.0f uncached=%.0f`,
+  TotalValue: cached=%.0f uncached=%.0f
+
+%s`,
 		setupSeed, setupSeed, tested,
 		cached.Hands, uncached.Hands,
 		cached.TotalValue, uncached.TotalValue,
+		narrowing.String(),
 	)
 }
+
+// bisectDivergentShuffle finds the smallest shuffle count K (1..maxShuffles) at which
+// cached vs uncached Evaluate disagrees on Hands or TotalValue. Returns (K, statsAtK
+// for cached, statsAtK for uncached) when a divergent boundary exists, or (0, _, _)
+// when the bisection didn't reproduce. O(log maxShuffles) Evaluate-pair calls.
+func bisectDivergentShuffle(baseline *deck.Deck, incoming, maxShuffles int) (int, deck.Stats, deck.Stats) {
+	diverges := func(n int) (deck.Stats, deck.Stats, bool) {
+		c := NewEvaluator().Evaluate(baseline.Copy(), n, Matchup{IncomingDamage: incoming}, rand.New(rand.NewSource(99)))
+		u := NewEvaluatorWithoutCache().Evaluate(baseline.Copy(), n, Matchup{IncomingDamage: incoming}, rand.New(rand.NewSource(99)))
+		return c, u, c.Hands != u.Hands || c.TotalValue != u.TotalValue
+	}
+	if c, u, ok := diverges(maxShuffles); !ok {
+		return 0, c, u
+	}
+	lo, hi := 1, maxShuffles
+	var cAtK, uAtK deck.Stats
+	for lo < hi {
+		mid := (lo + hi) / 2
+		c, u, ok := diverges(mid)
+		if ok {
+			hi = mid
+			cAtK, uAtK = c, u
+		} else {
+			lo = mid + 1
+		}
+	}
+	if cAtK.Runs == 0 {
+		cAtK, uAtK, _ = diverges(lo)
+	}
+	return lo, cAtK, uAtK
+}
+
 
 // BenchmarkEvalCache_SingleDeck compares one full Evaluate of viserai_v4 with the cache
 // enabled vs disabled. Skipped when the saved deck is absent.
