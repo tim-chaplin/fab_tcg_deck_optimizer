@@ -326,6 +326,27 @@ func (ge *GameEngine) PreventArcaneDamage(n int) int {
 	return n
 }
 
+// PreventIncomingDamage caps remaining unblocked physical damage by up to n. Returns
+// the amount actually prevented — the lesser of n and the current RemainingUnblockedDamage,
+// clamped at 0. Banks the prevention into damageBlocked so RemainingUnblockedDamage reads
+// the reduced figure for downstream triggers (a DamageAboutToBeTaken handler that absorbs
+// the swing chains into the DamageTaken gate this way). The caller AddValues the
+// returned amount to credit it.
+func (ge *GameEngine) PreventIncomingDamage(n int) int {
+	if n <= 0 {
+		return 0
+	}
+	rem := ge.incomingDamage - ge.damageBlocked
+	if rem <= 0 {
+		return 0
+	}
+	if n > rem {
+		n = rem
+	}
+	ge.damageBlocked += n
+	return n
+}
+
 // TurnFaceUp flips pc.FaceUp = true on the specific CardState the caller passes — found
 // by scanning CardsRemaining for an in-attack-turn target, or held directly when the target is
 // the arsenal-in or another known CardState pointer — then fires pc.Card.OnFaceUp if
@@ -496,7 +517,7 @@ func (ge *GameEngine) FireTriggers(t triggertype.Type, triggeringCard card.Card)
 	liveItemBits := ge.tokenItemsLiveBits
 
 	if heroFires {
-		fireHero(ge, triggeringCard, triggeringTypes)
+		fireHero(ge, t, triggeringCard, triggeringTypes)
 	}
 	fireHooks(ge, &ge.auras, t, triggeringCard, triggeringTypes, false)
 	if liveAuraBits != 0 {
@@ -513,8 +534,9 @@ func (ge *GameEngine) FireTriggers(t triggertype.Type, triggeringCard card.Card)
 
 // fireHero applies the OncePerTurn / Matches gates and invokes the hero handler. The
 // hero is singular (no slice splicing, no removeAfterFire) so it bypasses fireHooks's
-// cursor walk. The TriggerType bit-and check is done at the caller.
-func fireHero(ge *GameEngine, triggeringCard card.Card, triggeringTypes card.TypeSet) {
+// cursor walk. The TriggerType bit-and check is done at the caller; t is the firing
+// event so a multi-subscription hero can dispatch.
+func fireHero(ge *GameEngine, t triggertype.Type, triggeringCard card.Card, triggeringTypes card.TypeSet) {
 	h := ge.hero
 	if h.OncePerTurn() && h.FiredThisTurn() {
 		return
@@ -522,7 +544,7 @@ func fireHero(ge *GameEngine, triggeringCard card.Card, triggeringTypes card.Typ
 	if triggeringCard != nil && !h.Matches(triggeringTypes) {
 		return
 	}
-	h.Fire(ge, ge.logger)
+	h.Fire(ge, ge.logger, t)
 	if h.OncePerTurn() {
 		h.SetFiredThisTurn(true)
 	}
@@ -547,7 +569,7 @@ func fireHooks[H trigger.Hook](ge *GameEngine, hooks *[]H, t triggertype.Type, t
 		}
 		ge.currentHookIdx = i
 		ge.currentHookDestroyed = false
-		h.Fire(ge, ge.logger)
+		h.Fire(ge, ge.logger, t)
 		switch {
 		case ge.currentHookDestroyed:
 			n--
@@ -586,7 +608,7 @@ func fireTokenAuras(ge *GameEngine, t triggertype.Type, triggeringCard card.Card
 		}
 		ge.currentFiringTokenAura = i
 		ge.currentHookDestroyed = false
-		a.Fire(ge, ge.logger)
+		a.Fire(ge, ge.logger, t)
 		if !ge.currentHookDestroyed {
 			a.SetFiredThisTurn(true)
 		}
@@ -610,7 +632,7 @@ func fireTokenItems(ge *GameEngine, t triggertype.Type, triggeringCard card.Card
 		}
 		ge.currentFiringTokenItem = i
 		ge.currentHookDestroyed = false
-		it.Fire(ge, ge.logger)
+		it.Fire(ge, ge.logger, t)
 		if !ge.currentHookDestroyed {
 			it.SetFiredThisTurn(true)
 		}

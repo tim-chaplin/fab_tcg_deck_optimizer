@@ -40,7 +40,7 @@ func NewCopper(n int) *item.Item {
 // handler is pure state cleanup.
 func NewRunechant(n int) *aura.Aura {
 	return aura.NewFromToken("Runechant", ids.RunechantTokenID, triggertype.CardOrAbility,
-		func(engine card.GameEngine, _ card.Logger, ctx card.Aura) {
+		func(engine card.GameEngine, _ card.Logger, ctx card.Aura, _ triggertype.Type) {
 			if engine.LikelyDamageHits(ctx.Count(), false) {
 				engine.(GameEngine).SetArcaneDamageDealt(true)
 			}
@@ -54,7 +54,7 @@ func NewRunechant(n int) *aura.Aura {
 // past deck-end are silently skipped.
 func NewPonder(n int) *aura.Aura {
 	return aura.NewFromToken("Ponder", ids.PonderTokenID, triggertype.EndOfTurn,
-		func(engine card.GameEngine, _ card.Logger, ctx card.Aura) {
+		func(engine card.GameEngine, _ card.Logger, ctx card.Aura, _ triggertype.Type) {
 			for i := 0; i < ctx.Count(); i++ {
 				if !engine.DrawOne() {
 					break

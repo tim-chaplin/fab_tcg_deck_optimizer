@@ -153,5 +153,3 @@ func (gs *GameState) ForEachTokenItem(fn func(Item)) {
 		mask ^= low
 	}
 }
-
-

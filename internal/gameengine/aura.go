@@ -17,8 +17,9 @@ import (
 // CreateAura registers a card-sourced aura. Takes the next free slot from auraPool
 // (the pre-allocated [auraPoolSize]aura.Aura backing on this GameState), overwrites
 // it in place, and appends the pool-slot pointer to gs.auras. Panics if the pool is
-// exhausted (>auraPoolSize simultaneously live card auras).
-func (gs *GameState) CreateAura(source card.Card, tt triggertype.Type, handler func(card.GameEngine, card.Logger, card.Aura), count int, oncePerTurn bool, filter func(card.TypeSet) bool) {
+// exhausted (>auraPoolSize simultaneously live card auras). The handler signature ends
+// in triggertype.Type so multi-subscription auras can dispatch on which event fired.
+func (gs *GameState) CreateAura(source card.Card, tt triggertype.Type, handler func(card.GameEngine, card.Logger, card.Aura, triggertype.Type), count int, oncePerTurn bool, filter func(card.TypeSet) bool) {
 	slot := gs.nextFreeAuraSlot()
 	slot.SetFromCard(source, tt, handler, count, oncePerTurn, filter)
 	gs.auras = append(gs.auras, slot)
@@ -39,11 +40,11 @@ func (gs *GameState) nextFreeAuraSlot() *aura.Aura {
 }
 
 // CreateItem registers a card-sourced triggered item.
-func (gs *GameState) CreateItem(source card.Card, tt triggertype.Type, handler func(card.GameEngine, card.Logger, card.Item), oncePerTurn bool, filter func(card.TypeSet) bool) {
+func (gs *GameState) CreateItem(source card.Card, tt triggertype.Type, handler func(card.GameEngine, card.Logger, card.Item, triggertype.Type), oncePerTurn bool, filter func(card.TypeSet) bool) {
 	gs.items = append(gs.items, item.NewFromCard(source, tt, handler, oncePerTurn, filter))
 }
 
 // CreateTrigger registers a card-sourced one-shot ephemeral trigger.
-func (gs *GameState) CreateTrigger(source card.Card, tt triggertype.Type, handler func(card.GameEngine, card.Logger, card.EphemeralTrigger), filter func(card.TypeSet) bool) {
+func (gs *GameState) CreateTrigger(source card.Card, tt triggertype.Type, handler func(card.GameEngine, card.Logger, card.EphemeralTrigger, triggertype.Type), filter func(card.TypeSet) bool) {
 	gs.triggers = append(gs.triggers, trigger.NewEphemeralTrigger(source, tt, handler, filter))
 }

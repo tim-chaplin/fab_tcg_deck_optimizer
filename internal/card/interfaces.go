@@ -57,9 +57,11 @@ type GameEngine interface {
 	// card's self.Card) that fires on every event in tt's bit set. oncePerTurn caps it to
 	// one fire per turn; filter narrows the firing site to a card-type predicate (nil =
 	// any) and is consulted only on events that carry a triggering card (so StartOfTurn,
-	// EndOfTurn, and DamageTaken effectively ignore it). Handler signatures are inlined to
-	// keep this package import-free of the concrete aura type.
-	CreateAura(source Card, tt triggertype.Type, handler func(GameEngine, Logger, Aura), count int, oncePerTurn bool, filter func(TypeSet) bool)
+	// EndOfTurn, and DamageTaken effectively ignore it). The handler's final
+	// triggertype.Type argument is the event that fired this invocation — multi-trigger
+	// auras dispatch on it, single-trigger handlers ignore it. Handler signatures are
+	// inlined to keep this package import-free of the concrete aura type.
+	CreateAura(source Card, tt triggertype.Type, handler func(GameEngine, Logger, Aura, triggertype.Type), count int, oncePerTurn bool, filter func(TypeSet) bool)
 	// DestroyAura removes the aura currently being fired. addToGraveyard sends the
 	// originating card to the graveyard (token auras skip the append). Reached via the
 	// per-fire ctx's Destroy method; exposed on GameEngine so the ctx can route the call
@@ -70,8 +72,8 @@ type GameEngine interface {
 	DestroyItem(addToGraveyard bool)
 	// CreateItem puts a card-sourced item into play whose handler fires on every event in
 	// tt's bit set. oncePerTurn caps it to one fire per turn; filter narrows the firing
-	// site (nil = any).
-	CreateItem(source Card, tt triggertype.Type, handler func(GameEngine, Logger, Item), oncePerTurn bool, filter func(TypeSet) bool)
+	// site (nil = any). Handler's final triggertype.Type argument is the firing event.
+	CreateItem(source Card, tt triggertype.Type, handler func(GameEngine, Logger, Item, triggertype.Type), oncePerTurn bool, filter func(TypeSet) bool)
 	// AddResourcePoints adds n resources to the card currently being pitched — a Pitch handler
 	// calls it to boost what that pitched card yields. No effect outside a pitch fire.
 	AddResourcePoints(n int)
@@ -83,8 +85,9 @@ type GameEngine interface {
 	// event in tt's bit set and is then dropped. filter narrows the firing event to a
 	// card-type predicate (nil = any); it is consulted only when the triggering event has
 	// a triggering card. A trigger registered from a card's own Play does not fire for
-	// its own resolution — the CardOrAbility event has already resolved by then.
-	CreateTrigger(source Card, tt triggertype.Type, handler func(GameEngine, Logger, EphemeralTrigger), filter func(TypeSet) bool)
+	// its own resolution — the CardOrAbility event has already resolved by then. The
+	// handler's final triggertype.Type argument is the firing event.
+	CreateTrigger(source Card, tt triggertype.Type, handler func(GameEngine, Logger, EphemeralTrigger, triggertype.Type), filter func(TypeSet) bool)
 
 	// Token economy
 	CreateRunechants(int)
@@ -126,6 +129,12 @@ type GameEngine interface {
 	// so downstream readers see the reduced figure. Callers AddValue the returned amount
 	// to credit the prevention.
 	PreventArcaneDamage(n int) int
+
+	// PreventIncomingDamage caps the remaining unblocked physical damage by up to n.
+	// Returns the amount actually prevented (lesser of n and RemainingUnblockedDamage).
+	// Banks the prevention so a subsequent DamageTaken gate sees the reduced figure;
+	// callers AddValue the returned amount to credit it.
+	PreventIncomingDamage(n int) int
 
 	// AP (attack-step controls cards grant).
 	AddActionPoints(int)

@@ -5,8 +5,6 @@ types:
     - Aura
 cost: 2
 goAgain: true
-markers:
-    - NotImplemented
 text: |-
     **Go again** If your hero would be dealt damage, instead destroy Enchanting Melody and
     prevent 4 damage that source would deal. At the beginning of your end phase, destroy Enchanting

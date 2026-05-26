@@ -28,8 +28,8 @@ func (BloodspillInvocationBlue) Play(ge card.GameEngine, l card.Logger, self *ca
 // pop it); the DamageTaken path has no triggering card and so isn't gated. It creates
 // a.Count() Runechants only on the hit path — a triggering card is present there but not
 // on DamageTaken — then destroys the aura.
-func bloodspillInvocationAuraHandler(ge card.GameEngine, l card.Logger, a card.Aura) {
-	if ge.TriggeringCard() != nil {
+func bloodspillInvocationAuraHandler(ge card.GameEngine, l card.Logger, a card.Aura, firingType triggertype.Type) {
+	if firingType == triggertype.Hit {
 		n := a.Count()
 		ge.CreateRunechants(n)
 		l.AppendPostTriggerf(a.CardName(), n, "Created %d runechants", n)

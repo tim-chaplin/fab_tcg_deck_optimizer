@@ -12,7 +12,6 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/gameengine"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/triggertype"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapon"
 )
 
@@ -103,8 +102,7 @@ func (e *Evaluator) replaySolution(
 		installLeafDeck(ctx, bufs, d)
 		defenseDealt, _, ctx.handStart = ctx.runDefense(defs, p, h, ctx.deck, incoming, noBlockBudgetCap, arsenalDefenderIdx, entry.defenders)
 	} else if incoming > 0 {
-		ctx.leafState.SetIsMyTurn(false)
-		ctx.permEngine(ctx.leafState).FireTriggers(triggertype.DamageTaken, nil)
+		defenseDealt = ctx.fireUndefendedDamageTriggers()
 	}
 	attackDealt, _, _, _ = ctx.playSequenceModal(entry.attackOrder)
 	return attackDealt, defenseDealt, ctx.permState, arsenalAtAttackTurnStart

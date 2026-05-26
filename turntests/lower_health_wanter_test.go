@@ -14,35 +14,35 @@ import (
 // in" branch.
 type fakeLowHeroOn struct{}
 
-func (fakeLowHeroOn) ID() ids.HeroID                                  { return ids.InvalidHero }
-func (fakeLowHeroOn) Name() string                                    { return "fakeLowHeroOn" }
-func (fakeLowHeroOn) Intelligence() int                               { return 4 }
-func (fakeLowHeroOn) Types() card.TypeSet                             { return 0 }
-func (fakeLowHeroOn) Class() card.CardType                            { return 0 }
-func (fakeLowHeroOn) Opt(cards []card.Card) (top, bottom []card.Card) { return cards, nil }
-func (fakeLowHeroOn) WantsLowerHealth()                               {}
-func (fakeLowHeroOn) TriggerType() triggertype.Type                   { return 0 }
-func (fakeLowHeroOn) OncePerTurn() bool                               { return false }
-func (fakeLowHeroOn) FiredThisTurn() bool                             { return false }
-func (fakeLowHeroOn) SetFiredThisTurn(bool)                           {}
-func (fakeLowHeroOn) Matches(card.TypeSet) bool                       { return false }
-func (fakeLowHeroOn) Fire(card.GameEngine, card.Logger)               {}
+func (fakeLowHeroOn) ID() ids.HeroID                                      { return ids.InvalidHero }
+func (fakeLowHeroOn) Name() string                                        { return "fakeLowHeroOn" }
+func (fakeLowHeroOn) Intelligence() int                                   { return 4 }
+func (fakeLowHeroOn) Types() card.TypeSet                                 { return 0 }
+func (fakeLowHeroOn) Class() card.CardType                                { return 0 }
+func (fakeLowHeroOn) Opt(cards []card.Card) (top, bottom []card.Card)     { return cards, nil }
+func (fakeLowHeroOn) WantsLowerHealth()                                   {}
+func (fakeLowHeroOn) TriggerType() triggertype.Type                       { return 0 }
+func (fakeLowHeroOn) OncePerTurn() bool                                   { return false }
+func (fakeLowHeroOn) FiredThisTurn() bool                                 { return false }
+func (fakeLowHeroOn) SetFiredThisTurn(bool)                               {}
+func (fakeLowHeroOn) Matches(card.TypeSet) bool                           { return false }
+func (fakeLowHeroOn) Fire(card.GameEngine, card.Logger, triggertype.Type) {}
 
 // fakeLowHeroOff does NOT implement gameengine.LowerHealthWanter — the default branch.
 type fakeLowHeroOff struct{}
 
-func (fakeLowHeroOff) ID() ids.HeroID                                  { return ids.InvalidHero }
-func (fakeLowHeroOff) Name() string                                    { return "fakeLowHeroOff" }
-func (fakeLowHeroOff) Intelligence() int                               { return 4 }
-func (fakeLowHeroOff) Types() card.TypeSet                             { return 0 }
-func (fakeLowHeroOff) Class() card.CardType                            { return 0 }
-func (fakeLowHeroOff) Opt(cards []card.Card) (top, bottom []card.Card) { return cards, nil }
-func (fakeLowHeroOff) TriggerType() triggertype.Type                   { return 0 }
-func (fakeLowHeroOff) OncePerTurn() bool                               { return false }
-func (fakeLowHeroOff) FiredThisTurn() bool                             { return false }
-func (fakeLowHeroOff) SetFiredThisTurn(bool)                           {}
-func (fakeLowHeroOff) Matches(card.TypeSet) bool                       { return false }
-func (fakeLowHeroOff) Fire(card.GameEngine, card.Logger)               {}
+func (fakeLowHeroOff) ID() ids.HeroID                                      { return ids.InvalidHero }
+func (fakeLowHeroOff) Name() string                                        { return "fakeLowHeroOff" }
+func (fakeLowHeroOff) Intelligence() int                                   { return 4 }
+func (fakeLowHeroOff) Types() card.TypeSet                                 { return 0 }
+func (fakeLowHeroOff) Class() card.CardType                                { return 0 }
+func (fakeLowHeroOff) Opt(cards []card.Card) (top, bottom []card.Card)     { return cards, nil }
+func (fakeLowHeroOff) TriggerType() triggertype.Type                       { return 0 }
+func (fakeLowHeroOff) OncePerTurn() bool                                   { return false }
+func (fakeLowHeroOff) FiredThisTurn() bool                                 { return false }
+func (fakeLowHeroOff) SetFiredThisTurn(bool)                               {}
+func (fakeLowHeroOff) Matches(card.TypeSet) bool                           { return false }
+func (fakeLowHeroOff) Fire(card.GameEngine, card.Logger, triggertype.Type) {}
 
 // engineWithHero returns a fresh empty engine with hero installed.
 func engineWithHero(h gameengine.Hero) *gameengine.GameEngine {
