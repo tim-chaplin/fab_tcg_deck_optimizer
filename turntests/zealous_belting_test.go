@@ -15,7 +15,7 @@ import (
 // Red's base power is 5 — a pitched power-5 card fails the strict ">" check.
 func TestZealousBelting_NoQualifyingPitchNoGoAgain(t *testing.T) {
 	c := cards.ZealousBeltingRed{}
-	ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetPitched([]card.Card{testutils.FakeRedAttack().WithPower(5)}).Build()}
+	ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetPitched(pcs(testutils.FakeRedAttack().WithPower(5))).Build()}
 	pc := &card.CardState{Card: c}
 	ge.ResolveAttackStep(ge.Logger(), pc)
 	if got := ge.Value(); got != c.Attack() {
@@ -39,7 +39,7 @@ func TestZealousBelting_HigherPowerPitchGrantsGoAgain(t *testing.T) {
 		{cards.ZealousBeltingBlue{}, 4},   // base 3, pitched power 4
 	}
 	for _, tc := range cases {
-		ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetPitched([]card.Card{testutils.FakeRedAttack().WithPower(tc.pitchPow)}).Build()}
+		ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetPitched(pcs(testutils.FakeRedAttack().WithPower(tc.pitchPow))).Build()}
 		pc := &card.CardState{Card: tc.c}
 		ge.ResolveAttackStep(ge.Logger(), pc)
 		if !pc.GrantedGoAgain {

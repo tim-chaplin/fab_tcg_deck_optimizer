@@ -34,7 +34,7 @@ func TestDeathlyDuet_AttackAttributedAddsPower(t *testing.T) {
 	ge := gameengine.New()
 	pc := &card.CardState{
 		Card:      cards.DeathlyDuetRed{},
-		Ephemeral: card.Ephemeral{PitchedToPlay: []card.Card{testutils.FakeRedAttack().WithTypes(card.TypeRuneblade)}},
+		Ephemeral: card.Ephemeral{PitchedToPlay: pcs(testutils.FakeRedAttack().WithTypes(card.TypeRuneblade))},
 	}
 	ge.ResolveAttackStep(ge.Logger(), pc)
 	if got := ge.Value(); got != 6 {
@@ -49,7 +49,7 @@ func TestDeathlyDuet_NonAttackActionAttributedCreatesRunechants(t *testing.T) {
 	ge := gameengine.New()
 	pc := &card.CardState{
 		Card:      cards.DeathlyDuetRed{},
-		Ephemeral: card.Ephemeral{PitchedToPlay: []card.Card{testutils.FakeRedAction()}},
+		Ephemeral: card.Ephemeral{PitchedToPlay: pcs(testutils.FakeRedAction())},
 	}
 	ge.ResolveAttackStep(ge.Logger(), pc)
 	if got := ge.Value(); got != 6 {
@@ -69,7 +69,7 @@ func TestDeathlyDuet_BothBranchesFire(t *testing.T) {
 	ge := gameengine.New()
 	pc := &card.CardState{
 		Card:      cards.DeathlyDuetRed{},
-		Ephemeral: card.Ephemeral{PitchedToPlay: []card.Card{testutils.FakeRedAttack().WithTypes(card.TypeRuneblade), testutils.FakeRedAction()}},
+		Ephemeral: card.Ephemeral{PitchedToPlay: pcs(testutils.FakeRedAttack().WithTypes(card.TypeRuneblade), testutils.FakeRedAction())},
 	}
 	ge.ResolveAttackStep(ge.Logger(), pc)
 	if got := ge.Value(); got != 8 {

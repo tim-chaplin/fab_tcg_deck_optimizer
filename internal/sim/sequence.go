@@ -31,7 +31,9 @@ const perItemAbilityCap = 4
 func newSequenceContext(
 	masterState *gameengine.GameState,
 	weapons []weapon.Weapon,
-	attackers, defenders, pitched, held []card.Card,
+	attackers, defenders []card.Card,
+	pitched []*card.CardState,
+	held []card.Card,
 	d *deck.Deck,
 	bufs *attackBufs,
 	blockTotal, arsenalInIdx int,
@@ -125,7 +127,9 @@ func installLeafDeck(ctx *sequenceContext, _ *attackBufs, d *deck.Deck) {
 func bestAttackWithWeapons(
 	masterState *gameengine.GameState,
 	weapons []weapon.Weapon,
-	attackers, defenders, pitched, held []card.Card,
+	attackers, defenders []card.Card,
+	pitched []*card.CardState,
+	held []card.Card,
 	d *deck.Deck,
 	bufs *attackBufs,
 	blockTotal, arsenalInIdx, arsenalDefenderIdx int,
@@ -158,7 +162,7 @@ func bestAttackWithWeapons(
 
 	pitchedVals := bufs.pitchedValsScratch[:0]
 	for _, c := range pitched {
-		pitchedVals = append(pitchedVals, c.Pitch())
+		pitchedVals = append(pitchedVals, c.Card.Pitch())
 	}
 
 	phaseCount := 1
@@ -305,13 +309,13 @@ func (ctx *sequenceContext) drCostProbe(runechants int) *gameengine.GameEngine {
 
 // sequenceContext carries the stable per-partition-leaf environment.
 type sequenceContext struct {
-	pitched                  []card.Card
+	pitched                  []*card.CardState
 	attackers                []card.Card
 	deck                     *deck.Deck
 	handStart                []card.Card
 	arsenalAtAttackTurnStart card.Card
 	bufs                     *attackBufs
-	attackPitchPerm          []card.Card
+	attackPitchPerm          []*card.CardState
 	attackPitchVals          []int
 	resourceBudget           int
 	runechantCarryover       int
@@ -382,7 +386,7 @@ func (ctx *sequenceContext) fireUndefendedDamageTriggers() int {
 // installed so Discard consumes only Held. Returns the Held cards left after any Blocker
 // discards. cachedModes, when non-nil, supplies each plain blocker's mode for a cache replay;
 // nil drives the normal pickBlockerMode search.
-func (ctx *sequenceContext) runDefense(defenders, pitched, held []card.Card, deckPile *deck.Deck, matchupIncomingDamage, blockBudget, arsenalDefenderIdx int, cachedModes []playedCard) (int, bool, []card.Card) {
+func (ctx *sequenceContext) runDefense(defenders []card.Card, pitched []*card.CardState, held []card.Card, deckPile *deck.Deck, matchupIncomingDamage, blockBudget, arsenalDefenderIdx int, cachedModes []playedCard) (int, bool, []card.Card) {
 	state := ctx.leafState
 	state.SetIsMyTurn(false)
 	if ctx.replayLogger != nil {
@@ -419,7 +423,7 @@ func (ctx *sequenceContext) runDefense(defenders, pitched, held []card.Card, dec
 		defenseHand = append(defenseHand, card.CardState{Card: c, Role: card.Attack})
 	}
 	for _, c := range pitched {
-		defenseHand = append(defenseHand, card.CardState{Card: c, Role: card.Pitch})
+		defenseHand = append(defenseHand, card.CardState{Card: c.Card, Role: card.Pitch})
 	}
 	state.SetHandStates(defenseHand)
 
@@ -542,7 +546,7 @@ func (ctx *sequenceContext) preparePermState(playedAttackers []*card.CardState, 
 		hand = append(hand, card.CardState{Card: playedAttackers[k].Card, Role: card.Attack})
 	}
 	for _, c := range ctx.attackPitchPerm {
-		hand = append(hand, card.CardState{Card: c, Role: card.Pitch})
+		hand = append(hand, card.CardState{Card: c.Card, Role: card.Pitch})
 	}
 	s.SetHandStates(hand)
 	// CardsPlayed is similarly prewarmed; the cap check guards mid-attack-turn growth.
@@ -563,7 +567,7 @@ func (ctx *sequenceContext) preparePermState(playedAttackers []*card.CardState, 
 
 // captureWinningSeq records the winning permutation's attacker order + modes and pitch
 // ordering into attackBufs scratch — the raw material for a verbatim cache replay.
-func (ctx *sequenceContext) captureWinningSeq(pcBuf []card.CardState, pitchPerm []card.Card) {
+func (ctx *sequenceContext) captureWinningSeq(pcBuf []card.CardState, pitchPerm []*card.CardState) {
 	b := ctx.bufs
 	b.seqAttack = b.seqAttack[:0]
 	for i := range pcBuf {
@@ -571,7 +575,10 @@ func (ctx *sequenceContext) captureWinningSeq(pcBuf []card.CardState, pitchPerm 
 			card: pcBuf[i].Card, mode: pcBuf[i].Mode, fromArsenal: pcBuf[i].FromArsenal,
 		})
 	}
-	b.seqPitch = append(b.seqPitch[:0], pitchPerm...)
+	b.seqPitch = b.seqPitch[:0]
+	for _, pc := range pitchPerm {
+		b.seqPitch = append(b.seqPitch, pc.Card)
+	}
 }
 
 // bestSequence tries every ordering of attackers and returns the winning permutation's
@@ -690,9 +697,10 @@ func sortAttackersByID(pcBuf []card.CardState, permMeta []*attackerMeta) {
 }
 
 // sortPitchByID is sortAttackersByID for the (pitchPerm, pitchVals) parallel slices.
-func sortPitchByID(perm []card.Card, vals []int) {
+// Pitch entries are *CardState; comparison reads through .Card.ID().
+func sortPitchByID(perm []*card.CardState, vals []int) {
 	for i := 1; i < len(perm); i++ {
-		for j := i; j > 0 && perm[j].ID() < perm[j-1].ID(); j-- {
+		for j := i; j > 0 && perm[j].Card.ID() < perm[j-1].Card.ID(); j-- {
 			perm[j-1], perm[j] = perm[j], perm[j-1]
 			vals[j-1], vals[j] = vals[j], vals[j-1]
 		}
@@ -729,20 +737,21 @@ func nextPermAttackers(pcBuf []card.CardState, permMeta []*attackerMeta) bool {
 }
 
 // nextPermPitches is nextPermAttackers for the (pitchPerm, pitchVals) parallel slices.
-func nextPermPitches(perm []card.Card, vals []int) bool {
+// Pitch entries are *CardState; comparison reads through .Card.ID().
+func nextPermPitches(perm []*card.CardState, vals []int) bool {
 	n := len(perm)
 	if n < 2 {
 		return false
 	}
 	i := n - 2
-	for i >= 0 && perm[i].ID() >= perm[i+1].ID() {
+	for i >= 0 && perm[i].Card.ID() >= perm[i+1].Card.ID() {
 		i--
 	}
 	if i < 0 {
 		return false
 	}
 	j := n - 1
-	for perm[j].ID() <= perm[i].ID() {
+	for perm[j].Card.ID() <= perm[i].Card.ID() {
 		j--
 	}
 	perm[i], perm[j] = perm[j], perm[i]
@@ -858,7 +867,7 @@ func (ctx *sequenceContext) playSequenceWithMeta(n int) (damage int, totalCounte
 		}
 		pc.PitchedToPlay = contrib
 		for k := prevPitchIdx; k < pool.idx; k++ {
-			if !state.RemoveFromHand(pool.perm[k]) {
+			if !state.RemoveFromHand(pool.perm[k].Card) {
 				return infeasible()
 			}
 		}

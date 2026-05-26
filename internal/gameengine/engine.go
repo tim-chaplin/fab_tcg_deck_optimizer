@@ -708,10 +708,11 @@ func (ge *GameEngine) AddResourcePoints(n int) { ge.pitchBonus += n }
 
 // FirePitchTriggers fires the triggertype.Pitch event for a just-pitched card and returns
 // the resource bonus its handlers granted via AddResourcePoints — the amount pay adds to the
-// pitched card's contribution on top of its printed Pitch value.
-func (ge *GameEngine) FirePitchTriggers(pitched card.Card) int {
+// pitched card's contribution on top of its printed Pitch value. pitched is the physical
+// pitched-zone copy.
+func (ge *GameEngine) FirePitchTriggers(pitched *card.CardState) int {
 	ge.pitchBonus = 0
-	ge.FireTriggers(triggertype.Pitch, pitched)
+	ge.FireTriggers(triggertype.Pitch, pitched.Card)
 	return ge.pitchBonus
 }
 

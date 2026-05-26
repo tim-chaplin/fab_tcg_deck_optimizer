@@ -26,7 +26,7 @@ func (AetherSlashBlue) Play(ge card.GameEngine, l card.Logger, self *card.CardSt
 // aetherSlashApplyRider deals 1 arcane when a non-attack action is among the pitched cards.
 func aetherSlashApplyRider(ge card.GameEngine, l card.Logger, self *card.CardState) {
 	for _, p := range self.PitchedToPlay {
-		if p.Types(nil).IsNonAttackAction() {
+		if p.Card.Types(nil).IsNonAttackAction() {
 			ge.DealArcaneDamage(l, self.Card.DisplayName(), 1)
 			return
 		}

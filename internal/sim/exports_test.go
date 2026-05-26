@@ -70,15 +70,16 @@ func PromoteRandomHandCardToArsenal(best *TurnSummary, startingHand []card.Card,
 	markPromotedInBestLine(best.BestLine, promoteHeldToArsenal(best.State, startingHand, arsenalCardIn))
 }
 
-// DefendersDamage re-exports defendersDamage with an unbounded block budget.
+// DefendersDamage re-exports defendersDamage with an unbounded block budget. Wraps each
+// pitched Card in a *CardState before delegating.
 func DefendersDamage(defenders, pitched []card.Card, d *deck.Deck, ge *gameengine.GameEngine, gravBuf []card.Card, cs *card.CardState, incomingDamage, arsenalDefenderIdx int) (int, []card.Card) {
-	total, gravBuf, _ := defendersDamage(defenders, pitched, d, ge, gravBuf, cs, incomingDamage, noBlockBudgetCap, arsenalDefenderIdx)
+	total, gravBuf, _ := defendersDamage(defenders, wrapPitchedCards(pitched), d, ge, gravBuf, cs, incomingDamage, noBlockBudgetCap, arsenalDefenderIdx)
 	return total, gravBuf
 }
 
 // DefendersDamageWithBudget is the budget-aware export.
 func DefendersDamageWithBudget(defenders, pitched []card.Card, d *deck.Deck, ge *gameengine.GameEngine, gravBuf []card.Card, cs *card.CardState, incomingDamage, blockBudget, arsenalDefenderIdx int) (int, []card.Card) {
-	total, gravBuf, _ := defendersDamage(defenders, pitched, d, ge, gravBuf, cs, incomingDamage, blockBudget, arsenalDefenderIdx)
+	total, gravBuf, _ := defendersDamage(defenders, wrapPitchedCards(pitched), d, ge, gravBuf, cs, incomingDamage, blockBudget, arsenalDefenderIdx)
 	return total, gravBuf
 }
 

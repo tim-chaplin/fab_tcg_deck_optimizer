@@ -20,7 +20,7 @@ func TestEphemeralReset_ZeroesEveryField(t *testing.T) {
 		GrantedInstant:   true,
 		BonusAttack:      99,
 		BonusDefense:     99,
-		PitchedToPlay:    []Card{nil},
+		PitchedToPlay:    []*CardState{nil},
 		OnHit:            []OnHitHandler{{N: 1}},
 	}
 	e.Reset()

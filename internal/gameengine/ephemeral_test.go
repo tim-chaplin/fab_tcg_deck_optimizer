@@ -17,7 +17,7 @@ func TestEphemeralReset_MatchesExpectedShape(t *testing.T) {
 	dirty := ephemeral{
 		cardsPlayed:           []card.Card{nil, nil, nil},
 		cardsRemaining:        []*card.CardState{nil, nil},
-		pitched:               []card.Card{nil, nil},
+		pitched:               []*card.CardState{nil, nil},
 		defenders:             []card.Card{nil, nil},
 		triggers:              []EphemeralTrigger{nil, nil},
 		attackReactionTarget:  &card.CardState{},

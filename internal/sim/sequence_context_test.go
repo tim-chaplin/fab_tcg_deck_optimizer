@@ -27,7 +27,7 @@ func newSequenceContextForTest(h hero.Hero, pitched, deckCards []card.Card, reso
 	}
 	leafState := builder.Build()
 	return &sequenceContext{
-		pitched:            pitched,
+		pitched:            wrapPitchedCards(pitched),
 		deck:               d,
 		bufs:               bufs,
 		resourceBudget:     resourceBudget,

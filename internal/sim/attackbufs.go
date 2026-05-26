@@ -44,13 +44,18 @@ type attackBufs struct {
 	// arsenal-in slot the enumerator treats as index n.
 	partitionCards     []partitionCard
 	pitchedValsScratch []int
-	pitchedBuf         []card.Card
-	pitchPermBuf       []card.Card
-	pitchPermValsBuf   []int
-	pitchAttrBuf       []card.Card
-	attackersBuf       []card.Card
-	defendersBuf       []card.Card
-	heldBuf            []card.Card
+	// pitchPcBuf is the per-leaf backing for the *CardState wrappers around pitched cards.
+	// groupByRole writes pcBuf[i] = CardState{Card: pc.card} for each Pitch-role card and
+	// stores the &pcBuf[i] pointer in pitchedBuf. Sized handSize+1 so it can carry every
+	// hand card simultaneously even if every card pitches.
+	pitchPcBuf       []card.CardState
+	pitchedBuf       []*card.CardState
+	pitchPermBuf     []*card.CardState
+	pitchPermValsBuf []int
+	pitchAttrBuf     []*card.CardState
+	attackersBuf     []card.Card
+	defendersBuf     []card.Card
+	heldBuf          []card.Card
 	// defenseGravScratch backs the per-defender graveyard view inside defendersDamage.
 	defenseGravScratch []card.Card
 	// drCardStateScratch is a pooled *CardState handed to DR Card.Play calls.
@@ -126,10 +131,11 @@ func newAttackBufs(handSize, weaponCount int, weapons []weapon.Weapon, statePool
 		statePool:             statePool,
 		partitionCards:        make([]partitionCard, handSize+1),
 		pitchedValsScratch:    make([]int, 0, handSize+1),
-		pitchedBuf:            make([]card.Card, 0, handSize+1),
-		pitchPermBuf:          make([]card.Card, 0, handSize+1),
+		pitchPcBuf:            make([]card.CardState, handSize+1),
+		pitchedBuf:            make([]*card.CardState, 0, handSize+1),
+		pitchPermBuf:          make([]*card.CardState, 0, handSize+1),
 		pitchPermValsBuf:      make([]int, 0, handSize+1),
-		pitchAttrBuf:          make([]card.Card, 0, handSize+1),
+		pitchAttrBuf:          make([]*card.CardState, 0, handSize+1),
 		attackersBuf:          make([]card.Card, 0, handSize+1),
 		defendersBuf:          make([]card.Card, 0, handSize+1),
 		heldBuf:               make([]card.Card, 0, handSize+1),

@@ -29,7 +29,7 @@ func (DeathlyDuetBlue) Play(ge card.GameEngine, l card.Logger, self *card.CardSt
 func deathlyDuetApplyRiders(ge card.GameEngine, l card.Logger, self *card.CardState) {
 	var attackPitched, nonAttackActionPitched bool
 	for _, p := range self.PitchedToPlay {
-		t := p.Types(nil)
+		t := p.Card.Types(nil)
 		if t.Has(card.TypeAttack) {
 			attackPitched = true
 		}

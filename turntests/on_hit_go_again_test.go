@@ -48,6 +48,17 @@ func TestOnHitGoAgain_TwoConsecutiveARsExtendToWeaponSwing(t *testing.T) {
 	}
 }
 
+// pcs wraps each card in a fresh *card.CardState (Role=Pitch). Used by tests that build
+// PitchedToPlay literals or SetPitched arguments — the pitched zone holds *CardState
+// instances, not raw Cards.
+func pcs(cs ...card.Card) []*card.CardState {
+	out := make([]*card.CardState, len(cs))
+	for i, c := range cs {
+		out[i] = &card.CardState{Card: c, Role: card.Pitch}
+	}
+	return out
+}
+
 // formatBestLine renders the chosen role assignment in attack-turn order for failure messages.
 func formatBestLine(line []card.CardAssignment) string {
 	var parts []string

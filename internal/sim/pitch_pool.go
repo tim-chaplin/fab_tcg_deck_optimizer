@@ -10,13 +10,17 @@ import (
 // partially-consumed front (front + remaining), and the flat backing slice (attr) that
 // per-CardState PitchedToPlay slices index into.
 //
+// Each pitched entry is a *CardState — the physical pitched-zone copy carrying its own
+// ephemeral state — so triggertype.Pitch handlers reading TriggeringCard see the actual
+// scheduled instance rather than a stateless platonic Card.
+//
 // Lifecycle: one pitchPool per attack turn run (per attack-permutation × pitch-permutation
 // pair). playSequenceWithMeta constructs the pool from ctx.attackPitchPerm / Vals and
 // drains it step-by-step via pay. At end of attack turn a pool with idx < n means a pitched
 // card was held back without funding any cost — illegal in FaB. Residual `remaining`
 // is fine: it's the over-pitch surplus on the last popped pitch.
 type pitchPool struct {
-	perm []card.Card
+	perm []*card.CardState
 	vals []int
 	idx  int
 	n    int
@@ -25,9 +29,25 @@ type pitchPool struct {
 	// remaining==0) or one pitched card sits at the front with leftover resources.
 	// Tests bypass the real pool by seeding remaining with a synthetic budget and no
 	// backing front — pay then drains the budget without contributing attribution.
-	front     card.Card
+	front     *card.CardState
 	remaining int
-	attr      []card.Card
+	attr      []*card.CardState
+}
+
+// wrapPitchedCards allocates a *CardState (Role=Pitch) for each c in cs and returns the
+// pointer slice. Used by replay / print paths where bufs.pitchPcBuf isn't in scope; the
+// hot partition path uses groupByRole's pitchPcBuf-backed wrapping instead.
+func wrapPitchedCards(cs []card.Card) []*card.CardState {
+	if len(cs) == 0 {
+		return nil
+	}
+	states := make([]card.CardState, len(cs))
+	out := make([]*card.CardState, len(cs))
+	for i, c := range cs {
+		states[i] = card.CardState{Card: c, Role: card.Pitch}
+		out[i] = &states[i]
+	}
+	return out
 }
 
 // pay consumes `cost` resources from the front of the pool, popping new pitches as the
@@ -37,7 +57,7 @@ type pitchPool struct {
 // payment popped it. Each newly popped card fires its triggertype.Pitch handlers; any
 // AddResourcePoints grant folds into that card's contribution. Returns ok=false if the pool
 // ran out of pitches mid-payment.
-func (p *pitchPool) pay(ge *gameengine.GameEngine, cost int) (contrib []card.Card, ok bool) {
+func (p *pitchPool) pay(ge *gameengine.GameEngine, cost int) (contrib []*card.CardState, ok bool) {
 	attrStart := len(p.attr)
 	remaining := cost
 	for remaining > 0 {
