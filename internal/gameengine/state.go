@@ -598,9 +598,9 @@ func (gs *GameState) AuraCount() int {
 }
 
 // RunechantCount / PonderCount / GoldCount / SilverCount / CopperCount return the live
-// token count from the pre-allocated slot for each kind. Both GameState and GameEngine
-// expose these so end-of-turn callers (TurnSummary readers) can read counts off the
-// state pointer directly without needing an engine wrapper.
+// token count from the pre-allocated slot for each kind. Promoted onto *GameEngine via
+// the embedded *GameState, so card-facing engine callers and TurnSummary readers share
+// the same accessor.
 func (gs *GameState) RunechantCount() int { return gs.tokenAuras[tokenAuraRunechant].Count() }
 func (gs *GameState) PonderCount() int    { return gs.tokenAuras[tokenAuraPonder].Count() }
 func (gs *GameState) GoldCount() int      { return gs.tokenItems[tokenItemGold].Count() }

@@ -925,14 +925,6 @@ func (ge *GameEngine) CreateCopper(n int) {
 	ge.GameState.bumpTokenItem(tokenItemCopper, n)
 }
 
-// RunechantCount / PonderCount / GoldCount / SilverCount / CopperCount return the
-// live count of each token kind in play, or zero when none.
-func (ge *GameEngine) RunechantCount() int { return ge.tokenAuras[tokenAuraRunechant].Count() }
-func (ge *GameEngine) PonderCount() int    { return ge.tokenAuras[tokenAuraPonder].Count() }
-func (ge *GameEngine) GoldCount() int      { return ge.tokenItems[tokenItemGold].Count() }
-func (ge *GameEngine) SilverCount() int    { return ge.tokenItems[tokenItemSilver].Count() }
-func (ge *GameEngine) CopperCount() int    { return ge.tokenItems[tokenItemCopper].Count() }
-
 // CreateFrailtyForOpponent / CreateInertiaForOpponent / CreateBloodrotPoxForOpponent credit
 // the matching damage-equivalent heuristic when a status token is created under the
 // opponent's control. We don't track opposing status-token state, so these are flat value
