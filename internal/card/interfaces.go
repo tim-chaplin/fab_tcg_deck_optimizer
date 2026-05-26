@@ -92,10 +92,12 @@ type GameEngine interface {
 	// Token economy
 	CreateRunechants(int)
 	CreatePonders(int)
+	CreateQuicken(int)
 	CreateGold(int)
 	CreateSilver(int)
 	CreateCopper(int)
 	RunechantCount() int
+	QuickenCount() int
 	GoldCount() int
 	SilverCount() int
 	CopperCount() int
@@ -166,6 +168,10 @@ type GameEngine interface {
 	HasCrowdBooed() bool
 	// UntapHero untaps the owning player's hero — the printed "untap your hero" effect.
 	UntapHero()
+	// DamageDealt returns the cumulative damage credited at every Hit fire this turn.
+	DamageDealt() int
+	// HitThisTurn reports whether at least one attack has landed this turn.
+	HitThisTurn() bool
 	// LastAttackHit reports whether the most recent finalised attack this attack turn
 	// hit. False until the first attack finalises; each subsequent attack overwrites it.
 	LastAttackHit() bool
@@ -210,6 +216,10 @@ type GameEngine interface {
 
 	// Opt (hero-driven top-of-deck reshape)
 	Opt(Logger, int)
+	// OptWith is Opt with a card-supplied splitter — for cards whose printed text
+	// overrides the hero's heuristic. split must return (top, bottom) as exactly the
+	// input multiset.
+	OptWith(l Logger, n int, split func([]Card) (top, bottom []Card))
 
 	// Clash (top-of-deck power compare)
 	Clash(win, lose func())

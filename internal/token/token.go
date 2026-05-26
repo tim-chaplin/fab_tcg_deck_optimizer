@@ -63,3 +63,20 @@ func NewPonder(n int) *aura.Aura {
 			ctx.Destroy(false)
 		}, n, nil)
 }
+
+// NewQuicken returns a fresh Quicken token aura at count n. Fires when an attack is played
+// (triggertype.CardOrAbility, filtered to attacks, which fires before the attack resolves):
+// sets GrantedGoAgain on the triggering attack's CardState and consumes one charge.
+func NewQuicken(n int) *aura.Aura {
+	return aura.NewFromToken("Quicken", ids.QuickenTokenID, triggertype.CardOrAbility,
+		func(engine card.GameEngine, _ card.Logger, ctx card.Aura, _ triggertype.Type) {
+			pc := engine.TriggeringCard()
+			if pc == nil {
+				return
+			}
+			pc.GrantedGoAgain = true
+			if ctx.DecrementCount() <= 0 {
+				ctx.Destroy(false)
+			}
+		}, n, card.TypeSet.IsAttack)
+}

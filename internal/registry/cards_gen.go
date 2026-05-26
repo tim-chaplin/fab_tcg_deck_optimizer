@@ -170,6 +170,10 @@ var cardsByID = []Card{
 	ids.EvasiveLeapYellow: cards.EvasiveLeapYellow{},
 	ids.EvasiveLeapBlue:   cards.EvasiveLeapBlue{},
 
+	ids.EvenBiggerThanThatRed:    cards.EvenBiggerThanThatRed{},
+	ids.EvenBiggerThanThatYellow: cards.EvenBiggerThanThatYellow{},
+	ids.EvenBiggerThanThatBlue:   cards.EvenBiggerThanThatBlue{},
+
 	ids.ExposedBlue: cards.ExposedBlue{},
 
 	ids.FactFindingMissionRed:    cards.FactFindingMissionRed{},

@@ -88,8 +88,12 @@ type ephemeral struct {
 
 	logger card.Logger
 
-	actionPoints   int
-	value          int
+	actionPoints int
+	value        int
+	// damageDealt is the cumulative damage credited at every triggertype.Hit fire this
+	// turn — gates "if you've dealt {N} this turn" riders. Resets at the turn boundary
+	// via ephemeral.reset.
+	damageDealt int
 	damageBlocked  int
 	blockTotal     int
 	currentHookIdx int
@@ -635,6 +639,7 @@ func (gs *GameState) AuraCount() int {
 // the same accessor.
 func (gs *GameState) RunechantCount() int { return gs.tokenAuras[tokenAuraRunechant].Count() }
 func (gs *GameState) PonderCount() int    { return gs.tokenAuras[tokenAuraPonder].Count() }
+func (gs *GameState) QuickenCount() int   { return gs.tokenAuras[tokenAuraQuicken].Count() }
 func (gs *GameState) GoldCount() int      { return gs.tokenItems[tokenItemGold].Count() }
 func (gs *GameState) SilverCount() int    { return gs.tokenItems[tokenItemSilver].Count() }
 func (gs *GameState) CopperCount() int    { return gs.tokenItems[tokenItemCopper].Count() }
@@ -678,6 +683,15 @@ func (gs *GameState) AddActionPoints(n int) { gs.actionPoints += n }
 func (gs *GameState) Value() int     { return gs.value }
 func (gs *GameState) SetValue(v int) { gs.value = v }
 func (gs *GameState) AddValue(n int) { gs.value += n }
+
+// DamageDealt returns the cumulative damage credited at every Hit fire this turn —
+// "if you've dealt {N} this turn" gates read this. Zeroed at the turn boundary.
+func (gs *GameState) DamageDealt() int     { return gs.damageDealt }
+func (gs *GameState) AddDamageDealt(n int) { gs.damageDealt += n }
+
+// HitThisTurn reports whether at least one attack has fired Hit this turn — proxy for the
+// "if you've dealt damage this turn" gate.
+func (gs *GameState) HitThisTurn() bool { return gs.damageDealt > 0 }
 
 // RemainingUnblockedDamage returns the opponent damage still unblocked this turn — the
 // constant matchup figure minus everything defense has absorbed so far.
