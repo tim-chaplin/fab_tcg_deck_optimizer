@@ -106,13 +106,7 @@ func (e *Evaluator) replaySolution(
 		ctx.leafState.SetIsMyTurn(false)
 		ctx.permEngine(ctx.leafState).FireTriggers(triggertype.DamageTaken, nil)
 	}
-	ctx.leafState.SetDeck(nil)
-
 	attackDealt, _, _, _ = ctx.playSequenceModal(entry.attackOrder)
-	// Clone the winner's deck wrapper out of bufs.pooledDeck so the caller's next-turn d
-	// doesn't alias the pooled buffer (the next leaf would reset it). The search path takes
-	// the same hand-off via promoteWinnerDeck; replay must match.
-	ctx.promoteWinnerDeck(ctx.permState)
 	return attackDealt, defenseDealt, ctx.permState, arsenalAtChainStart
 }
 

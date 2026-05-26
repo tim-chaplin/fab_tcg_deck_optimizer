@@ -1,6 +1,9 @@
 package gameengine
 
-import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+import (
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
+)
 
 // Pool is a fixed-capacity recycler of *GameState values. All cap slots are built
 // eagerly by factory at NewPool time; Get / Put cycle the same pointers forever with no
@@ -126,8 +129,9 @@ const (
 var MaxDeckSize = 80
 
 // NewPrewarmedState returns a zero-value *GameState with hand / cardsPlayed / graveyard
-// / banished slice backings pre-allocated to worst-case sizes, so the chain runner's
-// per-permutation fills never need to grow past the pool slot's existing cap.
+// / banished slice backings pre-allocated to worst-case sizes and an empty *deck.Deck
+// wrapper attached. The chain runner rebinds slice headers in place rather than growing
+// them or producing new wrappers.
 func NewPrewarmedState() *GameState {
 	s := new(GameState)
 	s.SetHandStates(make([]card.CardState, 0, defaultHandCap))
@@ -135,6 +139,7 @@ func NewPrewarmedState() *GameState {
 	zoneCap := MaxDeckSize + graveyardBanishedHeadroom
 	s.SetGraveyard(make([]card.Card, 0, zoneCap))
 	s.SetBanished(make([]card.Card, 0, zoneCap))
+	s.SetDeck(deck.NewShallowSafe())
 	return s
 }
 

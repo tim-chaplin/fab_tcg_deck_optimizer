@@ -29,17 +29,14 @@ func best(weapons []weapon.Weapon, hand []card.Card, d *deck.Deck, master *gamee
 // Best returns the optimal TurnSummary for the given hand and lands the winning chain's
 // post-resolution state into master in place. Returned summary.State == master, so the
 // caller's ownership of master is unchanged; the borrowed pool slot is returned here.
+// CopyFrom rebinds master's owned deck wrapper to alias the winner's via ShallowCopyFrom.
 func (e *Evaluator) Best(weapons []weapon.Weapon, hand []card.Card, d *deck.Deck, master *gameengine.GameState) TurnSummary {
 	summary := e.findBest(weapons, hand, d, master)
 	winner := summary.State
 	if winner == nil || winner == master {
 		return summary
 	}
-	// Transfer the winner's deck pointer; its wrapper is already an owned shallow copy.
-	winnerDeck := winner.Deck()
-	winner.SetDeck(nil)
 	master.CopyFrom(winner)
-	master.SetDeck(winnerDeck)
 	e.statePool.Put(winner)
 	summary.State = master
 	return summary

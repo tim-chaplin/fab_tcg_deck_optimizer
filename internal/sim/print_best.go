@@ -73,7 +73,6 @@ func runReplayForTurn(snapshot *turnSnapshot, ev *Evaluator, logger card.Logger)
 	if len(defenders) > 0 {
 		_, _, ctx.handStart = ctx.runDefense(defenders, pitched, held, snapshot.deck, snapshot.state.IncomingDamage(), noBlockBudgetCap, arsenalDefenderIdx, nil)
 	}
-	ctx.leafState.SetDeck(nil)
 
 	ctx.playSequence(snapshot.cardsPlayed)
 	return TurnSummary{

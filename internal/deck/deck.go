@@ -62,6 +62,12 @@ func New(h Hero, weapons []Weapon, cards []Card) *Deck {
 	return &Deck{Hero: h, Weapons: weapons, cards: cards}
 }
 
+// NewShallowSafe returns an empty *Deck wrapper marked mustNotShuffle, ready to be
+// rebound via ShallowCopyFrom against a source deck.
+func NewShallowSafe() *Deck {
+	return &Deck{mustNotShuffle: true}
+}
+
 // Size reports the number of cards in the deck (Sideboard / Equipment excluded). Nil-safe:
 // a nil Deck reports 0.
 func (d *Deck) Size() int {
