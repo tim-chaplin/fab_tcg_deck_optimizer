@@ -30,6 +30,10 @@ type Aura interface {
 	DecrementCount() int
 	Copy() any
 	CopyInto(dst any) any
+	// Clear zeros source / count / fire-closure so the underlying pool slot reads as
+	// free for the GameState aura pool's next-free-slot scan. Called by DestroyAura
+	// after the slot leaves play.
+	Clear()
 }
 
 // EphemeralTrigger is the engine's view of a one-shot deferred handler. The trigger.Hook
