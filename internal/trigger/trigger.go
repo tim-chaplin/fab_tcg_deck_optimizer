@@ -19,26 +19,32 @@ type TypeFilter func(card.TypeSet) bool
 // one-shot triggers, and the hero. Concrete entries get it for free by embedding
 // Trigger[T] (whose pointer-receiver methods cover everything except Fire); each entry
 // type supplies its own Fire that calls Invoke with itself as the typed receiver. The
-// engine's dispatch loop walks entries through this interface.
+// engine's dispatch loop walks entries through this interface and threads the firing
+// trigger type (a single bit, even when the registration's TriggerType subscribes to
+// several via bitmask OR) so multi-trigger handlers can dispatch on which event
+// invoked them.
 type Hook interface {
 	TriggerType() triggertype.Type
 	OncePerTurn() bool
 	FiredThisTurn() bool
 	SetFiredThisTurn(bool)
 	Matches(types card.TypeSet) bool
-	Fire(engine card.GameEngine, logger card.Logger)
+	Fire(engine card.GameEngine, logger card.Logger, firingType triggertype.Type)
 }
 
 // Trigger is the embeddable core a triggered entry carries. T is the concrete surface the
 // handler receives — card.EphemeralTrigger, card.Aura, card.Item — so handlers stay typed
 // with no assertion. The embedding type supplies a Fire method that calls Invoke with
-// itself as the typed receiver.
+// itself as the typed receiver and the firing trigger type so multi-trigger subscribers
+// can dispatch.
 //
-// oncePerTurn caps the entry to one fire per turn; firedThisTurn is the gate, set after a
-// fire and re-armed at the turn boundary.
+// triggerType is the subscription bitmask — handlers may subscribe to several events by
+// OR-ing types (e.g. DamageAboutToBeTaken | EndOfTurn). oncePerTurn caps the entry to
+// one fire per turn across all subscribed events; firedThisTurn is the gate, set after
+// a fire and re-armed at the turn boundary.
 type Trigger[T any] struct {
 	triggerType   triggertype.Type
-	fire          func(card.GameEngine, card.Logger, T)
+	fire          func(card.GameEngine, card.Logger, T, triggertype.Type)
 	source        card.Card
 	tokenName     string
 	tokenID       ids.CardID
@@ -48,21 +54,22 @@ type Trigger[T any] struct {
 }
 
 // FromCard builds a card-sourced Trigger core. oncePerTurn caps it to one fire per turn;
-// typeFilter narrows the firing site, pass nil for no filter.
-func FromCard[T any](source card.Card, tt triggertype.Type, fire func(card.GameEngine, card.Logger, T), oncePerTurn bool, typeFilter TypeFilter) Trigger[T] {
+// typeFilter narrows the firing site, pass nil for no filter. The fire handler receives
+// the firing trigger type so multi-trigger subscribers can dispatch.
+func FromCard[T any](source card.Card, tt triggertype.Type, fire func(card.GameEngine, card.Logger, T, triggertype.Type), oncePerTurn bool, typeFilter TypeFilter) Trigger[T] {
 	return Trigger[T]{triggerType: tt, fire: fire, source: source, oncePerTurn: oncePerTurn, typeFilter: typeFilter}
 }
 
 // FromToken builds a token-sourced Trigger core — no originating card. CardName returns
 // the supplied name; CardID returns tokenID so cache keys distinguish each token kind.
-func FromToken[T any](name string, tokenID ids.CardID, tt triggertype.Type, fire func(card.GameEngine, card.Logger, T), oncePerTurn bool, typeFilter TypeFilter) Trigger[T] {
+func FromToken[T any](name string, tokenID ids.CardID, tt triggertype.Type, fire func(card.GameEngine, card.Logger, T, triggertype.Type), oncePerTurn bool, typeFilter TypeFilter) Trigger[T] {
 	return Trigger[T]{triggerType: tt, fire: fire, tokenName: name, tokenID: tokenID, oncePerTurn: oncePerTurn, typeFilter: typeFilter}
 }
 
 // FromHero builds a Trigger core for a hero ability — no card or token identity. The
 // embedding Hero type owns its own ID / Name, so the source / token slots stay zero;
 // CardName returns "" and CardID returns 0 on a hero-sourced trigger.
-func FromHero[T any](tt triggertype.Type, fire func(card.GameEngine, card.Logger, T), oncePerTurn bool, typeFilter TypeFilter) Trigger[T] {
+func FromHero[T any](tt triggertype.Type, fire func(card.GameEngine, card.Logger, T, triggertype.Type), oncePerTurn bool, typeFilter TypeFilter) Trigger[T] {
 	return Trigger[T]{triggerType: tt, fire: fire, oncePerTurn: oncePerTurn, typeFilter: typeFilter}
 }
 
@@ -103,15 +110,16 @@ func (t *Trigger[T]) SourceCard() any {
 	return t.source
 }
 
-// Invoke runs the handler, passing self as the typed receiver.
-func (t *Trigger[T]) Invoke(engine card.GameEngine, logger card.Logger, self T) {
-	t.fire(engine, logger, self)
+// Invoke runs the handler, passing self as the typed receiver plus the firing trigger
+// type so multi-trigger handlers can dispatch on which event invoked them.
+func (t *Trigger[T]) Invoke(engine card.GameEngine, logger card.Logger, self T, firingType triggertype.Type) {
+	t.fire(engine, logger, self, firingType)
 }
 
 // SetFromCard rewrites t in place as a fresh card-sourced trigger. firedThisTurn
 // re-arms so a reused pool slot fires cleanly. Token-identity fields zero out — a slot
 // returned to the card-aura pool stops claiming any token name / ID.
-func (t *Trigger[T]) SetFromCard(source card.Card, tt triggertype.Type, fire func(card.GameEngine, card.Logger, T), oncePerTurn bool, typeFilter TypeFilter) {
+func (t *Trigger[T]) SetFromCard(source card.Card, tt triggertype.Type, fire func(card.GameEngine, card.Logger, T, triggertype.Type), oncePerTurn bool, typeFilter TypeFilter) {
 	t.triggerType = tt
 	t.fire = fire
 	t.source = source

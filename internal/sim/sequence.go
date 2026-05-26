@@ -146,9 +146,8 @@ func bestAttackWithWeapons(
 		defenseDealtConst, defenseCacheableConst, ctx.handStart = ctx.runDefense(defenders, pitched, held, ctx.deck, incoming, noBlockBudgetCap, arsenalDefenderIdx, nil)
 	} else if !hasModalBlocker && incoming > 0 {
 		// No defenders, so runDefense doesn't run — but unblocked incoming damage still
-		// fires DamageTaken so auras destroyed by taking damage leave the arena.
-		ctx.leafState.SetIsMyTurn(false)
-		ctx.permEngine(ctx.leafState).FireTriggers(triggertype.DamageTaken, nil)
+		// goes through the DamageAboutToBeTaken → DamageTaken sequence.
+		defenseDealtConst = ctx.fireUndefendedDamageTriggers()
 	}
 	defenseDealt := defenseDealtConst
 	defenseCacheable := defenseCacheableConst
@@ -351,6 +350,24 @@ func (ctx *sequenceContext) permEngine(state *gameengine.GameState) *gameengine.
 	return ctx.bufs.pooledEngine
 }
 
+// fireUndefendedDamageTriggers runs the DamageAboutToBeTaken → DamageTaken sequence
+// against ctx.leafState on the no-defender path: DamageAboutToBeTaken subscribers may
+// call PreventIncomingDamage to absorb the swing before DamageTaken fires. Zeroes
+// state.Value before the fires so handler AddValues are captured cleanly into the
+// returned defense-dealt total, then restores ctx.leafState.Value to its prior level.
+func (ctx *sequenceContext) fireUndefendedDamageTriggers() int {
+	ctx.leafState.SetIsMyTurn(false)
+	leafEngine := ctx.permEngine(ctx.leafState)
+	ctx.leafState.SetValue(0)
+	if ctx.leafState.RemainingUnblockedDamage() > 0 {
+		leafEngine.FireTriggers(triggertype.DamageAboutToBeTaken, nil)
+	}
+	if ctx.leafState.RemainingUnblockedDamage() > 0 {
+		leafEngine.FireTriggers(triggertype.DamageTaken, nil)
+	}
+	return ctx.leafState.Value()
+}
+
 // runDefense mutates ctx.leafState through the defender list, accumulating per-DR Value.
 // Auras grow with any DR-added entries; graveyard is left as priorGraveyard + defenders for
 // the attack turn phase. Per-permutation per-turn-locals reset via ResetEphemeralState, so runDefense
@@ -471,11 +488,18 @@ func (ctx *sequenceContext) runDefense(defenders, pitched, held []card.Card, dec
 		state.AppendGraveyard(def)
 	}
 
-	// Defense phase over: if any incoming damage got through, fire DamageTaken so auras
-	// destroyed by taking damage (Arcane Cussing, Bloodspill Invocation) leave the arena.
+	// Defense phase over: fire DamageAboutToBeTaken while the unblocked figure is still
+	// mutable — subscribers may call PreventIncomingDamage to absorb. Then DamageTaken
+	// fires only if damage still gets through. Zero state.Value before the fires so any
+	// AddValue from the handlers is captured cleanly into total.
+	state.SetValue(0)
+	if state.RemainingUnblockedDamage() > 0 {
+		ge.FireTriggers(triggertype.DamageAboutToBeTaken, nil)
+	}
 	if state.RemainingUnblockedDamage() > 0 {
 		ge.FireTriggers(triggertype.DamageTaken, nil)
 	}
+	total += state.Value()
 
 	return total, cacheable, survivingHeld
 }

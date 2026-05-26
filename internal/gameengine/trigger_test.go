@@ -12,7 +12,7 @@ func TestFireEndOfTurn_FiresOnceAndRemoves(t *testing.T) {
 	ge := New()
 	calls := 0
 	ge.CreateTrigger(fakeCard{name: "src"}, triggertype.EndOfTurn,
-		func(_ card.GameEngine, _ card.Logger, _ card.EphemeralTrigger) { calls++ }, nil)
+		func(_ card.GameEngine, _ card.Logger, _ card.EphemeralTrigger, _ triggertype.Type) { calls++ }, nil)
 	ge.FireTriggers(triggertype.EndOfTurn, nil)
 	if calls != 1 {
 		t.Fatalf("handler calls = %d, want 1", calls)
@@ -27,7 +27,7 @@ func TestFireEndOfTurn_LeavesNonMatchingType(t *testing.T) {
 	ge := New()
 	calls := 0
 	ge.CreateTrigger(fakeCard{name: "src"}, triggertype.CardOrAbility,
-		func(_ card.GameEngine, _ card.Logger, _ card.EphemeralTrigger) { calls++ }, nil)
+		func(_ card.GameEngine, _ card.Logger, _ card.EphemeralTrigger, _ triggertype.Type) { calls++ }, nil)
 	ge.FireTriggers(triggertype.EndOfTurn, nil)
 	if calls != 0 {
 		t.Fatalf("handler calls = %d, want 0 (a CardOrAbility trigger should not fire from end-of-turn walk)", calls)
@@ -43,10 +43,10 @@ func TestFireEndOfTurn_HandlerAddTriggerSafeReentry(t *testing.T) {
 	ge := New()
 	calls := 0
 	ge.CreateTrigger(fakeCard{name: "src"}, triggertype.EndOfTurn,
-		func(engine card.GameEngine, _ card.Logger, _ card.EphemeralTrigger) {
+		func(engine card.GameEngine, _ card.Logger, _ card.EphemeralTrigger, _ triggertype.Type) {
 			calls++
 			engine.CreateTrigger(fakeCard{name: "added"}, triggertype.EndOfTurn,
-				func(_ card.GameEngine, _ card.Logger, _ card.EphemeralTrigger) { calls++ }, nil)
+				func(_ card.GameEngine, _ card.Logger, _ card.EphemeralTrigger, _ triggertype.Type) { calls++ }, nil)
 		}, nil)
 	ge.FireTriggers(triggertype.EndOfTurn, nil)
 	if calls != 1 {
@@ -66,7 +66,7 @@ func TestFireEndOfTurn_HandlerAddTriggerSafeReentry(t *testing.T) {
 func TestResetEphemeralState_RearmsOncePerTurnAuras(t *testing.T) {
 	ge := New()
 	ge.CreateAura(fakeCard{name: "src"}, triggertype.CardOrAbility,
-		func(card.GameEngine, card.Logger, card.Aura) {}, 1, true, nil)
+		func(card.GameEngine, card.Logger, card.Aura, triggertype.Type) {}, 1, true, nil)
 	ge.Auras()[0].SetFiredThisTurn(true)
 	ge.ResetEphemeralState()
 	if ge.Auras()[0].FiredThisTurn() {

@@ -4,6 +4,7 @@ package cards
 
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/triggertype"
 )
 
 // --- Aura helpers ---
@@ -11,7 +12,7 @@ import (
 // selfDestructAuraHandler is the start-of-action-phase trigger handler for an Aura whose
 // only trigger clause is "destroy this". The leave payoff is the source card's
 // OnLeavesArena hook, which the engine fires from DestroyAura.
-func selfDestructAuraHandler(_ card.GameEngine, _ card.Logger, a card.Aura) {
+func selfDestructAuraHandler(_ card.GameEngine, _ card.Logger, a card.Aura, _ triggertype.Type) {
 	a.Destroy(true)
 }
 

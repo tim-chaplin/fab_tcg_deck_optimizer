@@ -19,6 +19,11 @@ const (
 	EndOfTurn
 	// Hit fires when an attack hits (post-AR-buff EffectiveAttack survives blocks).
 	Hit
+	// DamageAboutToBeTaken fires just before DamageTaken, while the unblocked-damage figure
+	// is still mutable. Subscribers (Enchanting Melody's "instead destroy and prevent 4
+	// damage" rider) call GameEngine.PreventIncomingDamage to absorb part of the swing
+	// before the carry-through hits DamageTaken triggers.
+	DamageAboutToBeTaken
 	// DamageTaken fires at the end of the defense phase when incoming damage got through
 	// unblocked.
 	DamageTaken

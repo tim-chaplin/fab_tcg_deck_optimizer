@@ -11,13 +11,13 @@ import (
 
 // highStrikerOnHit{6,4,2} fire on the next hit matching the trigger's TypeFilter (any
 // attack per the printed wording). One handler per variant carries N in the function name.
-func highStrikerOnHit6(ge card.GameEngine, l card.Logger, t card.EphemeralTrigger) {
+func highStrikerOnHit6(ge card.GameEngine, l card.Logger, t card.EphemeralTrigger, _ triggertype.Type) {
 	highStrikerCreate(ge, l, t, 6)
 }
-func highStrikerOnHit4(ge card.GameEngine, l card.Logger, t card.EphemeralTrigger) {
+func highStrikerOnHit4(ge card.GameEngine, l card.Logger, t card.EphemeralTrigger, _ triggertype.Type) {
 	highStrikerCreate(ge, l, t, 4)
 }
-func highStrikerOnHit2(ge card.GameEngine, l card.Logger, t card.EphemeralTrigger) {
+func highStrikerOnHit2(ge card.GameEngine, l card.Logger, t card.EphemeralTrigger, _ triggertype.Type) {
 	highStrikerCreate(ge, l, t, 2)
 }
 

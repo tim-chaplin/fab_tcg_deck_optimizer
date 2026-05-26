@@ -22,7 +22,7 @@ func damageTrigger(self card.Card, damage int, calls *int) gameengine.Aura {
 	return aura.NewFromCard(
 		self,
 		triggertype.StartOfTurn,
-		func(ge card.GameEngine, _ card.Logger, a card.Aura) {
+		func(ge card.GameEngine, _ card.Logger, a card.Aura, _ triggertype.Type) {
 			*calls++
 			ge.AddValue(damage)
 			a.Destroy(true)
@@ -70,7 +70,7 @@ func TestProcessAurasAtStartOfTurn_GraveyardsExhaustedAura(t *testing.T) {
 	watcher := aura.NewFromCard(
 		testutils.FakeYellowAttack(),
 		triggertype.StartOfTurn,
-		func(ge card.GameEngine, _ card.Logger, _ card.Aura) {
+		func(ge card.GameEngine, _ card.Logger, _ card.Aura, _ triggertype.Type) {
 			eng := ge.(*gameengine.GameEngine)
 			seen = append([]card.Card(nil), eng.Graveyard()...)
 		},
@@ -81,7 +81,7 @@ func TestProcessAurasAtStartOfTurn_GraveyardsExhaustedAura(t *testing.T) {
 	first := aura.NewFromCard(
 		src,
 		triggertype.StartOfTurn,
-		func(_ card.GameEngine, _ card.Logger, a card.Aura) {
+		func(_ card.GameEngine, _ card.Logger, a card.Aura, _ triggertype.Type) {
 			a.Destroy(true)
 		},
 		1,

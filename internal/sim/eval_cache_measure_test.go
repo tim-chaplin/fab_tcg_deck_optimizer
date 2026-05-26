@@ -350,7 +350,6 @@ func bisectDivergentShuffle(baseline *deck.Deck, incoming, maxShuffles int) (int
 	return lo, cAtK, uAtK
 }
 
-
 // BenchmarkEvalCache_SingleDeck compares one full Evaluate of viserai_v4 with the cache
 // enabled vs disabled. Skipped when the saved deck is absent.
 func BenchmarkEvalCache_SingleDeck(b *testing.B) {

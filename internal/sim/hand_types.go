@@ -27,4 +27,3 @@ func (t TurnSummary) ArsenalIn() (card.CardAssignment, bool) {
 	}
 	return card.CardAssignment{}, false
 }
-

@@ -162,6 +162,10 @@ var cardsByID = []Card{
 
 	ids.EmissaryOfWindRed: cards.EmissaryOfWindRed{},
 
+	ids.EnchantingMelodyRed:    cards.EnchantingMelodyRed{},
+	ids.EnchantingMelodyYellow: cards.EnchantingMelodyYellow{},
+	ids.EnchantingMelodyBlue:   cards.EnchantingMelodyBlue{},
+
 	ids.EvasiveLeapRed:    cards.EvasiveLeapRed{},
 	ids.EvasiveLeapYellow: cards.EvasiveLeapYellow{},
 	ids.EvasiveLeapBlue:   cards.EvasiveLeapBlue{},
