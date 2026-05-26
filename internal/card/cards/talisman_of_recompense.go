@@ -14,7 +14,7 @@ import (
 // resource instead yields three, and Talisman of Recompense is destroyed. Pitch values
 // above one don't qualify, so the handler no-ops without consuming the talisman.
 func recompenseFire(ge card.GameEngine, l card.Logger, self card.Item, _ triggertype.Type) {
-	if ge.TriggeringCard().Pitch() != 1 {
+	if ge.TriggeringCard().Card.Pitch() != 1 {
 		return
 	}
 	ge.AddResourcePoints(2)

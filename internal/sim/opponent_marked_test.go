@@ -18,7 +18,7 @@ func TestRunechantAuraHandler_LeavesOpponentMarked(t *testing.T) {
 		Build()}
 	// The Runechant aura fires on triggertype.CardOrAbility filtered to attacks, so the
 	// firing card must be an attack for its IsAttack filter to match.
-	ge.FireTriggers(triggertype.CardOrAbility, testutils.FakeRedAttack())
+	ge.FireTriggers(triggertype.CardOrAbility, testutils.AsCardState(testutils.FakeRedAttack()))
 	if !ge.OpponentMarked() {
 		t.Error("OpponentMarked = false after runechant pop, want true (arcane doesn't clear mark)")
 	}

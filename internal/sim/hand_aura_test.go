@@ -22,11 +22,11 @@ func TestFireCardOrAbilityAuras_FiresOnceWhenGated(t *testing.T) {
 			l.AppendPreTriggerf("TestCard", 1, "test trigger fired")
 		}, 3, true, nil)
 	trigger := testutils.FakeRedAttack()
-	ge.FireTriggers(triggertype.CardOrAbility, trigger)
+	ge.FireTriggers(triggertype.CardOrAbility, testutils.AsCardState(trigger))
 	if ge.Value() != 1 {
 		t.Errorf("first fire Value = %d, want 1", ge.Value())
 	}
-	ge.FireTriggers(triggertype.CardOrAbility, trigger)
+	ge.FireTriggers(triggertype.CardOrAbility, testutils.AsCardState(trigger))
 	if ge.Value() != 1 {
 		t.Errorf("second fire Value = %d, want 1 (OncePerTurn gate kept second fire from crediting)", ge.Value())
 	}
@@ -51,7 +51,7 @@ func TestFireCardOrAbilityAuras_GraveyardsExhaustedAura(t *testing.T) {
 			ge.AddValue(1)
 			a.Destroy(true)
 		}, 1, false, nil)
-	ge.FireTriggers(triggertype.CardOrAbility, testutils.FakeRedAttack())
+	ge.FireTriggers(triggertype.CardOrAbility, testutils.AsCardState(testutils.FakeRedAttack()))
 	if len(ge.Auras()) != 0 {
 		t.Errorf("Auras = %+v, want empty (handler called Destroy)", ge.Auras())
 	}
@@ -69,7 +69,7 @@ func TestFireCardOrAbilityAuras_PassesThroughNonCardOrAbilityTriggers(t *testing
 	ge.CreateAura(src, triggertype.StartOfTurn,
 		func(card.GameEngine, card.Logger, card.Aura, triggertype.Type) { calls++ },
 		1, false, nil)
-	ge.FireTriggers(triggertype.CardOrAbility, testutils.FakeRedAttack())
+	ge.FireTriggers(triggertype.CardOrAbility, testutils.AsCardState(testutils.FakeRedAttack()))
 	if ge.Value() != 0 {
 		t.Errorf("Value = %d, want 0 (start-of-turn aura doesn't fire on a card played)", ge.Value())
 	}

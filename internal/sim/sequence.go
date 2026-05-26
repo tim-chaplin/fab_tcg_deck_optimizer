@@ -847,7 +847,7 @@ func (ctx *sequenceContext) playSequenceWithMeta(n int) (damage int, totalCounte
 				h := &activeAttack.OnHit[i]
 				h.Fire(ge, state.Logger(), activeAttack, h)
 			}
-			ge.FireTriggers(triggertype.Hit, activeAttack.Card)
+			ge.FireTriggers(triggertype.Hit, activeAttack)
 		}
 		activeAttack = nil
 	}
@@ -881,7 +881,7 @@ func (ctx *sequenceContext) playSequenceWithMeta(n int) (damage int, totalCounte
 			if !ok || activeAttack == nil || !ar.ARTargetAllowed(ge, activeAttack.Card, pc.Mode) {
 				return infeasible()
 			}
-			ge.FireTriggers(triggertype.CardOrAbility, pc.Card)
+			ge.FireTriggers(triggertype.CardOrAbility, pc)
 			state.SetAttackReactionTarget(activeAttack)
 			ge.ResolveAttackStep(state.Logger(), pc)
 			state.SetAttackReactionTarget(nil)
@@ -914,7 +914,7 @@ func (ctx *sequenceContext) playSequenceWithMeta(n int) (damage int, totalCounte
 		state.SetCurrentStepRerouted(false)
 		// CardOrAbility fires before the card resolves so play-triggered effects land ahead
 		// of the played card's own effect.
-		ge.FireTriggers(triggertype.CardOrAbility, pc.Card)
+		ge.FireTriggers(triggertype.CardOrAbility, pc)
 		ge.ResolveAttackStep(state.Logger(), pc)
 		// ModalTypes cards (Tip-Off) read different is-attack / type-line values per Mode.
 		// Resolve once and route the attack / non-attack-action / persistence checks off
