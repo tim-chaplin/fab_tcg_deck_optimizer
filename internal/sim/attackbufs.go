@@ -1,7 +1,6 @@
 package sim
 
 import (
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/aura"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/gameengine"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapon"
@@ -70,15 +69,8 @@ type attackBufs struct {
 	runDefensePostDRHeldBuf []card.Card
 	// pooledDRCostProbe is the recycled empty *GameEngine the variable-cost DR cost path
 	// reads RunechantCount off. Lazy-init on first DR-cost call; per call we rewrite the
-	// aura count rather than allocating a fresh engine + aura per probe.
+	// Runechant token slot's count via SetRunechantCount, no per-probe allocation.
 	pooledDRCostProbe *gameengine.GameEngine
-	// pooledDRProbeAura is the recycled runechant *aura.Aura the probe holds in its
-	// auras slot, lazy-init alongside pooledDRCostProbe. Per probe we rewrite its Count
-	// instead of building a fresh aura via token.NewRunechant.
-	pooledDRProbeAura *aura.Aura
-	// pooledDRProbeAuras is the 1-element slice header pooledDRProbeAura is installed
-	// through via GameState.SetAuras — pooled so the probe stays allocation-free.
-	pooledDRProbeAuras []gameengine.Aura
 	// pooledSequenceCtx is the recycled per-partition-leaf sequenceContext.
 	// newSequenceContext zeroes it and fills the active fields in place so the per-leaf
 	// alloc goes away. Sole users are bestAttackWithWeapons and the one-shot replay path;

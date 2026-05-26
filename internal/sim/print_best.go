@@ -129,36 +129,15 @@ func writeSnapshotSummary(w io.Writer, header string, state *gameengine.GameStat
 // M Ponders". Returns "" when no auras / tokens are in play.
 func aurasSummaryLine(state *gameengine.GameState) string {
 	var names []string
-	runechants := 0
-	ponders := 0
 	for _, a := range state.Auras() {
-		name := a.CardName()
-		switch name {
-		case "Runechant":
-			runechants += a.Count()
-		case "Ponder":
-			ponders += a.Count()
-		default:
-			names = append(names, name)
-		}
+		names = append(names, a.CardName())
 	}
-	return aurasLineFromNames(names, runechants, ponders)
+	return aurasLineFromNames(names, state.RunechantCount(), state.PonderCount())
 }
 
 // itemsSummaryLine renders state's items as "Items: ..." using the per-token counts.
 func itemsSummaryLine(state *gameengine.GameState) string {
-	gold, silver, copper := 0, 0, 0
-	for _, it := range state.Items() {
-		switch it.CardName() {
-		case "Gold":
-			gold += it.Count()
-		case "Silver":
-			silver += it.Count()
-		case "Copper":
-			copper += it.Count()
-		}
-	}
-	return itemsLine(gold, silver, copper)
+	return itemsLine(state.GoldCount(), state.SilverCount(), state.CopperCount())
 }
 
 // assignmentCards extracts the card.Card field from each assignment.

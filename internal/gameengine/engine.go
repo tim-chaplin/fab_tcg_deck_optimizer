@@ -9,7 +9,6 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/ids"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/token"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/trigger"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/triggertype"
 )
@@ -470,7 +469,7 @@ func panicIfOptViolatesMultiset(in, top, bottom []card.Card) {
 // interface-dispatch path.
 func (ge *GameEngine) FireTriggers(t triggertype.Type, triggeringCard card.Card) {
 	heroFires := ge.heroTriggerType&t != 0
-	if !heroFires && len(ge.auras) == 0 && len(ge.triggers) == 0 && len(ge.items) == 0 {
+	if !heroFires && !ge.AnyAurasInPlay() && len(ge.triggers) == 0 && !ge.AnyItemsInPlay() {
 		return
 	}
 	ge.triggeringCard = triggeringCard
@@ -487,12 +486,29 @@ func (ge *GameEngine) FireTriggers(t triggertype.Type, triggeringCard card.Card)
 		return triggeringTypes
 	}
 
+	// Snapshot which token slots were already live at fire-time. fireHooks() uses
+	// `n := len(*hooks)` for the same reason: a token created by an aura/trigger fired
+	// during this FireTriggers call must not fire on the same event (FaB rule: triggers
+	// only see events that happened *before* the trigger source entered the game). The
+	// snapshot lets fireTokenAuras / fireTokenItems skip slots whose count rose from 0
+	// to positive during this pass.
+	var liveTokenAuras [numTokenAuraKinds]bool
+	var liveTokenItems [numTokenItemKinds]bool
+	for i, a := range ge.tokenAuras {
+		liveTokenAuras[i] = a != nil && a.Count() > 0
+	}
+	for i, it := range ge.tokenItems {
+		liveTokenItems[i] = it != nil && it.Count() > 0
+	}
+
 	if heroFires {
 		fireHero(ge, triggeringCard, matchTypes)
 	}
 	fireHooks(ge, &ge.auras, t, triggeringCard, matchTypes, false)
+	fireTokenAuras(ge, t, triggeringCard, matchTypes, liveTokenAuras)
 	fireHooks(ge, &ge.triggers, t, triggeringCard, matchTypes, true)
 	fireHooks(ge, &ge.items, t, triggeringCard, matchTypes, false)
+	fireTokenItems(ge, t, triggeringCard, matchTypes, liveTokenItems)
 
 	ge.triggeringCard = nil
 }
@@ -548,6 +564,59 @@ func fireHooks[H trigger.Hook](ge *GameEngine, hooks *[]H, t triggertype.Type, t
 	ge.currentHookIdx = -1
 }
 
+// fireTokenAuras walks the fixed-size tokenAuras array, firing every slot whose count
+// is > 0, whose hook gate / type-filter accepts the event, AND that was already live at
+// fire-time per liveAtStart. The liveAtStart guard mirrors fireHooks's snapshot length
+// trick: a token created mid-FireTriggers can't fire on the same event.
+// Publishes currentFiringTokenAura before each Fire so DestroyAura routes to the slot's
+// SetCount(0) path.
+func fireTokenAuras(ge *GameEngine, t triggertype.Type, triggeringCard card.Card, matchTypes func() card.TypeSet, liveAtStart [numTokenAuraKinds]bool) {
+	for i := range ge.tokenAuras {
+		if !liveAtStart[i] {
+			continue
+		}
+		a := ge.tokenAuras[i]
+		if a == nil || a.Count() == 0 {
+			continue
+		}
+		if a.TriggerType()&t == 0 || (a.OncePerTurn() && a.FiredThisTurn()) ||
+			(triggeringCard != nil && !a.Matches(matchTypes())) {
+			continue
+		}
+		ge.currentFiringTokenAura = i
+		ge.currentHookDestroyed = false
+		a.Fire(ge, ge.logger)
+		if !ge.currentHookDestroyed {
+			a.SetFiredThisTurn(true)
+		}
+	}
+	ge.currentFiringTokenAura = -1
+}
+
+// fireTokenItems is the item-side counterpart of fireTokenAuras.
+func fireTokenItems(ge *GameEngine, t triggertype.Type, triggeringCard card.Card, matchTypes func() card.TypeSet, liveAtStart [numTokenItemKinds]bool) {
+	for i := range ge.tokenItems {
+		if !liveAtStart[i] {
+			continue
+		}
+		it := ge.tokenItems[i]
+		if it == nil || it.Count() == 0 {
+			continue
+		}
+		if it.TriggerType()&t == 0 || (it.OncePerTurn() && it.FiredThisTurn()) ||
+			(triggeringCard != nil && !it.Matches(matchTypes())) {
+			continue
+		}
+		ge.currentFiringTokenItem = i
+		ge.currentHookDestroyed = false
+		it.Fire(ge, ge.logger)
+		if !ge.currentHookDestroyed {
+			it.SetFiredThisTurn(true)
+		}
+	}
+	ge.currentFiringTokenItem = -1
+}
+
 // DestroyAura removes the aura currently being fired from the arena. It then fires the
 // source card's OnLeavesArena hook — the printed "when this leaves the arena" clause, when
 // the card implements card.LeavesArenaAura — and, when addToGraveyard==true, pushes the
@@ -556,6 +625,14 @@ func fireHooks[H trigger.Hook](ge *GameEngine, hooks *[]H, t triggertype.Type, t
 // doesn't see the just-left card. Direct splice with no cacheable flip — destruction is
 // deterministic from the triggering event.
 func (ge *GameEngine) DestroyAura(addToGraveyard bool) {
+	// Token-aura path: when a token slot is mid-Fire, zero its count instead of
+	// splicing ge.auras. Tokens have no source card, so the addToGraveyard /
+	// OnLeavesArena dance doesn't apply to them.
+	if ge.currentFiringTokenAura >= 0 {
+		ge.tokenAuras[ge.currentFiringTokenAura].SetCount(0)
+		ge.currentHookDestroyed = true
+		return
+	}
 	i := ge.currentHookIdx
 	if i < 0 || i >= len(ge.auras) {
 		return
@@ -576,6 +653,12 @@ func (ge *GameEngine) DestroyAura(addToGraveyard bool) {
 // items with no source). The item counterpart of DestroyAura: direct splice with no
 // cacheable flip — destruction is deterministic from the triggering event.
 func (ge *GameEngine) DestroyItem(addToGraveyard bool) {
+	// Token-item path: see DestroyAura.
+	if ge.currentFiringTokenItem >= 0 {
+		ge.tokenItems[ge.currentFiringTokenItem].SetCount(0)
+		ge.currentHookDestroyed = true
+		return
+	}
 	i := ge.currentHookIdx
 	if i < 0 || i >= len(ge.items) {
 		return
@@ -799,29 +882,18 @@ var dealtArcaneText = [...]string{
 
 // === Tokens ===
 
-// Card-facing token creation / count methods on *GameEngine. Live tokens are identified by
-// CardName (the canonical display name); concrete Aura / Item types live outside gameengine
-// and are produced by the token-package factories used below.
+// Card-facing token creation / count methods on *GameEngine. Each method bumps the
+// pre-allocated slot for its kind via bumpTokenAura / bumpTokenItem.
 
-// Token display names — the engine matches by CardName when bumping an existing entry's
-// Count or reading a count.
-const (
-	tokenNameRunechant = "Runechant"
-	tokenNamePonder    = "Ponder"
-	tokenNameGold      = "Gold"
-	tokenNameSilver    = "Silver"
-	tokenNameCopper    = "Copper"
-)
-
-// CreateRunechants creates n Runechant tokens and credits +n damage at creation.
-// Tokens are stored as a single Aura entry — bump an existing entry's Count or add a
-// new one. Sets AuraCreated so same-turn "aura created this turn" effects see it.
+// CreateRunechants creates n Runechant tokens and credits +n damage at creation. Bumps
+// the count on the pre-allocated Runechant slot; the slot's *Aura is reused across
+// creations / destructions for the GameState's lifetime so there's no allocation here.
 func (ge *GameEngine) CreateRunechants(n int) {
 	if n <= 0 {
 		return
 	}
 	ge.AddValue(n)
-	bumpOrCreateAura(ge.GameState, tokenNameRunechant, func(n int) Aura { return token.NewRunechant(n) }, n)
+	ge.GameState.bumpTokenAura(tokenAuraRunechant, n)
 }
 
 // CreatePonders creates n Ponder tokens. No Value credit — Ponder pays out at end of turn.
@@ -829,7 +901,7 @@ func (ge *GameEngine) CreatePonders(n int) {
 	if n <= 0 {
 		return
 	}
-	bumpOrCreateAura(ge.GameState, tokenNamePonder, func(n int) Aura { return token.NewPonder(n) }, n)
+	ge.GameState.bumpTokenAura(tokenAuraPonder, n)
 }
 
 // CreateGold / CreateSilver / CreateCopper create the matching token items. No Value
@@ -838,28 +910,28 @@ func (ge *GameEngine) CreateGold(n int) {
 	if n <= 0 {
 		return
 	}
-	bumpOrCreateItem(ge.GameState, tokenNameGold, func(n int) Item { return token.NewGold(n) }, n)
+	ge.GameState.bumpTokenItem(tokenItemGold, n)
 }
 func (ge *GameEngine) CreateSilver(n int) {
 	if n <= 0 {
 		return
 	}
-	bumpOrCreateItem(ge.GameState, tokenNameSilver, func(n int) Item { return token.NewSilver(n) }, n)
+	ge.GameState.bumpTokenItem(tokenItemSilver, n)
 }
 func (ge *GameEngine) CreateCopper(n int) {
 	if n <= 0 {
 		return
 	}
-	bumpOrCreateItem(ge.GameState, tokenNameCopper, func(n int) Item { return token.NewCopper(n) }, n)
+	ge.GameState.bumpTokenItem(tokenItemCopper, n)
 }
 
 // RunechantCount / PonderCount / GoldCount / SilverCount / CopperCount return the
 // live count of each token kind in play, or zero when none.
-func (ge *GameEngine) RunechantCount() int { return auraCountByName(ge.auras, tokenNameRunechant) }
-func (ge *GameEngine) PonderCount() int    { return auraCountByName(ge.auras, tokenNamePonder) }
-func (ge *GameEngine) GoldCount() int      { return itemCountByName(ge.items, tokenNameGold) }
-func (ge *GameEngine) SilverCount() int    { return itemCountByName(ge.items, tokenNameSilver) }
-func (ge *GameEngine) CopperCount() int    { return itemCountByName(ge.items, tokenNameCopper) }
+func (ge *GameEngine) RunechantCount() int { return ge.tokenAuras[tokenAuraRunechant].Count() }
+func (ge *GameEngine) PonderCount() int    { return ge.tokenAuras[tokenAuraPonder].Count() }
+func (ge *GameEngine) GoldCount() int      { return ge.tokenItems[tokenItemGold].Count() }
+func (ge *GameEngine) SilverCount() int    { return ge.tokenItems[tokenItemSilver].Count() }
+func (ge *GameEngine) CopperCount() int    { return ge.tokenItems[tokenItemCopper].Count() }
 
 // CreateFrailtyForOpponent / CreateInertiaForOpponent / CreateBloodrotPoxForOpponent credit
 // the matching damage-equivalent heuristic when a status token is created under the
@@ -869,65 +941,18 @@ func (ge *GameEngine) CreateFrailtyForOpponent()     { ge.AddValue(FrailtyValue)
 func (ge *GameEngine) CreateInertiaForOpponent()     { ge.AddValue(InertiaValue) }
 func (ge *GameEngine) CreateBloodrotPoxForOpponent() { ge.AddValue(BloodrotPoxValue) }
 
-// bumpOrCreateAura increments an existing aura entry matching name on s, or appends
-// a new one built by build(n). Flips gs.auraCreated.
-func bumpOrCreateAura(s *GameState, name string, build func(int) Aura, n int) {
-	s.auraCreated = true
-	for i := range s.auras {
-		if s.auras[i].CardName() == name {
-			s.auras[i].SetCount(s.auras[i].Count() + n)
-			return
-		}
-	}
-	s.auras = append(s.auras, build(n))
-}
+// SpendGold / SpendSilver / SpendCopper decrement the matching token slot by n, floored
+// at zero. The token cards' Play handlers call these to consume the activated ability's
+// payment.
+func (ge *GameEngine) SpendGold(n int)   { ge.consumeTokenItem(tokenItemGold, n) }
+func (ge *GameEngine) SpendSilver(n int) { ge.consumeTokenItem(tokenItemSilver, n) }
+func (ge *GameEngine) SpendCopper(n int) { ge.consumeTokenItem(tokenItemCopper, n) }
 
-// bumpOrCreateItem increments an existing item entry matching name on s, or appends
-// a fresh one built by build(n). Items don't flip auraCreated.
-func bumpOrCreateItem(s *GameState, name string, build func(int) Item, n int) {
-	for i := range s.items {
-		if s.items[i].CardName() == name {
-			s.items[i].SetCount(s.items[i].Count() + n)
-			return
-		}
+func (ge *GameEngine) consumeTokenItem(kind tokenItemKind, n int) {
+	it := ge.tokenItems[kind]
+	c := it.Count() - n
+	if c < 0 {
+		c = 0
 	}
-	s.items = append(s.items, build(n))
-}
-
-// ConsumeItemByName decrements the matching item's Count by n and removes the entry when
-// Count reaches zero. Token items don't head to the graveyard on destroy. No-op when no
-// item matches name.
-func (ge *GameEngine) ConsumeItemByName(name string, n int) {
-	for i := range ge.items {
-		if ge.items[i].CardName() != name {
-			continue
-		}
-		newCount := ge.items[i].Count() - n
-		if newCount <= 0 {
-			ge.items = append(ge.items[:i], ge.items[i+1:]...)
-		} else {
-			ge.items[i].SetCount(newCount)
-		}
-		return
-	}
-}
-
-// auraCountByName scans auras for a token aura by display name.
-func auraCountByName(auras []Aura, name string) int {
-	for _, a := range auras {
-		if a.CardName() == name {
-			return a.Count()
-		}
-	}
-	return 0
-}
-
-// itemCountByName scans items for a token item by display name.
-func itemCountByName(items []Item, name string) int {
-	for _, i := range items {
-		if i.CardName() == name {
-			return i.Count()
-		}
-	}
-	return 0
+	it.SetCount(c)
 }

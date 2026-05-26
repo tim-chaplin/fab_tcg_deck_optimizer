@@ -68,9 +68,8 @@ func TestBlessingOfOccult_StartOfTurnCreatesNRunes(t *testing.T) {
 		if got := summary.State.RunechantCount(); got != tc.n {
 			t.Errorf("%s: Runechants = %d, want %d (start-of-turn handler created them)", tc.c.Name(), got, tc.n)
 		}
-		if got := len(summary.State.Auras()); got != 1 {
-			t.Errorf("%s: Auras = %d, want 1 (Blessing destroyed itself, leaving only the consolidated Runechant entry)",
-				tc.c.Name(), got)
+		if got := len(summary.State.Auras()); got != 0 {
+			t.Errorf("%s: card Auras = %d, want 0 (Blessing destroyed itself)", tc.c.Name(), got)
 		}
 	}
 }

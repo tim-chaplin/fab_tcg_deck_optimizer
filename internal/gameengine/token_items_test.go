@@ -27,9 +27,6 @@ func TestGoldToken_PlaysDecrementsAndDestroys(t *testing.T) {
 	if ge.GoldCount() != 0 {
 		t.Fatalf("Gold = %d after spending the only token, want 0", ge.GoldCount())
 	}
-	if len(ge.Items()) != 0 {
-		t.Fatalf("Items still has %d entries after destroy, want 0", len(ge.Items()))
-	}
 	if h := ge.Hand(); len(h) != 1 {
 		t.Fatalf("Hand size = %d, want 1 (drew one card)", len(h))
 	}
@@ -55,9 +52,6 @@ func TestSilverToken_PlaysDecrementsAndDestroys(t *testing.T) {
 	if ge.SilverCount() != 0 {
 		t.Fatalf("Silver = %d after spending the only token, want 0", ge.SilverCount())
 	}
-	if len(ge.Items()) != 0 {
-		t.Fatalf("Items still has %d entries after destroy, want 0", len(ge.Items()))
-	}
 	if h := ge.Hand(); len(h) != 1 {
 		t.Fatalf("Hand size = %d, want 1 (drew one card)", len(h))
 	}
@@ -72,28 +66,22 @@ func TestCopperToken_PlaysDecrementsAndDestroys(t *testing.T) {
 	if ge.CopperCount() != 0 {
 		t.Fatalf("Copper = %d after spending the only token, want 0", ge.CopperCount())
 	}
-	if len(ge.Items()) != 0 {
-		t.Fatalf("Items still has %d entries after destroy, want 0", len(ge.Items()))
-	}
 	if h := ge.Hand(); len(h) != 1 {
 		t.Fatalf("Hand size = %d, want 1 (drew one card)", len(h))
 	}
 }
 
-// Tests CreateSilver and CreateCopper consolidate by token type.
-func TestCreateSilverCopper_BumpsExistingEntry(t *testing.T) {
+// Tests CreateSilver and CreateCopper accumulate counts on their respective token slots.
+func TestCreateSilverCopper_BumpsCountOnSlot(t *testing.T) {
 	ge := New()
 	ge.CreateSilver(2)
 	ge.CreateSilver(1)
 	ge.CreateCopper(1)
 	if ge.SilverCount() != 3 {
-		t.Errorf("Silver = %d, want 3 (2 + 1 consolidated)", ge.SilverCount())
+		t.Errorf("Silver = %d, want 3 (2 + 1)", ge.SilverCount())
 	}
 	if ge.CopperCount() != 1 {
 		t.Errorf("Copper = %d, want 1", ge.CopperCount())
-	}
-	if got := len(ge.Items()); got != 2 {
-		t.Errorf("Items entries = %d, want 2 (one Silver + one Copper)", got)
 	}
 }
 

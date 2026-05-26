@@ -47,10 +47,12 @@ func TestEphemeralReset_MatchesExpectedShape(t *testing.T) {
 	dirty.reset()
 
 	want := ephemeral{
-		actionPoints:   1,
-		currentHookIdx: -1,
-		cacheable:      true,
-		logger:         NoopLogger{},
+		actionPoints:           1,
+		currentHookIdx:         -1,
+		currentFiringTokenAura: -1,
+		currentFiringTokenItem: -1,
+		cacheable:              true,
+		logger:                 NoopLogger{},
 	}
 	got := reflect.ValueOf(dirty)
 	wantV := reflect.ValueOf(want)

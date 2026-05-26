@@ -129,6 +129,9 @@ func MeanStandardError(stats *deck.Stats) float64 { return meanStandardError(sta
 // aura queue and returns the post-tick (survivors, damage, revealedCards, graveyardedCards)
 // tuple. damage is gs.Value() post-call, since handlers write directly to it. Cards added
 // to state.Hand during firing (e.g. reveal-into-hand handlers) come back as `revealed`.
+// Survivors include both card-backed auras still in gs.Auras() and any token-aura slots
+// whose count is > 0 (Ponder kept in the slot, etc.) so callers can verify token auras
+// weren't accidentally fired at start of turn.
 func ProcessAurasAtStartOfTurnForTest(queued []gameengine.Aura, d *deck.Deck) (
 	survivors []gameengine.Aura,
 	damage int,
@@ -147,5 +150,8 @@ func ProcessAurasAtStartOfTurnForTest(queued []gameengine.Aura, d *deck.Deck) (
 		revealed = append([]card.Card(nil), newHand[preHand:]...)
 	}
 	survivors = append([]gameengine.Aura(nil), gs.Auras()...)
+	gs.ForEachTokenAura(func(a gameengine.Aura) {
+		survivors = append(survivors, a)
+	})
 	return survivors, damage, revealed, graveyarded
 }

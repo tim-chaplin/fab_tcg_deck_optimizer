@@ -16,7 +16,6 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/gameengine"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/hero"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/token"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/triggertype"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapon"
 )
@@ -50,7 +49,7 @@ func newSequenceContext(
 		handStart:                held,
 		arsenalAtAttackTurnStart: arsenalAtAttackTurnStart,
 		bufs:                     bufs,
-		runechantCarryover:       auraCountByNameInState(masterState, "Runechant"),
+		runechantCarryover:       masterState.RunechantCount(),
 		blockTotal:               blockTotal,
 		arsenalInIdx:             arsenalInIdx,
 		priorOpponentMarked:      masterState.OpponentMarked(),
@@ -62,12 +61,12 @@ func newSequenceContext(
 	}
 	abilities := bufs.activatedAbilities[:bufs.weaponAbilityCount]
 	abilityCosts := bufs.activatedAbilityCosts[:bufs.weaponAbilityCount]
-	for _, it := range masterState.Items() {
+	appendAbilities := func(it gameengine.Item) {
 		ability := it.Ability()
 		if ability == nil {
 			// Triggered items (Talisman of Recompense) have no activated ability — they fire
 			// through FireTriggers, with nothing to enqueue as a playable.
-			continue
+			return
 		}
 		copies := it.Count()
 		if copies > perItemAbilityCap {
@@ -80,6 +79,12 @@ func newSequenceContext(
 			abilityCosts = append(abilityCosts, cost)
 		}
 	}
+	for _, it := range masterState.Items() {
+		appendAbilities(it)
+	}
+	masterState.ForEachTokenItem(func(it gameengine.Item) {
+		appendAbilities(it)
+	})
 	bufs.activatedAbilities = abilities
 	bufs.activatedAbilityCosts = abilityCosts
 	ctx.activatedAbilities = abilities
@@ -284,25 +289,18 @@ func bestAttackWithWeapons(
 	return bestScore.value, bestDefenseDealt, bestBudget, bestSwung, bestWinner, true, ctx.cacheable && bestDefenseCacheable
 }
 
-// drCostProbe returns the pooled *GameEngine seeded with a runechant aura at the given
-// count for variable-cost DR cost probing. DRs read only RunechantCount() to decide Cost.
-// The engine + aura are lazily built once and reused across probes; per call rewrites Count.
+// drCostProbe returns the pooled *GameEngine with its Runechant token slot set to the
+// given count for variable-cost DR cost probing. DRs read only RunechantCount() to decide
+// Cost. The engine is lazily built once and reused across probes; per call just rewrites
+// the slot's count via SetRunechantCount.
 func (ctx *sequenceContext) drCostProbe(runechants int) *gameengine.GameEngine {
 	bufs := ctx.bufs
 	ge := bufs.pooledDRCostProbe
 	if ge == nil {
 		ge = gameengine.New()
 		bufs.pooledDRCostProbe = ge
-		bufs.pooledDRProbeAura = token.NewRunechant(0)
-		bufs.pooledDRProbeAuras = []gameengine.Aura{bufs.pooledDRProbeAura}
 	}
-	gs := ge.GameState
-	if runechants > 0 {
-		bufs.pooledDRProbeAura.SetCount(runechants)
-		gs.SetAuras(bufs.pooledDRProbeAuras)
-	} else {
-		gs.ClearAuras()
-	}
+	ge.GameState.SetRunechantCount(runechants)
 	return ge
 }
 
@@ -917,21 +915,15 @@ func (ctx *sequenceContext) playSequenceWithMeta(n int) (damage int, totalCounte
 	return state.Value(), pendingTotalCountersFromState(state), pool.remaining, state, true
 }
 
-// pendingTotalCountersFromState sums Count over Auras + Items at end of attack turn — the
-// partition's secondary tiebreaker. Counts pending aura fires and token stockpile at
-// 1:1 weight, weaker than a real card in hand (see pendingTotalCardsFromState).
+// pendingTotalCountersFromState sums Count over Auras + Items (card-backed + token
+// slots) at end of attack turn — the partition's secondary tiebreaker. Counts pending
+// aura fires and token stockpile at 1:1 weight, weaker than a real card in hand (see
+// pendingTotalCardsFromState).
 func pendingTotalCountersFromState(gs *gameengine.GameState) int {
 	if gs == nil {
 		return 0
 	}
-	total := 0
-	for _, a := range gs.Auras() {
-		total += a.Count()
-	}
-	for _, it := range gs.Items() {
-		total += it.Count()
-	}
-	return total
+	return gs.TotalAuraCount() + gs.TotalItemCount()
 }
 
 // attackTurnScoreOf builds a leaf's attackTurnScore from its end-of-attack-turn winner state and the

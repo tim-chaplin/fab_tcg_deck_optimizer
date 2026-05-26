@@ -19,7 +19,7 @@ var silverTypes = card.NewTypeSet(card.TypeGeneric, card.TypeItem)
 // silverConsumer is the narrow engine surface SilverToken.Play needs to destroy the
 // consumed token entry. *gameengine.GameEngine satisfies it structurally.
 type silverConsumer interface {
-	ConsumeItemByName(name string, n int)
+	SpendSilver(n int)
 }
 
 // SilverToken is the activated-ability card: cost {3}, draw a card, destroy one Silver.
@@ -40,7 +40,7 @@ func (SilverToken) PlayPrecondition(ge card.GameEngine, _ *card.CardState) bool 
 }
 
 func (SilverToken) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
-	ge.(silverConsumer).ConsumeItemByName(silverTokenName, 1)
+	ge.(silverConsumer).SpendSilver(1)
 	ge.DrawOne()
 	l.AppendPostTrigger(self.Card.DisplayName(), "Spent 1 silver to draw a card", 0)
 }

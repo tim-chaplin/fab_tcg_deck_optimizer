@@ -140,6 +140,7 @@ func NewPrewarmedState() *GameState {
 	s.SetGraveyard(make([]card.Card, 0, zoneCap))
 	s.SetBanished(make([]card.Card, 0, zoneCap))
 	s.SetDeck(deck.NewShallowSafe())
+	s.initTokenSlots()
 	return s
 }
 
