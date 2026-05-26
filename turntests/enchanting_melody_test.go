@@ -12,10 +12,10 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 )
 
-// melodySurvived reports whether any aura in auras carries Enchanting Melody [R]'s name.
-func melodySurvived(auras []gameengine.Aura) bool {
+// melodySurvived reports whether any aura in auras carries c's display name.
+func melodySurvived(auras []gameengine.Aura, c card.Card) bool {
 	for _, a := range auras {
-		if a.CardName() == "Enchanting Melody [R]" {
+		if a.CardName() == c.DisplayName() {
 			return true
 		}
 	}
@@ -54,7 +54,7 @@ func TestEnchantingMelody_AbsorbsBeforeDamageTakenSoCussingSurvives(t *testing.T
 		t.Errorf("Value = %d, want 4 (Melody absorbs all 4 physical damage)\nBestLine: %s",
 			summary.Value, formatBestLine(summary.BestLine))
 	}
-	if melodySurvived(summary.State.Auras()) {
+	if melodySurvived(summary.State.Auras(), cards.EnchantingMelodyRed{}) {
 		t.Errorf("Enchanting Melody still in auras after absorb; should have self-destructed")
 	}
 	cussingSurvived := false
@@ -81,7 +81,7 @@ func TestEnchantingMelody_DestroysAtEndOfTurnWhenNoNonAttackActionPlayed(t *test
 	if summary.Value != 0 {
 		t.Errorf("Value = %d, want 0 (no damage to prevent)", summary.Value)
 	}
-	if melodySurvived(summary.State.Auras()) {
+	if melodySurvived(summary.State.Auras(), cards.EnchantingMelodyRed{}) {
 		t.Errorf("Enchanting Melody still in auras after EOT; should self-destruct when no non-attack action played\nFinal auras: %v", summary.State.Auras())
 	}
 }
@@ -108,26 +108,39 @@ func TestEnchantingMelody_AbsorbDestroysEvenWhenNonAttackActionSatisfiesEOTClaus
 		t.Fatalf("NonAttackActionPlayed = false; setup expected the FakeRedAction to be played so the EOT clause would NOT destroy Melody\nBestLine: %s",
 			formatBestLine(summary.BestLine))
 	}
-	if melodySurvived(summary.State.Auras()) {
+	if melodySurvived(summary.State.Auras(), cards.EnchantingMelodyRed{}) {
 		t.Errorf("Enchanting Melody still in auras; absorb-and-destroy clause should fire on any prevention amount")
 	}
 }
 
-// Tests that Melody caps prevention at 4 damage — incoming=5 leaves 1 leaking through.
-func TestEnchantingMelody_CapsPreventionAtFour(t *testing.T) {
-	d := deck.New(heroes.Viserai, nil, nil)
-	initial := gameengine.GameStateBuilder().
-		CreateAuraFromCard(cards.EnchantingMelodyRed{}).
-		SetIncomingDamage(5).
-		Build()
-
-	summary := sim.EvalOneTurnForTesting(d, initial, nil)
-
-	if summary.Value != 4 {
-		t.Errorf("Value = %d, want 4 (cap at 4 prevention)\nBestLine: %s",
-			summary.Value, formatBestLine(summary.BestLine))
+// Tests that each Enchanting Melody variant caps prevention at its printed N
+// (Red 4 / Yellow 3 / Blue 2) — incoming=N+1 leaves 1 damage leaking through.
+func TestEnchantingMelody_PreventionCapsScaleByVariant(t *testing.T) {
+	cases := []struct {
+		c       card.Card
+		prevent int
+	}{
+		{cards.EnchantingMelodyRed{}, 4},
+		{cards.EnchantingMelodyYellow{}, 3},
+		{cards.EnchantingMelodyBlue{}, 2},
 	}
-	if melodySurvived(summary.State.Auras()) {
-		t.Errorf("Enchanting Melody still in auras; should self-destruct after absorbing")
+	for _, tc := range cases {
+		t.Run(tc.c.DisplayName(), func(t *testing.T) {
+			d := deck.New(heroes.Viserai, nil, nil)
+			initial := gameengine.GameStateBuilder().
+				CreateAuraFromCard(tc.c).
+				SetIncomingDamage(tc.prevent + 1).
+				Build()
+
+			summary := sim.EvalOneTurnForTesting(d, initial, nil)
+
+			if summary.Value != tc.prevent {
+				t.Errorf("Value = %d, want %d (cap at %d prevention)\nBestLine: %s",
+					summary.Value, tc.prevent, tc.prevent, formatBestLine(summary.BestLine))
+			}
+			if melodySurvived(summary.State.Auras(), tc.c) {
+				t.Errorf("%s still in auras; should self-destruct after absorbing", tc.c.DisplayName())
+			}
+		})
 	}
 }

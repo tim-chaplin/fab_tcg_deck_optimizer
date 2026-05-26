@@ -2,8 +2,12 @@
 // Blue 3. Defense 2.
 //
 // Text: "**Go again** If your hero would be dealt damage, instead destroy Enchanting Melody and
-// prevent 4 damage that source would deal. At the beginning of your end phase, destroy Enchanting
+// prevent N damage that source would deal. At the beginning of your end phase, destroy Enchanting
 // Melody unless you have played a 'non-attack' action card this turn."
+// (Red N=4, Yellow N=3, Blue N=2.)
+//
+// Handler reads a.Count() for the per-variant prevention amount. The aura subscribes to
+// DamageAboutToBeTaken | EndOfTurn; firingType dispatches each event to its clause.
 
 package cards
 
@@ -15,7 +19,7 @@ import (
 func enchantingMelodyHandler(ge card.GameEngine, l card.Logger, a card.Aura, firingType triggertype.Type) {
 	switch firingType {
 	case triggertype.DamageAboutToBeTaken:
-		prevented := ge.PreventIncomingDamage(4)
+		prevented := ge.PreventIncomingDamage(a.Count())
 		if prevented > 0 {
 			ge.AddValue(prevented)
 			l.AppendPostTriggerf(a.CardName(), prevented, "Prevented %d damage", prevented)
@@ -28,19 +32,19 @@ func enchantingMelodyHandler(ge card.GameEngine, l card.Logger, a card.Aura, fir
 	}
 }
 
-func enchantingMelodyPlay(ge card.GameEngine, l card.Logger, self *card.CardState) {
+func enchantingMelodyPlay(ge card.GameEngine, self *card.CardState, prevent int) {
 	ge.CreateAura(self.Card, triggertype.DamageAboutToBeTaken|triggertype.EndOfTurn,
-		enchantingMelodyHandler, 1, false, nil)
+		enchantingMelodyHandler, prevent, false, nil)
 }
 
 func (EnchantingMelodyRed) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
-	enchantingMelodyPlay(ge, l, self)
+	enchantingMelodyPlay(ge, self, 4)
 }
 
 func (EnchantingMelodyYellow) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
-	enchantingMelodyPlay(ge, l, self)
+	enchantingMelodyPlay(ge, self, 3)
 }
 
 func (EnchantingMelodyBlue) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
-	enchantingMelodyPlay(ge, l, self)
+	enchantingMelodyPlay(ge, self, 2)
 }
