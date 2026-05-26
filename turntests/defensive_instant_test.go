@@ -50,7 +50,7 @@ func TestDefensiveInstant_CalmingBreezeAlone(t *testing.T) {
 }
 
 // Tests that prevention caps at IncomingDamage — Oasis Respite Red has Defense 4 but only
-// 1 incoming damage, so the sim's chain-step resolver credits 1.
+// 1 incoming damage, so the sim's attack-step resolver credits 1.
 func TestDefensiveInstant_PreventionCapsAtIncoming(t *testing.T) {
 	d := deck.New(heroes.Viserai, nil, nil)
 	hand := []card.Card{cards.OasisRespiteRed{}, testutils.FakeBlueResource()}

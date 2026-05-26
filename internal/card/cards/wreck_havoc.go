@@ -1,7 +1,7 @@
 // Wreck Havoc — Generic Action - Attack. Cost 2. Printed power: Red 6, Yellow 5, Blue 4. Printed
 // pitch variants: Red 1, Yellow 2, Blue 3. Defense 2.
 //
-// Text: "Defense reactions can't be played to this chain link. When this hits a hero, you may turn
+// Text: "Defense reactions can't be played to this attack turn link. When this hits a hero, you may turn
 // a card in their arsenal face up, then destroy a defense reaction in their arsenal."
 //
 // Neither rider is modelled: the single-turn solver doesn't model the opponent playing defense

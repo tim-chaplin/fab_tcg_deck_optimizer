@@ -2,7 +2,7 @@ package ids
 
 // Token ability IDs. Anchored after the weapon ability IDs in the shared CardID space —
 // each token's activated ability (Gold spend, Silver spend, Copper spend) flows through
-// the chain runner like a weapon ability, so cardMetaCache keys off the same CardID space.
+// the attack-turn runner like a weapon ability, so cardMetaCache keys off the same CardID space.
 const (
 	GoldTokenAbilityID CardID = TalisharAbilityID + iota + 1
 	SilverTokenAbilityID

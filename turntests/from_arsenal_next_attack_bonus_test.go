@@ -28,14 +28,14 @@ func TestFromArsenalNextAttackBonus_GrantsOnArsenalCopyOnly(t *testing.T) {
 		// Hand-played copy: the bonus must NOT land on the queued attack action.
 		handTarget := &card.CardState{Card: testutils.FakeRedAttack()}
 		handState := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCardsRemaining([]*card.CardState{handTarget}).Build()}
-		handState.ResolveChainStep(handState.Logger(), &card.CardState{Card: tc.c})
+		handState.ResolveAttackStep(handState.Logger(), &card.CardState{Card: tc.c})
 		if handTarget.BonusAttack != 0 {
 			t.Errorf("%s: hand-play target BonusAttack = %d, want 0", tc.c.Name(), handTarget.BonusAttack)
 		}
 		// Arsenal-played copy: the bonus must land on the next attack action.
 		arsenalTarget := &card.CardState{Card: testutils.FakeRedAttack()}
 		arsenalState := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCardsRemaining([]*card.CardState{arsenalTarget}).Build()}
-		arsenalState.ResolveChainStep(arsenalState.Logger(), &card.CardState{Card: tc.c, FromArsenal: true})
+		arsenalState.ResolveAttackStep(arsenalState.Logger(), &card.CardState{Card: tc.c, FromArsenal: true})
 		if arsenalTarget.BonusAttack != tc.n {
 			t.Errorf("%s: arsenal-play target BonusAttack = %d, want %d", tc.c.Name(), arsenalTarget.BonusAttack, tc.n)
 		}

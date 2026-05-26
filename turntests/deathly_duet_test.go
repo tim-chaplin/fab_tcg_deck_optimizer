@@ -22,7 +22,7 @@ func TestDeathlyDuet_BaseDamage(t *testing.T) {
 	}
 	for _, tc := range cases {
 		ge := gameengine.New()
-		ge.ResolveChainStep(ge.Logger(), &card.CardState{Card: tc.c})
+		ge.ResolveAttackStep(ge.Logger(), &card.CardState{Card: tc.c})
 		if got := ge.Value(); got != tc.want {
 			t.Errorf("%s: Play() = %d, want %d", tc.c.Name(), got, tc.want)
 		}
@@ -33,10 +33,10 @@ func TestDeathlyDuet_AttackAttributedAddsPower(t *testing.T) {
 	// Attack attributed → +2{p}.
 	ge := gameengine.New()
 	pc := &card.CardState{
-		Card:    cards.DeathlyDuetRed{},
+		Card:      cards.DeathlyDuetRed{},
 		Ephemeral: card.Ephemeral{PitchedToPlay: []card.Card{testutils.FakeRedAttack().WithTypes(card.TypeRuneblade)}},
 	}
-	ge.ResolveChainStep(ge.Logger(), pc)
+	ge.ResolveAttackStep(ge.Logger(), pc)
 	if got := ge.Value(); got != 6 {
 		t.Errorf("Deathly Duet Red with attack attributed: Play() = %d, want 6", got)
 	}
@@ -48,10 +48,10 @@ func TestDeathlyDuet_NonAttackActionAttributedCreatesRunechants(t *testing.T) {
 	// for downstream consume bookkeeping.
 	ge := gameengine.New()
 	pc := &card.CardState{
-		Card:    cards.DeathlyDuetRed{},
+		Card:      cards.DeathlyDuetRed{},
 		Ephemeral: card.Ephemeral{PitchedToPlay: []card.Card{testutils.FakeRedAction()}},
 	}
-	ge.ResolveChainStep(ge.Logger(), pc)
+	ge.ResolveAttackStep(ge.Logger(), pc)
 	if got := ge.Value(); got != 6 {
 		t.Errorf("Deathly Duet Red with non-attack attributed: Play() = %d, want 6 (base 4 + 2 token credits)", got)
 	}
@@ -68,10 +68,10 @@ func TestDeathlyDuet_BothBranchesFire(t *testing.T) {
 	// plus 2 Runechants credited +1 each at creation. Play returns base 4 + 2 power + 2 = 8.
 	ge := gameengine.New()
 	pc := &card.CardState{
-		Card:    cards.DeathlyDuetRed{},
+		Card:      cards.DeathlyDuetRed{},
 		Ephemeral: card.Ephemeral{PitchedToPlay: []card.Card{testutils.FakeRedAttack().WithTypes(card.TypeRuneblade), testutils.FakeRedAction()}},
 	}
-	ge.ResolveChainStep(ge.Logger(), pc)
+	ge.ResolveAttackStep(ge.Logger(), pc)
 	if got := ge.Value(); got != 8 {
 		t.Errorf("Deathly Duet Red with both attributed: Play() = %d, want 8 (base 4 + 2 power + 2 token credits)", got)
 	}

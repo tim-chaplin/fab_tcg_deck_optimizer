@@ -18,7 +18,7 @@ import (
 // accessors and Copy / Reset promote automatically). GameState owns the data; GameEngine
 // owns the rules. The methods below override the embedded ones to add either
 // cacheable-flipping (for accessors that touch hidden state) or rules orchestration
-// (Fire*, ResolveChainStep, Opt, Clash, DealArcaneDamage, token economy).
+// (Fire*, ResolveAttackStep, Opt, Clash, DealArcaneDamage, token economy).
 type GameEngine struct {
 	*GameState
 	// pitchBonus accumulates extra resources a triggertype.Pitch handler grants for the
@@ -73,7 +73,7 @@ func (ge *GameEngine) AppendHand(c card.Card) {
 }
 
 // insertHandSorted inserts c at the Card.ID()-sorted position, flipping IsCacheable. The
-// canonical multiset ordering is required by the chain runner and the eval-cache key.
+// canonical multiset ordering is required by the attack-turn runner and the eval-cache key.
 func (ge *GameEngine) insertHandSorted(c card.Card) {
 	ge.cacheable = false
 	i := sort.Search(len(ge.hand), func(j int) bool { return ge.hand[j].Card.ID() > c.ID() })
@@ -88,7 +88,7 @@ func (ge *GameEngine) Graveyard() []card.Card {
 	return ge.graveyard
 }
 
-// Deck returns the chain-runner deck for read-only inspection and flips IsCacheable.
+// Deck returns the attack-turn runner deck for read-only inspection and flips IsCacheable.
 // Card handlers must not mutate it directly — route through PopDeckTop / PrependToDeck /
 // Opt / TutorFromDeck / RecycleToDeckBottom.
 func (ge *GameEngine) Deck() *deck.Deck {
@@ -135,7 +135,7 @@ func (ge *GameEngine) PeekDeck() (card.Card, bool) {
 }
 
 // PrependToDeck inserts c at the top of the deck. Doesn't flip IsCacheable — caller
-// supplied c, so the write is reproducible from cache key + chain order.
+// supplied c, so the write is reproducible from cache key + attack-turn order.
 func (ge *GameEngine) PrependToDeck(c card.Card) {
 	ge.deck.PutTop([]deck.Card{c})
 }
@@ -195,10 +195,10 @@ func (ge *GameEngine) popFirstHeldCard() (card.Card, bool) {
 	return nil, false
 }
 
-// RecycleToDeckBottom appends pc.Card to the bottom of the deck and flags the chain
+// RecycleToDeckBottom appends pc.Card to the bottom of the deck and flags the attack turn
 // dispatcher to skip the usual non-persistent → graveyard append. Models the FaB clause
 // "put this on the bottom of its owner's deck". Doesn't flip IsCacheable — the caller
-// supplies pc, so the write is reproducible from the cache key + chain order.
+// supplies pc, so the write is reproducible from the cache key + attack-turn order.
 func (ge *GameEngine) RecycleToDeckBottom(pc *card.CardState) {
 	ge.deck.PutBottom([]deck.Card{pc.Card})
 	ge.currentStepRerouted = true
@@ -261,15 +261,15 @@ func (ge *GameEngine) recycleFromGraveyard(pred func(card.Card) bool, toTop bool
 
 // AddToGraveyard appends c to graveyard so later-resolving cards see it. Doesn't flip
 // IsCacheable — the caller supplies c (a card whose identity is already known to the
-// caller), so the write is reproducible from the cache key + chain order.
+// caller), so the write is reproducible from the cache key + attack-turn order.
 func (ge *GameEngine) AddToGraveyard(c card.Card) {
 	ge.graveyard = append(ge.graveyard, c)
 }
 
 // DrawOne models a mid-turn draw: pop the top of the deck into the hand at its sorted
 // position. Reports whether a card was drawn; false on an empty deck. Doesn't flip
-// IsCacheable — the cached chain runs DrawOne again on replay against the caller's
-// current deck, so the drawn card's identity is naturally re-resolved per call. Chain
+// IsCacheable — the cached attack turn runs DrawOne again on replay against the caller's
+// current deck, so the drawn card's identity is naturally re-resolved per call. Attack
 // steps that read the drawn card's attributes via Hand / HeldHand / PeekTopN still
 // flip IsCacheable through those accessors, so a Hand-reader downstream of DrawOne
 // remains uncacheable.
@@ -324,7 +324,7 @@ func (ge *GameEngine) PreventArcaneDamage(n int) int {
 }
 
 // TurnFaceUp flips pc.FaceUp = true on the specific CardState the caller passes — found
-// by scanning CardsRemaining for an in-chain target, or held directly when the target is
+// by scanning CardsRemaining for an in-attack-turn target, or held directly when the target is
 // the arsenal-in or another known CardState pointer — then fires pc.Card.OnFaceUp if
 // pc.Card implements card.FaceUpHook. Touches a single instance rather than every
 // scheduled copy with the same identity; the caller picks the target.
@@ -408,7 +408,7 @@ func (ge *GameEngine) Opt(l card.Logger, n int) {
 	if l == nil {
 		return
 	}
-	l.AppendChainStepf(0, "Opted %s, put %s on top, put %s on bottom",
+	l.AppendAttackStepf(0, "Opted %s, put %s on top, put %s on bottom",
 		formatCardList(cards), formatCardList(top), formatCardList(bottom))
 }
 
@@ -622,41 +622,41 @@ func (ge *GameEngine) SacrificePayoffAura() bool {
 	return false
 }
 
-// === Chain-step resolution ===
+// === Attack-step resolution ===
 
-// ResolveChainStep runs card.Play on pc and then applies the standard chain-step
+// ResolveAttackStep runs card.Play on pc and then applies the standard attack-step
 // resolution: attack-action / weapon-attack credit pc.EffectiveAttack() to ge.value;
 // defense-reaction (or DefensiveInstant) credits EffectiveDefense capped at the remaining
-// unblocked damage; everything else logs (+0). The "<DisplayName>: <VERB> (+N)" chain-step
+// unblocked damage; everything else logs (+0). The "<DisplayName>: <VERB> (+N)" attack-step
 // entry is appended after Play returns so self-buffs Play applied are reflected in the
 // displayed delta.
-func (ge *GameEngine) ResolveChainStep(l card.Logger, pc *card.CardState) {
+func (ge *GameEngine) ResolveAttackStep(l card.Logger, pc *card.CardState) {
 	pc.Card.Play(ge, l, pc)
 	// EffectiveTypes routes through ModalTypes for cards whose type-line shifts per mode
 	// (Tip-Off mode 1 reads as Generic Instant, not Generic Action - Attack), so the
-	// downstream aura-create flip and chain-step delta land on the mode-correct TypeSet.
+	// downstream aura-create flip and attack-step delta land on the mode-correct TypeSet.
 	types := pc.EffectiveTypes(ge)
 	if types.Has(card.TypeAura) {
 		ge.auraCreated = true
 	}
-	n := ge.chainStepDelta(pc, types)
-	// NoopLogger discards the text, so skip the cached-string lookup and the AppendChainStep
-	// dispatch entirely on the eval hot path — every chain-step resolution hits this.
+	n := ge.attackStepDelta(pc, types)
+	// NoopLogger discards the text, so skip the cached-string lookup and the AppendAttackStep
+	// dispatch entirely on the eval hot path — every attack-step resolution hits this.
 	if _, isNoop := l.(NoopLogger); isNoop {
 		return
 	}
-	l.AppendChainStep(ChainStepText(pc), n)
+	l.AppendAttackStep(AttackStepText(pc), n)
 }
 
 // PlayCard implements card.GameEngine.PlayCard — resolves another card mid-handler.
 func (ge *GameEngine) PlayCard(l card.Logger, pc *card.CardState) {
-	ge.ResolveChainStep(l, pc)
+	ge.ResolveAttackStep(l, pc)
 }
 
-// chainStepDelta computes the chain step's display delta and applies the standard damage /
+// attackStepDelta computes the attack step's display delta and applies the standard damage /
 // block side effects. Returns the (+N) value for the log line. types is the caller's
 // already-resolved Types(nil) so we skip a second interface dispatch.
-func (ge *GameEngine) chainStepDelta(pc *card.CardState, types card.TypeSet) int {
+func (ge *GameEngine) attackStepDelta(pc *card.CardState, types card.TypeSet) int {
 	switch {
 	case types.IsAttackAction() || types.IsWeaponAttack():
 		n := pc.EffectiveAttack()
@@ -684,7 +684,7 @@ func isDefensiveInstant(c card.Card) bool {
 	return ok
 }
 
-// ChainStepText returns the "<DisplayName>: <VERB>[ from arsenal]" prefix for the chain-
+// AttackStepText returns the "<DisplayName>: <VERB>[ from arsenal]" prefix for the attack turn-
 // step log line. VERB picks WEAPON ATTACK for Weapon+Attack, ATTACK for attack-actions,
 // DEFENSE REACTION for DRs, and PLAY otherwise. EffectiveTypes dispatches on mode so
 // ModalTypes cards (Tip-Off mode 1) log under the mode-correct verb.
@@ -694,26 +694,26 @@ func isDefensiveInstant(c card.Card) bool {
 // for the whole process. ModalTypes cards (their type-line shifts with self.Mode) bypass
 // the cache and rebuild every call. Tests using a Card with ids.InvalidCard hit the same
 // no-cache path.
-func ChainStepText(pc *card.CardState) string {
+func AttackStepText(pc *card.CardState) string {
 	if _, ok := pc.Card.(card.ModalTypes); ok {
-		return buildChainStepText(pc)
+		return buildAttackStepText(pc)
 	}
 	id := pc.Card.ID()
 	if id == ids.InvalidCard {
-		return buildChainStepText(pc)
+		return buildAttackStepText(pc)
 	}
-	idx := chainStepCacheIndex(id, pc.FromArsenal)
-	if s := chainStepCache[idx].Load(); s != nil {
+	idx := attackStepCacheIndex(id, pc.FromArsenal)
+	if s := attackStepCache[idx].Load(); s != nil {
 		return *s
 	}
-	out := buildChainStepText(pc)
-	chainStepCache[idx].Store(&out)
+	out := buildAttackStepText(pc)
+	attackStepCache[idx].Store(&out)
 	return out
 }
 
-// buildChainStepText is the uncached renderer; the cached path falls through to it on
+// buildAttackStepText is the uncached renderer; the cached path falls through to it on
 // miss and ModalTypes / InvalidCard inputs route here every call.
-func buildChainStepText(pc *card.CardState) string {
+func buildAttackStepText(pc *card.CardState) string {
 	types := pc.EffectiveTypes(nil)
 	var verb string
 	switch {
@@ -732,18 +732,18 @@ func buildChainStepText(pc *card.CardState) string {
 	return pc.Card.DisplayName() + ": " + verb
 }
 
-// chainStepCache memoises ChainStepText results keyed by (Card.ID, FromArsenal). Two rows
+// attackStepCache memoises AttackStepText results keyed by (Card.ID, FromArsenal). Two rows
 // per card cover the in-hand and from-arsenal verb suffixes. Sized for the full uint16 ID
 // space (~1 MB) so lookups are direct bounds-checked array reads. Multiple goroutines
 // computing the same entry produce the same string, so racing writers converge.
-const chainStepCacheSize = 1 << 17 // 2 entries per ID × 65536 IDs
+const attackStepCacheSize = 1 << 17 // 2 entries per ID × 65536 IDs
 
-var chainStepCache [chainStepCacheSize]atomic.Pointer[string]
+var attackStepCache [attackStepCacheSize]atomic.Pointer[string]
 
-// chainStepCacheIndex packs (id, fromArsenal) into a single uint32 cache index. Bit 16 is
+// attackStepCacheIndex packs (id, fromArsenal) into a single uint32 cache index. Bit 16 is
 // the FromArsenal flag, bits 0-15 are the card ID — keeps the in-hand and from-arsenal
 // variants in adjacent halves so the hot path is a plain array read.
-func chainStepCacheIndex(id ids.CardID, fromArsenal bool) uint32 {
+func attackStepCacheIndex(id ids.CardID, fromArsenal bool) uint32 {
 	idx := uint32(id)
 	if fromArsenal {
 		idx |= 1 << 16

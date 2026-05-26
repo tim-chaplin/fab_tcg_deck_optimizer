@@ -21,7 +21,7 @@ func (ClubWeapon) Types() card.TypeSet { return clubWeaponTypes }
 func (ClubWeapon) Hands() int          { return 1 }
 func (ClubWeapon) Ability() card.Card  { return clubWeaponAbility }
 
-// Cached at package init so the chain runner's per-Best w.Ability() lookup is alloc-free.
+// Cached at package init so the attack-turn runner's per-Best w.Ability() lookup is alloc-free.
 // The ability is a FakeWeaponSwing with Club + OneHand sub-types and power 1.
 var clubWeaponAbility card.Card = FakeWeaponSwing().
 	WithName("test.ClubWeapon").

@@ -11,8 +11,8 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 )
 
-// Tests that an arsenal-played Frontline Scout gains go again and chains a hand attack.
-func TestFrontlineScout_ArsenalPlayChainsHandAttack(t *testing.T) {
+// Tests that an arsenal-played Frontline Scout gains go again and extends with a hand attack.
+func TestFrontlineScout_ArsenalPlayGoesAgainIntoHandAttack(t *testing.T) {
 	handAttack := testutils.FakeRedAttack().WithPower(3)
 	d := deck.New(testutils.Hero{Intel: 4}, nil, nil)
 	state := gameengine.GameStateBuilder().SetArsenal(cards.FrontlineScoutRed{}).Build()
@@ -22,8 +22,8 @@ func TestFrontlineScout_ArsenalPlayChainsHandAttack(t *testing.T) {
 	}
 }
 
-// Tests that a hand-played Frontline Scout gains no go again, so it cannot chain a second attack.
-func TestFrontlineScout_HandPlayDoesNotChain(t *testing.T) {
+// Tests that a hand-played Frontline Scout gains no go again, so it cannot extend with a second attack.
+func TestFrontlineScout_HandPlayDoesNotGoAgain(t *testing.T) {
 	handAttack := testutils.FakeRedAttack().WithPower(3)
 	d := deck.New(testutils.Hero{Intel: 4}, nil, nil)
 	summary := sim.EvalOneTurnForTesting(d, nil, []card.Card{cards.FrontlineScoutRed{}, handAttack})

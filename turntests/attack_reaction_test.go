@@ -27,7 +27,7 @@ func TestAttackReaction_BuffLandsOnTarget(t *testing.T) {
 	}
 }
 
-// Tests that an AR with no legal target in hand can't enter the chain.
+// Tests that an AR with no legal target in hand can't enter the attack turn.
 func TestAttackReaction_NoTargetAtAllNothingHappens(t *testing.T) {
 	d := deck.New(heroes.Viserai, nil, nil)
 	hand := []card.Card{cards.LungingPressBlue{}}
@@ -92,8 +92,8 @@ func TestAttackReaction_ThrustBuffsSwingingSwordWeapon(t *testing.T) {
 	}
 }
 
-// Tests that Blade Flash on Nebula Blade's swing chains a follow-up no-go-again attack action.
-func TestAttackReaction_BladeFlashGoAgainExtendsChain(t *testing.T) {
+// Tests that Blade Flash on Nebula Blade's swing extends with a follow-up no-go-again attack action.
+func TestAttackReaction_BladeFlashGoAgainExtendsAttackTurn(t *testing.T) {
 	d := deck.New(heroes.Viserai, []deck.Weapon{weapons.NebulaBlade{}}, nil)
 	hand := []card.Card{
 		cards.BladeFlashBlue{},
@@ -103,12 +103,12 @@ func TestAttackReaction_BladeFlashGoAgainExtendsChain(t *testing.T) {
 	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingDamage(0).Build(), hand)
 	got := summary.Value
 	if got != 3 {
-		t.Fatalf("Value = %d, want 3 (Nebula 1 + runechant 1 + chained 1-power attack)", got)
+		t.Fatalf("Value = %d, want 3 (Nebula 1 + runechant 1 + follow-up 1-power attack)", got)
 	}
 }
 
-// Tests that without Blade Flash the same hand can't chain past Nebula Blade's swing.
-func TestAttackReaction_NebulaSwingWithoutBladeFlashCantChain(t *testing.T) {
+// Tests that without Blade Flash the same hand can't extend past Nebula Blade's swing.
+func TestAttackReaction_NebulaSwingWithoutBladeFlashCantGoAgain(t *testing.T) {
 	d := deck.New(heroes.Viserai, []deck.Weapon{weapons.NebulaBlade{}}, nil)
 	hand := []card.Card{
 		cards.ToughenUpBlue{},

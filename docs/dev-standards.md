@@ -26,7 +26,7 @@ per-package `README.md` files; `docs/codebase-map.md` is the index into them.
   card uses. A card carrying `card.Dominator` doesn't re-explain Dominate; a `NotImplemented`
   card with a `// not implemented: <quirk>` line doesn't repeat "rider isn't modelled".
 - A function's docstring describes what the function does, not how callers in other packages
-  use it. Cross-file implementation references ("used by the chain runner's per-permutation
+  use it. Cross-file implementation references ("used by the attack-turn runner's per-permutation
   reset to drop millions of allocs") couple two sites that rot independently — that belongs
   in the PR description.
 - Default to no comment; add one only when the *why* is non-obvious.
@@ -41,7 +41,7 @@ local behaviour at the call site.
 
 A test's doc comment is a single brief sentence stating the behavior under test, e.g.
 `// Tests that a single pitch paying for multiple Aether Slashes activates the bonus on each.`
-Inputs, expected values, and chain shape are visible in the test body. Same rule for unit and
+Inputs, expected values, and attack-turn shape are visible in the test body. Same rule for unit and
 turn-level tests.
 
 ## Test scope

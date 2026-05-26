@@ -7,7 +7,7 @@ import (
 )
 
 // Tests that ge.HeldHand() returns only Held-role entries, skipping Pitch and Attack
-// role cards that the partition has scheduled to commit to chain costs / play.
+// role cards that the partition has scheduled to commit to attack-step costs / play.
 func TestHeldHand_FiltersOutPitchAndAttackRoles(t *testing.T) {
 	ge := New()
 	ge.SetHandStates([]card.CardState{
@@ -30,7 +30,7 @@ func TestHeldHand_FiltersOutPitchAndAttackRoles(t *testing.T) {
 
 // Tests that Discard / DiscardToTopOfDeck / DiscardToBottomOfDeck pop only Held-role
 // hand entries, skipping Pitch / Attack entries the partition has scheduled to commit
-// to chain costs. A bug here would let a card like Rise Above or the Emissary cycle
+// to attack-step costs. A bug here would let a card like Rise Above or the Emissary cycle
 // silently remove a Pitch-role card, leaving its cost unpaid downstream.
 func TestDiscard_OnlyPopsHeldRole(t *testing.T) {
 	ge := New()

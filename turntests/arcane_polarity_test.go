@@ -18,7 +18,7 @@ func TestArcanePolarity_NoArcaneIncomingCreditsOne(t *testing.T) {
 	}
 	for _, c := range cases {
 		ge := gameengine.New()
-		ge.ResolveChainStep(ge.Logger(), &card.CardState{Card: c})
+		ge.ResolveAttackStep(ge.Logger(), &card.CardState{Card: c})
 		if ge.Value() != 1 {
 			t.Errorf("%s: Value = %d, want 1", c.Name(), ge.Value())
 		}
@@ -37,7 +37,7 @@ func TestArcanePolarity_ArcaneIncomingCreditsLargeGain(t *testing.T) {
 	}
 	for _, tc := range cases {
 		ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetArcaneIncomingDamage(1).Build()}
-		ge.ResolveChainStep(ge.Logger(), &card.CardState{Card: tc.c})
+		ge.ResolveAttackStep(ge.Logger(), &card.CardState{Card: tc.c})
 		if ge.Value() != tc.gain {
 			t.Errorf("%s: Value = %d, want %d", tc.c.Name(), ge.Value(), tc.gain)
 		}

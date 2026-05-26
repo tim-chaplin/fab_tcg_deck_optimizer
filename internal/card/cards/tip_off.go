@@ -5,7 +5,7 @@
 //
 // Modelled as a two-mode card where mode 1's type-line is "Generic Instant" instead of the
 // printed "Generic Action - Attack" (via card.ModalTypes). The engine reads the per-mode
-// type-line: mode 1 pays 0 AP (Instant is a free chain step), credits no attack damage,
+// type-line: mode 1 pays 0 AP (Instant is a free attack step), credits no attack damage,
 // doesn't clear OpponentMarked, and won't match "next attack action card" predicates
 // scanning CardsRemaining. Play just marks the opponent — the rest falls out of the type
 // dispatch.

@@ -23,7 +23,7 @@ func TestReekOfCorruption_NoAuraReturnsBaseAttack(t *testing.T) {
 	for _, tc := range cases {
 		ge := gameengine.New()
 		cs := &card.CardState{Card: tc.c}
-		ge.ResolveChainStep(ge.Logger(), cs)
+		ge.ResolveAttackStep(ge.Logger(), cs)
 		testutils.FireOnHitIfLikely(ge, ge.Logger(), cs)
 		if got := ge.Value(); got != tc.want {
 			t.Errorf("%s: Play() = %d, want %d (base attack, no aura)", tc.c.Name(), got, tc.want)
@@ -36,7 +36,7 @@ func TestReekOfCorruption_LikelyToHitWithAuraCreatedTriggersDiscard(t *testing.T
 	ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetAuraCreated(true).Build()}
 	c := cards.ReekOfCorruptionRed{}
 	cs := &card.CardState{Card: c}
-	ge.ResolveChainStep(ge.Logger(), cs)
+	ge.ResolveAttackStep(ge.Logger(), cs)
 	testutils.FireOnHitIfLikely(ge, ge.Logger(), cs)
 	if got := ge.Value(); got != 4+3 {
 		t.Errorf("Red with AuraCreated: Play() = %d, want 7 (base 4 likely to hit + 3 discard)", got)
@@ -51,10 +51,10 @@ func TestReekOfCorruption_AuraPlayedTriggersDiscard(t *testing.T) {
 		Build()}
 	c := cards.ReekOfCorruptionRed{}
 	cs := &card.CardState{Card: c}
-	ge.ResolveChainStep(ge.Logger(), cs)
+	ge.ResolveAttackStep(ge.Logger(), cs)
 	testutils.FireOnHitIfLikely(ge, ge.Logger(), cs)
 	if got := ge.Value(); got != 4+3 {
-		t.Errorf("Play() = %d, want %d (aura earlier in chain triggers rider)", got, 4+3)
+		t.Errorf("Play() = %d, want %d (aura earlier in the attack turn triggers rider)", got, 4+3)
 	}
 }
 
@@ -69,7 +69,7 @@ func TestReekOfCorruption_BlockableBaseSuppressesDiscard(t *testing.T) {
 	}
 	for _, tc := range cases {
 		ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetAuraCreated(true).Build()}
-		ge.ResolveChainStep(ge.Logger(), &card.CardState{Card: tc.c})
+		ge.ResolveAttackStep(ge.Logger(), &card.CardState{Card: tc.c})
 		if got := ge.Value(); got != tc.want {
 			t.Errorf("%s with AuraCreated: Play() = %d, want %d (blockable, no rider)", tc.c.Name(), got, tc.want)
 		}
@@ -84,7 +84,7 @@ func TestReekOfCorruption_RunechantsDontRescue(t *testing.T) {
 		AddAura(token.NewRunechant(1)).
 		Build()}
 	c := cards.ReekOfCorruptionYellow{}
-	ge.ResolveChainStep(ge.Logger(), &card.CardState{Card: c})
+	ge.ResolveAttackStep(ge.Logger(), &card.CardState{Card: c})
 	if got := ge.Value(); got != 3 {
 		t.Errorf("Yellow with 1 Runechant: Play() = %d, want 3 (runechant isn't 'this' damage)", got)
 	}

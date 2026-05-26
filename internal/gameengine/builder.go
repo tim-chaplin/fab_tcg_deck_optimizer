@@ -11,7 +11,7 @@ import (
 // &gameengine.GameEngine{GameState: ...} when they need to drive Card.Play hooks
 // through the rules engine.
 //
-// The builder starts from the chain-locals defaults a just-constructed *GameState
+// The builder starts from the per-turn-locals defaults a just-constructed *GameState
 // carries (cacheable=true, currentHookIdx=-1, empty logger) so callers only set the
 // fields they care about.
 type StateBuilder struct {
@@ -60,7 +60,7 @@ func (b *StateBuilder) SetArsenal(c card.Card) *StateBuilder { b.gs.arsenal = c;
 
 // AddAura appends auras to the carryover aura list. Unlike GameState.CreateAura it does
 // not flip the auraCreated flag — builder auras are pre-turn carryover, not auras created
-// during this turn's chain; reach for SetAuraCreated to set that flag explicitly.
+// during this turn's attack phase; reach for SetAuraCreated to set that flag explicitly.
 func (b *StateBuilder) AddAura(auras ...Aura) *StateBuilder {
 	b.gs.auras = append(b.gs.auras, auras...)
 	return b
@@ -112,7 +112,7 @@ func (b *StateBuilder) SetDefenders(cs []card.Card) *StateBuilder { b.gs.defende
 // SetCardsPlayed replaces the cards-played-this-turn slice.
 func (b *StateBuilder) SetCardsPlayed(cs []card.Card) *StateBuilder { b.gs.cardsPlayed = cs; return b }
 
-// SetCardsRemaining replaces the cards-scheduled-after-current-chain-step slice.
+// SetCardsRemaining replaces the cards-scheduled-after-current-attack-step slice.
 func (b *StateBuilder) SetCardsRemaining(cs []*card.CardState) *StateBuilder {
 	b.gs.cardsRemaining = cs
 	return b
@@ -156,7 +156,7 @@ func (b *StateBuilder) SetAttackReactionTarget(cs *card.CardState) *StateBuilder
 	return b
 }
 
-// SetDeck replaces the chain-runner deck.
+// SetDeck replaces the attack-turn runner deck.
 func (b *StateBuilder) SetDeck(d *deck.Deck) *StateBuilder { b.gs.deck = d; return b }
 
 // SetCards wraps the supplied cards in a fresh *deck.Deck and assigns it as the

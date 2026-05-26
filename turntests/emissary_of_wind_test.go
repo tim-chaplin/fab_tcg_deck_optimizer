@@ -11,8 +11,8 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 )
 
-// Tests that the hand cycle fires and the granted go-again chains an arsenal play.
-func TestEmissaryOfWind_CyclesHandAndChainsArsenal(t *testing.T) {
+// Tests that the hand cycle fires and the granted go-again extends with an arsenal play.
+func TestEmissaryOfWind_CyclesHandAndGoesAgainIntoArsenal(t *testing.T) {
 	spare := testutils.FakeRedAttack().WithPower(0)
 	arsenalAttack := testutils.FakeRedAttack().WithPower(3)
 	d := deck.New(testutils.Hero{Intel: 4}, nil, nil)
@@ -30,6 +30,6 @@ func TestEmissaryOfWind_EmptyHandSuppressesGoAgain(t *testing.T) {
 	state := gameengine.GameStateBuilder().SetArsenal(arsenalAttack).Build()
 	summary := sim.EvalOneTurnForTesting(d, state, []card.Card{cards.EmissaryOfWindRed{}})
 	if summary.Value != 4 {
-		t.Errorf("Value = %d, want 4 (Emissary alone; no cycle → no go-again → arsenal can't chain)", summary.Value)
+		t.Errorf("Value = %d, want 4 (Emissary alone; no cycle → no go-again → arsenal can't extend)", summary.Value)
 	}
 }

@@ -24,7 +24,7 @@ func stateWithItems(items ...*item.Item) *gameengine.GameState {
 	return b.Build()
 }
 
-// Tests that the Copper token ability stays unspent when the chain can't fund its {4} cost.
+// Tests that the Copper token ability stays unspent when the attack turn can't fund its {4} cost.
 func TestCopperToken_NotEnoughResourceSkipsSpend(t *testing.T) {
 	cards := []deck.Card{
 		testutils.FakeRedAttack(), testutils.FakeRedAttack(), testutils.FakeRedAttack(),

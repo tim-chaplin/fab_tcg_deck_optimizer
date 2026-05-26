@@ -11,7 +11,7 @@ aura tokens) the trigger type plus fire closure.
 ## Key functions
 
 - `NewGold(n)` / `NewSilver(n)` / `NewCopper(n)` — token items at count `n`. Each wraps the
-  matching card's activated ability so the chain runner can enqueue it as a playable.
+  matching card's activated ability so the attack-turn runner can enqueue it as a playable.
 - `NewRunechant(n)` — a `CardOrAbility`-triggered aura filtered to attacks. When an attack is
   played it flips `ArcaneDamageDealt` if its count clears the damage-likely-to-hit window,
   then destroys. Resolving before the attack's own effect lets it turn on that attack's

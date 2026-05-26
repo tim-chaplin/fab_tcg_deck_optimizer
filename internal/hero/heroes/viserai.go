@@ -67,8 +67,8 @@ func viseraiOnCardPlayed(ge card.GameEngine, l card.Logger, _ card.Hero) {
 //   - Non-attack enabler: an Action card that isn't an Attack — needed to satisfy "if you
 //     have played another non-attack action card this turn" before the next Runeblade
 //     attack drops a runechant.
-//   - Action without Go again: an Action card that doesn't extend the chain — one is
-//     enough to close out a chain; further copies just sit in hand. Uses printed
+//   - Action without Go again: an Action card that doesn't extend the attack turn — one is
+//     enough to close out an attack turn; further copies just sit in hand. Uses printed
 //     GoAgain() only.
 //   - Block-only defender: a card whose only role is defending — Defense Reaction or
 //     Block subtype. Most cards carry a non-zero printed Defense value as a secondary

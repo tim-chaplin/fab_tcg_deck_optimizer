@@ -11,11 +11,11 @@ const (
 	// StartOfTurn fires at the start of the owning player's action phase, before the
 	// best-line search.
 	StartOfTurn Type = 1 << iota
-	// CardOrAbility fires once as a card or weapon attack is played during the chain,
+	// CardOrAbility fires once as a card or weapon attack is played during the attack turn,
 	// before that card's own effect resolves. Subscribers narrow with a typeFilter (e.g.
 	// IsAttack for Runechant tokens, IsAttackAction for Malefic Incantation).
 	CardOrAbility
-	// EndOfTurn fires after the chain finishes resolving, before the carry snapshot.
+	// EndOfTurn fires after the attack turn finishes resolving, before the carry snapshot.
 	EndOfTurn
 	// Hit fires when an attack hits (post-AR-buff EffectiveAttack survives blocks).
 	Hit

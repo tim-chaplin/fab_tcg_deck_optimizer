@@ -17,7 +17,7 @@ import (
 // and a start-of-turn Aura is registered for the "destroy this" clause.
 func TestSigilOfSilphidae_PlayFizzlesWithoutAura(t *testing.T) {
 	ge := gameengine.New()
-	ge.ResolveChainStep(ge.Logger(), &card.CardState{Card: cards.SigilOfSilphidaeBlue{}})
+	ge.ResolveAttackStep(ge.Logger(), &card.CardState{Card: cards.SigilOfSilphidaeBlue{}})
 	if got := ge.Value(); got != 0 {
 		t.Errorf("Play() = %d, want 0 (empty graveyard)", got)
 	}
@@ -37,7 +37,7 @@ func TestSigilOfSilphidae_PlayFizzlesWithoutAura(t *testing.T) {
 func TestSigilOfSilphidae_PlayBanishesAuraForOneArcane(t *testing.T) {
 	aura := cards.BlessingOfOccultRed{}
 	ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetGraveyard([]card.Card{aura}).Build()}
-	ge.ResolveChainStep(ge.Logger(), &card.CardState{Card: cards.SigilOfSilphidaeBlue{}})
+	ge.ResolveAttackStep(ge.Logger(), &card.CardState{Card: cards.SigilOfSilphidaeBlue{}})
 	if got := ge.Value(); got != 1 {
 		t.Errorf("Play() = %d, want 1", got)
 	}

@@ -1,7 +1,7 @@
 package sim
 
 // Hand-eval cache. Keyed on the (hand multiset, runechantCarryover, arsenalCardIn, auras)
-// tuple. Stores the winning partition's role assignments; on a hit, the chain replays that
+// tuple. Stores the winning partition's role assignments; on a hit, the attack turn replays that
 // partition to rebuild the full TurnSummary, skipping the exponential partition search.
 //
 // Caching is gated on best.Cacheable=true: if any sibling partition read deck or graveyard,
@@ -25,7 +25,7 @@ import (
 // maxCachedHandSize caps the hand size the cache fingerprints. Adult heroes deal 4 cards +
 // arsenal-in (5); 10 leaves headroom for reveal handlers that pad the hand at start of turn.
 // Hands beyond this skip the cache. The cap is on the dealt hand only — bounded by hero
-// intelligence — not mid-chain growth.
+// intelligence — not mid-attack-turn growth.
 const maxCachedHandSize = 10
 
 // maxCachedWeapons caps the weapon slot count the cache fingerprints. Heroes carry at most
@@ -70,7 +70,7 @@ type evalCacheKey struct {
 }
 
 // playedCard is one resolved card in a cached solution: the card, its modal Mode, and
-// whether it was played from arsenal. A cache replay seeds each chain step directly from
+// whether it was played from arsenal. A cache replay seeds each attack step directly from
 // these.
 type playedCard struct {
 	card        card.Card
@@ -106,11 +106,11 @@ func (s *cacheSolution) reset() {
 //   - line: BestLine roles (Card + Role + FromArsenal).
 //   - swungWeapons: swung-weapon names, for TurnSummary display only.
 //   - attackOrder: winning attacker permutation in resolution order, each with its chosen
-//     modal Mode. Includes weapon / item ability cards at their chain positions.
+//     modal Mode. Includes weapon / item ability cards at their attack-turn positions.
 //   - pitchOrder: winning attack-phase pitch ordering — the pitch-pool pop sequence (also
 //     identifying which pitch cards funded the attack vs defense phase).
 //   - defenders: winning defender list, each with its blocker Mode.
-//   - cardsRemovedFromDeck: cards the cached chain pulled off the deck. Replay refuses to
+//   - cardsRemovedFromDeck: cards the cached attack turn pulled off the deck. Replay refuses to
 //     run when the caller's deck has fewer cards left.
 type evalCacheEntry struct {
 	line                 []card.CardAssignment

@@ -8,26 +8,26 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/ids"
 )
 
-// Each card-type branch of ResolveChainStep gets one assertion so the standard
+// Each card-type branch of ResolveAttackStep gets one assertion so the standard
 // "card resolves and the sim credits / caps / logs" mechanic is pinned in exactly
 // one place. Per-card tests don't repeat this — they exercise card-specific
 // behaviour (riders, conditional self-buffs) and assume the standard mechanic.
 
-// fakeChainAttack is a vanilla attack-action card with printed power 3 and an empty Play.
-type fakeChainAttack struct{}
+// fakeAttack is a vanilla attack-action card with printed power 3 and an empty Play.
+type fakeAttack struct{}
 
-func (fakeChainAttack) ID() ids.CardID           { return ids.InvalidCard }
-func (fakeChainAttack) Name() string             { return "fakeChainAttack" }
-func (fakeChainAttack) DisplayName() string      { return "fakeChainAttack" }
-func (fakeChainAttack) Cost(card.GameEngine) int { return 0 }
-func (fakeChainAttack) Pitch() int               { return 0 }
-func (fakeChainAttack) Attack() int              { return 3 }
-func (fakeChainAttack) Defense() int             { return 0 }
-func (fakeChainAttack) Types(card.GameEngine) card.TypeSet {
+func (fakeAttack) ID() ids.CardID           { return ids.InvalidCard }
+func (fakeAttack) Name() string             { return "fakeAttack" }
+func (fakeAttack) DisplayName() string      { return "fakeAttack" }
+func (fakeAttack) Cost(card.GameEngine) int { return 0 }
+func (fakeAttack) Pitch() int               { return 0 }
+func (fakeAttack) Attack() int              { return 3 }
+func (fakeAttack) Defense() int             { return 0 }
+func (fakeAttack) Types(card.GameEngine) card.TypeSet {
 	return card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 }
-func (fakeChainAttack) GoAgain(card.GameEngine) bool                                 { return false }
-func (fakeChainAttack) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {}
+func (fakeAttack) GoAgain(card.GameEngine) bool                                 { return false }
+func (fakeAttack) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {}
 
 // fakeDR is a vanilla defense-reaction card with printed defense 4.
 type fakeDR struct{}
@@ -66,7 +66,7 @@ func (n fakeNonAttack) Play(ge card.GameEngine, l card.Logger, self *card.CardSt
 
 // fakeSelfBuff is an attack action whose Play body flips BonusAttack so the
 // sim's post-Play EffectiveAttack reads the buffed value. Pins the contract
-// that ResolveChainStep computes n AFTER Play returns.
+// that ResolveAttackStep computes n AFTER Play returns.
 type fakeSelfBuff struct{}
 
 func (fakeSelfBuff) ID() ids.CardID           { return ids.InvalidCard }
@@ -84,19 +84,19 @@ func (fakeSelfBuff) Play(ge card.GameEngine, l card.Logger, self *card.CardState
 	self.BonusAttack += 1
 }
 
-func TestResolveChainStep_AttackCreditsEffectiveAttack(t *testing.T) {
+func TestResolveAttackStep_AttackCreditsEffectiveAttack(t *testing.T) {
 	ge := gameengine.New()
-	pc := &card.CardState{Card: fakeChainAttack{}}
-	ge.ResolveChainStep(ge.Logger(), pc)
+	pc := &card.CardState{Card: fakeAttack{}}
+	ge.ResolveAttackStep(ge.Logger(), pc)
 	if ge.Value() != 3 {
 		t.Errorf("Value = %d, want 3 (printed attack)", ge.Value())
 	}
 }
 
-func TestResolveChainStep_DefenseReactionCapsToIncomingDamage(t *testing.T) {
+func TestResolveAttackStep_DefenseReactionCapsToIncomingDamage(t *testing.T) {
 	ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetIncomingDamage(2).Build()}
 	pc := &card.CardState{Card: fakeDR{}}
-	ge.ResolveChainStep(ge.Logger(), pc)
+	ge.ResolveAttackStep(ge.Logger(), pc)
 	if ge.Value() != 2 {
 		t.Errorf("Value = %d, want 2 (capped at IncomingDamage)", ge.Value())
 	}
@@ -105,10 +105,10 @@ func TestResolveChainStep_DefenseReactionCapsToIncomingDamage(t *testing.T) {
 	}
 }
 
-func TestResolveChainStep_DefenseReactionUncappedWhenIncomingExceedsDefense(t *testing.T) {
+func TestResolveAttackStep_DefenseReactionUncappedWhenIncomingExceedsDefense(t *testing.T) {
 	ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetIncomingDamage(10).Build()}
 	pc := &card.CardState{Card: fakeDR{}}
-	ge.ResolveChainStep(ge.Logger(), pc)
+	ge.ResolveAttackStep(ge.Logger(), pc)
 	if ge.Value() != 4 {
 		t.Errorf("Value = %d, want 4 (printed defense, uncapped)", ge.Value())
 	}
@@ -117,11 +117,11 @@ func TestResolveChainStep_DefenseReactionUncappedWhenIncomingExceedsDefense(t *t
 	}
 }
 
-func TestResolveChainStep_NonAttackContributesZero(t *testing.T) {
+func TestResolveAttackStep_NonAttackContributesZero(t *testing.T) {
 	played := false
 	ge := gameengine.New()
 	pc := &card.CardState{Card: fakeNonAttack{played: &played}}
-	ge.ResolveChainStep(ge.Logger(), pc)
+	ge.ResolveAttackStep(ge.Logger(), pc)
 	if !played {
 		t.Error("non-attack Play body did not run")
 	}
@@ -130,10 +130,10 @@ func TestResolveChainStep_NonAttackContributesZero(t *testing.T) {
 	}
 }
 
-func TestResolveChainStep_SelfBuffInPlayAppliesBeforeCredit(t *testing.T) {
+func TestResolveAttackStep_SelfBuffInPlayAppliesBeforeCredit(t *testing.T) {
 	ge := gameengine.New()
 	pc := &card.CardState{Card: fakeSelfBuff{}}
-	ge.ResolveChainStep(ge.Logger(), pc)
+	ge.ResolveAttackStep(ge.Logger(), pc)
 	if ge.Value() != 3 {
 		t.Errorf("Value = %d, want 3 (printed 2 + Play'ge +1 BonusAttack)", ge.Value())
 	}

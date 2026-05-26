@@ -14,7 +14,7 @@ func TestSeekHorizon_EmptyHandNoGoAgain(t *testing.T) {
 	for _, c := range []card.Card{cards.SeekHorizonRed{}, cards.SeekHorizonYellow{}, cards.SeekHorizonBlue{}} {
 		ge := gameengine.New()
 		pc := &card.CardState{Card: c}
-		ge.ResolveChainStep(ge.Logger(), pc)
+		ge.ResolveAttackStep(ge.Logger(), pc)
 		if pc.GrantedGoAgain {
 			t.Errorf("%s [%d{p}]: GrantedGoAgain = true with empty hand, want false", c.Name(), c.Pitch())
 		}
@@ -28,7 +28,7 @@ func TestSeekHorizon_PaysAltCostAndGrantsGoAgain(t *testing.T) {
 		spare := testutils.FakeRedAttack()
 		ge.GameState.AppendHandRaw(spare)
 		pc := &card.CardState{Card: c}
-		ge.ResolveChainStep(ge.Logger(), pc)
+		ge.ResolveAttackStep(ge.Logger(), pc)
 
 		if !pc.GrantedGoAgain {
 			t.Errorf("%s [%d{p}]: GrantedGoAgain = false after paying alt cost, want true", c.Name(), c.Pitch())

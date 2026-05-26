@@ -10,7 +10,7 @@ import (
 // Per-deck evaluation result types. Pure data + small derived-stat methods, with no
 // reference to sim or gameengine so this file can sit in internal/deck (which gameengine
 // imports) without introducing a cycle. BestTurn carries only the durable outcome —
-// runtime chain scratch lives on sim's TurnSummary.
+// runtime attack-turn scratch lives on sim's TurnSummary.
 
 // Stats is the aggregate hand-value statistics across all simulated runs of a Deck.
 type Stats struct {
@@ -78,7 +78,7 @@ func (s Stats) Max() int {
 	return m
 }
 
-// BestTurn records the peak draw a deck saw during simulation. The chain's printout is
+// BestTurn records the peak draw a deck saw during simulation. The attack turn's printout is
 // produced lazily via Stats.PrintBest at render time, not eval time.
 type BestTurn struct {
 	Value    int

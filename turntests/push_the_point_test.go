@@ -11,9 +11,9 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 )
 
-// Tests that Push the Point gains +2{p} when the last attack on this chain hit. The
+// Tests that Push the Point gains +2{p} when the last attack on this attack turn hit. The
 // preceding BlueAttack lands first, flipping LastAttackHit, so Push the Point reads it on
-// the next chain step.
+// the next attack step.
 func TestPushThePoint_LastAttackHitGrantsBonus(t *testing.T) {
 	for _, c := range []card.Card{cards.PushThePointRed{}, cards.PushThePointYellow{}, cards.PushThePointBlue{}} {
 		d := deck.New(testutils.Hero{Intel: 4}, nil, nil)

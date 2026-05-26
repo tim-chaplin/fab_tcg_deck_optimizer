@@ -13,7 +13,7 @@ import (
 )
 
 // Tests that Performance Bonus's on-hit Gold-create rider lands a Gold token via the
-// chain runner. Solo Blue printing in hand: cost 0, power 1 sits in the LikelyToHit
+// attack-turn runner. Solo Blue printing in hand: cost 0, power 1 sits in the LikelyToHit
 // window, on-hit fires.
 func TestPerformanceBonus_OnHitCreatesGold(t *testing.T) {
 	d := deck.New(heroes.Viserai, nil, nil)

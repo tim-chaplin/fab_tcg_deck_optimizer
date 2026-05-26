@@ -257,7 +257,7 @@ func (d *Deck) PutBottom(cards []Card) {
 }
 
 // PutTop prepends cards to the top of the deck, preserving the relative order passed
-// in (cards[0] becomes the new top). Used by mid-chain effects that put a card back on
+// in (cards[0] becomes the new top). Used by mid-attack-turn effects that put a card back on
 // top (PrependToDeck) or that re-order the top N (Opt).
 func (d *Deck) PutTop(cards []Card) {
 	if len(cards) == 0 {
@@ -270,7 +270,7 @@ func (d *Deck) PutTop(cards []Card) {
 }
 
 // Tutor scans the entire deck, removes the highest-scoring card per score, and returns it.
-// Returns (nil, false) when no card scores > 0 or the deck is empty. Used by mid-chain
+// Returns (nil, false) when no card scores > 0 or the deck is empty. Used by mid-attack-turn
 // tutor effects ("search your deck for a … with X").
 func (d *Deck) Tutor(score func(Card) int) (Card, bool) {
 	bestIdx := -1

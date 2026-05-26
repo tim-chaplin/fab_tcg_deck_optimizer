@@ -12,7 +12,7 @@ import (
 
 // Tests that the hand cycle pops the spare hand card to the deck bottom.
 func TestEmissaryOfMoon_CyclesHandToDeckBottom(t *testing.T) {
-	// BluePitch's ID sorts after Emissary's, so the chain runner's DiscardToBottomOfDeck
+	// BluePitch's ID sorts after Emissary's, so the attack-turn runner's DiscardToBottomOfDeck
 	// inside the Play hook pops BluePitch. Five-card filler deck keeps BluePitch at the bottom
 	// past Emissary's mid-turn DrawOne (1) plus end-of-turn refill (4 more).
 	spare := testutils.FakeBlueResource()

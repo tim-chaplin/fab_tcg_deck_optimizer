@@ -15,7 +15,7 @@ import (
 // Tests that Starting Stake creates a Gold token via the deck-eval path when no Gold
 // is in play and the hand has nothing more profitable to do — solo Starting Stake in
 // hand picks the create line over the Held alternative.
-func TestStartingStake_CreatesGoldViaChain(t *testing.T) {
+func TestStartingStake_CreatesGoldViaAttackTurn(t *testing.T) {
 	d := deck.New(heroes.Viserai, nil, nil)
 	hand := []card.Card{cards.StartingStakeYellow{}}
 	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingDamage(0).Build(), hand)
@@ -30,7 +30,7 @@ func TestStartingStake_CreatesGoldViaChain(t *testing.T) {
 func TestStartingStake_NoOpWhenGoldInPlay(t *testing.T) {
 	ge := gameengine.New()
 	ge.CreateGold(2)
-	ge.ResolveChainStep(ge.Logger(), &card.CardState{Card: cards.StartingStakeYellow{}})
+	ge.ResolveAttackStep(ge.Logger(), &card.CardState{Card: cards.StartingStakeYellow{}})
 	if ge.GoldCount() != 2 {
 		t.Fatalf("Gold = %d, want 2 (already had Gold, Starting Stake is a no-op)", ge.GoldCount())
 	}

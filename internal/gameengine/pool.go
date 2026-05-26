@@ -98,8 +98,8 @@ func (p *Pool) HighWaterMark() int {
 }
 
 // Worst-case sizes for pooled GameState slice backings. Bounded by FaB hero intellect
-// (handSize ≤ 7), equipment slots (weapons ≤ 4), and chain-runner mid-turn-drawn
-// headroom (32 extra attacker slots). hand carries (held + chain + pitch); cardsPlayed
+// (handSize ≤ 7), equipment slots (weapons ≤ 4), and attack-turn runner mid-turn-drawn
+// headroom (32 extra attacker slots). hand carries (held + attack + pitch); cardsPlayed
 // grows for rider plays / aura fires; graveyard absorbs prior-turn grav + this turn's
 // played cards.
 const (
@@ -130,7 +130,7 @@ var MaxDeckSize = 80
 
 // NewPrewarmedState returns a zero-value *GameState with hand / cardsPlayed / graveyard
 // / banished slice backings pre-allocated to worst-case sizes and an empty *deck.Deck
-// wrapper attached. The chain runner rebinds slice headers in place rather than growing
+// wrapper attached. The attack-turn runner rebinds slice headers in place rather than growing
 // them or producing new wrappers.
 func NewPrewarmedState() *GameState {
 	s := new(GameState)

@@ -4,7 +4,7 @@
 // Text: "If a card has been put into your banished zone this turn, Tremor of íArathael gains
 // +2{p}."
 //
-// Snapshot at Play: only banishes earlier in the chain trigger the +2{p}; later banishes
+// Snapshot at Play: only banishes earlier in the attack turn trigger the +2{p}; later banishes
 // don't retroactively buff this attack (matches the past-tense "has been put").
 
 package cards

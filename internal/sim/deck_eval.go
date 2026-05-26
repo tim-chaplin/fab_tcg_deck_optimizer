@@ -254,7 +254,7 @@ func runOneShuffle(masterDeck *deck.Deck, scratch *shuffleScratch, stats *deck.S
 		d = summary.State.Deck()
 		h = summary.State.Hand()
 		// Stop when no fresh cards entered the next hand: either deck exhausted (len(h) <
-		// handSize) or chain held everything (toDraw == 0, which would loop on identical
+		// handSize) or attack turn held everything (toDraw == 0, which would loop on identical
 		// inputs forever). freshDrawn = preDeck + pitched - postDeck reduces to draw count.
 		freshDrawn := preDeckSize + countPitched(summary.BestLine) - d.Size()
 		if freshDrawn == 0 || len(h) < handSize {
@@ -266,7 +266,7 @@ func runOneShuffle(masterDeck *deck.Deck, scratch *shuffleScratch, stats *deck.S
 }
 
 // weaponsFromDeck widens d.Weapons (typed as []deck.Weapon) into the []weapon.Weapon the
-// chain runner consumes.
+// attack-turn runner consumes.
 func weaponsFromDeck(d *deck.Deck) []weapon.Weapon {
 	weapons := make([]weapon.Weapon, len(d.Weapons))
 	for i, w := range d.Weapons {
@@ -288,7 +288,7 @@ func countPitched(bestLine []card.CardAssignment) int {
 }
 
 // playOneTurn drives one full turn: advance state, capture the start-of-turn snapshot,
-// fire start-of-turn auras, run chain via Best, recycle pitched to deck bottom, draw the
+// fire start-of-turn auras, run attack turn via Best, recycle pitched to deck bottom, draw the
 // next hand (partial OK).
 //
 // Returned summary.State is the end-of-turn boundary (pitched recycled, next hand drawn,
@@ -296,9 +296,9 @@ func countPitched(bestLine []card.CardAssignment) int {
 // the start-of-turn snapshot (independent of subsequent mutations to state/d) for
 // record-if-best / replay; nil in replay mode.
 //
-// When snapshot is non-nil, runs in REPLAY mode: drives the chain through snapshot.bestLine
+// When snapshot is non-nil, runs in REPLAY mode: drives the attack turn through snapshot.bestLine
 // + snapshot.cardsPlayed (no enumeration), streams emissions via logger (when non-nil), and
-// returns the raw post-chain per-perm state without recycle / next-draw cleanup.
+// returns the raw post-attack-turn per-perm state without recycle / next-draw cleanup.
 func playOneTurn(
 	state *gameengine.GameState,
 	d *deck.Deck,
@@ -316,60 +316,60 @@ func playOneTurn(
 		}
 	}
 
-	// Hand stays sorted by Card.ID() through the aura handlers, so the chain runner and
+	// Hand stays sorted by Card.ID() through the aura handlers, so the attack-turn runner and
 	// cache key see a canonical multiset.
 	processAurasAtStartOfTurn(state, d)
 	if snapshot != nil {
 		summary = runReplayForTurn(snapshot, ev, logger)
-		// Skip end-of-turn cleanup so summary.State stays at the post-chain per-perm state
+		// Skip end-of-turn cleanup so summary.State stays at the post-attack-turn per-perm state
 		// the caller needs for its end-of-turn snapshot.
 		return summary, nil
 	}
-	preChainHand := state.Hand()
-	summary = runBestForTurn(state.Weapons(), preChainHand, d, state, ev)
+	preAttackTurnHand := state.Hand()
+	summary = runBestForTurn(state.Weapons(), preAttackTurnHand, d, state, ev)
 
-	postChainDeck := recyclePitchedToDeckBottom(summary)
+	postAttackTurnDeck := recyclePitchedToDeckBottom(summary)
 	intellect := state.Hero().(hero.Hero).Intelligence()
-	nextHand := drawNextHand(postChainDeck, summary.State.Hand(), intellect)
+	nextHand := drawNextHand(postAttackTurnDeck, summary.State.Hand(), intellect)
 
 	summary.State.SetHand(nextHand)
-	verifyTurnInvariants(snap, preChainHand, summary)
+	verifyTurnInvariants(snap, preAttackTurnHand, summary)
 	return summary, snap
 }
 
 // recyclePitchedToDeckBottom pushes the turn's pitched cards (excluding the arsenal-in
-// slot, which never recycles) onto the bottom of the post-chain deck and returns that
-// deck. The chain ran on a shallow copy of the master deck that may have drawn mid-turn,
+// slot, which never recycles) onto the bottom of the post-attack-turn deck and returns that
+// deck. The attack turn ran on a shallow copy of the master deck that may have drawn mid-turn,
 // so summary.State.Deck() — not the original d — is the deck the next turn inherits.
 func recyclePitchedToDeckBottom(summary TurnSummary) *deck.Deck {
-	postChainDeck := summary.State.Deck()
+	postAttackTurnDeck := summary.State.Deck()
 	pitched := pitchedFromBestLine(summary.BestLine)
 	recycled := make([]deck.Card, len(pitched))
 	for i, c := range pitched {
 		recycled[i] = c
 	}
-	postChainDeck.PutBottom(recycled)
-	return postChainDeck
+	postAttackTurnDeck.PutBottom(recycled)
+	return postAttackTurnDeck
 }
 
-// drawNextHand assembles the hand the next turn will see: starts from held (the chain's
-// post-chain hand), tops it up with end-of-turn draws from postChainDeck (capped at the
+// drawNextHand assembles the hand the next turn will see: starts from held (the attack turn's
+// post-attack-turn hand), tops it up with end-of-turn draws from postAttackTurnDeck (capped at the
 // deck's remaining size), and returns the result sorted by Card.ID() so findBest's cache
 // key sees a canonical multiset.
 //
-// A fresh slice is always allocated: held aliases the chain's per-perm hand buffer (which
-// the next playOneTurn would overwrite) and the chain's RemoveFromHand reorders via
+// A fresh slice is always allocated: held aliases the attack turn's per-perm hand buffer (which
+// the next playOneTurn would overwrite) and the attack turn's RemoveFromHand reorders via
 // swap-with-last so held isn't sorted by ID. The sort must run on every path, including
-// the toDraw == 0 case where the chain's output order would otherwise leak through.
-func drawNextHand(postChainDeck *deck.Deck, held []card.Card, intellect int) []card.Card {
+// the toDraw == 0 case where the attack turn's output order would otherwise leak through.
+func drawNextHand(postAttackTurnDeck *deck.Deck, held []card.Card, intellect int) []card.Card {
 	toDraw := endOfTurnDraws(len(held), intellect)
-	if toDraw > postChainDeck.Size() {
-		toDraw = postChainDeck.Size()
+	if toDraw > postAttackTurnDeck.Size() {
+		toDraw = postAttackTurnDeck.Size()
 	}
 	nextHand := make([]card.Card, len(held), len(held)+toDraw)
 	copy(nextHand, held)
 	if toDraw > 0 {
-		for _, c := range postChainDeck.Draw(toDraw) {
+		for _, c := range postAttackTurnDeck.Draw(toDraw) {
 			nextHand = append(nextHand, c.(card.Card))
 		}
 	}
@@ -391,7 +391,7 @@ func endOfTurnDraws(heldLen, intellect int) int {
 
 // advanceToNextTurn clears per-turn ephemerals (value, cardsPlayed, ...). Idempotent on
 // a freshly-built state. The deck pointer is left untouched — pool slots own a *Deck
-// wrapper across resets, and the chain runner rebinds its contents via ShallowCopyFrom.
+// wrapper across resets, and the attack-turn runner rebinds its contents via ShallowCopyFrom.
 func advanceToNextTurn(state *gameengine.GameState) {
 	state.ResetEphemeralState()
 }
@@ -510,7 +510,7 @@ func sortHandByID(hand []card.Card) {
 }
 
 // recordBestTurnFromSnap commits a winning turn to stats: clones BestLine into stats.Best,
-// fills snap with the chain-produced bestLine / cardsPlayed / swungWeapons / value, and
+// fills snap with the attack turn-produced bestLine / cardsPlayed / swungWeapons / value, and
 // attaches stats.PrintBest as the deferred replay closure.
 func recordBestTurnFromSnap(stats *deck.Stats, summary TurnSummary, ev *Evaluator, snap *turnSnapshot) {
 	lineCopy := make([]card.CardAssignment, len(summary.BestLine))

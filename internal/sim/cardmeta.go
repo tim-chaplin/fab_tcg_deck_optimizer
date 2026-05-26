@@ -18,29 +18,29 @@ import (
 // hot loop skips Types / GoAgain interface dispatch; one meta build amortises across N!.
 //
 // minCost / maxCost are static bounds on Card.Cost. VariableCost cards: solver uses them
-// for O(1) partition pre-screens, then falls through to Cost(state) in the chain loop.
+// for O(1) partition pre-screens, then falls through to Cost(state) in the attack turn loop.
 // Non-VariableCost: minCost == maxCost == Cost(&TurnState{}), used directly.
 type attackerMeta struct {
 	types      card.TypeSet
-	card       card.Card // held for variable-cost / modal-cost chain-time Cost calls
+	card       card.Card // held for variable-cost / modal-cost play-time Cost calls
 	minCost    int
 	maxCost    int
 	isVariable bool
-	// isAttack is the "this chain step is an attack" test driving fireAttackAuras — true on
+	// isAttack is the "this attack step is an attack" test driving fireAttackAuras — true on
 	// any card carrying TypeAttack (attack action cards and weapon abilities both). For
-	// ModalTypes cards, this is the mode-0 value; the chain runner uses isAttackAt(mode)
+	// ModalTypes cards, this is the mode-0 value; the attack-turn runner uses isAttackAt(mode)
 	// instead so per-mode type-line changes propagate.
 	isAttack bool
-	// isFreeChainStep is set on cards that resolve in the chain without paying an Action
+	// isFreeAttackStep is set on cards that resolve in the attack turn without paying an Action
 	// Point — Instants and Attack Reactions (both 0 AP per FaB rules). Action cards and
 	// weapon swings cost 1 AP and don't set this. For ModalTypes cards, this is the
-	// mode-0 value; the chain runner uses isFreeChainStepAt(mode) instead.
-	isFreeChainStep bool
+	// mode-0 value; the attack-turn runner uses isFreeAttackStepAt(mode) instead.
+	isFreeAttackStep bool
 	// isModalCost is set when the card implements ModalCost — costAt dispatches on self.Mode
 	// instead of the static maxCost / Cost(s) paths.
 	isModalCost bool
 	// isModalTypes is set when the card implements ModalTypes — typesAt / isAttackAt /
-	// isFreeChainStepAt dispatch on self.Mode instead of returning the cached static fields.
+	// isFreeAttackStepAt dispatch on self.Mode instead of returning the cached static fields.
 	isModalTypes bool
 	// isModalBlocker is set when the card has a per-mode block-time cost (Blocker +
 	// Modal + BlockCost). Cached so containsModalBlocker / defendersDamage's mode-pick
@@ -51,17 +51,17 @@ type attackerMeta struct {
 	// once-per-ID slow path.
 	actsAsDR bool
 	// hasPlayPrecondition is true when the card implements card.PlayPrecondition. Cached
-	// to gate the per-chain-step type assertion — only ~6 cards in the registry implement
+	// to gate the per-attack-step type assertion — only ~6 cards in the registry implement
 	// it, so the 99%+ case folds into a single bool read.
 	hasPlayPrecondition bool
 	// modes is the mode count for a Modal, 1 for non-modal cards. Sized int8 so it
-	// packs into the bool block's padding alongside the bools above — every chain step
+	// packs into the bool block's padding alongside the bools above — every attack step
 	// reads permMeta[i] in the inner loop, and every extra cache line through that table
 	// shows up in the anneal bench.
 	modes int8
 	// typesByMode is the per-mode TypeSet table for ModalTypes cards (nil for everyone
 	// else). Length equals modes; entry i is the type-line when self.Mode == i. The
-	// chain runner reads it via typesWithMode(mode) when isModalTypes is set; non-modal
+	// attack-turn runner reads it via typesWithMode(mode) when isModalTypes is set; non-modal
 	// cards stay on the .types fast path.
 	typesByMode []card.TypeSet
 }
@@ -75,15 +75,15 @@ func (m *attackerMeta) typesWithMode(mode int8) card.TypeSet {
 	return m.types
 }
 
-// isFreeChainStepWithMode reports whether the card-at-mode resolves without paying an
+// isFreeAttackStepWithMode reports whether the card-at-mode resolves without paying an
 // AP. Reads the per-mode TypeSet for ModalTypes cards; falls through to the cached
-// isFreeChainStep otherwise.
-func (m *attackerMeta) isFreeChainStepWithMode(mode int8) bool {
+// isFreeAttackStep otherwise.
+func (m *attackerMeta) isFreeAttackStepWithMode(mode int8) bool {
 	if m.isModalTypes {
 		t := m.typesByMode[mode]
 		return t.Has(card.TypeInstant) || t.IsAttackReaction()
 	}
-	return m.isFreeChainStep
+	return m.isFreeAttackStep
 }
 
 // verifyStaticCost arms the static-cost assertion in costAt. A divergence between the
@@ -167,14 +167,14 @@ func buildAttackerMeta(c card.Card) attackerMeta {
 		types:               t,
 		card:                c,
 		isAttack:            t.Has(card.TypeAttack),
-		isFreeChainStep:     t.Has(card.TypeInstant) || t.IsAttackReaction(),
+		isFreeAttackStep:    t.Has(card.TypeInstant) || t.IsAttackReaction(),
 		actsAsDR:            t.IsDefenseReaction() || isDefensiveInstant,
 		hasPlayPrecondition: hasPlayPre,
 		modes:               1,
 	}
 	if mc, ok := c.(card.Modal); ok {
 		// A Modal must expose at least two modes — the marker exists to enumerate
-		// across them. Returning 0 would silently zero the chain (outer loop runs zero
+		// across them. Returning 0 would silently zero the attack turn (outer loop runs zero
 		// iterations); returning 1 makes the marker pointless. Panic so the bug surfaces
 		// at first encounter rather than corrupting solver output.
 		n := mc.Modes()
@@ -192,7 +192,7 @@ func buildAttackerMeta(c card.Card) attackerMeta {
 	}
 	if mt, ok := c.(card.ModalTypes); ok {
 		// ModalTypes cards have a per-mode TypeSet table; precompute it once so the
-		// chain runner reads typesByMode[mode] directly. Must be paired with Modal to
+		// attack-turn runner reads typesByMode[mode] directly. Must be paired with Modal to
 		// give the table its length.
 		if m.modes < 2 {
 			panic(fmt.Sprintf("ModalTypes %s: also needs Modal with Modes() >= 2 (got modes=%d)", c.Name(), m.modes))

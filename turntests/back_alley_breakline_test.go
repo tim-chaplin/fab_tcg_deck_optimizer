@@ -13,7 +13,7 @@ import (
 )
 
 // Tests that Back Alley Breakline's OnFaceUp hook grants +1 AP and that the extra AP
-// enables an additional non-Go-Again chain step that otherwise wouldn't fit.
+// enables an additional non-Go-Again attack step that otherwise wouldn't fit.
 //
 // Setup:
 //   - Arsenal: Back Alley Breakline Red (cost 1, attack 5)
@@ -24,14 +24,14 @@ import (
 //     to play.
 //   - Hand: BluePitch (pitch 3) to fund BAB's 1{r} cost when it plays from arsenal.
 //
-// Without OnFaceUp granting +1 AP, the chain has 1 AP total: the Go-Again caller
+// Without OnFaceUp granting +1 AP, the attack turn has 1 AP total: the Go-Again caller
 // refunds its AP, BAB consumes the only remaining AP, and the second attack is stuck
 // in hand. Optimal there is caller (4) + BAB-from-arsenal (5) = 9.
 //
 // With OnFaceUp granting +1 AP, the caller's Play turns BAB face up, BAB's hook adds 1
 // AP, and the second attack plays for 3 more. Optimal is caller (4) + BAB (5) +
 // second attack (3) = 12.
-func TestBackAlleyBreakline_OnFaceUpGrantsAPForExtraChainStep(t *testing.T) {
+func TestBackAlleyBreakline_OnFaceUpGrantsAPForExtraAttackStep(t *testing.T) {
 	bab := cards.BackAlleyBreaklineRed{}
 	caller := testutils.FakeRedAttack().
 		WithName("FakeFaceUpCaller").
@@ -56,7 +56,7 @@ func TestBackAlleyBreakline_OnFaceUpGrantsAPForExtraChainStep(t *testing.T) {
 	summary := sim.EvalOneTurnForTesting(d, initial, hand)
 
 	if summary.Value != 12 {
-		t.Errorf("Value = %d, want 12 (caller 4 + BAB 5 + extra 3 — the +1 AP from OnFaceUp must enable the third chain step)\nBestLine: %s",
+		t.Errorf("Value = %d, want 12 (caller 4 + BAB 5 + extra 3 — the +1 AP from OnFaceUp must enable the third attack step)\nBestLine: %s",
 			summary.Value, formatBestLine(summary.BestLine))
 	}
 	if !bestLineHasRole(summary.BestLine, bab, card.Attack) {

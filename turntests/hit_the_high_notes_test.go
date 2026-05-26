@@ -24,7 +24,7 @@ func TestHitTheHighNotes_NoAuraReturnsBase(t *testing.T) {
 	}
 	for _, tc := range cases {
 		ge := gameengine.New()
-		ge.ResolveChainStep(ge.Logger(), &card.CardState{Card: tc.c})
+		ge.ResolveAttackStep(ge.Logger(), &card.CardState{Card: tc.c})
 		if got := ge.Value(); got != tc.base {
 			t.Errorf("%s: Play() = %d, want %d", tc.c.Name(), got, tc.base)
 		}
@@ -37,17 +37,17 @@ func TestHitTheHighNotes_AuraPlayedTriggersBonus(t *testing.T) {
 		SetCardsPlayed([]card.Card{testutils.FakeRedAura()}).
 		SetAuraCreated(true).
 		Build()}
-	ge.ResolveChainStep(ge.Logger(), &card.CardState{Card: cards.HitTheHighNotesRed{}})
+	ge.ResolveAttackStep(ge.Logger(), &card.CardState{Card: cards.HitTheHighNotesRed{}})
 	if got := ge.Value(); got != 6 {
 		t.Errorf("Play() = %d, want 6 (base 4 + 2 aura bonus)", got)
 	}
 }
 
 func TestHitTheHighNotes_AuraCreatedTriggersBonus(t *testing.T) {
-	// AuraCreated flag set earlier in the chain (e.g. Runechant creation) → +2 power, even
+	// AuraCreated flag set earlier in the attack turn (e.g. Runechant creation) → +2 power, even
 	// without an Aura-typed card in CardsPlayed.
 	ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetAuraCreated(true).Build()}
-	ge.ResolveChainStep(ge.Logger(), &card.CardState{Card: cards.HitTheHighNotesRed{}})
+	ge.ResolveAttackStep(ge.Logger(), &card.CardState{Card: cards.HitTheHighNotesRed{}})
 	if got := ge.Value(); got != 6 {
 		t.Errorf("Play() = %d, want 6 (base 4 + 2 AuraCreated bonus)", got)
 	}
@@ -58,7 +58,7 @@ func TestHitTheHighNotes_AuraCreatedTriggersBonus(t *testing.T) {
 func TestHitTheHighNotes_BonusFlowsThroughBonusAttack(t *testing.T) {
 	ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetAuraCreated(true).Build()}
 	pc := &card.CardState{Card: cards.HitTheHighNotesRed{}}
-	ge.ResolveChainStep(ge.Logger(), pc)
+	ge.ResolveAttackStep(ge.Logger(), pc)
 	if got := pc.EffectiveAttack(); got != 6 {
 		t.Errorf("EffectiveAttack() = %d, want 6 (base 4 + 2 power buff)", got)
 	}

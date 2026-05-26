@@ -72,12 +72,12 @@ func TestLowerHealthWanter_DamageRiders(t *testing.T) {
 	}
 	for _, tc := range cases {
 		sOff := engineWithHero(fakeLowHeroOff{})
-		sOff.ResolveChainStep(sOff.Logger(), &card.CardState{Card: tc.card})
+		sOff.ResolveAttackStep(sOff.Logger(), &card.CardState{Card: tc.card})
 		if got := sOff.Value(); got != tc.wantOff {
 			t.Errorf("%s: Play() off = %d, want %d (hero does not opt in)", tc.name, got, tc.wantOff)
 		}
 		sOn := engineWithHero(fakeLowHeroOn{})
-		sOn.ResolveChainStep(sOn.Logger(), &card.CardState{Card: tc.card})
+		sOn.ResolveAttackStep(sOn.Logger(), &card.CardState{Card: tc.card})
 		if got := sOn.Value(); got != tc.wantOn {
 			t.Errorf("%s: Play() on = %d, want %d (hero opts in)", tc.name, got, tc.wantOn)
 		}
@@ -109,7 +109,7 @@ func TestLowerHealthWanter_GoAgainRiders(t *testing.T) {
 // TestLowerHealthWanter_NilHeroIsOff guards the startup / unset-hero case.
 func TestLowerHealthWanter_NilHeroIsOff(t *testing.T) {
 	ge := gameengine.New()
-	ge.ResolveChainStep(ge.Logger(), &card.CardState{Card: cards.AdrenalineRushRed{}})
+	ge.ResolveAttackStep(ge.Logger(), &card.CardState{Card: cards.AdrenalineRushRed{}})
 	if got := ge.Value(); got != 4 {
 		t.Errorf("AdrenalineRushRed nil-hero Play() = %d, want 4", got)
 	}
@@ -126,7 +126,7 @@ func TestLowerHealthWanter_PoundForPoundDominateGrant(t *testing.T) {
 	for _, c := range cards {
 		pc := &card.CardState{Card: c}
 		s := engineWithHero(fakeLowHeroOff{})
-		s.ResolveChainStep(s.Logger(), pc)
+		s.ResolveAttackStep(s.Logger(), pc)
 		if pc.GrantedDominate {
 			t.Errorf("%s: GrantedDominate = true with hero off, want false", c.Name())
 		}
@@ -137,7 +137,7 @@ func TestLowerHealthWanter_PoundForPoundDominateGrant(t *testing.T) {
 	for _, c := range cards {
 		pc := &card.CardState{Card: c}
 		s := engineWithHero(fakeLowHeroOn{})
-		s.ResolveChainStep(s.Logger(), pc)
+		s.ResolveAttackStep(s.Logger(), pc)
 		if !pc.GrantedDominate {
 			t.Errorf("%s: GrantedDominate = false with hero on, want true", c.Name())
 		}

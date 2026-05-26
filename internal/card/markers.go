@@ -1,13 +1,13 @@
 package card
 
 // Optional marker interfaces cards opt into to layer behaviour onto the base Card
-// contract. The chain runner type-asserts on these at the matching point in the
+// contract. The attack-turn runner type-asserts on these at the matching point in the
 // pipeline (cost, partition, defense, …) and skips the branch when the card doesn't
 // implement the marker.
 
 // VariableCost is optionally implemented by cards whose Cost(g) varies with the engine
 // state (e.g. discount-per-token effects). MinCost and MaxCost are static bounds; the
-// solver uses them for cheap pre-screens before enumerating chain permutations.
+// solver uses them for cheap pre-screens before enumerating attack-turn permutations.
 // Non-implementers must return the same value for Cost(g) regardless of g.
 type VariableCost interface {
 	MinCost() int
@@ -31,7 +31,7 @@ type ModalCost interface {
 // Tip-Off: Generic Action - Attack in the printed-attack mode, Generic Instant in the
 // Instant-discard mode). Implementers return the TypeSet for the given mode index. Cards
 // reading another card's type via CardState should use CardState.EffectiveTypes so the
-// mode-aware dispatch lands; the chain runner's cardmeta cache stores a per-mode slice
+// mode-aware dispatch lands; the attack-turn runner's cardmeta cache stores a per-mode slice
 // and dispatches the AP / mark / attack-clear gates on the live mode.
 type ModalTypes interface {
 	TypesForMode(g GameEngine, mode int8) TypeSet
@@ -40,8 +40,8 @@ type ModalTypes interface {
 // PlayPrecondition is a marker for cards whose printed text imposes a non-resource
 // additional cost beyond Cost(). Implementers return false when THIS play can't legally
 // happen (e.g. "reveal a card in your hand with cost 2 or greater" with no eligible
-// target); the chain runner rejects the permutation and Play is not called. The check runs
-// after the chain runner has removed the playing card and popped this card's funding
+// target); the attack-turn runner rejects the permutation and Play is not called. The check runs
+// after the attack-turn runner has removed the playing card and popped this card's funding
 // pitches, so scans see only cards that genuinely remain in hand.
 type PlayPrecondition interface {
 	PlayPrecondition(g GameEngine, self *CardState) bool
@@ -66,7 +66,7 @@ type BlockCost interface {
 
 // DefensiveInstant marks a TypeInstant card whose printed effect prevents damage during the
 // defense phase. Opting in routes the card through the Defense-Reaction partition slot;
-// ResolveChainStep treats it like a DR. Cards whose prevention is gated by hidden state
+// ResolveAttackStep treats it like a DR. Cards whose prevention is gated by hidden state
 // (arcane-only, multi-source rationing) must not opt in — the marker promises a full
 // single-bucket prevention. See docs/dev-standards.md: DefensiveInstant markers.
 type DefensiveInstant interface {
@@ -104,7 +104,7 @@ type Universal interface {
 // AttackReaction is implemented by every Attack Reaction card. ARTargetAllowed reports
 // whether c is a legal target for this AR's chosen mode. Non-modal ARs ignore the mode
 // parameter (it's always 0). Modal ARs (card.Modal) dispatch on it: each mode's printed
-// target text becomes its own predicate leg, and the chain runner rejects the
+// target text becomes its own predicate leg, and the attack-turn runner rejects the
 // permutation when the chosen mode doesn't accept the active attack.
 //
 // The engine handle is threaded through so predicates that read variable cost (c.Cost(g))

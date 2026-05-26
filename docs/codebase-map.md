@@ -24,7 +24,7 @@ card" reference.
 
 `cmd/fabsim` parses a subcommand, loads a deck via `internal/textio`, and hands it to
 `internal/sim`. For each shuffled hand, `sim` brute-forces the optimal turn with a two-layer
-search: enumerate every Pitch/Attack/Defend role partition, then permute the attack chain,
+search: enumerate every Pitch/Attack/Defend role partition, then permute the attack-turn search,
 replaying each ordering through the `internal/gameengine` state engine. Per-hand value folds
 into deck `Stats`. `internal/deck` enumerates single-slot mutations; `anneal` accepts or
 rejects each via the Metropolis rule and keeps the best deck found.
@@ -41,7 +41,7 @@ internal/
     cards/         Every implemented card (yaml + _gen.go + .go triples)
   cardgen/         Code generator: yaml -> _gen.go + registry map
   deck/            Deck type, mutation enumeration, per-deck Stats
-  gameengine/      Per-turn game-state engine the chain runner drives
+  gameengine/      Per-turn game-state engine the attack-turn runner drives
   aura/            Aura: a persistent hook firing a handler at a scheduled event
   trigger/         Shared trigger machinery (generic core + one-shot triggers)
   triggertype/     Bitmask enum for when an aura/trigger fires
@@ -51,7 +51,7 @@ internal/
   weapon/          Weapon interface; concrete weapons in weapons/
   ids/             Stable integer ID allocation for cards / heroes / weapons
   registry/        Master roster of every card / weapon / hero
-  sim/             Hand-and-deck evaluator and attack-chain search
+  sim/             Hand-and-deck evaluator and attack-turn search
   textio/          On-disk deck encodings (JSON deck+stats, fabrary text)
   lint/            Repo-wide convention tests
   testutils/       Card / hero / weapon fakes shared across tests
@@ -67,7 +67,7 @@ mydecks/           Local working deck files (untracked by git)
 ### Card model and data
 
 - **internal/card** — The contract layer: the `Card` interface every card implements, the
-  per-chain-step `CardState` wrapper, the `TypeSet` type-line bitfield, and the narrow
+  per-attack-step `CardState` wrapper, the `TypeSet` type-line bitfield, and the narrow
   `GameEngine` / `Logger` / `Aura` interfaces cards consume from the simulator without
   importing it.
 - **internal/card/cards** — Every implemented card as a three-file group (`.yaml` data,
@@ -86,11 +86,11 @@ mydecks/           Local working deck files (untracked by git)
 ### Simulation engine
 
 - **internal/sim** — The hand-and-deck evaluator: brute-forces each hand's optimal turn line
-  via a two-layer search (role-partition enumeration then attack-chain permutation) and
+  via a two-layer search (role-partition enumeration then attack-turn permutation) and
   folds per-hand value into deck stats for the annealing optimizer.
-- **internal/gameengine** — The per-turn game-state engine the chain runner drives, splitting
+- **internal/gameengine** — The per-turn game-state engine the attack-turn runner drives, splitting
   raw turn data (`GameState`) from the rules-engine API (`GameEngine`: trigger dispatch,
-  chain-step resolution, token economy, deck manipulation).
+  attack-step resolution, token economy, deck manipulation).
 - **internal/aura** — The concrete `Aura` type: a persistent hook that fires a typed handler
   at a scheduled lifecycle event, used to model any card that creates something firing later.
 - **internal/trigger** — The shared trigger machinery: the embeddable generic `Trigger`
@@ -99,7 +99,7 @@ mydecks/           Local working deck files (untracked by git)
 - **internal/triggertype** — A dependency-free micro-package holding the bitmask enum that
   categorizes when an aura or trigger fires (start of turn, card played, hit, end of turn).
 - **internal/item** — The concrete `Item` type for in-play permanents: token items carrying
-  an activated ability the chain runner enqueues, or card-sourced items carrying a trigger
+  an activated ability the attack-turn runner enqueues, or card-sourced items carrying a trigger
   that fires like an aura.
 - **internal/token** — Factories for Flesh and Blood's five built-in tokens (Gold / Silver /
   Copper items, Runechant / Ponder auras), pre-wired with identity and fire behavior.
@@ -137,4 +137,4 @@ mydecks/           Local working deck files (untracked by git)
   structural rule (marker placement, generated-file staleness, registry coverage, turntests
   entry-point discipline).
 - **internal/testutils** — Configurable card, hero, and weapon fakes shared across package
-  tests so predicate, partition, and chain-runner assertions have controllable inputs.
+  tests so predicate, partition, and attack-turn runner assertions have controllable inputs.

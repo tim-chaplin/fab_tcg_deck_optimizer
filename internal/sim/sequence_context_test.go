@@ -9,11 +9,11 @@ import (
 )
 
 // newSequenceContextForTest builds a sequenceContext wired to a fresh attackBufs sized
-// for the given chain length. runechantCarryover is wrapped into a Runechant token aura
+// for the given attack-turn length. runechantCarryover is wrapped into a Runechant token aura
 // on the leaf state so playSequence reads the count off the live aura set, matching
 // production.
-func newSequenceContextForTest(h hero.Hero, pitched, deckCards []card.Card, resourceBudget, runechantCarryover, chainLen int) *sequenceContext {
-	bufs := newAttackBufs(chainLen, 0, nil, gameengine.NewPrewarmedPool())
+func newSequenceContextForTest(h hero.Hero, pitched, deckCards []card.Card, resourceBudget, runechantCarryover, attackTurnLen int) *sequenceContext {
+	bufs := newAttackBufs(attackTurnLen, 0, nil, gameengine.NewPrewarmedPool())
 	dc := make([]deck.Card, len(deckCards))
 	for i, c := range deckCards {
 		dc[i] = c

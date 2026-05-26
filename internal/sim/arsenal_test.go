@@ -261,21 +261,21 @@ func TestPromoteRandomHandCardToArsenal_EmptyHandIsNoop(t *testing.T) {
 	}
 }
 
-// Tests chainScore.cmp's lexicographic ranking: value, then cardsPlayed, then totalCards,
+// Tests attackTurnScore.cmp's lexicographic ranking: value, then cardsPlayed, then totalCards,
 // then totalCounters.
-func TestChainScore_Cmp(t *testing.T) {
+func TestAttackTurnScore_Cmp(t *testing.T) {
 	cases := []struct {
 		name string
-		a, b chainScore
+		a, b attackTurnScore
 		want int
 	}{
-		{"value outranks everything", chainScore{value: 10}, chainScore{value: 11, cardsPlayed: 9, totalCards: 9, totalCounters: 9}, -1},
-		{"cardsPlayed breaks a value tie", chainScore{value: 5, cardsPlayed: 2}, chainScore{value: 5, cardsPlayed: 1}, 1},
-		{"cardsPlayed outranks totalCards", chainScore{value: 5, cardsPlayed: 2}, chainScore{value: 5, cardsPlayed: 1, totalCards: 9}, 1},
-		{"totalCards breaks a cardsPlayed tie", chainScore{value: 5, cardsPlayed: 1, totalCards: 3}, chainScore{value: 5, cardsPlayed: 1, totalCards: 2}, 1},
-		{"totalCards outranks totalCounters", chainScore{value: 5, totalCards: 1}, chainScore{value: 5, totalCounters: 9}, 1},
-		{"totalCounters breaks a totalCards tie", chainScore{value: 5, totalCards: 2, totalCounters: 1}, chainScore{value: 5, totalCards: 2}, 1},
-		{"fully equal", chainScore{value: 5, cardsPlayed: 1, totalCards: 2}, chainScore{value: 5, cardsPlayed: 1, totalCards: 2}, 0},
+		{"value outranks everything", attackTurnScore{value: 10}, attackTurnScore{value: 11, cardsPlayed: 9, totalCards: 9, totalCounters: 9}, -1},
+		{"cardsPlayed breaks a value tie", attackTurnScore{value: 5, cardsPlayed: 2}, attackTurnScore{value: 5, cardsPlayed: 1}, 1},
+		{"cardsPlayed outranks totalCards", attackTurnScore{value: 5, cardsPlayed: 2}, attackTurnScore{value: 5, cardsPlayed: 1, totalCards: 9}, 1},
+		{"totalCards breaks a cardsPlayed tie", attackTurnScore{value: 5, cardsPlayed: 1, totalCards: 3}, attackTurnScore{value: 5, cardsPlayed: 1, totalCards: 2}, 1},
+		{"totalCards outranks totalCounters", attackTurnScore{value: 5, totalCards: 1}, attackTurnScore{value: 5, totalCounters: 9}, 1},
+		{"totalCounters breaks a totalCards tie", attackTurnScore{value: 5, totalCards: 2, totalCounters: 1}, attackTurnScore{value: 5, totalCards: 2}, 1},
+		{"fully equal", attackTurnScore{value: 5, cardsPlayed: 1, totalCards: 2}, attackTurnScore{value: 5, cardsPlayed: 1, totalCards: 2}, 0},
 	}
 	for _, tc := range cases {
 		if got := tc.a.cmp(tc.b); got != tc.want {

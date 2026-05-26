@@ -34,7 +34,7 @@ func TestExposed_RejectsNonAttack(t *testing.T) {
 // Tests that Exposed's Play marks the opposing hero.
 func TestExposed_PlayMarksOpponent(t *testing.T) {
 	ge := gameengine.New()
-	ge.ResolveChainStep(ge.Logger(), &card.CardState{Card: cards.ExposedBlue{}})
+	ge.ResolveAttackStep(ge.Logger(), &card.CardState{Card: cards.ExposedBlue{}})
 	if !ge.OpponentMarked() {
 		t.Error("OpponentMarked = false after Play, want true")
 	}

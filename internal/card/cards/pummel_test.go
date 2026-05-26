@@ -8,7 +8,7 @@ import (
 )
 
 // Tests that mode 0 accepts Club and Hammer weapon attacks (probed via the activated-
-// ability Cards the chain runner enqueues for the swing).
+// ability Cards the attack-turn runner enqueues for the swing).
 func TestPummel_Mode0AcceptsClubAndHammer(t *testing.T) {
 	if !(PummelRed{}).ARTargetAllowed(nil, testutils.FakeWeaponSwing().WithTypes(card.TypeClub, card.TypeOneHand), 0) {
 		t.Error("mode 0 should accept a Club weapon ability")

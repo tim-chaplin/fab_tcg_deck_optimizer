@@ -1,5 +1,5 @@
 // Package card defines the Card interface every Flesh and Blood card implements, the
-// per-chain-step CardState wrapper that carries mutable flags between resolution phases,
+// per-attack-step CardState wrapper that carries mutable flags between resolution phases,
 // and the narrow GameEngine / Logger / Aura / EphemeralTrigger interfaces cards consume from
 // the sim.
 //
@@ -27,7 +27,7 @@ type GameEngine interface {
 	// this over len(Hand()) for emptiness / size gates: it doesn't flip IsCacheable.
 	HandSize() int
 	// HandHasMatching reports whether any non-drawn hand entry satisfies pred. Drawn
-	// entries are skipped — their identity is opaque mid-chain. Doesn't flip IsCacheable.
+	// entries are skipped — their identity is opaque mid-attack-turn. Doesn't flip IsCacheable.
 	HandHasMatching(pred func(Card) bool) bool
 	// HeldHandSize reports the total Held-role entry count (Pitch / Attack excluded),
 	// including drawn entries. Counting alone doesn't reveal drawn-card attributes, so
@@ -127,7 +127,7 @@ type GameEngine interface {
 	// to credit the prevention.
 	PreventArcaneDamage(n int) int
 
-	// AP (chain-step controls cards grant).
+	// AP (attack-step controls cards grant).
 	AddActionPoints(int)
 
 	// TurnFaceUp flips pc.FaceUp = true and, if pc.Card implements card.FaceUpHook, fires
@@ -157,7 +157,7 @@ type GameEngine interface {
 	HasCrowdBooed() bool
 	// UntapHero untaps the owning player's hero — the printed "untap your hero" effect.
 	UntapHero()
-	// LastAttackHit reports whether the most recent finalised attack on this combat chain
+	// LastAttackHit reports whether the most recent finalised attack this attack turn
 	// hit. False until the first attack finalises; each subsequent attack overwrites it.
 	LastAttackHit() bool
 	// IsMyTurn reports whether the active phase is the owning player's action phase (true)
@@ -181,7 +181,7 @@ type GameEngine interface {
 	CurrentHeroClass() CardType
 	HeroHasType(t CardType) bool
 
-	// Chain queries
+	// Attack-turn queries
 	HasPlayedType(CardType) bool
 	CardsPlayed() []Card
 	SetCardsPlayed([]Card)
@@ -191,7 +191,7 @@ type GameEngine interface {
 	// Cards don't get a typed slice view; the engine owns the live aura set.
 	AuraCount() int
 
-	// Mid-chain draw / tutoring / recycling — cards moving to different zones.
+	// Mid-attack-turn draw / tutoring / recycling — cards moving to different zones.
 	DrawOne() bool
 	TutorFromDeck(func(Card) int) (Card, bool)
 	RecycleToDeckBottom(*CardState)
@@ -205,7 +205,7 @@ type GameEngine interface {
 	// Clash (top-of-deck power compare)
 	Clash(win, lose func())
 
-	// PlayCard runs Card.Play on pc and emits the chain step. Used by cards that resolve
+	// PlayCard runs Card.Play on pc and emits the attack step. Used by cards that resolve
 	// another card mid-handler (Moon Wish tutoring Sun Kiss into play on go-again).
 	PlayCard(Logger, *CardState)
 
@@ -215,18 +215,18 @@ type GameEngine interface {
 	AttackReactionTarget() *CardState
 }
 
-// Logger is the cards-facing log sink the chain runner threads through every Card hook.
+// Logger is the cards-facing log sink the attack-turn runner threads through every Card hook.
 // Cards use AppendPostTrigger* for self-riders and AppendPreTrigger* for hero / aura
-// attack-action triggers. AppendChainStep* / AmendLastChainStepN are sim-internal but live
+// attack-action triggers. AppendAttackStep* / AmendLastAttackStepN are sim-internal but live
 // here so both call sites share one value.
 type Logger interface {
-	AppendChainStep(text string, n int)
-	AppendChainStepf(n int, format string, args ...any)
+	AppendAttackStep(text string, n int)
+	AppendAttackStepf(n int, format string, args ...any)
 	AppendPostTrigger(source, text string, n int)
 	AppendPostTriggerf(source string, n int, format string, args ...any)
 	AppendPreTrigger(source, text string, n int)
 	AppendPreTriggerf(source string, n int, format string, args ...any)
-	AmendLastChainStepN(n int)
+	AmendLastAttackStepN(n int)
 }
 
 // Aura is the minimal view cards' aura handlers see of the firing aura. The handler reads

@@ -14,8 +14,8 @@ import (
 )
 
 // Tests that Captain's Call picks the go-again mode when a follow-up attack can extend the
-// chain into more total damage than the +2{p} buff alone.
-func TestModal_CaptainsCallPicksGoAgainOverBuffWhenChainExtends(t *testing.T) {
+// extend into more total damage than the +2{p} buff alone.
+func TestModal_CaptainsCallPicksGoAgainOverBuffWhenAttackTurnContinues(t *testing.T) {
 	d := deck.New(heroes.Viserai, nil, nil)
 	hand := []card.Card{
 		cards.CaptainsCallRed{},
@@ -25,13 +25,13 @@ func TestModal_CaptainsCallPicksGoAgainOverBuffWhenChainExtends(t *testing.T) {
 	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingDamage(0).Build(), hand)
 	got := summary.Value
 	if got != 8 {
-		t.Fatalf("Value = %d, want 8 (mode 1 grants go-again so both Snatches chain)", got)
+		t.Fatalf("Value = %d, want 8 (mode 1 grants go-again so both Snatches extend)", got)
 	}
 }
 
 // Tests that Captain's Call picks the +2{p} mode when no follow-up attack can use a granted
 // go-again.
-func TestModal_CaptainsCallPicksBuffWhenChainCantExtend(t *testing.T) {
+func TestModal_CaptainsCallPicksBuffWhenCantGoAgain(t *testing.T) {
 	d := deck.New(heroes.Viserai, nil, nil)
 	hand := []card.Card{
 		cards.CaptainsCallRed{},
@@ -60,8 +60,8 @@ func TestModal_RazorReflexMode0BuffsSwordWeapon(t *testing.T) {
 
 // Tests that Razor Reflex mode 1's +N{p} buff plus on-hit go-again rider both land on a
 // cost-≤1 attack action: the buffed Snatch hits 7 power (in the 1/4/7 likely-hit window),
-// the eager on-hit go-again grants 1 AP, and a second Snatch chains for full damage.
-func TestModal_RazorReflexMode1BuffAndOnHitGoAgainExtendChain(t *testing.T) {
+// the eager on-hit go-again grants 1 AP, and a second Snatch play sequences.for full damage.
+func TestModal_RazorReflexMode1BuffAndOnHitGoAgainExtendsAttackTurn(t *testing.T) {
 	d := deck.New(heroes.Viserai, nil, nil)
 	hand := []card.Card{
 		cards.RazorReflexRed{},

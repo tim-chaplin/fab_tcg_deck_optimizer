@@ -83,14 +83,14 @@ func (c grantBonusAttackWeapon) Play(ge card.GameEngine, l card.Logger, self *ca
 	}
 }
 
-// Tests that a granter writes BonusAttack on the target's CardState and the chain total
+// Tests that a granter writes BonusAttack on the target's CardState and the attack turn total
 // reflects printed-attack + bonus.
 func TestPlaySequence_BonusAttackAppliedToTargetDamage(t *testing.T) {
 	order := []card.Card{grantBonusAttack{n: 3}, testutils.FakeRedAttack().WithPower(3)}
 	ctx := NewSequenceContextForTest(testutils.Hero{Intel: 4}, nil, nil, 10, 0, len(order))
 	dmg, _, _, legal := ctx.PlaySequence(order)
 	if !legal {
-		t.Fatalf("playSequence returned legal=false; expected granter→RedAttack to chain via go-again")
+		t.Fatalf("playSequence returned legal=false; expected granter→RedAttack to extend via go-again")
 	}
 	// Granter (cost 0, attack 0, go again) → RedAttack (cost 1, printed power 3, bonus +3).
 	// Total: 0 + (3 + 3) = 6.
@@ -107,7 +107,7 @@ func TestPlaySequence_BonusAttackNoTargetFizzles(t *testing.T) {
 	ctx := NewSequenceContextForTest(testutils.Hero{Intel: 4}, nil, nil, 10, 0, len(order))
 	dmg, _, _, legal := ctx.PlaySequence(order)
 	if !legal {
-		t.Fatalf("playSequence returned legal=false; expected granter alone to be a legal 1-card chain")
+		t.Fatalf("playSequence returned legal=false; expected granter alone to be a legal 1-card attack turn")
 	}
 	if dmg != 0 {
 		t.Fatalf("dmg = %d, want 0 (granter has no damage and no target to buff)", dmg)
@@ -121,7 +121,7 @@ func TestPlaySequence_BonusAttackStacksAcrossGranters(t *testing.T) {
 	ctx := NewSequenceContextForTest(testutils.Hero{Intel: 4}, nil, nil, 10, 0, len(order))
 	dmg, _, _, legal := ctx.PlaySequence(order)
 	if !legal {
-		t.Fatalf("playSequence returned legal=false; expected two granters→RedAttack to chain via go-again")
+		t.Fatalf("playSequence returned legal=false; expected two granters→RedAttack to extend via go-again")
 	}
 	// Granter +3 → granter +2 → RedAttack (cost 1, printed power 3, bonus 3+2=5). Total 0+0+8 = 8.
 	if dmg != 8 {
@@ -136,7 +136,7 @@ func TestPlaySequence_BonusAttackAppliesToWeapon(t *testing.T) {
 	ctx := NewSequenceContextForTest(testutils.Hero{Intel: 4}, nil, nil, 10, 0, len(order))
 	dmg, _, _, legal := ctx.PlaySequence(order)
 	if !legal {
-		t.Fatalf("playSequence returned legal=false; expected granter→weapon swing to chain via go-again")
+		t.Fatalf("playSequence returned legal=false; expected granter→weapon swing to extend via go-again")
 	}
 	// Granter (cost 0, returns 0) → Reaping Blade (cost 1, printed power 3, bonus +2 = 5).
 	// Total: 0 + 5 = 5.

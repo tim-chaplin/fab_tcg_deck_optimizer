@@ -4,7 +4,7 @@
 
 `item` owns the concrete `Item` type — an in-play permanent the engine stores in its arena.
 An item comes in two flavours sharing one struct: a **token item** carries an activated
-ability the chain runner enqueues as a playable, and a **card-sourced item** carries a
+ability the attack-turn runner enqueues as a playable, and a **card-sourced item** carries a
 trigger that fires on a scheduled event (mirroring an aura). Both embed the shared
 `trigger.Trigger` core; token items leave it zero-valued so trigger type 0 never matches a
 firing event.
@@ -32,8 +32,8 @@ firing event.
 
 Items mirror the weapon split: a `sim.Item` permanent (`Self` / `Count` / `Ability`) lives in
 `GameState.Items`, and a `card.Card` activated ability (e.g. `GoldTokenAbility`) is what the
-chain runner enqueues each turn. The ability carries the parent's `card.TypeSet` (so
-`TypeItem` keeps `PersistsInPlay` true and the chain step never hits the graveyard) plus any
+attack-turn runner enqueues each turn. The ability carries the parent's `card.TypeSet` (so
+`TypeItem` keeps `PersistsInPlay` true and the attack step never hits the graveyard) plus any
 subtype the printed text uses; an activated ability that does not attack omits `TypeAttack`.
 
 Token items consolidate by token kind: at most one `Item` per kind per `GameState`. The
@@ -41,7 +41,7 @@ per-token `Create` helper (`g.CreateGold(n)`, …) bumps an existing entry's `Co
 a new one. `g.ConsumeItem(t, n)` decrements `Count` and removes the entry at zero — the
 standard "ability paid one charge" path. Token items don't head to the graveyard on destroy.
 
-The chain runner builds the item-ability playable list by replicating each item's `Ability`
+The attack-turn runner builds the item-ability playable list by replicating each item's `Ability`
 up to `perItemAbilityCap` times so the weapon/ability mask can pick "play it 0..N times this
 turn"; the cap (in `internal/sim/sequence.go`) bounds the `2^k` mask explosion.
 

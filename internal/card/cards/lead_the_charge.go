@@ -12,7 +12,7 @@ import (
 )
 
 // leadTheChargePlay registers a one-shot trigger that grants 1 action point when the next
-// action card is played this chain. The printed "cost 0 or greater" clause admits every
+// action card is played this attack turn. The printed "cost 0 or greater" clause admits every
 // action card, so the filter is a plain action-card test. The point fizzles harmlessly
 // when no action card follows — an unspent action point credits no value.
 func leadTheChargePlay(ge card.GameEngine, self *card.CardState) {

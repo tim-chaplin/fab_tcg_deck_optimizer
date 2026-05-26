@@ -21,7 +21,7 @@ func TestDestructiveDeliberation_PlayCreditsAttack(t *testing.T) {
 	for _, tc := range cases {
 		ge := gameengine.New()
 		pc := &card.CardState{Card: tc.c}
-		ge.ResolveChainStep(ge.Logger(), pc)
+		ge.ResolveAttackStep(ge.Logger(), pc)
 		if ge.Value() != tc.want {
 			t.Errorf("%s: Value = %d, want %d", tc.c.Name(), ge.Value(), tc.want)
 		}
@@ -39,7 +39,7 @@ func TestDestructiveDeliberation_OnHitCreatesPonder(t *testing.T) {
 	} {
 		ge := gameengine.New()
 		pc := &card.CardState{Card: c}
-		ge.ResolveChainStep(ge.Logger(), pc)
+		ge.ResolveAttackStep(ge.Logger(), pc)
 		pc.OnHit[0].Fire(ge, ge.Logger(), pc, &pc.OnHit[0])
 		if got := ge.PonderCount(); got != 1 {
 			t.Errorf("%s: Ponders = %d, want 1", c.Name(), got)

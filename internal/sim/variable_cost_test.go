@@ -127,7 +127,7 @@ func TestBest_MauvrionReadNoCarryover(t *testing.T) {
 
 // TestBest_MauvrionReadWithCarryover is the same hand with 1 runechant carried in from the
 // previous turn. The hand still creates 4 tokens this turn, and the 1 carryover token doesn't
-// get consumed (no attack in the chain), so leftover = 5.
+// get consumed (no attack in the attack turn), so leftover = 5.
 func TestBest_MauvrionReadWithCarryover(t *testing.T) {
 	h := []card.Card{cards.MauvrionSkiesRed{}, cards.ReadTheRunesRed{}}
 	got := Best(nil, h, nil, stateWithRunechants(heroes.Viserai, 1))
@@ -149,8 +149,8 @@ func TestBest_AetherSlashAloneConsumesCarryover(t *testing.T) {
 	}
 }
 
-// Tests that Blessing's start-of-turn-deferred runes don't appear in the same-turn chain.
-func TestBest_BlessingOfOccultTokensDoNotAffectSameTurnChain(t *testing.T) {
+// Tests that Blessing's start-of-turn-deferred runes don't appear in the same-turn attack-turn play.
+func TestBest_BlessingOfOccultTokensDoNotAffectSameAttackTurn(t *testing.T) {
 	h := []card.Card{
 		cards.MaleficIncantationRed{},
 		cards.BlessingOfOccultRed{},

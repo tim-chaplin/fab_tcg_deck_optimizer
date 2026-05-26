@@ -12,7 +12,7 @@ import (
 // Tests that Starting Stake creates a Gold token when none are in play.
 func TestStartingStake_CreatesGoldWhenNone(t *testing.T) {
 	ge := gameengine.New()
-	ge.ResolveChainStep(ge.Logger(), &card.CardState{Card: cards.StartingStakeYellow{}})
+	ge.ResolveAttackStep(ge.Logger(), &card.CardState{Card: cards.StartingStakeYellow{}})
 	if ge.GoldCount() != 1 {
 		t.Fatalf("Gold = %d, want 1 (no prior tokens, creates one)", ge.GoldCount())
 	}
@@ -22,7 +22,7 @@ func TestStartingStake_CreatesGoldWhenNone(t *testing.T) {
 func TestStartingStake_NoOpWhenGoldExists(t *testing.T) {
 	ge := gameengine.New()
 	ge.CreateGold(2)
-	ge.ResolveChainStep(ge.Logger(), &card.CardState{Card: cards.StartingStakeYellow{}})
+	ge.ResolveAttackStep(ge.Logger(), &card.CardState{Card: cards.StartingStakeYellow{}})
 	if ge.GoldCount() != 2 {
 		t.Fatalf("Gold = %d, want 2 (already had Gold, no create)", ge.GoldCount())
 	}

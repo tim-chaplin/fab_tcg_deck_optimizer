@@ -22,7 +22,7 @@ func TestShrillOfSkullform_BaseDamage(t *testing.T) {
 	}
 	for _, tc := range cases {
 		ge := gameengine.New()
-		ge.ResolveChainStep(ge.Logger(), &card.CardState{Card: tc.c})
+		ge.ResolveAttackStep(ge.Logger(), &card.CardState{Card: tc.c})
 		got := ge.Value()
 		if got != tc.want {
 			t.Errorf("%s: Play() = %d, want %d", tc.c.Name(), got, tc.want)
@@ -45,7 +45,7 @@ func TestShrillOfSkullform_AuraBonus(t *testing.T) {
 			SetCardsPlayed([]card.Card{testutils.FakeRedAura()}).
 			SetAuraCreated(true).
 			Build()}
-		ge.ResolveChainStep(ge.Logger(), &card.CardState{Card: tc.c})
+		ge.ResolveAttackStep(ge.Logger(), &card.CardState{Card: tc.c})
 		got := ge.Value()
 		if got != tc.want {
 			t.Errorf("%s with aura: Play() = %d, want %d", tc.c.Name(), got, tc.want)

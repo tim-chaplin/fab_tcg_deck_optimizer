@@ -27,7 +27,7 @@ hero types satisfy both, and callers needing behaviour assert to `card.Card` / `
 structurally — neither package imports the other.
 
 Callers that need cards / weapons / heroes import `internal/registry` directly and assert to
-`card.Card` / `sim.Weapon` / `sim.Hero` at the read site. `gameengine.ChainStepText`
+`card.Card` / `sim.Weapon` / `sim.Hero` at the read site. `gameengine.AttackStepText`
 memoises results on `(Card.ID, FromArsenal)` and lazily backfills on the first call per
 card kind, so no caller needs to pre-warm the cache.
 

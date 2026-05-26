@@ -1,5 +1,5 @@
 // Package item owns the concrete Item type — an in-play permanent. A token item carries an
-// activated ability the chain runner enqueues as a 1-AP playable; a card-sourced item
+// activated ability the attack-turn runner enqueues as a 1-AP playable; a card-sourced item
 // carries a trigger that fires on a scheduled event. Both embed the shared trigger.Trigger
 // core; token items leave it zero-valued so trigger type 0 never matches a firing event.
 package item

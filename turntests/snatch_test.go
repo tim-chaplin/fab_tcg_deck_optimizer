@@ -17,7 +17,7 @@ func TestSnatch_LikelyHitFiresDrawOne(t *testing.T) {
 	ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCards([]card.Card{top}).Build()}
 	c := cards.SnatchRed{}
 	cs := &card.CardState{Card: c}
-	ge.ResolveChainStep(ge.Logger(), cs)
+	ge.ResolveAttackStep(ge.Logger(), cs)
 	testutils.FireOnHitIfLikely(ge, ge.Logger(), cs)
 	if got := ge.Value(); got != 4 {
 		t.Errorf("Red: Play() = %d, want 4", got)
@@ -42,7 +42,7 @@ func TestSnatch_BlockableSuppressesDraw(t *testing.T) {
 	for _, tc := range cases {
 		top := testutils.FakeRedAttack()
 		ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCards([]card.Card{top}).Build()}
-		ge.ResolveChainStep(ge.Logger(), &card.CardState{Card: tc.c})
+		ge.ResolveAttackStep(ge.Logger(), &card.CardState{Card: tc.c})
 		if got := ge.Value(); got != tc.want {
 			t.Errorf("%s: Play() = %d, want %d (blockable, no draw)", tc.c.Name(), got, tc.want)
 		}

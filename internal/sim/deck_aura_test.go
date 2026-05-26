@@ -140,7 +140,7 @@ func TestFireEndOfTurn_PonderEmptyDeckIsNoOp(t *testing.T) {
 // Tests that Sigil of the Arknight's handler reveals an attack action.
 func TestProcessAurasAtStartOfTurn_RevealsAttackActionIntoHand(t *testing.T) {
 	play := gameengine.New()
-	play.ResolveChainStep(play.Logger(), &card.CardState{Card: cards.SigilOfTheArknightBlue{}})
+	play.ResolveAttackStep(play.Logger(), &card.CardState{Card: cards.SigilOfTheArknightBlue{}})
 	slash := cards.AetherSlashRed{}
 	_, total, revealed, _ := ProcessAurasAtStartOfTurnForTest(play.Auras(), DeckOf(slash))
 	if total != 0 {
@@ -154,8 +154,8 @@ func TestProcessAurasAtStartOfTurn_RevealsAttackActionIntoHand(t *testing.T) {
 // TestProcessAurasAtStartOfTurn_CascadingReveals.
 func TestProcessAurasAtStartOfTurn_CascadingReveals(t *testing.T) {
 	play := gameengine.New()
-	play.ResolveChainStep(play.Logger(), &card.CardState{Card: cards.SigilOfTheArknightBlue{}})
-	play.ResolveChainStep(play.Logger(), &card.CardState{Card: cards.SigilOfTheArknightBlue{}})
+	play.ResolveAttackStep(play.Logger(), &card.CardState{Card: cards.SigilOfTheArknightBlue{}})
+	play.ResolveAttackStep(play.Logger(), &card.CardState{Card: cards.SigilOfTheArknightBlue{}})
 	first := cards.AetherSlashRed{}
 	second := cards.ConsumingVolitionRed{}
 	_, _, revealed, _ := ProcessAurasAtStartOfTurnForTest(play.Auras(), DeckOf(first, second))
@@ -171,7 +171,7 @@ func TestProcessAurasAtStartOfTurn_CascadingReveals(t *testing.T) {
 func TestProcessAurasAtStartOfTurn_NonAttackActionTopSkipsReveal(t *testing.T) {
 	play := gameengine.New()
 	sigil := cards.SigilOfTheArknightBlue{}
-	play.ResolveChainStep(play.Logger(), &card.CardState{Card: sigil})
+	play.ResolveAttackStep(play.Logger(), &card.CardState{Card: sigil})
 	_, total, revealed, _ := ProcessAurasAtStartOfTurnForTest(play.Auras(), DeckOf(sigil))
 	if total != 0 {
 		t.Errorf("total = %d, want 0 (non-attack top, no credit)", total)

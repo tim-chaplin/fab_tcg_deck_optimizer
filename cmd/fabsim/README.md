@@ -28,7 +28,7 @@ duplicating flag docs here.
 
 ## Layout
 
-- `main.go` — subcommand dispatch; an `init` warms the chain-step text cache from the
+- `main.go` — subcommand dispatch; an `init` warms the attack-step text cache from the
   registry.
 - `flags.go` — shared flag-parsing helpers (`parseFlagsAnywhere`, `requireFlag`).
 - `mode_anneal.go` / `mode_eval.go` / `mode_compare.go` / `mode_import.go` — one file per

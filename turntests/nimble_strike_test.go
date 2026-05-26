@@ -14,7 +14,7 @@ func TestNimbleStrike_NoNimblismRiderOff(t *testing.T) {
 	for _, c := range []card.Card{cards.NimbleStrikeRed{}, cards.NimbleStrikeYellow{}, cards.NimbleStrikeBlue{}} {
 		pc := &card.CardState{Card: c}
 		ge := gameengine.New()
-		ge.ResolveChainStep(ge.Logger(), pc)
+		ge.ResolveAttackStep(ge.Logger(), pc)
 		if pc.GrantedGoAgain {
 			t.Errorf("%s [%d{p}]: GrantedGoAgain = true with empty graveyard, want false", c.Name(), c.Pitch())
 		}
@@ -30,7 +30,7 @@ func TestNimbleStrike_BanishesNimblismForBonus(t *testing.T) {
 	for _, c := range []card.Card{cards.NimbleStrikeRed{}, cards.NimbleStrikeYellow{}, cards.NimbleStrikeBlue{}} {
 		ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetGraveyard([]card.Card{cards.NimblismRed{}}).Build()}
 		pc := &card.CardState{Card: c}
-		ge.ResolveChainStep(ge.Logger(), pc)
+		ge.ResolveAttackStep(ge.Logger(), pc)
 		if !pc.GrantedGoAgain {
 			t.Errorf("%s [%d{p}]: GrantedGoAgain = false after banish, want true", c.Name(), c.Pitch())
 		}

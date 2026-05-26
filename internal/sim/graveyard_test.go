@@ -11,13 +11,13 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapon/weapons"
 )
 
-// TestGraveyard_AttackChainAppends: every attacker in the chain lands in state.Graveyard, in
+// TestGraveyard_AttackTurnAppends: every attacker in the attack turn lands in state.Graveyard, in
 // play order. Confirms the solver actually populates the list as cards resolve.
-func TestGraveyard_AttackChainAppends(t *testing.T) {
+func TestGraveyard_AttackTurnAppends(t *testing.T) {
 	order := []card.Card{testutils.FakeRedAttack().WithGoAgain(), testutils.FakeRedAttack().WithGoAgain(), testutils.FakeRedAttack().WithGoAgain()}
 	ctx := NewSequenceContextForTest(testutils.Hero{Intel: 4}, nil, nil, 1_000_000, 0, len(order))
 	if _, _, _, legal := ctx.PlaySequence(order); !legal {
-		t.Fatalf("playSequence rejected the chain")
+		t.Fatalf("playSequence rejected the attack turn")
 	}
 	got := ctx.PermEngine().Graveyard()
 	if len(got) != len(order) {
@@ -31,7 +31,7 @@ func TestGraveyard_AttackChainAppends(t *testing.T) {
 }
 
 // TestGraveyard_WeaponSwingDoesNotEnterGraveyard: a weapon ability resolves in the attack
-// chain but stays equipped (PersistsInPlay via TypeWeapon); the adjacent action-attack
+// attack turn but stays equipped (PersistsInPlay via TypeWeapon); the adjacent action-attack
 // still lands in the graveyard.
 func TestGraveyard_WeaponSwingDoesNotEnterGraveyard(t *testing.T) {
 	attack := testutils.FakeRedAttack().WithGoAgain()

@@ -11,10 +11,10 @@ import (
 // pmask/wmask loop, bestSequence). Pooled on the Evaluator so one sizing amortises across
 // every hand. All *GameState instances come from statePool (gameengine.NewPrewarmedPool).
 
-// attackBufs holds the partition-level + chain-permutation scratch slices the search reuses
+// attackBufs holds the partition-level + attack-turn-permutation scratch slices the search reuses
 // across calls. Sized at construction; the slice headers re-slice to [:n] per call.
 type attackBufs struct {
-	// Chain-permutation scratch — pcBuf / ptrBuf back each chain step's CardState.
+	// Attack-turn-permutation scratch — pcBuf / ptrBuf back each attack step's CardState.
 	pcBuf  []card.CardState
 	ptrBuf []*card.CardState
 	// permMeta parallels pcBuf, each entry pointing into cardMetaCache so playSequence's
@@ -58,13 +58,13 @@ type attackBufs struct {
 	drCardStateScratch card.CardState
 	// statePool aliases the Evaluator's single *GameState pool. Every attackBufs the
 	// Evaluator caches shares the same pointer, so all *GameState borrows (leafState,
-	// per-perm chain scratch, per-shuffle carry) draw from one fixed budget.
+	// per-perm attack-turn scratch, per-shuffle carry) draw from one fixed budget.
 	statePool *gameengine.Pool
 	// pooledEngine wraps the active permState; rebound per perm. The wrapper itself holds
 	// no state, and no caller stashes ge across perms.
 	pooledEngine *gameengine.GameEngine
 	// runDefensePostDRHeldBuf backs the post-DR Held-only view of state.HandStates().
-	// The plain-block survivingHeld computation and the chain phase's handStart both
+	// The plain-block survivingHeld computation and the attack turn phase's handStart both
 	// consume this slice, so a Held card a DR Play removed is automatically absent
 	// from both. Recycled across runDefense calls.
 	runDefensePostDRHeldBuf []card.Card
@@ -96,7 +96,7 @@ type attackBufs struct {
 
 func newAttackBufs(handSize, weaponCount int, weapons []weapon.Weapon, statePool *gameengine.Pool) *attackBufs {
 	// +1 reserves a slot for the arsenal-in card; +maxDrawnExtensions leaves headroom for
-	// mid-turn-drawn cards that play as chain extensions.
+	// mid-turn-drawn cards that play as attack-turn extensions.
 	const maxDrawnExtensions = 32
 	maxAttackers := handSize + weaponCount + 1 + maxDrawnExtensions
 	activatedAbilities := make([]card.Card, len(weapons))

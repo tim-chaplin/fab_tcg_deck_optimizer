@@ -35,7 +35,7 @@ type Card interface {
 	GoAgain(g GameEngine) bool
 	// Play is called when the card resolves — as an attack or as a defense reaction. Cards
 	// own card-specific behaviour only: conditional self-buffs, OnHit registration, riders,
-	// mid-chain effects. The canonical chain-step credit + log happens in
-	// sim.ResolveChainStep after Play returns — vanilla attacks / DRs have an empty body.
+	// mid-attack-turn effects. The canonical attack-step credit + log happens in
+	// sim.ResolveAttackStep after Play returns — vanilla attacks / DRs have an empty body.
 	Play(g GameEngine, l Logger, self *CardState)
 }

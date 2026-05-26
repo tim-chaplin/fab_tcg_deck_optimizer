@@ -47,7 +47,7 @@ For cards that create an aura which fires later:
   logger methods.
 
 The engine-side walk that fires aura handlers (`FireTriggers` / `fireHooks`) lives in
-`internal/gameengine` — see `internal/sim` and `internal/gameengine` for how the chain runner
+`internal/gameengine` — see `internal/sim` and `internal/gameengine` for how the attack-turn runner
 and start-of-turn pass invoke it. `fireHooks` takes a length snapshot before firing so an
 aura created by a handler is not consumed in the same pass, and uses a cursor walk so a
 handler-side destroy doesn't skip the next entry.

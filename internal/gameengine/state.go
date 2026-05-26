@@ -8,7 +8,7 @@ import (
 )
 
 // GameState owns the raw per-turn data — every slice, scalar, and flag the engine reads or
-// writes during a chain run. Internal machinery (per-permutation scratch, cross-turn
+// writes during an attack turn run. Internal machinery (per-permutation scratch, cross-turn
 // snapshots, the find-best winning pointer) holds *GameState; GameEngine wraps it and adds
 // the rules-engine API cards see. Unexported fields are touched only through methods.
 //
@@ -40,7 +40,7 @@ type GameState struct {
 	ephemeral
 }
 
-// ephemeral groups per-turn-resolution scratch — every field a chain run accumulates or
+// ephemeral groups per-turn-resolution scratch — every field an attack turn run accumulates or
 // overwrites. reset zeroes the whole struct in one statement, with the four non-zero
 // defaults (actionPoints, currentHookIdx, cacheable, logger) reseated in the same literal.
 type ephemeral struct {
@@ -60,9 +60,9 @@ type ephemeral struct {
 	damageBlocked  int
 	blockTotal     int
 	currentHookIdx int
-	// cardsRemovedFromDeck counts deck → non-deck movements during this chain (draws,
+	// cardsRemovedFromDeck counts deck → non-deck movements during this attack turn (draws,
 	// tutors, peek-and-banish, etc.). The hand-eval cache stores it and refuses to replay
-	// against a shallower deck — the cached chain consumed N cards, so replay needs ≥ N.
+	// against a shallower deck — the cached attack turn consumed N cards, so replay needs ≥ N.
 	cardsRemovedFromDeck int
 
 	cardBanished          bool
@@ -80,7 +80,7 @@ type ephemeral struct {
 
 // reset returns e to its start-of-turn baseline: scalars zero except actionPoints=1,
 // currentHookIdx=-1, cacheable=true, logger=NoopLogger; slice fields keep their backing
-// but truncate to zero length so the per-perm chain runner's appends (notably
+// but truncate to zero length so the per-perm attack-turn runner's appends (notably
 // AppendCardsPlayed) reuse the cap instead of allocating fresh each iteration. Aura /
 // item FiredThisTurn flags live on the entries themselves and are rearmed by
 // ResetEphemeralState's separate loop.
@@ -103,7 +103,7 @@ func (e *ephemeral) reset() {
 	}
 }
 
-// Engine wraps s in a *GameEngine so the chain runner can drive Card.Play hooks against
+// Engine wraps s in a *GameEngine so the attack-turn runner can drive Card.Play hooks against
 // the rules-engine API while the underlying state remains the same pointer the caller
 // holds. Cheap (single struct allocation); the engine doesn't copy state.
 func (gs *GameState) Engine() *GameEngine { return &GameEngine{GameState: gs} }
@@ -292,7 +292,7 @@ func (gs *GameState) CopyPersistentState() *GameState {
 
 // CopyPersistentStateFrom overwrites *gs in place to match what CopyPersistentState(src)
 // would produce. graveyard / banished copy into gs's prewarmed backing (always fits at
-// the worst-case cap); auras / items reuse gs's backing when cap permits. The chain
+// the worst-case cap); auras / items reuse gs's backing when cap permits. The attack-turn
 // runner's per-permutation hot path avoids slice allocation entirely.
 func (gs *GameState) CopyPersistentStateFrom(src *GameState) {
 	gs.hero = src.hero
@@ -360,7 +360,7 @@ func (gs *GameState) Reset(h Hero, weapons []weapon.Weapon, incoming, arcaneInco
 	gs.SetHero(h)
 }
 
-// === Pure state accessors. No cacheable flips; sim uses these to drive the chain runner. ===
+// === Pure state accessors. No cacheable flips; sim uses these to drive the attack-turn runner. ===
 
 func (gs *GameState) Hero() Hero { return gs.hero }
 func (gs *GameState) SetHero(h Hero) {
@@ -377,7 +377,7 @@ func (gs *GameState) IsCacheable() bool            { return gs.cacheable }
 func (gs *GameState) SetCacheable(v bool)          { gs.cacheable = v }
 
 // CardsRemovedFromDeck reports how many cards have been moved out of the deck during
-// this chain resolution (mid-chain draws, tutors, peek-and-banish, etc.).
+// this attack turn resolution (mid-attack-turn draws, tutors, peek-and-banish, etc.).
 func (gs *GameState) CardsRemovedFromDeck() int { return gs.cardsRemovedFromDeck }
 
 // noteDeckRemoval increments the deck-removal counter; called by every helper that
@@ -386,7 +386,7 @@ func (gs *GameState) CardsRemovedFromDeck() int { return gs.cardsRemovedFromDeck
 func (gs *GameState) noteDeckRemoval(n int) { gs.cardsRemovedFromDeck += n }
 
 // Hand projects the role-tagged hand down to the bare cards. Callers needing the roles
-// (Discard, the chain runner) read HandStates.
+// (Discard, the attack-turn runner) read HandStates.
 func (gs *GameState) Hand() []card.Card {
 	if len(gs.hand) == 0 {
 		return nil
@@ -402,12 +402,12 @@ func (gs *GameState) Hand() []card.Card {
 func (gs *GameState) HandStates() []card.CardState { return gs.hand }
 
 // HandSize reports the total number of cards in the hand zone, including entries added
-// by mid-chain DrawOne. The value is determined by partition + chain progress alone, so
+// by mid-attack-turn DrawOne. The value is determined by partition + attack-turn progress alone, so
 // this accessor doesn't flip IsCacheable.
 func (gs *GameState) HandSize() int { return len(gs.hand) }
 
 // HandHasMatching reports whether any non-drawn hand entry satisfies pred. FromDraw
-// entries are skipped: their identity is unknown to in-chain attribute reads. Doesn't
+// entries are skipped: their identity is unknown to in-attack-turn attribute reads. Doesn't
 // flip IsCacheable — the starting-hand multiset is already part of the cache key.
 func (gs *GameState) HandHasMatching(pred func(card.Card) bool) bool {
 	for i := range gs.hand {
@@ -436,7 +436,7 @@ func (gs *GameState) HeldHandSize() int {
 }
 
 // SetHand installs h as the hand with every card defaulting to the Held role. Role-aware
-// callers (the defense pass, the chain runner) use SetHandStates.
+// callers (the defense pass, the attack-turn runner) use SetHandStates.
 func (gs *GameState) SetHand(h []card.Card) {
 	gs.hand = gs.hand[:0]
 	for _, c := range h {
@@ -453,7 +453,7 @@ func (gs *GameState) AppendHandRaw(c card.Card) {
 
 // RemoveFromHand removes the first matching card from the hand without flipping
 // IsCacheable. Returns true if a card was removed. Does not preserve order — the
-// removed slot is filled by the last element (swap-with-last). The chain runner
+// removed slot is filled by the last element (swap-with-last). The attack-turn runner
 // reads hand by membership / length, not by index, so order doesn't matter.
 func (gs *GameState) RemoveFromHand(c card.Card) bool {
 	for i := range gs.hand {
@@ -545,7 +545,7 @@ func (gs *GameState) SetIncomingDamage(n int) {
 
 // AddDamageBlocked credits n damage as absorbed by defense, shrinking
 // RemainingUnblockedDamage by n. The engine's DR resolution accumulates through here; the
-// chain runner's plain-block pass calls it directly.
+// attack-turn runner's plain-block pass calls it directly.
 func (gs *GameState) AddDamageBlocked(n int) { gs.damageBlocked += n }
 
 func (gs *GameState) IncomingDamage() int           { return gs.incomingDamage }
@@ -584,7 +584,7 @@ func (gs *GameState) LastAttackHit() bool     { return gs.lastAttackHit }
 func (gs *GameState) SetLastAttackHit(v bool) { gs.lastAttackHit = v }
 
 // IsMyTurn reports whether the active phase is the owning player's action phase (true) or
-// the defense phase (false). The chain runner sets it; cards read it for "during your
+// the defense phase (false). The attack-turn runner sets it; cards read it for "during your
 // turn" riders.
 func (gs *GameState) IsMyTurn() bool     { return gs.isMyTurn }
 func (gs *GameState) SetIsMyTurn(v bool) { gs.isMyTurn = v }
@@ -598,9 +598,9 @@ func (gs *GameState) UntapHero() { gs.heroTapped = false }
 func (gs *GameState) CurrentStepRerouted() bool     { return gs.currentStepRerouted }
 func (gs *GameState) SetCurrentStepRerouted(v bool) { gs.currentStepRerouted = v }
 
-// AmendLastChainStepN adds n to the most recent ChainStep entry's N field. No-op when
-// the logger is nil or when no chain-step entry exists yet.
-func (gs *GameState) AmendLastChainStepN(n int) { gs.logger.AmendLastChainStepN(n) }
+// AmendLastAttackStepN adds n to the most recent AttackStep entry's N field. No-op when
+// the logger is nil or when no attack-step entry exists yet.
+func (gs *GameState) AmendLastAttackStepN(n int) { gs.logger.AmendLastAttackStepN(n) }
 
 // HeroWantsLowerHealth reports whether the current hero opts into the LowerHealthWanter
 // marker. Returns false when no hero is set.

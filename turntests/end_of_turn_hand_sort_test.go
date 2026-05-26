@@ -11,9 +11,9 @@ import (
 )
 
 // Tests that the post-turn hand is sorted by Card.ID() even when end-of-turn refill draws
-// zero cards (held count already matches intellect, OR deck is empty). The chain runner's
+// zero cards (held count already matches intellect, OR deck is empty). The attack-turn runner's
 // RemoveFromHand uses swap-with-last so the held cards survive in non-canonical order;
-// the cache key + chain runner both rely on the hand being sorted at findBest entry, so
+// the cache key + attack-turn runner both rely on the hand being sorted at findBest entry, so
 // playOneTurn must always sort the post-turn hand. The pre-fix code only sorted when
 // toDraw > 0, leaving the unsorted held order to leak into next turn's findBest call.
 func TestEndOfTurnHand_SortedEvenWithZeroDraws(t *testing.T) {
@@ -22,7 +22,7 @@ func TestEndOfTurnHand_SortedEvenWithZeroDraws(t *testing.T) {
 	// is a swap-with-last pop, so removing the lowest-ID held card brings the
 	// highest-ID held card to index 0, leaving held = [OasisRespite (319), BrushOff (153)]
 	// — UNSORTED. Intel=2 with 2 held survivors makes toDraw == 0, the empty deck removes
-	// any mid-chain draw confound, and the pre-fix code skipped the sort on that path.
+	// any mid-attack-turn draw confound, and the pre-fix code skipped the sort on that path.
 	// Hand of 5: TradeInRed is the attack, two arsenal-eligible DRs (one becomes the
 	// post-hoc arsenal pick), and two Resource-typed cards that are arsenal-ineligible so
 	// they stay held. After Trade In's Discard pops the first held (ReduceToRunechant at

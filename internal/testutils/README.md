@@ -4,13 +4,13 @@
 
 Fake Card, Hero, and Weapon implementations shared by tests in multiple packages (card,
 cards, deck, hand, sim, turntests). Predictable, controllable fakes so predicate,
-lookahead, partition, and chain-runner tests have known inputs without pulling in real
+lookahead, partition, and attack-turn runner tests have known inputs without pulling in real
 cards whose printed effects would perturb the measured value.
 
 ## Key types
 
 - `Fake` — single configurable `card.Card` implementation. Constructed via one of the
-  colour-and-shape constructors below plus chained `With...` methods so every attribute
+  colour-and-shape constructors below plus follow-up `With...` methods so every attribute
   the test cares about is visible at the call site.
 - Colour-and-shape constructors — pitch is encoded in the constructor name (Red=1,
   Yellow=2, Blue=3) and shape (Attack / Action / Resource / DR / Instant / Aura) seeds
@@ -41,10 +41,10 @@ cards whose printed effects would perturb the measured value.
   `FakeWeaponSwing` with Club + OneHand types. Used by turn-level tests that need an
   equipped weapon of a Club/Hammer type the card pool doesn't print.
 - `GrantAll` / `GrantSpy` — a paired probe for detecting cross-permutation `CardState`
-  wrapper leakage in the chain runner. Build via `NewGrantAll()` / `NewGrantSpy(&saw)`.
+  wrapper leakage in the attack-turn runner. Build via `NewGrantAll()` / `NewGrantSpy(&saw)`.
 - `FireOnHitIfLikely` — fires every `OnHit` handler on a card when `LikelyToHit`, so a
   unit test that calls `Play` directly can exercise on-hit riders without the full
-  chain runner.
+  attack-turn runner.
 
 ## How to use / extend
 
@@ -64,7 +64,7 @@ shape (e.g. a printed-keyword card category), add one constructor per colour to
 ## Gotchas
 
 - Every fake returns `ids.InvalidCard` (or `InvalidWeapon` / `InvalidHero`) from
-  `ID()`. Per-ID caches (`cardMetaCache`, `chainStepCache`) special-case `InvalidCard`
+  `ID()`. Per-ID caches (`cardMetaCache`, `attackStepCache`) special-case `InvalidCard`
   so multiple fakes in one test don't interfere; the eval cache bails out whenever any
   input has an Invalid id (production cards always carry a unique non-zero ID).
 - `Fake` is comparable (`a == b` works) — the play hook is stored behind a pointer so

@@ -4,7 +4,7 @@
 // Text: "When this defends an attack, it gets -3{p}."
 //
 // The -3{p} attacker debuff is modelled as a flat 3/2/1{d} block on R/Y/B respectively —
-// equivalent to "block N damage" against an attack chain whose damage is consumed by
+// equivalent to "block N damage" against an attack turn whose damage is consumed by
 // IncomingDamage / BlockTotal. The Red→Blue decay matches the standard pitch-vs-body
 // trade-off across pitch variants.
 

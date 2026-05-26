@@ -23,7 +23,7 @@ func TestVantagePoint_BaseDamageNoAura(t *testing.T) {
 	for _, tc := range cases {
 		ge := gameengine.New()
 		pc := &card.CardState{Card: tc.c}
-		ge.ResolveChainStep(ge.Logger(), pc)
+		ge.ResolveAttackStep(ge.Logger(), pc)
 		if got := ge.Value(); got != tc.base {
 			t.Errorf("%s: Play() = %d, want %d", tc.c.Name(), got, tc.base)
 		}
@@ -37,7 +37,7 @@ func TestVantagePoint_BaseDamageNoAura(t *testing.T) {
 func TestVantagePoint_AuraCreatedSetsOverpower(t *testing.T) {
 	ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetAuraCreated(true).Build()}
 	pc := &card.CardState{Card: cards.VantagePointRed{}}
-	ge.ResolveChainStep(ge.Logger(), pc)
+	ge.ResolveAttackStep(ge.Logger(), pc)
 	if got := ge.Value(); got != 7 {
 		t.Errorf("Play() = %d, want 7", got)
 	}

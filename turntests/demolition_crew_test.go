@@ -42,7 +42,7 @@ func TestDemolitionCrew_PreconditionFailsOnEmptyHand(t *testing.T) {
 }
 
 // Tests that Play attacks for printed power once the precondition has been satisfied (a
-// second cost-2 card in hand serves as the reveal) and the chain has enough pitch to fund
+// second cost-2 card in hand serves as the reveal) and the attack turn has enough pitch to fund
 // the cost.
 func TestDemolitionCrew_PlayAttacksForPrintedPower(t *testing.T) {
 	cases := []struct {

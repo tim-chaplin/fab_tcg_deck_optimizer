@@ -2,7 +2,7 @@ package sim
 
 // Cache-hit replay: rebuild a TurnSummary by replaying the cached winning solution
 // verbatim — captured attacker order, modal modes, pitch ordering, blocker modes run as
-// a single chain, no partition search, no permutation enumeration. Post-hoc arsenal
+// a single attack turn, no partition search, no permutation enumeration. Post-hoc arsenal
 // promotion + Hand carryover still run, so the summary is byte-identical to a from-scratch
 // Best call.
 
@@ -17,10 +17,10 @@ import (
 )
 
 // replayBest is the cache-hit body. Builds the partitionCard set, maps the cached BestLine's
-// roles onto it, runs replaySolution for the verbatim chain, then assembles the TurnSummary.
+// roles onto it, runs replaySolution for the verbatim attack turn, then assembles the TurnSummary.
 //
 // Quirk: a cached entry may tag a hand card with Role=Arsenal (post-hoc promotion target),
-// but hand cards never carry that role during the chain run. Flip it to Held before
+// but hand cards never carry that role during the attack turn run. Flip it to Held before
 // replaySolution; re-stamp Arsenal on the BestLine afterward.
 func (e *Evaluator) replayBest(
 	entry evalCacheEntry,
@@ -49,7 +49,7 @@ func (e *Evaluator) replayBest(
 		pcards[postPromotedFromHeld].role = card.Held
 	}
 
-	attackDealt, defenseDealt, winner, arsenalAtChainStart := e.replaySolution(masterState, weapons, d, entry, pcards, n, bufs)
+	attackDealt, defenseDealt, winner, arsenalAtAttackTurnStart := e.replaySolution(masterState, weapons, d, entry, pcards, n, bufs)
 	if winner == nil {
 		panic(fmt.Sprintf("replayBest: cached solution is infeasible — cache invariant violated (hand=%d, incoming=%d)",
 			len(hand), masterState.IncomingDamage()))
@@ -59,7 +59,7 @@ func (e *Evaluator) replayBest(
 		pcards[postPromotedFromHeld].role = card.Arsenal
 	}
 
-	winner.SetArsenal(arsenalAtChainStart)
+	winner.SetArsenal(arsenalAtAttackTurnStart)
 	best := TurnSummary{
 		BestLine:       make([]card.CardAssignment, totalN),
 		Value:          attackDealt + defenseDealt,
@@ -86,9 +86,9 @@ func (e *Evaluator) replayBest(
 func (e *Evaluator) replaySolution(
 	masterState *gameengine.GameState, weapons []weapon.Weapon, d *deck.Deck,
 	entry evalCacheEntry, pcards []partitionCard, n int, bufs *attackBufs,
-) (attackDealt, defenseDealt int, winner *gameengine.GameState, arsenalAtChainStart card.Card) {
-	p, a, defs, h, arsenalInIdx, arsenalDefenderIdx, arsenalAtChainStart := groupPartition(pcards, n, bufs)
-	ctx := newSequenceContext(masterState, weapons, a, defs, p, h, d, bufs, defenseSumFromRoles(pcards), arsenalInIdx, arsenalAtChainStart)
+) (attackDealt, defenseDealt int, winner *gameengine.GameState, arsenalAtAttackTurnStart card.Card) {
+	p, a, defs, h, arsenalInIdx, arsenalDefenderIdx, arsenalAtAttackTurnStart := groupPartition(pcards, n, bufs)
+	ctx := newSequenceContext(masterState, weapons, a, defs, p, h, d, bufs, defenseSumFromRoles(pcards), arsenalInIdx, arsenalAtAttackTurnStart)
 	defer ctx.releaseLeafState()
 
 	ctx.attackPitchPerm = entry.pitchOrder
@@ -107,7 +107,7 @@ func (e *Evaluator) replaySolution(
 		ctx.permEngine(ctx.leafState).FireTriggers(triggertype.DamageTaken, nil)
 	}
 	attackDealt, _, _, _ = ctx.playSequenceModal(entry.attackOrder)
-	return attackDealt, defenseDealt, ctx.permState, arsenalAtChainStart
+	return attackDealt, defenseDealt, ctx.permState, arsenalAtAttackTurnStart
 }
 
 // defenseSumFromRoles totals the defenseVal of every Defend-role card.

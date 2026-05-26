@@ -26,21 +26,21 @@ func (fakeAR) GoAgain(card.GameEngine) bool                          { return fa
 func (fakeAR) ARTargetAllowed(card.GameEngine, card.Card, int8) bool { return true }
 func (fakeAR) Play(card.GameEngine, card.Logger, *card.CardState)    {}
 
-// fakeAttack is a Generic Action - Attack target candidate.
-type fakeAttack struct{}
+// fakeBaseAttack is a Generic Action - Attack target candidate.
+type fakeBaseAttack struct{}
 
-func (fakeAttack) ID() ids.CardID           { return ids.InvalidCard }
-func (fakeAttack) Name() string             { return "fakeAttack" }
-func (fakeAttack) DisplayName() string      { return "fakeAttack [R]" }
-func (fakeAttack) Cost(card.GameEngine) int { return 0 }
-func (fakeAttack) Pitch() int               { return 1 }
-func (fakeAttack) Attack() int              { return 1 }
-func (fakeAttack) Defense() int             { return 0 }
-func (fakeAttack) Types(card.GameEngine) card.TypeSet {
+func (fakeBaseAttack) ID() ids.CardID           { return ids.InvalidCard }
+func (fakeBaseAttack) Name() string             { return "fakeBaseAttack" }
+func (fakeBaseAttack) DisplayName() string      { return "fakeBaseAttack [R]" }
+func (fakeBaseAttack) Cost(card.GameEngine) int { return 0 }
+func (fakeBaseAttack) Pitch() int               { return 1 }
+func (fakeBaseAttack) Attack() int              { return 1 }
+func (fakeBaseAttack) Defense() int             { return 0 }
+func (fakeBaseAttack) Types(card.GameEngine) card.TypeSet {
 	return card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 }
-func (fakeAttack) GoAgain(card.GameEngine) bool                       { return true }
-func (fakeAttack) Play(card.GameEngine, card.Logger, *card.CardState) {}
+func (fakeBaseAttack) GoAgain(card.GameEngine) bool                       { return true }
+func (fakeBaseAttack) Play(card.GameEngine, card.Logger, *card.CardState) {}
 
 // Tests that GrantAttackReactionBuff is a no-op when no target is set.
 func TestGrantAttackReactionBuff_NoTargetIsNoOp(t *testing.T) {
@@ -53,7 +53,7 @@ func TestGrantAttackReactionBuff_NoTargetIsNoOp(t *testing.T) {
 
 // Tests that GrantAttackReactionBuff buffs BonusAttack and credits Value.
 func TestGrantAttackReactionBuff_AppliesBuffAndCreditsValue(t *testing.T) {
-	target := &card.CardState{Card: fakeAttack{}}
+	target := &card.CardState{Card: fakeBaseAttack{}}
 	ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetAttackReactionTarget(target).Build()}
 	(&card.CardState{Card: fakeAR{}}).GrantAttackReactionBuff(ge, ge.Logger(), 3)
 	if target.BonusAttack != 3 {

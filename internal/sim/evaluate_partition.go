@@ -10,11 +10,11 @@ import (
 // evaluatePartition scores a fixed role assignment: it groups the hand-card slots of
 // pcards into pitched/attackers/defenders/held, folds the arsenal-in slot (pcards[n], when
 // present) into its bucket per its role, computes the arsenal indices, and forwards to
-// bestAttackWithWeapons. The winning *GameState for this partition's chain is returned for
+// bestAttackWithWeapons. The winning *GameState for this partition's attack turn is returned for
 // the caller to keep.
 //
 // pcards[:n] are the hand-card slots and carry only Pitch/Attack/Defend/Held roles — hand
-// cards never have Arsenal role during the chain run.
+// cards never have Arsenal role during the attack turn run.
 //
 // Mutates the bufs scratch slices (pitchedBuf, attackersBuf, defendersBuf, heldBuf) in
 // place.
@@ -28,13 +28,13 @@ func (e *Evaluator) evaluatePartition(
 	attackDealt, defenseDealt int,
 	swung []string, winner *gameengine.GameState,
 	ok, cacheable bool,
-	arsenalAtChainStart card.Card,
+	arsenalAtAttackTurnStart card.Card,
 ) {
-	p, a, defs, h, arsenalInIdx, arsenalDefenderIdx, arsenalAtChainStart := groupPartition(pcards, n, bufs)
+	p, a, defs, h, arsenalInIdx, arsenalDefenderIdx, arsenalAtAttackTurnStart := groupPartition(pcards, n, bufs)
 	attackDealt, defenseDealt, _, swung, winner, ok, cacheable = bestAttackWithWeapons(
 		masterState, weapons, a, defs, p, h, d, bufs,
 		defenseSum,
-		arsenalInIdx, arsenalDefenderIdx, arsenalAtChainStart,
+		arsenalInIdx, arsenalDefenderIdx, arsenalAtAttackTurnStart,
 	)
 	return
 }
@@ -42,7 +42,7 @@ func (e *Evaluator) evaluatePartition(
 // groupPartition splits a role-assigned partition into its played / defending / pitched /
 // held card buckets and resolves the arsenal-in indices, reusing the bufs scratch slices.
 // The buckets fold in the arsenal-in card (pcards[n], when present) per its slot's role.
-func groupPartition(pcards []partitionCard, n int, bufs *attackBufs) (p, a, defs, h []card.Card, arsenalInIdx, arsenalDefenderIdx int, arsenalAtChainStart card.Card) {
+func groupPartition(pcards []partitionCard, n int, bufs *attackBufs) (p, a, defs, h []card.Card, arsenalInIdx, arsenalDefenderIdx int, arsenalAtAttackTurnStart card.Card) {
 	p, a, defs = groupByRole(
 		pcards[:n],
 		bufs.pitchedBuf[:0], bufs.attackersBuf[:0], bufs.defendersBuf[:0],
@@ -60,6 +60,6 @@ func groupPartition(pcards []partitionCard, n int, bufs *attackBufs) (p, a, defs
 		}
 	}
 	h = gatherHeldCards(pcards[:n], bufs.heldBuf[:0])
-	arsenalAtChainStart = findArsenalCard(pcards, n)
+	arsenalAtAttackTurnStart = findArsenalCard(pcards, n)
 	return
 }

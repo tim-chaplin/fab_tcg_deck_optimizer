@@ -14,7 +14,7 @@ import (
 func TestMinnowism_NoAttackReturnsZero(t *testing.T) {
 	ge := gameengine.New()
 	for _, c := range []card.Card{cards.MinnowismRed{}, cards.MinnowismYellow{}, cards.MinnowismBlue{}} {
-		ge.ResolveChainStep(ge.Logger(), &card.CardState{Card: c})
+		ge.ResolveAttackStep(ge.Logger(), &card.CardState{Card: c})
 		if got := ge.Value(); got != 0 {
 			t.Errorf("%s: Play() = %d, want 0", c.Name(), got)
 		}
@@ -25,7 +25,7 @@ func TestMinnowism_NoAttackReturnsZero(t *testing.T) {
 // so the rider fizzles without falling through to a later match.
 func TestMinnowism_HighPowerFilteredOut(t *testing.T) {
 	ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCardsRemaining([]*card.CardState{{Card: testutils.FakeRedAttack()}}).Build()}
-	ge.ResolveChainStep(ge.Logger(), &card.CardState{Card: cards.MinnowismRed{}})
+	ge.ResolveAttackStep(ge.Logger(), &card.CardState{Card: cards.MinnowismRed{}})
 	if got := ge.Value(); got != 0 {
 		t.Errorf("Play() = %d, want 0 (power 4 > 3)", got)
 	}
@@ -45,7 +45,7 @@ func TestMinnowism_LowPowerReturnsBonus(t *testing.T) {
 	for _, tc := range cases {
 		target := &card.CardState{Card: testutils.FakeRedAttack()}
 		ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCardsRemaining([]*card.CardState{target}).Build()}
-		ge.ResolveChainStep(ge.Logger(), &card.CardState{Card: tc.c})
+		ge.ResolveAttackStep(ge.Logger(), &card.CardState{Card: tc.c})
 		if got := ge.Value(); got != 0 {
 			t.Errorf("%s: Play() = %d, want 0 (granter returns 0; +N rides on target'ge BonusAttack)", tc.c.Name(), got)
 		}

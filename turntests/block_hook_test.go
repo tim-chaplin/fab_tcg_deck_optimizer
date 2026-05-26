@@ -52,7 +52,7 @@ func TestBlock_BattlefrontBastionAloneCancelledByBlockCard(t *testing.T) {
 }
 
 // Tests that a second plain blocker cancels Battlefront Bastion's alone-bonus while
-// firing Right Behind You's together-bonus on the same chain.
+// firing Right Behind You's together-bonus on the same attack turn.
 func TestBlock_BattlefrontBastionAloneCancelledByPlainBlocker(t *testing.T) {
 	d := deck.New(heroes.Viserai, nil, nil)
 	hand := []card.Card{cards.BattlefrontBastionRed{}, cards.RightBehindYouRed{}}

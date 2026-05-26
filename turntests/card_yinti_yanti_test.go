@@ -22,7 +22,7 @@ func TestYintiYanti_PlayNoAuraNoBonus(t *testing.T) {
 	for _, tc := range cases {
 		ge := gameengine.New()
 		pc := &card.CardState{Card: tc.c}
-		ge.ResolveChainStep(ge.Logger(), pc)
+		ge.ResolveAttackStep(ge.Logger(), pc)
 		if ge.Value() != tc.want {
 			t.Errorf("%s: Value = %d, want %d (printed attack, no aura bonus)", tc.c.Name(), ge.Value(), tc.want)
 		}
@@ -44,7 +44,7 @@ func TestYintiYanti_PlayWithAuraGetsBonus(t *testing.T) {
 			AddAura(token.NewRunechant(1)).
 			Build()}
 		pc := &card.CardState{Card: tc.c}
-		ge.ResolveChainStep(ge.Logger(), pc)
+		ge.ResolveAttackStep(ge.Logger(), pc)
 		if ge.Value() != tc.want {
 			t.Errorf("%s with aura: Value = %d, want %d (printed +1 aura bonus)", tc.c.Name(), ge.Value(), tc.want)
 		}

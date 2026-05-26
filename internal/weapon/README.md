@@ -15,8 +15,8 @@ Concrete weapons live in the `internal/weapon/weapons` subpackage.
 Each weapon is two paired Go types in one `<weapon>.go` file:
 
 - A `Weapon` permanent (`ID`, `Name`, `Types`, `Hands`, `Ability`) — the equipped
-  permanent that sits in the arena and never enters the chain.
-- A `card.Card` activated ability (`<Weapon>Ability`) — what the chain runner enqueues
+  permanent that sits in the arena and never enters the attack turn.
+- A `card.Card` activated ability (`<Weapon>Ability`) — what the attack-turn runner enqueues
   each turn when the player swings (1 AP, pays the ability's printed activation cost). It
   carries the printed Cost / Pitch / Attack / Defense / GoAgain / Play plus the parent's
   `card.TypeSet` with `card.TypeAttack` added, so `IsAttack`, `IsWeaponAttack`, and — for
@@ -25,14 +25,14 @@ Each weapon is two paired Go types in one `<weapon>.go` file:
 `Ability()` returns a package-level cached `card.Card`: each weapon file declares
 `var <weapon>Ability card.Card = <Weapon>Ability{}` and returns it. The cache keeps the
 lookup allocation-free, since Go's interface boxing of a zero-size struct allocates per
-call when the result escapes. The ability's `Name()` matches the weapon's so chain logs
+call when the result escapes. The ability's `Name()` matches the weapon's so attack-turn logs
 read `<Weapon>: WEAPON ATTACK`.
 
 IDs are anchored in `internal/ids/weapon_ids.go`: weapon permanents take `WeaponID`
 values past the last card ID; ability `CardID` values anchor past the last weapon-permanent
 ID; token activated abilities anchor past the last weapon-ability ID; test fakes anchor
 past the last token-ability ID. `WeaponID` is an alias of `CardID` because every weapon
-swing flows through the same chain-runner pipeline and per-card caches as deck cards.
+swing flows through the same attack-turn runner pipeline and per-card caches as deck cards.
 
 Card-attack predicates (`internal/card/types.go`) gate purely on `TypeAttack` (and
 `TypeWeapon` / `TypeRuneblade` where the rider needs the subtype). A bare weapon permanent
@@ -63,6 +63,6 @@ weapon is left out of `registry.AllWeapons`.
 
 ## Gotchas
 
-- The weapon permanent itself never enters the chain; only its `Ability()` Card does.
+- The weapon permanent itself never enters the attack turn; only its `Ability()` Card does.
 - Each weapon's top docstring must carry the printed `Text: "..."` block and any modelling
   fudge (e.g. Reaping Blade ignores its health-symmetry rider).

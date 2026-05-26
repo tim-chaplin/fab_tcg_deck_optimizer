@@ -2,7 +2,7 @@ package turntests
 
 // Pins start-of-turn aura behaviour at the turn-2 boundary: damage credit, graveyard
 // exhaustion, hand reveals, OncePerTurn re-arm. Turn 2 usually gets an empty deck/hand so
-// the chain produces 0 value and turn2.Value isolates the trigger's contribution.
+// the attack turn produces 0 value and turn2.Value isolates the trigger's contribution.
 
 import (
 	"testing"
@@ -26,7 +26,7 @@ func TestEvalTwoTurns_SigilOfFyendalQueuesTrigger(t *testing.T) {
 		t.Errorf("turn 1 BestLine didn't play Sigil of Fyendal as Role=Attack: %+v", turn1.BestLine)
 	}
 	if turn2.Value != 1 {
-		t.Errorf("turn 2 Value = %d, want 1 (Fyendal's 1{h} gain fires at start of turn 2; chain has nothing to play)",
+		t.Errorf("turn 2 Value = %d, want 1 (Fyendal's 1{h} gain fires at start of turn 2; attack turn has nothing to play)",
 			turn2.Value)
 	}
 	if !graveyardContains(turn2.State.Graveyard(), cards.SigilOfFyendalBlue{}) {
@@ -36,7 +36,7 @@ func TestEvalTwoTurns_SigilOfFyendalQueuesTrigger(t *testing.T) {
 }
 
 // Sigil of the Arknight reveals an attack off the deck top into the turn-2 hand and the
-// turn-2 chain plays it. Deck stacks 4 pitches (turn 2's refill) above the reveal so
+// turn-2 attack turn plays it. Deck stacks 4 pitches (turn 2's refill) above the reveal so
 // Sigil's PopDeckTop pulls the attack.
 func TestEvalTwoTurns_SigilOfTheArknightRevealsIntoHand(t *testing.T) {
 	sigil := cards.SigilOfTheArknightBlue{}
@@ -77,7 +77,7 @@ func TestEvalTwoTurns_BlessingOfOccultCreatesRunesAtStartOfNextTurn(t *testing.T
 		t.Errorf("turn 1 BestLine didn't play Blessing as Role=Attack: %+v", turn1.BestLine)
 	}
 	if turn2.Value != 3 {
-		t.Errorf("turn 2 Value = %d, want 3 (Blessing's trigger creates 3 runechants; chain has nothing to play)",
+		t.Errorf("turn 2 Value = %d, want 3 (Blessing's trigger creates 3 runechants; attack turn has nothing to play)",
 			turn2.Value)
 	}
 	if !graveyardContains(turn2.State.Graveyard(), cards.BlessingOfOccultRed{}) {
@@ -85,7 +85,7 @@ func TestEvalTwoTurns_BlessingOfOccultCreatesRunesAtStartOfNextTurn(t *testing.T
 	}
 }
 
-// Malefic's OncePerTurn AttackAction trigger ticks on chain attacks (one fire from Hocus
+// Malefic's OncePerTurn AttackAction trigger ticks on attack-turn attacks (one fire from Hocus
 // Pocus on turn 1) and stays silent at the start-of-turn boundary, surviving with Count>0.
 func TestEvalTwoTurns_MaleficIncantationOncePerTurnLimitsToOneRune(t *testing.T) {
 	malefic := cards.MaleficIncantationRed{}
@@ -104,7 +104,7 @@ func TestEvalTwoTurns_MaleficIncantationOncePerTurnLimitsToOneRune(t *testing.T)
 			turn1.Value)
 	}
 	if turn2.Value != 0 {
-		t.Errorf("turn 2 Value = %d, want 0 (Malefic only fires on attack actions; chain has nothing to play)",
+		t.Errorf("turn 2 Value = %d, want 0 (Malefic only fires on attack actions; attack turn has nothing to play)",
 			turn2.Value)
 	}
 	if graveyardContains(turn2.State.Graveyard(), cards.MaleficIncantationRed{}) {
@@ -129,7 +129,7 @@ func TestEvalTwoTurns_RunebloodIncantationTicksAcrossTurns(t *testing.T) {
 			turn1.Value)
 	}
 	if turn2.Value != 1 {
-		t.Errorf("turn 2 Value = %d, want 1 (one tick per turn; chain has nothing to play)", turn2.Value)
+		t.Errorf("turn 2 Value = %d, want 1 (one tick per turn; attack turn has nothing to play)", turn2.Value)
 	}
 	if graveyardContains(turn2.State.Graveyard(), cards.RunebloodIncantationRed{}) {
 		t.Errorf("turn 2 graveyard = %v, want it to NOT contain Runeblood (Red has Count=3, only one tick fired)",

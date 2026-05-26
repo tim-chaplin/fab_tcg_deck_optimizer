@@ -1,6 +1,6 @@
 package sim
 
-// Attack-chain search: bestAttackWithWeapons evaluates one partition leaf across all
+// Attack-turn search: bestAttackWithWeapons evaluates one partition leaf across all
 // phase / weapon masks; bestSequence picks the best attacker ordering; playSequence*
 // replays one permutation against a fresh per-permutation GameState copy while firing
 // hero triggers, Aura handlers, and per-attack OnHit closures.
@@ -8,7 +8,7 @@ package sim
 // State lifecycle:
 //   - findBest builds a master *GameState once per Best call.
 //   - evaluatePartition copies the master into a per-leaf state, runs defense, then
-//     enumerates chain permutations against fresh leafState copies so per-permutation
+//     enumerates attack-turn permutations against fresh leafState copies so per-permutation
 //     mutations stay isolated. The winning copy's *GameState is the partition's result.
 
 import (
@@ -36,7 +36,7 @@ func newSequenceContext(
 	d *deck.Deck,
 	bufs *attackBufs,
 	blockTotal, arsenalInIdx int,
-	arsenalAtChainStart card.Card,
+	arsenalAtAttackTurnStart card.Card,
 ) *sequenceContext {
 	ctx := bufs.pooledSequenceCtx
 	if ctx == nil {
@@ -44,21 +44,21 @@ func newSequenceContext(
 		bufs.pooledSequenceCtx = ctx
 	}
 	*ctx = sequenceContext{
-		pitched:             pitched,
-		attackers:           attackers,
-		deck:                d,
-		handStart:           held,
-		arsenalAtChainStart: arsenalAtChainStart,
-		bufs:                bufs,
-		runechantCarryover:  auraCountByNameInState(masterState, "Runechant"),
-		blockTotal:          blockTotal,
-		arsenalInIdx:        arsenalInIdx,
-		priorOpponentMarked: masterState.OpponentMarked(),
-		priorBanish:         masterState.Banished(),
-		priorGraveyard:      masterState.Graveyard(),
-		defenders:           defenders,
-		startOfTurnValue:    masterState.Value(),
-		cacheable:           true,
+		pitched:                  pitched,
+		attackers:                attackers,
+		deck:                     d,
+		handStart:                held,
+		arsenalAtAttackTurnStart: arsenalAtAttackTurnStart,
+		bufs:                     bufs,
+		runechantCarryover:       auraCountByNameInState(masterState, "Runechant"),
+		blockTotal:               blockTotal,
+		arsenalInIdx:             arsenalInIdx,
+		priorOpponentMarked:      masterState.OpponentMarked(),
+		priorBanish:              masterState.Banished(),
+		priorGraveyard:           masterState.Graveyard(),
+		defenders:                defenders,
+		startOfTurnValue:         masterState.Value(),
+		cacheable:                true,
 	}
 	abilities := bufs.activatedAbilities[:bufs.weaponAbilityCount]
 	abilityCosts := bufs.activatedAbilityCosts[:bufs.weaponAbilityCount]
@@ -124,9 +124,9 @@ func bestAttackWithWeapons(
 	d *deck.Deck,
 	bufs *attackBufs,
 	blockTotal, arsenalInIdx, arsenalDefenderIdx int,
-	arsenalAtChainStart card.Card,
-) (int, int, chainBudget, []string, *gameengine.GameState, bool, bool) {
-	ctx := newSequenceContext(masterState, weapons, attackers, defenders, pitched, held, d, bufs, blockTotal, arsenalInIdx, arsenalAtChainStart)
+	arsenalAtAttackTurnStart card.Card,
+) (int, int, attackTurnBudget, []string, *gameengine.GameState, bool, bool) {
+	ctx := newSequenceContext(masterState, weapons, attackers, defenders, pitched, held, d, bufs, blockTotal, arsenalInIdx, arsenalAtAttackTurnStart)
 	defer ctx.releaseLeafState()
 	// Cleared up front so a partition with no defenders leaves an empty defender capture.
 	bufs.defModes = bufs.defModes[:0]
@@ -169,9 +169,9 @@ func bestAttackWithWeapons(
 
 	copy(bufs.attackerBuf, attackers)
 
-	var bestScore, bestTotalScore chainScore
+	var bestScore, bestTotalScore attackTurnScore
 	var bestSwung []string
-	var bestBudget chainBudget
+	var bestBudget attackTurnBudget
 	var bestWinner *gameengine.GameState
 	foundFeasible := false
 
@@ -222,7 +222,7 @@ func bestAttackWithWeapons(
 			continue
 		}
 		if hasModalBlocker {
-			// Defense resolves before the attack chain. A modal blocker's block depends on
+			// Defense resolves before the attack turn. A modal blocker's block depends on
 			// phase.defendBudget, so the defense pass runs once per phase here.
 			installLeafDeck(ctx, bufs, d)
 			defenseDealt, defenseCacheable, ctx.handStart = ctx.runDefense(defenders, pitched, held, ctx.deck, incoming, phase.defendBudget-drCost, arsenalDefenderIdx, nil)
@@ -260,7 +260,7 @@ func bestAttackWithWeapons(
 				bestDefenseDealt = defenseDealt
 				bestDefenseCacheable = defenseCacheable
 				bestSwung = bufs.weaponNames[wmask&weaponBitsMask]
-				bestBudget = chainBudget{resource: phase.attackBudget, maxPitch: phase.maxAttackPitch, hasAttackPitches: phase.hasAttackPitches}
+				bestBudget = attackTurnBudget{resource: phase.attackBudget, maxPitch: phase.maxAttackPitch, hasAttackPitches: phase.hasAttackPitches}
 				// Hand the superseded leaf-best back to the pool so the next preparePermState
 				// reuses its struct + slice backings.
 				bufs.statePool.Put(bestWinner)
@@ -279,7 +279,7 @@ func bestAttackWithWeapons(
 	}
 
 	if !foundFeasible {
-		return 0, 0, chainBudget{}, nil, nil, false, defenseCacheable
+		return 0, 0, attackTurnBudget{}, nil, nil, false, defenseCacheable
 	}
 	return bestScore.value, bestDefenseDealt, bestBudget, bestSwung, bestWinner, true, ctx.cacheable && bestDefenseCacheable
 }
@@ -308,27 +308,27 @@ func (ctx *sequenceContext) drCostProbe(runechants int) *gameengine.GameEngine {
 
 // sequenceContext carries the stable per-partition-leaf environment.
 type sequenceContext struct {
-	pitched               []card.Card
-	attackers             []card.Card
-	deck                  *deck.Deck
-	handStart             []card.Card
-	arsenalAtChainStart   card.Card
-	bufs                  *attackBufs
-	attackPitchPerm       []card.Card
-	attackPitchVals       []int
-	resourceBudget        int
-	runechantCarryover    int
-	blockTotal            int
-	arsenalInIdx          int
-	priorOpponentMarked   bool
-	priorBanish           []card.Card
-	priorGraveyard        []card.Card
-	activatedAbilities    []card.Card
-	activatedAbilityCosts []int
-	defenders             []card.Card
-	leafState             *gameengine.GameState
+	pitched                  []card.Card
+	attackers                []card.Card
+	deck                     *deck.Deck
+	handStart                []card.Card
+	arsenalAtAttackTurnStart card.Card
+	bufs                     *attackBufs
+	attackPitchPerm          []card.Card
+	attackPitchVals          []int
+	resourceBudget           int
+	runechantCarryover       int
+	blockTotal               int
+	arsenalInIdx             int
+	priorOpponentMarked      bool
+	priorBanish              []card.Card
+	priorGraveyard           []card.Card
+	activatedAbilities       []card.Card
+	activatedAbilityCosts    []int
+	defenders                []card.Card
+	leafState                *gameengine.GameState
 	// startOfTurnValue is masterState.Value() captured at construction and re-seeded into each
-	// per-perm state after ResetEphemeralState — chain accumulators ride on top of the
+	// per-perm state after ResetEphemeralState — attack-turn accumulators ride on top of the
 	// start-of-action-phase aura tick, so summary.Value includes that baseline.
 	startOfTurnValue int
 	cacheable        bool
@@ -336,7 +336,7 @@ type sequenceContext struct {
 	// stream inline. PrintBestTurn sets it to a stdout StreamLogger; the eval hot path
 	// leaves it nil so the state's NoopLogger keeps emissions free.
 	replayLogger card.Logger
-	// permState records the last *GameState playSequence ran the chain against, so the
+	// permState records the last *GameState playSequence ran the attack turn against, so the
 	// test-only PermEngine accessor can read it. The hot bestSequence path threads the
 	// winner through return values and leaves this nil.
 	permState *gameengine.GameState
@@ -355,7 +355,7 @@ func (ctx *sequenceContext) permEngine(state *gameengine.GameState) *gameengine.
 
 // runDefense mutates ctx.leafState through the defender list, accumulating per-DR Value.
 // Auras grow with any DR-added entries; graveyard is left as priorGraveyard + defenders for
-// the chain phase. Per-permutation chain-locals reset via ResetEphemeralState, so runDefense
+// the attack turn phase. Per-permutation per-turn-locals reset via ResetEphemeralState, so runDefense
 // doesn't restore them.
 //
 // SetIncomingDamage installs the matchup figure once and zeroes the damage-blocked
@@ -376,7 +376,7 @@ func (ctx *sequenceContext) runDefense(defenders, pitched, held []card.Card, dec
 	state.SetDeck(deckPile)
 	state.SetIncomingDamage(matchupIncomingDamage)
 	// Baseline leafState's graveyard to priorGraveyard. Defending cards move to
-	// graveyard only when the chain closes (the post-block append below).
+	// graveyard only when the attack turn closes (the post-block append below).
 	state.SetGraveyard(append(state.Graveyard()[:0], ctx.priorGraveyard...))
 	ge := ctx.permEngine(state)
 	cs := &ctx.bufs.drCardStateScratch
@@ -419,7 +419,7 @@ func (ctx *sequenceContext) runDefense(defenders, pitched, held []card.Card, dec
 		state.SetValue(0)
 		state.SetCacheable(true)
 		*cs = card.CardState{Card: def, FromArsenal: i == arsenalDefenderIdx}
-		ge.ResolveChainStep(state.Logger(), cs)
+		ge.ResolveAttackStep(state.Logger(), cs)
 		total += state.Value()
 		if !state.IsCacheable() {
 			cacheable = false
@@ -482,10 +482,10 @@ func (ctx *sequenceContext) runDefense(defenders, pitched, held []card.Card, dec
 	return total, cacheable, survivingHeld
 }
 
-// preparePermState returns a fresh per-permutation *GameState for the chain run. The state
+// preparePermState returns a fresh per-permutation *GameState for the attack turn run. The state
 // inherits leafState's post-defense auras / items / graveyard / banished / hero / arsenal;
 // ResetEphemeralState wipes the previous perm's play state, then this perm's inputs install.
-// Hand = chain attackers + attack-phase pitched bag, so Hand() reads see the upcoming bag.
+// Hand = attack-turn attackers + attack-phase pitched bag, so Hand() reads see the upcoming bag.
 //
 // IncomingDamage is not re-installed: the matchup figure rode in constant on leafState and
 // ResetEphemeralState zeroed the damage-blocked accumulator.
@@ -498,10 +498,10 @@ func (ctx *sequenceContext) preparePermState(playedAttackers []*card.CardState, 
 	// Hero / opponentMarked already mirror leafState (which mirrors masterState). Only
 	// arsenal and blockTotal need explicit setting: arsenal may have been promoted out of
 	// the leaf via findArsenalCard, and blockTotal is zeroed by ResetEphemeralState.
-	s.SetArsenal(ctx.arsenalAtChainStart)
+	s.SetArsenal(ctx.arsenalAtAttackTurnStart)
 	s.SetBlockTotal(ctx.blockTotal)
 	// graveyard / banished arrived via CopyPersistentStateFrom, copied into s's own
-	// prewarmed backing — chain-runner appends mutate this slot's storage only. The deck
+	// prewarmed backing — attack-turn runner appends mutate this slot's storage only. The deck
 	// wrapper s owns is rebound in place to alias ctx.deck's backing.
 	s.Deck().ShallowCopyFrom(ctx.deck)
 	// Build the per-perm hand into s's prewarmed backing. A cap shortfall means the
@@ -523,7 +523,7 @@ func (ctx *sequenceContext) preparePermState(playedAttackers []*card.CardState, 
 		hand = append(hand, card.CardState{Card: c, Role: card.Pitch})
 	}
 	s.SetHandStates(hand)
-	// CardsPlayed is similarly prewarmed; the cap check guards mid-chain growth.
+	// CardsPlayed is similarly prewarmed; the cap check guards mid-attack-turn growth.
 	cpNeeded := n + len(ctx.attackPitchPerm)
 	cp := s.CardsPlayed()
 	if cap(cp) < cpNeeded {
@@ -553,13 +553,13 @@ func (ctx *sequenceContext) captureWinningSeq(pcBuf []card.CardState, pitchPerm 
 }
 
 // bestSequence tries every ordering of attackers and returns the winning permutation's
-// chainScore. legal=true when at least one ordering is playable. Returns the winning
+// attackTurnScore. legal=true when at least one ordering is playable. Returns the winning
 // *GameState via the second return value.
-func (ctx *sequenceContext) bestSequence(attackers []card.Card) (chainScore, *gameengine.GameState, bool) {
+func (ctx *sequenceContext) bestSequence(attackers []card.Card) (attackTurnScore, *gameengine.GameState, bool) {
 	n := len(attackers)
 	if n == 0 {
 		if len(ctx.attackPitchPerm) > 0 {
-			return chainScore{}, nil, false
+			return attackTurnScore{}, nil, false
 		}
 		emptyAttackers := ctx.bufs.ptrBuf[:0]
 		permState := ctx.preparePermState(emptyAttackers, 0)
@@ -567,16 +567,16 @@ func (ctx *sequenceContext) bestSequence(attackers []card.Card) (chainScore, *ga
 		ge.FireTriggers(triggertype.EndOfTurn, nil)
 		ctx.captureWinningSeq(nil, nil)
 		// permState.Value() carries the seeded baseline plus any EndOfTurn fire delta.
-		return chainScoreOf(permState, permState.Value()), permState, true
+		return attackTurnScoreOf(permState, permState.Value()), permState, true
 	}
 	pcBuf := ctx.bufs.pcBuf[:n]
 	permMeta := ctx.bufs.permMeta[:n]
 	for idx, c := range attackers {
 		permMeta[idx] = attackerMetaPtrFor(c)
-		ctx.seedChainEntry(&pcBuf[idx], c, idx)
+		ctx.seedAttackStepEntry(&pcBuf[idx], c, idx)
 	}
 
-	var bestScore chainScore
+	var bestScore attackTurnScore
 	var bestWinner *gameengine.GameState
 	foundLegal := false
 	pitchPerm := ctx.attackPitchPerm
@@ -599,7 +599,7 @@ func (ctx *sequenceContext) bestSequence(attackers []card.Card) (chainScore, *ga
 			if ctx.cacheable && !winner.IsCacheable() {
 				ctx.cacheable = false
 			}
-			score := chainScoreOf(winner, dmg)
+			score := attackTurnScoreOf(winner, dmg)
 			if !foundLegal || score.cmp(bestScore) > 0 {
 				bestScore = score
 				foundLegal = true
@@ -741,14 +741,14 @@ func (ctx *sequenceContext) playSequence(order []card.Card) (damage int, totalCo
 	meta := ctx.bufs.permMeta[:n]
 	for i, c := range order {
 		meta[i] = attackerMetaPtrFor(c)
-		ctx.seedChainEntry(&pcBuf[i], c, i)
+		ctx.seedAttackStepEntry(&pcBuf[i], c, i)
 	}
 	d, tc, rb, winner, lg := ctx.playSequenceWithMeta(n)
 	ctx.permState = winner
 	return d, tc, rb, lg
 }
 
-// playSequenceModal is playSequence for a cache replay: it seeds each chain step from a
+// playSequenceModal is playSequence for a cache replay: it seeds each attack step from a
 // playedCard, applying the cached modal Mode rather than the default 0. The winning state
 // lands on ctx.permState.
 func (ctx *sequenceContext) playSequenceModal(order []playedCard) (damage int, totalCounters int, residualBudget int, legal bool) {
@@ -757,7 +757,7 @@ func (ctx *sequenceContext) playSequenceModal(order []playedCard) (damage int, t
 	meta := ctx.bufs.permMeta[:n]
 	for i, pc := range order {
 		meta[i] = attackerMetaPtrFor(pc.card)
-		ctx.seedChainEntry(&pcBuf[i], pc.card, i)
+		ctx.seedAttackStepEntry(&pcBuf[i], pc.card, i)
 		pcBuf[i].Mode = pc.mode
 		pcBuf[i].FromArsenal = pc.fromArsenal
 	}
@@ -766,10 +766,10 @@ func (ctx *sequenceContext) playSequenceModal(order []playedCard) (damage int, t
 	return d, tc, rb, lg
 }
 
-// seedChainEntry initialises one pcBuf slot: bind (Card, FromArsenal, Mode) and zero every
-// ephemeral field. Mode is reseeded per modal tuple by the chain runner; initial 0 covers
+// seedAttackStepEntry initialises one pcBuf slot: bind (Card, FromArsenal, Mode) and zero every
+// ephemeral field. Mode is reseeded per modal tuple by the attack-turn runner; initial 0 covers
 // non-modal attackers.
-func (ctx *sequenceContext) seedChainEntry(pc *card.CardState, c card.Card, idx int) {
+func (ctx *sequenceContext) seedAttackStepEntry(pc *card.CardState, c card.Card, idx int) {
 	pc.Card = c
 	pc.FromArsenal = idx == ctx.arsenalInIdx
 	pc.Mode = 0
@@ -822,9 +822,9 @@ func (ctx *sequenceContext) playSequenceWithMeta(n int) (damage int, totalCounte
 	}
 	for i, pc := range played {
 		m := meta[i]
-		// RemoveFromHand returns false when an earlier chain step moved this card out of
+		// RemoveFromHand returns false when an earlier attack step moved this card out of
 		// hand (e.g. DiscardToTopOfDeck alt cost). The partition planned against the
-		// pre-chain hand; if the card is gone, reject so the optimiser doesn't credit a
+		// pre-attack-turn hand; if the card is gone, reject so the optimiser doesn't credit a
 		// phantom play.
 		if !state.RemoveFromHand(pc.Card) {
 			return infeasible()
@@ -852,7 +852,7 @@ func (ctx *sequenceContext) playSequenceWithMeta(n int) (damage int, totalCounte
 			}
 			ge.FireTriggers(triggertype.CardOrAbility, pc.Card)
 			state.SetAttackReactionTarget(activeAttack)
-			ge.ResolveChainStep(state.Logger(), pc)
+			ge.ResolveAttackStep(state.Logger(), pc)
 			state.SetAttackReactionTarget(nil)
 			state.AppendCardsPlayed(pc.Card)
 			state.AppendGraveyard(pc.Card)
@@ -864,9 +864,9 @@ func (ctx *sequenceContext) playSequenceWithMeta(n int) (damage int, totalCounte
 
 		finalizeActiveAttack()
 		// Runs after finalizeActiveAttack so an earlier attack's on-hit rider has its chance
-		// to set GrantedInstant. The free-chain-step check dispatches per-mode for
+		// to set GrantedInstant. The free-attack-step check dispatches per-mode for
 		// ModalTypes cards (Tip-Off mode 1 reads as Instant → 0 AP).
-		if !m.isFreeChainStepWithMode(pc.Mode) && !pc.GrantedInstant {
+		if !m.isFreeAttackStepWithMode(pc.Mode) && !pc.GrantedInstant {
 			if state.ActionPoints() <= 0 {
 				return infeasible()
 			}
@@ -884,14 +884,14 @@ func (ctx *sequenceContext) playSequenceWithMeta(n int) (damage int, totalCounte
 		// CardOrAbility fires before the card resolves so play-triggered effects land ahead
 		// of the played card's own effect.
 		ge.FireTriggers(triggertype.CardOrAbility, pc.Card)
-		ge.ResolveChainStep(state.Logger(), pc)
+		ge.ResolveAttackStep(state.Logger(), pc)
 		// ModalTypes cards (Tip-Off) read different is-attack / type-line values per Mode.
 		// Resolve once and route the attack / non-attack-action / persistence checks off
 		// the same TypeSet.
 		modeTypes := m.typesWithMode(pc.Mode)
 		if modeTypes.Has(card.TypeAttack) {
 			// Mark is consumed only when the marked hero takes damage. A 0-power swing can't
-			// strip the mark, so downstream chain steps can still read it.
+			// strip the mark, so downstream attack steps can still read it.
 			if pc.EffectiveAttack() > 0 {
 				state.ClearOpponentMarked()
 			}
@@ -917,7 +917,7 @@ func (ctx *sequenceContext) playSequenceWithMeta(n int) (damage int, totalCounte
 	return state.Value(), pendingTotalCountersFromState(state), pool.remaining, state, true
 }
 
-// pendingTotalCountersFromState sums Count over Auras + Items at end of chain — the
+// pendingTotalCountersFromState sums Count over Auras + Items at end of attack turn — the
 // partition's secondary tiebreaker. Counts pending aura fires and token stockpile at
 // 1:1 weight, weaker than a real card in hand (see pendingTotalCardsFromState).
 func pendingTotalCountersFromState(gs *gameengine.GameState) int {
@@ -934,10 +934,10 @@ func pendingTotalCountersFromState(gs *gameengine.GameState) int {
 	return total
 }
 
-// chainScoreOf builds a leaf's chainScore from its end-of-chain winner state and the
+// attackTurnScoreOf builds a leaf's attackTurnScore from its end-of-attack-turn winner state and the
 // damage / block value credited this turn.
-func chainScoreOf(winner *gameengine.GameState, value int) chainScore {
-	return chainScore{
+func attackTurnScoreOf(winner *gameengine.GameState, value int) attackTurnScore {
+	return attackTurnScore{
 		value:         value,
 		cardsPlayed:   len(winner.CardsPlayed()),
 		totalCards:    pendingTotalCardsFromState(winner),
@@ -947,8 +947,8 @@ func chainScoreOf(winner *gameengine.GameState, value int) chainScore {
 
 // pendingTotalCardsFromState projects cards available next turn: post-refill hand (held
 // topped up to intellect) plus an occupied arsenal. Scoring post-refill rather than the bare
-// end-of-chain hand lets the tiebreaker credit a chain that empties hand into attacks.
-// Refill is uncapped, so a near-decked-out chain is scored slightly optimistically.
+// end-of-attack-turn hand lets the tiebreaker credit an attack turn that empties hand into attacks.
+// Refill is uncapped, so a near-decked-out attack turn is scored slightly optimistically.
 func pendingTotalCardsFromState(gs *gameengine.GameState) int {
 	if gs == nil {
 		return 0
