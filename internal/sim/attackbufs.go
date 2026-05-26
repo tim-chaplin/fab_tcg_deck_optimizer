@@ -3,7 +3,6 @@ package sim
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/aura"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/gameengine"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapon"
 )
@@ -61,15 +60,6 @@ type attackBufs struct {
 	// Evaluator caches shares the same pointer, so all *GameState borrows (leafState,
 	// per-perm chain scratch, per-shuffle carry) draw from one fixed budget.
 	statePool *gameengine.Pool
-	// pooledDeck is the recycled *Deck wrapper; preparePermState rebinds its slice headers
-	// to alias ctx.deck. The winning perm's wrapper is cloned out via promoteWinnerDeck so
-	// the next perm can rebind safely.
-	pooledDeck *deck.Deck
-	// pooledLeafDeck is the per-leaf scratch *Deck wrapper, ShallowCopied from the master
-	// deck before runDefense so DR Plays (Rise Above's PrependToDeck, an Opt-ing DR, …)
-	// mutate it instead of the shared master. ctx.deck rebinds to this wrapper so
-	// preparePermState's ShallowCopyFrom propagates the post-DR state into the per-perm chain.
-	pooledLeafDeck *deck.Deck
 	// pooledEngine wraps the active permState; rebound per perm. The wrapper itself holds
 	// no state, and no caller stashes ge across perms.
 	pooledEngine *gameengine.GameEngine

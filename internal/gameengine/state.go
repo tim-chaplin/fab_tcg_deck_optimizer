@@ -185,15 +185,14 @@ func (gs *GameState) CopyFrom(src *GameState) {
 	}
 	gs.auras = copyAurasInto(pooledAuras, src.auras)
 	gs.items = copyItemsInto(pooledItems, src.items)
-	if src.deck != nil {
-		if pooledDeck != nil {
-			pooledDeck.CopyFrom(src.deck)
-			gs.deck = pooledDeck
-		} else {
-			gs.deck = src.deck.Copy()
-		}
-	} else {
-		gs.deck = nil
+	if pooledDeck != nil {
+		// Receiver owns a wrapper (pool slot prewarm); rebind its slice headers to src's
+		// content rather than deep-copying. ShallowCopyFrom handles src==nil too.
+		pooledDeck.ShallowCopyFrom(src.deck)
+		gs.deck = pooledDeck
+	} else if src.deck != nil {
+		// Non-pool receivers (no prewarmed wrapper): deep copy keeps them independent of src.
+		gs.deck = src.deck.Copy()
 	}
 }
 
@@ -340,6 +339,10 @@ func (gs *GameState) Reset(h Hero, weapons []weapon.Weapon, incoming, arcaneInco
 	banished := gs.banished[:0]
 	auras := gs.auras[:0]
 	items := gs.items[:0]
+	deckWrapper := gs.deck
+	if deckWrapper != nil {
+		deckWrapper.ShallowCopyFrom(nil)
+	}
 	eph := gs.ephemeral
 	*gs = GameState{
 		hand:                 hand,
@@ -350,6 +353,7 @@ func (gs *GameState) Reset(h Hero, weapons []weapon.Weapon, incoming, arcaneInco
 		weapons:              weapons,
 		incomingDamage:       incoming,
 		arcaneIncomingDamage: arcaneIncoming,
+		deck:                 deckWrapper,
 		ephemeral:            eph,
 	}
 	gs.ephemeral.reset()

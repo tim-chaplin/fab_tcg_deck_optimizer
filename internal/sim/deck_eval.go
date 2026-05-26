@@ -389,11 +389,11 @@ func endOfTurnDraws(heldLen, intellect int) int {
 	return 0
 }
 
-// advanceToNextTurn clears per-turn ephemerals (value, cardsPlayed, ...) and detaches any
-// stale deck pointer. Idempotent on a freshly-built state.
+// advanceToNextTurn clears per-turn ephemerals (value, cardsPlayed, ...). Idempotent on
+// a freshly-built state. The deck pointer is left untouched — pool slots own a *Deck
+// wrapper across resets, and the chain runner rebinds its contents via ShallowCopyFrom.
 func advanceToNextTurn(state *gameengine.GameState) {
 	state.ResetEphemeralState()
-	state.SetDeck(nil)
 }
 
 // mergeStatsInto folds src's per-shuffle accumulators into dst. PerCardMarginal merging
@@ -466,9 +466,13 @@ func processAurasAtStartOfTurn(state *gameengine.GameState, d *deck.Deck) {
 	if len(state.Auras()) == 0 {
 		return
 	}
+	// Swap state's deck pointer to d so aura handlers (DrawOne / RevealTopOfDeck /
+	// BanishTopOfDeck) mutate the master deck directly, then restore. The pool slot's
+	// owned wrapper is preserved across the swap.
+	saved := state.Deck()
 	state.SetDeck(d)
 	state.Engine().FireTriggers(triggertype.StartOfTurn, nil)
-	state.SetDeck(nil)
+	state.SetDeck(saved)
 }
 
 // pitchedFromBestLine returns BestLine's Pitch-role cards (excluding the arsenal-in slot,

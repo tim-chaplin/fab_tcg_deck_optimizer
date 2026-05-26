@@ -106,17 +106,12 @@ func (ctx *sequenceContext) releaseLeafState() {
 	ctx.leafState = nil
 }
 
-// installLeafDeck refreshes bufs.pooledLeafDeck from the master deck d and rebinds ctx.deck.
-// Run before runDefense so DR Plays (Rise Above's PrependToDeck, an Opt-ing DR, ...) mutate
-// the leaf-scoped wrapper rather than the master shared across leaves. The wrapper is
-// recycled across leaves; only its slice headers reset.
-func installLeafDeck(ctx *sequenceContext, bufs *attackBufs, d *deck.Deck) {
-	if bufs.pooledLeafDeck == nil {
-		bufs.pooledLeafDeck = d.ShallowCopy()
-	} else {
-		bufs.pooledLeafDeck.ShallowCopyFrom(d)
-	}
-	ctx.deck = bufs.pooledLeafDeck
+// installLeafDeck rebinds leafState's owned *deck.Deck wrapper to alias master deck d.
+// Run before runDefense so DR Plays (Rise Above's PrependToDeck, an Opt-ing DR, ...)
+// mutate the leaf-scoped wrapper rather than the master shared across leaves.
+func installLeafDeck(ctx *sequenceContext, _ *attackBufs, d *deck.Deck) {
+	ctx.leafState.Deck().ShallowCopyFrom(d)
+	ctx.deck = ctx.leafState.Deck()
 }
 
 // bestAttackWithWeapons enumerates phase / weapon masks for one partition leaf and
@@ -150,7 +145,6 @@ func bestAttackWithWeapons(
 		ctx.leafState.SetIsMyTurn(false)
 		ctx.permEngine(ctx.leafState).FireTriggers(triggertype.DamageTaken, nil)
 	}
-	ctx.leafState.SetDeck(nil)
 	defenseDealt := defenseDealtConst
 	defenseCacheable := defenseCacheableConst
 	// Stay paired with bestWinner / sol.defenders; the loop-scoped defenseDealt is
@@ -359,20 +353,6 @@ func (ctx *sequenceContext) permEngine(state *gameengine.GameState) *gameengine.
 	return ctx.bufs.pooledEngine
 }
 
-// promoteWinnerDeck swaps winner's pooled-deck pointer for a fresh wrapper so the next perm
-// can reset bufs.pooledDeck without trampling the winner. The clone reuses the same shared
-// slice backings (cap=len), so append-only mutations on either side still allocate fresh.
-func (ctx *sequenceContext) promoteWinnerDeck(winner *gameengine.GameState) {
-	if winner == nil {
-		return
-	}
-	winnerDeck := winner.Deck()
-	if winnerDeck != ctx.bufs.pooledDeck {
-		return
-	}
-	winner.SetDeck(winnerDeck.ShallowCopy())
-}
-
 // appendExcludingMultiset appends src to dst, skipping the first occurrence of each card in
 // exclude (multiset semantics). Used by runDefense to keep DR-banished defenders out of the
 // post-defense graveyard.
@@ -545,9 +525,6 @@ func (ctx *sequenceContext) runDefense(defenders, pitched, held []card.Card, dec
 //
 // IncomingDamage is not re-installed: the matchup figure rode in constant on leafState and
 // ResetEphemeralState zeroed the damage-blocked accumulator.
-//
-// Deck wrapper recycling: ctx.bufs.pooledDeck is the scratch wrapper reused across perms;
-// promoteWinnerDeck clones the wrapper out before the next perm runs, so this slot is free.
 func (ctx *sequenceContext) preparePermState(playedAttackers []*card.CardState, n int) *gameengine.GameState {
 	bufs := ctx.bufs
 	s := bufs.statePool.Get()
@@ -560,13 +537,9 @@ func (ctx *sequenceContext) preparePermState(playedAttackers []*card.CardState, 
 	s.SetArsenal(ctx.arsenalAtChainStart)
 	s.SetBlockTotal(ctx.blockTotal)
 	// graveyard / banished arrived via CopyPersistentStateFrom, copied into s's own
-	// prewarmed backing — chain-runner appends mutate this slot's storage only.
-	if bufs.pooledDeck == nil {
-		bufs.pooledDeck = ctx.deck.ShallowCopy()
-	} else {
-		bufs.pooledDeck.ShallowCopyFrom(ctx.deck)
-	}
-	s.SetDeck(bufs.pooledDeck)
+	// prewarmed backing — chain-runner appends mutate this slot's storage only. The deck
+	// wrapper s owns is rebound in place to alias ctx.deck's backing.
+	s.Deck().ShallowCopyFrom(ctx.deck)
 	// Build the per-perm hand into s's prewarmed backing. A cap shortfall means the
 	// workload outgrew gameengine's defaultHandCap — bump it rather than fall back to
 	// per-call alloc.
@@ -629,7 +602,6 @@ func (ctx *sequenceContext) bestSequence(attackers []card.Card) (chainScore, *ga
 		ge := ctx.permEngine(permState)
 		ge.FireTriggers(triggertype.EndOfTurn, nil)
 		ctx.captureWinningSeq(nil, nil)
-		ctx.promoteWinnerDeck(permState)
 		// permState.Value() carries the seeded baseline plus any EndOfTurn fire delta.
 		return chainScoreOf(permState, permState.Value()), permState, true
 	}
@@ -669,11 +641,10 @@ func (ctx *sequenceContext) bestSequence(attackers []card.Card) (chainScore, *ga
 				foundLegal = true
 				// Hand the superseded prior best back to the pool so the next perm's
 				// preparePermState reuses it; each pool slot owns its own graveyard /
-				// banished / hand backings, so no per-promotion clone is needed.
+				// banished / hand / deck backings, so no per-promotion clone is needed.
 				ctx.bufs.statePool.Put(bestWinner)
 				bestWinner = winner
 				ctx.captureWinningSeq(pcBuf, pitchPerm)
-				ctx.promoteWinnerDeck(winner)
 			} else {
 				// Loser: state is no longer referenced — return to the pool so the next
 				// perm reuses it instead of allocating fresh.
