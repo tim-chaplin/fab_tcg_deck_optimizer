@@ -91,7 +91,7 @@ func TestCopyPersistentState_GraveyardIsolatedFromSpliceOnSource(t *testing.T) {
 	a := fakeCard{name: "A"}
 	b := fakeCard{name: "B"}
 	c := fakeCard{name: "C"}
-	gs := &GameState{}
+	gs := GameStateBuilder().Build()
 	gs.graveyard = []card.Card{a, b, c}
 
 	snap := gs.CopyPersistentState()

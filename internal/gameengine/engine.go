@@ -2,6 +2,7 @@ package gameengine
 
 import (
 	"fmt"
+	"math/bits"
 	"sort"
 	"strings"
 	"sync/atomic"
@@ -482,29 +483,27 @@ func (ge *GameEngine) FireTriggers(t triggertype.Type, triggeringCard card.Card)
 		triggeringTypes = triggeringCard.Types(ge)
 	}
 
-	// Snapshot which token slots were already live at fire-time. fireHooks() uses
+	// Snapshot which token slots are live at fire-time. fireHooks uses
 	// `n := len(*hooks)` for the same reason: a token created by an aura/trigger fired
 	// during this FireTriggers call must not fire on the same event (FaB rule: triggers
 	// only see events that happened *before* the trigger source entered the game). The
-	// snapshot lets fireTokenAuras / fireTokenItems skip slots whose count rose from 0
-	// to positive during this pass.
-	var liveTokenAuras [numTokenAuraKinds]bool
-	var liveTokenItems [numTokenItemKinds]bool
-	for i, a := range ge.tokenAuras {
-		liveTokenAuras[i] = a != nil && a.Count() > 0
-	}
-	for i, it := range ge.tokenItems {
-		liveTokenItems[i] = it != nil && it.Count() > 0
-	}
+	// liveBits caches mean the snapshot is a single byte load instead of an N-slot
+	// interface walk.
+	liveAuraBits := ge.tokenAurasLiveBits
+	liveItemBits := ge.tokenItemsLiveBits
 
 	if heroFires {
 		fireHero(ge, triggeringCard, triggeringTypes)
 	}
 	fireHooks(ge, &ge.auras, t, triggeringCard, triggeringTypes, false)
-	fireTokenAuras(ge, t, triggeringCard, triggeringTypes, liveTokenAuras)
+	if liveAuraBits != 0 {
+		fireTokenAuras(ge, t, triggeringCard, triggeringTypes, liveAuraBits)
+	}
 	fireHooks(ge, &ge.triggers, t, triggeringCard, triggeringTypes, true)
 	fireHooks(ge, &ge.items, t, triggeringCard, triggeringTypes, false)
-	fireTokenItems(ge, t, triggeringCard, triggeringTypes, liveTokenItems)
+	if liveItemBits != 0 {
+		fireTokenItems(ge, t, triggeringCard, triggeringTypes, liveItemBits)
+	}
 
 	ge.triggeringCard = nil
 }
@@ -560,19 +559,22 @@ func fireHooks[H trigger.Hook](ge *GameEngine, hooks *[]H, t triggertype.Type, t
 	ge.currentHookIdx = -1
 }
 
-// fireTokenAuras walks the fixed-size tokenAuras array, firing every slot whose count
-// is > 0, whose hook gate / type-filter accepts the event, AND that was already live at
-// fire-time per liveAtStart. The liveAtStart guard mirrors fireHooks's snapshot length
-// trick: a token created mid-FireTriggers can't fire on the same event.
-// Publishes currentFiringTokenAura before each Fire so DestroyAura routes to the slot's
-// SetCount(0) path.
-func fireTokenAuras(ge *GameEngine, t triggertype.Type, triggeringCard card.Card, triggeringTypes card.TypeSet, liveAtStart [numTokenAuraKinds]bool) {
-	for i := range ge.tokenAuras {
-		if !liveAtStart[i] {
-			continue
-		}
+// fireTokenAuras walks the live token-aura slots indicated by liveAtStart (a snapshot
+// of tokenAurasLiveBits taken at FireTriggers entry), firing each whose hook gate /
+// type-filter accepts the event. The liveAtStart guard mirrors fireHooks's snapshot
+// length trick: a token created mid-FireTriggers won't have its bit set here, so it
+// can't fire on the same event. Publishes currentFiringTokenAura before each Fire so
+// DestroyAura routes to the slot's SetCount(0) path.
+func fireTokenAuras(ge *GameEngine, t triggertype.Type, triggeringCard card.Card, triggeringTypes card.TypeSet, liveAtStart uint8) {
+	for mask := liveAtStart; mask != 0; {
+		low := mask & -mask
+		i := bits.TrailingZeros8(low)
+		mask ^= low
 		a := ge.tokenAuras[i]
-		if a == nil || a.Count() == 0 {
+		// Re-check count: a prior token's Fire in this same pass may have routed
+		// through DestroyAura and zeroed this slot via the currentFiringTokenAura
+		// path. liveAtStart only guarantees the slot was live at entry.
+		if a.Count() == 0 {
 			continue
 		}
 		if a.TriggerType()&t == 0 || (a.OncePerTurn() && a.FiredThisTurn()) ||
@@ -590,13 +592,13 @@ func fireTokenAuras(ge *GameEngine, t triggertype.Type, triggeringCard card.Card
 }
 
 // fireTokenItems is the item-side counterpart of fireTokenAuras.
-func fireTokenItems(ge *GameEngine, t triggertype.Type, triggeringCard card.Card, triggeringTypes card.TypeSet, liveAtStart [numTokenItemKinds]bool) {
-	for i := range ge.tokenItems {
-		if !liveAtStart[i] {
-			continue
-		}
+func fireTokenItems(ge *GameEngine, t triggertype.Type, triggeringCard card.Card, triggeringTypes card.TypeSet, liveAtStart uint8) {
+	for mask := liveAtStart; mask != 0; {
+		low := mask & -mask
+		i := bits.TrailingZeros8(low)
+		mask ^= low
 		it := ge.tokenItems[i]
-		if it == nil || it.Count() == 0 {
+		if it.Count() == 0 {
 			continue
 		}
 		if it.TriggerType()&t == 0 || (it.OncePerTurn() && it.FiredThisTurn()) ||
@@ -626,6 +628,7 @@ func (ge *GameEngine) DestroyAura(addToGraveyard bool) {
 	// OnLeavesArena dance doesn't apply to them.
 	if ge.currentFiringTokenAura >= 0 {
 		ge.tokenAuras[ge.currentFiringTokenAura].SetCount(0)
+		ge.tokenAurasLiveBits &^= 1 << ge.currentFiringTokenAura
 		ge.currentHookDestroyed = true
 		return
 	}
@@ -657,6 +660,7 @@ func (ge *GameEngine) DestroyItem(addToGraveyard bool) {
 	// Token-item path: see DestroyAura.
 	if ge.currentFiringTokenItem >= 0 {
 		ge.tokenItems[ge.currentFiringTokenItem].SetCount(0)
+		ge.tokenItemsLiveBits &^= 1 << ge.currentFiringTokenItem
 		ge.currentHookDestroyed = true
 		return
 	}
@@ -949,4 +953,7 @@ func (ge *GameEngine) consumeTokenItem(kind tokenItemKind, n int) {
 		c = 0
 	}
 	it.SetCount(c)
+	if c == 0 {
+		ge.tokenItemsLiveBits &^= 1 << kind
+	}
 }
