@@ -73,17 +73,11 @@ type attackBufs struct {
 	// pooledEngine wraps the active permState; rebound per perm. The wrapper itself holds
 	// no state, and no caller stashes ge across perms.
 	pooledEngine *gameengine.GameEngine
-	// pooledGravBuf backs the per-perm graveyard. preparePermState seeds it from
-	// leafState.Graveyard() once per Best call and installs it on the pool state;
-	// mid-chain AppendGraveyard grows past the prefix. promoteWinnerState clones the
-	// winner's graveyard so the next reset can't scribble it. Hand and cardsPlayed
-	// backings live on each pooled GameState now and don't need their own buf field.
-	pooledGravBuf []card.Card
 	// runDefenseDRGravBuf and runDefenseChainGravBuf back the two graveyard views the
 	// defense pass installs on leafState: the DR-loop view (just defenders) and the
 	// post-defense view (priorGraveyard + defenders). Recycled across runDefense calls.
-	// preparePermState's gravBuf seed copies leafState's graveyard into its own backing
-	// before the perm runs, so aliasing the leafState's slice to these buffers is safe.
+	// preparePermState's CopyPersistentStateFrom copies leafState.Graveyard() into the
+	// perm slot's own backing, so the alias outlives only the defense pass.
 	runDefenseDRGravBuf    []card.Card
 	runDefenseChainGravBuf []card.Card
 	// runDefensePostDRHeldBuf backs the post-DR Held-only view of state.HandStates().

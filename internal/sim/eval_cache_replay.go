@@ -54,7 +54,6 @@ func (e *Evaluator) replayBest(
 		panic(fmt.Sprintf("replayBest: cached solution is infeasible — cache invariant violated (hand=%d, incoming=%d)",
 			len(hand), masterState.IncomingDamage()))
 	}
-	bufs.pooledSequenceCtx.promoteWinnerState(winner)
 
 	if postPromotedFromHeld >= 0 {
 		pcards[postPromotedFromHeld].role = card.Arsenal
@@ -108,7 +107,6 @@ func (e *Evaluator) replaySolution(
 		ctx.permEngine(ctx.leafState).FireTriggers(triggertype.DamageTaken, nil)
 	}
 	ctx.leafState.SetDeck(nil)
-	ctx.seedPoolGravBuf(len(entry.attackOrder), len(ctx.attackPitchPerm))
 
 	attackDealt, _, _, _ = ctx.playSequenceModal(entry.attackOrder)
 	// Clone the winner's deck wrapper out of bufs.pooledDeck so the caller's next-turn d

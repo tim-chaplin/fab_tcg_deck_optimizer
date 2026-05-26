@@ -62,6 +62,9 @@ func runEval(outPath string, shuffles int, precision float64, mp sim.Matchup, se
 // dedicated Evaluator's cache stats.
 func evaluateAndPersist(outPath string, shuffles int, precision float64, mp sim.Matchup, seed int64, debug bool) (*deck.Deck, deck.Stats) {
 	loaded, loadedStats := mustLoadDeck(outPath)
+	// Size the pool slots' graveyard/banished backings to this deck before any Evaluator
+	// gets constructed.
+	gameengine.MaxDeckSize = loaded.Size()
 	// Fresh Deck so the eval's stats start from zero; carry Sideboard and Equipment so
 	// writeDeck round-trips them back to disk verbatim.
 	d := loaded.Copy()

@@ -292,26 +292,16 @@ func (gs *GameState) CopyPersistentState() *GameState {
 }
 
 // CopyPersistentStateFrom overwrites *gs in place to match what CopyPersistentState(src)
-// would produce. Reuses gs's auras / items slice backing when capacity permits, avoiding
-// the per-permutation slice allocation in the chain runner's hot loop. The chain runner
-// follows with ResetEphemeralState which wipes ephemeral fields, so this only needs to
-// touch the persistent carryover; the chain-step pool slot's ephemeral content gets
-// thrown out either way.
+// would produce. graveyard / banished copy into gs's prewarmed backing (always fits at
+// the worst-case cap); auras / items reuse gs's backing when cap permits. The chain
+// runner's per-permutation hot path avoids slice allocation entirely.
 func (gs *GameState) CopyPersistentStateFrom(src *GameState) {
 	gs.hero = src.hero
 	gs.heroTriggerType = src.heroTriggerType
 	gs.weapons = src.weapons
 	gs.arsenal = src.arsenal
-	if n := len(src.graveyard); n > 0 {
-		gs.graveyard = src.graveyard[:n:n]
-	} else {
-		gs.graveyard = nil
-	}
-	if n := len(src.banished); n > 0 {
-		gs.banished = src.banished[:n:n]
-	} else {
-		gs.banished = nil
-	}
+	gs.graveyard = resetCardSlice(gs.graveyard, src.graveyard)
+	gs.banished = resetCardSlice(gs.banished, src.banished)
 	gs.auras = copyAurasInto(gs.auras, src.auras)
 	gs.items = copyItemsInto(gs.items, src.items)
 	gs.incomingDamage = src.incomingDamage

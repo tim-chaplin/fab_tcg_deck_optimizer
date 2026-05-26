@@ -74,7 +74,6 @@ func runReplayForTurn(snapshot *turnSnapshot, ev *Evaluator, logger card.Logger)
 		_, _, ctx.handStart = ctx.runDefense(defenders, pitched, held, snapshot.deck, snapshot.state.IncomingDamage(), noBlockBudgetCap, arsenalDefenderIdx, nil)
 	}
 	ctx.leafState.SetDeck(nil)
-	ctx.seedPoolGravBuf(len(snapshot.cardsPlayed), len(ctx.attackPitchPerm))
 
 	ctx.playSequence(snapshot.cardsPlayed)
 	return TurnSummary{

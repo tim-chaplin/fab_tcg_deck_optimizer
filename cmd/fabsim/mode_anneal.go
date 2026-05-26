@@ -116,6 +116,9 @@ func runAnnealCmd(args []string) {
 		die("%v", err)
 	}
 
+	// Size the pool slots' graveyard/banished backings to this run's deck size before any
+	// Evaluator gets constructed.
+	gameengine.MaxDeckSize = *deckSize
 	cfg := annealConfig{
 		shuffles:       *shuffles,
 		adaptive:       *shuffles < 0,

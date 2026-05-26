@@ -96,8 +96,9 @@ func (p *Pool) HighWaterMark() int {
 
 // Worst-case sizes for pooled GameState slice backings. Bounded by FaB hero intellect
 // (handSize ≤ 7), equipment slots (weapons ≤ 4), and chain-runner mid-turn-drawn
-// headroom (32 extra attacker slots). The hand slice carries (held + chain + pitch);
-// cardsPlayed grows for rider plays / aura fires through the chain.
+// headroom (32 extra attacker slots). hand carries (held + chain + pitch); cardsPlayed
+// grows for rider plays / aura fires; graveyard absorbs prior-turn grav + this turn's
+// played cards.
 const (
 	maxHandSize           = 7
 	maxWeapons            = 4
@@ -105,23 +106,40 @@ const (
 	maxAttackers          = maxHandSize + maxWeapons + 1 + maxDrawnExtra
 	defaultHandCap        = 2*maxHandSize + maxAttackers
 	defaultCardsPlayedCap = 2 * (maxHandSize + maxAttackers)
+	// graveyardBanishedHeadroom is the slack added to MaxDeckSize when sizing the
+	// graveyard / banished backings — covers starting equipment and any token / virtual
+	// cards that might land in either zone past the deck's printed size.
+	graveyardBanishedHeadroom = 10
 	// defaultPoolCap is the prewarmed Pool size. Measured peak in-flight on a 200-shuffle
 	// Viserai run is 6; this cap leaves headroom for higher-fanout decks.
 	defaultPoolCap = 24
 )
 
-// NewPrewarmedState returns a zero-value *GameState with hand and cardsPlayed slice
-// backings pre-allocated to worst-case sizes, so the chain runner's per-permutation
-// fills never need to grow past the pool slot's existing cap.
+// MaxDeckSize bounds the worst-case deck the sim runs against. Graveyard and banished
+// backings on every prewarmed pool slot are sized to MaxDeckSize + headroom, since both
+// zones can only hold cards that originated in the deck (plus starting equipment).
+//
+// Default = 80 covers Classic Constructed's 60-card minimum with headroom; CLI callers
+// (cmd/fabsim) overwrite this at startup from the --deck-size flag before any Evaluator
+// is constructed. Treated as effectively immutable post-init: NewPrewarmedState reads it
+// once per pool slot at NewPrewarmedPool time.
+var MaxDeckSize = 80
+
+// NewPrewarmedState returns a zero-value *GameState with hand / cardsPlayed / graveyard
+// / banished slice backings pre-allocated to worst-case sizes, so the chain runner's
+// per-permutation fills never need to grow past the pool slot's existing cap.
 func NewPrewarmedState() *GameState {
 	s := new(GameState)
 	s.SetHandStates(make([]card.CardState, 0, defaultHandCap))
 	s.SetCardsPlayed(make([]card.Card, 0, defaultCardsPlayedCap))
+	zoneCap := MaxDeckSize + graveyardBanishedHeadroom
+	s.SetGraveyard(make([]card.Card, 0, zoneCap))
+	s.SetBanished(make([]card.Card, 0, zoneCap))
 	return s
 }
 
-// NewPrewarmedPool returns a Pool of prewarmed GameStates sized for the chain runner's
-// worst case. The standard entry point for sim Evaluators.
+// NewPrewarmedPool returns a Pool of prewarmed GameStates sized for the current
+// MaxDeckSize. The standard entry point for sim Evaluators.
 func NewPrewarmedPool() *Pool {
 	return NewPool(defaultPoolCap, NewPrewarmedState)
 }
