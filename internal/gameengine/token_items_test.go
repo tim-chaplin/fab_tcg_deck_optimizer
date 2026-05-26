@@ -23,7 +23,7 @@ func TestGoldToken_PlaysDecrementsAndDestroys(t *testing.T) {
 	ge := New()
 	ge.SetDeck(deckOf(fakeCard{name: "filler"}))
 	ge.CreateGold(1)
-	ge.ResolveChainStep(ge.Logger(), &card.CardState{Card: cards.GoldToken{}})
+	ge.ResolveAttackStep(ge.Logger(), &card.CardState{Card: cards.GoldToken{}})
 	if ge.GoldCount() != 0 {
 		t.Fatalf("Gold = %d after spending the only token, want 0", ge.GoldCount())
 	}
@@ -40,7 +40,7 @@ func TestGoldToken_PlayDecrementsCountWhenMultiple(t *testing.T) {
 	ge := New()
 	ge.SetDeck(deckOf(fakeCard{name: "filler"}))
 	ge.CreateGold(3)
-	ge.ResolveChainStep(ge.Logger(), &card.CardState{Card: cards.GoldToken{}})
+	ge.ResolveAttackStep(ge.Logger(), &card.CardState{Card: cards.GoldToken{}})
 	if ge.GoldCount() != 2 {
 		t.Fatalf("Gold = %d after spending 1 of 3, want 2", ge.GoldCount())
 	}
@@ -51,7 +51,7 @@ func TestSilverToken_PlaysDecrementsAndDestroys(t *testing.T) {
 	ge := New()
 	ge.SetDeck(deckOf(fakeCard{name: "filler"}))
 	ge.CreateSilver(1)
-	ge.ResolveChainStep(ge.Logger(), &card.CardState{Card: cards.SilverToken{}})
+	ge.ResolveAttackStep(ge.Logger(), &card.CardState{Card: cards.SilverToken{}})
 	if ge.SilverCount() != 0 {
 		t.Fatalf("Silver = %d after spending the only token, want 0", ge.SilverCount())
 	}
@@ -68,7 +68,7 @@ func TestCopperToken_PlaysDecrementsAndDestroys(t *testing.T) {
 	ge := New()
 	ge.SetDeck(deckOf(fakeCard{name: "filler"}))
 	ge.CreateCopper(1)
-	ge.ResolveChainStep(ge.Logger(), &card.CardState{Card: cards.CopperToken{}})
+	ge.ResolveAttackStep(ge.Logger(), &card.CardState{Card: cards.CopperToken{}})
 	if ge.CopperCount() != 0 {
 		t.Fatalf("Copper = %d after spending the only token, want 0", ge.CopperCount())
 	}

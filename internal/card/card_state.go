@@ -1,8 +1,8 @@
 package card
 
 // CardState wraps a Card with per-turn mutable flags that other cards' effects can toggle.
-// Instances are created by the solver at the start of each attack chain and live only for
-// that chain. Effects that grant keywords to "the next X" scan TurnState.CardsRemaining and
+// Instances are created by the solver at the start of each attack turn and live only for
+// that attack turn. Effects that grant keywords to "the next X" scan TurnState.CardsRemaining and
 // flip flags on the matching entry; the card currently resolving receives its own CardState
 // as the `self` parameter to Play.
 //
@@ -19,15 +19,15 @@ type CardState struct {
 	// FromArsenal flags the single CardState whose Card came from the arsenal slot at start
 	// of turn. Cards gate "if this is played from arsenal" riders on self.FromArsenal.
 	FromArsenal bool
-	// FromDraw flags entries added to the hand by a mid-chain DrawOne. The optimizer
+	// FromDraw flags entries added to the hand by a mid-attack-turn DrawOne. The optimizer
 	// treats drawn cards as a black box: they count toward HandSize but their identity
-	// is hidden from in-chain attribute reads (HandHasMatching / HeldHandSize skip them).
+	// is hidden from in-attack-turn attribute reads (HandHasMatching / HeldHandSize skip them).
 	FromDraw bool
-	// Mode is the chosen mode for a Modal ("Choose 1") card. The chain runner's modal-tuple
+	// Mode is the chosen mode for a Modal ("Choose 1") card. The attack-turn runner's modal-tuple
 	// enumeration writes Mode before each permutation; Play reads it. Sized int8 so it
 	// packs into the bool block's padding.
 	Mode int8
-	// Ephemeral groups every field whose value can change during this card's chain-step
+	// Ephemeral groups every field whose value can change during this card's attack-step
 	// resolution: granted keywords, bonus accumulators, the pitch-attribution slice, and
 	// the on-hit handler queue. Anonymous embedding so callers keep writing pc.GrantedGoAgain
 	// / pc.BonusAttack / etc. directly; struct literals must address the group explicitly
@@ -61,17 +61,17 @@ type Ephemeral struct {
 	// clamp at 0 because FaB attack power can't go below 0.
 	BonusAttack int
 	// BonusDefense is the defender-side counterpart to BonusAttack. EffectiveDefense folds
-	// it into the chain step's (+N). Negative grants clamp at 0.
+	// it into the attack step's (+N). Negative grants clamp at 0.
 	BonusDefense int
-	// PitchedToPlay is the pitched cards the chain runner attributed to paying this card's
+	// PitchedToPlay is the pitched cards the attack-turn runner attributed to paying this card's
 	// resource cost during the active permutation. Cards whose printed text gates on "if X
 	// was pitched to play this" iterate this slice instead of the unordered g.Pitched bag.
 	// Empty for cards whose cost was fully paid by carry from a prior pitch.
 	PitchedToPlay []Card
 	// FaceUp is set to true when GameEngine.TurnFaceUp flips this scheduled card's CardState
-	// face-up earlier in the chain. Lives in Ephemeral because we don't yet model FaceUp
+	// face-up earlier in the attack turn. Lives in Ephemeral because we don't yet model FaceUp
 	// across the turn boundary (no card consumes the persistent flag); cards reading
-	// self.FaceUp see the in-chain TurnFaceUp result.
+	// self.FaceUp see the in-attack-turn TurnFaceUp result.
 	FaceUp bool
 	// OnHit holds "if this hits" handlers registered during Play. Stored as struct values
 	// (function pointer + small data payload) rather than closures so registration is
@@ -80,14 +80,14 @@ type Ephemeral struct {
 }
 
 // Reset zeroes r, preserving OnHit's backing array so per-Best reuse stays allocation-free.
-// PitchedToPlay's backing is owned by the chain runner's pitch pool; nilling it here drops
+// PitchedToPlay's backing is owned by the attack-turn runner's pitch pool; nilling it here drops
 // the alias so the next resolution receives a fresh contrib slice.
 func (r *Ephemeral) Reset() {
 	onHit := r.OnHit[:0]
 	*r = Ephemeral{OnHit: onHit}
 }
 
-// OnHitHandler is one registered on-hit rider on a CardState. The chain runner fires Fire
+// OnHitHandler is one registered on-hit rider on a CardState. The attack-turn runner fires Fire
 // at finalize-active-attack time when LikelyToHit(self) is true; self is the buffed attack's
 // CardState. Source names the card that registered the handler — needed when the handler
 // was attached to a different card's OnHit. N and LogText are optional small payloads cards
@@ -106,7 +106,7 @@ func (p *CardState) RegisterOnHit(fire func(g GameEngine, l Logger, self *CardSt
 }
 
 // GrantAttackReactionBuff buffs the active attack target by n: adds to BonusAttack, credits
-// g's value, amends the target's chain-step delta, and logs the rider under the target's
+// g's value, amends the target's attack-step delta, and logs the rider under the target's
 // entry. p is the Attack Reaction card granting the buff.
 func (p *CardState) GrantAttackReactionBuff(g GameEngine, l Logger, n int) {
 	target := g.AttackReactionTarget()
@@ -115,7 +115,7 @@ func (p *CardState) GrantAttackReactionBuff(g GameEngine, l Logger, n int) {
 	}
 	target.BonusAttack += n
 	g.AddValue(n)
-	l.AmendLastChainStepN(n)
+	l.AmendLastAttackStepN(n)
 	l.AppendPostTriggerf(target.Card.DisplayName(), 0, "%s buffed +%d{p}", p.Card.DisplayName(), n)
 }
 
@@ -159,7 +159,7 @@ func (p *CardState) EffectiveAttack() int {
 }
 
 // EffectiveDefense returns Defense() + BonusDefense + ArsenalDefenseBonus (when this copy
-// came from arsenal), clamped at 0. Read by ResolveChainStep to credit the DR's chain-step
+// came from arsenal), clamped at 0. Read by ResolveAttackStep to credit the DR's attack-step
 // (+N) and bank the block against IncomingDamage.
 func (p *CardState) EffectiveDefense() int {
 	n := p.Card.Defense() + p.BonusDefense

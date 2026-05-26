@@ -14,7 +14,7 @@ import (
 // CardsRemaining the grant fizzles and Play returns 0.
 func TestFlyingHigh_NoAttackReturnsZero(t *testing.T) {
 	ge := gameengine.New()
-	ge.ResolveChainStep(ge.Logger(), &card.CardState{Card: cards.FlyingHighRed{}})
+	ge.ResolveAttackStep(ge.Logger(), &card.CardState{Card: cards.FlyingHighRed{}})
 	if got := ge.Value(); got != 0 {
 		t.Errorf("Play() = %d, want 0", got)
 	}
@@ -25,7 +25,7 @@ func TestFlyingHigh_NoAttackReturnsZero(t *testing.T) {
 func TestFlyingHigh_NonAttackInRemainingFizzles(t *testing.T) {
 	skipped := &card.CardState{Card: testutils.FakeRedAction()}
 	ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCardsRemaining([]*card.CardState{skipped}).Build()}
-	ge.ResolveChainStep(ge.Logger(), &card.CardState{Card: cards.FlyingHighRed{}})
+	ge.ResolveAttackStep(ge.Logger(), &card.CardState{Card: cards.FlyingHighRed{}})
 	if got := ge.Value(); got != 0 {
 		t.Errorf("Play() = %d, want 0 (non-attack skipped)", got)
 	}
@@ -54,7 +54,7 @@ func TestFlyingHigh_ColorMatchGrantsBonus(t *testing.T) {
 		}{{1, tc.wantRed}, {2, tc.wantYellow}, {3, tc.wantBlue}} {
 			pc := &card.CardState{Card: testutils.FakeRedAttack().WithPitch(target.pitch)}
 			ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCardsRemaining([]*card.CardState{pc}).Build()}
-			ge.ResolveChainStep(ge.Logger(), &card.CardState{Card: tc.c})
+			ge.ResolveAttackStep(ge.Logger(), &card.CardState{Card: tc.c})
 			if got := ge.Value(); got != 0 {
 				t.Errorf("%s vs pitch-%d target: Play() = %d, want 0 (granter returns 0; +1 rides on target'ge BonusAttack when colour matches)",
 					tc.name, target.pitch, got)
@@ -76,7 +76,7 @@ func TestFlyingHigh_ColorMatchGrantsBonus(t *testing.T) {
 func TestFlyingHigh_GrantsGoAgainToWeaponSwing(t *testing.T) {
 	pc := &card.CardState{Card: testutils.FakeWeaponSwing().WithTypes(card.TypeRuneblade)}
 	ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCardsRemaining([]*card.CardState{pc}).Build()}
-	ge.ResolveChainStep(ge.Logger(), &card.CardState{Card: cards.FlyingHighRed{}})
+	ge.ResolveAttackStep(ge.Logger(), &card.CardState{Card: cards.FlyingHighRed{}})
 	if !pc.GrantedGoAgain {
 		t.Error("weapon swing should get go again ('your next attack' has no 'action card' qualifier)")
 	}

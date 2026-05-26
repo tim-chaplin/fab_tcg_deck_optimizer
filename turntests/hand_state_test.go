@@ -1,9 +1,9 @@
 package turntests
 
-// These tests pin the semantics of TurnState.Hand at chain-step Play time: Hand reflects
+// These tests pin the semantics of TurnState.Hand at attack-step Play time: Hand reflects
 // the cards in hand AT THIS MOMENT — committed-to-the-turn cards (pitched, used to block,
 // already played, the playing card itself) are out, but cards going to be Held, played later
-// in the chain, or drawn earlier in the chain stay in. Spring Load Red's "+3{p} if you have
+// in the attack turn, or drawn earlier in the attack turn stay in. Spring Load Red's "+3{p} if you have
 // no cards in hand" rider is the canary — the only implemented card whose firing depends on
 // a precise-at-this-moment snapshot.
 
@@ -41,8 +41,8 @@ func TestHandState_BlockerEmptiesHandForSpringLoad(t *testing.T) {
 	}
 }
 
-// Tests that an upcoming chain step keeps Hand non-empty: only ONE Spring Load fires the rider.
-func TestHandState_UpcomingChainStepBlocksFirstSpringLoadRider(t *testing.T) {
+// Tests that an upcoming attack step keeps Hand non-empty: only ONE Spring Load fires the rider.
+func TestHandState_UpcomingAttackStepBlocksFirstSpringLoadRider(t *testing.T) {
 	d := deck.New(heroes.Viserai, nil, fillerDeck())
 	hand := []card.Card{
 		testutils.FakeBlueResource(),
@@ -50,7 +50,7 @@ func TestHandState_UpcomingChainStepBlocksFirstSpringLoadRider(t *testing.T) {
 		cards.SpringLoadRed{}, cards.SpringLoadRed{},
 	}
 	// Pitch BluePitch (3 res) → fund Flying High (0) + Spring Load × 2 (1 + 1).
-	// Chain order [FH, SL1, SL2]: at SL1's Play, SL2 is upcoming → Hand non-empty,
+	// Play order [FH, SL1, SL2]: at SL1's Play, SL2 is upcoming → Hand non-empty,
 	// rider blocked. At SL2's Play, hand is empty → rider fires. Value = 0 + 2 + 5 = 7.
 	summary := sim.EvalOneTurnForTesting(d, nil, hand)
 	if got := summary.Value; got != 7 {
@@ -58,9 +58,9 @@ func TestHandState_UpcomingChainStepBlocksFirstSpringLoadRider(t *testing.T) {
 	}
 }
 
-// Tests that a mid-chain draw lands in Hand: Spring Load can never fire its rider
+// Tests that a mid-attack-turn draw lands in Hand: Spring Load can never fire its rider
 // alongside Snatch.
-func TestHandState_MidChainDrawBlocksSpringLoadRider(t *testing.T) {
+func TestHandState_MidAttackTurnDrawBlocksSpringLoadRider(t *testing.T) {
 	d := deck.New(heroes.Viserai, nil, fillerDeck())
 	hand := []card.Card{
 		testutils.FakeBlueResource(),
@@ -69,11 +69,11 @@ func TestHandState_MidChainDrawBlocksSpringLoadRider(t *testing.T) {
 		cards.SpringLoadRed{},
 	}
 	// Pitch BluePitch (3 res) → fund Flying High (0) + Snatch (0) + Spring Load (1).
-	// Either chain order keeps Spring Load's rider blocked:
+	// Either attack-turn order keeps Spring Load's rider blocked:
 	//   [FH, SL, Snatch] — SL plays before Snatch, Snatch in upcoming → Hand non-empty.
 	//   [FH, Snatch, SL] — Snatch hits, draws into Hand → SL sees the drawn card.
 	// Damage in both: FH 0 + Snatch 4 + SL 2 = 6. (Drawn card may itself extend the
-	// chain, but its presence at the moment SL resolves keeps the rider off.)
+	// attack turn, but its presence at the moment SL resolves keeps the rider off.)
 	summary := sim.EvalOneTurnForTesting(d, nil, hand)
 	if got := summary.Value; got != 6 {
 		t.Fatalf("Value = %d, want 6 (FH 0 + Snatch 4 + SL no rider 2)", got)
@@ -92,7 +92,7 @@ func TestHandState_HeldCardBlocksSpringLoadRider(t *testing.T) {
 	// still commit Dodge to the Defend role even with 0 incoming (Dodge's DR cost is 0,
 	// so it plays for free and prevents 0). That empties the hand and fires the rider
 	// for Value 5. Whether a no-op Defend assignment should still count as "stuck in
-	// hand" is a sim-semantics call beyond the chain-step Hand snapshot — flagged for
+	// hand" is a sim-semantics call beyond the attack-step Hand snapshot — flagged for
 	// review.
 	summary := sim.EvalOneTurnForTesting(d, nil, hand)
 	if got := summary.Value; got != 2 {
@@ -103,13 +103,13 @@ func TestHandState_HeldCardBlocksSpringLoadRider(t *testing.T) {
 // Tests that a to-be-pitched card stays in hand long enough for Demolition Crew's reveal.
 func TestHandState_DemolitionCrewSeesUncommittedPitchInHand(t *testing.T) {
 	d := deck.New(heroes.Viserai, nil, fillerDeck())
-	// Hand has 4 cards + Flying High in arsenal so the chain has 5 cards available without
+	// Hand has 4 cards + Flying High in arsenal so the attack turn has 5 cards available without
 	// exceeding Viserai's intel=4 hand size. Optimal line: Flying High plays from arsenal
 	// (granting go-again + matching-pitch +1{p} to the next attack action — Demolition Crew),
 	// pitch Drag Down [Y] to play Demolition Crew (which reveals Toughen Up — the only
 	// non-self cost-2 card still in hand at that moment), then pitch Toughen Up to fund
 	// Brandish. Toughen Up has to be in hand at Demolition Crew's Play even though it's
-	// queued to pitch later in the chain — that's the pitch-tracking semantic under test.
+	// queued to pitch later in the attack turn — that's the pitch-tracking semantic under test.
 	// Value: 0 (Flying High) + 7 (Demolition Crew base 6 + Flying High +1{p}) + 3 (Brandish) = 10.
 	hand := []card.Card{
 		cards.DemolitionCrewRed{},

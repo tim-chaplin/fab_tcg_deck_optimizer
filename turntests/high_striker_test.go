@@ -12,7 +12,7 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 )
 
-// Tests the High Striker → Critical Strike chain: High Striker's on-attack-action-hit
+// Tests the High Striker → Critical Strike sequence: High Striker's on-attack-action-hit
 // trigger lands when Critical Strike (power 4, hits LikelyToHit) resolves, creating
 // the printed per-pitch Copper count (6/4/2 for R/Y/B). Pitch Blue to fund {1}.
 func TestHighStriker_TriggersOnNextAttackActionHit(t *testing.T) {

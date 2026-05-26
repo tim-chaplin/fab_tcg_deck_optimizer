@@ -14,7 +14,7 @@ func TestRegurgitatingSlog_NoSloggismNoDominate(t *testing.T) {
 	for _, c := range []card.Card{cards.RegurgitatingSlogRed{}, cards.RegurgitatingSlogYellow{}, cards.RegurgitatingSlogBlue{}} {
 		ge := gameengine.New()
 		pc := &card.CardState{Card: c}
-		ge.ResolveChainStep(ge.Logger(), pc)
+		ge.ResolveAttackStep(ge.Logger(), pc)
 		if pc.GrantedDominate {
 			t.Errorf("%s [%d{p}]: GrantedDominate = true with no Sloggism, want false", c.Name(), c.Pitch())
 		}
@@ -27,7 +27,7 @@ func TestRegurgitatingSlog_BanishesSloggismForDominate(t *testing.T) {
 	for _, c := range []card.Card{cards.RegurgitatingSlogRed{}, cards.RegurgitatingSlogYellow{}, cards.RegurgitatingSlogBlue{}} {
 		ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetGraveyard([]card.Card{cards.SloggismRed{}}).Build()}
 		pc := &card.CardState{Card: c}
-		ge.ResolveChainStep(ge.Logger(), pc)
+		ge.ResolveAttackStep(ge.Logger(), pc)
 		if !pc.GrantedDominate {
 			t.Errorf("%s [%d{p}]: GrantedDominate = false after banish, want true", c.Name(), c.Pitch())
 		}

@@ -119,7 +119,7 @@ func TestBest_RunicReapingPrefersAttackPitch(t *testing.T) {
 func TestBest_ViseraiMauvrionGrantsGoAgainToShrill(t *testing.T) {
 	// Pitch Blue Hocus Pocus (3 res). Play Blue Malefic (1 arcane, go again). Play Red Mauvrion
 	// Skies (0 cost, go again; grants go-again to the next Runeblade attack action card = Shrill,
-	// and emits 3 runechants). Play Red Shrill (cost 2, 4 base + 3 aura-created bonus = 7; chains
+	// and emits 3 runechants). Play Red Shrill (cost 2, 4 base + 3 aura-created bonus = 7; goes again
 	// thanks to Mauvrion's grant). Swing Reaping Blade (cost 1, 3 dmg). Viserai fires +1 on
 	// Mauvrion (prior Malefic is a non-attack action) and +1 on Shrill (priors include non-attack
 	// actions). Value = 1 + 3 + 7 + 3 + 2 = 16.
@@ -158,7 +158,7 @@ func TestBest_ViseraiMauvrionPredictsDrowningDireDominate(t *testing.T) {
 func TestIsLegalOrder_MauvrionCantSaveShrillWhenRuneragerIsAhead(t *testing.T) {
 	// Mauvrion's grant lands on the first matching Runeblade attack action card in CardsRemaining.
 	// In the ordering Mauvrion → Runerager → Shrill → weapon, Runerager is that first match, so
-	// Shrill never gets the grant. Shrill has no printed go-again, so the Shrill → weapon chain
+	// Shrill never gets the grant. Shrill has no printed go-again, so the Shrill → weapon attack-turn
 	// must break — isLegalOrder rejects the ordering.
 	order := []card.Card{
 		cards.MauvrionSkiesRed{},
@@ -173,7 +173,7 @@ func TestIsLegalOrder_MauvrionCantSaveShrillWhenRuneragerIsAhead(t *testing.T) {
 	}
 }
 
-func TestBest_ViseraiMauvrionChainsShrillIntoRuneragerIntoWeapon(t *testing.T) {
+func TestBest_ViseraiMauvrionGoAgainsThroughShrillRunerageWeapon(t *testing.T) {
 	// Pitch Blue Hocus → Mauvrion → Shrill → Runerager → Reaping Blade. Value = 3+7+3+3+2 +
 	// Viserai runechants = 18.
 	h := []card.Card{
@@ -207,7 +207,7 @@ func TestBest_StateValueMatchesSummedReturns(t *testing.T) {
 		WithGoAgain()}
 	got := Best(nil, h, nil, gameengine.GameStateBuilder().SetHero(testutils.Hero{Intel: 4}).Build())
 	if got.Value != 7 {
-		t.Errorf("Value = %d, want 7 (Blue 1 + Red 3 + Red 3 chain off one Blue pitch). Roles=[%s]",
+		t.Errorf("Value = %d, want 7 (Blue 1 + Red 3 + Red 3 play after one Blue pitch). Roles=[%s]",
 			got.Value, FormatBestLine(got.BestLine))
 	}
 }
@@ -224,9 +224,9 @@ func TestBestSequence_CardStateGrantsDontLeakAcrossPermutations(t *testing.T) {
 	}
 }
 
-// Tests that a non-Go-again attack followed by a non-Instant card rejects the chain — the
+// Tests that a non-Go-again attack followed by a non-Instant card rejects the attack turn — the
 // AP pool drains to 0 on the first card and the second can't pay its 1 AP cost.
-func TestPlaySequence_NonGoAgainStopsChain(t *testing.T) {
+func TestPlaySequence_NonGoAgainStopsAttackTurn(t *testing.T) {
 	order := []card.Card{testutils.FakeRedAttack().WithPower(1), testutils.FakeRedAttack().WithPower(1)}
 	ctx := NewSequenceContextForTest(testutils.Hero{Intel: 4}, nil, nil, 1_000_000, 0, len(order))
 	if _, _, _, legal := ctx.PlaySequence(order); legal {
@@ -248,7 +248,7 @@ func TestPlaySequence_InstantBypassesAPRequirement(t *testing.T) {
 	}
 }
 
-// Tests that a chain of two Instants opens with neither card paying AP — the AP pool stays
+// Tests that an attack turn of two Instants opens with neither card paying AP — the AP pool stays
 // at 1 the whole way, and a non-Instant follow-up still works (which would fail if Instants
 // had silently consumed AP).
 func TestPlaySequence_InstantsDontConsumeAP(t *testing.T) {

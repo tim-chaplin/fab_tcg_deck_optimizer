@@ -36,8 +36,8 @@ func DeckOf(cards ...card.Card) *deck.Deck {
 type SequenceContextForTest struct{ ctx *sequenceContext }
 
 // NewSequenceContextForTest builds a sequenceContext via newSequenceContextForTest.
-func NewSequenceContextForTest(h hero.Hero, pitched, deck []card.Card, resourceBudget, runechantCarryover, chainLen int) *SequenceContextForTest {
-	return &SequenceContextForTest{ctx: newSequenceContextForTest(h, pitched, deck, resourceBudget, runechantCarryover, chainLen)}
+func NewSequenceContextForTest(h hero.Hero, pitched, deck []card.Card, resourceBudget, runechantCarryover, attackTurnLen int) *SequenceContextForTest {
+	return &SequenceContextForTest{ctx: newSequenceContextForTest(h, pitched, deck, resourceBudget, runechantCarryover, attackTurnLen)}
 }
 
 // PlaySequence wraps (*sequenceContext).playSequence.
@@ -46,7 +46,7 @@ func (s *SequenceContextForTest) PlaySequence(order []card.Card) (damage int, to
 }
 
 // PermEngine returns a *GameEngine wrapping the *GameState the most recent PlaySequence
-// call ran the chain against.
+// call ran the attack turn against.
 func (s *SequenceContextForTest) PermEngine() *gameengine.GameEngine {
 	if s.ctx.permState == nil {
 		return nil
@@ -91,7 +91,7 @@ func NewAttackBufs(handSize, weaponCount int, weapons []weapon.Weapon) *AttackBu
 }
 
 // DefenseGravScratch / DRCardStateScratch expose unexported attackBufs fields. State()
-// returns a fresh engine per call; the chain runner uses per-permutation Copy so attackBufs
+// returns a fresh engine per call; the attack-turn runner uses per-permutation Copy so attackBufs
 // doesn't pool one.
 func (b *attackBufs) DefenseGravScratch() []card.Card     { return b.defenseGravScratch }
 func (b *attackBufs) DRCardStateScratch() *card.CardState { return &b.drCardStateScratch }

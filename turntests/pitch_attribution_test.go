@@ -72,11 +72,11 @@ func TestPitchAttribution_OneNonAttackPitchFundsMultipleAetherSlashes(t *testing
 }
 
 // fillerDeck is a non-empty filler for EvalOneTurnForTesting calls that need a real deck
-// behind the supplied hand — e.g. a card that draws mid-chain (Snatch) needs something
+// behind the supplied hand — e.g. a card that draws mid-attack-turn (Snatch) needs something
 // to pull, a card that recycles to deck bottom (Relentless Pursuit) needs enough cards
 // above it that the end-of-turn refill doesn't pull it back into hand, and an optimal
 // line involving an extra draw needs a real card to draw or the engine sees no card
-// advantage. Tests that don't read turn-2 state or care about mid-chain draws should
+// advantage. Tests that don't read turn-2 state or care about mid-attack-turn draws should
 // pass nil directly.
 func fillerDeck() []deck.Card {
 	return []deck.Card{

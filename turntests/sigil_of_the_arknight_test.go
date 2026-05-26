@@ -17,7 +17,7 @@ import (
 // happens when the sim fires the trigger next turn.
 func TestSigilOfTheArknight_PlayOnlySetsAuraCreated(t *testing.T) {
 	ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCards([]card.Card{testutils.FakeRedAttack().WithTypes(card.TypeRuneblade)}).Build()}
-	ge.ResolveChainStep(ge.Logger(), &card.CardState{Card: cards.SigilOfTheArknightBlue{}})
+	ge.ResolveAttackStep(ge.Logger(), &card.CardState{Card: cards.SigilOfTheArknightBlue{}})
 	if got := ge.Value(); got != 0 {
 		t.Errorf("Play() = %d, want 0 (reveal deferred to trigger)", got)
 	}

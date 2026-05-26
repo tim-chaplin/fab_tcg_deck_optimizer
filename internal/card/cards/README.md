@@ -76,7 +76,7 @@ any modelling fudge, never the wiring itself.
   implement `card.ArsenalDefenseBonus` returning `N`. `CardState.EffectiveDefense` folds it in
   for the arsenal-in copy; `Defense()` itself stays the printed value.
 - **Plain-block bonuses** (Battlefront Bastion, Right Behind You, …): implement
-  `card.Blocker.Block(g, l, self)`. The chain runner calls `Block` on every plain blocker that
+  `card.Blocker.Block(g, l, self)`. The attack-turn runner calls `Block` on every plain blocker that
   opts in, with `g.Defenders()` set to the partition's full defender slice (DRs and plain
   blocks). Implementations scan `Defenders()` and flip `self.BonusDefense` for conditional
   buffs ("+1{d} when defending alone", "+1{d} together with another card"); the sim folds
@@ -91,7 +91,7 @@ any modelling fudge, never the wiring itself.
 - **Attack Reactions**: implement `card.AttackReaction.ARTargetAllowed(g, c, mode) bool`
   matching the printed target wording. Most ARs read only the printed type-line (`c.Types(nil)`)
   and ignore `g`; thread `g` through when the predicate reads `c.Cost(g)` or class-aware types.
-  The chain runner validates the chosen `Mode` and aborts the permutation on failure. The AR's
+  The attack-turn runner validates the chosen `Mode` and aborts the permutation on failure. The AR's
   `Play` reads `g.AttackReactionTarget()` (set by the runner before `Play`) and applies the
   buff — `self.GrantAttackReactionBuff(g, l, n)` for `+N{p}` buffs, or a direct verb such as
   `g.AddActionPoints(1)` for a granted action point. ARs cost 0 AP. Modal ARs combine with
@@ -99,24 +99,24 @@ any modelling fudge, never the wiring itself.
   unconditionally because the runner already validated. Non-modal ARs ignore `mode` (always 0).
 - **`OnHit` registrations**: attack cards with "if this hits, do X" append a handler to
   `self.OnHit` inside `Play` via `self.RegisterOnHit(fn)` (or an `OnHitHandler` literal when a
-  `Source` / `N` / `LogText` payload is needed). The chain runner finalizes each attack
+  `Source` / `N` / `LogText` payload is needed). The attack-turn runner finalizes each attack
   post-AR-buff: when `LikelyToHit(self)` is true on the post-buff `EffectiveAttack`, every
   handler in `self.OnHit` fires. Cards adding an on-hit rider to a *different* card (Mauvrion
   Skies, Runic Reaping) append to the target's `OnHit`. Do NOT call `LikelyToHit` directly
-  from `Play` — the chain runner owns the gate so AR buffs propagate. Use a top-level handler,
+  from `Play` — the attack-turn runner owns the gate so AR buffs propagate. Use a top-level handler,
   not an inline closure, so registration stays allocation-free.
 - **`NextHit` triggers** (Plunder Run, High Striker, …): cards reading "the next time an X you
   control hits this turn, do Y" register via
   `g.CreateTrigger(self.Card, triggertype.Hit, handler, filter)`. The
   `filter func(card.TypeSet) bool` narrows qualifying hits — `card.TypeSet.IsAttackAction` for
   "attack action card" wording, `card.TypeSet.IsAttack` for the broader "attack" wording that
-  includes weapon swings. The chain runner drains matching triggers on each `LikelyToHit`
+  includes weapon swings. The attack-turn runner drains matching triggers on each `LikelyToHit`
   attack; non-matching triggers stay queued. Use this — not `OnHit` on a specific `CardState`
   — when the rider must wait across misses for the first qualifying hit.
 - **Self-granting on-hit go-again** (Overload, Razor Reflex mode 1): "if this hits, it gains
   go again" flips `self.GrantedGoAgain = true` inside `Play` when `g.LikelyToHit(self)` is true.
 - **Modal "Choose 1" cards** (Captain's Call, …): implement `card.Modal.Modes() int` and
-  dispatch on `self.Mode` inside `Play`. The chain runner enumerates the cartesian product of
+  dispatch on `self.Mode` inside `Play`. The attack-turn runner enumerates the cartesian product of
   modes across modal cards and picks the highest-value tuple. No-op modes resolve as
   zero-value no-ops. The docstring calls out each mode's effect.
 - **Modal cost** (Bluster Buff / Chest Puff / Look Tuff cycle): modal cards whose resource
@@ -141,15 +141,15 @@ any modelling fudge, never the wiring itself.
 
 ## Logging idioms
 
-A card's `Play` body does NOT emit its own chain step — `sim.ResolveChainStep` runs `Play`,
-credits `g.Value`, and appends the canonical `<Card>: <VERB> (+N)` chain-step entry. `Play`
+A card's `Play` body does NOT emit its own attack step — `sim.ResolveAttackStep` runs `Play`,
+credits `g.Value`, and appends the canonical `<Card>: <VERB> (+N)` attack-step entry. `Play`
 emits rider sub-lines only, via `l.AppendPostTrigger*` (self-riders) or `l.AppendPreTrigger*`
 (hero / aura triggers).
 
 A line starting with `l.AppendXxx(...)` must have no side effects — put the value change on
 its own preceding line so a reader scanning for "what does this card do" can skip every
 `l.Append` line. Conditional self-buffs (`self.BonusAttack += 2`) go in the `Play` body before
-the chain step is logged; `ResolveChainStep` reads the buffed `EffectiveAttack` after `Play`
+the attack step is logged; `ResolveAttackStep` reads the buffed `EffectiveAttack` after `Play`
 returns.
 
 ## Important files

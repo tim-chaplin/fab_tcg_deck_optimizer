@@ -17,7 +17,7 @@ import (
 // when the sim fires the trigger next turn.
 func TestSigilOfFyendal_PlayRegistersStartOfTurnTrigger(t *testing.T) {
 	ge := gameengine.New()
-	ge.ResolveChainStep(ge.Logger(), &card.CardState{Card: cards.SigilOfFyendalBlue{}})
+	ge.ResolveAttackStep(ge.Logger(), &card.CardState{Card: cards.SigilOfFyendalBlue{}})
 	if got := ge.Value(); got != 0 {
 		t.Errorf("Play() = %d, want 0 (1{h} gain deferred to trigger)", got)
 	}

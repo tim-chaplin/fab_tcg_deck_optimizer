@@ -9,16 +9,16 @@ import (
 )
 
 // TestTurntests_NewTestsUseEvalNTurnsForTesting rejects new turntests/ test files driving
-// the chain via ge.ResolveChainStep(...) directly. Per docs/dev-standards.md "Test layout",
+// the attack turn via ge.ResolveAttackStep(...) directly. Per docs/dev-standards.md "Test layout",
 // turntests/ is for public-entry-point tests only: sim.EvalOneTurnForTesting /
-// sim.EvalTwoTurnsForTesting. grandfatheredResolveChainStepFiles is the allow-list of
+// sim.EvalTwoTurnsForTesting. grandfatheredResolveAttackStepFiles is the allow-list of
 // existing offenders; remove an entry to lock in its migration.
 func TestTurntests_NewTestsUseEvalNTurnsForTesting(t *testing.T) {
 	root := RepoRoot(t)
 	turntestsDir := filepath.Join(root, "turntests")
 
-	allowed := make(map[string]bool, len(grandfatheredResolveChainStepFiles))
-	for _, p := range grandfatheredResolveChainStepFiles {
+	allowed := make(map[string]bool, len(grandfatheredResolveAttackStepFiles))
+	for _, p := range grandfatheredResolveAttackStepFiles {
 		allowed[p] = true
 	}
 
@@ -37,7 +37,7 @@ func TestTurntests_NewTestsUseEvalNTurnsForTesting(t *testing.T) {
 		if err != nil {
 			return err
 		}
-		if !strings.Contains(string(body), "ResolveChainStep") {
+		if !strings.Contains(string(body), "ResolveAttackStep") {
 			return nil
 		}
 		rel, _ := filepath.Rel(root, path)
@@ -53,7 +53,7 @@ func TestTurntests_NewTestsUseEvalNTurnsForTesting(t *testing.T) {
 
 	sort.Strings(offenders)
 	for _, o := range offenders {
-		t.Errorf("%s: drives the chain via ResolveChainStep. turntests/ tests must use "+
+		t.Errorf("%s: drives the attack turn via ResolveAttackStep. turntests/ tests must use "+
 			"sim.EvalOneTurnForTesting / sim.EvalTwoTurnsForTesting (the public entry points) "+
 			"per docs/dev-standards.md \"Test layout\". Either rewrite the test against the "+
 			"public API or move it to a same-package unit test under the card's home directory.",
@@ -61,11 +61,11 @@ func TestTurntests_NewTestsUseEvalNTurnsForTesting(t *testing.T) {
 	}
 }
 
-// grandfatheredResolveChainStepFiles is the allow-list of existing turntests/ files driving
-// ResolveChainStep directly. They need migrating to same-package unit tests or the public
+// grandfatheredResolveAttackStepFiles is the allow-list of existing turntests/ files driving
+// ResolveAttackStep directly. They need migrating to same-package unit tests or the public
 // Eval entry points. To migrate, remove the entry — the lint then rejects reintroduction.
 // See TODO.md "Tech debt" for the migration plan.
-var grandfatheredResolveChainStepFiles = []string{
+var grandfatheredResolveAttackStepFiles = []string{
 	"turntests/aether_slash_test.go",
 	"turntests/arcane_polarity_test.go",
 	"turntests/arcanic_spike_test.go",

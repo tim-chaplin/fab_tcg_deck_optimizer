@@ -15,7 +15,7 @@ func TestSpringLoad_BasePower(t *testing.T) {
 	for _, c := range []card.Card{cards.SpringLoadRed{}, cards.SpringLoadYellow{}, cards.SpringLoadBlue{}} {
 		ge := gameengine.New()
 		ge.SetHand([]card.Card{testutils.FakeRedAttack()})
-		ge.ResolveChainStep(ge.Logger(), &card.CardState{Card: c})
+		ge.ResolveAttackStep(ge.Logger(), &card.CardState{Card: c})
 		if got := ge.Value(); got != 2 {
 			t.Errorf("%s: Play() with non-empty hand = %d, want 2", c.Name(), got)
 		}
@@ -26,7 +26,7 @@ func TestSpringLoad_BasePower(t *testing.T) {
 func TestSpringLoad_EmptyHandFiresRider(t *testing.T) {
 	for _, c := range []card.Card{cards.SpringLoadRed{}, cards.SpringLoadYellow{}, cards.SpringLoadBlue{}} {
 		ge := gameengine.New()
-		ge.ResolveChainStep(ge.Logger(), &card.CardState{Card: c})
+		ge.ResolveAttackStep(ge.Logger(), &card.CardState{Card: c})
 		if got := ge.Value(); got != 5 {
 			t.Errorf("%s: Play() with empty hand = %d, want 5 (2 printed + 3 rider)", c.Name(), got)
 		}

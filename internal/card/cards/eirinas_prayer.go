@@ -4,7 +4,7 @@
 // your hero this turn, where X is N minus the pitch value of the card revealed this way."
 // Red N=6, Yellow N=5, Blue N=4.
 //
-// DefensiveInstant routes the card through the defense partition slot so the chain runner
+// DefensiveInstant routes the card through the defense partition slot so the attack-turn runner
 // runs it at defense time (when ArcaneIncomingDamage is still on the matchup figure). Play
 // peeks the deck, computes x = N - top.Pitch (or N when the deck is empty), and asks the
 // engine to prevent that much arcane damage; the engine returns the amount actually

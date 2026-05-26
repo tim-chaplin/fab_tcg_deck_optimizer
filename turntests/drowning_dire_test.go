@@ -16,7 +16,7 @@ func TestDrowningDire_NoAuraNoDominate(t *testing.T) {
 	for _, c := range []card.Card{cards.DrowningDireRed{}, cards.DrowningDireYellow{}, cards.DrowningDireBlue{}} {
 		pc := &card.CardState{Card: c}
 		ge := gameengine.New()
-		ge.ResolveChainStep(ge.Logger(), pc)
+		ge.ResolveAttackStep(ge.Logger(), pc)
 		if pc.GrantedDominate {
 			t.Errorf("%s [%d{p}]: GrantedDominate = true without prior aura, want false", c.Name(), c.Pitch())
 		}
@@ -31,7 +31,7 @@ func TestDrowningDire_AuraGrantsDominate(t *testing.T) {
 			SetAuraCreated(true).
 			Build()}
 		pc := &card.CardState{Card: c}
-		ge.ResolveChainStep(ge.Logger(), pc)
+		ge.ResolveAttackStep(ge.Logger(), pc)
 		if !pc.GrantedDominate {
 			t.Errorf("%s [%d{p}]: GrantedDominate = false after aura, want true", c.Name(), c.Pitch())
 		}
@@ -47,7 +47,7 @@ func TestDrowningDire_OnHitRecyclesNonAttackToBottom(t *testing.T) {
 		SetGraveyard([]card.Card{non}).
 		Build()}
 	pc := &card.CardState{Card: cards.DrowningDireRed{}}
-	ge.ResolveChainStep(ge.Logger(), pc)
+	ge.ResolveAttackStep(ge.Logger(), pc)
 	pc.BonusAttack = 2
 	testutils.FireOnHitIfLikely(ge, ge.Logger(), pc)
 	if got := ge.Deck().Size(); got != 2 {

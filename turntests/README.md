@@ -5,7 +5,7 @@
 Turn-level tests for the simulator. Each test drives a single turn (occasionally two) of
 the engine from a fixed hand and asserts the resulting per-turn `Value` — the damage dealt
 plus damage prevented the optimizer scores a hand by. Turn tests are the project's primary
-way to verify card behaviour: they exercise a card through the real chain runner, partition
+way to verify card behaviour: they exercise a card through the real attack-turn runner, partition
 search, and play ordering, so they catch interaction bugs a `Play`-direct unit test would
 miss.
 
@@ -47,7 +47,7 @@ func TestDefensiveInstant_BrushOffRedAlone(t *testing.T) {
 ## Public entry points only
 
 `turntests/` is for public-entry-point tests. New files must **not** call
-`ge.ResolveChainStep(...)` directly — `internal/lint/turntests_lint_test.go` enforces this
+`ge.ResolveAttackStep(...)` directly — `internal/lint/turntests_lint_test.go` enforces this
 via an allowlist of grandfathered files from the v2 migration. A test that needs an
 unexported helper belongs as a same-package unit test next to the code instead, not here.
 To migrate a grandfathered file, rewrite it against the public Eval API (or move it to a

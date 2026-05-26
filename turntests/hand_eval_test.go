@@ -259,7 +259,7 @@ func TestBest_AllAttackHandPlusArsenalNoWeapons(t *testing.T) {
 	d := deck.New(testutils.Hero{Intel: 4}, nil, nil)
 	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetArsenal(cards.WoundingBlowRed{}).Build(), h)
 	if summary.Value != 4 {
-		t.Fatalf("Value = %d, want 4 (one Wounding Blow Red lands; rest can't chain without GoAgain). Roles=[%s]",
+		t.Fatalf("Value = %d, want 4 (one Wounding Blow Red lands; rest can't extend without GoAgain). Roles=[%s]",
 			summary.Value, sim.FormatBestLine(summary.BestLine))
 	}
 }

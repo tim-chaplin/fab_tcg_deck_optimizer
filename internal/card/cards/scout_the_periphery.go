@@ -5,7 +5,7 @@
 // arsenal this turn gains +N{p}. **Go again**" (Red N=3, Yellow N=2, Blue N=1.)
 //
 // Modelling: deck-peek rider isn't modelled. The +N{p} grant only fires when the arsenal-in
-// card is an attack action queued later in the chain.
+// card is an attack action queued later in the attack turn.
 
 package cards
 

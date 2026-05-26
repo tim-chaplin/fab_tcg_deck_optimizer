@@ -11,7 +11,7 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 )
 
-// Tests that Lead the Charge's action-point grant lets a second action card chain off it.
+// Tests that Lead the Charge's action-point grant lets a second action card play after it.
 func TestLeadTheCharge_GrantsActionPointForNextAction(t *testing.T) {
 	d := deck.New(testutils.Hero{Intel: 4}, nil, nil)
 	hand := []card.Card{
@@ -22,7 +22,7 @@ func TestLeadTheCharge_GrantsActionPointForNextAction(t *testing.T) {
 	}
 	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingDamage(0).Build(), hand)
 	if summary.Value != 6 {
-		t.Fatalf("Value = %d, want 6 (two CostlyAttacks chained via the rider's action point)\nBestLine: %s",
+		t.Fatalf("Value = %d, want 6 (two CostlyAttacks follow-up via the rider's action point)\nBestLine: %s",
 			summary.Value, formatBestLine(summary.BestLine))
 	}
 }

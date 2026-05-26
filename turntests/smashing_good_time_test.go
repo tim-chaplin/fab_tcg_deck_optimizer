@@ -14,7 +14,7 @@ import (
 func TestSmashingGoodTime_NoAttackReturnsZero(t *testing.T) {
 	ge := gameengine.New()
 	for _, c := range []card.Card{notimplemented.SmashingGoodTimeRed{}, notimplemented.SmashingGoodTimeYellow{}, notimplemented.SmashingGoodTimeBlue{}} {
-		ge.ResolveChainStep(ge.Logger(), &card.CardState{Card: c})
+		ge.ResolveAttackStep(ge.Logger(), &card.CardState{Card: c})
 		if got := ge.Value(); got != 0 {
 			t.Errorf("%s: Play() = %d, want 0", c.Name(), got)
 		}
@@ -24,7 +24,7 @@ func TestSmashingGoodTime_NoAttackReturnsZero(t *testing.T) {
 // TestSmashingGoodTime_NonAttackInRemainingFizzles: non-attack action fails the predicate.
 func TestSmashingGoodTime_NonAttackInRemainingFizzles(t *testing.T) {
 	ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCardsRemaining([]*card.CardState{{Card: testutils.FakeRedAction()}}).Build()}
-	ge.ResolveChainStep(ge.Logger(), &card.CardState{Card: notimplemented.SmashingGoodTimeRed{}})
+	ge.ResolveAttackStep(ge.Logger(), &card.CardState{Card: notimplemented.SmashingGoodTimeRed{}})
 	if got := ge.Value(); got != 0 {
 		t.Errorf("Play() = %d, want 0 (non-attack skipped)", got)
 	}
@@ -46,7 +46,7 @@ func TestSmashingGoodTime_NextAttackGrantsBonusAttack(t *testing.T) {
 		target := &card.CardState{Card: testutils.FakeRedAttack()}
 		ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCardsRemaining([]*card.CardState{target}).Build()}
 		pc := &card.CardState{Card: tc.c, FromArsenal: true}
-		ge.ResolveChainStep(ge.Logger(), pc)
+		ge.ResolveAttackStep(ge.Logger(), pc)
 		if got := ge.Value(); got != 0 {
 			t.Errorf("%s: Play() = %d, want 0 (granter returns 0; +N rides on target'ge BonusAttack)", tc.c.Name(), got)
 		}
@@ -61,7 +61,7 @@ func TestSmashingGoodTime_HandPlayedFizzles(t *testing.T) {
 	for _, c := range []card.Card{notimplemented.SmashingGoodTimeRed{}, notimplemented.SmashingGoodTimeYellow{}, notimplemented.SmashingGoodTimeBlue{}} {
 		ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCardsRemaining([]*card.CardState{{Card: testutils.FakeRedAttack()}}).Build()}
 		pc := &card.CardState{Card: c}
-		ge.ResolveChainStep(ge.Logger(), pc)
+		ge.ResolveAttackStep(ge.Logger(), pc)
 		if got := ge.Value(); got != 0 {
 			t.Errorf("%s: Play() = %d, want 0 (hand-played)", c.Name(), got)
 		}

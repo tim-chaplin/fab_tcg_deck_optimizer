@@ -39,7 +39,7 @@ func TestRiseAbove_AltCostMovesHandCardToDeckTop(t *testing.T) {
 		ge := gameengine.New()
 		ge.SetHand([]card.Card{spare})
 		pc := &card.CardState{Card: c}
-		ge.ResolveChainStep(ge.Logger(), pc)
+		ge.ResolveAttackStep(ge.Logger(), pc)
 		if len(ge.Hand()) != 0 {
 			t.Errorf("%s: Hand = %d entries, want 0", c.Name(), len(ge.Hand()))
 		}
@@ -56,7 +56,7 @@ func TestRiseAbove_EmptyHandLeavesDeckUntouched(t *testing.T) {
 		ge := gameengine.New()
 		preSize := ge.Deck().Size()
 		pc := &card.CardState{Card: c}
-		ge.ResolveChainStep(ge.Logger(), pc)
+		ge.ResolveAttackStep(ge.Logger(), pc)
 		if got := ge.Deck().Size(); got != preSize {
 			t.Errorf("%s: deck size = %d, want %d", c.Name(), got, preSize)
 		}

@@ -14,9 +14,9 @@ import (
 )
 
 // verifyTurnInvariants checks the structural invariants playOneTurn promises every turn.
-// snap is the pre-turn snapshot, preChainHand is the hand after start-of-turn aura
+// snap is the pre-turn snapshot, preAttackTurnHand is the hand after start-of-turn aura
 // processing (the actual input to findBest), and summary is the post-turn result.
-func verifyTurnInvariants(snap *turnSnapshot, preChainHand []card.Card, summary TurnSummary) {
+func verifyTurnInvariants(snap *turnSnapshot, preAttackTurnHand []card.Card, summary TurnSummary) {
 	if !testing.Testing() || snap == nil || summary.State == nil {
 		return
 	}
@@ -24,7 +24,7 @@ func verifyTurnInvariants(snap *turnSnapshot, preChainHand []card.Card, summary 
 	checkHandSorted(summary.State.Hand())
 	checkPersistentCounts(summary.State)
 	checkActionPoints(summary.State)
-	checkBestLineMultiset(preChainHand, snap.state.Arsenal(), summary.BestLine)
+	checkBestLineMultiset(preAttackTurnHand, snap.state.Arsenal(), summary.BestLine)
 }
 
 // checkCardConservation asserts the total card count stays constant turn-over-turn:
@@ -73,7 +73,7 @@ func cardBackedPersistents(state *gameengine.GameState) int {
 	return n
 }
 
-// checkHandSorted asserts the post-turn hand is sorted by Card.ID(). The chain runner
+// checkHandSorted asserts the post-turn hand is sorted by Card.ID(). The attack-turn runner
 // and eval cache both depend on the sorted invariant — a drift would silently flip cache
 // lookups onto unrelated entries on the next turn's findBest call.
 func checkHandSorted(hand []card.Card) {
@@ -104,7 +104,7 @@ func checkPersistentCounts(state *gameengine.GameState) {
 	}
 }
 
-// checkActionPoints asserts AP didn't go negative. The chain runner's AP check should
+// checkActionPoints asserts AP didn't go negative. The attack-turn runner's AP check should
 // reject any play that would underflow, so a negative value at end of turn means the
 // check was bypassed.
 func checkActionPoints(state *gameengine.GameState) {
@@ -113,16 +113,16 @@ func checkActionPoints(state *gameengine.GameState) {
 	}
 }
 
-// checkBestLineMultiset asserts BestLine's card multiset equals preChainHand + arsenal-in.
+// checkBestLineMultiset asserts BestLine's card multiset equals preAttackTurnHand + arsenal-in.
 // Partition role-assignment corruption (cards appearing in BestLine that weren't in the
-// pre-chain hand) would surface here. preChainHand is the hand AFTER start-of-turn aura
+// pre-attack-turn hand) would surface here. preAttackTurnHand is the hand AFTER start-of-turn aura
 // processing — auras can reveal / draw into hand, so the hand findBest sees may be
 // larger than snap.hand.
-func checkBestLineMultiset(preChainHand []card.Card, arsenalIn card.Card, line []card.CardAssignment) {
+func checkBestLineMultiset(preAttackTurnHand []card.Card, arsenalIn card.Card, line []card.CardAssignment) {
 	if len(line) == 0 {
-		return // no-chain fallback path; nothing to check
+		return // no-attack-turn fallback path; nothing to check
 	}
-	expectedLen := len(preChainHand)
+	expectedLen := len(preAttackTurnHand)
 	if arsenalIn != nil {
 		expectedLen++
 	}
@@ -130,7 +130,7 @@ func checkBestLineMultiset(preChainHand []card.Card, arsenalIn card.Card, line [
 		panic(fmt.Sprintf("turn invariant: BestLine length %d != hand+arsenal %d", len(line), expectedLen))
 	}
 	want := map[uint16]int{}
-	for _, c := range preChainHand {
+	for _, c := range preAttackTurnHand {
 		want[uint16(c.ID())]++
 	}
 	if arsenalIn != nil {

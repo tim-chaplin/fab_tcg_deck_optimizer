@@ -14,7 +14,7 @@ import (
 func TestPublicBounty_MarksOpponent(t *testing.T) {
 	for _, c := range []card.Card{cards.PublicBountyRed{}, cards.PublicBountyYellow{}, cards.PublicBountyBlue{}} {
 		ge := gameengine.New()
-		ge.ResolveChainStep(ge.Logger(), &card.CardState{Card: c})
+		ge.ResolveAttackStep(ge.Logger(), &card.CardState{Card: c})
 		if !ge.OpponentMarked() {
 			t.Errorf("%s: OpponentMarked = false after Play, want true", c.Name())
 		}
@@ -34,7 +34,7 @@ func TestPublicBounty_GrantsBonusToNextAttack(t *testing.T) {
 	for _, tc := range cases {
 		target := &card.CardState{Card: testutils.FakeRedAttack()}
 		ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCardsRemaining([]*card.CardState{target}).Build()}
-		ge.ResolveChainStep(ge.Logger(), &card.CardState{Card: tc.c})
+		ge.ResolveAttackStep(ge.Logger(), &card.CardState{Card: tc.c})
 		if target.BonusAttack != tc.want {
 			t.Errorf("%s: target BonusAttack = %d, want %d", tc.c.Name(), target.BonusAttack, tc.want)
 		}

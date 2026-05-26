@@ -17,7 +17,7 @@ import (
 // IncomingDamage=2 (so the partition allows Defend role) plus ArcaneIncomingDamage=5.
 // Deck top is pitch 2, so X = 6 - 2 = 4. Eirina prevents min(4, 5) = 4 arcane and
 // credits 4 Value; FakeBlue funds the 1{r} cost. Eirina's printed Defense is 0, so the
-// chain-step DR delta contributes nothing — the 4 comes entirely from the arcane
+// attack-step DR delta contributes nothing — the 4 comes entirely from the arcane
 // prevention rider.
 func TestEirinasPrayer_PreventsArcaneDamageScaledByDeckTopPitch(t *testing.T) {
 	d := deck.New(heroes.Viserai, nil, []deck.Card{testutils.FakeYellowResource()})

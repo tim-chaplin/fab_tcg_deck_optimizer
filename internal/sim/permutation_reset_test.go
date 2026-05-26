@@ -10,7 +10,7 @@ import (
 
 // flipsAndReadsDominate is a stub Action - Attack whose Play increments *saw whenever
 // self.GrantedDominate is already true at Play entry, then sets it true. Across the N!
-// permutations bestSequence walks, *saw must stay 0: the chain runner has to reset the
+// permutations bestSequence walks, *saw must stay 0: the attack-turn runner has to reset the
 // flag between permutations or a previous permutation's grant leaks into the next one.
 //
 // Mirrors the production shape of cards (Drowning Dire / Pound for Pound / Regurgitating

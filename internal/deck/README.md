@@ -57,7 +57,7 @@ engine live elsewhere.
   composition through `UniqueIDs` / `NameCounts` / `DisplayNames` / `PitchCounts`.
 - `Shuffle` panics on a `ShallowCopy`-produced wrapper (`mustNotShuffle` is set): those
   share slice backing with peer wrappers and an in-place shuffle would corrupt them. A card
-  that shuffles the deck mid-chain trips this — if that becomes intentional, the
+  that shuffles the deck mid-attack-turn trips this — if that becomes intentional, the
   per-permutation call site must revert to a deep `Copy`.
 - `Draw` / `PeekTopN` return slices that alias the deck's backing storage; do not retain or
   mutate them past the next deck mutation.

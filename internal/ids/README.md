@@ -1,7 +1,7 @@
 # internal/ids
 
 The central allocation of stable integer identifiers for every card, hero, weapon, weapon
-ability, and token in the build. Keeping the IDs in one package lets per-entity caches (chain
+ability, and token in the build. Keeping the IDs in one package lets per-entity caches (attack-turn
 step text, display name, attacker meta) be plain slices indexed by ID instead of map lookups
 on the hot path.
 
@@ -12,7 +12,7 @@ on the hot path.
   start at 1.
 - `HeroID` (`uint16`) — identifies a hero printing. `InvalidHero` (0) is the zero sentinel.
   Same width as `CardID` so (hero, card) tuples stay fixed-size integer structs.
-- `WeaponID` — a type alias for `CardID`. Weapon swings flow through the same chain-runner
+- `WeaponID` — a type alias for `CardID`. Weapon swings flow through the same attack-turn runner
   pipeline as deck cards, so weapons share the `CardID` number space rather than having their
   own.
 
@@ -25,7 +25,7 @@ adding entries to one range never renumbers another:
    Yellow then Blue within each family.
 2. Weapon-permanent IDs (`weapon_ids.go`) anchor immediately past the last card ID
    (`ZealousBeltingBlue + iota + 1`).
-3. Weapon-ability IDs (`weapon_ids.go`) anchor past the last weapon-permanent ID — the chain
+3. Weapon-ability IDs (`weapon_ids.go`) anchor past the last weapon-permanent ID — the attack turn
    runner enqueues the ability, so the cache keys off the ability ID.
 4. Token-ability IDs (`token_ids.go`) anchor past the last weapon-ability ID.
 5. Token aura / item IDs (`token_ids.go`) anchor past the last token-ability ID.

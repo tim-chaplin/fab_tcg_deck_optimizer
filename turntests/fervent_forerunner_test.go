@@ -42,7 +42,7 @@ func TestFerventForerunner_PlayCreditsPrintedPower(t *testing.T) {
 	for _, tc := range cases {
 		ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCards([]card.Card{a, b}).Build()}
 		cs := &card.CardState{Card: tc.c}
-		ge.ResolveChainStep(ge.Logger(), cs)
+		ge.ResolveAttackStep(ge.Logger(), cs)
 		testutils.FireOnHitIfLikely(ge, ge.Logger(), cs)
 		if ge.Value() != tc.printed {
 			t.Errorf("%s: Play() Value = %d, want %d (printed power)",
@@ -57,7 +57,7 @@ func TestFerventForerunner_OnHitOptFiresWithBonusAttackInWindow(t *testing.T) {
 	c := cards.FerventForerunnerRed{}
 	ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCards([]card.Card{a, b}).Build()}
 	cs := &card.CardState{Card: c, Ephemeral: card.Ephemeral{BonusAttack: 1}}
-	ge.ResolveChainStep(ge.Logger(), cs)
+	ge.ResolveAttackStep(ge.Logger(), cs)
 	testutils.FireOnHitIfLikely(ge, ge.Logger(), cs)
 	want := 3 + 1
 	if ge.Value() != want {

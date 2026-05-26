@@ -59,7 +59,7 @@ func (e *Evaluator) findBest(weapons []weapon.Weapon, hand []card.Card, d *deck.
 	}
 	if cacheUsable {
 		if entry, ok := e.cache.lookup(cacheKey); ok {
-			// Replay only when the caller's deck is at least as deep as the chain consumed
+			// Replay only when the caller's deck is at least as deep as the attack turn consumed
 			// during caching; a shallower deck would hit a deck-empty branch and diverge.
 			if d == nil || d.Size() >= entry.cardsRemovedFromDeck {
 				e.cache.hits.Add(1)
@@ -95,7 +95,7 @@ func (e *Evaluator) findBest(weapons []weapon.Weapon, hand []card.Card, d *deck.
 	cacheable := true
 	var bestSwung []string
 	var runningSeen bool
-	var runningScore chainScore
+	var runningScore attackTurnScore
 
 	// Defend role is valid whenever any incoming damage — physical or arcane — could be
 	// prevented.
@@ -107,7 +107,7 @@ func (e *Evaluator) findBest(weapons []weapon.Weapon, hand []card.Card, d *deck.
 	var recurse func(i, pitchSum, defenseSum int)
 	recurse = func(i, pitchSum, defenseSum int) {
 		if i == totalN {
-			attackDealt, defenseDealt, swung, winner, ok, leafCacheable, arsenalAtChainStart := e.evaluatePartition(
+			attackDealt, defenseDealt, swung, winner, ok, leafCacheable, arsenalAtAttackTurnStart := e.evaluatePartition(
 				masterState, weapons, d,
 				pcards, n, bufs,
 				defenseSum,
@@ -120,12 +120,12 @@ func (e *Evaluator) findBest(weapons []weapon.Weapon, hand []card.Card, d *deck.
 			}
 
 			v := attackDealt + defenseDealt
-			winner.SetArsenal(arsenalAtChainStart)
+			winner.SetArsenal(arsenalAtAttackTurnStart)
 			var promoted card.Card
 			if winner.Arsenal() == nil {
 				promoted = promoteHeldToArsenal(winner, hand, arsenalCardIn)
 			}
-			score := chainScoreOf(winner, v)
+			score := attackTurnScoreOf(winner, v)
 			if runningSeen && score.cmp(runningScore) <= 0 {
 				// Losing partition: hand its winner back to the pool so the next leaf's
 				// preparePermState reuses it rather than allocating fresh.
@@ -354,7 +354,7 @@ func defendersDamage(defenders, pitched []card.Card, deckPile *deck.Deck, ge *ga
 		ge.SetValue(0)
 		ge.SetCacheable(true)
 		*cs = card.CardState{Card: def, FromArsenal: i == arsenalDefenderIdx}
-		ge.ResolveChainStep(ge.Logger(), cs)
+		ge.ResolveAttackStep(ge.Logger(), cs)
 		total += ge.Value()
 		if !ge.IsCacheable() {
 			cacheable = false
@@ -417,8 +417,8 @@ func pickBlockerMode(d card.Card, ge *gameengine.GameEngine, cs *card.CardState,
 	return bestMode, bestCost
 }
 
-// chainBudget captures the winning phase-split's attack-chain resource state.
-type chainBudget struct {
+// attackTurnBudget captures the winning phase-split's attack-turn resource state.
+type attackTurnBudget struct {
 	resource         int
 	maxPitch         int
 	hasAttackPitches bool
@@ -484,13 +484,13 @@ func containsModalBlocker(cards []card.Card) bool {
 // modal blockers.
 const noBlockBudgetCap = 1 << 30
 
-// chainScore ranks leaves lexicographically:
-//   - value: chain-step damage / block credited this turn.
+// attackTurnScore ranks leaves lexicographically:
+//   - value: attack-step damage / block credited this turn.
 //   - cardsPlayed: tiebreaker favouring "play > hold" when payoff lands next turn (aura ticks,
 //     minted tokens).
 //   - totalCards: post-refill hand + arsenal slot available next turn.
 //   - totalCounters: summed Aura + Item Count — the weakest signal.
-type chainScore struct {
+type attackTurnScore struct {
 	value         int
 	cardsPlayed   int
 	totalCards    int
@@ -498,7 +498,7 @@ type chainScore struct {
 }
 
 // cmp returns 1 when a outranks b, -1 when b outranks a, 0 when they tie.
-func (a chainScore) cmp(b chainScore) int {
+func (a attackTurnScore) cmp(b attackTurnScore) int {
 	for _, d := range [...]int{
 		a.value - b.value,
 		a.cardsPlayed - b.cardsPlayed,

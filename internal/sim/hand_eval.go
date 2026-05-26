@@ -18,7 +18,7 @@ import (
 //
 // master holds the previous turn's carryover: Hero, Arsenal, Auras, Items, Banished,
 // Graveyard, OpponentMarked, plus matchup-derived IncomingDamage / ArcaneIncomingDamage.
-// Per-turn ephemerals are ignored. TurnSummary.State is the post-chain GameState; the next
+// Per-turn ephemerals are ignored. TurnSummary.State is the post-attack-turn GameState; the next
 // turn's master comes from PrepareNextTurn on it.
 //
 // Package-private so callers route through EvalOneTurnForTesting.
@@ -26,7 +26,7 @@ func best(weapons []weapon.Weapon, hand []card.Card, d *deck.Deck, master *gamee
 	return sharedEvaluator.Best(weapons, hand, d, master)
 }
 
-// Best returns the optimal TurnSummary for the given hand and lands the winning chain's
+// Best returns the optimal TurnSummary for the given hand and lands the winning attack turn's
 // post-resolution state into master in place. Returned summary.State == master, so the
 // caller's ownership of master is unchanged; the borrowed pool slot is returned here.
 // CopyFrom rebinds master's owned deck wrapper to alias the winner's via ShallowCopyFrom.
@@ -48,8 +48,8 @@ func (e *Evaluator) Best(weapons []weapon.Weapon, hand []card.Card, d *deck.Deck
 // for concurrent use — one Evaluator per goroutine.
 //
 // cache (nil to disable) memoizes the optimal partition per evalCacheKey. On a hit, Best
-// replays the chain against the cached BestLine; on a miss, the search runs and the result
-// is stored when the chain didn't depend on hidden state.
+// replays the attack turn against the cached BestLine; on a miss, the search runs and the result
+// is stored when the attack turn didn't depend on hidden state.
 type Evaluator struct {
 	cachedBufs     *attackBufs
 	cachedHandSize int

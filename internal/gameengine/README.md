@@ -2,10 +2,10 @@
 
 ## Purpose
 
-`gameengine` owns the per-turn game-state engine that the `sim` chain runner drives. It is
+`gameengine` owns the per-turn game-state engine that the `sim` attack-turn runner drives. It is
 split into two cooperating types: **`GameState`** holds the raw per-turn data (every slice,
 scalar, and flag), and **`GameEngine`** embeds a `*GameState` and adds the rules-engine API —
-trigger dispatch, chain-step resolution, the token economy, deck manipulation, clash/opt.
+trigger dispatch, attack-step resolution, the token economy, deck manipulation, clash/opt.
 Cards play against this engine through the narrow `card.GameEngine` interface, which is a
 subset of `GameEngine`'s method set.
 
@@ -15,7 +15,7 @@ subset of `GameEngine`'s method set.
 `GameEngine`, so every pure accessor and the `Copy` / `Reset` utilities promote
 automatically. Internal machinery (sim's per-permutation scratch, carryover snapshots, the
 winning pointer) passes around a bare `*GameState` when it only needs to read or copy data;
-the chain runner wraps it in a `*GameEngine` via `GameState.Engine()` to drive `Card.Play`.
+the attack-turn runner wraps it in a `*GameEngine` via `GameState.Engine()` to drive `Card.Play`.
 `GameEngine` methods that shadow a promoted `GameState` method add cacheable-flipping or
 rules logic on top.
 
@@ -38,8 +38,8 @@ rules logic on top.
 
 ## How it is used / how to extend it
 
-The `sim` chain runner builds one master `*GameState`, copies it per partition leaf, runs the
-defense pass, then runs each chain permutation against a fresh per-permutation copy. Cards
+The `sim` attack-turn runner builds one master `*GameState`, copies it per partition leaf, runs the
+defense pass, then runs each attack turn permutation against a fresh per-permutation copy. Cards
 reach the engine through hooks (`Play`, `Block`, `OnHitHandler.Fire`, trigger handlers,
 `Hero.OnCardPlayed`), all of which receive the `card.GameEngine` / `card.Logger` typed
 surfaces.
@@ -66,10 +66,10 @@ A triggered hero (`internal/hero/heroes`) embeds `trigger.Trigger[card.Hero]` to
 the trigger surface; heroes with no ability (`defaultHero`, test stubs) return
 `TriggerType == 0` so the dispatch's bit-and check skips them.
 
-## Chain-step resolution
+## Attack-step resolution
 
-`ResolveChainStep(l, pc)` runs `pc.Card.Play`, then `chainStepDelta` credits the standard
-chain-step value to `value` and `AppendChainStep` appends the canonical
+`ResolveAttackStep(l, pc)` runs `pc.Card.Play`, then `attackStepDelta` credits the standard
+attack-step value to `value` and `AppendAttackStep` appends the canonical
 `<DisplayName>: <VERB> (+N)` log entry — appended *after* `Play` so self-buffs are reflected.
 Attacks credit `EffectiveAttack`; defense reactions and `DefensiveInstant` cards credit
 `EffectiveDefense` capped at the remaining unblocked damage; everything else logs `(+0)`.
@@ -78,7 +78,7 @@ Attacks credit `EffectiveAttack`; defense reactions and `DefensiveInstant` cards
 
 - `state.go` — `GameState`, the copy/reset family, all pure accessors.
 - `engine.go` — `GameEngine`: cacheable-flipping zone accessors, `FireTriggers` / `fireHooks`,
-  `DestroyAura` / `DestroyItem`, `ResolveChainStep`, `Opt` / `Clash`, arcane damage, the
+  `DestroyAura` / `DestroyItem`, `ResolveAttackStep`, `Opt` / `Clash`, arcane damage, the
   token economy.
 - `interfaces.go` — the `Aura` / `EphemeralTrigger` / `Item` / `Hero` interfaces.
 - `builder.go` — `StateBuilder` and `New()`.
@@ -93,7 +93,7 @@ Attacks credit `EffectiveAttack`; defense reactions and `DefensiveInstant` cards
   to false as a side effect of exposing hidden state. The engine's own internals use the
   non-flipping promoted `GameState` variants (`ge.GameState.X`).
 - The hand is kept sorted by `Card.ID()` on every insert (`insertHandSorted`) so it stays a
-  canonical multiset for the chain runner and the eval-cache key.
+  canonical multiset for the attack-turn runner and the eval-cache key.
 - `ResetEphemeralState` keeps cross-turn carryover (hero, deck, hand, arsenal, graveyard,
   banished, auras, items, opponentMarked, incoming damage) and wipes everything else;
   `incomingDamage` is the constant matchup figure and survives, but `damageBlocked` resets.

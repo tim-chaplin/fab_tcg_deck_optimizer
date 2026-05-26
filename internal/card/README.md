@@ -1,7 +1,7 @@
 # internal/card
 
 The contract layer for every Flesh and Blood card. This package defines the `Card` interface
-every card implements, the per-chain-step `CardState` wrapper that carries mutable flags
+every card implements, the per-attack-step `CardState` wrapper that carries mutable flags
 between resolution phases, the `CardType` / `TypeSet` type-line bitfield, and the narrow
 `GameEngine` / `Logger` / `Aura` / `Item` / `EphemeralTrigger` interfaces cards consume from
 the simulator. It owns the contract and deliberately does not import the sim — `*sim.TurnState`
@@ -14,8 +14,8 @@ and the sim's logger satisfy these interfaces structurally.
   behaviour. Concrete implementations live in `cards/`.
 - `CardState` (`card_state.go`) — wraps a `Card` with per-turn mutable flags (`Role`,
   `GrantedGoAgain`, `GrantedDominate`, `BonusAttack`, `BonusDefense`, `Mode`, `FromArsenal`,
-  `PitchedToPlay`, `OnHit`, …). Created by the solver at the start of each attack chain and
-  lives only for that chain. The card currently resolving receives its own `CardState` as the
+  `PitchedToPlay`, `OnHit`, …). Created by the solver at the start of each attack-turn search and
+  lives only for that attack turn. The card currently resolving receives its own `CardState` as the
   `self` argument to `Play`. `Effective*` methods fold printed values with granted bonuses
   (clamped at 0); helpers like `GrantGoAgainIfFromArsenal` and `GrantAttackReactionBuff`
   package the common rider plumbing.
@@ -24,7 +24,7 @@ and the sim's logger satisfy these interfaces structurally.
   registration, draw/tutor verbs, hit heuristics. Card code needing raw field access
   type-asserts back to `*sim.TurnState`.
 - `Logger` (`interfaces.go`) — the log sink. Cards use `AppendPostTrigger*` for self-riders
-  and `AppendPreTrigger*` for hero/aura triggers; the `AppendChainStep*` / `AmendLastChainStepN`
+  and `AppendPreTrigger*` for hero/aura triggers; the `AppendAttackStep*` / `AmendLastAttackStepN`
   methods are sim-internal. A nil-pointer `Logger` (the find-best skip pass) silently elides
   every call.
 - `Aura`, `Item`, `EphemeralTrigger` (`interfaces.go`) — minimal views the corresponding
@@ -32,7 +32,7 @@ and the sim's logger satisfy these interfaces structurally.
 - Optional marker interfaces (`markers.go`) — `VariableCost`, `Modal`, `ModalCost`,
   `PlayPrecondition`, `Blocker`, `BlockCost`, `DefensiveInstant`, `Dominator`,
   `ArsenalDefenseBonus`, `ResourceSource`, `Universal`, `AttackReaction`, `LeavesArenaAura`.
-  Cards opt into these to layer behaviour onto the base contract; the chain runner
+  Cards opt into these to layer behaviour onto the base contract; the attack-turn runner
   type-asserts on them at the matching pipeline stage and skips the branch otherwise.
 - `CardType` / `TypeSet` (`types.go`) — the type-line bitfield. Every type check is a single
   bitmask AND. `TypeSet` carries predicate helpers (`IsAttack`, `IsAttackAction`,

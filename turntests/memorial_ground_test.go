@@ -13,7 +13,7 @@ import (
 // Tests that Memorial Ground with no eligible card in the graveyard leaves the deck empty.
 func TestMemorialGround_NoEligibleNoOp(t *testing.T) {
 	ge := gameengine.New()
-	ge.ResolveChainStep(ge.Logger(), &card.CardState{Card: cards.MemorialGroundRed{}})
+	ge.ResolveAttackStep(ge.Logger(), &card.CardState{Card: cards.MemorialGroundRed{}})
 	if ge.Deck().Size() != 0 {
 		t.Errorf("deck size = %d, want 0 (no eligible recycle target)", ge.Deck().Size())
 	}
@@ -28,7 +28,7 @@ func TestMemorialGround_RecyclesEligibleAttackActionToTop(t *testing.T) {
 		SetCards(deck).
 		SetGraveyard([]card.Card{target}).
 		Build()}
-	ge.ResolveChainStep(ge.Logger(), &card.CardState{Card: cards.MemorialGroundRed{}})
+	ge.ResolveAttackStep(ge.Logger(), &card.CardState{Card: cards.MemorialGroundRed{}})
 	if got := ge.Deck().Size(); got != 2 {
 		t.Errorf("deck size after recycle = %d, want 2 (target moved onto the existing top)", got)
 	}
@@ -44,7 +44,7 @@ func TestMemorialGround_RecyclesEligibleAttackActionToTop(t *testing.T) {
 // Ground unable to recycle.
 func TestMemorialGround_IgnoresIneligibleCards(t *testing.T) {
 	ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetGraveyard([]card.Card{testutils.FakeRedAttack().WithCost(3), testutils.FakeRedAction()}).Build()}
-	ge.ResolveChainStep(ge.Logger(), &card.CardState{Card: cards.MemorialGroundRed{}})
+	ge.ResolveAttackStep(ge.Logger(), &card.CardState{Card: cards.MemorialGroundRed{}})
 	if ge.Deck().Size() != 0 {
 		t.Errorf("deck size = %d, want 0 (no eligible target)", ge.Deck().Size())
 	}

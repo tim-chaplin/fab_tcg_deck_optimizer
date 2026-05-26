@@ -5,14 +5,14 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/gameengine"
 )
 
-// pitchPool tracks the state of the attack-phase pitch pool during a single chain run:
+// pitchPool tracks the state of the attack-phase pitch pool during a single attack turn run:
 // the active pitch ordering (perm / vals), how many pitches have popped (idx, n), the
 // partially-consumed front (front + remaining), and the flat backing slice (attr) that
 // per-CardState PitchedToPlay slices index into.
 //
-// Lifecycle: one pitchPool per chain run (per attack-permutation × pitch-permutation
+// Lifecycle: one pitchPool per attack turn run (per attack-permutation × pitch-permutation
 // pair). playSequenceWithMeta constructs the pool from ctx.attackPitchPerm / Vals and
-// drains it step-by-step via pay. At end of chain a pool with idx < n means a pitched
+// drains it step-by-step via pay. At end of attack turn a pool with idx < n means a pitched
 // card was held back without funding any cost — illegal in FaB. Residual `remaining`
 // is fine: it's the over-pitch surplus on the last popped pitch.
 type pitchPool struct {
@@ -21,7 +21,7 @@ type pitchPool struct {
 	idx  int
 	n    int
 	// front + remaining track the partially-consumed pitched card carrying over from a
-	// previous chain step. Between chain steps either front is empty (front==nil &&
+	// previous attack step. Between attack steps either front is empty (front==nil &&
 	// remaining==0) or one pitched card sits at the front with leftover resources.
 	// Tests bypass the real pool by seeding remaining with a synthetic budget and no
 	// backing front — pay then drains the budget without contributing attribution.

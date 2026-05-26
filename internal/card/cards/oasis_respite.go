@@ -5,7 +5,7 @@
 // 1{h}." Yellow caps at 3, Blue at 2.
 //
 // The 1{h} life-gain rider fires for heroes opting into card.LowerHealthWanter; it folds
-// into the chain-step "(+N)" by bumping self.BonusDefense so the sim's resolver caps it
+// into the attack-step "(+N)" by bumping self.BonusDefense so the sim's resolver caps it
 // against IncomingDamage alongside the printed prevention.
 
 package cards

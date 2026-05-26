@@ -14,7 +14,7 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapon/weapons"
 )
 
-// Pins on-hit-go-again chain extension through a weapon swing: Nimblism + Razor Reflex
+// Pins on-hit-go-again attack-turn extension through a weapon swing: Nimblism + Razor Reflex
 // buff Critical Strike to 7, RR's on-hit go-again grants AP for Reaping Blade (3).
 func TestOnHitGoAgain_RazorReflexExtendsToWeaponSwing(t *testing.T) {
 	d := deck.New(heroes.Viserai, []deck.Weapon{weapons.ReapingBlade{}}, nil)
@@ -48,7 +48,7 @@ func TestOnHitGoAgain_TwoConsecutiveARsExtendToWeaponSwing(t *testing.T) {
 	}
 }
 
-// formatBestLine renders the chosen role assignment in chain order for failure messages.
+// formatBestLine renders the chosen role assignment in attack-turn order for failure messages.
 func formatBestLine(line []card.CardAssignment) string {
 	var parts []string
 	for _, a := range line {

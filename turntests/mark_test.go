@@ -22,7 +22,7 @@ func TestPursueToTheEdgeOfOblivion_MarksOpponentOnHit(t *testing.T) {
 }
 
 // Tests that with the opponent already marked, Pursue's attack strips the prior mark and
-// its on-hit rider reapplies it — net end-of-chain mark stays on.
+// its on-hit rider reapplies it — net end-of-attack-turn mark stays on.
 func TestPursueToTheEdgeOfOblivion_PreservesMarkWhenOpponentAlreadyMarked(t *testing.T) {
 	d := deck.New(heroes.Viserai, nil, nil)
 	hand := []card.Card{cards.PursueToTheEdgeOfOblivionRed{}}

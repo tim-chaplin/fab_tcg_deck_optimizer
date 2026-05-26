@@ -1,7 +1,7 @@
 package sim
 
 // Integration-test entry points that drive one or two turns in source order (no shuffle).
-// Tests assert on summary.Value (chain + start-of-turn tick damage) and summary.State
+// Tests assert on summary.Value (attack turn + start-of-turn tick damage) and summary.State
 // (post end-of-turn cleanup + next-hand draw).
 
 import (

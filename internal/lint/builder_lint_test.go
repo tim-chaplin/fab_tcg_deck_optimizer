@@ -98,8 +98,8 @@ func TestFakeCardBuilder_MultiLineWhenMultiWither(t *testing.T) {
 		if perr != nil {
 			return perr
 		}
-		// seen marks the inner CallExprs of a chain so the outer ast.Inspect doesn't
-		// re-report a chain once from each With node along it.
+		// seen marks the inner CallExprs of an attack turn so the outer ast.Inspect doesn't
+		// re-report an attack turn once from each With node along it.
 		seen := map[*ast.CallExpr]bool{}
 		ast.Inspect(f, func(n ast.Node) bool {
 			call, isCall := n.(*ast.CallExpr)
@@ -180,8 +180,8 @@ func isFakeConstructorName(name string) bool {
 
 // gameStateBuilderChainLines reports whether call is the terminal .Build() of a
 // GameStateBuilder() chain. When it is, it returns the source line of every method
-// selector in the chain ordered outer→inner ([Build, SetN, ..., Set1, GameStateBuilder]);
-// otherwise ok is false. Nested Set* / GameStateBuilder calls return ok=false so a chain
+// selector in the attack-turn ordered outer→inner ([Build, SetN, ..., Set1, GameStateBuilder]);
+// otherwise ok is false. Nested Set* / GameStateBuilder calls return ok=false so an attack turn
 // is reported once, from its outermost Build().
 func gameStateBuilderChainLines(fset *token.FileSet, call *ast.CallExpr) (lines []int, ok bool) {
 	sel, isSel := call.Fun.(*ast.SelectorExpr)

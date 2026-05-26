@@ -322,7 +322,7 @@ func TestTutor_NoMatchReturnsFalse(t *testing.T) {
 // TestShallowCopy_ShufflePanics confirms the safety net on the ShallowCopy optimization:
 // a card calling Shuffle mid-turn on a per-permutation deck would silently corrupt every
 // peer permutation sharing the same slice backing, so ShallowCopy-produced wrappers must
-// panic on Shuffle. Any chain-runner test that exercises a card whose Play() shuffles
+// panic on Shuffle. Any attack-turn runner test that exercises a card whose Play() shuffles
 // the deck mid-turn will trip this panic.
 func TestShallowCopy_ShufflePanics(t *testing.T) {
 	master := New(nil, nil, []Card{fakeCard{id: 1}, fakeCard{id: 2}, fakeCard{id: 3}})

@@ -15,7 +15,7 @@ func TestCadaverousContraband_RegistersOnHit(t *testing.T) {
 	for _, c := range []card.Card{cards.CadaverousContrabandRed{}, cards.CadaverousContrabandYellow{}, cards.CadaverousContrabandBlue{}} {
 		pc := &card.CardState{Card: c}
 		ge := gameengine.New()
-		ge.ResolveChainStep(ge.Logger(), pc)
+		ge.ResolveAttackStep(ge.Logger(), pc)
 		if len(pc.OnHit) != 1 {
 			t.Errorf("%s [%d{p}]: OnHit handlers = %d, want 1", c.Name(), c.Pitch(), len(pc.OnHit))
 		}
@@ -31,7 +31,7 @@ func TestCadaverousContraband_OnHitRecyclesNonAttackToTop(t *testing.T) {
 		SetGraveyard([]card.Card{non}).
 		Build()}
 	pc := &card.CardState{Card: cards.CadaverousContrabandRed{}}
-	ge.ResolveChainStep(ge.Logger(), pc)
+	ge.ResolveAttackStep(ge.Logger(), pc)
 	pc.BonusAttack = 1
 	testutils.FireOnHitIfLikely(ge, ge.Logger(), pc)
 	if got := ge.Deck().Size(); got != 2 {
@@ -50,7 +50,7 @@ func TestCadaverousContraband_OnHitRecyclesNonAttackToTop(t *testing.T) {
 func TestCadaverousContraband_OnHitNoEligibleCardNoOp(t *testing.T) {
 	ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetGraveyard([]card.Card{testutils.FakeRedAttack()}).Build()}
 	pc := &card.CardState{Card: cards.CadaverousContrabandRed{}}
-	ge.ResolveChainStep(ge.Logger(), pc)
+	ge.ResolveAttackStep(ge.Logger(), pc)
 	testutils.FireOnHitIfLikely(ge, ge.Logger(), pc)
 	if len(ge.Graveyard()) != 1 {
 		t.Errorf("graveyard size = %d, want 1 (no eligible target, no recycle)", len(ge.Graveyard()))

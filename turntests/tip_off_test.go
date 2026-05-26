@@ -11,14 +11,14 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 )
 
-// Tests that Tip-Off's Instant-discard mode wins the partition when a same-chain
+// Tests that Tip-Off's Instant-discard mode wins the partition when a same-attack-turn
 // marked-defender rider can read the resulting mark. Hand is Tip-Off Blue + Outed Red:
 // mode 0 path is "pitch Outed for 1{r}, play Tip-Off Blue mode 0 for 3{p}" = 3 total;
 // mode 1 path is "Tip-Off Blue mode 1 (0 damage, marks, go-again) then Outed Red
-// (3 + 1 marked-defender = 4)" = 4 total. The chain runner's per-attack mark clear is
+// (3 + 1 marked-defender = 4)" = 4 total. The attack-turn runner's per-attack mark clear is
 // gated on positive EffectiveAttack, so mode 1's 0-power swing leaves the mark intact
 // for Outed to read.
-func TestTipOff_InstantModeMarksOpponentForSameChainOutedBonus(t *testing.T) {
+func TestTipOff_InstantModeMarksOpponentForSameAttackTurnOutedBonus(t *testing.T) {
 	d := deck.New(heroes.Viserai, nil, nil)
 	hand := []card.Card{cards.TipOffBlue{}, cards.OutedRed{}}
 

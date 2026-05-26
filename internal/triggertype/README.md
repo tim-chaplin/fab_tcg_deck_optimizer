@@ -15,10 +15,10 @@ pulling in the whole game engine.
 ## The events
 
 - `StartOfTurn` — start of the owning player's action phase, before the best-line search.
-- `CardOrAbility` — fires once as a card or weapon attack is played during the chain, before
+- `CardOrAbility` — fires once as a card or weapon attack is played during the attack turn, before
   that card's own effect resolves. Subscribers narrow with a `TypeFilter` (e.g. attacks only
   for Runechant tokens, attack-actions for Malefic Incantation).
-- `EndOfTurn` — after the chain finishes resolving, before the carry snapshot.
+- `EndOfTurn` — after the attack turn finishes resolving, before the carry snapshot.
 - `Hit` — when an attack hits (post-AR-buff `EffectiveAttack` survives blocks).
 - `DamageTaken` — end of the defense phase, when incoming damage got through unblocked.
 - `Pitch` — as each card is pitched to fund a play in the attack phase. The triggering card

@@ -141,7 +141,7 @@ func BenchmarkAnnealMultiRoundOnViseraiV4(b *testing.B) {
 // BenchmarkAnnealRoundOnViseraiV4: same anneal-round workload on viserai_v4 but with a
 // 2-mutation sample and a fixed 200-shuffle (non-adaptive) Evaluate, so a -count=10
 // -benchtime=3x benchstat finishes in well under a minute. Hits the same hot paths
-// (chain runner, partition search, cache) — a regression in either shows up here just as
+// (attack-turn runner, partition search, cache) — a regression in either shows up here just as
 // reliably as in the full bench, just with a smaller per-iteration footprint.
 func BenchmarkAnnealRoundOnViseraiV4_Quick(b *testing.B) {
 	const (

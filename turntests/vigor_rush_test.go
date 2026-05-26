@@ -11,7 +11,7 @@ import (
 )
 
 // TestVigorRush_BaseGoAgainFalse pins GoAgain() = false so EffectiveGoAgain short-circuits
-// chain-legality when the non-attack-action condition hasn't fired.
+// attack-turn legality when the non-attack-action condition hasn't fired.
 func TestVigorRush_BaseGoAgainFalse(t *testing.T) {
 	for _, c := range []card.Card{cards.VigorRushRed{}, cards.VigorRushYellow{}, cards.VigorRushBlue{}} {
 		if c.GoAgain(nil) {
@@ -30,7 +30,7 @@ func TestVigorRush_NoNonAttackActionNoGoAgain(t *testing.T) {
 			SetNonAttackActionPlayed(false).
 			Build()}
 		pc := &card.CardState{Card: c}
-		ge.ResolveChainStep(ge.Logger(), pc)
+		ge.ResolveAttackStep(ge.Logger(), pc)
 		if got := ge.Value(); got != c.Attack() {
 			t.Errorf("%s: Play() = %d, want %d (base power)", c.Name(), got, c.Attack())
 		}
@@ -50,7 +50,7 @@ func TestVigorRush_NonAttackActionGrantsGoAgain(t *testing.T) {
 			SetNonAttackActionPlayed(true).
 			Build()}
 		pc := &card.CardState{Card: c}
-		ge.ResolveChainStep(ge.Logger(), pc)
+		ge.ResolveAttackStep(ge.Logger(), pc)
 		if !pc.GrantedGoAgain {
 			t.Errorf("%s: GrantedGoAgain = false, want true (non-attack action → go again)", c.Name())
 		}

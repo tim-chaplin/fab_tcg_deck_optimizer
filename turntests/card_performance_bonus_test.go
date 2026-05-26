@@ -13,7 +13,7 @@ import (
 func TestPerformanceBonus_RegistersOnHit(t *testing.T) {
 	ge := gameengine.New()
 	pc := &card.CardState{Card: cards.PerformanceBonusBlue{}}
-	ge.ResolveChainStep(ge.Logger(), pc)
+	ge.ResolveAttackStep(ge.Logger(), pc)
 	if len(pc.OnHit) != 1 {
 		t.Fatalf("OnHit handlers = %d, want 1 (gold-create rider registered)", len(pc.OnHit))
 	}
@@ -23,7 +23,7 @@ func TestPerformanceBonus_RegistersOnHit(t *testing.T) {
 func TestPerformanceBonus_ArsenalGrantsGoAgain(t *testing.T) {
 	ge := gameengine.New()
 	pc := &card.CardState{Card: cards.PerformanceBonusRed{}, FromArsenal: true}
-	ge.ResolveChainStep(ge.Logger(), pc)
+	ge.ResolveAttackStep(ge.Logger(), pc)
 	if !pc.GrantedGoAgain {
 		t.Fatalf("GrantedGoAgain = false, want true (played from arsenal)")
 	}
@@ -33,7 +33,7 @@ func TestPerformanceBonus_ArsenalGrantsGoAgain(t *testing.T) {
 func TestPerformanceBonus_NonArsenalNoGoAgain(t *testing.T) {
 	ge := gameengine.New()
 	pc := &card.CardState{Card: cards.PerformanceBonusRed{}, FromArsenal: false}
-	ge.ResolveChainStep(ge.Logger(), pc)
+	ge.ResolveAttackStep(ge.Logger(), pc)
 	if pc.GrantedGoAgain {
 		t.Fatalf("GrantedGoAgain = true with FromArsenal=false, want false")
 	}

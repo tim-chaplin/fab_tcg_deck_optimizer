@@ -13,7 +13,7 @@ import (
 // Tests that Relentless Pursuit always marks the opposing hero on Play.
 func TestRelentlessPursuit_MarksOpponent(t *testing.T) {
 	ge := gameengine.New()
-	ge.ResolveChainStep(ge.Logger(), &card.CardState{Card: cards.RelentlessPursuitBlue{}})
+	ge.ResolveAttackStep(ge.Logger(), &card.CardState{Card: cards.RelentlessPursuitBlue{}})
 	if !ge.OpponentMarked() {
 		t.Errorf("OpponentMarked = false after Play, want true")
 	}
@@ -24,7 +24,7 @@ func TestRelentlessPursuit_MarksOpponent(t *testing.T) {
 func TestRelentlessPursuit_NoRecycleWithoutPriorAttack(t *testing.T) {
 	pc := &card.CardState{Card: cards.RelentlessPursuitBlue{}}
 	ge := gameengine.New()
-	ge.ResolveChainStep(ge.Logger(), pc)
+	ge.ResolveAttackStep(ge.Logger(), pc)
 	if got := ge.Deck().Size(); got != 0 {
 		t.Errorf("deck size = %d, want 0 (no recycle without prior attack)", got)
 	}
@@ -36,7 +36,7 @@ func TestRelentlessPursuit_RecyclesAfterPriorAttack(t *testing.T) {
 	pc := &card.CardState{Card: cards.RelentlessPursuitBlue{}}
 	ge := gameengine.New()
 	ge.SetCardsPlayed([]card.Card{testutils.FakeRedAttack()})
-	ge.ResolveChainStep(ge.Logger(), pc)
+	ge.ResolveAttackStep(ge.Logger(), pc)
 	if got := ge.Deck().Size(); got != 1 {
 		t.Errorf("deck size after recycle = %d, want 1 (Relentless Pursuit went onto an empty deck)", got)
 	}

@@ -15,7 +15,7 @@ import (
 func TestStrategicPlanning_QueuesEndOfTurnTrigger(t *testing.T) {
 	for _, c := range []card.Card{cards.StrategicPlanningRed{}, cards.StrategicPlanningYellow{}, cards.StrategicPlanningBlue{}} {
 		ge := gameengine.New()
-		ge.ResolveChainStep(ge.Logger(), &card.CardState{Card: c})
+		ge.ResolveAttackStep(ge.Logger(), &card.CardState{Card: c})
 		matching := 0
 		for _, tr := range ge.Triggers() {
 			if tr.TriggerType() == triggertype.EndOfTurn && tr.CardName() == c.DisplayName() {
@@ -39,7 +39,7 @@ func TestStrategicPlanning_RecyclesEligibleActionToBottom(t *testing.T) {
 		SetCards(deck).
 		SetGraveyard([]card.Card{target}).
 		Build()}
-	ge.ResolveChainStep(ge.Logger(), &card.CardState{Card: cards.StrategicPlanningRed{}})
+	ge.ResolveAttackStep(ge.Logger(), &card.CardState{Card: cards.StrategicPlanningRed{}})
 	if got := ge.Deck().Size(); got != 2 {
 		t.Errorf("deck size after recycle = %d, want 2 (target appended to bottom)", got)
 	}

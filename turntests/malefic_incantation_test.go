@@ -25,7 +25,7 @@ func TestMaleficIncantation_PlayRegistersCardOrAbilityTrigger(t *testing.T) {
 	}
 	for _, tc := range cases {
 		ge := gameengine.New()
-		ge.ResolveChainStep(ge.Logger(), &card.CardState{Card: tc.c})
+		ge.ResolveAttackStep(ge.Logger(), &card.CardState{Card: tc.c})
 		if got := ge.Value(); got != 0 {
 			t.Errorf("%s: Play() = %d, want 0 (rune comes from trigger, not Play)", tc.c.Name(), got)
 		}

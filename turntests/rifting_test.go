@@ -28,7 +28,7 @@ func TestRifting_HitLetsNextNonAttackActionPlayAsInstant(t *testing.T) {
 		}
 	}
 	if !played {
-		t.Errorf("FakeRedAction not played — Rifting's instant grant didn't let it into the chain\nBestLine: %s",
+		t.Errorf("FakeRedAction not played — Rifting's instant grant didn't let it into the attack turn\nBestLine: %s",
 			formatBestLine(summary.BestLine))
 	}
 }

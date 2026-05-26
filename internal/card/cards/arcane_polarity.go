@@ -12,7 +12,7 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 )
 
-// arcanePolarityPlay credits the conditional life gain as the chain step.
+// arcanePolarityPlay credits the conditional life gain as the attack step.
 func arcanePolarityPlay(ge card.GameEngine, l card.Logger, self *card.CardState, arcaneGain int) {
 	gain := 1
 	if ge.ArcaneIncomingDamage() > 0 {

@@ -6,7 +6,7 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 )
 
-// Tests that On the Horizon is typed as Block — not Defense Reaction — so the chain
+// Tests that On the Horizon is typed as Block — not Defense Reaction — so the attack turn
 // runner routes it through the plain-block path rather than calling its Play during the
 // defender DR loop.
 func TestOnTheHorizon_TypedAsBlock(t *testing.T) {

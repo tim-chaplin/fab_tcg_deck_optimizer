@@ -15,7 +15,7 @@ func TestWarmongersRecital_NoAttackReturnsZero(t *testing.T) {
 	for _, c := range []card.Card{
 		cards.WarmongersRecitalRed{}, cards.WarmongersRecitalYellow{}, cards.WarmongersRecitalBlue{},
 	} {
-		ge.ResolveChainStep(ge.Logger(), &card.CardState{Card: c})
+		ge.ResolveAttackStep(ge.Logger(), &card.CardState{Card: c})
 		if ge.Value() != 0 {
 			t.Errorf("%s: Play() = %d, want 0", c.Name(), ge.Value())
 		}
@@ -25,7 +25,7 @@ func TestWarmongersRecital_NoAttackReturnsZero(t *testing.T) {
 // TestWarmongersRecital_NonAttackInRemainingFizzles: non-attack action fails the predicate.
 func TestWarmongersRecital_NonAttackInRemainingFizzles(t *testing.T) {
 	ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCardsRemaining([]*card.CardState{{Card: testutils.FakeRedAction()}}).Build()}
-	ge.ResolveChainStep(ge.Logger(), &card.CardState{Card: cards.WarmongersRecitalRed{}})
+	ge.ResolveAttackStep(ge.Logger(), &card.CardState{Card: cards.WarmongersRecitalRed{}})
 	if ge.Value() != 0 {
 		t.Errorf("Play() = %d, want 0 (non-attack skipped)", ge.Value())
 	}
@@ -45,7 +45,7 @@ func TestWarmongersRecital_NextAttackReceivesBonusAndOnHit(t *testing.T) {
 	for _, tc := range cases {
 		target := &card.CardState{Card: testutils.FakeRedAttack()}
 		ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCardsRemaining([]*card.CardState{target}).Build()}
-		ge.ResolveChainStep(ge.Logger(), &card.CardState{Card: tc.c})
+		ge.ResolveAttackStep(ge.Logger(), &card.CardState{Card: tc.c})
 		if target.BonusAttack != tc.want {
 			t.Errorf("%s: target BonusAttack = %d, want %d", tc.c.Name(), target.BonusAttack, tc.want)
 		}
@@ -63,12 +63,12 @@ func TestWarmongersRecital_OnHitFireRecyclesTargetFromGraveyardToDeckBottom(t *t
 	deckTop := testutils.FakeRedAttack()
 	ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCards([]card.Card{deckTop}).Build()}
 	ge.SetCardsRemaining([]*card.CardState{targetState})
-	ge.ResolveChainStep(ge.Logger(), &card.CardState{Card: cards.WarmongersRecitalRed{}})
+	ge.ResolveAttackStep(ge.Logger(), &card.CardState{Card: cards.WarmongersRecitalRed{}})
 	if len(targetState.OnHit) != 1 {
 		t.Fatalf("OnHit not registered: len=%d", len(targetState.OnHit))
 	}
 
-	// Simulate the chain step's graveyard deposit, then fire the OnHit.
+	// Simulate the attack step's graveyard deposit, then fire the OnHit.
 	ge.AddToGraveyard(target)
 	h := &targetState.OnHit[0]
 	h.Fire(ge, ge.Logger(), targetState, h)

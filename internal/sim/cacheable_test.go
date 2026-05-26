@@ -1,7 +1,7 @@
 package sim
 
 // End-to-end tests for TurnSummary.Cacheable propagation through hand.Best. The bit
-// reports whether the chain that produced the summary depended on hidden state (deck
+// reports whether the attack turn that produced the summary depended on hidden state (deck
 // order, prior-turn graveyard contents). The structural-enforcement principle: cards
 // only reach deck / graveyard via accessor methods on TurnState (the underlying fields
 // are package-private), so the cacheable signal is sound by the language's visibility
@@ -16,18 +16,18 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 )
 
-// TestBest_CacheableEmptyHand: no chain ran, nothing read hidden state — Cacheable=true.
+// TestBest_CacheableEmptyHand: no attack-turn ran, nothing read hidden state — Cacheable=true.
 // Pins the no-feasible-line fallback's seed default so an empty hand doesn't accidentally
 // report uncacheable just because the search visited zero leaves.
 func TestBest_CacheableEmptyHand(t *testing.T) {
 	got := Best(nil, nil, nil, gameengine.GameStateBuilder().SetHero(testutils.Hero{Intel: 4}).Build())
 	if !got.Cacheable {
-		t.Errorf("empty hand: Cacheable = false, want true (no chain, no hidden read)")
+		t.Errorf("empty hand: Cacheable = false, want true (no attack turn, no hidden read)")
 	}
 }
 
 // TestBest_CacheablePlainAttackers: a hand of plain attack-action fakes whose Play does no
-// deck / graveyard reads. The chain's output depends only on the inputs (hand + cards
+// deck / graveyard reads. The attack turn's output depends only on the inputs (hand + cards
 // played), so Cacheable=true.
 func TestBest_CacheablePlainAttackers(t *testing.T) {
 	h := []card.Card{testutils.FakeRedAttack(), testutils.FakeRedAttack(), testutils.FakeRedAttack(), testutils.FakeRedAttack()}
@@ -73,7 +73,7 @@ func TestBest_UncacheableRavenousRabble(t *testing.T) {
 	}
 }
 
-// Tests that a Snatch hit's on-hit DrawOne leaves the chain Cacheable.
+// Tests that a Snatch hit's on-hit DrawOne leaves the attack turn Cacheable.
 func TestBest_CacheableSnatchHitDrawsViaDrawOne(t *testing.T) {
 	h := []card.Card{cards.SnatchRed{}}
 	deck := DeckOf(testutils.FakeRedAttack())

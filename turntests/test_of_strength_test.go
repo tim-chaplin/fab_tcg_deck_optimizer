@@ -15,7 +15,7 @@ import (
 func TestTestOfStrength_WinCreatesGold(t *testing.T) {
 	for _, power := range []int{6, 7} {
 		ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCards([]card.Card{testutils.FakeRedAttack().WithPower(power)}).Build()}
-		ge.ResolveChainStep(ge.Logger(), &card.CardState{Card: cards.TestOfStrengthRed{}})
+		ge.ResolveAttackStep(ge.Logger(), &card.CardState{Card: cards.TestOfStrengthRed{}})
 		if ge.GoldCount() != 1 {
 			t.Errorf("top power %d: Gold = %d, want 1 (clash win)", power, ge.GoldCount())
 		}
@@ -25,7 +25,7 @@ func TestTestOfStrength_WinCreatesGold(t *testing.T) {
 // Tests that a tied clash (top power == 5) creates no Gold token.
 func TestTestOfStrength_TieNoGold(t *testing.T) {
 	ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCards([]card.Card{testutils.FakeRedAttack().WithPower(5)}).Build()}
-	ge.ResolveChainStep(ge.Logger(), &card.CardState{Card: cards.TestOfStrengthRed{}})
+	ge.ResolveAttackStep(ge.Logger(), &card.CardState{Card: cards.TestOfStrengthRed{}})
 	if ge.GoldCount() != 0 {
 		t.Errorf("top power 5: Gold = %d, want 0 (tie)", ge.GoldCount())
 	}
@@ -37,7 +37,7 @@ func TestTestOfStrength_LossNoGoldAndDocksValue(t *testing.T) {
 	for _, power := range []int{0, 1, 2, 3, 4} {
 		ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCards([]card.Card{testutils.FakeRedAttack().WithPower(power)}).Build()}
 		valueBefore := ge.Value()
-		ge.ResolveChainStep(ge.Logger(), &card.CardState{Card: cards.TestOfStrengthRed{}})
+		ge.ResolveAttackStep(ge.Logger(), &card.CardState{Card: cards.TestOfStrengthRed{}})
 		if ge.GoldCount() != 0 {
 			t.Errorf("top power %d: Gold = %d, want 0 (clash loss)", power, ge.GoldCount())
 		}
@@ -51,7 +51,7 @@ func TestTestOfStrength_LossNoGoldAndDocksValue(t *testing.T) {
 // Tests that an empty deck makes the clash a no-op (no Gold created).
 func TestTestOfStrength_EmptyDeckNoGold(t *testing.T) {
 	ge := gameengine.New()
-	ge.ResolveChainStep(ge.Logger(), &card.CardState{Card: cards.TestOfStrengthRed{}})
+	ge.ResolveAttackStep(ge.Logger(), &card.CardState{Card: cards.TestOfStrengthRed{}})
 	if ge.GoldCount() != 0 {
 		t.Errorf("empty deck: Gold = %d, want 0 (clash fails)", ge.GoldCount())
 	}

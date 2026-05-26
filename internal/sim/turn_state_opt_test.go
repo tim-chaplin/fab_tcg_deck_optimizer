@@ -156,7 +156,7 @@ func TestTurnStateOpt_NonPositiveNSkipsHandler(t *testing.T) {
 }
 
 // Tests that Opt always flips IsCacheable to false, even on the no-op paths (n <= 0,
-// empty deck) — the chain reading the deck implies an order dependency regardless of
+// empty deck) — the attack turn reading the deck implies an order dependency regardless of
 // whether the handler ran.
 func TestTurnStateOpt_AlwaysFlipsCacheable(t *testing.T) {
 	cases := []struct {

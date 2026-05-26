@@ -15,7 +15,7 @@ import (
 func TestPursueToThePitsOfDespair_OnHitMarksOpponent(t *testing.T) {
 	pc := &card.CardState{Card: cards.PursueToThePitsOfDespairRed{}}
 	ge := gameengine.New()
-	ge.ResolveChainStep(ge.Logger(), pc)
+	ge.ResolveAttackStep(ge.Logger(), pc)
 	if len(pc.OnHit) != 1 {
 		t.Fatalf("OnHit handlers = %d, want 1", len(pc.OnHit))
 	}

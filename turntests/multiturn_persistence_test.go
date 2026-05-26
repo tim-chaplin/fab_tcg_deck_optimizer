@@ -96,7 +96,7 @@ func TestEvalTwoTurns_DestroyedAuraSourceReachesGraveyard(t *testing.T) {
 			turn1.Value, formatBestLine(turn1.BestLine))
 	}
 	if len(turn1.BestLine) != 0 {
-		t.Errorf("turn 1 BestLine = %s, want empty (value is from the aura tick, not a chain play)",
+		t.Errorf("turn 1 BestLine = %s, want empty (value is from the aura tick, not an attack turn play)",
 			formatBestLine(turn1.BestLine))
 	}
 	if turn2.Value != 1 {

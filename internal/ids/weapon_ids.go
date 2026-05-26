@@ -2,9 +2,9 @@ package ids
 
 // WeaponID identifies a weapon printing.
 //
-// KLUDGE: aliased to CardID. Weapon swings flow through the same chain-runner pipeline as
+// KLUDGE: aliased to CardID. Weapon swings flow through the same attack-turn runner pipeline as
 // deck cards — Weapon structurally satisfies sim.Card so weapons sit alongside cards in
-// the chain's permutation slice without an adapter, and per-card caches key by CardID.
+// the attack turn's permutation slice without an adapter, and per-card caches key by CardID.
 // See TODO.md → "Weapon IDs share the CardID space".
 type WeaponID = CardID
 
@@ -24,7 +24,7 @@ const (
 )
 
 // Weapon ability IDs. Anchored after the weapon-permanent IDs in the shared CardID space;
-// cardMetaCache keys off the ability ID since the chain runner enqueues the ability.
+// cardMetaCache keys off the ability ID since the attack-turn runner enqueues the ability.
 const (
 	AnnalsOfSutcliffeAbilityID CardID = TalisharID + iota + 1
 	NebulaBladeAbilityID

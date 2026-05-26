@@ -14,7 +14,7 @@ import (
 func TestPrimeTheCrowd_NoAttackReturnsZero(t *testing.T) {
 	ge := gameengine.New()
 	for _, c := range []card.Card{cards.PrimeTheCrowdRed{}, cards.PrimeTheCrowdYellow{}, cards.PrimeTheCrowdBlue{}} {
-		ge.ResolveChainStep(ge.Logger(), &card.CardState{Card: c})
+		ge.ResolveAttackStep(ge.Logger(), &card.CardState{Card: c})
 		if got := ge.Value(); got != 0 {
 			t.Errorf("%s: Play() = %d, want 0", c.Name(), got)
 		}
@@ -24,7 +24,7 @@ func TestPrimeTheCrowd_NoAttackReturnsZero(t *testing.T) {
 // Tests that a non-attack action in CardsRemaining fails the rider predicate.
 func TestPrimeTheCrowd_NonAttackInRemainingFizzles(t *testing.T) {
 	ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCardsRemaining([]*card.CardState{{Card: testutils.FakeRedAction()}}).Build()}
-	ge.ResolveChainStep(ge.Logger(), &card.CardState{Card: cards.PrimeTheCrowdRed{}})
+	ge.ResolveAttackStep(ge.Logger(), &card.CardState{Card: cards.PrimeTheCrowdRed{}})
 	if got := ge.Value(); got != 0 {
 		t.Errorf("Play() = %d, want 0 (non-attack skipped)", got)
 	}
@@ -39,7 +39,7 @@ func TestPrimeTheCrowd_FiresCrowdCheerTrigger(t *testing.T) {
 	ge.CreateTrigger(testutils.FakeRedAction(), triggertype.CrowdCheer, func(_ card.GameEngine, _ card.Logger, _ card.EphemeralTrigger) {
 		cheers++
 	}, nil)
-	ge.ResolveChainStep(ge.Logger(), &card.CardState{Card: cards.PrimeTheCrowdRed{}})
+	ge.ResolveAttackStep(ge.Logger(), &card.CardState{Card: cards.PrimeTheCrowdRed{}})
 	if cheers != 1 {
 		t.Errorf("CrowdCheer trigger fired %d times, want 1", cheers)
 	}
@@ -62,7 +62,7 @@ func TestPrimeTheCrowd_FiresCrowdReactionsByHeroType(t *testing.T) {
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
 			ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetHero(testutils.Hero{Intel: 4, TypeSet: tc.heroTypes}).Build()}
-			ge.ResolveChainStep(ge.Logger(), &card.CardState{Card: cards.PrimeTheCrowdRed{}})
+			ge.ResolveAttackStep(ge.Logger(), &card.CardState{Card: cards.PrimeTheCrowdRed{}})
 			if got := ge.HasCrowdCheered(); got != tc.wantCheer {
 				t.Errorf("HasCrowdCheered = %v, want %v", got, tc.wantCheer)
 			}
@@ -86,7 +86,7 @@ func TestPrimeTheCrowd_NextAttackReturnsBonus(t *testing.T) {
 	for _, tc := range cases {
 		target := &card.CardState{Card: testutils.FakeRedAttack()}
 		ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCardsRemaining([]*card.CardState{target}).Build()}
-		ge.ResolveChainStep(ge.Logger(), &card.CardState{Card: tc.c})
+		ge.ResolveAttackStep(ge.Logger(), &card.CardState{Card: tc.c})
 		if got := ge.Value(); got != 0 {
 			t.Errorf("%s: Play() = %d, want 0 (granter returns 0; +N rides on target's BonusAttack)", tc.c.Name(), got)
 		}

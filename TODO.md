@@ -44,8 +44,8 @@ implemented` riders across the card roster.
   defender-side debuffs need a defender-aware Play hook to land.
 - **Defence-prevention and damage-prevention triggers.** No "prevent the next N damage"
   state; cards that grant Ward N or pre-emptive prevention return only their printed stats.
-- **Defence-time instant activations.** Cards whose printed text adds a chain-link defender
-  or activates an instant during an attack chain carry only their printed defence.
+- **Defence-time instant activations.** Cards whose printed text adds an attack turn-link defender
+  or activates an instant during an attack-turn search carry only their printed defence.
 - **Pay-extra / modal cost choices.** "Pay {r} or lose 1{p}", "pay {r}{r} for +N{p}",
   "choose go-again or +N{p}", and Crazy Brew substitutes don't probe the resource budget;
   they pick one branch and stick with it. A pay-aware modal cost evaluator would let the
@@ -54,7 +54,7 @@ implemented` riders across the card roster.
   than pay {r}" isn't modelled — cards fall back to their printed cost.
 - **Mid-turn draw side-channels.** `TurnState.DrawOne` puts drawn cards into `Drawn` for
   carry-as-Held or arsenal promotion, but drawn cards can't pitch or extend the attack
-  chain (would leak top-of-deck identity into the solver's line choice). Lookahead grants
+  attack turn (would leak top-of-deck identity into the solver's line choice). Lookahead grants
   that scan `CardsRemaining` silently fizzle when their target is drawn rather than in the
   starting hand — a conservative under-count we tolerate.
 - **Graveyard-banish additional costs.** Several cards have "as an additional cost,
@@ -66,13 +66,13 @@ implemented` riders across the card roster.
 - **Top-of-deck reveal and reorder.** Some cards peek `s.Deck` (Sky Fire Lanterns,
   Ravenous Rabble, On the Horizon) but reorder steps are collapsed; reveal-comparison
   riders like Crash Down the Gates collapse too.
-- **Weapon chain visibility from `Play`.** `CardsRemaining` only carries action cards;
+- **Weapon attack-turn visibility from `Play`.** `CardsRemaining` only carries action cards;
   weapon swings aren't visible to look-ahead riders that gate on "next sword attack" /
   "next weapon attack". Brandish, On a Knife Edge, Visit the Blacksmith all drop their
   riders.
-- **In-chain history readable from Play.** A card's `Play` doesn't see what played
-  earlier in this same chain (it sees `CardsPlayed` from earlier resolutions but not
-  immediate-prior chain history needed for chain-history riders like Push the Point and
+- **In-attack-turn history readable from Play.** A card's `Play` doesn't see what played
+  earlier in this same attack turn (it sees `CardsPlayed` from earlier resolutions but not
+  immediate-prior attack-turn history needed for attack-turn-history riders like Push the Point and
   Water the Seeds).
 - **Aura-created vs aura-played semantics.** `TurnState.HasPlayedOrCreatedAura` covers most "have
   you played or created an aura this turn" reads, but a few specialised aura-state
@@ -96,26 +96,26 @@ out of `notimplemented/` together.
   cheers / boos, passive-tap pirates. Each is a stateful counter on a hero / card that
   riders read or destroy. Mirrors the existing token plumbing (Runechant, Gold, …) but
   on a per-hero / per-card axis instead of a global pool.
-- **Hand cycling** (6): "discard a card from hand, draw a card" mid-chain, with riders
+- **Hand cycling** (6): "discard a card from hand, draw a card" mid-attack-turn, with riders
   that fire conditional on the discard happening. Needs a `DiscardFromHand` primitive
   and a way to gate "if you cycled a card" riders.
 - **Defense-time activated abilities / DR refinements** (5): defense-time instants
   (Rally the Coast Guard / Rearguard), Instant +N{d} grants to a defending attack
   action card, base-power caps on what a Block can defend, Instant arcane-prevention
   scaled by deck reveal. Defenders today resolve as one-shot Plays inside
-  `defendersDamage`; landing this would give the defense phase its own chain.
+  `defendersDamage`; landing this would give the defense phase its own attack turn.
 - **Reactive talismans** (4): Spellvoid passive, AR-buff-event react, opponent-draw-event
   react, pitch-1-event react. All four self-destroy on a specific event; the sim has no
   passive event hook today, so the talismans collapse to base stats.
-- **Weapon-chain inspection** (3): "next sword / weapon attack +N{p} or go again". Today
+- **Weapon-attack-turn inspection** (3): "next sword / weapon attack +N{p} or go again". Today
   `CardsRemaining` only carries action cards; weapon swings aren't visible to look-ahead
-  riders. Needs to extend the look-ahead view past the action portion of the chain.
+  riders. Needs to extend the look-ahead view past the action portion of the attack turn.
 - **Opponent state observation** (3): peek opponent hand / arsenal / equipment. The sim
   doesn't model the opposing player's private zones at all, so peek riders collapse.
 - **Token economies** (3): Gold / Silver / Landmark mints by trigger (discard creates
   Gold, etc.). Slots into the existing token-creation plumbing; each new mint site is
   a small addition.
-- **Action-point-from-deck-reveal** (2): cards that grant a free chain step gated on
+- **Action-point-from-deck-reveal** (2): cards that grant a free attack step gated on
   the top card of the deck. Needs a deck-top-reveal-into-AP path.
 - **Aura-trade / aura-destroy-opponent** (2): "destroy an opposing aura" or "trade aura
   for aura". Opposing-aura state isn't modelled.
@@ -141,21 +141,21 @@ out of `notimplemented/` together.
 - **Deck-top reveal compare + destroy** (1): Crash Down the Gates' reveal-and-cap rider.
 - **Health / Overpower / agility-might-vigor tokens** (1): Down But Not Out's stack of
   tokens-and-Overpower comparisons.
-- **Chain-history-readable Play** (1): Push the Point's "+2{p} if a card has been played"
-  rider. `CardsPlayed` is read-after-the-fact; the rider needs a mid-chain history pipe.
+- **Attack-turn-history-readable Play** (1): Push the Point's "+2{p} if a card has been played"
+  rider. `CardsPlayed` is read-after-the-fact; the rider needs a mid-attack-turn history pipe.
 - **Self-destroying sigils with leave-arena triggers** (1): Sigil of Cycles' "destroy at
   start of action phase, leaves arena → discard then draw".
 - **Misc unique mechanics** (1): on-hit Wizard instant-casting grant (Rifting).
 
 ### Same-turn item activation
 
-Items created mid-chain can't be spent the same turn — only items carried in via
-`priorItems` participate in the wmask's activated-ability enumeration. So a chain like
+Items created mid-attack-turn can't be spent the same turn — only items carried in via
+`priorItems` participate in the wmask's activated-ability enumeration. So an attack turn like
 "Strike Gold creates Gold on hit → spend Gold for {2}, draw a card" doesn't get found:
-the Gold lands in `s.Items` for next turn but no chain step in the current turn fires
+the Gold lands in `s.Items` for next turn but no attack step in the current turn fires
 its ability. Items are slightly underpowered as a result. Fixing this means letting the
-chain runner's activated-ability list mutate dynamically with token creates rather than
-being committed at chain start.
+attack-turn runner's activated-ability list mutate dynamically with token creates rather than
+being committed at attack-turn start.
 
 ### Weapons are Cards
 
@@ -170,10 +170,10 @@ past the last real card so they don't collide in the shared cache slots. Test fa
 `InvalidCard` / `InvalidWeapon` and rely on the per-ID caches' Invalid-slot bypass.
 Ideally weapons would have their own `WeaponID uint16` type starting at 1, separate from
 `CardID`. Blocked by depth: every weapon swing flows through the same
-chain runner as deck cards (`bestSequence` permutes one `[]card.Card` slice; weapons rely
+attack-turn runner as deck cards (`bestSequence` permutes one `[]card.Card` slice; weapons rely
 on `*card.CardState` for `BonusAttack` / `GrantedGoAgain` and call helpers like
 `s.ApplyAndLogEffectiveAttack(self)` / `s.ApplyAndLogRiderOnPlay(self, …)` that read
-`self.Card.*`; the chain step / display name / attacker meta caches are keyed by `CardID`).
+`self.Card.*`; the attack step / display name / attacker meta caches are keyed by `CardID`).
 Splitting the type cleanly needs either a slot-tagged permutation that branches per-step
 between card and weapon paths, or a parallel `WeaponState` + parallel helpers — ~200–300
 lines across `card/`, `weapon/`, `hand/` plus every weapon impl.
@@ -184,11 +184,11 @@ lines across `card/`, `weapon/`, `hand/` plus every weapon impl.
   attack-power read for hit-likelihood checks. `LikelyToHit(self)` folds it in along with
   `EffectiveDominate`. Granters set `pc.BonusAttack += N` on the target's `CardState`
   rather than returning the bonus from their own `Play` — the +N attributes to the buffed
-  attack's chain slot, and any "if this hits" rider on the target reads the buffed value.
+  attack's attack-step slot, and any "if this hits" rider on the target reads the buffed value.
 - For grants whose "if this hits" rider needs to see the target's *fully-resolved* attack
-  state (post-grants from later cards in the chain), append the rider closure to the
+  state (post-grants from later cards in the attack turn), append the rider closure to the
   target's `CardState.OnHit` — Mauvrion Skies and Runic Reaping route their on-hit
-  Runechant clauses this way. The chain runner fires `OnHit` post-AR-buff.
+  Runechant clauses this way. The attack-turn runner fires `OnHit` post-AR-buff.
 
 ### Tech debt
 
@@ -200,4 +200,4 @@ lines across `card/`, `weapon/`, `hand/` plus every weapon impl.
 - combine `internal/sim/hand_aura_test.go` and `internal/sim/deck_aura_test.go` into `internal/sim/aura_test.go`. Mid-turn-draw is split across packages (`internal/sim/hand_mid_turn_draw_test.go` + `turntests/deck_mid_turn_draw_test.go`); fold the sim-side cases into `turntests/` if possible.
 - remove the local `zeroDefenseAura` fake from `turntests/weeping_battleground_test.go` once `defendersDamage` seeds the defense-phase state graveyard from `priorGraveyard + defenders` (currently defenders-only, asymmetric with the attack-phase seed). After that, the test can put a real aura in `prior.Graveyard` instead of routing one through a 0-defense plain block.
 - clean stale `TurnState` references in `internal/sim/cardmeta.go` comments — the type was removed; only `TurnSummary` survives.
-- migrate the 102 grandfathered `ge.ResolveChainStep` tests in `turntests/` out of that directory. They landed there during the v2 reorganisation but violate the "public entry points only" rule — each test should be rewritten against `sim.EvalOneTurnForTesting` (and stay in `turntests/`) or moved to a same-package unit test under the card's home. The allowlist lives in `internal/lint/turntests_lint_test.go`; remove entries as files are migrated.
+- migrate the 102 grandfathered `ge.ResolveAttackStep` tests in `turntests/` out of that directory. They landed there during the v2 reorganisation but violate the "public entry points only" rule — each test should be rewritten against `sim.EvalOneTurnForTesting` (and stay in `turntests/`) or moved to a same-package unit test under the card's home. The allowlist lives in `internal/lint/turntests_lint_test.go`; remove entries as files are migrated.

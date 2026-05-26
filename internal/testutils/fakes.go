@@ -1,4 +1,4 @@
-// Fake-card builders. Every fake is one `Fake` struct configured via chained `With...`
+// Fake-card builders. Every fake is one `Fake` struct configured vian attack turned `With...`
 // methods so the call site spells out every attribute the test depends on — no
 // cross-referencing a separate type definition to know that "FakeRedAttack" means
 // "pitch 1, power 0, no Go again, no Play side effect" by default.
@@ -16,7 +16,7 @@ import (
 )
 
 // Fake is the configurable card.Card returned by every FakeXxx... constructor below.
-// Construct it via a constructor + chained With... methods; the zero value is not
+// Construct it via a constructor + follow-up With... methods; the zero value is not
 // meaningful (no Name(), no types).
 //
 // The play hook is held behind a pointer so the struct itself stays comparable — the

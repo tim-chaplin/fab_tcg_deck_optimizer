@@ -34,7 +34,7 @@ type dominatingFake struct {
 
 func (dominatingFake) Dominate() {}
 
-// TestCardState_EffectiveGoAgain: printed GoAgain OR a mid-chain grant qualifies the card
+// TestCardState_EffectiveGoAgain: printed GoAgain OR a mid-attack-turn grant qualifies the card
 // for Go again. Neither printed nor granted -> false.
 func TestCardState_EffectiveGoAgain(t *testing.T) {
 	cases := []struct {
@@ -50,7 +50,7 @@ func TestCardState_EffectiveGoAgain(t *testing.T) {
 	}
 	for _, tc := range cases {
 		p := &CardState{
-			Card:    fakeCard{name: tc.name, goAgain: tc.printed},
+			Card:      fakeCard{name: tc.name, goAgain: tc.printed},
 			Ephemeral: Ephemeral{GrantedGoAgain: tc.granted},
 		}
 		if got := p.EffectiveGoAgain(nil); got != tc.want {
@@ -59,7 +59,7 @@ func TestCardState_EffectiveGoAgain(t *testing.T) {
 	}
 }
 
-// TestCardState_EffectiveDominate: the Dominator marker OR a mid-chain grant (a "gains
+// TestCardState_EffectiveDominate: the Dominator marker OR a mid-attack-turn grant (a "gains
 // dominate" rider flipping self.GrantedDominate) each qualifies the attack as dominating.
 func TestCardState_EffectiveDominate(t *testing.T) {
 	plain := fakeCard{name: "plain"}
@@ -113,7 +113,7 @@ func TestCardState_EffectiveAttack(t *testing.T) {
 	}
 	for _, tc := range cases {
 		p := &CardState{
-			Card:    fakeCard{name: tc.name, attack: tc.printed},
+			Card:      fakeCard{name: tc.name, attack: tc.printed},
 			Ephemeral: Ephemeral{BonusAttack: tc.bonusAttack},
 		}
 		if got := p.EffectiveAttack(); got != tc.want {

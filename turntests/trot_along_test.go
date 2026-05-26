@@ -14,7 +14,7 @@ import (
 // fizzles.
 func TestTrotAlong_NoAttackReturnsZero(t *testing.T) {
 	ge := gameengine.New()
-	ge.ResolveChainStep(ge.Logger(), &card.CardState{Card: cards.TrotAlongBlue{}})
+	ge.ResolveAttackStep(ge.Logger(), &card.CardState{Card: cards.TrotAlongBlue{}})
 	if got := ge.Value(); got != 0 {
 		t.Errorf("Play() = %d, want 0", got)
 	}
@@ -25,7 +25,7 @@ func TestTrotAlong_NoAttackReturnsZero(t *testing.T) {
 func TestTrotAlong_HighPowerAttackDoesNotFire(t *testing.T) {
 	target := &card.CardState{Card: testutils.FakeRedAttack().WithPower(4)}
 	ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCardsRemaining([]*card.CardState{target}).Build()}
-	ge.ResolveChainStep(ge.Logger(), &card.CardState{Card: cards.TrotAlongBlue{}})
+	ge.ResolveAttackStep(ge.Logger(), &card.CardState{Card: cards.TrotAlongBlue{}})
 	if got := ge.Value(); got != 0 {
 		t.Errorf("Play() = %d, want 0 (power 4 > 3)", got)
 	}
@@ -38,7 +38,7 @@ func TestTrotAlong_HighPowerAttackDoesNotFire(t *testing.T) {
 func TestTrotAlong_LowPowerAttackGrantsGoAgain(t *testing.T) {
 	target := &card.CardState{Card: testutils.FakeRedAttack().WithPower(3)}
 	ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCardsRemaining([]*card.CardState{target}).Build()}
-	ge.ResolveChainStep(ge.Logger(), &card.CardState{Card: cards.TrotAlongBlue{}})
+	ge.ResolveAttackStep(ge.Logger(), &card.CardState{Card: cards.TrotAlongBlue{}})
 	if got := ge.Value(); got != 0 {
 		t.Errorf("Play() = %d, want 0 (Trot Along grants go again, not damage)", got)
 	}
@@ -53,7 +53,7 @@ func TestTrotAlong_LowPowerAttackGrantsGoAgain(t *testing.T) {
 func TestTrotAlong_GrantsGoAgainToWeaponSwing(t *testing.T) {
 	target := &card.CardState{Card: testutils.FakeWeaponSwing().WithTypes(card.TypeRuneblade)}
 	ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCardsRemaining([]*card.CardState{target}).Build()}
-	ge.ResolveChainStep(ge.Logger(), &card.CardState{Card: cards.TrotAlongBlue{}})
+	ge.ResolveAttackStep(ge.Logger(), &card.CardState{Card: cards.TrotAlongBlue{}})
 	if !target.GrantedGoAgain {
 		t.Error("weapon swing should get go again ('your next attack' has no 'action card' qualifier)")
 	}

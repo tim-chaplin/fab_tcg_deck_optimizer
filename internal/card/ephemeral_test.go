@@ -7,7 +7,7 @@ import (
 
 // TestEphemeralReset_ZeroesEveryField mutates every Ephemeral field non-zero, calls Reset,
 // and asserts each one is back to its type's zero value. A new field added to Ephemeral is
-// zeroed for free by *e = Ephemeral{}; this test enforces that structurally so the chain
+// zeroed for free by *e = Ephemeral{}; this test enforces that structurally so the attack turn
 // runner can never re-introduce the "forgot to clear field X" bug class.
 //
 // OnHit is checked by truncation length, not deep zero, because Reset preserves its

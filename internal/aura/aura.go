@@ -18,7 +18,7 @@ type Handler func(card.GameEngine, card.Logger, card.Aura)
 // trigger.Trigger holds the shared core; Aura adds the multi-fire count.
 //
 // activeEngine is set by Fire to the engine driving the current firing event so Destroy can
-// route back without allocating a per-fire wrapper struct. Single-threaded per chain-runner.
+// route back without allocating a per-fire wrapper struct. Single-threaded per attack-turn runner.
 type Aura struct {
 	trigger.Trigger[card.Aura]
 	activeEngine card.GameEngine

@@ -1,7 +1,7 @@
 // Package testutils provides fake Card, Hero, and Weapon implementations shared by tests
 // in multiple packages (card, cards, deck, hand, sim, turntests). The main entry point is
 // the colour-and-shape-named builder constructors in fakes.go (FakeRedAttack,
-// FakeBlueResource, FakeRedDR, …) plus chained `With...` methods so every attribute the
+// FakeBlueResource, FakeRedDR, …) plus follow-up `With...` methods so every attribute the
 // test cares about is visible at the call site.
 package testutils
 
@@ -72,8 +72,8 @@ func CardNamesSim(cs []card.Card) []string {
 }
 
 // FireOnHitIfLikely fires every OnHit handler on self when LikelyToHit(self) — what the
-// chain runner does at finalize-active-attack time. Unit tests that call Card.Play
-// directly use this to exercise on-hit riders without driving the full chain runner.
+// attack-turn runner does at finalize-active-attack time. Unit tests that call Card.Play
+// directly use this to exercise on-hit riders without driving the full attack-turn runner.
 func FireOnHitIfLikely(ge card.GameEngine, l card.Logger, self *card.CardState) {
 	if !ge.LikelyToHit(self) {
 		return

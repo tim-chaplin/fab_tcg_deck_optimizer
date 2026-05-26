@@ -5,7 +5,7 @@ package sim
 // (Mark / Tap state, hero life total, etc.) adds a field here rather than threading a new
 // int through every Best / Evaluate / RunMutationRound signature.
 //
-// The chain runner copies these fields onto TurnState in resetStateForPermutation; cards
+// The attack-turn runner copies these fields onto TurnState in resetStateForPermutation; cards
 // read the per-turn copy (gs.incomingDamage, gs.arcaneIncomingDamage) rather than reaching
 // back into the Matchup so per-card hot paths stay one struct field deep.
 type Matchup struct {

@@ -13,7 +13,7 @@ import (
 func TestJackBeQuick_NoNimblismRiderOff(t *testing.T) {
 	pc := &card.CardState{Card: cards.JackBeQuickRed{}}
 	ge := gameengine.New()
-	ge.ResolveChainStep(ge.Logger(), pc)
+	ge.ResolveAttackStep(ge.Logger(), pc)
 	if pc.GrantedGoAgain {
 		t.Errorf("GrantedGoAgain = true with empty graveyard, want false")
 	}
@@ -27,7 +27,7 @@ func TestJackBeQuick_NoNimblismRiderOff(t *testing.T) {
 func TestJackBeQuick_BanishesNimblismForBonus(t *testing.T) {
 	ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetGraveyard([]card.Card{cards.NimblismRed{}}).Build()}
 	pc := &card.CardState{Card: cards.JackBeQuickRed{}}
-	ge.ResolveChainStep(ge.Logger(), pc)
+	ge.ResolveAttackStep(ge.Logger(), pc)
 	if !pc.GrantedGoAgain {
 		t.Errorf("GrantedGoAgain = false after banish, want true")
 	}

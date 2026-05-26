@@ -27,7 +27,7 @@ type turnSnapshot struct {
 }
 
 // PrintBestTurn streams the peak turn's printout to w: header + start-of-turn snapshot,
-// then one playOneTurn call in replay mode (chain emissions stream inline via a
+// then one playOneTurn call in replay mode (attack-turn emissions stream inline via a
 // StreamLogger), then the end-of-turn snapshot from the post-replay state.
 func PrintBestTurn(ev *Evaluator, snap *turnSnapshot, w io.Writer) {
 	if snap == nil {
@@ -43,7 +43,7 @@ func PrintBestTurn(ev *Evaluator, snap *turnSnapshot, w io.Writer) {
 	writeSnapshotSummary(w, "End of turn:", summary.State, nil, snap.bestLine)
 }
 
-// runReplayForTurn drives the chain through snapshot's known role assignment + cardsPlayed
+// runReplayForTurn drives the attack turn through snapshot's known role assignment + cardsPlayed
 // order with logger installed on every per-perm state, skipping Best's partition
 // enumeration. Called after start-of-turn auras have fired against snapshot.state / .deck.
 func runReplayForTurn(snapshot *turnSnapshot, ev *Evaluator, logger card.Logger) TurnSummary {
@@ -53,14 +53,14 @@ func runReplayForTurn(snapshot *turnSnapshot, ev *Evaluator, logger card.Logger)
 	pitched := append(assignmentCards(defensePitches), assignmentCards(attackPitches)...)
 	defenders := append(assignmentCards(parts.defenseReactions), assignmentCards(parts.plainBlocks)...)
 	held := assignmentCards(parts.held)
-	arsenalAtChainStart := arsenalRoleCard(snapshot.bestLine)
+	arsenalAtAttackTurnStart := arsenalRoleCard(snapshot.bestLine)
 	arsenalCardIn := snapshot.state.Arsenal()
 	arsenalInIdx := matchedCardIndex(snapshot.cardsPlayed, arsenalCardIn, snapshot.bestLine, card.Attack)
 	arsenalDefenderIdx := matchedCardIndex(defenders, arsenalCardIn, snapshot.bestLine, card.Defend)
 
 	weapons := snapshot.state.Weapons()
 	bufs := newAttackBufs(len(snapshot.cardsPlayed), len(weapons), weapons, ev.statePool)
-	ctx := newSequenceContext(snapshot.state, weapons, snapshot.cardsPlayed, defenders, pitched, held, snapshot.deck, bufs, 0, arsenalInIdx, arsenalAtChainStart)
+	ctx := newSequenceContext(snapshot.state, weapons, snapshot.cardsPlayed, defenders, pitched, held, snapshot.deck, bufs, 0, arsenalInIdx, arsenalAtAttackTurnStart)
 	defer ctx.releaseLeafState()
 	ctx.replayLogger = logger
 	ctx.attackPitchPerm = assignmentCards(attackPitches)

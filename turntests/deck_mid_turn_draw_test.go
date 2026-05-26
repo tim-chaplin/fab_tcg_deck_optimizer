@@ -176,7 +176,7 @@ func TestEvalOneTurn_MidTurnDrawHeldWhenArsenalFull(t *testing.T) {
 	}
 }
 
-// Tests that without go-again the drawn card and a Held card share the post-chain pool —
+// Tests that without go-again the drawn card and a Held card share the post-attack-turn pool —
 // exactly one arsenals, the other anchors turn 2's hand (either outcome is accepted).
 func TestEvalOneTurn_MidTurnDrawSansGoAgainStaysHeld(t *testing.T) {
 	initialHand := []card.Card{
@@ -192,10 +192,10 @@ func TestEvalOneTurn_MidTurnDrawSansGoAgainStaysHeld(t *testing.T) {
 	d := deck.New(heroes.Viserai, nil, deckCards)
 	summary := sim.EvalOneTurnForTesting(d, nil, initialHand)
 
-	// Turn 1 damage: Snatch alone for 4 (no chain extension, no Viserai trigger — Snatch isn't
+	// Turn 1 damage: Snatch alone for 4 (no attack-turn extension, no Viserai trigger — Snatch isn't
 	// Runeblade and nothing else was played).
 	if summary.Value != 4 {
-		t.Errorf("turn 1 Value = %d, want 4 (Snatch alone; chain couldn't extend)", summary.Value)
+		t.Errorf("turn 1 Value = %d, want 4 (Snatch alone; couldn't go again)", summary.Value)
 	}
 
 	// One of {Toughen Up, Aether Slash} lands in arsenal; the other anchors turn 2's hand.

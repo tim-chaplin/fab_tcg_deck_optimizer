@@ -11,7 +11,7 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 )
 
-// forceSightPlay grants the next attack action +bonus{p}, logs the chain step (Force
+// forceSightPlay grants the next attack action +bonus{p}, logs the attack step (Force
 // Sight is a non-attack action — no Attack() to apply), and resolves the arsenal-gated
 // Opt 2.
 func forceSightPlay(ge card.GameEngine, l card.Logger, self *card.CardState, bonus int) {

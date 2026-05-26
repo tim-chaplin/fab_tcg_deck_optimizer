@@ -7,7 +7,7 @@
 //
 // Mode 1's on-hit go-again rider is modelled eagerly: when ge.LikelyToHit on the post-buff
 // target returns true, the AR grants 1 AP at Play time so the AP is available for the next
-// chain step's gate.
+// attack step's gate.
 
 package cards
 
