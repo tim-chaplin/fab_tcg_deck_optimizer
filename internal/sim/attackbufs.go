@@ -63,13 +63,6 @@ type attackBufs struct {
 	// pooledEngine wraps the active permState; rebound per perm. The wrapper itself holds
 	// no state, and no caller stashes ge across perms.
 	pooledEngine *gameengine.GameEngine
-	// runDefenseDRGravBuf and runDefenseChainGravBuf back the two graveyard views the
-	// defense pass installs on leafState: the DR-loop view (just defenders) and the
-	// post-defense view (priorGraveyard + defenders). Recycled across runDefense calls.
-	// preparePermState's CopyPersistentStateFrom copies leafState.Graveyard() into the
-	// perm slot's own backing, so the alias outlives only the defense pass.
-	runDefenseDRGravBuf    []card.Card
-	runDefenseChainGravBuf []card.Card
 	// runDefensePostDRHeldBuf backs the post-DR Held-only view of state.HandStates().
 	// The plain-block survivingHeld computation and the chain phase's handStart both
 	// consume this slice, so a Held card a DR Play removed is automatically absent
