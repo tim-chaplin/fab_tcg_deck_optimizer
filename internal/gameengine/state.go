@@ -6,6 +6,7 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/aura"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/item"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/triggertype"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapon"
 )
@@ -48,10 +49,20 @@ type GameState struct {
 	items    []Item // card-backed items only — tokens live in tokenItems
 
 	// Token slots — one pre-allocated Aura / Item per kind, count=0 means "not in
-	// play." Pointer identity stable for the GameState's lifetime, so trigger
-	// dispatch fires the same closure every time without per-creation allocation.
-	tokenAuras [numTokenAuraKinds]Aura
-	tokenItems [numTokenItemKinds]Item
+	// play." Pointer identity stable for the GameState's lifetime; concrete pointer
+	// types (not the Aura / Item interfaces) so Count / SetCount / Fire stay direct
+	// calls instead of paying interface dispatch on every FireTriggers walk.
+	tokenAuras [numTokenAuraKinds]*aura.Aura
+	tokenItems [numTokenItemKinds]*item.Item
+
+	// tokenAurasLiveBits / tokenItemsLiveBits mirror the per-slot Count() > 0
+	// predicate as a bitmask: bit i set ⇔ tokenAuras[i].Count() > 0. Maintained by
+	// bumpTokenAura / bumpTokenItem on 0→positive transitions and by DestroyAura /
+	// DestroyItem (and Reset / Copy paths) on the reverse. Lets FireTriggers'
+	// early-exit and per-pass snapshot reduce to a single byte load instead of an
+	// N-slot interface walk.
+	tokenAurasLiveBits uint8
+	tokenItemsLiveBits uint8
 
 	incomingDamage       int
 	arcaneIncomingDamage int
@@ -171,16 +182,10 @@ func (gs *GameState) Copy() *GameState {
 	// Make out's own per-slot instances so mutations don't cross-link the clones.
 	out.initTokenSlots()
 	for i := range out.tokenAuras {
-		if gs.tokenAuras[i] == nil {
-			continue
-		}
 		out.tokenAuras[i].SetCount(gs.tokenAuras[i].Count())
 		out.tokenAuras[i].SetFiredThisTurn(gs.tokenAuras[i].FiredThisTurn())
 	}
 	for i := range out.tokenItems {
-		if gs.tokenItems[i] == nil {
-			continue
-		}
 		out.tokenItems[i].SetCount(gs.tokenItems[i].Count())
 		out.tokenItems[i].SetFiredThisTurn(gs.tokenItems[i].FiredThisTurn())
 	}
@@ -212,16 +217,10 @@ func (gs *GameState) CopyFrom(src *GameState) {
 	gs.tokenAuras = tokenAuras
 	gs.tokenItems = tokenItems
 	for i := range gs.tokenAuras {
-		if gs.tokenAuras[i] == nil || src.tokenAuras[i] == nil {
-			continue
-		}
 		gs.tokenAuras[i].SetCount(src.tokenAuras[i].Count())
 		gs.tokenAuras[i].SetFiredThisTurn(src.tokenAuras[i].FiredThisTurn())
 	}
 	for i := range gs.tokenItems {
-		if gs.tokenItems[i] == nil || src.tokenItems[i] == nil {
-			continue
-		}
 		gs.tokenItems[i].SetCount(src.tokenItems[i].Count())
 		gs.tokenItems[i].SetFiredThisTurn(src.tokenItems[i].FiredThisTurn())
 	}
@@ -378,16 +377,10 @@ func (gs *GameState) CopyPersistentState() *GameState {
 	// instances so the snapshot's counts can't drift if src's slots mutate.
 	out.initTokenSlots()
 	for i := range out.tokenAuras {
-		if gs.tokenAuras[i] == nil {
-			continue
-		}
 		out.tokenAuras[i].SetCount(gs.tokenAuras[i].Count())
 		out.tokenAuras[i].SetFiredThisTurn(gs.tokenAuras[i].FiredThisTurn())
 	}
 	for i := range out.tokenItems {
-		if gs.tokenItems[i] == nil {
-			continue
-		}
 		out.tokenItems[i].SetCount(gs.tokenItems[i].Count())
 		out.tokenItems[i].SetFiredThisTurn(gs.tokenItems[i].FiredThisTurn())
 	}
@@ -405,30 +398,24 @@ func (gs *GameState) CopyPersistentStateFrom(src *GameState) {
 	gs.arsenal = src.arsenal
 	gs.graveyard = resetCardSlice(gs.graveyard, src.graveyard)
 	gs.banished = resetCardSlice(gs.banished, src.banished)
-	// Clear gs.auraPool slots that gs.auras currently references so the rebuild starts
-	// from an "all slots free" state. rebuildPooledAuras then writes src's live entries
-	// into the matching pool slots. Skips the 1920-byte bulk memcpy that
-	// gs.auraPool = src.auraPool would do, since most permutations carry zero live auras
-	// and only need the receiver's slot table cleared from the prior permutation's churn.
+	// Clear only the auraPool slots that gs.auras currently references; the rest already
+	// read as free (SourceCard nil), which is all rebuildPooledAuras needs before writing
+	// src's live entries into matching pool slots.
 	for _, a := range gs.auras {
 		a.Clear()
 	}
 	gs.auras = rebuildPooledAuras(gs, src.auras, &src.auraPool[0], gs.auras)
 	gs.items = copyItemsInto(gs.items, src.items)
 	for i := range gs.tokenAuras {
-		if gs.tokenAuras[i] == nil || src.tokenAuras[i] == nil {
-			continue
-		}
 		gs.tokenAuras[i].SetCount(src.tokenAuras[i].Count())
 		gs.tokenAuras[i].SetFiredThisTurn(src.tokenAuras[i].FiredThisTurn())
 	}
 	for i := range gs.tokenItems {
-		if gs.tokenItems[i] == nil || src.tokenItems[i] == nil {
-			continue
-		}
 		gs.tokenItems[i].SetCount(src.tokenItems[i].Count())
 		gs.tokenItems[i].SetFiredThisTurn(src.tokenItems[i].FiredThisTurn())
 	}
+	gs.tokenAurasLiveBits = src.tokenAurasLiveBits
+	gs.tokenItemsLiveBits = src.tokenItemsLiveBits
 	gs.incomingDamage = src.incomingDamage
 	gs.arcaneIncomingDamage = src.arcaneIncomingDamage
 	gs.opponentMarked = src.opponentMarked
@@ -652,10 +639,18 @@ func (gs *GameState) GoldCount() int      { return gs.tokenItems[tokenItemGold].
 func (gs *GameState) SilverCount() int    { return gs.tokenItems[tokenItemSilver].Count() }
 func (gs *GameState) CopperCount() int    { return gs.tokenItems[tokenItemCopper].Count() }
 
-// SetRunechantCount rewrites the Runechant slot's count directly. Used by the sim's
-// pooled DR-cost probe, which churns the count across probes without going through the
-// CreateRunechants damage-credit path.
-func (gs *GameState) SetRunechantCount(n int) { gs.tokenAuras[tokenAuraRunechant].SetCount(n) }
+// SetRunechantCount rewrites the Runechant slot's count directly and reconciles
+// tokenAurasLiveBits with the new count. Used by the sim's pooled DR-cost probe,
+// which churns the count across probes without going through the CreateRunechants
+// damage-credit path.
+func (gs *GameState) SetRunechantCount(n int) {
+	gs.tokenAuras[tokenAuraRunechant].SetCount(n)
+	if n > 0 {
+		gs.tokenAurasLiveBits |= 1 << tokenAuraRunechant
+	} else {
+		gs.tokenAurasLiveBits &^= 1 << tokenAuraRunechant
+	}
+}
 
 func (gs *GameState) Pitched() []card.Card     { return gs.pitched }
 func (gs *GameState) SetPitched(p []card.Card) { gs.pitched = p }

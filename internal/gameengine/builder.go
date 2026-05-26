@@ -71,6 +71,9 @@ func (b *StateBuilder) AddAura(auras ...Aura) *StateBuilder {
 		if kind, ok := tokenAuraKindForID(a.CardID()); ok {
 			slot := b.gs.tokenAuras[kind]
 			slot.SetCount(slot.Count() + a.Count())
+			if slot.Count() > 0 {
+				b.gs.tokenAurasLiveBits |= 1 << kind
+			}
 			continue
 		}
 		b.gs.auras = append(b.gs.auras, a)
@@ -111,6 +114,9 @@ func (b *StateBuilder) AddItem(items ...Item) *StateBuilder {
 		if kind, ok := tokenItemKindForID(it.CardID()); ok {
 			slot := b.gs.tokenItems[kind]
 			slot.SetCount(slot.Count() + it.Count())
+			if slot.Count() > 0 {
+				b.gs.tokenItemsLiveBits |= 1 << kind
+			}
 			continue
 		}
 		b.gs.items = append(b.gs.items, it)
