@@ -42,10 +42,10 @@ func (e *Evaluator) evaluatePartition(
 // groupPartition splits a role-assigned partition into its played / defending / pitched /
 // held card buckets and resolves the arsenal-in indices, reusing the bufs scratch slices.
 // The buckets fold in the arsenal-in card (pcards[n], when present) per its slot's role.
-func groupPartition(pcards []partitionCard, n int, bufs *attackBufs) (p, a, defs, h []card.Card, arsenalInIdx, arsenalDefenderIdx int, arsenalAtAttackTurnStart card.Card) {
+func groupPartition(pcards []partitionCard, n int, bufs *attackBufs) (p []*card.CardState, a, defs, h []card.Card, arsenalInIdx, arsenalDefenderIdx int, arsenalAtAttackTurnStart card.Card) {
 	p, a, defs = groupByRole(
 		pcards[:n],
-		bufs.pitchedBuf[:0], bufs.attackersBuf[:0], bufs.defendersBuf[:0],
+		bufs.pitchPcBuf, bufs.pitchedBuf[:0], bufs.attackersBuf[:0], bufs.defendersBuf[:0],
 	)
 	arsenalInIdx = -1
 	arsenalDefenderIdx = -1

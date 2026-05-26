@@ -90,7 +90,7 @@ func (e *Evaluator) replaySolution(
 	ctx := newSequenceContext(masterState, weapons, a, defs, p, h, d, bufs, defenseSumFromRoles(pcards), arsenalInIdx, arsenalAtAttackTurnStart)
 	defer ctx.releaseLeafState()
 
-	ctx.attackPitchPerm = entry.pitchOrder
+	ctx.attackPitchPerm = wrapPitchedCards(entry.pitchOrder)
 	ctx.attackPitchVals = bufs.pitchPermValsBuf[:0]
 	for _, c := range entry.pitchOrder {
 		ctx.attackPitchVals = append(ctx.attackPitchVals, c.Pitch())

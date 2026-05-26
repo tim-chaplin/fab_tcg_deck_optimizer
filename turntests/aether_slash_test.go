@@ -43,7 +43,7 @@ func TestAetherSlash_NonAttackActionAttributedFiresRider(t *testing.T) {
 	}
 	for _, tc := range cases {
 		ge := gameengine.New()
-		pc := &card.CardState{Card: tc.c, Ephemeral: card.Ephemeral{PitchedToPlay: []card.Card{testutils.FakeRedAction()}}}
+		pc := &card.CardState{Card: tc.c, Ephemeral: card.Ephemeral{PitchedToPlay: pcs(testutils.FakeRedAction())}}
 		ge.ResolveAttackStep(ge.Logger(), pc)
 		if got := ge.Value(); got != tc.want {
 			t.Errorf("%s: Play() = %d, want %d", tc.c.Name(), got, tc.want)
@@ -57,9 +57,9 @@ func TestAetherSlash_AttackAttributedDoesNotFireRider(t *testing.T) {
 	// cards funded specifically to play this Aether Slash (PitchedToPlay) count.
 	pc := &card.CardState{
 		Card:      cards.AetherSlashRed{},
-		Ephemeral: card.Ephemeral{PitchedToPlay: []card.Card{testutils.FakeRedAttack().WithTypes(card.TypeRuneblade)}},
+		Ephemeral: card.Ephemeral{PitchedToPlay: pcs(testutils.FakeRedAttack().WithTypes(card.TypeRuneblade))},
 	}
-	ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetPitched([]card.Card{testutils.FakeRedAttack().WithTypes(card.TypeRuneblade), testutils.FakeRedAction()}).Build()}
+	ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetPitched(pcs(testutils.FakeRedAttack().WithTypes(card.TypeRuneblade), testutils.FakeRedAction())).Build()}
 	ge.ResolveAttackStep(ge.Logger(), pc)
 	if got := ge.Value(); got != 4 {
 		t.Errorf("Aether Slash Red: Play() = %d, want 4 (attack attributed; rider gated to PitchedToPlay)", got)
@@ -75,7 +75,7 @@ func TestAetherSlash_FlagsArcaneDamageDealtOnlyWhenTriggered(t *testing.T) {
 		t.Error("ArcaneDamageDealt = true with no qualifying pitch attribution; want false")
 	}
 	ge = gameengine.New()
-	pc := &card.CardState{Card: cards.AetherSlashRed{}, Ephemeral: card.Ephemeral{PitchedToPlay: []card.Card{testutils.FakeRedAction()}}}
+	pc := &card.CardState{Card: cards.AetherSlashRed{}, Ephemeral: card.Ephemeral{PitchedToPlay: pcs(testutils.FakeRedAction())}}
 	ge.ResolveAttackStep(ge.Logger(), pc)
 	if !ge.ArcaneDamageDealt() {
 		t.Error("ArcaneDamageDealt = false with non-attack action attributed; want true")

@@ -50,7 +50,8 @@ func runReplayForTurn(snapshot *turnSnapshot, ev *Evaluator, logger card.Logger)
 	parts := partitionBestLineForDisplay(snapshot.bestLine)
 	defensePitches, attackPitches := splitPitchesByPhase(parts.pitched, parts.drCost)
 
-	pitched := append(assignmentCards(defensePitches), assignmentCards(attackPitches)...)
+	pitchedCards := append(assignmentCards(defensePitches), assignmentCards(attackPitches)...)
+	pitched := wrapPitchedCards(pitchedCards)
 	defenders := append(assignmentCards(parts.defenseReactions), assignmentCards(parts.plainBlocks)...)
 	held := assignmentCards(parts.held)
 	arsenalAtAttackTurnStart := arsenalRoleCard(snapshot.bestLine)
@@ -63,7 +64,7 @@ func runReplayForTurn(snapshot *turnSnapshot, ev *Evaluator, logger card.Logger)
 	ctx := newSequenceContext(snapshot.state, weapons, snapshot.cardsPlayed, defenders, pitched, held, snapshot.deck, bufs, 0, arsenalInIdx, arsenalAtAttackTurnStart)
 	defer ctx.releaseLeafState()
 	ctx.replayLogger = logger
-	ctx.attackPitchPerm = assignmentCards(attackPitches)
+	ctx.attackPitchPerm = wrapPitchedCards(assignmentCards(attackPitches))
 	ctx.attackPitchVals = pitchValues(attackPitches)
 	// resourceBudget starts at 0 — the pitch pool pops perm entries lazily as costs come
 	// in, so pre-filling it would short-circuit pay() and leave perm unconsumed (which

@@ -79,7 +79,7 @@ type GameState struct {
 type ephemeral struct {
 	cardsPlayed    []card.Card
 	cardsRemaining []*card.CardState
-	pitched        []card.Card
+	pitched        []*card.CardState
 	defenders      []card.Card
 
 	triggers             []EphemeralTrigger
@@ -652,8 +652,8 @@ func (gs *GameState) SetRunechantCount(n int) {
 	}
 }
 
-func (gs *GameState) Pitched() []card.Card     { return gs.pitched }
-func (gs *GameState) SetPitched(p []card.Card) { gs.pitched = p }
+func (gs *GameState) Pitched() []*card.CardState     { return gs.pitched }
+func (gs *GameState) SetPitched(p []*card.CardState) { gs.pitched = p }
 
 func (gs *GameState) Defenders() []card.Card     { return gs.defenders }
 func (gs *GameState) SetDefenders(d []card.Card) { gs.defenders = d }

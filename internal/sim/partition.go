@@ -282,12 +282,17 @@ func arsenalPromotionHash(startingHand []card.Card, stateHand []card.CardState, 
 }
 
 // groupByRole appends each card to the caller-provided pitched / attackers / defenders
-// slice matching its enumerated role; Held and Arsenal cards are skipped.
-func groupByRole(pcards []partitionCard, pitched, attackers, defenders []card.Card) ([]card.Card, []card.Card, []card.Card) {
+// slice matching its enumerated role; Held and Arsenal cards are skipped. Pitched cards
+// are wrapped in *CardState pointers backed by pcBuf so triggertype.Pitch handlers see the
+// physical pitched-zone copy; pcBuf must have cap >= number of Pitch-role cards.
+func groupByRole(pcards []partitionCard, pcBuf []card.CardState, pitched []*card.CardState, attackers, defenders []card.Card) ([]*card.CardState, []card.Card, []card.Card) {
+	pIdx := 0
 	for _, pc := range pcards {
 		switch pc.role {
 		case card.Pitch:
-			pitched = append(pitched, pc.card)
+			pcBuf[pIdx] = card.CardState{Card: pc.card, Role: card.Pitch}
+			pitched = append(pitched, &pcBuf[pIdx])
+			pIdx++
 		case card.Attack:
 			attackers = append(attackers, pc.card)
 		case card.Defend:
@@ -338,7 +343,7 @@ func roleAllowed(r card.Role, isArsenalSlot, isDefenseReaction, canAttack bool) 
 // capped per card. blockBudget is the resource pool the modal-blocker mode pick spends from.
 // Returns the sticky cacheable bit — once a DR reads deck or graveyard, the partition's
 // defense output is uncacheable.
-func defendersDamage(defenders, pitched []card.Card, deckPile *deck.Deck, ge *gameengine.GameEngine, gravBuf []card.Card, cs *card.CardState, incomingDamage, blockBudget, arsenalDefenderIdx int) (int, []card.Card, bool) {
+func defendersDamage(defenders []card.Card, pitched []*card.CardState, deckPile *deck.Deck, ge *gameengine.GameEngine, gravBuf []card.Card, cs *card.CardState, incomingDamage, blockBudget, arsenalDefenderIdx int) (int, []card.Card, bool) {
 	total := 0
 	cacheable := true
 	ge.SetDeck(deckPile)

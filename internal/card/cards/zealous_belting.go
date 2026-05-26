@@ -15,7 +15,7 @@ import (
 func zealousBeltingPlay(ge card.GameEngine, l card.Logger, self *card.CardState) {
 	base := self.Card.Attack()
 	for _, p := range ge.Pitched() {
-		if p.Attack() > base {
+		if p.Card.Attack() > base {
 			self.GrantedGoAgain = true
 			break
 		}

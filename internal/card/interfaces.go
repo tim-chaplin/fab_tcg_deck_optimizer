@@ -178,7 +178,7 @@ type GameEngine interface {
 	ArcaneIncomingDamage() int
 	BlockTotal() int
 	Defenders() []Card
-	Pitched() []Card
+	Pitched() []*CardState
 
 	// Hero info. HeroWantsLowerHealth reports whether the current hero opts into the
 	// LowerHealthWanter marker (proxy for "less {h} than the opponent" riders).

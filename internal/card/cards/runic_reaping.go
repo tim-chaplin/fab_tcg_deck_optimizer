@@ -45,7 +45,7 @@ func runicReapingPlay(ge card.GameEngine, l card.Logger, selfState *card.CardSta
 		return
 	}
 	for _, p := range selfState.PitchedToPlay {
-		if p.Types(nil).Has(card.TypeAttack) {
+		if p.Card.Types(nil).Has(card.TypeAttack) {
 			target.BonusAttack++
 			break
 		}

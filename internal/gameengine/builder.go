@@ -156,8 +156,9 @@ func (b *StateBuilder) SetBanished(cs []card.Card) *StateBuilder { b.gs.banished
 // SetGraveyard replaces the graveyard slice.
 func (b *StateBuilder) SetGraveyard(cs []card.Card) *StateBuilder { b.gs.graveyard = cs; return b }
 
-// SetPitched replaces the pitched-this-turn slice.
-func (b *StateBuilder) SetPitched(cs []card.Card) *StateBuilder { b.gs.pitched = cs; return b }
+// SetPitched replaces the pitched-this-turn slice. Each entry is the physical
+// pitched-zone copy (carries in-attack-turn state).
+func (b *StateBuilder) SetPitched(cs []*card.CardState) *StateBuilder { b.gs.pitched = cs; return b }
 
 // SetDefenders replaces the defenders slice.
 func (b *StateBuilder) SetDefenders(cs []card.Card) *StateBuilder { b.gs.defenders = cs; return b }

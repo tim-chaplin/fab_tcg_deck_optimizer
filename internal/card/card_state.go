@@ -66,8 +66,9 @@ type Ephemeral struct {
 	// PitchedToPlay is the pitched cards the attack-turn runner attributed to paying this card's
 	// resource cost during the active permutation. Cards whose printed text gates on "if X
 	// was pitched to play this" iterate this slice instead of the unordered g.Pitched bag.
-	// Empty for cards whose cost was fully paid by carry from a prior pitch.
-	PitchedToPlay []Card
+	// Each entry is the physical pitched-zone copy (carries in-attack-turn state). Empty
+	// for cards whose cost was fully paid by carry from a prior pitch.
+	PitchedToPlay []*CardState
 	// FaceUp is set to true when GameEngine.TurnFaceUp flips this scheduled card's CardState
 	// face-up earlier in the attack turn. Lives in Ephemeral because we don't yet model FaceUp
 	// across the turn boundary (no card consumes the persistent flag); cards reading
