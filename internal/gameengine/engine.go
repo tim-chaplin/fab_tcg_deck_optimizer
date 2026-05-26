@@ -267,14 +267,17 @@ func (ge *GameEngine) AddToGraveyard(c card.Card) {
 }
 
 // DrawOne models a mid-turn draw: pop the top of the deck into the hand at its sorted
-// position. Reports whether a card was drawn; false on an empty deck. Doesn't flip
-// IsCacheable — the cached attack turn runs DrawOne again on replay against the caller's
-// current deck, so the drawn card's identity is naturally re-resolved per call. Attack
-// steps that read the drawn card's attributes via Hand / HeldHand / PeekTopN still
-// flip IsCacheable through those accessors, so a Hand-reader downstream of DrawOne
-// remains uncacheable.
+// position. Reports whether a card was drawn; false on an empty deck. A successful
+// draw doesn't flip IsCacheable — the cached attack turn replays DrawOne against the
+// caller's current deck, and any downstream read of the drawn card's attributes
+// (Hand / HeldHand / PeekTopN) flips IsCacheable through its own accessor. An
+// empty-deck failure DOES flip IsCacheable: the card's no-draw branch took here was
+// forced by an exhausted deck, and a future Best call with the same cache key but a
+// non-empty deck would explore the successful-draw branch and produce a different
+// optimum, so the entry must not be stored.
 func (ge *GameEngine) DrawOne() bool {
 	if ge.deck == nil || ge.deck.Size() == 0 {
+		ge.cacheable = false
 		return false
 	}
 	c := ge.deck.Draw(1)[0].(card.Card)
