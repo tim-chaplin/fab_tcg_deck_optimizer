@@ -19,7 +19,7 @@ var goldTypes = card.NewTypeSet(card.TypeGeneric, card.TypeItem)
 // goldConsumer is the narrow engine surface GoldToken.Play needs to destroy the consumed
 // token entry. *gameengine.GameEngine satisfies it structurally.
 type goldConsumer interface {
-	ConsumeItemByName(name string, n int)
+	SpendGold(n int)
 }
 
 // GoldToken is the activated-ability card: cost {2}, draw a card, destroy one Gold token.
@@ -40,7 +40,7 @@ func (GoldToken) PlayPrecondition(ge card.GameEngine, _ *card.CardState) bool {
 }
 
 func (GoldToken) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
-	ge.(goldConsumer).ConsumeItemByName(goldTokenName, 1)
+	ge.(goldConsumer).SpendGold(1)
 	ge.DrawOne()
 	l.AppendPostTrigger(self.Card.DisplayName(), "Spent 1 gold to draw a card", 0)
 }

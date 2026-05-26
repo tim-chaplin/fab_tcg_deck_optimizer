@@ -107,7 +107,7 @@ func TestPonder_PeaceOfMindFillsEmptyArsenalNextTurn(t *testing.T) {
 	d := deck.New(heroes.Viserai, nil, deckCards)
 	hand := []card.Card{cards.PeaceOfMindRed{}, testutils.FakeBlueResource()}
 	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingDamage(4).Build(), hand)
-	if summary.State.Arsenal().Name() != beacon.Name() {
+	if summary.State.Arsenal() == nil || summary.State.Arsenal().Name() != beacon.Name() {
 		t.Errorf("turn 2 arsenal = %v, want %v (Ponder draw should fill empty arsenal from deck top)",
 			summary.State.Arsenal(), beacon)
 	}

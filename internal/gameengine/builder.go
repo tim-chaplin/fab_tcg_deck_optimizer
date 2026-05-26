@@ -3,6 +3,7 @@ package gameengine
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/ids"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapon"
 )
 
@@ -31,17 +32,19 @@ func New() *GameEngine {
 // panic on a zero-card state), and a no-ability fallback hero (20 health, 4 Intelligence).
 // SetDeck / SetCards overrides the empty deck; SetHero overrides the default hero.
 func GameStateBuilder() *StateBuilder {
-	return &StateBuilder{
-		gs: &GameState{
-			ephemeral: ephemeral{
-				cacheable:      true,
-				currentHookIdx: -1,
-				logger:         NoopLogger{},
-			},
-			deck: deck.New(nil, nil, nil),
-			hero: defaultHero{},
+	gs := &GameState{
+		ephemeral: ephemeral{
+			cacheable:              true,
+			currentHookIdx:         -1,
+			currentFiringTokenAura: -1,
+			currentFiringTokenItem: -1,
+			logger:                 NoopLogger{},
 		},
+		deck: deck.New(nil, nil, nil),
+		hero: defaultHero{},
 	}
+	gs.initTokenSlots()
+	return &StateBuilder{gs: gs}
 }
 
 // Build returns the configured *GameState.
@@ -61,8 +64,17 @@ func (b *StateBuilder) SetArsenal(c card.Card) *StateBuilder { b.gs.arsenal = c;
 // AddAura appends auras to the carryover aura list. Unlike GameState.CreateAura it does
 // not flip the auraCreated flag — builder auras are pre-turn carryover, not auras created
 // during this turn's attack phase; reach for SetAuraCreated to set that flag explicitly.
+// Token-aura entries (Runechant, Ponder) route into the pre-allocated tokenAuras slot
+// for their kind (count merged via SetCount) instead of appending to the card-aura list.
 func (b *StateBuilder) AddAura(auras ...Aura) *StateBuilder {
-	b.gs.auras = append(b.gs.auras, auras...)
+	for _, a := range auras {
+		if kind, ok := tokenAuraKindForID(a.CardID()); ok {
+			slot := b.gs.tokenAuras[kind]
+			slot.SetCount(slot.Count() + a.Count())
+			continue
+		}
+		b.gs.auras = append(b.gs.auras, a)
+	}
 	return b
 }
 
@@ -91,10 +103,45 @@ func (b *StateBuilder) playForCarryover(c card.Card) {
 	c.Play(ge, NoopLogger{}, &card.CardState{Card: c})
 }
 
-// AddItem appends items to the carryover item list.
+// AddItem appends items to the carryover item list. Token-item entries (Gold, Silver,
+// Copper) route into the pre-allocated tokenItems slot for their kind (count merged via
+// SetCount) instead of appending to the card-item list.
 func (b *StateBuilder) AddItem(items ...Item) *StateBuilder {
-	b.gs.items = append(b.gs.items, items...)
+	for _, it := range items {
+		if kind, ok := tokenItemKindForID(it.CardID()); ok {
+			slot := b.gs.tokenItems[kind]
+			slot.SetCount(slot.Count() + it.Count())
+			continue
+		}
+		b.gs.items = append(b.gs.items, it)
+	}
 	return b
+}
+
+// tokenAuraKindForID maps a token aura's CardID to its tokenAuraKind index, or returns
+// false if id is not a recognised aura-token kind.
+func tokenAuraKindForID(id ids.CardID) (tokenAuraKind, bool) {
+	switch id {
+	case ids.RunechantTokenID:
+		return tokenAuraRunechant, true
+	case ids.PonderTokenID:
+		return tokenAuraPonder, true
+	}
+	return 0, false
+}
+
+// tokenItemKindForID maps a token item's CardID to its tokenItemKind index, or returns
+// false if id is not a recognised item-token kind.
+func tokenItemKindForID(id ids.CardID) (tokenItemKind, bool) {
+	switch id {
+	case ids.GoldTokenID:
+		return tokenItemGold, true
+	case ids.SilverTokenID:
+		return tokenItemSilver, true
+	case ids.CopperTokenID:
+		return tokenItemCopper, true
+	}
+	return 0, false
 }
 
 // SetBanished replaces the banished-zone slice.

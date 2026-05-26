@@ -28,8 +28,14 @@ type GameState struct {
 	arsenal   card.Card
 	graveyard []card.Card
 	banished  []card.Card
-	auras     []Aura
-	items     []Item
+	auras     []Aura // card-backed auras only — tokens live in tokenAuras
+	items     []Item // card-backed items only — tokens live in tokenItems
+
+	// Token slots — one pre-allocated Aura / Item per kind, count=0 means "not in
+	// play." Pointer identity stable for the GameState's lifetime, so trigger
+	// dispatch fires the same closure every time without per-creation allocation.
+	tokenAuras [numTokenAuraKinds]Aura
+	tokenItems [numTokenItemKinds]Item
 
 	incomingDamage       int
 	arcaneIncomingDamage int
@@ -60,6 +66,11 @@ type ephemeral struct {
 	damageBlocked  int
 	blockTotal     int
 	currentHookIdx int
+	// currentFiringTokenAura / currentFiringTokenItem track which token slot is mid-Fire
+	// so DestroyAura / DestroyItem route to "zero the count" instead of splicing s.auras
+	// / s.items. -1 means no token is firing (the splice path is active).
+	currentFiringTokenAura int
+	currentFiringTokenItem int
 	// cardsRemovedFromDeck counts deck → non-deck movements during this attack turn (draws,
 	// tutors, peek-and-banish, etc.). The hand-eval cache stores it and refuses to replay
 	// against a shallower deck — the cached attack turn consumed N cards, so replay needs ≥ N.
@@ -91,15 +102,17 @@ func (e *ephemeral) reset() {
 	defenders := e.defenders[:0]
 	triggers := e.triggers[:0]
 	*e = ephemeral{
-		cardsPlayed:    cardsPlayed,
-		cardsRemaining: cardsRemaining,
-		pitched:        pitched,
-		defenders:      defenders,
-		triggers:       triggers,
-		actionPoints:   1,
-		currentHookIdx: -1,
-		cacheable:      true,
-		logger:         NoopLogger{},
+		cardsPlayed:            cardsPlayed,
+		cardsRemaining:         cardsRemaining,
+		pitched:                pitched,
+		defenders:              defenders,
+		triggers:               triggers,
+		actionPoints:           1,
+		currentHookIdx:         -1,
+		currentFiringTokenAura: -1,
+		currentFiringTokenItem: -1,
+		cacheable:              true,
+		logger:                 NoopLogger{},
 	}
 }
 
@@ -135,6 +148,23 @@ func (gs *GameState) Copy() *GameState {
 		out.triggers = nil
 	}
 	out.items = copyItemsInto(nil, gs.items)
+	// out := *gs copied the token-slot interface values (pointer + type), aliasing src.
+	// Make out's own per-slot instances so mutations don't cross-link the clones.
+	out.initTokenSlots()
+	for i := range out.tokenAuras {
+		if gs.tokenAuras[i] == nil {
+			continue
+		}
+		out.tokenAuras[i].SetCount(gs.tokenAuras[i].Count())
+		out.tokenAuras[i].SetFiredThisTurn(gs.tokenAuras[i].FiredThisTurn())
+	}
+	for i := range out.tokenItems {
+		if gs.tokenItems[i] == nil {
+			continue
+		}
+		out.tokenItems[i].SetCount(gs.tokenItems[i].Count())
+		out.tokenItems[i].SetFiredThisTurn(gs.tokenItems[i].FiredThisTurn())
+	}
 	out.logger = NoopLogger{}
 	return &out
 }
@@ -155,7 +185,27 @@ func (gs *GameState) CopyFrom(src *GameState) {
 	pooledTriggers := gs.triggers
 	pooledItems := gs.items
 	pooledDeck := gs.deck
+	tokenAuras := gs.tokenAuras
+	tokenItems := gs.tokenItems
 	*gs = *src
+	// Restore the receiver's own token-slot pointers, then transcribe counts +
+	// firedThisTurn from src's slots so the receiver mirrors src's token state.
+	gs.tokenAuras = tokenAuras
+	gs.tokenItems = tokenItems
+	for i := range gs.tokenAuras {
+		if gs.tokenAuras[i] == nil || src.tokenAuras[i] == nil {
+			continue
+		}
+		gs.tokenAuras[i].SetCount(src.tokenAuras[i].Count())
+		gs.tokenAuras[i].SetFiredThisTurn(src.tokenAuras[i].FiredThisTurn())
+	}
+	for i := range gs.tokenItems {
+		if gs.tokenItems[i] == nil || src.tokenItems[i] == nil {
+			continue
+		}
+		gs.tokenItems[i].SetCount(src.tokenItems[i].Count())
+		gs.tokenItems[i].SetFiredThisTurn(src.tokenItems[i].FiredThisTurn())
+	}
 	gs.logger = NoopLogger{}
 	gs.hand = resetCardSlice(pooledHand, src.hand)
 	gs.graveyard = resetCardSlice(pooledGrav, src.graveyard)
@@ -287,6 +337,23 @@ func (gs *GameState) CopyPersistentState() *GameState {
 	}
 	out.auras = copyAurasInto(nil, gs.auras)
 	out.items = copyItemsInto(nil, gs.items)
+	// Token slots: out := *gs copied the slot pointers, aliasing src. Give out its own
+	// instances so the snapshot's counts can't drift if src's slots mutate.
+	out.initTokenSlots()
+	for i := range out.tokenAuras {
+		if gs.tokenAuras[i] == nil {
+			continue
+		}
+		out.tokenAuras[i].SetCount(gs.tokenAuras[i].Count())
+		out.tokenAuras[i].SetFiredThisTurn(gs.tokenAuras[i].FiredThisTurn())
+	}
+	for i := range out.tokenItems {
+		if gs.tokenItems[i] == nil {
+			continue
+		}
+		out.tokenItems[i].SetCount(gs.tokenItems[i].Count())
+		out.tokenItems[i].SetFiredThisTurn(gs.tokenItems[i].FiredThisTurn())
+	}
 	return &out
 }
 
@@ -303,6 +370,20 @@ func (gs *GameState) CopyPersistentStateFrom(src *GameState) {
 	gs.banished = resetCardSlice(gs.banished, src.banished)
 	gs.auras = copyAurasInto(gs.auras, src.auras)
 	gs.items = copyItemsInto(gs.items, src.items)
+	for i := range gs.tokenAuras {
+		if gs.tokenAuras[i] == nil || src.tokenAuras[i] == nil {
+			continue
+		}
+		gs.tokenAuras[i].SetCount(src.tokenAuras[i].Count())
+		gs.tokenAuras[i].SetFiredThisTurn(src.tokenAuras[i].FiredThisTurn())
+	}
+	for i := range gs.tokenItems {
+		if gs.tokenItems[i] == nil || src.tokenItems[i] == nil {
+			continue
+		}
+		gs.tokenItems[i].SetCount(src.tokenItems[i].Count())
+		gs.tokenItems[i].SetFiredThisTurn(src.tokenItems[i].FiredThisTurn())
+	}
 	gs.incomingDamage = src.incomingDamage
 	gs.arcaneIncomingDamage = src.arcaneIncomingDamage
 	gs.opponentMarked = src.opponentMarked
@@ -325,6 +406,16 @@ func (gs *GameState) ResetEphemeralState() {
 	for _, it := range gs.items {
 		it.SetFiredThisTurn(false)
 	}
+	for i := range gs.tokenAuras {
+		if gs.tokenAuras[i] != nil {
+			gs.tokenAuras[i].SetFiredThisTurn(false)
+		}
+	}
+	for i := range gs.tokenItems {
+		if gs.tokenItems[i] != nil {
+			gs.tokenItems[i].SetFiredThisTurn(false)
+		}
+	}
 	if gs.hero != nil && gs.hero.OncePerTurn() {
 		gs.hero.SetFiredThisTurn(false)
 	}
@@ -343,6 +434,8 @@ func (gs *GameState) Reset(h Hero, weapons []weapon.Weapon, incoming, arcaneInco
 	if deckWrapper != nil {
 		deckWrapper.ShallowCopyFrom(nil)
 	}
+	tokenAuras := gs.tokenAuras
+	tokenItems := gs.tokenItems
 	eph := gs.ephemeral
 	*gs = GameState{
 		hand:                 hand,
@@ -350,6 +443,8 @@ func (gs *GameState) Reset(h Hero, weapons []weapon.Weapon, incoming, arcaneInco
 		banished:             banished,
 		auras:                auras,
 		items:                items,
+		tokenAuras:           tokenAuras,
+		tokenItems:           tokenItems,
 		weapons:              weapons,
 		incomingDamage:       incoming,
 		arcaneIncomingDamage: arcaneIncoming,
@@ -357,6 +452,7 @@ func (gs *GameState) Reset(h Hero, weapons []weapon.Weapon, incoming, arcaneInco
 		ephemeral:            eph,
 	}
 	gs.ephemeral.reset()
+	gs.resetTokenCounts()
 	gs.SetHero(h)
 }
 
@@ -488,19 +584,33 @@ func (gs *GameState) ClearTriggers()               { gs.triggers = nil }
 func (gs *GameState) Items() []Item                { return gs.items }
 func (gs *GameState) ClearItems()                  { gs.items = nil }
 
-// AuraCount returns the count of live auras. Used by gates like Yinti Yanti's "while you
-// control an aura" rider.
-func (gs *GameState) AuraCount() int { return len(gs.auras) }
+// AuraCount returns the number of aura entries currently in play (card-backed + token
+// slots with count > 0). Used by gates like Yinti Yanti's "while you control an aura"
+// rider — a Runechant or Ponder slot counts as one entry regardless of its stack count.
+func (gs *GameState) AuraCount() int {
+	n := len(gs.auras)
+	for _, a := range gs.tokenAuras {
+		if a != nil && a.Count() > 0 {
+			n++
+		}
+	}
+	return n
+}
 
 // RunechantCount / PonderCount / GoldCount / SilverCount / CopperCount return the live
-// token-aura / token-item count by display name. Both GameState and GameEngine expose
-// these so end-of-turn callers (TurnSummary readers) can read counts off the state
-// pointer directly without needing an engine wrapper.
-func (gs *GameState) RunechantCount() int { return auraCountByName(gs.auras, tokenNameRunechant) }
-func (gs *GameState) PonderCount() int    { return auraCountByName(gs.auras, tokenNamePonder) }
-func (gs *GameState) GoldCount() int      { return itemCountByName(gs.items, tokenNameGold) }
-func (gs *GameState) SilverCount() int    { return itemCountByName(gs.items, tokenNameSilver) }
-func (gs *GameState) CopperCount() int    { return itemCountByName(gs.items, tokenNameCopper) }
+// token count from the pre-allocated slot for each kind. Promoted onto *GameEngine via
+// the embedded *GameState, so card-facing engine callers and TurnSummary readers share
+// the same accessor.
+func (gs *GameState) RunechantCount() int { return gs.tokenAuras[tokenAuraRunechant].Count() }
+func (gs *GameState) PonderCount() int    { return gs.tokenAuras[tokenAuraPonder].Count() }
+func (gs *GameState) GoldCount() int      { return gs.tokenItems[tokenItemGold].Count() }
+func (gs *GameState) SilverCount() int    { return gs.tokenItems[tokenItemSilver].Count() }
+func (gs *GameState) CopperCount() int    { return gs.tokenItems[tokenItemCopper].Count() }
+
+// SetRunechantCount rewrites the Runechant slot's count directly. Used by the sim's
+// pooled DR-cost probe, which churns the count across probes without going through the
+// CreateRunechants damage-credit path.
+func (gs *GameState) SetRunechantCount(n int) { gs.tokenAuras[tokenAuraRunechant].SetCount(n) }
 
 func (gs *GameState) Pitched() []card.Card     { return gs.pitched }
 func (gs *GameState) SetPitched(p []card.Card) { gs.pitched = p }

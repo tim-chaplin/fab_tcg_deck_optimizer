@@ -25,8 +25,8 @@ func TestRunebloodIncantation_StartOfTurnFireCreatesRunechant(t *testing.T) {
 	if got := summary.State.RunechantCount(); got != 1 {
 		t.Fatalf("RunechantCount = %d, want 1 (one verse counter spent on a Runechant)", got)
 	}
-	if got := len(summary.State.Auras()); got != 2 {
-		t.Fatalf("Auras = %d, want 2 (Runeblood Incantation survives alongside its Runechant)", got)
+	if got := len(summary.State.Auras()); got != 1 {
+		t.Fatalf("card Auras = %d, want 1 (Runeblood Incantation survives — Runechant lives in the token slot, not Auras())", got)
 	}
 }
 

@@ -463,7 +463,7 @@ const startOfTurnRevealRoom = 8
 // Cascading reveals: a handler that pops d shrinks the view for the next, so two
 // reveal-capable auras see distinct tops.
 func processAurasAtStartOfTurn(state *gameengine.GameState, d *deck.Deck) {
-	if len(state.Auras()) == 0 {
+	if !state.AnyAurasInPlay() {
 		return
 	}
 	// Swap state's deck pointer to d so aura handlers (DrawOne / RevealTopOfDeck /

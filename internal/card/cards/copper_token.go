@@ -19,7 +19,7 @@ var copperTypes = card.NewTypeSet(card.TypeGeneric, card.TypeItem)
 // copperConsumer is the narrow engine surface CopperToken.Play needs to destroy the
 // consumed token entry. *gameengine.GameEngine satisfies it structurally.
 type copperConsumer interface {
-	ConsumeItemByName(name string, n int)
+	SpendCopper(n int)
 }
 
 // CopperToken is the activated-ability card: cost {4}, draw a card, destroy one Copper.
@@ -40,7 +40,7 @@ func (CopperToken) PlayPrecondition(ge card.GameEngine, _ *card.CardState) bool 
 }
 
 func (CopperToken) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
-	ge.(copperConsumer).ConsumeItemByName(copperTokenName, 1)
+	ge.(copperConsumer).SpendCopper(1)
 	ge.DrawOne()
 	l.AppendPostTrigger(self.Card.DisplayName(), "Spent 1 copper to draw a card", 0)
 }

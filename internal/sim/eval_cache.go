@@ -53,21 +53,33 @@ type persistentCacheKey struct {
 
 // evalCacheKey is the comparable map key. Fixed-size arrays carry explicit length fields so
 // a shorter input can't collide with a longer one on its prefix. heroID + weaponIDs key the
-// loadout. Matchup is NOT in the key — an Evaluator's lifetime spans calls at a constant
-// Matchup; tests mixing matchups must use NewEvaluatorWithoutCache.
+// loadout. Token aura/item counts are pinned at fixed indices so two states that differ
+// only in a token kind's count produce distinct keys without an array sort. Matchup is NOT
+// in the key — an Evaluator's lifetime spans calls at a constant Matchup; tests mixing
+// matchups must use NewEvaluatorWithoutCache.
 type evalCacheKey struct {
-	handIDs        [maxCachedHandSize]ids.CardID
-	weaponIDs      [maxCachedWeapons]ids.WeaponID
-	auras          [maxCachedAuras]persistentCacheKey
-	items          [maxCachedItems]persistentCacheKey
-	handLen        int
-	weaponLen      int
-	auraLen        int
-	itemLen        int
-	heroID         ids.HeroID
-	arsenalID      ids.CardID
-	opponentMarked bool
+	handIDs         [maxCachedHandSize]ids.CardID
+	weaponIDs       [maxCachedWeapons]ids.WeaponID
+	auras           [maxCachedAuras]persistentCacheKey
+	items           [maxCachedItems]persistentCacheKey
+	tokenAuraCounts [numCachedTokenAuras]int
+	tokenItemCounts [numCachedTokenItems]int
+	handLen         int
+	weaponLen       int
+	auraLen         int
+	itemLen         int
+	heroID          ids.HeroID
+	arsenalID       ids.CardID
+	opponentMarked  bool
 }
+
+// numCachedTokenAuras / numCachedTokenItems pin the per-kind token slot counts into the
+// cache key at fixed array positions. Must stay in sync with gameengine's
+// numTokenAuraKinds / numTokenItemKinds.
+const (
+	numCachedTokenAuras = 2 // Runechant, Ponder
+	numCachedTokenItems = 3 // Gold, Silver, Copper
+)
 
 // playedCard is one resolved card in a cached solution: the card, its modal Mode, and
 // whether it was played from arsenal. A cache replay seeds each attack step directly from
@@ -243,6 +255,11 @@ func makeCacheKey(
 		key.arsenalID = arsenal.ID()
 	}
 	key.opponentMarked = masterState.OpponentMarked()
+	key.tokenAuraCounts[0] = masterState.RunechantCount()
+	key.tokenAuraCounts[1] = masterState.PonderCount()
+	key.tokenItemCounts[0] = masterState.GoldCount()
+	key.tokenItemCounts[1] = masterState.SilverCount()
+	key.tokenItemCounts[2] = masterState.CopperCount()
 	return key, true
 }
 

@@ -28,16 +28,3 @@ func (t TurnSummary) ArsenalIn() (card.CardAssignment, bool) {
 	return card.CardAssignment{}, false
 }
 
-// auraCountByNameInState scans the state's aura list for a token aura with the given
-// display name and returns its Count, or zero if no matching entry is present.
-func auraCountByNameInState(gs *gameengine.GameState, name string) int {
-	if gs == nil {
-		return 0
-	}
-	for _, a := range gs.Auras() {
-		if a.CardName() == name {
-			return a.Count()
-		}
-	}
-	return 0
-}
