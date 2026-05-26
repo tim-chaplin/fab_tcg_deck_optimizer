@@ -474,16 +474,12 @@ func (ge *GameEngine) FireTriggers(t triggertype.Type, triggeringCard card.Card)
 	}
 	ge.triggeringCard = triggeringCard
 
+	// Resolve triggeringTypes eagerly. The early-exit above guarantees we have a hook to
+	// dispatch to, every Types() impl returns a precomputed package-level constant, and
+	// passing a value sidesteps the per-call closure box that lazy resolution required.
 	var triggeringTypes card.TypeSet
-	typesResolved := false
-	matchTypes := func() card.TypeSet {
-		if !typesResolved {
-			if triggeringCard != nil {
-				triggeringTypes = triggeringCard.Types(ge)
-			}
-			typesResolved = true
-		}
-		return triggeringTypes
+	if triggeringCard != nil {
+		triggeringTypes = triggeringCard.Types(ge)
 	}
 
 	// Snapshot which token slots were already live at fire-time. fireHooks() uses
@@ -502,13 +498,13 @@ func (ge *GameEngine) FireTriggers(t triggertype.Type, triggeringCard card.Card)
 	}
 
 	if heroFires {
-		fireHero(ge, triggeringCard, matchTypes)
+		fireHero(ge, triggeringCard, triggeringTypes)
 	}
-	fireHooks(ge, &ge.auras, t, triggeringCard, matchTypes, false)
-	fireTokenAuras(ge, t, triggeringCard, matchTypes, liveTokenAuras)
-	fireHooks(ge, &ge.triggers, t, triggeringCard, matchTypes, true)
-	fireHooks(ge, &ge.items, t, triggeringCard, matchTypes, false)
-	fireTokenItems(ge, t, triggeringCard, matchTypes, liveTokenItems)
+	fireHooks(ge, &ge.auras, t, triggeringCard, triggeringTypes, false)
+	fireTokenAuras(ge, t, triggeringCard, triggeringTypes, liveTokenAuras)
+	fireHooks(ge, &ge.triggers, t, triggeringCard, triggeringTypes, true)
+	fireHooks(ge, &ge.items, t, triggeringCard, triggeringTypes, false)
+	fireTokenItems(ge, t, triggeringCard, triggeringTypes, liveTokenItems)
 
 	ge.triggeringCard = nil
 }
@@ -516,12 +512,12 @@ func (ge *GameEngine) FireTriggers(t triggertype.Type, triggeringCard card.Card)
 // fireHero applies the OncePerTurn / Matches gates and invokes the hero handler. The
 // hero is singular (no slice splicing, no removeAfterFire) so it bypasses fireHooks's
 // cursor walk. The TriggerType bit-and check is done at the caller.
-func fireHero(ge *GameEngine, triggeringCard card.Card, matchTypes func() card.TypeSet) {
+func fireHero(ge *GameEngine, triggeringCard card.Card, triggeringTypes card.TypeSet) {
 	h := ge.hero
 	if h.OncePerTurn() && h.FiredThisTurn() {
 		return
 	}
-	if triggeringCard != nil && !h.Matches(matchTypes()) {
+	if triggeringCard != nil && !h.Matches(triggeringTypes) {
 		return
 	}
 	h.Fire(ge, ge.logger)
@@ -538,12 +534,12 @@ func fireHero(ge *GameEngine, triggeringCard card.Card, matchTypes func() card.T
 // Destroy splices the right slot and sets currentHookDestroyed, which shortens the walk.
 // removeAfterFire splices every fired entry unconditionally: the one-shot semantics of
 // ephemeral triggers, which the engine drops once they fire.
-func fireHooks[H trigger.Hook](ge *GameEngine, hooks *[]H, t triggertype.Type, triggeringCard card.Card, matchTypes func() card.TypeSet, removeAfterFire bool) {
+func fireHooks[H trigger.Hook](ge *GameEngine, hooks *[]H, t triggertype.Type, triggeringCard card.Card, triggeringTypes card.TypeSet, removeAfterFire bool) {
 	n := len(*hooks)
 	for i := 0; i < n; {
 		h := (*hooks)[i]
 		if h.TriggerType()&t == 0 || (h.OncePerTurn() && h.FiredThisTurn()) ||
-			(triggeringCard != nil && !h.Matches(matchTypes())) {
+			(triggeringCard != nil && !h.Matches(triggeringTypes)) {
 			i++
 			continue
 		}
@@ -570,7 +566,7 @@ func fireHooks[H trigger.Hook](ge *GameEngine, hooks *[]H, t triggertype.Type, t
 // trick: a token created mid-FireTriggers can't fire on the same event.
 // Publishes currentFiringTokenAura before each Fire so DestroyAura routes to the slot's
 // SetCount(0) path.
-func fireTokenAuras(ge *GameEngine, t triggertype.Type, triggeringCard card.Card, matchTypes func() card.TypeSet, liveAtStart [numTokenAuraKinds]bool) {
+func fireTokenAuras(ge *GameEngine, t triggertype.Type, triggeringCard card.Card, triggeringTypes card.TypeSet, liveAtStart [numTokenAuraKinds]bool) {
 	for i := range ge.tokenAuras {
 		if !liveAtStart[i] {
 			continue
@@ -580,7 +576,7 @@ func fireTokenAuras(ge *GameEngine, t triggertype.Type, triggeringCard card.Card
 			continue
 		}
 		if a.TriggerType()&t == 0 || (a.OncePerTurn() && a.FiredThisTurn()) ||
-			(triggeringCard != nil && !a.Matches(matchTypes())) {
+			(triggeringCard != nil && !a.Matches(triggeringTypes)) {
 			continue
 		}
 		ge.currentFiringTokenAura = i
@@ -594,7 +590,7 @@ func fireTokenAuras(ge *GameEngine, t triggertype.Type, triggeringCard card.Card
 }
 
 // fireTokenItems is the item-side counterpart of fireTokenAuras.
-func fireTokenItems(ge *GameEngine, t triggertype.Type, triggeringCard card.Card, matchTypes func() card.TypeSet, liveAtStart [numTokenItemKinds]bool) {
+func fireTokenItems(ge *GameEngine, t triggertype.Type, triggeringCard card.Card, triggeringTypes card.TypeSet, liveAtStart [numTokenItemKinds]bool) {
 	for i := range ge.tokenItems {
 		if !liveAtStart[i] {
 			continue
@@ -604,7 +600,7 @@ func fireTokenItems(ge *GameEngine, t triggertype.Type, triggeringCard card.Card
 			continue
 		}
 		if it.TriggerType()&t == 0 || (it.OncePerTurn() && it.FiredThisTurn()) ||
-			(triggeringCard != nil && !it.Matches(matchTypes())) {
+			(triggeringCard != nil && !it.Matches(triggeringTypes)) {
 			continue
 		}
 		ge.currentFiringTokenItem = i
