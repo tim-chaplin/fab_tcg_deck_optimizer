@@ -353,31 +353,6 @@ func (ctx *sequenceContext) permEngine(state *gameengine.GameState) *gameengine.
 	return ctx.bufs.pooledEngine
 }
 
-// appendExcludingMultiset appends src to dst, skipping the first occurrence of each card in
-// exclude (multiset semantics). Used by runDefense to keep DR-banished defenders out of the
-// post-defense graveyard.
-func appendExcludingMultiset(dst, src, exclude []card.Card) []card.Card {
-	if len(exclude) == 0 {
-		return append(dst, src...)
-	}
-	// Defender lists are tiny (<= handSize+1) so an alloc-free linear scan beats a map.
-	skip := make([]bool, len(exclude))
-	for _, c := range src {
-		excluded := false
-		for j, e := range exclude {
-			if !skip[j] && e == c {
-				skip[j] = true
-				excluded = true
-				break
-			}
-		}
-		if !excluded {
-			dst = append(dst, c)
-		}
-	}
-	return dst
-}
-
 // runDefense mutates ctx.leafState through the defender list, accumulating per-DR Value.
 // Auras grow with any DR-added entries; graveyard is left as priorGraveyard + defenders for
 // the chain phase. Per-permutation chain-locals reset via ResetEphemeralState, so runDefense
@@ -400,6 +375,9 @@ func (ctx *sequenceContext) runDefense(defenders, pitched, held []card.Card, dec
 	}
 	state.SetDeck(deckPile)
 	state.SetIncomingDamage(matchupIncomingDamage)
+	// Baseline leafState's graveyard to priorGraveyard. Defending cards move to
+	// graveyard only when the chain closes (the post-block append below).
+	state.SetGraveyard(append(state.Graveyard()[:0], ctx.priorGraveyard...))
 	ge := ctx.permEngine(state)
 	cs := &ctx.bufs.drCardStateScratch
 
@@ -430,17 +408,12 @@ func (ctx *sequenceContext) runDefense(defenders, pitched, held []card.Card, dec
 	}
 	state.SetHandStates(defenseHand)
 
-	// Per-DR view: graveyard = defenders so DRs that scan graveyard see the defender
-	// set. runDefenseDRGravBuf is recycled across runDefense calls. drGraveyard carries
-	// across the DR loop so a banish or destroy by an earlier DR is reflected in the
-	// view the next DR scans.
-	drGraveyard := append(ctx.bufs.runDefenseDRGravBuf[:0], defenders...)
+	// DR loop: graveyard reads see only priorGraveyard.
 	for i, def := range defenders {
 		if !attackerMetaPtrFor(def).actsAsDR {
 			continue
 		}
 		ctx.bufs.defModes[i] = playedCard{card: def}
-		state.SetGraveyard(drGraveyard)
 		state.SetPitched(pitched)
 		state.SetDefenders(defenders)
 		state.SetValue(0)
@@ -451,9 +424,7 @@ func (ctx *sequenceContext) runDefense(defenders, pitched, held []card.Card, dec
 		if !state.IsCacheable() {
 			cacheable = false
 		}
-		drGraveyard = state.Graveyard()
 	}
-	ctx.bufs.runDefenseDRGravBuf = drGraveyard
 
 	// Plain blocks: walk surviving defenders, picking the best mode within blockBudget.
 	// origHeld is the Held-role slice of the post-DR HandStates; any card a DR Play
@@ -493,21 +464,14 @@ func (ctx *sequenceContext) runDefense(defenders, pitched, held []card.Card, dec
 	}
 
 	// A Blocker may have discarded leading Held cards; the survivors are origHeld's tail.
+	// Discards already entered graveyard via ge.Discard mid-block-loop.
 	discarded := len(origHeld) - (len(state.HandStates()) - len(ctx.attackers) - len(pitched))
 	survivingHeld := origHeld[discarded:]
 
-	// Leave state with graveyard = priorGraveyard + defenders + discarded cards for the chain
-	// phase, EXCLUDING any defender a DR banished — those cards already moved to banished, and
-	// duplicating them in graveyard would let BanishFromGraveyard / RecycleFromGraveyard see
-	// a phantom copy. runDefenseChainGravBuf is recycled across runDefense calls; per-perm
-	// preparePermState's CopyPersistentStateFrom copies this slice into the perm slot's own
-	// graveyard backing, so the alias here only outlives the defense pass.
-	chainGraveyard := append(ctx.bufs.runDefenseChainGravBuf[:0], ctx.priorGraveyard...)
-	drBanished := state.Banished()[len(ctx.priorBanish):]
-	chainGraveyard = appendExcludingMultiset(chainGraveyard, defenders, drBanished)
-	chainGraveyard = append(chainGraveyard, origHeld[:discarded]...)
-	ctx.bufs.runDefenseChainGravBuf = chainGraveyard
-	state.SetGraveyard(chainGraveyard)
+	// Combat chain closes — all defending cards move to graveyard now, simultaneously.
+	for _, def := range defenders {
+		state.AppendGraveyard(def)
+	}
 
 	// Defense phase over: if any incoming damage got through, fire DamageTaken so auras
 	// destroyed by taking damage (Arcane Cussing, Bloodspill Invocation) leave the arena.

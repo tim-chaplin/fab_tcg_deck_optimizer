@@ -12,9 +12,9 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 )
 
-// zeroDefenseAura is an aura-typed card that blocks for nothing — used to park an aura in
-// the graveyard via the plain-block seeding path without adding to the defense total, so
-// tests can isolate Weeping Battleground's +1 arcane banish rider.
+// zeroDefenseAura is an aura-typed card used to populate the prior-turn graveyard so
+// tests can isolate Weeping Battleground's +1 arcane banish rider. Defense / Pitch are
+// zero so it wouldn't contribute to a defense total if drawn into hand.
 type zeroDefenseAura struct{}
 
 func (zeroDefenseAura) ID() ids.CardID                                     { return ids.InvalidCard }
@@ -28,12 +28,16 @@ func (zeroDefenseAura) Types(card.GameEngine) card.TypeSet                 { ret
 func (zeroDefenseAura) GoAgain(card.GameEngine) bool                       { return false }
 func (zeroDefenseAura) Play(card.GameEngine, card.Logger, *card.CardState) {}
 
-// Tests that Weeping Battleground banishes a same-turn-blocked aura from the graveyard
-// for 1 arcane while also defending.
+// Tests that Weeping Battleground banishes a pre-existing graveyard aura for +1 arcane
+// while also defending.
 func TestBest_WeepingBattlegroundBanishesAuraFromGraveyard(t *testing.T) {
-	h := []card.Card{cards.WeepingBattlegroundRed{}, zeroDefenseAura{}}
+	h := []card.Card{cards.WeepingBattlegroundRed{}}
 	d := deck.New(testutils.Hero{Intel: 4}, nil, nil)
-	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingDamage(4).Build(), h)
+	state := gameengine.GameStateBuilder().
+		SetIncomingDamage(4).
+		SetGraveyard([]card.Card{zeroDefenseAura{}}).
+		Build()
+	summary := sim.EvalOneTurnForTesting(d, state, h)
 	if summary.Value != 4 {
 		t.Errorf("Value = %d, want 4 (3 block + 1 arcane from banish). Roles=[%s]",
 			summary.Value, sim.FormatBestLine(summary.BestLine))
@@ -52,23 +56,23 @@ func TestBest_WeepingBattlegroundFizzlesWithoutAura(t *testing.T) {
 	}
 }
 
-// Tests that a defender a DR banished during the defense phase doesn't ALSO appear in
-// the post-defense graveyard. Pre-fix, runDefense rebuilt chainGraveyard from the original
-// defenders list unconditionally, so the banished card ended up in BOTH the banished zone
-// AND the graveyard — double-counted across the per-turn zone accounting, and visible to
-// subsequent BanishFromGraveyard / RecycleFromGraveyard scans as a phantom copy.
+// Tests that an aura banished by Weeping Battleground ends up only in the banished
+// zone, not duplicated across both zones.
 func TestBest_WeepingBattlegroundBanishedAuraOnlyInBanishedZone(t *testing.T) {
-	h := []card.Card{cards.WeepingBattlegroundRed{}, zeroDefenseAura{}}
+	h := []card.Card{cards.WeepingBattlegroundRed{}}
 	d := deck.New(testutils.Hero{Intel: 4}, nil, nil)
-	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingDamage(4).Build(), h)
+	state := gameengine.GameStateBuilder().
+		SetIncomingDamage(4).
+		SetGraveyard([]card.Card{zeroDefenseAura{}}).
+		Build()
+	summary := sim.EvalOneTurnForTesting(d, state, h)
 
-	// Conservation: pre = 2 cards in hand, 0 elsewhere. Post must equal 2.
 	post := summary.State.Deck().Size() + len(summary.State.Graveyard()) + len(summary.State.Hand()) + len(summary.State.Banished())
 	if summary.State.Arsenal() != nil {
 		post++
 	}
 	if post != 2 {
-		t.Errorf("total card count = %d, want 2 (DR banish moved zeroDefenseAura grav -> banished; no card should spawn/vanish). deck=%d grav=%v hand=%v banished=%v arsenal=%v",
+		t.Errorf("total card count = %d, want 2 (WB + zeroDefenseAura). deck=%d grav=%v hand=%v banished=%v arsenal=%v",
 			post, summary.State.Deck().Size(), summary.State.Graveyard(), summary.State.Hand(), summary.State.Banished(), summary.State.Arsenal())
 	}
 
