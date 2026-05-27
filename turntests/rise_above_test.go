@@ -51,16 +51,38 @@ func TestRiseAbove_AltCostMovesHandCardToDeckTop(t *testing.T) {
 	}
 }
 
-// Tests that the printed-cost branch (PaidAlternativeCost=false) doesn't touch the hand.
+// Tests that the printed-cost branch (PaidAlternativeCost=false) leaves both hand and deck
+// untouched — the alt-cost discard-to-top side effect is gated on the flag.
 func TestRiseAbove_PrintedCostBranchSkipsAltCostSideEffect(t *testing.T) {
 	for _, c := range []card.Card{cards.RiseAboveRed{}, cards.RiseAboveYellow{}, cards.RiseAboveBlue{}} {
 		spare := testutils.FakeRedAttack()
 		ge := gameengine.New()
 		ge.SetHand([]card.Card{spare})
+		preDeck := ge.Deck().Size()
 		pc := &card.CardState{Card: c}
 		ge.ResolveAttackStep(ge.Logger(), pc)
 		if len(ge.Hand()) != 1 {
 			t.Errorf("%s: Hand size = %d, want 1 (printed-cost branch should not pop the hand card)", c.Name(), len(ge.Hand()))
+		}
+		if got := ge.Deck().Size(); got != preDeck {
+			t.Errorf("%s: deck size = %d, want %d (printed-cost branch should not push to deck)", c.Name(), got, preDeck)
+		}
+	}
+}
+
+// Tests that an empty hand leaves the deck untouched even when PaidAlternativeCost is set —
+// the alt-cost side effect is a no-op when there's no Held card to push.
+func TestRiseAbove_EmptyHandLeavesDeckUntouched(t *testing.T) {
+	for _, c := range []card.Card{cards.RiseAboveRed{}, cards.RiseAboveYellow{}, cards.RiseAboveBlue{}} {
+		ge := gameengine.New()
+		preDeck := ge.Deck().Size()
+		pc := &card.CardState{
+			Card:      c,
+			Ephemeral: card.Ephemeral{PaidAlternativeCost: true},
+		}
+		ge.ResolveAttackStep(ge.Logger(), pc)
+		if got := ge.Deck().Size(); got != preDeck {
+			t.Errorf("%s: deck size = %d, want %d", c.Name(), got, preDeck)
 		}
 	}
 }

@@ -67,6 +67,12 @@ func TestMoonWish_PrintedCostBranchSkipsAltCostSideEffect(t *testing.T) {
 	if h := ge.Hand(); len(h) != 1 {
 		t.Errorf("Hand size = %d, want 1 (printed-cost branch should not pop the hand card)", len(h))
 	}
+	if got := ge.Deck().Size(); got != 1 {
+		t.Errorf("Deck size = %d, want 1 (printed-cost branch should not push to deck)", got)
+	}
+	if top := ge.Deck().PeekTop(); top == nil || top.(card.Card).Name() != "deckTop" {
+		t.Errorf("Deck top = %v, want original %q (printed-cost branch should not push to deck)", top, "deckTop")
+	}
 }
 
 // Tests that the Sun Kiss tutor picks the highest-power printing (Red > Yellow > Blue).

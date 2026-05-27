@@ -27,6 +27,9 @@ func TestDrawnToTheDarkDimension_CostBounds(t *testing.T) {
 		if !ok {
 			t.Fatalf("%s: does not implement card.VariableCost", c.Name())
 		}
+		if vc.MinCost() != 0 {
+			t.Errorf("%s: MinCost() = %d, want 0 (full discount possible)", c.Name(), vc.MinCost())
+		}
 		zeroState := gameengine.New()
 		if got := vc.EffectiveCost(zeroState); got != c.Cost() {
 			t.Errorf("%s: EffectiveCost(zeroState) = %d, want printed Cost()=%d", c.Name(), got, c.Cost())
