@@ -14,10 +14,7 @@ import (
 // riseAboveAlternativeCost reports the alt branch as (0, ok=true) when a Held card remains
 // in hand to push onto the deck top.
 func riseAboveAlternativeCost(ge card.GameEngine) (int, bool) {
-	if ge != nil && ge.HeldHandSize() > 0 {
-		return 0, true
-	}
-	return 0, false
+	return 0, ge.HeldHandSize() > 0
 }
 
 func riseAbovePlay(ge card.GameEngine, l card.Logger, self *card.CardState) {

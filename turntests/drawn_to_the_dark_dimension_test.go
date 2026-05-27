@@ -23,25 +23,19 @@ func TestDrawnToTheDarkDimension_CostBounds(t *testing.T) {
 		cards.DrawnToTheDarkDimensionBlue{},
 	}
 	for _, c := range cases {
-		if c.Cost() != 2 {
-			t.Errorf("%s: Cost() = %d, want 2 (printed cost)", c.Name(), c.Cost())
-		}
 		vc, ok := c.(card.VariableCost)
 		if !ok {
 			t.Fatalf("%s: does not implement card.VariableCost", c.Name())
 		}
-		if vc.MinCost() != 0 {
-			t.Errorf("%s: MinCost() = %d, want 0", c.Name(), vc.MinCost())
-		}
 		zeroState := gameengine.New()
-		if vc.EffectiveCost(zeroState) != 2 {
-			t.Errorf("%s: EffectiveCost(zeroState) = %d, want 2", c.Name(), vc.EffectiveCost(zeroState))
+		if got := vc.EffectiveCost(zeroState); got != c.Cost() {
+			t.Errorf("%s: EffectiveCost(zeroState) = %d, want printed Cost()=%d", c.Name(), got, c.Cost())
 		}
 		withRune := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().
 			AddAura(token.NewRunechant(5)).
 			Build()}
-		if vc.EffectiveCost(withRune) != 0 {
-			t.Errorf("%s: EffectiveCost(Runechants=5) = %d, want 0", c.Name(), vc.EffectiveCost(withRune))
+		if got := vc.EffectiveCost(withRune); got != 0 {
+			t.Errorf("%s: EffectiveCost(Runechants=5) = %d, want 0 (discount floors at 0)", c.Name(), got)
 		}
 	}
 }

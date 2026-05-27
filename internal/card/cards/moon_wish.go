@@ -22,10 +22,7 @@ import (
 // remains in hand to push onto the deck top. The runner picks the cheaper branch and flips
 // self.PaidAlternativeCost when the alt is taken.
 func moonWishAlternativeCost(ge card.GameEngine) (int, bool) {
-	if ge != nil && ge.HeldHandSize() > 0 {
-		return 0, true
-	}
-	return 0, false
+	return 0, ge.HeldHandSize() > 0
 }
 
 // moonWishPlay performs the alt-cost side effect (push a hand card to deck top) when the

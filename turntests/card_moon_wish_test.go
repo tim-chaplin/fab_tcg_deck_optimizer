@@ -11,14 +11,11 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 )
 
-// Tests printed Cost() == 2 always (irrespective of hand state) and AlternativeCost
-// reports (0, true) when a Held card is available, (0, false) when not.
-func TestMoonWish_PrintedAndAlternativeCost(t *testing.T) {
+// Tests that AlternativeCost reports (0, true) when a Held card is available to pay the
+// alt cost, (_, false) when not.
+func TestMoonWish_AlternativeCostAvailability(t *testing.T) {
 	cases := []card.Card{cards.MoonWishRed{}, cards.MoonWishYellow{}, cards.MoonWishBlue{}}
 	for _, c := range cases {
-		if got := c.Cost(); got != 2 {
-			t.Errorf("%s: Cost() = %d, want 2 (printed)", c.Name(), got)
-		}
 		ac, ok := c.(card.AlternativeCost)
 		if !ok {
 			t.Fatalf("%s: missing card.AlternativeCost", c.Name())

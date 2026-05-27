@@ -69,8 +69,6 @@ func partitionBestLineForDisplay(line []card.CardAssignment) bestLineDisplayPart
 		switch a.Role {
 		case card.Pitch:
 			parts.pitched = append(parts.pitched, a)
-		case card.Attack:
-			_ = a.Card.Cost()
 		case card.Defend:
 			if a.Card.Types(nil).IsDefenseReaction() {
 				parts.drCost += a.Card.Cost()

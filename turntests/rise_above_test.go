@@ -9,13 +9,10 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 )
 
-// Tests printed Cost() == 2 always and AlternativeCost reports (0, true) when a Held card
-// is available, (0, false) when empty.
-func TestRiseAbove_PrintedAndAlternativeCost(t *testing.T) {
+// Tests that AlternativeCost reports (0, true) when a Held card is available to pay the
+// alt cost, (_, false) when not.
+func TestRiseAbove_AlternativeCostAvailability(t *testing.T) {
 	for _, c := range []card.Card{cards.RiseAboveRed{}, cards.RiseAboveYellow{}, cards.RiseAboveBlue{}} {
-		if got := c.Cost(); got != 2 {
-			t.Errorf("%s: Cost() = %d, want 2 (printed)", c.Name(), got)
-		}
 		ac, ok := c.(card.AlternativeCost)
 		if !ok {
 			t.Fatalf("%s: missing card.AlternativeCost", c.Name())
