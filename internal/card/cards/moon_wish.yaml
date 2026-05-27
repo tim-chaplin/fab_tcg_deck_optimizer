@@ -3,7 +3,7 @@ types:
     - Generic
     - Action
     - Attack
-cost: variable
+cost: 2
 text: |-
     You may put a card from your hand on top of your deck rather than pay Moon Wish's {r}
     cost. If Moon Wish hits, search your deck for a card named Sun Kiss, reveal it, put it into

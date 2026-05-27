@@ -14,7 +14,7 @@ type EvenBiggerThanThatRed struct{}
 func (EvenBiggerThanThatRed) ID() ids.CardID                     { return ids.EvenBiggerThanThatRed }
 func (EvenBiggerThanThatRed) Name() string                       { return "Even Bigger Than That!" }
 func (EvenBiggerThanThatRed) DisplayName() string                { return "Even Bigger Than That! [R]" }
-func (EvenBiggerThanThatRed) Cost(card.GameEngine) int           { return 0 }
+func (EvenBiggerThanThatRed) Cost() int                          { return 0 }
 func (EvenBiggerThanThatRed) Pitch() int                         { return 1 }
 func (EvenBiggerThanThatRed) Attack() int                        { return 0 }
 func (EvenBiggerThanThatRed) Defense() int                       { return 0 }
@@ -26,7 +26,7 @@ type EvenBiggerThanThatYellow struct{}
 func (EvenBiggerThanThatYellow) ID() ids.CardID                     { return ids.EvenBiggerThanThatYellow }
 func (EvenBiggerThanThatYellow) Name() string                       { return "Even Bigger Than That!" }
 func (EvenBiggerThanThatYellow) DisplayName() string                { return "Even Bigger Than That! [Y]" }
-func (EvenBiggerThanThatYellow) Cost(card.GameEngine) int           { return 0 }
+func (EvenBiggerThanThatYellow) Cost() int                          { return 0 }
 func (EvenBiggerThanThatYellow) Pitch() int                         { return 2 }
 func (EvenBiggerThanThatYellow) Attack() int                        { return 0 }
 func (EvenBiggerThanThatYellow) Defense() int                       { return 0 }
@@ -38,7 +38,7 @@ type EvenBiggerThanThatBlue struct{}
 func (EvenBiggerThanThatBlue) ID() ids.CardID                     { return ids.EvenBiggerThanThatBlue }
 func (EvenBiggerThanThatBlue) Name() string                       { return "Even Bigger Than That!" }
 func (EvenBiggerThanThatBlue) DisplayName() string                { return "Even Bigger Than That! [B]" }
-func (EvenBiggerThanThatBlue) Cost(card.GameEngine) int           { return 0 }
+func (EvenBiggerThanThatBlue) Cost() int                          { return 0 }
 func (EvenBiggerThanThatBlue) Pitch() int                         { return 3 }
 func (EvenBiggerThanThatBlue) Attack() int                        { return 0 }
 func (EvenBiggerThanThatBlue) Defense() int                       { return 0 }

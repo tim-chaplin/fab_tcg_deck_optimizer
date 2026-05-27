@@ -23,7 +23,7 @@ func razorReflexAccepts(ge card.GameEngine, c card.Card, mode int8) bool {
 	case 0:
 		return t.Has(card.TypeSword) && t.IsWeaponAttack()
 	case 1:
-		return t.IsAttackAction() && c.Cost(ge) <= 1
+		return t.IsAttackAction() && c.Cost() <= 1
 	}
 	return false
 }

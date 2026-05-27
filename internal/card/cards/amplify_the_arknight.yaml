@@ -3,7 +3,7 @@ types:
     - Runeblade
     - Action
     - Attack
-cost: variable
+cost: 3
 text: Amplify the Arknight costs {r} less to play for each Runechant you control.
 variants:
     - id: AmplifyTheArknightRed

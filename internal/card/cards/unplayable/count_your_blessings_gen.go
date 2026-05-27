@@ -14,7 +14,7 @@ type CountYourBlessingsRed struct{}
 func (CountYourBlessingsRed) ID() ids.CardID                     { return ids.CountYourBlessingsRed }
 func (CountYourBlessingsRed) Name() string                       { return "Count Your Blessings" }
 func (CountYourBlessingsRed) DisplayName() string                { return "Count Your Blessings [R]" }
-func (CountYourBlessingsRed) Cost(card.GameEngine) int           { return 2 }
+func (CountYourBlessingsRed) Cost() int                          { return 2 }
 func (CountYourBlessingsRed) Pitch() int                         { return 1 }
 func (CountYourBlessingsRed) Attack() int                        { return 0 }
 func (CountYourBlessingsRed) Defense() int                       { return 0 }
@@ -28,7 +28,7 @@ type CountYourBlessingsYellow struct{}
 func (CountYourBlessingsYellow) ID() ids.CardID                     { return ids.CountYourBlessingsYellow }
 func (CountYourBlessingsYellow) Name() string                       { return "Count Your Blessings" }
 func (CountYourBlessingsYellow) DisplayName() string                { return "Count Your Blessings [Y]" }
-func (CountYourBlessingsYellow) Cost(card.GameEngine) int           { return 2 }
+func (CountYourBlessingsYellow) Cost() int                          { return 2 }
 func (CountYourBlessingsYellow) Pitch() int                         { return 2 }
 func (CountYourBlessingsYellow) Attack() int                        { return 0 }
 func (CountYourBlessingsYellow) Defense() int                       { return 0 }
@@ -42,7 +42,7 @@ type CountYourBlessingsBlue struct{}
 func (CountYourBlessingsBlue) ID() ids.CardID                     { return ids.CountYourBlessingsBlue }
 func (CountYourBlessingsBlue) Name() string                       { return "Count Your Blessings" }
 func (CountYourBlessingsBlue) DisplayName() string                { return "Count Your Blessings [B]" }
-func (CountYourBlessingsBlue) Cost(card.GameEngine) int           { return 2 }
+func (CountYourBlessingsBlue) Cost() int                          { return 2 }
 func (CountYourBlessingsBlue) Pitch() int                         { return 3 }
 func (CountYourBlessingsBlue) Attack() int                        { return 0 }
 func (CountYourBlessingsBlue) Defense() int                       { return 0 }

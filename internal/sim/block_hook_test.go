@@ -11,13 +11,13 @@ import (
 // "defends alone" pattern (BattlefrontBastion).
 type soloBlocker struct{}
 
-func (soloBlocker) ID() ids.CardID           { return ids.InvalidCard }
-func (soloBlocker) Name() string             { return "soloBlocker" }
-func (soloBlocker) DisplayName() string      { return "soloBlocker" }
-func (soloBlocker) Cost(card.GameEngine) int { return 0 }
-func (soloBlocker) Pitch() int               { return 0 }
-func (soloBlocker) Attack() int              { return 0 }
-func (soloBlocker) Defense() int             { return 2 }
+func (soloBlocker) ID() ids.CardID      { return ids.InvalidCard }
+func (soloBlocker) Name() string        { return "soloBlocker" }
+func (soloBlocker) DisplayName() string { return "soloBlocker" }
+func (soloBlocker) Cost() int           { return 0 }
+func (soloBlocker) Pitch() int          { return 0 }
+func (soloBlocker) Attack() int         { return 0 }
+func (soloBlocker) Defense() int        { return 2 }
 func (soloBlocker) Types(card.GameEngine) card.TypeSet {
 	return card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 }
@@ -41,13 +41,13 @@ func (soloBlocker) Block(ge card.GameEngine, l card.Logger, self *card.CardState
 // the "defends together" pattern (RightBehindYou).
 type togetherBlocker struct{}
 
-func (togetherBlocker) ID() ids.CardID           { return ids.InvalidCard }
-func (togetherBlocker) Name() string             { return "togetherBlocker" }
-func (togetherBlocker) DisplayName() string      { return "togetherBlocker" }
-func (togetherBlocker) Cost(card.GameEngine) int { return 0 }
-func (togetherBlocker) Pitch() int               { return 0 }
-func (togetherBlocker) Attack() int              { return 0 }
-func (togetherBlocker) Defense() int             { return 2 }
+func (togetherBlocker) ID() ids.CardID      { return ids.InvalidCard }
+func (togetherBlocker) Name() string        { return "togetherBlocker" }
+func (togetherBlocker) DisplayName() string { return "togetherBlocker" }
+func (togetherBlocker) Cost() int           { return 0 }
+func (togetherBlocker) Pitch() int          { return 0 }
+func (togetherBlocker) Attack() int         { return 0 }
+func (togetherBlocker) Defense() int        { return 2 }
 func (togetherBlocker) Types(card.GameEngine) card.TypeSet {
 	return card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 }
@@ -70,13 +70,13 @@ func (togetherBlocker) Block(ge card.GameEngine, l card.Logger, self *card.CardS
 // plainBlocker is a vanilla 2-defense plain blocker with no Block hook.
 type plainBlocker struct{}
 
-func (plainBlocker) ID() ids.CardID           { return ids.InvalidCard }
-func (plainBlocker) Name() string             { return "plainBlocker" }
-func (plainBlocker) DisplayName() string      { return "plainBlocker" }
-func (plainBlocker) Cost(card.GameEngine) int { return 0 }
-func (plainBlocker) Pitch() int               { return 0 }
-func (plainBlocker) Attack() int              { return 0 }
-func (plainBlocker) Defense() int             { return 2 }
+func (plainBlocker) ID() ids.CardID      { return ids.InvalidCard }
+func (plainBlocker) Name() string        { return "plainBlocker" }
+func (plainBlocker) DisplayName() string { return "plainBlocker" }
+func (plainBlocker) Cost() int           { return 0 }
+func (plainBlocker) Pitch() int          { return 0 }
+func (plainBlocker) Attack() int         { return 0 }
+func (plainBlocker) Defense() int        { return 2 }
 func (plainBlocker) Types(card.GameEngine) card.TypeSet {
 	return card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 }
@@ -87,13 +87,13 @@ func (plainBlocker) Play(card.GameEngine, card.Logger, *card.CardState) {}
 // don't satisfy "another plain block" for either Block-time pattern.
 type blockOneDR struct{}
 
-func (blockOneDR) ID() ids.CardID           { return ids.InvalidCard }
-func (blockOneDR) Name() string             { return "blockOneDR" }
-func (blockOneDR) DisplayName() string      { return "blockOneDR" }
-func (blockOneDR) Cost(card.GameEngine) int { return 0 }
-func (blockOneDR) Pitch() int               { return 0 }
-func (blockOneDR) Attack() int              { return 0 }
-func (blockOneDR) Defense() int             { return 1 }
+func (blockOneDR) ID() ids.CardID      { return ids.InvalidCard }
+func (blockOneDR) Name() string        { return "blockOneDR" }
+func (blockOneDR) DisplayName() string { return "blockOneDR" }
+func (blockOneDR) Cost() int           { return 0 }
+func (blockOneDR) Pitch() int          { return 0 }
+func (blockOneDR) Attack() int         { return 0 }
+func (blockOneDR) Defense() int        { return 1 }
 func (blockOneDR) Types(card.GameEngine) card.TypeSet {
 	return card.NewTypeSet(card.TypeGeneric, card.TypeDefenseReaction)
 }

@@ -14,7 +14,7 @@ type ScarForAScarRed struct{}
 func (ScarForAScarRed) ID() ids.CardID                     { return ids.ScarForAScarRed }
 func (ScarForAScarRed) Name() string                       { return "Scar for a Scar" }
 func (ScarForAScarRed) DisplayName() string                { return "Scar for a Scar [R]" }
-func (ScarForAScarRed) Cost(card.GameEngine) int           { return 0 }
+func (ScarForAScarRed) Cost() int                          { return 0 }
 func (ScarForAScarRed) Pitch() int                         { return 1 }
 func (ScarForAScarRed) Attack() int                        { return 4 }
 func (ScarForAScarRed) Defense() int                       { return 2 }
@@ -25,7 +25,7 @@ type ScarForAScarYellow struct{}
 func (ScarForAScarYellow) ID() ids.CardID                     { return ids.ScarForAScarYellow }
 func (ScarForAScarYellow) Name() string                       { return "Scar for a Scar" }
 func (ScarForAScarYellow) DisplayName() string                { return "Scar for a Scar [Y]" }
-func (ScarForAScarYellow) Cost(card.GameEngine) int           { return 0 }
+func (ScarForAScarYellow) Cost() int                          { return 0 }
 func (ScarForAScarYellow) Pitch() int                         { return 2 }
 func (ScarForAScarYellow) Attack() int                        { return 3 }
 func (ScarForAScarYellow) Defense() int                       { return 2 }
@@ -36,7 +36,7 @@ type ScarForAScarBlue struct{}
 func (ScarForAScarBlue) ID() ids.CardID                     { return ids.ScarForAScarBlue }
 func (ScarForAScarBlue) Name() string                       { return "Scar for a Scar" }
 func (ScarForAScarBlue) DisplayName() string                { return "Scar for a Scar [B]" }
-func (ScarForAScarBlue) Cost(card.GameEngine) int           { return 0 }
+func (ScarForAScarBlue) Cost() int                          { return 0 }
 func (ScarForAScarBlue) Pitch() int                         { return 3 }
 func (ScarForAScarBlue) Attack() int                        { return 2 }
 func (ScarForAScarBlue) Defense() int                       { return 2 }

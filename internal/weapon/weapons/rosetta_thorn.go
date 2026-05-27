@@ -37,7 +37,7 @@ type RosettaThornAbility struct{}
 func (RosettaThornAbility) ID() ids.CardID                     { return ids.RosettaThornAbilityID }
 func (RosettaThornAbility) Name() string                       { return "Rosetta Thorn" }
 func (RosettaThornAbility) DisplayName() string                { return "Rosetta Thorn" }
-func (RosettaThornAbility) Cost(card.GameEngine) int           { return 1 }
+func (RosettaThornAbility) Cost() int                          { return 1 }
 func (RosettaThornAbility) Pitch() int                         { return 0 }
 func (RosettaThornAbility) Attack() int                        { return 2 }
 func (RosettaThornAbility) Defense() int                       { return 0 }

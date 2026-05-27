@@ -19,7 +19,7 @@ type attackStepTextFake struct {
 func (c attackStepTextFake) ID() ids.CardID                                   { return c.id }
 func (c attackStepTextFake) Name() string                                     { return c.name }
 func (c attackStepTextFake) DisplayName() string                              { return c.name }
-func (attackStepTextFake) Cost(card.GameEngine) int                           { return 0 }
+func (attackStepTextFake) Cost() int                                          { return 0 }
 func (attackStepTextFake) Pitch() int                                         { return 0 }
 func (attackStepTextFake) Attack() int                                        { return 0 }
 func (attackStepTextFake) Defense() int                                       { return 0 }

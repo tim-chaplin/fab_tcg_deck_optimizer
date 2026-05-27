@@ -14,7 +14,7 @@ type RavenousRabbleRed struct{}
 func (RavenousRabbleRed) ID() ids.CardID                     { return ids.RavenousRabbleRed }
 func (RavenousRabbleRed) Name() string                       { return "Ravenous Rabble" }
 func (RavenousRabbleRed) DisplayName() string                { return "Ravenous Rabble [R]" }
-func (RavenousRabbleRed) Cost(card.GameEngine) int           { return 0 }
+func (RavenousRabbleRed) Cost() int                          { return 0 }
 func (RavenousRabbleRed) Pitch() int                         { return 1 }
 func (RavenousRabbleRed) Attack() int                        { return 5 }
 func (RavenousRabbleRed) Defense() int                       { return 2 }
@@ -26,7 +26,7 @@ type RavenousRabbleYellow struct{}
 func (RavenousRabbleYellow) ID() ids.CardID                     { return ids.RavenousRabbleYellow }
 func (RavenousRabbleYellow) Name() string                       { return "Ravenous Rabble" }
 func (RavenousRabbleYellow) DisplayName() string                { return "Ravenous Rabble [Y]" }
-func (RavenousRabbleYellow) Cost(card.GameEngine) int           { return 0 }
+func (RavenousRabbleYellow) Cost() int                          { return 0 }
 func (RavenousRabbleYellow) Pitch() int                         { return 2 }
 func (RavenousRabbleYellow) Attack() int                        { return 4 }
 func (RavenousRabbleYellow) Defense() int                       { return 2 }
@@ -38,7 +38,7 @@ type RavenousRabbleBlue struct{}
 func (RavenousRabbleBlue) ID() ids.CardID                     { return ids.RavenousRabbleBlue }
 func (RavenousRabbleBlue) Name() string                       { return "Ravenous Rabble" }
 func (RavenousRabbleBlue) DisplayName() string                { return "Ravenous Rabble [B]" }
-func (RavenousRabbleBlue) Cost(card.GameEngine) int           { return 0 }
+func (RavenousRabbleBlue) Cost() int                          { return 0 }
 func (RavenousRabbleBlue) Pitch() int                         { return 3 }
 func (RavenousRabbleBlue) Attack() int                        { return 3 }
 func (RavenousRabbleBlue) Defense() int                       { return 2 }

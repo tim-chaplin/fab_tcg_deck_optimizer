@@ -15,7 +15,7 @@ import (
 // demolitionCrewPrecondition is the shared additional-cost reveal check across all 3
 // pitch variants.
 func demolitionCrewPrecondition(ge card.GameEngine) bool {
-	return ge.HandHasMatching(func(c card.Card) bool { return c.Cost(ge) >= 2 })
+	return ge.HandHasMatching(func(c card.Card) bool { return c.Cost() >= 2 })
 }
 
 func (DemolitionCrewRed) Dominate() {}

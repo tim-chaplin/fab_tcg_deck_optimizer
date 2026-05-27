@@ -14,7 +14,7 @@ type RunicFellingsongRed struct{}
 func (RunicFellingsongRed) ID() ids.CardID                     { return ids.RunicFellingsongRed }
 func (RunicFellingsongRed) Name() string                       { return "Runic Fellingsong" }
 func (RunicFellingsongRed) DisplayName() string                { return "Runic Fellingsong [R]" }
-func (RunicFellingsongRed) Cost(card.GameEngine) int           { return 3 }
+func (RunicFellingsongRed) Cost() int                          { return 3 }
 func (RunicFellingsongRed) Pitch() int                         { return 1 }
 func (RunicFellingsongRed) Attack() int                        { return 7 }
 func (RunicFellingsongRed) Defense() int                       { return 3 }
@@ -26,7 +26,7 @@ type RunicFellingsongYellow struct{}
 func (RunicFellingsongYellow) ID() ids.CardID                     { return ids.RunicFellingsongYellow }
 func (RunicFellingsongYellow) Name() string                       { return "Runic Fellingsong" }
 func (RunicFellingsongYellow) DisplayName() string                { return "Runic Fellingsong [Y]" }
-func (RunicFellingsongYellow) Cost(card.GameEngine) int           { return 3 }
+func (RunicFellingsongYellow) Cost() int                          { return 3 }
 func (RunicFellingsongYellow) Pitch() int                         { return 2 }
 func (RunicFellingsongYellow) Attack() int                        { return 6 }
 func (RunicFellingsongYellow) Defense() int                       { return 3 }
@@ -38,7 +38,7 @@ type RunicFellingsongBlue struct{}
 func (RunicFellingsongBlue) ID() ids.CardID                     { return ids.RunicFellingsongBlue }
 func (RunicFellingsongBlue) Name() string                       { return "Runic Fellingsong" }
 func (RunicFellingsongBlue) DisplayName() string                { return "Runic Fellingsong [B]" }
-func (RunicFellingsongBlue) Cost(card.GameEngine) int           { return 3 }
+func (RunicFellingsongBlue) Cost() int                          { return 3 }
 func (RunicFellingsongBlue) Pitch() int                         { return 3 }
 func (RunicFellingsongBlue) Attack() int                        { return 5 }
 func (RunicFellingsongBlue) Defense() int                       { return 3 }

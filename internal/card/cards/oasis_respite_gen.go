@@ -14,7 +14,7 @@ type OasisRespiteRed struct{}
 func (OasisRespiteRed) ID() ids.CardID                     { return ids.OasisRespiteRed }
 func (OasisRespiteRed) Name() string                       { return "Oasis Respite" }
 func (OasisRespiteRed) DisplayName() string                { return "Oasis Respite [R]" }
-func (OasisRespiteRed) Cost(card.GameEngine) int           { return 1 }
+func (OasisRespiteRed) Cost() int                          { return 1 }
 func (OasisRespiteRed) Pitch() int                         { return 1 }
 func (OasisRespiteRed) Attack() int                        { return 0 }
 func (OasisRespiteRed) Defense() int                       { return 4 }
@@ -26,7 +26,7 @@ type OasisRespiteYellow struct{}
 func (OasisRespiteYellow) ID() ids.CardID                     { return ids.OasisRespiteYellow }
 func (OasisRespiteYellow) Name() string                       { return "Oasis Respite" }
 func (OasisRespiteYellow) DisplayName() string                { return "Oasis Respite [Y]" }
-func (OasisRespiteYellow) Cost(card.GameEngine) int           { return 1 }
+func (OasisRespiteYellow) Cost() int                          { return 1 }
 func (OasisRespiteYellow) Pitch() int                         { return 2 }
 func (OasisRespiteYellow) Attack() int                        { return 0 }
 func (OasisRespiteYellow) Defense() int                       { return 3 }
@@ -38,7 +38,7 @@ type OasisRespiteBlue struct{}
 func (OasisRespiteBlue) ID() ids.CardID                     { return ids.OasisRespiteBlue }
 func (OasisRespiteBlue) Name() string                       { return "Oasis Respite" }
 func (OasisRespiteBlue) DisplayName() string                { return "Oasis Respite [B]" }
-func (OasisRespiteBlue) Cost(card.GameEngine) int           { return 1 }
+func (OasisRespiteBlue) Cost() int                          { return 1 }
 func (OasisRespiteBlue) Pitch() int                         { return 3 }
 func (OasisRespiteBlue) Attack() int                        { return 0 }
 func (OasisRespiteBlue) Defense() int                       { return 2 }

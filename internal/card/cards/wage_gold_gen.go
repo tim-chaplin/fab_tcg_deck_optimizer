@@ -11,13 +11,13 @@ var wageGoldTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.Type
 
 type WageGoldRed struct{}
 
-func (WageGoldRed) ID() ids.CardID           { return ids.WageGoldRed }
-func (WageGoldRed) Name() string             { return "Wage Gold" }
-func (WageGoldRed) DisplayName() string      { return "Wage Gold [R]" }
-func (WageGoldRed) Cost(card.GameEngine) int { return 3 }
-func (WageGoldRed) Pitch() int               { return 1 }
-func (WageGoldRed) Attack() int              { return 7 }
-func (WageGoldRed) Defense() int             { return 2 }
+func (WageGoldRed) ID() ids.CardID      { return ids.WageGoldRed }
+func (WageGoldRed) Name() string        { return "Wage Gold" }
+func (WageGoldRed) DisplayName() string { return "Wage Gold [R]" }
+func (WageGoldRed) Cost() int           { return 3 }
+func (WageGoldRed) Pitch() int          { return 1 }
+func (WageGoldRed) Attack() int         { return 7 }
+func (WageGoldRed) Defense() int        { return 2 }
 func (WageGoldRed) Types(ge card.GameEngine) card.TypeSet {
 	if ge == nil {
 		return wageGoldTypes
@@ -29,13 +29,13 @@ func (WageGoldRed) GoAgain(card.GameEngine) bool { return false }
 
 type WageGoldYellow struct{}
 
-func (WageGoldYellow) ID() ids.CardID           { return ids.WageGoldYellow }
-func (WageGoldYellow) Name() string             { return "Wage Gold" }
-func (WageGoldYellow) DisplayName() string      { return "Wage Gold [Y]" }
-func (WageGoldYellow) Cost(card.GameEngine) int { return 3 }
-func (WageGoldYellow) Pitch() int               { return 2 }
-func (WageGoldYellow) Attack() int              { return 6 }
-func (WageGoldYellow) Defense() int             { return 2 }
+func (WageGoldYellow) ID() ids.CardID      { return ids.WageGoldYellow }
+func (WageGoldYellow) Name() string        { return "Wage Gold" }
+func (WageGoldYellow) DisplayName() string { return "Wage Gold [Y]" }
+func (WageGoldYellow) Cost() int           { return 3 }
+func (WageGoldYellow) Pitch() int          { return 2 }
+func (WageGoldYellow) Attack() int         { return 6 }
+func (WageGoldYellow) Defense() int        { return 2 }
 func (WageGoldYellow) Types(ge card.GameEngine) card.TypeSet {
 	if ge == nil {
 		return wageGoldTypes
@@ -47,13 +47,13 @@ func (WageGoldYellow) GoAgain(card.GameEngine) bool { return false }
 
 type WageGoldBlue struct{}
 
-func (WageGoldBlue) ID() ids.CardID           { return ids.WageGoldBlue }
-func (WageGoldBlue) Name() string             { return "Wage Gold" }
-func (WageGoldBlue) DisplayName() string      { return "Wage Gold [B]" }
-func (WageGoldBlue) Cost(card.GameEngine) int { return 3 }
-func (WageGoldBlue) Pitch() int               { return 3 }
-func (WageGoldBlue) Attack() int              { return 5 }
-func (WageGoldBlue) Defense() int             { return 2 }
+func (WageGoldBlue) ID() ids.CardID      { return ids.WageGoldBlue }
+func (WageGoldBlue) Name() string        { return "Wage Gold" }
+func (WageGoldBlue) DisplayName() string { return "Wage Gold [B]" }
+func (WageGoldBlue) Cost() int           { return 3 }
+func (WageGoldBlue) Pitch() int          { return 3 }
+func (WageGoldBlue) Attack() int         { return 5 }
+func (WageGoldBlue) Defense() int        { return 2 }
 func (WageGoldBlue) Types(ge card.GameEngine) card.TypeSet {
 	if ge == nil {
 		return wageGoldTypes

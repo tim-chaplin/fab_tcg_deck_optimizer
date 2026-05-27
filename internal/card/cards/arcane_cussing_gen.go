@@ -14,7 +14,7 @@ type ArcaneCussingRed struct{}
 func (ArcaneCussingRed) ID() ids.CardID                     { return ids.ArcaneCussingRed }
 func (ArcaneCussingRed) Name() string                       { return "Arcane Cussing" }
 func (ArcaneCussingRed) DisplayName() string                { return "Arcane Cussing [R]" }
-func (ArcaneCussingRed) Cost(card.GameEngine) int           { return 1 }
+func (ArcaneCussingRed) Cost() int                          { return 1 }
 func (ArcaneCussingRed) Pitch() int                         { return 1 }
 func (ArcaneCussingRed) Attack() int                        { return 0 }
 func (ArcaneCussingRed) Defense() int                       { return 2 }
@@ -26,7 +26,7 @@ type ArcaneCussingYellow struct{}
 func (ArcaneCussingYellow) ID() ids.CardID                     { return ids.ArcaneCussingYellow }
 func (ArcaneCussingYellow) Name() string                       { return "Arcane Cussing" }
 func (ArcaneCussingYellow) DisplayName() string                { return "Arcane Cussing [Y]" }
-func (ArcaneCussingYellow) Cost(card.GameEngine) int           { return 1 }
+func (ArcaneCussingYellow) Cost() int                          { return 1 }
 func (ArcaneCussingYellow) Pitch() int                         { return 2 }
 func (ArcaneCussingYellow) Attack() int                        { return 0 }
 func (ArcaneCussingYellow) Defense() int                       { return 2 }
@@ -38,7 +38,7 @@ type ArcaneCussingBlue struct{}
 func (ArcaneCussingBlue) ID() ids.CardID                     { return ids.ArcaneCussingBlue }
 func (ArcaneCussingBlue) Name() string                       { return "Arcane Cussing" }
 func (ArcaneCussingBlue) DisplayName() string                { return "Arcane Cussing [B]" }
-func (ArcaneCussingBlue) Cost(card.GameEngine) int           { return 1 }
+func (ArcaneCussingBlue) Cost() int                          { return 1 }
 func (ArcaneCussingBlue) Pitch() int                         { return 3 }
 func (ArcaneCussingBlue) Attack() int                        { return 0 }
 func (ArcaneCussingBlue) Defense() int                       { return 2 }

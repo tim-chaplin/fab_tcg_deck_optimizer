@@ -12,13 +12,13 @@ import (
 // CardState.GrantAttackReactionBuff's bookkeeping.
 type fakeAR struct{}
 
-func (fakeAR) ID() ids.CardID           { return ids.InvalidCard }
-func (fakeAR) Name() string             { return "fakeAR" }
-func (fakeAR) DisplayName() string      { return "fakeAR [B]" }
-func (fakeAR) Cost(card.GameEngine) int { return 0 }
-func (fakeAR) Pitch() int               { return 3 }
-func (fakeAR) Attack() int              { return 0 }
-func (fakeAR) Defense() int             { return 0 }
+func (fakeAR) ID() ids.CardID      { return ids.InvalidCard }
+func (fakeAR) Name() string        { return "fakeAR" }
+func (fakeAR) DisplayName() string { return "fakeAR [B]" }
+func (fakeAR) Cost() int           { return 0 }
+func (fakeAR) Pitch() int          { return 3 }
+func (fakeAR) Attack() int         { return 0 }
+func (fakeAR) Defense() int        { return 0 }
 func (fakeAR) Types(card.GameEngine) card.TypeSet {
 	return card.NewTypeSet(card.TypeGeneric, card.TypeAttackReaction)
 }
@@ -29,13 +29,13 @@ func (fakeAR) Play(card.GameEngine, card.Logger, *card.CardState)    {}
 // fakeBaseAttack is a Generic Action - Attack target candidate.
 type fakeBaseAttack struct{}
 
-func (fakeBaseAttack) ID() ids.CardID           { return ids.InvalidCard }
-func (fakeBaseAttack) Name() string             { return "fakeBaseAttack" }
-func (fakeBaseAttack) DisplayName() string      { return "fakeBaseAttack [R]" }
-func (fakeBaseAttack) Cost(card.GameEngine) int { return 0 }
-func (fakeBaseAttack) Pitch() int               { return 1 }
-func (fakeBaseAttack) Attack() int              { return 1 }
-func (fakeBaseAttack) Defense() int             { return 0 }
+func (fakeBaseAttack) ID() ids.CardID      { return ids.InvalidCard }
+func (fakeBaseAttack) Name() string        { return "fakeBaseAttack" }
+func (fakeBaseAttack) DisplayName() string { return "fakeBaseAttack [R]" }
+func (fakeBaseAttack) Cost() int           { return 0 }
+func (fakeBaseAttack) Pitch() int          { return 1 }
+func (fakeBaseAttack) Attack() int         { return 1 }
+func (fakeBaseAttack) Defense() int        { return 0 }
 func (fakeBaseAttack) Types(card.GameEngine) card.TypeSet {
 	return card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 }

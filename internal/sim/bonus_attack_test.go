@@ -18,13 +18,13 @@ import (
 // don't see it as a candidate target for their "next attack action" grants.
 type pitchOnlyRed struct{}
 
-func (pitchOnlyRed) ID() ids.CardID           { return ids.InvalidCard }
-func (pitchOnlyRed) Name() string             { return "pitchOnlyRed" }
-func (pitchOnlyRed) DisplayName() string      { return "pitchOnlyRed [R]" }
-func (pitchOnlyRed) Cost(card.GameEngine) int { return 0 }
-func (pitchOnlyRed) Pitch() int               { return 1 }
-func (pitchOnlyRed) Attack() int              { return 0 }
-func (pitchOnlyRed) Defense() int             { return 0 }
+func (pitchOnlyRed) ID() ids.CardID      { return ids.InvalidCard }
+func (pitchOnlyRed) Name() string        { return "pitchOnlyRed" }
+func (pitchOnlyRed) DisplayName() string { return "pitchOnlyRed [R]" }
+func (pitchOnlyRed) Cost() int           { return 0 }
+func (pitchOnlyRed) Pitch() int          { return 1 }
+func (pitchOnlyRed) Attack() int         { return 0 }
+func (pitchOnlyRed) Defense() int        { return 0 }
 func (pitchOnlyRed) Types(card.GameEngine) card.TypeSet {
 	return card.NewTypeSet(card.TypeGeneric, card.TypeAction)
 }
@@ -37,13 +37,13 @@ func (pitchOnlyRed) Play(card.GameEngine, card.Logger, *card.CardState) {}
 // being buffed and feeds EffectiveAttack for any "if this hits" rider on that target.
 type grantBonusAttack struct{ n int }
 
-func (grantBonusAttack) ID() ids.CardID           { return ids.InvalidCard }
-func (grantBonusAttack) Name() string             { return "grantBonusAttack" }
-func (grantBonusAttack) DisplayName() string      { return "grantBonusAttack" }
-func (grantBonusAttack) Cost(card.GameEngine) int { return 0 }
-func (grantBonusAttack) Pitch() int               { return 0 }
-func (grantBonusAttack) Attack() int              { return 0 }
-func (grantBonusAttack) Defense() int             { return 0 }
+func (grantBonusAttack) ID() ids.CardID      { return ids.InvalidCard }
+func (grantBonusAttack) Name() string        { return "grantBonusAttack" }
+func (grantBonusAttack) DisplayName() string { return "grantBonusAttack" }
+func (grantBonusAttack) Cost() int           { return 0 }
+func (grantBonusAttack) Pitch() int          { return 0 }
+func (grantBonusAttack) Attack() int         { return 0 }
+func (grantBonusAttack) Defense() int        { return 0 }
 func (grantBonusAttack) Types(card.GameEngine) card.TypeSet {
 	return card.NewTypeSet(card.TypeGeneric, card.TypeAction)
 }
@@ -63,13 +63,13 @@ func (c grantBonusAttack) Play(ge card.GameEngine, l card.Logger, self *card.Car
 // +1{p}" rider — the target is a weapon swing, not an attack action.
 type grantBonusAttackWeapon struct{ n int }
 
-func (grantBonusAttackWeapon) ID() ids.CardID           { return ids.InvalidCard }
-func (grantBonusAttackWeapon) Name() string             { return "grantBonusAttackWeapon" }
-func (grantBonusAttackWeapon) DisplayName() string      { return "grantBonusAttackWeapon" }
-func (grantBonusAttackWeapon) Cost(card.GameEngine) int { return 0 }
-func (grantBonusAttackWeapon) Pitch() int               { return 0 }
-func (grantBonusAttackWeapon) Attack() int              { return 0 }
-func (grantBonusAttackWeapon) Defense() int             { return 0 }
+func (grantBonusAttackWeapon) ID() ids.CardID      { return ids.InvalidCard }
+func (grantBonusAttackWeapon) Name() string        { return "grantBonusAttackWeapon" }
+func (grantBonusAttackWeapon) DisplayName() string { return "grantBonusAttackWeapon" }
+func (grantBonusAttackWeapon) Cost() int           { return 0 }
+func (grantBonusAttackWeapon) Pitch() int          { return 0 }
+func (grantBonusAttackWeapon) Attack() int         { return 0 }
+func (grantBonusAttackWeapon) Defense() int        { return 0 }
 func (grantBonusAttackWeapon) Types(card.GameEngine) card.TypeSet {
 	return card.NewTypeSet(card.TypeGeneric, card.TypeAction)
 }

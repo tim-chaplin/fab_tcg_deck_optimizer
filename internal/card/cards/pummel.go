@@ -22,7 +22,7 @@ func pummelAccepts(ge card.GameEngine, c card.Card, mode int8) bool {
 	case 0:
 		return (t.Has(card.TypeClub) || t.Has(card.TypeHammer)) && t.IsWeaponAttack()
 	case 1:
-		return t.IsAttackAction() && c.Cost(ge) >= 2
+		return t.IsAttackAction() && c.Cost() >= 2
 	}
 	return false
 }

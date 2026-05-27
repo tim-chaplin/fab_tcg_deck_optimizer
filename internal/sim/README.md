@@ -153,9 +153,10 @@ func blusterBuffPlay(g card.GameEngine, l card.Logger, self *card.CardState) {
 - The attack-budget prune relaxes by `maxResourceBonus` (the declared upper bound of
   resource-producing cards) so resource cards aren't pruned out; `pitchPool.pay` does the
   exact funding check.
-- A static-cost card that secretly varies `Cost(g)` with game state corrupts the prune; the
-  `verifyStaticCost` assertion in `costAt` catches it in test builds. Cards with
-  state-dependent cost must declare `VariableCost` or `ModalCost`.
+- Cards with state-dependent cost must implement `VariableCost.EffectiveCost(g)` so the
+  attack-turn runner reads the live figure at `costAt`. The interface contract on
+  `Card.Cost()` (no engine arg) makes the legacy "secretly-varying static cost" footgun
+  impossible by construction.
 - New `turntests/` files must not call `ResolveAttackStep` directly — they exercise the
   public `Eval*` entry points.
 </content>

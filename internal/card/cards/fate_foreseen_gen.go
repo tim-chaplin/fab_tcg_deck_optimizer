@@ -14,7 +14,7 @@ type FateForeseenRed struct{}
 func (FateForeseenRed) ID() ids.CardID                     { return ids.FateForeseenRed }
 func (FateForeseenRed) Name() string                       { return "Fate Foreseen" }
 func (FateForeseenRed) DisplayName() string                { return "Fate Foreseen [R]" }
-func (FateForeseenRed) Cost(card.GameEngine) int           { return 0 }
+func (FateForeseenRed) Cost() int                          { return 0 }
 func (FateForeseenRed) Pitch() int                         { return 1 }
 func (FateForeseenRed) Attack() int                        { return 0 }
 func (FateForeseenRed) Defense() int                       { return 4 }
@@ -27,7 +27,7 @@ type FateForeseenYellow struct{}
 func (FateForeseenYellow) ID() ids.CardID                     { return ids.FateForeseenYellow }
 func (FateForeseenYellow) Name() string                       { return "Fate Foreseen" }
 func (FateForeseenYellow) DisplayName() string                { return "Fate Foreseen [Y]" }
-func (FateForeseenYellow) Cost(card.GameEngine) int           { return 0 }
+func (FateForeseenYellow) Cost() int                          { return 0 }
 func (FateForeseenYellow) Pitch() int                         { return 2 }
 func (FateForeseenYellow) Attack() int                        { return 0 }
 func (FateForeseenYellow) Defense() int                       { return 3 }
@@ -40,7 +40,7 @@ type FateForeseenBlue struct{}
 func (FateForeseenBlue) ID() ids.CardID                     { return ids.FateForeseenBlue }
 func (FateForeseenBlue) Name() string                       { return "Fate Foreseen" }
 func (FateForeseenBlue) DisplayName() string                { return "Fate Foreseen [B]" }
-func (FateForeseenBlue) Cost(card.GameEngine) int           { return 0 }
+func (FateForeseenBlue) Cost() int                          { return 0 }
 func (FateForeseenBlue) Pitch() int                         { return 3 }
 func (FateForeseenBlue) Attack() int                        { return 0 }
 func (FateForeseenBlue) Defense() int                       { return 2 }

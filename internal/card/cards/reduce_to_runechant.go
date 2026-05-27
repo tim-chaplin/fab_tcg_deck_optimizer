@@ -4,9 +4,8 @@
 // Text: "Reduce to Runechant costs {r} less to play for each Runechant you control. Create a
 // Runechant token."
 //
-// Cost returns max(0, printed - RunechantCount). The created Runechant credits at creation;
-// since defense-reaction state is reset between reactions, only its damage credit lands —
-// the token itself doesn't carry forward.
+// The created Runechant credits at creation; since defense-reaction state is reset between
+// reactions, only its damage credit lands — the token itself doesn't carry forward.
 
 package cards
 
@@ -16,7 +15,8 @@ import (
 
 const reduceToRunechantPrintedCost = 1
 
-func reduceToRunechantCost(ge card.GameEngine) int {
+// reduceToRunechantEffectiveCost is max(0, printed - RunechantCount).
+func reduceToRunechantEffectiveCost(ge card.GameEngine) int {
 	eff := reduceToRunechantPrintedCost - ge.RunechantCount()
 	if eff < 0 {
 		return 0
@@ -24,27 +24,30 @@ func reduceToRunechantCost(ge card.GameEngine) int {
 	return eff
 }
 
-func (ReduceToRunechantRed) Cost(ge card.GameEngine) int { return reduceToRunechantCost(ge) }
-func (ReduceToRunechantRed) MinCost() int                { return 0 }
-func (ReduceToRunechantRed) MaxCost() int                { return reduceToRunechantPrintedCost }
+func (ReduceToRunechantRed) EffectiveCost(ge card.GameEngine) int {
+	return reduceToRunechantEffectiveCost(ge)
+}
+func (ReduceToRunechantRed) MinCost() int { return 0 }
 
 func (ReduceToRunechantRed) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
 	ge.CreateRunechants(1)
 	l.AppendPostTrigger(self.Card.DisplayName(), "Created a runechant", 1)
 }
 
-func (ReduceToRunechantYellow) Cost(ge card.GameEngine) int { return reduceToRunechantCost(ge) }
-func (ReduceToRunechantYellow) MinCost() int                { return 0 }
-func (ReduceToRunechantYellow) MaxCost() int                { return reduceToRunechantPrintedCost }
+func (ReduceToRunechantYellow) EffectiveCost(ge card.GameEngine) int {
+	return reduceToRunechantEffectiveCost(ge)
+}
+func (ReduceToRunechantYellow) MinCost() int { return 0 }
 
 func (ReduceToRunechantYellow) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
 	ge.CreateRunechants(1)
 	l.AppendPostTrigger(self.Card.DisplayName(), "Created a runechant", 1)
 }
 
-func (ReduceToRunechantBlue) Cost(ge card.GameEngine) int { return reduceToRunechantCost(ge) }
-func (ReduceToRunechantBlue) MinCost() int                { return 0 }
-func (ReduceToRunechantBlue) MaxCost() int                { return reduceToRunechantPrintedCost }
+func (ReduceToRunechantBlue) EffectiveCost(ge card.GameEngine) int {
+	return reduceToRunechantEffectiveCost(ge)
+}
+func (ReduceToRunechantBlue) MinCost() int { return 0 }
 
 func (ReduceToRunechantBlue) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
 	ge.CreateRunechants(1)

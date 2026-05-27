@@ -18,13 +18,13 @@ import (
 // EffectiveDominate in later permutations even when the condition didn't fire.
 type flipsAndReadsDominate struct{ saw *int }
 
-func (flipsAndReadsDominate) ID() ids.CardID           { return ids.InvalidCard }
-func (flipsAndReadsDominate) Name() string             { return "flipsAndReadsDominate" }
-func (flipsAndReadsDominate) DisplayName() string      { return "flipsAndReadsDominate" }
-func (flipsAndReadsDominate) Cost(card.GameEngine) int { return 0 }
-func (flipsAndReadsDominate) Pitch() int               { return 0 }
-func (flipsAndReadsDominate) Attack() int              { return 3 }
-func (flipsAndReadsDominate) Defense() int             { return 0 }
+func (flipsAndReadsDominate) ID() ids.CardID      { return ids.InvalidCard }
+func (flipsAndReadsDominate) Name() string        { return "flipsAndReadsDominate" }
+func (flipsAndReadsDominate) DisplayName() string { return "flipsAndReadsDominate" }
+func (flipsAndReadsDominate) Cost() int           { return 0 }
+func (flipsAndReadsDominate) Pitch() int          { return 0 }
+func (flipsAndReadsDominate) Attack() int         { return 3 }
+func (flipsAndReadsDominate) Defense() int        { return 0 }
 func (flipsAndReadsDominate) Types(card.GameEngine) card.TypeSet {
 	return card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 }
@@ -41,13 +41,13 @@ func (s flipsAndReadsDominate) Play(_ card.GameEngine, _ card.Logger, self *card
 // having been created this turn.
 type flipsAndReadsOverpower struct{ saw *int }
 
-func (flipsAndReadsOverpower) ID() ids.CardID           { return ids.InvalidCard }
-func (flipsAndReadsOverpower) Name() string             { return "flipsAndReadsOverpower" }
-func (flipsAndReadsOverpower) DisplayName() string      { return "flipsAndReadsOverpower" }
-func (flipsAndReadsOverpower) Cost(card.GameEngine) int { return 0 }
-func (flipsAndReadsOverpower) Pitch() int               { return 0 }
-func (flipsAndReadsOverpower) Attack() int              { return 3 }
-func (flipsAndReadsOverpower) Defense() int             { return 0 }
+func (flipsAndReadsOverpower) ID() ids.CardID      { return ids.InvalidCard }
+func (flipsAndReadsOverpower) Name() string        { return "flipsAndReadsOverpower" }
+func (flipsAndReadsOverpower) DisplayName() string { return "flipsAndReadsOverpower" }
+func (flipsAndReadsOverpower) Cost() int           { return 0 }
+func (flipsAndReadsOverpower) Pitch() int          { return 0 }
+func (flipsAndReadsOverpower) Attack() int         { return 3 }
+func (flipsAndReadsOverpower) Defense() int        { return 0 }
 func (flipsAndReadsOverpower) Types(card.GameEngine) card.TypeSet {
 	return card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 }
@@ -64,13 +64,13 @@ func (s flipsAndReadsOverpower) Play(_ card.GameEngine, _ card.Logger, self *car
 // counter would accumulate across the N! enumeration.
 type flipsAndReadsBonusDefense struct{ maxSeen *int }
 
-func (flipsAndReadsBonusDefense) ID() ids.CardID           { return ids.InvalidCard }
-func (flipsAndReadsBonusDefense) Name() string             { return "flipsAndReadsBonusDefense" }
-func (flipsAndReadsBonusDefense) DisplayName() string      { return "flipsAndReadsBonusDefense" }
-func (flipsAndReadsBonusDefense) Cost(card.GameEngine) int { return 0 }
-func (flipsAndReadsBonusDefense) Pitch() int               { return 0 }
-func (flipsAndReadsBonusDefense) Attack() int              { return 3 }
-func (flipsAndReadsBonusDefense) Defense() int             { return 0 }
+func (flipsAndReadsBonusDefense) ID() ids.CardID      { return ids.InvalidCard }
+func (flipsAndReadsBonusDefense) Name() string        { return "flipsAndReadsBonusDefense" }
+func (flipsAndReadsBonusDefense) DisplayName() string { return "flipsAndReadsBonusDefense" }
+func (flipsAndReadsBonusDefense) Cost() int           { return 0 }
+func (flipsAndReadsBonusDefense) Pitch() int          { return 0 }
+func (flipsAndReadsBonusDefense) Attack() int         { return 3 }
+func (flipsAndReadsBonusDefense) Defense() int        { return 0 }
 func (flipsAndReadsBonusDefense) Types(card.GameEngine) card.TypeSet {
 	return card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 }

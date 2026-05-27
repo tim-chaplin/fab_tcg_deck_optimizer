@@ -18,24 +18,19 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/ids"
 )
 
-// moonWishPrintedCost is the un-discounted resource cost (also the VariableCost MaxCost bound).
-const moonWishPrintedCost = 2
-
-// moonWishCost returns 0 when there's any card left in hand to spend on the alt cost,
-// else the printed cost. Shared across all three pitch variants since the alt cost is
-// identical.
-func moonWishCost(ge card.GameEngine) int {
-	if ge != nil && ge.HeldHandSize() > 0 {
-		return 0
-	}
-	return moonWishPrintedCost
+// moonWishAlternativeCost reports the alt branch as (0, ok=true) when at least one Held card
+// remains in hand to push onto the deck top. The runner picks the cheaper branch and flips
+// self.PaidAlternativeCost when the alt is taken.
+func moonWishAlternativeCost(ge card.GameEngine) (int, bool) {
+	return 0, ge.HeldHandSize() > 0
 }
 
-// moonWishPlay pays the alt cost (when a Held hand card is available) and registers an
-// OnHit that tutors Sun Kiss. Tutored Sun Kiss plays immediately when self has go-again
-// granted; otherwise it lands in hand for next turn.
+// moonWishPlay performs the alt-cost side effect (push a hand card to deck top) when the
+// runner paid the alternative, then registers the on-hit Sun Kiss tutor.
 func moonWishPlay(c card.Card, ge card.GameEngine, l card.Logger, self *card.CardState) {
-	ge.DiscardToTopOfDeck(c.DisplayName())
+	if self.PaidAlternativeCost {
+		ge.DiscardToTopOfDeck(c.DisplayName())
+	}
 	self.RegisterOnHit(moonWishOnHit)
 }
 
@@ -82,26 +77,23 @@ func sunKissTutorPriority(c card.Card) int {
 	}
 }
 
-func (MoonWishRed) Cost(ge card.GameEngine) int { return moonWishCost(ge) }
-func (MoonWishRed) MinCost() int                { return 0 }
-func (MoonWishRed) MaxCost() int                { return moonWishPrintedCost }
-
+func (MoonWishRed) AlternativeCost(ge card.GameEngine) (int, bool) {
+	return moonWishAlternativeCost(ge)
+}
 func (c MoonWishRed) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
 	moonWishPlay(c, ge, l, self)
 }
 
-func (MoonWishYellow) Cost(ge card.GameEngine) int { return moonWishCost(ge) }
-func (MoonWishYellow) MinCost() int                { return 0 }
-func (MoonWishYellow) MaxCost() int                { return moonWishPrintedCost }
-
+func (MoonWishYellow) AlternativeCost(ge card.GameEngine) (int, bool) {
+	return moonWishAlternativeCost(ge)
+}
 func (c MoonWishYellow) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
 	moonWishPlay(c, ge, l, self)
 }
 
-func (MoonWishBlue) Cost(ge card.GameEngine) int { return moonWishCost(ge) }
-func (MoonWishBlue) MinCost() int                { return 0 }
-func (MoonWishBlue) MaxCost() int                { return moonWishPrintedCost }
-
+func (MoonWishBlue) AlternativeCost(ge card.GameEngine) (int, bool) {
+	return moonWishAlternativeCost(ge)
+}
 func (c MoonWishBlue) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
 	moonWishPlay(c, ge, l, self)
 }

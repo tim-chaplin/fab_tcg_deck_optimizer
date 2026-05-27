@@ -14,7 +14,7 @@ type WoundingBlowRed struct{}
 func (WoundingBlowRed) ID() ids.CardID                     { return ids.WoundingBlowRed }
 func (WoundingBlowRed) Name() string                       { return "Wounding Blow" }
 func (WoundingBlowRed) DisplayName() string                { return "Wounding Blow [R]" }
-func (WoundingBlowRed) Cost(card.GameEngine) int           { return 0 }
+func (WoundingBlowRed) Cost() int                          { return 0 }
 func (WoundingBlowRed) Pitch() int                         { return 1 }
 func (WoundingBlowRed) Attack() int                        { return 4 }
 func (WoundingBlowRed) Defense() int                       { return 3 }
@@ -26,7 +26,7 @@ type WoundingBlowYellow struct{}
 func (WoundingBlowYellow) ID() ids.CardID                     { return ids.WoundingBlowYellow }
 func (WoundingBlowYellow) Name() string                       { return "Wounding Blow" }
 func (WoundingBlowYellow) DisplayName() string                { return "Wounding Blow [Y]" }
-func (WoundingBlowYellow) Cost(card.GameEngine) int           { return 0 }
+func (WoundingBlowYellow) Cost() int                          { return 0 }
 func (WoundingBlowYellow) Pitch() int                         { return 2 }
 func (WoundingBlowYellow) Attack() int                        { return 3 }
 func (WoundingBlowYellow) Defense() int                       { return 3 }
@@ -38,7 +38,7 @@ type WoundingBlowBlue struct{}
 func (WoundingBlowBlue) ID() ids.CardID                     { return ids.WoundingBlowBlue }
 func (WoundingBlowBlue) Name() string                       { return "Wounding Blow" }
 func (WoundingBlowBlue) DisplayName() string                { return "Wounding Blow [B]" }
-func (WoundingBlowBlue) Cost(card.GameEngine) int           { return 0 }
+func (WoundingBlowBlue) Cost() int                          { return 0 }
 func (WoundingBlowBlue) Pitch() int                         { return 3 }
 func (WoundingBlowBlue) Attack() int                        { return 2 }
 func (WoundingBlowBlue) Defense() int                       { return 3 }

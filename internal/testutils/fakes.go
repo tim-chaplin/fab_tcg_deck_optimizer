@@ -42,7 +42,7 @@ type playBody struct {
 func (Fake) ID() ids.CardID                       { return ids.InvalidCard }
 func (f Fake) Name() string                       { return f.name }
 func (f Fake) DisplayName() string                { return f.name }
-func (f Fake) Cost(card.GameEngine) int           { return f.cost }
+func (f Fake) Cost() int                          { return f.cost }
 func (f Fake) Pitch() int                         { return f.pitch }
 func (f Fake) Attack() int                        { return f.power }
 func (f Fake) Defense() int                       { return f.defense }

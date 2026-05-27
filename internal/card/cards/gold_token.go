@@ -28,7 +28,7 @@ type GoldToken struct{}
 func (GoldToken) ID() ids.CardID                     { return ids.GoldTokenAbilityID }
 func (GoldToken) Name() string                       { return goldTokenName }
 func (GoldToken) DisplayName() string                { return goldTokenName }
-func (GoldToken) Cost(card.GameEngine) int           { return 2 }
+func (GoldToken) Cost() int                          { return 2 }
 func (GoldToken) Pitch() int                         { return 0 }
 func (GoldToken) Attack() int                        { return 0 }
 func (GoldToken) Defense() int                       { return 0 }

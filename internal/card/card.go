@@ -16,10 +16,13 @@ type Card interface {
 	// DisplayName returns the human-readable identifier including the pitch suffix —
 	// "Aether Slash [R]" / "[Y]" / "[B]". Used in log lines, deck listings, debug.
 	DisplayName() string
-	// Cost returns the card's current resource cost given the turn state. Static-cost cards
-	// ignore g; cards that read g additionally implement VariableCost so the solver can
-	// pre-screen with MinCost / MaxCost bounds.
-	Cost(g GameEngine) int
+	// Cost returns the card's PRINTED resource cost. This is a static value — the number
+	// in the cost gem on the card. Cards whose actual paid cost varies with game state
+	// (discounts, runechant-consumes, etc.) implement VariableCost.EffectiveCost(g) and
+	// expose the live value via CardState.EffectiveCost(g); Cost() itself is the printed
+	// upper bound. Predicates that read "a card with cost N" (Flock's reveal, Demolition
+	// Crew's "cost 2 or greater") read Cost() — printed cost is cache-key-safe.
+	Cost() int
 	Pitch() int
 	// Attack is the printed attack value. Conditional bonuses belong in Play.
 	Attack() int

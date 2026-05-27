@@ -17,15 +17,22 @@ import (
 // attackerMeta caches the scalar card attributes playSequence reads per permutation. The
 // hot loop skips Types / GoAgain interface dispatch; one meta build amortises across N!.
 //
-// minCost / maxCost are static bounds on Card.Cost. VariableCost cards: solver uses them
-// for O(1) partition pre-screens, then falls through to Cost(state) in the attack turn loop.
-// Non-VariableCost: minCost == maxCost == Cost(&TurnState{}), used directly.
+// minCost / maxCost are static bounds on the actual paid cost (the cheapest of Card.Cost()
+// and any AlternativeCost / VariableCost / ModalCost branch). The solver uses them for
+// O(1) partition pre-screens, then falls through to costAt at play time for the live
+// figure. Non-variable, non-modal, non-alt-cost cards have minCost == maxCost == Cost().
 type attackerMeta struct {
 	types      card.TypeSet
-	card       card.Card // held for variable-cost / modal-cost play-time Cost calls
+	card       card.Card // held for variable-cost / modal-cost / alt-cost play-time Cost calls
 	minCost    int
 	maxCost    int
 	isVariable bool
+	// hasAlternativeCost is set when the card implements card.AlternativeCost. costAt
+	// picks the cheaper of Card.Cost() and AlternativeCost(g) at play time, flipping
+	// PaidAlternativeCost on the CardState when the alt branch wins. Static bound: alt
+	// branches reduce the cost (and never raise it), so minCost folds the alt's lower
+	// bound in conservatively.
+	hasAlternativeCost bool
 	// isAttack is the "this attack step is an attack" test driving fireAttackAuras — true on
 	// any card carrying TypeAttack (attack action cards and weapon abilities both). For
 	// ModalTypes cards, this is the mode-0 value; the attack-turn runner uses isAttackAt(mode)
@@ -86,31 +93,25 @@ func (m *attackerMeta) isFreeAttackStepWithMode(mode int8) bool {
 	return m.isFreeAttackStep
 }
 
-// verifyStaticCost arms the static-cost assertion in costAt. A divergence between the
-// re-probed Cost(ge) and the cached bound means the card varies cost with game state but
-// declares neither VariableCost nor ModalCost, so the attack-budget prune bounds it from a
-// wrong fixed cost and can skip a fundable line. Off in production to avoid the probe.
-var verifyStaticCost bool
-
-// costAt returns the card's effective cost given the current TurnState and chosen mode.
-// ModalCost cards dispatch on the mode index; static cards return the cached value
-// directly; VariableCost cards defer to Cost(s) so every game-state-dependent costing rule
-// lives inside the card, not the solver.
-func (m *attackerMeta) costAt(ge *gameengine.GameEngine, mode int8) int {
+// costAt returns the card's effective cost given the current engine state and chosen
+// mode, plus whether the AlternativeCost branch was chosen. ModalCost dispatches on mode;
+// VariableCost defers to EffectiveCost(g); AlternativeCost picks min(Cost, alt) when alt is
+// available. paidAlt is true only when the AlternativeCost branch wins — the attack-turn
+// runner mirrors it onto pc.PaidAlternativeCost so the card's Play body branches correctly.
+func (m *attackerMeta) costAt(ge *gameengine.GameEngine, mode int8) (cost int, paidAlt bool) {
 	if m.isModalCost {
-		return m.card.(card.ModalCost).ModalCost(mode)
+		return m.card.(card.ModalCost).ModalCost(mode), false
 	}
 	if m.isVariable {
-		return m.card.Cost(ge)
+		return m.card.(card.VariableCost).EffectiveCost(ge), false
 	}
-	if verifyStaticCost {
-		if live := m.card.Cost(ge); live != m.maxCost {
-			panic(fmt.Sprintf("card %q varies Cost(g) with game state (cached %d, live %d) "+
-				"but implements neither VariableCost nor ModalCost — declare one so the "+
-				"attack-budget prune bounds it correctly", m.card.Name(), m.maxCost, live))
+	base := m.maxCost
+	if m.hasAlternativeCost {
+		if alt, ok := m.card.(card.AlternativeCost).AlternativeCost(ge); ok && alt < base {
+			return alt, true
 		}
 	}
-	return m.maxCost
+	return base, false
 }
 
 // cardMetaCache / cardMetaReady are read-only-after-init metadata tables, populated lazily
@@ -221,14 +222,24 @@ func buildAttackerMeta(c card.Card) attackerMeta {
 		m.maxCost = maxC
 		m.isVariable = minC != maxC
 	} else if vc, ok := c.(card.VariableCost); ok {
+		// VariableCost: MinCost is the static lower bound; the printed Cost() is the upper.
 		m.minCost = vc.MinCost()
-		m.maxCost = vc.MaxCost()
+		m.maxCost = c.Cost()
 		m.isVariable = m.minCost != m.maxCost
 	} else {
-		// Static cost: any TurnState probe returns the same value.
-		fixed := c.Cost(gameengine.New())
-		m.minCost = fixed
+		// Static or alternative cost: Cost() is the printed value, identical at every call.
+		// The static lower bound is Cost() unless an AlternativeCost branch is wired in,
+		// which can probe to 0 — the conservative bound for alt-cost cards.
+		fixed := c.Cost()
 		m.maxCost = fixed
+		m.minCost = fixed
+	}
+	if _, ok := c.(card.AlternativeCost); ok {
+		m.hasAlternativeCost = true
+		// Alt branches never raise the cost; pre-screen with 0 as the worst-case lower
+		// bound. Real branches usually return 0 (Moon Wish, Rise Above); a card returning
+		// a higher alt cost would still be over-bounded by 0 — sound, just looser.
+		m.minCost = 0
 	}
 	return m
 }

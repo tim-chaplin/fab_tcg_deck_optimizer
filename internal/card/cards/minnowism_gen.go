@@ -14,7 +14,7 @@ type MinnowismRed struct{}
 func (MinnowismRed) ID() ids.CardID                     { return ids.MinnowismRed }
 func (MinnowismRed) Name() string                       { return "Minnowism" }
 func (MinnowismRed) DisplayName() string                { return "Minnowism [R]" }
-func (MinnowismRed) Cost(card.GameEngine) int           { return 0 }
+func (MinnowismRed) Cost() int                          { return 0 }
 func (MinnowismRed) Pitch() int                         { return 1 }
 func (MinnowismRed) Attack() int                        { return 0 }
 func (MinnowismRed) Defense() int                       { return 2 }
@@ -26,7 +26,7 @@ type MinnowismYellow struct{}
 func (MinnowismYellow) ID() ids.CardID                     { return ids.MinnowismYellow }
 func (MinnowismYellow) Name() string                       { return "Minnowism" }
 func (MinnowismYellow) DisplayName() string                { return "Minnowism [Y]" }
-func (MinnowismYellow) Cost(card.GameEngine) int           { return 0 }
+func (MinnowismYellow) Cost() int                          { return 0 }
 func (MinnowismYellow) Pitch() int                         { return 2 }
 func (MinnowismYellow) Attack() int                        { return 0 }
 func (MinnowismYellow) Defense() int                       { return 2 }
@@ -38,7 +38,7 @@ type MinnowismBlue struct{}
 func (MinnowismBlue) ID() ids.CardID                     { return ids.MinnowismBlue }
 func (MinnowismBlue) Name() string                       { return "Minnowism" }
 func (MinnowismBlue) DisplayName() string                { return "Minnowism [B]" }
-func (MinnowismBlue) Cost(card.GameEngine) int           { return 0 }
+func (MinnowismBlue) Cost() int                          { return 0 }
 func (MinnowismBlue) Pitch() int                         { return 3 }
 func (MinnowismBlue) Attack() int                        { return 0 }
 func (MinnowismBlue) Defense() int                       { return 2 }

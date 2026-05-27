@@ -14,7 +14,7 @@ type CriticalStrikeRed struct{}
 func (CriticalStrikeRed) ID() ids.CardID                     { return ids.CriticalStrikeRed }
 func (CriticalStrikeRed) Name() string                       { return "Critical Strike" }
 func (CriticalStrikeRed) DisplayName() string                { return "Critical Strike [R]" }
-func (CriticalStrikeRed) Cost(card.GameEngine) int           { return 1 }
+func (CriticalStrikeRed) Cost() int                          { return 1 }
 func (CriticalStrikeRed) Pitch() int                         { return 1 }
 func (CriticalStrikeRed) Attack() int                        { return 5 }
 func (CriticalStrikeRed) Defense() int                       { return 3 }
@@ -26,7 +26,7 @@ type CriticalStrikeYellow struct{}
 func (CriticalStrikeYellow) ID() ids.CardID                     { return ids.CriticalStrikeYellow }
 func (CriticalStrikeYellow) Name() string                       { return "Critical Strike" }
 func (CriticalStrikeYellow) DisplayName() string                { return "Critical Strike [Y]" }
-func (CriticalStrikeYellow) Cost(card.GameEngine) int           { return 1 }
+func (CriticalStrikeYellow) Cost() int                          { return 1 }
 func (CriticalStrikeYellow) Pitch() int                         { return 2 }
 func (CriticalStrikeYellow) Attack() int                        { return 4 }
 func (CriticalStrikeYellow) Defense() int                       { return 3 }
@@ -38,7 +38,7 @@ type CriticalStrikeBlue struct{}
 func (CriticalStrikeBlue) ID() ids.CardID                     { return ids.CriticalStrikeBlue }
 func (CriticalStrikeBlue) Name() string                       { return "Critical Strike" }
 func (CriticalStrikeBlue) DisplayName() string                { return "Critical Strike [B]" }
-func (CriticalStrikeBlue) Cost(card.GameEngine) int           { return 1 }
+func (CriticalStrikeBlue) Cost() int                          { return 1 }
 func (CriticalStrikeBlue) Pitch() int                         { return 3 }
 func (CriticalStrikeBlue) Attack() int                        { return 3 }
 func (CriticalStrikeBlue) Defense() int                       { return 3 }

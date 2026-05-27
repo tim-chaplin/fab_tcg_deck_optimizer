@@ -28,7 +28,7 @@ type SilverToken struct{}
 func (SilverToken) ID() ids.CardID                     { return ids.SilverTokenAbilityID }
 func (SilverToken) Name() string                       { return silverTokenName }
 func (SilverToken) DisplayName() string                { return silverTokenName }
-func (SilverToken) Cost(card.GameEngine) int           { return 3 }
+func (SilverToken) Cost() int                          { return 3 }
 func (SilverToken) Pitch() int                         { return 0 }
 func (SilverToken) Attack() int                        { return 0 }
 func (SilverToken) Defense() int                       { return 0 }

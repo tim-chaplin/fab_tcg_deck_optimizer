@@ -14,7 +14,7 @@ type TongueTiedRed struct{}
 func (TongueTiedRed) ID() ids.CardID                     { return ids.TongueTiedRed }
 func (TongueTiedRed) Name() string                       { return "Tongue Tied" }
 func (TongueTiedRed) DisplayName() string                { return "Tongue Tied [R]" }
-func (TongueTiedRed) Cost(card.GameEngine) int           { return 3 }
+func (TongueTiedRed) Cost() int                          { return 3 }
 func (TongueTiedRed) Pitch() int                         { return 1 }
 func (TongueTiedRed) Attack() int                        { return 7 }
 func (TongueTiedRed) Defense() int                       { return 2 }

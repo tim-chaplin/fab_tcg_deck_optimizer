@@ -14,7 +14,7 @@ type SpellbladeAssaultRed struct{}
 func (SpellbladeAssaultRed) ID() ids.CardID                     { return ids.SpellbladeAssaultRed }
 func (SpellbladeAssaultRed) Name() string                       { return "Spellblade Assault" }
 func (SpellbladeAssaultRed) DisplayName() string                { return "Spellblade Assault [R]" }
-func (SpellbladeAssaultRed) Cost(card.GameEngine) int           { return 2 }
+func (SpellbladeAssaultRed) Cost() int                          { return 2 }
 func (SpellbladeAssaultRed) Pitch() int                         { return 1 }
 func (SpellbladeAssaultRed) Attack() int                        { return 4 }
 func (SpellbladeAssaultRed) Defense() int                       { return 3 }
@@ -26,7 +26,7 @@ type SpellbladeAssaultYellow struct{}
 func (SpellbladeAssaultYellow) ID() ids.CardID                     { return ids.SpellbladeAssaultYellow }
 func (SpellbladeAssaultYellow) Name() string                       { return "Spellblade Assault" }
 func (SpellbladeAssaultYellow) DisplayName() string                { return "Spellblade Assault [Y]" }
-func (SpellbladeAssaultYellow) Cost(card.GameEngine) int           { return 2 }
+func (SpellbladeAssaultYellow) Cost() int                          { return 2 }
 func (SpellbladeAssaultYellow) Pitch() int                         { return 2 }
 func (SpellbladeAssaultYellow) Attack() int                        { return 3 }
 func (SpellbladeAssaultYellow) Defense() int                       { return 3 }
@@ -38,7 +38,7 @@ type SpellbladeAssaultBlue struct{}
 func (SpellbladeAssaultBlue) ID() ids.CardID                     { return ids.SpellbladeAssaultBlue }
 func (SpellbladeAssaultBlue) Name() string                       { return "Spellblade Assault" }
 func (SpellbladeAssaultBlue) DisplayName() string                { return "Spellblade Assault [B]" }
-func (SpellbladeAssaultBlue) Cost(card.GameEngine) int           { return 2 }
+func (SpellbladeAssaultBlue) Cost() int                          { return 2 }
 func (SpellbladeAssaultBlue) Pitch() int                         { return 3 }
 func (SpellbladeAssaultBlue) Attack() int                        { return 2 }
 func (SpellbladeAssaultBlue) Defense() int                       { return 3 }

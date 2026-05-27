@@ -28,7 +28,7 @@ type CopperToken struct{}
 func (CopperToken) ID() ids.CardID                     { return ids.CopperTokenAbilityID }
 func (CopperToken) Name() string                       { return copperTokenName }
 func (CopperToken) DisplayName() string                { return copperTokenName }
-func (CopperToken) Cost(card.GameEngine) int           { return 4 }
+func (CopperToken) Cost() int                          { return 4 }
 func (CopperToken) Pitch() int                         { return 0 }
 func (CopperToken) Attack() int                        { return 0 }
 func (CopperToken) Defense() int                       { return 0 }

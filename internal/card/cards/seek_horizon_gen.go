@@ -14,7 +14,7 @@ type SeekHorizonRed struct{}
 func (SeekHorizonRed) ID() ids.CardID                     { return ids.SeekHorizonRed }
 func (SeekHorizonRed) Name() string                       { return "Seek Horizon" }
 func (SeekHorizonRed) DisplayName() string                { return "Seek Horizon [R]" }
-func (SeekHorizonRed) Cost(card.GameEngine) int           { return 0 }
+func (SeekHorizonRed) Cost() int                          { return 0 }
 func (SeekHorizonRed) Pitch() int                         { return 1 }
 func (SeekHorizonRed) Attack() int                        { return 4 }
 func (SeekHorizonRed) Defense() int                       { return 2 }
@@ -26,7 +26,7 @@ type SeekHorizonYellow struct{}
 func (SeekHorizonYellow) ID() ids.CardID                     { return ids.SeekHorizonYellow }
 func (SeekHorizonYellow) Name() string                       { return "Seek Horizon" }
 func (SeekHorizonYellow) DisplayName() string                { return "Seek Horizon [Y]" }
-func (SeekHorizonYellow) Cost(card.GameEngine) int           { return 0 }
+func (SeekHorizonYellow) Cost() int                          { return 0 }
 func (SeekHorizonYellow) Pitch() int                         { return 2 }
 func (SeekHorizonYellow) Attack() int                        { return 3 }
 func (SeekHorizonYellow) Defense() int                       { return 2 }
@@ -38,7 +38,7 @@ type SeekHorizonBlue struct{}
 func (SeekHorizonBlue) ID() ids.CardID                     { return ids.SeekHorizonBlue }
 func (SeekHorizonBlue) Name() string                       { return "Seek Horizon" }
 func (SeekHorizonBlue) DisplayName() string                { return "Seek Horizon [B]" }
-func (SeekHorizonBlue) Cost(card.GameEngine) int           { return 0 }
+func (SeekHorizonBlue) Cost() int                          { return 0 }
 func (SeekHorizonBlue) Pitch() int                         { return 3 }
 func (SeekHorizonBlue) Attack() int                        { return 2 }
 func (SeekHorizonBlue) Defense() int                       { return 2 }

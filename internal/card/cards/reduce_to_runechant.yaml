@@ -2,7 +2,7 @@ name: Reduce to Runechant
 types:
     - Runeblade
     - DefenseReaction
-cost: variable
+cost: 1
 text: |-
     Reduce to Runechant costs {r} less to play for each Runechant you control. Create a
     Runechant token.

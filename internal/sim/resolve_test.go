@@ -16,13 +16,13 @@ import (
 // fakeAttack is a vanilla attack-action card with printed power 3 and an empty Play.
 type fakeAttack struct{}
 
-func (fakeAttack) ID() ids.CardID           { return ids.InvalidCard }
-func (fakeAttack) Name() string             { return "fakeAttack" }
-func (fakeAttack) DisplayName() string      { return "fakeAttack" }
-func (fakeAttack) Cost(card.GameEngine) int { return 0 }
-func (fakeAttack) Pitch() int               { return 0 }
-func (fakeAttack) Attack() int              { return 3 }
-func (fakeAttack) Defense() int             { return 0 }
+func (fakeAttack) ID() ids.CardID      { return ids.InvalidCard }
+func (fakeAttack) Name() string        { return "fakeAttack" }
+func (fakeAttack) DisplayName() string { return "fakeAttack" }
+func (fakeAttack) Cost() int           { return 0 }
+func (fakeAttack) Pitch() int          { return 0 }
+func (fakeAttack) Attack() int         { return 3 }
+func (fakeAttack) Defense() int        { return 0 }
 func (fakeAttack) Types(card.GameEngine) card.TypeSet {
 	return card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 }
@@ -32,13 +32,13 @@ func (fakeAttack) Play(ge card.GameEngine, l card.Logger, self *card.CardState) 
 // fakeDR is a vanilla defense-reaction card with printed defense 4.
 type fakeDR struct{}
 
-func (fakeDR) ID() ids.CardID           { return ids.InvalidCard }
-func (fakeDR) Name() string             { return "fakeDR" }
-func (fakeDR) DisplayName() string      { return "fakeDR" }
-func (fakeDR) Cost(card.GameEngine) int { return 0 }
-func (fakeDR) Pitch() int               { return 0 }
-func (fakeDR) Attack() int              { return 0 }
-func (fakeDR) Defense() int             { return 4 }
+func (fakeDR) ID() ids.CardID      { return ids.InvalidCard }
+func (fakeDR) Name() string        { return "fakeDR" }
+func (fakeDR) DisplayName() string { return "fakeDR" }
+func (fakeDR) Cost() int           { return 0 }
+func (fakeDR) Pitch() int          { return 0 }
+func (fakeDR) Attack() int         { return 0 }
+func (fakeDR) Defense() int        { return 4 }
 func (fakeDR) Types(card.GameEngine) card.TypeSet {
 	return card.NewTypeSet(card.TypeGeneric, card.TypeDefenseReaction)
 }
@@ -49,13 +49,13 @@ func (fakeDR) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {}
 // confirm the Play body still runs even though the sim contributes no n).
 type fakeNonAttack struct{ played *bool }
 
-func (fakeNonAttack) ID() ids.CardID           { return ids.InvalidCard }
-func (fakeNonAttack) Name() string             { return "fakeNonAttack" }
-func (fakeNonAttack) DisplayName() string      { return "fakeNonAttack" }
-func (fakeNonAttack) Cost(card.GameEngine) int { return 0 }
-func (fakeNonAttack) Pitch() int               { return 0 }
-func (fakeNonAttack) Attack() int              { return 0 }
-func (fakeNonAttack) Defense() int             { return 0 }
+func (fakeNonAttack) ID() ids.CardID      { return ids.InvalidCard }
+func (fakeNonAttack) Name() string        { return "fakeNonAttack" }
+func (fakeNonAttack) DisplayName() string { return "fakeNonAttack" }
+func (fakeNonAttack) Cost() int           { return 0 }
+func (fakeNonAttack) Pitch() int          { return 0 }
+func (fakeNonAttack) Attack() int         { return 0 }
+func (fakeNonAttack) Defense() int        { return 0 }
 func (fakeNonAttack) Types(card.GameEngine) card.TypeSet {
 	return card.NewTypeSet(card.TypeGeneric, card.TypeAction)
 }
@@ -69,13 +69,13 @@ func (n fakeNonAttack) Play(ge card.GameEngine, l card.Logger, self *card.CardSt
 // that ResolveAttackStep computes n AFTER Play returns.
 type fakeSelfBuff struct{}
 
-func (fakeSelfBuff) ID() ids.CardID           { return ids.InvalidCard }
-func (fakeSelfBuff) Name() string             { return "fakeSelfBuff" }
-func (fakeSelfBuff) DisplayName() string      { return "fakeSelfBuff" }
-func (fakeSelfBuff) Cost(card.GameEngine) int { return 0 }
-func (fakeSelfBuff) Pitch() int               { return 0 }
-func (fakeSelfBuff) Attack() int              { return 2 }
-func (fakeSelfBuff) Defense() int             { return 0 }
+func (fakeSelfBuff) ID() ids.CardID      { return ids.InvalidCard }
+func (fakeSelfBuff) Name() string        { return "fakeSelfBuff" }
+func (fakeSelfBuff) DisplayName() string { return "fakeSelfBuff" }
+func (fakeSelfBuff) Cost() int           { return 0 }
+func (fakeSelfBuff) Pitch() int          { return 0 }
+func (fakeSelfBuff) Attack() int         { return 2 }
+func (fakeSelfBuff) Defense() int        { return 0 }
 func (fakeSelfBuff) Types(card.GameEngine) card.TypeSet {
 	return card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 }

@@ -14,7 +14,7 @@ type AmuletOfInterventionBlue struct{}
 func (AmuletOfInterventionBlue) ID() ids.CardID                     { return ids.AmuletOfInterventionBlue }
 func (AmuletOfInterventionBlue) Name() string                       { return "Amulet of Intervention" }
 func (AmuletOfInterventionBlue) DisplayName() string                { return "Amulet of Intervention [B]" }
-func (AmuletOfInterventionBlue) Cost(card.GameEngine) int           { return 0 }
+func (AmuletOfInterventionBlue) Cost() int                          { return 0 }
 func (AmuletOfInterventionBlue) Pitch() int                         { return 3 }
 func (AmuletOfInterventionBlue) Attack() int                        { return 0 }
 func (AmuletOfInterventionBlue) Defense() int                       { return 0 }

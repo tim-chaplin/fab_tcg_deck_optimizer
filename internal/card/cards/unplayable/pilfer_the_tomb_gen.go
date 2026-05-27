@@ -14,7 +14,7 @@ type PilferTheTombBlue struct{}
 func (PilferTheTombBlue) ID() ids.CardID                     { return ids.PilferTheTombBlue }
 func (PilferTheTombBlue) Name() string                       { return "Pilfer the Tomb" }
 func (PilferTheTombBlue) DisplayName() string                { return "Pilfer the Tomb [B]" }
-func (PilferTheTombBlue) Cost(card.GameEngine) int           { return 0 }
+func (PilferTheTombBlue) Cost() int                          { return 0 }
 func (PilferTheTombBlue) Pitch() int                         { return 3 }
 func (PilferTheTombBlue) Attack() int                        { return 0 }
 func (PilferTheTombBlue) Defense() int                       { return 0 }

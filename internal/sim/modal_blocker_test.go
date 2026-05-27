@@ -11,13 +11,13 @@ import (
 // the printed Defense (2); mode 1 costs 1 and contributes Defense + 2.
 type modalBlocker struct{}
 
-func (modalBlocker) ID() ids.CardID           { return ids.InvalidCard }
-func (modalBlocker) Name() string             { return "modalBlocker" }
-func (modalBlocker) DisplayName() string      { return "modalBlocker" }
-func (modalBlocker) Cost(card.GameEngine) int { return 0 }
-func (modalBlocker) Pitch() int               { return 0 }
-func (modalBlocker) Attack() int              { return 0 }
-func (modalBlocker) Defense() int             { return 2 }
+func (modalBlocker) ID() ids.CardID      { return ids.InvalidCard }
+func (modalBlocker) Name() string        { return "modalBlocker" }
+func (modalBlocker) DisplayName() string { return "modalBlocker" }
+func (modalBlocker) Cost() int           { return 0 }
+func (modalBlocker) Pitch() int          { return 0 }
+func (modalBlocker) Attack() int         { return 0 }
+func (modalBlocker) Defense() int        { return 2 }
 func (modalBlocker) Types(card.GameEngine) card.TypeSet {
 	return card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 }

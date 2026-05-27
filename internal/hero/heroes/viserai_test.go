@@ -15,13 +15,13 @@ import (
 // fakeRuneAttack is a minimal Runeblade attack-action card.
 type fakeRuneAttack struct{}
 
-func (fakeRuneAttack) ID() ids.CardID           { return ids.InvalidCard }
-func (fakeRuneAttack) Name() string             { return "StubRuneAttack" }
-func (fakeRuneAttack) DisplayName() string      { return "StubRuneAttack" }
-func (fakeRuneAttack) Cost(card.GameEngine) int { return 0 }
-func (fakeRuneAttack) Pitch() int               { return 0 }
-func (fakeRuneAttack) Attack() int              { return 0 }
-func (fakeRuneAttack) Defense() int             { return 0 }
+func (fakeRuneAttack) ID() ids.CardID      { return ids.InvalidCard }
+func (fakeRuneAttack) Name() string        { return "StubRuneAttack" }
+func (fakeRuneAttack) DisplayName() string { return "StubRuneAttack" }
+func (fakeRuneAttack) Cost() int           { return 0 }
+func (fakeRuneAttack) Pitch() int          { return 0 }
+func (fakeRuneAttack) Attack() int         { return 0 }
+func (fakeRuneAttack) Defense() int        { return 0 }
 func (fakeRuneAttack) Types(card.GameEngine) card.TypeSet {
 	return card.NewTypeSet(card.TypeRuneblade, card.TypeAction, card.TypeAttack)
 }
@@ -31,13 +31,13 @@ func (fakeRuneAttack) Play(card.GameEngine, card.Logger, *card.CardState) {}
 // fakeRuneAura is a minimal Runeblade non-attack action (an Aura).
 type fakeRuneAura struct{}
 
-func (fakeRuneAura) ID() ids.CardID           { return ids.InvalidCard }
-func (fakeRuneAura) Name() string             { return "StubRuneAura" }
-func (fakeRuneAura) DisplayName() string      { return "StubRuneAura" }
-func (fakeRuneAura) Cost(card.GameEngine) int { return 0 }
-func (fakeRuneAura) Pitch() int               { return 0 }
-func (fakeRuneAura) Attack() int              { return 0 }
-func (fakeRuneAura) Defense() int             { return 0 }
+func (fakeRuneAura) ID() ids.CardID      { return ids.InvalidCard }
+func (fakeRuneAura) Name() string        { return "StubRuneAura" }
+func (fakeRuneAura) DisplayName() string { return "StubRuneAura" }
+func (fakeRuneAura) Cost() int           { return 0 }
+func (fakeRuneAura) Pitch() int          { return 0 }
+func (fakeRuneAura) Attack() int         { return 0 }
+func (fakeRuneAura) Defense() int        { return 0 }
 func (fakeRuneAura) Types(card.GameEngine) card.TypeSet {
 	return card.NewTypeSet(card.TypeRuneblade, card.TypeAction, card.TypeAura)
 }
@@ -47,13 +47,13 @@ func (fakeRuneAura) Play(card.GameEngine, card.Logger, *card.CardState) {}
 // fakeNonRuneblade is an Action-Attack with no Runeblade type — should never trigger Viserai.
 type fakeNonRuneblade struct{}
 
-func (fakeNonRuneblade) ID() ids.CardID           { return ids.InvalidCard }
-func (fakeNonRuneblade) Name() string             { return "StubGeneric" }
-func (fakeNonRuneblade) DisplayName() string      { return "StubGeneric" }
-func (fakeNonRuneblade) Cost(card.GameEngine) int { return 0 }
-func (fakeNonRuneblade) Pitch() int               { return 0 }
-func (fakeNonRuneblade) Attack() int              { return 0 }
-func (fakeNonRuneblade) Defense() int             { return 0 }
+func (fakeNonRuneblade) ID() ids.CardID      { return ids.InvalidCard }
+func (fakeNonRuneblade) Name() string        { return "StubGeneric" }
+func (fakeNonRuneblade) DisplayName() string { return "StubGeneric" }
+func (fakeNonRuneblade) Cost() int           { return 0 }
+func (fakeNonRuneblade) Pitch() int          { return 0 }
+func (fakeNonRuneblade) Attack() int         { return 0 }
+func (fakeNonRuneblade) Defense() int        { return 0 }
 func (fakeNonRuneblade) Types(card.GameEngine) card.TypeSet {
 	return card.NewTypeSet(card.TypeGeneric, card.TypeAction, card.TypeAttack)
 }
@@ -64,13 +64,13 @@ func (fakeNonRuneblade) Play(card.GameEngine, card.Logger, *card.CardState) {}
 // trigger when it swings.
 type fakeRuneWeapon struct{}
 
-func (fakeRuneWeapon) ID() ids.CardID           { return ids.InvalidCard }
-func (fakeRuneWeapon) Name() string             { return "StubRuneWeapon" }
-func (fakeRuneWeapon) DisplayName() string      { return "StubRuneWeapon" }
-func (fakeRuneWeapon) Cost(card.GameEngine) int { return 0 }
-func (fakeRuneWeapon) Pitch() int               { return 0 }
-func (fakeRuneWeapon) Attack() int              { return 0 }
-func (fakeRuneWeapon) Defense() int             { return 0 }
+func (fakeRuneWeapon) ID() ids.CardID      { return ids.InvalidCard }
+func (fakeRuneWeapon) Name() string        { return "StubRuneWeapon" }
+func (fakeRuneWeapon) DisplayName() string { return "StubRuneWeapon" }
+func (fakeRuneWeapon) Cost() int           { return 0 }
+func (fakeRuneWeapon) Pitch() int          { return 0 }
+func (fakeRuneWeapon) Attack() int         { return 0 }
+func (fakeRuneWeapon) Defense() int        { return 0 }
 func (fakeRuneWeapon) Types(card.GameEngine) card.TypeSet {
 	return card.NewTypeSet(card.TypeRuneblade, card.TypeWeapon, card.TypeAttack)
 }

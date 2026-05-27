@@ -14,7 +14,7 @@ type BladeFlashBlue struct{}
 func (BladeFlashBlue) ID() ids.CardID                     { return ids.BladeFlashBlue }
 func (BladeFlashBlue) Name() string                       { return "Blade Flash" }
 func (BladeFlashBlue) DisplayName() string                { return "Blade Flash [B]" }
-func (BladeFlashBlue) Cost(card.GameEngine) int           { return 1 }
+func (BladeFlashBlue) Cost() int                          { return 1 }
 func (BladeFlashBlue) Pitch() int                         { return 3 }
 func (BladeFlashBlue) Attack() int                        { return 0 }
 func (BladeFlashBlue) Defense() int                       { return 2 }

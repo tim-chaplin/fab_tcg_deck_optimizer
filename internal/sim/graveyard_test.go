@@ -54,13 +54,13 @@ func TestGraveyard_WeaponSwingDoesNotEnterGraveyard(t *testing.T) {
 // tests can assert the solver seeded it with the expected defenders before the DR resolved.
 type gravSpyDR struct{ saw *[]card.Card }
 
-func (gravSpyDR) ID() ids.CardID           { return ids.InvalidCard }
-func (gravSpyDR) Name() string             { return "gravSpyDR" }
-func (gravSpyDR) DisplayName() string      { return "gravSpyDR" }
-func (gravSpyDR) Cost(card.GameEngine) int { return 0 }
-func (gravSpyDR) Pitch() int               { return 0 }
-func (gravSpyDR) Attack() int              { return 0 }
-func (gravSpyDR) Defense() int             { return 1 }
+func (gravSpyDR) ID() ids.CardID      { return ids.InvalidCard }
+func (gravSpyDR) Name() string        { return "gravSpyDR" }
+func (gravSpyDR) DisplayName() string { return "gravSpyDR" }
+func (gravSpyDR) Cost() int           { return 0 }
+func (gravSpyDR) Pitch() int          { return 0 }
+func (gravSpyDR) Attack() int         { return 0 }
+func (gravSpyDR) Defense() int        { return 1 }
 func (gravSpyDR) Types(card.GameEngine) card.TypeSet {
 	return card.NewTypeSet(card.TypeGeneric, card.TypeDefenseReaction)
 }
@@ -78,7 +78,7 @@ type auraDefender struct{}
 func (auraDefender) ID() ids.CardID                                     { return ids.InvalidCard }
 func (auraDefender) Name() string                                       { return "auraDefender" }
 func (auraDefender) DisplayName() string                                { return "auraDefender" }
-func (auraDefender) Cost(card.GameEngine) int                           { return 0 }
+func (auraDefender) Cost() int                                          { return 0 }
 func (auraDefender) Pitch() int                                         { return 0 }
 func (auraDefender) Attack() int                                        { return 0 }
 func (auraDefender) Defense() int                                       { return 3 }

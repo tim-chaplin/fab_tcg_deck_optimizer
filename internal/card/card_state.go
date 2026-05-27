@@ -74,6 +74,11 @@ type Ephemeral struct {
 	// across the turn boundary (no card consumes the persistent flag); cards reading
 	// self.FaceUp see the in-attack-turn TurnFaceUp result.
 	FaceUp bool
+	// PaidAlternativeCost is set by the attack-turn runner when this card was paid via its
+	// AlternativeCost branch (Moon Wish's "put a card on top of your deck rather than pay
+	// {r}"). Card.Play reads it to decide whether the alt-cost side effect (DiscardToTopOfDeck)
+	// should run. Cards without AlternativeCost never see this set.
+	PaidAlternativeCost bool
 	// OnHit holds "if this hits" handlers registered during Play. Stored as struct values
 	// (function pointer + small data payload) rather than closures so registration is
 	// alloc-free.
@@ -125,6 +130,19 @@ func (p *CardState) GrantAttackReactionBuff(g GameEngine, l Logger, n int) {
 // cards can read g.HeroWantsLowerHealth.
 func (p *CardState) EffectiveGoAgain(g GameEngine) bool {
 	return p.Card.GoAgain(g) || p.GrantedGoAgain
+}
+
+// EffectiveCost returns the card's live paid resource cost: VariableCost cards return
+// their EffectiveCost(g); everyone else falls through to Card.Cost() (the printed cost).
+// This is the value the sim's resource-pool drains against — never the printed cost for
+// a VariableCost card. Predicates that read "a card with cost N" (Flock's reveal, etc.)
+// use Card.Cost() directly so the read stays cache-key-safe; EffectiveCost is for the
+// attack-turn runner's payment site.
+func (p *CardState) EffectiveCost(g GameEngine) int {
+	if vc, ok := p.Card.(VariableCost); ok {
+		return vc.EffectiveCost(g)
+	}
+	return p.Card.Cost()
 }
 
 // GrantGoAgainIfFromArsenal flips p.GrantedGoAgain when this copy came from the arsenal

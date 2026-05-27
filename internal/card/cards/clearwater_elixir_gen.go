@@ -14,7 +14,7 @@ type ClearwaterElixirRed struct{}
 func (ClearwaterElixirRed) ID() ids.CardID                     { return ids.ClearwaterElixirRed }
 func (ClearwaterElixirRed) Name() string                       { return "Clearwater Elixir" }
 func (ClearwaterElixirRed) DisplayName() string                { return "Clearwater Elixir [R]" }
-func (ClearwaterElixirRed) Cost(card.GameEngine) int           { return 1 }
+func (ClearwaterElixirRed) Cost() int                          { return 1 }
 func (ClearwaterElixirRed) Pitch() int                         { return 1 }
 func (ClearwaterElixirRed) Attack() int                        { return 0 }
 func (ClearwaterElixirRed) Defense() int                       { return 3 }

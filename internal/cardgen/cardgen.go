@@ -24,7 +24,8 @@
 //
 // The yaml's basename ("aether_slash") drives the gen file name; the package name comes
 // from the first .go file already in the directory. Variable cost: leave `cost:` unset or
-// set it to "variable"; the hand-written file supplies Cost(s), MinCost, MaxCost.
+// set it to "variable"; the hand-written file supplies Cost() (printed) plus the
+// VariableCost interface (EffectiveCost + MinCost).
 package cardgen
 
 import (
@@ -146,7 +147,7 @@ func genGroup(pkg, basename string, g CardGroup) ([]byte, error) {
 		fmt.Fprintf(&buf, "func (%s) Name() string        { return %q }\n", v.ID, g.Name)
 		fmt.Fprintf(&buf, "func (%s) DisplayName() string { return %q }\n", v.ID, display)
 		if c, ok := g.constCost(); ok {
-			fmt.Fprintf(&buf, "func (%s) Cost(card.GameEngine) int { return %d }\n", v.ID, c)
+			fmt.Fprintf(&buf, "func (%s) Cost() int            { return %d }\n", v.ID, c)
 		}
 		fmt.Fprintf(&buf, "func (%s) Pitch() int          { return %d }\n", v.ID, v.Pitch)
 		fmt.Fprintf(&buf, "func (%s) Attack() int         { return %d }\n", v.ID, v.Attack)

@@ -14,7 +14,7 @@ type WaterTheSeedsRed struct{}
 func (WaterTheSeedsRed) ID() ids.CardID                     { return ids.WaterTheSeedsRed }
 func (WaterTheSeedsRed) Name() string                       { return "Water the Seeds" }
 func (WaterTheSeedsRed) DisplayName() string                { return "Water the Seeds [R]" }
-func (WaterTheSeedsRed) Cost(card.GameEngine) int           { return 1 }
+func (WaterTheSeedsRed) Cost() int                          { return 1 }
 func (WaterTheSeedsRed) Pitch() int                         { return 1 }
 func (WaterTheSeedsRed) Attack() int                        { return 3 }
 func (WaterTheSeedsRed) Defense() int                       { return 2 }
@@ -26,7 +26,7 @@ type WaterTheSeedsYellow struct{}
 func (WaterTheSeedsYellow) ID() ids.CardID                     { return ids.WaterTheSeedsYellow }
 func (WaterTheSeedsYellow) Name() string                       { return "Water the Seeds" }
 func (WaterTheSeedsYellow) DisplayName() string                { return "Water the Seeds [Y]" }
-func (WaterTheSeedsYellow) Cost(card.GameEngine) int           { return 1 }
+func (WaterTheSeedsYellow) Cost() int                          { return 1 }
 func (WaterTheSeedsYellow) Pitch() int                         { return 2 }
 func (WaterTheSeedsYellow) Attack() int                        { return 2 }
 func (WaterTheSeedsYellow) Defense() int                       { return 2 }
@@ -38,7 +38,7 @@ type WaterTheSeedsBlue struct{}
 func (WaterTheSeedsBlue) ID() ids.CardID                     { return ids.WaterTheSeedsBlue }
 func (WaterTheSeedsBlue) Name() string                       { return "Water the Seeds" }
 func (WaterTheSeedsBlue) DisplayName() string                { return "Water the Seeds [B]" }
-func (WaterTheSeedsBlue) Cost(card.GameEngine) int           { return 1 }
+func (WaterTheSeedsBlue) Cost() int                          { return 1 }
 func (WaterTheSeedsBlue) Pitch() int                         { return 3 }
 func (WaterTheSeedsBlue) Attack() int                        { return 1 }
 func (WaterTheSeedsBlue) Defense() int                       { return 2 }

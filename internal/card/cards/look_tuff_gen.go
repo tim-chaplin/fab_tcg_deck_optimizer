@@ -14,7 +14,7 @@ type LookTuffRed struct{}
 func (LookTuffRed) ID() ids.CardID                     { return ids.LookTuffRed }
 func (LookTuffRed) Name() string                       { return "Look Tuff" }
 func (LookTuffRed) DisplayName() string                { return "Look Tuff [R]" }
-func (LookTuffRed) Cost(card.GameEngine) int           { return 3 }
+func (LookTuffRed) Cost() int                          { return 3 }
 func (LookTuffRed) Pitch() int                         { return 1 }
 func (LookTuffRed) Attack() int                        { return 8 }
 func (LookTuffRed) Defense() int                       { return 3 }

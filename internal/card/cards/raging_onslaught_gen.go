@@ -14,7 +14,7 @@ type RagingOnslaughtRed struct{}
 func (RagingOnslaughtRed) ID() ids.CardID                     { return ids.RagingOnslaughtRed }
 func (RagingOnslaughtRed) Name() string                       { return "Raging Onslaught" }
 func (RagingOnslaughtRed) DisplayName() string                { return "Raging Onslaught [R]" }
-func (RagingOnslaughtRed) Cost(card.GameEngine) int           { return 3 }
+func (RagingOnslaughtRed) Cost() int                          { return 3 }
 func (RagingOnslaughtRed) Pitch() int                         { return 1 }
 func (RagingOnslaughtRed) Attack() int                        { return 7 }
 func (RagingOnslaughtRed) Defense() int                       { return 3 }
@@ -26,7 +26,7 @@ type RagingOnslaughtYellow struct{}
 func (RagingOnslaughtYellow) ID() ids.CardID                     { return ids.RagingOnslaughtYellow }
 func (RagingOnslaughtYellow) Name() string                       { return "Raging Onslaught" }
 func (RagingOnslaughtYellow) DisplayName() string                { return "Raging Onslaught [Y]" }
-func (RagingOnslaughtYellow) Cost(card.GameEngine) int           { return 3 }
+func (RagingOnslaughtYellow) Cost() int                          { return 3 }
 func (RagingOnslaughtYellow) Pitch() int                         { return 2 }
 func (RagingOnslaughtYellow) Attack() int                        { return 6 }
 func (RagingOnslaughtYellow) Defense() int                       { return 3 }
@@ -38,7 +38,7 @@ type RagingOnslaughtBlue struct{}
 func (RagingOnslaughtBlue) ID() ids.CardID                     { return ids.RagingOnslaughtBlue }
 func (RagingOnslaughtBlue) Name() string                       { return "Raging Onslaught" }
 func (RagingOnslaughtBlue) DisplayName() string                { return "Raging Onslaught [B]" }
-func (RagingOnslaughtBlue) Cost(card.GameEngine) int           { return 3 }
+func (RagingOnslaughtBlue) Cost() int                          { return 3 }
 func (RagingOnslaughtBlue) Pitch() int                         { return 3 }
 func (RagingOnslaughtBlue) Attack() int                        { return 5 }
 func (RagingOnslaughtBlue) Defense() int                       { return 3 }

@@ -20,7 +20,7 @@ func captainsCallPlay(ge card.GameEngine, l card.Logger, self *card.CardState, m
 		if !pc.EffectiveTypes(ge).IsAttackAction() {
 			continue
 		}
-		if pc.Card.Cost(ge) > maxCost {
+		if pc.Card.Cost() > maxCost {
 			continue
 		}
 		switch self.Mode {

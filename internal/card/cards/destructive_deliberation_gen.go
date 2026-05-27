@@ -11,13 +11,13 @@ var destructiveDeliberationTypes = card.NewTypeSet(card.TypeGeneric, card.TypeAc
 
 type DestructiveDeliberationRed struct{}
 
-func (DestructiveDeliberationRed) ID() ids.CardID           { return ids.DestructiveDeliberationRed }
-func (DestructiveDeliberationRed) Name() string             { return "Destructive Deliberation" }
-func (DestructiveDeliberationRed) DisplayName() string      { return "Destructive Deliberation [R]" }
-func (DestructiveDeliberationRed) Cost(card.GameEngine) int { return 1 }
-func (DestructiveDeliberationRed) Pitch() int               { return 1 }
-func (DestructiveDeliberationRed) Attack() int              { return 5 }
-func (DestructiveDeliberationRed) Defense() int             { return 2 }
+func (DestructiveDeliberationRed) ID() ids.CardID      { return ids.DestructiveDeliberationRed }
+func (DestructiveDeliberationRed) Name() string        { return "Destructive Deliberation" }
+func (DestructiveDeliberationRed) DisplayName() string { return "Destructive Deliberation [R]" }
+func (DestructiveDeliberationRed) Cost() int           { return 1 }
+func (DestructiveDeliberationRed) Pitch() int          { return 1 }
+func (DestructiveDeliberationRed) Attack() int         { return 5 }
+func (DestructiveDeliberationRed) Defense() int        { return 2 }
 func (DestructiveDeliberationRed) Types(card.GameEngine) card.TypeSet {
 	return destructiveDeliberationTypes
 }
@@ -25,13 +25,13 @@ func (DestructiveDeliberationRed) GoAgain(card.GameEngine) bool { return false }
 
 type DestructiveDeliberationYellow struct{}
 
-func (DestructiveDeliberationYellow) ID() ids.CardID           { return ids.DestructiveDeliberationYellow }
-func (DestructiveDeliberationYellow) Name() string             { return "Destructive Deliberation" }
-func (DestructiveDeliberationYellow) DisplayName() string      { return "Destructive Deliberation [Y]" }
-func (DestructiveDeliberationYellow) Cost(card.GameEngine) int { return 1 }
-func (DestructiveDeliberationYellow) Pitch() int               { return 2 }
-func (DestructiveDeliberationYellow) Attack() int              { return 4 }
-func (DestructiveDeliberationYellow) Defense() int             { return 2 }
+func (DestructiveDeliberationYellow) ID() ids.CardID      { return ids.DestructiveDeliberationYellow }
+func (DestructiveDeliberationYellow) Name() string        { return "Destructive Deliberation" }
+func (DestructiveDeliberationYellow) DisplayName() string { return "Destructive Deliberation [Y]" }
+func (DestructiveDeliberationYellow) Cost() int           { return 1 }
+func (DestructiveDeliberationYellow) Pitch() int          { return 2 }
+func (DestructiveDeliberationYellow) Attack() int         { return 4 }
+func (DestructiveDeliberationYellow) Defense() int        { return 2 }
 func (DestructiveDeliberationYellow) Types(card.GameEngine) card.TypeSet {
 	return destructiveDeliberationTypes
 }
@@ -39,13 +39,13 @@ func (DestructiveDeliberationYellow) GoAgain(card.GameEngine) bool { return fals
 
 type DestructiveDeliberationBlue struct{}
 
-func (DestructiveDeliberationBlue) ID() ids.CardID           { return ids.DestructiveDeliberationBlue }
-func (DestructiveDeliberationBlue) Name() string             { return "Destructive Deliberation" }
-func (DestructiveDeliberationBlue) DisplayName() string      { return "Destructive Deliberation [B]" }
-func (DestructiveDeliberationBlue) Cost(card.GameEngine) int { return 1 }
-func (DestructiveDeliberationBlue) Pitch() int               { return 3 }
-func (DestructiveDeliberationBlue) Attack() int              { return 3 }
-func (DestructiveDeliberationBlue) Defense() int             { return 2 }
+func (DestructiveDeliberationBlue) ID() ids.CardID      { return ids.DestructiveDeliberationBlue }
+func (DestructiveDeliberationBlue) Name() string        { return "Destructive Deliberation" }
+func (DestructiveDeliberationBlue) DisplayName() string { return "Destructive Deliberation [B]" }
+func (DestructiveDeliberationBlue) Cost() int           { return 1 }
+func (DestructiveDeliberationBlue) Pitch() int          { return 3 }
+func (DestructiveDeliberationBlue) Attack() int         { return 3 }
+func (DestructiveDeliberationBlue) Defense() int        { return 2 }
 func (DestructiveDeliberationBlue) Types(card.GameEngine) card.TypeSet {
 	return destructiveDeliberationTypes
 }
