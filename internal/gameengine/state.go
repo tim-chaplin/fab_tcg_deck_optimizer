@@ -88,8 +88,12 @@ type ephemeral struct {
 
 	logger card.Logger
 
-	actionPoints   int
-	value          int
+	actionPoints int
+	value        int
+	// damageDealt is the cumulative damage credited at every triggertype.Hit fire this
+	// turn — gates "if you've dealt {N} this turn" riders. Resets at the turn boundary
+	// via ephemeral.reset.
+	damageDealt int
 	damageBlocked  int
 	blockTotal     int
 	currentHookIdx int
@@ -108,12 +112,17 @@ type ephemeral struct {
 	auraCreated           bool
 	nonAttackActionPlayed bool
 	lastAttackHit         bool
-	currentHookDestroyed  bool
-	currentStepRerouted   bool
-	cacheable             bool
-	heroTapped            bool
-	hasCrowdCheered       bool
-	hasCrowdBooed         bool
+	// hitThisTurn flips true the first time a physical attack lands (the "if hit"
+	// branch in the sequence runner). Distinct from damageDealt > 0 because arcane
+	// damage contributes to damageDealt but does not count as a "hit" — same reason
+	// arcane doesn't strip Mark.
+	hitThisTurn          bool
+	currentHookDestroyed bool
+	currentStepRerouted  bool
+	cacheable            bool
+	heroTapped           bool
+	hasCrowdCheered      bool
+	hasCrowdBooed        bool
 }
 
 // reset returns e to its start-of-turn baseline: scalars zero except actionPoints=1,
@@ -635,6 +644,7 @@ func (gs *GameState) AuraCount() int {
 // the same accessor.
 func (gs *GameState) RunechantCount() int { return gs.tokenAuras[tokenAuraRunechant].Count() }
 func (gs *GameState) PonderCount() int    { return gs.tokenAuras[tokenAuraPonder].Count() }
+func (gs *GameState) QuickenCount() int   { return gs.tokenAuras[tokenAuraQuicken].Count() }
 func (gs *GameState) GoldCount() int      { return gs.tokenItems[tokenItemGold].Count() }
 func (gs *GameState) SilverCount() int    { return gs.tokenItems[tokenItemSilver].Count() }
 func (gs *GameState) CopperCount() int    { return gs.tokenItems[tokenItemCopper].Count() }
@@ -678,6 +688,44 @@ func (gs *GameState) AddActionPoints(n int) { gs.actionPoints += n }
 func (gs *GameState) Value() int     { return gs.value }
 func (gs *GameState) SetValue(v int) { gs.value = v }
 func (gs *GameState) AddValue(n int) { gs.value += n }
+
+// DamageDealt returns the cumulative damage credited at every Hit / arcane-damage event
+// this turn — "if you've dealt {N} this turn" gates read this. Zeroed at the turn boundary.
+// Updated only by RegisterPhysicalDamage / RegisterArcaneDamage so the bookkeeping stays
+// centralized.
+func (gs *GameState) DamageDealt() int { return gs.damageDealt }
+
+// HitThisTurn reports whether at least one physical attack has landed this turn. Arcane
+// damage does not count — same reason it doesn't strip Mark.
+func (gs *GameState) HitThisTurn() bool     { return gs.hitThisTurn }
+func (gs *GameState) SetHitThisTurn(v bool) { gs.hitThisTurn = v }
+
+// RegisterPhysicalDamage runs the side effects for an n-power physical attack: when the
+// attack clears the likely-to-hit gate it flips HitThisTurn and credits the unblocked
+// amount (per LikelyDamageDealt) to DamageDealt. Self-gating — a miss is a no-op, so
+// callers don't need an outer "did this hit" guard around the call. The single
+// bookkeeping point on the physical side; counterpart to RegisterArcaneDamage.
+func (gs *GameState) RegisterPhysicalDamage(n int, dominate bool) {
+	d := LikelyDamageDealt(n, dominate)
+	if d == 0 {
+		return
+	}
+	gs.hitThisTurn = true
+	gs.damageDealt += d
+}
+
+// RegisterArcaneDamage runs the side effects for an n-arcane-damage event: flips
+// arcaneDamageDealt and credits the unblocked amount to DamageDealt when n clears the
+// LikelyDamageHits gate. The single bookkeeping point on the arcane side —
+// DealArcaneDamage routes through here, and tokens whose Value is pre-credited at
+// creation (Runechant) call it directly at fire time. Doesn't touch OpponentMarked or
+// HitThisTurn — neither responds to arcane.
+func (gs *GameState) RegisterArcaneDamage(n int) {
+	if d := LikelyDamageDealt(n, false); d > 0 {
+		gs.arcaneDamageDealt = true
+		gs.damageDealt += d
+	}
+}
 
 // RemainingUnblockedDamage returns the opponent damage still unblocked this turn — the
 // constant matchup figure minus everything defense has absorbed so far.

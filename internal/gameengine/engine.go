@@ -299,6 +299,11 @@ func (ge *GameEngine) LikelyDamageHits(n int, dominate bool) bool {
 	return LikelyDamageHits(n, dominate)
 }
 
+// LikelyDamageDealt is the "how much" sibling — see the package-level function.
+func (ge *GameEngine) LikelyDamageDealt(n int, dominate bool) int {
+	return LikelyDamageDealt(n, dominate)
+}
+
 // OpponentDiscard credits n cards' worth of damage-equivalent value for forcing the
 // opponent to discard. Returns the credited value for log attribution.
 func (ge *GameEngine) OpponentDiscard(n int) int {
@@ -382,16 +387,26 @@ func (ge *GameEngine) Clash(win, lose func()) {
 	}
 }
 
-// Opt resolves the FaB "Opt N" keyword: pops up to n cards from the top of the deck and
-// hands them to the current hero's Opt heuristic. The handler returns a (top, bottom)
-// split; the top list goes back on top of the deck (in returned order) and the bottom
-// list appends to the bottom (in returned order). n is clamped to the current deck
-// length. Always flips IsCacheable to false.
+// Opt resolves the FaB "Opt N" keyword via the current hero's splitter. Wrapper around
+// OptWith; see that method for the contract.
+func (ge *GameEngine) Opt(l card.Logger, n int) {
+	split := func(cs []card.Card) (top, bottom []card.Card) { return cs, nil }
+	if ge.hero != nil {
+		split = ge.hero.Opt
+	}
+	ge.OptWith(l, n, split)
+}
+
+// OptWith is Opt with a caller-supplied splitter — for cards whose printed text overrides
+// the hero's Opt heuristic with a card-local rule. Pops up to n cards from the top of the
+// deck and hands them to split; the returned top list goes back on top of the deck (in
+// returned order) and the bottom list appends to the bottom (in returned order). n is
+// clamped to the current deck length. Always flips IsCacheable to false.
 //
 // Emits a log entry naming the revealed cards and the split when the handler ran.
 //
 // Panics if the handler's combined output isn't exactly the input multiset.
-func (ge *GameEngine) Opt(l card.Logger, n int) {
+func (ge *GameEngine) OptWith(l card.Logger, n int, split func([]card.Card) (top, bottom []card.Card)) {
 	ge.cacheable = false
 	if n <= 0 || ge.deck.Size() == 0 {
 		return
@@ -406,12 +421,7 @@ func (ge *GameEngine) Opt(l card.Logger, n int) {
 		cards[i] = c.(card.Card)
 	}
 
-	var top, bottom []card.Card
-	if ge.hero == nil {
-		top = cards
-	} else {
-		top, bottom = ge.hero.Opt(cards)
-	}
+	top, bottom := split(cards)
 	panicIfOptViolatesMultiset(cards, top, bottom)
 
 	deckTop := make([]deck.Card, len(top))
@@ -861,16 +871,12 @@ func attackStepCacheIndex(id ids.CardID, fromArsenal bool) uint32 {
 
 // === Arcane damage ===
 
-// DealArcaneDamage credits n arcane damage to Value, writes a "Dealt n arcane damage" rider
-// line under source, and flips ArcaneDamageDealt when LikelyDamageHits(n, false) approves
-// so same-turn triggers reading "if you've dealt arcane damage this turn" fire. Routes
-// through dealtArcaneText to avoid per-call fmt.Sprintf and variadic-int boxing. Doesn't
-// touch OpponentMarked — only physical hits consume the mark.
+// DealArcaneDamage credits n arcane damage to Value, runs the arcane side effects
+// (RegisterArcaneDamage), and writes the "Dealt n arcane damage" rider line under source.
+// Routes through dealtArcaneText to avoid per-call fmt.Sprintf and variadic-int boxing.
 func (ge *GameEngine) DealArcaneDamage(l card.Logger, source string, n int) {
 	ge.AddValue(n)
-	if ge.LikelyDamageHits(n, false) {
-		ge.arcaneDamageDealt = true
-	}
+	ge.RegisterArcaneDamage(n)
 	if n >= 0 && n < len(dealtArcaneText) {
 		l.AppendPostTrigger(source, dealtArcaneText[n], n)
 		return
@@ -927,6 +933,16 @@ func (ge *GameEngine) CreatePonders(n int) {
 		return
 	}
 	ge.GameState.bumpTokenAura(tokenAuraPonder, n)
+}
+
+// CreateQuicken creates n Quicken tokens. Each charge grants the next attack-action card
+// played Go again, then consumes. No Value credit at creation — the value lands when the
+// chain extends from the granted go-again.
+func (ge *GameEngine) CreateQuicken(n int) {
+	if n <= 0 {
+		return
+	}
+	ge.GameState.bumpTokenAura(tokenAuraQuicken, n)
 }
 
 // CreateGold / CreateSilver / CreateCopper create the matching token items. No Value

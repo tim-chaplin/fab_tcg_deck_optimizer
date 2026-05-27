@@ -33,17 +33,15 @@ func NewCopper(n int) *item.Item {
 }
 
 // NewRunechant returns a fresh Runechant token aura at count n. Fires when an attack is
-// played (triggertype.CardOrAbility, filtered to attacks): flips ArcaneDamageDealt when its
-// count clears the damage-likely-to-hit window, then destroys. The Runechant resolves
-// before the attack's own effect, so it can turn on that attack's "dealt arcane damage
-// this turn" rider. Damage is credited at creation time inside CreateRunechants; this
-// handler is pure state cleanup.
+// played (triggertype.CardOrAbility, filtered to attacks): routes the arcane side
+// effects through RegisterArcaneDamage, then destroys. The Runechant resolves before
+// the attack's own effect, so it can turn on that attack's "dealt arcane damage this
+// turn" rider. Value is credited at creation time inside CreateRunechants; this
+// handler hands off the rest of the arcane bookkeeping.
 func NewRunechant(n int) *aura.Aura {
 	return aura.NewFromToken("Runechant", ids.RunechantTokenID, triggertype.CardOrAbility,
 		func(engine card.GameEngine, _ card.Logger, ctx card.Aura, _ triggertype.Type) {
-			if engine.LikelyDamageHits(ctx.Count(), false) {
-				engine.(GameEngine).SetArcaneDamageDealt(true)
-			}
+			engine.(GameEngine).RegisterArcaneDamage(ctx.Count())
 			ctx.Destroy(false)
 		}, n, card.TypeSet.IsAttack)
 }
@@ -62,4 +60,21 @@ func NewPonder(n int) *aura.Aura {
 			}
 			ctx.Destroy(false)
 		}, n, nil)
+}
+
+// NewQuicken returns a fresh Quicken token aura at count n. Fires when an attack is played
+// (triggertype.CardOrAbility, filtered to attacks, which fires before the attack resolves):
+// sets GrantedGoAgain on the triggering attack's CardState and destroys the entire slot.
+// Tokens don't activate efficiently — every charge pops on the same attack even though
+// GoAgain is a bool and surplus charges are wasted.
+func NewQuicken(n int) *aura.Aura {
+	return aura.NewFromToken("Quicken", ids.QuickenTokenID, triggertype.CardOrAbility,
+		func(engine card.GameEngine, _ card.Logger, ctx card.Aura, _ triggertype.Type) {
+			pc := engine.TriggeringCard()
+			if pc == nil {
+				return
+			}
+			pc.GrantedGoAgain = true
+			ctx.Destroy(false)
+		}, n, card.TypeSet.IsAttack)
 }

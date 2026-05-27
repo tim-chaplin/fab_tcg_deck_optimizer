@@ -17,6 +17,7 @@ type tokenAuraKind int
 const (
 	tokenAuraRunechant tokenAuraKind = iota
 	tokenAuraPonder
+	tokenAuraQuicken
 	numTokenAuraKinds
 )
 
@@ -35,6 +36,7 @@ const (
 func (gs *GameState) initTokenSlots() {
 	gs.tokenAuras[tokenAuraRunechant] = token.NewRunechant(0)
 	gs.tokenAuras[tokenAuraPonder] = token.NewPonder(0)
+	gs.tokenAuras[tokenAuraQuicken] = token.NewQuicken(0)
 	gs.tokenItems[tokenItemGold] = token.NewGold(0)
 	gs.tokenItems[tokenItemSilver] = token.NewSilver(0)
 	gs.tokenItems[tokenItemCopper] = token.NewCopper(0)

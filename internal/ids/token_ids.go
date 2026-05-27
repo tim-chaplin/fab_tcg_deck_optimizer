@@ -18,4 +18,5 @@ const (
 	GoldTokenID
 	SilverTokenID
 	CopperTokenID
+	QuickenTokenID
 )
