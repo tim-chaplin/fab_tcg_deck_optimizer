@@ -10,8 +10,8 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 )
 
-func (ThrustRed) ARTargetAllowed(_ card.GameEngine, c card.Card, _ int8) bool {
-	t := c.Types(nil)
+func (ThrustRed) ARTargetAllowed(_ card.GameEngine, target *card.CardState, _ int8) bool {
+	t := target.Card.Types(nil)
 	return t.Has(card.TypeSword) && t.IsAttack()
 }
 func (ThrustRed) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {

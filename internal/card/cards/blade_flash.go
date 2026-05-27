@@ -11,8 +11,8 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 )
 
-func (BladeFlashBlue) ARTargetAllowed(_ card.GameEngine, c card.Card, _ int8) bool {
-	t := c.Types(nil)
+func (BladeFlashBlue) ARTargetAllowed(_ card.GameEngine, target *card.CardState, _ int8) bool {
+	t := target.Card.Types(nil)
 	return t.Has(card.TypeSword) && t.IsAttack()
 }
 func (BladeFlashBlue) Play(ge card.GameEngine, l card.Logger, _ *card.CardState) {

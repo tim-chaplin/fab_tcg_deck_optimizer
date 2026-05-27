@@ -21,8 +21,8 @@ func selfDestructAuraHandler(_ card.GameEngine, _ card.Logger, a card.Aura, _ tr
 // Callers that also destroy the source card must run this BEFORE adding the source to
 // the graveyard so the printed "another aura" restriction is satisfied naturally.
 func banishAuraFromGraveyard(ge card.GameEngine, l card.Logger, source string) bool {
-	if _, ok := ge.BanishFromGraveyard(func(c card.Card) bool {
-		return c.Types(nil).Has(card.TypeAura)
+	if _, ok := ge.BanishFromGraveyard(func(_ card.GameEngine, pc *card.CardState) bool {
+		return pc.Card.Types(nil).Has(card.TypeAura)
 	}); !ok {
 		return false
 	}

@@ -12,8 +12,8 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 )
 
-func (NipAtTheHeelsBlue) ARTargetAllowed(_ card.GameEngine, c card.Card, _ int8) bool {
-	return c.Types(nil).IsAttack() && c.Attack() <= 3
+func (NipAtTheHeelsBlue) ARTargetAllowed(_ card.GameEngine, target *card.CardState, _ int8) bool {
+	return target.Card.Types(nil).IsAttack() && target.Card.Attack() <= 3
 }
 func (NipAtTheHeelsBlue) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
 	self.GrantAttackReactionBuff(ge, l, 1)

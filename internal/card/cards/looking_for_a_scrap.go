@@ -21,7 +21,7 @@ func lookingForAScrapPlay(ge card.GameEngine, l card.Logger, self *card.CardStat
 // isOnePowerCard matches the printed "card with 1{p}" target — any card whose printed
 // Attack value is 1. Non-attack cards have Attack() = 0, so the type predicate would be
 // redundant.
-func isOnePowerCard(c card.Card) bool { return c.Attack() == 1 }
+func isOnePowerCard(_ card.GameEngine, pc *card.CardState) bool { return pc.Card.Attack() == 1 }
 
 func (LookingForAScrapRed) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
 	lookingForAScrapPlay(ge, l, self)

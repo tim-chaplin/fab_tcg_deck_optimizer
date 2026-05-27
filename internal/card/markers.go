@@ -121,19 +121,19 @@ type Universal interface {
 }
 
 // AttackReaction is implemented by every Attack Reaction card. ARTargetAllowed reports
-// whether c is a legal target for this AR's chosen mode. Non-modal ARs ignore the mode
-// parameter (it's always 0). Modal ARs (card.Modal) dispatch on it: each mode's printed
-// target text becomes its own predicate leg, and the attack-turn runner rejects the
-// permutation when the chosen mode doesn't accept the active attack.
+// whether target is a legal target for this AR's chosen mode. Non-modal ARs ignore the
+// mode parameter (it's always 0). Modal ARs (card.Modal) dispatch on it: each mode's
+// printed target text becomes its own predicate leg, and the attack-turn runner rejects
+// the permutation when the chosen mode doesn't accept the active attack.
 //
-// The engine handle is threaded through so predicates that read live state (e.g.
-// class-aware types via c.Types(g)) don't have to fabricate a zero TurnState. Most ARs
-// look only at printed type-line predicates and ignore g.
+// target is the active attack's *CardState so predicates that read EffectiveCost / live
+// types do so uniformly with the in-play and hand sites. Most ARs look only at the
+// printed type-line via target.Card.Types(nil) and ignore the engine handle.
 //
 // CardState.GrantAttackReactionBuff (the method most ARs call from Play) lives alongside
 // this interface in internal/card — it's pure GameEngine / Logger / CardState plumbing.
 type AttackReaction interface {
-	ARTargetAllowed(ge GameEngine, c Card, mode int8) bool
+	ARTargetAllowed(ge GameEngine, target *CardState, mode int8) bool
 }
 
 // LeavesArenaAura is the optional marker for an Aura card with a printed "when this leaves

@@ -26,9 +26,12 @@ type GameEngine interface {
 	// HandSize reports the total number of cards in hand, including drawn cards. Prefer
 	// this over len(Hand()) for emptiness / size gates: it doesn't flip IsCacheable.
 	HandSize() int
-	// HandHasMatching reports whether any non-drawn hand entry satisfies pred. Drawn
-	// entries are skipped — their identity is opaque mid-attack-turn. Doesn't flip IsCacheable.
-	HandHasMatching(pred func(Card) bool) bool
+	// HandHasMatching reports whether any non-drawn hand entry satisfies pred. The
+	// predicate receives the engine handle plus the entry's *CardState so it can dispatch
+	// to the package-level card.IsAttackAction / card.IsNonAttackAction / EffectiveCost
+	// helpers without a closure. Drawn entries are skipped — their identity is opaque
+	// mid-attack-turn. Doesn't flip IsCacheable.
+	HandHasMatching(pred func(GameEngine, *CardState) bool) bool
 	// HeldHandSize reports the total Held-role entry count (Pitch / Attack excluded),
 	// including drawn entries. Counting alone doesn't reveal drawn-card attributes, so
 	// this accessor doesn't flip IsCacheable.
@@ -214,9 +217,9 @@ type GameEngine interface {
 	DrawOne() bool
 	TutorFromDeck(func(Card) int) (Card, bool)
 	RecycleToDeckBottom(*CardState)
-	RecycleFromGraveyardToTop(func(Card) bool) (Card, bool)
-	RecycleFromGraveyardToBottom(func(Card) bool) (Card, bool)
-	BanishFromGraveyard(func(Card) bool) (Card, bool)
+	RecycleFromGraveyardToTop(func(GameEngine, *CardState) bool) (Card, bool)
+	RecycleFromGraveyardToBottom(func(GameEngine, *CardState) bool) (Card, bool)
+	BanishFromGraveyard(func(GameEngine, *CardState) bool) (Card, bool)
 
 	// Opt (hero-driven top-of-deck reshape)
 	Opt(Logger, int)

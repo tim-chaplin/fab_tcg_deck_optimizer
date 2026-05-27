@@ -11,12 +11,10 @@ import (
 )
 
 func cadaverousContrabandOnHitRecycle(ge card.GameEngine, l card.Logger, self *card.CardState, _ *card.OnHitHandler) {
-	if _, ok := ge.RecycleFromGraveyardToTop(isNonAttackAction); ok {
+	if _, ok := ge.RecycleFromGraveyardToTop(card.IsNonAttackAction); ok {
 		l.AppendPostTrigger(self.Card.DisplayName(), "Recycled a non-attack action card to top of deck", 0)
 	}
 }
-
-func isNonAttackAction(c card.Card) bool { return c.Types(nil).IsNonAttackAction() }
 
 func cadaverousContrabandPlay(ge card.GameEngine, l card.Logger, self *card.CardState) {
 	self.RegisterOnHit(cadaverousContrabandOnHitRecycle)

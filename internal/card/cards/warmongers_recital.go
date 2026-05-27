@@ -13,7 +13,7 @@ import (
 // warmongersRecitalRecycleOnHit pulls the buffed attack out of graveyard onto the deck bottom.
 func warmongersRecitalRecycleOnHit(ge card.GameEngine, l card.Logger, self *card.CardState, _ *card.OnHitHandler) {
 	target := self.Card
-	if _, ok := ge.RecycleFromGraveyardToBottom(func(c card.Card) bool { return c == target }); !ok {
+	if _, ok := ge.RecycleFromGraveyardToBottom(func(_ card.GameEngine, pc *card.CardState) bool { return pc.Card == target }); !ok {
 		return
 	}
 	l.AppendPostTrigger(self.Card.DisplayName(), "Recycled to bottom of deck on hit", 0)

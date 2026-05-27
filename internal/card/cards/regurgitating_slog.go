@@ -17,7 +17,7 @@ func regurgitatingSlogPlay(ge card.GameEngine, l card.Logger, self *card.CardSta
 	}
 }
 
-func isSloggism(c card.Card) bool { return c.Name() == "Sloggism" }
+func isSloggism(_ card.GameEngine, pc *card.CardState) bool { return pc.Card.Name() == "Sloggism" }
 
 func (RegurgitatingSlogRed) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
 	regurgitatingSlogPlay(ge, l, self)

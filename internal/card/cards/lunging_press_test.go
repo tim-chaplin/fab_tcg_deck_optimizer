@@ -9,14 +9,14 @@ import (
 
 // Tests that Lunging Press's predicate accepts an attack action card.
 func TestLungingPress_AcceptsAttackAction(t *testing.T) {
-	if !(LungingPressBlue{}).ARTargetAllowed(nil, testutils.FakeRedAttack(), 0) {
+	if !(LungingPressBlue{}).ARTargetAllowed(nil, &card.CardState{Card: testutils.FakeRedAttack()}, 0) {
 		t.Error("attack action card should be a legal target")
 	}
 }
 
 // Tests that the predicate rejects a plain non-attack Action.
 func TestLungingPress_RejectsNonAttackAction(t *testing.T) {
-	if (LungingPressBlue{}).ARTargetAllowed(nil, testutils.FakeRedAction(), 0) {
+	if (LungingPressBlue{}).ARTargetAllowed(nil, &card.CardState{Card: testutils.FakeRedAction()}, 0) {
 		t.Error("non-attack action should be rejected")
 	}
 }
@@ -26,7 +26,7 @@ func TestLungingPress_RejectsNonAttackAction(t *testing.T) {
 // the predicate.
 func TestLungingPress_RejectsWeapon(t *testing.T) {
 	weapon := testutils.FakeRedResource().WithTypes(card.TypeWeapon)
-	if (LungingPressBlue{}).ARTargetAllowed(nil, weapon, 0) {
+	if (LungingPressBlue{}).ARTargetAllowed(nil, &card.CardState{Card: weapon}, 0) {
 		t.Error("weapon should be rejected")
 	}
 }

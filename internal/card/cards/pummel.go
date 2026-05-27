@@ -16,13 +16,13 @@ import (
 
 // pummelAccepts is the per-mode target predicate. Mode 0 gates on club/hammer weapon attack;
 // mode 1 gates on cost-≥2 attack action.
-func pummelAccepts(ge card.GameEngine, c card.Card, mode int8) bool {
-	t := c.Types(nil)
+func pummelAccepts(ge card.GameEngine, target *card.CardState, mode int8) bool {
+	t := target.Card.Types(nil)
 	switch mode {
 	case 0:
 		return (t.Has(card.TypeClub) || t.Has(card.TypeHammer)) && t.IsWeaponAttack()
 	case 1:
-		return t.IsAttackAction() && c.Cost() >= 2
+		return t.IsAttackAction() && target.EffectiveCost(ge) >= 2
 	}
 	return false
 }
@@ -51,24 +51,24 @@ func pummelPlay(ge card.GameEngine, l card.Logger, self *card.CardState, n int) 
 }
 
 func (PummelRed) Modes() int { return 2 }
-func (PummelRed) ARTargetAllowed(ge card.GameEngine, c card.Card, mode int8) bool {
-	return pummelAccepts(ge, c, mode)
+func (PummelRed) ARTargetAllowed(ge card.GameEngine, target *card.CardState, mode int8) bool {
+	return pummelAccepts(ge, target, mode)
 }
 func (PummelRed) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
 	pummelPlay(ge, l, self, 4)
 }
 
 func (PummelYellow) Modes() int { return 2 }
-func (PummelYellow) ARTargetAllowed(ge card.GameEngine, c card.Card, mode int8) bool {
-	return pummelAccepts(ge, c, mode)
+func (PummelYellow) ARTargetAllowed(ge card.GameEngine, target *card.CardState, mode int8) bool {
+	return pummelAccepts(ge, target, mode)
 }
 func (PummelYellow) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
 	pummelPlay(ge, l, self, 3)
 }
 
 func (PummelBlue) Modes() int { return 2 }
-func (PummelBlue) ARTargetAllowed(ge card.GameEngine, c card.Card, mode int8) bool {
-	return pummelAccepts(ge, c, mode)
+func (PummelBlue) ARTargetAllowed(ge card.GameEngine, target *card.CardState, mode int8) bool {
+	return pummelAccepts(ge, target, mode)
 }
 func (PummelBlue) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
 	pummelPlay(ge, l, self, 2)

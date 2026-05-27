@@ -10,7 +10,7 @@ import (
 // Tests that Blade Flash's predicate accepts a sword attack action card.
 func TestBladeFlash_AcceptsSwordAttackAction(t *testing.T) {
 	swordAction := testutils.FakeRedAttack().WithTypes(card.TypeSword)
-	if !(BladeFlashBlue{}).ARTargetAllowed(nil, swordAction, 0) {
+	if !(BladeFlashBlue{}).ARTargetAllowed(nil, &card.CardState{Card: swordAction}, 0) {
 		t.Error("sword action card should be a legal target")
 	}
 }
@@ -18,14 +18,14 @@ func TestBladeFlash_AcceptsSwordAttackAction(t *testing.T) {
 // Tests that Blade Flash's predicate accepts a Sword weapon swing.
 func TestBladeFlash_AcceptsSwordWeapon(t *testing.T) {
 	swordSwing := testutils.FakeWeaponSwing().WithTypes(card.TypeSword)
-	if !(BladeFlashBlue{}).ARTargetAllowed(nil, swordSwing, 0) {
+	if !(BladeFlashBlue{}).ARTargetAllowed(nil, &card.CardState{Card: swordSwing}, 0) {
 		t.Error("sword weapon swing should be a legal target")
 	}
 }
 
 // Tests that a non-Sword attack is rejected.
 func TestBladeFlash_RejectsNonSwordAttack(t *testing.T) {
-	if (BladeFlashBlue{}).ARTargetAllowed(nil, testutils.FakeRedAttack(), 0) {
+	if (BladeFlashBlue{}).ARTargetAllowed(nil, &card.CardState{Card: testutils.FakeRedAttack()}, 0) {
 		t.Error("non-sword attack action should be rejected")
 	}
 }
@@ -35,7 +35,7 @@ func TestBladeFlash_RejectsNonSwordAttack(t *testing.T) {
 // TypeAttack is absent so the rejection branch fires.
 func TestBladeFlash_RejectsNonAttackSword(t *testing.T) {
 	swordEquipment := testutils.FakeRedResource().WithTypes(card.TypeSword)
-	if (BladeFlashBlue{}).ARTargetAllowed(nil, swordEquipment, 0) {
+	if (BladeFlashBlue{}).ARTargetAllowed(nil, &card.CardState{Card: swordEquipment}, 0) {
 		t.Error("non-attack sword should be rejected")
 	}
 }
