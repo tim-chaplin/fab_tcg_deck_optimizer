@@ -699,6 +699,29 @@ func (gs *GameState) AddDamageDealt(n int) { gs.damageDealt += n }
 func (gs *GameState) HitThisTurn() bool     { return gs.hitThisTurn }
 func (gs *GameState) SetHitThisTurn(v bool) { gs.hitThisTurn = v }
 
+// RegisterPhysicalDamage runs the side effects for an n-power physical-attack hit:
+// flips HitThisTurn and credits the unblocked amount (per LikelyDamageDealt) to
+// DamageDealt. The single bookkeeping point on the physical side — the chain runner's
+// "if hit" block routes through here so future physical-damage sources don't have to
+// remember the formula. Counterpart to RegisterArcaneDamage.
+func (gs *GameState) RegisterPhysicalDamage(n int, dominate bool) {
+	gs.hitThisTurn = true
+	gs.damageDealt += LikelyDamageDealt(n, dominate)
+}
+
+// RegisterArcaneDamage runs the side effects for an n-arcane-damage event: flips
+// arcaneDamageDealt and credits the unblocked amount to DamageDealt when n clears the
+// LikelyDamageHits gate. The single bookkeeping point on the arcane side —
+// DealArcaneDamage routes through here, and tokens whose Value is pre-credited at
+// creation (Runechant) call it directly at fire time. Doesn't touch OpponentMarked or
+// HitThisTurn — neither responds to arcane.
+func (gs *GameState) RegisterArcaneDamage(n int) {
+	if d := LikelyDamageDealt(n, false); d > 0 {
+		gs.arcaneDamageDealt = true
+		gs.damageDealt += d
+	}
+}
+
 // RemainingUnblockedDamage returns the opponent damage still unblocked this turn — the
 // constant matchup figure minus everything defense has absorbed so far.
 func (gs *GameState) RemainingUnblockedDamage() int { return gs.incomingDamage - gs.damageBlocked }

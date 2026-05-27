@@ -843,11 +843,9 @@ func (ctx *sequenceContext) playSequenceWithMeta(n int) (damage int, totalCounte
 		hit := gameengine.LikelyToHit(activeAttack)
 		state.SetLastAttackHit(hit)
 		if hit {
-			// Mark the physical-hit flag and credit the unblocked damage before the Hit
-			// fire so handlers see both the flag and the updated cumulative count.
-			state.SetHitThisTurn(true)
-			state.AddDamageDealt(gameengine.LikelyDamageDealt(
-				activeAttack.EffectiveAttack(), activeAttack.EffectiveDominate()))
+			// Register physical damage before the Hit fire so handlers see the updated
+			// flag and DamageDealt count.
+			state.RegisterPhysicalDamage(activeAttack.EffectiveAttack(), activeAttack.EffectiveDominate())
 			for i := range activeAttack.OnHit {
 				h := &activeAttack.OnHit[i]
 				h.Fire(ge, state.Logger(), activeAttack, h)

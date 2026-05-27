@@ -927,18 +927,6 @@ func (ge *GameEngine) CreateRunechants(n int) {
 	ge.GameState.bumpTokenAura(tokenAuraRunechant, n)
 }
 
-// RegisterArcaneDamage runs the side effects for an n-arcane-damage event: flips
-// arcaneDamageDealt and credits the unblocked amount to DamageDealt when n clears the
-// LikelyDamageHits gate. The single bookkeeping point — DealArcaneDamage routes through
-// here, and tokens whose Value is pre-credited at creation (Runechant) call it directly
-// at fire time. Doesn't touch OpponentMarked or HitThisTurn — neither responds to arcane.
-func (ge *GameEngine) RegisterArcaneDamage(n int) {
-	if d := LikelyDamageDealt(n, false); d > 0 {
-		ge.arcaneDamageDealt = true
-		ge.AddDamageDealt(d)
-	}
-}
-
 // CreatePonders creates n Ponder tokens. No Value credit — Ponder pays out at end of turn.
 func (ge *GameEngine) CreatePonders(n int) {
 	if n <= 0 {
