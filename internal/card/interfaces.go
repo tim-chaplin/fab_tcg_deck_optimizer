@@ -49,12 +49,12 @@ type GameEngine interface {
 	// Returns true on success; false when no Held card exists. Cache-safe — the
 	// discarded identity never escapes the engine.
 	Discard(source string) bool
-	// DiscardToTopOfDeck pops the first Held card to the top of the deck and logs
+	// MoveFromHandToTopOfDeck pops the first Held card to the top of the deck and logs
 	// under source. Returns true on success. Cache-safe.
-	DiscardToTopOfDeck(source string) bool
-	// DiscardToBottomOfDeck pops the first Held card to the bottom of the deck and
+	MoveFromHandToTopOfDeck(source string) bool
+	// MoveFromHandToBottomOfDeck pops the first Held card to the bottom of the deck and
 	// logs under source. Returns true on success. Cache-safe.
-	DiscardToBottomOfDeck(source string) bool
+	MoveFromHandToBottomOfDeck(source string) bool
 
 	// CreateAura registers a multi-fire aura sourced from source (typically the playing
 	// card's self.Card) that fires on every event in tt's bit set. oncePerTurn caps it to

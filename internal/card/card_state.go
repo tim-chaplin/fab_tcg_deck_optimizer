@@ -76,7 +76,7 @@ type Ephemeral struct {
 	FaceUp bool
 	// PaidAlternativeCost is set by the attack-turn runner when this card was paid via its
 	// AlternativeCost branch (Moon Wish's "put a card on top of your deck rather than pay
-	// {r}"). Card.Play reads it to decide whether the alt-cost side effect (DiscardToTopOfDeck)
+	// {r}"). Card.Play reads it to decide whether the alt-cost side effect (MoveFromHandToTopOfDeck)
 	// should run. Cards without AlternativeCost never see this set.
 	PaidAlternativeCost bool
 	// OnHit holds "if this hits" handlers registered during Play. Stored as struct values

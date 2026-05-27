@@ -11,7 +11,7 @@ import (
 )
 
 func seekHorizonPlay(ge card.GameEngine, l card.Logger, self *card.CardState) {
-	if !ge.DiscardToTopOfDeck(self.Card.DisplayName()) {
+	if !ge.MoveFromHandToTopOfDeck(self.Card.DisplayName()) {
 		return
 	}
 	self.GrantedGoAgain = true

@@ -28,7 +28,7 @@ func TestHeldHand_FiltersOutPitchAndAttackRoles(t *testing.T) {
 	}
 }
 
-// Tests that Discard / DiscardToTopOfDeck / DiscardToBottomOfDeck pop only Held-role
+// Tests that Discard / MoveFromHandToTopOfDeck / MoveFromHandToBottomOfDeck pop only Held-role
 // hand entries, skipping Pitch / Attack entries the partition has scheduled to commit
 // to attack-step costs. A bug here would let a card like Rise Above or the Emissary cycle
 // silently remove a Pitch-role card, leaving its cost unpaid downstream.

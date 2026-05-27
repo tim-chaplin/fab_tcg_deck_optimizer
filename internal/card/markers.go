@@ -154,3 +154,12 @@ type LeavesArenaAura interface {
 type FaceUpHook interface {
 	OnFaceUp(g GameEngine, l Logger)
 }
+
+// OnDiscardHook is the optional marker for cards that react to being discarded from hand
+// to graveyard (Fool's Gold: "When this is discarded, create a Gold token."). The engine
+// calls OnDiscard from GameEngine.Discard after the card lands in the graveyard. The hook
+// does NOT fire from MoveFromHandToTopOfDeck / MoveFromHandToBottomOfDeck — those model FaB's
+// "put on top/bottom of deck" effects, which aren't discards.
+type OnDiscardHook interface {
+	OnDiscard(g GameEngine, l Logger)
+}

@@ -19,7 +19,7 @@ func siftPlay(ge card.GameEngine, l card.Logger, self *card.CardState) {
 		n = 4
 	}
 	for i := 0; i < n; i++ {
-		ge.DiscardToBottomOfDeck(name)
+		ge.MoveFromHandToBottomOfDeck(name)
 	}
 	for i := 0; i < n; i++ {
 		ge.DrawOne()
