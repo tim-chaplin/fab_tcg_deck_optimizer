@@ -5,7 +5,7 @@ types:
 cost: 0
 goAgain: true
 markers:
-    - NotImplemented
+    - Unplayable
 text: Destroy target landmark with cost X. Create X Gold tokens. **Go again**
 variants:
     - id: RansackAndRazeBlue
