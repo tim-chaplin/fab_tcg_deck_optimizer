@@ -380,11 +380,19 @@ func Random(h Hero, size, maxCopies int, rng *rand.Rand, reg Registry) *Deck {
 	picks := make([]Card, 0, size)
 	for len(picks) < size {
 		c := pool[rng.Intn(len(pool))]
-		if counts[c.ID()]+1 > maxCopies {
+		if counts[c.ID()]+1 > effectiveMaxCopies(c, maxCopies) {
 			continue
 		}
 		counts[c.ID()]++
 		picks = append(picks, c)
 	}
 	return New(h, weapons, picks)
+}
+
+// effectiveMaxCopies returns 1 for Legendary cards and maxCopies otherwise.
+func effectiveMaxCopies(c Card, maxCopies int) int {
+	if _, ok := c.(interface{ Legendary() }); ok {
+		return 1
+	}
+	return maxCopies
 }

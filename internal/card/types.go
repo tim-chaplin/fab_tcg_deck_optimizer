@@ -25,6 +25,7 @@ const (
 	TypeResource                             // "Resource"
 	TypeRevered                              // "Revered" — hero-only; Rosetta crowd-cheer keyword
 	TypeReviled                              // "Reviled" — hero-only; Rosetta crowd-boo keyword
+	TypeRoyal                                // "Royal" — hero-only; Imperial Seal of Command gate
 	TypeRuneblade                            // "Runeblade"
 	TypeScepter                              // "Scepter"
 	TypeSword                                // "Sword"

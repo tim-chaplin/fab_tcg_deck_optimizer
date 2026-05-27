@@ -367,7 +367,7 @@ func respectsMaxCopies(cs []Card, maxCopies int) bool {
 	counts := map[ids.CardID]int{}
 	for _, c := range cs {
 		counts[c.ID()]++
-		if counts[c.ID()] > maxCopies {
+		if counts[c.ID()] > effectiveMaxCopies(c, maxCopies) {
 			return false
 		}
 	}

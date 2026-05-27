@@ -3,7 +3,6 @@ package gameengine
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/aura"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/item"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/trigger"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/triggertype"
 )
@@ -37,11 +36,6 @@ func (gs *GameState) nextFreeAuraSlot() *aura.Aura {
 		}
 	}
 	panic("CreateAura: gameengine auraPool exhausted — increase auraPoolSize or investigate why this GameState carries so many simultaneous card auras")
-}
-
-// CreateItem registers a card-sourced triggered item.
-func (gs *GameState) CreateItem(source card.Card, tt triggertype.Type, handler func(card.GameEngine, card.Logger, card.Item, triggertype.Type), oncePerTurn bool, filter func(card.TypeSet) bool) {
-	gs.items = append(gs.items, item.NewFromCard(source, tt, handler, oncePerTurn, filter))
 }
 
 // CreateTrigger registers a card-sourced one-shot ephemeral trigger.

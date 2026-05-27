@@ -524,3 +524,21 @@ func TestRespectsMaxCopies_ShortCircuits(t *testing.T) {
 		t.Error("3 copies at maxCopies=3 should pass RespectsMaxCopies")
 	}
 }
+
+// fakeLegendaryCard wraps fakeCard with the Legendary marker, so the deck builder caps it
+// at 1 regardless of maxCopies.
+type fakeLegendaryCard struct{ fakeCard }
+
+func (fakeLegendaryCard) Legendary() {}
+
+// Tests that respectsMaxCopies caps Legendary cards at 1 copy even when the global
+// maxCopies is higher. A single Legendary copy still passes; two fail.
+func TestRespectsMaxCopies_LegendaryCappedAtOne(t *testing.T) {
+	leg := fakeLegendaryCard{fakeCard: makeFakeCard(fakeC1)}
+	if !respectsMaxCopies([]Card{leg}, 3) {
+		t.Error("1 Legendary copy at maxCopies=3 should pass")
+	}
+	if respectsMaxCopies([]Card{leg, leg}, 3) {
+		t.Error("2 Legendary copies at maxCopies=3 should fail (Legendary caps at 1)")
+	}
+}
