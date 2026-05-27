@@ -885,7 +885,7 @@ func (ctx *sequenceContext) playSequenceWithMeta(n int) (damage int, totalCounte
 				}
 			}
 			ar, ok := pc.Card.(card.AttackReaction)
-			if !ok || activeAttack == nil || !ar.ARTargetAllowed(ge, activeAttack.Card, pc.Mode) {
+			if !ok || activeAttack == nil || !ar.ARTargetAllowed(ge, activeAttack, pc.Mode) {
 				return infeasible()
 			}
 			ge.FireTriggers(triggertype.CardOrAbility, pc)

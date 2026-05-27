@@ -17,13 +17,13 @@ import (
 
 // razorReflexAccepts is the per-mode target predicate. Mode 0 gates on sword weapon attack;
 // mode 1 gates on cost-≤1 attack action.
-func razorReflexAccepts(ge card.GameEngine, c card.Card, mode int8) bool {
-	t := c.Types(nil)
+func razorReflexAccepts(ge card.GameEngine, target *card.CardState, mode int8) bool {
+	t := target.Card.Types(nil)
 	switch mode {
 	case 0:
 		return t.Has(card.TypeSword) && t.IsWeaponAttack()
 	case 1:
-		return t.IsAttackAction() && c.Cost() <= 1
+		return t.IsAttackAction() && target.EffectiveCost(ge) <= 1
 	}
 	return false
 }
@@ -42,24 +42,24 @@ func razorReflexPlay(ge card.GameEngine, l card.Logger, self *card.CardState, n 
 }
 
 func (RazorReflexRed) Modes() int { return 2 }
-func (RazorReflexRed) ARTargetAllowed(ge card.GameEngine, c card.Card, mode int8) bool {
-	return razorReflexAccepts(ge, c, mode)
+func (RazorReflexRed) ARTargetAllowed(ge card.GameEngine, target *card.CardState, mode int8) bool {
+	return razorReflexAccepts(ge, target, mode)
 }
 func (RazorReflexRed) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
 	razorReflexPlay(ge, l, self, 3)
 }
 
 func (RazorReflexYellow) Modes() int { return 2 }
-func (RazorReflexYellow) ARTargetAllowed(ge card.GameEngine, c card.Card, mode int8) bool {
-	return razorReflexAccepts(ge, c, mode)
+func (RazorReflexYellow) ARTargetAllowed(ge card.GameEngine, target *card.CardState, mode int8) bool {
+	return razorReflexAccepts(ge, target, mode)
 }
 func (RazorReflexYellow) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
 	razorReflexPlay(ge, l, self, 2)
 }
 
 func (RazorReflexBlue) Modes() int { return 2 }
-func (RazorReflexBlue) ARTargetAllowed(ge card.GameEngine, c card.Card, mode int8) bool {
-	return razorReflexAccepts(ge, c, mode)
+func (RazorReflexBlue) ARTargetAllowed(ge card.GameEngine, target *card.CardState, mode int8) bool {
+	return razorReflexAccepts(ge, target, mode)
 }
 func (RazorReflexBlue) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
 	razorReflexPlay(ge, l, self, 1)

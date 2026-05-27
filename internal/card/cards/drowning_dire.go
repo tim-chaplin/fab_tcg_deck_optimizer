@@ -14,7 +14,7 @@ import (
 )
 
 func drowningDireOnHitRecycle(ge card.GameEngine, l card.Logger, self *card.CardState, _ *card.OnHitHandler) {
-	if _, ok := ge.RecycleFromGraveyardToBottom(isNonAttackAction); ok {
+	if _, ok := ge.RecycleFromGraveyardToBottom(card.IsNonAttackAction); ok {
 		l.AppendPostTrigger(self.Card.DisplayName(), "Recycled a non-attack action card to bottom of deck", 0)
 	}
 }

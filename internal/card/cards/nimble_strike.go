@@ -18,7 +18,7 @@ func nimbleStrikePlay(ge card.GameEngine, l card.Logger, self *card.CardState) {
 	}
 }
 
-func isNimblism(c card.Card) bool { return c.Name() == "Nimblism" }
+func isNimblism(_ card.GameEngine, pc *card.CardState) bool { return pc.Card.Name() == "Nimblism" }
 
 func (NimbleStrikeRed) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
 	nimbleStrikePlay(ge, l, self)

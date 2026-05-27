@@ -9,10 +9,11 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 )
 
-// Cost predicate reads g so variable-cost targets are gated on their current cost.
+// Cost predicate reads EffectiveCost so variable-cost targets are gated on their
+// current discounted cost.
 func memorialGroundPlay(ge card.GameEngine, l card.Logger, self *card.CardState) {
-	if _, ok := ge.RecycleFromGraveyardToTop(func(c card.Card) bool {
-		return c.Types(nil).IsAttackAction() && c.Cost() <= 2
+	if _, ok := ge.RecycleFromGraveyardToTop(func(ge card.GameEngine, pc *card.CardState) bool {
+		return card.IsAttackAction(ge, pc) && pc.EffectiveCost(ge) <= 2
 	}); ok {
 		l.AppendPostTrigger(self.Card.DisplayName(), "Recycled an attack action card to top of deck", 0)
 	}

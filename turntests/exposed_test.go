@@ -12,21 +12,21 @@ import (
 
 // Tests that Exposed accepts attack action cards as targets.
 func TestExposed_AcceptsAttackAction(t *testing.T) {
-	if !(cards.ExposedBlue{}).ARTargetAllowed(nil, testutils.FakeRedAttack(), 0) {
+	if !(cards.ExposedBlue{}).ARTargetAllowed(nil, &card.CardState{Card: testutils.FakeRedAttack()}, 0) {
 		t.Error("attack action should be a legal target")
 	}
 }
 
 // Tests that Exposed accepts weapon swings as targets.
 func TestExposed_AcceptsWeaponAttack(t *testing.T) {
-	if !(cards.ExposedBlue{}).ARTargetAllowed(nil, testutils.FakeWeaponSwing().WithTypes(card.TypeRuneblade), 0) {
+	if !(cards.ExposedBlue{}).ARTargetAllowed(nil, &card.CardState{Card: testutils.FakeWeaponSwing().WithTypes(card.TypeRuneblade)}, 0) {
 		t.Error("weapon swing should be a legal target")
 	}
 }
 
 // Tests that Exposed rejects non-attack cards.
 func TestExposed_RejectsNonAttack(t *testing.T) {
-	if (cards.ExposedBlue{}).ARTargetAllowed(nil, testutils.FakeRedAction(), 0) {
+	if (cards.ExposedBlue{}).ARTargetAllowed(nil, &card.CardState{Card: testutils.FakeRedAction()}, 0) {
 		t.Error("non-attack should be rejected")
 	}
 }

@@ -543,20 +543,10 @@ func (gs *GameState) HandStates() []card.CardState { return gs.hand }
 // this accessor doesn't flip IsCacheable.
 func (gs *GameState) HandSize() int { return len(gs.hand) }
 
-// HandHasMatching reports whether any non-drawn hand entry satisfies pred. FromDraw
-// entries are skipped: their identity is unknown to in-attack-turn attribute reads. Doesn't
-// flip IsCacheable — the starting-hand multiset is already part of the cache key.
-func (gs *GameState) HandHasMatching(pred func(card.Card) bool) bool {
-	for i := range gs.hand {
-		if gs.hand[i].FromDraw {
-			continue
-		}
-		if pred(gs.hand[i].Card) {
-			return true
-		}
-	}
-	return false
-}
+// handStates returns the underlying CardState slice for HandHasMatching's iteration.
+// Kept on GameState; the cards-facing HandHasMatching is on *GameEngine so it can pass
+// itself as the engine handle into the predicate.
+func (gs *GameState) handStatesForMatching() []card.CardState { return gs.hand }
 
 // HeldHandSize reports the total Held-role hand-entry count, including drawn entries.
 // Counting alone doesn't reveal drawn-card attributes, so this accessor stays

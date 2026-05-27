@@ -46,6 +46,24 @@ func (ge *GameEngine) HeldHand() []card.Card {
 	return heldHandSlice(ge.GameState.HandStates())
 }
 
+// HandHasMatching reports whether any non-drawn hand entry satisfies pred. Pred receives
+// the engine handle plus the entry's *CardState so it can dispatch to the existing
+// card.IsAttackAction / card.IsNonAttackAction / EffectiveCost helpers without a closure.
+// FromDraw entries are skipped: their identity is unknown to in-attack-turn attribute reads.
+// Doesn't flip IsCacheable — the starting-hand multiset is already part of the cache key.
+func (ge *GameEngine) HandHasMatching(pred func(card.GameEngine, *card.CardState) bool) bool {
+	states := ge.handStatesForMatching()
+	for i := range states {
+		if states[i].FromDraw {
+			continue
+		}
+		if pred(ge, &states[i]) {
+			return true
+		}
+	}
+	return false
+}
+
 // heldHandSlice projects a role-tagged hand to its Held cards. Returns nil when empty.
 func heldHandSlice(states []card.CardState) []card.Card {
 	n := 0
@@ -219,10 +237,12 @@ func (ge *GameEngine) TutorFromDeck(score func(card.Card) int) (card.Card, bool)
 // BanishFromGraveyard removes the first graveyard card matching pred, appends it to the
 // banished zone, and returns it. Returns (nil, false) when no card matches. Flips
 // IsCacheable to false. Sets CardBanished so this-turn-banish riders fire correctly.
-func (ge *GameEngine) BanishFromGraveyard(pred func(card.Card) bool) (card.Card, bool) {
+func (ge *GameEngine) BanishFromGraveyard(pred func(card.GameEngine, *card.CardState) bool) (card.Card, bool) {
 	ge.cacheable = false
+	var cs card.CardState
 	for i, c := range ge.graveyard {
-		if !pred(c) {
+		cs = card.CardState{Card: c}
+		if !pred(ge, &cs) {
 			continue
 		}
 		ge.banished = append(ge.banished, c)
@@ -235,17 +255,22 @@ func (ge *GameEngine) BanishFromGraveyard(pred func(card.Card) bool) (card.Card,
 
 // RecycleFromGraveyardToTop / RecycleFromGraveyardToBottom remove the first graveyard
 // card matching pred and put it on the top / bottom of the deck. Flip IsCacheable.
-func (ge *GameEngine) RecycleFromGraveyardToTop(pred func(card.Card) bool) (card.Card, bool) {
+// pred receives the engine handle plus a transient *card.CardState wrapping each
+// graveyard entry so it can read EffectiveCost / EffectiveTypes uniformly with the hand
+// and in-play sites, or dispatch directly to card.IsAttackAction / card.IsNonAttackAction.
+func (ge *GameEngine) RecycleFromGraveyardToTop(pred func(card.GameEngine, *card.CardState) bool) (card.Card, bool) {
 	return ge.recycleFromGraveyard(pred, true)
 }
-func (ge *GameEngine) RecycleFromGraveyardToBottom(pred func(card.Card) bool) (card.Card, bool) {
+func (ge *GameEngine) RecycleFromGraveyardToBottom(pred func(card.GameEngine, *card.CardState) bool) (card.Card, bool) {
 	return ge.recycleFromGraveyard(pred, false)
 }
 
-func (ge *GameEngine) recycleFromGraveyard(pred func(card.Card) bool, toTop bool) (card.Card, bool) {
+func (ge *GameEngine) recycleFromGraveyard(pred func(card.GameEngine, *card.CardState) bool, toTop bool) (card.Card, bool) {
 	ge.cacheable = false
+	var cs card.CardState
 	for i, c := range ge.graveyard {
-		if !pred(c) {
+		cs = card.CardState{Card: c}
+		if !pred(ge, &cs) {
 			continue
 		}
 		ge.graveyard = append(ge.graveyard[:i], ge.graveyard[i+1:]...)

@@ -10,8 +10,8 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 )
 
-func (LungingPressBlue) ARTargetAllowed(_ card.GameEngine, c card.Card, _ int8) bool {
-	return c.Types(nil).IsAttackAction()
+func (LungingPressBlue) ARTargetAllowed(_ card.GameEngine, target *card.CardState, _ int8) bool {
+	return target.Card.Types(nil).IsAttackAction()
 }
 func (LungingPressBlue) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
 	self.GrantAttackReactionBuff(ge, l, 1)
