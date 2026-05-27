@@ -141,6 +141,22 @@ func (ge *GameEngine) PopDeckTop() (card.Card, bool) {
 	return ge.deck.Draw(1)[0].(card.Card), true
 }
 
+// MoveFromTopOfDeckToArsenal pops the top of the deck into the (currently-empty) arsenal
+// slot without revealing it. Returns true when it ran (deck non-empty AND arsenal empty),
+// false otherwise. Does NOT flip IsCacheable: the caller never reads the card's identity,
+// so the operation is reproducible from the cache key (the popped card is determined by
+// start-of-turn deck order, and the arsenal's identity at NEXT turn start is captured by
+// that turn's own cache key). Notes the deck removal so the eval cache's depth check
+// stays accurate.
+func (ge *GameEngine) MoveFromTopOfDeckToArsenal() bool {
+	if ge.arsenal != nil || ge.deck.Size() == 0 {
+		return false
+	}
+	ge.noteDeckRemoval(1)
+	ge.arsenal = ge.deck.Draw(1)[0].(card.Card)
+	return true
+}
+
 // PeekDeck returns the top card of the deck without removing it. Returns (nil, false) on
 // an empty deck. Flips IsCacheable to false.
 func (ge *GameEngine) PeekDeck() (card.Card, bool) {

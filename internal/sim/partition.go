@@ -120,7 +120,14 @@ func (e *Evaluator) findBest(weapons []weapon.Weapon, hand []card.Card, d *deck.
 			}
 
 			v := attackDealt + defenseDealt
-			winner.SetArsenal(arsenalAtAttackTurnStart)
+			// Only restore the start-of-attack-turn arsenal when the per-perm hasn't already
+			// filled the slot mid-turn (Promise of Plenty's on-hit MoveFromTopOfDeckToArsenal).
+			// A nil arsenal at end of perm means the in-arsenal card was played out and no
+			// mid-turn fill landed; restore via arsenalAtAttackTurnStart (also nil in that
+			// case, so this branch is also the cheapest reset for "nothing happened").
+			if winner.Arsenal() == nil {
+				winner.SetArsenal(arsenalAtAttackTurnStart)
+			}
 			var promoted card.Card
 			if winner.Arsenal() == nil {
 				promoted = promoteHeldToArsenal(winner, hand, arsenalCardIn)

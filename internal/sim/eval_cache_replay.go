@@ -58,7 +58,12 @@ func (e *Evaluator) replayBest(
 		pcards[postPromotedFromHeld].role = card.Arsenal
 	}
 
-	winner.SetArsenal(arsenalAtAttackTurnStart)
+	// Mirror partition.go's mid-turn-fill-aware restore: only re-seed the arsenal when
+	// the per-perm didn't fill it mid-turn (Promise of Plenty's on-hit). A nil arsenal at
+	// end of replay means no fill landed; restore via arsenalAtAttackTurnStart.
+	if winner.Arsenal() == nil {
+		winner.SetArsenal(arsenalAtAttackTurnStart)
+	}
 	best := TurnSummary{
 		BestLine:       make([]card.CardAssignment, totalN),
 		Value:          attackDealt + defenseDealt,

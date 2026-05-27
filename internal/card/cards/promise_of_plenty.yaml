@@ -4,8 +4,6 @@ types:
     - Action
     - Attack
 cost: 0
-markers:
-    - NotImplemented
 text: |-
     If Promise of Plenty hits, each hero who doesn't have a card in their arsenal puts the top
     card of their deck face down into their arsenal. If Promise of Plenty is played from arsenal, it

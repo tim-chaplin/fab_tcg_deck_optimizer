@@ -45,6 +45,10 @@ type GameEngine interface {
 	PrependToDeck(Card)
 	AppendToDeck(Card)
 	AddToGraveyard(Card)
+	// MoveFromTopOfDeckToArsenal pops the top card of the deck into the arsenal slot
+	// without revealing it. Returns true when it ran (deck non-empty AND arsenal empty),
+	// false otherwise. Cache-safe — the caller never observes the card's identity.
+	MoveFromTopOfDeckToArsenal() bool
 	// Discard pops the first Held card to the graveyard and logs under source.
 	// Returns true on success; false when no Held card exists. Cache-safe — the
 	// discarded identity never escapes the engine.
