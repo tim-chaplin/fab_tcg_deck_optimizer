@@ -200,6 +200,10 @@ var cardsByID = []Card{
 	ids.FlexYellow: cards.FlexYellow{},
 	ids.FlexBlue:   cards.FlexBlue{},
 
+	ids.FlockOfTheFeatherWalkersRed:    cards.FlockOfTheFeatherWalkersRed{},
+	ids.FlockOfTheFeatherWalkersYellow: cards.FlockOfTheFeatherWalkersYellow{},
+	ids.FlockOfTheFeatherWalkersBlue:   cards.FlockOfTheFeatherWalkersBlue{},
+
 	ids.FlyingHighRed:    cards.FlyingHighRed{},
 	ids.FlyingHighYellow: cards.FlyingHighYellow{},
 	ids.FlyingHighBlue:   cards.FlyingHighBlue{},
