@@ -1,8 +1,10 @@
 name: Put in Context
-types: []
+types:
+    - Generic
+    - DefenseReaction
 cost: 0
 markers:
-    - NotImplemented
+    - Unplayable
 text: This can only defend an attack with 3 or less base {p}.
 variants:
     - id: PutInContextBlue
