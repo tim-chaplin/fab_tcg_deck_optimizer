@@ -20,3 +20,9 @@ const (
 	CopperTokenID
 	QuickenTokenID
 )
+
+// Card-sourced activated-ability IDs. The ability card uses a distinct ID from its
+// parent so cardMetaCache keys the "parent play" and "item ability" paths separately.
+const (
+	ImperialSealOfCommandRedAbilityID CardID = QuickenTokenID + iota + 1
+)

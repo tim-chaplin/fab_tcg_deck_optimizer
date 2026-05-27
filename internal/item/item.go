@@ -48,6 +48,18 @@ func NewFromCard(source card.Card, tt triggertype.Type, fire func(card.GameEngin
 	}
 }
 
+// NewFromCardWithAbility builds a card-sourced in-play permanent carrying an activated
+// ability — no trigger handler; the item sits in play until its ability fires or another
+// effect destroys it. See card.GameEngine.CreateItemWithAbility for the wmask
+// same-turn-delay contract.
+func NewFromCardWithAbility(source card.Card, ability card.Card) *Item {
+	return &Item{
+		Trigger: trigger.FromCard[card.Item](source, 0, nil, false, nil),
+		ability: ability,
+		count:   1,
+	}
+}
+
 func (i *Item) Count() int     { return i.count }
 func (i *Item) SetCount(n int) { i.count = n }
 

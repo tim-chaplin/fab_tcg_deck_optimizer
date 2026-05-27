@@ -364,6 +364,17 @@ func (ge *GameEngine) OpponentDiscard(n int) int {
 	return v
 }
 
+// DestroyOpponentArsenal destroys the opposing arsenal, crediting one card's worth of the
+// OpponentDiscard heuristic (DiscardValue). Idempotent per turn: a second call returns 0
+// and credits nothing. Returns the value credited for log attribution.
+func (ge *GameEngine) DestroyOpponentArsenal() int {
+	if ge.destroyedOpponentArsenal {
+		return 0
+	}
+	ge.destroyedOpponentArsenal = true
+	return ge.OpponentDiscard(1)
+}
+
 // PreventArcaneDamage caps incoming arcane damage by up to n. Returns the amount actually
 // prevented — the lesser of n and the remaining ArcaneIncomingDamage, clamped at 0.
 // Mutates ArcaneIncomingDamage so a second prevention call this turn sees the reduced

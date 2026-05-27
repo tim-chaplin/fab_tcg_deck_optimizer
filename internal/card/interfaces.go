@@ -81,6 +81,11 @@ type GameEngine interface {
 	// tt's bit set. oncePerTurn caps it to one fire per turn; filter narrows the firing
 	// site (nil = any). Handler's final triggertype.Type argument is the firing event.
 	CreateItem(source Card, tt triggertype.Type, handler func(GameEngine, Logger, Item, triggertype.Type), oncePerTurn bool, filter func(TypeSet) bool)
+	// CreateItemWithAbility puts a card-sourced in-play permanent that carries an
+	// activated ability (no trigger handler). The wmask enumerates the ability card as a
+	// 1-AP playable starting the turn AFTER this call — the wmask is computed from
+	// masterState.Items() at attack-turn start, so same-turn activation isn't supported.
+	CreateItemWithAbility(source Card, ability Card)
 	// AddResourcePoints adds n resources to the card currently being pitched — a Pitch handler
 	// calls it to boost what that pitched card yields. No effect outside a pitch fire.
 	AddResourcePoints(n int)
@@ -168,6 +173,10 @@ type GameEngine interface {
 	NonAttackActionPlayed() bool
 	OpponentMarked() bool
 	MarkOpponent()
+	// DestroyOpponentArsenal destroys the opposing arsenal, crediting one card's worth of
+	// the OpponentDiscard heuristic (=DiscardValue). Idempotent per turn: a second call
+	// returns 0 and credits nothing. Returns the value credited for log attribution.
+	DestroyOpponentArsenal() int
 	// CrowdCheer / CrowdBoo land a crowd reaction on the active hero: flips the
 	// HasCrowdCheered / HasCrowdBooed flag and fires the CrowdCheer / CrowdBoo trigger.
 	// Callers gate on the source-side rule (e.g. "each Revered hero") themselves.

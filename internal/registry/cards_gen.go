@@ -252,6 +252,8 @@ var cardsByID = []Card{
 	ids.HumbleYellow: cards.HumbleYellow{},
 	ids.HumbleBlue:   cards.HumbleBlue{},
 
+	ids.ImperialSealOfCommandRed: cards.ImperialSealOfCommandRed{},
+
 	ids.InfectiousHostRed:    cards.InfectiousHostRed{},
 	ids.InfectiousHostYellow: cards.InfectiousHostYellow{},
 	ids.InfectiousHostBlue:   cards.InfectiousHostBlue{},

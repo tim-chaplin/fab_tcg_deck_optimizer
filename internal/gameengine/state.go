@@ -112,6 +112,9 @@ type ephemeral struct {
 	auraCreated           bool
 	nonAttackActionPlayed bool
 	lastAttackHit         bool
+	// destroyedOpponentArsenal flips true once the opposing arsenal is destroyed this turn;
+	// the once-per-turn gate lives inside GameEngine.DestroyOpponentArsenal.
+	destroyedOpponentArsenal bool
 	// hitThisTurn flips true the first time a physical attack lands (the "if hit"
 	// branch in the sequence runner). Distinct from damageDealt > 0 because arcane
 	// damage contributes to damageDealt but does not count as a "hit" — same reason
@@ -770,6 +773,10 @@ func (gs *GameState) SetNonAttackActionPlayed(v bool) { gs.nonAttackActionPlayed
 
 func (gs *GameState) LastAttackHit() bool     { return gs.lastAttackHit }
 func (gs *GameState) SetLastAttackHit(v bool) { gs.lastAttackHit = v }
+
+// DestroyedOpponentArsenal reports whether the opposing arsenal has already been
+// destroyed this turn. Cards mutate it via GameEngine.DestroyOpponentArsenal.
+func (gs *GameState) DestroyedOpponentArsenal() bool { return gs.destroyedOpponentArsenal }
 
 // IsMyTurn reports whether the active phase is the owning player's action phase (true) or
 // the defense phase (false). The attack-turn runner sets it; cards read it for "during your

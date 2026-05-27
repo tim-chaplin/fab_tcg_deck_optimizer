@@ -145,6 +145,14 @@ type LeavesArenaAura interface {
 	OnLeavesArena(g GameEngine, l Logger)
 }
 
+// Legendary is the marker for cards subject to FaB's Legendary deck-building constraint:
+// at most one copy across the deck regardless of the otherwise-applied maxCopies cap. The
+// deck builder's Random / mutation generators enforce the cap-of-1 by consulting this
+// marker per ID. Cards opt in via `markers: [Legendary]` in their YAML.
+type Legendary interface {
+	Legendary()
+}
+
 // FaceUpHook is the optional marker for cards that react to being turned face up by an
 // effect (e.g. "If an activated ability or action card effect puts <self> face up into a
 // zone from your deck, gain 1 action point"). The engine calls OnFaceUp from
