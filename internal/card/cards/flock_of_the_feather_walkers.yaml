@@ -4,8 +4,6 @@ types:
     - Action
     - Attack
 cost: 1
-markers:
-    - NotImplemented
 text: |-
     As an additional cost to play Flock of the Feather Walkers, reveal a card in your hand
     with cost 1 or less. When you attack with Flock of the Feather Walkers, create a Quicken token.
