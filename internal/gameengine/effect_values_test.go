@@ -35,6 +35,26 @@ func TestLikelyDamageHits_DominateClearsFive(t *testing.T) {
 	}
 }
 
+// Tests LikelyDamageDealt's unblocked-damage credit: 1/4/7 leak 1 (opponent over-pays
+// blocking), dominate 5+ leaks n-3 (opponent capped at one block), everything else 0.
+func TestLikelyDamageDealt_BlocksInMultiplesOfThree(t *testing.T) {
+	cases := []struct {
+		n        int
+		dominate bool
+		want     int
+	}{
+		{1, false, 1}, {4, false, 1}, {7, false, 1},
+		{0, false, 0}, {2, false, 0}, {3, false, 0}, {5, false, 0}, {6, false, 0}, {8, false, 0},
+		{5, true, 2}, {6, true, 3}, {7, true, 4}, {8, true, 5},
+		{0, true, 0}, {2, true, 0}, {3, true, 0}, {4, true, 1},
+	}
+	for _, c := range cases {
+		if got := LikelyDamageDealt(c.n, c.dominate); got != c.want {
+			t.Errorf("LikelyDamageDealt(%d, %t) = %d, want %d", c.n, c.dominate, got, c.want)
+		}
+	}
+}
+
 // Tests that LikelyToHit folds EffectiveAttack (printed + BonusAttack, clamp 0) and
 // EffectiveDominate (printed marker OR granted) into LikelyDamageHits.
 func TestLikelyToHit_FoldsEffectiveAttackAndDominate(t *testing.T) {

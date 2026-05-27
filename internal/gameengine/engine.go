@@ -299,6 +299,11 @@ func (ge *GameEngine) LikelyDamageHits(n int, dominate bool) bool {
 	return LikelyDamageHits(n, dominate)
 }
 
+// LikelyDamageDealt is the "how much" sibling — see the package-level function.
+func (ge *GameEngine) LikelyDamageDealt(n int, dominate bool) int {
+	return LikelyDamageDealt(n, dominate)
+}
+
 // OpponentDiscard credits n cards' worth of damage-equivalent value for forcing the
 // opponent to discard. Returns the credited value for log attribution.
 func (ge *GameEngine) OpponentDiscard(n int) int {
@@ -867,14 +872,15 @@ func attackStepCacheIndex(id ids.CardID, fromArsenal bool) uint32 {
 // === Arcane damage ===
 
 // DealArcaneDamage credits n arcane damage to Value, writes a "Dealt n arcane damage" rider
-// line under source, and flips ArcaneDamageDealt when LikelyDamageHits(n, false) approves
-// so same-turn triggers reading "if you've dealt arcane damage this turn" fire. Routes
-// through dealtArcaneText to avoid per-call fmt.Sprintf and variadic-int boxing. Doesn't
-// touch OpponentMarked — only physical hits consume the mark.
+// line under source, flips ArcaneDamageDealt when any arcane damage lands past the
+// opponent's blocks, and credits that unblocked amount to DamageDealt. Routes through
+// dealtArcaneText to avoid per-call fmt.Sprintf and variadic-int boxing. Doesn't touch
+// OpponentMarked or HitThisTurn — neither flag responds to arcane damage.
 func (ge *GameEngine) DealArcaneDamage(l card.Logger, source string, n int) {
 	ge.AddValue(n)
-	if ge.LikelyDamageHits(n, false) {
+	if d := LikelyDamageDealt(n, false); d > 0 {
 		ge.arcaneDamageDealt = true
+		ge.AddDamageDealt(d)
 	}
 	if n >= 0 && n < len(dealtArcaneText) {
 		l.AppendPostTrigger(source, dealtArcaneText[n], n)

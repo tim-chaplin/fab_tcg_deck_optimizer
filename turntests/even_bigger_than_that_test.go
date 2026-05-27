@@ -25,27 +25,37 @@ func TestEvenBiggerThanThat_PlayPreconditionFailsWithoutPriorDamage(t *testing.T
 	}
 }
 
-// Tests that a landing attack credits its effective power to DamageDealt — the gate
-// EBT's PlayPrecondition reads through HitThisTurn / DamageDealt.
-func TestEvenBiggerThanThat_LandingAttackCreditsDamageDealt(t *testing.T) {
+// Tests that a landing power-4 attack credits 1 unblocked damage (blocks-in-multiples-
+// of-3 model: opponent blocks 3, leaks 1) and flips HitThisTurn.
+func TestEvenBiggerThanThat_LandingAttackCreditsUnblockedDamage(t *testing.T) {
 	d := deck.New(testutils.Hero{Intel: 4}, nil, nil)
 	hand := []card.Card{testutils.FakeRedAttack().WithPower(4)}
 	summary := sim.EvalOneTurnForTesting(d, nil, hand)
-	if got := summary.State.DamageDealt(); got != 4 {
-		t.Errorf("DamageDealt = %d, want 4 (a power-4 attack landed)\nBestLine: %s",
+	if got := summary.State.DamageDealt(); got != 1 {
+		t.Errorf("DamageDealt = %d, want 1 (power-4 attack, opponent blocks 3)\nBestLine: %s",
 			got, formatBestLine(summary.BestLine))
 	}
 	if !summary.State.HitThisTurn() {
-		t.Errorf("HitThisTurn = false, want true")
+		t.Errorf("HitThisTurn = false, want true (physical hit landed)")
 	}
 }
 
-// Tests EBT's PlayPrecondition gate flips once damage has been credited this turn.
-func TestEvenBiggerThanThat_PlayPreconditionPassesAfterDamage(t *testing.T) {
+// Tests EBT's PlayPrecondition gate flips once a physical attack has landed this turn.
+func TestEvenBiggerThanThat_PlayPreconditionPassesAfterHit(t *testing.T) {
 	ge := gameengine.New()
-	ge.AddDamageDealt(1)
+	ge.SetHitThisTurn(true)
 	if !(cards.EvenBiggerThanThatRed{}).PlayPrecondition(ge, &card.CardState{}) {
-		t.Errorf("PlayPrecondition = false after AddDamageDealt(1), want true")
+		t.Errorf("PlayPrecondition = false after SetHitThisTurn(true), want true")
+	}
+}
+
+// Tests that DamageDealt > 0 alone (arcane only, no physical hit) does not satisfy the
+// EBT precondition — HitThisTurn must be set by a physical hit.
+func TestEvenBiggerThanThat_PlayPreconditionFailsWithArcaneOnly(t *testing.T) {
+	ge := gameengine.New()
+	ge.AddDamageDealt(1) // simulates arcane-only credit
+	if (cards.EvenBiggerThanThatRed{}).PlayPrecondition(ge, &card.CardState{}) {
+		t.Errorf("PlayPrecondition = true with arcane-only damage, want false (arcane doesn't 'hit')")
 	}
 }
 

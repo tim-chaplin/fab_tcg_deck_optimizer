@@ -36,18 +36,28 @@ func LikelyToHit(pc *card.CardState) bool {
 	return LikelyDamageHits(pc.EffectiveAttack(), pc.EffectiveDominate())
 }
 
-// LikelyDamageHits is the raw-integer threshold check behind LikelyToHit. A typical FaB
-// card is worth ~3 points, so blocking 1/4/7 with a pitch or block card over-pays — the
-// opponent eats the damage instead. Multiples of 3 are the easy-to-block amounts.
-//
-// Dominate flips the math for cards printed (or granted) with the Dominate keyword: the
-// defender is capped at one blocking card, so any attack of 5+ power slips at least 2
-// damage past that single block.
+// LikelyDamageHits is the raw-integer threshold check behind LikelyToHit. True iff
+// LikelyDamageDealt would credit any damage past blocks.
 func LikelyDamageHits(n int, dominate bool) bool {
+	return LikelyDamageDealt(n, dominate) > 0
+}
+
+// LikelyDamageDealt is the "how much" sibling of LikelyDamageHits: it returns the damage
+// expected to land past the opponent's blocks. Heuristic assumes opponents block in
+// multiples of 3 (the typical block-card power), so 1/4/7 leaks 1 (opponent over-pays
+// blocking these awkward amounts and eats them instead). Multiples of 3 are easy-block
+// amounts and deal 0.
+//
+// Dominate flips the math: the defender is capped at one blocking card (3 power), so any
+// attack of 5+ power slips n-3 damage past that single block.
+func LikelyDamageDealt(n int, dominate bool) int {
 	if dominate && n >= 5 {
-		return true
+		return n - 3
 	}
-	return n == 1 || n == 4 || n == 7
+	if n == 1 || n == 4 || n == 7 {
+		return 1
+	}
+	return 0
 }
 
 // OptDebug, when true, makes GameEngine.Opt print every Opt outcome to stdout (input

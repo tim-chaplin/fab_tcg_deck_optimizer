@@ -120,6 +120,10 @@ type GameEngine interface {
 	// the attack lands.
 	LikelyToHit(pc *CardState) bool
 	LikelyDamageHits(n int, dominate bool) bool
+	// LikelyDamageDealt is the "how much" sibling of LikelyDamageHits: returns the
+	// damage expected to land past the opponent's blocks (0 when LikelyDamageHits is
+	// false).
+	LikelyDamageDealt(n int, dominate bool) int
 
 	// Tempo verbs. Cards say "this card does X" (force a discard); the engine decides how
 	// much that's worth in damage-equivalent Value and credits it. The verb returns the

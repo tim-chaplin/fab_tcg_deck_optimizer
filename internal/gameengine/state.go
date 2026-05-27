@@ -112,12 +112,17 @@ type ephemeral struct {
 	auraCreated           bool
 	nonAttackActionPlayed bool
 	lastAttackHit         bool
-	currentHookDestroyed  bool
-	currentStepRerouted   bool
-	cacheable             bool
-	heroTapped            bool
-	hasCrowdCheered       bool
-	hasCrowdBooed         bool
+	// hitThisTurn flips true the first time a physical attack lands (the "if hit"
+	// branch in the sequence runner). Distinct from damageDealt > 0 because arcane
+	// damage contributes to damageDealt but does not count as a "hit" — same reason
+	// arcane doesn't strip Mark.
+	hitThisTurn          bool
+	currentHookDestroyed bool
+	currentStepRerouted  bool
+	cacheable            bool
+	heroTapped           bool
+	hasCrowdCheered      bool
+	hasCrowdBooed        bool
 }
 
 // reset returns e to its start-of-turn baseline: scalars zero except actionPoints=1,
@@ -684,14 +689,15 @@ func (gs *GameState) Value() int     { return gs.value }
 func (gs *GameState) SetValue(v int) { gs.value = v }
 func (gs *GameState) AddValue(n int) { gs.value += n }
 
-// DamageDealt returns the cumulative damage credited at every Hit fire this turn —
-// "if you've dealt {N} this turn" gates read this. Zeroed at the turn boundary.
+// DamageDealt returns the cumulative damage credited at every Hit / arcane-damage event
+// this turn — "if you've dealt {N} this turn" gates read this. Zeroed at the turn boundary.
 func (gs *GameState) DamageDealt() int     { return gs.damageDealt }
 func (gs *GameState) AddDamageDealt(n int) { gs.damageDealt += n }
 
-// HitThisTurn reports whether at least one attack has fired Hit this turn — proxy for the
-// "if you've dealt damage this turn" gate.
-func (gs *GameState) HitThisTurn() bool { return gs.damageDealt > 0 }
+// HitThisTurn reports whether at least one physical attack has landed this turn. Arcane
+// damage does not count — same reason it doesn't strip Mark.
+func (gs *GameState) HitThisTurn() bool     { return gs.hitThisTurn }
+func (gs *GameState) SetHitThisTurn(v bool) { gs.hitThisTurn = v }
 
 // RemainingUnblockedDamage returns the opponent damage still unblocked this turn — the
 // constant matchup figure minus everything defense has absorbed so far.
