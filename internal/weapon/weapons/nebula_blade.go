@@ -29,7 +29,7 @@ type NebulaBladeAbility struct{}
 func (NebulaBladeAbility) ID() ids.CardID                     { return ids.NebulaBladeAbilityID }
 func (NebulaBladeAbility) Name() string                       { return "Nebula Blade" }
 func (NebulaBladeAbility) DisplayName() string                { return "Nebula Blade" }
-func (NebulaBladeAbility) Cost(card.GameEngine) int           { return 2 }
+func (NebulaBladeAbility) Cost() int                          { return 2 }
 func (NebulaBladeAbility) Pitch() int                         { return 0 }
 func (NebulaBladeAbility) Attack() int                        { return 1 }
 func (NebulaBladeAbility) Defense() int                       { return 0 }

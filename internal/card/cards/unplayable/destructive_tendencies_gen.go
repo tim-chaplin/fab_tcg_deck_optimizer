@@ -11,13 +11,13 @@ var destructiveTendenciesTypes = card.NewTypeSet(card.TypeGeneric, card.TypeInst
 
 type DestructiveTendenciesBlue struct{}
 
-func (DestructiveTendenciesBlue) ID() ids.CardID           { return ids.DestructiveTendenciesBlue }
-func (DestructiveTendenciesBlue) Name() string             { return "Destructive Tendencies" }
-func (DestructiveTendenciesBlue) DisplayName() string      { return "Destructive Tendencies [B]" }
-func (DestructiveTendenciesBlue) Cost(card.GameEngine) int { return 0 }
-func (DestructiveTendenciesBlue) Pitch() int               { return 3 }
-func (DestructiveTendenciesBlue) Attack() int              { return 0 }
-func (DestructiveTendenciesBlue) Defense() int             { return 0 }
+func (DestructiveTendenciesBlue) ID() ids.CardID      { return ids.DestructiveTendenciesBlue }
+func (DestructiveTendenciesBlue) Name() string        { return "Destructive Tendencies" }
+func (DestructiveTendenciesBlue) DisplayName() string { return "Destructive Tendencies [B]" }
+func (DestructiveTendenciesBlue) Cost() int           { return 0 }
+func (DestructiveTendenciesBlue) Pitch() int          { return 3 }
+func (DestructiveTendenciesBlue) Attack() int         { return 0 }
+func (DestructiveTendenciesBlue) Defense() int        { return 0 }
 func (DestructiveTendenciesBlue) Types(card.GameEngine) card.TypeSet {
 	return destructiveTendenciesTypes
 }

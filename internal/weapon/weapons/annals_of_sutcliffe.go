@@ -30,13 +30,13 @@ var annalsOfSutcliffeAbilityTypes = card.NewTypeSet(card.TypeRuneblade, card.Typ
 
 type AnnalsOfSutcliffeAbility struct{}
 
-func (AnnalsOfSutcliffeAbility) ID() ids.CardID           { return ids.AnnalsOfSutcliffeAbilityID }
-func (AnnalsOfSutcliffeAbility) Name() string             { return "Annals of Sutcliffe" }
-func (AnnalsOfSutcliffeAbility) DisplayName() string      { return "Annals of Sutcliffe" }
-func (AnnalsOfSutcliffeAbility) Cost(card.GameEngine) int { return 3 }
-func (AnnalsOfSutcliffeAbility) Pitch() int               { return 0 }
-func (AnnalsOfSutcliffeAbility) Attack() int              { return 0 }
-func (AnnalsOfSutcliffeAbility) Defense() int             { return 0 }
+func (AnnalsOfSutcliffeAbility) ID() ids.CardID      { return ids.AnnalsOfSutcliffeAbilityID }
+func (AnnalsOfSutcliffeAbility) Name() string        { return "Annals of Sutcliffe" }
+func (AnnalsOfSutcliffeAbility) DisplayName() string { return "Annals of Sutcliffe" }
+func (AnnalsOfSutcliffeAbility) Cost() int           { return 3 }
+func (AnnalsOfSutcliffeAbility) Pitch() int          { return 0 }
+func (AnnalsOfSutcliffeAbility) Attack() int         { return 0 }
+func (AnnalsOfSutcliffeAbility) Defense() int        { return 0 }
 func (AnnalsOfSutcliffeAbility) Types(card.GameEngine) card.TypeSet {
 	return annalsOfSutcliffeAbilityTypes
 }

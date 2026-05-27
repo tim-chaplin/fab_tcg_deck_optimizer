@@ -33,7 +33,7 @@ type TalisharAbility struct{}
 func (TalisharAbility) ID() ids.CardID                     { return ids.TalisharAbilityID }
 func (TalisharAbility) Name() string                       { return "Talishar, the Lost Prince" }
 func (TalisharAbility) DisplayName() string                { return "Talishar, the Lost Prince" }
-func (TalisharAbility) Cost(card.GameEngine) int           { return 0 }
+func (TalisharAbility) Cost() int                          { return 0 }
 func (TalisharAbility) Pitch() int                         { return 0 }
 func (TalisharAbility) Attack() int                        { return 4 }
 func (TalisharAbility) Defense() int                       { return 0 }

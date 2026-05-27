@@ -11,13 +11,13 @@ var springboardSomersaultTypes = card.NewTypeSet(card.TypeGeneric, card.TypeDefe
 
 type SpringboardSomersaultYellow struct{}
 
-func (SpringboardSomersaultYellow) ID() ids.CardID           { return ids.SpringboardSomersaultYellow }
-func (SpringboardSomersaultYellow) Name() string             { return "Springboard Somersault" }
-func (SpringboardSomersaultYellow) DisplayName() string      { return "Springboard Somersault [Y]" }
-func (SpringboardSomersaultYellow) Cost(card.GameEngine) int { return 0 }
-func (SpringboardSomersaultYellow) Pitch() int               { return 2 }
-func (SpringboardSomersaultYellow) Attack() int              { return 0 }
-func (SpringboardSomersaultYellow) Defense() int             { return 2 }
+func (SpringboardSomersaultYellow) ID() ids.CardID      { return ids.SpringboardSomersaultYellow }
+func (SpringboardSomersaultYellow) Name() string        { return "Springboard Somersault" }
+func (SpringboardSomersaultYellow) DisplayName() string { return "Springboard Somersault [Y]" }
+func (SpringboardSomersaultYellow) Cost() int           { return 0 }
+func (SpringboardSomersaultYellow) Pitch() int          { return 2 }
+func (SpringboardSomersaultYellow) Attack() int         { return 0 }
+func (SpringboardSomersaultYellow) Defense() int        { return 2 }
 func (SpringboardSomersaultYellow) Types(card.GameEngine) card.TypeSet {
 	return springboardSomersaultTypes
 }

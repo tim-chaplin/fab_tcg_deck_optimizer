@@ -9,36 +9,40 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 )
 
-// Tests that Cost is 0 when a hand card can pay the alt cost, else printed 2.
-func TestRiseAbove_VariableCost(t *testing.T) {
+// Tests printed Cost() == 2 always and AlternativeCost reports (0, true) when a Held card
+// is available, (0, false) when empty.
+func TestRiseAbove_PrintedAndAlternativeCost(t *testing.T) {
 	for _, c := range []card.Card{cards.RiseAboveRed{}, cards.RiseAboveYellow{}, cards.RiseAboveBlue{}} {
+		if got := c.Cost(); got != 2 {
+			t.Errorf("%s: Cost() = %d, want 2 (printed)", c.Name(), got)
+		}
+		ac, ok := c.(card.AlternativeCost)
+		if !ok {
+			t.Fatalf("%s: missing card.AlternativeCost", c.Name())
+		}
 		held := gameengine.New()
 		held.SetHand([]card.Card{testutils.FakeRedAttack()})
-		if got := c.Cost(held); got != 0 {
-			t.Errorf("%s: Cost(Hand) = %d, want 0", c.Name(), got)
+		if cost, available := ac.AlternativeCost(held); cost != 0 || !available {
+			t.Errorf("%s: AlternativeCost(hand=1) = (%d, %v), want (0, true)", c.Name(), cost, available)
 		}
 		empty := gameengine.New()
-		if got := c.Cost(empty); got != 2 {
-			t.Errorf("%s: Cost(empty) = %d, want 2", c.Name(), got)
-		}
-		vc, ok := c.(card.VariableCost)
-		if !ok {
-			t.Errorf("%s: missing card.VariableCost", c.Name())
-			continue
-		}
-		if vc.MinCost() != 0 || vc.MaxCost() != 2 {
-			t.Errorf("%s: bounds = [%d, %d], want [0, 2]", c.Name(), vc.MinCost(), vc.MaxCost())
+		if _, available := ac.AlternativeCost(empty); available {
+			t.Errorf("%s: AlternativeCost(empty hand) reports available, want unavailable", c.Name())
 		}
 	}
 }
 
-// Tests that the alt cost pops a hand card and prepends it to the deck.
+// Tests that Play pops a hand card and prepends it to the deck only when PaidAlternativeCost
+// is set on the CardState.
 func TestRiseAbove_AltCostMovesHandCardToDeckTop(t *testing.T) {
 	for _, c := range []card.Card{cards.RiseAboveRed{}, cards.RiseAboveYellow{}, cards.RiseAboveBlue{}} {
 		spare := testutils.FakeRedAttack()
 		ge := gameengine.New()
 		ge.SetHand([]card.Card{spare})
-		pc := &card.CardState{Card: c}
+		pc := &card.CardState{
+			Card:      c,
+			Ephemeral: card.Ephemeral{PaidAlternativeCost: true},
+		}
 		ge.ResolveAttackStep(ge.Logger(), pc)
 		if len(ge.Hand()) != 0 {
 			t.Errorf("%s: Hand = %d entries, want 0", c.Name(), len(ge.Hand()))
@@ -50,15 +54,16 @@ func TestRiseAbove_AltCostMovesHandCardToDeckTop(t *testing.T) {
 	}
 }
 
-// Tests that an empty hand leaves the deck untouched.
-func TestRiseAbove_EmptyHandLeavesDeckUntouched(t *testing.T) {
+// Tests that the printed-cost branch (PaidAlternativeCost=false) doesn't touch the hand.
+func TestRiseAbove_PrintedCostBranchSkipsAltCostSideEffect(t *testing.T) {
 	for _, c := range []card.Card{cards.RiseAboveRed{}, cards.RiseAboveYellow{}, cards.RiseAboveBlue{}} {
+		spare := testutils.FakeRedAttack()
 		ge := gameengine.New()
-		preSize := ge.Deck().Size()
+		ge.SetHand([]card.Card{spare})
 		pc := &card.CardState{Card: c}
 		ge.ResolveAttackStep(ge.Logger(), pc)
-		if got := ge.Deck().Size(); got != preSize {
-			t.Errorf("%s: deck size = %d, want %d", c.Name(), got, preSize)
+		if len(ge.Hand()) != 1 {
+			t.Errorf("%s: Hand size = %d, want 1 (printed-cost branch should not pop the hand card)", c.Name(), len(ge.Hand()))
 		}
 	}
 }

@@ -42,12 +42,12 @@ func TestReduceToRunechant_CostBounds(t *testing.T) {
 		cards.ReduceToRunechantBlue{},
 	}
 	for _, c := range cases {
+		if c.Cost() != 1 {
+			t.Errorf("%s: Cost() = %d, want 1 (printed)", c.Name(), c.Cost())
+		}
 		vc, ok := c.(card.VariableCost)
 		if !ok {
 			t.Fatalf("%s: does not implement card.VariableCost", c.Name())
-		}
-		if vc.MaxCost() != 1 {
-			t.Errorf("%s: MaxCost() = %d, want 1", c.Name(), vc.MaxCost())
 		}
 		if vc.MinCost() != 0 {
 			t.Errorf("%s: MinCost() = %d, want 0", c.Name(), vc.MinCost())

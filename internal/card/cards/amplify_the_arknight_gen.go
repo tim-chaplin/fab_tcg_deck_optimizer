@@ -14,6 +14,7 @@ type AmplifyTheArknightRed struct{}
 func (AmplifyTheArknightRed) ID() ids.CardID                     { return ids.AmplifyTheArknightRed }
 func (AmplifyTheArknightRed) Name() string                       { return "Amplify the Arknight" }
 func (AmplifyTheArknightRed) DisplayName() string                { return "Amplify the Arknight [R]" }
+func (AmplifyTheArknightRed) Cost() int                          { return 3 }
 func (AmplifyTheArknightRed) Pitch() int                         { return 1 }
 func (AmplifyTheArknightRed) Attack() int                        { return 6 }
 func (AmplifyTheArknightRed) Defense() int                       { return 3 }
@@ -25,6 +26,7 @@ type AmplifyTheArknightYellow struct{}
 func (AmplifyTheArknightYellow) ID() ids.CardID                     { return ids.AmplifyTheArknightYellow }
 func (AmplifyTheArknightYellow) Name() string                       { return "Amplify the Arknight" }
 func (AmplifyTheArknightYellow) DisplayName() string                { return "Amplify the Arknight [Y]" }
+func (AmplifyTheArknightYellow) Cost() int                          { return 3 }
 func (AmplifyTheArknightYellow) Pitch() int                         { return 2 }
 func (AmplifyTheArknightYellow) Attack() int                        { return 5 }
 func (AmplifyTheArknightYellow) Defense() int                       { return 3 }
@@ -36,6 +38,7 @@ type AmplifyTheArknightBlue struct{}
 func (AmplifyTheArknightBlue) ID() ids.CardID                     { return ids.AmplifyTheArknightBlue }
 func (AmplifyTheArknightBlue) Name() string                       { return "Amplify the Arknight" }
 func (AmplifyTheArknightBlue) DisplayName() string                { return "Amplify the Arknight [B]" }
+func (AmplifyTheArknightBlue) Cost() int                          { return 3 }
 func (AmplifyTheArknightBlue) Pitch() int                         { return 3 }
 func (AmplifyTheArknightBlue) Attack() int                        { return 4 }
 func (AmplifyTheArknightBlue) Defense() int                       { return 3 }

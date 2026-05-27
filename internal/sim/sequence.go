@@ -200,10 +200,12 @@ func bestAttackWithWeapons(
 	if hasDRDefender {
 		probe := ctx.drCostProbe(ctx.runechantCarryover)
 		for _, def := range defenders {
-			if !attackerMetaPtrFor(def).actsAsDR {
+			m := attackerMetaPtrFor(def)
+			if !m.actsAsDR {
 				continue
 			}
-			drCost += def.Cost(probe)
+			c, _ := m.costAt(probe, 0)
+			drCost += c
 		}
 	}
 
@@ -864,10 +866,12 @@ func (ctx *sequenceContext) playSequenceWithMeta(n int) (damage int, totalCounte
 			return infeasible()
 		}
 		prevPitchIdx := pool.idx
-		contrib, ok := pool.pay(ge, m.costAt(ge, pc.Mode))
+		cost, paidAlt := m.costAt(ge, pc.Mode)
+		contrib, ok := pool.pay(ge, cost)
 		if !ok {
 			return infeasible()
 		}
+		pc.PaidAlternativeCost = paidAlt
 		pc.PitchedToPlay = contrib
 		for k := prevPitchIdx; k < pool.idx; k++ {
 			if !state.RemoveFromHand(pool.perm[k].Card) {

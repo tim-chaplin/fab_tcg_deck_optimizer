@@ -14,7 +14,7 @@ type AdrenalineRushRed struct{}
 func (AdrenalineRushRed) ID() ids.CardID                     { return ids.AdrenalineRushRed }
 func (AdrenalineRushRed) Name() string                       { return "Adrenaline Rush" }
 func (AdrenalineRushRed) DisplayName() string                { return "Adrenaline Rush [R]" }
-func (AdrenalineRushRed) Cost(card.GameEngine) int           { return 2 }
+func (AdrenalineRushRed) Cost() int                          { return 2 }
 func (AdrenalineRushRed) Pitch() int                         { return 1 }
 func (AdrenalineRushRed) Attack() int                        { return 4 }
 func (AdrenalineRushRed) Defense() int                       { return 2 }
@@ -26,7 +26,7 @@ type AdrenalineRushYellow struct{}
 func (AdrenalineRushYellow) ID() ids.CardID                     { return ids.AdrenalineRushYellow }
 func (AdrenalineRushYellow) Name() string                       { return "Adrenaline Rush" }
 func (AdrenalineRushYellow) DisplayName() string                { return "Adrenaline Rush [Y]" }
-func (AdrenalineRushYellow) Cost(card.GameEngine) int           { return 2 }
+func (AdrenalineRushYellow) Cost() int                          { return 2 }
 func (AdrenalineRushYellow) Pitch() int                         { return 2 }
 func (AdrenalineRushYellow) Attack() int                        { return 3 }
 func (AdrenalineRushYellow) Defense() int                       { return 2 }
@@ -38,7 +38,7 @@ type AdrenalineRushBlue struct{}
 func (AdrenalineRushBlue) ID() ids.CardID                     { return ids.AdrenalineRushBlue }
 func (AdrenalineRushBlue) Name() string                       { return "Adrenaline Rush" }
 func (AdrenalineRushBlue) DisplayName() string                { return "Adrenaline Rush [B]" }
-func (AdrenalineRushBlue) Cost(card.GameEngine) int           { return 2 }
+func (AdrenalineRushBlue) Cost() int                          { return 2 }
 func (AdrenalineRushBlue) Pitch() int                         { return 3 }
 func (AdrenalineRushBlue) Attack() int                        { return 2 }
 func (AdrenalineRushBlue) Defense() int                       { return 2 }

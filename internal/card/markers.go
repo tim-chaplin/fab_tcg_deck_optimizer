@@ -5,13 +5,26 @@ package card
 // pipeline (cost, partition, defense, …) and skips the branch when the card doesn't
 // implement the marker.
 
-// VariableCost is optionally implemented by cards whose Cost(g) varies with the engine
-// state (e.g. discount-per-token effects). MinCost and MaxCost are static bounds; the
-// solver uses them for cheap pre-screens before enumerating attack-turn permutations.
-// Non-implementers must return the same value for Cost(g) regardless of g.
+// VariableCost is optionally implemented by cards whose actual paid resource cost varies
+// with engine state (e.g. discount-per-runechant effects). EffectiveCost(g) returns the
+// live cost; MinCost is the static lower bound the solver's partition pre-screen uses to
+// keep the attack-budget prune sound. The printed upper bound is just Card.Cost().
+// Non-implementers pay Card.Cost() regardless of game state.
 type VariableCost interface {
+	EffectiveCost(g GameEngine) int
 	MinCost() int
-	MaxCost() int
+}
+
+// AlternativeCost is optionally implemented by cards offering an alternative payment for
+// the printed resource cost ("you may put a card from your hand on top of your deck rather
+// than pay Moon Wish's {r} cost"). AlternativeCost returns (altCost, ok); ok=false means
+// the alt branch isn't available right now (e.g. no hand card to put on deck). The sim
+// treats Card.Cost() and AlternativeCost() as two cost branches, picks whichever fits the
+// budget at lowest expense, and flips CardState.PaidAlternativeCost on the alt branch.
+// Card.Cost() still returns the PRINTED cost — predicates like Flock's reveal cost see the
+// printed cost, not the alt branch.
+type AlternativeCost interface {
+	AlternativeCost(g GameEngine) (cost int, available bool)
 }
 
 // Modal is the marker for "Choose 1" cards. Modes returns the number of exclusive modes
@@ -107,8 +120,8 @@ type Universal interface {
 // target text becomes its own predicate leg, and the attack-turn runner rejects the
 // permutation when the chosen mode doesn't accept the active attack.
 //
-// The engine handle is threaded through so predicates that read variable cost (c.Cost(g))
-// or class-aware types (c.Types(g)) don't have to fabricate a zero TurnState. Most ARs
+// The engine handle is threaded through so predicates that read live state (e.g.
+// class-aware types via c.Types(g)) don't have to fabricate a zero TurnState. Most ARs
 // look only at printed type-line predicates and ignore g.
 //
 // CardState.GrantAttackReactionBuff (the method most ARs call from Play) lives alongside

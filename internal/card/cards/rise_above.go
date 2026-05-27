@@ -11,37 +11,38 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 )
 
-// riseAbovePrintedCost is the un-discounted resource cost (also the VariableCost MaxCost bound).
-const riseAbovePrintedCost = 2
-
-func riseAboveCost(ge card.GameEngine) int {
+// riseAboveAlternativeCost reports the alt branch as (0, ok=true) when a Held card remains
+// in hand to push onto the deck top.
+func riseAboveAlternativeCost(ge card.GameEngine) (int, bool) {
 	if ge != nil && ge.HeldHandSize() > 0 {
-		return 0
+		return 0, true
 	}
-	return riseAbovePrintedCost
+	return 0, false
 }
 
 func riseAbovePlay(ge card.GameEngine, l card.Logger, self *card.CardState) {
-	ge.DiscardToTopOfDeck(self.Card.DisplayName())
+	if self.PaidAlternativeCost {
+		ge.DiscardToTopOfDeck(self.Card.DisplayName())
+	}
 }
 
-func (RiseAboveRed) Cost(ge card.GameEngine) int { return riseAboveCost(ge) }
-func (RiseAboveRed) MinCost() int                { return 0 }
-func (RiseAboveRed) MaxCost() int                { return riseAbovePrintedCost }
+func (RiseAboveRed) AlternativeCost(ge card.GameEngine) (int, bool) {
+	return riseAboveAlternativeCost(ge)
+}
 func (RiseAboveRed) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
 	riseAbovePlay(ge, l, self)
 }
 
-func (RiseAboveYellow) Cost(ge card.GameEngine) int { return riseAboveCost(ge) }
-func (RiseAboveYellow) MinCost() int                { return 0 }
-func (RiseAboveYellow) MaxCost() int                { return riseAbovePrintedCost }
+func (RiseAboveYellow) AlternativeCost(ge card.GameEngine) (int, bool) {
+	return riseAboveAlternativeCost(ge)
+}
 func (RiseAboveYellow) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
 	riseAbovePlay(ge, l, self)
 }
 
-func (RiseAboveBlue) Cost(ge card.GameEngine) int { return riseAboveCost(ge) }
-func (RiseAboveBlue) MinCost() int                { return 0 }
-func (RiseAboveBlue) MaxCost() int                { return riseAbovePrintedCost }
+func (RiseAboveBlue) AlternativeCost(ge card.GameEngine) (int, bool) {
+	return riseAboveAlternativeCost(ge)
+}
 func (RiseAboveBlue) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
 	riseAbovePlay(ge, l, self)
 }

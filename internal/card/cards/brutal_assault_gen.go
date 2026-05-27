@@ -14,7 +14,7 @@ type BrutalAssaultRed struct{}
 func (BrutalAssaultRed) ID() ids.CardID                     { return ids.BrutalAssaultRed }
 func (BrutalAssaultRed) Name() string                       { return "Brutal Assault" }
 func (BrutalAssaultRed) DisplayName() string                { return "Brutal Assault [R]" }
-func (BrutalAssaultRed) Cost(card.GameEngine) int           { return 2 }
+func (BrutalAssaultRed) Cost() int                          { return 2 }
 func (BrutalAssaultRed) Pitch() int                         { return 1 }
 func (BrutalAssaultRed) Attack() int                        { return 6 }
 func (BrutalAssaultRed) Defense() int                       { return 3 }
@@ -26,7 +26,7 @@ type BrutalAssaultYellow struct{}
 func (BrutalAssaultYellow) ID() ids.CardID                     { return ids.BrutalAssaultYellow }
 func (BrutalAssaultYellow) Name() string                       { return "Brutal Assault" }
 func (BrutalAssaultYellow) DisplayName() string                { return "Brutal Assault [Y]" }
-func (BrutalAssaultYellow) Cost(card.GameEngine) int           { return 2 }
+func (BrutalAssaultYellow) Cost() int                          { return 2 }
 func (BrutalAssaultYellow) Pitch() int                         { return 2 }
 func (BrutalAssaultYellow) Attack() int                        { return 5 }
 func (BrutalAssaultYellow) Defense() int                       { return 3 }
@@ -38,7 +38,7 @@ type BrutalAssaultBlue struct{}
 func (BrutalAssaultBlue) ID() ids.CardID                     { return ids.BrutalAssaultBlue }
 func (BrutalAssaultBlue) Name() string                       { return "Brutal Assault" }
 func (BrutalAssaultBlue) DisplayName() string                { return "Brutal Assault [B]" }
-func (BrutalAssaultBlue) Cost(card.GameEngine) int           { return 2 }
+func (BrutalAssaultBlue) Cost() int                          { return 2 }
 func (BrutalAssaultBlue) Pitch() int                         { return 3 }
 func (BrutalAssaultBlue) Attack() int                        { return 4 }
 func (BrutalAssaultBlue) Defense() int                       { return 3 }

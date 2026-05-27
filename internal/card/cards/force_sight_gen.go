@@ -14,7 +14,7 @@ type ForceSightRed struct{}
 func (ForceSightRed) ID() ids.CardID                     { return ids.ForceSightRed }
 func (ForceSightRed) Name() string                       { return "Force Sight" }
 func (ForceSightRed) DisplayName() string                { return "Force Sight [R]" }
-func (ForceSightRed) Cost(card.GameEngine) int           { return 1 }
+func (ForceSightRed) Cost() int                          { return 1 }
 func (ForceSightRed) Pitch() int                         { return 1 }
 func (ForceSightRed) Attack() int                        { return 0 }
 func (ForceSightRed) Defense() int                       { return 2 }
@@ -26,7 +26,7 @@ type ForceSightYellow struct{}
 func (ForceSightYellow) ID() ids.CardID                     { return ids.ForceSightYellow }
 func (ForceSightYellow) Name() string                       { return "Force Sight" }
 func (ForceSightYellow) DisplayName() string                { return "Force Sight [Y]" }
-func (ForceSightYellow) Cost(card.GameEngine) int           { return 1 }
+func (ForceSightYellow) Cost() int                          { return 1 }
 func (ForceSightYellow) Pitch() int                         { return 2 }
 func (ForceSightYellow) Attack() int                        { return 0 }
 func (ForceSightYellow) Defense() int                       { return 2 }
@@ -38,7 +38,7 @@ type ForceSightBlue struct{}
 func (ForceSightBlue) ID() ids.CardID                     { return ids.ForceSightBlue }
 func (ForceSightBlue) Name() string                       { return "Force Sight" }
 func (ForceSightBlue) DisplayName() string                { return "Force Sight [B]" }
-func (ForceSightBlue) Cost(card.GameEngine) int           { return 1 }
+func (ForceSightBlue) Cost() int                          { return 1 }
 func (ForceSightBlue) Pitch() int                         { return 3 }
 func (ForceSightBlue) Attack() int                        { return 0 }
 func (ForceSightBlue) Defense() int                       { return 2 }

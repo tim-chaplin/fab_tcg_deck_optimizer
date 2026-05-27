@@ -14,7 +14,7 @@ type ClarityPotionBlue struct{}
 func (ClarityPotionBlue) ID() ids.CardID                     { return ids.ClarityPotionBlue }
 func (ClarityPotionBlue) Name() string                       { return "Clarity Potion" }
 func (ClarityPotionBlue) DisplayName() string                { return "Clarity Potion [B]" }
-func (ClarityPotionBlue) Cost(card.GameEngine) int           { return 0 }
+func (ClarityPotionBlue) Cost() int                          { return 0 }
 func (ClarityPotionBlue) Pitch() int                         { return 3 }
 func (ClarityPotionBlue) Attack() int                        { return 0 }
 func (ClarityPotionBlue) Defense() int                       { return 0 }

@@ -11,38 +11,40 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 )
 
-// Tests that Cost is 0 when a hand card can pay the alt cost, else printed 2; static
-// bounds are [0, 2].
-func TestMoonWish_VariableCost(t *testing.T) {
+// Tests printed Cost() == 2 always (irrespective of hand state) and AlternativeCost
+// reports (0, true) when a Held card is available, (0, false) when not.
+func TestMoonWish_PrintedAndAlternativeCost(t *testing.T) {
 	cases := []card.Card{cards.MoonWishRed{}, cards.MoonWishYellow{}, cards.MoonWishBlue{}}
 	for _, c := range cases {
+		if got := c.Cost(); got != 2 {
+			t.Errorf("%s: Cost() = %d, want 2 (printed)", c.Name(), got)
+		}
+		ac, ok := c.(card.AlternativeCost)
+		if !ok {
+			t.Fatalf("%s: missing card.AlternativeCost", c.Name())
+		}
 		held := gameengine.New()
 		held.SetHand([]card.Card{testutils.FakeRedAttack()})
-		if got := c.Cost(held); got != 0 {
-			t.Errorf("%s: Cost(Hand) = %d, want 0", c.Name(), got)
+		if cost, available := ac.AlternativeCost(held); cost != 0 || !available {
+			t.Errorf("%s: AlternativeCost(hand=1) = (%d, %v), want (0, true)", c.Name(), cost, available)
 		}
 		empty := gameengine.New()
-		if got := c.Cost(empty); got != 2 {
-			t.Errorf("%s: Cost(empty) = %d, want 2", c.Name(), got)
-		}
-		vc, ok := c.(card.VariableCost)
-		if !ok {
-			t.Errorf("%s: missing card.VariableCost", c.Name())
-			continue
-		}
-		if vc.MinCost() != 0 || vc.MaxCost() != 2 {
-			t.Errorf("%s: bounds = [%d, %d], want [0, 2]", c.Name(), vc.MinCost(), vc.MaxCost())
+		if _, available := ac.AlternativeCost(empty); available {
+			t.Errorf("%s: AlternativeCost(empty hand) reports available, want unavailable", c.Name())
 		}
 	}
 }
 
-// Tests that the alt cost pops a hand card and prepends it to the deck.
+// Tests that Play pops a hand card onto the deck top only when PaidAlternativeCost is set.
 func TestMoonWish_AltCostMovesHandCardToDeckTop(t *testing.T) {
 	dr := testutils.FakeRedAttack().WithName("dr")
 	other := testutils.FakeRedAttack().WithName("deckTop")
 	ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCards([]card.Card{other}).Build()}
 	ge.SetHand([]card.Card{dr})
-	pc := &card.CardState{Card: cards.MoonWishYellow{}}
+	pc := &card.CardState{
+		Card:      cards.MoonWishYellow{},
+		Ephemeral: card.Ephemeral{PaidAlternativeCost: true},
+	}
 	ge.ResolveAttackStep(ge.Logger(), pc)
 	testutils.FireOnHitIfLikely(ge, ge.Logger(), pc)
 	if h := ge.Hand(); len(h) != 0 {
@@ -53,6 +55,20 @@ func TestMoonWish_AltCostMovesHandCardToDeckTop(t *testing.T) {
 	}
 	if top := ge.Deck().PeekTop(); top == nil || top.(card.Card).Name() != "dr" {
 		t.Errorf("Deck top = %v, want %q (alt-cost'd card moved to top)", top, "dr")
+	}
+}
+
+// Tests that Play leaves the hand and deck alone when PaidAlternativeCost is NOT set
+// (the printed-cost branch — no alt-cost side effect runs).
+func TestMoonWish_PrintedCostBranchSkipsAltCostSideEffect(t *testing.T) {
+	dr := testutils.FakeRedAttack().WithName("dr")
+	other := testutils.FakeRedAttack().WithName("deckTop")
+	ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCards([]card.Card{other}).Build()}
+	ge.SetHand([]card.Card{dr})
+	pc := &card.CardState{Card: cards.MoonWishYellow{}}
+	ge.ResolveAttackStep(ge.Logger(), pc)
+	if h := ge.Hand(); len(h) != 1 {
+		t.Errorf("Hand size = %d, want 1 (printed-cost branch should not pop the hand card)", len(h))
 	}
 }
 

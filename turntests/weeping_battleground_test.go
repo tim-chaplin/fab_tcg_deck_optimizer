@@ -20,7 +20,7 @@ type zeroDefenseAura struct{}
 func (zeroDefenseAura) ID() ids.CardID                                     { return ids.InvalidCard }
 func (zeroDefenseAura) Name() string                                       { return "zeroDefenseAura" }
 func (zeroDefenseAura) DisplayName() string                                { return "zeroDefenseAura" }
-func (zeroDefenseAura) Cost(card.GameEngine) int                           { return 0 }
+func (zeroDefenseAura) Cost() int                                          { return 0 }
 func (zeroDefenseAura) Pitch() int                                         { return 0 }
 func (zeroDefenseAura) Attack() int                                        { return 0 }
 func (zeroDefenseAura) Defense() int                                       { return 0 }

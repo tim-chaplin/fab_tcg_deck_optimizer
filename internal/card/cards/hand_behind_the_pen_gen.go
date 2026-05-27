@@ -14,7 +14,7 @@ type HandBehindThePenRed struct{}
 func (HandBehindThePenRed) ID() ids.CardID                     { return ids.HandBehindThePenRed }
 func (HandBehindThePenRed) Name() string                       { return "Hand Behind the Pen" }
 func (HandBehindThePenRed) DisplayName() string                { return "Hand Behind the Pen [R]" }
-func (HandBehindThePenRed) Cost(card.GameEngine) int           { return 2 }
+func (HandBehindThePenRed) Cost() int                          { return 2 }
 func (HandBehindThePenRed) Pitch() int                         { return 1 }
 func (HandBehindThePenRed) Attack() int                        { return 6 }
 func (HandBehindThePenRed) Defense() int                       { return 2 }

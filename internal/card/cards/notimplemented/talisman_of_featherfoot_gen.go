@@ -11,13 +11,13 @@ var talismanOfFeatherfootTypes = card.NewTypeSet(card.TypeGeneric, card.TypeActi
 
 type TalismanOfFeatherfootYellow struct{}
 
-func (TalismanOfFeatherfootYellow) ID() ids.CardID           { return ids.TalismanOfFeatherfootYellow }
-func (TalismanOfFeatherfootYellow) Name() string             { return "Talisman of Featherfoot" }
-func (TalismanOfFeatherfootYellow) DisplayName() string      { return "Talisman of Featherfoot [Y]" }
-func (TalismanOfFeatherfootYellow) Cost(card.GameEngine) int { return 0 }
-func (TalismanOfFeatherfootYellow) Pitch() int               { return 2 }
-func (TalismanOfFeatherfootYellow) Attack() int              { return 0 }
-func (TalismanOfFeatherfootYellow) Defense() int             { return 0 }
+func (TalismanOfFeatherfootYellow) ID() ids.CardID      { return ids.TalismanOfFeatherfootYellow }
+func (TalismanOfFeatherfootYellow) Name() string        { return "Talisman of Featherfoot" }
+func (TalismanOfFeatherfootYellow) DisplayName() string { return "Talisman of Featherfoot [Y]" }
+func (TalismanOfFeatherfootYellow) Cost() int           { return 0 }
+func (TalismanOfFeatherfootYellow) Pitch() int          { return 2 }
+func (TalismanOfFeatherfootYellow) Attack() int         { return 0 }
+func (TalismanOfFeatherfootYellow) Defense() int        { return 0 }
 func (TalismanOfFeatherfootYellow) Types(card.GameEngine) card.TypeSet {
 	return talismanOfFeatherfootTypes
 }

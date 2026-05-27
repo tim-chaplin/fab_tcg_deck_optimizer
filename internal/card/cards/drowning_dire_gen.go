@@ -14,7 +14,7 @@ type DrowningDireRed struct{}
 func (DrowningDireRed) ID() ids.CardID                     { return ids.DrowningDireRed }
 func (DrowningDireRed) Name() string                       { return "Drowning Dire" }
 func (DrowningDireRed) DisplayName() string                { return "Drowning Dire [R]" }
-func (DrowningDireRed) Cost(card.GameEngine) int           { return 2 }
+func (DrowningDireRed) Cost() int                          { return 2 }
 func (DrowningDireRed) Pitch() int                         { return 1 }
 func (DrowningDireRed) Attack() int                        { return 5 }
 func (DrowningDireRed) Defense() int                       { return 3 }
@@ -26,7 +26,7 @@ type DrowningDireYellow struct{}
 func (DrowningDireYellow) ID() ids.CardID                     { return ids.DrowningDireYellow }
 func (DrowningDireYellow) Name() string                       { return "Drowning Dire" }
 func (DrowningDireYellow) DisplayName() string                { return "Drowning Dire [Y]" }
-func (DrowningDireYellow) Cost(card.GameEngine) int           { return 2 }
+func (DrowningDireYellow) Cost() int                          { return 2 }
 func (DrowningDireYellow) Pitch() int                         { return 2 }
 func (DrowningDireYellow) Attack() int                        { return 4 }
 func (DrowningDireYellow) Defense() int                       { return 3 }
@@ -38,7 +38,7 @@ type DrowningDireBlue struct{}
 func (DrowningDireBlue) ID() ids.CardID                     { return ids.DrowningDireBlue }
 func (DrowningDireBlue) Name() string                       { return "Drowning Dire" }
 func (DrowningDireBlue) DisplayName() string                { return "Drowning Dire [B]" }
-func (DrowningDireBlue) Cost(card.GameEngine) int           { return 2 }
+func (DrowningDireBlue) Cost() int                          { return 2 }
 func (DrowningDireBlue) Pitch() int                         { return 3 }
 func (DrowningDireBlue) Attack() int                        { return 3 }
 func (DrowningDireBlue) Defense() int                       { return 3 }

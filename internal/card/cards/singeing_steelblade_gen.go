@@ -14,7 +14,7 @@ type SingeingSteelbladeRed struct{}
 func (SingeingSteelbladeRed) ID() ids.CardID                     { return ids.SingeingSteelbladeRed }
 func (SingeingSteelbladeRed) Name() string                       { return "Singeing Steelblade" }
 func (SingeingSteelbladeRed) DisplayName() string                { return "Singeing Steelblade [R]" }
-func (SingeingSteelbladeRed) Cost(card.GameEngine) int           { return 1 }
+func (SingeingSteelbladeRed) Cost() int                          { return 1 }
 func (SingeingSteelbladeRed) Pitch() int                         { return 1 }
 func (SingeingSteelbladeRed) Attack() int                        { return 4 }
 func (SingeingSteelbladeRed) Defense() int                       { return 3 }
@@ -26,7 +26,7 @@ type SingeingSteelbladeYellow struct{}
 func (SingeingSteelbladeYellow) ID() ids.CardID                     { return ids.SingeingSteelbladeYellow }
 func (SingeingSteelbladeYellow) Name() string                       { return "Singeing Steelblade" }
 func (SingeingSteelbladeYellow) DisplayName() string                { return "Singeing Steelblade [Y]" }
-func (SingeingSteelbladeYellow) Cost(card.GameEngine) int           { return 1 }
+func (SingeingSteelbladeYellow) Cost() int                          { return 1 }
 func (SingeingSteelbladeYellow) Pitch() int                         { return 2 }
 func (SingeingSteelbladeYellow) Attack() int                        { return 3 }
 func (SingeingSteelbladeYellow) Defense() int                       { return 3 }
@@ -38,7 +38,7 @@ type SingeingSteelbladeBlue struct{}
 func (SingeingSteelbladeBlue) ID() ids.CardID                     { return ids.SingeingSteelbladeBlue }
 func (SingeingSteelbladeBlue) Name() string                       { return "Singeing Steelblade" }
 func (SingeingSteelbladeBlue) DisplayName() string                { return "Singeing Steelblade [B]" }
-func (SingeingSteelbladeBlue) Cost(card.GameEngine) int           { return 1 }
+func (SingeingSteelbladeBlue) Cost() int                          { return 1 }
 func (SingeingSteelbladeBlue) Pitch() int                         { return 3 }
 func (SingeingSteelbladeBlue) Attack() int                        { return 2 }
 func (SingeingSteelbladeBlue) Defense() int                       { return 3 }

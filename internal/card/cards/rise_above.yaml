@@ -2,7 +2,7 @@ name: Rise Above
 types:
     - Generic
     - DefenseReaction
-cost: variable
+cost: 2
 text: |-
     You may put a card from your hand on top of your deck rather than pay Rise Above's {r}
     cost.

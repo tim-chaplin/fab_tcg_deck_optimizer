@@ -14,7 +14,7 @@ type SurgingMilitiaRed struct{}
 func (SurgingMilitiaRed) ID() ids.CardID                     { return ids.SurgingMilitiaRed }
 func (SurgingMilitiaRed) Name() string                       { return "Surging Militia" }
 func (SurgingMilitiaRed) DisplayName() string                { return "Surging Militia [R]" }
-func (SurgingMilitiaRed) Cost(card.GameEngine) int           { return 2 }
+func (SurgingMilitiaRed) Cost() int                          { return 2 }
 func (SurgingMilitiaRed) Pitch() int                         { return 1 }
 func (SurgingMilitiaRed) Attack() int                        { return 5 }
 func (SurgingMilitiaRed) Defense() int                       { return 2 }
@@ -26,7 +26,7 @@ type SurgingMilitiaYellow struct{}
 func (SurgingMilitiaYellow) ID() ids.CardID                     { return ids.SurgingMilitiaYellow }
 func (SurgingMilitiaYellow) Name() string                       { return "Surging Militia" }
 func (SurgingMilitiaYellow) DisplayName() string                { return "Surging Militia [Y]" }
-func (SurgingMilitiaYellow) Cost(card.GameEngine) int           { return 2 }
+func (SurgingMilitiaYellow) Cost() int                          { return 2 }
 func (SurgingMilitiaYellow) Pitch() int                         { return 2 }
 func (SurgingMilitiaYellow) Attack() int                        { return 4 }
 func (SurgingMilitiaYellow) Defense() int                       { return 2 }
@@ -38,7 +38,7 @@ type SurgingMilitiaBlue struct{}
 func (SurgingMilitiaBlue) ID() ids.CardID                     { return ids.SurgingMilitiaBlue }
 func (SurgingMilitiaBlue) Name() string                       { return "Surging Militia" }
 func (SurgingMilitiaBlue) DisplayName() string                { return "Surging Militia [B]" }
-func (SurgingMilitiaBlue) Cost(card.GameEngine) int           { return 2 }
+func (SurgingMilitiaBlue) Cost() int                          { return 2 }
 func (SurgingMilitiaBlue) Pitch() int                         { return 3 }
 func (SurgingMilitiaBlue) Attack() int                        { return 3 }
 func (SurgingMilitiaBlue) Defense() int                       { return 2 }

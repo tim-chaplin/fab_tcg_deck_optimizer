@@ -18,7 +18,7 @@ type fakeCard struct {
 func (c fakeCard) ID() ids.CardID                    { return ids.InvalidCard }
 func (c fakeCard) Name() string                      { return c.name }
 func (c fakeCard) DisplayName() string               { return c.name }
-func (fakeCard) Cost(GameEngine) int                 { return 0 }
+func (fakeCard) Cost() int                           { return 0 }
 func (fakeCard) Pitch() int                          { return 0 }
 func (c fakeCard) Attack() int                       { return c.attack }
 func (fakeCard) Defense() int                        { return 0 }

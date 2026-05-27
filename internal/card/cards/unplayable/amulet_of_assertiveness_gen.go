@@ -11,13 +11,13 @@ var amuletOfAssertivenessTypes = card.NewTypeSet(card.TypeGeneric, card.TypeActi
 
 type AmuletOfAssertivenessYellow struct{}
 
-func (AmuletOfAssertivenessYellow) ID() ids.CardID           { return ids.AmuletOfAssertivenessYellow }
-func (AmuletOfAssertivenessYellow) Name() string             { return "Amulet of Assertiveness" }
-func (AmuletOfAssertivenessYellow) DisplayName() string      { return "Amulet of Assertiveness [Y]" }
-func (AmuletOfAssertivenessYellow) Cost(card.GameEngine) int { return 0 }
-func (AmuletOfAssertivenessYellow) Pitch() int               { return 2 }
-func (AmuletOfAssertivenessYellow) Attack() int              { return 0 }
-func (AmuletOfAssertivenessYellow) Defense() int             { return 0 }
+func (AmuletOfAssertivenessYellow) ID() ids.CardID      { return ids.AmuletOfAssertivenessYellow }
+func (AmuletOfAssertivenessYellow) Name() string        { return "Amulet of Assertiveness" }
+func (AmuletOfAssertivenessYellow) DisplayName() string { return "Amulet of Assertiveness [Y]" }
+func (AmuletOfAssertivenessYellow) Cost() int           { return 0 }
+func (AmuletOfAssertivenessYellow) Pitch() int          { return 2 }
+func (AmuletOfAssertivenessYellow) Attack() int         { return 0 }
+func (AmuletOfAssertivenessYellow) Defense() int        { return 0 }
 func (AmuletOfAssertivenessYellow) Types(card.GameEngine) card.TypeSet {
 	return amuletOfAssertivenessTypes
 }

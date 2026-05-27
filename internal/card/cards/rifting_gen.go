@@ -14,7 +14,7 @@ type RiftingRed struct{}
 func (RiftingRed) ID() ids.CardID                     { return ids.RiftingRed }
 func (RiftingRed) Name() string                       { return "Rifting" }
 func (RiftingRed) DisplayName() string                { return "Rifting [R]" }
-func (RiftingRed) Cost(card.GameEngine) int           { return 2 }
+func (RiftingRed) Cost() int                          { return 2 }
 func (RiftingRed) Pitch() int                         { return 1 }
 func (RiftingRed) Attack() int                        { return 6 }
 func (RiftingRed) Defense() int                       { return 2 }
@@ -26,7 +26,7 @@ type RiftingYellow struct{}
 func (RiftingYellow) ID() ids.CardID                     { return ids.RiftingYellow }
 func (RiftingYellow) Name() string                       { return "Rifting" }
 func (RiftingYellow) DisplayName() string                { return "Rifting [Y]" }
-func (RiftingYellow) Cost(card.GameEngine) int           { return 2 }
+func (RiftingYellow) Cost() int                          { return 2 }
 func (RiftingYellow) Pitch() int                         { return 2 }
 func (RiftingYellow) Attack() int                        { return 5 }
 func (RiftingYellow) Defense() int                       { return 2 }
@@ -38,7 +38,7 @@ type RiftingBlue struct{}
 func (RiftingBlue) ID() ids.CardID                     { return ids.RiftingBlue }
 func (RiftingBlue) Name() string                       { return "Rifting" }
 func (RiftingBlue) DisplayName() string                { return "Rifting [B]" }
-func (RiftingBlue) Cost(card.GameEngine) int           { return 2 }
+func (RiftingBlue) Cost() int                          { return 2 }
 func (RiftingBlue) Pitch() int                         { return 3 }
 func (RiftingBlue) Attack() int                        { return 4 }
 func (RiftingBlue) Defense() int                       { return 2 }

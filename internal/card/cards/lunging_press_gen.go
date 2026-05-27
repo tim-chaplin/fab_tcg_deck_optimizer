@@ -14,7 +14,7 @@ type LungingPressBlue struct{}
 func (LungingPressBlue) ID() ids.CardID                     { return ids.LungingPressBlue }
 func (LungingPressBlue) Name() string                       { return "Lunging Press" }
 func (LungingPressBlue) DisplayName() string                { return "Lunging Press [B]" }
-func (LungingPressBlue) Cost(card.GameEngine) int           { return 0 }
+func (LungingPressBlue) Cost() int                          { return 0 }
 func (LungingPressBlue) Pitch() int                         { return 3 }
 func (LungingPressBlue) Attack() int                        { return 0 }
 func (LungingPressBlue) Defense() int                       { return 2 }

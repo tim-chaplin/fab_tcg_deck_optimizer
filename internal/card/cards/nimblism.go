@@ -11,7 +11,7 @@ import (
 
 // nimblismIsTarget gates the rider on attack action cards whose cost is 1 or less.
 func nimblismIsTarget(ge card.GameEngine, pc *card.CardState) bool {
-	return pc.EffectiveTypes(ge).IsAttackAction() && pc.Card.Cost(ge) <= 1
+	return pc.EffectiveTypes(ge).IsAttackAction() && pc.Card.Cost() <= 1
 }
 
 func (NimblismRed) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {

@@ -14,7 +14,7 @@ type ExposedBlue struct{}
 func (ExposedBlue) ID() ids.CardID                     { return ids.ExposedBlue }
 func (ExposedBlue) Name() string                       { return "Exposed" }
 func (ExposedBlue) DisplayName() string                { return "Exposed [B]" }
-func (ExposedBlue) Cost(card.GameEngine) int           { return 0 }
+func (ExposedBlue) Cost() int                          { return 0 }
 func (ExposedBlue) Pitch() int                         { return 3 }
 func (ExposedBlue) Attack() int                        { return 0 }
 func (ExposedBlue) Defense() int                       { return 0 }

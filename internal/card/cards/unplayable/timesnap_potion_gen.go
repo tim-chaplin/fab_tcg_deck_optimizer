@@ -14,7 +14,7 @@ type TimesnapPotionBlue struct{}
 func (TimesnapPotionBlue) ID() ids.CardID                     { return ids.TimesnapPotionBlue }
 func (TimesnapPotionBlue) Name() string                       { return "Timesnap Potion" }
 func (TimesnapPotionBlue) DisplayName() string                { return "Timesnap Potion [B]" }
-func (TimesnapPotionBlue) Cost(card.GameEngine) int           { return 0 }
+func (TimesnapPotionBlue) Cost() int                          { return 0 }
 func (TimesnapPotionBlue) Pitch() int                         { return 3 }
 func (TimesnapPotionBlue) Attack() int                        { return 0 }
 func (TimesnapPotionBlue) Defense() int                       { return 0 }

@@ -14,7 +14,7 @@ type EvasiveLeapRed struct{}
 func (EvasiveLeapRed) ID() ids.CardID                     { return ids.EvasiveLeapRed }
 func (EvasiveLeapRed) Name() string                       { return "Evasive Leap" }
 func (EvasiveLeapRed) DisplayName() string                { return "Evasive Leap [R]" }
-func (EvasiveLeapRed) Cost(card.GameEngine) int           { return 0 }
+func (EvasiveLeapRed) Cost() int                          { return 0 }
 func (EvasiveLeapRed) Pitch() int                         { return 1 }
 func (EvasiveLeapRed) Attack() int                        { return 0 }
 func (EvasiveLeapRed) Defense() int                       { return 3 }
@@ -26,7 +26,7 @@ type EvasiveLeapYellow struct{}
 func (EvasiveLeapYellow) ID() ids.CardID                     { return ids.EvasiveLeapYellow }
 func (EvasiveLeapYellow) Name() string                       { return "Evasive Leap" }
 func (EvasiveLeapYellow) DisplayName() string                { return "Evasive Leap [Y]" }
-func (EvasiveLeapYellow) Cost(card.GameEngine) int           { return 0 }
+func (EvasiveLeapYellow) Cost() int                          { return 0 }
 func (EvasiveLeapYellow) Pitch() int                         { return 2 }
 func (EvasiveLeapYellow) Attack() int                        { return 0 }
 func (EvasiveLeapYellow) Defense() int                       { return 2 }
@@ -38,7 +38,7 @@ type EvasiveLeapBlue struct{}
 func (EvasiveLeapBlue) ID() ids.CardID                     { return ids.EvasiveLeapBlue }
 func (EvasiveLeapBlue) Name() string                       { return "Evasive Leap" }
 func (EvasiveLeapBlue) DisplayName() string                { return "Evasive Leap [B]" }
-func (EvasiveLeapBlue) Cost(card.GameEngine) int           { return 0 }
+func (EvasiveLeapBlue) Cost() int                          { return 0 }
 func (EvasiveLeapBlue) Pitch() int                         { return 3 }
 func (EvasiveLeapBlue) Attack() int                        { return 0 }
 func (EvasiveLeapBlue) Defense() int                       { return 1 }

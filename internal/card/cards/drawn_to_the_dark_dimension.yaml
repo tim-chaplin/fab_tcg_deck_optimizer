@@ -3,7 +3,7 @@ types:
     - Runeblade
     - Action
     - Attack
-cost: variable
+cost: 2
 text: |-
     Drawn to the Dark Dimension costs {r} less to play for each Runechant you control.
     Draw a card.

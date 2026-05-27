@@ -12,7 +12,7 @@ import (
 // Cost predicate reads g so variable-cost targets are gated on their current cost.
 func memorialGroundPlay(ge card.GameEngine, l card.Logger, self *card.CardState) {
 	if _, ok := ge.RecycleFromGraveyardToTop(func(c card.Card) bool {
-		return c.Types(nil).IsAttackAction() && c.Cost(ge) <= 2
+		return c.Types(nil).IsAttackAction() && c.Cost() <= 2
 	}); ok {
 		l.AppendPostTrigger(self.Card.DisplayName(), "Recycled an attack action card to top of deck", 0)
 	}

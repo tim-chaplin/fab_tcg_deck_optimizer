@@ -8,7 +8,6 @@ import (
 	"strings"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/gameengine"
 )
 
 // assignmentName returns the card's display name, suffixed with " (from arsenal)" when
@@ -66,16 +65,15 @@ type bestLineDisplayParts struct {
 // and their cost contributes to the defense-phase pitch target.
 func partitionBestLineForDisplay(line []card.CardAssignment) bestLineDisplayParts {
 	var parts bestLineDisplayParts
-	zeroState := gameengine.New()
 	for _, a := range line {
 		switch a.Role {
 		case card.Pitch:
 			parts.pitched = append(parts.pitched, a)
 		case card.Attack:
-			_ = a.Card.Cost(zeroState)
+			_ = a.Card.Cost()
 		case card.Defend:
 			if a.Card.Types(nil).IsDefenseReaction() {
-				parts.drCost += a.Card.Cost(zeroState)
+				parts.drCost += a.Card.Cost()
 				parts.defenseReactions = append(parts.defenseReactions, a)
 			} else {
 				parts.plainBlocks = append(parts.plainBlocks, a)

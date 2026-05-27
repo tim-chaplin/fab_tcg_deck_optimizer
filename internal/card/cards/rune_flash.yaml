@@ -3,7 +3,7 @@ types:
     - Runeblade
     - Action
     - Attack
-cost: variable
+cost: 3
 goAgain: true
 text: Rune Flash costs {r} less to play for each Runechant you control.
 variants:

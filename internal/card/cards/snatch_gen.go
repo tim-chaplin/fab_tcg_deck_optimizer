@@ -14,7 +14,7 @@ type SnatchRed struct{}
 func (SnatchRed) ID() ids.CardID                     { return ids.SnatchRed }
 func (SnatchRed) Name() string                       { return "Snatch" }
 func (SnatchRed) DisplayName() string                { return "Snatch [R]" }
-func (SnatchRed) Cost(card.GameEngine) int           { return 0 }
+func (SnatchRed) Cost() int                          { return 0 }
 func (SnatchRed) Pitch() int                         { return 1 }
 func (SnatchRed) Attack() int                        { return 4 }
 func (SnatchRed) Defense() int                       { return 2 }
@@ -26,7 +26,7 @@ type SnatchYellow struct{}
 func (SnatchYellow) ID() ids.CardID                     { return ids.SnatchYellow }
 func (SnatchYellow) Name() string                       { return "Snatch" }
 func (SnatchYellow) DisplayName() string                { return "Snatch [Y]" }
-func (SnatchYellow) Cost(card.GameEngine) int           { return 0 }
+func (SnatchYellow) Cost() int                          { return 0 }
 func (SnatchYellow) Pitch() int                         { return 2 }
 func (SnatchYellow) Attack() int                        { return 3 }
 func (SnatchYellow) Defense() int                       { return 2 }
@@ -38,7 +38,7 @@ type SnatchBlue struct{}
 func (SnatchBlue) ID() ids.CardID                     { return ids.SnatchBlue }
 func (SnatchBlue) Name() string                       { return "Snatch" }
 func (SnatchBlue) DisplayName() string                { return "Snatch [B]" }
-func (SnatchBlue) Cost(card.GameEngine) int           { return 0 }
+func (SnatchBlue) Cost() int                          { return 0 }
 func (SnatchBlue) Pitch() int                         { return 3 }
 func (SnatchBlue) Attack() int                        { return 2 }
 func (SnatchBlue) Defense() int                       { return 2 }

@@ -14,7 +14,7 @@ type ArcanicSpikeRed struct{}
 func (ArcanicSpikeRed) ID() ids.CardID                     { return ids.ArcanicSpikeRed }
 func (ArcanicSpikeRed) Name() string                       { return "Arcanic Spike" }
 func (ArcanicSpikeRed) DisplayName() string                { return "Arcanic Spike [R]" }
-func (ArcanicSpikeRed) Cost(card.GameEngine) int           { return 2 }
+func (ArcanicSpikeRed) Cost() int                          { return 2 }
 func (ArcanicSpikeRed) Pitch() int                         { return 1 }
 func (ArcanicSpikeRed) Attack() int                        { return 5 }
 func (ArcanicSpikeRed) Defense() int                       { return 3 }
@@ -26,7 +26,7 @@ type ArcanicSpikeYellow struct{}
 func (ArcanicSpikeYellow) ID() ids.CardID                     { return ids.ArcanicSpikeYellow }
 func (ArcanicSpikeYellow) Name() string                       { return "Arcanic Spike" }
 func (ArcanicSpikeYellow) DisplayName() string                { return "Arcanic Spike [Y]" }
-func (ArcanicSpikeYellow) Cost(card.GameEngine) int           { return 2 }
+func (ArcanicSpikeYellow) Cost() int                          { return 2 }
 func (ArcanicSpikeYellow) Pitch() int                         { return 2 }
 func (ArcanicSpikeYellow) Attack() int                        { return 4 }
 func (ArcanicSpikeYellow) Defense() int                       { return 3 }
@@ -38,7 +38,7 @@ type ArcanicSpikeBlue struct{}
 func (ArcanicSpikeBlue) ID() ids.CardID                     { return ids.ArcanicSpikeBlue }
 func (ArcanicSpikeBlue) Name() string                       { return "Arcanic Spike" }
 func (ArcanicSpikeBlue) DisplayName() string                { return "Arcanic Spike [B]" }
-func (ArcanicSpikeBlue) Cost(card.GameEngine) int           { return 2 }
+func (ArcanicSpikeBlue) Cost() int                          { return 2 }
 func (ArcanicSpikeBlue) Pitch() int                         { return 3 }
 func (ArcanicSpikeBlue) Attack() int                        { return 3 }
 func (ArcanicSpikeBlue) Defense() int                       { return 3 }

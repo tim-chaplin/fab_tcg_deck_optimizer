@@ -14,7 +14,7 @@ type ArcanePolarityRed struct{}
 func (ArcanePolarityRed) ID() ids.CardID                     { return ids.ArcanePolarityRed }
 func (ArcanePolarityRed) Name() string                       { return "Arcane Polarity" }
 func (ArcanePolarityRed) DisplayName() string                { return "Arcane Polarity [R]" }
-func (ArcanePolarityRed) Cost(card.GameEngine) int           { return 0 }
+func (ArcanePolarityRed) Cost() int                          { return 0 }
 func (ArcanePolarityRed) Pitch() int                         { return 1 }
 func (ArcanePolarityRed) Attack() int                        { return 0 }
 func (ArcanePolarityRed) Defense() int                       { return 0 }
@@ -26,7 +26,7 @@ type ArcanePolarityYellow struct{}
 func (ArcanePolarityYellow) ID() ids.CardID                     { return ids.ArcanePolarityYellow }
 func (ArcanePolarityYellow) Name() string                       { return "Arcane Polarity" }
 func (ArcanePolarityYellow) DisplayName() string                { return "Arcane Polarity [Y]" }
-func (ArcanePolarityYellow) Cost(card.GameEngine) int           { return 0 }
+func (ArcanePolarityYellow) Cost() int                          { return 0 }
 func (ArcanePolarityYellow) Pitch() int                         { return 2 }
 func (ArcanePolarityYellow) Attack() int                        { return 0 }
 func (ArcanePolarityYellow) Defense() int                       { return 0 }
@@ -38,7 +38,7 @@ type ArcanePolarityBlue struct{}
 func (ArcanePolarityBlue) ID() ids.CardID                     { return ids.ArcanePolarityBlue }
 func (ArcanePolarityBlue) Name() string                       { return "Arcane Polarity" }
 func (ArcanePolarityBlue) DisplayName() string                { return "Arcane Polarity [B]" }
-func (ArcanePolarityBlue) Cost(card.GameEngine) int           { return 0 }
+func (ArcanePolarityBlue) Cost() int                          { return 0 }
 func (ArcanePolarityBlue) Pitch() int                         { return 3 }
 func (ArcanePolarityBlue) Attack() int                        { return 0 }
 func (ArcanePolarityBlue) Defense() int                       { return 0 }

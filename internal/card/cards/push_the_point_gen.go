@@ -14,7 +14,7 @@ type PushThePointRed struct{}
 func (PushThePointRed) ID() ids.CardID                     { return ids.PushThePointRed }
 func (PushThePointRed) Name() string                       { return "Push the Point" }
 func (PushThePointRed) DisplayName() string                { return "Push the Point [R]" }
-func (PushThePointRed) Cost(card.GameEngine) int           { return 1 }
+func (PushThePointRed) Cost() int                          { return 1 }
 func (PushThePointRed) Pitch() int                         { return 1 }
 func (PushThePointRed) Attack() int                        { return 4 }
 func (PushThePointRed) Defense() int                       { return 2 }
@@ -26,7 +26,7 @@ type PushThePointYellow struct{}
 func (PushThePointYellow) ID() ids.CardID                     { return ids.PushThePointYellow }
 func (PushThePointYellow) Name() string                       { return "Push the Point" }
 func (PushThePointYellow) DisplayName() string                { return "Push the Point [Y]" }
-func (PushThePointYellow) Cost(card.GameEngine) int           { return 1 }
+func (PushThePointYellow) Cost() int                          { return 1 }
 func (PushThePointYellow) Pitch() int                         { return 2 }
 func (PushThePointYellow) Attack() int                        { return 3 }
 func (PushThePointYellow) Defense() int                       { return 2 }
@@ -38,7 +38,7 @@ type PushThePointBlue struct{}
 func (PushThePointBlue) ID() ids.CardID                     { return ids.PushThePointBlue }
 func (PushThePointBlue) Name() string                       { return "Push the Point" }
 func (PushThePointBlue) DisplayName() string                { return "Push the Point [B]" }
-func (PushThePointBlue) Cost(card.GameEngine) int           { return 1 }
+func (PushThePointBlue) Cost() int                          { return 1 }
 func (PushThePointBlue) Pitch() int                         { return 3 }
 func (PushThePointBlue) Attack() int                        { return 2 }
 func (PushThePointBlue) Defense() int                       { return 2 }

@@ -14,7 +14,7 @@ type ZealousBeltingRed struct{}
 func (ZealousBeltingRed) ID() ids.CardID                     { return ids.ZealousBeltingRed }
 func (ZealousBeltingRed) Name() string                       { return "Zealous Belting" }
 func (ZealousBeltingRed) DisplayName() string                { return "Zealous Belting [R]" }
-func (ZealousBeltingRed) Cost(card.GameEngine) int           { return 2 }
+func (ZealousBeltingRed) Cost() int                          { return 2 }
 func (ZealousBeltingRed) Pitch() int                         { return 1 }
 func (ZealousBeltingRed) Attack() int                        { return 5 }
 func (ZealousBeltingRed) Defense() int                       { return 2 }
@@ -26,7 +26,7 @@ type ZealousBeltingYellow struct{}
 func (ZealousBeltingYellow) ID() ids.CardID                     { return ids.ZealousBeltingYellow }
 func (ZealousBeltingYellow) Name() string                       { return "Zealous Belting" }
 func (ZealousBeltingYellow) DisplayName() string                { return "Zealous Belting [Y]" }
-func (ZealousBeltingYellow) Cost(card.GameEngine) int           { return 2 }
+func (ZealousBeltingYellow) Cost() int                          { return 2 }
 func (ZealousBeltingYellow) Pitch() int                         { return 2 }
 func (ZealousBeltingYellow) Attack() int                        { return 4 }
 func (ZealousBeltingYellow) Defense() int                       { return 2 }
@@ -38,7 +38,7 @@ type ZealousBeltingBlue struct{}
 func (ZealousBeltingBlue) ID() ids.CardID                     { return ids.ZealousBeltingBlue }
 func (ZealousBeltingBlue) Name() string                       { return "Zealous Belting" }
 func (ZealousBeltingBlue) DisplayName() string                { return "Zealous Belting [B]" }
-func (ZealousBeltingBlue) Cost(card.GameEngine) int           { return 2 }
+func (ZealousBeltingBlue) Cost() int                          { return 2 }
 func (ZealousBeltingBlue) Pitch() int                         { return 3 }
 func (ZealousBeltingBlue) Attack() int                        { return 3 }
 func (ZealousBeltingBlue) Defense() int                       { return 2 }

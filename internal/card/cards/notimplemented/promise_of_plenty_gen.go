@@ -14,7 +14,7 @@ type PromiseOfPlentyRed struct{}
 func (PromiseOfPlentyRed) ID() ids.CardID                     { return ids.PromiseOfPlentyRed }
 func (PromiseOfPlentyRed) Name() string                       { return "Promise of Plenty" }
 func (PromiseOfPlentyRed) DisplayName() string                { return "Promise of Plenty [R]" }
-func (PromiseOfPlentyRed) Cost(card.GameEngine) int           { return 0 }
+func (PromiseOfPlentyRed) Cost() int                          { return 0 }
 func (PromiseOfPlentyRed) Pitch() int                         { return 1 }
 func (PromiseOfPlentyRed) Attack() int                        { return 3 }
 func (PromiseOfPlentyRed) Defense() int                       { return 2 }
@@ -27,7 +27,7 @@ type PromiseOfPlentyYellow struct{}
 func (PromiseOfPlentyYellow) ID() ids.CardID                     { return ids.PromiseOfPlentyYellow }
 func (PromiseOfPlentyYellow) Name() string                       { return "Promise of Plenty" }
 func (PromiseOfPlentyYellow) DisplayName() string                { return "Promise of Plenty [Y]" }
-func (PromiseOfPlentyYellow) Cost(card.GameEngine) int           { return 0 }
+func (PromiseOfPlentyYellow) Cost() int                          { return 0 }
 func (PromiseOfPlentyYellow) Pitch() int                         { return 2 }
 func (PromiseOfPlentyYellow) Attack() int                        { return 2 }
 func (PromiseOfPlentyYellow) Defense() int                       { return 2 }
@@ -40,7 +40,7 @@ type PromiseOfPlentyBlue struct{}
 func (PromiseOfPlentyBlue) ID() ids.CardID                     { return ids.PromiseOfPlentyBlue }
 func (PromiseOfPlentyBlue) Name() string                       { return "Promise of Plenty" }
 func (PromiseOfPlentyBlue) DisplayName() string                { return "Promise of Plenty [B]" }
-func (PromiseOfPlentyBlue) Cost(card.GameEngine) int           { return 0 }
+func (PromiseOfPlentyBlue) Cost() int                          { return 0 }
 func (PromiseOfPlentyBlue) Pitch() int                         { return 3 }
 func (PromiseOfPlentyBlue) Attack() int                        { return 1 }
 func (PromiseOfPlentyBlue) Defense() int                       { return 2 }
