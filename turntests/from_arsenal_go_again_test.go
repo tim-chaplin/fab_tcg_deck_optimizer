@@ -5,7 +5,6 @@ import (
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card/cards"
-	notimpl "github.com/tim-chaplin/fab-deck-optimizer/internal/card/cards/notimplemented"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/gameengine"
 )
 
@@ -16,7 +15,7 @@ func TestFromArsenalGoAgain_GrantsOnArsenalCopyOnly(t *testing.T) {
 		cards.FerventForerunnerRed{}, cards.FerventForerunnerYellow{}, cards.FerventForerunnerBlue{},
 		cards.FrontlineScoutRed{}, cards.FrontlineScoutYellow{}, cards.FrontlineScoutBlue{},
 		cards.PerformanceBonusRed{}, cards.PerformanceBonusYellow{}, cards.PerformanceBonusBlue{},
-		notimpl.PromiseOfPlentyRed{}, notimpl.PromiseOfPlentyYellow{}, notimpl.PromiseOfPlentyBlue{},
+		cards.PromiseOfPlentyRed{}, cards.PromiseOfPlentyYellow{}, cards.PromiseOfPlentyBlue{},
 		cards.ScourTheBattlescapeRed{}, cards.ScourTheBattlescapeYellow{}, cards.ScourTheBattlescapeBlue{},
 	}
 	for _, c := range cards {

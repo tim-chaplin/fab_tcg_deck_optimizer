@@ -370,6 +370,10 @@ var cardsByID = []Card{
 	ids.PrimeTheCrowdYellow: cards.PrimeTheCrowdYellow{},
 	ids.PrimeTheCrowdBlue:   cards.PrimeTheCrowdBlue{},
 
+	ids.PromiseOfPlentyRed:    cards.PromiseOfPlentyRed{},
+	ids.PromiseOfPlentyYellow: cards.PromiseOfPlentyYellow{},
+	ids.PromiseOfPlentyBlue:   cards.PromiseOfPlentyBlue{},
+
 	ids.PublicBountyRed:    cards.PublicBountyRed{},
 	ids.PublicBountyYellow: cards.PublicBountyYellow{},
 	ids.PublicBountyBlue:   cards.PublicBountyBlue{},
