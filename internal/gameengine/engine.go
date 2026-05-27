@@ -871,17 +871,12 @@ func attackStepCacheIndex(id ids.CardID, fromArsenal bool) uint32 {
 
 // === Arcane damage ===
 
-// DealArcaneDamage credits n arcane damage to Value, writes a "Dealt n arcane damage" rider
-// line under source, flips ArcaneDamageDealt when any arcane damage lands past the
-// opponent's blocks, and credits that unblocked amount to DamageDealt. Routes through
-// dealtArcaneText to avoid per-call fmt.Sprintf and variadic-int boxing. Doesn't touch
-// OpponentMarked or HitThisTurn — neither flag responds to arcane damage.
+// DealArcaneDamage credits n arcane damage to Value, runs the arcane side effects
+// (RegisterArcaneDamage), and writes the "Dealt n arcane damage" rider line under source.
+// Routes through dealtArcaneText to avoid per-call fmt.Sprintf and variadic-int boxing.
 func (ge *GameEngine) DealArcaneDamage(l card.Logger, source string, n int) {
 	ge.AddValue(n)
-	if d := LikelyDamageDealt(n, false); d > 0 {
-		ge.arcaneDamageDealt = true
-		ge.AddDamageDealt(d)
-	}
+	ge.RegisterArcaneDamage(n)
 	if n >= 0 && n < len(dealtArcaneText) {
 		l.AppendPostTrigger(source, dealtArcaneText[n], n)
 		return
@@ -930,6 +925,18 @@ func (ge *GameEngine) CreateRunechants(n int) {
 	}
 	ge.AddValue(n)
 	ge.GameState.bumpTokenAura(tokenAuraRunechant, n)
+}
+
+// RegisterArcaneDamage runs the side effects for an n-arcane-damage event: flips
+// arcaneDamageDealt and credits the unblocked amount to DamageDealt when n clears the
+// LikelyDamageHits gate. The single bookkeeping point — DealArcaneDamage routes through
+// here, and tokens whose Value is pre-credited at creation (Runechant) call it directly
+// at fire time. Doesn't touch OpponentMarked or HitThisTurn — neither responds to arcane.
+func (ge *GameEngine) RegisterArcaneDamage(n int) {
+	if d := LikelyDamageDealt(n, false); d > 0 {
+		ge.arcaneDamageDealt = true
+		ge.AddDamageDealt(d)
+	}
 }
 
 // CreatePonders creates n Ponder tokens. No Value credit — Ponder pays out at end of turn.
