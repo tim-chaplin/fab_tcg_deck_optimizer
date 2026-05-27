@@ -53,7 +53,7 @@ func TestEvenBiggerThanThat_PlayPreconditionPassesAfterHit(t *testing.T) {
 // EBT precondition — HitThisTurn must be set by a physical hit.
 func TestEvenBiggerThanThat_PlayPreconditionFailsWithArcaneOnly(t *testing.T) {
 	ge := gameengine.New()
-	ge.AddDamageDealt(1) // simulates arcane-only credit
+	ge.RegisterArcaneDamage(1) // arcane event credits DamageDealt but not HitThisTurn
 	if (cards.EvenBiggerThanThatRed{}).PlayPrecondition(ge, &card.CardState{}) {
 		t.Errorf("PlayPrecondition = true with arcane-only damage, want false (arcane doesn't 'hit')")
 	}
@@ -72,7 +72,8 @@ func TestEvenBiggerThanThat_HighDeckTopCreatesQuickenAndDraws(t *testing.T) {
 		SetHero(testutils.Hero{Intel: 4}).
 		SetDeck(d).
 		Build()
-	state.AddDamageDealt(3)
+	// Dominate-6 hit leaks 3 damage (opponent capped at one 3-block).
+	state.RegisterPhysicalDamage(6, true)
 	ge := state.Engine()
 	handBefore := ge.HandSize()
 	(cards.EvenBiggerThanThatRed{}).Play(ge, ge.Logger(), &card.CardState{Card: cards.EvenBiggerThanThatRed{}})
@@ -95,7 +96,8 @@ func TestEvenBiggerThanThat_LowDeckTopFizzles(t *testing.T) {
 		SetHero(testutils.Hero{Intel: 4}).
 		SetDeck(d).
 		Build()
-	state.AddDamageDealt(5)
+	// Dominate-8 hit leaks 5 damage (opponent capped at one 3-block).
+	state.RegisterPhysicalDamage(8, true)
 	ge := state.Engine()
 	handBefore := ge.HandSize()
 	(cards.EvenBiggerThanThatRed{}).Play(ge, ge.Logger(), &card.CardState{Card: cards.EvenBiggerThanThatRed{}})
@@ -109,36 +111,46 @@ func TestEvenBiggerThanThat_LowDeckTopFizzles(t *testing.T) {
 }
 
 // Tests that a Quicken token grants Go again to the firing attack's CardState and
-// consumes one charge per fire.
-func TestQuicken_GrantsGoAgainAndConsumesPerFire(t *testing.T) {
+// destroys the entire slot on that one fire.
+func TestQuicken_GrantsGoAgainAndDestroysSlot(t *testing.T) {
 	ge := gameengine.New()
-	ge.CreateQuicken(2)
-	if got := ge.QuickenCount(); got != 2 {
-		t.Fatalf("QuickenCount after CreateQuicken(2) = %d, want 2", got)
-	}
-
+	ge.CreateQuicken(1)
 	first := &card.CardState{Card: testutils.FakeRedAttack()}
 	ge.FireTriggers(triggertype.CardOrAbility, first)
 	if !first.GrantedGoAgain {
 		t.Errorf("first attack GrantedGoAgain = false, want true (Quicken should grant)")
 	}
-	if got := ge.QuickenCount(); got != 1 {
-		t.Errorf("QuickenCount after first fire = %d, want 1 (one charge consumed)", got)
+	if got := ge.QuickenCount(); got != 0 {
+		t.Errorf("QuickenCount after fire = %d, want 0 (slot destroyed)", got)
 	}
-
 	second := &card.CardState{Card: testutils.FakeRedAttack()}
 	ge.FireTriggers(triggertype.CardOrAbility, second)
-	if !second.GrantedGoAgain {
-		t.Errorf("second attack GrantedGoAgain = false, want true")
+	if second.GrantedGoAgain {
+		t.Errorf("second attack GrantedGoAgain = true, want false (Quicken already gone)")
+	}
+}
+
+// Tests that multiple Quicken charges all pop on a single attack — tokens don't activate
+// efficiently. 5 Quickens + 1 attack: the one attack gets GoAgain (idempotent), all 5
+// charges destroy together, 4 are wasted. The follow-up attack gets no grant.
+func TestQuicken_MultipleChargesAllPopOnSingleAttack(t *testing.T) {
+	ge := gameengine.New()
+	ge.CreateQuicken(5)
+	if got := ge.QuickenCount(); got != 5 {
+		t.Fatalf("QuickenCount after CreateQuicken(5) = %d, want 5", got)
+	}
+	first := &card.CardState{Card: testutils.FakeRedAttack()}
+	ge.FireTriggers(triggertype.CardOrAbility, first)
+	if !first.GrantedGoAgain {
+		t.Errorf("first attack GrantedGoAgain = false, want true")
 	}
 	if got := ge.QuickenCount(); got != 0 {
-		t.Errorf("QuickenCount after second fire = %d, want 0 (last charge consumed)", got)
+		t.Errorf("QuickenCount after fire = %d, want 0 (all 5 charges popped on the one attack, 4 wasted)", got)
 	}
-
-	third := &card.CardState{Card: testutils.FakeRedAttack()}
-	ge.FireTriggers(triggertype.CardOrAbility, third)
-	if third.GrantedGoAgain {
-		t.Errorf("third attack GrantedGoAgain = true, want false (Quicken exhausted)")
+	second := &card.CardState{Card: testutils.FakeRedAttack()}
+	ge.FireTriggers(triggertype.CardOrAbility, second)
+	if second.GrantedGoAgain {
+		t.Errorf("second attack GrantedGoAgain = true, want false (Quicken slot already destroyed)")
 	}
 }
 

@@ -691,22 +691,27 @@ func (gs *GameState) AddValue(n int) { gs.value += n }
 
 // DamageDealt returns the cumulative damage credited at every Hit / arcane-damage event
 // this turn — "if you've dealt {N} this turn" gates read this. Zeroed at the turn boundary.
-func (gs *GameState) DamageDealt() int     { return gs.damageDealt }
-func (gs *GameState) AddDamageDealt(n int) { gs.damageDealt += n }
+// Updated only by RegisterPhysicalDamage / RegisterArcaneDamage so the bookkeeping stays
+// centralized.
+func (gs *GameState) DamageDealt() int { return gs.damageDealt }
 
 // HitThisTurn reports whether at least one physical attack has landed this turn. Arcane
 // damage does not count — same reason it doesn't strip Mark.
 func (gs *GameState) HitThisTurn() bool     { return gs.hitThisTurn }
 func (gs *GameState) SetHitThisTurn(v bool) { gs.hitThisTurn = v }
 
-// RegisterPhysicalDamage runs the side effects for an n-power physical-attack hit:
-// flips HitThisTurn and credits the unblocked amount (per LikelyDamageDealt) to
-// DamageDealt. The single bookkeeping point on the physical side — the chain runner's
-// "if hit" block routes through here so future physical-damage sources don't have to
-// remember the formula. Counterpart to RegisterArcaneDamage.
+// RegisterPhysicalDamage runs the side effects for an n-power physical attack: when the
+// attack clears the likely-to-hit gate it flips HitThisTurn and credits the unblocked
+// amount (per LikelyDamageDealt) to DamageDealt. Self-gating — a miss is a no-op, so
+// callers don't need an outer "did this hit" guard around the call. The single
+// bookkeeping point on the physical side; counterpart to RegisterArcaneDamage.
 func (gs *GameState) RegisterPhysicalDamage(n int, dominate bool) {
+	d := LikelyDamageDealt(n, dominate)
+	if d == 0 {
+		return
+	}
 	gs.hitThisTurn = true
-	gs.damageDealt += LikelyDamageDealt(n, dominate)
+	gs.damageDealt += d
 }
 
 // RegisterArcaneDamage runs the side effects for an n-arcane-damage event: flips

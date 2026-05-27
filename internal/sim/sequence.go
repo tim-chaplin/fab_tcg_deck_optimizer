@@ -842,10 +842,10 @@ func (ctx *sequenceContext) playSequenceWithMeta(n int) (damage int, totalCounte
 		}
 		hit := gameengine.LikelyToHit(activeAttack)
 		state.SetLastAttackHit(hit)
+		// Self-gating — no-op on a miss. Runs before the OnHit / FireTriggers block so
+		// those handlers see the updated HitThisTurn flag + DamageDealt count.
+		state.RegisterPhysicalDamage(activeAttack.EffectiveAttack(), activeAttack.EffectiveDominate())
 		if hit {
-			// Register physical damage before the Hit fire so handlers see the updated
-			// flag and DamageDealt count.
-			state.RegisterPhysicalDamage(activeAttack.EffectiveAttack(), activeAttack.EffectiveDominate())
 			for i := range activeAttack.OnHit {
 				h := &activeAttack.OnHit[i]
 				h.Fire(ge, state.Logger(), activeAttack, h)
