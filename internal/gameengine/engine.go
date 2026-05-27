@@ -164,7 +164,11 @@ func (ge *GameEngine) AppendToDeck(c card.Card) {
 }
 
 // Discard pops the first Held-role hand card to the graveyard and logs under source. Cache-
-// safe: discarded card's identity never escapes the engine, so cache can't diverge.
+// safe: discarded card's identity never escapes the engine, so cache can't diverge. After
+// the move, fires the OnDiscardHook on the popped card when implemented (Fool's Gold:
+// "when this is discarded, create a Gold token"). MoveFromHandToTopOfDeck /
+// MoveFromHandToBottomOfDeck don't fire the hook — those model "put on top/bottom of deck"
+// effects, not actual discards.
 func (ge *GameEngine) Discard(source string) bool {
 	c, ok := ge.popFirstHeldCard()
 	if !ok {
@@ -172,12 +176,17 @@ func (ge *GameEngine) Discard(source string) bool {
 	}
 	ge.graveyard = append(ge.graveyard, c)
 	ge.logger.AppendPostTriggerf(source, 0, "Discarded a card")
+	if hook, ok := c.(card.OnDiscardHook); ok {
+		hook.OnDiscard(ge, ge.logger)
+	}
 	return true
 }
 
-// DiscardToTopOfDeck pops the first Held-role hand card to the top of the deck and logs
-// under source. Cache-safe like Discard.
-func (ge *GameEngine) DiscardToTopOfDeck(source string) bool {
+// MoveFromHandToTopOfDeck pops the first Held-role hand card to the top of the deck and
+// logs under source. Models FaB's "put a card from your hand on top of your deck" effects
+// (Moon Wish / Rise Above alt cost, Seek Horizon). Not a discard event — the OnDiscardHook
+// (Fool's Gold) doesn't fire. Cache-safe.
+func (ge *GameEngine) MoveFromHandToTopOfDeck(source string) bool {
 	c, ok := ge.popFirstHeldCard()
 	if !ok {
 		return false
@@ -187,9 +196,11 @@ func (ge *GameEngine) DiscardToTopOfDeck(source string) bool {
 	return true
 }
 
-// DiscardToBottomOfDeck pops the first Held-role hand card to the bottom of the deck and
-// logs under source. Cache-safe.
-func (ge *GameEngine) DiscardToBottomOfDeck(source string) bool {
+// MoveFromHandToBottomOfDeck pops the first Held-role hand card to the bottom of the deck
+// and logs under source. Models FaB's "put a card from your hand on the bottom of your
+// deck" effects (Emissary cycle, Scour the Battlescape, Sift). Not a discard event — the
+// OnDiscardHook (Fool's Gold) doesn't fire. Cache-safe.
+func (ge *GameEngine) MoveFromHandToBottomOfDeck(source string) bool {
 	c, ok := ge.popFirstHeldCard()
 	if !ok {
 		return false

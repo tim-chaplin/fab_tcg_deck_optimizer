@@ -19,7 +19,7 @@ func riseAboveAlternativeCost(ge card.GameEngine) (int, bool) {
 
 func riseAbovePlay(ge card.GameEngine, l card.Logger, self *card.CardState) {
 	if self.PaidAlternativeCost {
-		ge.DiscardToTopOfDeck(self.Card.DisplayName())
+		ge.MoveFromHandToTopOfDeck(self.Card.DisplayName())
 	}
 }
 

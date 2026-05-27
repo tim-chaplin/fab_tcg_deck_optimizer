@@ -8,17 +8,22 @@ import (
 	"testing"
 )
 
-// TestTurntests_NewTestsUseEvalNTurnsForTesting rejects new turntests/ test files driving
-// the attack turn via ge.ResolveAttackStep(...) directly. Per docs/dev-standards.md "Test layout",
-// turntests/ is for public-entry-point tests only: sim.EvalOneTurnForTesting /
-// sim.EvalTwoTurnsForTesting. grandfatheredResolveAttackStepFiles is the allow-list of
-// existing offenders; remove an entry to lock in its migration.
+// TestTurntests_NewTestsUseEvalNTurnsForTesting rejects new turntests/ test files that
+// don't drive a turn through the public sim.EvalOneTurnForTesting /
+// sim.EvalTwoTurnsForTesting entry points. Per docs/dev-standards.md "Test layout",
+// turntests/ is for public-entry-point tests only — anything that drives the engine
+// directly (ResolveAttackStep, ge.Discard, ge.FireTriggers, …) belongs in a same-package
+// unit test under the card's home directory.
+//
+// grandfatheredTurntestFiles is the allow-list of existing offenders; remove an entry to
+// lock in its migration to either a same-package unit test or the public Eval entry
+// points.
 func TestTurntests_NewTestsUseEvalNTurnsForTesting(t *testing.T) {
 	root := RepoRoot(t)
 	turntestsDir := filepath.Join(root, "turntests")
 
-	allowed := make(map[string]bool, len(grandfatheredResolveAttackStepFiles))
-	for _, p := range grandfatheredResolveAttackStepFiles {
+	allowed := make(map[string]bool, len(grandfatheredTurntestFiles))
+	for _, p := range grandfatheredTurntestFiles {
 		allowed[p] = true
 	}
 
@@ -37,7 +42,12 @@ func TestTurntests_NewTestsUseEvalNTurnsForTesting(t *testing.T) {
 		if err != nil {
 			return err
 		}
-		if !strings.Contains(string(body), "ResolveAttackStep") {
+		src := string(body)
+		// A passing file must call EvalOneTurnForTesting or EvalTwoTurnsForTesting (its
+		// purpose is to exercise the public turn-eval API). Files that drive engine
+		// internals directly (ResolveAttackStep, ge.Discard, ge.FireTriggers, …) are
+		// offenders unless grandfathered.
+		if strings.Contains(src, "EvalOneTurnForTesting") || strings.Contains(src, "EvalTwoTurnsForTesting") {
 			return nil
 		}
 		rel, _ := filepath.Rel(root, path)
@@ -53,24 +63,26 @@ func TestTurntests_NewTestsUseEvalNTurnsForTesting(t *testing.T) {
 
 	sort.Strings(offenders)
 	for _, o := range offenders {
-		t.Errorf("%s: drives the attack turn via ResolveAttackStep. turntests/ tests must use "+
-			"sim.EvalOneTurnForTesting / sim.EvalTwoTurnsForTesting (the public entry points) "+
-			"per docs/dev-standards.md \"Test layout\". Either rewrite the test against the "+
-			"public API or move it to a same-package unit test under the card's home directory.",
+		t.Errorf("%s: doesn't drive a turn through sim.EvalOneTurnForTesting / "+
+			"sim.EvalTwoTurnsForTesting. turntests/ is for public-entry-point tests only "+
+			"(docs/dev-standards.md \"Test layout\"). Move card-specific unit tests to "+
+			"internal/card/cards/<card>_test.go (same package).",
 			o)
 	}
 }
 
-// grandfatheredResolveAttackStepFiles is the allow-list of existing turntests/ files driving
-// ResolveAttackStep directly. They need migrating to same-package unit tests or the public
-// Eval entry points. To migrate, remove the entry — the lint then rejects reintroduction.
-// See TODO.md "Tech debt" for the migration plan.
-var grandfatheredResolveAttackStepFiles = []string{
+// grandfatheredTurntestFiles is the allow-list of existing turntests/ files that don't
+// drive a turn through sim.EvalOneTurnForTesting / sim.EvalTwoTurnsForTesting — they call
+// ge.ResolveAttackStep or other engine internals directly. They need migrating to
+// same-package unit tests (under internal/card/cards/<card>_test.go) or rewriting against
+// the public Eval entry points. To migrate, remove the entry — the lint then rejects
+// reintroduction. See TODO.md "Tech debt" for the migration plan.
+var grandfatheredTurntestFiles = []string{
 	"turntests/aether_slash_test.go",
 	"turntests/arcane_polarity_test.go",
-	"turntests/arcanic_spike_test.go",
-	"turntests/blessing_of_occult_test.go",
+	"turntests/battlefront_bastion_test.go",
 	"turntests/bloodspill_invocation_test.go",
+	"turntests/brothers_in_arms_test.go",
 	"turntests/cadaverous_contraband_test.go",
 	"turntests/captains_call_test.go",
 	"turntests/card_high_striker_test.go",
@@ -87,8 +99,8 @@ var grandfatheredResolveAttackStepFiles = []string{
 	"turntests/consuming_volition_test.go",
 	"turntests/deathly_duet_test.go",
 	"turntests/destructive_deliberation_test.go",
+	"turntests/drawn_to_the_dark_dimension_test.go",
 	"turntests/drowning_dire_test.go",
-	"turntests/enchanting_melody_test.go",
 	"turntests/exposed_test.go",
 	"turntests/fate_foreseen_test.go",
 	"turntests/fervent_forerunner_test.go",
@@ -96,13 +108,11 @@ var grandfatheredResolveAttackStepFiles = []string{
 	"turntests/force_sight_test.go",
 	"turntests/from_arsenal_go_again_test.go",
 	"turntests/from_arsenal_next_attack_bonus_test.go",
-	"turntests/hit_the_high_notes_test.go",
 	"turntests/jack_be_nimble_test.go",
 	"turntests/jack_be_quick_test.go",
 	"turntests/lifegain_variants_test.go",
 	"turntests/looking_for_a_scrap_test.go",
 	"turntests/lower_health_wanter_test.go",
-	"turntests/malefic_incantation_test.go",
 	"turntests/meat_and_greet_test.go",
 	"turntests/memorial_ground_test.go",
 	"turntests/minnowism_test.go",
@@ -119,22 +129,19 @@ var grandfatheredResolveAttackStepFiles = []string{
 	"turntests/reduce_to_runechant_test.go",
 	"turntests/reek_of_corruption_test.go",
 	"turntests/regurgitating_slog_test.go",
+	"turntests/right_behind_you_test.go",
 	"turntests/rise_above_test.go",
 	"turntests/runerager_swarm_test.go",
 	"turntests/runic_reaping_test.go",
 	"turntests/scout_the_periphery_test.go",
 	"turntests/seek_horizon_test.go",
 	"turntests/shrill_of_skullform_test.go",
-	"turntests/sigil_of_fyendal_test.go",
 	"turntests/sigil_of_protection_test.go",
-	"turntests/sigil_of_silphidae_test.go",
-	"turntests/sigil_of_the_arknight_test.go",
 	"turntests/sky_fire_lanterns_test.go",
 	"turntests/sloggism_test.go",
 	"turntests/smashing_good_time_test.go",
 	"turntests/snatch_test.go",
 	"turntests/spring_load_test.go",
-	"turntests/starting_stake_test.go",
 	"turntests/strategic_planning_test.go",
 	"turntests/sun_kiss_test.go",
 	"turntests/sutcliffes_research_notes_test.go",

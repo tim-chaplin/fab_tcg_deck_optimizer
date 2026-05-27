@@ -29,7 +29,7 @@ func moonWishAlternativeCost(ge card.GameEngine) (int, bool) {
 // runner paid the alternative, then registers the on-hit Sun Kiss tutor.
 func moonWishPlay(c card.Card, ge card.GameEngine, l card.Logger, self *card.CardState) {
 	if self.PaidAlternativeCost {
-		ge.DiscardToTopOfDeck(c.DisplayName())
+		ge.MoveFromHandToTopOfDeck(c.DisplayName())
 	}
 	self.RegisterOnHit(moonWishOnHit)
 }

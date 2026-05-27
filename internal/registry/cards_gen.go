@@ -208,6 +208,8 @@ var cardsByID = []Card{
 	ids.FlyingHighYellow: cards.FlyingHighYellow{},
 	ids.FlyingHighBlue:   cards.FlyingHighBlue{},
 
+	ids.FoolsGoldYellow: cards.FoolsGoldYellow{},
+
 	ids.ForceSightRed:    cards.ForceSightRed{},
 	ids.ForceSightYellow: cards.ForceSightYellow{},
 	ids.ForceSightBlue:   cards.ForceSightBlue{},

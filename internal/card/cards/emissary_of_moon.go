@@ -11,7 +11,7 @@ import (
 )
 
 func (EmissaryOfMoonRed) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
-	if !ge.DiscardToBottomOfDeck(self.Card.DisplayName()) {
+	if !ge.MoveFromHandToBottomOfDeck(self.Card.DisplayName()) {
 		return
 	}
 	ge.DrawOne()
