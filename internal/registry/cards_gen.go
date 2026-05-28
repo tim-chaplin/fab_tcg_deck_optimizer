@@ -596,6 +596,8 @@ var cardsByID = []Card{
 	ids.TipOffYellow: cards.TipOffYellow{},
 	ids.TipOffBlue:   cards.TipOffBlue{},
 
+	ids.TitForTatBlue: cards.TitForTatBlue{},
+
 	ids.TitaniumBaubleBlue: cards.TitaniumBaubleBlue{},
 
 	ids.TongueTiedRed: cards.TongueTiedRed{},
