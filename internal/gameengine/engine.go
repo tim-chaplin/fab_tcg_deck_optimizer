@@ -580,7 +580,11 @@ func panicIfOptViolatesMultiset(in, top, bottom []card.Card) {
 func (ge *GameEngine) FireTriggers(ctx card.FireContext) {
 	t := ctx.FiringType
 	heroFires := ge.heroTriggerType&t != 0
-	if !heroFires && !ge.AnyAurasInPlay() && len(ge.triggers) == 0 && !ge.AnyItemsInPlay() && !ge.WeaponInPlay() {
+	// A handler-less weapon (TriggerType 0) can never match an event, so it must NOT defeat
+	// the early-exit — every equipped deck would otherwise pay the full walk on every fire.
+	// Gate on anyTriggeredWeapon, which is false for all current weapons.
+	weaponFires := ge.anyTriggeredWeapon()
+	if !heroFires && !ge.AnyAurasInPlay() && len(ge.triggers) == 0 && !ge.AnyItemsInPlay() && !weaponFires {
 		return
 	}
 
@@ -610,7 +614,9 @@ func (ge *GameEngine) FireTriggers(ctx card.FireContext) {
 	if liveItemBits != 0 {
 		fireTokenItems(ge, ctx, triggeringTypes, liveItemBits)
 	}
-	fireHooks(ge, &ge.weapons, ctx, triggeringTypes, false)
+	if weaponFires {
+		fireHooks(ge, &ge.weapons, ctx, triggeringTypes, false)
+	}
 }
 
 // fireHero applies the OncePerTurn / Matches gates and invokes the hero handler. The

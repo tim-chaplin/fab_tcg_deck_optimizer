@@ -108,5 +108,19 @@ func (w *Weapon) Copy() any {
 	return &out
 }
 
+// CopyInto rewrites *dst with w's fields and returns dst as any. When dst is a *Weapon from
+// a prior permutation's slot the per-perm reset reuses the existing allocation instead of
+// paying for a fresh one — the equip loadout is identical across perms, so only the mutable
+// counter / fire flag change. dst types other than *Weapon fall back to Copy.
+func (w *Weapon) CopyInto(dst any) any {
+	d, ok := dst.(*Weapon)
+	if !ok {
+		return w.Copy()
+	}
+	*d = *w
+	d.activeEngine = nil
+	return d
+}
+
 // Compile-time check that *Weapon satisfies card.Weapon.
 var _ card.Weapon = (*Weapon)(nil)

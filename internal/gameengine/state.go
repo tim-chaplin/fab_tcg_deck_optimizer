@@ -347,23 +347,30 @@ func copyItemsInto(pool, src []Item) []Item {
 	return out
 }
 
-// copyWeaponsInto returns a per-entry copy of src, reusing pool's slice backing when
-// capacity permits. Weapons are mutable once equipped (per-turn counters), so each entry is
-// duplicated through Weapon.Copy — the per-permutation deep copy that keeps one perm's
-// counter mutations from leaking into a sibling perm. Mirrors copyItemsInto.
+// copyWeaponsInto returns a per-entry copy of src, reusing pool's slice backing AND its
+// per-entry *weapon.Weapon allocations when present. Weapons are mutable once equipped
+// (per-turn counters), so each entry is deep-copied to keep one perm's counter mutations
+// from leaking into a sibling perm — but the equip loadout is identical across perms, so
+// CopyInto rewrites the prior perm's slot in place (no per-perm allocation) on the hot
+// CopyPersistentStateFrom path. A grown / fresh backing falls back to Copy for new slots.
 func copyWeaponsInto(pool, src []Weapon) []Weapon {
 	n := len(src)
 	if n == 0 {
 		return nil
 	}
+	reuse := cap(pool) >= n
 	var out []Weapon
-	if cap(pool) >= n {
+	if reuse {
 		out = pool[:n]
 	} else {
 		out = make([]Weapon, n)
 	}
 	for i, w := range src {
-		out[i] = w.Copy().(Weapon)
+		if reuse && out[i] != nil {
+			out[i] = w.CopyInto(out[i]).(Weapon)
+		} else {
+			out[i] = w.Copy().(Weapon)
+		}
 	}
 	return out
 }
@@ -551,9 +558,18 @@ func (gs *GameState) SetHero(h Hero) {
 func (gs *GameState) Weapons() []Weapon     { return gs.weapons }
 func (gs *GameState) SetWeapons(w []Weapon) { gs.weapons = w }
 
-// WeaponInPlay reports whether any weapon is equipped — the weapon counterpart of
-// AnyAurasInPlay / AnyItemsInPlay, used to early-exit the FireTriggers weapon walk.
-func (gs *GameState) WeaponInPlay() bool { return len(gs.weapons) > 0 }
+// anyTriggeredWeapon reports whether any equipped weapon subscribes to a trigger event
+// (TriggerType != 0). The FireTriggers early-exit gates on this rather than "any weapon
+// equipped": a handler-less weapon (every current weapon) can never match a firing event,
+// so it must not keep FireTriggers from short-circuiting on the common no-subscriber path.
+func (gs *GameState) anyTriggeredWeapon() bool {
+	for _, w := range gs.weapons {
+		if w.TriggerType() != 0 {
+			return true
+		}
+	}
+	return false
+}
 
 func (gs *GameState) IsCacheable() bool   { return gs.cacheable }
 func (gs *GameState) SetCacheable(v bool) { gs.cacheable = v }

@@ -64,7 +64,9 @@ type Item interface {
 // (no weapon registers a handler yet), a counter total, and the source card sent to the
 // graveyard on destroy. Name / Hands / Ability surface the platonic card's weapon attributes
 // the attack-turn runner reads — Ability is the swing card enqueued each turn. Copy uses any
-// so State.Copy can deep-copy without referencing the concrete *weapon.Weapon.
+// so State.Copy can deep-copy without referencing the concrete *weapon.Weapon. CopyInto is
+// the per-perm reset fast path: it rewrites a pooled slot's existing concrete value in place
+// (the loadout is identical across perms) so the hot path allocates nothing.
 type Weapon interface {
 	trigger.Hook
 	CardName() string
@@ -76,6 +78,7 @@ type Weapon interface {
 	Hands() int
 	Ability() card.Card
 	Copy() any
+	CopyInto(dst any) any
 }
 
 // Hero is the engine's view of the active hero. The trigger-dispatch surface mirrors
