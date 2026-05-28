@@ -46,19 +46,19 @@ func TestSigilOfProtection_SetsAuraCreated(t *testing.T) {
 // and AuraCreated wiring via the public path.
 func TestSigilOfProtection_AbsorbsUpToFourThenSelfDestructs(t *testing.T) {
 	c := cards.SigilOfProtectionRed{}
-	ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetIncomingDamage(5).Build()}
+	ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetIncomingPhysicalDamage(5).Build()}
 	ge.ResolveAttackStep(ge.Logger(), &card.CardState{Card: c})
 	if len(ge.Auras()) != 1 {
 		t.Fatalf("Auras = %d, want 1 (sigil aura registered)", len(ge.Auras()))
 	}
 
-	ge.FireTriggers(triggertype.DamageAboutToBeTaken, nil)
+	ge.FireTriggers(card.FireContext{FiringType: triggertype.DamageAboutToBeTaken})
 
 	if got := ge.Value(); got != 4 {
 		t.Errorf("Value = %d, want 4 (Ward 4 caps prevention against 5 incoming)", got)
 	}
-	if rem := ge.RemainingUnblockedDamage(); rem != 1 {
-		t.Errorf("RemainingUnblockedDamage = %d, want 1 (5 incoming - 4 absorbed)", rem)
+	if rem := ge.RemainingPhysicalDamage(); rem != 1 {
+		t.Errorf("RemainingPhysicalDamage = %d, want 1 (5 incoming - 4 absorbed)", rem)
 	}
 	if len(ge.Auras()) != 0 {
 		t.Errorf("Auras = %d, want 0 (sigil self-destructs after absorbing)", len(ge.Auras()))
@@ -75,7 +75,7 @@ func TestSigilOfProtection_AbsorbsUpToFourThenSelfDestructs(t *testing.T) {
 func TestSigilOfProtection_DestroysAtStartOfNextTurn(t *testing.T) {
 	sigil := cards.SigilOfProtectionRed{}
 	d := deck.New(testutils.Hero{Intel: 4}, nil, nil)
-	prior := gameengine.GameStateBuilder().SetIncomingDamage(0).Build()
+	prior := gameengine.GameStateBuilder().SetIncomingPhysicalDamage(0).Build()
 
 	// FakeBlueResource pitches for the cost-1 sigil; sigil's Ward absorb doesn't fire
 	// with no incoming damage, so it must survive turn 1 on the play-this-turn path.

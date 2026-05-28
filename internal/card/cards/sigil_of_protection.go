@@ -3,8 +3,9 @@
 //
 // Text: "**Ward 4** At the beginning of your action phase, destroy Sigil of Protection."
 //
-// Ward 4 is modelled as a one-shot DamageAboutToBeTaken absorb capped at 4; firing
-// dispatches on the trigger type so the StartOfTurn clause only destroys.
+// Ward 4 is modelled as a one-shot DamageAboutToBeTaken absorb capped at 4; ctx.FiringType
+// dispatches so the StartOfTurn clause only destroys. PreventGenericDamage picks the active
+// damage type (physical or arcane) and credits the prevented amount as Value.
 
 package cards
 
@@ -13,12 +14,10 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/triggertype"
 )
 
-func sigilOfProtectionHandler(ge card.GameEngine, l card.Logger, a card.Aura, firingType triggertype.Type) {
-	switch firingType {
+func sigilOfProtectionHandler(ge card.GameEngine, l card.Logger, a card.Aura, ctx card.FireContext) {
+	switch ctx.FiringType {
 	case triggertype.DamageAboutToBeTaken:
-		prevented := ge.PreventIncomingDamage(a.Count())
-		if prevented > 0 {
-			ge.AddValue(prevented)
+		if prevented := ge.PreventGenericDamage(a.Count()); prevented > 0 {
 			l.AppendPostTriggerf(a.CardName(), prevented, "Prevented %d damage", prevented)
 		}
 		a.Destroy(true)
