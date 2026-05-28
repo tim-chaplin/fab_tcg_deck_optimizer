@@ -148,11 +148,17 @@ type GameEngine interface {
 	// to credit the prevention.
 	PreventArcaneDamage(n int) int
 
-	// PreventIncomingDamage caps the remaining unblocked physical damage by up to n.
+	// PreventPhysicalDamage caps the remaining unblocked physical damage by up to n.
 	// Returns the amount actually prevented (lesser of n and RemainingUnblockedDamage).
 	// Banks the prevention so a subsequent DamageTaken gate sees the reduced figure;
 	// callers AddValue the returned amount to credit it.
-	PreventIncomingDamage(n int) int
+	PreventPhysicalDamage(n int) int
+
+	// PreventGenericDamage caps up to n damage of whichever type is active at this fire
+	// (physical preferred when both are non-zero). Mirrors the official-rules wording
+	// "prevent N damage" — the card doesn't pick a type, the engine does. Returns the
+	// amount actually prevented. Callers AddValue the returned amount to credit it.
+	PreventGenericDamage(n int) int
 
 	// AP (attack-step controls cards grant).
 	AddActionPoints(int)

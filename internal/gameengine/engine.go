@@ -394,13 +394,13 @@ func (ge *GameEngine) PreventArcaneDamage(n int) int {
 	return n
 }
 
-// PreventIncomingDamage caps remaining unblocked physical damage by up to n. Returns
+// PreventPhysicalDamage caps remaining unblocked physical damage by up to n. Returns
 // the amount actually prevented — the lesser of n and the current RemainingUnblockedDamage,
 // clamped at 0. Banks the prevention into damageBlocked so RemainingUnblockedDamage reads
 // the reduced figure for downstream triggers (a DamageAboutToBeTaken handler that absorbs
 // the swing chains into the DamageTaken gate this way). The caller AddValues the
 // returned amount to credit it.
-func (ge *GameEngine) PreventIncomingDamage(n int) int {
+func (ge *GameEngine) PreventPhysicalDamage(n int) int {
 	if n <= 0 {
 		return 0
 	}
@@ -413,6 +413,18 @@ func (ge *GameEngine) PreventIncomingDamage(n int) int {
 	}
 	ge.damageBlocked += n
 	return n
+}
+
+// PreventGenericDamage absorbs up to n damage of whichever type is currently active —
+// physical when there's remaining unblocked physical, otherwise arcane. Mirrors the
+// official-rules wording "prevent N damage": the card asks for N prevented without
+// naming a type, the engine picks. Returns the amount actually prevented (0 when both
+// types are empty). The caller AddValues the returned amount to credit it.
+func (ge *GameEngine) PreventGenericDamage(n int) int {
+	if prevented := ge.PreventPhysicalDamage(n); prevented > 0 {
+		return prevented
+	}
+	return ge.PreventArcaneDamage(n)
 }
 
 // TurnFaceUp flips pc.FaceUp = true on the specific CardState the caller passes — found

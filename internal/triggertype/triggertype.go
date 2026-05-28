@@ -21,12 +21,13 @@ const (
 	Hit
 	// DamageAboutToBeTaken fires just before DamageTaken, while the unblocked-damage figure
 	// is still mutable. Subscribers (Enchanting Melody's "instead destroy and prevent 4
-	// damage" rider, Talisman of Dousing's Spellvoid) call PreventIncomingDamage /
-	// PreventArcaneDamage to absorb part of the swing before the carry-through hits
-	// DamageTaken triggers. The engine fires this trigger twice per damage moment: once
-	// for the physical side then once for the arcane side. Each fire is gated on the
-	// matching damage figure being non-zero. Handlers introspect RemainingUnblockedDamage
-	// vs ArcaneIncomingDamage to identify which side they are being called on.
+	// damage" rider, Talisman of Dousing's Spellvoid) call PreventGenericDamage /
+	// PreventPhysicalDamage / PreventArcaneDamage to absorb part of the swing before the
+	// carry-through hits DamageTaken triggers. The engine fires this trigger twice per
+	// damage moment: once for the physical side then once for the arcane side. Each fire
+	// is gated on the matching damage figure being non-zero — type-specific subscribers
+	// (Dousing) call the typed prevention method; type-agnostic subscribers (Melody) call
+	// PreventGenericDamage and the engine picks the active type.
 	DamageAboutToBeTaken
 	// DamageTaken fires at the end of the defense phase when incoming damage got through
 	// unblocked. Like DamageAboutToBeTaken, it fires twice per damage moment — physical
