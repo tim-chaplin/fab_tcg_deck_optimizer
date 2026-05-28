@@ -15,7 +15,7 @@ import (
 func TestCalmingBreeze_PreventsFlat3(t *testing.T) {
 	d := deck.New(testutils.Hero{Intel: 4}, nil, nil)
 	hand := []card.Card{cards.CalmingBreezeRed{}}
-	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingDamage(5).Build(), hand)
+	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingPhysicalDamage(5).Build(), hand)
 	if summary.Value != 3 {
 		t.Errorf("Value = %d, want 3", summary.Value)
 	}

@@ -20,7 +20,12 @@ pulling in the whole game engine.
   for Runechant tokens, attack-actions for Malefic Incantation).
 - `EndOfTurn` — after the attack turn finishes resolving, before the carry snapshot.
 - `Hit` — when an attack hits (post-AR-buff `EffectiveAttack` survives blocks).
-- `DamageTaken` — end of the defense phase, when incoming damage got through unblocked.
+- `DamageAboutToBeTaken` / `DamageTaken` — end of the defense phase. Each fires twice per
+  damage moment: once for the physical side, once for the arcane side, gated on the
+  respective non-zero damage figure. Handlers introspect `RemainingUnblockedDamage()` vs
+  `ArcaneIncomingDamage()` to identify which side they're on. `DamageAboutToBeTaken`
+  precedes `DamageTaken` so a prevention handler (Enchanting Melody, Talisman of Dousing)
+  can absorb before a downstream self-destruct (Arcane Cussing) pops.
 - `Pitch` — as each card is pitched to fund a play in the attack phase. The triggering card
   is the pitched card; a handler may boost the resources it yields via
   `GameEngine.AddResourcePoints`.

@@ -45,7 +45,7 @@ func TestEnchantingMelody_AbsorbsBeforeDamageTakenSoCussingSurvives(t *testing.T
 	initial := gameengine.GameStateBuilder().
 		CreateAuraFromCard(cards.EnchantingMelodyRed{}).
 		CreateAuraFromCard(cards.ArcaneCussingRed{}).
-		SetIncomingDamage(4).
+		SetIncomingPhysicalDamage(4).
 		Build()
 
 	summary := sim.EvalOneTurnForTesting(d, initial, nil)
@@ -95,7 +95,7 @@ func TestEnchantingMelody_AbsorbDestroysEvenWhenNonAttackActionSatisfiesEOTClaus
 	d := deck.New(heroes.Viserai, nil, nil)
 	initial := gameengine.GameStateBuilder().
 		CreateAuraFromCard(cards.EnchantingMelodyRed{}).
-		SetIncomingDamage(1).
+		SetIncomingPhysicalDamage(1).
 		Build()
 
 	summary := sim.EvalOneTurnForTesting(d, initial, []card.Card{testutils.FakeRedAction()})
@@ -110,6 +110,52 @@ func TestEnchantingMelody_AbsorbDestroysEvenWhenNonAttackActionSatisfiesEOTClaus
 	}
 	if melodySurvived(summary.State.Auras(), cards.EnchantingMelodyRed{}) {
 		t.Errorf("Enchanting Melody still in auras; absorb-and-destroy clause should fire on any prevention amount")
+	}
+}
+
+// Tests that Enchanting Melody absorbs arcane damage when only arcane is incoming —
+// the DamageAboutToBeTaken fire on the arcane side picks the arcane branch and EM eats
+// up to its printed N. Red N=4, incoming arcane 5 → 4 prevented, 1 leaks; EM destroyed.
+func TestEnchantingMelody_AbsorbsArcaneDamage(t *testing.T) {
+	d := deck.New(heroes.Viserai, nil, nil)
+	initial := gameengine.GameStateBuilder().
+		CreateAuraFromCard(cards.EnchantingMelodyRed{}).
+		SetIncomingArcaneDamage(5).
+		Build()
+
+	summary := sim.EvalOneTurnForTesting(d, initial, nil)
+
+	if summary.Value != 4 {
+		t.Errorf("Value = %d, want 4 (Red EM absorbs 4 arcane of 5 incoming)\nBestLine: %s",
+			summary.Value, formatBestLine(summary.BestLine))
+	}
+	if melodySurvived(summary.State.Auras(), cards.EnchantingMelodyRed{}) {
+		t.Errorf("Enchanting Melody still in auras; should self-destruct after absorbing arcane")
+	}
+}
+
+// Tests the "OR not AND" rule: a turn with both physical and arcane damage incoming
+// fires DamageAboutToBeTaken twice (physical then arcane). EM destroys on the first fire
+// (physical), so it cannot also eat the subsequent arcane fire. Setup: 3 physical and 3
+// arcane incoming, Red EM (N=4). Physical fires first: EM absorbs 3, credits 3 Value,
+// destroys. Arcane fire then finds no EM → 3 arcane leaks (no further Value credit). The
+// damage cap means total Value is exactly 3, not 6.
+func TestEnchantingMelody_CannotMixPhysicalAndArcaneSameTurn(t *testing.T) {
+	d := deck.New(heroes.Viserai, nil, nil)
+	initial := gameengine.GameStateBuilder().
+		CreateAuraFromCard(cards.EnchantingMelodyRed{}).
+		SetIncomingPhysicalDamage(3).
+		SetIncomingArcaneDamage(3).
+		Build()
+
+	summary := sim.EvalOneTurnForTesting(d, initial, nil)
+
+	if summary.Value != 3 {
+		t.Errorf("Value = %d, want 3 (EM absorbs only the physical fire; arcane fire finds no EM)\nBestLine: %s",
+			summary.Value, formatBestLine(summary.BestLine))
+	}
+	if melodySurvived(summary.State.Auras(), cards.EnchantingMelodyRed{}) {
+		t.Errorf("Enchanting Melody still in auras; should self-destruct after absorbing physical")
 	}
 }
 
@@ -129,7 +175,7 @@ func TestEnchantingMelody_PreventionCapsScaleByVariant(t *testing.T) {
 			d := deck.New(heroes.Viserai, nil, nil)
 			initial := gameengine.GameStateBuilder().
 				CreateAuraFromCard(tc.c).
-				SetIncomingDamage(tc.prevent + 1).
+				SetIncomingPhysicalDamage(tc.prevent + 1).
 				Build()
 
 			summary := sim.EvalOneTurnForTesting(d, initial, nil)

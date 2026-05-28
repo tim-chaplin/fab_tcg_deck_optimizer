@@ -93,27 +93,27 @@ func TestResolveAttackStep_AttackCreditsEffectiveAttack(t *testing.T) {
 	}
 }
 
-func TestResolveAttackStep_DefenseReactionCapsToIncomingDamage(t *testing.T) {
-	ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetIncomingDamage(2).Build()}
+func TestResolveAttackStep_DefenseReactionCapsToIncomingPhysicalDamage(t *testing.T) {
+	ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetIncomingPhysicalDamage(2).Build()}
 	pc := &card.CardState{Card: fakeDR{}}
 	ge.ResolveAttackStep(ge.Logger(), pc)
 	if ge.Value() != 2 {
-		t.Errorf("Value = %d, want 2 (capped at IncomingDamage)", ge.Value())
+		t.Errorf("Value = %d, want 2 (capped at IncomingPhysicalDamage)", ge.Value())
 	}
-	if ge.RemainingUnblockedDamage() != 0 {
-		t.Errorf("RemainingUnblockedDamage = %d, want 0 (capped block banked against it)", ge.RemainingUnblockedDamage())
+	if ge.RemainingPhysicalDamage() != 0 {
+		t.Errorf("RemainingPhysicalDamage = %d, want 0 (capped block banked against it)", ge.RemainingPhysicalDamage())
 	}
 }
 
 func TestResolveAttackStep_DefenseReactionUncappedWhenIncomingExceedsDefense(t *testing.T) {
-	ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetIncomingDamage(10).Build()}
+	ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetIncomingPhysicalDamage(10).Build()}
 	pc := &card.CardState{Card: fakeDR{}}
 	ge.ResolveAttackStep(ge.Logger(), pc)
 	if ge.Value() != 4 {
 		t.Errorf("Value = %d, want 4 (printed defense, uncapped)", ge.Value())
 	}
-	if ge.RemainingUnblockedDamage() != 6 {
-		t.Errorf("RemainingUnblockedDamage = %d, want 6 (10 - 4)", ge.RemainingUnblockedDamage())
+	if ge.RemainingPhysicalDamage() != 6 {
+		t.Errorf("RemainingPhysicalDamage = %d, want 6 (10 - 4)", ge.RemainingPhysicalDamage())
 	}
 }
 

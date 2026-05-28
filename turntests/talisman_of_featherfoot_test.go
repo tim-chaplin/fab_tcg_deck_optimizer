@@ -37,7 +37,7 @@ func TestTalismanOfFeatherfoot_PlusOneBuffGrantsGoAgainAndSelfDestructs(t *testi
 			WithPower(1),
 	}
 	state := gameengine.GameStateBuilder().
-		SetIncomingDamage(0).
+		SetIncomingPhysicalDamage(0).
 		CreateItemFromCard(cards.TalismanOfFeatherfootYellow{}).
 		Build()
 
@@ -63,7 +63,7 @@ func TestTalismanOfFeatherfoot_PlusOneBuffWithoutTalismanNoFollowUp(t *testing.T
 			WithPower(1),
 	}
 
-	summary := sim.EvalOneTurnForTesting(featherfootDeck(), gameengine.GameStateBuilder().SetIncomingDamage(0).Build(), hand)
+	summary := sim.EvalOneTurnForTesting(featherfootDeck(), gameengine.GameStateBuilder().SetIncomingPhysicalDamage(0).Build(), hand)
 
 	// Expect Crackle 3 + LP +1 buff + arcane 1 = 5 (no follow-up: only 1 AP available).
 	if summary.Value != 5 {
@@ -87,7 +87,7 @@ func TestTalismanOfFeatherfoot_GoAgainGrantPaysForSecondAttack(t *testing.T) {
 		WithName("Attacker2")
 	hand := []card.Card{attacker1, cards.LungingPressBlue{}, attacker2}
 	state := gameengine.GameStateBuilder().
-		SetIncomingDamage(0).
+		SetIncomingPhysicalDamage(0).
 		CreateItemFromCard(cards.TalismanOfFeatherfootYellow{}).
 		Build()
 
@@ -116,7 +116,7 @@ func TestTalismanOfFeatherfoot_NoTalismanOnlyOneAttackPlays(t *testing.T) {
 		WithName("Attacker2")
 	hand := []card.Card{attacker1, cards.LungingPressBlue{}, attacker2}
 
-	summary := sim.EvalOneTurnForTesting(featherfootDeck(), gameengine.GameStateBuilder().SetIncomingDamage(0).Build(), hand)
+	summary := sim.EvalOneTurnForTesting(featherfootDeck(), gameengine.GameStateBuilder().SetIncomingPhysicalDamage(0).Build(), hand)
 
 	// Best line: Attacker1 3 + LP +1 buff = 4. Attacker2 can't be paid for; AP exhausted.
 	if summary.Value != 4 {
@@ -140,7 +140,7 @@ func TestTalismanOfFeatherfoot_PlusTwoBuffDoesNotFire(t *testing.T) {
 			WithPower(1),
 	}
 	state := gameengine.GameStateBuilder().
-		SetIncomingDamage(0).
+		SetIncomingPhysicalDamage(0).
 		CreateItemFromCard(cards.TalismanOfFeatherfootYellow{}).
 		Build()
 

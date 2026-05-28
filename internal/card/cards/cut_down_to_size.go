@@ -5,7 +5,7 @@
 //
 // On-hit rider intentionally not modelled: an optimal defender drops one card to block,
 // falls under the 4+ threshold, and dodges the discard — crediting the rider would
-// double-count the block already captured by IncomingDamage / BlockTotal.
+// double-count the block already captured by IncomingPhysicalDamage / BlockTotal.
 
 package cards
 

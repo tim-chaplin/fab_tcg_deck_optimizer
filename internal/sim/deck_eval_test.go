@@ -90,7 +90,7 @@ func TestEvaluate_HeldCardDefersDrawToNextTurn(t *testing.T) {
 // Tests that a card promoted to Arsenal on one turn becomes arsenalCardIn on the next.
 func TestEvaluate_ArsenalPersistsAcrossTurns(t *testing.T) {
 	d := deck.New(testutils.Hero{Intel: 1}, nil, []deck.Card{cards.ToughenUpBlue{}, cards.ToughenUpBlue{}})
-	stats := NewEvaluator().Evaluate(d, 1, Matchup{IncomingDamage: 4}, rand.New(rand.NewSource(1)))
+	stats := NewEvaluator().Evaluate(d, 1, Matchup{IncomingPhysicalDamage: 4}, rand.New(rand.NewSource(1)))
 
 	// Best captures turn 2 — only turn with Value > 0 (arsenal DR fires).
 	if stats.Best.Value != 4 {

@@ -30,7 +30,7 @@ func TestTokenBasics_Runechant_CreateFireDestroy(t *testing.T) {
 	}
 	d := deck.New(testutils.Hero{Intel: 4}, nil, deckCards)
 	turn1Hand := []card.Card{cards.HocusPocusRed{}, testutils.FakeBlueResource(), testutils.FakeBlueResource()}
-	turn1, turn2 := sim.EvalTwoTurnsForTesting(d, gameengine.GameStateBuilder().SetIncomingDamage(0).Build(), turn1Hand)
+	turn1, turn2 := sim.EvalTwoTurnsForTesting(d, gameengine.GameStateBuilder().SetIncomingPhysicalDamage(0).Build(), turn1Hand)
 	if got := turn1.State.RunechantCount(); got != 1 {
 		t.Errorf("turn 1 RunechantCount = %d, want 1 (Hocus Pocus rider created one)", got)
 	}
@@ -46,7 +46,7 @@ func TestTokenBasics_Ponder_CreateFireDestroy(t *testing.T) {
 		testutils.FakeBlueAttack(), testutils.FakeBlueAttack(), testutils.FakeBlueAttack(), testutils.FakeBlueAttack()}
 	d := deck.New(heroes.Viserai, nil, deckCards)
 	hand := []card.Card{cards.PeaceOfMindRed{}, testutils.FakeBlueResource()}
-	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingDamage(4).Build(), hand)
+	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingPhysicalDamage(4).Build(), hand)
 	if got := summary.State.PonderCount(); got != 0 {
 		t.Errorf("PonderCount after turn = %d, want 0 (end-of-turn fire destroys the Ponder)", got)
 	}

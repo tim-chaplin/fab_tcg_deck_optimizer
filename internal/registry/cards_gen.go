@@ -586,6 +586,8 @@ var cardsByID = []Card{
 	ids.SutcliffesResearchNotesYellow: cards.SutcliffesResearchNotesYellow{},
 	ids.SutcliffesResearchNotesBlue:   cards.SutcliffesResearchNotesBlue{},
 
+	ids.TalismanOfDousingYellow: cards.TalismanOfDousingYellow{},
+
 	ids.TalismanOfFeatherfootYellow: cards.TalismanOfFeatherfootYellow{},
 
 	ids.TalismanOfRecompenseYellow: cards.TalismanOfRecompenseYellow{},

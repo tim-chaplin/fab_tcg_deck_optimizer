@@ -23,7 +23,7 @@ func TestWarmongersRecital_OnHitRecyclesToDeck(t *testing.T) {
 		cards.WarmongersRecitalRed{},
 		cards.CriticalStrikeYellow{},
 	}
-	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingDamage(0).Build(), hand)
+	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingPhysicalDamage(0).Build(), hand)
 	if got := countAcrossSurfaces(summary.State, ids.CriticalStrikeYellow); got != 1 {
 		t.Fatalf("Critical Strike total across turn-2 surfaces = %d, want 1 "+
 			"(OnHit recycled it; graveyard=%v)", got, summary.State.Graveyard())

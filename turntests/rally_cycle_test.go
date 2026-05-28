@@ -41,7 +41,7 @@ func TestRallyCycle_DiscardsHeldCardOnlyWhenWorthIt(t *testing.T) {
 	for _, rally := range []card.Card{cards.RallyTheCoastGuardRed{}, cards.RallyTheRearguardRed{}} {
 		for _, c := range cases {
 			d := deck.New(testutils.Hero{Intel: 4}, nil, nil)
-			prior := gameengine.GameStateBuilder().SetIncomingDamage(c.incoming).Build()
+			prior := gameengine.GameStateBuilder().SetIncomingPhysicalDamage(c.incoming).Build()
 			summary := sim.EvalOneTurnForTesting(d, prior, []card.Card{rally, c.spare})
 
 			if got := summary.Value; got != c.want {

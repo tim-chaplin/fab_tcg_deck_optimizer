@@ -16,7 +16,7 @@ import (
 func TestLifeForALife_LikelyHitCreditsHeal(t *testing.T) {
 	d := deck.New(testutils.Hero{Intel: 4}, nil, nil)
 	hand := []card.Card{cards.LifeForALifeRed{}, testutils.FakeBlueResource()}
-	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingDamage(0).Build(), hand)
+	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingPhysicalDamage(0).Build(), hand)
 	if summary.Value != 5 {
 		t.Errorf("Red: Value = %d, want 5 (4 likely-hit + 1 heal)", summary.Value)
 	}
@@ -35,7 +35,7 @@ func TestLifeForALife_BlockableSuppressesHeal(t *testing.T) {
 	for _, tc := range cases {
 		d := deck.New(testutils.Hero{Intel: 4}, nil, nil)
 		hand := []card.Card{tc.c, testutils.FakeBlueResource()}
-		summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingDamage(0).Build(), hand)
+		summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingPhysicalDamage(0).Build(), hand)
 		if summary.Value != tc.want {
 			t.Errorf("%s: Value = %d, want %d (blockable, no heal)", tc.c.Name(), summary.Value, tc.want)
 		}

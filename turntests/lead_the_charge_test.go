@@ -20,7 +20,7 @@ func TestLeadTheCharge_GrantsActionPointForNextAction(t *testing.T) {
 		testutils.FakeRedAttack().WithPower(3),
 		testutils.FakeRedAttack().WithPower(3),
 	}
-	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingDamage(0).Build(), hand)
+	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingPhysicalDamage(0).Build(), hand)
 	if summary.Value != 6 {
 		t.Fatalf("Value = %d, want 6 (two CostlyAttacks follow-up via the rider's action point)\nBestLine: %s",
 			summary.Value, formatBestLine(summary.BestLine))
@@ -34,7 +34,7 @@ func TestLeadTheCharge_NoExtraPointWithoutFollowingAction(t *testing.T) {
 		cards.LeadTheChargeRed{},
 		testutils.FakeRedAttack().WithPower(3),
 	}
-	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingDamage(0).Build(), hand)
+	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingPhysicalDamage(0).Build(), hand)
 	if summary.Value != 3 {
 		t.Fatalf("Value = %d, want 3 (single CostlyAttack off Lead the Charge's own go again)\nBestLine: %s",
 			summary.Value, formatBestLine(summary.BestLine))
@@ -55,7 +55,7 @@ func TestLeadTheCharge_ActionPointStacksWithGoAgain(t *testing.T) {
 		testutils.FakeRedAttack().WithPower(3),
 		testutils.FakeRedAttack().WithPower(3),
 	}
-	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingDamage(0).Build(), hand)
+	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingPhysicalDamage(0).Build(), hand)
 	if summary.Value != 9 {
 		t.Fatalf("Value = %d, want 9 (AttackWithPower + two CostlyAttacks; the rider's point stacks atop AttackWithPower's own go again)\nBestLine: %s",
 			summary.Value, formatBestLine(summary.BestLine))

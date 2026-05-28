@@ -22,7 +22,7 @@ import (
 func TestYintiYanti_RunechantFromReduceFiresBeforeYintiResolves(t *testing.T) {
 	d := deck.New(heroes.Viserai, nil, nil)
 	hand := []card.Card{cards.YintiYantiRed{}, cards.ReduceToRunechantRed{}, testutils.FakeRedAction()}
-	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingDamage(4).Build(), hand)
+	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingPhysicalDamage(4).Build(), hand)
 	got := summary.Value
 	if got != 8 {
 		t.Fatalf("Value = %d, want 8 (Reduce defense 4 + Yinti Yanti 3 with no aura bonus + creation credit 1)", got)
@@ -34,7 +34,7 @@ func TestYintiYanti_RunechantFromReduceFiresBeforeYintiResolves(t *testing.T) {
 func TestYintiYanti_SeesPonderFromPeaceOfMindInDefense(t *testing.T) {
 	d := deck.New(heroes.Viserai, nil, nil)
 	hand := []card.Card{cards.YintiYantiRed{}, cards.PeaceOfMindRed{}, testutils.FakeBlueResource()}
-	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingDamage(4).Build(), hand)
+	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingPhysicalDamage(4).Build(), hand)
 	got := summary.Value
 	if got != 8 {
 		t.Fatalf("Value = %d, want 8 (Peace of Mind defense 4 + Yinti Yanti 4 with +1 aura bonus from Ponder)", got)
@@ -46,7 +46,7 @@ func TestYintiYanti_SeesPonderFromPeaceOfMindInDefense(t *testing.T) {
 func TestYintiYanti_BlueBlockSeesRunechantFromReduceInDefense(t *testing.T) {
 	d := deck.New(heroes.Viserai, nil, nil)
 	hand := []card.Card{cards.YintiYantiBlue{}, cards.ReduceToRunechantRed{}, testutils.FakeRedAction()}
-	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingDamage(7).Build(), hand)
+	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingPhysicalDamage(7).Build(), hand)
 	got := summary.Value
 	if got != 8 {
 		t.Fatalf("Value = %d, want 8 (Reduce defense 4 + Yinti Yanti block 3 with +1 aura bonus + creation credit 1)", got)
@@ -58,7 +58,7 @@ func TestYintiYanti_BlueBlockSeesRunechantFromReduceInDefense(t *testing.T) {
 func TestYintiYanti_BlueBlockSeesPonderFromPeaceOfMindInDefense(t *testing.T) {
 	d := deck.New(heroes.Viserai, nil, nil)
 	hand := []card.Card{cards.YintiYantiBlue{}, cards.PeaceOfMindRed{}, testutils.FakeBlueResource()}
-	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingDamage(7).Build(), hand)
+	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingPhysicalDamage(7).Build(), hand)
 	got := summary.Value
 	if got != 7 {
 		t.Fatalf("Value = %d, want 7 (Peace of Mind defense 4 + Yinti Yanti block 3 with +1 aura bonus from Ponder)", got)

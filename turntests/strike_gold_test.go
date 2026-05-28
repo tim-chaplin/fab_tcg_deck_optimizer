@@ -21,7 +21,7 @@ func TestStrikeGold_OnHitCreatesGoldToken(t *testing.T) {
 		testutils.FakeBlueResource(),
 		testutils.FakeBlueResource(),
 	}
-	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingDamage(0).Build(), hand)
+	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingPhysicalDamage(0).Build(), hand)
 	if summary.Value != 4 {
 		t.Fatalf("Value = %d, want 4 (Strike Gold Red 4 power)\nBestLine: %s",
 			summary.Value, formatBestLine(summary.BestLine))
@@ -40,7 +40,7 @@ func TestStrikeGold_BlockableMissDoesNotCreateGold(t *testing.T) {
 		testutils.FakeBlueResource(),
 		testutils.FakeBlueResource(),
 	}
-	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingDamage(0).Build(), hand)
+	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingPhysicalDamage(0).Build(), hand)
 	if summary.Value != 3 {
 		t.Fatalf("Value = %d, want 3 (Strike Gold Yellow 3 power)\nBestLine: %s",
 			summary.Value, formatBestLine(summary.BestLine))

@@ -33,7 +33,7 @@ func TestHighStriker_TriggersOnNextAttackActionHit(t *testing.T) {
 				cards.CriticalStrikeYellow{},
 				testutils.FakeBlueResource(),
 			}
-			summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingDamage(0).Build(), hand)
+			summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingPhysicalDamage(0).Build(), hand)
 			if summary.State.CopperCount() != tc.wantCopper {
 				t.Fatalf("Copper = %d, want %d (next attack hit fires the rider)\nBestLine: %s",
 					summary.State.CopperCount(), tc.wantCopper, formatBestLine(summary.BestLine))

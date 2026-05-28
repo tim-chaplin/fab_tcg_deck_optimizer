@@ -16,7 +16,7 @@ import (
 func TestCondemnToSlaughter_SacrificesArcaneCussing(t *testing.T) {
 	prior := gameengine.GameStateBuilder().
 		CreateAuraFromCard(cards.ArcaneCussingRed{}).
-		SetIncomingDamage(0).
+		SetIncomingPhysicalDamage(0).
 		Build()
 	d := deck.New(testutils.Hero{Intel: 4}, nil, nil)
 	hand := []card.Card{cards.CondemnToSlaughterRed{}, testutils.FakeBlueResource()}
@@ -35,7 +35,7 @@ func TestCondemnToSlaughter_BuffsNextRunebladeAttack(t *testing.T) {
 	d := deck.New(testutils.Hero{Intel: 4}, nil, nil)
 	hand := []card.Card{cards.CondemnToSlaughterBlue{}, testutils.FakeRedAttack().WithTypes(card.TypeRuneblade), testutils.FakeBlueResource()}
 
-	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingDamage(0).Build(), hand)
+	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingPhysicalDamage(0).Build(), hand)
 
 	if got := summary.Value; got != 1 {
 		t.Fatalf("Value = %d, want 1 (Condemn's +1{p} turns the 0-power Runeblade attack into a 1-damage hit)\nBestLine: %s",

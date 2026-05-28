@@ -14,7 +14,7 @@ type TurnSummary struct {
 	SwungWeapons   []string
 	Value          int
 	State          *gameengine.GameState
-	IncomingDamage int
+	IncomingPhysicalDamage int
 	Cacheable      bool
 }
 

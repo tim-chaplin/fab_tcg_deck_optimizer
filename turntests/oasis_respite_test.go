@@ -27,7 +27,7 @@ func TestOasisRespite_PreventsAndLifeRider(t *testing.T) {
 		dOff := deck.New(testutils.Hero{Intel: 4}, nil, nil)
 		sOff := gameengine.GameStateBuilder().
 			SetHero(fakeLowHeroOff{}).
-			SetIncomingDamage(10).
+			SetIncomingPhysicalDamage(10).
 			Build()
 		summary := sim.EvalOneTurnForTesting(dOff, sOff, hand)
 		if summary.Value != tc.wantOff {
@@ -37,7 +37,7 @@ func TestOasisRespite_PreventsAndLifeRider(t *testing.T) {
 		dOn := deck.New(testutils.Hero{Intel: 4}, nil, nil)
 		sOn := gameengine.GameStateBuilder().
 			SetHero(fakeLowHeroOn{}).
-			SetIncomingDamage(10).
+			SetIncomingPhysicalDamage(10).
 			Build()
 		summary = sim.EvalOneTurnForTesting(dOn, sOn, hand)
 		if summary.Value != tc.wantOn {

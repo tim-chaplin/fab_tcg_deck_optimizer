@@ -34,7 +34,7 @@ func TestRunechantOnPlay_CreatesNTokens(t *testing.T) {
 	for _, tc := range cases {
 		d := deck.New(testutils.Hero{Intel: 4}, nil, nil)
 		hand := []card.Card{tc.c, testutils.FakeBlueResource(), testutils.FakeBlueResource()}
-		summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingDamage(0).Build(), hand)
+		summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingPhysicalDamage(0).Build(), hand)
 		want := tc.c.Attack() + tc.n
 		if summary.Value != want {
 			t.Errorf("%s: Value = %d, want %d (Attack %d + %d runechants)",

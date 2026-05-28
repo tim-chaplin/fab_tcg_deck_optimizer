@@ -20,7 +20,7 @@ import (
 func TestEvalTwoTurns_SigilOfFyendalQueuesTrigger(t *testing.T) {
 	sigil := cards.SigilOfFyendalBlue{}
 	d := deck.New(heroes.Viserai, nil, nil)
-	turn1, turn2 := sim.EvalTwoTurnsForTesting(d, gameengine.GameStateBuilder().SetIncomingDamage(0).Build(), []card.Card{sigil})
+	turn1, turn2 := sim.EvalTwoTurnsForTesting(d, gameengine.GameStateBuilder().SetIncomingPhysicalDamage(0).Build(), []card.Card{sigil})
 
 	if !bestLineHasRole(turn1.BestLine, cards.SigilOfFyendalBlue{}, card.Attack) {
 		t.Errorf("turn 1 BestLine didn't play Sigil of Fyendal as Role=Attack: %+v", turn1.BestLine)
@@ -48,7 +48,7 @@ func TestEvalTwoTurns_SigilOfTheArknightRevealsIntoHand(t *testing.T) {
 		testutils.FakeBlueResource(),
 		reveal,
 	})
-	turn1, turn2 := sim.EvalTwoTurnsForTesting(d, gameengine.GameStateBuilder().SetIncomingDamage(0).Build(), []card.Card{sigil})
+	turn1, turn2 := sim.EvalTwoTurnsForTesting(d, gameengine.GameStateBuilder().SetIncomingPhysicalDamage(0).Build(), []card.Card{sigil})
 
 	if !bestLineHasRole(turn1.BestLine, cards.SigilOfTheArknightBlue{}, card.Attack) {
 		t.Errorf("turn 1 BestLine didn't play the sigil as Role=Attack: %+v", turn1.BestLine)
@@ -68,7 +68,7 @@ func TestEvalTwoTurns_BlessingOfOccultCreatesRunesAtStartOfNextTurn(t *testing.T
 	blessing := cards.BlessingOfOccultRed{}
 	pitch := testutils.FakeBlueResource()
 	d := deck.New(heroes.Viserai, nil, nil)
-	turn1, turn2 := sim.EvalTwoTurnsForTesting(d, gameengine.GameStateBuilder().SetIncomingDamage(0).Build(), []card.Card{blessing, pitch})
+	turn1, turn2 := sim.EvalTwoTurnsForTesting(d, gameengine.GameStateBuilder().SetIncomingPhysicalDamage(0).Build(), []card.Card{blessing, pitch})
 
 	if turn1.Value != 0 {
 		t.Errorf("turn 1 Value = %d, want 0 (Blessing's rune credit is deferred)", turn1.Value)
@@ -119,7 +119,7 @@ func TestEvalTwoTurns_RunebloodIncantationTicksAcrossTurns(t *testing.T) {
 	runeblood := cards.RunebloodIncantationRed{}
 	pitch := testutils.FakeBlueResource()
 	d := deck.New(heroes.Viserai, nil, nil)
-	turn1, turn2 := sim.EvalTwoTurnsForTesting(d, gameengine.GameStateBuilder().SetIncomingDamage(0).Build(), []card.Card{runeblood, pitch})
+	turn1, turn2 := sim.EvalTwoTurnsForTesting(d, gameengine.GameStateBuilder().SetIncomingPhysicalDamage(0).Build(), []card.Card{runeblood, pitch})
 
 	if !bestLineHasRole(turn1.BestLine, cards.RunebloodIncantationRed{}, card.Attack) {
 		t.Errorf("turn 1 BestLine didn't play Runeblood as Role=Attack: %+v", turn1.BestLine)

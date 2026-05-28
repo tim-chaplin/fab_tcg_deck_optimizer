@@ -18,7 +18,7 @@ import (
 func TestStartingStake_CreatesGoldViaAttackTurn(t *testing.T) {
 	d := deck.New(heroes.Viserai, nil, nil)
 	hand := []card.Card{cards.StartingStakeYellow{}}
-	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingDamage(0).Build(), hand)
+	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingPhysicalDamage(0).Build(), hand)
 	if summary.State.GoldCount() != 1 {
 		t.Fatalf("Gold = %d, want 1 (Starting Stake creates one)\nBestLine: %s",
 			summary.State.GoldCount(), formatBestLine(summary.BestLine))

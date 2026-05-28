@@ -14,7 +14,7 @@ import (
 
 // Tests that Eirina's Prayer's DefensiveInstant routing prevents arcane damage scaled by
 // the revealed deck-top pitch. Hand = [Eirina Red, FakeBlueResource]; matchup has
-// IncomingDamage=2 (so the partition allows Defend role) plus ArcaneIncomingDamage=5.
+// IncomingPhysicalDamage=2 (so the partition allows Defend role) plus IncomingArcaneDamage=5.
 // Deck top is pitch 2, so X = 6 - 2 = 4. Eirina prevents min(4, 5) = 4 arcane and
 // credits 4 Value; FakeBlue funds the 1{r} cost. Eirina's printed Defense is 0, so the
 // attack-step DR delta contributes nothing — the 4 comes entirely from the arcane
@@ -23,8 +23,8 @@ func TestEirinasPrayer_PreventsArcaneDamageScaledByDeckTopPitch(t *testing.T) {
 	d := deck.New(heroes.Viserai, nil, []deck.Card{testutils.FakeYellowResource()})
 	hand := []card.Card{cards.EirinasPrayerRed{}, testutils.FakeBlueResource()}
 	initial := gameengine.GameStateBuilder().
-		SetIncomingDamage(2).
-		SetArcaneIncomingDamage(5).
+		SetIncomingPhysicalDamage(2).
+		SetIncomingArcaneDamage(5).
 		Build()
 
 	summary := sim.EvalOneTurnForTesting(d, initial, hand)
@@ -38,7 +38,7 @@ func TestEirinasPrayer_PreventsArcaneDamageScaledByDeckTopPitch(t *testing.T) {
 	}
 }
 
-// Tests that Eirina's prevention is capped at the remaining ArcaneIncomingDamage — when
+// Tests that Eirina's prevention is capped at the remaining IncomingArcaneDamage — when
 // X (= 6 - deck-top pitch) exceeds incoming arcane, the credited Value is the incoming
 // total, not the formula amount. Deck top is pitch 1 → X = 5; incoming arcane = 2 →
 // prevented = 2.
@@ -46,8 +46,8 @@ func TestEirinasPrayer_PreventionCapsAtRemainingArcane(t *testing.T) {
 	d := deck.New(heroes.Viserai, nil, []deck.Card{testutils.FakeRedResource()})
 	hand := []card.Card{cards.EirinasPrayerRed{}, testutils.FakeBlueResource()}
 	initial := gameengine.GameStateBuilder().
-		SetIncomingDamage(2).
-		SetArcaneIncomingDamage(2).
+		SetIncomingPhysicalDamage(2).
+		SetIncomingArcaneDamage(2).
 		Build()
 
 	summary := sim.EvalOneTurnForTesting(d, initial, hand)
@@ -64,8 +64,8 @@ func TestEirinasPrayerYellow_UsesN5(t *testing.T) {
 	d := deck.New(heroes.Viserai, nil, []deck.Card{testutils.FakeYellowResource()})
 	hand := []card.Card{cards.EirinasPrayerYellow{}, testutils.FakeBlueResource()}
 	initial := gameengine.GameStateBuilder().
-		SetIncomingDamage(2).
-		SetArcaneIncomingDamage(5).
+		SetIncomingPhysicalDamage(2).
+		SetIncomingArcaneDamage(5).
 		Build()
 
 	summary := sim.EvalOneTurnForTesting(d, initial, hand)
@@ -76,15 +76,15 @@ func TestEirinasPrayerYellow_UsesN5(t *testing.T) {
 	}
 }
 
-// Pure arcane-only matchup: Eirina's Prayer prevents arcane damage when IncomingDamage
+// Pure arcane-only matchup: Eirina's Prayer prevents arcane damage when IncomingPhysicalDamage
 // is zero. The partition recurse must let Defend role through whenever any incoming
 // damage (physical or arcane) could be prevented.
 func TestEirinasPrayer_ArcaneOnlyMatchup(t *testing.T) {
 	d := deck.New(heroes.Viserai, nil, []deck.Card{testutils.FakeYellowResource()})
 	hand := []card.Card{cards.EirinasPrayerRed{}, testutils.FakeBlueResource()}
 	initial := gameengine.GameStateBuilder().
-		SetIncomingDamage(0).
-		SetArcaneIncomingDamage(5).
+		SetIncomingPhysicalDamage(0).
+		SetIncomingArcaneDamage(5).
 		Build()
 
 	summary := sim.EvalOneTurnForTesting(d, initial, hand)
@@ -100,8 +100,8 @@ func TestEirinasPrayerBlue_UsesN4(t *testing.T) {
 	d := deck.New(heroes.Viserai, nil, []deck.Card{testutils.FakeRedResource()})
 	hand := []card.Card{cards.EirinasPrayerBlue{}, testutils.FakeBlueResource()}
 	initial := gameengine.GameStateBuilder().
-		SetIncomingDamage(2).
-		SetArcaneIncomingDamage(5).
+		SetIncomingPhysicalDamage(2).
+		SetIncomingArcaneDamage(5).
 		Build()
 
 	summary := sim.EvalOneTurnForTesting(d, initial, hand)

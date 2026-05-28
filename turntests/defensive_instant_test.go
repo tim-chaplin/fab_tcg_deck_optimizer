@@ -19,7 +19,7 @@ import (
 func TestDefensiveInstant_BrushOffRedAlone(t *testing.T) {
 	d := deck.New(heroes.Viserai, nil, nil)
 	hand := []card.Card{cards.BrushOffRed{}}
-	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingDamage(5).Build(), hand)
+	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingPhysicalDamage(5).Build(), hand)
 	if got := summary.Value; got != 3 {
 		t.Fatalf("Value = %d, want 3 (Brush Off Red prevents 3 of 5)", got)
 	}
@@ -28,35 +28,35 @@ func TestDefensiveInstant_BrushOffRedAlone(t *testing.T) {
 // Tests the Yellow / Blue printings cap at their lower thresholds.
 func TestDefensiveInstant_BrushOffYellowAndBlueAlone(t *testing.T) {
 	d := deck.New(heroes.Viserai, nil, nil)
-	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingDamage(5).Build(), []card.Card{cards.BrushOffYellow{}})
+	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingPhysicalDamage(5).Build(), []card.Card{cards.BrushOffYellow{}})
 	if got := summary.Value; got != 2 {
 		t.Fatalf("Yellow Value = %d, want 2", got)
 	}
-	summary = sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingDamage(5).Build(), []card.Card{cards.BrushOffBlue{}})
+	summary = sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingPhysicalDamage(5).Build(), []card.Card{cards.BrushOffBlue{}})
 	if got := summary.Value; got != 1 {
 		t.Fatalf("Blue Value = %d, want 1", got)
 	}
 }
 
 // Tests Calming Breeze's collapsed-prevention model (3 events × 1 = 3 against the single
-// IncomingDamage bucket).
+// IncomingPhysicalDamage bucket).
 func TestDefensiveInstant_CalmingBreezeAlone(t *testing.T) {
 	d := deck.New(heroes.Viserai, nil, nil)
 	hand := []card.Card{cards.CalmingBreezeRed{}}
-	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingDamage(5).Build(), hand)
+	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingPhysicalDamage(5).Build(), hand)
 	if got := summary.Value; got != 3 {
 		t.Fatalf("Value = %d, want 3 (Calming Breeze 3 prevention)", got)
 	}
 }
 
-// Tests that prevention caps at IncomingDamage — Oasis Respite Red has Defense 4 but only
+// Tests that prevention caps at IncomingPhysicalDamage — Oasis Respite Red has Defense 4 but only
 // 1 incoming damage, so the sim's attack-step resolver credits 1.
 func TestDefensiveInstant_PreventionCapsAtIncoming(t *testing.T) {
 	d := deck.New(heroes.Viserai, nil, nil)
 	hand := []card.Card{cards.OasisRespiteRed{}, testutils.FakeBlueResource()}
-	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingDamage(1).Build(), hand)
+	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingPhysicalDamage(1).Build(), hand)
 	if got := summary.Value; got != 1 {
-		t.Fatalf("Value = %d, want 1 (Oasis Respite caps at IncomingDamage=1)", got)
+		t.Fatalf("Value = %d, want 1 (Oasis Respite caps at IncomingPhysicalDamage=1)", got)
 	}
 }
 
@@ -65,18 +65,18 @@ func TestDefensiveInstant_PreventionCapsAtIncoming(t *testing.T) {
 func TestDefensiveInstant_PeaceOfMindWithCost(t *testing.T) {
 	d := deck.New(heroes.Viserai, nil, nil)
 	hand := []card.Card{cards.PeaceOfMindRed{}, testutils.FakeBlueResource(), cards.CriticalStrikeBlue{}}
-	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingDamage(4).Build(), hand)
+	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingPhysicalDamage(4).Build(), hand)
 	if got := summary.Value; got != 4 {
 		t.Fatalf("Value = %d, want 4 (PoM 4; pitch can't fund both phases)", got)
 	}
 }
 
 // Tests that a defensive instant resolves alongside a printed DR — both go through the
-// DR loop in defendersDamage and contribute their full prevention up to IncomingDamage.
+// DR loop in defendersDamage and contribute their full prevention up to IncomingPhysicalDamage.
 func TestDefensiveInstant_StacksWithDR(t *testing.T) {
 	d := deck.New(heroes.Viserai, nil, nil)
 	hand := []card.Card{cards.BrushOffRed{}, cards.DodgeBlue{}}
-	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingDamage(5).Build(), hand)
+	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingPhysicalDamage(5).Build(), hand)
 	if got := summary.Value; got != 5 {
 		t.Fatalf("Value = %d, want 5 (Brush Off 3 + Dodge 2 fully prevent 5 incoming)", got)
 	}
@@ -88,7 +88,7 @@ func TestDefensiveInstant_DefendsFromArsenal(t *testing.T) {
 	hand := []card.Card{testutils.FakeBlueResource()}
 	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().
 		SetArsenal(cards.BrushOffRed{}).
-		SetIncomingDamage(3).
+		SetIncomingPhysicalDamage(3).
 		Build(), hand)
 	if got := summary.Value; got != 3 {
 		t.Fatalf("Value = %d, want 3 (Brush Off plays from arsenal as defender)", got)
@@ -106,7 +106,7 @@ func TestPonder_PeaceOfMindFillsEmptyArsenalNextTurn(t *testing.T) {
 	}
 	d := deck.New(heroes.Viserai, nil, deckCards)
 	hand := []card.Card{cards.PeaceOfMindRed{}, testutils.FakeBlueResource()}
-	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingDamage(4).Build(), hand)
+	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingPhysicalDamage(4).Build(), hand)
 	if summary.State.Arsenal() == nil || summary.State.Arsenal().Name() != beacon.Name() {
 		t.Errorf("turn 2 arsenal = %v, want %v (Ponder draw should fill empty arsenal from deck top)",
 			summary.State.Arsenal(), beacon)

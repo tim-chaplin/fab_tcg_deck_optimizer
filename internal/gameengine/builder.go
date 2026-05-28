@@ -195,12 +195,12 @@ func (b *StateBuilder) SetNonAttackActionPlayed(v bool) *StateBuilder {
 	return b
 }
 
-// SetIncomingDamage replaces the matchup's incoming-damage tally.
-func (b *StateBuilder) SetIncomingDamage(n int) *StateBuilder { b.gs.incomingDamage = n; return b }
+// SetIncomingPhysicalDamage replaces the matchup's incoming-damage tally.
+func (b *StateBuilder) SetIncomingPhysicalDamage(n int) *StateBuilder { b.gs.incomingPhysicalDamage = n; return b }
 
-// SetArcaneIncomingDamage replaces the matchup's arcane-incoming-damage tally.
-func (b *StateBuilder) SetArcaneIncomingDamage(n int) *StateBuilder {
-	b.gs.arcaneIncomingDamage = n
+// SetIncomingArcaneDamage replaces the matchup's arcane-incoming-damage tally.
+func (b *StateBuilder) SetIncomingArcaneDamage(n int) *StateBuilder {
+	b.gs.incomingArcaneDamage = n
 	return b
 }
 

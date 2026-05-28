@@ -34,7 +34,7 @@ func TestBest_WeepingBattlegroundBanishesAuraFromGraveyard(t *testing.T) {
 	h := []card.Card{cards.WeepingBattlegroundRed{}}
 	d := deck.New(testutils.Hero{Intel: 4}, nil, nil)
 	state := gameengine.GameStateBuilder().
-		SetIncomingDamage(4).
+		SetIncomingPhysicalDamage(4).
 		SetGraveyard([]card.Card{zeroDefenseAura{}}).
 		Build()
 	summary := sim.EvalOneTurnForTesting(d, state, h)
@@ -49,7 +49,7 @@ func TestBest_WeepingBattlegroundBanishesAuraFromGraveyard(t *testing.T) {
 func TestBest_WeepingBattlegroundFizzlesWithoutAura(t *testing.T) {
 	h := []card.Card{cards.WeepingBattlegroundRed{}}
 	d := deck.New(testutils.Hero{Intel: 4}, nil, nil)
-	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingDamage(4).Build(), h)
+	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingPhysicalDamage(4).Build(), h)
 	if summary.Value != 3 {
 		t.Errorf("Value = %d, want 3 (3 block only; banish fizzles). Roles=[%s]",
 			summary.Value, sim.FormatBestLine(summary.BestLine))
@@ -62,7 +62,7 @@ func TestBest_WeepingBattlegroundBanishedAuraOnlyInBanishedZone(t *testing.T) {
 	h := []card.Card{cards.WeepingBattlegroundRed{}}
 	d := deck.New(testutils.Hero{Intel: 4}, nil, nil)
 	state := gameengine.GameStateBuilder().
-		SetIncomingDamage(4).
+		SetIncomingPhysicalDamage(4).
 		SetGraveyard([]card.Card{zeroDefenseAura{}}).
 		Build()
 	summary := sim.EvalOneTurnForTesting(d, state, h)

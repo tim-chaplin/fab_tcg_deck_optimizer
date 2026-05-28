@@ -21,7 +21,7 @@ func TestHighStriker_WeaponHitCreatesCopper(t *testing.T) {
 		testutils.FakeBlueResource(),
 		testutils.FakeBlueResource(),
 	}
-	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingDamage(0).Build(), hand)
+	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingPhysicalDamage(0).Build(), hand)
 	if got := summary.State.CopperCount(); got != 6 {
 		t.Fatalf("Copper at start of next turn = %d, want 6 (HSR rider on Club swing)\nBestLine: %s",
 			got, formatBestLine(summary.BestLine))

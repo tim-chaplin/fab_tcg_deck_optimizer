@@ -24,7 +24,7 @@ func TestFreewheelingRenegades_AlwaysDebuffedByTwo(t *testing.T) {
 	for _, tc := range cases {
 		d := deck.New(testutils.Hero{Intel: 4}, nil, nil)
 		hand := []card.Card{tc.c, testutils.FakeBlueResource()}
-		summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingDamage(0).Build(), hand)
+		summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingPhysicalDamage(0).Build(), hand)
 		if summary.Value != tc.want {
 			t.Errorf("%s: Value = %d, want %d (printed - 2)", tc.c.Name(), summary.Value, tc.want)
 		}

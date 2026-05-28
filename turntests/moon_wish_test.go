@@ -25,7 +25,7 @@ func TestEvalOneTurn_MoonWishAltCostTutorsSunKissAndConsumesDeck(t *testing.T) {
 		testutils.FakeRedAttack(), testutils.FakeRedAttack(),
 	}
 	d := deck.New(testutils.Hero{Intel: 4}, nil, deckCards)
-	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingDamage(0).Build(), []card.Card{
+	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingPhysicalDamage(0).Build(), []card.Card{
 		cards.MoonWishYellow{},
 		cards.WeepingBattlegroundRed{},
 	})
@@ -57,7 +57,7 @@ func TestEvalOneTurn_MoonWishAltCostTutorFizzlesWithoutSunKiss(t *testing.T) {
 		testutils.FakeRedAttack(), testutils.FakeRedAttack(), testutils.FakeRedAttack(),
 	}
 	d := deck.New(testutils.Hero{Intel: 4}, nil, deckCards)
-	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingDamage(0).Build(), []card.Card{
+	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingPhysicalDamage(0).Build(), []card.Card{
 		cards.MoonWishYellow{},
 		cards.WeepingBattlegroundRed{},
 	})
@@ -87,7 +87,7 @@ func TestEvalOneTurn_MoonWishWithFlyingHighPlaysTutoredSunKiss(t *testing.T) {
 		testutils.FakeRedAttack(), testutils.FakeRedAttack(), testutils.FakeRedAttack(), testutils.FakeRedAttack(),
 	}
 	d := deck.New(testutils.Hero{Intel: 4}, nil, deckCards)
-	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingDamage(0).Build(), []card.Card{
+	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingPhysicalDamage(0).Build(), []card.Card{
 		cards.FlyingHighRed{},
 		cards.MoonWishYellow{},
 		cards.WeepingBattlegroundRed{},
