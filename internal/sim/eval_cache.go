@@ -90,7 +90,8 @@ type playedCard struct {
 	mode        int8
 	fromArsenal bool
 	// weaponIdx is the equipped-weapon index for a weapon swing, or -1 for hand cards / item
-	// abilities. Replay seeds CardState.WeaponIdx from it. int16 to match CardState.WeaponIdx.
+	// abilities. Replay seeds the sim's per-slot permWeaponIdx from it (via seedAttackStepEntry).
+	// int16 to match permWeaponIdx.
 	weaponIdx int16
 }
 

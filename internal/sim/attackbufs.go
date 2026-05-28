@@ -19,14 +19,19 @@ type attackBufs struct {
 	// inner loop skips interface dispatch on Types / GoAgain. Pointer-valued so perm swaps
 	// move 8 bytes instead of a full struct.
 	permMeta []*attackerMeta
+	// permWeaponIdx parallels pcBuf: entry i is the equipped-weapon index of slot i's weapon
+	// swing (-1 for hand cards / item abilities), swapped in lockstep with pcBuf / permMeta by
+	// the permutation so playSequenceWithMeta can resolve the per-perm weapon object onto
+	// pcBuf[i].Weapon. Sim-private — the index never touches the card-facing CardState API.
+	permWeaponIdx []int16
 	// attackerBuf is the per-mask-combo working slice that bestAttackWithWeapons fills
 	// with the partition's attackers + the weapon-mask's selected weapons before handing
 	// off to bestSequence. Sized at construction; the slice header re-slices to [:n] per
 	// call.
 	attackerBuf []card.Card
 	// attackerWeaponIdxBuf parallels attackerBuf: the equipped-weapon index for each appended
-	// weapon swing, or -1 for partition attackers / item abilities. bestSequence seeds each
-	// CardState.WeaponIdx from it so the per-perm weapon object resolves correctly.
+	// weapon swing, or -1 for partition attackers / item abilities. bestSequence copies it into
+	// the per-slot permWeaponIdx at seed time.
 	attackerWeaponIdxBuf []int
 	// weaponNames[mask] is the pre-built []string of weapon names indexed by the
 	// weapon-prefix bits of the wmask, used for SwungWeapons display.
@@ -126,6 +131,7 @@ func newAttackBufs(handSize, weaponCount int, weapons []gameengine.Weapon, state
 		pcBuf:                 pcBuf,
 		ptrBuf:                ptrBuf,
 		permMeta:              make([]*attackerMeta, maxAttackers),
+		permWeaponIdx:         make([]int16, maxAttackers),
 		attackerBuf:           make([]card.Card, maxAttackers),
 		attackerWeaponIdxBuf:  make([]int, maxAttackers),
 		weaponNames:           weaponNames,

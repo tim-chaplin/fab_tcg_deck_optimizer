@@ -13,9 +13,6 @@ import (
 //
 //   - Card / FromArsenal / Mode: attack-step-binding identity. Mode is reseeded per modal tuple
 //     by the attack-turn runner's enumeration loop.
-//   - WeaponIdx: stable equipped-weapon index for a weapon swing (-1 otherwise). Bound at
-//     seed time so it rides the permutation swap; playSequenceWithMeta resolves it into
-//     Ephemeral.Weapon per perm.
 //   - FromDraw: set only by mid-attack-turn DrawOne inserts; pcBuf entries are planned
 //     attackers, so this stays zero.
 //   - Ephemeral: the embedded short-lived state. Its Reset method owns the per-field
@@ -28,7 +25,6 @@ var seedAttackStepEntryAllowlist = map[string]bool{
 	"FromArsenal": true,
 	"FromDraw":    true,
 	"Mode":        true,
-	"WeaponIdx":   true,
 	"Role":        true,
 	"Ephemeral":   true,
 }
