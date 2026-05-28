@@ -559,16 +559,14 @@ func panicIfOptViolatesMultiset(in, top, bottom []card.Card) {
 //
 // ctx carries the firing event, the triggering card (the *CardState whose resolution
 // raised the event, or nil for turn-boundary events), and any trigger-specific payload
-// (BuffDelta for AttackBuffedByReaction). ctx.TriggeringCard is also published on
-// ge.triggeringCard so engine internals can read it. The hero fires first, then auras,
-// ephemeral triggers, and items.
+// (BuffDelta for AttackBuffedByReaction). The hero fires first, then auras, ephemeral
+// triggers, and items.
 func (ge *GameEngine) FireTriggers(ctx card.FireContext) {
 	t := ctx.FiringType
 	heroFires := ge.heroTriggerType&t != 0
 	if !heroFires && !ge.AnyAurasInPlay() && len(ge.triggers) == 0 && !ge.AnyItemsInPlay() {
 		return
 	}
-	ge.triggeringCard = ctx.TriggeringCard
 
 	var triggeringTypes card.TypeSet
 	if ctx.TriggeringCard != nil {
@@ -596,15 +594,13 @@ func (ge *GameEngine) FireTriggers(ctx card.FireContext) {
 	if liveItemBits != 0 {
 		fireTokenItems(ge, ctx, triggeringTypes, liveItemBits)
 	}
-
-	ge.triggeringCard = nil
 }
 
 // fireHero applies the OncePerTurn / Matches gates and invokes the hero handler. The
 // hero is singular (no slice splicing, no removeAfterFire) so it bypasses fireHooks's
-// cursor walk. The TriggerType bit-and check is done at the caller; t is the firing
-// event so a multi-subscription hero can dispatch. triggeringCard is passed through to
-// the handler so it can read the source card's in-attack-turn state.
+// cursor walk. The TriggerType bit-and check is done at the caller; ctx carries the
+// firing event and the triggering card so a multi-subscription hero can dispatch and
+// read the source card's in-attack-turn state.
 func fireHero(ge *GameEngine, ctx card.FireContext, triggeringTypes card.TypeSet) {
 	h := ge.hero
 	if h.OncePerTurn() && h.FiredThisTurn() {
@@ -619,9 +615,9 @@ func fireHero(ge *GameEngine, ctx card.FireContext, triggeringTypes card.TypeSet
 	}
 }
 
-// fireHooks fires every entry of *hooks subscribed to event t: an open once-per-turn gate
-// is required, and card-raised events additionally need the entry's type filter to accept
-// triggeringCard. The snapshot length is taken up front so an entry a handler creates
+// fireHooks fires every entry of *hooks subscribed to ctx.FiringType: an open once-per-turn
+// gate is required, and card-raised events additionally need the entry's type filter to
+// accept ctx.TriggeringCard. The snapshot length is taken up front so an entry a handler creates
 // lands past it and isn't fired this pass. A cursor walk keeps a handler-side destroy from
 // skipping the next entry — currentHookIdx is published before each Fire so the entry's
 // Destroy splices the right slot and sets currentHookDestroyed, which shortens the walk.

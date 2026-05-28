@@ -247,7 +247,6 @@ type GameEngine interface {
 	CardsPlayed() []Card
 	SetCardsPlayed([]Card)
 	CardsRemaining() []*CardState
-	TriggeringCard() *CardState
 	// AuraCount is the count of live auras — used by "while you control an aura" gates.
 	// Cards don't get a typed slice view; the engine owns the live aura set.
 	AuraCount() int
