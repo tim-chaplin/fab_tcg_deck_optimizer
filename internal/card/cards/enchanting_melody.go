@@ -22,7 +22,6 @@ func enchantingMelodyHandler(ge card.GameEngine, l card.Logger, a card.Aura, fir
 	switch firingType {
 	case triggertype.DamageAboutToBeTaken:
 		if prevented := ge.PreventGenericDamage(a.Count()); prevented > 0 {
-			ge.AddValue(prevented)
 			l.AppendPostTriggerf(a.CardName(), prevented, "Prevented %d damage", prevented)
 		}
 		a.Destroy(true)

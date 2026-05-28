@@ -25,7 +25,6 @@ func eirinasPrayerPlay(ge card.GameEngine, l card.Logger, self *card.CardState, 
 	if prevented <= 0 {
 		return
 	}
-	ge.AddValue(prevented)
 	l.AppendPostTriggerf(self.Card.DisplayName(), prevented, "Prevented %d arcane damage", prevented)
 }
 

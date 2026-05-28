@@ -142,22 +142,22 @@ type GameEngine interface {
 	// value it credited so cards can attribute the rider line.
 	OpponentDiscard(n int) int
 
-	// PreventArcaneDamage caps remaining arcane damage by up to n, returning the amount
-	// actually prevented (lesser of n and RemainingArcaneDamage). Banks the prevention into
-	// a per-turn accumulator so downstream readers see the reduced figure and later turns
-	// are unaffected. Callers AddValue the returned amount to credit the prevention.
+	// PreventArcaneDamage caps remaining arcane damage by up to n, crediting the prevented
+	// amount to Value and returning it (lesser of n and RemainingArcaneDamage) for log
+	// attribution. Banks the prevention into a per-turn accumulator so downstream readers
+	// see the reduced figure and later turns are unaffected.
 	PreventArcaneDamage(n int) int
 
-	// PreventPhysicalDamage caps the remaining physical damage by up to n. Returns the
-	// amount actually prevented (lesser of n and RemainingPhysicalDamage). Banks the
-	// prevention so a subsequent DamageTaken gate sees the reduced figure; callers AddValue
-	// the returned amount to credit it.
+	// PreventPhysicalDamage caps the remaining physical damage by up to n, crediting the
+	// prevented amount to Value and returning it (lesser of n and RemainingPhysicalDamage)
+	// for log attribution. Banks the prevention so a subsequent DamageTaken gate sees the
+	// reduced figure.
 	PreventPhysicalDamage(n int) int
 
 	// PreventGenericDamage caps up to n damage of whichever type is active at this fire
-	// (physical preferred when both are non-zero). Mirrors the official-rules wording
-	// "prevent N damage" — the card doesn't pick a type, the engine does. Returns the
-	// amount actually prevented. Callers AddValue the returned amount to credit it.
+	// (physical preferred when both are non-zero), crediting the prevented amount to Value.
+	// Mirrors the official-rules wording "prevent N damage" — the card doesn't pick a type,
+	// the engine does. Returns the amount actually prevented for log attribution.
 	PreventGenericDamage(n int) int
 
 	// AP (attack-step controls cards grant).

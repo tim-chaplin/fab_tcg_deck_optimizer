@@ -375,11 +375,11 @@ func (ge *GameEngine) DestroyOpponentArsenal() int {
 	return ge.OpponentDiscard(1)
 }
 
-// PreventArcaneDamage caps remaining arcane damage by up to n. Returns the amount actually
-// prevented — the lesser of n and RemainingArcaneDamage, clamped at 0. Banks the prevention
-// into arcaneDamageBlocked (which resets per turn) rather than mutating the constant matchup
-// figure, so prevention doesn't leak into later turns. The caller AddValues the returned
-// amount to credit the prevention.
+// PreventArcaneDamage caps remaining arcane damage by up to n, crediting the prevented
+// amount to Value. Returns the amount actually prevented — the lesser of n and
+// RemainingArcaneDamage, clamped at 0 — for log attribution. Banks the prevention into
+// arcaneDamageBlocked (which resets per turn) rather than mutating the constant matchup
+// figure, so prevention doesn't leak into later turns.
 func (ge *GameEngine) PreventArcaneDamage(n int) int {
 	if n <= 0 {
 		return 0
@@ -392,15 +392,16 @@ func (ge *GameEngine) PreventArcaneDamage(n int) int {
 		n = rem
 	}
 	ge.arcaneDamageBlocked += n
+	ge.AddValue(n)
 	return n
 }
 
-// PreventPhysicalDamage caps remaining physical damage by up to n. Returns the amount
-// actually prevented — the lesser of n and the current RemainingPhysicalDamage, clamped at
-// 0. Banks the prevention into physicalDamageBlocked so RemainingPhysicalDamage reads the
-// reduced figure for downstream triggers (a DamageAboutToBeTaken handler that absorbs the
-// swing chains into the DamageTaken gate this way). The caller AddValues the returned
-// amount to credit it.
+// PreventPhysicalDamage caps remaining physical damage by up to n, crediting the prevented
+// amount to Value. Returns the amount actually prevented (lesser of n and the current
+// RemainingPhysicalDamage, clamped at 0) for log attribution. Banks the prevention into
+// physicalDamageBlocked so RemainingPhysicalDamage reads the reduced figure for downstream
+// triggers (a DamageAboutToBeTaken handler that absorbs the swing chains into the
+// DamageTaken gate this way).
 func (ge *GameEngine) PreventPhysicalDamage(n int) int {
 	if n <= 0 {
 		return 0
@@ -413,14 +414,15 @@ func (ge *GameEngine) PreventPhysicalDamage(n int) int {
 		n = rem
 	}
 	ge.physicalDamageBlocked += n
+	ge.AddValue(n)
 	return n
 }
 
 // PreventGenericDamage absorbs up to n damage of whichever type is currently active —
 // physical when there's remaining unblocked physical, otherwise arcane. Mirrors the
-// official-rules wording "prevent N damage": the card asks for N prevented without
-// naming a type, the engine picks. Returns the amount actually prevented (0 when both
-// types are empty). The caller AddValues the returned amount to credit it.
+// official-rules wording "prevent N damage": the card asks for N prevented without naming
+// a type, the engine picks. The chosen typed method credits Value; this returns the amount
+// actually prevented (0 when both types are empty) for log attribution.
 func (ge *GameEngine) PreventGenericDamage(n int) int {
 	if prevented := ge.PreventPhysicalDamage(n); prevented > 0 {
 		return prevented

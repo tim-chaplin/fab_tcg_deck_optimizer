@@ -20,7 +20,6 @@ func dousingHandler(ge card.GameEngine, l card.Logger, it card.Item, _ triggerty
 	if prevented <= 0 {
 		return
 	}
-	ge.AddValue(prevented)
 	l.AppendPostTriggerf(it.CardName(), prevented, "Prevented %d arcane damage", prevented)
 	it.Destroy(true)
 }
