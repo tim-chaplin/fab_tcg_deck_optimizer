@@ -7,7 +7,7 @@ import (
 )
 
 // CreateItem registers a card-sourced triggered item.
-func (gs *GameState) CreateItem(source card.Card, tt triggertype.Type, handler func(card.GameEngine, card.Logger, card.Item, triggertype.Type), oncePerTurn bool, filter func(card.TypeSet) bool) {
+func (gs *GameState) CreateItem(source card.Card, tt triggertype.Type, handler func(card.GameEngine, card.Logger, card.Item, card.FireContext), oncePerTurn bool, filter func(card.TypeSet) bool) {
 	gs.items = append(gs.items, item.NewFromCard(source, tt, handler, oncePerTurn, filter))
 }
 

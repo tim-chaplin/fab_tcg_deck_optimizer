@@ -22,9 +22,9 @@ func (fakeAR) Defense() int        { return 0 }
 func (fakeAR) Types(card.GameEngine) card.TypeSet {
 	return card.NewTypeSet(card.TypeGeneric, card.TypeAttackReaction)
 }
-func (fakeAR) GoAgain(card.GameEngine) bool                          { return false }
+func (fakeAR) GoAgain(card.GameEngine) bool                                { return false }
 func (fakeAR) ARTargetAllowed(card.GameEngine, *card.CardState, int8) bool { return true }
-func (fakeAR) Play(card.GameEngine, card.Logger, *card.CardState)    {}
+func (fakeAR) Play(card.GameEngine, card.Logger, *card.CardState)          {}
 
 // fakeBaseAttack is a Generic Action - Attack target candidate.
 type fakeBaseAttack struct{}

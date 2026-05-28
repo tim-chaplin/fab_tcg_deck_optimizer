@@ -83,7 +83,6 @@ type ephemeral struct {
 	defenders      []card.Card
 
 	triggers             []EphemeralTrigger
-	triggeringCard       *card.CardState
 	attackReactionTarget *card.CardState
 
 	logger card.Logger
@@ -670,7 +669,6 @@ func (gs *GameState) SetCardsRemaining(cs []*card.CardState) { gs.cardsRemaining
 func (gs *GameState) Logger() card.Logger     { return gs.logger }
 func (gs *GameState) SetLogger(l card.Logger) { gs.logger = l }
 
-func (gs *GameState) TriggeringCard() *card.CardState            { return gs.triggeringCard }
 func (gs *GameState) AttackReactionTarget() *card.CardState      { return gs.attackReactionTarget }
 func (gs *GameState) SetAttackReactionTarget(cs *card.CardState) { gs.attackReactionTarget = cs }
 

@@ -16,7 +16,7 @@ import (
 // action card, so the filter is a plain action-card test. The point fizzles harmlessly
 // when no action card follows — an unspent action point credits no value.
 func leadTheChargePlay(ge card.GameEngine, self *card.CardState) {
-	ge.CreateTrigger(self.Card, triggertype.CardOrAbility, func(g card.GameEngine, l card.Logger, t card.EphemeralTrigger, _ triggertype.Type) {
+	ge.CreateTrigger(self.Card, triggertype.CardOrAbility, func(g card.GameEngine, l card.Logger, t card.EphemeralTrigger, _ card.FireContext) {
 		g.AddActionPoints(1)
 		l.AppendPostTrigger(t.CardName(), "Gained 1 action point", 0)
 	}, card.TypeSet.IsAction)

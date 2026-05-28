@@ -24,9 +24,9 @@ func (defaultHero) Class() card.CardType                            { return car
 func (defaultHero) Opt(cards []card.Card) (top, bottom []card.Card) { return nil, cards }
 
 // No triggered ability — TriggerType == 0 makes FireTriggers skip the hero.
-func (defaultHero) TriggerType() triggertype.Type                       { return 0 }
-func (defaultHero) OncePerTurn() bool                                   { return false }
-func (defaultHero) FiredThisTurn() bool                                 { return false }
-func (defaultHero) SetFiredThisTurn(bool)                               {}
-func (defaultHero) Matches(card.TypeSet) bool                           { return false }
-func (defaultHero) Fire(card.GameEngine, card.Logger, triggertype.Type) {}
+func (defaultHero) TriggerType() triggertype.Type                                        { return 0 }
+func (defaultHero) OncePerTurn() bool                                                    { return false }
+func (defaultHero) FiredThisTurn() bool                                                  { return false }
+func (defaultHero) SetFiredThisTurn(bool)                                                {}
+func (defaultHero) Matches(card.TypeSet) bool                                            { return false }
+func (defaultHero) Fire(card.GameEngine, card.Logger, card.FireContext) {}

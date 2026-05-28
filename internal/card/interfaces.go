@@ -12,6 +12,25 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/triggertype"
 )
 
+// FireContext is the per-fire payload every triggered handler receives. It bundles the
+// firing event, the card that raised it, and any trigger-type-specific extras into one
+// typed value — so adding a new payload (a future "+N" reader, a damage-source tag, …)
+// is a new field here, read only by the handlers that care, rather than a new GameEngine
+// accessor or an untyped variadic. Most fields are zero for most events: BuffDelta is set
+// only for AttackBuffedByReaction, TriggeringCard is nil for turn-boundary events.
+type FireContext struct {
+	// FiringType is the lifecycle event being dispatched — a single bit even when the
+	// subscriber registered for several via bitmask OR, so multi-trigger handlers can
+	// dispatch on which event invoked them.
+	FiringType triggertype.Type
+	// TriggeringCard is the CardState whose resolution raised the event, or nil for
+	// turn-boundary events (StartOfTurn / EndOfTurn / DamageTaken).
+	TriggeringCard *CardState
+	// BuffDelta is the +{p} just applied to TriggeringCard, set only when FiringType is
+	// AttackBuffedByReaction; zero otherwise. Talisman of Featherfoot gates on == 1.
+	BuffDelta int
+}
+
 // GameEngine is the cards-facing rules-engine handle the sim threads through every Card
 // hook. The surface combines state queries (Hand, Graveyard, Runechants, …) with active-
 // effect operations (DrawOne, CreateRunechants, AddValue, Opt, Clash, …). *sim.TurnState
@@ -64,11 +83,11 @@ type GameEngine interface {
 	// card's self.Card) that fires on every event in tt's bit set. oncePerTurn caps it to
 	// one fire per turn; filter narrows the firing site to a card-type predicate (nil =
 	// any) and is consulted only on events that carry a triggering card (so StartOfTurn,
-	// EndOfTurn, and DamageTaken effectively ignore it). The handler's final
-	// triggertype.Type argument is the event that fired this invocation — multi-trigger
-	// auras dispatch on it, single-trigger handlers ignore it. Handler signatures are
-	// inlined to keep this package import-free of the concrete aura type.
-	CreateAura(source Card, tt triggertype.Type, handler func(GameEngine, Logger, Aura, triggertype.Type), count int, oncePerTurn bool, filter func(TypeSet) bool)
+	// EndOfTurn, and DamageTaken effectively ignore it). The handler receives a FireContext
+	// describing the fire — its FiringType lets multi-trigger auras dispatch on which event
+	// invoked them. Handler signatures are inlined to keep this package import-free of the
+	// concrete aura type.
+	CreateAura(source Card, tt triggertype.Type, handler func(GameEngine, Logger, Aura, FireContext), count int, oncePerTurn bool, filter func(TypeSet) bool)
 	// DestroyAura removes the aura currently being fired. addToGraveyard sends the
 	// originating card to the graveyard (token auras skip the append). Reached via the
 	// per-fire ctx's Destroy method; exposed on GameEngine so the ctx can route the call
@@ -79,8 +98,8 @@ type GameEngine interface {
 	DestroyItem(addToGraveyard bool)
 	// CreateItem puts a card-sourced item into play whose handler fires on every event in
 	// tt's bit set. oncePerTurn caps it to one fire per turn; filter narrows the firing
-	// site (nil = any). Handler's final triggertype.Type argument is the firing event.
-	CreateItem(source Card, tt triggertype.Type, handler func(GameEngine, Logger, Item, triggertype.Type), oncePerTurn bool, filter func(TypeSet) bool)
+	// site (nil = any). The handler receives a FireContext describing the fire.
+	CreateItem(source Card, tt triggertype.Type, handler func(GameEngine, Logger, Item, FireContext), oncePerTurn bool, filter func(TypeSet) bool)
 	// CreateItemWithAbility puts a card-sourced in-play permanent that carries an
 	// activated ability (no trigger handler). The wmask enumerates the ability card as a
 	// 1-AP playable starting the turn AFTER this call — the wmask is computed from
@@ -98,8 +117,15 @@ type GameEngine interface {
 	// card-type predicate (nil = any); it is consulted only when the triggering event has
 	// a triggering card. A trigger registered from a card's own Play does not fire for
 	// its own resolution — the CardOrAbility event has already resolved by then. The
-	// handler's final triggertype.Type argument is the firing event.
-	CreateTrigger(source Card, tt triggertype.Type, handler func(GameEngine, Logger, EphemeralTrigger, triggertype.Type), filter func(TypeSet) bool)
+	// handler receives a FireContext describing the fire.
+	CreateTrigger(source Card, tt triggertype.Type, handler func(GameEngine, Logger, EphemeralTrigger, FireContext), filter func(TypeSet) bool)
+
+	// FireTriggers fires every aura / item / one-shot trigger / hero subscribed to
+	// ctx.FiringType, passing ctx through to each handler. Card code reaches for this only
+	// when a card-side helper raises a lifecycle event that isn't centrally fired by the
+	// engine (CardState.GrantAttackReactionBuff raising AttackBuffedByReaction) — most
+	// events fire from the engine itself.
+	FireTriggers(ctx FireContext)
 
 	// Token economy
 	CreateRunechants(int)
@@ -221,7 +247,6 @@ type GameEngine interface {
 	CardsPlayed() []Card
 	SetCardsPlayed([]Card)
 	CardsRemaining() []*CardState
-	TriggeringCard() *CardState
 	// AuraCount is the count of live auras — used by "while you control an aura" gates.
 	// Cards don't get a typed slice view; the engine owns the live aura set.
 	AuraCount() int
