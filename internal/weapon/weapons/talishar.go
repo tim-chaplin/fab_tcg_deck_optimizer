@@ -10,7 +10,6 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/ids"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/triggertype"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapon"
 )
 
 // talisharRustLimit is the rust-counter total at which Talishar self-destructs in the end
@@ -23,24 +22,23 @@ var talisharTypes = card.NewTypeSet(card.TypeGeneric, card.TypeWeapon, card.Type
 // what the attack-turn runner enqueues each turn.
 type Talishar struct{}
 
-func (Talishar) ID() ids.CardID                                     { return ids.TalisharID }
-func (Talishar) Name() string                                       { return "Talishar, the Lost Prince" }
-func (Talishar) DisplayName() string                                { return "Talishar, the Lost Prince" }
-func (Talishar) Cost() int                                          { return 0 }
-func (Talishar) Pitch() int                                         { return 0 }
-func (Talishar) Attack() int                                        { return 0 }
-func (Talishar) Defense() int                                       { return 0 }
-func (Talishar) Types(card.GameEngine) card.TypeSet                 { return talisharTypes }
-func (Talishar) GoAgain(card.GameEngine) bool                       { return false }
-func (Talishar) Play(card.GameEngine, card.Logger, *card.CardState) {}
-func (Talishar) Hands() int                                         { return 2 }
-func (Talishar) Ability() card.Card                                 { return talisharAbility }
+func (Talishar) ID() ids.CardID                     { return ids.TalisharID }
+func (Talishar) Name() string                       { return "Talishar, the Lost Prince" }
+func (Talishar) DisplayName() string                { return "Talishar, the Lost Prince" }
+func (Talishar) Cost() int                          { return 0 }
+func (Talishar) Pitch() int                         { return 0 }
+func (Talishar) Attack() int                        { return 0 }
+func (Talishar) Defense() int                       { return 0 }
+func (Talishar) Types(card.GameEngine) card.TypeSet { return talisharTypes }
+func (Talishar) GoAgain(card.GameEngine) bool       { return false }
+func (Talishar) Hands() int                         { return 2 }
+func (Talishar) Ability() card.Card                 { return talisharAbility }
 
-// WeaponTrigger registers Talishar's end-phase self-destruct: at end of turn, if it has
-// accumulated talisharRustLimit rust counters, destroy it (the platonic card goes to the
-// graveyard and the weapon can't be swung next turn).
-func (Talishar) WeaponTrigger() (triggertype.Type, weapon.Handler) {
-	return triggertype.EndOfTurn, talisharEndPhaseSelfDestruct
+// Play registers Talishar as an equipped weapon, wiring its end-phase self-destruct: at the
+// start of the end phase, if it has accumulated talisharRustLimit rust counters, destroy it
+// (the card goes to the graveyard and it can't be swung next turn).
+func (Talishar) Play(ge card.GameEngine, _ card.Logger, self *card.CardState) {
+	ge.CreateWeapon(self.Card, triggertype.EndOfTurn, talisharEndPhaseSelfDestruct, false, nil)
 }
 
 func talisharEndPhaseSelfDestruct(_ card.GameEngine, l card.Logger, self card.Weapon, _ card.FireContext) {

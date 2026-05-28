@@ -21,18 +21,15 @@ import (
 )
 
 // Card is the platonic weapon card. It is a full card.Card (so it has a CardID, a
-// DisplayName, a Types line, and lives in the card universe / graveyard) plus the
-// weapon-specific accessors EquipFromCards and the attack-turn runner read: Hands for the
-// equipment-slot rule, Ability for the swing card enqueued each turn, and WeaponTrigger for
-// the equip-time trigger handler.
+// DisplayName, a Types line, and lives in the card universe / graveyard) plus the two
+// weapon-specific accessors the attack-turn runner reads: Hands for the equipment-slot rule
+// and Ability for the swing card it enqueues each turn. A weapon registers its equipped object
+// (and any trigger) from its Play via ge.CreateWeapon — the same way an item card's Play calls
+// ge.CreateItem — so there is no weapon-trigger accessor on the card.
 type Card interface {
 	card.Card
 	Hands() int
 	Ability() card.Card
-	// WeaponTrigger reports the trigger EquipFromCards registers on the equipped object: the
-	// firing event and its handler (e.g. Talishar's end-phase self-destruct). An untriggered
-	// weapon returns (0, nil) — trigger type 0 never matches a firing event.
-	WeaponTrigger() (triggertype.Type, Handler)
 }
 
 // Handler is the typed weapon handler signature — the func stored on a Weapon and called at

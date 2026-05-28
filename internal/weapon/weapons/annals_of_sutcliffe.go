@@ -13,8 +13,6 @@ package weapons
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/ids"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/triggertype"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapon"
 )
 
 var annalsOfSutcliffeTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeWeapon, card.TypeBook, card.TypeTwoHand)
@@ -23,20 +21,21 @@ var annalsOfSutcliffeTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeWeapon
 // ability is what the attack-turn runner enqueues each turn.
 type AnnalsOfSutcliffe struct{}
 
-func (AnnalsOfSutcliffe) ID() ids.CardID                                     { return ids.AnnalsOfSutcliffeID }
-func (AnnalsOfSutcliffe) Name() string                                       { return "Annals of Sutcliffe" }
-func (AnnalsOfSutcliffe) DisplayName() string                                { return "Annals of Sutcliffe" }
-func (AnnalsOfSutcliffe) Cost() int                                          { return 0 }
-func (AnnalsOfSutcliffe) Pitch() int                                         { return 0 }
-func (AnnalsOfSutcliffe) Attack() int                                        { return 0 }
-func (AnnalsOfSutcliffe) Defense() int                                       { return 0 }
-func (AnnalsOfSutcliffe) Types(card.GameEngine) card.TypeSet                 { return annalsOfSutcliffeTypes }
-func (AnnalsOfSutcliffe) GoAgain(card.GameEngine) bool                       { return false }
-func (AnnalsOfSutcliffe) Play(card.GameEngine, card.Logger, *card.CardState) {}
-func (AnnalsOfSutcliffe) Hands() int                                         { return 2 }
-func (AnnalsOfSutcliffe) Ability() card.Card                                 { return annalsOfSutcliffeAbility }
+func (AnnalsOfSutcliffe) ID() ids.CardID                     { return ids.AnnalsOfSutcliffeID }
+func (AnnalsOfSutcliffe) Name() string                       { return "Annals of Sutcliffe" }
+func (AnnalsOfSutcliffe) DisplayName() string                { return "Annals of Sutcliffe" }
+func (AnnalsOfSutcliffe) Cost() int                          { return 0 }
+func (AnnalsOfSutcliffe) Pitch() int                         { return 0 }
+func (AnnalsOfSutcliffe) Attack() int                        { return 0 }
+func (AnnalsOfSutcliffe) Defense() int                       { return 0 }
+func (AnnalsOfSutcliffe) Types(card.GameEngine) card.TypeSet { return annalsOfSutcliffeTypes }
+func (AnnalsOfSutcliffe) GoAgain(card.GameEngine) bool       { return false }
+func (AnnalsOfSutcliffe) Hands() int                         { return 2 }
+func (AnnalsOfSutcliffe) Ability() card.Card                 { return annalsOfSutcliffeAbility }
 
-func (AnnalsOfSutcliffe) WeaponTrigger() (triggertype.Type, weapon.Handler) { return 0, nil }
+func (AnnalsOfSutcliffe) Play(ge card.GameEngine, _ card.Logger, self *card.CardState) {
+	ge.CreateWeapon(self.Card, 0, nil, false, nil)
+}
 
 var annalsOfSutcliffeAbility card.Card = AnnalsOfSutcliffeAbility{}
 

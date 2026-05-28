@@ -7,8 +7,6 @@ package testutils
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/ids"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/triggertype"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapon"
 )
 
 var clubWeaponTypes = card.NewTypeSet(card.TypeGeneric, card.TypeWeapon, card.TypeClub, card.TypeOneHand)
@@ -18,20 +16,21 @@ var clubWeaponTypes = card.NewTypeSet(card.TypeGeneric, card.TypeWeapon, card.Ty
 // equip-time builder wraps it in a mutable weapon.Weapon object.
 type ClubWeapon struct{}
 
-func (ClubWeapon) ID() ids.CardID                                     { return ids.InvalidCard }
-func (ClubWeapon) Name() string                                       { return "test.ClubWeapon" }
-func (ClubWeapon) DisplayName() string                                { return "test.ClubWeapon" }
-func (ClubWeapon) Cost() int                                          { return 0 }
-func (ClubWeapon) Pitch() int                                         { return 0 }
-func (ClubWeapon) Attack() int                                        { return 0 }
-func (ClubWeapon) Defense() int                                       { return 0 }
-func (ClubWeapon) Types(card.GameEngine) card.TypeSet                 { return clubWeaponTypes }
-func (ClubWeapon) GoAgain(card.GameEngine) bool                       { return false }
-func (ClubWeapon) Play(card.GameEngine, card.Logger, *card.CardState) {}
-func (ClubWeapon) Hands() int                                         { return 1 }
-func (ClubWeapon) Ability() card.Card                                 { return clubWeaponAbility }
+func (ClubWeapon) ID() ids.CardID                     { return ids.InvalidCard }
+func (ClubWeapon) Name() string                       { return "test.ClubWeapon" }
+func (ClubWeapon) DisplayName() string                { return "test.ClubWeapon" }
+func (ClubWeapon) Cost() int                          { return 0 }
+func (ClubWeapon) Pitch() int                         { return 0 }
+func (ClubWeapon) Attack() int                        { return 0 }
+func (ClubWeapon) Defense() int                       { return 0 }
+func (ClubWeapon) Types(card.GameEngine) card.TypeSet { return clubWeaponTypes }
+func (ClubWeapon) GoAgain(card.GameEngine) bool       { return false }
+func (ClubWeapon) Hands() int                         { return 1 }
+func (ClubWeapon) Ability() card.Card                 { return clubWeaponAbility }
 
-func (ClubWeapon) WeaponTrigger() (triggertype.Type, weapon.Handler) { return 0, nil }
+func (ClubWeapon) Play(ge card.GameEngine, _ card.Logger, self *card.CardState) {
+	ge.CreateWeapon(self.Card, 0, nil, false, nil)
+}
 
 // Cached at package init so the attack-turn runner's per-Best w.Ability() lookup is alloc-free.
 // The ability is a FakeWeaponSwing with Club + OneHand sub-types and power 1.
@@ -51,20 +50,21 @@ var counterWeaponTypes = card.NewTypeSet(card.TypeGeneric, card.TypeWeapon, card
 // the equip-time builder wraps each copy in its own mutable weapon.Weapon object.
 type CounterWeapon struct{}
 
-func (CounterWeapon) ID() ids.CardID                                     { return ids.InvalidCard }
-func (CounterWeapon) Name() string                                       { return "test.CounterWeapon" }
-func (CounterWeapon) DisplayName() string                                { return "test.CounterWeapon" }
-func (CounterWeapon) Cost() int                                          { return 0 }
-func (CounterWeapon) Pitch() int                                         { return 0 }
-func (CounterWeapon) Attack() int                                        { return 0 }
-func (CounterWeapon) Defense() int                                       { return 0 }
-func (CounterWeapon) Types(card.GameEngine) card.TypeSet                 { return counterWeaponTypes }
-func (CounterWeapon) GoAgain(card.GameEngine) bool                       { return false }
-func (CounterWeapon) Play(card.GameEngine, card.Logger, *card.CardState) {}
-func (CounterWeapon) Hands() int                                         { return 1 }
-func (CounterWeapon) Ability() card.Card                                 { return counterWeaponAbility }
+func (CounterWeapon) ID() ids.CardID                     { return ids.InvalidCard }
+func (CounterWeapon) Name() string                       { return "test.CounterWeapon" }
+func (CounterWeapon) DisplayName() string                { return "test.CounterWeapon" }
+func (CounterWeapon) Cost() int                          { return 0 }
+func (CounterWeapon) Pitch() int                         { return 0 }
+func (CounterWeapon) Attack() int                        { return 0 }
+func (CounterWeapon) Defense() int                       { return 0 }
+func (CounterWeapon) Types(card.GameEngine) card.TypeSet { return counterWeaponTypes }
+func (CounterWeapon) GoAgain(card.GameEngine) bool       { return false }
+func (CounterWeapon) Hands() int                         { return 1 }
+func (CounterWeapon) Ability() card.Card                 { return counterWeaponAbility }
 
-func (CounterWeapon) WeaponTrigger() (triggertype.Type, weapon.Handler) { return 0, nil }
+func (CounterWeapon) Play(ge card.GameEngine, _ card.Logger, self *card.CardState) {
+	ge.CreateWeapon(self.Card, 0, nil, false, nil)
+}
 
 // counterWeaponAbility is the shared swing ability: power 1, Go again, whose Play bumps the
 // counter on self.Weapon — the specific equipped object the attack-turn runner resolved for
