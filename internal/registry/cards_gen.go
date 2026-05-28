@@ -532,6 +532,10 @@ var cardsByID = []Card{
 
 	ids.SmashUpRed: cards.SmashUpRed{},
 
+	ids.SmashingGoodTimeRed:    cards.SmashingGoodTimeRed{},
+	ids.SmashingGoodTimeYellow: cards.SmashingGoodTimeYellow{},
+	ids.SmashingGoodTimeBlue:   cards.SmashingGoodTimeBlue{},
+
 	ids.SnatchRed:    cards.SnatchRed{},
 	ids.SnatchYellow: cards.SnatchYellow{},
 	ids.SnatchBlue:   cards.SnatchBlue{},
@@ -593,6 +597,8 @@ var cardsByID = []Card{
 	ids.TipOffRed:    cards.TipOffRed{},
 	ids.TipOffYellow: cards.TipOffYellow{},
 	ids.TipOffBlue:   cards.TipOffBlue{},
+
+	ids.TitForTatBlue: cards.TitForTatBlue{},
 
 	ids.TitaniumBaubleBlue: cards.TitaniumBaubleBlue{},
 
