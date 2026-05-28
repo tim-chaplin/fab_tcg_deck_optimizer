@@ -31,9 +31,17 @@ type Card interface {
 }
 
 // Handler is the typed weapon handler signature — the func stored on a Weapon and called at
-// every Fire. Mirrors aura.Handler / the item handler. No weapon registers one yet; the
-// type exists so the equip-time builder can accept a handler when Talishar lands.
+// every Fire. Mirrors aura.Handler / the item handler.
 type Handler func(card.GameEngine, card.Logger, card.Weapon, card.FireContext)
+
+// TriggeredCard is the optional interface a platonic weapon card implements to register a
+// trigger handler on its equipped object — Talishar's end-phase "if 3+ rust counters,
+// destroy" check. EquipFromCards builds such weapons via NewTriggered; weapons without it
+// get a plain New (no handler).
+type TriggeredCard interface {
+	Card
+	WeaponTrigger() (triggertype.Type, Handler)
+}
 
 // Weapon is the concrete mutable entry the engine stores in its equipped-weapon list. The
 // embedded trigger.Trigger holds the source card and, for a future triggered weapon, the

@@ -59,6 +59,7 @@ type persistentCacheKey struct {
 type evalCacheKey struct {
 	handIDs         [maxCachedHandSize]ids.CardID
 	weaponIDs       [maxCachedWeapons]ids.CardID
+	weaponCounts    [maxCachedWeapons]int
 	auras           [maxCachedAuras]persistentCacheKey
 	items           [maxCachedItems]persistentCacheKey
 	tokenAuraCounts [numCachedTokenAuras]int
@@ -220,6 +221,9 @@ func makeCacheKey(
 			return evalCacheKey{}, false
 		}
 		key.weaponIDs[i] = id
+		// Weapon counters (Talishar's rust) are mutable cross-turn state: two otherwise-equal
+		// turns with different counter totals must not share a cached solution.
+		key.weaponCounts[i] = w.Count()
 	}
 	// Insertion-sort by (CardID, Count) so the key stays multiset-invariant across
 	// registration order. Token kinds are distinguished by their reserved CardID range.

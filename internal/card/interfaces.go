@@ -100,6 +100,11 @@ type GameEngine interface {
 	// counterpart of DestroyAura / DestroyItem — reached via the firing weapon's Destroy
 	// method.
 	DestroyWeapon(addToGraveyard bool)
+	// WeaponByID returns the equipped weapon with the given source-card ID, or nil when it
+	// isn't equipped. A weapon's own activated ability uses it to reach its weapon object
+	// (e.g. to bump a counter) — the ability card has no direct handle to the equipped
+	// permanent otherwise.
+	WeaponByID(id ids.CardID) Weapon
 	// CreateItem puts a card-sourced item into play whose handler fires on every event in
 	// tt's bit set. oncePerTurn caps it to one fire per turn; filter narrows the firing
 	// site (nil = any). The handler receives a FireContext describing the fire.
