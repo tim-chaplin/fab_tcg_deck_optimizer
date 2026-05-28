@@ -57,7 +57,7 @@ func BenchmarkEvalWorkerSweep(b *testing.B) {
 				rng := rand.New(rand.NewSource(42))
 				d := loaded.Copy()
 				b.StartTimer()
-				ev.Evaluate(d, shuffles, Matchup{IncomingDamage: incoming}, rng)
+				ev.Evaluate(d, shuffles, Matchup{IncomingPhysicalDamage: incoming}, rng)
 			}
 		})
 	}
@@ -137,7 +137,7 @@ func BenchmarkAnnealWorkerSweep(b *testing.B) {
 				b.StartTimer()
 				_, _, _, _, found := RunMutationRound(
 					context.Background(), mutations, unreachableBaseline, 0, 0,
-					0, Matchup{IncomingDamage: incoming}, c.mut, c.shuf,
+					0, Matchup{IncomingPhysicalDamage: incoming}, c.mut, c.shuf,
 					iterRNG.Int63(), nil, true, 0.1, nil,
 				)
 				if found {

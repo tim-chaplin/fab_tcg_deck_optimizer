@@ -22,7 +22,7 @@ func TestBest_RiseAboveAsDR_NoGhostCard(t *testing.T) {
 	d := deck.New(testutils.Hero{Intel: 4}, nil, nil)
 	summary := sim.EvalOneTurnForTesting(
 		d,
-		gameengine.GameStateBuilder().SetIncomingDamage(3).Build(),
+		gameengine.GameStateBuilder().SetIncomingPhysicalDamage(3).Build(),
 		h,
 	)
 

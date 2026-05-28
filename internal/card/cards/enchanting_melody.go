@@ -7,7 +7,9 @@
 // (Red N=4, Yellow N=3, Blue N=2.)
 //
 // Handler reads a.Count() for the per-variant prevention amount. The aura subscribes to
-// DamageAboutToBeTaken | EndOfTurn; firingType dispatches each event to its clause.
+// DamageAboutToBeTaken | EndOfTurn; ctx.FiringType dispatches each event to its clause.
+// PreventGenericDamage picks the active damage type (physical or arcane); EM destroys
+// after one fire so the prevention can't mix between types.
 
 package cards
 
@@ -16,12 +18,10 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/triggertype"
 )
 
-func enchantingMelodyHandler(ge card.GameEngine, l card.Logger, a card.Aura, firingType triggertype.Type) {
-	switch firingType {
+func enchantingMelodyHandler(ge card.GameEngine, l card.Logger, a card.Aura, ctx card.FireContext) {
+	switch ctx.FiringType {
 	case triggertype.DamageAboutToBeTaken:
-		prevented := ge.PreventIncomingDamage(a.Count())
-		if prevented > 0 {
-			ge.AddValue(prevented)
+		if prevented := ge.PreventGenericDamage(a.Count()); prevented > 0 {
 			l.AppendPostTriggerf(a.CardName(), prevented, "Prevented %d damage", prevented)
 		}
 		a.Destroy(true)

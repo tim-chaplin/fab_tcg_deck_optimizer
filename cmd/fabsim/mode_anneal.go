@@ -122,7 +122,7 @@ func runAnnealCmd(args []string) {
 	cfg := annealConfig{
 		shuffles:       *shuffles,
 		adaptive:       *shuffles < 0,
-		matchup:        sim.Matchup{IncomingDamage: *incoming, ArcaneIncomingDamage: *arcaneIncoming},
+		matchup:        sim.Matchup{IncomingPhysicalDamage: *incoming, IncomingArcaneDamage: *arcaneIncoming},
 		deckSize:       *deckSize,
 		maxCopies:      *maxCopies,
 		seed:           *seed,

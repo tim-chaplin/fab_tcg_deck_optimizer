@@ -19,7 +19,7 @@ func TestSigilOfCycles_DestroysAtStartOfNextTurnAndCyclesHand(t *testing.T) {
 	// the aura's Discard target is deterministic and the resulting graveyard membership
 	// distinguishes "rider fired" from "rider was a no-op".
 	d := deck.New(testutils.Hero{Intel: 1}, nil, []deck.Card{testutils.FakeRedAttack()})
-	turn1, turn2 := sim.EvalTwoTurnsForTesting(d, gameengine.GameStateBuilder().SetIncomingDamage(0).Build(), []card.Card{sigil})
+	turn1, turn2 := sim.EvalTwoTurnsForTesting(d, gameengine.GameStateBuilder().SetIncomingPhysicalDamage(0).Build(), []card.Card{sigil})
 
 	if !bestLineHasRole(turn1.BestLine, cards.SigilOfCyclesBlue{}, card.Attack) {
 		t.Errorf("turn 1 BestLine didn't play Sigil of Cycles as Role=Attack: %+v", turn1.BestLine)

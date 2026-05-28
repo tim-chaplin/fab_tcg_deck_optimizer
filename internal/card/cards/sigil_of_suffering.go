@@ -5,7 +5,7 @@
 // Sigil of Suffering gains +1{d}."
 //
 // The Sigil's own printed-1 arcane satisfies the conditional via LikelyDamageHits(1, false),
-// so the +1{d} is credited whenever there's IncomingDamage left to absorb it.
+// so the +1{d} is credited whenever there's IncomingPhysicalDamage left to absorb it.
 
 package cards
 

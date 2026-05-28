@@ -35,7 +35,7 @@ func TestHandState_BlockerEmptiesHandForSpringLoad(t *testing.T) {
 	hand := []card.Card{testutils.FakeBlueResource(), cards.DodgeBlue{}, cards.SpringLoadRed{}}
 	// Incoming = 3 → BluePitch pitched (3 res), Dodge played as DR for 2 prevented,
 	// Spring Load resolves with empty hand. Value = 5 (Spring Load + rider) + 2 (Dodge).
-	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingDamage(3).Build(), hand)
+	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingPhysicalDamage(3).Build(), hand)
 	if got := summary.Value; got != 7 {
 		t.Fatalf("Value = %d, want 7 (Spring Load 2 + rider 3 + Dodge 2)", got)
 	}

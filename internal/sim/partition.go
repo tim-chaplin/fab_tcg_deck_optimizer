@@ -74,7 +74,7 @@ func (e *Evaluator) findBest(weapons []weapon.Weapon, hand []card.Card, d *deck.
 	bufs.bestSolution.reset()
 	arsenalCardIn := masterState.Arsenal()
 	bufs.maxResourceBonus = resourceBonusUpperBound(hand, arsenalCardIn, masterState.Items())
-	incoming := masterState.IncomingDamage()
+	incoming := masterState.IncomingPhysicalDamage()
 	n := len(hand)
 	totalN := n
 	if arsenalCardIn != nil {
@@ -83,7 +83,7 @@ func (e *Evaluator) findBest(weapons []weapon.Weapon, hand []card.Card, d *deck.
 
 	best := TurnSummary{
 		BestLine:       make([]card.CardAssignment, totalN),
-		IncomingDamage: incoming,
+		IncomingPhysicalDamage: incoming,
 		Cacheable:      true,
 	}
 	for i := 0; i < n; i++ {
@@ -99,7 +99,7 @@ func (e *Evaluator) findBest(weapons []weapon.Weapon, hand []card.Card, d *deck.
 
 	// Defend role is valid whenever any incoming damage — physical or arcane — could be
 	// prevented.
-	anyIncoming := incoming > 0 || masterState.ArcaneIncomingDamage() > 0
+	anyIncoming := incoming > 0 || masterState.IncomingArcaneDamage() > 0
 
 	pcards := bufs.partitionCards[:totalN]
 	fillPartitionCards(hand, n, totalN, arsenalCardIn, pcards)
@@ -350,11 +350,11 @@ func roleAllowed(r card.Role, isArsenalSlot, isDefenseReaction, canAttack bool) 
 // capped per card. blockBudget is the resource pool the modal-blocker mode pick spends from.
 // Returns the sticky cacheable bit — once a DR reads deck or graveyard, the partition's
 // defense output is uncacheable.
-func defendersDamage(defenders []card.Card, pitched []*card.CardState, deckPile *deck.Deck, ge *gameengine.GameEngine, gravBuf []card.Card, cs *card.CardState, incomingDamage, blockBudget, arsenalDefenderIdx int) (int, []card.Card, bool) {
+func defendersDamage(defenders []card.Card, pitched []*card.CardState, deckPile *deck.Deck, ge *gameengine.GameEngine, gravBuf []card.Card, cs *card.CardState, incomingPhysicalDamage, blockBudget, arsenalDefenderIdx int) (int, []card.Card, bool) {
 	total := 0
 	cacheable := true
 	ge.SetDeck(deckPile)
-	ge.SetIncomingDamage(incomingDamage)
+	ge.SetIncomingPhysicalDamage(incomingPhysicalDamage)
 	for i, def := range defenders {
 		if !attackerMetaPtrFor(def).actsAsDR {
 			continue
@@ -384,12 +384,12 @@ func defendersDamage(defenders []card.Card, pitched []*card.CardState, deckPile 
 			b.Block(ge, ge.Logger(), cs)
 		}
 		block := cs.EffectiveDefense()
-		if rem := ge.RemainingUnblockedDamage(); block > rem {
+		if rem := ge.RemainingPhysicalDamage(); block > rem {
 			block = rem
 		}
 		if block > 0 {
 			total += block
-			ge.AddDamageBlocked(block)
+			ge.AddPhysicalDamageBlocked(block)
 		}
 	}
 	return total, gravBuf, cacheable

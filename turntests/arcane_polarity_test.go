@@ -25,7 +25,7 @@ func TestArcanePolarity_NoArcaneIncomingCreditsOne(t *testing.T) {
 	}
 }
 
-// Tests that ArcaneIncomingDamage > 0 swaps to the per-pitch alternate gain.
+// Tests that IncomingArcaneDamage > 0 swaps to the per-pitch alternate gain.
 func TestArcanePolarity_ArcaneIncomingCreditsLargeGain(t *testing.T) {
 	cases := []struct {
 		c    card.Card
@@ -36,7 +36,7 @@ func TestArcanePolarity_ArcaneIncomingCreditsLargeGain(t *testing.T) {
 		{cards.ArcanePolarityBlue{}, 2},
 	}
 	for _, tc := range cases {
-		ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetArcaneIncomingDamage(1).Build()}
+		ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetIncomingArcaneDamage(1).Build()}
 		ge.ResolveAttackStep(ge.Logger(), &card.CardState{Card: tc.c})
 		if ge.Value() != tc.gain {
 			t.Errorf("%s: Value = %d, want %d", tc.c.Name(), ge.Value(), tc.gain)

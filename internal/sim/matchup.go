@@ -6,11 +6,11 @@ package sim
 // int through every Best / Evaluate / RunMutationRound signature.
 //
 // The attack-turn runner copies these fields onto TurnState in resetStateForPermutation; cards
-// read the per-turn copy (gs.incomingDamage, gs.arcaneIncomingDamage) rather than reaching
+// read the per-turn copy (gs.incomingPhysicalDamage, gs.incomingArcaneDamage) rather than reaching
 // back into the Matchup so per-card hot paths stay one struct field deep.
 type Matchup struct {
-	// IncomingDamage is the opponent damage per turn.
-	IncomingDamage int
-	// ArcaneIncomingDamage is the opponent's arcane damage per turn.
-	ArcaneIncomingDamage int
+	// IncomingPhysicalDamage is the opponent's physical damage per turn.
+	IncomingPhysicalDamage int
+	// IncomingArcaneDamage is the opponent's arcane damage per turn.
+	IncomingArcaneDamage int
 }

@@ -229,7 +229,7 @@ func runOneShuffle(masterDeck *deck.Deck, scratch *shuffleScratch, stats *deck.S
 	// Carry state borrows one pool slot; playOneTurn / Best mutate it in place across
 	// turns. Put back at shuffle end before FreeAll.
 	state := ev.statePool.Get()
-	state.Reset(d.Hero.(hero.Hero), weaponsFromDeck(d), mp.IncomingDamage, mp.ArcaneIncomingDamage)
+	state.Reset(d.Hero.(hero.Hero), weaponsFromDeck(d), mp.IncomingPhysicalDamage, mp.IncomingArcaneDamage)
 
 	// Initial hand drawn into the reusable handBuf, sorted so it is canonical from turn one.
 	handBuf := scratch.handBuf
@@ -471,7 +471,7 @@ func processAurasAtStartOfTurn(state *gameengine.GameState, d *deck.Deck) {
 	// owned wrapper is preserved across the swap.
 	saved := state.Deck()
 	state.SetDeck(d)
-	state.Engine().FireTriggers(triggertype.StartOfTurn, nil)
+	state.Engine().FireTriggers(card.FireContext{FiringType: triggertype.StartOfTurn})
 	state.SetDeck(saved)
 }
 

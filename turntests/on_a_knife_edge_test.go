@@ -17,7 +17,7 @@ func TestOnAKnifeEdge_GrantsGoAgainToSwordAttack(t *testing.T) {
 	d := deck.New(testutils.Hero{Intel: 4}, []deck.Weapon{weapons.ReapingBlade{}}, nil)
 	hand := []card.Card{cards.OnAKnifeEdgeYellow{}, testutils.FakeRedAttack().WithPower(1), testutils.FakeBlueResource()}
 
-	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingDamage(0).Build(), hand)
+	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingPhysicalDamage(0).Build(), hand)
 
 	if got := summary.Value; got != 4 {
 		t.Fatalf("Value = %d, want 4 (Reaping Blade 3 + a second attack 1 — the granted go again funds it)\nBestLine: %s",
@@ -30,7 +30,7 @@ func TestOnAKnifeEdge_NoSwordAttackFizzles(t *testing.T) {
 	d := deck.New(testutils.Hero{Intel: 4}, nil, nil)
 	hand := []card.Card{cards.OnAKnifeEdgeYellow{}}
 
-	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingDamage(0).Build(), hand)
+	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingPhysicalDamage(0).Build(), hand)
 
 	if got := summary.Value; got != 0 {
 		t.Fatalf("Value = %d, want 0 (On a Knife Edge alone scores nothing)\nBestLine: %s",

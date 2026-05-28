@@ -16,7 +16,7 @@ import (
 func TestFlex_Mode0PrintedAttack(t *testing.T) {
 	d := deck.New(testutils.Hero{Intel: 4}, nil, nil)
 	hand := []card.Card{cards.FlexRed{}}
-	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingDamage(0).Build(), hand)
+	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingPhysicalDamage(0).Build(), hand)
 	if summary.Value != 4 {
 		t.Errorf("Value = %d, want 4 (Mode 0 fallback when no pitch funds Mode 1)", summary.Value)
 	}
@@ -26,7 +26,7 @@ func TestFlex_Mode0PrintedAttack(t *testing.T) {
 func TestFlex_Mode1AddsTwo(t *testing.T) {
 	d := deck.New(testutils.Hero{Intel: 4}, nil, nil)
 	hand := []card.Card{cards.FlexRed{}, testutils.FakeBlueResource()}
-	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingDamage(0).Build(), hand)
+	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingPhysicalDamage(0).Build(), hand)
 	if summary.Value != 6 {
 		t.Errorf("Value = %d, want 6 (4 printed + 2 Mode 1 bonus)", summary.Value)
 	}

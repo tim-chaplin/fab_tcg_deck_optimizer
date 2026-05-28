@@ -1,4 +1,4 @@
-package sim
+package fuzz
 
 import (
 	"math/rand"
@@ -7,6 +7,7 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/hero/heroes"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
 
 // Pinned fuzz seed: a Viserai hand with a modal blocker funded across two pitches must
@@ -21,8 +22,8 @@ func TestEvalCacheEquivalence_Seed3307073355315735355(t *testing.T) {
 	)
 	setupRNG := rand.New(rand.NewSource(3307073355315735355))
 	baseline := deck.Random(heroes.Viserai, deckSize, maxCopies, setupRNG, registry.Registry{})
-	cached := NewEvaluator().Evaluate(baseline.Copy(), shuffles, Matchup{IncomingDamage: incoming}, rand.New(rand.NewSource(99)))
-	uncached := NewEvaluatorWithoutCache().Evaluate(baseline.Copy(), shuffles, Matchup{IncomingDamage: incoming}, rand.New(rand.NewSource(99)))
+	cached := sim.NewEvaluator().Evaluate(baseline.Copy(), shuffles, sim.Matchup{IncomingPhysicalDamage: incoming}, rand.New(rand.NewSource(99)))
+	uncached := sim.NewEvaluatorWithoutCache().Evaluate(baseline.Copy(), shuffles, sim.Matchup{IncomingPhysicalDamage: incoming}, rand.New(rand.NewSource(99)))
 	if cached.Hands != uncached.Hands || cached.TotalValue != uncached.TotalValue {
 		t.Errorf("eval cache divergence: cached=(hands=%d val=%.0f) uncached=(hands=%d val=%.0f)",
 			cached.Hands, cached.TotalValue, uncached.Hands, uncached.TotalValue)
@@ -41,6 +42,6 @@ func TestRunDefense_DRGraveyardCarriesBetweenDRs_Seed6556227072949927836(t *test
 	)
 	setupRNG := rand.New(rand.NewSource(6556227072949927836))
 	baseline := deck.Random(heroes.Viserai, deckSize, maxCopies, setupRNG, registry.Registry{})
-	NewEvaluator().Evaluate(baseline.Copy(), shuffles, Matchup{IncomingDamage: incoming}, rand.New(rand.NewSource(99)))
-	NewEvaluatorWithoutCache().Evaluate(baseline.Copy(), shuffles, Matchup{IncomingDamage: incoming}, rand.New(rand.NewSource(99)))
+	sim.NewEvaluator().Evaluate(baseline.Copy(), shuffles, sim.Matchup{IncomingPhysicalDamage: incoming}, rand.New(rand.NewSource(99)))
+	sim.NewEvaluatorWithoutCache().Evaluate(baseline.Copy(), shuffles, sim.Matchup{IncomingPhysicalDamage: incoming}, rand.New(rand.NewSource(99)))
 }

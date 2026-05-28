@@ -33,7 +33,7 @@ func TestBest_CacheablePlainAttackers(t *testing.T) {
 	h := []card.Card{testutils.FakeRedAttack(), testutils.FakeRedAttack(), testutils.FakeRedAttack(), testutils.FakeRedAttack()}
 	got := Best(nil, h, nil, gameengine.GameStateBuilder().
 		SetHero(testutils.Hero{Intel: 4}).
-		SetIncomingDamage(4).
+		SetIncomingPhysicalDamage(4).
 		Build())
 	if !got.Cacheable {
 		t.Errorf("plain attackers: Cacheable = false, want true (no card touches hidden state)")
@@ -88,7 +88,7 @@ func TestBest_UncacheableTestOfStrengthClash(t *testing.T) {
 	h := []card.Card{cards.TestOfStrengthRed{}}
 	got := Best(nil, h, DeckOf(testutils.FakeRedAttack()), gameengine.GameStateBuilder().
 		SetHero(testutils.Hero{Intel: 4}).
-		SetIncomingDamage(1).
+		SetIncomingPhysicalDamage(1).
 		Build())
 	if got.Cacheable {
 		t.Errorf("Test of Strength hand: Cacheable = true, want false (Clash reads deck top)")
@@ -101,7 +101,7 @@ func TestBest_UncacheableWeepingBattlegroundDR(t *testing.T) {
 	h := []card.Card{cards.WeepingBattlegroundRed{}, cards.MaleficIncantationBlue{}}
 	got := Best(nil, h, nil, gameengine.GameStateBuilder().
 		SetHero(testutils.Hero{Intel: 4}).
-		SetIncomingDamage(3).
+		SetIncomingPhysicalDamage(3).
 		Build())
 	if got.Cacheable {
 		t.Errorf("Weeping Battleground hand: Cacheable = true, want false (BanishFromGraveyard flips)")

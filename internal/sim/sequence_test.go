@@ -27,7 +27,7 @@ func TestBest_ViseraiMaleficShrillCombo(t *testing.T) {
 	}
 	got := Best(nil, h, nil, gameengine.GameStateBuilder().
 		SetHero(heroes.Viserai).
-		SetIncomingDamage(4).
+		SetIncomingPhysicalDamage(4).
 		Build())
 	if got.Value != 11 {
 		t.Fatalf("want value 11, got %d (roles=[%s])",

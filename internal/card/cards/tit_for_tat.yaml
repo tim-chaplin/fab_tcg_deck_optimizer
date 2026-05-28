@@ -4,8 +4,6 @@ types:
     - Action
 cost: 0
 goAgain: true
-markers:
-    - NotImplemented
 text: '{t} target hero. {u} another target hero. **Go again**'
 variants:
     - id: TitForTatBlue

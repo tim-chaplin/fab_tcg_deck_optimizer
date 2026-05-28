@@ -44,7 +44,7 @@ func TestBestSequence_PermutationOrderInvariance(t *testing.T) {
 
 		makeState := func() *gameengine.GameState {
 			gs := gameengine.GameStateBuilder().SetHero(heroes.Viserai).Build()
-			gs.SetIncomingDamage(incoming)
+			gs.SetIncomingPhysicalDamage(incoming)
 			return gs
 		}
 		forward := NewEvaluatorWithoutCache().Best(nil, hand, d.Copy(), makeState()).Value

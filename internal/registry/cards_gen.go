@@ -590,6 +590,10 @@ var cardsByID = []Card{
 	ids.SutcliffesResearchNotesYellow: cards.SutcliffesResearchNotesYellow{},
 	ids.SutcliffesResearchNotesBlue:   cards.SutcliffesResearchNotesBlue{},
 
+	ids.TalismanOfDousingYellow: cards.TalismanOfDousingYellow{},
+
+	ids.TalismanOfFeatherfootYellow: cards.TalismanOfFeatherfootYellow{},
+
 	ids.TalismanOfRecompenseYellow: cards.TalismanOfRecompenseYellow{},
 
 	ids.TestOfStrengthRed: cards.TestOfStrengthRed{},
@@ -599,6 +603,8 @@ var cardsByID = []Card{
 	ids.TipOffRed:    cards.TipOffRed{},
 	ids.TipOffYellow: cards.TipOffYellow{},
 	ids.TipOffBlue:   cards.TipOffBlue{},
+
+	ids.TitForTatBlue: cards.TitForTatBlue{},
 
 	ids.TitaniumBaubleBlue: cards.TitaniumBaubleBlue{},
 

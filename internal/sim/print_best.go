@@ -72,7 +72,7 @@ func runReplayForTurn(snapshot *turnSnapshot, ev *Evaluator, logger card.Logger)
 	ctx.resourceBudget = 0
 
 	if len(defenders) > 0 {
-		_, _, ctx.handStart = ctx.runDefense(defenders, pitched, held, snapshot.deck, snapshot.state.IncomingDamage(), noBlockBudgetCap, arsenalDefenderIdx, nil)
+		_, _, ctx.handStart = ctx.runDefense(defenders, pitched, held, snapshot.deck, snapshot.state.IncomingPhysicalDamage(), noBlockBudgetCap, arsenalDefenderIdx, nil)
 	}
 
 	ctx.playSequence(snapshot.cardsPlayed)
@@ -81,7 +81,7 @@ func runReplayForTurn(snapshot *turnSnapshot, ev *Evaluator, logger card.Logger)
 		SwungWeapons:   snapshot.swungWeapons,
 		Value:          snapshot.value,
 		State:          ctx.permState,
-		IncomingDamage: snapshot.state.IncomingDamage(),
+		IncomingPhysicalDamage: snapshot.state.IncomingPhysicalDamage(),
 	}
 }
 

@@ -13,7 +13,7 @@ import (
 func rallyTheRearguardBlock(ge card.GameEngine, self *card.CardState) {
 	// Spend a card on the +3{d} only when the base block leaves damage unblocked;
 	// over-blocking past the incoming damage would waste the discarded card.
-	if ge.RemainingUnblockedDamage() <= self.EffectiveDefense() {
+	if ge.RemainingPhysicalDamage() <= self.EffectiveDefense() {
 		return
 	}
 	if ge.Discard(self.Card.DisplayName()) {

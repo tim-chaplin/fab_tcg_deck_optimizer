@@ -18,7 +18,7 @@ import (
 func TestPerformanceBonus_OnHitCreatesGold(t *testing.T) {
 	d := deck.New(heroes.Viserai, nil, nil)
 	hand := []card.Card{cards.PerformanceBonusBlue{}}
-	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingDamage(0).Build(), hand)
+	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingPhysicalDamage(0).Build(), hand)
 	if summary.Value != 1 {
 		t.Fatalf("Value = %d, want 1 (PB Blue power 1 hits)\nBestLine: %s",
 			summary.Value, formatBestLine(summary.BestLine))

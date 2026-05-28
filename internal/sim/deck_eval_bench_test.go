@@ -30,6 +30,6 @@ func BenchmarkEvaluate(b *testing.B) {
 		b.StopTimer()
 		evalRNG = rand.New(rand.NewSource(42))
 		b.StartTimer()
-		ev.Evaluate(d, shuffles, Matchup{IncomingDamage: incoming}, evalRNG)
+		ev.Evaluate(d, shuffles, Matchup{IncomingPhysicalDamage: incoming}, evalRNG)
 	}
 }

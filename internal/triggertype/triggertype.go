@@ -21,11 +21,18 @@ const (
 	Hit
 	// DamageAboutToBeTaken fires just before DamageTaken, while the unblocked-damage figure
 	// is still mutable. Subscribers (Enchanting Melody's "instead destroy and prevent 4
-	// damage" rider) call GameEngine.PreventIncomingDamage to absorb part of the swing
-	// before the carry-through hits DamageTaken triggers.
+	// damage" rider, Talisman of Dousing's Spellvoid) call PreventGenericDamage /
+	// PreventPhysicalDamage / PreventArcaneDamage to absorb part of the swing before the
+	// carry-through hits DamageTaken triggers. The engine fires this trigger twice per
+	// damage moment: once for the physical side then once for the arcane side. Each fire
+	// is gated on the matching damage figure being non-zero — type-specific subscribers
+	// (Dousing) call the typed prevention method; type-agnostic subscribers (Melody) call
+	// PreventGenericDamage and the engine picks the active type.
 	DamageAboutToBeTaken
 	// DamageTaken fires at the end of the defense phase when incoming damage got through
-	// unblocked.
+	// unblocked. Like DamageAboutToBeTaken, it fires twice per damage moment — physical
+	// then arcane — so DamageTaken-subscribed self-destruct auras (Arcane Cussing) pop on
+	// either side.
 	DamageTaken
 	// Pitch fires as each card is pitched to fund a play during the attack phase. The
 	// triggering card is the pitched card; a handler reads its Pitch value and may boost
@@ -37,4 +44,10 @@ const (
 	CrowdCheer
 	// CrowdBoo is the boo-side counterpart to CrowdCheer.
 	CrowdBoo
+	// AttackBuffedByReaction fires when an attack action card's BonusAttack increments by
+	// exactly 1 during the reaction-step buff resolution. The buffed attack CardState is
+	// the firing context. Backs "when an attack you control gains exactly +1{p} from an
+	// effect during the reaction step" handlers (Talisman of Featherfoot). The "exactly +1"
+	// gate is enforced at the fire site — subscribers don't re-check the delta.
+	AttackBuffedByReaction
 )

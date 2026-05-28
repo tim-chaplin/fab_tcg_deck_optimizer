@@ -5,10 +5,10 @@
 // Red N=6, Yellow N=5, Blue N=4.
 //
 // DefensiveInstant routes the card through the defense partition slot so the attack-turn runner
-// runs it at defense time (when ArcaneIncomingDamage is still on the matchup figure). Play
+// runs it at defense time (when IncomingArcaneDamage is still on the matchup figure). Play
 // peeks the deck, computes x = N - top.Pitch (or N when the deck is empty), and asks the
-// engine to prevent that much arcane damage; the engine returns the amount actually
-// prevented (clamped at the remaining ArcaneIncomingDamage) and we credit it as Value.
+// engine to prevent that much arcane damage; PreventArcaneDamage credits the prevented
+// amount as Value and returns it for the rider log.
 
 package cards
 
@@ -25,7 +25,6 @@ func eirinasPrayerPlay(ge card.GameEngine, l card.Logger, self *card.CardState, 
 	if prevented <= 0 {
 		return
 	}
-	ge.AddValue(prevented)
 	l.AppendPostTriggerf(self.Card.DisplayName(), prevented, "Prevented %d arcane damage", prevented)
 }
 

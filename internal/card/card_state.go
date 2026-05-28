@@ -1,5 +1,7 @@
 package card
 
+import "github.com/tim-chaplin/fab-deck-optimizer/internal/triggertype"
+
 // CardState wraps a Card with per-turn mutable flags that other cards' effects can toggle.
 // Instances are created by the solver at the start of each attack turn and live only for
 // that attack turn. Effects that grant keywords to "the next X" scan TurnState.CardsRemaining and
@@ -113,7 +115,10 @@ func (p *CardState) RegisterOnHit(fire func(g GameEngine, l Logger, self *CardSt
 
 // GrantAttackReactionBuff buffs the active attack target by n: adds to BonusAttack, credits
 // g's value, amends the target's attack-step delta, and logs the rider under the target's
-// entry. p is the Attack Reaction card granting the buff.
+// entry. p is the Attack Reaction card granting the buff. Any positive buff fires the
+// AttackBuffedByReaction trigger with the buffed target as triggering card and n in
+// FireContext.BuffDelta; subscribers (Talisman of Featherfoot's "exactly +1{p}" gate)
+// filter on the delta themselves so card-specific predicates don't live in this helper.
 func (p *CardState) GrantAttackReactionBuff(g GameEngine, l Logger, n int) {
 	target := g.AttackReactionTarget()
 	if target == nil {
@@ -123,6 +128,13 @@ func (p *CardState) GrantAttackReactionBuff(g GameEngine, l Logger, n int) {
 	g.AddValue(n)
 	l.AmendLastAttackStepN(n)
 	l.AppendPostTriggerf(target.Card.DisplayName(), 0, "%s buffed +%d{p}", p.Card.DisplayName(), n)
+	if n > 0 {
+		g.FireTriggers(FireContext{
+			FiringType:     triggertype.AttackBuffedByReaction,
+			TriggeringCard: target,
+			BuffDelta:      n,
+		})
+	}
 }
 
 // EffectiveGoAgain reports whether this card has Go again this turn — from printed text or
@@ -179,7 +191,7 @@ func (p *CardState) EffectiveAttack() int {
 
 // EffectiveDefense returns Defense() + BonusDefense + ArsenalDefenseBonus (when this copy
 // came from arsenal), clamped at 0. Read by ResolveAttackStep to credit the DR's attack-step
-// (+N) and bank the block against IncomingDamage.
+// (+N) and bank the block against IncomingPhysicalDamage.
 func (p *CardState) EffectiveDefense() int {
 	n := p.Card.Defense() + p.BonusDefense
 	if p.FromArsenal {

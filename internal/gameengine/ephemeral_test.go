@@ -24,7 +24,7 @@ func TestEphemeralReset_MatchesExpectedShape(t *testing.T) {
 		logger:                &StreamLogger{},
 		actionPoints:          99,
 		value:                 99,
-		damageBlocked:         99,
+		physicalDamageBlocked: 99,
 		blockTotal:            99,
 		currentHookIdx:        99,
 		cardBanished:          true,

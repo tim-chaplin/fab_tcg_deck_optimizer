@@ -11,7 +11,7 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 )
 
-// Tests that with enough IncomingDamage Value sums printed Defense + +1{d} boost + 1 arcane.
+// Tests that with enough IncomingPhysicalDamage Value sums printed Defense + +1{d} boost + 1 arcane.
 func TestSigilOfSuffering_FullCreditWhenIncomingAbsorbsBoost(t *testing.T) {
 	cases := []struct {
 		c    card.Card
@@ -24,7 +24,7 @@ func TestSigilOfSuffering_FullCreditWhenIncomingAbsorbsBoost(t *testing.T) {
 	for _, tc := range cases {
 		d := deck.New(testutils.Hero{Intel: 4}, nil, nil)
 		hand := []card.Card{tc.c}
-		summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingDamage(10).Build(), hand)
+		summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingPhysicalDamage(10).Build(), hand)
 		if summary.Value != tc.want {
 			t.Errorf("%s: Value = %d, want %d (block + boost + arcane)",
 				tc.c.DisplayName(), summary.Value, tc.want)
@@ -32,7 +32,7 @@ func TestSigilOfSuffering_FullCreditWhenIncomingAbsorbsBoost(t *testing.T) {
 	}
 }
 
-// Tests that when IncomingDamage equals printed Defense the +1{d} boost is clamped away;
+// Tests that when IncomingPhysicalDamage equals printed Defense the +1{d} boost is clamped away;
 // Value collapses to printed Defense + 1 arcane.
 func TestSigilOfSuffering_BoostWastedWhenIncomingMatchesDefense(t *testing.T) {
 	cases := []struct {
@@ -47,7 +47,7 @@ func TestSigilOfSuffering_BoostWastedWhenIncomingMatchesDefense(t *testing.T) {
 	for _, tc := range cases {
 		d := deck.New(testutils.Hero{Intel: 4}, nil, nil)
 		hand := []card.Card{tc.c}
-		summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingDamage(tc.incoming).Build(), hand)
+		summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingPhysicalDamage(tc.incoming).Build(), hand)
 		if summary.Value != tc.want {
 			t.Errorf("%s: Value = %d, want %d (block at cap + arcane only)",
 				tc.c.DisplayName(), summary.Value, tc.want)

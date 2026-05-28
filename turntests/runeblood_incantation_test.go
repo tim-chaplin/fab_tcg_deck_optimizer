@@ -35,7 +35,7 @@ func TestRunebloodIncantation_StartOfTurnFireCreatesRunechant(t *testing.T) {
 func TestRunebloodIncantation_LastVerseSpentThenDestroyedNextTurn(t *testing.T) {
 	prior := gameengine.GameStateBuilder().
 		CreateAuraFromCard(cards.RunebloodIncantationBlue{}).
-		SetIncomingDamage(0).
+		SetIncomingPhysicalDamage(0).
 		Build()
 	d := deck.New(testutils.Hero{Intel: 4}, nil, nil)
 	hand := []card.Card{testutils.FakeBlueResource()}
