@@ -19,14 +19,10 @@ import (
 // featherfootFire grants the buffed attack go again and self-destructs. The fire site
 // already verified the +1 gate, so the handler unconditionally applies the payoff.
 // GrantedGoAgain records the keyword grant on the buffed attack's CardState; the
-// matching extra action point is credited via AddActionPoints so the next card in the
-// permutation can spend it (the buffed attack already passed its own EffectiveGoAgain
-// check before the AR step, so the grant arrives too late to retroactively bank that
-// attack's AP — AddActionPoints back-fills it). Value falls out naturally from whatever
-// card spends the extra AP, so the handler credits no Value of its own.
-func featherfootFire(ge card.GameEngine, l card.Logger, self card.Item, triggeringCard *card.CardState, _ triggertype.Type) {
+// attack's own EffectiveGoAgain check (deferred until after all attack reactions
+// resolve) banks the corresponding action point.
+func featherfootFire(_ card.GameEngine, l card.Logger, self card.Item, triggeringCard *card.CardState, _ triggertype.Type) {
 	triggeringCard.GrantedGoAgain = true
-	ge.AddActionPoints(1)
 	self.Destroy(true)
 	l.AppendPostTrigger(triggeringCard.Card.DisplayName(),
 		"Talisman of Featherfoot destroyed to grant go again on a +1 reaction-step buff", 0)

@@ -854,6 +854,13 @@ func (ctx *sequenceContext) playSequenceWithMeta(n int) (damage int, totalCounte
 			}
 			ge.FireTriggers(triggertype.Hit, activeAttack)
 		}
+		// Go-again credit for the attack lands here, after every attack reaction targeting
+		// it has resolved and after OnHit / Hit triggers fire. A reaction-step buff
+		// (Talisman of Featherfoot) or on-hit rider that flips GrantedGoAgain is picked up
+		// by EffectiveGoAgain at this point.
+		if activeAttack.EffectiveGoAgain(ge) {
+			state.AddActionPoints(1)
+		}
 		activeAttack = nil
 	}
 	for i, pc := range played {
@@ -942,7 +949,10 @@ func (ctx *sequenceContext) playSequenceWithMeta(n int) (damage int, totalCounte
 		if !modeTypes.PersistsInPlay() && !state.CurrentStepRerouted() {
 			state.AppendGraveyard(pc.Card)
 		}
-		if pc.EffectiveGoAgain(ge) {
+		// Attack cards' go-again credit is deferred into finalizeActiveAttack so it sees
+		// any GrantedGoAgain flipped during the reaction step (Featherfoot) or by OnHit
+		// riders. Non-attack-action cards credit at resolution as before.
+		if !modeTypes.Has(card.TypeAttack) && pc.EffectiveGoAgain(ge) {
 			state.AddActionPoints(1)
 		}
 	}

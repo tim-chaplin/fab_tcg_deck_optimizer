@@ -71,6 +71,59 @@ func TestTalismanOfFeatherfoot_PlusOneBuffWithoutTalismanNoFollowUp(t *testing.T
 	}
 }
 
+// Tests that Featherfoot grants go-again to a no-go-again attack via the deferred
+// go-again check in finalizeActiveAttack: hand is two no-go-again attacks + a +1
+// attack reaction. The AR buffs the first attack, Featherfoot fires and flips
+// GrantedGoAgain, the deferred check (after all ARs targeting that attack resolve)
+// banks the AP, and the second attack plays. Whole hand played.
+func TestTalismanOfFeatherfoot_GoAgainGrantPaysForSecondAttack(t *testing.T) {
+	attacker1 := testutils.FakeRedAttack().
+		WithCost(0).
+		WithPower(3).
+		WithName("Attacker1")
+	attacker2 := testutils.FakeRedAttack().
+		WithCost(0).
+		WithPower(2).
+		WithName("Attacker2")
+	hand := []card.Card{attacker1, cards.LungingPressBlue{}, attacker2}
+	state := gameengine.GameStateBuilder().
+		SetIncomingDamage(0).
+		CreateItemFromCard(cards.TalismanOfFeatherfootYellow{}).
+		Build()
+
+	summary := sim.EvalOneTurnForTesting(featherfootDeck(), state, hand)
+
+	// Whole hand resolves: Attacker1 3 + LP +1 buff = 4, then Attacker2 2 = 6 total.
+	if summary.Value != 6 {
+		t.Fatalf("Value = %d, want 6 (Attacker1 3 + LP +1 + Attacker2 2; Featherfoot's go-again grant funds the second attack)", summary.Value)
+	}
+	if n := len(summary.State.Items()); n != 0 {
+		t.Fatalf("Items() = %d after turn, want 0 (Featherfoot must self-destruct on +1 fire)", n)
+	}
+}
+
+// Counterfactual: same hand without Talisman of Featherfoot in play. The first attack
+// has no go-again, the AR is free, but the second attack has no AP — the optimiser can
+// only play one attack + AR (or drop the AR for the second attack).
+func TestTalismanOfFeatherfoot_NoTalismanOnlyOneAttackPlays(t *testing.T) {
+	attacker1 := testutils.FakeRedAttack().
+		WithCost(0).
+		WithPower(3).
+		WithName("Attacker1")
+	attacker2 := testutils.FakeRedAttack().
+		WithCost(0).
+		WithPower(2).
+		WithName("Attacker2")
+	hand := []card.Card{attacker1, cards.LungingPressBlue{}, attacker2}
+
+	summary := sim.EvalOneTurnForTesting(featherfootDeck(), gameengine.GameStateBuilder().SetIncomingDamage(0).Build(), hand)
+
+	// Best line: Attacker1 3 + LP +1 buff = 4. Attacker2 can't be paid for; AP exhausted.
+	if summary.Value != 4 {
+		t.Fatalf("Value = %d, want 4 (Attacker1 3 + LP +1; no Featherfoot means no AP for the second attack)", summary.Value)
+	}
+}
+
 // Tests that a +2{p} buff does NOT fire Featherfoot. Razor Reflex Yellow mode 1 grants
 // +2{p} to a cost-≤1 attack action card — exactly the "exactly +1" gate's negative
 // case. The talisman stays in play, no extra AP is banked, and the 1-power follow-up
