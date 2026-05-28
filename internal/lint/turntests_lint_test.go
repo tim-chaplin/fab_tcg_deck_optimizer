@@ -136,7 +136,6 @@ var grandfatheredTurntestFiles = []string{
 	"turntests/scout_the_periphery_test.go",
 	"turntests/seek_horizon_test.go",
 	"turntests/shrill_of_skullform_test.go",
-	"turntests/sigil_of_protection_test.go",
 	"turntests/sky_fire_lanterns_test.go",
 	"turntests/sloggism_test.go",
 	"turntests/smashing_good_time_test.go",

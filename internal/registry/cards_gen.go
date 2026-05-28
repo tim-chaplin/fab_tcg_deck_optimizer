@@ -506,6 +506,10 @@ var cardsByID = []Card{
 
 	ids.SigilOfFyendalBlue: cards.SigilOfFyendalBlue{},
 
+	ids.SigilOfProtectionRed:    cards.SigilOfProtectionRed{},
+	ids.SigilOfProtectionYellow: cards.SigilOfProtectionYellow{},
+	ids.SigilOfProtectionBlue:   cards.SigilOfProtectionBlue{},
+
 	ids.SigilOfSilphidaeBlue: cards.SigilOfSilphidaeBlue{},
 
 	ids.SigilOfSufferingRed:    cards.SigilOfSufferingRed{},
