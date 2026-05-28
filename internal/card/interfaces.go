@@ -263,6 +263,15 @@ type GameEngine interface {
 	// TODO: pass the target directly into the AttackReaction's Play instead of leaking the
 	// "engine remembers the active attack" detail through this accessor.
 	AttackReactionTarget() *CardState
+
+	// RaiseAttackBuffedByReaction fires the AttackBuffedByReaction trigger on target,
+	// exposing the buff size n through AttackReactionBuffDelta for the duration of the
+	// fire. Called by CardState.GrantAttackReactionBuff once the buff has been applied;
+	// subscribers (Featherfoot) read AttackReactionBuffDelta to gate their payoff.
+	RaiseAttackBuffedByReaction(target *CardState, n int)
+	// AttackReactionBuffDelta returns the buff size of the AttackBuffedByReaction trigger
+	// currently firing — zero outside that window.
+	AttackReactionBuffDelta() int
 }
 
 // Logger is the cards-facing log sink the attack-turn runner threads through every Card hook.

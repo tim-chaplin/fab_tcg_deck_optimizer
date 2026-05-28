@@ -85,6 +85,11 @@ type ephemeral struct {
 	triggers             []EphemeralTrigger
 	triggeringCard       *card.CardState
 	attackReactionTarget *card.CardState
+	// attackReactionBuffDelta holds the buff size while an AttackBuffedByReaction trigger
+	// is firing — set by RaiseAttackBuffedByReaction immediately before FireTriggers and
+	// cleared after. Zero outside that window. Subscribers (Talisman of Featherfoot, which
+	// gates on "exactly +1{p}") read it via AttackReactionBuffDelta().
+	attackReactionBuffDelta int
 
 	logger card.Logger
 
@@ -673,6 +678,11 @@ func (gs *GameState) SetLogger(l card.Logger) { gs.logger = l }
 func (gs *GameState) TriggeringCard() *card.CardState            { return gs.triggeringCard }
 func (gs *GameState) AttackReactionTarget() *card.CardState      { return gs.attackReactionTarget }
 func (gs *GameState) SetAttackReactionTarget(cs *card.CardState) { gs.attackReactionTarget = cs }
+
+// AttackReactionBuffDelta returns the buff size for the AttackBuffedByReaction trigger
+// currently being fired (zero outside that window). Subscribers gate their payoff on this
+// value — keeping card-specific filters out of the general GrantAttackReactionBuff helper.
+func (gs *GameState) AttackReactionBuffDelta() int { return gs.attackReactionBuffDelta }
 
 func (gs *GameState) ActionPoints() int     { return gs.actionPoints }
 func (gs *GameState) SetActionPoints(n int) { gs.actionPoints = n }

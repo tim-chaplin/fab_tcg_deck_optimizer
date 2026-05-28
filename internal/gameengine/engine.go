@@ -364,6 +364,17 @@ func (ge *GameEngine) OpponentDiscard(n int) int {
 	return v
 }
 
+// RaiseAttackBuffedByReaction fires the AttackBuffedByReaction trigger on target, exposing
+// the buff size n through AttackReactionBuffDelta() for the duration of the fire.
+// Subscribers (Talisman of Featherfoot) gate their payoff on the delta — keeping
+// card-specific filters out of the general GrantAttackReactionBuff helper.
+func (ge *GameEngine) RaiseAttackBuffedByReaction(target *card.CardState, n int) {
+	prev := ge.attackReactionBuffDelta
+	ge.attackReactionBuffDelta = n
+	ge.FireTriggers(triggertype.AttackBuffedByReaction, target)
+	ge.attackReactionBuffDelta = prev
+}
+
 // DestroyOpponentArsenal destroys the opposing arsenal, crediting one card's worth of the
 // OpponentDiscard heuristic (DiscardValue). Idempotent per turn: a second call returns 0
 // and credits nothing. Returns the value credited for log attribution.
