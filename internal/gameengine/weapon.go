@@ -30,9 +30,8 @@ func EquipFromCards(cards []weapon.Card) []Weapon {
 // DestroyWeapon removes the weapon currently being fired from the arena and, when
 // addToGraveyard is true, pushes its source weapon card into the graveyard. The weapon
 // counterpart of DestroyAura / DestroyItem: direct splice with no cacheable flip —
-// destruction is deterministic from the triggering event. Not used by any weapon yet
-// (Talishar's end-phase self-destruct will be the first); wired so a future triggered
-// weapon's handler-side Destroy routes back here.
+// destruction is deterministic from the triggering event. Talishar's end-phase
+// self-destruct routes its handler-side Destroy back here.
 func (ge *GameEngine) DestroyWeapon(addToGraveyard bool) {
 	i := ge.currentHookIdx
 	if i < 0 || i >= len(ge.weapons) {
