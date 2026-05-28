@@ -5,9 +5,9 @@
 //     Ability). Each concrete weapon in internal/weapon/weapons satisfies it; the card lives
 //     in the card universe and goes to the graveyard when its equipped object is destroyed.
 //   - Weapon: the concrete mutable engine-side object built when the card is equipped. It
-//     embeds trigger.Trigger so a future end-phase handler (Talishar's rust-counter
-//     self-destruct) can subscribe, and carries the per-turn counter total. A deck equips
-//     0–2 weapons under the "2 × 1H or 1 × 2H" rule.
+//     embeds trigger.Trigger so an end-phase handler (Talishar's rust-counter self-destruct)
+//     can subscribe, and carries the per-turn counter total. A deck equips 0–2 weapons under
+//     the "2 × 1H or 1 × 2H" rule.
 //
 // This package must NOT import gameengine — same layering rule as internal/aura /
 // internal/item. The concrete Weapon's Destroy routes back through card.GameEngine, which
@@ -21,32 +21,28 @@ import (
 )
 
 // Card is the platonic weapon card. It is a full card.Card (so it has a CardID, a
-// DisplayName, a Types line, and lives in the card universe / graveyard) plus the two
-// weapon-specific accessors the attack-turn runner reads: Hands for the equipment-slot rule
-// and Ability for the swing card it enqueues each turn.
+// DisplayName, a Types line, and lives in the card universe / graveyard) plus the
+// weapon-specific accessors EquipFromCards and the attack-turn runner read: Hands for the
+// equipment-slot rule, Ability for the swing card enqueued each turn, and WeaponTrigger for
+// the equip-time trigger handler.
 type Card interface {
 	card.Card
 	Hands() int
 	Ability() card.Card
+	// WeaponTrigger reports the trigger EquipFromCards registers on the equipped object: the
+	// firing event and its handler (e.g. Talishar's end-phase self-destruct). An untriggered
+	// weapon returns (0, nil) — trigger type 0 never matches a firing event.
+	WeaponTrigger() (triggertype.Type, Handler)
 }
 
 // Handler is the typed weapon handler signature — the func stored on a Weapon and called at
 // every Fire. Mirrors aura.Handler / the item handler.
 type Handler func(card.GameEngine, card.Logger, card.Weapon, card.FireContext)
 
-// TriggeredCard is the optional interface a platonic weapon card implements to register a
-// trigger handler on its equipped object — Talishar's end-phase "if 3+ rust counters,
-// destroy" check. EquipFromCards builds such weapons via NewTriggered; weapons without it
-// get a plain New (no handler).
-type TriggeredCard interface {
-	Card
-	WeaponTrigger() (triggertype.Type, Handler)
-}
-
 // Weapon is the concrete mutable entry the engine stores in its equipped-weapon list. The
-// embedded trigger.Trigger holds the source card and, for a future triggered weapon, the
-// firing event and handler; Weapon adds the counter total and caches the platonic card's
-// Hands / Ability so the attack-turn runner reads them without re-asserting the source.
+// embedded trigger.Trigger holds the source card and, for a triggered weapon, the firing
+// event and handler; Weapon adds the counter total and caches the platonic card's Hands /
+// Ability so the attack-turn runner reads them without re-asserting the source.
 //
 // activeEngine is set by Fire so a handler-side Destroy routes back through
 // engine.DestroyWeapon without allocating a per-fire wrapper. Cleared after the handler
@@ -58,21 +54,11 @@ type Weapon struct {
 	count        int
 }
 
-// New builds the engine-side Weapon for the supplied platonic card with no trigger handler
-// — the equip-time path every current weapon takes. count starts at 0. A future triggered
-// weapon reaches for NewTriggered.
-func New(source Card) *Weapon {
-	return &Weapon{
-		Trigger: trigger.FromCard[card.Weapon](source, 0, nil, false, nil),
-		source:  source,
-	}
-}
-
-// NewTriggered builds an engine-side Weapon whose handler fires on every event in tt's bit
-// set. oncePerTurn caps it to one fire per turn; typeFilter narrows the firing site (pass
-// nil for none). Unused until Talishar's end-phase self-destruct lands; New is the
-// equip-time path today.
-func NewTriggered(source Card, tt triggertype.Type, fire Handler, oncePerTurn bool, typeFilter trigger.TypeFilter) *Weapon {
+// NewFromCard builds the engine-side Weapon for the supplied platonic card. The handler fires
+// on every event in tt's bit set; pass tt=0 / fire=nil for an untriggered weapon. oncePerTurn
+// caps it to one fire per turn; typeFilter narrows the firing site (pass nil for none).
+// count starts at 0. Mirrors item.NewFromCard.
+func NewFromCard(source Card, tt triggertype.Type, fire Handler, oncePerTurn bool, typeFilter trigger.TypeFilter) *Weapon {
 	return &Weapon{
 		Trigger: trigger.FromCard[card.Weapon](source, tt, fire, oncePerTurn, typeFilter),
 		source:  source,

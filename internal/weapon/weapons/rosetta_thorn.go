@@ -10,6 +10,8 @@ package weapons
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/ids"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/triggertype"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapon"
 )
 
 var rosettaThornTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeWeapon, card.TypeSword, card.TypeTwoHand)
@@ -30,6 +32,8 @@ func (RosettaThorn) GoAgain(card.GameEngine) bool                       { return
 func (RosettaThorn) Play(card.GameEngine, card.Logger, *card.CardState) {}
 func (RosettaThorn) Hands() int                                         { return 2 }
 func (RosettaThorn) Ability() card.Card                                 { return rosettaThornAbility }
+
+func (RosettaThorn) WeaponTrigger() (triggertype.Type, weapon.Handler) { return 0, nil }
 
 var rosettaThornAbility card.Card = RosettaThornAbility{}
 

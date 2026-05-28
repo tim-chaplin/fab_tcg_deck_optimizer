@@ -13,6 +13,8 @@ package weapons
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/ids"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/triggertype"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapon"
 )
 
 var annalsOfSutcliffeTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeWeapon, card.TypeBook, card.TypeTwoHand)
@@ -33,6 +35,8 @@ func (AnnalsOfSutcliffe) GoAgain(card.GameEngine) bool                       { r
 func (AnnalsOfSutcliffe) Play(card.GameEngine, card.Logger, *card.CardState) {}
 func (AnnalsOfSutcliffe) Hands() int                                         { return 2 }
 func (AnnalsOfSutcliffe) Ability() card.Card                                 { return annalsOfSutcliffeAbility }
+
+func (AnnalsOfSutcliffe) WeaponTrigger() (triggertype.Type, weapon.Handler) { return 0, nil }
 
 var annalsOfSutcliffeAbility card.Card = AnnalsOfSutcliffeAbility{}
 

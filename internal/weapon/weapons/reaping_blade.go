@@ -10,6 +10,8 @@ package weapons
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/ids"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/triggertype"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapon"
 )
 
 var reapingBladeTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeWeapon, card.TypeSword, card.TypeTwoHand)
@@ -30,6 +32,8 @@ func (ReapingBlade) GoAgain(card.GameEngine) bool                       { return
 func (ReapingBlade) Play(card.GameEngine, card.Logger, *card.CardState) {}
 func (ReapingBlade) Hands() int                                         { return 2 }
 func (ReapingBlade) Ability() card.Card                                 { return reapingBladeAbility }
+
+func (ReapingBlade) WeaponTrigger() (triggertype.Type, weapon.Handler) { return 0, nil }
 
 var reapingBladeAbility card.Card = ReapingBladeAbility{}
 

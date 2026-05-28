@@ -10,22 +10,19 @@ import (
 // sim and the StateBuilder build the mutable weapon objects from the deck's platonic weapon
 // cards through EquipFromCards.
 
-// EquipFromCards builds the engine-side weapon object for each platonic weapon card. Each
-// object embeds a trigger.Trigger (no handler yet) and caches the card's Hands / Ability;
-// it lives in GameState.weapons across turns. Returns nil for an empty loadout so the
-// no-weapon case carries no allocation.
+// EquipFromCards builds the engine-side weapon object for each platonic weapon card via
+// weapon.NewFromCard, registering the card's WeaponTrigger (the firing event + handler; (0,
+// nil) for an untriggered weapon) and caching the card's Hands / Ability. The object lives in
+// GameState.weapons across turns. Returns nil for an empty loadout so the no-weapon case
+// carries no allocation.
 func EquipFromCards(cards []weapon.Card) []Weapon {
 	if len(cards) == 0 {
 		return nil
 	}
 	out := make([]Weapon, len(cards))
 	for i, c := range cards {
-		if tc, ok := c.(weapon.TriggeredCard); ok {
-			tt, h := tc.WeaponTrigger()
-			out[i] = weapon.NewTriggered(c, tt, h, false, nil)
-		} else {
-			out[i] = weapon.New(c)
-		}
+		tt, h := c.WeaponTrigger()
+		out[i] = weapon.NewFromCard(c, tt, h, false, nil)
 	}
 	return out
 }

@@ -8,6 +8,8 @@ package weapons
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/ids"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/triggertype"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapon"
 )
 
 var nebulaBladeTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeWeapon, card.TypeSword, card.TypeTwoHand)
@@ -29,6 +31,8 @@ func (NebulaBlade) GoAgain(card.GameEngine) bool                       { return 
 func (NebulaBlade) Play(card.GameEngine, card.Logger, *card.CardState) {}
 func (NebulaBlade) Hands() int                                         { return 2 }
 func (NebulaBlade) Ability() card.Card                                 { return nebulaBladeAbility }
+
+func (NebulaBlade) WeaponTrigger() (triggertype.Type, weapon.Handler) { return 0, nil }
 
 var nebulaBladeAbility card.Card = NebulaBladeAbility{}
 

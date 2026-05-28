@@ -7,6 +7,8 @@ package weapons
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/ids"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/triggertype"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapon"
 )
 
 var scepterOfPainTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeWeapon, card.TypeScepter, card.TypeOneHand)
@@ -27,6 +29,8 @@ func (ScepterOfPain) GoAgain(card.GameEngine) bool                       { retur
 func (ScepterOfPain) Play(card.GameEngine, card.Logger, *card.CardState) {}
 func (ScepterOfPain) Hands() int                                         { return 1 }
 func (ScepterOfPain) Ability() card.Card                                 { return scepterOfPainAbility }
+
+func (ScepterOfPain) WeaponTrigger() (triggertype.Type, weapon.Handler) { return 0, nil }
 
 var scepterOfPainAbility card.Card = ScepterOfPainAbility{}
 
