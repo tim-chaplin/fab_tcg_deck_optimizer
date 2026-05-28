@@ -7,15 +7,15 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/ids"
 )
 
-// stubWeapon is a no-op card.Weapon so the Ephemeral.Weapon field can be set non-nil for the
+// fakeWeapon is a no-op card.Weapon so the Ephemeral.Weapon field can be set non-nil for the
 // reset-coverage assertion.
-type stubWeapon struct{}
+type fakeWeapon struct{}
 
-func (stubWeapon) Count() int         { return 0 }
-func (stubWeapon) SetCount(int)       {}
-func (stubWeapon) CardName() string   { return "stubWeapon" }
-func (stubWeapon) CardID() ids.CardID { return ids.InvalidCard }
-func (stubWeapon) Destroy(bool)       {}
+func (fakeWeapon) Count() int         { return 0 }
+func (fakeWeapon) SetCount(int)       {}
+func (fakeWeapon) CardName() string   { return "fakeWeapon" }
+func (fakeWeapon) CardID() ids.CardID { return ids.InvalidCard }
+func (fakeWeapon) Destroy(bool)       {}
 
 // TestEphemeralReset_ZeroesEveryField mutates every Ephemeral field non-zero, calls Reset,
 // and asserts each one is back to its type's zero value. A new field added to Ephemeral is
@@ -34,7 +34,7 @@ func TestEphemeralReset_ZeroesEveryField(t *testing.T) {
 		BonusDefense:     99,
 		PitchedToPlay:    []*CardState{nil},
 		OnHit:            []OnHitHandler{{N: 1}},
-		Weapon:           stubWeapon{},
+		Weapon:           fakeWeapon{},
 	}
 	e.Reset()
 
