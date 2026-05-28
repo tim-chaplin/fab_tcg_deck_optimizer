@@ -51,6 +51,28 @@ func TestArcaneCussing_FullyBlockedDoesNotPop(t *testing.T) {
 	}
 }
 
+// Tests that a carried Arcane Cussing is destroyed by unblocked arcane damage — the
+// arcane-side DamageTaken fire reaches Cussing's selfDestructAuraHandler the same way a
+// physical hit does. No Runechants are created (Cussing leaves on the defense phase, not
+// our turn).
+func TestArcaneCussing_DestroyedByArcaneDamage(t *testing.T) {
+	prior := gameengine.GameStateBuilder().
+		CreateAuraFromCard(cards.ArcaneCussingRed{}).
+		SetArcaneIncomingDamage(2).
+		Build()
+	d := deck.New(testutils.Hero{Intel: 4}, nil, nil)
+
+	summary := sim.EvalOneTurnForTesting(d, prior, nil)
+
+	if got := summary.State.RunechantCount(); got != 0 {
+		t.Fatalf("RunechantCount = %d, want 0 (Cussing popped on defense phase, not our turn)", got)
+	}
+	if got := len(summary.State.Auras()); got != 0 {
+		t.Fatalf("Auras = %d, want 0 (Arcane Cussing destroyed by arcane DamageTaken fire)\nFinal auras: %v",
+			got, summary.State.Auras())
+	}
+}
+
 // Tests that, after a fully-blocked turn, a return attack that hits pops Arcane Cussing
 // during our turn — paying out its 3 Runechants.
 func TestArcaneCussing_PoppedByOwnAttackCreatesRunechants(t *testing.T) {

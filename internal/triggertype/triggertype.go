@@ -21,11 +21,17 @@ const (
 	Hit
 	// DamageAboutToBeTaken fires just before DamageTaken, while the unblocked-damage figure
 	// is still mutable. Subscribers (Enchanting Melody's "instead destroy and prevent 4
-	// damage" rider) call GameEngine.PreventIncomingDamage to absorb part of the swing
-	// before the carry-through hits DamageTaken triggers.
+	// damage" rider, Talisman of Dousing's Spellvoid) call PreventIncomingDamage /
+	// PreventArcaneDamage to absorb part of the swing before the carry-through hits
+	// DamageTaken triggers. The engine fires this trigger twice per damage moment: once
+	// for the physical side then once for the arcane side. Each fire is gated on the
+	// matching damage figure being non-zero. Handlers introspect RemainingUnblockedDamage
+	// vs ArcaneIncomingDamage to identify which side they are being called on.
 	DamageAboutToBeTaken
 	// DamageTaken fires at the end of the defense phase when incoming damage got through
-	// unblocked.
+	// unblocked. Like DamageAboutToBeTaken, it fires twice per damage moment — physical
+	// then arcane — so DamageTaken-subscribed self-destruct auras (Arcane Cussing) pop on
+	// either side.
 	DamageTaken
 	// Pitch fires as each card is pitched to fund a play during the attack phase. The
 	// triggering card is the pitched card; a handler reads its Pitch value and may boost

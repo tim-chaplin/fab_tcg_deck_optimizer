@@ -142,15 +142,16 @@ func bestAttackWithWeapons(
 	hasDRs := containsDefenseReaction(defenders)
 	hasModalBlocker := containsModalBlocker(defenders)
 	incoming := masterState.IncomingDamage()
+	arcaneIncoming := masterState.ArcaneIncomingDamage()
 
 	var defenseDealtConst int
 	defenseCacheableConst := true
 	if !hasModalBlocker && len(defenders) > 0 {
 		installLeafDeck(ctx, bufs, d)
 		defenseDealtConst, defenseCacheableConst, ctx.handStart = ctx.runDefense(defenders, pitched, held, ctx.deck, incoming, noBlockBudgetCap, arsenalDefenderIdx, nil)
-	} else if !hasModalBlocker && incoming > 0 {
-		// No defenders, so runDefense doesn't run — but unblocked incoming damage still
-		// goes through the DamageAboutToBeTaken → DamageTaken sequence.
+	} else if !hasModalBlocker && (incoming > 0 || arcaneIncoming > 0) {
+		// No defenders, so runDefense doesn't run — but unblocked damage (physical or
+		// arcane) still goes through the DamageAboutToBeTaken → DamageTaken sequence.
 		defenseDealtConst = ctx.fireUndefendedDamageTriggers()
 	}
 	defenseDealt := defenseDealtConst
@@ -358,9 +359,17 @@ func (ctx *sequenceContext) permEngine(state *gameengine.GameState) *gameengine.
 
 // fireUndefendedDamageTriggers runs the DamageAboutToBeTaken → DamageTaken sequence
 // against ctx.leafState on the no-defender path: DamageAboutToBeTaken subscribers may
-// call PreventIncomingDamage to absorb the swing before DamageTaken fires. Zeroes
-// state.Value before the fires so handler AddValues are captured cleanly into the
-// returned defense-dealt total, then restores ctx.leafState.Value to its prior level.
+// call PreventIncomingDamage / PreventArcaneDamage to absorb the swing before DamageTaken
+// fires. Zeroes state.Value before the fires so handler AddValues are captured cleanly
+// into the returned defense-dealt total, then restores ctx.leafState.Value to its prior
+// level.
+//
+// Physical and arcane share the same two trigger types. Each type fires up to twice per
+// damage moment: once for the physical side, once for the arcane side. Order is physical
+// first then arcane — physical is the established path and arcane is layered on. Handlers
+// introspect RemainingUnblockedDamage() / ArcaneIncomingDamage() to identify the active
+// side. A self-destroying handler (Enchanting Melody) fired on the physical side will
+// not be present for the subsequent arcane fire of the same trigger type — by design.
 func (ctx *sequenceContext) fireUndefendedDamageTriggers() int {
 	ctx.leafState.SetIsMyTurn(false)
 	leafEngine := ctx.permEngine(ctx.leafState)
@@ -368,7 +377,13 @@ func (ctx *sequenceContext) fireUndefendedDamageTriggers() int {
 	if ctx.leafState.RemainingUnblockedDamage() > 0 {
 		leafEngine.FireTriggers(triggertype.DamageAboutToBeTaken, nil)
 	}
+	if ctx.leafState.ArcaneIncomingDamage() > 0 {
+		leafEngine.FireTriggers(triggertype.DamageAboutToBeTaken, nil)
+	}
 	if ctx.leafState.RemainingUnblockedDamage() > 0 {
+		leafEngine.FireTriggers(triggertype.DamageTaken, nil)
+	}
+	if ctx.leafState.ArcaneIncomingDamage() > 0 {
 		leafEngine.FireTriggers(triggertype.DamageTaken, nil)
 	}
 	return ctx.leafState.Value()
@@ -495,14 +510,27 @@ func (ctx *sequenceContext) runDefense(defenders []card.Card, pitched []*card.Ca
 	}
 
 	// Defense phase over: fire DamageAboutToBeTaken while the unblocked figure is still
-	// mutable — subscribers may call PreventIncomingDamage to absorb. Then DamageTaken
-	// fires only if damage still gets through. Zero state.Value before the fires so any
-	// AddValue from the handlers is captured cleanly into total.
+	// mutable — subscribers may call PreventIncomingDamage / PreventArcaneDamage to absorb.
+	// Then DamageTaken fires only if damage still gets through. Zero state.Value before the
+	// fires so any AddValue from the handlers is captured cleanly into total.
+	//
+	// Physical and arcane each get their own fire of each trigger type. Order is physical
+	// first then arcane — matches fireUndefendedDamageTriggers and keeps the established
+	// physical path stable. Handlers introspect RemainingUnblockedDamage() /
+	// ArcaneIncomingDamage() to identify the active side; a self-destroying handler
+	// (Enchanting Melody) fired on the physical side will not be present for the
+	// subsequent arcane fire.
 	state.SetValue(0)
 	if state.RemainingUnblockedDamage() > 0 {
 		ge.FireTriggers(triggertype.DamageAboutToBeTaken, nil)
 	}
+	if state.ArcaneIncomingDamage() > 0 {
+		ge.FireTriggers(triggertype.DamageAboutToBeTaken, nil)
+	}
 	if state.RemainingUnblockedDamage() > 0 {
+		ge.FireTriggers(triggertype.DamageTaken, nil)
+	}
+	if state.ArcaneIncomingDamage() > 0 {
 		ge.FireTriggers(triggertype.DamageTaken, nil)
 	}
 	total += state.Value()

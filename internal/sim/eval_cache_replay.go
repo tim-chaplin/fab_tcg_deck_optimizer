@@ -103,10 +103,11 @@ func (e *Evaluator) replaySolution(
 	ctx.resourceBudget = 0
 
 	incoming := masterState.IncomingDamage()
+	arcaneIncoming := masterState.ArcaneIncomingDamage()
 	if len(defs) > 0 {
 		installLeafDeck(ctx, bufs, d)
 		defenseDealt, _, ctx.handStart = ctx.runDefense(defs, p, h, ctx.deck, incoming, noBlockBudgetCap, arsenalDefenderIdx, entry.defenders)
-	} else if incoming > 0 {
+	} else if incoming > 0 || arcaneIncoming > 0 {
 		defenseDealt = ctx.fireUndefendedDamageTriggers()
 	}
 	attackDealt, _, _, _ = ctx.playSequenceModal(entry.attackOrder)
