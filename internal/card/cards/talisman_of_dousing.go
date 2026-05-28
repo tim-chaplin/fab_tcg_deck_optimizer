@@ -4,10 +4,9 @@
 //
 // Modelling: Play creates a card-sourced item subscribed to DamageAboutToBeTaken. The
 // handler asks the engine to prevent 1 arcane damage; on any actual prevention the
-// talisman is destroyed (the printed Spellvoid charge is consumed). A physical-only
-// damage moment leaves ArcaneIncomingDamage at 0, so PreventArcaneDamage returns 0 and
-// the item survives — physical and arcane each fire DamageAboutToBeTaken once and the
-// item is inert on the physical fire.
+// talisman is destroyed (the printed Spellvoid charge is consumed). When no arcane damage
+// is incoming, PreventArcaneDamage returns 0 and the item survives — so on a physical-only
+// damage moment the item is inert.
 
 package cards
 

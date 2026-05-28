@@ -94,9 +94,16 @@ type ephemeral struct {
 	// turn — gates "if you've dealt {N} this turn" riders. Resets at the turn boundary
 	// via ephemeral.reset.
 	damageDealt int
-	damageBlocked  int
-	blockTotal     int
-	currentHookIdx int
+	// physicalDamageBlocked / arcaneDamageBlocked accumulate this turn's mitigation of each
+	// incoming damage type — blocks and PreventPhysicalDamage on the physical side,
+	// PreventArcaneDamage on the arcane side. Kept separate from the constant matchup
+	// figures (incomingDamage / arcaneIncomingDamage) so RemainingPhysical/ArcaneDamage =
+	// figure - blocked, and both reset per turn via ephemeral.reset rather than mutating
+	// the carryover figure (which would leak prevention into every later turn).
+	physicalDamageBlocked int
+	arcaneDamageBlocked   int
+	blockTotal            int
+	currentHookIdx        int
 	// currentFiringTokenAura / currentFiringTokenItem track which token slot is mid-Fire
 	// so DestroyAura / DestroyItem route to "zero the count" instead of splicing s.auras
 	// / s.items. -1 means no token is firing (the splice path is active).
@@ -720,24 +727,34 @@ func (gs *GameState) RegisterArcaneDamage(n int) {
 	}
 }
 
-// RemainingUnblockedDamage returns the opponent damage still unblocked this turn — the
-// constant matchup figure minus everything defense has absorbed so far.
-func (gs *GameState) RemainingUnblockedDamage() int { return gs.incomingDamage - gs.damageBlocked }
-
-// SetIncomingDamage installs the turn's incoming-damage figure and zeroes the
-// damage-blocked accumulator — "n incoming, none blocked yet". Defense reactions and
-// blocks then chip away at it via AddDamageBlocked (and the engine's DR resolution)
-// rather than mutating the figure itself, so the matchup number stays constant and
-// carries across turns untouched.
-func (gs *GameState) SetIncomingDamage(n int) {
-	gs.incomingDamage = n
-	gs.damageBlocked = 0
+// RemainingPhysicalDamage returns the physical damage still unmitigated this turn — the
+// constant matchup figure minus everything defense has blocked / prevented so far.
+func (gs *GameState) RemainingPhysicalDamage() int {
+	return gs.incomingDamage - gs.physicalDamageBlocked
 }
 
-// AddDamageBlocked credits n damage as absorbed by defense, shrinking
-// RemainingUnblockedDamage by n. The engine's DR resolution accumulates through here; the
+// RemainingArcaneDamage is the arcane counterpart of RemainingPhysicalDamage — the
+// constant matchup arcane figure minus everything prevented so far this turn.
+func (gs *GameState) RemainingArcaneDamage() int {
+	return gs.arcaneIncomingDamage - gs.arcaneDamageBlocked
+}
+
+// SetIncomingDamage installs the turn's physical incoming-damage figure and zeroes BOTH
+// damage-blocked accumulators — "fresh defense computation: n physical incoming, nothing
+// mitigated yet on either side". Defense reactions, blocks, and prevention chip away at
+// the accumulators rather than mutating the matchup figures, so the constants carry
+// across turns untouched. Called at the start of every defense computation, so it also
+// re-arms the arcane accumulator between per-leaf re-runs.
+func (gs *GameState) SetIncomingDamage(n int) {
+	gs.incomingDamage = n
+	gs.physicalDamageBlocked = 0
+	gs.arcaneDamageBlocked = 0
+}
+
+// AddPhysicalDamageBlocked credits n physical damage as absorbed by defense, shrinking
+// RemainingPhysicalDamage by n. The engine's DR resolution accumulates through here; the
 // attack-turn runner's plain-block pass calls it directly.
-func (gs *GameState) AddDamageBlocked(n int) { gs.damageBlocked += n }
+func (gs *GameState) AddPhysicalDamageBlocked(n int) { gs.physicalDamageBlocked += n }
 
 func (gs *GameState) IncomingDamage() int           { return gs.incomingDamage }
 func (gs *GameState) ArcaneIncomingDamage() int     { return gs.arcaneIncomingDamage }

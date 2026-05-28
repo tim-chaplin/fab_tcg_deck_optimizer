@@ -142,16 +142,16 @@ type GameEngine interface {
 	// value it credited so cards can attribute the rider line.
 	OpponentDiscard(n int) int
 
-	// PreventArcaneDamage caps incoming arcane damage by up to n, returning the amount
-	// actually prevented (clamped at the remaining arcane). Mutates ArcaneIncomingDamage
-	// so downstream readers see the reduced figure. Callers AddValue the returned amount
-	// to credit the prevention.
+	// PreventArcaneDamage caps remaining arcane damage by up to n, returning the amount
+	// actually prevented (lesser of n and RemainingArcaneDamage). Banks the prevention into
+	// a per-turn accumulator so downstream readers see the reduced figure and later turns
+	// are unaffected. Callers AddValue the returned amount to credit the prevention.
 	PreventArcaneDamage(n int) int
 
-	// PreventPhysicalDamage caps the remaining unblocked physical damage by up to n.
-	// Returns the amount actually prevented (lesser of n and RemainingUnblockedDamage).
-	// Banks the prevention so a subsequent DamageTaken gate sees the reduced figure;
-	// callers AddValue the returned amount to credit it.
+	// PreventPhysicalDamage caps the remaining physical damage by up to n. Returns the
+	// amount actually prevented (lesser of n and RemainingPhysicalDamage). Banks the
+	// prevention so a subsequent DamageTaken gate sees the reduced figure; callers AddValue
+	// the returned amount to credit it.
 	PreventPhysicalDamage(n int) int
 
 	// PreventGenericDamage caps up to n damage of whichever type is active at this fire
@@ -206,7 +206,7 @@ type GameEngine interface {
 	IsMyTurn() bool
 
 	// Partition / matchup state.
-	RemainingUnblockedDamage() int
+	RemainingPhysicalDamage() int
 	ArcaneIncomingDamage() int
 	BlockTotal() int
 	Defenders() []Card

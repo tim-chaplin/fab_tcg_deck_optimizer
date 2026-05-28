@@ -357,36 +357,29 @@ func (ctx *sequenceContext) permEngine(state *gameengine.GameState) *gameengine.
 	return ctx.bufs.pooledEngine
 }
 
-// fireUndefendedDamageTriggers runs the DamageAboutToBeTaken → DamageTaken sequence
-// against ctx.leafState on the no-defender path: DamageAboutToBeTaken subscribers may
-// call PreventPhysicalDamage / PreventArcaneDamage (or the type-agnostic
-// PreventGenericDamage) to absorb the swing before DamageTaken fires. Zeroes state.Value
-// before the fires so handler AddValues are captured cleanly into the returned
-// defense-dealt total, then restores ctx.leafState.Value to its prior level.
-//
-// Physical and arcane share the same two trigger types. Each type fires up to twice per
-// damage moment: once for the physical side, once for the arcane side. Order is physical
-// first then arcane — physical is the established path and arcane is layered on. Handlers
-// introspect RemainingUnblockedDamage() / ArcaneIncomingDamage() to identify the active
-// side. A self-destroying handler (Enchanting Melody) fired on the physical side will
-// not be present for the subsequent arcane fire of the same trigger type — by design.
+// fireIncomingDamageTriggers runs the DamageAboutToBeTaken → DamageTaken sequence once for
+// the turn's remaining incoming damage. DamageAboutToBeTaken fires while the figures are
+// still mutable so subscribers can prevent (PreventPhysicalDamage / PreventArcaneDamage /
+// PreventGenericDamage); DamageTaken then fires only if damage still gets through. Each
+// trigger fires a single time covering both damage types at once — handlers introspect
+// RemainingPhysicalDamage() / RemainingArcaneDamage() to see which side is live. Zeroes
+// ge.Value first so handler AddValues are captured cleanly into the returned total.
+func fireIncomingDamageTriggers(ge *gameengine.GameEngine) int {
+	ge.SetValue(0)
+	if ge.RemainingPhysicalDamage() > 0 || ge.RemainingArcaneDamage() > 0 {
+		ge.FireTriggers(triggertype.DamageAboutToBeTaken, nil)
+	}
+	if ge.RemainingPhysicalDamage() > 0 || ge.RemainingArcaneDamage() > 0 {
+		ge.FireTriggers(triggertype.DamageTaken, nil)
+	}
+	return ge.Value()
+}
+
+// fireUndefendedDamageTriggers runs the incoming-damage trigger sequence against
+// ctx.leafState on the no-defender path.
 func (ctx *sequenceContext) fireUndefendedDamageTriggers() int {
 	ctx.leafState.SetIsMyTurn(false)
-	leafEngine := ctx.permEngine(ctx.leafState)
-	ctx.leafState.SetValue(0)
-	if ctx.leafState.RemainingUnblockedDamage() > 0 {
-		leafEngine.FireTriggers(triggertype.DamageAboutToBeTaken, nil)
-	}
-	if ctx.leafState.ArcaneIncomingDamage() > 0 {
-		leafEngine.FireTriggers(triggertype.DamageAboutToBeTaken, nil)
-	}
-	if ctx.leafState.RemainingUnblockedDamage() > 0 {
-		leafEngine.FireTriggers(triggertype.DamageTaken, nil)
-	}
-	if ctx.leafState.ArcaneIncomingDamage() > 0 {
-		leafEngine.FireTriggers(triggertype.DamageTaken, nil)
-	}
-	return ctx.leafState.Value()
+	return fireIncomingDamageTriggers(ctx.permEngine(ctx.leafState))
 }
 
 // runDefense mutates ctx.leafState through the defender list, accumulating per-DR Value.
@@ -396,7 +389,7 @@ func (ctx *sequenceContext) fireUndefendedDamageTriggers() int {
 //
 // SetIncomingDamage installs the matchup figure once and zeroes the damage-blocked
 // accumulator; each DR + plain block banks into that accumulator, so
-// RemainingUnblockedDamage() reads the unblocked remainder while the matchup figure stays
+// RemainingPhysicalDamage() reads the unblocked remainder while the matchup figure stays
 // constant.
 //
 // Before the plain-block loop, the role-tagged defense hand (held + attackers + pitched) is
@@ -490,12 +483,12 @@ func (ctx *sequenceContext) runDefense(defenders []card.Card, pitched []*card.Ca
 			b.Block(ge, state.Logger(), cs)
 		}
 		block := cs.EffectiveDefense()
-		if rem := state.RemainingUnblockedDamage(); block > rem {
+		if rem := state.RemainingPhysicalDamage(); block > rem {
 			block = rem
 		}
 		if block > 0 {
 			total += block
-			state.AddDamageBlocked(block)
+			state.AddPhysicalDamageBlocked(block)
 		}
 	}
 
@@ -509,32 +502,9 @@ func (ctx *sequenceContext) runDefense(defenders []card.Card, pitched []*card.Ca
 		state.AppendGraveyard(def)
 	}
 
-	// Defense phase over: fire DamageAboutToBeTaken while the unblocked figure is still
-	// mutable — subscribers may call PreventPhysicalDamage / PreventArcaneDamage (or
-	// PreventGenericDamage) to absorb. Then DamageTaken fires only if damage still gets
-	// through. Zero state.Value before the fires so any AddValue from the handlers is
-	// captured cleanly into total.
-	//
-	// Physical and arcane each get their own fire of each trigger type. Order is physical
-	// first then arcane — matches fireUndefendedDamageTriggers and keeps the established
-	// physical path stable. Handlers introspect RemainingUnblockedDamage() /
-	// ArcaneIncomingDamage() to identify the active side; a self-destroying handler
-	// (Enchanting Melody) fired on the physical side will not be present for the
-	// subsequent arcane fire.
-	state.SetValue(0)
-	if state.RemainingUnblockedDamage() > 0 {
-		ge.FireTriggers(triggertype.DamageAboutToBeTaken, nil)
-	}
-	if state.ArcaneIncomingDamage() > 0 {
-		ge.FireTriggers(triggertype.DamageAboutToBeTaken, nil)
-	}
-	if state.RemainingUnblockedDamage() > 0 {
-		ge.FireTriggers(triggertype.DamageTaken, nil)
-	}
-	if state.ArcaneIncomingDamage() > 0 {
-		ge.FireTriggers(triggertype.DamageTaken, nil)
-	}
-	total += state.Value()
+	// Defense phase over: fire the incoming-damage triggers once for whatever physical /
+	// arcane damage still gets through.
+	total += fireIncomingDamageTriggers(ge)
 
 	return total, cacheable, survivingHeld
 }

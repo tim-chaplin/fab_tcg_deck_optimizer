@@ -384,12 +384,12 @@ func defendersDamage(defenders []card.Card, pitched []*card.CardState, deckPile 
 			b.Block(ge, ge.Logger(), cs)
 		}
 		block := cs.EffectiveDefense()
-		if rem := ge.RemainingUnblockedDamage(); block > rem {
+		if rem := ge.RemainingPhysicalDamage(); block > rem {
 			block = rem
 		}
 		if block > 0 {
 			total += block
-			ge.AddDamageBlocked(block)
+			ge.AddPhysicalDamageBlocked(block)
 		}
 	}
 	return total, gravBuf, cacheable

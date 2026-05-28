@@ -375,43 +375,44 @@ func (ge *GameEngine) DestroyOpponentArsenal() int {
 	return ge.OpponentDiscard(1)
 }
 
-// PreventArcaneDamage caps incoming arcane damage by up to n. Returns the amount actually
-// prevented — the lesser of n and the remaining ArcaneIncomingDamage, clamped at 0.
-// Mutates ArcaneIncomingDamage so a second prevention call this turn sees the reduced
-// figure. The caller AddValues the returned amount to credit the prevention.
+// PreventArcaneDamage caps remaining arcane damage by up to n. Returns the amount actually
+// prevented — the lesser of n and RemainingArcaneDamage, clamped at 0. Banks the prevention
+// into arcaneDamageBlocked (which resets per turn) rather than mutating the constant matchup
+// figure, so prevention doesn't leak into later turns. The caller AddValues the returned
+// amount to credit the prevention.
 func (ge *GameEngine) PreventArcaneDamage(n int) int {
 	if n <= 0 {
 		return 0
 	}
-	rem := ge.arcaneIncomingDamage
+	rem := ge.arcaneIncomingDamage - ge.arcaneDamageBlocked
 	if rem <= 0 {
 		return 0
 	}
 	if n > rem {
 		n = rem
 	}
-	ge.arcaneIncomingDamage = rem - n
+	ge.arcaneDamageBlocked += n
 	return n
 }
 
-// PreventPhysicalDamage caps remaining unblocked physical damage by up to n. Returns
-// the amount actually prevented — the lesser of n and the current RemainingUnblockedDamage,
-// clamped at 0. Banks the prevention into damageBlocked so RemainingUnblockedDamage reads
-// the reduced figure for downstream triggers (a DamageAboutToBeTaken handler that absorbs
-// the swing chains into the DamageTaken gate this way). The caller AddValues the
-// returned amount to credit it.
+// PreventPhysicalDamage caps remaining physical damage by up to n. Returns the amount
+// actually prevented — the lesser of n and the current RemainingPhysicalDamage, clamped at
+// 0. Banks the prevention into physicalDamageBlocked so RemainingPhysicalDamage reads the
+// reduced figure for downstream triggers (a DamageAboutToBeTaken handler that absorbs the
+// swing chains into the DamageTaken gate this way). The caller AddValues the returned
+// amount to credit it.
 func (ge *GameEngine) PreventPhysicalDamage(n int) int {
 	if n <= 0 {
 		return 0
 	}
-	rem := ge.incomingDamage - ge.damageBlocked
+	rem := ge.incomingDamage - ge.physicalDamageBlocked
 	if rem <= 0 {
 		return 0
 	}
 	if n > rem {
 		n = rem
 	}
-	ge.damageBlocked += n
+	ge.physicalDamageBlocked += n
 	return n
 }
 
@@ -857,13 +858,13 @@ func (ge *GameEngine) attackStepDelta(pc *card.CardState, types card.TypeSet) in
 		return n
 	case types.IsDefenseReaction() || isDefensiveInstant(pc.Card):
 		n := pc.EffectiveDefense()
-		if rem := ge.incomingDamage - ge.damageBlocked; n > rem {
+		if rem := ge.incomingDamage - ge.physicalDamageBlocked; n > rem {
 			n = rem
 		}
 		if n < 0 {
 			n = 0
 		}
-		ge.damageBlocked += n
+		ge.physicalDamageBlocked += n
 		ge.value += n
 		return n
 	}
