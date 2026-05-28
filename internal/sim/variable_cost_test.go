@@ -139,7 +139,7 @@ func TestBest_MauvrionReadWithCarryover(t *testing.T) {
 // Tests that an attack consumes a carryover runechant without re-crediting damage.
 func TestBest_AetherSlashAloneConsumesCarryover(t *testing.T) {
 	h := []card.Card{cards.AetherSlashRed{}}
-	weapons := []weapon.Weapon{weapons.ReapingBlade{}}
+	weapons := []weapon.Card{weapons.ReapingBlade{}}
 	got := Best(weapons, h, nil, stateWithRunechants(heroes.Viserai, 1))
 	if got.Value != 3 {
 		t.Errorf("Value = %d, want 3 (Reaping Blade attack; carryover consumed without credit)", got.Value)

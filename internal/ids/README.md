@@ -12,9 +12,9 @@ on the hot path.
   start at 1.
 - `HeroID` (`uint16`) — identifies a hero printing. `InvalidHero` (0) is the zero sentinel.
   Same width as `CardID` so (hero, card) tuples stay fixed-size integer structs.
-- `WeaponID` — a type alias for `CardID`. Weapon swings flow through the same attack-turn runner
-  pipeline as deck cards, so weapons share the `CardID` number space rather than having their
-  own.
+
+Weapons are cards: the platonic weapon card and its activated ability both carry `CardID`s
+in the shared number space (see "ID anchoring scheme"). There is no separate weapon-ID type.
 
 ## ID anchoring scheme
 
@@ -38,7 +38,7 @@ and non-overlapping.
 
 - `card_ids.go` — `CardID`, `InvalidCard`, every card variant ID.
 - `hero_ids.go` — `HeroID`, `InvalidHero`, hero IDs (`DefaultHeroID`, `ViseraiID`, …).
-- `weapon_ids.go` — `WeaponID` alias, weapon-permanent IDs, weapon-ability IDs.
+- `weapon_ids.go` — weapon-permanent card IDs and weapon-ability IDs.
 - `token_ids.go` — token-ability IDs and token aura / item IDs.
 
 ## Gotchas and invariants

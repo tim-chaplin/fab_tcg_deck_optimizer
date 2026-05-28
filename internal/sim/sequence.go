@@ -17,7 +17,6 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/gameengine"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/hero"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/triggertype"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapon"
 )
 
 // perItemAbilityCap caps per-turn ability instances per item to bound the wmask 2^k blowup
@@ -30,7 +29,7 @@ const perItemAbilityCap = 4
 // overrides (pmask, wmask, replayLogger).
 func newSequenceContext(
 	masterState *gameengine.GameState,
-	weapons []weapon.Weapon,
+	weapons []gameengine.Weapon,
 	attackers, defenders []card.Card,
 	pitched []*card.CardState,
 	held []card.Card,
@@ -126,7 +125,7 @@ func installLeafDeck(ctx *sequenceContext, _ *attackBufs, d *deck.Deck) {
 // cacheable) tuple. Each per-leaf state branches off via masterState.Copy().
 func bestAttackWithWeapons(
 	masterState *gameengine.GameState,
-	weapons []weapon.Weapon,
+	weapons []gameengine.Weapon,
 	attackers, defenders []card.Card,
 	pitched []*card.CardState,
 	held []card.Card,

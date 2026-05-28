@@ -159,24 +159,13 @@ being committed at attack-turn start.
 
 ### Weapons are Cards
 
-The Weapon interface includes the Card interface; weapons are sometimes cardlike (they
-have attack power, which can be buffed, they can be granted Go Again, etc.) but are also
-different from cards (they're never played, drawn from the deck, pitched, etc.). They
-should really be treated as a completely separate type. However, parts of the sim currently
-treat Weapons as Cards, so that will have to be carefully disentangled.
-
-`internal/ids/weapon_ids.go` aliases `WeaponID = CardID` and anchors the weapon constants
-past the last real card so they don't collide in the shared cache slots. Test fakes return
-`InvalidCard` / `InvalidWeapon` and rely on the per-ID caches' Invalid-slot bypass.
-Ideally weapons would have their own `WeaponID uint16` type starting at 1, separate from
-`CardID`. Blocked by depth: every weapon swing flows through the same
-attack-turn runner as deck cards (`bestSequence` permutes one `[]card.Card` slice; weapons rely
-on `*card.CardState` for `BonusAttack` / `GrantedGoAgain` and call helpers like
-`s.ApplyAndLogEffectiveAttack(self)` / `s.ApplyAndLogRiderOnPlay(self, …)` that read
-`self.Card.*`; the attack step / display name / attacker meta caches are keyed by `CardID`).
-Splitting the type cleanly needs either a slot-tagged permutation that branches per-step
-between card and weapon paths, or a parallel `WeaponState` + parallel helpers — ~200–300
-lines across `card/`, `weapon/`, `hand/` plus every weapon impl.
+The platonic weapon card is a `card.Card` (`internal/weapon.Card`); equipping it builds a
+mutable `weapon.Weapon` object that lives in `GameState.weapons`, mirroring the aura / item
+model. The weapon swing still flows through the attack-turn runner as the ability `card.Card`
+the weapon enqueues each turn — `bestSequence` permutes one `[]card.Card` slice, and the
+ability relies on `*card.CardState` for `BonusAttack` / `GrantedGoAgain`, so the ability
+keeps its own `CardID`. The weapon-permanent card and its ability both anchor in the shared
+`CardID` space (`internal/ids/weapon_ids.go`).
 
 ### LikelyToHit / EffectiveAttack notes
 

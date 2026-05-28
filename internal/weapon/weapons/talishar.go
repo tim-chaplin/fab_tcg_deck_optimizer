@@ -13,13 +13,22 @@ import (
 
 var talisharTypes = card.NewTypeSet(card.TypeGeneric, card.TypeWeapon, card.TypeSword, card.TypeTwoHand)
 
+// Talishar is the platonic weapon card — the equipped permanent. Its activated ability is
+// what the attack-turn runner enqueues each turn.
 type Talishar struct{}
 
-func (Talishar) ID() ids.WeaponID    { return ids.TalisharID }
-func (Talishar) Name() string        { return "Talishar, the Lost Prince" }
-func (Talishar) Types() card.TypeSet { return talisharTypes }
-func (Talishar) Hands() int          { return 2 }
-func (Talishar) Ability() card.Card  { return talisharAbility }
+func (Talishar) ID() ids.CardID                                     { return ids.TalisharID }
+func (Talishar) Name() string                                       { return "Talishar, the Lost Prince" }
+func (Talishar) DisplayName() string                                { return "Talishar, the Lost Prince" }
+func (Talishar) Cost() int                                          { return 0 }
+func (Talishar) Pitch() int                                         { return 0 }
+func (Talishar) Attack() int                                        { return 0 }
+func (Talishar) Defense() int                                       { return 0 }
+func (Talishar) Types(card.GameEngine) card.TypeSet                 { return talisharTypes }
+func (Talishar) GoAgain(card.GameEngine) bool                       { return false }
+func (Talishar) Play(card.GameEngine, card.Logger, *card.CardState) {}
+func (Talishar) Hands() int                                         { return 2 }
+func (Talishar) Ability() card.Card                                 { return talisharAbility }
 
 var talisharAbility card.Card = TalisharAbility{}
 

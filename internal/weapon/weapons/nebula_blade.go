@@ -12,13 +12,23 @@ import (
 
 var nebulaBladeTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeWeapon, card.TypeSword, card.TypeTwoHand)
 
+// NebulaBlade is the platonic weapon card — the equipped permanent that sits in the arena
+// and never enters the attack turn. Its activated ability (NebulaBladeAbility) is what the
+// attack-turn runner enqueues each turn.
 type NebulaBlade struct{}
 
-func (NebulaBlade) ID() ids.WeaponID    { return ids.NebulaBladeID }
-func (NebulaBlade) Name() string        { return "Nebula Blade" }
-func (NebulaBlade) Types() card.TypeSet { return nebulaBladeTypes }
-func (NebulaBlade) Hands() int          { return 2 }
-func (NebulaBlade) Ability() card.Card  { return nebulaBladeAbility }
+func (NebulaBlade) ID() ids.CardID                                     { return ids.NebulaBladeID }
+func (NebulaBlade) Name() string                                       { return "Nebula Blade" }
+func (NebulaBlade) DisplayName() string                                { return "Nebula Blade" }
+func (NebulaBlade) Cost() int                                          { return 0 }
+func (NebulaBlade) Pitch() int                                         { return 0 }
+func (NebulaBlade) Attack() int                                        { return 0 }
+func (NebulaBlade) Defense() int                                       { return 0 }
+func (NebulaBlade) Types(card.GameEngine) card.TypeSet                 { return nebulaBladeTypes }
+func (NebulaBlade) GoAgain(card.GameEngine) bool                       { return false }
+func (NebulaBlade) Play(card.GameEngine, card.Logger, *card.CardState) {}
+func (NebulaBlade) Hands() int                                         { return 2 }
+func (NebulaBlade) Ability() card.Card                                 { return nebulaBladeAbility }
 
 var nebulaBladeAbility card.Card = NebulaBladeAbility{}
 

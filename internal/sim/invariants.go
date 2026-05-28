@@ -55,9 +55,12 @@ func zoneTotal(deckSize int, grav, hand, banished []card.Card, arsenal card.Card
 	return n
 }
 
-// cardBackedPersistents counts aura + item entries whose SourceCard is a real card (not
-// a token). Each such entry holds one card in the aura / item zone; destroying the entry
-// sends that card to the graveyard, so conservation must count it on both sides.
+// cardBackedPersistents counts aura + item + weapon entries whose SourceCard is a real card
+// (not a token). Each such entry holds one card in its in-play zone; destroying the entry
+// sends that card to the graveyard, so conservation must count it on both sides. Equipped
+// weapons are card-backed: an equipped weapon counts as one card in play on both the pre-
+// and post-turn sides, and a future weapon that self-destructs (Talishar) moves its card to
+// the graveyard, which the count keeps balanced.
 func cardBackedPersistents(state *gameengine.GameState) int {
 	n := 0
 	for _, a := range state.Auras() {
@@ -67,6 +70,11 @@ func cardBackedPersistents(state *gameengine.GameState) int {
 	}
 	for _, it := range state.Items() {
 		if it.SourceCard() != nil {
+			n++
+		}
+	}
+	for _, w := range state.Weapons() {
+		if w.SourceCard() != nil {
 			n++
 		}
 	}
@@ -88,9 +96,10 @@ func checkHandSorted(hand []card.Card) {
 	}
 }
 
-// checkPersistentCounts asserts every aura and item entry has non-negative Count.
-// Count == 0 is legal (some cards survive a turn with no counters before their next-turn
-// destroy fires). A negative count means a Decrement underflowed without a guard.
+// checkPersistentCounts asserts every aura, item, and weapon entry has non-negative Count.
+// Count == 0 is legal (weapons sit at 0 counters until a rust-counter effect bumps them;
+// some auras survive a turn with no counters before their next-turn destroy fires). A
+// negative count means a Decrement underflowed without a guard.
 func checkPersistentCounts(state *gameengine.GameState) {
 	for _, a := range state.Auras() {
 		if a.Count() < 0 {
@@ -100,6 +109,11 @@ func checkPersistentCounts(state *gameengine.GameState) {
 	for _, it := range state.Items() {
 		if it.Count() < 0 {
 			panic(fmt.Sprintf("turn invariant: item %q has negative Count=%d", it.CardName(), it.Count()))
+		}
+	}
+	for _, w := range state.Weapons() {
+		if w.Count() < 0 {
+			panic(fmt.Sprintf("turn invariant: weapon %q has negative Count=%d", w.CardName(), w.Count()))
 		}
 	}
 }

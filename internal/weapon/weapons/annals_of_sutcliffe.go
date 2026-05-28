@@ -17,13 +17,22 @@ import (
 
 var annalsOfSutcliffeTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeWeapon, card.TypeBook, card.TypeTwoHand)
 
+// AnnalsOfSutcliffe is the platonic weapon card — the equipped permanent. Its activated
+// ability is what the attack-turn runner enqueues each turn.
 type AnnalsOfSutcliffe struct{}
 
-func (AnnalsOfSutcliffe) ID() ids.WeaponID    { return ids.AnnalsOfSutcliffeID }
-func (AnnalsOfSutcliffe) Name() string        { return "Annals of Sutcliffe" }
-func (AnnalsOfSutcliffe) Types() card.TypeSet { return annalsOfSutcliffeTypes }
-func (AnnalsOfSutcliffe) Hands() int          { return 2 }
-func (AnnalsOfSutcliffe) Ability() card.Card  { return annalsOfSutcliffeAbility }
+func (AnnalsOfSutcliffe) ID() ids.CardID                                     { return ids.AnnalsOfSutcliffeID }
+func (AnnalsOfSutcliffe) Name() string                                       { return "Annals of Sutcliffe" }
+func (AnnalsOfSutcliffe) DisplayName() string                                { return "Annals of Sutcliffe" }
+func (AnnalsOfSutcliffe) Cost() int                                          { return 0 }
+func (AnnalsOfSutcliffe) Pitch() int                                         { return 0 }
+func (AnnalsOfSutcliffe) Attack() int                                        { return 0 }
+func (AnnalsOfSutcliffe) Defense() int                                       { return 0 }
+func (AnnalsOfSutcliffe) Types(card.GameEngine) card.TypeSet                 { return annalsOfSutcliffeTypes }
+func (AnnalsOfSutcliffe) GoAgain(card.GameEngine) bool                       { return false }
+func (AnnalsOfSutcliffe) Play(card.GameEngine, card.Logger, *card.CardState) {}
+func (AnnalsOfSutcliffe) Hands() int                                         { return 2 }
+func (AnnalsOfSutcliffe) Ability() card.Card                                 { return annalsOfSutcliffeAbility }
 
 var annalsOfSutcliffeAbility card.Card = AnnalsOfSutcliffeAbility{}
 

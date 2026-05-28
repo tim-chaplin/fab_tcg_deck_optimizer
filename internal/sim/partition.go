@@ -8,7 +8,6 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/gameengine"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapon"
 )
 
 // partitionCard is one slot in the partition enumerator's working set: a hand (or
@@ -47,7 +46,7 @@ func resourceBonusUpperBound(hand []card.Card, arsenalIn card.Card, items []game
 	return sum
 }
 
-func (e *Evaluator) findBest(weapons []weapon.Weapon, hand []card.Card, d *deck.Deck, masterState *gameengine.GameState) TurnSummary {
+func (e *Evaluator) findBest(weapons []gameengine.Weapon, hand []card.Card, d *deck.Deck, masterState *gameengine.GameState) TurnSummary {
 	var cacheKey evalCacheKey
 	cacheUsable := e.cache != nil
 	if cacheUsable {
@@ -82,9 +81,9 @@ func (e *Evaluator) findBest(weapons []weapon.Weapon, hand []card.Card, d *deck.
 	}
 
 	best := TurnSummary{
-		BestLine:       make([]card.CardAssignment, totalN),
+		BestLine:               make([]card.CardAssignment, totalN),
 		IncomingPhysicalDamage: incoming,
-		Cacheable:      true,
+		Cacheable:              true,
 	}
 	for i := 0; i < n; i++ {
 		best.BestLine[i] = card.CardAssignment{Card: hand[i], Role: card.Held}

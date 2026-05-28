@@ -54,9 +54,16 @@ func (b *StateBuilder) Build() *GameState { return b.gs }
 // heroTriggerType stays in sync.
 func (b *StateBuilder) SetHero(h Hero) *StateBuilder { b.gs.SetHero(h); return b }
 
-// SetWeapons installs the equipped weapons. Persistent across turns; mid-game equip /
-// unequip card abilities mutate via GameState.SetWeapons.
-func (b *StateBuilder) SetWeapons(w []weapon.Weapon) *StateBuilder { b.gs.weapons = w; return b }
+// SetWeapons installs the equipped weapon objects directly. Persistent across turns.
+func (b *StateBuilder) SetWeapons(w []Weapon) *StateBuilder { b.gs.weapons = w; return b }
+
+// EquipWeapons builds the engine-side weapon objects for the supplied platonic weapon cards
+// and installs them — the equip-at-game-start path. Mirrors how the sim equips weapons from
+// the deck. Returns the builder for chaining.
+func (b *StateBuilder) EquipWeapons(cards ...weapon.Card) *StateBuilder {
+	b.gs.weapons = EquipFromCards(cards)
+	return b
+}
 
 // SetArsenal installs c into the arsenal slot.
 func (b *StateBuilder) SetArsenal(c card.Card) *StateBuilder { b.gs.arsenal = c; return b }
@@ -196,7 +203,10 @@ func (b *StateBuilder) SetNonAttackActionPlayed(v bool) *StateBuilder {
 }
 
 // SetIncomingPhysicalDamage replaces the matchup's incoming-damage tally.
-func (b *StateBuilder) SetIncomingPhysicalDamage(n int) *StateBuilder { b.gs.incomingPhysicalDamage = n; return b }
+func (b *StateBuilder) SetIncomingPhysicalDamage(n int) *StateBuilder {
+	b.gs.incomingPhysicalDamage = n
+	return b
+}
 
 // SetIncomingArcaneDamage replaces the matchup's arcane-incoming-damage tally.
 func (b *StateBuilder) SetIncomingArcaneDamage(n int) *StateBuilder {

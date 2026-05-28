@@ -12,7 +12,6 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/gameengine"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapon"
 )
 
 // replayBest is the cache-hit body. Builds the partitionCard set, maps the cached BestLine's
@@ -23,7 +22,7 @@ import (
 // replaySolution; re-stamp Arsenal on the BestLine afterward.
 func (e *Evaluator) replayBest(
 	entry evalCacheEntry,
-	weapons []weapon.Weapon, hand []card.Card,
+	weapons []gameengine.Weapon, hand []card.Card,
 	d *deck.Deck,
 	masterState *gameengine.GameState,
 ) TurnSummary {
@@ -65,12 +64,12 @@ func (e *Evaluator) replayBest(
 		winner.SetArsenal(arsenalAtAttackTurnStart)
 	}
 	best := TurnSummary{
-		BestLine:       make([]card.CardAssignment, totalN),
-		Value:          attackDealt + defenseDealt,
-		SwungWeapons:   append([]string(nil), entry.swungWeapons...),
+		BestLine:               make([]card.CardAssignment, totalN),
+		Value:                  attackDealt + defenseDealt,
+		SwungWeapons:           append([]string(nil), entry.swungWeapons...),
 		IncomingPhysicalDamage: masterState.IncomingPhysicalDamage(),
-		Cacheable:      true,
-		State:          winner,
+		Cacheable:              true,
+		State:                  winner,
 	}
 	for i := 0; i < n; i++ {
 		best.BestLine[i] = card.CardAssignment{Card: hand[i], Role: pcards[i].role}
@@ -88,7 +87,7 @@ func (e *Evaluator) replayBest(
 // the role-assigned partition, runs defense with the cached blocker modes, then runs the
 // single winning attack sequence. Output is byte-identical to the originating Best call.
 func (e *Evaluator) replaySolution(
-	masterState *gameengine.GameState, weapons []weapon.Weapon, d *deck.Deck,
+	masterState *gameengine.GameState, weapons []gameengine.Weapon, d *deck.Deck,
 	entry evalCacheEntry, pcards []partitionCard, n int, bufs *attackBufs,
 ) (attackDealt, defenseDealt int, winner *gameengine.GameState, arsenalAtAttackTurnStart card.Card) {
 	p, a, defs, h, arsenalInIdx, arsenalDefenderIdx, arsenalAtAttackTurnStart := groupPartition(pcards, n, bufs)

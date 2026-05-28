@@ -14,13 +14,22 @@ import (
 
 var reapingBladeTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeWeapon, card.TypeSword, card.TypeTwoHand)
 
+// ReapingBlade is the platonic weapon card — the equipped permanent. Its activated ability
+// is what the attack-turn runner enqueues each turn.
 type ReapingBlade struct{}
 
-func (ReapingBlade) ID() ids.WeaponID    { return ids.ReapingBladeID }
-func (ReapingBlade) Name() string        { return "Reaping Blade" }
-func (ReapingBlade) Types() card.TypeSet { return reapingBladeTypes }
-func (ReapingBlade) Hands() int          { return 2 }
-func (ReapingBlade) Ability() card.Card  { return reapingBladeAbility }
+func (ReapingBlade) ID() ids.CardID                                     { return ids.ReapingBladeID }
+func (ReapingBlade) Name() string                                       { return "Reaping Blade" }
+func (ReapingBlade) DisplayName() string                                { return "Reaping Blade" }
+func (ReapingBlade) Cost() int                                          { return 0 }
+func (ReapingBlade) Pitch() int                                         { return 0 }
+func (ReapingBlade) Attack() int                                        { return 0 }
+func (ReapingBlade) Defense() int                                       { return 0 }
+func (ReapingBlade) Types(card.GameEngine) card.TypeSet                 { return reapingBladeTypes }
+func (ReapingBlade) GoAgain(card.GameEngine) bool                       { return false }
+func (ReapingBlade) Play(card.GameEngine, card.Logger, *card.CardState) {}
+func (ReapingBlade) Hands() int                                         { return 2 }
+func (ReapingBlade) Ability() card.Card                                 { return reapingBladeAbility }
 
 var reapingBladeAbility card.Card = ReapingBladeAbility{}
 

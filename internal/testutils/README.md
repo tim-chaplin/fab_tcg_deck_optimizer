@@ -63,10 +63,11 @@ shape (e.g. a printed-keyword card category), add one constructor per colour to
 
 ## Gotchas
 
-- Every fake returns `ids.InvalidCard` (or `InvalidWeapon` / `InvalidHero`) from
-  `ID()`. Per-ID caches (`cardMetaCache`, `attackStepCache`) special-case `InvalidCard`
-  so multiple fakes in one test don't interfere; the eval cache bails out whenever any
-  input has an Invalid id (production cards always carry a unique non-zero ID).
+- Every fake returns `ids.InvalidCard` (or `InvalidHero`) from `ID()` — the weapon fake
+  `ClubWeapon` is a card now, so it too returns `InvalidCard`. Per-ID caches
+  (`cardMetaCache`, `attackStepCache`) special-case `InvalidCard` so multiple fakes in one
+  test don't interfere; the eval cache bails out whenever any input has an Invalid id
+  (production cards always carry a unique non-zero ID).
 - `Fake` is comparable (`a == b` works) — the play hook is stored behind a pointer so
   the struct itself stays comparable. The engine uses `==` in places like
   `RemoveFromHand`; if you write a fake outside the builder, keep that invariant.

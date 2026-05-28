@@ -13,10 +13,11 @@ import (
 
 // Test-only exports.
 
-// Best re-exports the package-private best. state carries the matchup figures (set via
+// Best re-exports the package-private best, equipping the supplied platonic weapon cards
+// into engine-side objects first. state carries the matchup figures (set via
 // SetIncomingPhysicalDamage) and any other carryover.
-func Best(weapons []weapon.Weapon, hand []card.Card, d *deck.Deck, state *gameengine.GameState) TurnSummary {
-	return best(weapons, hand, d, state)
+func Best(weapons []weapon.Card, hand []card.Card, d *deck.Deck, state *gameengine.GameState) TurnSummary {
+	return best(gameengine.EquipFromCards(weapons), hand, d, state)
 }
 
 // DeckOf builds a *deck.Deck from a list of cards.
@@ -59,7 +60,9 @@ func (s *SequenceContextForTest) BestSequence(attackers []card.Card) (int, int, 
 }
 
 // FireEndOfTurn re-exports the engine's end-of-turn fire for sim_test consumers.
-func FireEndOfTurn(ge *gameengine.GameEngine) { ge.FireTriggers(card.FireContext{FiringType: triggertype.EndOfTurn}) }
+func FireEndOfTurn(ge *gameengine.GameEngine) {
+	ge.FireTriggers(card.FireContext{FiringType: triggertype.EndOfTurn})
+}
 
 // PromoteRandomHandCardToArsenal promotes a Held card on best.State and reflects the pick
 // in best.BestLine.
@@ -83,9 +86,10 @@ func DefendersDamageWithBudget(defenders, pitched []card.Card, d *deck.Deck, ge 
 // AttackBufs is the exported alias of attackBufs.
 type AttackBufs = attackBufs
 
-// NewAttackBufs re-exports newAttackBufs, wiring a fresh statePool for the buf.
-func NewAttackBufs(handSize, weaponCount int, weapons []weapon.Weapon) *AttackBufs {
-	return newAttackBufs(handSize, weaponCount, weapons, gameengine.NewPrewarmedPool())
+// NewAttackBufs re-exports newAttackBufs, equipping the supplied platonic weapon cards and
+// wiring a fresh statePool for the buf.
+func NewAttackBufs(handSize, weaponCount int, weapons []weapon.Card) *AttackBufs {
+	return newAttackBufs(handSize, weaponCount, gameengine.EquipFromCards(weapons), gameengine.NewPrewarmedPool())
 }
 
 // DefenseGravScratch / DRCardStateScratch expose unexported attackBufs fields. State()

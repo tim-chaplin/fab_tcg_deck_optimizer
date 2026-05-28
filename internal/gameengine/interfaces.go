@@ -59,6 +59,25 @@ type Item interface {
 	Copy() any
 }
 
+// Weapon is the engine's view of an equipped weapon — the mutable object built when the
+// platonic weapon card is equipped at game start. Mirrors Aura / Item: it carries a trigger
+// (no weapon registers a handler yet), a counter total, and the source card sent to the
+// graveyard on destroy. Name / Hands / Ability surface the platonic card's weapon attributes
+// the attack-turn runner reads — Ability is the swing card enqueued each turn. Copy uses any
+// so State.Copy can deep-copy without referencing the concrete *weapon.Weapon.
+type Weapon interface {
+	trigger.Hook
+	CardName() string
+	CardID() ids.CardID
+	Count() int
+	SetCount(int)
+	SourceCard() any
+	Name() string
+	Hands() int
+	Ability() card.Card
+	Copy() any
+}
+
 // Hero is the engine's view of the active hero. The trigger-dispatch surface mirrors
 // the methods Aura and Item expose through their embedded trigger — FireTriggers walks
 // the hero through the same path.

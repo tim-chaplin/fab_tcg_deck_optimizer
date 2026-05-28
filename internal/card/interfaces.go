@@ -96,6 +96,10 @@ type GameEngine interface {
 	// DestroyItem removes the item currently being fired. The item counterpart of
 	// DestroyAura — reached via the firing item's Destroy method.
 	DestroyItem(addToGraveyard bool)
+	// DestroyWeapon removes the weapon currently being fired from the arena. The weapon
+	// counterpart of DestroyAura / DestroyItem — reached via the firing weapon's Destroy
+	// method.
+	DestroyWeapon(addToGraveyard bool)
 	// CreateItem puts a card-sourced item into play whose handler fires on every event in
 	// tt's bit set. oncePerTurn caps it to one fire per turn; filter narrows the firing
 	// site (nil = any). The handler receives a FireContext describing the fire.
@@ -333,6 +337,24 @@ type Item interface {
 	CardID() ids.CardID
 	// Destroy ends the item's life. addToGraveyard sends the originating card to the
 	// graveyard (token items with no originating card skip the append).
+	Destroy(addToGraveyard bool)
+}
+
+// Weapon is the minimal view a firing weapon's trigger handler sees of the equipped
+// weapon. Mirrors Aura / Item: the handler reads counts / source-card identity and ends
+// the weapon's life via Destroy. No weapon registers a handler yet — the surface exists so
+// a future end-phase weapon trigger (Talishar's rust-counter self-destruct) can subscribe.
+type Weapon interface {
+	// Count returns the weapon's current counter total — rust counters and the like.
+	Count() int
+	// SetCount overwrites the counter total.
+	SetCount(n int)
+	// CardName is the originating weapon card's display name — used for log attribution.
+	CardName() string
+	// CardID is the originating weapon card's registry ID.
+	CardID() ids.CardID
+	// Destroy ends the weapon's life. addToGraveyard sends the originating weapon card to
+	// the graveyard.
 	Destroy(addToGraveyard bool)
 }
 

@@ -4,7 +4,6 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/gameengine"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapon"
 )
 
 // evaluatePartition scores a fixed role assignment: it groups the hand-card slots of
@@ -20,7 +19,7 @@ import (
 // place.
 func (e *Evaluator) evaluatePartition(
 	masterState *gameengine.GameState,
-	weapons []weapon.Weapon,
+	weapons []gameengine.Weapon,
 	d *deck.Deck,
 	pcards []partitionCard, n int, bufs *attackBufs,
 	defenseSum int,
