@@ -5,7 +5,6 @@ import (
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card/cards"
-	notimpl "github.com/tim-chaplin/fab-deck-optimizer/internal/card/cards/notimplemented"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/gameengine"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/hero/heroes"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/ids"
@@ -139,12 +138,12 @@ func TestBest_HandUnmovableNoDefenseBonus(t *testing.T) {
 // Tests that Smashing Good Time's +3 rider only fires for the arsenal copy, not the hand copy.
 func TestBest_ArsenalInSmashingGoodTimeGatesOnlyArsenalCopy(t *testing.T) {
 	h := []card.Card{
-		notimpl.SmashingGoodTimeRed{},
+		cards.SmashingGoodTimeRed{},
 		cards.HocusPocusRed{},
 	}
 	state := gameengine.GameStateBuilder().
 		SetHero(heroes.Viserai).
-		SetArsenal(notimpl.SmashingGoodTimeRed{}).
+		SetArsenal(cards.SmashingGoodTimeRed{}).
 		Build()
 	got := Best(nil, h, nil, state)
 	if got.Value != 8 {

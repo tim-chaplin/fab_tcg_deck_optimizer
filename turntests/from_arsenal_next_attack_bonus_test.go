@@ -5,7 +5,6 @@ import (
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card/cards"
-	notimpl "github.com/tim-chaplin/fab-deck-optimizer/internal/card/cards/notimplemented"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/gameengine"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 )
@@ -20,9 +19,9 @@ func TestFromArsenalNextAttackBonus_GrantsOnArsenalCopyOnly(t *testing.T) {
 		{cards.PlunderRunRed{}, 3},
 		{cards.PlunderRunYellow{}, 2},
 		{cards.PlunderRunBlue{}, 1},
-		{notimpl.SmashingGoodTimeRed{}, 3},
-		{notimpl.SmashingGoodTimeYellow{}, 2},
-		{notimpl.SmashingGoodTimeBlue{}, 1},
+		{cards.SmashingGoodTimeRed{}, 3},
+		{cards.SmashingGoodTimeYellow{}, 2},
+		{cards.SmashingGoodTimeBlue{}, 1},
 	}
 	for _, tc := range cases {
 		// Hand-played copy: the bonus must NOT land on the queued attack action.
