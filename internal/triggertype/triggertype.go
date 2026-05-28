@@ -37,4 +37,10 @@ const (
 	CrowdCheer
 	// CrowdBoo is the boo-side counterpart to CrowdCheer.
 	CrowdBoo
+	// AttackBuffedByReaction fires when an attack action card's BonusAttack increments by
+	// exactly 1 during the reaction-step buff resolution. The buffed attack CardState is
+	// the firing context. Backs "when an attack you control gains exactly +1{p} from an
+	// effect during the reaction step" handlers (Talisman of Featherfoot). The "exactly +1"
+	// gate is enforced at the fire site — subscribers don't re-check the delta.
+	AttackBuffedByReaction
 )

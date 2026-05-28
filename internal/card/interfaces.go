@@ -64,11 +64,13 @@ type GameEngine interface {
 	// card's self.Card) that fires on every event in tt's bit set. oncePerTurn caps it to
 	// one fire per turn; filter narrows the firing site to a card-type predicate (nil =
 	// any) and is consulted only on events that carry a triggering card (so StartOfTurn,
-	// EndOfTurn, and DamageTaken effectively ignore it). The handler's final
-	// triggertype.Type argument is the event that fired this invocation — multi-trigger
-	// auras dispatch on it, single-trigger handlers ignore it. Handler signatures are
-	// inlined to keep this package import-free of the concrete aura type.
-	CreateAura(source Card, tt triggertype.Type, handler func(GameEngine, Logger, Aura, triggertype.Type), count int, oncePerTurn bool, filter func(TypeSet) bool)
+	// EndOfTurn, and DamageTaken effectively ignore it). The handler's *CardState
+	// argument is the triggering card (the CardState whose resolution raised the event,
+	// or nil for turn-boundary events); the final triggertype.Type argument is the event
+	// that fired this invocation — multi-trigger auras dispatch on it, single-trigger
+	// handlers ignore it. Handler signatures are inlined to keep this package import-free
+	// of the concrete aura type.
+	CreateAura(source Card, tt triggertype.Type, handler func(GameEngine, Logger, Aura, *CardState, triggertype.Type), count int, oncePerTurn bool, filter func(TypeSet) bool)
 	// DestroyAura removes the aura currently being fired. addToGraveyard sends the
 	// originating card to the graveyard (token auras skip the append). Reached via the
 	// per-fire ctx's Destroy method; exposed on GameEngine so the ctx can route the call
@@ -79,8 +81,9 @@ type GameEngine interface {
 	DestroyItem(addToGraveyard bool)
 	// CreateItem puts a card-sourced item into play whose handler fires on every event in
 	// tt's bit set. oncePerTurn caps it to one fire per turn; filter narrows the firing
-	// site (nil = any). Handler's final triggertype.Type argument is the firing event.
-	CreateItem(source Card, tt triggertype.Type, handler func(GameEngine, Logger, Item, triggertype.Type), oncePerTurn bool, filter func(TypeSet) bool)
+	// site (nil = any). Handler's *CardState argument is the triggering card (or nil for
+	// turn-boundary events); the final triggertype.Type argument is the firing event.
+	CreateItem(source Card, tt triggertype.Type, handler func(GameEngine, Logger, Item, *CardState, triggertype.Type), oncePerTurn bool, filter func(TypeSet) bool)
 	// CreateItemWithAbility puts a card-sourced in-play permanent that carries an
 	// activated ability (no trigger handler). The wmask enumerates the ability card as a
 	// 1-AP playable starting the turn AFTER this call — the wmask is computed from
@@ -98,8 +101,16 @@ type GameEngine interface {
 	// card-type predicate (nil = any); it is consulted only when the triggering event has
 	// a triggering card. A trigger registered from a card's own Play does not fire for
 	// its own resolution — the CardOrAbility event has already resolved by then. The
-	// handler's final triggertype.Type argument is the firing event.
-	CreateTrigger(source Card, tt triggertype.Type, handler func(GameEngine, Logger, EphemeralTrigger, triggertype.Type), filter func(TypeSet) bool)
+	// handler's *CardState argument is the triggering card (or nil for turn-boundary
+	// events); the final triggertype.Type argument is the firing event.
+	CreateTrigger(source Card, tt triggertype.Type, handler func(GameEngine, Logger, EphemeralTrigger, *CardState, triggertype.Type), filter func(TypeSet) bool)
+
+	// FireTriggers fires every aura / item / one-shot trigger / hero subscribed to t,
+	// threading triggeringCard (the CardState whose resolution raised the event, or nil
+	// for turn-boundary events) through to each handler. Card code reaches for this only
+	// when a card-side helper raises a lifecycle event that isn't centrally fired by the
+	// engine — most events fire from the engine itself.
+	FireTriggers(t triggertype.Type, triggeringCard *CardState)
 
 	// Token economy
 	CreateRunechants(int)

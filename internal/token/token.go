@@ -40,7 +40,7 @@ func NewCopper(n int) *item.Item {
 // handler hands off the rest of the arcane bookkeeping.
 func NewRunechant(n int) *aura.Aura {
 	return aura.NewFromToken("Runechant", ids.RunechantTokenID, triggertype.CardOrAbility,
-		func(engine card.GameEngine, _ card.Logger, ctx card.Aura, _ triggertype.Type) {
+		func(engine card.GameEngine, _ card.Logger, ctx card.Aura, _ *card.CardState, _ triggertype.Type) {
 			engine.(GameEngine).RegisterArcaneDamage(ctx.Count())
 			ctx.Destroy(false)
 		}, n, card.TypeSet.IsAttack)
@@ -52,7 +52,7 @@ func NewRunechant(n int) *aura.Aura {
 // past deck-end are silently skipped.
 func NewPonder(n int) *aura.Aura {
 	return aura.NewFromToken("Ponder", ids.PonderTokenID, triggertype.EndOfTurn,
-		func(engine card.GameEngine, _ card.Logger, ctx card.Aura, _ triggertype.Type) {
+		func(engine card.GameEngine, _ card.Logger, ctx card.Aura, _ *card.CardState, _ triggertype.Type) {
 			for i := 0; i < ctx.Count(); i++ {
 				if !engine.DrawOne() {
 					break
@@ -69,12 +69,11 @@ func NewPonder(n int) *aura.Aura {
 // GoAgain is a bool and surplus charges are wasted.
 func NewQuicken(n int) *aura.Aura {
 	return aura.NewFromToken("Quicken", ids.QuickenTokenID, triggertype.CardOrAbility,
-		func(engine card.GameEngine, _ card.Logger, ctx card.Aura, _ triggertype.Type) {
-			pc := engine.TriggeringCard()
-			if pc == nil {
+		func(engine card.GameEngine, _ card.Logger, ctx card.Aura, triggeringCard *card.CardState, _ triggertype.Type) {
+			if triggeringCard == nil {
 				return
 			}
-			pc.GrantedGoAgain = true
+			triggeringCard.GrantedGoAgain = true
 			ctx.Destroy(false)
 		}, n, card.TypeSet.IsAttack)
 }

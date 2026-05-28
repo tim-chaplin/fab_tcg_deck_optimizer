@@ -601,7 +601,8 @@ func (ge *GameEngine) FireTriggers(t triggertype.Type, triggeringCard *card.Card
 // fireHero applies the OncePerTurn / Matches gates and invokes the hero handler. The
 // hero is singular (no slice splicing, no removeAfterFire) so it bypasses fireHooks's
 // cursor walk. The TriggerType bit-and check is done at the caller; t is the firing
-// event so a multi-subscription hero can dispatch.
+// event so a multi-subscription hero can dispatch. triggeringCard is passed through to
+// the handler so it can read the source card's in-attack-turn state.
 func fireHero(ge *GameEngine, t triggertype.Type, triggeringCard *card.CardState, triggeringTypes card.TypeSet) {
 	h := ge.hero
 	if h.OncePerTurn() && h.FiredThisTurn() {
@@ -610,7 +611,7 @@ func fireHero(ge *GameEngine, t triggertype.Type, triggeringCard *card.CardState
 	if triggeringCard != nil && !h.Matches(triggeringTypes) {
 		return
 	}
-	h.Fire(ge, ge.logger, t)
+	h.Fire(ge, ge.logger, triggeringCard, t)
 	if h.OncePerTurn() {
 		h.SetFiredThisTurn(true)
 	}
@@ -635,7 +636,7 @@ func fireHooks[H trigger.Hook](ge *GameEngine, hooks *[]H, t triggertype.Type, t
 		}
 		ge.currentHookIdx = i
 		ge.currentHookDestroyed = false
-		h.Fire(ge, ge.logger, t)
+		h.Fire(ge, ge.logger, triggeringCard, t)
 		switch {
 		case ge.currentHookDestroyed:
 			n--
@@ -674,7 +675,7 @@ func fireTokenAuras(ge *GameEngine, t triggertype.Type, triggeringCard *card.Car
 		}
 		ge.currentFiringTokenAura = i
 		ge.currentHookDestroyed = false
-		a.Fire(ge, ge.logger, t)
+		a.Fire(ge, ge.logger, triggeringCard, t)
 		if !ge.currentHookDestroyed {
 			a.SetFiredThisTurn(true)
 		}
@@ -698,7 +699,7 @@ func fireTokenItems(ge *GameEngine, t triggertype.Type, triggeringCard *card.Car
 		}
 		ge.currentFiringTokenItem = i
 		ge.currentHookDestroyed = false
-		it.Fire(ge, ge.logger, t)
+		it.Fire(ge, ge.logger, triggeringCard, t)
 		if !ge.currentHookDestroyed {
 			it.SetFiredThisTurn(true)
 		}

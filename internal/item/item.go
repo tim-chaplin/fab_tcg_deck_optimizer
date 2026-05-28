@@ -39,9 +39,9 @@ func NewFromToken(name string, tokenID ids.CardID, ability any, count int) *Item
 // NewFromCard builds a card-sourced triggered item — an in-play permanent whose handler
 // fires when an event of type tt resolves. count starts at 1; oncePerTurn caps it to one
 // fire per turn; typeFilter narrows the firing site to a card-type predicate, pass nil
-// for no filter. The fire handler receives the firing trigger type so multi-trigger
-// subscribers can dispatch.
-func NewFromCard(source card.Card, tt triggertype.Type, fire func(card.GameEngine, card.Logger, card.Item, triggertype.Type), oncePerTurn bool, typeFilter trigger.TypeFilter) *Item {
+// for no filter. The fire handler receives the triggering card (or nil for turn-boundary
+// events) and the firing trigger type so multi-trigger subscribers can dispatch.
+func NewFromCard(source card.Card, tt triggertype.Type, fire func(card.GameEngine, card.Logger, card.Item, *card.CardState, triggertype.Type), oncePerTurn bool, typeFilter trigger.TypeFilter) *Item {
 	return &Item{
 		Trigger: trigger.FromCard[card.Item](source, tt, fire, oncePerTurn, typeFilter),
 		count:   1,
@@ -68,11 +68,12 @@ func (i *Item) SetCount(n int) { i.count = n }
 func (i *Item) Ability() any { return i.ability }
 
 // Fire invokes the stored handler with this item as the typed receiver, threading the
-// firing trigger type so multi-trigger handlers can dispatch. activeEngine is set for
-// the handler's duration and cleared afterward.
-func (i *Item) Fire(engine card.GameEngine, logger card.Logger, firingType triggertype.Type) {
+// triggering card (or nil for turn-boundary events) and the firing trigger type so
+// multi-trigger handlers can dispatch. activeEngine is set for the handler's duration
+// and cleared afterward.
+func (i *Item) Fire(engine card.GameEngine, logger card.Logger, triggeringCard *card.CardState, firingType triggertype.Type) {
 	i.activeEngine = engine
-	i.Invoke(engine, logger, i, firingType)
+	i.Invoke(engine, logger, i, triggeringCard, firingType)
 	i.activeEngine = nil
 }
 

@@ -13,8 +13,8 @@ import (
 // recompenseFire is the pitch-trigger handler: a pitch that would yield exactly one
 // resource instead yields three, and Talisman of Recompense is destroyed. Pitch values
 // above one don't qualify, so the handler no-ops without consuming the talisman.
-func recompenseFire(ge card.GameEngine, l card.Logger, self card.Item, _ triggertype.Type) {
-	if ge.TriggeringCard().Card.Pitch() != 1 {
+func recompenseFire(ge card.GameEngine, l card.Logger, self card.Item, triggeringCard *card.CardState, _ triggertype.Type) {
+	if triggeringCard.Card.Pitch() != 1 {
 		return
 	}
 	ge.AddResourcePoints(2)

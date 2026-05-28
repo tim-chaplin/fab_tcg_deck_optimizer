@@ -48,7 +48,7 @@ func (ImperialSealOfCommandRedAbility) Play(ge card.GameEngine, l card.Logger, s
 	ge.CreateTrigger(self.Card, triggertype.Hit, imperialSealOnHitDestroyArsenal, card.TypeSet.IsAttack)
 }
 
-func imperialSealOnHitDestroyArsenal(ge card.GameEngine, l card.Logger, t card.EphemeralTrigger, _ triggertype.Type) {
+func imperialSealOnHitDestroyArsenal(ge card.GameEngine, l card.Logger, t card.EphemeralTrigger, _ *card.CardState, _ triggertype.Type) {
 	if v := ge.DestroyOpponentArsenal(); v > 0 {
 		l.AppendPostTriggerf(t.CardName(), v, "%s destroyed opposing arsenal", t.CardName())
 	}

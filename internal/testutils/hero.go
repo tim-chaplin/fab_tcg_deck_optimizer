@@ -30,12 +30,12 @@ func (h Hero) Types() card.TypeSet { return h.TypeSet }
 func (Hero) Class() card.CardType  { return 0 }
 
 // No triggered ability — TriggerType == 0 makes FireTriggers skip the hero.
-func (Hero) TriggerType() triggertype.Type                       { return 0 }
-func (Hero) OncePerTurn() bool                                   { return false }
-func (Hero) FiredThisTurn() bool                                 { return false }
-func (Hero) SetFiredThisTurn(bool)                               {}
-func (Hero) Matches(card.TypeSet) bool                           { return false }
-func (Hero) Fire(card.GameEngine, card.Logger, triggertype.Type) {}
+func (Hero) TriggerType() triggertype.Type                                        { return 0 }
+func (Hero) OncePerTurn() bool                                                    { return false }
+func (Hero) FiredThisTurn() bool                                                  { return false }
+func (Hero) SetFiredThisTurn(bool)                                                {}
+func (Hero) Matches(card.TypeSet) bool                                            { return false }
+func (Hero) Fire(card.GameEngine, card.Logger, *card.CardState, triggertype.Type) {}
 
 // Opt dispatches to OptStrategy when set; otherwise keeps every revealed card on top of
 // the deck in input order (no reshape).

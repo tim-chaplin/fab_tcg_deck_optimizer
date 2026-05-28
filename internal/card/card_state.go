@@ -1,5 +1,7 @@
 package card
 
+import "github.com/tim-chaplin/fab-deck-optimizer/internal/triggertype"
+
 // CardState wraps a Card with per-turn mutable flags that other cards' effects can toggle.
 // Instances are created by the solver at the start of each attack turn and live only for
 // that attack turn. Effects that grant keywords to "the next X" scan TurnState.CardsRemaining and
@@ -113,7 +115,10 @@ func (p *CardState) RegisterOnHit(fire func(g GameEngine, l Logger, self *CardSt
 
 // GrantAttackReactionBuff buffs the active attack target by n: adds to BonusAttack, credits
 // g's value, amends the target's attack-step delta, and logs the rider under the target's
-// entry. p is the Attack Reaction card granting the buff.
+// entry. p is the Attack Reaction card granting the buff. An exactly-+1 buff also fires
+// the AttackBuffedByReaction trigger with the buffed target as triggering card (backs
+// Talisman of Featherfoot's "gains exactly +1{p} from an effect during the reaction
+// step" gate); larger buffs skip the fire.
 func (p *CardState) GrantAttackReactionBuff(g GameEngine, l Logger, n int) {
 	target := g.AttackReactionTarget()
 	if target == nil {
@@ -123,6 +128,9 @@ func (p *CardState) GrantAttackReactionBuff(g GameEngine, l Logger, n int) {
 	g.AddValue(n)
 	l.AmendLastAttackStepN(n)
 	l.AppendPostTriggerf(target.Card.DisplayName(), 0, "%s buffed +%d{p}", p.Card.DisplayName(), n)
+	if n == 1 {
+		g.FireTriggers(triggertype.AttackBuffedByReaction, target)
+	}
 }
 
 // EffectiveGoAgain reports whether this card has Go again this turn — from printed text or

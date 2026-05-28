@@ -13,7 +13,7 @@ func TestItemTrigger_FiresAndStays(t *testing.T) {
 	ge := New()
 	fired := 0
 	ge.CreateItem(fakeCard{name: "Test Talisman"}, triggertype.Hit,
-		func(_ card.GameEngine, _ card.Logger, _ card.Item, _ triggertype.Type) { fired++ }, false, nil)
+		func(_ card.GameEngine, _ card.Logger, _ card.Item, _ *card.CardState, _ triggertype.Type) { fired++ }, false, nil)
 
 	ge.FireTriggers(triggertype.Hit, &card.CardState{Card: fakeCard{name: "attacker"}})
 
@@ -30,7 +30,7 @@ func TestItemTrigger_SkipsNonMatchingEvent(t *testing.T) {
 	ge := New()
 	fired := 0
 	ge.CreateItem(fakeCard{name: "Test Talisman"}, triggertype.Hit,
-		func(_ card.GameEngine, _ card.Logger, _ card.Item, _ triggertype.Type) { fired++ }, false, nil)
+		func(_ card.GameEngine, _ card.Logger, _ card.Item, _ *card.CardState, _ triggertype.Type) { fired++ }, false, nil)
 
 	ge.FireTriggers(triggertype.EndOfTurn, nil)
 
@@ -45,7 +45,9 @@ func TestItemTrigger_SelfDestructRemovesItemAndGraveyards(t *testing.T) {
 	ge := New()
 	src := fakeCard{name: "Test Talisman"}
 	ge.CreateItem(src, triggertype.Hit,
-		func(_ card.GameEngine, _ card.Logger, self card.Item, _ triggertype.Type) { self.Destroy(true) }, false, nil)
+		func(_ card.GameEngine, _ card.Logger, self card.Item, _ *card.CardState, _ triggertype.Type) {
+			self.Destroy(true)
+		}, false, nil)
 
 	ge.FireTriggers(triggertype.Hit, &card.CardState{Card: fakeCard{name: "attacker"}})
 

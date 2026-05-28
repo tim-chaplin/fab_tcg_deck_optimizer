@@ -11,10 +11,11 @@ import (
 )
 
 // Handler is the typed aura handler signature: the func stored on each Aura and called at
-// every Fire. The final triggertype.Type is the event that invoked this fire so
-// multi-trigger handlers can dispatch (handlers with a single subscription typically
-// ignore it).
-type Handler func(card.GameEngine, card.Logger, card.Aura, triggertype.Type)
+// every Fire. The *card.CardState is the triggering card (the CardState whose resolution
+// raised the event, or nil for turn-boundary events). The final triggertype.Type is the
+// event that invoked this fire so multi-trigger handlers can dispatch (handlers with a
+// single subscription typically ignore it).
+type Handler func(card.GameEngine, card.Logger, card.Aura, *card.CardState, triggertype.Type)
 
 // Aura is the concrete entry the engine stores in its persistent hook list. The embedded
 // trigger.Trigger holds the shared core; Aura adds the multi-fire count.
@@ -55,12 +56,13 @@ func (a *Aura) DecrementCount() int {
 }
 
 // Fire invokes the stored handler with this aura as the typed receiver, threading the
-// firing trigger type so multi-trigger handlers can dispatch. activeEngine is set for
-// the handler's duration and cleared afterward so a Destroy outside the firing window
-// can't call into a stale engine.
-func (a *Aura) Fire(engine card.GameEngine, logger card.Logger, firingType triggertype.Type) {
+// triggering card (or nil for turn-boundary events) and the firing trigger type so
+// multi-trigger handlers can dispatch. activeEngine is set for the handler's duration
+// and cleared afterward so a Destroy outside the firing window can't call into a stale
+// engine.
+func (a *Aura) Fire(engine card.GameEngine, logger card.Logger, triggeringCard *card.CardState, firingType triggertype.Type) {
 	a.activeEngine = engine
-	a.Invoke(engine, logger, a, firingType)
+	a.Invoke(engine, logger, a, triggeringCard, firingType)
 	a.activeEngine = nil
 }
 

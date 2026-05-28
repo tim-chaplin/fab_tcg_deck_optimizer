@@ -16,7 +16,7 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/triggertype"
 )
 
-func enchantingMelodyHandler(ge card.GameEngine, l card.Logger, a card.Aura, firingType triggertype.Type) {
+func enchantingMelodyHandler(ge card.GameEngine, l card.Logger, a card.Aura, _ *card.CardState, firingType triggertype.Type) {
 	switch firingType {
 	case triggertype.DamageAboutToBeTaken:
 		prevented := ge.PreventIncomingDamage(a.Count())
