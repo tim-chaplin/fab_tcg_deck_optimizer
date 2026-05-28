@@ -359,10 +359,10 @@ func (ctx *sequenceContext) permEngine(state *gameengine.GameState) *gameengine.
 
 // fireUndefendedDamageTriggers runs the DamageAboutToBeTaken → DamageTaken sequence
 // against ctx.leafState on the no-defender path: DamageAboutToBeTaken subscribers may
-// call PreventIncomingDamage / PreventArcaneDamage to absorb the swing before DamageTaken
-// fires. Zeroes state.Value before the fires so handler AddValues are captured cleanly
-// into the returned defense-dealt total, then restores ctx.leafState.Value to its prior
-// level.
+// call PreventPhysicalDamage / PreventArcaneDamage (or the type-agnostic
+// PreventGenericDamage) to absorb the swing before DamageTaken fires. Zeroes state.Value
+// before the fires so handler AddValues are captured cleanly into the returned
+// defense-dealt total, then restores ctx.leafState.Value to its prior level.
 //
 // Physical and arcane share the same two trigger types. Each type fires up to twice per
 // damage moment: once for the physical side, once for the arcane side. Order is physical
@@ -510,9 +510,10 @@ func (ctx *sequenceContext) runDefense(defenders []card.Card, pitched []*card.Ca
 	}
 
 	// Defense phase over: fire DamageAboutToBeTaken while the unblocked figure is still
-	// mutable — subscribers may call PreventIncomingDamage / PreventArcaneDamage to absorb.
-	// Then DamageTaken fires only if damage still gets through. Zero state.Value before the
-	// fires so any AddValue from the handlers is captured cleanly into total.
+	// mutable — subscribers may call PreventPhysicalDamage / PreventArcaneDamage (or
+	// PreventGenericDamage) to absorb. Then DamageTaken fires only if damage still gets
+	// through. Zero state.Value before the fires so any AddValue from the handlers is
+	// captured cleanly into total.
 	//
 	// Physical and arcane each get their own fire of each trigger type. Order is physical
 	// first then arcane — matches fireUndefendedDamageTriggers and keeps the established

@@ -8,12 +8,8 @@
 //
 // Handler reads a.Count() for the per-variant prevention amount. The aura subscribes to
 // DamageAboutToBeTaken | EndOfTurn; firingType dispatches each event to its clause.
-//
-// Modelling: each DamageAboutToBeTaken fire is a single damage moment for one damage type.
-// Physical and arcane fire separately, so EM picks whichever type is active at this fire,
-// absorbs up to a.Count() from it, and self-destructs. This enforces the "OR, not AND"
-// rule — even when both damage types arrive the same turn, EM only eats the first fire
-// and is gone by the time the second fires.
+// PreventGenericDamage picks the active damage type (physical or arcane); EM destroys
+// after one fire so the prevention can't mix between types.
 
 package cards
 
@@ -25,13 +21,7 @@ import (
 func enchantingMelodyHandler(ge card.GameEngine, l card.Logger, a card.Aura, firingType triggertype.Type) {
 	switch firingType {
 	case triggertype.DamageAboutToBeTaken:
-		var prevented int
-		if ge.RemainingUnblockedDamage() > 0 {
-			prevented = ge.PreventIncomingDamage(a.Count())
-		} else if ge.ArcaneIncomingDamage() > 0 {
-			prevented = ge.PreventArcaneDamage(a.Count())
-		}
-		if prevented > 0 {
+		if prevented := ge.PreventGenericDamage(a.Count()); prevented > 0 {
 			ge.AddValue(prevented)
 			l.AppendPostTriggerf(a.CardName(), prevented, "Prevented %d damage", prevented)
 		}
