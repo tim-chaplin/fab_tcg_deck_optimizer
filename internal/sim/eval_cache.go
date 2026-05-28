@@ -77,7 +77,7 @@ type evalCacheKey struct {
 // cache key at fixed array positions. Must stay in sync with gameengine's
 // numTokenAuraKinds / numTokenItemKinds.
 const (
-	numCachedTokenAuras = 2 // Runechant, Ponder
+	numCachedTokenAuras = 3 // Runechant, Ponder, Quicken
 	numCachedTokenItems = 3 // Gold, Silver, Copper
 )
 
@@ -257,6 +257,7 @@ func makeCacheKey(
 	key.opponentMarked = masterState.OpponentMarked()
 	key.tokenAuraCounts[0] = masterState.RunechantCount()
 	key.tokenAuraCounts[1] = masterState.PonderCount()
+	key.tokenAuraCounts[2] = masterState.QuickenCount()
 	key.tokenItemCounts[0] = masterState.GoldCount()
 	key.tokenItemCounts[1] = masterState.SilverCount()
 	key.tokenItemCounts[2] = masterState.CopperCount()
