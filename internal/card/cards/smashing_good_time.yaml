@@ -4,8 +4,6 @@ types:
     - Action
 cost: 0
 goAgain: true
-markers:
-    - NotImplemented
 text: |-
     The next time an attack action card hits a hero this turn, you may destroy an item they
     control with cost 2 or less. If Smashing Good Time is played from arsenal, the next attack action
