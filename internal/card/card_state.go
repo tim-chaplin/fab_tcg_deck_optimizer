@@ -115,10 +115,10 @@ func (p *CardState) RegisterOnHit(fire func(g GameEngine, l Logger, self *CardSt
 
 // GrantAttackReactionBuff buffs the active attack target by n: adds to BonusAttack, credits
 // g's value, amends the target's attack-step delta, and logs the rider under the target's
-// entry. p is the Attack Reaction card granting the buff. An exactly-+1 buff also fires
-// the AttackBuffedByReaction trigger with the buffed target as triggering card (backs
-// Talisman of Featherfoot's "gains exactly +1{p} from an effect during the reaction
-// step" gate); larger buffs skip the fire.
+// entry. p is the Attack Reaction card granting the buff. Any positive buff fires the
+// AttackBuffedByReaction trigger with the buffed target as triggering card and n in
+// FireContext.BuffDelta; subscribers (Talisman of Featherfoot's "exactly +1{p}" gate)
+// filter on the delta themselves so card-specific predicates don't live in this helper.
 func (p *CardState) GrantAttackReactionBuff(g GameEngine, l Logger, n int) {
 	target := g.AttackReactionTarget()
 	if target == nil {
@@ -128,8 +128,12 @@ func (p *CardState) GrantAttackReactionBuff(g GameEngine, l Logger, n int) {
 	g.AddValue(n)
 	l.AmendLastAttackStepN(n)
 	l.AppendPostTriggerf(target.Card.DisplayName(), 0, "%s buffed +%d{p}", p.Card.DisplayName(), n)
-	if n == 1 {
-		g.FireTriggers(triggertype.AttackBuffedByReaction, target)
+	if n > 0 {
+		g.FireTriggers(FireContext{
+			FiringType:     triggertype.AttackBuffedByReaction,
+			TriggeringCard: target,
+			BuffDelta:      n,
+		})
 	}
 }
 

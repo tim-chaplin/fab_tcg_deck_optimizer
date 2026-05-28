@@ -26,7 +26,7 @@ func (fakeLowHeroOn) OncePerTurn() bool                                         
 func (fakeLowHeroOn) FiredThisTurn() bool                                                  { return false }
 func (fakeLowHeroOn) SetFiredThisTurn(bool)                                                {}
 func (fakeLowHeroOn) Matches(card.TypeSet) bool                                            { return false }
-func (fakeLowHeroOn) Fire(card.GameEngine, card.Logger, *card.CardState, triggertype.Type) {}
+func (fakeLowHeroOn) Fire(card.GameEngine, card.Logger, card.FireContext) {}
 
 // fakeLowHeroOff does NOT implement gameengine.LowerHealthWanter — the default branch.
 type fakeLowHeroOff struct{}
@@ -42,7 +42,7 @@ func (fakeLowHeroOff) OncePerTurn() bool                                        
 func (fakeLowHeroOff) FiredThisTurn() bool                                                  { return false }
 func (fakeLowHeroOff) SetFiredThisTurn(bool)                                                {}
 func (fakeLowHeroOff) Matches(card.TypeSet) bool                                            { return false }
-func (fakeLowHeroOff) Fire(card.GameEngine, card.Logger, *card.CardState, triggertype.Type) {}
+func (fakeLowHeroOff) Fire(card.GameEngine, card.Logger, card.FireContext) {}
 
 // engineWithHero returns a fresh empty engine with hero installed.
 func engineWithHero(h gameengine.Hero) *gameengine.GameEngine {

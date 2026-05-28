@@ -34,7 +34,7 @@ func (BlessingOfOccultBlue) Play(ge card.GameEngine, l card.Logger, self *card.C
 
 // blessingOfOccultHandler creates a.Count() Runechants and destroys the aura. Count carries
 // the per-variant rune count (R=3 / Y=2 / B=1).
-func blessingOfOccultHandler(ge card.GameEngine, l card.Logger, a card.Aura, _ *card.CardState, _ triggertype.Type) {
+func blessingOfOccultHandler(ge card.GameEngine, l card.Logger, a card.Aura, _ card.FireContext) {
 	n := a.Count()
 	ge.CreateRunechants(n)
 	l.AppendPostTrigger(a.CardName(), blessingOfOccultTriggerText[n], n)

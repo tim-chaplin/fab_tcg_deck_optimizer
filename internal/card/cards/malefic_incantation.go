@@ -44,11 +44,11 @@ var maleficCreatedRunechantText = func() map[ids.CardID]string {
 // maleficAuraHandler is the once-per-turn attack-action trigger handler shared across
 // Malefic Incantation variants. Decrements the verse counter and destroys the aura when
 // the last verse fires.
-func maleficAuraHandler(ge card.GameEngine, l card.Logger, a card.Aura, triggeringCard *card.CardState, _ triggertype.Type) {
+func maleficAuraHandler(ge card.GameEngine, l card.Logger, a card.Aura, ctx card.FireContext) {
 	cardID := a.CardID()
 	lastVerse := a.DecrementCount() <= 0
 	ge.CreateRunechants(1)
-	l.AppendPostTrigger(triggeringCard.Card.DisplayName(), maleficCreatedRunechantText[cardID], 1)
+	l.AppendPostTrigger(ctx.TriggeringCard.Card.DisplayName(), maleficCreatedRunechantText[cardID], 1)
 	if lastVerse {
 		a.Destroy(true)
 	}

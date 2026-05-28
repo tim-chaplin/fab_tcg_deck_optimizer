@@ -36,8 +36,8 @@ func (*viserai) Intelligence() int    { return 4 }
 func (*viserai) Types() card.TypeSet  { return viseraiTypes }
 func (*viserai) Class() card.CardType { return card.TypeRuneblade }
 
-func (v *viserai) Fire(engine card.GameEngine, logger card.Logger, triggeringCard *card.CardState, firingType triggertype.Type) {
-	v.Invoke(engine, logger, v, triggeringCard, firingType)
+func (v *viserai) Fire(engine card.GameEngine, logger card.Logger, ctx card.FireContext) {
+	v.Invoke(engine, logger, v, ctx)
 }
 
 // viseraiTypeFilter narrows the trigger's firing site to Runeblade-typed cards that
@@ -51,12 +51,12 @@ func viseraiTypeFilter(t card.TypeSet) bool {
 // have played another non-attack action card this turn, create a Runechant" trigger.
 // The type filter above already gates on "Runeblade card, not weapon"; this handler
 // adds the non-attack-action precondition and credits the Runechant via the engine.
-func viseraiOnCardPlayed(ge card.GameEngine, l card.Logger, _ card.Hero, triggeringCard *card.CardState, _ triggertype.Type) {
+func viseraiOnCardPlayed(ge card.GameEngine, l card.Logger, _ card.Hero, ctx card.FireContext) {
 	if !ge.NonAttackActionPlayed() {
 		return
 	}
 	ge.CreateRunechants(1)
-	l.AppendPreTrigger(triggeringCard.Card.DisplayName(), "Viserai created a runechant", 1)
+	l.AppendPreTrigger(ctx.TriggeringCard.Card.DisplayName(), "Viserai created a runechant", 1)
 }
 
 // Opt is the Viserai-specific Opt heuristic: keep one card per "slot category" and

@@ -35,7 +35,7 @@ func (Hero) OncePerTurn() bool                                                  
 func (Hero) FiredThisTurn() bool                                                  { return false }
 func (Hero) SetFiredThisTurn(bool)                                                {}
 func (Hero) Matches(card.TypeSet) bool                                            { return false }
-func (Hero) Fire(card.GameEngine, card.Logger, *card.CardState, triggertype.Type) {}
+func (Hero) Fire(card.GameEngine, card.Logger, card.FireContext) {}
 
 // Opt dispatches to OptStrategy when set; otherwise keeps every revealed card on top of
 // the deck in input order (no reshape).

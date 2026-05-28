@@ -29,4 +29,4 @@ func (defaultHero) OncePerTurn() bool                                           
 func (defaultHero) FiredThisTurn() bool                                                  { return false }
 func (defaultHero) SetFiredThisTurn(bool)                                                {}
 func (defaultHero) Matches(card.TypeSet) bool                                            { return false }
-func (defaultHero) Fire(card.GameEngine, card.Logger, *card.CardState, triggertype.Type) {}
+func (defaultHero) Fire(card.GameEngine, card.Logger, card.FireContext) {}

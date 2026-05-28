@@ -13,9 +13,9 @@ func TestItemTrigger_FiresAndStays(t *testing.T) {
 	ge := New()
 	fired := 0
 	ge.CreateItem(fakeCard{name: "Test Talisman"}, triggertype.Hit,
-		func(_ card.GameEngine, _ card.Logger, _ card.Item, _ *card.CardState, _ triggertype.Type) { fired++ }, false, nil)
+		func(_ card.GameEngine, _ card.Logger, _ card.Item, _ card.FireContext) { fired++ }, false, nil)
 
-	ge.FireTriggers(triggertype.Hit, &card.CardState{Card: fakeCard{name: "attacker"}})
+	ge.FireTriggers(card.FireContext{FiringType: triggertype.Hit, TriggeringCard: &card.CardState{Card: fakeCard{name: "attacker"}}})
 
 	if fired != 1 {
 		t.Fatalf("handler fired %d times, want 1", fired)
@@ -30,9 +30,9 @@ func TestItemTrigger_SkipsNonMatchingEvent(t *testing.T) {
 	ge := New()
 	fired := 0
 	ge.CreateItem(fakeCard{name: "Test Talisman"}, triggertype.Hit,
-		func(_ card.GameEngine, _ card.Logger, _ card.Item, _ *card.CardState, _ triggertype.Type) { fired++ }, false, nil)
+		func(_ card.GameEngine, _ card.Logger, _ card.Item, _ card.FireContext) { fired++ }, false, nil)
 
-	ge.FireTriggers(triggertype.EndOfTurn, nil)
+	ge.FireTriggers(card.FireContext{FiringType: triggertype.EndOfTurn})
 
 	if fired != 0 {
 		t.Fatalf("handler fired %d times on a non-matching event, want 0", fired)
@@ -45,11 +45,11 @@ func TestItemTrigger_SelfDestructRemovesItemAndGraveyards(t *testing.T) {
 	ge := New()
 	src := fakeCard{name: "Test Talisman"}
 	ge.CreateItem(src, triggertype.Hit,
-		func(_ card.GameEngine, _ card.Logger, self card.Item, _ *card.CardState, _ triggertype.Type) {
+		func(_ card.GameEngine, _ card.Logger, self card.Item, _ card.FireContext) {
 			self.Destroy(true)
 		}, false, nil)
 
-	ge.FireTriggers(triggertype.Hit, &card.CardState{Card: fakeCard{name: "attacker"}})
+	ge.FireTriggers(card.FireContext{FiringType: triggertype.Hit, TriggeringCard: &card.CardState{Card: fakeCard{name: "attacker"}}})
 
 	if len(ge.Items()) != 0 {
 		t.Fatalf("Items has %d entries after self-destruct, want 0", len(ge.Items()))
@@ -64,8 +64,8 @@ func TestItemTrigger_TokenItemNeverFires(t *testing.T) {
 	ge := New()
 	ge.CreateGold(1)
 
-	ge.FireTriggers(triggertype.Hit, &card.CardState{Card: fakeCard{name: "attacker"}})
-	ge.FireTriggers(triggertype.EndOfTurn, nil)
+	ge.FireTriggers(card.FireContext{FiringType: triggertype.Hit, TriggeringCard: &card.CardState{Card: fakeCard{name: "attacker"}}})
+	ge.FireTriggers(card.FireContext{FiringType: triggertype.EndOfTurn})
 
 	if ge.GoldCount() != 1 {
 		t.Fatalf("Gold count = %d after FireTriggers, want 1 (token must not fire)", ge.GoldCount())

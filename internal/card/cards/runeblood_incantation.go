@@ -28,7 +28,7 @@ func (RunebloodIncantationBlue) Play(ge card.GameEngine, l card.Logger, self *ca
 
 // runebloodAuraHandler removes a verse counter each fire to create a runechant; a fire
 // that finds no counter left destroys the aura and graveyards the card.
-func runebloodAuraHandler(ge card.GameEngine, l card.Logger, a card.Aura, _ *card.CardState, _ triggertype.Type) {
+func runebloodAuraHandler(ge card.GameEngine, l card.Logger, a card.Aura, _ card.FireContext) {
 	if a.Count() <= 0 {
 		a.Destroy(true)
 		return

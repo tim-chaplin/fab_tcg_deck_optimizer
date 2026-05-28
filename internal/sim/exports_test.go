@@ -59,7 +59,7 @@ func (s *SequenceContextForTest) BestSequence(attackers []card.Card) (int, int, 
 }
 
 // FireEndOfTurn re-exports the engine's end-of-turn fire for sim_test consumers.
-func FireEndOfTurn(ge *gameengine.GameEngine) { ge.FireTriggers(triggertype.EndOfTurn, nil) }
+func FireEndOfTurn(ge *gameengine.GameEngine) { ge.FireTriggers(card.FireContext{FiringType: triggertype.EndOfTurn}) }
 
 // PromoteRandomHandCardToArsenal promotes a Held card on best.State and reflects the pick
 // in best.BestLine.

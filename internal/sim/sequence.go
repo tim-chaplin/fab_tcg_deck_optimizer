@@ -366,10 +366,10 @@ func (ctx *sequenceContext) fireUndefendedDamageTriggers() int {
 	leafEngine := ctx.permEngine(ctx.leafState)
 	ctx.leafState.SetValue(0)
 	if ctx.leafState.RemainingUnblockedDamage() > 0 {
-		leafEngine.FireTriggers(triggertype.DamageAboutToBeTaken, nil)
+		leafEngine.FireTriggers(card.FireContext{FiringType: triggertype.DamageAboutToBeTaken})
 	}
 	if ctx.leafState.RemainingUnblockedDamage() > 0 {
-		leafEngine.FireTriggers(triggertype.DamageTaken, nil)
+		leafEngine.FireTriggers(card.FireContext{FiringType: triggertype.DamageTaken})
 	}
 	return ctx.leafState.Value()
 }
@@ -500,10 +500,10 @@ func (ctx *sequenceContext) runDefense(defenders []card.Card, pitched []*card.Ca
 	// AddValue from the handlers is captured cleanly into total.
 	state.SetValue(0)
 	if state.RemainingUnblockedDamage() > 0 {
-		ge.FireTriggers(triggertype.DamageAboutToBeTaken, nil)
+		ge.FireTriggers(card.FireContext{FiringType: triggertype.DamageAboutToBeTaken})
 	}
 	if state.RemainingUnblockedDamage() > 0 {
-		ge.FireTriggers(triggertype.DamageTaken, nil)
+		ge.FireTriggers(card.FireContext{FiringType: triggertype.DamageTaken})
 	}
 	total += state.Value()
 
@@ -595,7 +595,7 @@ func (ctx *sequenceContext) bestSequence(attackers []card.Card) (attackTurnScore
 		emptyAttackers := ctx.bufs.ptrBuf[:0]
 		permState := ctx.preparePermState(emptyAttackers, 0)
 		ge := ctx.permEngine(permState)
-		ge.FireTriggers(triggertype.EndOfTurn, nil)
+		ge.FireTriggers(card.FireContext{FiringType: triggertype.EndOfTurn})
 		ctx.captureWinningSeq(nil, nil)
 		// permState.Value() carries the seeded baseline plus any EndOfTurn fire delta.
 		return attackTurnScoreOf(permState, permState.Value()), permState, true
@@ -852,7 +852,7 @@ func (ctx *sequenceContext) playSequenceWithMeta(n int) (damage int, totalCounte
 				h := &activeAttack.OnHit[i]
 				h.Fire(ge, state.Logger(), activeAttack, h)
 			}
-			ge.FireTriggers(triggertype.Hit, activeAttack)
+			ge.FireTriggers(card.FireContext{FiringType: triggertype.Hit, TriggeringCard: activeAttack})
 		}
 		// Go-again credit for the attack lands here, after every attack reaction targeting
 		// it has resolved and after OnHit / Hit triggers fire. A reaction-step buff
@@ -895,7 +895,7 @@ func (ctx *sequenceContext) playSequenceWithMeta(n int) (damage int, totalCounte
 			if !ok || activeAttack == nil || !ar.ARTargetAllowed(ge, activeAttack, pc.Mode) {
 				return infeasible()
 			}
-			ge.FireTriggers(triggertype.CardOrAbility, pc)
+			ge.FireTriggers(card.FireContext{FiringType: triggertype.CardOrAbility, TriggeringCard: pc})
 			state.SetAttackReactionTarget(activeAttack)
 			ge.ResolveAttackStep(state.Logger(), pc)
 			state.SetAttackReactionTarget(nil)
@@ -928,7 +928,7 @@ func (ctx *sequenceContext) playSequenceWithMeta(n int) (damage int, totalCounte
 		state.SetCurrentStepRerouted(false)
 		// CardOrAbility fires before the card resolves so play-triggered effects land ahead
 		// of the played card's own effect.
-		ge.FireTriggers(triggertype.CardOrAbility, pc)
+		ge.FireTriggers(card.FireContext{FiringType: triggertype.CardOrAbility, TriggeringCard: pc})
 		ge.ResolveAttackStep(state.Logger(), pc)
 		// ModalTypes cards (Tip-Off) read different is-attack / type-line values per Mode.
 		// Resolve once and route the attack / non-attack-action / persistence checks off
@@ -961,7 +961,7 @@ func (ctx *sequenceContext) playSequenceWithMeta(n int) (damage int, totalCounte
 	if pool.idx < pool.n {
 		return infeasible()
 	}
-	ge.FireTriggers(triggertype.EndOfTurn, nil)
+	ge.FireTriggers(card.FireContext{FiringType: triggertype.EndOfTurn})
 	return state.Value(), pendingTotalCountersFromState(state), pool.remaining, state, true
 }
 
