@@ -1,21 +1,11 @@
 package ids
 
-// WeaponID identifies a weapon printing.
-//
-// KLUDGE: aliased to CardID. Weapon swings flow through the same attack-turn runner pipeline as
-// deck cards — Weapon structurally satisfies sim.Card so weapons sit alongside cards in
-// the attack turn's permutation slice without an adapter, and per-card caches key by CardID.
-// See TODO.md → "Weapon IDs share the CardID space".
-type WeaponID = CardID
-
-// InvalidWeapon is the sentinel zero value.
-const InvalidWeapon WeaponID = 0
-
-// Weapon IDs. Anchored past the last real card so weapons get distinct cache slots in the
-// shared CardID space. Test fakes return InvalidCard / InvalidWeapon; per-ID caches bypass
-// the Invalid slot rather than consume a production ID.
+// Weapon-permanent card IDs. Weapons are cards: the platonic weapon card lives in the card
+// universe, goes to the graveyard when its equipped object is destroyed, and is counted by
+// card conservation — so it carries a CardID like any other card. Anchored past the last
+// real deck card so weapons get distinct cache slots in the shared CardID space.
 const (
-	AnnalsOfSutcliffeID WeaponID = ZealousBeltingBlue + iota + 1
+	AnnalsOfSutcliffeID CardID = ZealousBeltingBlue + iota + 1
 	NebulaBladeID
 	ReapingBladeID
 	RosettaThornID

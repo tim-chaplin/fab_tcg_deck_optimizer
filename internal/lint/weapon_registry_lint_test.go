@@ -34,10 +34,7 @@ func TestRegistry_CoversEveryWeapon(t *testing.T) {
 		}
 		for _, decl := range f.Decls {
 			fn, ok := decl.(*ast.FuncDecl)
-			if !ok || fn.Recv == nil || fn.Recv.NumFields() == 0 || fn.Name.Name != "ID" {
-				continue
-			}
-			if !returnsWeaponID(fn) {
+			if !ok || fn.Recv == nil || fn.Recv.NumFields() == 0 || fn.Name.Name != "Hands" {
 				continue
 			}
 			if recv, ok := fn.Recv.List[0].Type.(*ast.Ident); ok {
@@ -61,18 +58,4 @@ func TestRegistry_CoversEveryWeapon(t *testing.T) {
 			t.Errorf("registry.AllWeapons lists %s, which is not an implemented weapon type", name)
 		}
 	}
-}
-
-// returnsWeaponID reports whether fn's single result is ids.WeaponID — the signature that
-// marks a weapon type apart from its activated-ability card, which returns ids.CardID.
-func returnsWeaponID(fn *ast.FuncDecl) bool {
-	if fn.Type.Results == nil || len(fn.Type.Results.List) != 1 {
-		return false
-	}
-	sel, ok := fn.Type.Results.List[0].Type.(*ast.SelectorExpr)
-	if !ok {
-		return false
-	}
-	pkg, ok := sel.X.(*ast.Ident)
-	return ok && pkg.Name == "ids" && sel.Sel.Name == "WeaponID"
 }

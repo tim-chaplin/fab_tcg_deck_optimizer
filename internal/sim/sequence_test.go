@@ -47,7 +47,7 @@ func TestBest_ViseraiReapingBladeBlueMalefics(t *testing.T) {
 		cards.MaleficIncantationBlue{},
 		cards.MaleficIncantationBlue{},
 	}
-	weapons := []weapon.Weapon{weapons.ReapingBlade{}}
+	weapons := []weapon.Card{weapons.ReapingBlade{}}
 	got := Best(weapons, h, nil, gameengine.GameStateBuilder().SetHero(heroes.Viserai).Build())
 	if got.Value != 5 {
 		t.Fatalf("want value 5, got %d (roles=[%s])",
@@ -65,7 +65,7 @@ func TestBest_ViseraiReapingBladeMaleficsPlusShrill(t *testing.T) {
 		cards.MaleficIncantationBlue{},
 		cards.ShrillOfSkullformRed{},
 	}
-	weapons := []weapon.Weapon{weapons.ReapingBlade{}}
+	weapons := []weapon.Card{weapons.ReapingBlade{}}
 	got := Best(weapons, h, nil, gameengine.GameStateBuilder().SetHero(heroes.Viserai).Build())
 	if got.Value != 11 {
 		t.Fatalf("want value 11, got %d (roles=[%s])",
@@ -84,7 +84,7 @@ func TestBest_ViseraiOathBlueHocusRedMalefic(t *testing.T) {
 		cards.OathOfTheArknightRed{},
 		cards.MaleficIncantationRed{},
 	}
-	weapons := []weapon.Weapon{weapons.ReapingBlade{}}
+	weapons := []weapon.Card{weapons.ReapingBlade{}}
 	got := Best(weapons, h, nil, gameengine.GameStateBuilder().SetHero(heroes.Viserai).Build())
 	if got.Value != 8 {
 		t.Fatalf("want value 8, got %d (roles=[%s])",
@@ -129,7 +129,7 @@ func TestBest_ViseraiMauvrionGrantsGoAgainToShrill(t *testing.T) {
 		cards.MauvrionSkiesRed{},
 		cards.ShrillOfSkullformRed{},
 	}
-	weapons := []weapon.Weapon{weapons.ReapingBlade{}}
+	weapons := []weapon.Card{weapons.ReapingBlade{}}
 	got := Best(weapons, h, nil, gameengine.GameStateBuilder().SetHero(heroes.Viserai).Build())
 	if got.Value != 16 {
 		t.Fatalf("want value 16, got %d (roles=[%s])",
@@ -182,7 +182,7 @@ func TestBest_ViseraiMauvrionGoAgainsThroughShrillRunerageWeapon(t *testing.T) {
 		cards.RuneragerSwarmRed{},
 		cards.ShrillOfSkullformRed{},
 	}
-	weapons := []weapon.Weapon{weapons.ReapingBlade{}}
+	weapons := []weapon.Card{weapons.ReapingBlade{}}
 	got := Best(weapons, h, nil, gameengine.GameStateBuilder().SetHero(heroes.Viserai).Build())
 	if got.Value != 18 {
 		t.Fatalf("want value 18, got %d (roles=[%s])",

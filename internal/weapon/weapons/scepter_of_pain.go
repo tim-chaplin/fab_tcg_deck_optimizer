@@ -11,13 +11,22 @@ import (
 
 var scepterOfPainTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeWeapon, card.TypeScepter, card.TypeOneHand)
 
+// ScepterOfPain is the platonic weapon card — the equipped permanent. Its activated ability
+// is what the attack-turn runner enqueues each turn.
 type ScepterOfPain struct{}
 
-func (ScepterOfPain) ID() ids.WeaponID    { return ids.ScepterOfPainID }
-func (ScepterOfPain) Name() string        { return "Scepter of Pain" }
-func (ScepterOfPain) Types() card.TypeSet { return scepterOfPainTypes }
-func (ScepterOfPain) Hands() int          { return 1 }
-func (ScepterOfPain) Ability() card.Card  { return scepterOfPainAbility }
+func (ScepterOfPain) ID() ids.CardID                                     { return ids.ScepterOfPainID }
+func (ScepterOfPain) Name() string                                       { return "Scepter of Pain" }
+func (ScepterOfPain) DisplayName() string                                { return "Scepter of Pain" }
+func (ScepterOfPain) Cost() int                                          { return 0 }
+func (ScepterOfPain) Pitch() int                                         { return 0 }
+func (ScepterOfPain) Attack() int                                        { return 0 }
+func (ScepterOfPain) Defense() int                                       { return 0 }
+func (ScepterOfPain) Types(card.GameEngine) card.TypeSet                 { return scepterOfPainTypes }
+func (ScepterOfPain) GoAgain(card.GameEngine) bool                       { return false }
+func (ScepterOfPain) Play(card.GameEngine, card.Logger, *card.CardState) {}
+func (ScepterOfPain) Hands() int                                         { return 1 }
+func (ScepterOfPain) Ability() card.Card                                 { return scepterOfPainAbility }
 
 var scepterOfPainAbility card.Card = ScepterOfPainAbility{}
 

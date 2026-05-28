@@ -3,7 +3,6 @@ package sim
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/gameengine"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapon"
 )
 
 // Pre-allocated scratch threaded through the attack-evaluation pipeline (findBest, the
@@ -91,7 +90,7 @@ type attackBufs struct {
 	bestSolution cacheSolution
 }
 
-func newAttackBufs(handSize, weaponCount int, weapons []weapon.Weapon, statePool *gameengine.Pool) *attackBufs {
+func newAttackBufs(handSize, weaponCount int, weapons []gameengine.Weapon, statePool *gameengine.Pool) *attackBufs {
 	// +1 reserves a slot for the arsenal-in card; +maxDrawnExtensions leaves headroom for
 	// mid-turn-drawn cards that play as attack-turn extensions.
 	const maxDrawnExtensions = 32
@@ -145,7 +144,7 @@ func newAttackBufs(handSize, weaponCount int, weapons []weapon.Weapon, statePool
 
 // getAttackBufs returns the Evaluator's cached attackBufs when (handSize, weapons) match
 // the last call; otherwise allocates a fresh one and caches it.
-func (e *Evaluator) getAttackBufs(handSize int, weapons []weapon.Weapon) *attackBufs {
+func (e *Evaluator) getAttackBufs(handSize int, weapons []gameengine.Weapon) *attackBufs {
 	if e.cachedBufs != nil && e.cachedHandSize == handSize && sameWeapons(e.cachedWeapons, weapons) {
 		return e.cachedBufs
 	}
@@ -155,14 +154,16 @@ func (e *Evaluator) getAttackBufs(handSize int, weapons []weapon.Weapon) *attack
 	return e.cachedBufs
 }
 
-// sameWeapons reports whether two weapon slices contain the same weapons in the same
-// order.
-func sameWeapons(a, b []weapon.Weapon) bool {
+// sameWeapons reports whether two weapon slices hold the same weapon kinds in the same
+// order. Compares by CardID, not pointer: equip rebuilds fresh weapon objects every turn
+// (CopyFrom deep-copies), so pointer identity would miss the cache every turn even though
+// the loadout is unchanged.
+func sameWeapons(a, b []gameengine.Weapon) bool {
 	if len(a) != len(b) {
 		return false
 	}
 	for i := range a {
-		if a[i] != b[i] {
+		if a[i].CardID() != b[i].CardID() {
 			return false
 		}
 	}

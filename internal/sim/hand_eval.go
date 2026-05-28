@@ -4,7 +4,6 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/gameengine"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapon"
 )
 
 // Entry points for hand evaluation. Best computes the optimal turn line for a given hand
@@ -22,7 +21,7 @@ import (
 // turn's master comes from PrepareNextTurn on it.
 //
 // Package-private so callers route through EvalOneTurnForTesting.
-func best(weapons []weapon.Weapon, hand []card.Card, d *deck.Deck, master *gameengine.GameState) TurnSummary {
+func best(weapons []gameengine.Weapon, hand []card.Card, d *deck.Deck, master *gameengine.GameState) TurnSummary {
 	return sharedEvaluator.Best(weapons, hand, d, master)
 }
 
@@ -30,7 +29,7 @@ func best(weapons []weapon.Weapon, hand []card.Card, d *deck.Deck, master *gamee
 // post-resolution state into master in place. Returned summary.State == master, so the
 // caller's ownership of master is unchanged; the borrowed pool slot is returned here.
 // CopyFrom rebinds master's owned deck wrapper to alias the winner's via ShallowCopyFrom.
-func (e *Evaluator) Best(weapons []weapon.Weapon, hand []card.Card, d *deck.Deck, master *gameengine.GameState) TurnSummary {
+func (e *Evaluator) Best(weapons []gameengine.Weapon, hand []card.Card, d *deck.Deck, master *gameengine.GameState) TurnSummary {
 	summary := e.findBest(weapons, hand, d, master)
 	winner := summary.State
 	if winner == nil || winner == master {
@@ -53,7 +52,7 @@ func (e *Evaluator) Best(weapons []weapon.Weapon, hand []card.Card, d *deck.Deck
 type Evaluator struct {
 	cachedBufs     *attackBufs
 	cachedHandSize int
-	cachedWeapons  []weapon.Weapon
+	cachedWeapons  []gameengine.Weapon
 	cache          *evalCache
 	statePool      *gameengine.Pool
 	// numWorkers controls Evaluate's shuffle-loop fan-out. 0 or 1 runs sequentially; >1

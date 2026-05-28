@@ -139,6 +139,9 @@ func NewPrewarmedState() *GameState {
 	zoneCap := MaxDeckSize + graveyardBanishedHeadroom
 	s.SetGraveyard(make([]card.Card, 0, zoneCap))
 	s.SetBanished(make([]card.Card, 0, zoneCap))
+	// Weapons backing pre-sized to the equipment cap so copyWeaponsInto reuses it across
+	// per-perm CopyPersistentStateFrom calls instead of allocating fresh each permutation.
+	s.SetWeapons(make([]Weapon, 0, maxWeapons))
 	s.SetDeck(deck.NewShallowSafe())
 	s.initTokenSlots()
 	return s

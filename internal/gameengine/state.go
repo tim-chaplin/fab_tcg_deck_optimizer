@@ -8,7 +8,6 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/item"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/triggertype"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapon"
 )
 
 // auraPoolSize caps the number of simultaneously-live card-backed auras a single
@@ -31,7 +30,7 @@ type GameState struct {
 	// heroTriggerType caches hero.TriggerType() so FireTriggers can gate the hero fire on a
 	// field read instead of a per-event interface dispatch. SetHero keeps it in sync.
 	heroTriggerType triggertype.Type
-	weapons         []weapon.Weapon // currently-equipped weapons; persistent across turns
+	weapons         []Weapon // currently-equipped weapon objects; persistent across turns
 
 	hand      []card.CardState // role-tagged; each entry carries its partition role
 	deck      *deck.Deck       // owned scratch; refilled on Reset via CopyFrom
@@ -64,8 +63,8 @@ type GameState struct {
 	tokenAurasLiveBits uint8
 	tokenItemsLiveBits uint8
 
-	incomingPhysicalDamage       int
-	incomingArcaneDamage int
+	incomingPhysicalDamage int
+	incomingArcaneDamage   int
 
 	opponentMarked bool
 	isMyTurn       bool
@@ -172,6 +171,7 @@ func (gs *GameState) Engine() *GameEngine { return &GameEngine{GameState: gs} }
 // Logger resets to nil — the caller installs a fresh per-clone logger when recording.
 func (gs *GameState) Copy() *GameState {
 	out := *gs
+	out.weapons = copyWeaponsInto(nil, gs.weapons)
 	out.hand = appendCopy(nil, gs.hand)
 	if gs.deck != nil {
 		out.deck = gs.deck.Copy()
@@ -213,8 +213,9 @@ func (gs *GameState) Copy() *GameState {
 
 // CopyFrom rewrites *gs in place to match what src.Copy() would produce. Reuses the
 // receiver's slice / deck backings when capacity permits so a pool slot stands in for
-// repeated masterState.Copy() allocations. Auras / items deep-copy per entry into the
-// pool, amortising both the *GameState alloc and the per-entry *Aura / *Item allocs.
+// repeated masterState.Copy() allocations. Auras / items / weapons deep-copy per entry into
+// the pool, amortising both the *GameState alloc and the per-entry *Aura / *Item / *Weapon
+// allocs.
 func (gs *GameState) CopyFrom(src *GameState) {
 	pooledHand := gs.hand
 	pooledGrav := gs.graveyard
@@ -226,6 +227,7 @@ func (gs *GameState) CopyFrom(src *GameState) {
 	pooledAuras := gs.auras
 	pooledTriggers := gs.triggers
 	pooledItems := gs.items
+	pooledWeapons := gs.weapons
 	pooledDeck := gs.deck
 	tokenAuras := gs.tokenAuras
 	tokenItems := gs.tokenItems
@@ -274,6 +276,7 @@ func (gs *GameState) CopyFrom(src *GameState) {
 	// indices src.auras occupied.
 	gs.auras = rebuildPooledAuras(gs, src.auras, &src.auraPool[0], pooledAuras)
 	gs.items = copyItemsInto(pooledItems, src.items)
+	gs.weapons = copyWeaponsInto(pooledWeapons, src.weapons)
 	if pooledDeck != nil {
 		// Receiver owns a wrapper (pool slot prewarm); rebind its slice headers to src's
 		// content rather than deep-copying. ShallowCopyFrom handles src==nil too.
@@ -344,6 +347,34 @@ func copyItemsInto(pool, src []Item) []Item {
 	return out
 }
 
+// copyWeaponsInto returns a per-entry copy of src, reusing pool's slice backing AND its
+// per-entry *weapon.Weapon allocations when present. Weapons are mutable once equipped
+// (per-turn counters), so each entry is deep-copied to keep one perm's counter mutations
+// from leaking into a sibling perm — but the equip loadout is identical across perms, so
+// CopyInto rewrites the prior perm's slot in place (no per-perm allocation) on the hot
+// CopyPersistentStateFrom path. A grown / fresh backing falls back to Copy for new slots.
+func copyWeaponsInto(pool, src []Weapon) []Weapon {
+	n := len(src)
+	if n == 0 {
+		return nil
+	}
+	reuse := cap(pool) >= n
+	var out []Weapon
+	if reuse {
+		out = pool[:n]
+	} else {
+		out = make([]Weapon, n)
+	}
+	for i, w := range src {
+		if reuse && out[i] != nil {
+			out[i] = w.CopyInto(out[i]).(Weapon)
+		} else {
+			out[i] = w.Copy().(Weapon)
+		}
+	}
+	return out
+}
+
 // resetCardSlice returns a fresh slice header that aliases pooled when capacity permits,
 // or a freshly allocated backing sized to src. Empty src returns nil to match the Copy()
 // path's nil-on-empty semantics.
@@ -367,12 +398,12 @@ func resetCardSlice[T any](pooled, src []T) []T {
 // (callers that want those populated set them after copying). Graveyard and banished
 // get fresh backings so that source-side splice-style mutations (BanishFromGraveyard
 // rewrites the source's backing in place during the same turn this snapshot is
-// captured) don't bleed into the snapshot's view. Weapons are carried via the implicit
-// `out := *gs` slice-header copy — no per-entry cloning (stateless structs). Auras
-// and items get full per-entry copies because their fire-this-turn / count fields
-// mutate independently of the source.
+// captured) don't bleed into the snapshot's view. Weapons, auras, and items get full
+// per-entry copies because their counter / fire-this-turn fields mutate independently of
+// the source.
 func (gs *GameState) CopyPersistentState() *GameState {
 	out := *gs
+	out.weapons = copyWeaponsInto(nil, gs.weapons)
 	out.hand = nil
 	out.pitched = nil
 	out.defenders = nil
@@ -412,7 +443,9 @@ func (gs *GameState) CopyPersistentState() *GameState {
 func (gs *GameState) CopyPersistentStateFrom(src *GameState) {
 	gs.hero = src.hero
 	gs.heroTriggerType = src.heroTriggerType
-	gs.weapons = src.weapons
+	// Weapons deep-copy into gs's reused backing: per-perm counter mutations must isolate
+	// from the master, mirroring auras / items.
+	gs.weapons = copyWeaponsInto(gs.weapons, src.weapons)
 	gs.arsenal = src.arsenal
 	gs.graveyard = resetCardSlice(gs.graveyard, src.graveyard)
 	gs.banished = resetCardSlice(gs.banished, src.banished)
@@ -446,8 +479,8 @@ func (gs *GameState) CopyPersistentStateFrom(src *GameState) {
 // and the matchup's incoming-damage figures).
 //
 // gs.ephemeral.reset wipes every per-turn scratch field in one struct assignment. The
-// aura / item / hero FiredThisTurn flags live on those entries themselves, not in
-// ephemeral, so they get their own rearm loop here so OncePerTurn auras can fire again.
+// aura / item / weapon / hero FiredThisTurn flags live on those entries themselves, not in
+// ephemeral, so they get their own rearm loop here so OncePerTurn handlers can fire again.
 func (gs *GameState) ResetEphemeralState() {
 	gs.ephemeral.reset()
 	for _, a := range gs.auras {
@@ -455,6 +488,9 @@ func (gs *GameState) ResetEphemeralState() {
 	}
 	for _, it := range gs.items {
 		it.SetFiredThisTurn(false)
+	}
+	for _, w := range gs.weapons {
+		w.SetFiredThisTurn(false)
 	}
 	for i := range gs.tokenAuras {
 		if gs.tokenAuras[i] != nil {
@@ -473,8 +509,10 @@ func (gs *GameState) ResetEphemeralState() {
 
 // Reset re-seeds gs with the given hero / weapons / incoming-damage values, preserving
 // pre-allocated slice backings (hand, graveyard, banished, auras, items, ephemeral).
-// Lets a pooled GameState start a fresh shuffle without losing prewarmed backings.
-func (gs *GameState) Reset(h Hero, weapons []weapon.Weapon, incoming, arcaneIncoming int) {
+// Lets a pooled GameState start a fresh shuffle without losing prewarmed backings. The
+// caller hands over freshly-built weapon objects (one set per shuffle), so they're assigned
+// directly rather than copied.
+func (gs *GameState) Reset(h Hero, weapons []Weapon, incoming, arcaneIncoming int) {
 	hand := gs.hand[:0]
 	graveyard := gs.graveyard[:0]
 	banished := gs.banished[:0]
@@ -488,18 +526,18 @@ func (gs *GameState) Reset(h Hero, weapons []weapon.Weapon, incoming, arcaneInco
 	tokenItems := gs.tokenItems
 	eph := gs.ephemeral
 	*gs = GameState{
-		hand:                 hand,
-		graveyard:            graveyard,
-		banished:             banished,
-		auras:                auras,
-		items:                items,
-		tokenAuras:           tokenAuras,
-		tokenItems:           tokenItems,
-		weapons:              weapons,
-		incomingPhysicalDamage:       incoming,
-		incomingArcaneDamage: arcaneIncoming,
-		deck:                 deckWrapper,
-		ephemeral:            eph,
+		hand:                   hand,
+		graveyard:              graveyard,
+		banished:               banished,
+		auras:                  auras,
+		items:                  items,
+		tokenAuras:             tokenAuras,
+		tokenItems:             tokenItems,
+		weapons:                weapons,
+		incomingPhysicalDamage: incoming,
+		incomingArcaneDamage:   arcaneIncoming,
+		deck:                   deckWrapper,
+		ephemeral:              eph,
 	}
 	gs.ephemeral.reset()
 	gs.resetTokenCounts()
@@ -517,10 +555,24 @@ func (gs *GameState) SetHero(h Hero) {
 		gs.heroTriggerType = 0
 	}
 }
-func (gs *GameState) Weapons() []weapon.Weapon     { return gs.weapons }
-func (gs *GameState) SetWeapons(w []weapon.Weapon) { gs.weapons = w }
-func (gs *GameState) IsCacheable() bool            { return gs.cacheable }
-func (gs *GameState) SetCacheable(v bool)          { gs.cacheable = v }
+func (gs *GameState) Weapons() []Weapon     { return gs.weapons }
+func (gs *GameState) SetWeapons(w []Weapon) { gs.weapons = w }
+
+// anyTriggeredWeapon reports whether any equipped weapon subscribes to a trigger event
+// (TriggerType != 0). The FireTriggers early-exit gates on this rather than "any weapon
+// equipped": a handler-less weapon (every current weapon) can never match a firing event,
+// so it must not keep FireTriggers from short-circuiting on the common no-subscriber path.
+func (gs *GameState) anyTriggeredWeapon() bool {
+	for _, w := range gs.weapons {
+		if w.TriggerType() != 0 {
+			return true
+		}
+	}
+	return false
+}
+
+func (gs *GameState) IsCacheable() bool   { return gs.cacheable }
+func (gs *GameState) SetCacheable(v bool) { gs.cacheable = v }
 
 // CardsRemovedFromDeck reports how many cards have been moved out of the deck during
 // this attack turn resolution (mid-attack-turn draws, tutors, peek-and-banish, etc.).
@@ -754,7 +806,7 @@ func (gs *GameState) SetIncomingPhysicalDamage(n int) {
 // attack-turn runner's plain-block pass calls it directly.
 func (gs *GameState) AddPhysicalDamageBlocked(n int) { gs.physicalDamageBlocked += n }
 
-func (gs *GameState) IncomingPhysicalDamage() int           { return gs.incomingPhysicalDamage }
+func (gs *GameState) IncomingPhysicalDamage() int   { return gs.incomingPhysicalDamage }
 func (gs *GameState) IncomingArcaneDamage() int     { return gs.incomingArcaneDamage }
 func (gs *GameState) SetIncomingArcaneDamage(n int) { gs.incomingArcaneDamage = n }
 

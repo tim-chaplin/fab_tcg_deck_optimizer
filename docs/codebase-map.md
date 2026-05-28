@@ -78,8 +78,8 @@ mydecks/           Local working deck files (untracked by git)
 - **cmd/cardgen** — The thin CLI wrapper that runs `internal/cardgen` and writes the
   generated files, normally invoked via `go generate`.
 - **internal/ids** — The central allocation of stable integer identifiers (`CardID`,
-  `HeroID`, `WeaponID`) anchored into contiguous non-overlapping ranges so per-entity caches
-  can be slice-indexed.
+  `HeroID`) anchored into contiguous non-overlapping ranges so per-entity caches can be
+  slice-indexed. Weapons are cards, so they take `CardID`s in the shared range.
 - **internal/registry** — The master roster of every implemented card, weapon, and hero,
   providing ID/name lookups and the marker-filtered deck-construction pools.
 
@@ -111,7 +111,8 @@ mydecks/           Local working deck files (untracked by git)
   per-deck `Stats` result types.
 - **internal/hero** — The `Hero` interface a hero card satisfies and the narrow engine
   surfaces its abilities consume; concrete heroes (currently Viserai) live in `heroes/`.
-- **internal/weapon** — The `Weapon` interface for arena equipment, where each weapon pairs a
+- **internal/weapon** — The platonic weapon `Card` plus the mutable engine-side `Weapon`
+  object built when it's equipped (mirroring the aura / item model), where each weapon pairs a
   permanent type with a `card.Card` activated ability; concrete weapons (including
   `NotImplemented`-marked ones) live in `weapons/`.
 

@@ -19,7 +19,6 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/gameengine"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/ids"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapon"
 )
 
 // maxCachedHandSize caps the hand size the cache fingerprints. Adult heroes deal 4 cards +
@@ -59,7 +58,7 @@ type persistentCacheKey struct {
 // matchups must use NewEvaluatorWithoutCache.
 type evalCacheKey struct {
 	handIDs         [maxCachedHandSize]ids.CardID
-	weaponIDs       [maxCachedWeapons]ids.WeaponID
+	weaponIDs       [maxCachedWeapons]ids.CardID
 	auras           [maxCachedAuras]persistentCacheKey
 	items           [maxCachedItems]persistentCacheKey
 	tokenAuraCounts [numCachedTokenAuras]int
@@ -192,7 +191,7 @@ func newEvalCacheBounded(capacity int) *evalCache {
 // (CardID, Count) for the same reason. Weapon IDs are NOT sorted: weapon order is stable
 // across calls, and reordering would drift the cached BestLine's swung-weapon names.
 func makeCacheKey(
-	weapons []weapon.Weapon, hand []card.Card,
+	weapons []gameengine.Weapon, hand []card.Card,
 	masterState *gameengine.GameState,
 ) (evalCacheKey, bool) {
 	auras := masterState.Auras()
@@ -216,8 +215,8 @@ func makeCacheKey(
 	}
 	key.weaponLen = len(weapons)
 	for i, w := range weapons {
-		id := w.ID()
-		if id == ids.InvalidWeapon {
+		id := w.CardID()
+		if id == ids.InvalidCard {
 			return evalCacheKey{}, false
 		}
 		key.weaponIDs[i] = id

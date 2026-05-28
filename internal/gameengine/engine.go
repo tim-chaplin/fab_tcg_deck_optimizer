@@ -568,18 +568,23 @@ func panicIfOptViolatesMultiset(in, top, bottom []card.Card) {
 
 // === Trigger and aura dispatch ===
 
-// FireTriggers fires the hero plus every Aura, EphemeralTrigger, and Item registered for
-// ctx.FiringType. It is the single dispatch point for every triggertype.Type lifecycle
-// event.
+// FireTriggers fires the hero plus every Aura, EphemeralTrigger, Item, and Weapon
+// registered for ctx.FiringType. It is the single dispatch point for every triggertype.Type
+// lifecycle event.
 //
 // ctx carries the firing event, the triggering card (the *CardState whose resolution
 // raised the event, or nil for turn-boundary events), and any trigger-specific payload
 // (BuffDelta for AttackBuffedByReaction). The hero fires first, then auras, ephemeral
-// triggers, and items.
+// triggers, items, and weapons. No equipped weapon registers a handler yet, so the weapon
+// walk is a no-op today — wired so a future end-phase weapon trigger can subscribe.
 func (ge *GameEngine) FireTriggers(ctx card.FireContext) {
 	t := ctx.FiringType
 	heroFires := ge.heroTriggerType&t != 0
-	if !heroFires && !ge.AnyAurasInPlay() && len(ge.triggers) == 0 && !ge.AnyItemsInPlay() {
+	// A handler-less weapon (TriggerType 0) can never match an event, so it must NOT defeat
+	// the early-exit — every equipped deck would otherwise pay the full walk on every fire.
+	// Gate on anyTriggeredWeapon, which is false for all current weapons.
+	weaponFires := ge.anyTriggeredWeapon()
+	if !heroFires && !ge.AnyAurasInPlay() && len(ge.triggers) == 0 && !ge.AnyItemsInPlay() && !weaponFires {
 		return
 	}
 
@@ -608,6 +613,9 @@ func (ge *GameEngine) FireTriggers(ctx card.FireContext) {
 	fireHooks(ge, &ge.items, ctx, triggeringTypes, false)
 	if liveItemBits != 0 {
 		fireTokenItems(ge, ctx, triggeringTypes, liveItemBits)
+	}
+	if weaponFires {
+		fireHooks(ge, &ge.weapons, ctx, triggeringTypes, false)
 	}
 }
 

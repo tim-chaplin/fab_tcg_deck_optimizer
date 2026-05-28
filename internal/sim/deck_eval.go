@@ -265,14 +265,16 @@ func runOneShuffle(masterDeck *deck.Deck, scratch *shuffleScratch, stats *deck.S
 	ev.statePool.FreeAll()
 }
 
-// weaponsFromDeck widens d.Weapons (typed as []deck.Weapon) into the []weapon.Weapon the
-// attack-turn runner consumes.
-func weaponsFromDeck(d *deck.Deck) []weapon.Weapon {
-	weapons := make([]weapon.Weapon, len(d.Weapons))
+// weaponsFromDeck equips the deck's weapons: each d.Weapons entry is a platonic weapon
+// card (weapon.Card), so this builds the mutable engine-side weapon object for each — the
+// game-start equip step. Fresh objects per call keep one shuffle's per-turn counter state
+// from leaking into the next.
+func weaponsFromDeck(d *deck.Deck) []gameengine.Weapon {
+	cards := make([]weapon.Card, len(d.Weapons))
 	for i, w := range d.Weapons {
-		weapons[i] = w.(weapon.Weapon)
+		cards[i] = w.(weapon.Card)
 	}
-	return weapons
+	return gameengine.EquipFromCards(cards)
 }
 
 // countPitched returns the number of Pitch-role entries in bestLine, excluding the arsenal
@@ -420,7 +422,7 @@ func mergeStatsInto(dst, src *deck.Stats) {
 
 // runBestForTurn dispatches to ev.Best.
 func runBestForTurn(
-	weapons []weapon.Weapon,
+	weapons []gameengine.Weapon,
 	h []card.Card,
 	d *deck.Deck,
 	state *gameengine.GameState,
