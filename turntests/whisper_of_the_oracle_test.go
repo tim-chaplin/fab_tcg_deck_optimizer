@@ -23,7 +23,7 @@ func TestWhisperOfTheOracle_PlayCallsOpt4(t *testing.T) {
 	for _, variant := range whisperOfTheOracleVariants {
 		d := deck.New(testutils.Hero{Intel: 4}, nil, nil)
 		hand := []card.Card{variant}
-		summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingDamage(0).Build(), hand)
+		summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingPhysicalDamage(0).Build(), hand)
 		if summary.Value != 0 {
 			t.Errorf("%s: Value = %d, want 0", variant.Name(), summary.Value)
 		}

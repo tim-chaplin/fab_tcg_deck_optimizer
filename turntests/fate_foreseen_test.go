@@ -24,10 +24,10 @@ func TestFateForeseen_BlocksAndCallsOpt1(t *testing.T) {
 	for _, tc := range cases {
 		top := testutils.FakeRedAction().WithName("top")
 		ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetCards([]card.Card{top}).Build()}
-		ge.SetIncomingDamage(10)
+		ge.SetIncomingPhysicalDamage(10)
 		ge.ResolveAttackStep(ge.Logger(), &card.CardState{Card: tc.c})
 		if ge.Value() != tc.block {
-			t.Errorf("%s: Play(IncomingDamage=10) Value = %d, want %d (block only)",
+			t.Errorf("%s: Play(IncomingPhysicalDamage=10) Value = %d, want %d (block only)",
 				tc.c.Name(), ge.Value(), tc.block)
 		}
 	}

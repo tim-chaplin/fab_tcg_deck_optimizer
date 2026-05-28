@@ -17,7 +17,7 @@ import (
 // resources split across attack / defense phases (resources don't carry between turns).
 //
 // master holds the previous turn's carryover: Hero, Arsenal, Auras, Items, Banished,
-// Graveyard, OpponentMarked, plus matchup-derived IncomingDamage / ArcaneIncomingDamage.
+// Graveyard, OpponentMarked, plus matchup-derived IncomingPhysicalDamage / IncomingArcaneDamage.
 // Per-turn ephemerals are ignored. TurnSummary.State is the post-attack-turn GameState; the next
 // turn's master comes from PrepareNextTurn on it.
 //

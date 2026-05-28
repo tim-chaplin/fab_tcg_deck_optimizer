@@ -16,7 +16,7 @@ func TestTitForTat_GoAgainLetsAttackFollow(t *testing.T) {
 	d := deck.New(testutils.Hero{Intel: 4}, nil, nil)
 	hand := []card.Card{cards.TitForTatBlue{}, testutils.FakeRedAttack().WithPower(2)}
 
-	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingDamage(0).Build(), hand)
+	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingPhysicalDamage(0).Build(), hand)
 
 	if got := summary.Value; got != 2 {
 		t.Fatalf("Value = %d, want 2 (Tit for Tat's go-again lets the 2-power attack swing)\nBestLine: %s",

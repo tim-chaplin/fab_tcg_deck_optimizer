@@ -17,7 +17,7 @@ import (
 func TestBlusterBuff_Mode0DebuffsByOne(t *testing.T) {
 	d := deck.New(testutils.Hero{Intel: 4}, nil, nil)
 	hand := []card.Card{cards.BlusterBuffRed{}, testutils.FakeRedAttack()}
-	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingDamage(0).Build(), hand)
+	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingPhysicalDamage(0).Build(), hand)
 	if summary.Value != 5 {
 		t.Errorf("Value = %d, want 5 (Mode 0: printed 6 - 1 self-debuff)", summary.Value)
 	}
@@ -28,7 +28,7 @@ func TestBlusterBuff_Mode0DebuffsByOne(t *testing.T) {
 func TestBlusterBuff_Mode1KeepsPrintedPower(t *testing.T) {
 	d := deck.New(testutils.Hero{Intel: 4}, nil, nil)
 	hand := []card.Card{cards.BlusterBuffRed{}, testutils.FakeBlueResource()}
-	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingDamage(0).Build(), hand)
+	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingPhysicalDamage(0).Build(), hand)
 	if summary.Value != 6 {
 		t.Errorf("Value = %d, want 6 (Mode 1: printed)", summary.Value)
 	}

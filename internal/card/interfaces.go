@@ -207,7 +207,7 @@ type GameEngine interface {
 
 	// Partition / matchup state.
 	RemainingPhysicalDamage() int
-	ArcaneIncomingDamage() int
+	IncomingArcaneDamage() int
 	BlockTotal() int
 	Defenders() []Card
 	Pitched() []*CardState

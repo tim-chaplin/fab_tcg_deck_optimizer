@@ -384,7 +384,7 @@ func (ge *GameEngine) PreventArcaneDamage(n int) int {
 	if n <= 0 {
 		return 0
 	}
-	rem := ge.arcaneIncomingDamage - ge.arcaneDamageBlocked
+	rem := ge.incomingArcaneDamage - ge.arcaneDamageBlocked
 	if rem <= 0 {
 		return 0
 	}
@@ -406,7 +406,7 @@ func (ge *GameEngine) PreventPhysicalDamage(n int) int {
 	if n <= 0 {
 		return 0
 	}
-	rem := ge.incomingDamage - ge.physicalDamageBlocked
+	rem := ge.incomingPhysicalDamage - ge.physicalDamageBlocked
 	if rem <= 0 {
 		return 0
 	}
@@ -860,7 +860,7 @@ func (ge *GameEngine) attackStepDelta(pc *card.CardState, types card.TypeSet) in
 		return n
 	case types.IsDefenseReaction() || isDefensiveInstant(pc.Card):
 		n := pc.EffectiveDefense()
-		if rem := ge.incomingDamage - ge.physicalDamageBlocked; n > rem {
+		if rem := ge.incomingPhysicalDamage - ge.physicalDamageBlocked; n > rem {
 			n = rem
 		}
 		if n < 0 {

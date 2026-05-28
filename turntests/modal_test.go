@@ -22,7 +22,7 @@ func TestModal_CaptainsCallPicksGoAgainOverBuffWhenAttackTurnContinues(t *testin
 		cards.SnatchRed{},
 		cards.SnatchRed{},
 	}
-	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingDamage(0).Build(), hand)
+	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingPhysicalDamage(0).Build(), hand)
 	got := summary.Value
 	if got != 8 {
 		t.Fatalf("Value = %d, want 8 (mode 1 grants go-again so both Snatches extend)", got)
@@ -37,7 +37,7 @@ func TestModal_CaptainsCallPicksBuffWhenCantGoAgain(t *testing.T) {
 		cards.CaptainsCallRed{},
 		cards.SnatchRed{},
 	}
-	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingDamage(0).Build(), hand)
+	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingPhysicalDamage(0).Build(), hand)
 	got := summary.Value
 	if got != 6 {
 		t.Fatalf("Value = %d, want 6 (mode 0 +2{p} since no second attack to extend into)", got)
@@ -51,7 +51,7 @@ func TestModal_RazorReflexMode0BuffsSwordWeapon(t *testing.T) {
 		cards.RazorReflexRed{},
 		cards.ToughenUpBlue{},
 	}
-	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingDamage(0).Build(), hand)
+	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingPhysicalDamage(0).Build(), hand)
 	got := summary.Value
 	if got != 5 {
 		t.Fatalf("Value = %d, want 5 (NebulaBlade 1 + Razor Reflex mode 0 +3 + runechant 1)", got)
@@ -69,7 +69,7 @@ func TestModal_RazorReflexMode1BuffAndOnHitGoAgainExtendsAttackTurn(t *testing.T
 		cards.SnatchRed{},
 		testutils.FakeBlueAttack(),
 	}
-	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingDamage(0).Build(), hand)
+	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingPhysicalDamage(0).Build(), hand)
 	got := summary.Value
 	if got != 11 {
 		t.Fatalf("Value = %d, want 11 (Snatch1 4 + Razor Reflex +3 + Snatch2 4 via on-hit go-again)", got)
@@ -86,7 +86,7 @@ func TestModal_PummelMode1BuffsAndDiscardsOnHit(t *testing.T) {
 		testutils.FakeBlueAttack(),
 		testutils.FakeBlueAttack(),
 	}
-	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingDamage(0).Build(), hand)
+	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingPhysicalDamage(0).Build(), hand)
 	got := summary.Value
 	if got != 7 {
 		t.Fatalf("Value = %d, want 7 (AdrenalineRush 2 + Pummel +2 + on-hit discard 3)", got)
@@ -100,7 +100,7 @@ func TestModal_PummelMode0BuffsClubWeapon(t *testing.T) {
 		cards.PummelRed{},
 		cards.ToughenUpBlue{},
 	}
-	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingDamage(0).Build(), hand)
+	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingPhysicalDamage(0).Build(), hand)
 	got := summary.Value
 	if got != 5 {
 		t.Fatalf("Value = %d, want 5 (Club 1 + Pummel mode 0 +4)", got)

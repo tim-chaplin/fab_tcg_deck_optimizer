@@ -16,7 +16,7 @@ import (
 func TestArcaneCussing_PoppedUnblockedCreatesNoRunechants(t *testing.T) {
 	prior := gameengine.GameStateBuilder().
 		CreateAuraFromCard(cards.ArcaneCussingRed{}).
-		SetIncomingDamage(3).
+		SetIncomingPhysicalDamage(3).
 		Build()
 	d := deck.New(testutils.Hero{Intel: 4}, nil, nil)
 	hand := []card.Card{testutils.FakeBlueResource()}
@@ -36,7 +36,7 @@ func TestArcaneCussing_PoppedUnblockedCreatesNoRunechants(t *testing.T) {
 func TestArcaneCussing_FullyBlockedDoesNotPop(t *testing.T) {
 	prior := gameengine.GameStateBuilder().
 		CreateAuraFromCard(cards.ArcaneCussingRed{}).
-		SetIncomingDamage(3).
+		SetIncomingPhysicalDamage(3).
 		Build()
 	d := deck.New(testutils.Hero{Intel: 4}, nil, nil)
 	hand := []card.Card{testutils.FakeRedDR().WithDefense(3)}
@@ -58,7 +58,7 @@ func TestArcaneCussing_FullyBlockedDoesNotPop(t *testing.T) {
 func TestArcaneCussing_DestroyedByArcaneDamage(t *testing.T) {
 	prior := gameengine.GameStateBuilder().
 		CreateAuraFromCard(cards.ArcaneCussingRed{}).
-		SetArcaneIncomingDamage(2).
+		SetIncomingArcaneDamage(2).
 		Build()
 	d := deck.New(testutils.Hero{Intel: 4}, nil, nil)
 
@@ -78,7 +78,7 @@ func TestArcaneCussing_DestroyedByArcaneDamage(t *testing.T) {
 func TestArcaneCussing_PoppedByOwnAttackCreatesRunechants(t *testing.T) {
 	prior := gameengine.GameStateBuilder().
 		CreateAuraFromCard(cards.ArcaneCussingRed{}).
-		SetIncomingDamage(3).
+		SetIncomingPhysicalDamage(3).
 		Build()
 	d := deck.New(testutils.Hero{Intel: 4}, nil, nil)
 	hand := []card.Card{testutils.FakeRedDR().WithDefense(3), testutils.FakeRedAttack().

@@ -42,7 +42,7 @@ func TestEvalCache_PersistenceAcrossRounds(t *testing.T) {
 	for r := 0; r < rounds; r++ {
 		ev := NewEvaluator()
 		for _, d := range roundDecks[r] {
-			ev.Evaluate(d.Copy(), shuffles, Matchup{IncomingDamage: incoming}, rand.New(rand.NewSource(99)))
+			ev.Evaluate(d.Copy(), shuffles, Matchup{IncomingPhysicalDamage: incoming}, rand.New(rand.NewSource(99)))
 		}
 		stats := ev.CacheStats()
 		freshPerRound[r] = evalCounters{hits: stats.Hits, misses: stats.Misses}
@@ -56,7 +56,7 @@ func TestEvalCache_PersistenceAcrossRounds(t *testing.T) {
 	var priorHits, priorMisses int
 	for r := 0; r < rounds; r++ {
 		for _, d := range roundDecks[r] {
-			warmEv.Evaluate(d.Copy(), shuffles, Matchup{IncomingDamage: incoming}, rand.New(rand.NewSource(99)))
+			warmEv.Evaluate(d.Copy(), shuffles, Matchup{IncomingPhysicalDamage: incoming}, rand.New(rand.NewSource(99)))
 		}
 		stats := warmEv.CacheStats()
 		warmPerRound[r] = evalCounters{

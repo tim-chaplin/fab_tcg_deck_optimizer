@@ -38,7 +38,7 @@ func runEvalCmd(args []string) {
 		requireFlag(fs, "eval", "incoming")
 	}
 	gameengine.OptDebug = *debug
-	runEval(resolveDeckPath(fs.Arg(0)), *shuffles, *precision, sim.Matchup{IncomingDamage: *incoming, ArcaneIncomingDamage: *arcaneIncoming}, *seed, *printOnly, *brief, *debug)
+	runEval(resolveDeckPath(fs.Arg(0)), *shuffles, *precision, sim.Matchup{IncomingPhysicalDamage: *incoming, IncomingArcaneDamage: *arcaneIncoming}, *seed, *printOnly, *brief, *debug)
 }
 
 // runEval loads the deck at outPath and prints its stats. With printOnly=false it first

@@ -14,7 +14,7 @@ import (
 // Test-only exports.
 
 // Best re-exports the package-private best. state carries the matchup figures (set via
-// SetIncomingDamage) and any other carryover.
+// SetIncomingPhysicalDamage) and any other carryover.
 func Best(weapons []weapon.Weapon, hand []card.Card, d *deck.Deck, state *gameengine.GameState) TurnSummary {
 	return best(weapons, hand, d, state)
 }
@@ -69,14 +69,14 @@ func PromoteRandomHandCardToArsenal(best *TurnSummary, startingHand []card.Card,
 
 // DefendersDamage re-exports defendersDamage with an unbounded block budget. Wraps each
 // pitched Card in a *CardState before delegating.
-func DefendersDamage(defenders, pitched []card.Card, d *deck.Deck, ge *gameengine.GameEngine, gravBuf []card.Card, cs *card.CardState, incomingDamage, arsenalDefenderIdx int) (int, []card.Card) {
-	total, gravBuf, _ := defendersDamage(defenders, wrapPitchedCards(pitched), d, ge, gravBuf, cs, incomingDamage, noBlockBudgetCap, arsenalDefenderIdx)
+func DefendersDamage(defenders, pitched []card.Card, d *deck.Deck, ge *gameengine.GameEngine, gravBuf []card.Card, cs *card.CardState, incomingPhysicalDamage, arsenalDefenderIdx int) (int, []card.Card) {
+	total, gravBuf, _ := defendersDamage(defenders, wrapPitchedCards(pitched), d, ge, gravBuf, cs, incomingPhysicalDamage, noBlockBudgetCap, arsenalDefenderIdx)
 	return total, gravBuf
 }
 
 // DefendersDamageWithBudget is the budget-aware export.
-func DefendersDamageWithBudget(defenders, pitched []card.Card, d *deck.Deck, ge *gameengine.GameEngine, gravBuf []card.Card, cs *card.CardState, incomingDamage, blockBudget, arsenalDefenderIdx int) (int, []card.Card) {
-	total, gravBuf, _ := defendersDamage(defenders, wrapPitchedCards(pitched), d, ge, gravBuf, cs, incomingDamage, blockBudget, arsenalDefenderIdx)
+func DefendersDamageWithBudget(defenders, pitched []card.Card, d *deck.Deck, ge *gameengine.GameEngine, gravBuf []card.Card, cs *card.CardState, incomingPhysicalDamage, blockBudget, arsenalDefenderIdx int) (int, []card.Card) {
+	total, gravBuf, _ := defendersDamage(defenders, wrapPitchedCards(pitched), d, ge, gravBuf, cs, incomingPhysicalDamage, blockBudget, arsenalDefenderIdx)
 	return total, gravBuf
 }
 

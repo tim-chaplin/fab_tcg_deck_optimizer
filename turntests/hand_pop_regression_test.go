@@ -18,7 +18,7 @@ func TestAttackTurnRunner_AltCostPoppedCardCannotPhantomPlay(t *testing.T) {
 	d := deck.New(testutils.Hero{Intel: 4}, nil, nil)
 	summary := sim.EvalOneTurnForTesting(
 		d,
-		gameengine.GameStateBuilder().SetIncomingDamage(0).Build(),
+		gameengine.GameStateBuilder().SetIncomingPhysicalDamage(0).Build(),
 		[]card.Card{cards.SeekHorizonRed{}, bigAttack},
 	)
 	if summary.Value > 5 {

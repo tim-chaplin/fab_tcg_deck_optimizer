@@ -38,7 +38,7 @@ func TestEvalCache_AnnealShapeMeasurement(t *testing.T) {
 	ev := NewEvaluator()
 	for _, mut := range mutations {
 		evalRNG := rand.New(rand.NewSource(99))
-		ev.Evaluate(mut.Deck.Copy(), shufflesPerEval, Matchup{IncomingDamage: incoming}, evalRNG)
+		ev.Evaluate(mut.Deck.Copy(), shufflesPerEval, Matchup{IncomingPhysicalDamage: incoming}, evalRNG)
 	}
 
 	cs := ev.CacheStats()

@@ -21,7 +21,7 @@ func TestElixirCycle_BuffsNextAttack(t *testing.T) {
 		d := deck.New(testutils.Hero{Intel: 4}, nil, nil)
 		hand := []card.Card{elixir, testutils.FakeRedAttack().WithTypes(card.TypeRuneblade), testutils.FakeBlueResource()}
 
-		summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingDamage(0).Build(), hand)
+		summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingPhysicalDamage(0).Build(), hand)
 
 		if got := summary.Value; got != 3 {
 			t.Errorf("%s: Value = %d, want 3 (+3{p} turns the 0-power attack into a 3-damage hit)", elixir.Name(), got)

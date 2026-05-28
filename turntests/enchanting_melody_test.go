@@ -45,7 +45,7 @@ func TestEnchantingMelody_AbsorbsBeforeDamageTakenSoCussingSurvives(t *testing.T
 	initial := gameengine.GameStateBuilder().
 		CreateAuraFromCard(cards.EnchantingMelodyRed{}).
 		CreateAuraFromCard(cards.ArcaneCussingRed{}).
-		SetIncomingDamage(4).
+		SetIncomingPhysicalDamage(4).
 		Build()
 
 	summary := sim.EvalOneTurnForTesting(d, initial, nil)
@@ -95,7 +95,7 @@ func TestEnchantingMelody_AbsorbDestroysEvenWhenNonAttackActionSatisfiesEOTClaus
 	d := deck.New(heroes.Viserai, nil, nil)
 	initial := gameengine.GameStateBuilder().
 		CreateAuraFromCard(cards.EnchantingMelodyRed{}).
-		SetIncomingDamage(1).
+		SetIncomingPhysicalDamage(1).
 		Build()
 
 	summary := sim.EvalOneTurnForTesting(d, initial, []card.Card{testutils.FakeRedAction()})
@@ -120,7 +120,7 @@ func TestEnchantingMelody_AbsorbsArcaneDamage(t *testing.T) {
 	d := deck.New(heroes.Viserai, nil, nil)
 	initial := gameengine.GameStateBuilder().
 		CreateAuraFromCard(cards.EnchantingMelodyRed{}).
-		SetArcaneIncomingDamage(5).
+		SetIncomingArcaneDamage(5).
 		Build()
 
 	summary := sim.EvalOneTurnForTesting(d, initial, nil)
@@ -144,8 +144,8 @@ func TestEnchantingMelody_CannotMixPhysicalAndArcaneSameTurn(t *testing.T) {
 	d := deck.New(heroes.Viserai, nil, nil)
 	initial := gameengine.GameStateBuilder().
 		CreateAuraFromCard(cards.EnchantingMelodyRed{}).
-		SetIncomingDamage(3).
-		SetArcaneIncomingDamage(3).
+		SetIncomingPhysicalDamage(3).
+		SetIncomingArcaneDamage(3).
 		Build()
 
 	summary := sim.EvalOneTurnForTesting(d, initial, nil)
@@ -175,7 +175,7 @@ func TestEnchantingMelody_PreventionCapsScaleByVariant(t *testing.T) {
 			d := deck.New(heroes.Viserai, nil, nil)
 			initial := gameengine.GameStateBuilder().
 				CreateAuraFromCard(tc.c).
-				SetIncomingDamage(tc.prevent + 1).
+				SetIncomingPhysicalDamage(tc.prevent + 1).
 				Build()
 
 			summary := sim.EvalOneTurnForTesting(d, initial, nil)

@@ -59,8 +59,8 @@ func TestEvalCache_EquivalenceWithUncached_FuzzAutomatic(t *testing.T) {
 		setupRNG := rand.New(rand.NewSource(setupSeed))
 		baseline := deck.Random(heroes.Viserai, deckSize, maxCopies, setupRNG, registry.Registry{})
 
-		cachedStats := sim.NewEvaluator().Evaluate(baseline.Copy(), shuffles, sim.Matchup{IncomingDamage: incoming}, rand.New(rand.NewSource(99)))
-		uncachedStats := sim.NewEvaluatorWithoutCache().Evaluate(baseline.Copy(), shuffles, sim.Matchup{IncomingDamage: incoming}, rand.New(rand.NewSource(99)))
+		cachedStats := sim.NewEvaluator().Evaluate(baseline.Copy(), shuffles, sim.Matchup{IncomingPhysicalDamage: incoming}, rand.New(rand.NewSource(99)))
+		uncachedStats := sim.NewEvaluatorWithoutCache().Evaluate(baseline.Copy(), shuffles, sim.Matchup{IncomingPhysicalDamage: incoming}, rand.New(rand.NewSource(99)))
 		tested++
 
 		if cachedStats.Hands != uncachedStats.Hands || cachedStats.TotalValue != uncachedStats.TotalValue {
@@ -119,8 +119,8 @@ Divergence at setupSeed=%d (after %d seeds):
 // when the bisection didn't reproduce. O(log maxShuffles) Evaluate-pair calls.
 func bisectDivergentShuffle(baseline *deck.Deck, incoming, maxShuffles int) (int, deck.Stats, deck.Stats) {
 	diverges := func(n int) (deck.Stats, deck.Stats, bool) {
-		c := sim.NewEvaluator().Evaluate(baseline.Copy(), n, sim.Matchup{IncomingDamage: incoming}, rand.New(rand.NewSource(99)))
-		u := sim.NewEvaluatorWithoutCache().Evaluate(baseline.Copy(), n, sim.Matchup{IncomingDamage: incoming}, rand.New(rand.NewSource(99)))
+		c := sim.NewEvaluator().Evaluate(baseline.Copy(), n, sim.Matchup{IncomingPhysicalDamage: incoming}, rand.New(rand.NewSource(99)))
+		u := sim.NewEvaluatorWithoutCache().Evaluate(baseline.Copy(), n, sim.Matchup{IncomingPhysicalDamage: incoming}, rand.New(rand.NewSource(99)))
 		return c, u, c.Hands != u.Hands || c.TotalValue != u.TotalValue
 	}
 	if c, u, ok := diverges(maxShuffles); !ok {

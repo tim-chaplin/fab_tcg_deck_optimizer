@@ -74,7 +74,7 @@ func TestHitTheHighNotes_BonusFlowsThroughBonusAttack(t *testing.T) {
 func TestHitTheHighNotes_SeesRunechantFromTriggeredMalefic(t *testing.T) {
 	prior := gameengine.GameStateBuilder().
 		CreateAuraFromCard(cards.MaleficIncantationRed{}).
-		SetIncomingDamage(0).
+		SetIncomingPhysicalDamage(0).
 		Build()
 	d := deck.New(testutils.Hero{Intel: 4}, nil, nil)
 	hand := []card.Card{testutils.FakeBlueResource(), cards.HitTheHighNotesRed{}}

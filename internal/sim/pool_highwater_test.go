@@ -23,7 +23,7 @@ func TestPool_HighWaterAfterRealDeckEval(t *testing.T) {
 	}
 	ev := NewEvaluator()
 	rng := rand.New(rand.NewSource(42))
-	ev.Evaluate(loaded.Copy(), shuffles, Matchup{IncomingDamage: incoming}, rng)
+	ev.Evaluate(loaded.Copy(), shuffles, Matchup{IncomingPhysicalDamage: incoming}, rng)
 	if ev.cachedBufs == nil {
 		t.Fatalf("Evaluator never built its attackBufs scratch — no pool to inspect")
 	}

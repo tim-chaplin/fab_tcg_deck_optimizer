@@ -69,7 +69,7 @@ func TestEvalCache_HitRateMeasurement(t *testing.T) {
 	// Use a dedicated Evaluator so we can read its cache stats after the run.
 	ev := NewEvaluator()
 	rng := rand.New(rand.NewSource(42))
-	ev.Evaluate(baseline, shuffles, Matchup{IncomingDamage: incoming}, rng)
+	ev.Evaluate(baseline, shuffles, Matchup{IncomingPhysicalDamage: incoming}, rng)
 
 	stats := ev.CacheStats()
 	total := stats.Hits + stats.Misses
@@ -112,12 +112,12 @@ func TestEvalCache_ParallelEquivalentToSequential(t *testing.T) {
 	var seqStats deck.Stats
 	for _, seed := range workerSeeds {
 		workerRNG := rand.New(rand.NewSource(seed))
-		workerStats := NewEvaluator().Evaluate(baseline.Copy(), 1, Matchup{IncomingDamage: incoming}, workerRNG)
+		workerStats := NewEvaluator().Evaluate(baseline.Copy(), 1, Matchup{IncomingPhysicalDamage: incoming}, workerRNG)
 		mergeStats(&seqStats, workerStats)
 	}
 
 	parRNG := rand.New(rand.NewSource(masterSeed))
-	parStats := NewEvaluatorParallel(numWorkers).Evaluate(baseline.Copy(), numWorkers, Matchup{IncomingDamage: incoming}, parRNG)
+	parStats := NewEvaluatorParallel(numWorkers).Evaluate(baseline.Copy(), numWorkers, Matchup{IncomingPhysicalDamage: incoming}, parRNG)
 
 	if seqStats.Hands != parStats.Hands {
 		t.Errorf("Hands: seq=%d par=%d", seqStats.Hands, parStats.Hands)
@@ -208,10 +208,10 @@ func TestEvalCache_EquivalenceWithUncached(t *testing.T) {
 	baseline := deck.Random(heroes.Viserai, deckSize, maxCopies, setupRNG, registry.Registry{})
 
 	cached := baseline.Copy()
-	cachedStats := NewEvaluator().Evaluate(cached, shuffles, Matchup{IncomingDamage: incoming}, rand.New(rand.NewSource(99)))
+	cachedStats := NewEvaluator().Evaluate(cached, shuffles, Matchup{IncomingPhysicalDamage: incoming}, rand.New(rand.NewSource(99)))
 
 	uncached := baseline.Copy()
-	uncachedStats := NewEvaluatorWithoutCache().Evaluate(uncached, shuffles, Matchup{IncomingDamage: incoming}, rand.New(rand.NewSource(99)))
+	uncachedStats := NewEvaluatorWithoutCache().Evaluate(uncached, shuffles, Matchup{IncomingPhysicalDamage: incoming}, rand.New(rand.NewSource(99)))
 
 	if cachedStats.Hands != uncachedStats.Hands {
 		t.Errorf("Hands: cached=%d uncached=%d", cachedStats.Hands, uncachedStats.Hands)
@@ -242,7 +242,7 @@ func BenchmarkEvalCache_SingleDeck(b *testing.B) {
 			rng := rand.New(rand.NewSource(42))
 			d := loaded.Copy()
 			b.StartTimer()
-			ev.Evaluate(d, shuffles, Matchup{IncomingDamage: incoming}, rng)
+			ev.Evaluate(d, shuffles, Matchup{IncomingPhysicalDamage: incoming}, rng)
 		}
 	})
 	b.Run("without-cache", func(b *testing.B) {
@@ -254,7 +254,7 @@ func BenchmarkEvalCache_SingleDeck(b *testing.B) {
 			rng := rand.New(rand.NewSource(42))
 			d := loaded.Copy()
 			b.StartTimer()
-			ev.Evaluate(d, shuffles, Matchup{IncomingDamage: incoming}, rng)
+			ev.Evaluate(d, shuffles, Matchup{IncomingPhysicalDamage: incoming}, rng)
 		}
 	})
 }
@@ -281,7 +281,7 @@ func BenchmarkEvalCache_ParallelDeck(b *testing.B) {
 				rng := rand.New(rand.NewSource(42))
 				d := loaded.Copy()
 				b.StartTimer()
-				ev.Evaluate(d, shuffles, Matchup{IncomingDamage: incoming}, rng)
+				ev.Evaluate(d, shuffles, Matchup{IncomingPhysicalDamage: incoming}, rng)
 			}
 		})
 	}

@@ -51,7 +51,7 @@ func (e *Evaluator) replayBest(
 	attackDealt, defenseDealt, winner, arsenalAtAttackTurnStart := e.replaySolution(masterState, weapons, d, entry, pcards, n, bufs)
 	if winner == nil {
 		panic(fmt.Sprintf("replayBest: cached solution is infeasible — cache invariant violated (hand=%d, incoming=%d)",
-			len(hand), masterState.IncomingDamage()))
+			len(hand), masterState.IncomingPhysicalDamage()))
 	}
 
 	if postPromotedFromHeld >= 0 {
@@ -68,7 +68,7 @@ func (e *Evaluator) replayBest(
 		BestLine:       make([]card.CardAssignment, totalN),
 		Value:          attackDealt + defenseDealt,
 		SwungWeapons:   append([]string(nil), entry.swungWeapons...),
-		IncomingDamage: masterState.IncomingDamage(),
+		IncomingPhysicalDamage: masterState.IncomingPhysicalDamage(),
 		Cacheable:      true,
 		State:          winner,
 	}
@@ -102,8 +102,8 @@ func (e *Evaluator) replaySolution(
 	}
 	ctx.resourceBudget = 0
 
-	incoming := masterState.IncomingDamage()
-	arcaneIncoming := masterState.ArcaneIncomingDamage()
+	incoming := masterState.IncomingPhysicalDamage()
+	arcaneIncoming := masterState.IncomingArcaneDamage()
 	if len(defs) > 0 {
 		installLeafDeck(ctx, bufs, d)
 		defenseDealt, _, ctx.handStart = ctx.runDefense(defs, p, h, ctx.deck, incoming, noBlockBudgetCap, arsenalDefenderIdx, entry.defenders)

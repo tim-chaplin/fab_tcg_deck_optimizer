@@ -62,7 +62,7 @@ func TestArcanicSpike_ArcaneDamageDealtTriggersBonus(t *testing.T) {
 func TestArcanicSpike_RunechantFiresBeforeAttackAndTriggersRider(t *testing.T) {
 	prior := gameengine.GameStateBuilder().
 		AddAura(token.NewRunechant(1)).
-		SetIncomingDamage(0).
+		SetIncomingPhysicalDamage(0).
 		Build()
 	d := deck.New(testutils.Hero{Intel: 4}, nil, nil)
 	hand := []card.Card{testutils.FakeBlueResource(), cards.ArcanicSpikeRed{}}

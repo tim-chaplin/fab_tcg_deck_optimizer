@@ -141,8 +141,8 @@ func bestAttackWithWeapons(
 	bufs.defModes = bufs.defModes[:0]
 	hasDRs := containsDefenseReaction(defenders)
 	hasModalBlocker := containsModalBlocker(defenders)
-	incoming := masterState.IncomingDamage()
-	arcaneIncoming := masterState.ArcaneIncomingDamage()
+	incoming := masterState.IncomingPhysicalDamage()
+	arcaneIncoming := masterState.IncomingArcaneDamage()
 
 	var defenseDealtConst int
 	defenseCacheableConst := true
@@ -357,14 +357,14 @@ func (ctx *sequenceContext) permEngine(state *gameengine.GameState) *gameengine.
 	return ctx.bufs.pooledEngine
 }
 
-// fireIncomingDamageTriggers runs the DamageAboutToBeTaken → DamageTaken sequence once for
+// fireIncomingPhysicalDamageTriggers runs the DamageAboutToBeTaken → DamageTaken sequence once for
 // the turn's remaining incoming damage. DamageAboutToBeTaken fires while the figures are
 // still mutable so subscribers can prevent (PreventPhysicalDamage / PreventArcaneDamage /
 // PreventGenericDamage); DamageTaken then fires only if damage still gets through. Each
 // trigger fires a single time covering both damage types at once — handlers introspect
 // RemainingPhysicalDamage() / RemainingArcaneDamage() to see which side is live. Zeroes
 // ge.Value first so handler AddValues are captured cleanly into the returned total.
-func fireIncomingDamageTriggers(ge *gameengine.GameEngine) int {
+func fireIncomingPhysicalDamageTriggers(ge *gameengine.GameEngine) int {
 	ge.SetValue(0)
 	if ge.RemainingPhysicalDamage() > 0 || ge.RemainingArcaneDamage() > 0 {
 		ge.FireTriggers(triggertype.DamageAboutToBeTaken, nil)
@@ -379,7 +379,7 @@ func fireIncomingDamageTriggers(ge *gameengine.GameEngine) int {
 // ctx.leafState on the no-defender path.
 func (ctx *sequenceContext) fireUndefendedDamageTriggers() int {
 	ctx.leafState.SetIsMyTurn(false)
-	return fireIncomingDamageTriggers(ctx.permEngine(ctx.leafState))
+	return fireIncomingPhysicalDamageTriggers(ctx.permEngine(ctx.leafState))
 }
 
 // runDefense mutates ctx.leafState through the defender list, accumulating per-DR Value.
@@ -387,7 +387,7 @@ func (ctx *sequenceContext) fireUndefendedDamageTriggers() int {
 // the attack turn phase. Per-permutation per-turn-locals reset via ResetEphemeralState, so runDefense
 // doesn't restore them.
 //
-// SetIncomingDamage installs the matchup figure once and zeroes the damage-blocked
+// SetIncomingPhysicalDamage installs the matchup figure once and zeroes the damage-blocked
 // accumulator; each DR + plain block banks into that accumulator, so
 // RemainingPhysicalDamage() reads the unblocked remainder while the matchup figure stays
 // constant.
@@ -396,14 +396,14 @@ func (ctx *sequenceContext) fireUndefendedDamageTriggers() int {
 // installed so Discard consumes only Held. Returns the Held cards left after any Blocker
 // discards. cachedModes, when non-nil, supplies each plain blocker's mode for a cache replay;
 // nil drives the normal pickBlockerMode search.
-func (ctx *sequenceContext) runDefense(defenders []card.Card, pitched []*card.CardState, held []card.Card, deckPile *deck.Deck, matchupIncomingDamage, blockBudget, arsenalDefenderIdx int, cachedModes []playedCard) (int, bool, []card.Card) {
+func (ctx *sequenceContext) runDefense(defenders []card.Card, pitched []*card.CardState, held []card.Card, deckPile *deck.Deck, matchupIncomingPhysicalDamage, blockBudget, arsenalDefenderIdx int, cachedModes []playedCard) (int, bool, []card.Card) {
 	state := ctx.leafState
 	state.SetIsMyTurn(false)
 	if ctx.replayLogger != nil {
 		state.SetLogger(ctx.replayLogger)
 	}
 	state.SetDeck(deckPile)
-	state.SetIncomingDamage(matchupIncomingDamage)
+	state.SetIncomingPhysicalDamage(matchupIncomingPhysicalDamage)
 	// Baseline leafState's graveyard to priorGraveyard. Defending cards move to
 	// graveyard only when the attack turn closes (the post-block append below).
 	state.SetGraveyard(append(state.Graveyard()[:0], ctx.priorGraveyard...))
@@ -504,7 +504,7 @@ func (ctx *sequenceContext) runDefense(defenders []card.Card, pitched []*card.Ca
 
 	// Defense phase over: fire the incoming-damage triggers once for whatever physical /
 	// arcane damage still gets through.
-	total += fireIncomingDamageTriggers(ge)
+	total += fireIncomingPhysicalDamageTriggers(ge)
 
 	return total, cacheable, survivingHeld
 }
@@ -514,7 +514,7 @@ func (ctx *sequenceContext) runDefense(defenders []card.Card, pitched []*card.Ca
 // ResetEphemeralState wipes the previous perm's play state, then this perm's inputs install.
 // Hand = attack-turn attackers + attack-phase pitched bag, so Hand() reads see the upcoming bag.
 //
-// IncomingDamage is not re-installed: the matchup figure rode in constant on leafState and
+// IncomingPhysicalDamage is not re-installed: the matchup figure rode in constant on leafState and
 // ResetEphemeralState zeroed the damage-blocked accumulator.
 func (ctx *sequenceContext) preparePermState(playedAttackers []*card.CardState, n int) *gameengine.GameState {
 	bufs := ctx.bufs

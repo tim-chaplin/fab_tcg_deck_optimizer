@@ -26,7 +26,7 @@ func TestTalismanOfDousing_PreventsOneArcaneAndDestroys(t *testing.T) {
 	d := deck.New(heroes.Viserai, nil, nil)
 	initial := gameengine.GameStateBuilder().
 		CreateItemFromCard(cards.TalismanOfDousingYellow{}).
-		SetArcaneIncomingDamage(2).
+		SetIncomingArcaneDamage(2).
 		Build()
 
 	summary := sim.EvalOneTurnForTesting(d, initial, nil)
@@ -46,8 +46,8 @@ func TestTalismanOfDousing_PhysicalOnlyTurnLeavesItemIntact(t *testing.T) {
 	d := deck.New(heroes.Viserai, nil, nil)
 	initial := gameengine.GameStateBuilder().
 		CreateItemFromCard(cards.TalismanOfDousingYellow{}).
-		SetIncomingDamage(5).
-		SetArcaneIncomingDamage(0).
+		SetIncomingPhysicalDamage(5).
+		SetIncomingArcaneDamage(0).
 		Build()
 
 	summary := sim.EvalOneTurnForTesting(d, initial, nil)

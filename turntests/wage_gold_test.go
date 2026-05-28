@@ -21,7 +21,7 @@ func TestWageGold_OnHitCreatesGoldToken(t *testing.T) {
 		testutils.FakeBlueResource(),
 		testutils.FakeBlueResource(),
 	}
-	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingDamage(0).Build(), hand)
+	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingPhysicalDamage(0).Build(), hand)
 	if summary.Value != 7 {
 		t.Fatalf("Value = %d, want 7 (Wage Gold Red 7 power)\nBestLine: %s",
 			summary.Value, formatBestLine(summary.BestLine))
@@ -40,7 +40,7 @@ func TestWageGold_BlockableMissDoesNotCreateGold(t *testing.T) {
 		testutils.FakeBlueResource(),
 		testutils.FakeBlueResource(),
 	}
-	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingDamage(0).Build(), hand)
+	summary := sim.EvalOneTurnForTesting(d, gameengine.GameStateBuilder().SetIncomingPhysicalDamage(0).Build(), hand)
 	if summary.Value != 5 {
 		t.Fatalf("Value = %d, want 5 (Wage Gold Blue 5 power)\nBestLine: %s",
 			summary.Value, formatBestLine(summary.BestLine))

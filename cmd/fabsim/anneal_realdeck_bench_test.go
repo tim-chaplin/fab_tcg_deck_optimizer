@@ -63,7 +63,7 @@ func BenchmarkAnnealRoundOnViseraiV4(b *testing.B) {
 		b.StartTimer()
 		_, _, _, _, found := sim.RunMutationRound(
 			context.Background(), mutations, unreachableBaseline, 0, 0,
-			0, sim.Matchup{IncomingDamage: incoming}, 0, 0,
+			0, sim.Matchup{IncomingPhysicalDamage: incoming}, 0, 0,
 			iterRNG.Int63(), nil, true, 0.1, nil,
 		)
 		if found {
@@ -105,7 +105,7 @@ func BenchmarkAnnealMultiRoundOnViseraiV4(b *testing.B) {
 	runRound := func(cache *sim.Cache, seed int64) {
 		_, _, _, _, _ = sim.RunMutationRound(
 			context.Background(), mutations, unreachableBaseline, 0, 0,
-			shuffles, sim.Matchup{IncomingDamage: incoming}, 0, 0,
+			shuffles, sim.Matchup{IncomingPhysicalDamage: incoming}, 0, 0,
 			seed, nil, false, 0.1, cache,
 		)
 	}
@@ -178,7 +178,7 @@ func BenchmarkAnnealRoundOnViseraiV4_Quick(b *testing.B) {
 		b.StartTimer()
 		_, _, _, _, found := sim.RunMutationRound(
 			context.Background(), mutations, unreachableBaseline, 0, 0,
-			shuffles, sim.Matchup{IncomingDamage: incoming}, 0, 0,
+			shuffles, sim.Matchup{IncomingPhysicalDamage: incoming}, 0, 0,
 			iterRNG.Int63(), nil, false, 0.1, nil,
 		)
 		if found {

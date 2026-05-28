@@ -22,8 +22,8 @@ func TestEvalCacheEquivalence_Seed3307073355315735355(t *testing.T) {
 	)
 	setupRNG := rand.New(rand.NewSource(3307073355315735355))
 	baseline := deck.Random(heroes.Viserai, deckSize, maxCopies, setupRNG, registry.Registry{})
-	cached := sim.NewEvaluator().Evaluate(baseline.Copy(), shuffles, sim.Matchup{IncomingDamage: incoming}, rand.New(rand.NewSource(99)))
-	uncached := sim.NewEvaluatorWithoutCache().Evaluate(baseline.Copy(), shuffles, sim.Matchup{IncomingDamage: incoming}, rand.New(rand.NewSource(99)))
+	cached := sim.NewEvaluator().Evaluate(baseline.Copy(), shuffles, sim.Matchup{IncomingPhysicalDamage: incoming}, rand.New(rand.NewSource(99)))
+	uncached := sim.NewEvaluatorWithoutCache().Evaluate(baseline.Copy(), shuffles, sim.Matchup{IncomingPhysicalDamage: incoming}, rand.New(rand.NewSource(99)))
 	if cached.Hands != uncached.Hands || cached.TotalValue != uncached.TotalValue {
 		t.Errorf("eval cache divergence: cached=(hands=%d val=%.0f) uncached=(hands=%d val=%.0f)",
 			cached.Hands, cached.TotalValue, uncached.Hands, uncached.TotalValue)
@@ -42,6 +42,6 @@ func TestRunDefense_DRGraveyardCarriesBetweenDRs_Seed6556227072949927836(t *test
 	)
 	setupRNG := rand.New(rand.NewSource(6556227072949927836))
 	baseline := deck.Random(heroes.Viserai, deckSize, maxCopies, setupRNG, registry.Registry{})
-	sim.NewEvaluator().Evaluate(baseline.Copy(), shuffles, sim.Matchup{IncomingDamage: incoming}, rand.New(rand.NewSource(99)))
-	sim.NewEvaluatorWithoutCache().Evaluate(baseline.Copy(), shuffles, sim.Matchup{IncomingDamage: incoming}, rand.New(rand.NewSource(99)))
+	sim.NewEvaluator().Evaluate(baseline.Copy(), shuffles, sim.Matchup{IncomingPhysicalDamage: incoming}, rand.New(rand.NewSource(99)))
+	sim.NewEvaluatorWithoutCache().Evaluate(baseline.Copy(), shuffles, sim.Matchup{IncomingPhysicalDamage: incoming}, rand.New(rand.NewSource(99)))
 }

@@ -170,7 +170,7 @@ func TestBest_BlessingOfOccultTokensDoNotAffectSameAttackTurn(t *testing.T) {
 func TestBest_ReduceToRunechantAffordableWithCarryover(t *testing.T) {
 	h := []card.Card{cards.ReduceToRunechantRed{}}
 	state := stateWithRunechants(heroes.Viserai, 1)
-	state.SetIncomingDamage(4)
+	state.SetIncomingPhysicalDamage(4)
 	got := Best(nil, h, nil, state)
 	if got.Value != 5 {
 		t.Errorf("Value = %d, want 5 (Reduce defends at cost 0 thanks to 1 carryover Runechant)", got.Value)
@@ -183,7 +183,7 @@ func TestBest_ReduceToRunechantUnaffordableWithoutCarryover(t *testing.T) {
 	h := []card.Card{cards.ReduceToRunechantRed{}}
 	got := Best(nil, h, nil, gameengine.GameStateBuilder().
 		SetHero(heroes.Viserai).
-		SetIncomingDamage(4).
+		SetIncomingPhysicalDamage(4).
 		Build())
 	if got.Value != 0 {
 		t.Errorf("Value = %d, want 0 (Reduce can't pay its cost without Runechants or pitch)", got.Value)
@@ -215,7 +215,7 @@ func TestBest_DiscountDefenderPaysByPitchWithoutCarryover(t *testing.T) {
 	h := []card.Card{cards.ReduceToRunechantRed{}, testutils.FakeRedAttack()}
 	got := Best(nil, h, nil, gameengine.GameStateBuilder().
 		SetHero(testutils.Hero{Intel: 4}).
-		SetIncomingDamage(4).
+		SetIncomingPhysicalDamage(4).
 		Build())
 	if got.Value != 5 {
 		t.Errorf("Value = %d, want 5", got.Value)

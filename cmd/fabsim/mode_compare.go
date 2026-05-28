@@ -35,7 +35,7 @@ func runCompareCmd(args []string) {
 	if err != nil {
 		die("%v", err)
 	}
-	runCompare(fs.Arg(0), fs.Arg(1), *shuffles, sim.Matchup{IncomingDamage: *incoming, ArcaneIncomingDamage: *arcaneIncoming}, *maxCopies, *seed, fmtValue)
+	runCompare(fs.Arg(0), fs.Arg(1), *shuffles, sim.Matchup{IncomingPhysicalDamage: *incoming, IncomingArcaneDamage: *arcaneIncoming}, *maxCopies, *seed, fmtValue)
 }
 
 // runCompare re-evaluates both decks under identical (shuffles, incoming) settings and
@@ -48,7 +48,7 @@ func runCompare(name1, name2 string, shuffles int, mp sim.Matchup, maxCopies int
 	d1, s1 := evaluateAndPersist(resolveDeckPath(name1), shuffles, 0, mp, seed, false)
 	d2, s2 := evaluateAndPersist(resolveDeckPath(name2), shuffles, 0, mp, seed, false)
 
-	fmt.Printf("compare: -shuffles=%s -incoming=%d -arcane-incoming=%d\n", commaInt(shuffles), mp.IncomingDamage, mp.ArcaneIncomingDamage)
+	fmt.Printf("compare: -shuffles=%s -incoming=%d -arcane-incoming=%d\n", commaInt(shuffles), mp.IncomingPhysicalDamage, mp.IncomingArcaneDamage)
 	fmt.Println()
 
 	printSideBySideStats(name1, name2, []statSection{

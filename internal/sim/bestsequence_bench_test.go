@@ -27,6 +27,6 @@ func BenchmarkEvaluate_BestSequence(b *testing.B) {
 		rng := rand.New(rand.NewSource(99))
 		ev := NewEvaluatorWithoutCache()
 		b.StartTimer()
-		ev.Evaluate(d, shuffles, Matchup{IncomingDamage: incoming}, rng)
+		ev.Evaluate(d, shuffles, Matchup{IncomingPhysicalDamage: incoming}, rng)
 	}
 }
