@@ -471,7 +471,7 @@ func processAurasAtStartOfTurn(state *gameengine.GameState, d *deck.Deck) {
 	// owned wrapper is preserved across the swap.
 	saved := state.Deck()
 	state.SetDeck(d)
-	state.Engine().FireTriggers(triggertype.StartOfTurn, nil)
+	state.Engine().FireTriggers(card.FireContext{FiringType: triggertype.StartOfTurn})
 	state.SetDeck(saved)
 }
 

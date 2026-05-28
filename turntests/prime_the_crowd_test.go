@@ -36,7 +36,7 @@ func TestPrimeTheCrowd_NonAttackInRemainingFizzles(t *testing.T) {
 func TestPrimeTheCrowd_FiresCrowdCheerTrigger(t *testing.T) {
 	cheers := 0
 	ge := &gameengine.GameEngine{GameState: gameengine.GameStateBuilder().SetHero(testutils.Hero{Intel: 4, TypeSet: card.NewTypeSet(card.TypeRevered)}).Build()}
-	ge.CreateTrigger(testutils.FakeRedAction(), triggertype.CrowdCheer, func(_ card.GameEngine, _ card.Logger, _ card.EphemeralTrigger, _ triggertype.Type) {
+	ge.CreateTrigger(testutils.FakeRedAction(), triggertype.CrowdCheer, func(_ card.GameEngine, _ card.Logger, _ card.EphemeralTrigger, _ card.FireContext) {
 		cheers++
 	}, nil)
 	ge.ResolveAttackStep(ge.Logger(), &card.CardState{Card: cards.PrimeTheCrowdRed{}})

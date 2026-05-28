@@ -569,23 +569,23 @@ func panicIfOptViolatesMultiset(in, top, bottom []card.Card) {
 // === Trigger and aura dispatch ===
 
 // FireTriggers fires the hero plus every Aura, EphemeralTrigger, and Item registered for
-// trigger type t. It is the single dispatch point for every triggertype.Type lifecycle
+// ctx.FiringType. It is the single dispatch point for every triggertype.Type lifecycle
 // event.
 //
-// triggeringCard is the physical *CardState whose resolution raised the event, or nil for
-// turn-boundary events. It is published on ge.triggeringCard so handlers can read its
-// in-attack-turn ephemeral state and write back to it. The hero fires first, then auras,
-// ephemeral triggers, and items.
-func (ge *GameEngine) FireTriggers(t triggertype.Type, triggeringCard *card.CardState) {
+// ctx carries the firing event, the triggering card (the *CardState whose resolution
+// raised the event, or nil for turn-boundary events), and any trigger-specific payload
+// (BuffDelta for AttackBuffedByReaction). The hero fires first, then auras, ephemeral
+// triggers, and items.
+func (ge *GameEngine) FireTriggers(ctx card.FireContext) {
+	t := ctx.FiringType
 	heroFires := ge.heroTriggerType&t != 0
 	if !heroFires && !ge.AnyAurasInPlay() && len(ge.triggers) == 0 && !ge.AnyItemsInPlay() {
 		return
 	}
-	ge.triggeringCard = triggeringCard
 
 	var triggeringTypes card.TypeSet
-	if triggeringCard != nil {
-		triggeringTypes = triggeringCard.Card.Types(ge)
+	if ctx.TriggeringCard != nil {
+		triggeringTypes = ctx.TriggeringCard.Card.Types(ge)
 	}
 
 	// Snapshot which token slots are live at fire-time. fireHooks uses
@@ -598,59 +598,58 @@ func (ge *GameEngine) FireTriggers(t triggertype.Type, triggeringCard *card.Card
 	liveItemBits := ge.tokenItemsLiveBits
 
 	if heroFires {
-		fireHero(ge, t, triggeringCard, triggeringTypes)
+		fireHero(ge, ctx, triggeringTypes)
 	}
-	fireHooks(ge, &ge.auras, t, triggeringCard, triggeringTypes, false)
+	fireHooks(ge, &ge.auras, ctx, triggeringTypes, false)
 	if liveAuraBits != 0 {
-		fireTokenAuras(ge, t, triggeringCard, triggeringTypes, liveAuraBits)
+		fireTokenAuras(ge, ctx, triggeringTypes, liveAuraBits)
 	}
-	fireHooks(ge, &ge.triggers, t, triggeringCard, triggeringTypes, true)
-	fireHooks(ge, &ge.items, t, triggeringCard, triggeringTypes, false)
+	fireHooks(ge, &ge.triggers, ctx, triggeringTypes, true)
+	fireHooks(ge, &ge.items, ctx, triggeringTypes, false)
 	if liveItemBits != 0 {
-		fireTokenItems(ge, t, triggeringCard, triggeringTypes, liveItemBits)
+		fireTokenItems(ge, ctx, triggeringTypes, liveItemBits)
 	}
-
-	ge.triggeringCard = nil
 }
 
 // fireHero applies the OncePerTurn / Matches gates and invokes the hero handler. The
 // hero is singular (no slice splicing, no removeAfterFire) so it bypasses fireHooks's
-// cursor walk. The TriggerType bit-and check is done at the caller; t is the firing
-// event so a multi-subscription hero can dispatch.
-func fireHero(ge *GameEngine, t triggertype.Type, triggeringCard *card.CardState, triggeringTypes card.TypeSet) {
+// cursor walk. The TriggerType bit-and check is done at the caller; ctx carries the
+// firing event and the triggering card so a multi-subscription hero can dispatch and
+// read the source card's in-attack-turn state.
+func fireHero(ge *GameEngine, ctx card.FireContext, triggeringTypes card.TypeSet) {
 	h := ge.hero
 	if h.OncePerTurn() && h.FiredThisTurn() {
 		return
 	}
-	if triggeringCard != nil && !h.Matches(triggeringTypes) {
+	if ctx.TriggeringCard != nil && !h.Matches(triggeringTypes) {
 		return
 	}
-	h.Fire(ge, ge.logger, t)
+	h.Fire(ge, ge.logger, ctx)
 	if h.OncePerTurn() {
 		h.SetFiredThisTurn(true)
 	}
 }
 
-// fireHooks fires every entry of *hooks subscribed to event t: an open once-per-turn gate
-// is required, and card-raised events additionally need the entry's type filter to accept
-// triggeringCard. The snapshot length is taken up front so an entry a handler creates
+// fireHooks fires every entry of *hooks subscribed to ctx.FiringType: an open once-per-turn
+// gate is required, and card-raised events additionally need the entry's type filter to
+// accept ctx.TriggeringCard. The snapshot length is taken up front so an entry a handler creates
 // lands past it and isn't fired this pass. A cursor walk keeps a handler-side destroy from
 // skipping the next entry — currentHookIdx is published before each Fire so the entry's
 // Destroy splices the right slot and sets currentHookDestroyed, which shortens the walk.
 // removeAfterFire splices every fired entry unconditionally: the one-shot semantics of
 // ephemeral triggers, which the engine drops once they fire.
-func fireHooks[H trigger.Hook](ge *GameEngine, hooks *[]H, t triggertype.Type, triggeringCard *card.CardState, triggeringTypes card.TypeSet, removeAfterFire bool) {
+func fireHooks[H trigger.Hook](ge *GameEngine, hooks *[]H, ctx card.FireContext, triggeringTypes card.TypeSet, removeAfterFire bool) {
 	n := len(*hooks)
 	for i := 0; i < n; {
 		h := (*hooks)[i]
-		if h.TriggerType()&t == 0 || (h.OncePerTurn() && h.FiredThisTurn()) ||
-			(triggeringCard != nil && !h.Matches(triggeringTypes)) {
+		if h.TriggerType()&ctx.FiringType == 0 || (h.OncePerTurn() && h.FiredThisTurn()) ||
+			(ctx.TriggeringCard != nil && !h.Matches(triggeringTypes)) {
 			i++
 			continue
 		}
 		ge.currentHookIdx = i
 		ge.currentHookDestroyed = false
-		h.Fire(ge, ge.logger, t)
+		h.Fire(ge, ge.logger, ctx)
 		switch {
 		case ge.currentHookDestroyed:
 			n--
@@ -671,7 +670,7 @@ func fireHooks[H trigger.Hook](ge *GameEngine, hooks *[]H, t triggertype.Type, t
 // length trick: a token created mid-FireTriggers won't have its bit set here, so it
 // can't fire on the same event. Publishes currentFiringTokenAura before each Fire so
 // DestroyAura routes to the slot's SetCount(0) path.
-func fireTokenAuras(ge *GameEngine, t triggertype.Type, triggeringCard *card.CardState, triggeringTypes card.TypeSet, liveAtStart uint8) {
+func fireTokenAuras(ge *GameEngine, ctx card.FireContext, triggeringTypes card.TypeSet, liveAtStart uint8) {
 	for mask := liveAtStart; mask != 0; {
 		low := mask & -mask
 		i := bits.TrailingZeros8(low)
@@ -683,13 +682,13 @@ func fireTokenAuras(ge *GameEngine, t triggertype.Type, triggeringCard *card.Car
 		if a.Count() == 0 {
 			continue
 		}
-		if a.TriggerType()&t == 0 || (a.OncePerTurn() && a.FiredThisTurn()) ||
-			(triggeringCard != nil && !a.Matches(triggeringTypes)) {
+		if a.TriggerType()&ctx.FiringType == 0 || (a.OncePerTurn() && a.FiredThisTurn()) ||
+			(ctx.TriggeringCard != nil && !a.Matches(triggeringTypes)) {
 			continue
 		}
 		ge.currentFiringTokenAura = i
 		ge.currentHookDestroyed = false
-		a.Fire(ge, ge.logger, t)
+		a.Fire(ge, ge.logger, ctx)
 		if !ge.currentHookDestroyed {
 			a.SetFiredThisTurn(true)
 		}
@@ -698,7 +697,7 @@ func fireTokenAuras(ge *GameEngine, t triggertype.Type, triggeringCard *card.Car
 }
 
 // fireTokenItems is the item-side counterpart of fireTokenAuras.
-func fireTokenItems(ge *GameEngine, t triggertype.Type, triggeringCard *card.CardState, triggeringTypes card.TypeSet, liveAtStart uint8) {
+func fireTokenItems(ge *GameEngine, ctx card.FireContext, triggeringTypes card.TypeSet, liveAtStart uint8) {
 	for mask := liveAtStart; mask != 0; {
 		low := mask & -mask
 		i := bits.TrailingZeros8(low)
@@ -707,13 +706,13 @@ func fireTokenItems(ge *GameEngine, t triggertype.Type, triggeringCard *card.Car
 		if it.Count() == 0 {
 			continue
 		}
-		if it.TriggerType()&t == 0 || (it.OncePerTurn() && it.FiredThisTurn()) ||
-			(triggeringCard != nil && !it.Matches(triggeringTypes)) {
+		if it.TriggerType()&ctx.FiringType == 0 || (it.OncePerTurn() && it.FiredThisTurn()) ||
+			(ctx.TriggeringCard != nil && !it.Matches(triggeringTypes)) {
 			continue
 		}
 		ge.currentFiringTokenItem = i
 		ge.currentHookDestroyed = false
-		it.Fire(ge, ge.logger, t)
+		it.Fire(ge, ge.logger, ctx)
 		if !ge.currentHookDestroyed {
 			it.SetFiredThisTurn(true)
 		}
@@ -793,7 +792,7 @@ func (ge *GameEngine) AddResourcePoints(n int) { ge.pitchBonus += n }
 // pitched-zone copy.
 func (ge *GameEngine) FirePitchTriggers(pitched *card.CardState) int {
 	ge.pitchBonus = 0
-	ge.FireTriggers(triggertype.Pitch, pitched)
+	ge.FireTriggers(card.FireContext{FiringType: triggertype.Pitch, TriggeringCard: pitched})
 	return ge.pitchBonus
 }
 
@@ -970,13 +969,13 @@ func (ge *GameEngine) DealArcaneDamage(l card.Logger, source string, n int) {
 // caller; this method only records the cheer landing on your hero.
 func (ge *GameEngine) CrowdCheer() {
 	ge.hasCrowdCheered = true
-	ge.FireTriggers(triggertype.CrowdCheer, nil)
+	ge.FireTriggers(card.FireContext{FiringType: triggertype.CrowdCheer})
 }
 
 // CrowdBoo is the boo-side counterpart to CrowdCheer.
 func (ge *GameEngine) CrowdBoo() {
 	ge.hasCrowdBooed = true
-	ge.FireTriggers(triggertype.CrowdBoo, nil)
+	ge.FireTriggers(card.FireContext{FiringType: triggertype.CrowdBoo})
 }
 
 // dealtArcaneText is the pre-built rider-line cache indexed by arcane-damage count, keeping

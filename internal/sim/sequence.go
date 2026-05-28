@@ -357,20 +357,20 @@ func (ctx *sequenceContext) permEngine(state *gameengine.GameState) *gameengine.
 	return ctx.bufs.pooledEngine
 }
 
-// fireIncomingPhysicalDamageTriggers runs the DamageAboutToBeTaken → DamageTaken sequence once for
+// fireIncomingDamageTriggers runs the DamageAboutToBeTaken → DamageTaken sequence once for
 // the turn's remaining incoming damage. DamageAboutToBeTaken fires while the figures are
 // still mutable so subscribers can prevent (PreventPhysicalDamage / PreventArcaneDamage /
 // PreventGenericDamage); DamageTaken then fires only if damage still gets through. Each
 // trigger fires a single time covering both damage types at once — handlers introspect
 // RemainingPhysicalDamage() / RemainingArcaneDamage() to see which side is live. Zeroes
 // ge.Value first so handler AddValues are captured cleanly into the returned total.
-func fireIncomingPhysicalDamageTriggers(ge *gameengine.GameEngine) int {
+func fireIncomingDamageTriggers(ge *gameengine.GameEngine) int {
 	ge.SetValue(0)
 	if ge.RemainingPhysicalDamage() > 0 || ge.RemainingArcaneDamage() > 0 {
-		ge.FireTriggers(triggertype.DamageAboutToBeTaken, nil)
+		ge.FireTriggers(card.FireContext{FiringType: triggertype.DamageAboutToBeTaken})
 	}
 	if ge.RemainingPhysicalDamage() > 0 || ge.RemainingArcaneDamage() > 0 {
-		ge.FireTriggers(triggertype.DamageTaken, nil)
+		ge.FireTriggers(card.FireContext{FiringType: triggertype.DamageTaken})
 	}
 	return ge.Value()
 }
@@ -379,7 +379,7 @@ func fireIncomingPhysicalDamageTriggers(ge *gameengine.GameEngine) int {
 // ctx.leafState on the no-defender path.
 func (ctx *sequenceContext) fireUndefendedDamageTriggers() int {
 	ctx.leafState.SetIsMyTurn(false)
-	return fireIncomingPhysicalDamageTriggers(ctx.permEngine(ctx.leafState))
+	return fireIncomingDamageTriggers(ctx.permEngine(ctx.leafState))
 }
 
 // runDefense mutates ctx.leafState through the defender list, accumulating per-DR Value.
@@ -504,7 +504,7 @@ func (ctx *sequenceContext) runDefense(defenders []card.Card, pitched []*card.Ca
 
 	// Defense phase over: fire the incoming-damage triggers once for whatever physical /
 	// arcane damage still gets through.
-	total += fireIncomingPhysicalDamageTriggers(ge)
+	total += fireIncomingDamageTriggers(ge)
 
 	return total, cacheable, survivingHeld
 }
@@ -594,7 +594,7 @@ func (ctx *sequenceContext) bestSequence(attackers []card.Card) (attackTurnScore
 		emptyAttackers := ctx.bufs.ptrBuf[:0]
 		permState := ctx.preparePermState(emptyAttackers, 0)
 		ge := ctx.permEngine(permState)
-		ge.FireTriggers(triggertype.EndOfTurn, nil)
+		ge.FireTriggers(card.FireContext{FiringType: triggertype.EndOfTurn})
 		ctx.captureWinningSeq(nil, nil)
 		// permState.Value() carries the seeded baseline plus any EndOfTurn fire delta.
 		return attackTurnScoreOf(permState, permState.Value()), permState, true
@@ -851,7 +851,14 @@ func (ctx *sequenceContext) playSequenceWithMeta(n int) (damage int, totalCounte
 				h := &activeAttack.OnHit[i]
 				h.Fire(ge, state.Logger(), activeAttack, h)
 			}
-			ge.FireTriggers(triggertype.Hit, activeAttack)
+			ge.FireTriggers(card.FireContext{FiringType: triggertype.Hit, TriggeringCard: activeAttack})
+		}
+		// Go-again credit for the attack lands here, after every attack reaction targeting
+		// it has resolved and after OnHit / Hit triggers fire. A reaction-step buff
+		// (Talisman of Featherfoot) or on-hit rider that flips GrantedGoAgain is picked up
+		// by EffectiveGoAgain at this point.
+		if activeAttack.EffectiveGoAgain(ge) {
+			state.AddActionPoints(1)
 		}
 		activeAttack = nil
 	}
@@ -887,7 +894,7 @@ func (ctx *sequenceContext) playSequenceWithMeta(n int) (damage int, totalCounte
 			if !ok || activeAttack == nil || !ar.ARTargetAllowed(ge, activeAttack, pc.Mode) {
 				return infeasible()
 			}
-			ge.FireTriggers(triggertype.CardOrAbility, pc)
+			ge.FireTriggers(card.FireContext{FiringType: triggertype.CardOrAbility, TriggeringCard: pc})
 			state.SetAttackReactionTarget(activeAttack)
 			ge.ResolveAttackStep(state.Logger(), pc)
 			state.SetAttackReactionTarget(nil)
@@ -920,7 +927,7 @@ func (ctx *sequenceContext) playSequenceWithMeta(n int) (damage int, totalCounte
 		state.SetCurrentStepRerouted(false)
 		// CardOrAbility fires before the card resolves so play-triggered effects land ahead
 		// of the played card's own effect.
-		ge.FireTriggers(triggertype.CardOrAbility, pc)
+		ge.FireTriggers(card.FireContext{FiringType: triggertype.CardOrAbility, TriggeringCard: pc})
 		ge.ResolveAttackStep(state.Logger(), pc)
 		// ModalTypes cards (Tip-Off) read different is-attack / type-line values per Mode.
 		// Resolve once and route the attack / non-attack-action / persistence checks off
@@ -941,7 +948,10 @@ func (ctx *sequenceContext) playSequenceWithMeta(n int) (damage int, totalCounte
 		if !modeTypes.PersistsInPlay() && !state.CurrentStepRerouted() {
 			state.AppendGraveyard(pc.Card)
 		}
-		if pc.EffectiveGoAgain(ge) {
+		// Attack cards' go-again credit is deferred into finalizeActiveAttack so it sees
+		// any GrantedGoAgain flipped during the reaction step (Featherfoot) or by OnHit
+		// riders. Non-attack-action cards credit at resolution as before.
+		if !modeTypes.Has(card.TypeAttack) && pc.EffectiveGoAgain(ge) {
 			state.AddActionPoints(1)
 		}
 	}
@@ -950,7 +960,7 @@ func (ctx *sequenceContext) playSequenceWithMeta(n int) (damage int, totalCounte
 	if pool.idx < pool.n {
 		return infeasible()
 	}
-	ge.FireTriggers(triggertype.EndOfTurn, nil)
+	ge.FireTriggers(card.FireContext{FiringType: triggertype.EndOfTurn})
 	return state.Value(), pendingTotalCountersFromState(state), pool.remaining, state, true
 }
 

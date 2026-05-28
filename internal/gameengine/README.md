@@ -51,7 +51,7 @@ site.
 
 ## Trigger dispatch
 
-`FireTriggers(t, triggeringCard)` is the single dispatch point for every lifecycle event. It
+`FireTriggers(ctx card.FireContext)` is the single dispatch point for every lifecycle event. It
 fires the hero (via the standalone `fireHero` helper) and then walks auras, ephemeral
 triggers, and items via `fireHooks`. `fireHooks` takes a length snapshot up front (so an
 entry a handler creates lands past it and is not fired this pass — the self-exclusion

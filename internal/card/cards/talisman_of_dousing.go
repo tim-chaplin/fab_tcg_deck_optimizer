@@ -15,7 +15,7 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/triggertype"
 )
 
-func dousingHandler(ge card.GameEngine, l card.Logger, it card.Item, _ triggertype.Type) {
+func dousingHandler(ge card.GameEngine, l card.Logger, it card.Item, _ card.FireContext) {
 	prevented := ge.PreventArcaneDamage(1)
 	if prevented <= 0 {
 		return

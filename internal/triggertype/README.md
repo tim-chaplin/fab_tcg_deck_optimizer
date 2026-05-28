@@ -29,6 +29,12 @@ pulling in the whole game engine.
 - `Pitch` — as each card is pitched to fund a play in the attack phase. The triggering card
   is the pitched card; a handler may boost the resources it yields via
   `GameEngine.AddResourcePoints`.
+- `CrowdCheer` / `CrowdBoo` — when the crowd cheers / boos your hero, raised by
+  `GameState.CrowdCheer` / `GameState.CrowdBoo`.
+- `AttackBuffedByReaction` — when an attack action card's `BonusAttack` increments by
+  exactly 1 during the reaction-step buff resolution. The buffed attack `CardState` is the
+  firing context. The "exactly +1" gate lives at the fire site (in
+  `CardState.GrantAttackReactionBuff`), not in subscribers.
 
 ## How it is used / how to extend it
 
@@ -39,7 +45,7 @@ occurs.
 
 ## Important file
 
-- `triggertype.go` — the `Type` enum and all six constants.
+- `triggertype.go` — the `Type` enum and its lifecycle-event constants.
 
 ## Gotchas and invariants
 
@@ -47,4 +53,3 @@ occurs.
   an OR; the engine's dispatch is a bitwise-AND test. Keep new constants single-bit.
 - The package imports nothing — keep it dependency-free so the whole codebase can name a
   trigger type cheaply.
-</content>

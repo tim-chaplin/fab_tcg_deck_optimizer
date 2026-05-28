@@ -588,6 +588,8 @@ var cardsByID = []Card{
 
 	ids.TalismanOfDousingYellow: cards.TalismanOfDousingYellow{},
 
+	ids.TalismanOfFeatherfootYellow: cards.TalismanOfFeatherfootYellow{},
+
 	ids.TalismanOfRecompenseYellow: cards.TalismanOfRecompenseYellow{},
 
 	ids.TestOfStrengthRed: cards.TestOfStrengthRed{},

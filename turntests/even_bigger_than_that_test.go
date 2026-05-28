@@ -116,7 +116,7 @@ func TestQuicken_GrantsGoAgainAndDestroysSlot(t *testing.T) {
 	ge := gameengine.New()
 	ge.CreateQuicken(1)
 	first := &card.CardState{Card: testutils.FakeRedAttack()}
-	ge.FireTriggers(triggertype.CardOrAbility, first)
+	ge.FireTriggers(card.FireContext{FiringType: triggertype.CardOrAbility, TriggeringCard: first})
 	if !first.GrantedGoAgain {
 		t.Errorf("first attack GrantedGoAgain = false, want true (Quicken should grant)")
 	}
@@ -124,7 +124,7 @@ func TestQuicken_GrantsGoAgainAndDestroysSlot(t *testing.T) {
 		t.Errorf("QuickenCount after fire = %d, want 0 (slot destroyed)", got)
 	}
 	second := &card.CardState{Card: testutils.FakeRedAttack()}
-	ge.FireTriggers(triggertype.CardOrAbility, second)
+	ge.FireTriggers(card.FireContext{FiringType: triggertype.CardOrAbility, TriggeringCard: second})
 	if second.GrantedGoAgain {
 		t.Errorf("second attack GrantedGoAgain = true, want false (Quicken already gone)")
 	}
@@ -140,7 +140,7 @@ func TestQuicken_MultipleChargesAllPopOnSingleAttack(t *testing.T) {
 		t.Fatalf("QuickenCount after CreateQuicken(5) = %d, want 5", got)
 	}
 	first := &card.CardState{Card: testutils.FakeRedAttack()}
-	ge.FireTriggers(triggertype.CardOrAbility, first)
+	ge.FireTriggers(card.FireContext{FiringType: triggertype.CardOrAbility, TriggeringCard: first})
 	if !first.GrantedGoAgain {
 		t.Errorf("first attack GrantedGoAgain = false, want true")
 	}
@@ -148,7 +148,7 @@ func TestQuicken_MultipleChargesAllPopOnSingleAttack(t *testing.T) {
 		t.Errorf("QuickenCount after fire = %d, want 0 (all 5 charges popped on the one attack, 4 wasted)", got)
 	}
 	second := &card.CardState{Card: testutils.FakeRedAttack()}
-	ge.FireTriggers(triggertype.CardOrAbility, second)
+	ge.FireTriggers(card.FireContext{FiringType: triggertype.CardOrAbility, TriggeringCard: second})
 	if second.GrantedGoAgain {
 		t.Errorf("second attack GrantedGoAgain = true, want false (Quicken slot already destroyed)")
 	}
@@ -159,7 +159,7 @@ func TestQuicken_SkipsNonAttackFires(t *testing.T) {
 	ge := gameengine.New()
 	ge.CreateQuicken(1)
 	action := &card.CardState{Card: testutils.FakeRedAction()}
-	ge.FireTriggers(triggertype.CardOrAbility, action)
+	ge.FireTriggers(card.FireContext{FiringType: triggertype.CardOrAbility, TriggeringCard: action})
 	if action.GrantedGoAgain {
 		t.Errorf("non-attack action GrantedGoAgain = true, want false")
 	}
