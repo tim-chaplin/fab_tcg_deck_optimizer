@@ -2,6 +2,11 @@
 //
 // Text: "**Once per Turn Action** - {r}{r}{r}: Draw a card. If an attack action card and a
 // 'non-attack' action card were pitched this way, create a Runechant token."
+//
+// The activation is a non-attack action — the ability card carries no TypeAttack, so it
+// resolves through the attack-turn runner without dealing damage. The conditional Runechant
+// reads self.PitchedToPlay (the cards the runner attributed to funding this activation) and
+// fires when that set contains both an attack action card and a non-attack action card.
 
 package weapons
 
@@ -22,11 +27,7 @@ func (AnnalsOfSutcliffe) Ability() card.Card  { return annalsOfSutcliffeAbility 
 
 var annalsOfSutcliffeAbility card.Card = AnnalsOfSutcliffeAbility{}
 
-// not implemented: draw rider and conditional Runechant rider; activation pays 3 resources
-// for zero modelled value, so the optimizer naturally avoids equipping it
-func (AnnalsOfSutcliffe) NotImplemented() {}
-
-var annalsOfSutcliffeAbilityTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeWeapon, card.TypeBook, card.TypeTwoHand, card.TypeAttack)
+var annalsOfSutcliffeAbilityTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeWeapon, card.TypeBook, card.TypeTwoHand)
 
 type AnnalsOfSutcliffeAbility struct{}
 
@@ -41,5 +42,23 @@ func (AnnalsOfSutcliffeAbility) Types(card.GameEngine) card.TypeSet {
 	return annalsOfSutcliffeAbilityTypes
 }
 func (AnnalsOfSutcliffeAbility) GoAgain(card.GameEngine) bool { return false }
+
 func (AnnalsOfSutcliffeAbility) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
+	ge.DrawOne()
+	l.AppendPostTrigger(self.Card.DisplayName(), "Drew a card", 0)
+
+	pitchedAttack, pitchedNonAttack := false, false
+	for _, p := range self.PitchedToPlay {
+		t := p.Card.Types(ge)
+		if t.IsAttackAction() {
+			pitchedAttack = true
+		}
+		if t.IsNonAttackAction() {
+			pitchedNonAttack = true
+		}
+	}
+	if pitchedAttack && pitchedNonAttack {
+		ge.CreateRunechants(1)
+		l.AppendPostTrigger(self.Card.DisplayName(), "Created a runechant", 1)
+	}
 }
