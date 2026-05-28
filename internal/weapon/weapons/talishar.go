@@ -70,7 +70,7 @@ func (TalisharAbility) GoAgain(card.GameEngine) bool       { return false }
 // Play puts a rust counter on the equipped Talishar — the activation's "put a rust counter"
 // clause. The 4-power attack itself is resolved by the attack-turn runner from the ability's
 // printed Attack; this handler only bumps the counter on self.Weapon, the specific equipped
-// object the runner attributed to this swing (so two 1H copies would each track their own).
+// object the runner attributed to this swing.
 func (TalisharAbility) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
 	if self.Weapon != nil {
 		self.Weapon.SetCount(self.Weapon.Count() + 1)

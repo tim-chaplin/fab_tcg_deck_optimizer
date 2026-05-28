@@ -43,9 +43,8 @@ var counterWeaponTypes = card.NewTypeSet(card.TypeGeneric, card.TypeWeapon, card
 // swing in one turn (one starting action point + the first swing's go-again funds the
 // second). Two equipped copies share one Ability() card value (like any pair of identical
 // weapons), so it pins per-object counter attribution: each swing must bump the specific
-// object the runner attributed it to, not the first equipped copy with a matching CardID. As
-// a platonic weapon card it satisfies weapon.Card; the equip-time builder wraps each copy in
-// its own mutable weapon.Weapon object.
+// object the runner attributed it to. As a platonic weapon card it satisfies weapon.Card;
+// the equip-time builder wraps each copy in its own mutable weapon.Weapon object.
 type CounterWeapon struct{}
 
 func (CounterWeapon) ID() ids.CardID                                     { return ids.InvalidCard }
