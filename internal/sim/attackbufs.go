@@ -24,6 +24,10 @@ type attackBufs struct {
 	// off to bestSequence. Sized at construction; the slice header re-slices to [:n] per
 	// call.
 	attackerBuf []card.Card
+	// attackerWeaponIdxBuf parallels attackerBuf: the equipped-weapon index for each appended
+	// weapon swing, or -1 for partition attackers / item abilities. bestSequence seeds each
+	// CardState.WeaponIdx from it so the per-perm weapon object resolves correctly.
+	attackerWeaponIdxBuf []int
 	// weaponNames[mask] is the pre-built []string of weapon names indexed by the
 	// weapon-prefix bits of the wmask, used for SwungWeapons display.
 	weaponNames [][]string
@@ -123,6 +127,7 @@ func newAttackBufs(handSize, weaponCount int, weapons []gameengine.Weapon, state
 		ptrBuf:                ptrBuf,
 		permMeta:              make([]*attackerMeta, maxAttackers),
 		attackerBuf:           make([]card.Card, maxAttackers),
+		attackerWeaponIdxBuf:  make([]int, maxAttackers),
 		weaponNames:           weaponNames,
 		activatedAbilities:    activatedAbilities,
 		activatedAbilityCosts: activatedAbilityCosts,

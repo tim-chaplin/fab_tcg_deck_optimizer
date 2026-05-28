@@ -29,6 +29,14 @@ type CardState struct {
 	// enumeration writes Mode before each permutation; Play reads it. Sized int8 so it
 	// packs into the bool block's padding.
 	Mode int8
+	// WeaponIdx is the equipped-weapon index in GameState.Weapons() this entry's weapon
+	// activated ability belongs to, or -1 for anything that isn't a weapon swing (hand cards,
+	// item abilities). Stable identity: the attack-turn runner sets it at seed time so it
+	// rides the permutation swap alongside Card, letting two 1H copies of the same weapon
+	// each address their own object. The runner resolves it into the per-perm Ephemeral.Weapon
+	// each playSequence call. Sized int16 (equip slots are 0-3) so it packs into the bool /
+	// Mode block rather than widening the struct.
+	WeaponIdx int16
 	// Ephemeral groups every field whose value can change during this card's attack-step
 	// resolution: granted keywords, bonus accumulators, the pitch-attribution slice, and
 	// the on-hit handler queue. Anonymous embedding so callers keep writing pc.GrantedGoAgain
@@ -85,6 +93,13 @@ type Ephemeral struct {
 	// (function pointer + small data payload) rather than closures so registration is
 	// alloc-free.
 	OnHit []OnHitHandler
+	// Weapon is the equipped weapon object this entry's activated ability belongs to, nil for
+	// everything that isn't a weapon swing. The attack-turn runner resolves it per-permutation
+	// from CardState.WeaponIdx against the per-perm GameState.Weapons() (each permutation has
+	// its own weapon copies), so a weapon ability's Play mutates the correct object —
+	// two 1H copies of the same weapon each carry their own. Lives in Ephemeral so Reset
+	// clears the stale per-perm pointer before the slot is reused.
+	Weapon Weapon
 }
 
 // Reset zeroes r, preserving OnHit's backing array so per-Best reuse stays allocation-free.

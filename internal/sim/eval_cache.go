@@ -81,13 +81,17 @@ const (
 	numCachedTokenItems = 3 // Gold, Silver, Copper
 )
 
-// playedCard is one resolved card in a cached solution: the card, its modal Mode, and
-// whether it was played from arsenal. A cache replay seeds each attack step directly from
-// these.
+// playedCard is one resolved card in a cached solution: the card, its modal Mode, whether it
+// was played from arsenal, and (for a weapon swing) the equipped-weapon index it belongs to.
+// A cache replay seeds each attack step directly from these, so weaponIdx must round-trip to
+// re-resolve the same per-perm weapon object the originating Best call used.
 type playedCard struct {
 	card        card.Card
 	mode        int8
 	fromArsenal bool
+	// weaponIdx is the equipped-weapon index for a weapon swing, or -1 for hand cards / item
+	// abilities. Replay seeds CardState.WeaponIdx from it. int16 to match CardState.WeaponIdx.
+	weaponIdx int16
 }
 
 // cacheSolution is the in-flight winning solution before it stores into an evalCacheEntry.

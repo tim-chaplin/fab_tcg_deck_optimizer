@@ -53,9 +53,14 @@ func (s *SequenceContextForTest) PermEngine() *gameengine.GameEngine {
 }
 
 // BestSequence wraps (*sequenceContext).bestSequence and returns the winning leaf's
-// damage / totalCounters / legal triplet.
+// damage / totalCounters / legal triplet. Every attacker seeds WeaponIdx=-1: this export
+// drives raw card orderings without weapon-swing attribution.
 func (s *SequenceContextForTest) BestSequence(attackers []card.Card) (int, int, bool) {
-	score, _, ok := s.ctx.bestSequence(attackers)
+	weaponIdx := make([]int, len(attackers))
+	for i := range weaponIdx {
+		weaponIdx[i] = -1
+	}
+	score, _, ok := s.ctx.bestSequence(attackers, weaponIdx)
 	return score.value, score.totalCounters, ok
 }
 

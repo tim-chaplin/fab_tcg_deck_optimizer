@@ -251,12 +251,23 @@ func bestAttackWithWeapons(
 				continue
 			}
 			allAttackers := bufs.attackerBuf[:len(attackers)]
+			allWeaponIdx := bufs.attackerWeaponIdxBuf[:len(attackers)]
+			for j := range attackers {
+				allWeaponIdx[j] = -1
+			}
 			for j, ab := range ctx.activatedAbilities {
 				if wmask&(1<<j) != 0 {
 					allAttackers = append(allAttackers, ab)
+					// For j < weaponAbilityCount, j is the equipped-weapon index in
+					// state.weapons; item abilities (j >= weaponAbilityCount) carry -1.
+					wIdx := -1
+					if j < bufs.weaponAbilityCount {
+						wIdx = j
+					}
+					allWeaponIdx = append(allWeaponIdx, wIdx)
 				}
 			}
-			score, winner, legal := ctx.bestSequence(allAttackers)
+			score, winner, legal := ctx.bestSequence(allAttackers, allWeaponIdx)
 			if !legal {
 				continue
 			}
@@ -573,6 +584,7 @@ func (ctx *sequenceContext) captureWinningSeq(pcBuf []card.CardState, pitchPerm 
 	for i := range pcBuf {
 		b.seqAttack = append(b.seqAttack, playedCard{
 			card: pcBuf[i].Card, mode: pcBuf[i].Mode, fromArsenal: pcBuf[i].FromArsenal,
+			weaponIdx: pcBuf[i].WeaponIdx,
 		})
 	}
 	b.seqPitch = b.seqPitch[:0]
@@ -583,8 +595,9 @@ func (ctx *sequenceContext) captureWinningSeq(pcBuf []card.CardState, pitchPerm 
 
 // bestSequence tries every ordering of attackers and returns the winning permutation's
 // attackTurnScore. legal=true when at least one ordering is playable. Returns the winning
-// *GameState via the second return value.
-func (ctx *sequenceContext) bestSequence(attackers []card.Card) (attackTurnScore, *gameengine.GameState, bool) {
+// *GameState via the second return value. weaponIdx parallels attackers: entry i is the
+// equipped-weapon index for a weapon swing, or -1 for hand cards / item abilities.
+func (ctx *sequenceContext) bestSequence(attackers []card.Card, weaponIdx []int) (attackTurnScore, *gameengine.GameState, bool) {
 	n := len(attackers)
 	if n == 0 {
 		if len(ctx.attackPitchPerm) > 0 {
@@ -602,7 +615,7 @@ func (ctx *sequenceContext) bestSequence(attackers []card.Card) (attackTurnScore
 	permMeta := ctx.bufs.permMeta[:n]
 	for idx, c := range attackers {
 		permMeta[idx] = attackerMetaPtrFor(c)
-		ctx.seedAttackStepEntry(&pcBuf[idx], c, idx)
+		ctx.seedAttackStepEntry(&pcBuf[idx], c, idx, weaponIdx[idx])
 	}
 
 	var bestScore attackTurnScore
@@ -765,14 +778,15 @@ func nextPermPitches(perm []*card.CardState, vals []int) bool {
 
 // playSequence builds permMeta and calls playSequenceWithMeta, recording the result on
 // ctx.permState for the test-only PermEngine accessor. bestSequence's hot path threads the
-// winner through return values instead and skips this write.
+// winner through return values instead and skips this write. Every entry seeds WeaponIdx=-1:
+// this path drives raw card orderings that don't carry weapon-swing attribution.
 func (ctx *sequenceContext) playSequence(order []card.Card) (damage int, totalCounters int, residualBudget int, legal bool) {
 	n := len(order)
 	pcBuf := ctx.bufs.pcBuf
 	meta := ctx.bufs.permMeta[:n]
 	for i, c := range order {
 		meta[i] = attackerMetaPtrFor(c)
-		ctx.seedAttackStepEntry(&pcBuf[i], c, i)
+		ctx.seedAttackStepEntry(&pcBuf[i], c, i, -1)
 	}
 	d, tc, rb, winner, lg := ctx.playSequenceWithMeta(n)
 	ctx.permState = winner
@@ -788,7 +802,7 @@ func (ctx *sequenceContext) playSequenceModal(order []playedCard) (damage int, t
 	meta := ctx.bufs.permMeta[:n]
 	for i, pc := range order {
 		meta[i] = attackerMetaPtrFor(pc.card)
-		ctx.seedAttackStepEntry(&pcBuf[i], pc.card, i)
+		ctx.seedAttackStepEntry(&pcBuf[i], pc.card, i, int(pc.weaponIdx))
 		pcBuf[i].Mode = pc.mode
 		pcBuf[i].FromArsenal = pc.fromArsenal
 	}
@@ -797,13 +811,16 @@ func (ctx *sequenceContext) playSequenceModal(order []playedCard) (damage int, t
 	return d, tc, rb, lg
 }
 
-// seedAttackStepEntry initialises one pcBuf slot: bind (Card, FromArsenal, Mode) and zero every
-// ephemeral field. Mode is reseeded per modal tuple by the attack-turn runner; initial 0 covers
-// non-modal attackers.
-func (ctx *sequenceContext) seedAttackStepEntry(pc *card.CardState, c card.Card, idx int) {
+// seedAttackStepEntry initialises one pcBuf slot: bind (Card, FromArsenal, Mode, WeaponIdx) and
+// zero every ephemeral field. Mode is reseeded per modal tuple by the attack-turn runner; initial
+// 0 covers non-modal attackers. weaponIdx is the equipped-weapon index for a weapon swing, or -1
+// for hand cards / item abilities; it rides the permutation so the per-perm weapon object resolves
+// onto pc.Weapon in playSequenceWithMeta. Ephemeral.Reset clears any stale pc.Weapon.
+func (ctx *sequenceContext) seedAttackStepEntry(pc *card.CardState, c card.Card, idx, weaponIdx int) {
 	pc.Card = c
 	pc.FromArsenal = idx == ctx.arsenalInIdx
 	pc.Mode = 0
+	pc.WeaponIdx = int16(weaponIdx)
 	pc.Ephemeral.Reset()
 }
 
@@ -819,6 +836,17 @@ func (ctx *sequenceContext) playSequenceWithMeta(n int) (damage int, totalCounte
 	}
 	played := ptrBuf[:n]
 	state := ctx.preparePermState(played, n)
+	// Resolve each weapon swing's CardState.Weapon against this permutation's own weapon
+	// copies (preparePermState rebuilt them via copyWeaponsInto, so they differ from the
+	// prior call's). WeaponIdx rode the permutation swap with the entry; the per-perm object
+	// it points at is what a weapon ability's Play mutates. The Ephemeral.Reset above cleared
+	// any stale pointer from the prior call.
+	weapons := state.Weapons()
+	for i := 0; i < n; i++ {
+		if idx := int(pcBuf[i].WeaponIdx); idx >= 0 && idx < len(weapons) {
+			pcBuf[i].Weapon = weapons[idx].(card.Weapon)
+		}
+	}
 	state.SetIsMyTurn(true)
 	ge := ctx.permEngine(state)
 	// infeasible returns state to the pool and surfaces the legal=false signal. Used at

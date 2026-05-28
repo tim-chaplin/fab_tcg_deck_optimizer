@@ -2,7 +2,6 @@ package gameengine
 
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/ids"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapon"
 )
 
@@ -48,15 +47,4 @@ func (ge *GameEngine) DestroyWeapon(addToGraveyard bool) {
 	if src != nil && addToGraveyard {
 		ge.AppendGraveyard(src.(card.Card))
 	}
-}
-
-// WeaponByID returns the equipped weapon whose source card has the given ID, or nil. A
-// weapon's activated ability reaches its weapon object through this to mutate its counter.
-func (ge *GameEngine) WeaponByID(id ids.CardID) card.Weapon {
-	for _, w := range ge.weapons {
-		if w.CardID() == id {
-			return w.(card.Weapon)
-		}
-	}
-	return nil
 }
