@@ -301,7 +301,7 @@ func applyAcceptedMutation(cfg annealConfig, round int, verbose bool, tempLabel 
 	}
 	if verbose {
 		fmt.Fprintf(os.Stderr, "\r[round %d] %s at %d/%d: deep %.3f vs %.3f (%s)%s       \n",
-			round, verb, idx+1, total, avg, currentAvg, mut.Description, tempLabel)
+			round, verb, idx+1, total, avg, currentAvg, mut.Description(), tempLabel)
 	}
 	if avg <= bestEverAvg {
 		return bestEver, bestEverStats, bestEverAvg
