@@ -352,8 +352,11 @@ func cardMultisetKey(cs []Card) string {
 // tests that exercise the cap filter directly.
 func filterMaxCopiesViolations(muts []Mutation, maxCopies int) []Mutation {
 	out := make([]Mutation, 0, len(muts))
+	// One counts map reused across every candidate (cleared per check). A round filters
+	// thousands of mutations, so a fresh map per candidate would dominate allocations.
+	counts := map[ids.CardID]int{}
 	for _, m := range muts {
-		if respectsMaxCopies(m.Deck.cards, maxCopies) {
+		if respectsMaxCopiesInto(m.Deck.cards, maxCopies, counts) {
 			out = append(out, m)
 		}
 	}
@@ -364,7 +367,14 @@ func filterMaxCopiesViolations(muts []Mutation, maxCopies int) []Mutation {
 // times. Returns false at the first overshoot so a single hot card short-circuits the
 // count. Exported for tests pinning the short-circuit behaviour.
 func respectsMaxCopies(cs []Card, maxCopies int) bool {
-	counts := map[ids.CardID]int{}
+	return respectsMaxCopiesInto(cs, maxCopies, map[ids.CardID]int{})
+}
+
+// respectsMaxCopiesInto is respectsMaxCopies with a caller-supplied counts map so a tight
+// filtering loop can reuse one map instead of allocating per check. counts is cleared on
+// entry; its contents on return are unspecified.
+func respectsMaxCopiesInto(cs []Card, maxCopies int, counts map[ids.CardID]int) bool {
+	clear(counts)
 	for _, c := range cs {
 		counts[c.ID()]++
 		if counts[c.ID()] > effectiveMaxCopies(c, maxCopies) {
