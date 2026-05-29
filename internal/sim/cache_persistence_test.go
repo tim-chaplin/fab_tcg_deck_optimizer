@@ -126,7 +126,7 @@ func makeRoundDecks(baseline *deck.Deck, rounds, mutationsPerRound int) [][]*dec
 		mutGen.Shuffle(len(muts), func(i, j int) { muts[i], muts[j] = muts[j], muts[i] })
 		picks := make([]*deck.Deck, 0, mutationsPerRound)
 		for i := 0; i < mutationsPerRound && i < len(muts); i++ {
-			picks = append(picks, muts[i].Deck)
+			picks = append(picks, muts[i].Deck())
 		}
 		out[r] = picks
 		// Thread the first candidate into the next round's base — simulates anneal
