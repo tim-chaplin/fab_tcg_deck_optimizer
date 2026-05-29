@@ -352,8 +352,8 @@ func cardMultisetKey(cs []Card) string {
 // tests that exercise the cap filter directly.
 func filterMaxCopiesViolations(muts []Mutation, maxCopies int) []Mutation {
 	out := make([]Mutation, 0, len(muts))
-	// One counts map reused across every candidate (cleared per check) — a from-scratch anneal
-	// round filters thousands of mutations, and a fresh map per candidate dominated allocations.
+	// One counts map reused across every candidate (cleared per check). A round filters
+	// thousands of mutations, so a fresh map per candidate would dominate allocations.
 	counts := map[ids.CardID]int{}
 	for _, m := range muts {
 		if respectsMaxCopiesInto(m.Deck.cards, maxCopies, counts) {
