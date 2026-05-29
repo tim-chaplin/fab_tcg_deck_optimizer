@@ -1,8 +1,6 @@
 package sim
 
 import (
-	"math/rand"
-
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/gameengine"
@@ -115,25 +113,6 @@ func EngineWithHand(h []card.Card) *gameengine.GameState {
 	gs.SetHand(h)
 	return gs
 }
-
-// EvaluateImplForTest re-exports the unexported (*Evaluator).evaluateImpl.
-func (ev *Evaluator) EvaluateImplForTest(d *deck.Deck, maxRuns int, mp Matchup, rng *rand.Rand, stop func(stats *deck.Stats, runs int) bool) deck.Stats {
-	return ev.evaluateImpl(d, maxRuns, mp, rng, stop)
-}
-
-// AdaptiveCheckInterval re-exports the adaptive-shuffle check interval constant.
-const AdaptiveCheckInterval = adaptiveCheckInterval
-
-// AdaptiveShufflesCap re-exports the adaptive-shuffle ceiling.
-const AdaptiveShufflesCap = adaptiveShufflesCap
-
-// MakeAdaptiveStop re-exports makeAdaptiveStop.
-func MakeAdaptiveStop(targetSE float64) func(stats *deck.Stats, runs int) bool {
-	return makeAdaptiveStop(targetSE)
-}
-
-// MeanStandardError re-exports meanStandardError.
-func MeanStandardError(stats *deck.Stats) float64 { return meanStandardError(stats) }
 
 // ProcessAurasAtStartOfTurnForTest drives processAurasAtStartOfTurn against an arbitrary
 // aura queue and returns the post-tick (survivors, damage, revealedCards, graveyardedCards)

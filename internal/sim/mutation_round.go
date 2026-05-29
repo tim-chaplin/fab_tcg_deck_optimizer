@@ -45,8 +45,6 @@ type deckEvalConfig struct {
 	seed           int64
 	completed      *atomic.Int64
 	cache          *Cache
-	adaptive       bool
-	precision      float64
 }
 
 // RunMutationRound runs one mutation-round pass. mutationWorkers pull indices from a shared
@@ -54,7 +52,7 @@ type deckEvalConfig struct {
 // apply the Metropolis acceptance gate. First acceptance wins; the others cancel.
 //
 // Defaults (0): mutationWorkers=1, shuffleWorkers=DefaultWorkers(). The (1, DefaultWorkers())
-// shape wins the worker_sweep benchmark on adaptive Viserai by ~20% — sequential mutations
+// shape wins the worker_sweep benchmark on a Viserai deck by ~20% — sequential mutations
 // let the cache fill with one deck's hand multisets at a time (~70% hit rate within a
 // mutation), and the per-shuffle barrier balances variance better than per-mutation queues.
 //
@@ -69,9 +67,9 @@ type deckEvalConfig struct {
 // FIFO pull order makes earliest-position-wins usually hold, but a stuck early worker
 // doesn't block later positions from occasionally winning first.
 //
-// bestAvg is the SA current state (not all-time best). adaptive=true stops per-mutation
-// evals early at precision (SE ≤ precision/4), capped by deck.adaptiveShufflesCap. cache,
-// when non-nil, is the hand-eval cache for every shuffle this round; nil allocates one.
+// bestAvg is the SA current state (not all-time best). Each mutation is evaluated with the
+// fixed shuffles budget. cache, when non-nil, is the hand-eval cache for every shuffle this
+// round; nil allocates one.
 //
 // Returns (acceptedDeck, acceptedStats, acceptedAvg, acceptedIndex, true) on first
 // acceptance, or (nil, zero, bestAvg, -1, false) on no acceptance / cancellation.
@@ -86,8 +84,6 @@ func RunMutationRound(
 	mutationWorkers, shuffleWorkers int,
 	seed int64,
 	completed *atomic.Int64,
-	adaptive bool,
-	precision float64,
 	cache *Cache,
 ) (*deck.Deck, deck.Stats, float64, int, bool) {
 	if mutationWorkers <= 0 {
@@ -128,8 +124,6 @@ func RunMutationRound(
 		seed:           seed,
 		completed:      completed,
 		cache:          cache,
-		adaptive:       adaptive,
-		precision:      precision,
 	}
 
 	var wg sync.WaitGroup
@@ -184,12 +178,7 @@ func runDeckEvalWorker(
 		}
 		mut := cfg.mutations[i]
 		d := mut.Deck.Copy()
-		var stats deck.Stats
-		if cfg.adaptive {
-			stats = ev.EvaluateAdaptive(d, cfg.precision, cfg.matchup, rng)
-		} else {
-			stats = ev.Evaluate(d, cfg.shuffles, cfg.matchup, rng)
-		}
+		stats := ev.Evaluate(d, cfg.shuffles, cfg.matchup, rng)
 		avg := stats.Mean()
 		if cfg.completed != nil {
 			cfg.completed.Add(1)

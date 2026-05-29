@@ -35,6 +35,7 @@ func BenchmarkAnnealRoundOnViseraiV4(b *testing.B) {
 		incoming            = 7 // mid-game opponent swing
 		unreachableBaseline = 1_000_000.0
 		sampleSize          = 8
+		shuffles            = 10000
 	)
 	path := findRepoFile(b, filepath.Join("mydecks", "viserai_v4.json"))
 	if path == "" {
@@ -63,8 +64,8 @@ func BenchmarkAnnealRoundOnViseraiV4(b *testing.B) {
 		b.StartTimer()
 		_, _, _, _, found := sim.RunMutationRound(
 			context.Background(), mutations, unreachableBaseline, 0, 0,
-			0, sim.Matchup{IncomingPhysicalDamage: incoming}, 0, 0,
-			iterRNG.Int63(), nil, true, 0.1, nil,
+			shuffles, sim.Matchup{IncomingPhysicalDamage: incoming}, 0, 0,
+			iterRNG.Int63(), nil, nil,
 		)
 		if found {
 			b.Fatalf("iter %d: unreachable baseline was beaten — bench setup is wrong", n)
@@ -106,7 +107,7 @@ func BenchmarkAnnealMultiRoundOnViseraiV4(b *testing.B) {
 		_, _, _, _, _ = sim.RunMutationRound(
 			context.Background(), mutations, unreachableBaseline, 0, 0,
 			shuffles, sim.Matchup{IncomingPhysicalDamage: incoming}, 0, 0,
-			seed, nil, false, 0.1, cache,
+			seed, nil, cache,
 		)
 	}
 
@@ -139,10 +140,10 @@ func BenchmarkAnnealMultiRoundOnViseraiV4(b *testing.B) {
 
 // BenchmarkAnnealRoundOnViseraiV4_Quick is the PR-validation sibling of
 // BenchmarkAnnealRoundOnViseraiV4: same anneal-round workload on viserai_v4 but with a
-// 2-mutation sample and a fixed 200-shuffle (non-adaptive) Evaluate, so a -count=10
-// -benchtime=3x benchstat finishes in well under a minute. Hits the same hot paths
-// (attack-turn runner, partition search, cache) — a regression in either shows up here just as
-// reliably as in the full bench, just with a smaller per-iteration footprint.
+// 2-mutation sample and a fixed 200-shuffle Evaluate, so a -count=10 -benchtime=3x benchstat
+// finishes in well under a minute. Hits the same hot paths (attack-turn runner, partition
+// search, cache) — a regression in either shows up here just as reliably as in the full
+// bench, just with a smaller per-iteration footprint.
 func BenchmarkAnnealRoundOnViseraiV4_Quick(b *testing.B) {
 	const (
 		maxCopies           = 2
@@ -179,7 +180,7 @@ func BenchmarkAnnealRoundOnViseraiV4_Quick(b *testing.B) {
 		_, _, _, _, found := sim.RunMutationRound(
 			context.Background(), mutations, unreachableBaseline, 0, 0,
 			shuffles, sim.Matchup{IncomingPhysicalDamage: incoming}, 0, 0,
-			iterRNG.Int63(), nil, false, 0.1, nil,
+			iterRNG.Int63(), nil, nil,
 		)
 		if found {
 			b.Fatalf("iter %d: unreachable baseline was beaten — bench setup is wrong", n)

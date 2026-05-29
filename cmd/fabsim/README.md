@@ -22,9 +22,9 @@ lists exactly the flags that apply.
 - `import` — interactively paste a fabrary.net plain-text export and save it as
   `mydecks/<name>.json`.
 
-The root `README.md` documents the full flag set, the adaptive-vs-fixed `-shuffles`
-behaviour, the suggested workflow, and the wrapper scripts — refer to it rather than
-duplicating flag docs here.
+The root `README.md` documents the full flag set, the `-shuffles` budget behaviour, the
+suggested workflow, and the wrapper scripts — refer to it rather than duplicating flag docs
+here.
 
 ## Layout
 

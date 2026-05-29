@@ -28,11 +28,9 @@ const annealCacheCapacity = 2_000_000
 
 // annealConfig bundles the knobs runAnneal needs. Built by runAnnealCmd from its flag.FlagSet.
 type annealConfig struct {
-	// shuffles is the per-eval shuffle budget when adaptive is false (apples-to-apples
-	// acceptance, repro flows). Ignored when adaptive is true — the adaptive path stops
-	// when SE drops to minImprovement/4 (capped at adaptiveShufflesCap).
+	// shuffles is the per-eval shuffle budget — the number of shuffles every per-mutation and
+	// baseline eval simulates.
 	shuffles   int
-	adaptive   bool
 	matchup    sim.Matchup
 	deckSize   int
 	maxCopies  int
@@ -69,7 +67,7 @@ func defaultDeckNameFor(h hero.Hero, f GameplayFormat, incoming int) string {
 func runAnnealCmd(args []string) {
 	fs := flag.NewFlagSet("anneal", flag.ExitOnError)
 	deckName := fs.String("deck", "", "deck name; resolved to mydecks/<name>.json (\".json\" suffix optional). Defaults to <hero>_<format>_<incoming>_incoming so different (hero, format, -incoming) regimes keep separate deck files. When the named deck exists, anneal resumes from it as a checkpoint.")
-	shuffles := fs.Int("shuffles", -1, "per-eval shuffle budget. -1 (default) runs adaptively to -min-improvement. Any non-negative value runs exactly that many shuffles for apples-to-apples acceptance / repro flows.")
+	shuffles := fs.Int("shuffles", 1000, "per-eval shuffle budget — the number of shuffles every per-mutation eval simulates. -finalize overrides this to 10000.")
 	incoming := fs.Int("incoming", 0, "opponent damage per turn (required — different values produce different optimal decks, so this is explicit rather than defaulted)")
 	arcaneIncoming := fs.Int("arcane-incoming", 0, "opponent arcane damage per turn (defaults to 0 — the non-arcane matchup; raise it to score cards that gate on incoming arcane)")
 	deckSize := fs.Int("deck-size", 40, "number of cards per deck")
@@ -78,9 +76,9 @@ func runAnnealCmd(args []string) {
 	formatFlag := fs.String("format", string(SilverAge), "constructed format whose banlist restricts the card pool during search (only \"silver_age\" is supported today)")
 	debug := fs.Bool("debug", false, "print additional debug info to stdout / stderr")
 	reevaluate := fs.Bool("reevaluate", false, "force re-evaluation of the loaded deck's baseline avg, even if its prior run count already matches the current -shuffles budget. Use after adjusting modelling assumptions or fixing bugs that may have shifted the deck's true score.")
-	finalize := fs.Bool("finalize", false, "high-precision pass — sets -shuffles to 100000 (fixed) and tightens -min-improvement to 0.01. Use on a deck that's already converged to squeeze out the remaining sub-percent improvements.")
+	finalize := fs.Bool("finalize", false, "high-precision pass — sets -shuffles to 10000 and tightens -min-improvement to 0.01. Use on a deck that's already converged to squeeze out the remaining sub-percent improvements.")
 	startTemp := fs.Float64("start-temp", 0, "simulated-annealing starting temperature. 0 (default) runs a pure hill climb. Higher values probabilistically accept worse mutations early; acceptance probability is exp((avg - baseline) / T). Good starting range is ~0.05–0.5 given typical Value units.")
-	minImprovement := fs.Float64("min-improvement", 0.1, "noise floor on strict (T==0) acceptance: a mutation's avg must exceed the current avg by more than this margin to be accepted. Guards against infinite-loop acceptance of within-noise wins; raise it for chunkier improvements only, lower it (e.g. 0.01) for fine-grained finalize passes. The probabilistic SA gate at T>0 ignores this margin so annealing can still cross ties. Doubles as the adaptive-eval precision target so per-mutation evals resolve the mean to the granularity acceptance needs.")
+	minImprovement := fs.Float64("min-improvement", 0.1, "noise floor on strict (T==0) acceptance: a mutation's avg must exceed the current avg by more than this margin to be accepted. Guards against infinite-loop acceptance of within-noise wins; raise it for chunkier improvements only, lower it (e.g. 0.01) for fine-grained finalize passes. The probabilistic SA gate at T>0 ignores this margin so annealing can still cross ties.")
 	tempDecay := fs.Float64("temp-decay", 0.95, "multiplicative cooling per acceptance — T ← T × decay, floored at -min-temp. Unused when -start-temp is 0.")
 	minTemp := fs.Float64("min-temp", 0, "minimum temperature. Once T reaches this floor the climb becomes greedy until a local maximum is found. 0 disables annealing in the converged tail.")
 	quietLoad := fs.Bool("quiet-load", false, "skip the baseline card-list dump at startup. Intended for wrapper scripts (e.g. anneal-reanneal.ps1) that re-invoke anneal many times on the same deck — the listing never changes pass-to-pass and floods the log.")
@@ -101,9 +99,11 @@ func runAnnealCmd(args []string) {
 
 	gameengine.OptDebug = *debug
 
-	// -finalize tightens the noise floor so sub-0.1 wins land that the default 0.1
-	// -min-improvement gate would reject. Applied post-parse so it composes with explicit flags.
+	// -finalize pins a high shuffle budget and tightens the noise floor so sub-0.1 wins land
+	// that the default 0.1 -min-improvement gate would reject. Applied post-parse so it
+	// overrides explicit flags.
 	if *finalize {
+		*shuffles = 10000
 		*minImprovement = 0.01
 	}
 
@@ -121,7 +121,6 @@ func runAnnealCmd(args []string) {
 	gameengine.MaxDeckSize = *deckSize
 	cfg := annealConfig{
 		shuffles:       *shuffles,
-		adaptive:       *shuffles < 0,
 		matchup:        sim.Matchup{IncomingPhysicalDamage: *incoming, IncomingArcaneDamage: *arcaneIncoming},
 		deckSize:       *deckSize,
 		maxCopies:      *maxCopies,
@@ -243,7 +242,7 @@ func runAnneal(cfg annealConfig) annealResult {
 		d, dStats, avg, idx, found := sim.RunMutationRound(
 			ctx, mutations, currentAvg, temperature, cfg.minImprovement,
 			cfg.shuffles, cfg.matchup, 0, 0,
-			rng.Int63(), &completed, cfg.adaptive, cfg.minImprovement, roundCache,
+			rng.Int63(), &completed, roundCache,
 		)
 		stopTicker()
 
@@ -351,19 +350,11 @@ func coolDown(temperature, decay, minTemp float64) float64 {
 	return next
 }
 
-// baselineEvaluate runs the eval used for every prepareBaseline path. Adaptive when
-// cfg.adaptive is true (no -shuffles pinned); fixed-shuffles otherwise. The two paths
-// return the same DeckStats shape; DeckStats.Runs reflects the actual shuffle count so
-// the next prepareBaseline call's "already evaluated" check still works (an adaptive run
-// may finish below the cap and prompt a re-evaluation next session, which is fine —
-// adaptive runs are cheap). Routes through evaluateParallel so the once-per-session
-// baseline benefits from the same DefaultWorkers fan-out as iterate's per-mutation evals.
+// baselineEvaluate runs the eval used for every prepareBaseline path at the fixed -shuffles
+// budget. Routes through evaluateParallel so the once-per-session baseline benefits from the
+// same DefaultWorkers fan-out as iterate's per-mutation evals.
 func baselineEvaluate(d *deck.Deck, cfg annealConfig, rng *rand.Rand) deck.Stats {
-	shuffles := cfg.shuffles
-	if cfg.adaptive {
-		shuffles = -1
-	}
-	stats, _ := evaluateParallel(d, shuffles, cfg.minImprovement, cfg.matchup, rng)
+	stats, _ := evaluateParallel(d, cfg.shuffles, cfg.matchup, rng)
 	return stats
 }
 
@@ -392,10 +383,8 @@ func prepareBaseline(cfg annealConfig, rng *rand.Rand) (*deck.Deck, deck.Stats, 
 	}
 	bestAvg := bestStats.Mean()
 	// Re-evaluate when the saved deck was scored at fewer shuffles than the current budget,
-	// or when -reevaluate forces it. Adaptive runs always take the re-evaluate path because
-	// the recorded Runs reflects whatever count the previous adaptive run terminated at,
-	// which carries no precision guarantee for the new run's target.
-	needReeval := cfg.adaptive || cfg.reevaluate || bestStats.Runs < cfg.shuffles
+	// or when -reevaluate forces it.
+	needReeval := cfg.reevaluate || bestStats.Runs < cfg.shuffles
 	if needReeval {
 		var freshStats deck.Stats
 		best, freshStats, bestAvg = reevaluateBaseline(cfg, rng, best, bestStats, bestAvg)
@@ -421,9 +410,6 @@ func reevaluateBaseline(cfg annealConfig, rng *rand.Rand, loaded *deck.Deck, loa
 	// score. Decks scored under older simulation logic can have saved avgs that diverge
 	// substantially from what today's simulator produces.
 	budgetLabel := fmt.Sprintf("%d shuffles", cfg.shuffles)
-	if cfg.adaptive {
-		budgetLabel = "adaptive shuffles"
-	}
 	fmt.Printf("Loaded best deck (saved avg %.3f, %s); re-evaluating at %s for an apples-to-apples baseline\n",
 		savedAvg, reason, budgetLabel)
 	// Sideboard and Equipment are user-managed and don't feed the sim — preserve them across

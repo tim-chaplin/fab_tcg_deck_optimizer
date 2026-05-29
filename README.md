@@ -108,22 +108,14 @@ that apply.
   histograms, and the per-card count delta. The (shuffles, incoming) settings ride at the top
   so the per-section rows don't repeat them.
 
-#### Adaptive vs fixed shuffles
+#### Shuffle budget
 
-`-shuffles` controls the per-eval shuffle budget across all subcommands:
-
-- `-shuffles -1` (default for `anneal` and `eval`) — adaptive. Each eval keeps shuffling until
-  the per-turn mean's standard error drops below an internal target (~±0.05), then stops.
-  Typical Viserai decks converge in 200–400 shuffles; an internal cap stops a pathological
-  high-variance regime that doesn't converge. Use this for everyday hill-climbs and one-off
-  re-scores where ±0.05 precision on the mean is plenty.
-- `-shuffles N` (any non-negative value) — fixed. Every eval runs exactly N shuffles, giving
-  apples-to-apples comparisons across mutations. Use this for repro flows and any time you
-  want every eval scored at the same budget.
-- `compare` always uses fixed `-shuffles` (default 10000); adaptive isn't allowed there because
-  the side-by-side comparison needs matched conditions on both decks.
-- `anneal -finalize` pins `-shuffles` to 100000 and tightens `-min-improvement` to 0.01 — a
-  high-precision pass for decks that have already converged.
+`-shuffles` sets the per-eval shuffle budget — the number of shuffles each eval simulates —
+across all subcommands. More shuffles tighten the per-deck mean at a roughly linear cost in
+time. Defaults: `anneal` and `eval` use 1000; `compare` uses 10000 (it scores both decks at
+the same fixed count so the side-by-side comparison stays apples-to-apples). `anneal
+-finalize` overrides `-shuffles` to 10000 and tightens `-min-improvement` to 0.01 — a
+high-precision pass for decks that have already converged.
 
 ### Suggested workflow
 
@@ -155,8 +147,7 @@ The summary below groups the flags by subcommand.
 - `-deck` — checkpoint name; resolved to `mydecks/<name>.json` (default
   `<hero>_<format>_<incoming>_incoming`, keyed off the hero, format, and `-incoming`). The
   `mydecks/` directory is created automatically. If the file exists anneal resumes from it.
-- `-shuffles` — per-eval shuffle budget. `-1` (default) runs adaptively; any non-negative value
-  pins a fixed count for apples-to-apples acceptance. See "Adaptive vs fixed shuffles" above.
+- `-shuffles` — per-eval shuffle budget (default 1000). See "Shuffle budget" above.
 - `-incoming` — opponent damage per turn (default 0)
 - `-deck-size` — cards per deck, used only for random starting decks (default 40)
 - `-max-copies` — max copies of any single card printing (default 2)
@@ -168,7 +159,7 @@ The summary below groups the flags by subcommand.
   probabilistically accept worse mutations early (Metropolis rule).
 - `-temp-decay` — multiplicative cooling per acceptance (default 0.95).
 - `-min-temp` — temperature floor (default 0).
-- `-finalize` — high-precision pass — sets `-shuffles` to 100000 (fixed) and tightens
+- `-finalize` — high-precision pass — sets `-shuffles` to 10000 and tightens
   `-min-improvement` to 0.01. Use on a deck that's already converged to squeeze out the
   remaining sub-percent improvements.
 - `-reevaluate` — force re-evaluation of the loaded deck's baseline avg even if its prior run
@@ -181,8 +172,7 @@ The summary below groups the flags by subcommand.
 
 **`eval`** (re-score a deck and rewrite it; `-print-only` skips the sim and the rewrite):
 
-- `-shuffles` — per-eval shuffle budget. `-1` (default) runs adaptively; any non-negative
-  value runs exactly that many shuffles. See "Adaptive vs fixed shuffles" above.
+- `-shuffles` — per-eval shuffle budget (default 1000). See "Shuffle budget" above.
 - `-incoming` — opponent damage per turn (required unless `-print-only` is set)
 - `-seed` — RNG seed (default: time-based)
 - `-format` — format predicate applied to replacement picks when the loaded deck contains
@@ -195,8 +185,8 @@ The summary below groups the flags by subcommand.
 
 **`compare`** (re-score both decks at matched settings before reporting):
 
-- `-shuffles` — shuffles per deck used for the re-score (default 10000). compare always runs
-  fixed shuffles; adaptive isn't allowed because both decks need matched conditions.
+- `-shuffles` — shuffles per deck used for the re-score (default 10000). Both decks are scored
+  at this same fixed count so the comparison stays apples-to-apples.
 - `-incoming` — opponent damage per turn (required; both decks are re-scored against this value)
 - `-seed` — RNG seed (default: time-based)
 - `-format` — format predicate applied to replacement picks when a loaded deck contains

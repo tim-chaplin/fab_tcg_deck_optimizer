@@ -22,8 +22,7 @@ func runEvalCmd(args []string) {
 		fmt.Fprintln(fs.Output(), "Flags:")
 		fs.PrintDefaults()
 	}
-	shuffles := fs.Int("shuffles", -1, "per-eval shuffle budget. -1 (default) runs adaptively to -precision. Any non-negative value runs exactly that many shuffles (apples-to-apples re-scores, repro flows).")
-	precision := fs.Float64("precision", 0.1, "adaptive-eval precision target — stop once the per-turn mean's standard error falls to precision/4 (≈ ±precision/2 on the reported value with 95% confidence). Only relevant when -shuffles is negative (adaptive mode).")
+	shuffles := fs.Int("shuffles", 1000, "per-eval shuffle budget — the number of shuffles to simulate when re-scoring the deck.")
 	incoming := fs.Int("incoming", 0, "opponent damage per turn (required unless -print-only is set — must match the value the deck was annealed at for comparable numbers)")
 	arcaneIncoming := fs.Int("arcane-incoming", 0, "opponent arcane damage per turn (defaults to 0 — the non-arcane matchup; raise it to score cards that gate on incoming arcane)")
 	seed := fs.Int64("seed", time.Now().UnixNano(), "RNG seed")
@@ -38,17 +37,17 @@ func runEvalCmd(args []string) {
 		requireFlag(fs, "eval", "incoming")
 	}
 	gameengine.OptDebug = *debug
-	runEval(resolveDeckPath(fs.Arg(0)), *shuffles, *precision, sim.Matchup{IncomingPhysicalDamage: *incoming, IncomingArcaneDamage: *arcaneIncoming}, *seed, *printOnly, *brief, *debug)
+	runEval(resolveDeckPath(fs.Arg(0)), *shuffles, sim.Matchup{IncomingPhysicalDamage: *incoming, IncomingArcaneDamage: *arcaneIncoming}, *seed, *printOnly, *brief, *debug)
 }
 
 // runEval loads the deck at outPath and prints its stats. With printOnly=false it first
 // re-simulates against mp and writes the fresh stats back to disk (.json + sibling fabrary
 // .txt). brief=true prints the score summary only; brief=false prints the full
 // printBestDeck dump. debug=true prints cache telemetry to stderr after a fresh sim.
-func runEval(outPath string, shuffles int, precision float64, mp sim.Matchup, seed int64, printOnly, brief, debug bool) {
+func runEval(outPath string, shuffles int, mp sim.Matchup, seed int64, printOnly, brief, debug bool) {
 	if !printOnly {
 		// Print from the in-memory stats — the disk round-trip would drop Stats.PrintBest.
-		d, stats := evaluateAndPersist(outPath, shuffles, precision, mp, seed, debug)
+		d, stats := evaluateAndPersist(outPath, shuffles, mp, seed, debug)
 		printLoadedDeck(d, stats, brief)
 		return
 	}
@@ -56,11 +55,11 @@ func runEval(outPath string, shuffles int, precision float64, mp sim.Matchup, se
 	printLoadedDeck(d, stats, brief)
 }
 
-// evaluateAndPersist runs the eval (adaptive when shuffles<0, fixed otherwise), writes the
-// fresh stats back to disk (.json + sibling fabrary .txt), and returns the simulated deck +
-// stats. Prints a one-line before/after summary to stderr; debug=true also prints the
-// dedicated Evaluator's cache stats.
-func evaluateAndPersist(outPath string, shuffles int, precision float64, mp sim.Matchup, seed int64, debug bool) (*deck.Deck, deck.Stats) {
+// evaluateAndPersist runs the eval for the fixed shuffles budget, writes the fresh stats back
+// to disk (.json + sibling fabrary .txt), and returns the simulated deck + stats. Prints a
+// one-line before/after summary to stderr; debug=true also prints the dedicated Evaluator's
+// cache stats.
+func evaluateAndPersist(outPath string, shuffles int, mp sim.Matchup, seed int64, debug bool) (*deck.Deck, deck.Stats) {
 	loaded, loadedStats := mustLoadDeck(outPath)
 	// Size the pool slots' graveyard/banished backings to this deck before any Evaluator
 	// gets constructed.
@@ -73,7 +72,7 @@ func evaluateAndPersist(outPath string, shuffles int, precision float64, mp sim.
 	rng := rand.New(rand.NewSource(seed))
 	savedAvg := loadedStats.Mean()
 	start := time.Now()
-	stats, ev := evaluateParallel(d, shuffles, precision, mp, rng)
+	stats, ev := evaluateParallel(d, shuffles, mp, rng)
 	elapsed := time.Since(start)
 	freshAvg := stats.Mean()
 	fmt.Fprintf(os.Stderr, "eval: avg %.3f → %.3f (delta %+.3f) in %s (%s shuffles); rewriting %s\n",
