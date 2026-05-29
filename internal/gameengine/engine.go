@@ -515,18 +515,23 @@ func (ge *GameEngine) OptWith(l card.Logger, n int, split func([]card.Card) (top
 
 	if OptDebug {
 		fmt.Printf("Opt(%d): cards=%s -> top=%s bottom=%s\n",
-			n, formatCardList(cards), formatCardList(top), formatCardList(bottom))
+			n, cardList(cards), cardList(top), cardList(bottom))
 	}
 	if l == nil {
 		return
 	}
 	l.AppendAttackStepf(0, "Opted %s, put %s on top, put %s on bottom",
-		formatCardList(cards), formatCardList(top), formatCardList(bottom))
+		cardList(cards), cardList(top), cardList(bottom))
 }
 
-// formatCardList renders cs as "[name1, name2, ...]" using DisplayName, or "[]" when
-// empty.
-func formatCardList(cs []card.Card) string {
+// cardList renders a card slice as "[name1, name2, ...]" via DisplayName (or "[]" when empty),
+// but only when something actually formats it. Passing cardList(x) to a logger keeps the
+// DisplayName walk and the join off the eval hot path: NoopLogger never invokes String(), so
+// nothing is allocated during evaluation, while a real StreamLogger still renders it on print.
+// This is the idiomatic way to log a card slice — prefer it to formatting the list eagerly.
+type cardList []card.Card
+
+func (cs cardList) String() string {
 	if len(cs) == 0 {
 		return "[]"
 	}
