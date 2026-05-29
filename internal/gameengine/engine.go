@@ -129,6 +129,21 @@ func (ge *GameEngine) PeekTopN(n int) []card.Card {
 	return out
 }
 
+// CountTopNMatching returns the number of cards among the top n of the deck for which pred
+// returns true. Walks the deck view without allocating a []card.Card — callers that only
+// need a count should use this in preference to PeekTopN, which copies into a fresh slice.
+// pred must not retain c. Flips IsCacheable to false.
+func (ge *GameEngine) CountTopNMatching(n int, pred func(c card.Card) bool) int {
+	ge.cacheable = false
+	count := 0
+	for _, c := range ge.deck.PeekTopN(n) {
+		if pred(c.(card.Card)) {
+			count++
+		}
+	}
+	return count
+}
+
 // PopDeckTop removes and returns the top card, (nil, false) when empty. Flips IsCacheable
 // (caller observes identity) and notes the removal so the eval cache's depth check stays
 // accurate even on uncacheable paths.

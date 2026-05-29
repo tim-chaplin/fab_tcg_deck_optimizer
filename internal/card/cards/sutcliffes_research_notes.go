@@ -16,15 +16,17 @@ import (
 // sutcliffesResearchNotesPlay scans the top revealCount cards of the deck and creates one
 // runechant per Runeblade attack action card found.
 func sutcliffesResearchNotesPlay(ge card.GameEngine, l card.Logger, self *card.CardState, revealCount int) {
-	count := 0
-	for _, c := range ge.PeekTopN(revealCount) {
-		t := c.Types(nil)
-		if t.Has(card.TypeRuneblade) && t.IsAttackAction() {
-			count++
-		}
-	}
+	count := ge.CountTopNMatching(revealCount, isRunebladeAttackAction)
 	ge.CreateRunechants(count)
 	l.AppendPostTriggerf(self.Card.DisplayName(), count, "Created %d runechants", count)
+}
+
+// isRunebladeAttackAction is the top-level predicate sutcliffesResearchNotesPlay hands to
+// CountTopNMatching. Defined at package scope (not as an inline closure) so the function
+// value carries no captures and stays alloc-free across calls.
+func isRunebladeAttackAction(c card.Card) bool {
+	t := c.Types(nil)
+	return t.Has(card.TypeRuneblade) && t.IsAttackAction()
 }
 
 func (SutcliffesResearchNotesRed) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
