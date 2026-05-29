@@ -1,6 +1,7 @@
-// Test-only Weapon fake. The card pool currently lacks Club and Hammer printings, but
-// ARs like Pummel mode 0 gate on those types — ClubWeapon lets a turn-level test pin the
-// predicate and the buff plumbing end-to-end without waiting on a real printing.
+// Test-only platonic weapon fakes the card pool can't supply. ClubWeapon is a 1H Club weapon
+// (ARs like Pummel mode 0 gate on Club/Hammer types the pool doesn't print); CounterWeapon is
+// a 1H weapon whose swing bumps a counter on its own equipped object, pinning per-object
+// attribution when two copies are dual-wielded.
 
 package testutils
 

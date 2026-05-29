@@ -4,7 +4,6 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/ids"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapon"
 )
 
 // StateBuilder fluently constructs a *GameState. Callers chain setters and finish
@@ -53,18 +52,6 @@ func (b *StateBuilder) Build() *GameState { return b.gs }
 // SetHero installs h as the active hero. Routes through GameState.SetHero so the cached
 // heroTriggerType stays in sync.
 func (b *StateBuilder) SetHero(h Hero) *StateBuilder { b.gs.SetHero(h); return b }
-
-// SetWeapons installs the equipped weapon objects directly. Persistent across turns.
-func (b *StateBuilder) SetWeapons(w []Weapon) *StateBuilder { b.gs.weapons = w; return b }
-
-// EquipWeapons equips the supplied platonic weapon cards onto the state being built by playing
-// each one — the equip-at-game-start path, mirroring how the sim equips weapons from the deck
-// (and how CreateAuraFromCard / CreateItemFromCard play a card into b.gs). Returns the builder
-// for chaining.
-func (b *StateBuilder) EquipWeapons(cards ...weapon.Card) *StateBuilder {
-	EquipFromCards(b.gs, cards)
-	return b
-}
 
 // SetArsenal installs c into the arsenal slot.
 func (b *StateBuilder) SetArsenal(c card.Card) *StateBuilder { b.gs.arsenal = c; return b }
