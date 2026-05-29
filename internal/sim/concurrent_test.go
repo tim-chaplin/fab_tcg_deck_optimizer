@@ -64,7 +64,7 @@ func TestRunMutationRound_RunsWithoutPanic(t *testing.T) {
 	d, _, avg, idx, found := RunMutationRound(
 		context.Background(), mutations, baseAvg, 0, 0,
 		30, Matchup{}, 0, 0,
-		rng.Int63(), nil, false, 0.1, nil,
+		rng.Int63(), nil, nil,
 	)
 
 	if found {
@@ -106,7 +106,7 @@ func TestRunMutationRound_AbortsOnContextCancel(t *testing.T) {
 	d, _, avg, idx, found := RunMutationRound(
 		ctx, mutations, baseAvg, 0, 0,
 		1000, Matchup{}, 0, 0,
-		rng.Int63(), &tested, false, 0.1, nil,
+		rng.Int63(), &tested, nil,
 	)
 	elapsed := time.Since(start)
 
@@ -146,7 +146,7 @@ func TestRunMutationRound_TerminatesWithNoImprovement(t *testing.T) {
 	d, _, avg, idx, found := RunMutationRound(
 		context.Background(), mutations, 1_000_000.0, 0, 0, // unreachable baseline, T=0
 		100, Matchup{}, 0, 0,
-		rng.Int63(), nil, false, 0.1, nil,
+		rng.Int63(), nil, nil,
 	)
 	elapsed := time.Since(start)
 

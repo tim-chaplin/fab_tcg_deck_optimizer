@@ -35,8 +35,8 @@ import (
 // stops cutting wall-clock — past which the chunk-merge barrier and cache contention
 // outweigh the added parallelism.
 //
-// Uses fixed shuffles=1000 (rather than adaptive) so every sub-bench does identical
-// total work and the ns/op reads as wall-clock-per-1k-shuffles directly.
+// Uses fixed shuffles=1000 so every sub-bench does identical total work and the ns/op reads
+// as wall-clock-per-1k-shuffles directly.
 func BenchmarkEvalWorkerSweep(b *testing.B) {
 	const (
 		incoming = 7
@@ -91,6 +91,7 @@ func BenchmarkEvalWorkerSweep(b *testing.B) {
 func BenchmarkAnnealWorkerSweep(b *testing.B) {
 	const (
 		incoming = 7
+		shuffles = 10000 // fixed per-mutation eval budget
 		// unreachableBaseline keeps every mutation from being accepted, so the worker pool
 		// drains every sampled mutation. Production rounds short-circuit on the first
 		// improvement, but the per-mutation eval cost is the same.
@@ -137,8 +138,8 @@ func BenchmarkAnnealWorkerSweep(b *testing.B) {
 				b.StartTimer()
 				_, _, _, _, found := RunMutationRound(
 					context.Background(), mutations, unreachableBaseline, 0, 0,
-					0, Matchup{IncomingPhysicalDamage: incoming}, c.mut, c.shuf,
-					iterRNG.Int63(), nil, true, 0.1, nil,
+					shuffles, Matchup{IncomingPhysicalDamage: incoming}, c.mut, c.shuf,
+					iterRNG.Int63(), nil, nil,
 				)
 				if found {
 					b.Fatalf("iter %d: unreachable baseline was beaten — bench setup is wrong", n)

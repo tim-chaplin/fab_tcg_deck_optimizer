@@ -39,7 +39,6 @@ and the highest-ranked is kept.
   callers route through the test entry points or `Evaluate`.
 - **`(*Evaluator).Evaluate`** (`deck_eval.go`) — shuffles a deck `runs` times, walks two
   cycles of hands per shuffle, threads cross-turn carryover, and returns `deck.Stats`.
-  `EvaluateAdaptive` shuffles until the per-turn mean's standard error drops below a target.
 - **`EvalOneTurnForTesting` / `EvalTwoTurnsForTesting`** (`integration_testing.go`) — the
   public single-/two-turn test entry points. They drive the same per-turn pipeline production
   uses (no shuffle) and return the resulting `TurnSummary`. Turn-level tests in `turntests/`

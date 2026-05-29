@@ -42,11 +42,10 @@ func runCompareCmd(args []string) {
 // prints a side-by-side comparison: pitch counts, mean hand value, per-cycle means, hand-
 // value histograms, and per-card count delta. The header records the matched settings.
 func runCompare(name1, name2 string, shuffles int, mp sim.Matchup, maxCopies int, seed int64, fmtValue GameplayFormat) {
-	// compare always uses a fixed -shuffles count so the two decks are scored under matched
-	// conditions. Adaptive stop would let one deck terminate at a different shuffle count
-	// than the other, breaking the apples-to-apples invariant the per-stat comparison rests on.
-	d1, s1 := evaluateAndPersist(resolveDeckPath(name1), shuffles, 0, mp, seed, false)
-	d2, s2 := evaluateAndPersist(resolveDeckPath(name2), shuffles, 0, mp, seed, false)
+	// compare scores both decks at the same fixed -shuffles count so the per-stat comparison
+	// rests on matched conditions.
+	d1, s1 := evaluateAndPersist(resolveDeckPath(name1), shuffles, mp, seed, false)
+	d2, s2 := evaluateAndPersist(resolveDeckPath(name2), shuffles, mp, seed, false)
 
 	fmt.Printf("compare: -shuffles=%s -incoming=%d -arcane-incoming=%d\n", commaInt(shuffles), mp.IncomingPhysicalDamage, mp.IncomingArcaneDamage)
 	fmt.Println()

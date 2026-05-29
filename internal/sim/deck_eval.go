@@ -7,7 +7,6 @@ package sim
 
 import (
 	"io"
-	"math"
 	"math/rand"
 	"sort"
 	"sync"
@@ -26,114 +25,55 @@ import (
 // against mp, and recycles Pitched cards to deck bottom. A run ends when the deck can't
 // fill the next hand. A "cycle" is one pass through the original deck size.
 func (ev *Evaluator) Evaluate(d *deck.Deck, runs int, mp Matchup, rng *rand.Rand) deck.Stats {
-	return ev.evaluateImpl(d, runs, mp, rng, nil)
+	return ev.evaluateImpl(d, runs, mp, rng)
 }
 
-// EvaluateAdaptive runs shuffles until the per-turn mean's standard error drops to
-// precision/4 — a ~95% confidence interval of ±precision/2 around the running mean — capped
-// at adaptiveShufflesCap. SE is checked every adaptiveCheckInterval shuffles. Use when
-// knowing the mean to within precision is enough; modes that need apples-to-apples shuffle
-// counts (compare, explicit -shuffles) should use Evaluate with a fixed runs count.
-// Order-of-magnitude scale on a Viserai deck: precision=0.1 ≈ 1k shuffles, precision=0.01
-// ≈ 80k shuffles.
-func (ev *Evaluator) EvaluateAdaptive(d *deck.Deck, precision float64, mp Matchup, rng *rand.Rand) deck.Stats {
-	return ev.evaluateImpl(d, adaptiveShufflesCap, mp, rng, makeAdaptiveStop(precision/4))
-}
+// parallelChunkPerWorker is the per-worker chunk size in the parallel-shuffle path: the pool
+// processes shuffles in batches of numWorkers × parallelChunkPerWorker, barrier-merging each
+// worker's local stats into the run aggregate after every batch. 50 is the empirical sweet
+// spot — below it the barrier overhead dominates.
+const parallelChunkPerWorker = 50
 
-// shuffleStopper is the early-stop policy for the eval shuffle loop. Called once after each
-// shuffle's stats are recorded; returning true breaks the loop. nil disables early stop.
-type shuffleStopper func(stats *deck.Stats, runs int) bool
-
-const (
-	// adaptiveCheckInterval is the per-worker chunk size in the parallel-shuffle path: every
-	// numWorkers × adaptiveCheckInterval shuffles, the pool barrier-merges into the run's
-	// aggregate stats and runs the adaptive stop check. 50 is the empirical sweet spot —
-	// smaller chunks let random Viserai decks converge in ~2000 shuffles; below 50 the
-	// barrier overhead dominates.
-	adaptiveCheckInterval = 50
-	// adaptiveShufflesCap caps the adaptive shuffle path so a pathological high-variance
-	// regime terminates. Sized for precision=0.01 (~82k shuffles on a baseline Viserai
-	// deck) with headroom for higher-variance heroes.
-	adaptiveShufflesCap = 200000
-)
-
-// makeAdaptiveStop returns a shuffleStopper that fires when the per-turn mean's standard
-// error drops below targetSE. Checks every adaptiveCheckInterval shuffles to amortise the
-// histogram walk.
-func makeAdaptiveStop(targetSE float64) shuffleStopper {
-	return func(stats *deck.Stats, runs int) bool {
-		if runs%adaptiveCheckInterval != 0 {
-			return false
-		}
-		return meanStandardError(stats) <= targetSE
-	}
-}
-
-// meanStandardError computes the standard error of the per-turn mean Value: sigma / sqrt(N)
-// where sigma is the unbiased per-turn sample standard deviation. Walks the histogram so
-// it's O(unique values) ~ O(30) per call rather than O(N). Returns +Inf when fewer than two
-// turns have been simulated (variance is undefined).
-func meanStandardError(stats *deck.Stats) float64 {
-	n := float64(stats.Hands)
-	if n < 2 {
-		return math.Inf(1)
-	}
-	mean := stats.TotalValue / n
-	sumSq := 0.0
-	for v, count := range stats.Histogram {
-		diff := float64(v) - mean
-		sumSq += diff * diff * float64(count)
-	}
-	variance := sumSq / (n - 1)
-	return math.Sqrt(variance / n)
-}
-
-func (ev *Evaluator) evaluateImpl(d *deck.Deck, maxRuns int, mp Matchup, rng *rand.Rand, stop shuffleStopper) deck.Stats {
+func (ev *Evaluator) evaluateImpl(d *deck.Deck, maxRuns int, mp Matchup, rng *rand.Rand) deck.Stats {
 	handSize := d.Hero.(hero.Hero).Intelligence()
 	deckSize := d.Size()
 	if handSize <= 0 || deckSize < handSize {
 		return deck.Stats{}
 	}
 	if ev.numWorkers > 1 {
-		return ev.evaluateParallelImpl(d, maxRuns, mp, rng, stop, handSize, deckSize)
+		return ev.evaluateParallelImpl(d, maxRuns, mp, rng, handSize, deckSize)
 	}
-	return ev.evaluateSequentialImpl(d, maxRuns, mp, rng, stop, handSize, deckSize)
+	return ev.evaluateSequentialImpl(d, maxRuns, mp, rng, handSize, deckSize)
 }
 
 // evaluateSequentialImpl runs the shuffle loop in the calling goroutine — the
 // deterministic-RNG path tests rely on.
-func (ev *Evaluator) evaluateSequentialImpl(d *deck.Deck, maxRuns int, mp Matchup, rng *rand.Rand, stop shuffleStopper, handSize, deckSize int) deck.Stats {
+func (ev *Evaluator) evaluateSequentialImpl(d *deck.Deck, maxRuns int, mp Matchup, rng *rand.Rand, handSize, deckSize int) deck.Stats {
 	handsPerCycle := deckSize / handSize
 	uniqueIDs, idIndex := d.UniqueIDs()
 	scratch := newShuffleScratch(len(d.Weapons), deckSize, handSize, len(uniqueIDs))
 
 	var stats deck.Stats
-	actualRuns := 0
 	for r := 0; r < maxRuns; r++ {
 		runOneShuffle(d, scratch, &stats, idIndex, ev, rng, mp, handsPerCycle, handSize)
-		actualRuns = r + 1
-		if stop != nil && stop(&stats, actualRuns) {
-			break
-		}
 	}
-	stats.Runs += actualRuns
+	stats.Runs += maxRuns
 	mergeMarginalBuf(&stats, uniqueIDs, scratch.marginalBuf)
 	return stats
 }
 
 // evaluateParallelImpl fans the shuffle loop across ev.numWorkers goroutines that share
 // ev.cache (RWMutex-protected) but each carry their own per-call scratch. Shuffles process
-// in chunks of (numWorkers × adaptiveCheckInterval); after each chunk the main goroutine
-// merges every worker's local deck.Stats into the running aggregate and runs the adaptive
-// stop check. Per-worker seeds derive from rng.Int63() so the distribution is deterministic
-// given the input rng.
-func (ev *Evaluator) evaluateParallelImpl(d *deck.Deck, maxRuns int, mp Matchup, rng *rand.Rand, stop shuffleStopper, handSize, deckSize int) deck.Stats {
+// in chunks of (numWorkers × parallelChunkPerWorker); after each chunk the main goroutine
+// merges every worker's local deck.Stats into the running aggregate. Per-worker seeds derive
+// from rng.Int63() so the distribution is deterministic given the input rng.
+func (ev *Evaluator) evaluateParallelImpl(d *deck.Deck, maxRuns int, mp Matchup, rng *rand.Rand, handSize, deckSize int) deck.Stats {
 	numWorkers := ev.numWorkers
 	handsPerCycle := deckSize / handSize
 	uniqueIDs, idIndex := d.UniqueIDs()
 	aggregateMarginal := make([]deck.CardMarginalStats, len(uniqueIDs))
 
-	chunkPerWorker := adaptiveCheckInterval
+	chunkPerWorker := parallelChunkPerWorker
 	maxChunk := numWorkers * chunkPerWorker
 
 	type partial struct {
@@ -189,9 +129,6 @@ func (ev *Evaluator) evaluateParallelImpl(d *deck.Deck, maxRuns int, mp Matchup,
 			}
 		}
 		actualRuns += sz
-		if stop != nil && stop(&stats, actualRuns) {
-			break
-		}
 	}
 	stats.Runs += actualRuns
 	mergeMarginalBuf(&stats, uniqueIDs, aggregateMarginal)
