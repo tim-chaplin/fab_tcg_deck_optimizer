@@ -59,8 +59,8 @@ Weapons are equipped at game start, not played from hand. A weapon card's `Play`
 equip-time registration hook: it calls `card.GameEngine.CreateWeapon` — the `CreateAura` /
 `CreateItem` counterpart — to put its mutable object into `GameState.weapons`, passing a
 trigger (firing event + handler) or `(0, nil)` for an untriggered weapon. `EquipFromCards`
-drives this by playing each platonic weapon card (the sim equips a deck's weapons in
-`weaponsFromDeck`; tests reach for `StateBuilder.EquipWeapons`). `FireTriggers` walks equipped
+drives this by playing each platonic weapon card into the target state (the sim passes
+`weaponCards(d)`; tests reach for `StateBuilder.EquipWeapons`). `FireTriggers` walks equipped
 weapons like auras / items; Talishar registers an `EndOfTurn` handler (its rust-counter
 self-destruct), so the walk fires for any loadout that includes it.
 

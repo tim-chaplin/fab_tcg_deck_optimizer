@@ -517,7 +517,6 @@ func (gs *GameState) Reset(h Hero, incoming, arcaneIncoming int) {
 	banished := gs.banished[:0]
 	auras := gs.auras[:0]
 	items := gs.items[:0]
-	// Reuse the pooled weapons backing; the caller re-equips via EquipFromCards after Reset.
 	weapons := gs.weapons[:0]
 	deckWrapper := gs.deck
 	if deckWrapper != nil {
