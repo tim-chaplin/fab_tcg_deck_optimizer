@@ -40,6 +40,10 @@ cards whose printed effects would perturb the measured value.
 - `ClubWeapon` — a 1-handed Club weapon (Weapon interface) whose `Ability()` returns a
   `FakeWeaponSwing` with Club + OneHand types. Used by turn-level tests that need an
   equipped weapon of a Club/Hammer type the card pool doesn't print.
+- `CounterWeapon` — a 1-handed weapon whose Go-again swing ability bumps the counter on its
+  own equipped object via `self.Weapon`. Two equipped copies share one `Ability()` value, so
+  dual-wielding it pins per-object counter attribution (each swing mutates the object the
+  attack-turn runner resolved for it, not the first equipped copy with a matching CardID).
 - `GrantAll` / `GrantSpy` — a paired probe for detecting cross-permutation `CardState`
   wrapper leakage in the attack-turn runner. Build via `NewGrantAll()` / `NewGrantSpy(&saw)`.
 - `FireOnHitIfLikely` — fires every `OnHit` handler on a card when `LikelyToHit`, so a

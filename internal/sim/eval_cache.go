@@ -59,6 +59,7 @@ type persistentCacheKey struct {
 type evalCacheKey struct {
 	handIDs         [maxCachedHandSize]ids.CardID
 	weaponIDs       [maxCachedWeapons]ids.CardID
+	weaponCounts    [maxCachedWeapons]int
 	auras           [maxCachedAuras]persistentCacheKey
 	items           [maxCachedItems]persistentCacheKey
 	tokenAuraCounts [numCachedTokenAuras]int
@@ -80,13 +81,18 @@ const (
 	numCachedTokenItems = 3 // Gold, Silver, Copper
 )
 
-// playedCard is one resolved card in a cached solution: the card, its modal Mode, and
-// whether it was played from arsenal. A cache replay seeds each attack step directly from
-// these.
+// playedCard is one resolved card in a cached solution: the card, its modal Mode, whether it
+// was played from arsenal, and (for a weapon swing) the equipped-weapon index it belongs to.
+// A cache replay seeds each attack step directly from these, so weaponIdx must round-trip to
+// re-resolve the same per-perm weapon object the originating Best call used.
 type playedCard struct {
 	card        card.Card
 	mode        int8
 	fromArsenal bool
+	// weaponIdx is the equipped-weapon index for a weapon swing, or -1 for hand cards / item
+	// abilities. Replay seeds the sim's per-slot permWeaponIdx from it (via seedAttackStepEntry).
+	// int16 to match permWeaponIdx.
+	weaponIdx int16
 }
 
 // cacheSolution is the in-flight winning solution before it stores into an evalCacheEntry.
@@ -220,6 +226,9 @@ func makeCacheKey(
 			return evalCacheKey{}, false
 		}
 		key.weaponIDs[i] = id
+		// Weapon counters (Talishar's rust) are mutable cross-turn state: two otherwise-equal
+		// turns with different counter totals must not share a cached solution.
+		key.weaponCounts[i] = w.Count()
 	}
 	// Insertion-sort by (CardID, Count) so the key stays multiset-invariant across
 	// registration order. Token kinds are distinguished by their reserved CardID range.

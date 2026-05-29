@@ -251,12 +251,23 @@ func bestAttackWithWeapons(
 				continue
 			}
 			allAttackers := bufs.attackerBuf[:len(attackers)]
+			allWeaponIdx := bufs.attackerWeaponIdxBuf[:len(attackers)]
+			for j := range attackers {
+				allWeaponIdx[j] = -1
+			}
 			for j, ab := range ctx.activatedAbilities {
 				if wmask&(1<<j) != 0 {
 					allAttackers = append(allAttackers, ab)
+					// For j < weaponAbilityCount, j is the equipped-weapon index in
+					// state.weapons; item abilities (j >= weaponAbilityCount) carry -1.
+					wIdx := -1
+					if j < bufs.weaponAbilityCount {
+						wIdx = j
+					}
+					allWeaponIdx = append(allWeaponIdx, wIdx)
 				}
 			}
-			score, winner, legal := ctx.bestSequence(allAttackers)
+			score, winner, legal := ctx.bestSequence(allAttackers, allWeaponIdx)
 			if !legal {
 				continue
 			}
@@ -573,6 +584,7 @@ func (ctx *sequenceContext) captureWinningSeq(pcBuf []card.CardState, pitchPerm 
 	for i := range pcBuf {
 		b.seqAttack = append(b.seqAttack, playedCard{
 			card: pcBuf[i].Card, mode: pcBuf[i].Mode, fromArsenal: pcBuf[i].FromArsenal,
+			weaponIdx: ctx.bufs.permWeaponIdx[i],
 		})
 	}
 	b.seqPitch = b.seqPitch[:0]
@@ -583,8 +595,9 @@ func (ctx *sequenceContext) captureWinningSeq(pcBuf []card.CardState, pitchPerm 
 
 // bestSequence tries every ordering of attackers and returns the winning permutation's
 // attackTurnScore. legal=true when at least one ordering is playable. Returns the winning
-// *GameState via the second return value.
-func (ctx *sequenceContext) bestSequence(attackers []card.Card) (attackTurnScore, *gameengine.GameState, bool) {
+// *GameState via the second return value. weaponIdx parallels attackers: entry i is the
+// equipped-weapon index for a weapon swing, or -1 for hand cards / item abilities.
+func (ctx *sequenceContext) bestSequence(attackers []card.Card, weaponIdx []int) (attackTurnScore, *gameengine.GameState, bool) {
 	n := len(attackers)
 	if n == 0 {
 		if len(ctx.attackPitchPerm) > 0 {
@@ -600,9 +613,10 @@ func (ctx *sequenceContext) bestSequence(attackers []card.Card) (attackTurnScore
 	}
 	pcBuf := ctx.bufs.pcBuf[:n]
 	permMeta := ctx.bufs.permMeta[:n]
+	permWeaponIdx := ctx.bufs.permWeaponIdx[:n]
 	for idx, c := range attackers {
 		permMeta[idx] = attackerMetaPtrFor(c)
-		ctx.seedAttackStepEntry(&pcBuf[idx], c, idx)
+		ctx.seedAttackStepEntry(&pcBuf[idx], c, idx, weaponIdx[idx])
 	}
 
 	var bestScore attackTurnScore
@@ -612,7 +626,7 @@ func (ctx *sequenceContext) bestSequence(attackers []card.Card) (attackTurnScore
 	pitchVals := ctx.attackPitchVals
 	// Canonicalise ascending by card ID so lex-next-permutation visits each distinct
 	// ordering exactly once — duplicates skip the redundant swap.
-	sortAttackersByID(pcBuf, permMeta)
+	sortAttackersByID(pcBuf, permMeta, permWeaponIdx)
 	sortPitchByID(pitchPerm, pitchVals)
 	tupleCount := 1
 	for i := 0; i < n; i++ {
@@ -668,7 +682,7 @@ func (ctx *sequenceContext) bestSequence(attackers []card.Card) (attackTurnScore
 		}
 	}
 	eval()
-	for nextPermAttackers(pcBuf, permMeta) {
+	for nextPermAttackers(pcBuf, permMeta, permWeaponIdx) {
 		eval()
 	}
 	return bestScore, bestWinner, foundLegal
@@ -684,14 +698,15 @@ func attackerKey(pc *card.CardState) uint32 {
 	return k
 }
 
-// sortAttackersByID insertion-sorts pcBuf and permMeta in lockstep, ascending by
-// (Card.ID, FromArsenal). n is small (≤ 8 attackers), so insertion sort beats
-// sort.Slice's closure-allocation overhead.
-func sortAttackersByID(pcBuf []card.CardState, permMeta []*attackerMeta) {
+// sortAttackersByID insertion-sorts pcBuf, permMeta, and permWeaponIdx in lockstep, ascending
+// by (Card.ID, FromArsenal). n is small (≤ 8 attackers), so insertion sort beats sort.Slice's
+// closure-allocation overhead.
+func sortAttackersByID(pcBuf []card.CardState, permMeta []*attackerMeta, permWeaponIdx []int16) {
 	for i := 1; i < len(pcBuf); i++ {
 		for j := i; j > 0 && attackerKey(&pcBuf[j]) < attackerKey(&pcBuf[j-1]); j-- {
 			pcBuf[j-1], pcBuf[j] = pcBuf[j], pcBuf[j-1]
 			permMeta[j-1], permMeta[j] = permMeta[j], permMeta[j-1]
+			permWeaponIdx[j-1], permWeaponIdx[j] = permWeaponIdx[j], permWeaponIdx[j-1]
 		}
 	}
 }
@@ -707,10 +722,10 @@ func sortPitchByID(perm []*card.CardState, vals []int) {
 	}
 }
 
-// nextPermAttackers advances (pcBuf, permMeta) in lockstep to the lex-next permutation by
-// attackerKey, returning false once the slice is in descending order. Equal-key entries
-// skip the redundant swap, so duplicates yield each distinct ordering exactly once.
-func nextPermAttackers(pcBuf []card.CardState, permMeta []*attackerMeta) bool {
+// nextPermAttackers advances (pcBuf, permMeta, permWeaponIdx) in lockstep to the lex-next
+// permutation by attackerKey, returning false once the slice is in descending order. Equal-key
+// entries skip the redundant swap, so duplicates yield each distinct ordering exactly once.
+func nextPermAttackers(pcBuf []card.CardState, permMeta []*attackerMeta, permWeaponIdx []int16) bool {
 	n := len(pcBuf)
 	if n < 2 {
 		return false
@@ -729,9 +744,11 @@ func nextPermAttackers(pcBuf []card.CardState, permMeta []*attackerMeta) bool {
 	}
 	pcBuf[i], pcBuf[j] = pcBuf[j], pcBuf[i]
 	permMeta[i], permMeta[j] = permMeta[j], permMeta[i]
+	permWeaponIdx[i], permWeaponIdx[j] = permWeaponIdx[j], permWeaponIdx[i]
 	for l, r := i+1, n-1; l < r; l, r = l+1, r-1 {
 		pcBuf[l], pcBuf[r] = pcBuf[r], pcBuf[l]
 		permMeta[l], permMeta[r] = permMeta[r], permMeta[l]
+		permWeaponIdx[l], permWeaponIdx[r] = permWeaponIdx[r], permWeaponIdx[l]
 	}
 	return true
 }
@@ -765,14 +782,15 @@ func nextPermPitches(perm []*card.CardState, vals []int) bool {
 
 // playSequence builds permMeta and calls playSequenceWithMeta, recording the result on
 // ctx.permState for the test-only PermEngine accessor. bestSequence's hot path threads the
-// winner through return values instead and skips this write.
+// winner through return values instead and skips this write. Every entry seeds weaponIdx=-1:
+// this path drives raw card orderings that don't carry weapon-swing attribution.
 func (ctx *sequenceContext) playSequence(order []card.Card) (damage int, totalCounters int, residualBudget int, legal bool) {
 	n := len(order)
 	pcBuf := ctx.bufs.pcBuf
 	meta := ctx.bufs.permMeta[:n]
 	for i, c := range order {
 		meta[i] = attackerMetaPtrFor(c)
-		ctx.seedAttackStepEntry(&pcBuf[i], c, i)
+		ctx.seedAttackStepEntry(&pcBuf[i], c, i, -1)
 	}
 	d, tc, rb, winner, lg := ctx.playSequenceWithMeta(n)
 	ctx.permState = winner
@@ -788,7 +806,7 @@ func (ctx *sequenceContext) playSequenceModal(order []playedCard) (damage int, t
 	meta := ctx.bufs.permMeta[:n]
 	for i, pc := range order {
 		meta[i] = attackerMetaPtrFor(pc.card)
-		ctx.seedAttackStepEntry(&pcBuf[i], pc.card, i)
+		ctx.seedAttackStepEntry(&pcBuf[i], pc.card, i, int(pc.weaponIdx))
 		pcBuf[i].Mode = pc.mode
 		pcBuf[i].FromArsenal = pc.fromArsenal
 	}
@@ -799,11 +817,14 @@ func (ctx *sequenceContext) playSequenceModal(order []playedCard) (damage int, t
 
 // seedAttackStepEntry initialises one pcBuf slot: bind (Card, FromArsenal, Mode) and zero every
 // ephemeral field. Mode is reseeded per modal tuple by the attack-turn runner; initial 0 covers
-// non-modal attackers.
-func (ctx *sequenceContext) seedAttackStepEntry(pc *card.CardState, c card.Card, idx int) {
+// non-modal attackers. weaponIdx is the equipped-weapon index for a weapon swing, or -1 for hand
+// cards / item abilities; it lands in the sim-private permWeaponIdx[idx] (never on the CardState),
+// rides the permutation alongside the slot, and resolves onto pc.Weapon in playSequenceWithMeta.
+func (ctx *sequenceContext) seedAttackStepEntry(pc *card.CardState, c card.Card, idx, weaponIdx int) {
 	pc.Card = c
 	pc.FromArsenal = idx == ctx.arsenalInIdx
 	pc.Mode = 0
+	ctx.bufs.permWeaponIdx[idx] = int16(weaponIdx)
 	pc.Ephemeral.Reset()
 }
 
@@ -819,6 +840,17 @@ func (ctx *sequenceContext) playSequenceWithMeta(n int) (damage int, totalCounte
 	}
 	played := ptrBuf[:n]
 	state := ctx.preparePermState(played, n)
+	// Resolve each weapon swing's Weapon against this permutation's own weapon copies
+	// (preparePermState rebuilt them via copyWeaponsInto, so they differ from the prior call's).
+	// permWeaponIdx rode the permutation swap alongside the slot; the per-perm object it points
+	// at is what a weapon ability's Play mutates. The Ephemeral.Reset above cleared any stale
+	// pointer from the prior call.
+	weapons := state.Weapons()
+	for i := 0; i < n; i++ {
+		if idx := int(ctx.bufs.permWeaponIdx[i]); idx >= 0 && idx < len(weapons) {
+			pcBuf[i].Weapon = weapons[idx].(card.Weapon)
+		}
+	}
 	state.SetIsMyTurn(true)
 	ge := ctx.permEngine(state)
 	// infeasible returns state to the pool and surfaces the legal=false signal. Used at

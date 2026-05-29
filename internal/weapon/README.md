@@ -18,19 +18,20 @@ which `gameengine.GameEngine` satisfies structurally.
   `DisplayName`, `Types(GameEngine)`, lives in the card universe, and goes to the graveyard
   when destroyed) plus `Hands()` and `Ability()`.
 - `Weapon` — the concrete mutable object the engine stores in `GameState.weapons`. Embeds
-  `trigger.Trigger` (so a future end-phase handler can subscribe), carries the per-turn
-  counter total (`Count` / `SetCount`), the source card (`SourceCard`), and caches the
-  card's `Name` / `Hands` / `Ability`. Built at game start via `gameengine.EquipFromCards`,
-  deep-copied per permutation via `Copy`, destroyed via `GameEngine.DestroyWeapon`. Satisfies
-  `gameengine.Weapon` and `card.Weapon`.
+  `trigger.Trigger` (so an end-phase handler can subscribe — Talishar's self-destruct),
+  carries the per-turn counter total (`Count` / `SetCount`), the source card (`SourceCard`),
+  and caches the card's `Name` / `Hands` / `Ability`. Built at game start via
+  `gameengine.EquipFromCards`, deep-copied per permutation via `Copy`, destroyed via
+  `GameEngine.DestroyWeapon`. Satisfies `gameengine.Weapon` and `card.Weapon`.
 
 ## Weapon activated abilities
 
 Each weapon is two paired Go types in one `<weapon>.go` file:
 
 - A platonic weapon `Card` (`ID`, `DisplayName`, `Cost`/`Pitch`/`Attack`/`Defense` all 0,
-  `Types`, no-op `Play`, `Hands`, `Ability`) — the equipped permanent that sits in the arena
-  and never enters the attack turn.
+  `Types`, `Hands`, `Ability`, plus a `Play` that registers the equipped object via
+  `ge.CreateWeapon` at equip time) — the equipped permanent that sits in the arena and never
+  enters the attack turn.
 - A `card.Card` activated ability (`<Weapon>Ability`) — what the attack-turn runner enqueues
   each turn when the player swings (1 AP, pays the ability's printed activation cost). It
   carries the printed Cost / Pitch / Attack / Defense / GoAgain / Play plus the parent's
@@ -54,12 +55,14 @@ Card-attack predicates (`internal/card/types.go`) gate purely on `TypeAttack` (a
 
 ## Equip and end-of-turn plumbing
 
-Weapons are equipped at game start, not played from hand, so there is no card-facing
-`CreateWeapon` (the `CreateAura` / `CreateItem` counterpart). The sim equips a deck's weapons
-in `weaponsFromDeck` via `gameengine.EquipFromCards`; tests reach for
-`StateBuilder.EquipWeapons`. `FireTriggers` walks equipped weapons like auras / items so a
-future weapon can subscribe an EndOfTurn handler — no current weapon registers one, so the
-walk is a no-op today.
+Weapons are equipped at game start, not played from hand. A weapon card's `Play` is its
+equip-time registration hook: it calls `card.GameEngine.CreateWeapon` — the `CreateAura` /
+`CreateItem` counterpart — to put its mutable object into `GameState.weapons`, passing a
+trigger (firing event + handler) or `(0, nil)` for an untriggered weapon. `EquipFromCards`
+drives this by playing each platonic weapon card into the target state (the sim passes
+`weaponCards(d)`; tests reach for `StateBuilder.EquipWeapons`). `FireTriggers` walks equipped
+weapons like auras / items; Talishar registers an `EndOfTurn` handler (its rust-counter
+self-destruct), so the walk fires for any loadout that includes it.
 
 ## Weapon markers
 
@@ -68,7 +71,7 @@ Unlike cards, which keep their `NotImplemented` / `Unplayable` markers in dedica
 stays as a normal file in `internal/weapon/weapons/` and carries a `NotImplemented()` /
 `Unplayable()` marker method directly on the platonic `Card` type. There is no weapon
 subpackage for markers. Pair a `NotImplemented()` with a `// not implemented: <quirk>`
-comment; Talishar is the model.
+comment; Rosetta Thorn is the model.
 
 ## How to use / extend
 
@@ -83,7 +86,10 @@ method.
 - `weapon.go` — the `Card` and `Weapon` types, the equip-time builders, and the package doc.
 - `weapons/nebula_blade.go` — a fully-modelled weapon (on-hit Runechant rider, conditional
   +3 power); the model for new weapon files.
-- `weapons/talishar.go` — a `NotImplemented`-marked weapon, the marker model.
+- `weapons/talishar.go` — a self-triggering weapon: its `Play` registers an `EndOfTurn`
+  self-destruct via `ge.CreateWeapon`; the model for weapons that subscribe a trigger.
+- `weapons/rosetta_thorn.go` — a `NotImplemented` / `NotSilverAgeLegal`-marked weapon, the
+  marker model.
 
 ## Gotchas
 

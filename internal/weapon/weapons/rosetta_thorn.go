@@ -18,18 +18,21 @@ var rosettaThornTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeWeapon, car
 // is what the attack-turn runner enqueues each turn.
 type RosettaThorn struct{}
 
-func (RosettaThorn) ID() ids.CardID                                     { return ids.RosettaThornID }
-func (RosettaThorn) Name() string                                       { return "Rosetta Thorn" }
-func (RosettaThorn) DisplayName() string                                { return "Rosetta Thorn" }
-func (RosettaThorn) Cost() int                                          { return 0 }
-func (RosettaThorn) Pitch() int                                         { return 0 }
-func (RosettaThorn) Attack() int                                        { return 0 }
-func (RosettaThorn) Defense() int                                       { return 0 }
-func (RosettaThorn) Types(card.GameEngine) card.TypeSet                 { return rosettaThornTypes }
-func (RosettaThorn) GoAgain(card.GameEngine) bool                       { return false }
-func (RosettaThorn) Play(card.GameEngine, card.Logger, *card.CardState) {}
-func (RosettaThorn) Hands() int                                         { return 2 }
-func (RosettaThorn) Ability() card.Card                                 { return rosettaThornAbility }
+func (RosettaThorn) ID() ids.CardID                     { return ids.RosettaThornID }
+func (RosettaThorn) Name() string                       { return "Rosetta Thorn" }
+func (RosettaThorn) DisplayName() string                { return "Rosetta Thorn" }
+func (RosettaThorn) Cost() int                          { return 0 }
+func (RosettaThorn) Pitch() int                         { return 0 }
+func (RosettaThorn) Attack() int                        { return 0 }
+func (RosettaThorn) Defense() int                       { return 0 }
+func (RosettaThorn) Types(card.GameEngine) card.TypeSet { return rosettaThornTypes }
+func (RosettaThorn) GoAgain(card.GameEngine) bool       { return false }
+func (RosettaThorn) Hands() int                         { return 2 }
+func (RosettaThorn) Ability() card.Card                 { return rosettaThornAbility }
+
+func (RosettaThorn) Play(ge card.GameEngine, _ card.Logger, self *card.CardState) {
+	ge.CreateWeapon(self.Card, 0, nil, false, nil)
+}
 
 var rosettaThornAbility card.Card = RosettaThornAbility{}
 

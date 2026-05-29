@@ -22,7 +22,7 @@ func EvalOneTurnForTesting(d *deck.Deck, initialState *gameengine.GameState, ini
 	if initialState == nil {
 		initialState = gameengine.GameStateBuilder().Build()
 	}
-	initialState.SetWeapons(weaponsFromDeck(d))
+	gameengine.EquipFromCards(initialState, weaponCards(d))
 	sortHandByID(initialHand)
 	initialState.SetHand(initialHand)
 	summary, _ := playOneTurn(initialState, d, ev(), nil, nil)
@@ -37,7 +37,7 @@ func EvalTwoTurnsForTesting(d *deck.Deck, initialState *gameengine.GameState, ha
 	if initialState == nil {
 		initialState = gameengine.GameStateBuilder().Build()
 	}
-	initialState.SetWeapons(weaponsFromDeck(d))
+	gameengine.EquipFromCards(initialState, weaponCards(d))
 	sortHandByID(hand1)
 	initialState.SetHand(hand1)
 
@@ -47,6 +47,34 @@ func EvalTwoTurnsForTesting(d *deck.Deck, initialState *gameengine.GameState, ha
 
 	turn2, _ := playOneTurn(turn1.State, turn1.State.Deck(), ev(), nil, nil)
 	return stable, turn2
+}
+
+// EvalFourTurnsForTesting drives four turns, threading carryover between them — the harness
+// for weapons / effects whose state accumulates over several turns (Talishar's rust counters
+// reach the self-destruct threshold on turn 3). Each returned summary's State is an
+// independent deep copy except the last, which mutates the shared state.
+func EvalFourTurnsForTesting(d *deck.Deck, initialState *gameengine.GameState, hand1 []card.Card) (TurnSummary, TurnSummary, TurnSummary, TurnSummary) {
+	if initialState == nil {
+		initialState = gameengine.GameStateBuilder().Build()
+	}
+	gameengine.EquipFromCards(initialState, weaponCards(d))
+	sortHandByID(hand1)
+	initialState.SetHand(hand1)
+
+	turn1, _ := playOneTurn(initialState, d, ev(), nil, nil)
+	s1 := turn1
+	s1.State = turn1.State.Copy()
+
+	turn2, _ := playOneTurn(turn1.State, turn1.State.Deck(), ev(), nil, nil)
+	s2 := turn2
+	s2.State = turn2.State.Copy()
+
+	turn3, _ := playOneTurn(turn2.State, turn2.State.Deck(), ev(), nil, nil)
+	s3 := turn3
+	s3.State = turn3.State.Copy()
+
+	turn4, _ := playOneTurn(turn3.State, turn3.State.Deck(), ev(), nil, nil)
+	return s1, s2, s3, turn4
 }
 
 // ev returns the package-level Evaluator so test helpers share its cache/scratch state.

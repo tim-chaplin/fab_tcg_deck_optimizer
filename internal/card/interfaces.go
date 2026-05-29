@@ -109,6 +109,12 @@ type GameEngine interface {
 	// 1-AP playable starting the turn AFTER this call — the wmask is computed from
 	// masterState.Items() at attack-turn start, so same-turn activation isn't supported.
 	CreateItemWithAbility(source Card, ability Card)
+	// CreateWeapon equips a card-sourced weapon — the weapon counterpart of CreateItem /
+	// CreateAura. A weapon card's Play registers its equipped object here; source supplies the
+	// swing Ability and Hands. Pass a trigger (tt's bit set + handler) for a self-triggering
+	// weapon like Talishar's end-phase self-destruct, or (0, nil) for an untriggered weapon.
+	// oncePerTurn caps the handler to one fire per turn; filter narrows the firing site (nil = any).
+	CreateWeapon(source Card, tt triggertype.Type, handler func(GameEngine, Logger, Weapon, FireContext), oncePerTurn bool, filter func(TypeSet) bool)
 	// AddResourcePoints adds n resources to the card currently being pitched — a Pitch handler
 	// calls it to boost what that pitched card yields. No effect outside a pitch fire.
 	AddResourcePoints(n int)

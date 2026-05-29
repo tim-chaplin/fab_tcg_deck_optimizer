@@ -3,10 +3,15 @@ package lint
 import (
 	"os"
 	"path/filepath"
+	"regexp"
 	"sort"
 	"strings"
 	"testing"
 )
+
+// evalNTurnsForTesting matches the public turn-eval entry points — EvalOneTurnForTesting,
+// EvalTwoTurnsForTesting, EvalFourTurnsForTesting, and any future EvalNTurnsForTesting.
+var evalNTurnsForTesting = regexp.MustCompile(`Eval\w+ForTesting`)
 
 // TestTurntests_NewTestsUseEvalNTurnsForTesting rejects new turntests/ test files that
 // don't drive a turn through the public sim.EvalOneTurnForTesting /
@@ -43,11 +48,11 @@ func TestTurntests_NewTestsUseEvalNTurnsForTesting(t *testing.T) {
 			return err
 		}
 		src := string(body)
-		// A passing file must call EvalOneTurnForTesting or EvalTwoTurnsForTesting (its
-		// purpose is to exercise the public turn-eval API). Files that drive engine
-		// internals directly (ResolveAttackStep, ge.Discard, ge.FireTriggers, …) are
-		// offenders unless grandfathered.
-		if strings.Contains(src, "EvalOneTurnForTesting") || strings.Contains(src, "EvalTwoTurnsForTesting") {
+		// A passing file must call an EvalNTurnsForTesting entry point (its purpose is to
+		// exercise the public turn-eval API). Files that drive engine internals directly
+		// (ResolveAttackStep, ge.Discard, ge.FireTriggers, …) are offenders unless
+		// grandfathered.
+		if evalNTurnsForTesting.MatchString(src) {
 			return nil
 		}
 		rel, _ := filepath.Rel(root, path)

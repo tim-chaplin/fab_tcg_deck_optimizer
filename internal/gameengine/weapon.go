@@ -2,35 +2,40 @@ package gameengine
 
 import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/triggertype"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapon"
 )
 
-// Equip-time weapon object construction. Weapons aren't played from hand — they're equipped
-// at game start, so there is no card-facing CreateWeapon (the Aura / Item counterpart). The
-// sim and the StateBuilder build the mutable weapon objects from the deck's platonic weapon
-// cards through EquipFromCards.
+// CreateWeapon equips a card-sourced weapon — the weapon counterpart of CreateItem / CreateAura.
+// A weapon card's Play registers its equipped object here; source supplies the swing Ability and
+// Hands. tt / handler give a self-triggering weapon its scheduled handler (Talishar's end-phase
+// self-destruct); pass (0, nil) for an untriggered weapon.
+func (gs *GameState) CreateWeapon(source card.Card, tt triggertype.Type, handler func(card.GameEngine, card.Logger, card.Weapon, card.FireContext), oncePerTurn bool, filter func(card.TypeSet) bool) {
+	gs.weapons = append(gs.weapons, weapon.NewFromCard(source.(weapon.Card), tt, handler, oncePerTurn, filter))
+}
 
-// EquipFromCards builds the engine-side weapon object for each platonic weapon card. Each
-// object embeds a trigger.Trigger (no handler yet) and caches the card's Hands / Ability;
-// it lives in GameState.weapons across turns. Returns nil for an empty loadout so the
-// no-weapon case carries no allocation.
-func EquipFromCards(cards []weapon.Card) []Weapon {
+// EquipFromCards equips each platonic weapon card onto gs by playing it: the card's Play
+// registers its object (and any trigger) via ge.CreateWeapon — the same way an item card's
+// Play calls ge.CreateItem, and StateBuilder.CreateItemFromCard plays a card into the state
+// being built. Weapons aren't played from hand; this is the game-start equip step the sim and
+// StateBuilder drive.
+func EquipFromCards(gs *GameState, cards []weapon.Card) {
 	if len(cards) == 0 {
-		return nil
+		return
 	}
-	out := make([]Weapon, len(cards))
-	for i, c := range cards {
-		out[i] = weapon.New(c)
+	ge := &GameEngine{GameState: gs}
+	var cs card.CardState
+	for _, c := range cards {
+		cs = card.CardState{Card: c}
+		c.Play(ge, NoopLogger{}, &cs)
 	}
-	return out
 }
 
 // DestroyWeapon removes the weapon currently being fired from the arena and, when
 // addToGraveyard is true, pushes its source weapon card into the graveyard. The weapon
 // counterpart of DestroyAura / DestroyItem: direct splice with no cacheable flip —
-// destruction is deterministic from the triggering event. Not used by any weapon yet
-// (Talishar's end-phase self-destruct will be the first); wired so a future triggered
-// weapon's handler-side Destroy routes back here.
+// destruction is deterministic from the triggering event. Talishar's end-phase
+// self-destruct routes its handler-side Destroy back here.
 func (ge *GameEngine) DestroyWeapon(addToGraveyard bool) {
 	i := ge.currentHookIdx
 	if i < 0 || i >= len(ge.weapons) {

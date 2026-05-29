@@ -3,7 +3,19 @@ package card
 import (
 	"reflect"
 	"testing"
+
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/ids"
 )
+
+// fakeWeapon is a no-op card.Weapon so the Ephemeral.Weapon field can be set non-nil for the
+// reset-coverage assertion.
+type fakeWeapon struct{}
+
+func (fakeWeapon) Count() int         { return 0 }
+func (fakeWeapon) SetCount(int)       {}
+func (fakeWeapon) CardName() string   { return "fakeWeapon" }
+func (fakeWeapon) CardID() ids.CardID { return ids.InvalidCard }
+func (fakeWeapon) Destroy(bool)       {}
 
 // TestEphemeralReset_ZeroesEveryField mutates every Ephemeral field non-zero, calls Reset,
 // and asserts each one is back to its type's zero value. A new field added to Ephemeral is
@@ -22,6 +34,7 @@ func TestEphemeralReset_ZeroesEveryField(t *testing.T) {
 		BonusDefense:     99,
 		PitchedToPlay:    []*CardState{nil},
 		OnHit:            []OnHitHandler{{N: 1}},
+		Weapon:           fakeWeapon{},
 	}
 	e.Reset()
 

@@ -229,7 +229,8 @@ func runOneShuffle(masterDeck *deck.Deck, scratch *shuffleScratch, stats *deck.S
 	// Carry state borrows one pool slot; playOneTurn / Best mutate it in place across
 	// turns. Put back at shuffle end before FreeAll.
 	state := ev.statePool.Get()
-	state.Reset(d.Hero.(hero.Hero), weaponsFromDeck(d), mp.IncomingPhysicalDamage, mp.IncomingArcaneDamage)
+	state.Reset(d.Hero.(hero.Hero), mp.IncomingPhysicalDamage, mp.IncomingArcaneDamage)
+	gameengine.EquipFromCards(state, weaponCards(d))
 
 	// Initial hand drawn into the reusable handBuf, sorted so it is canonical from turn one.
 	handBuf := scratch.handBuf
@@ -265,16 +266,14 @@ func runOneShuffle(masterDeck *deck.Deck, scratch *shuffleScratch, stats *deck.S
 	ev.statePool.FreeAll()
 }
 
-// weaponsFromDeck equips the deck's weapons: each d.Weapons entry is a platonic weapon
-// card (weapon.Card), so this builds the mutable engine-side weapon object for each — the
-// game-start equip step. Fresh objects per call keep one shuffle's per-turn counter state
-// from leaking into the next.
-func weaponsFromDeck(d *deck.Deck) []gameengine.Weapon {
+// weaponCards extracts the deck's platonic weapon cards (each d.Weapons entry is a
+// weapon.Card) for EquipFromCards to play onto a state at game start.
+func weaponCards(d *deck.Deck) []weapon.Card {
 	cards := make([]weapon.Card, len(d.Weapons))
 	for i, w := range d.Weapons {
 		cards[i] = w.(weapon.Card)
 	}
-	return gameengine.EquipFromCards(cards)
+	return cards
 }
 
 // countPitched returns the number of Pitch-role entries in bestLine, excluding the arsenal

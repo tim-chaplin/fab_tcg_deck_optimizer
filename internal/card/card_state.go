@@ -85,6 +85,13 @@ type Ephemeral struct {
 	// (function pointer + small data payload) rather than closures so registration is
 	// alloc-free.
 	OnHit []OnHitHandler
+	// Weapon is the equipped weapon object this entry's activated ability belongs to, nil for
+	// everything that isn't a weapon swing. A weapon ability's Play mutates this object (the
+	// equipped permanent, not the printed attack copy). The attack-turn runner resolves it
+	// per-permutation against that permutation's own GameState.Weapons() copies, so two 1H
+	// copies of the same weapon each carry their own object. Lives in Ephemeral so Reset clears
+	// the stale per-perm pointer before the slot is reused.
+	Weapon Weapon
 }
 
 // Reset zeroes r, preserving OnHit's backing array so per-Best reuse stays allocation-free.

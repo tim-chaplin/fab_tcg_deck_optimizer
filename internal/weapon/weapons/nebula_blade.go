@@ -17,18 +17,21 @@ var nebulaBladeTypes = card.NewTypeSet(card.TypeRuneblade, card.TypeWeapon, card
 // attack-turn runner enqueues each turn.
 type NebulaBlade struct{}
 
-func (NebulaBlade) ID() ids.CardID                                     { return ids.NebulaBladeID }
-func (NebulaBlade) Name() string                                       { return "Nebula Blade" }
-func (NebulaBlade) DisplayName() string                                { return "Nebula Blade" }
-func (NebulaBlade) Cost() int                                          { return 0 }
-func (NebulaBlade) Pitch() int                                         { return 0 }
-func (NebulaBlade) Attack() int                                        { return 0 }
-func (NebulaBlade) Defense() int                                       { return 0 }
-func (NebulaBlade) Types(card.GameEngine) card.TypeSet                 { return nebulaBladeTypes }
-func (NebulaBlade) GoAgain(card.GameEngine) bool                       { return false }
-func (NebulaBlade) Play(card.GameEngine, card.Logger, *card.CardState) {}
-func (NebulaBlade) Hands() int                                         { return 2 }
-func (NebulaBlade) Ability() card.Card                                 { return nebulaBladeAbility }
+func (NebulaBlade) ID() ids.CardID                     { return ids.NebulaBladeID }
+func (NebulaBlade) Name() string                       { return "Nebula Blade" }
+func (NebulaBlade) DisplayName() string                { return "Nebula Blade" }
+func (NebulaBlade) Cost() int                          { return 0 }
+func (NebulaBlade) Pitch() int                         { return 0 }
+func (NebulaBlade) Attack() int                        { return 0 }
+func (NebulaBlade) Defense() int                       { return 0 }
+func (NebulaBlade) Types(card.GameEngine) card.TypeSet { return nebulaBladeTypes }
+func (NebulaBlade) GoAgain(card.GameEngine) bool       { return false }
+func (NebulaBlade) Hands() int                         { return 2 }
+func (NebulaBlade) Ability() card.Card                 { return nebulaBladeAbility }
+
+func (NebulaBlade) Play(ge card.GameEngine, _ card.Logger, self *card.CardState) {
+	ge.CreateWeapon(self.Card, 0, nil, false, nil)
+}
 
 var nebulaBladeAbility card.Card = NebulaBladeAbility{}
 
