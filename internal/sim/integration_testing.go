@@ -22,7 +22,7 @@ func EvalOneTurnForTesting(d *deck.Deck, initialState *gameengine.GameState, ini
 	if initialState == nil {
 		initialState = gameengine.GameStateBuilder().Build()
 	}
-	initialState.SetWeapons(weaponsFromDeck(d))
+	gameengine.EquipFromCards(initialState, weaponCards(d))
 	sortHandByID(initialHand)
 	initialState.SetHand(initialHand)
 	summary, _ := playOneTurn(initialState, d, ev(), nil, nil)
@@ -37,7 +37,7 @@ func EvalTwoTurnsForTesting(d *deck.Deck, initialState *gameengine.GameState, ha
 	if initialState == nil {
 		initialState = gameengine.GameStateBuilder().Build()
 	}
-	initialState.SetWeapons(weaponsFromDeck(d))
+	gameengine.EquipFromCards(initialState, weaponCards(d))
 	sortHandByID(hand1)
 	initialState.SetHand(hand1)
 
@@ -57,7 +57,7 @@ func EvalFourTurnsForTesting(d *deck.Deck, initialState *gameengine.GameState, h
 	if initialState == nil {
 		initialState = gameengine.GameStateBuilder().Build()
 	}
-	initialState.SetWeapons(weaponsFromDeck(d))
+	gameengine.EquipFromCards(initialState, weaponCards(d))
 	sortHandByID(hand1)
 	initialState.SetHand(hand1)
 

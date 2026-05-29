@@ -57,11 +57,12 @@ func (b *StateBuilder) SetHero(h Hero) *StateBuilder { b.gs.SetHero(h); return b
 // SetWeapons installs the equipped weapon objects directly. Persistent across turns.
 func (b *StateBuilder) SetWeapons(w []Weapon) *StateBuilder { b.gs.weapons = w; return b }
 
-// EquipWeapons builds the engine-side weapon objects for the supplied platonic weapon cards
-// and installs them — the equip-at-game-start path. Mirrors how the sim equips weapons from
-// the deck. Returns the builder for chaining.
+// EquipWeapons equips the supplied platonic weapon cards onto the state being built by playing
+// each one — the equip-at-game-start path, mirroring how the sim equips weapons from the deck
+// (and how CreateAuraFromCard / CreateItemFromCard play a card into b.gs). Returns the builder
+// for chaining.
 func (b *StateBuilder) EquipWeapons(cards ...weapon.Card) *StateBuilder {
-	b.gs.weapons = EquipFromCards(cards)
+	EquipFromCards(b.gs, cards)
 	return b
 }
 

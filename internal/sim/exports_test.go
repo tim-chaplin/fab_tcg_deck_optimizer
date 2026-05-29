@@ -17,7 +17,8 @@ import (
 // into engine-side objects first. state carries the matchup figures (set via
 // SetIncomingPhysicalDamage) and any other carryover.
 func Best(weapons []weapon.Card, hand []card.Card, d *deck.Deck, state *gameengine.GameState) TurnSummary {
-	return best(gameengine.EquipFromCards(weapons), hand, d, state)
+	gameengine.EquipFromCards(state, weapons)
+	return best(state.Weapons(), hand, d, state)
 }
 
 // DeckOf builds a *deck.Deck from a list of cards.
@@ -94,7 +95,9 @@ type AttackBufs = attackBufs
 // NewAttackBufs re-exports newAttackBufs, equipping the supplied platonic weapon cards and
 // wiring a fresh statePool for the buf.
 func NewAttackBufs(handSize, weaponCount int, weapons []weapon.Card) *AttackBufs {
-	return newAttackBufs(handSize, weaponCount, gameengine.EquipFromCards(weapons), gameengine.NewPrewarmedPool())
+	gs := gameengine.GameStateBuilder().Build()
+	gameengine.EquipFromCards(gs, weapons)
+	return newAttackBufs(handSize, weaponCount, gs.Weapons(), gameengine.NewPrewarmedPool())
 }
 
 // DefenseGravScratch / DRCardStateScratch expose unexported attackBufs fields. State()

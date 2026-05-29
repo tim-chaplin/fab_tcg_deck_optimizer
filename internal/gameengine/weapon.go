@@ -1,8 +1,6 @@
 package gameengine
 
 import (
-	"sync"
-
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/triggertype"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapon"
@@ -16,31 +14,21 @@ func (gs *GameState) CreateWeapon(source card.Card, tt triggertype.Type, handler
 	gs.weapons = append(gs.weapons, weapon.NewFromCard(source.(weapon.Card), tt, handler, oncePerTurn, filter))
 }
 
-// equipEnginePool supplies the scratch engine EquipFromCards plays weapon cards against, so a
-// per-shuffle equip reuses one GameState instead of allocating a fresh ~KB struct each call. A
-// weapon card's Play only ever calls CreateWeapon (which just appends to gs.weapons), so the
-// pooled state needs no reset beyond clearing weapons.
-var equipEnginePool = sync.Pool{New: func() any { return &GameEngine{GameState: &GameState{}} }}
-
-// EquipFromCards builds the engine-side weapon objects for the supplied platonic weapon cards by
-// playing each one: the card's Play registers its equipped object (and any trigger) via
-// ge.CreateWeapon, exactly as an item card's Play calls ge.CreateItem. Weapons aren't played from
-// hand — this is the game-start equip step the sim and StateBuilder drive. Returns nil for an
-// empty loadout so the no-weapon case carries no allocation.
-func EquipFromCards(cards []weapon.Card) []Weapon {
+// EquipFromCards equips each platonic weapon card onto gs by playing it: the card's Play
+// registers its object (and any trigger) via ge.CreateWeapon — the same way an item card's
+// Play calls ge.CreateItem, and StateBuilder.CreateItemFromCard plays a card into the state
+// being built. Weapons aren't played from hand; this is the game-start equip step the sim and
+// StateBuilder drive.
+func EquipFromCards(gs *GameState, cards []weapon.Card) {
 	if len(cards) == 0 {
-		return nil
+		return
 	}
-	ge := equipEnginePool.Get().(*GameEngine)
+	ge := &GameEngine{GameState: gs}
 	var cs card.CardState
 	for _, c := range cards {
 		cs = card.CardState{Card: c}
 		c.Play(ge, NoopLogger{}, &cs)
 	}
-	out := ge.weapons
-	ge.weapons = nil
-	equipEnginePool.Put(ge)
-	return out
 }
 
 // DestroyWeapon removes the weapon currently being fired from the arena and, when

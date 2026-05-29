@@ -507,17 +507,18 @@ func (gs *GameState) ResetEphemeralState() {
 	}
 }
 
-// Reset re-seeds gs with the given hero / weapons / incoming-damage values, preserving
-// pre-allocated slice backings (hand, graveyard, banished, auras, items, ephemeral).
-// Lets a pooled GameState start a fresh shuffle without losing prewarmed backings. The
-// caller hands over freshly-built weapon objects (one set per shuffle), so they're assigned
-// directly rather than copied.
-func (gs *GameState) Reset(h Hero, weapons []Weapon, incoming, arcaneIncoming int) {
+// Reset re-seeds gs with the given hero / incoming-damage values, preserving pre-allocated
+// slice backings (hand, graveyard, banished, auras, items, weapons, ephemeral) so a pooled
+// GameState starts a fresh shuffle without losing prewarmed backings. Weapons are emptied
+// (backing kept); the caller re-equips via EquipFromCards after Reset.
+func (gs *GameState) Reset(h Hero, incoming, arcaneIncoming int) {
 	hand := gs.hand[:0]
 	graveyard := gs.graveyard[:0]
 	banished := gs.banished[:0]
 	auras := gs.auras[:0]
 	items := gs.items[:0]
+	// Reuse the pooled weapons backing; the caller re-equips via EquipFromCards after Reset.
+	weapons := gs.weapons[:0]
 	deckWrapper := gs.deck
 	if deckWrapper != nil {
 		deckWrapper.ShallowCopyFrom(nil)
