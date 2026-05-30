@@ -45,7 +45,7 @@ func TestEvalCache_MemoryPerEntry(t *testing.T) {
 	ev := NewEvaluator()
 	for _, mut := range mutations {
 		evalRNG := rand.New(rand.NewSource(99))
-		ev.Evaluate(mut.Deck.Copy(), shufflesPerEval, Matchup{IncomingPhysicalDamage: incoming}, evalRNG)
+		ev.Evaluate(mut.Deck(), shufflesPerEval, Matchup{IncomingPhysicalDamage: incoming}, evalRNG)
 	}
 
 	ev.cache.mu.RLock()

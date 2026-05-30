@@ -177,7 +177,7 @@ func runDeckEvalWorker(
 			return
 		}
 		mut := cfg.mutations[i]
-		d := mut.Deck.Copy()
+		d := mut.Deck()
 		stats := ev.Evaluate(d, cfg.shuffles, cfg.matchup, rng)
 		avg := stats.Mean()
 		if cfg.completed != nil {
