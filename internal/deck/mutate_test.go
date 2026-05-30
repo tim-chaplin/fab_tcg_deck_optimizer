@@ -121,6 +121,54 @@ func TestAllMutations_CountsAndShape(t *testing.T) {
 	}
 }
 
+// TestSingleSwapMutationIsPositionAligned pins materialiseSingleSwap's in-place placement: a
+// single-card swap must change the card array at exactly one index — the removed card's slot,
+// now holding the added card — and leave every other position fixed. The anneal shuffles a
+// mutant and its incumbent from the same seed, so a one-index array difference is what yields
+// shuffles that differ at exactly one drawn position (common random numbers). Appending the new
+// card at the end would shift the whole tail and break that, yet still pass the count / multiset
+// checks the other tests rely on — so this positional guard is load-bearing.
+func TestSingleSwapMutationIsPositionAligned(t *testing.T) {
+	reg := allMutationsFixture()
+	base := New(fakeHero{}, []Weapon{reg.weapons[0], reg.weapons[1]},
+		[]Card{reg.cards[0], reg.cards[0], reg.cards[1], reg.cards[1]})
+
+	swaps := 0
+	for _, m := range AllMutations(base, 3, false, reg) {
+		mut := m.Deck()
+		if len(mut.cards) != len(base.cards) {
+			t.Fatalf("mutation %q changed card count to %d", m.Description(), len(mut.cards))
+		}
+		diffs := positionDiffs(base.cards, mut.cards)
+		if weaponKey(mut.Weapons) != weaponKey(base.Weapons) {
+			// Weapon-loadout mutation: cards are untouched.
+			if diffs != 0 {
+				t.Errorf("weapon loadout %q changed %d card positions, want 0", m.Description(), diffs)
+			}
+			continue
+		}
+		if diffs != 1 {
+			t.Errorf("single swap %q changed %d card positions, want exactly 1", m.Description(), diffs)
+		}
+		swaps++
+	}
+	if swaps == 0 {
+		t.Fatal("fixture produced no single-swap mutations to check")
+	}
+}
+
+// positionDiffs counts indices where a and b hold different card IDs. a and b must be equal
+// length.
+func positionDiffs(a, b []Card) int {
+	n := 0
+	for i := range a {
+		if a[i].ID() != b[i].ID() {
+			n++
+		}
+	}
+	return n
+}
+
 // Tests single-card-swap semantics: odd-count distributions are legal and raising
 // maxCopies opens adds to in-deck cards below the cap.
 func TestAllMutations_OddCountsAllowed(t *testing.T) {

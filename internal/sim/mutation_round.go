@@ -67,12 +67,11 @@ type deckEvalConfig struct {
 // FIFO pull order makes earliest-position-wins usually hold, but a stuck early worker
 // doesn't block later positions from occasionally winning first.
 //
-// bestAvg is the SA current state (not all-time best). Each mutation is evaluated with the
-// fixed shuffles budget, shuffled from seed — so for the avg-vs-bestAvg comparison to benefit
-// from common random numbers, the caller must derive bestAvg by evaluating the incumbent with
-// the SAME seed (and the same shuffle-worker count). Pass an independently-derived bestAvg
-// (e.g. a fixed unreachable baseline) when coupling isn't wanted. cache, when non-nil, is the
-// hand-eval cache for every shuffle this round; nil allocates one.
+// bestAvg is the SA current state (not all-time best): the baseline each mutation's avg is
+// compared against. Every mutation is evaluated with the fixed shuffles budget, shuffled from
+// seed — so the comparison is paired (common random numbers) when bestAvg was itself measured
+// on this seed and shuffleWorkers, and an ordinary independent comparison otherwise. cache,
+// when non-nil, is the hand-eval cache for every shuffle this round; nil allocates one.
 //
 // Returns (acceptedDeck, acceptedStats, acceptedAvg, acceptedIndex, true) on first
 // acceptance, or (nil, zero, bestAvg, -1, false) on no acceptance / cancellation.
@@ -174,11 +173,10 @@ func runDeckEvalWorker(
 	if cfg.shuffleWorkers > 1 {
 		ev.numWorkers = cfg.shuffleWorkers
 	}
-	// Every mutation is shuffled from cfg.seed — the same seed the caller used to re-evaluate
-	// the incumbent (cfg.bestAvg). Coupling the shuffles this way (common random numbers) makes
-	// the shuffle-to-shuffle noise common to the incumbent and the mutant cancel in the
-	// avg-vs-baseline comparison, so a real improvement resolves in far fewer shuffles. The
-	// shared 39 cards also draw identically across mutants, lifting the hand-eval cache hit
+	// Every mutation shuffles from cfg.seed, the same seed the caller used for the incumbent
+	// (cfg.bestAvg). Common random numbers: the shuffle noise shared by incumbent and mutant
+	// cancels in the avg-vs-baseline comparison, so a real improvement resolves in far fewer
+	// shuffles, and the shared 39 cards draw identically across mutants to lift the cache hit
 	// rate. shuffleRNG is reseeded per mutation; coinRNG is a separate per-worker stream so the
 	// SA acceptance coin still varies between mutations.
 	shuffleRNG := rand.New(rand.NewSource(cfg.seed))

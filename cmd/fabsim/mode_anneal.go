@@ -221,8 +221,8 @@ func runAnneal(cfg annealConfig) annealResult {
 
 	// Persistent hand-eval cache shared across rounds — see sim.NewCacheBounded.
 	roundCache := sim.NewCacheBounded(annealCacheCapacity)
-	// Incumbent re-evaluator: shares roundCache and uses the round's shuffle-worker count so its
-	// shuffles couple with the mutation evals (see the per-round re-eval below).
+	// Incumbent re-evaluator: shares roundCache and the round's shuffle-worker count so its
+	// shuffles couple with the mutation evals.
 	shuffleWorkers := sim.DefaultWorkers()
 	incumbentEv := sim.NewEvaluatorParallelWithCache(shuffleWorkers, roundCache)
 
@@ -234,12 +234,11 @@ func runAnneal(cfg annealConfig) annealResult {
 		mutations := buildRoundMutations(cfg, rng, current)
 		tempLabel := formatTempLabel(temperature)
 
-		// Re-evaluate the incumbent on this round's shuffle bank so every mutation below is
-		// judged against the same shuffles it is (common random numbers): the shuffle noise
-		// shared by the incumbent and a mutant cancels in their delta, so a real improvement
-		// clears minImprovement in far fewer shuffles than independent evals would need. A fresh
-		// bank each round keeps the climb from overfitting any single shuffle set. One eval,
-		// amortised over the whole mutation pool — and it warms roundCache for the mutants.
+		// Re-evaluate the incumbent on this round's seed so every mutation below is judged
+		// against the same shuffles (common random numbers, resolving improvements in fewer
+		// shuffles). A fresh seed each round keeps the climb from overfitting one shuffle set.
+		// One eval amortised over the whole mutation pool, and it warms roundCache for the
+		// mutants.
 		roundSeed := rng.Int63()
 		currentAvg = incumbentEv.Evaluate(current, cfg.shuffles, cfg.matchup,
 			rand.New(rand.NewSource(roundSeed))).Mean()
@@ -280,7 +279,8 @@ func runAnneal(cfg annealConfig) annealResult {
 		bestEver, bestEverStats, bestEverAvg = applyAcceptedMutation(cfg, round, verbose, tempLabel,
 			idx, len(mutations), mutations[idx], d, dStats, avg, currentAvg, bestEver, bestEverStats, bestEverAvg)
 		current = d
-		currentAvg = avg
+		// currentAvg isn't carried across rounds — the top of the next round re-evaluates the
+		// incumbent on its own seed.
 		temperature = coolDown(temperature, cfg.tempDecay, cfg.minTemp)
 	}
 }

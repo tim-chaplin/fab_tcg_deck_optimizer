@@ -79,12 +79,11 @@ func (m Mutation) Deck() *Deck {
 	panic(fmt.Sprintf("deck: unknown mutationKind %d", m.kind))
 }
 
-// materialiseSingleSwap replaces the swapped-out card in place — the added card takes the
-// removed card's slot rather than going to the end. Positional alignment matters: the anneal
-// evaluator shuffles the mutant and its incumbent from the same seed (common random numbers),
-// so an array that differs from the incumbent's at exactly one index yields shuffles that
-// differ at exactly one drawn position. Appending to the end would shift every card after the
-// removed slot and break that coupling. Cost is identical — one allocation, one O(n) copy.
+// materialiseSingleSwap puts the added card in the removed card's slot, keeping every other
+// position fixed. Positional alignment matters: the anneal evaluator shuffles a mutant and its
+// incumbent from the same seed (common random numbers), so an array differing at exactly one
+// index yields shuffles differing at exactly one drawn position. Shifting later slots would
+// break that coupling.
 func (m Mutation) materialiseSingleSwap() *Deck {
 	newCards := make([]Card, len(m.base.cards))
 	replaced := false

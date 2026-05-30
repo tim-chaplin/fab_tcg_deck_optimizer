@@ -15,6 +15,31 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry"
 )
 
+// TestEvaluateDeterministicForCoupling pins the property the anneal common-random-numbers
+// coupling rests on: for a fixed deck, Evaluate is a pure function of (seed, shuffle-worker
+// count, run count). The per-round incumbent re-eval and every mutation in the round are seeded
+// identically, so only this determinism makes them walk the same shuffle sequence and the
+// shared shuffle noise cancel in their avg delta. Covers the sequential (workers=1) and
+// parallel (workers>1) paths, both reachable via the round's shuffleWorkers.
+func TestEvaluateDeterministicForCoupling(t *testing.T) {
+	rng := rand.New(rand.NewSource(7))
+	d := deck.Random(heroes.Viserai, 40, 2, rng, registry.Registry{})
+	const (
+		runs = 60
+		seed = 1234567
+	)
+	mp := Matchup{IncomingPhysicalDamage: 5}
+	for _, workers := range []int{1, 4} {
+		ev := NewEvaluatorParallelWithCache(workers, NewCache())
+		first := ev.Evaluate(d, runs, mp, rand.New(rand.NewSource(seed)))
+		second := ev.Evaluate(d, runs, mp, rand.New(rand.NewSource(seed)))
+		if first.TotalValue != second.TotalValue || first.Hands != second.Hands {
+			t.Errorf("workers=%d: Evaluate not deterministic for a fixed seed: (%d hands, %.0f total) vs (%d hands, %.0f total)",
+				workers, first.Hands, first.TotalValue, second.Hands, second.TotalValue)
+		}
+	}
+}
+
 // Tests that concurrent Evaluate from many goroutines (each with its own Evaluator)
 // doesn't panic on the shared card-meta lookup table.
 func TestEvaluate_ConcurrentNoMapPanic(t *testing.T) {
