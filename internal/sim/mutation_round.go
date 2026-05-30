@@ -67,9 +67,11 @@ type deckEvalConfig struct {
 // FIFO pull order makes earliest-position-wins usually hold, but a stuck early worker
 // doesn't block later positions from occasionally winning first.
 //
-// bestAvg is the SA current state (not all-time best). Each mutation is evaluated with the
-// fixed shuffles budget. cache, when non-nil, is the hand-eval cache for every shuffle this
-// round; nil allocates one.
+// bestAvg is the SA current state (not all-time best): the baseline each mutation's avg is
+// compared against. Every mutation is evaluated with the fixed shuffles budget, shuffled from
+// seed — so the comparison is paired (common random numbers) when bestAvg was itself measured
+// on this seed and shuffleWorkers, and an ordinary independent comparison otherwise. cache,
+// when non-nil, is the hand-eval cache for every shuffle this round; nil allocates one.
 //
 // Returns (acceptedDeck, acceptedStats, acceptedAvg, acceptedIndex, true) on first
 // acceptance, or (nil, zero, bestAvg, -1, false) on no acceptance / cancellation.
@@ -171,19 +173,27 @@ func runDeckEvalWorker(
 	if cfg.shuffleWorkers > 1 {
 		ev.numWorkers = cfg.shuffleWorkers
 	}
-	rng := rand.New(rand.NewSource(cfg.seed ^ (int64(workerIdx)+1)*int64(0x9e3779b9)))
+	// Every mutation shuffles from cfg.seed, the same seed the caller used for the incumbent
+	// (cfg.bestAvg). Common random numbers: the shuffle noise shared by incumbent and mutant
+	// cancels in the avg-vs-baseline comparison, so a real improvement resolves in far fewer
+	// shuffles, and the shared 39 cards draw identically across mutants to lift the cache hit
+	// rate. shuffleRNG is reseeded per mutation; coinRNG is a separate per-worker stream so the
+	// SA acceptance coin still varies between mutations.
+	shuffleRNG := rand.New(rand.NewSource(cfg.seed))
+	coinRNG := rand.New(rand.NewSource(cfg.seed ^ (int64(workerIdx)+1)*int64(0x9e3779b9)))
 	for i := range jobs {
 		if ctx.Err() != nil {
 			return
 		}
 		mut := cfg.mutations[i]
 		d := mut.Deck()
-		stats := ev.Evaluate(d, cfg.shuffles, cfg.matchup, rng)
+		shuffleRNG.Seed(cfg.seed)
+		stats := ev.Evaluate(d, cfg.shuffles, cfg.matchup, shuffleRNG)
 		avg := stats.Mean()
 		if cfg.completed != nil {
 			cfg.completed.Add(1)
 		}
-		if !acceptMutation(avg, cfg.bestAvg, cfg.temperature, cfg.minImprovement, rng) {
+		if !acceptMutation(avg, cfg.bestAvg, cfg.temperature, cfg.minImprovement, coinRNG) {
 			continue
 		}
 		select {

@@ -79,17 +79,22 @@ func (m Mutation) Deck() *Deck {
 	panic(fmt.Sprintf("deck: unknown mutationKind %d", m.kind))
 }
 
+// materialiseSingleSwap puts the added card in the removed card's slot, keeping every other
+// position fixed. Positional alignment matters: the anneal evaluator shuffles a mutant and its
+// incumbent from the same seed (common random numbers), so an array differing at exactly one
+// index yields shuffles differing at exactly one drawn position. Shifting later slots would
+// break that coupling.
 func (m Mutation) materialiseSingleSwap() *Deck {
-	newCards := make([]Card, 0, len(m.base.cards))
-	removed := false
-	for _, c := range m.base.cards {
-		if !removed && c.ID() == m.removeID {
-			removed = true
+	newCards := make([]Card, len(m.base.cards))
+	replaced := false
+	for i, c := range m.base.cards {
+		if !replaced && c.ID() == m.removeID {
+			newCards[i] = m.addA
+			replaced = true
 			continue
 		}
-		newCards = append(newCards, c)
+		newCards[i] = c
 	}
-	newCards = append(newCards, m.addA)
 	nd := New(m.base.Hero, m.base.Weapons, newCards)
 	nd.Sideboard = m.base.Sideboard
 	nd.Equipment = m.base.Equipment
