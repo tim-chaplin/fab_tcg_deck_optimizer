@@ -16,13 +16,12 @@ import (
 // BenchmarkAnnealRoundOnViseraiV4 mimics anneal's per-round workload anchored on
 // mydecks/viserai_v4.json: build the mutation pool, run the first sampleSize mutations
 // through RunMutationRound against an unreachable baseline so the worker pool drains every
-// sampled mutation end-to-end. This is the gold-standard anneal bench — the workload PGO
-// profiles target and the canonical reference for measuring per-mutation-eval changes.
+// sampled mutation end-to-end. Canonical reference for measuring per-mutation-eval changes
+// against a fixed converged deck.
 //
-// To refresh cmd/fabsim/default.pgo (the profile fabsim builds with via -pgo=auto):
-//
-//	go test -bench=BenchmarkAnnealRoundOnViseraiV4$ -benchtime=3x -count=1 -run=^$ \
-//	    -cpuprofile=cmd/fabsim/default.pgo ./cmd/fabsim/
+// PGO is regenerated from BenchmarkAnnealFromScratch — that workload covers the early-anneal
+// card variety real runs spend most of their time on, which a converged deck like viserai_v4
+// undersamples.
 //
 // Skips when mydecks/viserai_v4.json is absent so go test ./... still passes on a fresh
 // checkout that doesn't carry the saved deck.

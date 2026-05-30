@@ -6,6 +6,10 @@ import (
 	"path/filepath"
 	"testing"
 
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/gameengine"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/hero/heroes"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/textio"
 )
@@ -43,6 +47,70 @@ func BenchmarkEvalRealDeck(b *testing.B) {
 		b.StopTimer()
 		d := loaded.Copy()
 		evalRNG := rand.New(rand.NewSource(42))
+		b.StartTimer()
+		ev.Evaluate(d, shuffles, sim.Matchup{IncomingPhysicalDamage: incoming}, evalRNG)
+	}
+}
+
+// BenchmarkEvalViseraiV5 mirrors `fabsim eval viserai_v5 -shuffles 5000 -incoming 7` end-to-end
+// at half the production shuffle count to keep iterations bounded. Sized for direct comparison
+// with BenchmarkEvalRealDeck (v4) so the gap between converged decks is visible on the same
+// scale, and with BenchmarkEvalRandomDeck so we can read off which hot paths are deck-specific
+// versus inherent to evaluation.
+func BenchmarkEvalViseraiV5(b *testing.B) {
+	const (
+		shuffles = 5000
+		incoming = 7
+	)
+	path := findRepoFile(b, filepath.Join("mydecks", "viserai_v5.json"))
+	if path == "" {
+		b.Skip("mydecks/viserai_v5.json not found")
+	}
+	data, err := os.ReadFile(path)
+	if err != nil {
+		b.Fatalf("read deck: %v", err)
+	}
+	loaded, _, err := textio.UnmarshalDeck(data)
+	if err != nil {
+		b.Fatalf("unmarshal deck: %v", err)
+	}
+	ev := sim.NewEvaluator()
+
+	b.ReportAllocs()
+	b.ResetTimer()
+	for n := 0; n < b.N; n++ {
+		b.StopTimer()
+		d := loaded.Copy()
+		evalRNG := rand.New(rand.NewSource(42))
+		b.StartTimer()
+		ev.Evaluate(d, shuffles, sim.Matchup{IncomingPhysicalDamage: incoming}, evalRNG)
+	}
+}
+
+// BenchmarkEvalRandomDeck evaluates a random legal Viserai deck under the same shuffles /
+// incoming as the v5 bench. Comparing the two profiles (which functions dominate where, how
+// the alloc / time mix shifts) is the cleanest way to tell which hot spots are inherent to
+// 40-card-Viserai evaluation versus deck-mix-specific symptoms of whatever makes v5 slow.
+// Fixed seed for reproducibility.
+func BenchmarkEvalRandomDeck(b *testing.B) {
+	const (
+		shuffles  = 5000
+		incoming  = 7
+		deckSize  = 40
+		maxCopies = 2
+		seed      = 42
+	)
+	gameengine.MaxDeckSize = deckSize
+	rng := rand.New(rand.NewSource(seed))
+	loaded := deck.Random(heroes.Viserai, deckSize, maxCopies, rng, registry.Registry{})
+	ev := sim.NewEvaluator()
+
+	b.ReportAllocs()
+	b.ResetTimer()
+	for n := 0; n < b.N; n++ {
+		b.StopTimer()
+		d := loaded.Copy()
+		evalRNG := rand.New(rand.NewSource(seed))
 		b.StartTimer()
 		ev.Evaluate(d, shuffles, sim.Matchup{IncomingPhysicalDamage: incoming}, evalRNG)
 	}

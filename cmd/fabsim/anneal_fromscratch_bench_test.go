@@ -23,6 +23,12 @@ import (
 // an early real run does. That makes it the representative target for profiling and PGO: code
 // tuned only to viserai_v4's card mix doesn't necessarily help a from-scratch search.
 //
+// This is the workload PGO regenerates from. To refresh cmd/fabsim/default.pgo (the profile
+// fabsim builds with via -pgo=auto):
+//
+//	go test -bench=BenchmarkAnnealFromScratch$ -benchtime=3x -count=1 -run=^$ \
+//	    -cpuprofile=cmd/fabsim/default.pgo ./cmd/fabsim/
+//
 // Fixed seed + the production (mutationWorkers=1) shape make the accept trajectory
 // deterministic on a given machine. -shuffles is pinned low (100) so a round resolves fast
 // and the bench covers many distinct decks within its budget. Needs no saved deck file.
