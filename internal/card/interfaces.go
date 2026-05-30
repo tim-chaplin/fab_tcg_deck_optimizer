@@ -61,6 +61,9 @@ type GameEngine interface {
 	AppendHand(Card)
 	PeekDeck() (Card, bool)
 	PeekTopN(int) []Card
+	// CountTopNMatching counts the top n cards of the deck (top first) whose pred returns
+	// true, without copying them into a fresh []Card. Use when only a count is needed.
+	CountTopNMatching(n int, pred func(c Card) bool) int
 	PrependToDeck(Card)
 	AppendToDeck(Card)
 	AddToGraveyard(Card)
