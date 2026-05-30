@@ -162,9 +162,6 @@ The summary below groups the flags by subcommand.
 - `-finalize` — high-precision pass — sets `-shuffles` to 10000 and tightens
   `-min-improvement` to 0.01. Use on a deck that's already converged to squeeze out the
   remaining sub-percent improvements.
-- `-reevaluate` — force re-evaluation of the loaded deck's baseline avg even if its prior run
-  count already matches the current `-shuffles` budget. Use after adjusting modelling
-  assumptions.
 - `-quiet-load` — skip the baseline card-list dump at startup. Used by
   `scripts/anneal-reanneal.ps1` from pass 2 onward so the unchanging listing doesn't flood the
   log.

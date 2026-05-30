@@ -25,7 +25,6 @@ param(
     [int]$DeckSize = 40,
     [int]$MaxCopies = 2,
     [string]$Format = "silver_age",
-    [switch]$Reevaluate,
     [switch]$IterateDebug
 )
 
@@ -65,7 +64,6 @@ while ($true) {
         '-max-copies', $MaxCopies,
         '-format', $Format
     )
-    if ($Reevaluate)   { $goArgs += '-reevaluate' }
     if ($IterateDebug) { $goArgs += '-debug' }
     # The starting card list is identical every pass once we're iterating on the same deck file,
     # so suppress it from pass 2 onward — the user already saw it in pass 1 and reprinting ~40
