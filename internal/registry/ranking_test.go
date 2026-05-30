@@ -2,8 +2,10 @@ package registry
 
 import (
 	"encoding/json"
+	"math/rand"
 	"os"
 	"path/filepath"
+	"sync"
 	"testing"
 )
 
@@ -44,6 +46,46 @@ func TestRanking_RecordResultNoopWhenWinnerAlreadyAbove(t *testing.T) {
 	r.RecordResult(top, low) // winner already ranked above loser
 	if r.Rank(top) != 0 || r.Rank(low) != 5 {
 		t.Errorf("ranks changed on a no-op result: top=%d low=%d", r.Rank(top), r.Rank(low))
+	}
+}
+
+// TestRanking_RecordResultConcurrent hammers RecordResult / Rank from many goroutines (run with
+// -race), asserting order stays a valid permutation with pos consistent — the safety the mutex
+// provides.
+func TestRanking_RecordResultConcurrent(t *testing.T) {
+	r := NewRanking()
+	n := len(r.order)
+	ids := append([]CardID(nil), r.order...) // snapshot the pool IDs
+
+	var wg sync.WaitGroup
+	for g := 0; g < 8; g++ {
+		wg.Add(1)
+		go func(seed int64) {
+			defer wg.Done()
+			rng := rand.New(rand.NewSource(seed))
+			for i := 0; i < 2000; i++ {
+				r.RecordResult(ids[rng.Intn(n)], ids[rng.Intn(n)])
+				_ = r.Rank(ids[rng.Intn(n)])
+			}
+		}(int64(g + 1))
+	}
+	wg.Wait()
+
+	if len(r.order) != n {
+		t.Fatalf("order length changed to %d, want %d", len(r.order), n)
+	}
+	seen := make(map[CardID]bool, n)
+	for i, id := range r.order {
+		if seen[id] {
+			t.Fatalf("duplicate card at index %d", i)
+		}
+		seen[id] = true
+		if r.pos[id] != i {
+			t.Errorf("pos/order inconsistent: pos says %d, order index is %d", r.pos[id], i)
+		}
+	}
+	if len(seen) != n {
+		t.Errorf("permutation lost cards: %d distinct, want %d", len(seen), n)
 	}
 }
 

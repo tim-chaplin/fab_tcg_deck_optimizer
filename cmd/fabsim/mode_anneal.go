@@ -299,8 +299,9 @@ func buildRoundMutations(cfg annealConfig, current *deck.Deck, ranking *registry
 }
 
 // mutationRank is the round-ordering key: a single swap sorts by the rank of the card it adds
-// (best first); weapon-loadout and pair mutations have no single added card, so they sort to the
-// front (few of them, always worth trying).
+// (best first). Weapon-loadout and pair mutations have no single added card, so they return -1 —
+// below every real rank, including 0 (the best card) — sorting them to the front (few of them, and
+// always worth trying).
 func mutationRank(m deck.Mutation, ranking *registry.Ranking) int {
 	if added, _, ok := m.Swap(); ok {
 		return ranking.Rank(added)

@@ -2,9 +2,10 @@ package registry
 
 // Persistent card ranking for the anneal search. Ranking holds a total order over the legal card
 // pool, best (index 0) to worst, so the search can try mutations involving promising cards first.
-// RecordResult bubbles a winning card above a losing one — one comparison at a time — so genuinely
-// good cards rise and chaff sinks the more the search runs. The order persists to disk between
-// runs; a fresh ranking just seeds the pool in registration order and lets the results settle it.
+// RecordResult exchanges a winning card with a higher-ranked loser — the winner takes the loser's
+// slot outright, so a proven card can jump well up the order and good cards rise / chaff sinks the
+// more the search runs. The order persists to disk between runs; a fresh ranking just seeds the
+// pool in registration order and lets the results settle it.
 
 import (
 	"encoding/json"
@@ -74,8 +75,9 @@ func (r *Ranking) Rank(id CardID) int {
 }
 
 // RecordResult registers that winner beat loser in a head-to-head. If the winner currently ranks
-// below the loser they exchange positions, so the winner rises and the loser sinks one step; if the
-// winner already ranks above the loser nothing changes. Unknown cards are ignored.
+// below the loser they exchange positions — the winner takes the loser's slot and vice versa, so a
+// proven card can jump well up the order in one result; if the winner already ranks above the loser
+// nothing changes. Unknown cards are ignored.
 func (r *Ranking) RecordResult(winner, loser CardID) {
 	r.mu.Lock()
 	defer r.mu.Unlock()
