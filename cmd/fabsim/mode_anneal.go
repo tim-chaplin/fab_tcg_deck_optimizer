@@ -8,6 +8,7 @@ import (
 	"os"
 	"runtime"
 	"runtime/pprof"
+	"sort"
 	"strings"
 	"time"
 
@@ -179,6 +180,18 @@ type annealResult struct {
 func runAnneal(cfg annealConfig) annealResult {
 	rng := rand.New(rand.NewSource(cfg.seed))
 
+	// Persistent card ranking: orders each round's mutations (promising cards first) and records
+	// every screened head-to-head so good cards rise and chaff sinks over time. Saved on return.
+	ranking, err := registry.LoadRanking(registry.DefaultRankingPath)
+	if err != nil {
+		die("load card ranking: %v", err)
+	}
+	defer func() {
+		if err := ranking.Save(registry.DefaultRankingPath); err != nil {
+			fmt.Fprintf(os.Stderr, "warning: could not save card ranking: %v\n", err)
+		}
+	}()
+
 	current, currentStats, currentAvg := prepareBaseline(cfg, rng)
 	// All-time best tracks the highest-avg deck since runAnneal started; the saved JSON
 	// mirrors it. SA walks through worse states to escape local maxima, but the on-disk
@@ -217,7 +230,7 @@ func runAnneal(cfg annealConfig) annealResult {
 	start := time.Now()
 	for {
 		round++
-		mutations := buildRoundMutations(cfg, rng, current)
+		mutations := buildRoundMutations(cfg, current, ranking)
 		tempLabel := formatTempLabel(temperature)
 		if verbose {
 			fmt.Fprintf(os.Stderr, "\n[round %d] evaluating %d mutations of avg %.3f%s (best ever %.3f)\n",
@@ -243,6 +256,7 @@ func runAnneal(cfg annealConfig) annealResult {
 			MutationWorkers: mutationWorkers,
 			Seed:            rng.Int63(),
 			Progress:        &progress,
+			Recorder:        ranking,
 			Cache:           roundCache,
 		})
 		stopTicker()
@@ -274,14 +288,24 @@ func runAnneal(cfg annealConfig) annealResult {
 	}
 }
 
-// buildRoundMutations enumerates every single-card / weapon mutation and shuffles the
-// result so first-improvement climb and SA acceptance don't concentrate on a fixed slice.
-func buildRoundMutations(cfg annealConfig, rng *rand.Rand, current *deck.Deck) []deck.Mutation {
+// buildRoundMutations enumerates every single-card / weapon mutation and orders it by the ranking
+// so the round tries the most promising swaps first (and hits an improvement, if any, sooner).
+func buildRoundMutations(cfg annealConfig, current *deck.Deck, ranking *registry.Ranking) []deck.Mutation {
 	mutations := deck.AllMutations(current, cfg.maxCopies, cfg.pairMutations, registry.Registry{})
-	rng.Shuffle(len(mutations), func(i, j int) {
-		mutations[i], mutations[j] = mutations[j], mutations[i]
+	sort.SliceStable(mutations, func(i, j int) bool {
+		return mutationRank(mutations[i], ranking) < mutationRank(mutations[j], ranking)
 	})
 	return mutations
+}
+
+// mutationRank is the round-ordering key: a single swap sorts by the rank of the card it adds
+// (best first); weapon-loadout and pair mutations have no single added card, so they sort to the
+// front (few of them, always worth trying).
+func mutationRank(m deck.Mutation, ranking *registry.Ranking) int {
+	if added, _, ok := m.Swap(); ok {
+		return ranking.Rank(added)
+	}
+	return -1
 }
 
 // formatTempLabel is the " (T=…)" suffix; empty string when temperature is 0.

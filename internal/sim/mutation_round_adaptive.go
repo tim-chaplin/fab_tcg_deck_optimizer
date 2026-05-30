@@ -158,7 +158,32 @@ type AdaptiveRoundConfig struct {
 	Seed            int64             // couples every screen shuffle and the confirm
 	ConfirmSigmas   float64           // k in the k·σ̂/√N accept threshold; 0 → defaultConfirmSigmas
 	Progress        *AdaptiveProgress // optional live counters the ticker reads; nil to skip
+	Recorder        RankRecorder      // optional: records screened head-to-heads into a ranking; nil to skip
 	Cache           *Cache            // shared hand-eval cache; nil → a fresh one
+}
+
+// RankRecorder receives a screened head-to-head outcome — winner beat loser — so the search can
+// feed its accept/reject results into a persistent card ranking. nil disables recording.
+type RankRecorder interface {
+	RecordResult(winner, loser ids.CardID)
+}
+
+// recordOutcome feeds a screened single-swap result into recorder. Hill climb (temperature == 0)
+// only: at temperature > 0 an accept can be a deliberate downhill move, so it isn't a clean "added
+// beat removed" signal. won is true when the added (pool) card beat the removed (deck) card.
+func recordOutcome(recorder RankRecorder, temperature float64, mut deck.Mutation, won bool) {
+	if recorder == nil || temperature != 0 {
+		return
+	}
+	added, removed, ok := mut.Swap()
+	if !ok {
+		return
+	}
+	if won {
+		recorder.RecordResult(added, removed)
+	} else {
+		recorder.RecordResult(removed, added)
+	}
 }
 
 // RunMutationRoundAdaptive runs one mutation round with SPRT screening + coupled confirm.
@@ -281,6 +306,7 @@ func runAdaptiveWorker(ctx context.Context, cancel context.CancelFunc, cfg Adapt
 			cfg.Progress.Screened.Add(1)
 		}
 		if verdict != sprtAccept {
+			recordOutcome(cfg.Recorder, cfg.Temperature, cfg.Mutations[i], false) // removed beat added
 			continue
 		}
 		// Screen says accept; confirm ΔV > tau at high precision, coupled to the incumbent baseline.
@@ -295,8 +321,10 @@ func runAdaptiveWorker(ctx context.Context, cancel context.CancelFunc, cfg Adapt
 		}
 		mutAvg := stats.Mean()
 		if mutAvg-incAvg <= tau {
-			continue // screen false-accept — the confirm clears it, preserving termination
+			recordOutcome(cfg.Recorder, cfg.Temperature, cfg.Mutations[i], false) // false-accept: removed beat added
+			continue                                                              // the confirm clears it, preserving termination
 		}
+		recordOutcome(cfg.Recorder, cfg.Temperature, cfg.Mutations[i], true) // confirmed: added beat removed
 		select {
 		case improvementCh <- mutationImprovement{idx: i, avg: mutAvg, candidate: d, stats: stats}:
 		default:

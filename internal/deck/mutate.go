@@ -64,6 +64,16 @@ func (m Mutation) Description() string {
 	panic(fmt.Sprintf("deck: unknown mutationKind %d", m.kind))
 }
 
+// Swap returns the (added, removed) card IDs of a single-card-swap mutation — the pool card being
+// tried and the deck card it replaces. ok is false for weapon-loadout and pair mutations, which
+// have no single added/removed pair, so the ranking search skips them.
+func (m Mutation) Swap() (added, removed ids.CardID, ok bool) {
+	if m.kind != kindSingleSwap {
+		return 0, 0, false
+	}
+	return m.addA.ID(), m.removeID, true
+}
+
 // Deck builds and returns the mutated deck this spec describes. Each call constructs a fresh
 // *Deck, so the caller can shuffle / mutate the result without aliasing the spec or any
 // sibling materialisation.

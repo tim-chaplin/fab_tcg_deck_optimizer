@@ -23,3 +23,5 @@ Thumbs.db
 /data_sources/*.csv
 best_deck*.json
 /mydecks/
+# Evolving anneal card ranking — run state, not source.
+/internal/registry/card_ranking.json
