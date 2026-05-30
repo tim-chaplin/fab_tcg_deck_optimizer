@@ -241,10 +241,18 @@ func runAnneal(cfg annealConfig) annealResult {
 		// per-shuffle deltas, and a coupled confirm at cfg.shuffles verifies a screen pass. currentAvg
 		// is carried from the last accepted deck for the display; the confirm derives its own coupled
 		// incumbent baseline.
-		d, dStats, avg, idx, found := sim.RunMutationRoundAdaptive(
-			ctx, mutations, current, cfg.minImprovement, temperature, cfg.matchup,
-			cfg.shuffles, mutationWorkers, rng.Int63(), &progress, roundCache,
-		)
+		d, dStats, avg, idx, found := sim.RunMutationRoundAdaptive(ctx, sim.AdaptiveRoundConfig{
+			Mutations:       mutations,
+			Incumbent:       current,
+			Threshold:       cfg.minImprovement,
+			Temperature:     temperature,
+			Matchup:         cfg.matchup,
+			StatsShuffles:   cfg.shuffles,
+			MutationWorkers: mutationWorkers,
+			Seed:            rng.Int63(),
+			Progress:        &progress,
+			Cache:           roundCache,
+		})
 		stopTicker()
 
 		if ctx.Err() != nil {

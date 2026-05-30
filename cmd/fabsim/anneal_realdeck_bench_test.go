@@ -110,11 +110,11 @@ func BenchmarkAnnealRoundAdaptiveOnViseraiV4(b *testing.B) {
 		b.StopTimer()
 		iterRNG := rand.New(rand.NewSource(42))
 		b.StartTimer()
-		_, _, _, _, found := sim.RunMutationRoundAdaptive(
-			context.Background(), mutations, baseline, threshold, 0,
-			sim.Matchup{IncomingPhysicalDamage: incoming}, statsShuffles, 0,
-			iterRNG.Int63(), nil, nil,
-		)
+		_, _, _, _, found := sim.RunMutationRoundAdaptive(context.Background(), sim.AdaptiveRoundConfig{
+			Mutations: mutations, Incumbent: baseline, Threshold: threshold,
+			Matchup:       sim.Matchup{IncomingPhysicalDamage: incoming},
+			StatsShuffles: statsShuffles, Seed: iterRNG.Int63(),
+		})
 		if found {
 			b.Fatalf("iter %d: converged-deck mutation was accepted — bench setup is wrong", n)
 		}

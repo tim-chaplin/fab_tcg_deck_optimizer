@@ -138,62 +138,65 @@ type AdaptiveProgress struct {
 	Confirming atomic.Int64
 }
 
+// AdaptiveRoundConfig bundles the inputs to RunMutationRoundAdaptive. The caller builds a fresh one
+// each round; ctx stays a separate argument per the Go convention.
+type AdaptiveRoundConfig struct {
+	Mutations       []deck.Mutation
+	Incumbent       *deck.Deck
+	Threshold       float64 // the min-improvement gate
+	Temperature     float64 // 0 = hill climb; > 0 = simulated annealing
+	Matchup         Matchup
+	StatsShuffles   int               // confirm / saved-stats budget
+	MutationWorkers int               // 0 → DefaultWorkers()
+	Seed            int64             // couples every screen shuffle and the confirm
+	Progress        *AdaptiveProgress // optional live counters the ticker reads; nil to skip
+	Cache           *Cache            // shared hand-eval cache; nil → a fresh one
+}
+
 // RunMutationRoundAdaptive runs one mutation round with SPRT screening + coupled confirm.
-// mutationWorkers goroutines pull candidates from a shared queue; the first to clear both the
+// cfg.MutationWorkers goroutines pull candidates from a shared queue; the first to clear both the
 // screen and the confirm wins and cancels the rest.
 //
-// Each candidate is judged against a per-mutation accept threshold tau: a hill climb (temperature
-// == 0) sets tau = threshold (the min-improvement gate); an SA step (temperature > 0) sets
-// tau = temperature·ln(U) for a per-mutation uniform U, since the Metropolis rule accepts iff
-// ΔV > temperature·ln(U). Both are the same "is ΔV > tau?" test, screened by the SPRT and
-// verified by the confirm. statsShuffles is the confirm / saved-stats budget. seed couples every
-// screen shuffle and the confirm across the incumbent and the mutants.
+// Each candidate is judged against a per-mutation accept threshold tau: a hill climb
+// (cfg.Temperature == 0) sets tau = cfg.Threshold (the min-improvement gate); an SA step
+// (cfg.Temperature > 0) sets tau = cfg.Temperature·ln(U) for a per-mutation uniform U, since the
+// Metropolis rule accepts iff ΔV > cfg.Temperature·ln(U). Both are the same "is ΔV > tau?" test,
+// screened by the SPRT and verified by the confirm. cfg.Seed couples every screen shuffle and the
+// confirm across the incumbent and the mutants.
 //
 // Returns (acceptedDeck, acceptedStats, acceptedAvg, acceptedIndex, true) on the first confirmed
 // acceptance, or (nil, zero, 0, -1, false) when every candidate is rejected or the round is
 // cancelled.
-func RunMutationRoundAdaptive(
-	ctx context.Context,
-	mutations []deck.Mutation,
-	incumbent *deck.Deck,
-	threshold float64,
-	temperature float64,
-	mp Matchup,
-	statsShuffles int,
-	mutationWorkers int,
-	seed int64,
-	progress *AdaptiveProgress,
-	cache *Cache,
-) (*deck.Deck, deck.Stats, float64, int, bool) {
-	if mutationWorkers <= 0 {
-		mutationWorkers = defaultWorkers()
+func RunMutationRoundAdaptive(ctx context.Context, cfg AdaptiveRoundConfig) (*deck.Deck, deck.Stats, float64, int, bool) {
+	if cfg.MutationWorkers <= 0 {
+		cfg.MutationWorkers = defaultWorkers()
 	}
-	if len(mutations) == 0 {
+	if len(cfg.Mutations) == 0 {
 		return nil, deck.Stats{}, 0, -1, false
 	}
-	if cache == nil {
-		cache = NewCache()
+	if cfg.Cache == nil {
+		cfg.Cache = NewCache()
 	}
 
 	innerCtx, cancel := context.WithCancel(ctx)
 	defer cancel()
 
-	incVals := newIncumbentValues(incumbent, NewEvaluatorWithCache(cache), mp, seed)
-	conf := &confirmer{incumbent: incumbent, mp: mp, shuffles: statsShuffles, seed: perShuffleSeed(seed, 0), cache: cache}
+	incVals := newIncumbentValues(cfg.Incumbent, NewEvaluatorWithCache(cfg.Cache), cfg.Matchup, cfg.Seed)
+	conf := &confirmer{incumbent: cfg.Incumbent, mp: cfg.Matchup, shuffles: cfg.StatsShuffles, seed: perShuffleSeed(cfg.Seed, 0), cache: cfg.Cache}
 
-	improvementCh := make(chan mutationImprovement, mutationWorkers)
-	jobs := make(chan int, len(mutations))
-	for i := range mutations {
+	improvementCh := make(chan mutationImprovement, cfg.MutationWorkers)
+	jobs := make(chan int, len(cfg.Mutations))
+	for i := range cfg.Mutations {
 		jobs <- i
 	}
 	close(jobs)
 
 	var wg sync.WaitGroup
-	for w := 0; w < mutationWorkers; w++ {
+	for w := 0; w < cfg.MutationWorkers; w++ {
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
-			runAdaptiveWorker(innerCtx, cancel, mutations, incVals, conf, threshold, temperature, mp, statsShuffles, seed, progress, cache, jobs, improvementCh)
+			runAdaptiveWorker(innerCtx, cancel, cfg, incVals, conf, jobs, improvementCh)
 		}()
 	}
 
@@ -220,23 +223,8 @@ func RunMutationRoundAdaptive(
 // runAdaptiveWorker pulls candidates, screens each with the SPRT, and on a screen-accept runs the
 // confirm. A confirmed improvement is sent and cancels the round; a screen false-accept that fails
 // the confirm is dropped and the worker moves on.
-func runAdaptiveWorker(
-	ctx context.Context,
-	cancel context.CancelFunc,
-	mutations []deck.Mutation,
-	incVals *incumbentValues,
-	conf *confirmer,
-	threshold float64,
-	temperature float64,
-	mp Matchup,
-	statsShuffles int,
-	seed int64,
-	progress *AdaptiveProgress,
-	cache *Cache,
-	jobs <-chan int,
-	improvementCh chan<- mutationImprovement,
-) {
-	ev := NewEvaluatorWithCache(cache)
+func runAdaptiveWorker(ctx context.Context, cancel context.CancelFunc, cfg AdaptiveRoundConfig, incVals *incumbentValues, conf *confirmer, jobs <-chan int, improvementCh chan<- mutationImprovement) {
+	ev := NewEvaluatorWithCache(cfg.Cache)
 	rng := rand.New(rand.NewSource(1))  // reseeded per shuffle in value(); initial seed is irrelevant
 	uRng := rand.New(rand.NewSource(1)) // reseeded per mutation for the SA acceptance draw
 	for i := range jobs {
@@ -246,13 +234,13 @@ func runAdaptiveWorker(
 		// tau is the accept threshold for this candidate: min-improvement for a hill climb, the
 		// random temperature·ln(U) Metropolis threshold for an SA step. U is drawn per mutation so
 		// the SA acceptance is reproducible and independent of which worker pulls the candidate.
-		tau := threshold
-		if temperature > 0 {
-			uRng.Seed(perShuffleSeed(seed, -(i + 1)))
-			tau = temperature * math.Log(1-uRng.Float64())
+		tau := cfg.Threshold
+		if cfg.Temperature > 0 {
+			uRng.Seed(perShuffleSeed(cfg.Seed, -(i + 1)))
+			tau = cfg.Temperature * math.Log(1-uRng.Float64())
 		}
-		d := mutations[i].Deck()
-		screen := newSingleShuffleEval(d, ev, mp)
+		d := cfg.Mutations[i].Deck()
+		screen := newSingleShuffleEval(d, ev, cfg.Matchup)
 		var acc sprtAccumulator
 		verdict := sprtContinue
 		for n := 1; verdict == sprtContinue; n++ {
@@ -261,25 +249,25 @@ func runAdaptiveWorker(
 			}
 			// Shift by (threshold - tau) so the SPRT's H0=0 / H1=threshold tests ΔV against
 			// tau-threshold (reject) and tau (accept). At tau==threshold this is a no-op.
-			delta := screen.value(rng, perShuffleSeed(seed, n)) - incVals.at(n)
-			acc.add(delta - tau + threshold)
-			verdict = acc.decision(threshold, defaultSPRTConfig)
+			delta := screen.value(rng, perShuffleSeed(cfg.Seed, n)) - incVals.at(n)
+			acc.add(delta - tau + cfg.Threshold)
+			verdict = acc.decision(cfg.Threshold, defaultSPRTConfig)
 		}
-		if progress != nil {
-			progress.Screened.Add(1)
+		if cfg.Progress != nil {
+			cfg.Progress.Screened.Add(1)
 		}
 		if verdict != sprtAccept {
 			continue
 		}
 		// Screen says accept; confirm ΔV > tau at high precision, coupled to the incumbent baseline.
 		// Confirming is the round's expensive moment — flag it so the ticker can report the full eval.
-		if progress != nil {
-			progress.Confirming.Add(1)
+		if cfg.Progress != nil {
+			cfg.Progress.Confirming.Add(1)
 		}
 		incAvg := conf.incumbentAvg()
-		stats := ev.Evaluate(d, statsShuffles, mp, rand.New(rand.NewSource(perShuffleSeed(seed, 0))))
-		if progress != nil {
-			progress.Confirming.Add(-1)
+		stats := ev.Evaluate(d, cfg.StatsShuffles, cfg.Matchup, rand.New(rand.NewSource(perShuffleSeed(cfg.Seed, 0))))
+		if cfg.Progress != nil {
+			cfg.Progress.Confirming.Add(-1)
 		}
 		mutAvg := stats.Mean()
 		if mutAvg-incAvg <= tau {

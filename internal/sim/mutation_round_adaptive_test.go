@@ -43,8 +43,10 @@ func TestRunMutationRoundAdaptive_ConfirmedImprovementClearsThreshold(t *testing
 	incumbent, muts := adaptiveFixture(t, 1)
 
 	// One mutation worker → deterministic FIFO winner, so the reconstruction below is exact.
-	d, stats, avg, idx, found := RunMutationRoundAdaptive(
-		context.Background(), muts, incumbent, threshold, 0, mp, statsShuffles, 1, seed, nil, nil)
+	d, stats, avg, idx, found := RunMutationRoundAdaptive(context.Background(), AdaptiveRoundConfig{
+		Mutations: muts, Incumbent: incumbent, Threshold: threshold, Matchup: mp,
+		StatsShuffles: statsShuffles, MutationWorkers: 1, Seed: seed,
+	})
 	if !found {
 		t.Skip("weak deck produced no improvement at this seed; nothing to confirm")
 	}
@@ -80,8 +82,10 @@ func TestRunMutationRoundAdaptive_MultiWorkerWinnerClearsThreshold(t *testing.T)
 	mp := Matchup{IncomingPhysicalDamage: 5}
 	incumbent, muts := adaptiveFixture(t, 1)
 
-	d, _, avg, _, found := RunMutationRoundAdaptive(
-		context.Background(), muts, incumbent, threshold, 0, mp, statsShuffles, workers, seed, nil, nil)
+	d, _, avg, _, found := RunMutationRoundAdaptive(context.Background(), AdaptiveRoundConfig{
+		Mutations: muts, Incumbent: incumbent, Threshold: threshold, Matchup: mp,
+		StatsShuffles: statsShuffles, MutationWorkers: workers, Seed: seed,
+	})
 	if !found {
 		t.Skip("weak deck produced no improvement at this seed")
 	}
@@ -110,8 +114,10 @@ func TestRunMutationRoundAdaptive_SAStepClearsItsTau(t *testing.T) {
 	mp := Matchup{IncomingPhysicalDamage: 5}
 	incumbent, muts := adaptiveFixture(t, 1)
 
-	d, _, avg, idx, found := RunMutationRoundAdaptive(
-		context.Background(), muts, incumbent, minImprovement, temperature, mp, statsShuffles, 1, seed, nil, nil)
+	d, _, avg, idx, found := RunMutationRoundAdaptive(context.Background(), AdaptiveRoundConfig{
+		Mutations: muts, Incumbent: incumbent, Threshold: minImprovement, Temperature: temperature,
+		Matchup: mp, StatsShuffles: statsShuffles, MutationWorkers: 1, Seed: seed,
+	})
 	if !found {
 		t.Skip("no candidate cleared its SA threshold at this seed")
 	}
@@ -136,8 +142,10 @@ func TestRunMutationRoundAdaptive_UnreachableThresholdRejectsAll(t *testing.T) {
 	incumbent, muts := adaptiveFixture(t, 2)
 
 	var progress AdaptiveProgress
-	d, _, avg, idx, found := RunMutationRoundAdaptive(
-		context.Background(), muts, incumbent, 1_000_000.0, 0, mp, 200, 0, 7, &progress, nil)
+	d, _, avg, idx, found := RunMutationRoundAdaptive(context.Background(), AdaptiveRoundConfig{
+		Mutations: muts, Incumbent: incumbent, Threshold: 1_000_000.0, Matchup: mp,
+		StatsShuffles: 200, Seed: 7, Progress: &progress,
+	})
 	if found {
 		t.Errorf("found=true with an unreachable threshold; want false")
 	}
@@ -155,8 +163,10 @@ func TestRunMutationRoundAdaptive_Deterministic(t *testing.T) {
 	mp := Matchup{IncomingPhysicalDamage: 5}
 	incumbent, muts := adaptiveFixture(t, 3)
 	run := func() (int, bool, float64) {
-		d, _, avg, idx, found := RunMutationRoundAdaptive(
-			context.Background(), muts, incumbent, 0.1, 0, mp, 300, 1, 99, nil, nil)
+		d, _, avg, idx, found := RunMutationRoundAdaptive(context.Background(), AdaptiveRoundConfig{
+			Mutations: muts, Incumbent: incumbent, Threshold: 0.1, Matchup: mp,
+			StatsShuffles: 300, MutationWorkers: 1, Seed: 99,
+		})
 		_ = d
 		return idx, found, avg
 	}
