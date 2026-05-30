@@ -29,6 +29,9 @@ type PitchCountsJSON struct {
 
 // StatsJSON mirrors deck.Stats with card references flattened to names.
 type StatsJSON struct {
+	// Matchup is the opponent profile these stats were measured under. Pointer + omitempty so an
+	// unevaluated deck (Runs == 0) omits it rather than claim a 0/0 matchup it never faced.
+	Matchup *MatchupJSON `json:"matchup,omitempty"`
 	// Avg is TotalValue/Hands, emitted for human readability. Unmarshal ignores it and
 	// rederives via DeckStats.Mean(); the canonical state is (Runs, Hands, TotalValue).
 	Avg             float64                 `json:"avg"`
@@ -60,4 +63,10 @@ type CardMarginalStatsJSON struct {
 // BestTurnJSON is the on-disk shape of deck.BestTurn — just the headline Value.
 type BestTurnJSON struct {
 	Value int `json:"value"`
+}
+
+// MatchupJSON is the on-disk shape of the opponent profile a deck's stats were measured under.
+type MatchupJSON struct {
+	IncomingPhysicalDamage int `json:"incoming_physical_damage"`
+	IncomingArcaneDamage   int `json:"incoming_arcane_damage"`
 }

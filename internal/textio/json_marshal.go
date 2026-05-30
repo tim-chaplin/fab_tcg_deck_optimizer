@@ -52,6 +52,7 @@ func sortedStrings(ss []string) []string {
 
 func statsToJSON(s deck.Stats) StatsJSON {
 	return StatsJSON{
+		Matchup:         matchupToJSON(s),
 		Runs:            s.Runs,
 		Hands:           s.Hands,
 		TotalValue:      s.TotalValue,
@@ -61,6 +62,18 @@ func statsToJSON(s deck.Stats) StatsJSON {
 		Best:            bestTurnToJSON(s.Best),
 		PerCardMarginal: perCardMarginalToJSON(s.PerCardMarginal),
 		Histogram:       s.Histogram,
+	}
+}
+
+// matchupToJSON returns the matchup only for evaluated stats (Runs > 0); an unevaluated deck
+// has no matchup, so nil drops the field.
+func matchupToJSON(s deck.Stats) *MatchupJSON {
+	if s.Runs == 0 {
+		return nil
+	}
+	return &MatchupJSON{
+		IncomingPhysicalDamage: s.IncomingPhysicalDamage,
+		IncomingArcaneDamage:   s.IncomingArcaneDamage,
 	}
 }
 

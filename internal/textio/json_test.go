@@ -49,6 +49,41 @@ func TestDeck_MarshalUnmarshalRoundTrip(t *testing.T) {
 	}
 }
 
+// TestRoundTrip_PreservesMatchup checks the matchup an eval ran under survives Marshal/Unmarshal,
+// and that an unevaluated deck (Runs == 0) omits the field rather than record a 0/0 matchup it
+// never faced.
+func TestRoundTrip_PreservesMatchup(t *testing.T) {
+	rng := rand.New(rand.NewSource(5))
+	d := deck.Random(heroes.Viserai, 40, 2, rng, registry.Registry{})
+	mp := sim.Matchup{IncomingPhysicalDamage: 7, IncomingArcaneDamage: 2}
+	stats := sim.NewEvaluator().Evaluate(d, 50, mp, rng)
+
+	data, err := MarshalDeck(d, stats)
+	if err != nil {
+		t.Fatalf("Marshal: %v", err)
+	}
+	if !strings.Contains(string(data), `"matchup"`) {
+		t.Errorf("evaluated deck JSON missing matchup block:\n%s", data)
+	}
+	_, gotStats, err := UnmarshalDeck(data)
+	if err != nil {
+		t.Fatalf("Unmarshal: %v", err)
+	}
+	if gotStats.IncomingPhysicalDamage != 7 || gotStats.IncomingArcaneDamage != 2 {
+		t.Errorf("matchup round trip: got physical=%d arcane=%d, want 7/2",
+			gotStats.IncomingPhysicalDamage, gotStats.IncomingArcaneDamage)
+	}
+
+	// Unevaluated deck (no stats) omits the matchup block.
+	bare, err := MarshalDeck(d, deck.Stats{})
+	if err != nil {
+		t.Fatalf("Marshal bare: %v", err)
+	}
+	if strings.Contains(string(bare), `"matchup"`) {
+		t.Errorf("unevaluated deck JSON should omit matchup:\n%s", bare)
+	}
+}
+
 // Tests that PerCardMarginal (Present/Absent totals and hand counts per CardID) survives
 // Marshal/Unmarshal.
 func TestRoundTrip_PreservesPerCardMarginal(t *testing.T) {

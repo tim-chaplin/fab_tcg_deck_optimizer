@@ -72,6 +72,10 @@ func fromJSON(dj *DeckJSON) (*deck.Deck, deck.Stats, error) {
 		PerCardMarginal: perCardMarginal,
 		Histogram:       dj.Stats.Histogram,
 	}
+	if m := dj.Stats.Matchup; m != nil {
+		stats.IncomingPhysicalDamage = m.IncomingPhysicalDamage
+		stats.IncomingArcaneDamage = m.IncomingArcaneDamage
+	}
 	return d, stats, nil
 }
 

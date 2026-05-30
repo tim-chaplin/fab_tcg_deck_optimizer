@@ -35,6 +35,11 @@ type Stats struct {
 	// Min / Max can be derived without retaining every hand's value. Nil until the first
 	// hand is evaluated.
 	Histogram map[int]int
+	// IncomingPhysicalDamage and IncomingArcaneDamage record the matchup that scored every
+	// hand, so a saved deck carries the assumptions it was tuned against. Zero when unevaluated
+	// (Runs == 0).
+	IncomingPhysicalDamage int
+	IncomingArcaneDamage   int
 	// PrintBest streams the peak turn's printout to w. Nil when no callable replay is
 	// attached — loaded-from-JSON stats and evals with no recorded best — so callers
 	// nil-check and skip the section.
