@@ -44,10 +44,8 @@ func TestSPRT_RejectsClearlyWorse(t *testing.T) {
 	}
 }
 
-// TestSPRT_ErrorRatesControlled checks the test honours its nominal error rate: at the exactly-
-// neutral mean (H0) it should accept only ~alpha of the time, and at the threshold mean (H1) it
-// should reject only ~alpha. The bound is loose (well above the 0.05 nominal) to tolerate the
-// plug-in-variance approximation while still catching gross miscalibration.
+// TestSPRT_ErrorRatesControlled checks the empirical false-accept rate at H0 and false-reject rate
+// at H1 both stay within a loose bound above the 0.05 nominal (tolerating the plug-in variance).
 func TestSPRT_ErrorRatesControlled(t *testing.T) {
 	const (
 		threshold = 0.1

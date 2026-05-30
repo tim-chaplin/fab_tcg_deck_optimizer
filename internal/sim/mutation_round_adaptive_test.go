@@ -67,6 +67,36 @@ func TestRunMutationRoundAdaptive_ConfirmedImprovementClearsThreshold(t *testing
 	}
 }
 
+// TestRunMutationRoundAdaptive_MultiWorkerWinnerClearsThreshold runs with several mutation workers
+// (so the winner is racy) and asserts that whichever candidate wins still clears the confirm gate —
+// the safety property the confirm exists to guarantee, independent of which worker lands first.
+func TestRunMutationRoundAdaptive_MultiWorkerWinnerClearsThreshold(t *testing.T) {
+	const (
+		threshold     = 0.1
+		statsShuffles = 400
+		seed          = 8675309
+		workers       = 4
+	)
+	mp := Matchup{IncomingPhysicalDamage: 5}
+	incumbent, muts := adaptiveFixture(t, 1)
+
+	d, _, avg, _, found := RunMutationRoundAdaptive(
+		context.Background(), muts, incumbent, threshold, mp, statsShuffles, workers, seed, nil, nil)
+	if !found {
+		t.Skip("weak deck produced no improvement at this seed")
+	}
+	confirmSeed := perShuffleSeed(seed, 0)
+	incAvg := seqValue(incumbent, statsShuffles, mp, confirmSeed)
+	mutAvg := seqValue(d, statsShuffles, mp, confirmSeed)
+	if mutAvg-incAvg <= threshold {
+		t.Errorf("multi-worker winner does not clear the confirm gate: %.4f - %.4f = %.4f <= %.2f",
+			mutAvg, incAvg, mutAvg-incAvg, threshold)
+	}
+	if mutAvg != avg {
+		t.Errorf("reconstructed confirm avg %.4f != returned avg %.4f", mutAvg, avg)
+	}
+}
+
 // TestRunMutationRoundAdaptive_UnreachableThresholdRejectsAll: with an impossibly high threshold no
 // candidate clears the screen, so the round drains and reports no improvement.
 func TestRunMutationRoundAdaptive_UnreachableThresholdRejectsAll(t *testing.T) {

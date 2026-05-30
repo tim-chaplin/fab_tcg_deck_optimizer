@@ -17,8 +17,6 @@ type sprtConfig struct {
 }
 
 // defaultSPRTConfig is the anneal default: a 5% symmetric error rate and an 8-shuffle warmup.
-// These are statistical settings, not a shuffle budget — there is no upper bound on samples; the
-// test terminates on its own once a boundary is crossed.
 var defaultSPRTConfig = sprtConfig{alpha: 0.05, warmup: 8}
 
 // sprtVerdict is the running test's current call.
@@ -36,9 +34,9 @@ const (
 //	H1: mean delta = threshold  (a real improvement — accept it)
 //
 // Anything strictly between 0 and threshold is the indifference zone: the test still terminates
-// there, just to whichever side the evidence drifts, which is acceptable because a sub-threshold
-// gain is a don't-care by the same logic min-improvement encodes. Bounded expected sample size
-// for every true mean, so no max-shuffle cap is needed.
+// there, to whichever side the evidence drifts, which is fine — a sub-threshold gain is a
+// don't-care by the same logic min-improvement encodes. Expected sample size is bounded for every
+// true mean, so no max-shuffle cap is needed.
 //
 // The delta variance is estimated online (Welford), making this the standard Gaussian SPRT with
 // a plug-in variance rather than a known-variance test — accurate enough at the few-dozen-sample

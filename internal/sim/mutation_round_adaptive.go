@@ -5,8 +5,7 @@ package sim
 // non-improvements are dropped in a handful of shuffles, only close calls run long, and there is
 // no max-shuffle cap. A mutation the screen accepts is then confirmed with a high-precision
 // coupled eval at statsShuffles before it can win the round — so a screen false-accept can't be
-// taken as a real improvement, giving the climb the same termination guarantee the fixed-budget
-// gate had, and the confirm doubles as the saved deck's stats.
+// taken as a real improvement, which is what guarantees the round terminates.
 //
 // Parallelism here is across mutations (one worker per goroutine), not within an eval: a per-
 // shuffle sequential screen can't fan a single shuffle across workers. The incumbent's per-shuffle
@@ -108,9 +107,9 @@ func (iv *incumbentValues) at(n int) float64 {
 	return iv.vals[n-1]
 }
 
-// confirmer holds the high-precision confirm baseline: the incumbent's avg over statsShuffles,
-// coupled (same seed, sequential) with each mutant's confirm so their difference has the reduced
-// CRN variance. Computed once per round on first use.
+// confirmer lazily computes the incumbent's averaged value over shuffles at the confirm seed,
+// once. A mutant confirm evaluated at the same seed (sequential) is coupled with it, so their
+// difference carries the reduced common-random-numbers variance.
 type confirmer struct {
 	once      sync.Once
 	incumbent *deck.Deck
@@ -221,7 +220,7 @@ func runAdaptiveWorker(
 	improvementCh chan<- mutationImprovement,
 ) {
 	ev := NewEvaluatorWithCache(cache)
-	rng := rand.New(rand.NewSource(1))
+	rng := rand.New(rand.NewSource(1)) // reseeded per shuffle in value(); initial seed is irrelevant
 	for i := range jobs {
 		if ctx.Err() != nil {
 			return
@@ -246,11 +245,12 @@ func runAdaptiveWorker(
 		}
 		// Screen says improvement; confirm at high precision, coupled to the incumbent baseline.
 		stats := ev.Evaluate(d, statsShuffles, mp, rand.New(rand.NewSource(perShuffleSeed(seed, 0))))
-		if stats.Mean()-conf.incumbentAvg() <= threshold {
+		mutAvg := stats.Mean()
+		if mutAvg-conf.incumbentAvg() <= threshold {
 			continue // screen false-accept — the confirm clears it, preserving termination
 		}
 		select {
-		case improvementCh <- mutationImprovement{idx: i, avg: stats.Mean(), candidate: d, stats: stats}:
+		case improvementCh <- mutationImprovement{idx: i, avg: mutAvg, candidate: d, stats: stats}:
 		default:
 		}
 		cancel()

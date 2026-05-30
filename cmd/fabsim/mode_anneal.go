@@ -232,10 +232,10 @@ func runAnneal(cfg annealConfig) annealResult {
 		tempLabel := formatTempLabel(temperature)
 
 		roundSeed := rng.Int63()
-		// A simulated-annealing step (T>0) needs a magnitude of ΔV to weigh exp(ΔV/T), so it keeps
-		// the coupled fixed-budget eval: re-evaluate the incumbent on this round's seed and compare
+		// A simulated-annealing step (T>0) needs a magnitude of ΔV to weigh exp(ΔV/T), so it uses
+		// a coupled fixed-budget eval: re-evaluate the incumbent on this round's seed and compare
 		// each mutation against it (common random numbers — the shared shuffle noise cancels). The
-		// hill climb (T==0) only needs the sign of the comparison, so it goes through the adaptive
+		// hill climb (T==0) needs only the sign of the comparison, so it goes through the adaptive
 		// screen below and currentAvg is just carried from the last accepted deck.
 		if temperature > 0 {
 			currentAvg = incumbentEv.Evaluate(current, cfg.shuffles, cfg.matchup,
