@@ -25,7 +25,6 @@ param(
     [int]$MaxCopies = 2,
     [string]$Format = "silver_age",
     [switch]$Finalize,
-    [switch]$Reevaluate,
     [switch]$IterateDebug
 )
 
@@ -60,7 +59,6 @@ for ($i = 1; $i -le $N; $i++) {
         '-format', $Format
     )
     if ($Finalize)     { $goArgs += '-finalize' }
-    if ($Reevaluate)   { $goArgs += '-reevaluate' }
     if ($IterateDebug) { $goArgs += '-debug' }
 
     & go @goArgs

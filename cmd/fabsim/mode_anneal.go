@@ -30,14 +30,13 @@ const annealCacheCapacity = 2_000_000
 type annealConfig struct {
 	// shuffles is the per-eval shuffle budget — the number of shuffles every per-mutation and
 	// baseline eval simulates.
-	shuffles   int
-	matchup    sim.Matchup
-	deckSize   int
-	maxCopies  int
-	seed       int64
-	outPath    string
-	debug      bool
-	reevaluate bool
+	shuffles  int
+	matchup   sim.Matchup
+	deckSize  int
+	maxCopies int
+	seed      int64
+	outPath   string
+	debug     bool
 	// startTemp / tempDecay / minTemp are the SA knobs. startTemp=0 is a classical hill climb.
 	startTemp float64
 	tempDecay float64
@@ -75,7 +74,6 @@ func runAnnealCmd(args []string) {
 	seed := fs.Int64("seed", time.Now().UnixNano(), "RNG seed")
 	formatFlag := fs.String("format", string(SilverAge), "constructed format whose banlist restricts the card pool during search (only \"silver_age\" is supported today)")
 	debug := fs.Bool("debug", false, "print additional debug info to stdout / stderr")
-	reevaluate := fs.Bool("reevaluate", false, "force re-evaluation of the loaded deck's baseline avg, even if its prior run count already matches the current -shuffles budget. Use after adjusting modelling assumptions or fixing bugs that may have shifted the deck's true score.")
 	finalize := fs.Bool("finalize", false, "high-precision pass — sets -shuffles to 10000 and tightens -min-improvement to 0.01. Use on a deck that's already converged to squeeze out the remaining sub-percent improvements.")
 	startTemp := fs.Float64("start-temp", 0, "simulated-annealing starting temperature. 0 (default) runs a pure hill climb. Higher values probabilistically accept worse mutations early; acceptance probability is exp((avg - baseline) / T). Good starting range is ~0.05–0.5 given typical Value units.")
 	minImprovement := fs.Float64("min-improvement", 0.1, "noise floor on strict (T==0) acceptance: a mutation's avg must exceed the current avg by more than this margin to be accepted. Guards against infinite-loop acceptance of within-noise wins; raise it for chunkier improvements only, lower it (e.g. 0.01) for fine-grained finalize passes. The probabilistic SA gate at T>0 ignores this margin so annealing can still cross ties.")
@@ -127,7 +125,6 @@ func runAnnealCmd(args []string) {
 		seed:           *seed,
 		outPath:        outPath,
 		debug:          *debug,
-		reevaluate:     *reevaluate,
 		startTemp:      *startTemp,
 		tempDecay:      *tempDecay,
 		minTemp:        *minTemp,
@@ -358,12 +355,10 @@ func baselineEvaluate(d *deck.Deck, cfg annealConfig, rng *rand.Rand) deck.Stats
 	return stats
 }
 
-// prepareBaseline returns the starting deck for the hill climb with its baseline avg.
-// Four cases: no deck on disk (generate random + evaluate); loaded deck under the current
-// shuffle budget (re-evaluate for an apples-to-apples baseline); -reevaluate set (force
-// re-evaluation even if the run count already matches); or deck already evaluated at the
-// budget (use as-is). File exists but doesn't parse → die loudly rather than silently
-// overwrite a corrupt checkpoint.
+// prepareBaseline returns the starting deck for the hill climb with its baseline avg. No deck on
+// disk → generate a random one and evaluate it; a loaded deck → always re-score it against the
+// current simulator so a saved avg that predates scoring changes can't seed bestEver. File exists
+// but doesn't parse → die loudly rather than silently overwrite a corrupt checkpoint.
 func prepareBaseline(cfg annealConfig, rng *rand.Rand) (*deck.Deck, deck.Stats, float64) {
 	best, bestStats, err := loadExisting(cfg.outPath)
 	if err != nil {
@@ -381,39 +376,26 @@ func prepareBaseline(cfg annealConfig, rng *rand.Rand) (*deck.Deck, deck.Stats, 
 		maybePrintBaselineCards(cfg, best)
 		return best, bestStats, bestAvg
 	}
-	bestAvg := bestStats.Mean()
-	// Re-evaluate when the saved deck was scored at fewer shuffles than the current budget,
-	// or when -reevaluate forces it.
-	needReeval := cfg.reevaluate || bestStats.Runs < cfg.shuffles
-	if needReeval {
-		var freshStats deck.Stats
-		best, freshStats, bestAvg = reevaluateBaseline(cfg, rng, best, bestStats, bestAvg)
-		maybePrintBaselineCards(cfg, best)
-		return best, freshStats, bestAvg
-	}
-	fmt.Printf("Loaded best deck (avg %.3f) from %s\n", bestAvg, cfg.outPath)
+	// Always re-score a loaded deck against the current simulator. Its saved avg can predate
+	// scoring changes, and a stale baseline both misleads the display and lets the search accept
+	// mutations that only beat the outdated number; the fresh score is the truth, written back and
+	// used as bestEver.
+	best, freshStats, freshAvg := reevaluateBaseline(cfg, rng, best, bestStats, bestStats.Mean())
 	maybePrintBaselineCards(cfg, best)
-	return best, bestStats, bestAvg
+	return best, freshStats, freshAvg
 }
 
-// reevaluateBaseline rebuilds the loaded deck against the current shuffle budget and writes
-// the refreshed stats back to disk. Picks an explanatory reason label (-reevaluate forced or
-// stale shuffle count), reconstructs the deck (Sideboard and Equipment preserved), runs
-// baselineEvaluate, and persists the result. Returns the rebuilt deck, its fresh stats, and
-// avg.
+// reevaluateBaseline re-scores the loaded deck against the current shuffle budget and writes the
+// refreshed stats back to disk. Reconstructs the deck (Sideboard and Equipment preserved), runs
+// baselineEvaluate, and persists the result. Returns the rebuilt deck, its fresh stats, and avg.
 func reevaluateBaseline(cfg annealConfig, rng *rand.Rand, loaded *deck.Deck, loadedStats deck.Stats, savedAvg float64) (*deck.Deck, deck.Stats, float64) {
-	reason := fmt.Sprintf("from %d shuffles", loadedStats.Runs)
-	if cfg.reevaluate && loadedStats.Runs >= cfg.shuffles {
-		reason = "-reevaluate forced"
-	}
-	// Label the loaded number "saved avg" so it can't be mistaken for the re-evaluated
-	// score. Decks scored under older simulation logic can have saved avgs that diverge
-	// substantially from what today's simulator produces.
-	budgetLabel := fmt.Sprintf("%d shuffles", cfg.shuffles)
-	fmt.Printf("Loaded best deck (saved avg %.3f, %s); re-evaluating at %s for an apples-to-apples baseline\n",
-		savedAvg, reason, budgetLabel)
+	// Decks scored under older simulation logic can have saved avgs that diverge substantially from
+	// what today's simulator produces, so label the loaded number "saved avg" to keep it distinct
+	// from the fresh score.
+	fmt.Printf("Loaded best deck (saved avg %.3f, %d shuffles); re-scoring at %d shuffles against the current simulator\n",
+		savedAvg, loadedStats.Runs, cfg.shuffles)
 	// Sideboard and Equipment are user-managed and don't feed the sim — preserve them across
-	// the stats reset so the re-evaluated deck writes back unchanged.
+	// the stats reset so the re-scored deck writes back unchanged.
 	sideboard := loaded.Sideboard
 	equipment := loaded.Equipment
 	rebuilt := loaded.Copy()
@@ -424,9 +406,8 @@ func reevaluateBaseline(cfg annealConfig, rng *rand.Rand, loaded *deck.Deck, loa
 	if err := writeDeck(rebuilt, freshStats, cfg.outPath); err != nil {
 		die("%v", err)
 	}
-	// Show saved→current so the delta from any simulation-logic drift is visible at a glance,
-	// instead of the user guessing which of the two printed numbers is the fresh one.
-	fmt.Printf("Re-evaluated baseline: %.3f → %.3f, saved to %s\n", savedAvg, freshAvg, cfg.outPath)
+	// Show saved→current so any drift from simulation-logic changes is visible at a glance.
+	fmt.Printf("Re-scored baseline: %.3f → %.3f, saved to %s\n", savedAvg, freshAvg, cfg.outPath)
 	return rebuilt, freshStats, freshAvg
 }
 
