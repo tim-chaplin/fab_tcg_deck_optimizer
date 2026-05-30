@@ -79,6 +79,14 @@ func NewEvaluatorWithCache(c *Cache) *Evaluator {
 	return &Evaluator{cache: c, statePool: gameengine.NewPrewarmedPool()}
 }
 
+// NewEvaluatorParallelWithCache fans the shuffle loop across numWorkers goroutines and points
+// at an existing shared Cache. The anneal incumbent re-eval uses this so it runs with the same
+// worker count and cache as the round's mutation evals — a prerequisite for their shuffles to
+// stay coupled (identical seed + worker count + run count ⇒ identical shuffle sequence).
+func NewEvaluatorParallelWithCache(numWorkers int, c *Cache) *Evaluator {
+	return &Evaluator{cache: c, statePool: gameengine.NewPrewarmedPool(), numWorkers: numWorkers}
+}
+
 // NewEvaluatorWithoutCache returns a fresh Evaluator with the hand-eval cache disabled.
 func NewEvaluatorWithoutCache() *Evaluator {
 	return &Evaluator{statePool: gameengine.NewPrewarmedPool()}

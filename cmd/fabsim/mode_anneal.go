@@ -221,6 +221,10 @@ func runAnneal(cfg annealConfig) annealResult {
 
 	// Persistent hand-eval cache shared across rounds — see sim.NewCacheBounded.
 	roundCache := sim.NewCacheBounded(annealCacheCapacity)
+	// Incumbent re-evaluator: shares roundCache and uses the round's shuffle-worker count so its
+	// shuffles couple with the mutation evals (see the per-round re-eval below).
+	shuffleWorkers := sim.DefaultWorkers()
+	incumbentEv := sim.NewEvaluatorParallelWithCache(shuffleWorkers, roundCache)
 
 	round := 0
 	acceptances := 0
@@ -229,6 +233,16 @@ func runAnneal(cfg annealConfig) annealResult {
 		round++
 		mutations := buildRoundMutations(cfg, rng, current)
 		tempLabel := formatTempLabel(temperature)
+
+		// Re-evaluate the incumbent on this round's shuffle bank so every mutation below is
+		// judged against the same shuffles it is (common random numbers): the shuffle noise
+		// shared by the incumbent and a mutant cancels in their delta, so a real improvement
+		// clears minImprovement in far fewer shuffles than independent evals would need. A fresh
+		// bank each round keeps the climb from overfitting any single shuffle set. One eval,
+		// amortised over the whole mutation pool — and it warms roundCache for the mutants.
+		roundSeed := rng.Int63()
+		currentAvg = incumbentEv.Evaluate(current, cfg.shuffles, cfg.matchup,
+			rand.New(rand.NewSource(roundSeed))).Mean()
 		if verbose {
 			fmt.Fprintf(os.Stderr, "\n[round %d] evaluating %d mutations of avg %.3f%s (best ever %.3f)\n",
 				round, len(mutations), currentAvg, tempLabel, bestEverAvg)
@@ -241,8 +255,8 @@ func runAnneal(cfg annealConfig) annealResult {
 			temperature, currentAvg, bestEverAvg)
 		d, dStats, avg, idx, found := sim.RunMutationRound(
 			ctx, mutations, currentAvg, temperature, cfg.minImprovement,
-			cfg.shuffles, cfg.matchup, 0, 0,
-			rng.Int63(), &completed, roundCache,
+			cfg.shuffles, cfg.matchup, 0, shuffleWorkers,
+			roundSeed, &completed, roundCache,
 		)
 		stopTicker()
 
