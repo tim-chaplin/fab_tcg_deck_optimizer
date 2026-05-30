@@ -375,12 +375,14 @@ func copyWeaponsInto(pool, src []Weapon) []Weapon {
 	return out
 }
 
-// resetCardSlice returns a fresh slice header that aliases pooled when capacity permits,
-// or a freshly allocated backing sized to src. Empty src returns nil to match the Copy()
-// path's nil-on-empty semantics.
+// resetCardSlice returns a slice of length len(src) holding src's contents, preferring to
+// alias pooled's backing when capacity permits. For empty src, returns pooled[:0] — keeping
+// the prewarmed backing alive so subsequent appends within the prewarmed cap don't realloc.
+// (Returning nil on empty src would silently throw the backing away every time a per-perm
+// state was reset from a zero-graveyard start, which dominated AppendGraveyard's allocs.)
 func resetCardSlice[T any](pooled, src []T) []T {
 	if len(src) == 0 {
-		return nil
+		return pooled[:0]
 	}
 	if cap(pooled) >= len(src) {
 		out := pooled[:len(src)]
