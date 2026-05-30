@@ -1,6 +1,6 @@
 package deck
 
-import "github.com/tim-chaplin/fab-deck-optimizer/internal/ids"
+import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 
 // Hero is a deck's hero slot. Deck stores Hero through verbatim and never calls into it;
 // the simulator's own Hero contract carries every behaviour. Keeping the deck-side surface
@@ -14,17 +14,14 @@ type Weapon interface {
 	Hands() int
 }
 
-// Card is what Deck needs from a card to enforce per-printing copy budgets and dedupe
-// against the user-managed sideboard. DisplayName is the canonical human-readable
-// identifier including pitch suffix ("Read the Runes [R]") — sideboard / equipment merges
-// compare by it so the three pitch printings of one card stay distinct.
-//
-// Anything beyond ID and DisplayName (Play, Cost, Attack, …) belongs on the simulator's
-// own richer Card contract; consumers that need rich behaviour assert at the read site.
-type Card interface {
-	ID() ids.CardID
-	DisplayName() string
-}
+// Card is the rich card.Card contract. Deck used to define its own narrow ID+DisplayName
+// view to stay decoupled from card, but that decoupling forced []deck.Card<->[]card.Card
+// conversions every time the deck handed cards back to the sim — visible as a top entry
+// in the from-scratch-anneal alloc profile (PeekTopN's slice copy alone, plus every Opt /
+// runOneShuffle / drawNextHand boundary). Aliasing here erases all of them: []deck.Card
+// IS []card.Card, so PeekTopN can return a deck-backing view, and Opt's split feeds the
+// hero directly with no copy.
+type Card = card.Card
 
 // Registry is the legal card / weapon roster Deck constructs against. The two methods
 // hand back the full pre-filtered pools (the production registry's NotImplemented /

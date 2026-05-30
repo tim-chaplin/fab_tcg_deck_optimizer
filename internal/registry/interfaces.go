@@ -4,17 +4,13 @@
 // hooks are wired.
 package registry
 
-import "github.com/tim-chaplin/fab-deck-optimizer/internal/ids"
+import "github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 
-// Card is the registry-side view of a printed card: identity + display name, the bits
-// needed to index, name, and dedupe printings. Name is the printed name without pitch
-// suffix ("Aether Slash"); DisplayName includes it ("Aether Slash [R]") so all three
-// printings of one card map to distinct entries in the byName index.
-type Card interface {
-	ID() ids.CardID
-	Name() string
-	DisplayName() string
-}
+// Card is the rich card.Card contract — aliased here for the same reason deck.Card is:
+// the original narrow ID/Name/DisplayName view forced []registry.Card<->[]card.Card
+// conversions at every sim boundary. Aliasing erases them so deck-construction pools and
+// the sim share one card type end-to-end.
+type Card = card.Card
 
 // Hero is the registry-side view of a hero: just the printed name, used as the byName
 // lookup key.
