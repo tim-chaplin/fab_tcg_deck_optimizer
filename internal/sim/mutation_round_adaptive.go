@@ -130,6 +130,14 @@ func (c *confirmer) incumbentAvg() float64 {
 	return c.incAvg
 }
 
+// AdaptiveProgress carries the live counters the anneal ticker reads while a round runs: how many
+// candidates have reached a screen decision, and how many high-precision confirms are in flight
+// (non-zero means the round paused to full-evaluate a promising candidate).
+type AdaptiveProgress struct {
+	Screened   atomic.Int64
+	Confirming atomic.Int64
+}
+
 // RunMutationRoundAdaptive runs one mutation round with SPRT screening + coupled confirm.
 // mutationWorkers goroutines pull candidates from a shared queue; the first to clear both the
 // screen and the confirm wins and cancels the rest.
@@ -154,7 +162,7 @@ func RunMutationRoundAdaptive(
 	statsShuffles int,
 	mutationWorkers int,
 	seed int64,
-	completed *atomic.Int64,
+	progress *AdaptiveProgress,
 	cache *Cache,
 ) (*deck.Deck, deck.Stats, float64, int, bool) {
 	if mutationWorkers <= 0 {
@@ -185,7 +193,7 @@ func RunMutationRoundAdaptive(
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
-			runAdaptiveWorker(innerCtx, cancel, mutations, incVals, conf, threshold, temperature, mp, statsShuffles, seed, completed, cache, jobs, improvementCh)
+			runAdaptiveWorker(innerCtx, cancel, mutations, incVals, conf, threshold, temperature, mp, statsShuffles, seed, progress, cache, jobs, improvementCh)
 		}()
 	}
 
@@ -223,7 +231,7 @@ func runAdaptiveWorker(
 	mp Matchup,
 	statsShuffles int,
 	seed int64,
-	completed *atomic.Int64,
+	progress *AdaptiveProgress,
 	cache *Cache,
 	jobs <-chan int,
 	improvementCh chan<- mutationImprovement,
@@ -257,16 +265,24 @@ func runAdaptiveWorker(
 			acc.add(delta - tau + threshold)
 			verdict = acc.decision(threshold, defaultSPRTConfig)
 		}
-		if completed != nil {
-			completed.Add(1)
+		if progress != nil {
+			progress.Screened.Add(1)
 		}
 		if verdict != sprtAccept {
 			continue
 		}
 		// Screen says accept; confirm ΔV > tau at high precision, coupled to the incumbent baseline.
+		// Confirming is the round's expensive moment — flag it so the ticker can report the full eval.
+		if progress != nil {
+			progress.Confirming.Add(1)
+		}
+		incAvg := conf.incumbentAvg()
 		stats := ev.Evaluate(d, statsShuffles, mp, rand.New(rand.NewSource(perShuffleSeed(seed, 0))))
+		if progress != nil {
+			progress.Confirming.Add(-1)
+		}
 		mutAvg := stats.Mean()
-		if mutAvg-conf.incumbentAvg() <= tau {
+		if mutAvg-incAvg <= tau {
 			continue // screen false-accept — the confirm clears it, preserving termination
 		}
 		select {

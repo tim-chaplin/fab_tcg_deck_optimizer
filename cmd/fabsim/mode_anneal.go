@@ -9,7 +9,6 @@ import (
 	"runtime"
 	"runtime/pprof"
 	"strings"
-	"sync/atomic"
 	"time"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
@@ -233,10 +232,10 @@ func runAnneal(cfg annealConfig) annealResult {
 		}
 
 		// Round-scoped start so the ticker's elapsed/ETA reflect this round, not the session.
-		var completed atomic.Int64
+		var progress sim.AdaptiveProgress
 		roundStart := time.Now()
-		stopTicker := startRoundTicker(round, len(mutations), roundStart, &completed,
-			temperature, currentAvg, bestEverAvg)
+		stopTicker := startRoundTicker(round, len(mutations), roundStart, &progress,
+			cfg.shuffles, temperature, currentAvg, bestEverAvg)
 		// Adaptive round for every temperature: the SPRT screens each candidate against its accept
 		// threshold (min-improvement at T==0, the random Metropolis threshold at T>0) on coupled
 		// per-shuffle deltas, and a coupled confirm at cfg.shuffles verifies a screen pass. currentAvg
@@ -244,7 +243,7 @@ func runAnneal(cfg annealConfig) annealResult {
 		// incumbent baseline.
 		d, dStats, avg, idx, found := sim.RunMutationRoundAdaptive(
 			ctx, mutations, current, cfg.minImprovement, temperature, cfg.matchup,
-			cfg.shuffles, mutationWorkers, rng.Int63(), &completed, roundCache,
+			cfg.shuffles, mutationWorkers, rng.Int63(), &progress, roundCache,
 		)
 		stopTicker()
 
@@ -449,7 +448,7 @@ func watchStdinForAbort(cancel context.CancelFunc) {
 // rate; it under-estimates by the fraction of mutations cut short by an early acceptance,
 // but over-estimates dominate in long converged-tail runs. Returns a stop function the
 // caller must call when the round finishes.
-func startRoundTicker(round, total int, roundStart time.Time, completed *atomic.Int64, temperature, currentAvg, bestEverAvg float64) func() {
+func startRoundTicker(round, total int, roundStart time.Time, progress *sim.AdaptiveProgress, shuffles int, temperature, currentAvg, bestEverAvg float64) func() {
 	done := make(chan struct{})
 	go func() {
 		t := time.NewTicker(500 * time.Millisecond)
@@ -464,9 +463,17 @@ func startRoundTicker(round, total int, roundStart time.Time, completed *atomic.
 					tempLabel = fmt.Sprintf("  T=%.4f", temperature)
 				}
 				elapsed := time.Since(roundStart)
-				fmt.Fprintf(os.Stderr, "\r[round %d] tested %d/%d  cur %.3f  best %.3f%s  %s elapsed%s        ",
-					round, completed.Load(), total, currentAvg, bestEverAvg, tempLabel,
-					elapsed.Truncate(time.Second), formatETA(elapsed, completed.Load(), int64(total)))
+				screened := progress.Screened.Load()
+				// While a candidate is being confirmed the round has paused on the expensive full
+				// eval, so report that instead of the screen progress.
+				if progress.Confirming.Load() > 0 {
+					fmt.Fprintf(os.Stderr, "\r[round %d] found a promising candidate — full-evaluating at %d shuffles  best %.3f%s  %s elapsed                    ",
+						round, shuffles, bestEverAvg, tempLabel, elapsed.Truncate(time.Second))
+					continue
+				}
+				fmt.Fprintf(os.Stderr, "\r[round %d] screened %d/%d  cur %.3f  best %.3f%s  %s elapsed%s                    ",
+					round, screened, total, currentAvg, bestEverAvg, tempLabel,
+					elapsed.Truncate(time.Second), formatETA(elapsed, screened, int64(total)))
 			}
 		}
 	}()

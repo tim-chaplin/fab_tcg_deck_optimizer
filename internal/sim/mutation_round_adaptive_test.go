@@ -4,7 +4,6 @@ import (
 	"context"
 	"math"
 	"math/rand"
-	"sync/atomic"
 	"testing"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
@@ -136,17 +135,17 @@ func TestRunMutationRoundAdaptive_UnreachableThresholdRejectsAll(t *testing.T) {
 	mp := Matchup{IncomingPhysicalDamage: 5}
 	incumbent, muts := adaptiveFixture(t, 2)
 
-	var completed atomic.Int64
+	var progress AdaptiveProgress
 	d, _, avg, idx, found := RunMutationRoundAdaptive(
-		context.Background(), muts, incumbent, 1_000_000.0, 0, mp, 200, 0, 7, &completed, nil)
+		context.Background(), muts, incumbent, 1_000_000.0, 0, mp, 200, 0, 7, &progress, nil)
 	if found {
 		t.Errorf("found=true with an unreachable threshold; want false")
 	}
 	if d != nil || idx != -1 || avg != 0 {
 		t.Errorf("no-improvement return shape: d=%v avg=%v idx=%d, want nil/0/-1", d, avg, idx)
 	}
-	if int(completed.Load()) != len(muts) {
-		t.Errorf("completed=%d, want every candidate screened (%d)", completed.Load(), len(muts))
+	if got := progress.Screened.Load(); int(got) != len(muts) {
+		t.Errorf("screened=%d, want every candidate (%d)", got, len(muts))
 	}
 }
 
