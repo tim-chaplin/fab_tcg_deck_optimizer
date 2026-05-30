@@ -4,6 +4,7 @@ import (
 	"math/bits"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/token"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/triggertype"
 )
 
 // Token kinds — sequential indices into GameState.tokenAuras / tokenItems. Every pool
@@ -55,6 +56,8 @@ func (gs *GameState) resetTokenCounts() {
 	}
 	gs.tokenAurasLiveBits = 0
 	gs.tokenItemsLiveBits = 0
+	gs.liveTokenAuraTypes = 0
+	gs.liveTokenItemTypes = 0
 }
 
 // bumpTokenAura increments a token aura's count by n; re-arms firedThisTurn when the
@@ -67,6 +70,7 @@ func (gs *GameState) bumpTokenAura(kind tokenAuraKind, n int) {
 	a.SetCount(prev + n)
 	if prev == 0 {
 		a.SetFiredThisTurn(false)
+		gs.liveTokenAuraTypes |= a.TriggerType()
 	}
 	gs.tokenAurasLiveBits |= 1 << kind
 	gs.auraCreated = true
@@ -82,8 +86,36 @@ func (gs *GameState) bumpTokenItem(kind tokenItemKind, n int) {
 	it.SetCount(prev + n)
 	if prev == 0 {
 		it.SetFiredThisTurn(false)
+		gs.liveTokenItemTypes |= it.TriggerType()
 	}
 	gs.tokenItemsLiveBits |= 1 << kind
+}
+
+// recomputeLiveTokenAuraTypes rebuilds liveTokenAuraTypes by walking the surviving live
+// aura slots. Called from the Destroy / count-to-zero paths where a token's contribution
+// to the type mask should drop out — bumpTokenAura is the only producer that has the
+// kind's TriggerType cheaply, so the destroy side rebuilds from gs.tokenAurasLiveBits.
+func (gs *GameState) recomputeLiveTokenAuraTypes() {
+	var t triggertype.Type
+	mask := gs.tokenAurasLiveBits
+	for mask != 0 {
+		low := mask & -mask
+		t |= gs.tokenAuras[bits.TrailingZeros8(low)].TriggerType()
+		mask ^= low
+	}
+	gs.liveTokenAuraTypes = t
+}
+
+// recomputeLiveTokenItemTypes is the item counterpart of recomputeLiveTokenAuraTypes.
+func (gs *GameState) recomputeLiveTokenItemTypes() {
+	var t triggertype.Type
+	mask := gs.tokenItemsLiveBits
+	for mask != 0 {
+		low := mask & -mask
+		t |= gs.tokenItems[bits.TrailingZeros8(low)].TriggerType()
+		mask ^= low
+	}
+	gs.liveTokenItemTypes = t
 }
 
 // TotalAuraCount returns the count summed across card-backed auras + every active

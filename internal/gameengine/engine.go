@@ -606,12 +606,12 @@ func (ge *GameEngine) FireTriggers(ctx card.FireContext) {
 		fireHero(ge, ctx, triggeringTypes)
 	}
 	fireHooks(ge, &ge.auras, ctx, triggeringTypes, false)
-	if liveAuraBits != 0 {
+	if liveAuraBits != 0 && ge.liveTokenAuraTypes&t != 0 {
 		fireTokenAuras(ge, ctx, triggeringTypes, liveAuraBits)
 	}
 	fireHooks(ge, &ge.triggers, ctx, triggeringTypes, true)
 	fireHooks(ge, &ge.items, ctx, triggeringTypes, false)
-	if liveItemBits != 0 {
+	if liveItemBits != 0 && ge.liveTokenItemTypes&t != 0 {
 		fireTokenItems(ge, ctx, triggeringTypes, liveItemBits)
 	}
 	if weaponFires {
@@ -742,6 +742,7 @@ func (ge *GameEngine) DestroyAura(addToGraveyard bool) {
 	if ge.currentFiringTokenAura >= 0 {
 		ge.tokenAuras[ge.currentFiringTokenAura].SetCount(0)
 		ge.tokenAurasLiveBits &^= 1 << ge.currentFiringTokenAura
+		ge.recomputeLiveTokenAuraTypes()
 		ge.currentHookDestroyed = true
 		return
 	}
@@ -774,6 +775,7 @@ func (ge *GameEngine) DestroyItem(addToGraveyard bool) {
 	if ge.currentFiringTokenItem >= 0 {
 		ge.tokenItems[ge.currentFiringTokenItem].SetCount(0)
 		ge.tokenItemsLiveBits &^= 1 << ge.currentFiringTokenItem
+		ge.recomputeLiveTokenItemTypes()
 		ge.currentHookDestroyed = true
 		return
 	}
@@ -1075,5 +1077,6 @@ func (ge *GameEngine) consumeTokenItem(kind tokenItemKind, n int) {
 	it.SetCount(c)
 	if c == 0 {
 		ge.tokenItemsLiveBits &^= 1 << kind
+		ge.recomputeLiveTokenItemTypes()
 	}
 }

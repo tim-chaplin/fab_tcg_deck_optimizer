@@ -63,6 +63,17 @@ type GameState struct {
 	tokenAurasLiveBits uint8
 	tokenItemsLiveBits uint8
 
+	// liveTokenAuraTypes / liveTokenItemTypes are the OR of TriggerType bitmasks across every
+	// live token slot. FireTriggers reads these to skip the whole fireTokenAuras /
+	// fireTokenItems walk when the firing event isn't a type any live token subscribes to —
+	// most events on token-heavy decks miss the small set of token subscriptions, and the
+	// walk was previously paying per-slot per-fire even when nothing matched. Maintained by
+	// the same bumpTokenAura / bumpTokenItem and Destroy paths that maintain the live bits.
+	// Treated as a permissive superset: stale entries (a destroyed slot whose contribution
+	// hasn't been rebuilt yet) only cause a redundant walk, never a missed fire.
+	liveTokenAuraTypes triggertype.Type
+	liveTokenItemTypes triggertype.Type
+
 	incomingPhysicalDamage int
 	incomingArcaneDamage   int
 
@@ -469,6 +480,8 @@ func (gs *GameState) CopyPersistentStateFrom(src *GameState) {
 	}
 	gs.tokenAurasLiveBits = src.tokenAurasLiveBits
 	gs.tokenItemsLiveBits = src.tokenItemsLiveBits
+	gs.liveTokenAuraTypes = src.liveTokenAuraTypes
+	gs.liveTokenItemTypes = src.liveTokenItemTypes
 	gs.incomingPhysicalDamage = src.incomingPhysicalDamage
 	gs.incomingArcaneDamage = src.incomingArcaneDamage
 	gs.opponentMarked = src.opponentMarked
@@ -710,8 +723,10 @@ func (gs *GameState) SetRunechantCount(n int) {
 	gs.tokenAuras[tokenAuraRunechant].SetCount(n)
 	if n > 0 {
 		gs.tokenAurasLiveBits |= 1 << tokenAuraRunechant
+		gs.liveTokenAuraTypes |= gs.tokenAuras[tokenAuraRunechant].TriggerType()
 	} else {
 		gs.tokenAurasLiveBits &^= 1 << tokenAuraRunechant
+		gs.recomputeLiveTokenAuraTypes()
 	}
 }
 

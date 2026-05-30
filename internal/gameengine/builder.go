@@ -68,6 +68,7 @@ func (b *StateBuilder) AddAura(auras ...Aura) *StateBuilder {
 			slot.SetCount(slot.Count() + a.Count())
 			if slot.Count() > 0 {
 				b.gs.tokenAurasLiveBits |= 1 << kind
+				b.gs.liveTokenAuraTypes |= slot.TriggerType()
 			}
 			continue
 		}
@@ -111,6 +112,7 @@ func (b *StateBuilder) AddItem(items ...Item) *StateBuilder {
 			slot.SetCount(slot.Count() + it.Count())
 			if slot.Count() > 0 {
 				b.gs.tokenItemsLiveBits |= 1 << kind
+				b.gs.liveTokenItemTypes |= slot.TriggerType()
 			}
 			continue
 		}
