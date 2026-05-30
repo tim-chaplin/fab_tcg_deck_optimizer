@@ -123,6 +123,34 @@ func TestSPRT_ZeroVarianceExactDelta(t *testing.T) {
 	}
 }
 
+// TestSPRT_TauShiftTestsAgainstTau pins the worker's tau-shift: feeding (delta - tau + threshold)
+// to the H0=0/H1=threshold SPRT decides "is mean(delta) > tau?", including a negative tau (an SA
+// step accepting a downhill move).
+func TestSPRT_TauShiftTestsAgainstTau(t *testing.T) {
+	const threshold = 0.1
+	cases := []struct {
+		dv, tau float64
+		want    sprtVerdict
+	}{
+		{dv: 0.0, tau: -0.5, want: sprtAccept},  // downhill-but-above-tau accepts (SA)
+		{dv: -1.0, tau: -0.5, want: sprtReject}, // below tau rejects
+		{dv: 0.5, tau: 0.1, want: sprtAccept},   // clear hill-climb improvement
+		{dv: -0.2, tau: 0.1, want: sprtReject},  // worse than the hill-climb threshold
+	}
+	for _, c := range cases {
+		rng := rand.New(rand.NewSource(1))
+		var acc sprtAccumulator
+		got := sprtContinue
+		for n := 0; n < 1_000_000 && got == sprtContinue; n++ {
+			acc.add((c.dv + 0.5*rng.NormFloat64()) - c.tau + threshold)
+			got = acc.decision(threshold, defaultSPRTConfig)
+		}
+		if got != c.want {
+			t.Errorf("dv=%.2f tau=%.2f: verdict %v after %d samples, want %v", c.dv, c.tau, got, acc.n, c.want)
+		}
+	}
+}
+
 // TestSPRT_WelfordMatchesNaive cross-checks the streaming mean/variance against a two-pass
 // computation, since the decision math leans on both.
 func TestSPRT_WelfordMatchesNaive(t *testing.T) {

@@ -268,8 +268,8 @@ func runAnneal(cfg annealConfig) annealResult {
 		bestEver, bestEverStats, bestEverAvg = applyAcceptedMutation(cfg, round, verbose, tempLabel,
 			idx, len(mutations), mutations[idx], d, dStats, avg, currentAvg, bestEver, bestEverStats, bestEverAvg)
 		current = d
-		// The hill climb carries currentAvg (the accepted deck's confirm avg) into the next round
-		// for display; an SA round overwrites it with a fresh coupled incumbent eval at the top.
+		// currentAvg carries the accepted deck's confirm avg into the next round for the display;
+		// the round's confirm derives its own coupled incumbent baseline.
 		currentAvg = avg
 		temperature = coolDown(temperature, cfg.tempDecay, cfg.minTemp)
 	}

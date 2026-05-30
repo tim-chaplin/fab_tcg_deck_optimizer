@@ -137,9 +137,9 @@ func (c *confirmer) incumbentAvg() float64 {
 // Each candidate is judged against a per-mutation accept threshold tau: a hill climb (temperature
 // == 0) sets tau = threshold (the min-improvement gate); an SA step (temperature > 0) sets
 // tau = temperature·ln(U) for a per-mutation uniform U, since the Metropolis rule accepts iff
-// ΔV > temperature·ln(U). Both are the same "is ΔV > tau?" test, screened by the SPRT and verified
-// by the confirm. statsShuffles is the confirm / saved-stats budget. seed couples every screen
-// shuffle and the confirm across the incumbent and the mutants.
+// ΔV > temperature·ln(U). Both are the same "is ΔV > tau?" test, screened by the SPRT and
+// verified by the confirm. statsShuffles is the confirm / saved-stats budget. seed couples every
+// screen shuffle and the confirm across the incumbent and the mutants.
 //
 // Returns (acceptedDeck, acceptedStats, acceptedAvg, acceptedIndex, true) on the first confirmed
 // acceptance, or (nil, zero, 0, -1, false) when every candidate is rejected or the round is

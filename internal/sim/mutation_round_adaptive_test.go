@@ -99,8 +99,8 @@ func TestRunMutationRoundAdaptive_MultiWorkerWinnerClearsThreshold(t *testing.T)
 }
 
 // TestRunMutationRoundAdaptive_SAStepClearsItsTau verifies the T>0 path: the winner clears its own
-// per-mutation Metropolis threshold tau = temperature·ln(U) under the coupled confirm (the accepted
-// deck may be worse than the incumbent — an SA step is allowed to move downhill).
+// Metropolis threshold tau = temperature·ln(U) under the coupled confirm (the accepted deck may be
+// worse than the incumbent — an SA step is allowed to move downhill).
 func TestRunMutationRoundAdaptive_SAStepClearsItsTau(t *testing.T) {
 	const (
 		minImprovement = 0.1
