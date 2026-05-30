@@ -114,19 +114,13 @@ func (ge *GameEngine) Deck() *deck.Deck {
 	return ge.deck
 }
 
-// PeekTopN returns the top n cards of the deck (top first) without removing them and
-// flips IsCacheable to false. Returns fewer cards when the deck has < n.
+// PeekTopN returns a view onto the top n cards of the deck (top first) without removing
+// them, and flips IsCacheable to false. Returns fewer cards when the deck has < n. The
+// caller must not retain or mutate the returned slice — the next Draw / Shuffle / ReorderTop
+// will overwrite the deck's backing under it.
 func (ge *GameEngine) PeekTopN(n int) []card.Card {
 	ge.cacheable = false
-	top := ge.deck.PeekTopN(n)
-	if len(top) == 0 {
-		return nil
-	}
-	out := make([]card.Card, len(top))
-	for i, c := range top {
-		out[i] = c.(card.Card)
-	}
-	return out
+	return ge.deck.PeekTopN(n)
 }
 
 // CountTopNMatching returns the number of cards among the top n of the deck for which pred
@@ -137,7 +131,7 @@ func (ge *GameEngine) CountTopNMatching(n int, pred func(c card.Card) bool) int 
 	ge.cacheable = false
 	count := 0
 	for _, c := range ge.deck.PeekTopN(n) {
-		if pred(c.(card.Card)) {
+		if pred(c) {
 			count++
 		}
 	}

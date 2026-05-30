@@ -6,6 +6,7 @@ import (
 	"slices"
 	"testing"
 
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/ids"
 )
 
@@ -20,14 +21,25 @@ func (w fakeWeapon) Name() string { return w.name }
 func (w fakeWeapon) Hands() int   { return w.hands }
 
 // fakeCard is a tiny Card implementation. ID is the per-printing key the copy-budget
-// arithmetic operates on; DisplayName is the canonical sideboard-merge key.
+// arithmetic operates on; DisplayName is the canonical sideboard-merge key. The other
+// methods are zero-value stubs the deck never touches — deck only reads ID, Name, and
+// DisplayName, but now that Card is aliased to the rich card.Card the full method set has
+// to satisfy the interface.
 type fakeCard struct {
 	id      ids.CardID
 	display string
 }
 
-func (c fakeCard) ID() ids.CardID      { return c.id }
-func (c fakeCard) DisplayName() string { return c.display }
+func (c fakeCard) ID() ids.CardID                                     { return c.id }
+func (c fakeCard) Name() string                                       { return c.display }
+func (c fakeCard) DisplayName() string                                { return c.display }
+func (c fakeCard) Cost() int                                          { return 0 }
+func (c fakeCard) Pitch() int                                         { return 0 }
+func (c fakeCard) Attack() int                                        { return 0 }
+func (c fakeCard) Defense() int                                       { return 0 }
+func (c fakeCard) Types(card.GameEngine) card.TypeSet                 { return 0 }
+func (c fakeCard) GoAgain(card.GameEngine) bool                       { return false }
+func (c fakeCard) Play(card.GameEngine, card.Logger, *card.CardState) {}
 
 // fakeRegistry is the in-memory registry the tests build against.
 type fakeRegistry struct {
