@@ -549,15 +549,19 @@ func (ctx *sequenceContext) preparePermState(playedAttackers []*card.CardState, 
 	if cap(hand) < needed {
 		panic("sim: pooled state hand backing too small; raise gameengine.defaultHandCap")
 	}
-	hand = hand[:0]
+	hand = hand[:needed]
+	idx := 0
 	for _, c := range ctx.handStart {
-		hand = append(hand, card.CardState{Card: c, Role: card.Held})
+		hand[idx] = card.CardState{Card: c, Role: card.Held}
+		idx++
 	}
 	for k := 0; k < n; k++ {
-		hand = append(hand, card.CardState{Card: playedAttackers[k].Card, Role: card.Attack})
+		hand[idx] = card.CardState{Card: playedAttackers[k].Card, Role: card.Attack}
+		idx++
 	}
 	for _, c := range ctx.attackPitchPerm {
-		hand = append(hand, card.CardState{Card: c.Card, Role: card.Pitch})
+		hand[idx] = card.CardState{Card: c.Card, Role: card.Pitch}
+		idx++
 	}
 	s.SetHandStates(hand)
 	// CardsPlayed is similarly prewarmed; the cap check guards mid-attack-turn growth.
