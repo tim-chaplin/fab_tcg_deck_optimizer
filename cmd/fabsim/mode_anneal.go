@@ -376,10 +376,9 @@ func prepareBaseline(cfg annealConfig, rng *rand.Rand) (*deck.Deck, deck.Stats, 
 		maybePrintBaselineCards(cfg, best)
 		return best, bestStats, bestAvg
 	}
-	// Always re-score a loaded deck against the current simulator. Its saved avg can predate
-	// scoring changes, and a stale baseline both misleads the display and lets the search accept
-	// mutations that only beat the outdated number; the fresh score is the truth, written back and
-	// used as bestEver.
+	// Always re-score a loaded deck against the current simulator: a stale saved avg both misleads
+	// the display and lets the search accept mutations that only beat the outdated number. The fresh
+	// score is written back and used as bestEver.
 	best, freshStats, freshAvg := reevaluateBaseline(cfg, rng, best, bestStats, bestStats.Mean())
 	maybePrintBaselineCards(cfg, best)
 	return best, freshStats, freshAvg
@@ -389,9 +388,8 @@ func prepareBaseline(cfg annealConfig, rng *rand.Rand) (*deck.Deck, deck.Stats, 
 // refreshed stats back to disk. Reconstructs the deck (Sideboard and Equipment preserved), runs
 // baselineEvaluate, and persists the result. Returns the rebuilt deck, its fresh stats, and avg.
 func reevaluateBaseline(cfg annealConfig, rng *rand.Rand, loaded *deck.Deck, loadedStats deck.Stats, savedAvg float64) (*deck.Deck, deck.Stats, float64) {
-	// Decks scored under older simulation logic can have saved avgs that diverge substantially from
-	// what today's simulator produces, so label the loaded number "saved avg" to keep it distinct
-	// from the fresh score.
+	// The saved avg can diverge substantially from what the current simulator produces, so label it
+	// "saved avg" to keep it distinct from the fresh score.
 	fmt.Printf("Loaded best deck (saved avg %.3f, %d shuffles); re-scoring at %d shuffles against the current simulator\n",
 		savedAvg, loadedStats.Runs, cfg.shuffles)
 	// Sideboard and Equipment are user-managed and don't feed the sim — preserve them across
