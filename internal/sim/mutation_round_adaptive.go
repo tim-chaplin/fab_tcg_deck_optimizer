@@ -1,11 +1,12 @@
 package sim
 
-// Adaptive mutation-round runner for the T==0 hill climb. Each candidate is screened by an SPRT
-// on coupled per-shuffle value deltas (see sprt.go) instead of a fixed shuffle budget: clear
-// non-improvements are dropped in a handful of shuffles, only close calls run long, and there is
-// no max-shuffle cap. A mutation the screen accepts is then confirmed with a high-precision
-// coupled eval at statsShuffles before it can win the round — so a screen false-accept can't be
-// taken as a real improvement, which is what guarantees the round terminates.
+// Adaptive mutation-round runner. Each candidate is screened by an SPRT on coupled per-shuffle
+// value deltas (see sprt.go) instead of a fixed shuffle budget: clear rejects are dropped in a
+// handful of shuffles, only close calls run long, and there is no max-shuffle cap. A mutation the
+// screen accepts is then confirmed with a high-precision coupled eval at statsShuffles before it
+// can win the round — so a screen false-accept can't win, which is what guarantees the round
+// terminates. The accept threshold is min-improvement for a hill climb and the random Metropolis
+// threshold for an SA step, so this runner covers all temperatures.
 //
 // Parallelism here is across mutations (one worker per goroutine), not within an eval: a per-
 // shuffle sequential screen can't fan a single shuffle across workers. The incumbent's per-shuffle
@@ -13,6 +14,7 @@ package sim
 
 import (
 	"context"
+	"math"
 	"math/rand"
 	"sync"
 	"sync/atomic"
@@ -128,20 +130,26 @@ func (c *confirmer) incumbentAvg() float64 {
 	return c.incAvg
 }
 
-// RunMutationRoundAdaptive runs one T==0 hill-climb round with SPRT screening + coupled confirm.
+// RunMutationRoundAdaptive runs one mutation round with SPRT screening + coupled confirm.
 // mutationWorkers goroutines pull candidates from a shared queue; the first to clear both the
-// screen and the confirm wins and cancels the rest. threshold is the min-improvement gate, applied
-// at both the screen (as the SPRT's H1) and the confirm. statsShuffles is the confirm / saved-stats
-// budget. seed couples every screen shuffle and the confirm across the incumbent and the mutants.
+// screen and the confirm wins and cancels the rest.
+//
+// Each candidate is judged against a per-mutation accept threshold tau: a hill climb (temperature
+// == 0) sets tau = threshold (the min-improvement gate); an SA step (temperature > 0) sets
+// tau = temperature·ln(U) for a per-mutation uniform U, since the Metropolis rule accepts iff
+// ΔV > temperature·ln(U). Both are the same "is ΔV > tau?" test, screened by the SPRT and verified
+// by the confirm. statsShuffles is the confirm / saved-stats budget. seed couples every screen
+// shuffle and the confirm across the incumbent and the mutants.
 //
 // Returns (acceptedDeck, acceptedStats, acceptedAvg, acceptedIndex, true) on the first confirmed
-// improvement, or (nil, zero, 0, -1, false) when every candidate is rejected or the round is
+// acceptance, or (nil, zero, 0, -1, false) when every candidate is rejected or the round is
 // cancelled.
 func RunMutationRoundAdaptive(
 	ctx context.Context,
 	mutations []deck.Mutation,
 	incumbent *deck.Deck,
 	threshold float64,
+	temperature float64,
 	mp Matchup,
 	statsShuffles int,
 	mutationWorkers int,
@@ -177,7 +185,7 @@ func RunMutationRoundAdaptive(
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
-			runAdaptiveWorker(innerCtx, cancel, mutations, incVals, conf, threshold, mp, statsShuffles, seed, completed, cache, jobs, improvementCh)
+			runAdaptiveWorker(innerCtx, cancel, mutations, incVals, conf, threshold, temperature, mp, statsShuffles, seed, completed, cache, jobs, improvementCh)
 		}()
 	}
 
@@ -211,6 +219,7 @@ func runAdaptiveWorker(
 	incVals *incumbentValues,
 	conf *confirmer,
 	threshold float64,
+	temperature float64,
 	mp Matchup,
 	statsShuffles int,
 	seed int64,
@@ -220,10 +229,19 @@ func runAdaptiveWorker(
 	improvementCh chan<- mutationImprovement,
 ) {
 	ev := NewEvaluatorWithCache(cache)
-	rng := rand.New(rand.NewSource(1)) // reseeded per shuffle in value(); initial seed is irrelevant
+	rng := rand.New(rand.NewSource(1))  // reseeded per shuffle in value(); initial seed is irrelevant
+	uRng := rand.New(rand.NewSource(1)) // reseeded per mutation for the SA acceptance draw
 	for i := range jobs {
 		if ctx.Err() != nil {
 			return
+		}
+		// tau is the accept threshold for this candidate: min-improvement for a hill climb, the
+		// random temperature·ln(U) Metropolis threshold for an SA step. U is drawn per mutation so
+		// the SA acceptance is reproducible and independent of which worker pulls the candidate.
+		tau := threshold
+		if temperature > 0 {
+			uRng.Seed(perShuffleSeed(seed, -(i + 1)))
+			tau = temperature * math.Log(1-uRng.Float64())
 		}
 		d := mutations[i].Deck()
 		screen := newSingleShuffleEval(d, ev, mp)
@@ -233,8 +251,10 @@ func runAdaptiveWorker(
 			if ctx.Err() != nil {
 				return
 			}
+			// Shift by (threshold - tau) so the SPRT's H0=0 / H1=threshold tests ΔV against
+			// tau-threshold (reject) and tau (accept). At tau==threshold this is a no-op.
 			delta := screen.value(rng, perShuffleSeed(seed, n)) - incVals.at(n)
-			acc.add(delta)
+			acc.add(delta - tau + threshold)
 			verdict = acc.decision(threshold, defaultSPRTConfig)
 		}
 		if completed != nil {
@@ -243,10 +263,10 @@ func runAdaptiveWorker(
 		if verdict != sprtAccept {
 			continue
 		}
-		// Screen says improvement; confirm at high precision, coupled to the incumbent baseline.
+		// Screen says accept; confirm ΔV > tau at high precision, coupled to the incumbent baseline.
 		stats := ev.Evaluate(d, statsShuffles, mp, rand.New(rand.NewSource(perShuffleSeed(seed, 0))))
 		mutAvg := stats.Mean()
-		if mutAvg-conf.incumbentAvg() <= threshold {
+		if mutAvg-conf.incumbentAvg() <= tau {
 			continue // screen false-accept — the confirm clears it, preserving termination
 		}
 		select {

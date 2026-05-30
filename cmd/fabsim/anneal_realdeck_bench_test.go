@@ -111,7 +111,7 @@ func BenchmarkAnnealRoundAdaptiveOnViseraiV4(b *testing.B) {
 		iterRNG := rand.New(rand.NewSource(42))
 		b.StartTimer()
 		_, _, _, _, found := sim.RunMutationRoundAdaptive(
-			context.Background(), mutations, baseline, threshold,
+			context.Background(), mutations, baseline, threshold, 0,
 			sim.Matchup{IncomingPhysicalDamage: incoming}, statsShuffles, 0,
 			iterRNG.Int63(), nil, nil,
 		)

@@ -2,6 +2,7 @@ package sim
 
 import (
 	"context"
+	"math"
 	"math/rand"
 	"sync/atomic"
 	"testing"
@@ -44,7 +45,7 @@ func TestRunMutationRoundAdaptive_ConfirmedImprovementClearsThreshold(t *testing
 
 	// One mutation worker → deterministic FIFO winner, so the reconstruction below is exact.
 	d, stats, avg, idx, found := RunMutationRoundAdaptive(
-		context.Background(), muts, incumbent, threshold, mp, statsShuffles, 1, seed, nil, nil)
+		context.Background(), muts, incumbent, threshold, 0, mp, statsShuffles, 1, seed, nil, nil)
 	if !found {
 		t.Skip("weak deck produced no improvement at this seed; nothing to confirm")
 	}
@@ -81,7 +82,7 @@ func TestRunMutationRoundAdaptive_MultiWorkerWinnerClearsThreshold(t *testing.T)
 	incumbent, muts := adaptiveFixture(t, 1)
 
 	d, _, avg, _, found := RunMutationRoundAdaptive(
-		context.Background(), muts, incumbent, threshold, mp, statsShuffles, workers, seed, nil, nil)
+		context.Background(), muts, incumbent, threshold, 0, mp, statsShuffles, workers, seed, nil, nil)
 	if !found {
 		t.Skip("weak deck produced no improvement at this seed")
 	}
@@ -97,6 +98,38 @@ func TestRunMutationRoundAdaptive_MultiWorkerWinnerClearsThreshold(t *testing.T)
 	}
 }
 
+// TestRunMutationRoundAdaptive_SAStepClearsItsTau verifies the T>0 path: the winner clears its own
+// per-mutation Metropolis threshold tau = temperature·ln(U) under the coupled confirm (the accepted
+// deck may be worse than the incumbent — an SA step is allowed to move downhill).
+func TestRunMutationRoundAdaptive_SAStepClearsItsTau(t *testing.T) {
+	const (
+		minImprovement = 0.1
+		temperature    = 0.5 // warm enough that downhill moves can be accepted
+		statsShuffles  = 400
+		seed           = 13
+	)
+	mp := Matchup{IncomingPhysicalDamage: 5}
+	incumbent, muts := adaptiveFixture(t, 1)
+
+	d, _, avg, idx, found := RunMutationRoundAdaptive(
+		context.Background(), muts, incumbent, minImprovement, temperature, mp, statsShuffles, 1, seed, nil, nil)
+	if !found {
+		t.Skip("no candidate cleared its SA threshold at this seed")
+	}
+	// Reconstruct the winner's tau the same way the worker draws it, then check the confirm gate.
+	u := rand.New(rand.NewSource(perShuffleSeed(seed, -(idx + 1)))).Float64()
+	tau := temperature * math.Log(1-u)
+	confirmSeed := perShuffleSeed(seed, 0)
+	mutAvg := seqValue(d, statsShuffles, mp, confirmSeed)
+	if mutAvg-seqValue(incumbent, statsShuffles, mp, confirmSeed) <= tau {
+		t.Errorf("SA winner does not clear its tau %.4f (confirm delta %.4f)",
+			tau, mutAvg-seqValue(incumbent, statsShuffles, mp, confirmSeed))
+	}
+	if mutAvg != avg {
+		t.Errorf("reconstructed confirm avg %.4f != returned avg %.4f", mutAvg, avg)
+	}
+}
+
 // TestRunMutationRoundAdaptive_UnreachableThresholdRejectsAll: with an impossibly high threshold no
 // candidate clears the screen, so the round drains and reports no improvement.
 func TestRunMutationRoundAdaptive_UnreachableThresholdRejectsAll(t *testing.T) {
@@ -105,7 +138,7 @@ func TestRunMutationRoundAdaptive_UnreachableThresholdRejectsAll(t *testing.T) {
 
 	var completed atomic.Int64
 	d, _, avg, idx, found := RunMutationRoundAdaptive(
-		context.Background(), muts, incumbent, 1_000_000.0, mp, 200, 0, 7, &completed, nil)
+		context.Background(), muts, incumbent, 1_000_000.0, 0, mp, 200, 0, 7, &completed, nil)
 	if found {
 		t.Errorf("found=true with an unreachable threshold; want false")
 	}
@@ -124,7 +157,7 @@ func TestRunMutationRoundAdaptive_Deterministic(t *testing.T) {
 	incumbent, muts := adaptiveFixture(t, 3)
 	run := func() (int, bool, float64) {
 		d, _, avg, idx, found := RunMutationRoundAdaptive(
-			context.Background(), muts, incumbent, 0.1, mp, 300, 1, 99, nil, nil)
+			context.Background(), muts, incumbent, 0.1, 0, mp, 300, 1, 99, nil, nil)
 		_ = d
 		return idx, found, avg
 	}

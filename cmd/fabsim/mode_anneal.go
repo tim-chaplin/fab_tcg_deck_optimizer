@@ -218,10 +218,7 @@ func runAnneal(cfg annealConfig) annealResult {
 
 	// Persistent hand-eval cache shared across rounds — see sim.NewCacheBounded.
 	roundCache := sim.NewCacheBounded(annealCacheCapacity)
-	// Incumbent re-evaluator: shares roundCache and the round's shuffle-worker count so its
-	// shuffles couple with the mutation evals.
-	shuffleWorkers := sim.DefaultWorkers()
-	incumbentEv := sim.NewEvaluatorParallelWithCache(shuffleWorkers, roundCache)
+	mutationWorkers := sim.DefaultWorkers()
 
 	round := 0
 	acceptances := 0
@@ -230,17 +227,6 @@ func runAnneal(cfg annealConfig) annealResult {
 		round++
 		mutations := buildRoundMutations(cfg, rng, current)
 		tempLabel := formatTempLabel(temperature)
-
-		roundSeed := rng.Int63()
-		// A simulated-annealing step (T>0) needs a magnitude of ΔV to weigh exp(ΔV/T), so it uses
-		// a coupled fixed-budget eval: re-evaluate the incumbent on this round's seed and compare
-		// each mutation against it (common random numbers — the shared shuffle noise cancels). The
-		// hill climb (T==0) needs only the sign of the comparison, so it goes through the adaptive
-		// screen below and currentAvg is just carried from the last accepted deck.
-		if temperature > 0 {
-			currentAvg = incumbentEv.Evaluate(current, cfg.shuffles, cfg.matchup,
-				rand.New(rand.NewSource(roundSeed))).Mean()
-		}
 		if verbose {
 			fmt.Fprintf(os.Stderr, "\n[round %d] evaluating %d mutations of avg %.3f%s (best ever %.3f)\n",
 				round, len(mutations), currentAvg, tempLabel, bestEverAvg)
@@ -251,27 +237,15 @@ func runAnneal(cfg annealConfig) annealResult {
 		roundStart := time.Now()
 		stopTicker := startRoundTicker(round, len(mutations), roundStart, &completed,
 			temperature, currentAvg, bestEverAvg)
-		var (
-			d      *deck.Deck
-			dStats deck.Stats
-			avg    float64
-			idx    int
-			found  bool
+		// Adaptive round for every temperature: the SPRT screens each candidate against its accept
+		// threshold (min-improvement at T==0, the random Metropolis threshold at T>0) on coupled
+		// per-shuffle deltas, and a coupled confirm at cfg.shuffles verifies a screen pass. currentAvg
+		// is carried from the last accepted deck for the display; the confirm derives its own coupled
+		// incumbent baseline.
+		d, dStats, avg, idx, found := sim.RunMutationRoundAdaptive(
+			ctx, mutations, current, cfg.minImprovement, temperature, cfg.matchup,
+			cfg.shuffles, mutationWorkers, rng.Int63(), &completed, roundCache,
 		)
-		if temperature == 0 {
-			// Adaptive: SPRT-screen each mutation on coupled per-shuffle deltas, confirm a screen
-			// pass with a high-precision coupled eval at cfg.shuffles. No fixed per-mutation budget.
-			d, dStats, avg, idx, found = sim.RunMutationRoundAdaptive(
-				ctx, mutations, current, cfg.minImprovement, cfg.matchup,
-				cfg.shuffles, shuffleWorkers, roundSeed, &completed, roundCache,
-			)
-		} else {
-			d, dStats, avg, idx, found = sim.RunMutationRound(
-				ctx, mutations, currentAvg, temperature, cfg.minImprovement,
-				cfg.shuffles, cfg.matchup, 0, shuffleWorkers,
-				roundSeed, &completed, roundCache,
-			)
-		}
 		stopTicker()
 
 		if ctx.Err() != nil {
