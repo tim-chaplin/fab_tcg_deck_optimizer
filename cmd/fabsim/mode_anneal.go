@@ -28,8 +28,8 @@ const annealCacheCapacity = 2_000_000
 
 // annealConfig bundles the knobs runAnneal needs. Built by runAnnealCmd from its flag.FlagSet.
 type annealConfig struct {
-	// shuffles is the per-eval shuffle budget — the number of shuffles every per-mutation and
-	// baseline eval simulates.
+	// shuffles is the deck-scoring budget: the hill climb's improvement-confirm eval and each SA
+	// step's per-mutation eval. The hill-climb screen itself is adaptive and ignores it.
 	shuffles  int
 	matchup   sim.Matchup
 	deckSize  int
@@ -66,7 +66,7 @@ func defaultDeckNameFor(h hero.Hero, f GameplayFormat, incoming int) string {
 func runAnnealCmd(args []string) {
 	fs := flag.NewFlagSet("anneal", flag.ExitOnError)
 	deckName := fs.String("deck", "", "deck name; resolved to mydecks/<name>.json (\".json\" suffix optional). Defaults to <hero>_<format>_<incoming>_incoming so different (hero, format, -incoming) regimes keep separate deck files. When the named deck exists, anneal resumes from it as a checkpoint.")
-	shuffles := fs.Int("shuffles", 1000, "per-eval shuffle budget — the number of shuffles every per-mutation eval simulates. -finalize overrides this to 10000.")
+	shuffles := fs.Int("shuffles", 1000, "shuffles used to score a deck: the budget for the hill climb's improvement-confirm and each SA step's per-mutation eval. The hill climb screens candidates adaptively (a sequential test, no fixed budget) and spends this only when confirming a screen pass. -finalize overrides this to 10000.")
 	incoming := fs.Int("incoming", 0, "opponent damage per turn (required — different values produce different optimal decks, so this is explicit rather than defaulted)")
 	arcaneIncoming := fs.Int("arcane-incoming", 0, "opponent arcane damage per turn (defaults to 0 — the non-arcane matchup; raise it to score cards that gate on incoming arcane)")
 	deckSize := fs.Int("deck-size", 40, "number of cards per deck")
@@ -231,14 +231,16 @@ func runAnneal(cfg annealConfig) annealResult {
 		mutations := buildRoundMutations(cfg, rng, current)
 		tempLabel := formatTempLabel(temperature)
 
-		// Re-evaluate the incumbent on this round's seed so every mutation below is judged
-		// against the same shuffles (common random numbers, resolving improvements in fewer
-		// shuffles). A fresh seed each round keeps the climb from overfitting one shuffle set.
-		// One eval amortised over the whole mutation pool, and it warms roundCache for the
-		// mutants.
 		roundSeed := rng.Int63()
-		currentAvg = incumbentEv.Evaluate(current, cfg.shuffles, cfg.matchup,
-			rand.New(rand.NewSource(roundSeed))).Mean()
+		// A simulated-annealing step (T>0) needs a magnitude of ΔV to weigh exp(ΔV/T), so it keeps
+		// the coupled fixed-budget eval: re-evaluate the incumbent on this round's seed and compare
+		// each mutation against it (common random numbers — the shared shuffle noise cancels). The
+		// hill climb (T==0) only needs the sign of the comparison, so it goes through the adaptive
+		// screen below and currentAvg is just carried from the last accepted deck.
+		if temperature > 0 {
+			currentAvg = incumbentEv.Evaluate(current, cfg.shuffles, cfg.matchup,
+				rand.New(rand.NewSource(roundSeed))).Mean()
+		}
 		if verbose {
 			fmt.Fprintf(os.Stderr, "\n[round %d] evaluating %d mutations of avg %.3f%s (best ever %.3f)\n",
 				round, len(mutations), currentAvg, tempLabel, bestEverAvg)
@@ -249,11 +251,27 @@ func runAnneal(cfg annealConfig) annealResult {
 		roundStart := time.Now()
 		stopTicker := startRoundTicker(round, len(mutations), roundStart, &completed,
 			temperature, currentAvg, bestEverAvg)
-		d, dStats, avg, idx, found := sim.RunMutationRound(
-			ctx, mutations, currentAvg, temperature, cfg.minImprovement,
-			cfg.shuffles, cfg.matchup, 0, shuffleWorkers,
-			roundSeed, &completed, roundCache,
+		var (
+			d      *deck.Deck
+			dStats deck.Stats
+			avg    float64
+			idx    int
+			found  bool
 		)
+		if temperature == 0 {
+			// Adaptive: SPRT-screen each mutation on coupled per-shuffle deltas, confirm a screen
+			// pass with a high-precision coupled eval at cfg.shuffles. No fixed per-mutation budget.
+			d, dStats, avg, idx, found = sim.RunMutationRoundAdaptive(
+				ctx, mutations, current, cfg.minImprovement, cfg.matchup,
+				cfg.shuffles, shuffleWorkers, roundSeed, &completed, roundCache,
+			)
+		} else {
+			d, dStats, avg, idx, found = sim.RunMutationRound(
+				ctx, mutations, currentAvg, temperature, cfg.minImprovement,
+				cfg.shuffles, cfg.matchup, 0, shuffleWorkers,
+				roundSeed, &completed, roundCache,
+			)
+		}
 		stopTicker()
 
 		if ctx.Err() != nil {
@@ -276,8 +294,9 @@ func runAnneal(cfg annealConfig) annealResult {
 		bestEver, bestEverStats, bestEverAvg = applyAcceptedMutation(cfg, round, verbose, tempLabel,
 			idx, len(mutations), mutations[idx], d, dStats, avg, currentAvg, bestEver, bestEverStats, bestEverAvg)
 		current = d
-		// currentAvg isn't carried across rounds — the top of the next round re-evaluates the
-		// incumbent on its own seed.
+		// The hill climb carries currentAvg (the accepted deck's confirm avg) into the next round
+		// for display; an SA round overwrites it with a fresh coupled incumbent eval at the top.
+		currentAvg = avg
 		temperature = coolDown(temperature, cfg.tempDecay, cfg.minTemp)
 	}
 }
