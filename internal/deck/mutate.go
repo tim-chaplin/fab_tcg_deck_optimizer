@@ -29,21 +29,39 @@ const (
 )
 
 // Mutation is one candidate single-slot, pair, or weapon-loadout change: a tagged-union spec
-// plus a human-readable summary. Deck builds the mutated deck on demand — the anneal driver
-// shuffles thousands of mutations per round and typically accepts within the first handful,
-// so eagerly materialising every candidate would burn a deck.Copy per spec that almost
-// always goes unused.
+// the consumer materialises and labels on demand. The anneal driver shuffles thousands of
+// mutations per round and typically accepts within the first handful, so eagerly building
+// either the deck or the human-readable summary would burn work per spec that almost always
+// goes unused. Deck and Description both run only when actually needed.
 type Mutation struct {
-	Description string
-
 	base     *Deck
 	kind     mutationKind
 	addA     Card
 	addB     Card
+	removeA  Card
 	removeID ids.CardID
 	iA       int
 	iB       int
 	weapons  []Weapon
+}
+
+// Description renders the human-readable summary of this mutation (e.g.
+// "-1 Aether Slash [R], +1 Arcanic Spike [R]"). Built on demand — the anneal driver only
+// reads it for the one mutation per round that gets accepted, so 99% of the per-round
+// Sprintf work the eager field used to do is avoided.
+func (m Mutation) Description() string {
+	switch m.kind {
+	case kindSingleSwap:
+		return fmt.Sprintf("-1 %s, +1 %s", m.removeA.DisplayName(), m.addA.DisplayName())
+	case kindPairSwap:
+		return fmt.Sprintf("-1 %s, -1 %s, +1 %s, +1 %s",
+			m.base.cards[m.iA].DisplayName(), m.base.cards[m.iB].DisplayName(),
+			m.addA.DisplayName(), m.addB.DisplayName())
+	case kindWeaponLoadout:
+		return fmt.Sprintf("swapped weapons from %s to %s",
+			loadoutLabel(m.base.Weapons), loadoutLabel(m.weapons))
+	}
+	panic(fmt.Sprintf("deck: unknown mutationKind %d", m.kind))
 }
 
 // Deck builds and returns the mutated deck this spec describes. Each call constructs a fresh
@@ -170,10 +188,9 @@ func weaponLoadoutMutations(d *Deck, reg Registry) []Mutation {
 			continue
 		}
 		out = append(out, Mutation{
-			Description: fmt.Sprintf("swapped weapons from %s to %s", loadoutLabel(d.Weapons), loadoutLabel(l.weapons)),
-			base:        d,
-			kind:        kindWeaponLoadout,
-			weapons:     l.weapons,
+			base:    d,
+			kind:    kindWeaponLoadout,
+			weapons: l.weapons,
 		})
 	}
 	return out
@@ -199,11 +216,11 @@ func singleSwapMutations(d *Deck, pool legalCardPool, baseCounts map[ids.CardID]
 				continue
 			}
 			out = append(out, Mutation{
-				Description: fmt.Sprintf("-1 %s, +1 %s", removed.DisplayName(), replacement.DisplayName()),
-				base:        d,
-				kind:        kindSingleSwap,
-				addA:        replacement,
-				removeID:    removeID,
+				base:     d,
+				kind:     kindSingleSwap,
+				addA:     replacement,
+				removeA:  removed,
+				removeID: removeID,
 			})
 		}
 	}
@@ -360,9 +377,6 @@ func pairSwapMutations(d *Deck, pairs []CardPair, pool legalCardPool, baseCounts
 						}
 						seen[key] = true
 						out = append(out, Mutation{
-							Description: fmt.Sprintf("-1 %s, -1 %s, +1 %s, +1 %s",
-								d.cards[i].DisplayName(), d.cards[j].DisplayName(),
-								first.DisplayName(), second.DisplayName()),
 							base: d,
 							kind: kindPairSwap,
 							iA:   i,

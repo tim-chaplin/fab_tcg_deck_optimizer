@@ -115,7 +115,7 @@ func TestAllMutations_CountsAndShape(t *testing.T) {
 		if m.Deck().Hero != d.Hero {
 			t.Errorf("mutation %d: hero changed", i)
 		}
-		if m.Description == "" {
+		if m.Description() == "" {
 			t.Errorf("mutation %d: empty description", i)
 		}
 	}
@@ -155,7 +155,7 @@ func TestAllMutations_OddCountsAllowed(t *testing.T) {
 				sawOdd = true
 			}
 			if n > 3 {
-				t.Errorf("card count %d exceeds maxCopies=3: %v", n, m.Description)
+				t.Errorf("card count %d exceeds maxCopies=3: %v", n, m.Description())
 			}
 		}
 	}
@@ -186,7 +186,7 @@ func TestAllMutations_PreservesSideboard(t *testing.T) {
 		for name, want := range wantCounts {
 			if got[name] != want {
 				t.Errorf("mutation %d (%s): sideboard count for %s = %d, want %d",
-					i, m.Description, name, got[name], want)
+					i, m.Description(), name, got[name], want)
 				break
 			}
 		}
@@ -210,9 +210,9 @@ func TestAllMutations_Deterministic(t *testing.T) {
 		if weaponKey(first[i].Deck().Weapons) != weaponKey(second[i].Deck().Weapons) {
 			t.Errorf("mutation %d weapons differ between calls", i)
 		}
-		if first[i].Description != second[i].Description {
+		if first[i].Description() != second[i].Description() {
 			t.Errorf("mutation %d descriptions differ: %q vs %q",
-				i, first[i].Description, second[i].Description)
+				i, first[i].Description(), second[i].Description())
 		}
 		for j, c := range first[i].Deck().cards {
 			if c.ID() != second[i].Deck().cards[j].ID() {
@@ -260,8 +260,8 @@ func TestPairSwapMutations_EnumeratesAllVariantCrossProducts(t *testing.T) {
 	for _, m := range muts {
 		for _, fID := range fakeMoonSunPair[0].First {
 			for _, sID := range fakeMoonSunPair[0].Second {
-				if strings.Contains(m.Description, "+1 "+makeFakeCard(fID).DisplayName()) &&
-					strings.Contains(m.Description, "+1 "+makeFakeCard(sID).DisplayName()) {
+				if strings.Contains(m.Description(), "+1 "+makeFakeCard(fID).DisplayName()) &&
+					strings.Contains(m.Description(), "+1 "+makeFakeCard(sID).DisplayName()) {
 					seen[combo{fID, sID}] = true
 				}
 			}
@@ -290,18 +290,18 @@ func TestPairSwapMutations_RemovesBothCopiesOfDuplicate(t *testing.T) {
 
 	for i, m := range muts {
 		want := fmt.Sprintf("-1 %s, -1 %s", dup.DisplayName(), dup.DisplayName())
-		if !strings.Contains(m.Description, want) {
+		if !strings.Contains(m.Description(), want) {
 			t.Errorf("mutation %d (%s): expected both copies of %s removed",
-				i, m.Description, dup.DisplayName())
+				i, m.Description(), dup.DisplayName())
 		}
 		// Result deck has 2 cards (the new pair), zero c1.
 		if len(m.Deck().cards) != 2 {
-			t.Errorf("mutation %d (%s): card count %d, want 2", i, m.Description, len(m.Deck().cards))
+			t.Errorf("mutation %d (%s): card count %d, want 2", i, m.Description(), len(m.Deck().cards))
 		}
 		for _, c := range m.Deck().cards {
 			if c.ID() == dup.ID() {
 				t.Errorf("mutation %d (%s): result deck still holds %s",
-					i, m.Description, dup.DisplayName())
+					i, m.Description(), dup.DisplayName())
 			}
 		}
 	}
@@ -322,8 +322,8 @@ func TestPairSwapMutations_FiresWhenOneHalfAlreadyPresent(t *testing.T) {
 	}
 	sawDifferentSecondVariantAdd := false
 	for _, m := range muts {
-		if strings.Contains(m.Description, "+1 "+(makeFakeCard(fakeSK2)).DisplayName()) ||
-			strings.Contains(m.Description, "+1 "+(makeFakeCard(fakeSK3)).DisplayName()) {
+		if strings.Contains(m.Description(), "+1 "+(makeFakeCard(fakeSK2)).DisplayName()) ||
+			strings.Contains(m.Description(), "+1 "+(makeFakeCard(fakeSK3)).DisplayName()) {
 			sawDifferentSecondVariantAdd = true
 			break
 		}
@@ -359,7 +359,7 @@ func TestPairSwapMutations_GeneratesCapViolatingCandidates(t *testing.T) {
 	// in AllMutations does.
 	sawCapViolator := false
 	for _, m := range muts {
-		if strings.Contains(m.Description, "+1 "+sk1.DisplayName()) {
+		if strings.Contains(m.Description(), "+1 "+sk1.DisplayName()) {
 			counts := map[ids.CardID]int{}
 			for _, c := range m.Deck().cards {
 				counts[c.ID()]++
@@ -401,7 +401,7 @@ func TestPairSwapMutations_HandlesUnbalancedHalfCounts(t *testing.T) {
 	for i, m := range muts {
 		if len(m.Deck().cards) != len(cardsList) {
 			t.Errorf("mutation %d (%s): card count %d, want %d (size must stay stable)",
-				i, m.Description, len(m.Deck().cards), len(cardsList))
+				i, m.Description(), len(m.Deck().cards), len(cardsList))
 		}
 	}
 }
@@ -415,7 +415,7 @@ func TestPairSwapMutations_ResultDifferentFromSource(t *testing.T) {
 	srcKey := cardMultisetKey(d.cards)
 	for i, m := range pairSwapMutations(d, fakeMoonSunPair, buildLegalByID(reg), cardCounts(d.cards), 1000) {
 		if cardMultisetKey(m.Deck().cards) == srcKey {
-			t.Errorf("mutation %d (%s) produced a no-op (same multiset as source)", i, m.Description)
+			t.Errorf("mutation %d (%s) produced a no-op (same multiset as source)", i, m.Description())
 		}
 	}
 }
@@ -431,9 +431,9 @@ func TestPairSwapMutations_OverlapSuppressionSkipsRedundantSwaps(t *testing.T) {
 	addStr := "+1 " + sk1.DisplayName()
 	rmStr := "-1 " + sk1.DisplayName()
 	for i, m := range pairSwapMutations(d, fakeMoonSunPair, buildLegalByID(reg), cardCounts(d.cards), 1000) {
-		if strings.Contains(m.Description, rmStr) && strings.Contains(m.Description, addStr) {
+		if strings.Contains(m.Description(), rmStr) && strings.Contains(m.Description(), addStr) {
 			t.Errorf("mutation %d (%s): redundant -1/+1 of %s — overlap suppression failed",
-				i, m.Description, sk1.DisplayName())
+				i, m.Description(), sk1.DisplayName())
 		}
 	}
 }
@@ -461,9 +461,9 @@ func TestPairSwapMutations_SkipsPoolMissingHalves(t *testing.T) {
 		[]Card{a, a, b, b})
 	missingDisplay := makeFakeCard(missing).DisplayName()
 	for i, m := range pairSwapMutations(d, fakeMoonSunPair, buildLegalByID(reg), cardCounts(d.cards), 1000) {
-		if strings.Contains(m.Description, missingDisplay) {
+		if strings.Contains(m.Description(), missingDisplay) {
 			t.Errorf("mutation %d (%s): added pool-missing half %s",
-				i, m.Description, missingDisplay)
+				i, m.Description(), missingDisplay)
 		}
 	}
 }
@@ -482,9 +482,9 @@ func TestPairSwapMutations_DeterministicOrdering(t *testing.T) {
 		t.Fatalf("call counts differ: %d vs %d", len(first), len(second))
 	}
 	for i := range first {
-		if first[i].Description != second[i].Description {
+		if first[i].Description() != second[i].Description() {
 			t.Errorf("mutation %d descriptions differ: %q vs %q",
-				i, first[i].Description, second[i].Description)
+				i, first[i].Description(), second[i].Description())
 		}
 	}
 }
