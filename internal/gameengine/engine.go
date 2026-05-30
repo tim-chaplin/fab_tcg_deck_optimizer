@@ -486,32 +486,18 @@ func (ge *GameEngine) Opt(l card.Logger, n int) {
 // Panics if the handler's combined output isn't exactly the input multiset.
 func (ge *GameEngine) OptWith(l card.Logger, n int, split func([]card.Card) (top, bottom []card.Card)) {
 	ge.cacheable = false
-	if n <= 0 || ge.deck.Size() == 0 {
+	size := ge.deck.Size()
+	if n <= 0 || size == 0 {
 		return
 	}
-	if n > ge.deck.Size() {
-		n = ge.deck.Size()
+	if n > size {
+		n = size
 	}
-	drawn := ge.deck.Draw(n)
 	ge.noteDeckRemoval(n)
-	cards := make([]card.Card, len(drawn))
-	for i, c := range drawn {
-		cards[i] = c.(card.Card)
-	}
-
+	cards := ge.PeekTopN(n)
 	top, bottom := split(cards)
 	panicIfOptViolatesMultiset(cards, top, bottom)
-
-	deckTop := make([]deck.Card, len(top))
-	for i, c := range top {
-		deckTop[i] = c
-	}
-	ge.deck.PutTop(deckTop)
-	deckBottom := make([]deck.Card, len(bottom))
-	for i, c := range bottom {
-		deckBottom[i] = c
-	}
-	ge.deck.PutBottom(deckBottom)
+	ge.deck.ReorderTop(n, top, bottom)
 
 	if OptDebug {
 		fmt.Printf("Opt(%d): cards=%s -> top=%s bottom=%s\n",
