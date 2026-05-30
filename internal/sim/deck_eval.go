@@ -25,7 +25,11 @@ import (
 // against mp, and recycles Pitched cards to deck bottom. A run ends when the deck can't
 // fill the next hand. A "cycle" is one pass through the original deck size.
 func (ev *Evaluator) Evaluate(d *deck.Deck, runs int, mp Matchup, rng *rand.Rand) deck.Stats {
-	return ev.evaluateImpl(d, runs, mp, rng)
+	stats := ev.evaluateImpl(d, runs, mp, rng)
+	// Stamp the matchup so persisted stats record the opponent profile they were measured under.
+	stats.IncomingPhysicalDamage = mp.IncomingPhysicalDamage
+	stats.IncomingArcaneDamage = mp.IncomingArcaneDamage
+	return stats
 }
 
 // parallelChunkPerWorker is the per-worker chunk size in the parallel-shuffle path: the pool
