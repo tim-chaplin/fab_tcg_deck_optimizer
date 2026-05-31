@@ -139,6 +139,13 @@ type AdaptiveProgress struct {
 	Confirming atomic.Int64
 }
 
+// defaultConfirmSigmas is the hill-climb accept threshold's width in confirm standard errors: a
+// mutation must beat the incumbent by more than k·σ̂/√N — k sigma of the N-shuffle confirm — to be
+// accepted, i.e. the confirm's interval for the gain excludes zero at this confidence. With no
+// min-improvement, this is the sole thing flooring the resolution; the only user knob left is N
+// (-shuffles), which sets how small a k-sigma gain is worth chasing.
+const defaultConfirmSigmas = 3.0
+
 // AdaptiveRoundConfig bundles the inputs to RunMutationRoundAdaptive. The caller builds a fresh one
 // each round; ctx stays a separate argument per the Go convention.
 type AdaptiveRoundConfig struct {
