@@ -169,6 +169,51 @@ func positionDiffs(a, b []Card) int {
 	return n
 }
 
+// holdsCard reports whether cs contains a card with the given ID.
+func holdsCard(cs []Card, id ids.CardID) bool {
+	for _, c := range cs {
+		if c.ID() == id {
+			return true
+		}
+	}
+	return false
+}
+
+// TestMutationSwap checks Swap exposes the (added, removed) pair for single swaps — removed is a
+// deck card, added lands in the materialised deck — and reports ok=false for weapon loadouts.
+func TestMutationSwap(t *testing.T) {
+	reg := allMutationsFixture()
+	base := New(fakeHero{}, []Weapon{reg.weapons[0], reg.weapons[1]},
+		[]Card{reg.cards[0], reg.cards[0], reg.cards[1], reg.cards[1]})
+	baseIDs := map[ids.CardID]bool{reg.cards[0].ID(): true, reg.cards[1].ID(): true}
+
+	singles, weapons := 0, 0
+	for _, m := range AllMutations(base, 3, false, reg) {
+		added, removed, ok := m.Swap()
+		if weaponKey(m.Deck().Weapons) != weaponKey(base.Weapons) {
+			if ok {
+				t.Errorf("weapon loadout %q reported ok=true from Swap", m.Description())
+			}
+			weapons++
+			continue
+		}
+		if !ok {
+			t.Errorf("single swap %q reported ok=false from Swap", m.Description())
+			continue
+		}
+		if !baseIDs[removed] {
+			t.Errorf("swap %q: removed %d is not a deck card", m.Description(), removed)
+		}
+		if positionDiffs(base.cards, m.Deck().cards) != 1 || !holdsCard(m.Deck().cards, added) {
+			t.Errorf("swap %q: materialised deck doesn't hold added card %d", m.Description(), added)
+		}
+		singles++
+	}
+	if singles == 0 || weapons == 0 {
+		t.Fatalf("fixture didn't exercise both kinds: singles=%d weapons=%d", singles, weapons)
+	}
+}
+
 // Tests single-card-swap semantics: odd-count distributions are legal and raising
 // maxCopies opens adds to in-deck cards below the cap.
 func TestAllMutations_OddCountsAllowed(t *testing.T) {

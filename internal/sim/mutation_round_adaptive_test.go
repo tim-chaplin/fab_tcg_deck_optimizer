@@ -8,8 +8,61 @@ import (
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/hero/heroes"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/ids"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry"
 )
+
+// fakeRecorder captures RecordResult calls for the recordOutcome test.
+type fakeRecorder struct{ results [][2]ids.CardID }
+
+func (f *fakeRecorder) RecordResult(winner, loser ids.CardID) {
+	f.results = append(f.results, [2]ids.CardID{winner, loser})
+}
+
+// TestRecordOutcome pins the ranking-signal mapping: only at T==0, a win records the added card
+// beating the removed one and a loss the reverse, and non-single-swap mutations record nothing.
+func TestRecordOutcome(t *testing.T) {
+	rng := rand.New(rand.NewSource(1))
+	d := deck.Random(heroes.Viserai, 40, 2, rng, registry.Registry{})
+	var swap, weapon deck.Mutation
+	for _, m := range deck.AllMutations(d, 2, false, registry.Registry{}) {
+		if _, _, ok := m.Swap(); ok {
+			swap = m
+		} else {
+			weapon = m
+		}
+	}
+	added, removed, _ := swap.Swap()
+
+	cases := []struct {
+		name        string
+		temperature float64
+		mut         deck.Mutation
+		won         bool
+		want        [][2]ids.CardID
+	}{
+		{"T>0 records nothing", 0.5, swap, true, nil},
+		{"win → added beats removed", 0, swap, true, [][2]ids.CardID{{added, removed}}},
+		{"loss → removed beats added", 0, swap, false, [][2]ids.CardID{{removed, added}}},
+		{"non-single-swap records nothing", 0, weapon, true, nil},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			f := &fakeRecorder{}
+			recordOutcome(f, c.temperature, c.mut, c.won)
+			if len(f.results) != len(c.want) {
+				t.Fatalf("recorded %v, want %v", f.results, c.want)
+			}
+			for i := range c.want {
+				if f.results[i] != c.want[i] {
+					t.Errorf("result %d = %v, want %v", i, f.results[i], c.want[i])
+				}
+			}
+		})
+	}
+
+	recordOutcome(nil, 0, swap, true) // nil recorder must be a no-op (no panic)
+}
 
 // adaptiveFixture builds a deliberately weak random deck (so plenty of mutations improve it) plus
 // its mutation list, the shared inputs for the adaptive-round tests.
