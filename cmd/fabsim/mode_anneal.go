@@ -467,8 +467,8 @@ func startRoundTicker(round, total int, roundStart time.Time, progress *sim.Adap
 				// While a candidate is being confirmed the round has paused on the expensive full
 				// eval, so report that instead of the screen progress.
 				if progress.Confirming.Load() > 0 {
-					fmt.Fprintf(os.Stderr, "\r[round %d] found a promising candidate — full-evaluating at %d shuffles  best %.3f%s  %s elapsed                    ",
-						round, shuffles, bestEverAvg, tempLabel, elapsed.Truncate(time.Second))
+					fmt.Fprintf(os.Stderr, "\r[round %d] found a promising candidate — full-evaluating at %d shuffles  cur %.3f  best %.3f%s  %s elapsed                    ",
+						round, shuffles, currentAvg, bestEverAvg, tempLabel, elapsed.Truncate(time.Second))
 					continue
 				}
 				fmt.Fprintf(os.Stderr, "\r[round %d] screened %d/%d  cur %.3f  best %.3f%s  %s elapsed%s                    ",
