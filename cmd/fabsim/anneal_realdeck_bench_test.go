@@ -72,6 +72,54 @@ func BenchmarkAnnealRoundOnViseraiV4(b *testing.B) {
 	}
 }
 
+// BenchmarkAnnealRoundAdaptiveOnViseraiV4 is the adaptive-path counterpart to
+// BenchmarkAnnealRoundOnViseraiV4: the same converged-deck mutations, but screened by the SPRT
+// against the real incumbent and the derived k·σ/√N accept threshold. On a converged deck every
+// candidate is a non-improvement, so each is rejected in a handful of screen shuffles with no
+// confirm — the scenario where the adaptive round most outruns the fixed-budget drain.
+func BenchmarkAnnealRoundAdaptiveOnViseraiV4(b *testing.B) {
+	const (
+		maxCopies     = 2
+		incoming      = 7
+		statsShuffles = 10000
+		sampleSize    = 8
+	)
+	path := findRepoFile(b, filepath.Join("mydecks", "viserai_v4.json"))
+	if path == "" {
+		b.Skip("mydecks/viserai_v4.json not found — saved deck is needed to run this bench")
+	}
+	data, err := os.ReadFile(path)
+	if err != nil {
+		b.Fatalf("read deck: %v", err)
+	}
+	loaded, _, err := textio.UnmarshalDeck(data)
+	if err != nil {
+		b.Fatalf("unmarshal deck: %v", err)
+	}
+	baseline := loaded.Copy()
+	all := deck.AllMutations(baseline, maxCopies, true, registry.Registry{})
+	if len(all) < sampleSize {
+		b.Fatalf("mutation pool size %d < sample size %d", len(all), sampleSize)
+	}
+	mutations := all[:sampleSize]
+
+	b.ReportAllocs()
+	b.ResetTimer()
+	for n := 0; n < b.N; n++ {
+		b.StopTimer()
+		iterRNG := rand.New(rand.NewSource(42))
+		b.StartTimer()
+		_, _, _, _, found := sim.RunMutationRoundAdaptive(context.Background(), sim.AdaptiveRoundConfig{
+			Mutations: mutations, Incumbent: baseline,
+			Matchup:       sim.Matchup{IncomingPhysicalDamage: incoming},
+			StatsShuffles: statsShuffles, Seed: iterRNG.Int63(),
+		})
+		if found {
+			b.Fatalf("iter %d: converged-deck mutation was accepted — bench setup is wrong", n)
+		}
+	}
+}
+
 // Measures the gain from a persistent hand-eval cache across consecutive anneal rounds
 // on viserai_v4.
 func BenchmarkAnnealMultiRoundOnViseraiV4(b *testing.B) {

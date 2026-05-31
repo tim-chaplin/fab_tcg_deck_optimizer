@@ -9,7 +9,6 @@ import (
 	"runtime"
 	"runtime/pprof"
 	"strings"
-	"sync/atomic"
 	"time"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
@@ -28,8 +27,8 @@ const annealCacheCapacity = 2_000_000
 
 // annealConfig bundles the knobs runAnneal needs. Built by runAnnealCmd from its flag.FlagSet.
 type annealConfig struct {
-	// shuffles is the per-eval shuffle budget — the number of shuffles every per-mutation and
-	// baseline eval simulates.
+	// shuffles is the deck-scoring budget: the hill climb's improvement-confirm eval and each SA
+	// step's per-mutation eval. The hill-climb screen itself is adaptive and ignores it.
 	shuffles  int
 	matchup   sim.Matchup
 	deckSize  int
@@ -41,10 +40,6 @@ type annealConfig struct {
 	startTemp float64
 	tempDecay float64
 	minTemp   float64
-	// minImprovement is the strict (T==0) noise floor: avg must exceed bestAvg by more than
-	// this margin. Guards against infinite-loop acceptance of within-noise wins. The
-	// probabilistic SA gate ignores it so annealing can still cross ties / dips.
-	minImprovement float64
 	// quietLoad suppresses the baseline card-list dump in prepareBaseline — useful for
 	// wrapper scripts that re-invoke anneal repeatedly on the same deck.
 	quietLoad bool
@@ -66,7 +61,7 @@ func defaultDeckNameFor(h hero.Hero, f GameplayFormat, incoming int) string {
 func runAnnealCmd(args []string) {
 	fs := flag.NewFlagSet("anneal", flag.ExitOnError)
 	deckName := fs.String("deck", "", "deck name; resolved to mydecks/<name>.json (\".json\" suffix optional). Defaults to <hero>_<format>_<incoming>_incoming so different (hero, format, -incoming) regimes keep separate deck files. When the named deck exists, anneal resumes from it as a checkpoint.")
-	shuffles := fs.Int("shuffles", 1000, "per-eval shuffle budget — the number of shuffles every per-mutation eval simulates. -finalize overrides this to 10000.")
+	shuffles := fs.Int("shuffles", 1000, "shuffles used to score a deck: the budget for the hill climb's improvement-confirm and each SA step's per-mutation eval. The hill climb screens candidates adaptively (a sequential test, no fixed budget) and spends this only when confirming a screen pass. Also sets how small a gain is worth accepting — the threshold is k·σ/√shuffles, the confirm's resolution — so this is the climb's one tuning knob. -finalize overrides it to 10000.")
 	incoming := fs.Int("incoming", 0, "opponent damage per turn (required — different values produce different optimal decks, so this is explicit rather than defaulted)")
 	arcaneIncoming := fs.Int("arcane-incoming", 0, "opponent arcane damage per turn (defaults to 0 — the non-arcane matchup; raise it to score cards that gate on incoming arcane)")
 	deckSize := fs.Int("deck-size", 40, "number of cards per deck")
@@ -74,9 +69,8 @@ func runAnnealCmd(args []string) {
 	seed := fs.Int64("seed", time.Now().UnixNano(), "RNG seed")
 	formatFlag := fs.String("format", string(SilverAge), "constructed format whose banlist restricts the card pool during search (only \"silver_age\" is supported today)")
 	debug := fs.Bool("debug", false, "print additional debug info to stdout / stderr")
-	finalize := fs.Bool("finalize", false, "high-precision pass — sets -shuffles to 10000 and tightens -min-improvement to 0.01. Use on a deck that's already converged to squeeze out the remaining sub-percent improvements.")
+	finalize := fs.Bool("finalize", false, "high-precision pass — sets -shuffles to 10000. The accept threshold is k·σ/√shuffles, so a bigger budget resolves (and accepts) finer sub-percent gains. Use on a deck that's already converged.")
 	startTemp := fs.Float64("start-temp", 0, "simulated-annealing starting temperature. 0 (default) runs a pure hill climb. Higher values probabilistically accept worse mutations early; acceptance probability is exp((avg - baseline) / T). Good starting range is ~0.05–0.5 given typical Value units.")
-	minImprovement := fs.Float64("min-improvement", 0.1, "noise floor on strict (T==0) acceptance: a mutation's avg must exceed the current avg by more than this margin to be accepted. Guards against infinite-loop acceptance of within-noise wins; raise it for chunkier improvements only, lower it (e.g. 0.01) for fine-grained finalize passes. The probabilistic SA gate at T>0 ignores this margin so annealing can still cross ties.")
 	tempDecay := fs.Float64("temp-decay", 0.95, "multiplicative cooling per acceptance — T ← T × decay, floored at -min-temp. Unused when -start-temp is 0.")
 	minTemp := fs.Float64("min-temp", 0, "minimum temperature. Once T reaches this floor the climb becomes greedy until a local maximum is found. 0 disables annealing in the converged tail.")
 	quietLoad := fs.Bool("quiet-load", false, "skip the baseline card-list dump at startup. Intended for wrapper scripts (e.g. anneal-reanneal.ps1) that re-invoke anneal many times on the same deck — the listing never changes pass-to-pass and floods the log.")
@@ -97,12 +91,11 @@ func runAnnealCmd(args []string) {
 
 	gameengine.OptDebug = *debug
 
-	// -finalize pins a high shuffle budget and tightens the noise floor so sub-0.1 wins land
-	// that the default 0.1 -min-improvement gate would reject. Applied post-parse so it
-	// overrides explicit flags.
+	// -finalize pins a high shuffle budget; since the accept threshold is k·σ/√shuffles, the
+	// larger budget alone resolves the sub-percent wins a shallow pass can't. Applied post-parse
+	// so it overrides an explicit -shuffles.
 	if *finalize {
 		*shuffles = 10000
-		*minImprovement = 0.01
 	}
 
 	name := *deckName
@@ -118,20 +111,19 @@ func runAnnealCmd(args []string) {
 	// Evaluator gets constructed.
 	gameengine.MaxDeckSize = *deckSize
 	cfg := annealConfig{
-		shuffles:       *shuffles,
-		matchup:        sim.Matchup{IncomingPhysicalDamage: *incoming, IncomingArcaneDamage: *arcaneIncoming},
-		deckSize:       *deckSize,
-		maxCopies:      *maxCopies,
-		seed:           *seed,
-		outPath:        outPath,
-		debug:          *debug,
-		startTemp:      *startTemp,
-		tempDecay:      *tempDecay,
-		minTemp:        *minTemp,
-		minImprovement: *minImprovement,
-		quietLoad:      *quietLoad,
-		maxDuration:    *maxDuration,
-		pairMutations:  *pairMutations,
+		shuffles:      *shuffles,
+		matchup:       sim.Matchup{IncomingPhysicalDamage: *incoming, IncomingArcaneDamage: *arcaneIncoming},
+		deckSize:      *deckSize,
+		maxCopies:     *maxCopies,
+		seed:          *seed,
+		outPath:       outPath,
+		debug:         *debug,
+		startTemp:     *startTemp,
+		tempDecay:     *tempDecay,
+		minTemp:       *minTemp,
+		quietLoad:     *quietLoad,
+		maxDuration:   *maxDuration,
+		pairMutations: *pairMutations,
 	}
 
 	// Wrap in a function that owns the profile lifecycle so deferred StopCPUProfile / heap
@@ -218,10 +210,7 @@ func runAnneal(cfg annealConfig) annealResult {
 
 	// Persistent hand-eval cache shared across rounds — see sim.NewCacheBounded.
 	roundCache := sim.NewCacheBounded(annealCacheCapacity)
-	// Incumbent re-evaluator: shares roundCache and the round's shuffle-worker count so its
-	// shuffles couple with the mutation evals.
-	shuffleWorkers := sim.DefaultWorkers()
-	incumbentEv := sim.NewEvaluatorParallelWithCache(shuffleWorkers, roundCache)
+	mutationWorkers := sim.DefaultWorkers()
 
 	round := 0
 	acceptances := 0
@@ -230,30 +219,32 @@ func runAnneal(cfg annealConfig) annealResult {
 		round++
 		mutations := buildRoundMutations(cfg, rng, current)
 		tempLabel := formatTempLabel(temperature)
-
-		// Re-evaluate the incumbent on this round's seed so every mutation below is judged
-		// against the same shuffles (common random numbers, resolving improvements in fewer
-		// shuffles). A fresh seed each round keeps the climb from overfitting one shuffle set.
-		// One eval amortised over the whole mutation pool, and it warms roundCache for the
-		// mutants.
-		roundSeed := rng.Int63()
-		currentAvg = incumbentEv.Evaluate(current, cfg.shuffles, cfg.matchup,
-			rand.New(rand.NewSource(roundSeed))).Mean()
 		if verbose {
 			fmt.Fprintf(os.Stderr, "\n[round %d] evaluating %d mutations of avg %.3f%s (best ever %.3f)\n",
 				round, len(mutations), currentAvg, tempLabel, bestEverAvg)
 		}
 
 		// Round-scoped start so the ticker's elapsed/ETA reflect this round, not the session.
-		var completed atomic.Int64
+		var progress sim.AdaptiveProgress
 		roundStart := time.Now()
-		stopTicker := startRoundTicker(round, len(mutations), roundStart, &completed,
-			temperature, currentAvg, bestEverAvg)
-		d, dStats, avg, idx, found := sim.RunMutationRound(
-			ctx, mutations, currentAvg, temperature, cfg.minImprovement,
-			cfg.shuffles, cfg.matchup, 0, shuffleWorkers,
-			roundSeed, &completed, roundCache,
-		)
+		stopTicker := startRoundTicker(round, len(mutations), roundStart, &progress,
+			cfg.shuffles, temperature, currentAvg, bestEverAvg)
+		// Adaptive round for every temperature: the SPRT screens each candidate against its accept
+		// threshold (the derived k·σ/√shuffles resolution at T==0, the random Metropolis threshold
+		// at T>0) on coupled per-shuffle deltas, and a coupled confirm at cfg.shuffles verifies a
+		// screen pass. currentAvg is carried from the last accepted deck for the display; the
+		// confirm derives its own coupled incumbent baseline.
+		d, dStats, avg, idx, found := sim.RunMutationRoundAdaptive(ctx, sim.AdaptiveRoundConfig{
+			Mutations:       mutations,
+			Incumbent:       current,
+			Temperature:     temperature,
+			Matchup:         cfg.matchup,
+			StatsShuffles:   cfg.shuffles,
+			MutationWorkers: mutationWorkers,
+			Seed:            rng.Int63(),
+			Progress:        &progress,
+			Cache:           roundCache,
+		})
 		stopTicker()
 
 		if ctx.Err() != nil {
@@ -276,8 +267,9 @@ func runAnneal(cfg annealConfig) annealResult {
 		bestEver, bestEverStats, bestEverAvg = applyAcceptedMutation(cfg, round, verbose, tempLabel,
 			idx, len(mutations), mutations[idx], d, dStats, avg, currentAvg, bestEver, bestEverStats, bestEverAvg)
 		current = d
-		// currentAvg isn't carried across rounds — the top of the next round re-evaluates the
-		// incumbent on its own seed.
+		// currentAvg carries the accepted deck's confirm avg into the next round for the display;
+		// the round's confirm derives its own coupled incumbent baseline.
+		currentAvg = avg
 		temperature = coolDown(temperature, cfg.tempDecay, cfg.minTemp)
 	}
 }
@@ -456,7 +448,7 @@ func watchStdinForAbort(cancel context.CancelFunc) {
 // rate; it under-estimates by the fraction of mutations cut short by an early acceptance,
 // but over-estimates dominate in long converged-tail runs. Returns a stop function the
 // caller must call when the round finishes.
-func startRoundTicker(round, total int, roundStart time.Time, completed *atomic.Int64, temperature, currentAvg, bestEverAvg float64) func() {
+func startRoundTicker(round, total int, roundStart time.Time, progress *sim.AdaptiveProgress, shuffles int, temperature, currentAvg, bestEverAvg float64) func() {
 	done := make(chan struct{})
 	go func() {
 		t := time.NewTicker(500 * time.Millisecond)
@@ -471,9 +463,17 @@ func startRoundTicker(round, total int, roundStart time.Time, completed *atomic.
 					tempLabel = fmt.Sprintf("  T=%.4f", temperature)
 				}
 				elapsed := time.Since(roundStart)
-				fmt.Fprintf(os.Stderr, "\r[round %d] tested %d/%d  cur %.3f  best %.3f%s  %s elapsed%s        ",
-					round, completed.Load(), total, currentAvg, bestEverAvg, tempLabel,
-					elapsed.Truncate(time.Second), formatETA(elapsed, completed.Load(), int64(total)))
+				screened := progress.Screened.Load()
+				// While a candidate is being confirmed the round has paused on the expensive full
+				// eval, so report that instead of the screen progress.
+				if progress.Confirming.Load() > 0 {
+					fmt.Fprintf(os.Stderr, "\r[round %d] found a promising candidate — full-evaluating at %d shuffles  cur %.3f  best %.3f%s  %s elapsed                    ",
+						round, shuffles, currentAvg, bestEverAvg, tempLabel, elapsed.Truncate(time.Second))
+					continue
+				}
+				fmt.Fprintf(os.Stderr, "\r[round %d] screened %d/%d  cur %.3f  best %.3f%s  %s elapsed%s                    ",
+					round, screened, total, currentAvg, bestEverAvg, tempLabel,
+					elapsed.Truncate(time.Second), formatETA(elapsed, screened, int64(total)))
 			}
 		}
 	}()
