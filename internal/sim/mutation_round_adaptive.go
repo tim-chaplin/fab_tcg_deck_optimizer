@@ -5,8 +5,9 @@ package sim
 // handful of shuffles, only close calls run long, and there is no max-shuffle cap. A mutation the
 // screen accepts is then confirmed with a high-precision coupled eval at statsShuffles before it
 // can win the round — so a screen false-accept can't win, which is what guarantees the round
-// terminates. The accept threshold is min-improvement for a hill climb and the random Metropolis
-// threshold for an SA step, so this runner covers all temperatures.
+// terminates. The accept threshold is the confirm's k·σ̂/√N resolution for a hill climb (any gain
+// the confirm can resolve) and the random Metropolis threshold for an SA step, so this runner
+// covers all temperatures with no min-improvement knob.
 //
 // Parallelism here is across mutations (one worker per goroutine), not within an eval: a per-
 // shuffle sequential screen can't fan a single shuffle across workers. The incumbent's per-shuffle
@@ -143,12 +144,12 @@ type AdaptiveProgress struct {
 type AdaptiveRoundConfig struct {
 	Mutations       []deck.Mutation
 	Incumbent       *deck.Deck
-	Threshold       float64 // the min-improvement gate
 	Temperature     float64 // 0 = hill climb; > 0 = simulated annealing
 	Matchup         Matchup
-	StatsShuffles   int               // confirm / saved-stats budget
+	StatsShuffles   int               // confirm / saved-stats budget N; also sets the accept threshold k·σ̂/√N
 	MutationWorkers int               // 0 → DefaultWorkers()
 	Seed            int64             // couples every screen shuffle and the confirm
+	ConfirmSigmas   float64           // k in the k·σ̂/√N accept threshold; 0 → defaultConfirmSigmas
 	Progress        *AdaptiveProgress // optional live counters the ticker reads; nil to skip
 	Cache           *Cache            // shared hand-eval cache; nil → a fresh one
 }
@@ -158,11 +159,13 @@ type AdaptiveRoundConfig struct {
 // screen and the confirm wins and cancels the rest.
 //
 // Each candidate is judged against a per-mutation accept threshold tau: a hill climb
-// (cfg.Temperature == 0) sets tau = cfg.Threshold (the min-improvement gate); an SA step
-// (cfg.Temperature > 0) sets tau = cfg.Temperature·ln(U) for a per-mutation uniform U, since the
-// Metropolis rule accepts iff ΔV > cfg.Temperature·ln(U). Both are the same "is ΔV > tau?" test,
-// screened by the SPRT and verified by the confirm. cfg.Seed couples every screen shuffle and the
-// confirm across the incumbent and the mutants.
+// (cfg.Temperature == 0) sets tau = k·σ̂/√N, the smallest gain the N-shuffle confirm resolves at k
+// sigma (k = cfg.ConfirmSigmas, σ̂ the candidate's screened per-shuffle delta SD) — so any genuine,
+// resolvable improvement is accepted, with no min-improvement knob. An SA step (cfg.Temperature >
+// 0) sets tau = cfg.Temperature·ln(U) for a per-mutation uniform U, since the Metropolis rule
+// accepts iff ΔV > cfg.Temperature·ln(U). Both are the same "is ΔV > tau?" test, screened by the
+// SPRT and verified by the confirm. cfg.Seed couples every screen shuffle and the confirm across
+// the incumbent and the mutants.
 //
 // Returns (acceptedDeck, acceptedStats, acceptedAvg, acceptedIndex, true) on the first confirmed
 // acceptance, or (nil, zero, 0, -1, false) when every candidate is rejected or the round is
@@ -176,6 +179,9 @@ func RunMutationRoundAdaptive(ctx context.Context, cfg AdaptiveRoundConfig) (*de
 	}
 	if cfg.Cache == nil {
 		cfg.Cache = NewCache()
+	}
+	if cfg.ConfirmSigmas <= 0 {
+		cfg.ConfirmSigmas = defaultConfirmSigmas
 	}
 
 	innerCtx, cancel := context.WithCancel(ctx)
@@ -231,27 +237,38 @@ func runAdaptiveWorker(ctx context.Context, cancel context.CancelFunc, cfg Adapt
 		if ctx.Err() != nil {
 			return
 		}
-		// tau is the accept threshold for this candidate: min-improvement for a hill climb, the
-		// random temperature·ln(U) Metropolis threshold for an SA step. U is drawn per mutation so
-		// the SA acceptance is reproducible and independent of which worker pulls the candidate.
-		tau := cfg.Threshold
-		if cfg.Temperature > 0 {
+		// A hill climb (Temperature == 0) accepts any gain its confirm resolves, so its accept
+		// point is the derived threshold itself (set per shuffle below). An SA step fixes the
+		// random temperature·ln(U) Metropolis threshold up front; U is drawn per mutation so the
+		// acceptance is reproducible and independent of which worker pulls the candidate.
+		hillClimb := cfg.Temperature == 0
+		saThreshold := 0.0
+		if !hillClimb {
 			uRng.Seed(perShuffleSeed(cfg.Seed, -(i + 1)))
-			tau = cfg.Temperature * math.Log(1-uRng.Float64())
+			saThreshold = cfg.Temperature * math.Log(1-uRng.Float64())
 		}
 		d := cfg.Mutations[i].Deck()
 		screen := newSingleShuffleEval(d, ev, cfg.Matchup)
 		var acc sprtAccumulator
 		verdict := sprtContinue
+		var tau float64
 		for n := 1; verdict == sprtContinue; n++ {
 			if ctx.Err() != nil {
 				return
 			}
-			// Shift by (threshold - tau) so the SPRT's H0=0 / H1=threshold tests ΔV against
-			// tau-threshold (reject) and tau (accept). At tau==threshold this is a no-op.
-			delta := screen.value(rng, perShuffleSeed(cfg.Seed, n)) - incVals.at(n)
-			acc.add(delta - tau + cfg.Threshold)
-			verdict = acc.decision(cfg.Threshold, defaultSPRTConfig)
+			acc.add(screen.value(rng, perShuffleSeed(cfg.Seed, n)) - incVals.at(n))
+			// threshold is the confirm's k-sigma resolution from this candidate's own screened
+			// delta SD: k·σ̂/√N. A hill climb's accept point tau is that same threshold (accept any
+			// resolvable gain); an SA step's is its fixed Metropolis tau, with the zone around it.
+			threshold := 0.0
+			if v := acc.variance(); v > 0 {
+				threshold = cfg.ConfirmSigmas * math.Sqrt(v) / math.Sqrt(float64(cfg.StatsShuffles))
+			}
+			tau = saThreshold
+			if hillClimb {
+				tau = threshold
+			}
+			verdict = acc.decision(tau, threshold, defaultSPRTConfig)
 		}
 		if cfg.Progress != nil {
 			cfg.Progress.Screened.Add(1)

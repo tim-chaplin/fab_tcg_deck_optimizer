@@ -74,14 +74,13 @@ func BenchmarkAnnealRoundOnViseraiV4(b *testing.B) {
 
 // BenchmarkAnnealRoundAdaptiveOnViseraiV4 is the adaptive-path counterpart to
 // BenchmarkAnnealRoundOnViseraiV4: the same converged-deck mutations, but screened by the SPRT
-// against the real incumbent and min-improvement threshold. On a converged deck every candidate
-// is a non-improvement, so each is rejected in a handful of screen shuffles with no confirm — the
-// scenario where the adaptive round most outruns the fixed-budget drain.
+// against the real incumbent and the derived k·σ/√N accept threshold. On a converged deck every
+// candidate is a non-improvement, so each is rejected in a handful of screen shuffles with no
+// confirm — the scenario where the adaptive round most outruns the fixed-budget drain.
 func BenchmarkAnnealRoundAdaptiveOnViseraiV4(b *testing.B) {
 	const (
 		maxCopies     = 2
 		incoming      = 7
-		threshold     = 0.1
 		statsShuffles = 10000
 		sampleSize    = 8
 	)
@@ -111,7 +110,7 @@ func BenchmarkAnnealRoundAdaptiveOnViseraiV4(b *testing.B) {
 		iterRNG := rand.New(rand.NewSource(42))
 		b.StartTimer()
 		_, _, _, _, found := sim.RunMutationRoundAdaptive(context.Background(), sim.AdaptiveRoundConfig{
-			Mutations: mutations, Incumbent: baseline, Threshold: threshold,
+			Mutations: mutations, Incumbent: baseline,
 			Matchup:       sim.Matchup{IncomingPhysicalDamage: incoming},
 			StatsShuffles: statsShuffles, Seed: iterRNG.Int63(),
 		})

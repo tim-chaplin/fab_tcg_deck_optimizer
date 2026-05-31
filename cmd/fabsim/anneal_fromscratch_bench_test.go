@@ -47,11 +47,10 @@ func BenchmarkAnnealFromScratch(b *testing.B) {
 	// Size the pool slots' graveyard/banished backings before any Evaluator is built.
 	gameengine.MaxDeckSize = deckSize
 	cfg := annealConfig{
-		shuffles:       shuffles,
-		matchup:        sim.Matchup{IncomingPhysicalDamage: incoming},
-		deckSize:       deckSize,
-		maxCopies:      maxCopies,
-		minImprovement: minImprovement,
+		shuffles:  shuffles,
+		matchup:   sim.Matchup{IncomingPhysicalDamage: incoming},
+		deckSize:  deckSize,
+		maxCopies: maxCopies,
 	}
 
 	b.ReportAllocs()
@@ -69,7 +68,7 @@ func BenchmarkAnnealFromScratch(b *testing.B) {
 		for round := 0; round < rounds; round++ {
 			mutations := buildRoundMutations(cfg, rng, current)
 			d, _, avg, _, found := sim.RunMutationRound(
-				context.Background(), mutations, currentAvg, temperature, cfg.minImprovement,
+				context.Background(), mutations, currentAvg, temperature, minImprovement,
 				cfg.shuffles, cfg.matchup, 0, 0,
 				rng.Int63(), nil, cache,
 			)

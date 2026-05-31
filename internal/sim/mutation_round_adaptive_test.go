@@ -30,12 +30,11 @@ func seqValue(d *deck.Deck, shuffles int, mp Matchup, seed int64) float64 {
 	return NewEvaluator().Evaluate(d, shuffles, mp, rand.New(rand.NewSource(seed))).Mean()
 }
 
-// TestRunMutationRoundAdaptive_ConfirmedImprovementClearsThreshold verifies the core contract: when
-// the round reports an improvement, the accepted deck genuinely beats the incumbent by more than the
-// threshold under the high-precision coupled confirm — i.e. a screen false-accept can't win.
-func TestRunMutationRoundAdaptive_ConfirmedImprovementClearsThreshold(t *testing.T) {
+// TestRunMutationRoundAdaptive_ConfirmedImprovementBeatsIncumbent verifies the core contract: when
+// the round reports an improvement, the accepted deck genuinely beats the incumbent under the
+// high-precision coupled confirm — i.e. a screen false-accept can't win.
+func TestRunMutationRoundAdaptive_ConfirmedImprovementBeatsIncumbent(t *testing.T) {
 	const (
-		threshold     = 0.1
 		statsShuffles = 400
 		seed          = 4242
 	)
@@ -44,7 +43,7 @@ func TestRunMutationRoundAdaptive_ConfirmedImprovementClearsThreshold(t *testing
 
 	// One mutation worker → deterministic FIFO winner, so the reconstruction below is exact.
 	d, stats, avg, idx, found := RunMutationRoundAdaptive(context.Background(), AdaptiveRoundConfig{
-		Mutations: muts, Incumbent: incumbent, Threshold: threshold, Matchup: mp,
+		Mutations: muts, Incumbent: incumbent, Matchup: mp,
 		StatsShuffles: statsShuffles, MutationWorkers: 1, Seed: seed,
 	})
 	if !found {
@@ -60,21 +59,21 @@ func TestRunMutationRoundAdaptive_ConfirmedImprovementClearsThreshold(t *testing
 	confirmSeed := perShuffleSeed(seed, 0)
 	incAvg := seqValue(incumbent, statsShuffles, mp, confirmSeed)
 	mutAvg := seqValue(d, statsShuffles, mp, confirmSeed)
-	if mutAvg-incAvg <= threshold {
-		t.Errorf("accepted mutation does not clear the confirm gate: mutAvg %.4f - incAvg %.4f = %.4f <= %.2f",
-			mutAvg, incAvg, mutAvg-incAvg, threshold)
+	if mutAvg-incAvg <= 0 {
+		t.Errorf("accepted mutation does not beat the incumbent under the confirm: mutAvg %.4f - incAvg %.4f = %.4f <= 0",
+			mutAvg, incAvg, mutAvg-incAvg)
 	}
 	if mutAvg != avg {
 		t.Errorf("reconstructed confirm avg %.4f != returned avg %.4f (coupling/seed mismatch)", mutAvg, avg)
 	}
 }
 
-// TestRunMutationRoundAdaptive_MultiWorkerWinnerClearsThreshold runs with several mutation workers
-// (so the winner is racy) and asserts that whichever candidate wins still clears the confirm gate —
-// the safety property the confirm exists to guarantee, independent of which worker lands first.
-func TestRunMutationRoundAdaptive_MultiWorkerWinnerClearsThreshold(t *testing.T) {
+// TestRunMutationRoundAdaptive_MultiWorkerWinnerBeatsIncumbent runs with several mutation workers
+// (so the winner is racy) and asserts that whichever candidate wins still beats the incumbent under
+// the confirm — the safety property the confirm exists to guarantee, independent of which worker
+// lands first.
+func TestRunMutationRoundAdaptive_MultiWorkerWinnerBeatsIncumbent(t *testing.T) {
 	const (
-		threshold     = 0.1
 		statsShuffles = 400
 		seed          = 8675309
 		workers       = 4
@@ -83,7 +82,7 @@ func TestRunMutationRoundAdaptive_MultiWorkerWinnerClearsThreshold(t *testing.T)
 	incumbent, muts := adaptiveFixture(t, 1)
 
 	d, _, avg, _, found := RunMutationRoundAdaptive(context.Background(), AdaptiveRoundConfig{
-		Mutations: muts, Incumbent: incumbent, Threshold: threshold, Matchup: mp,
+		Mutations: muts, Incumbent: incumbent, Matchup: mp,
 		StatsShuffles: statsShuffles, MutationWorkers: workers, Seed: seed,
 	})
 	if !found {
@@ -92,9 +91,9 @@ func TestRunMutationRoundAdaptive_MultiWorkerWinnerClearsThreshold(t *testing.T)
 	confirmSeed := perShuffleSeed(seed, 0)
 	incAvg := seqValue(incumbent, statsShuffles, mp, confirmSeed)
 	mutAvg := seqValue(d, statsShuffles, mp, confirmSeed)
-	if mutAvg-incAvg <= threshold {
-		t.Errorf("multi-worker winner does not clear the confirm gate: %.4f - %.4f = %.4f <= %.2f",
-			mutAvg, incAvg, mutAvg-incAvg, threshold)
+	if mutAvg-incAvg <= 0 {
+		t.Errorf("multi-worker winner does not beat the incumbent under the confirm: %.4f - %.4f = %.4f <= 0",
+			mutAvg, incAvg, mutAvg-incAvg)
 	}
 	if mutAvg != avg {
 		t.Errorf("reconstructed confirm avg %.4f != returned avg %.4f", mutAvg, avg)
@@ -106,16 +105,15 @@ func TestRunMutationRoundAdaptive_MultiWorkerWinnerClearsThreshold(t *testing.T)
 // worse than the incumbent — an SA step is allowed to move downhill).
 func TestRunMutationRoundAdaptive_SAStepClearsItsTau(t *testing.T) {
 	const (
-		minImprovement = 0.1
-		temperature    = 0.5 // warm enough that downhill moves can be accepted
-		statsShuffles  = 400
-		seed           = 13
+		temperature   = 0.5 // warm enough that downhill moves can be accepted
+		statsShuffles = 400
+		seed          = 13
 	)
 	mp := Matchup{IncomingPhysicalDamage: 5}
 	incumbent, muts := adaptiveFixture(t, 1)
 
 	d, _, avg, idx, found := RunMutationRoundAdaptive(context.Background(), AdaptiveRoundConfig{
-		Mutations: muts, Incumbent: incumbent, Threshold: minImprovement, Temperature: temperature,
+		Mutations: muts, Incumbent: incumbent, Temperature: temperature,
 		Matchup: mp, StatsShuffles: statsShuffles, MutationWorkers: 1, Seed: seed,
 	})
 	if !found {
@@ -135,15 +133,16 @@ func TestRunMutationRoundAdaptive_SAStepClearsItsTau(t *testing.T) {
 	}
 }
 
-// TestRunMutationRoundAdaptive_UnreachableThresholdRejectsAll: with an impossibly high threshold no
-// candidate clears the screen, so the round drains and reports no improvement.
+// TestRunMutationRoundAdaptive_UnreachableThresholdRejectsAll: with an impossibly wide accept
+// threshold (a huge ConfirmSigmas inflates k·σ̂/√N out of reach) no candidate clears the screen, so
+// the round drains and reports no improvement.
 func TestRunMutationRoundAdaptive_UnreachableThresholdRejectsAll(t *testing.T) {
 	mp := Matchup{IncomingPhysicalDamage: 5}
 	incumbent, muts := adaptiveFixture(t, 2)
 
 	var progress AdaptiveProgress
 	d, _, avg, idx, found := RunMutationRoundAdaptive(context.Background(), AdaptiveRoundConfig{
-		Mutations: muts, Incumbent: incumbent, Threshold: 1_000_000.0, Matchup: mp,
+		Mutations: muts, Incumbent: incumbent, ConfirmSigmas: 1e9, Matchup: mp,
 		StatsShuffles: 200, Seed: 7, Progress: &progress,
 	})
 	if found {
@@ -164,7 +163,7 @@ func TestRunMutationRoundAdaptive_Deterministic(t *testing.T) {
 	incumbent, muts := adaptiveFixture(t, 3)
 	run := func() (int, bool, float64) {
 		d, _, avg, idx, found := RunMutationRoundAdaptive(context.Background(), AdaptiveRoundConfig{
-			Mutations: muts, Incumbent: incumbent, Threshold: 0.1, Matchup: mp,
+			Mutations: muts, Incumbent: incumbent, Matchup: mp,
 			StatsShuffles: 300, MutationWorkers: 1, Seed: 99,
 		})
 		_ = d

@@ -19,6 +19,13 @@ type sprtConfig struct {
 // defaultSPRTConfig is the anneal default: a 5% symmetric error rate and an 8-shuffle warmup.
 var defaultSPRTConfig = sprtConfig{alpha: 0.05, warmup: 8}
 
+// defaultConfirmSigmas is the accept threshold's width in confirm standard errors: a hill-climb
+// mutation must beat the incumbent by more than k·σ̂/√N — k sigma of the N-shuffle confirm — to be
+// accepted, i.e. the confirm's interval for the gain excludes zero at this confidence. With no
+// min-improvement, this is the sole thing flooring the resolution; the only user knob left is N
+// (-shuffles), which sets how small a k-sigma gain is worth chasing.
+const defaultConfirmSigmas = 3.0
+
 // sprtVerdict is the running test's current call.
 type sprtVerdict int
 
@@ -28,15 +35,17 @@ const (
 	sprtReject
 )
 
-// sprtAccumulator streams paired per-shuffle deltas through an SPRT for the hypotheses
+// sprtAccumulator streams paired per-shuffle deltas through an SPRT. decision tests the running
+// mean against an accept point tau with an indifference-zone width threshold:
 //
-//	H0: mean delta = 0          (neutral — reject the mutation)
-//	H1: mean delta = threshold  (a real improvement — accept it)
+//	H0: mean delta = tau − threshold  (reject the mutation)
+//	H1: mean delta = tau              (accept it)
 //
-// Anything strictly between 0 and threshold is the indifference zone: the test still terminates
-// there, to whichever side the evidence drifts, which is fine — a sub-threshold gain is a
-// don't-care by the same logic min-improvement encodes. Expected sample size is bounded for every
-// true mean, so no max-shuffle cap is needed.
+// Anything strictly inside the zone is a don't-care: the test still terminates there, to whichever
+// side the evidence drifts. Expected sample size is bounded for every true mean, so no max-shuffle
+// cap is needed. The caller derives threshold per candidate as k·σ̂/√N — the confirm's k-sigma
+// resolution — rather than passing a fixed min-improvement, so the gain it can resolve scales with
+// the confirm budget N.
 //
 // The delta variance is estimated online (Welford), making this the standard Gaussian SPRT with
 // a plug-in variance rather than a known-variance test — accurate enough at the few-dozen-sample
@@ -63,18 +72,20 @@ func (s *sprtAccumulator) variance() float64 {
 	return s.m2 / float64(s.n-1)
 }
 
-// decision applies the SPRT for H0: mean=0 vs H1: mean=threshold at symmetric error rate
-// cfg.alpha, returning sprtContinue until the log-likelihood ratio crosses a boundary or
-// sprtAccept / sprtReject once it does. No decision is made before cfg.warmup samples.
-func (s *sprtAccumulator) decision(threshold float64, cfg sprtConfig) sprtVerdict {
+// decision applies the SPRT for H0: mean = tau−threshold (reject) vs H1: mean = tau (accept) at
+// symmetric error rate cfg.alpha, returning sprtContinue until the log-likelihood ratio crosses a
+// boundary or sprtAccept / sprtReject once it does. threshold is the indifference-zone width (the
+// derived k·σ̂/√N resolution); tau the accept point. tau == threshold reduces to the classic
+// H0=0 / H1=threshold test. No decision is made before cfg.warmup samples.
+func (s *sprtAccumulator) decision(tau, threshold float64, cfg sprtConfig) sprtVerdict {
 	if s.n < cfg.warmup {
 		return sprtContinue
 	}
 	sigma2 := s.variance()
 	if sigma2 <= 0 {
 		// No observed noise: the mean is the exact delta. Decide on the indifference zone's
-		// midpoint — the zero-variance limit of the ratio below.
-		if s.mean > threshold/2 {
+		// midpoint, tau − threshold/2 — the zero-variance limit of the ratio below.
+		if s.mean > tau-threshold/2 {
 			return sprtAccept
 		}
 		return sprtReject
@@ -82,9 +93,9 @@ func (s *sprtAccumulator) decision(threshold float64, cfg sprtConfig) sprtVerdic
 	// Boundary on the log-likelihood ratio for the symmetric error rate; ±this is the Wald
 	// A / B pair when alpha == beta.
 	boundary := math.Log((1 - cfg.alpha) / cfg.alpha)
-	// LLR after n iid samples with mean d̄ for N(0,σ²) vs N(threshold,σ²):
-	//   (threshold/σ²) · n · (d̄ − threshold/2)
-	llr := (threshold / sigma2) * float64(s.n) * (s.mean - threshold/2)
+	// LLR after n iid samples with mean d̄ for N(tau−threshold,σ²) vs N(tau,σ²):
+	//   (threshold/σ²) · n · (d̄ − tau + threshold/2)
+	llr := (threshold / sigma2) * float64(s.n) * (s.mean - tau + threshold/2)
 	switch {
 	case llr >= boundary:
 		return sprtAccept

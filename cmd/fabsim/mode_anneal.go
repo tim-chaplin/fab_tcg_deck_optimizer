@@ -40,10 +40,6 @@ type annealConfig struct {
 	startTemp float64
 	tempDecay float64
 	minTemp   float64
-	// minImprovement is the strict (T==0) noise floor: avg must exceed bestAvg by more than
-	// this margin. Guards against infinite-loop acceptance of within-noise wins. The
-	// probabilistic SA gate ignores it so annealing can still cross ties / dips.
-	minImprovement float64
 	// quietLoad suppresses the baseline card-list dump in prepareBaseline — useful for
 	// wrapper scripts that re-invoke anneal repeatedly on the same deck.
 	quietLoad bool
@@ -65,7 +61,7 @@ func defaultDeckNameFor(h hero.Hero, f GameplayFormat, incoming int) string {
 func runAnnealCmd(args []string) {
 	fs := flag.NewFlagSet("anneal", flag.ExitOnError)
 	deckName := fs.String("deck", "", "deck name; resolved to mydecks/<name>.json (\".json\" suffix optional). Defaults to <hero>_<format>_<incoming>_incoming so different (hero, format, -incoming) regimes keep separate deck files. When the named deck exists, anneal resumes from it as a checkpoint.")
-	shuffles := fs.Int("shuffles", 1000, "shuffles used to score a deck: the budget for the hill climb's improvement-confirm and each SA step's per-mutation eval. The hill climb screens candidates adaptively (a sequential test, no fixed budget) and spends this only when confirming a screen pass. -finalize overrides this to 10000.")
+	shuffles := fs.Int("shuffles", 1000, "shuffles used to score a deck: the budget for the hill climb's improvement-confirm and each SA step's per-mutation eval. The hill climb screens candidates adaptively (a sequential test, no fixed budget) and spends this only when confirming a screen pass. Also sets how small a gain is worth accepting — the threshold is k·σ/√shuffles, the confirm's resolution — so this is the climb's one tuning knob. -finalize overrides it to 10000.")
 	incoming := fs.Int("incoming", 0, "opponent damage per turn (required — different values produce different optimal decks, so this is explicit rather than defaulted)")
 	arcaneIncoming := fs.Int("arcane-incoming", 0, "opponent arcane damage per turn (defaults to 0 — the non-arcane matchup; raise it to score cards that gate on incoming arcane)")
 	deckSize := fs.Int("deck-size", 40, "number of cards per deck")
@@ -73,9 +69,8 @@ func runAnnealCmd(args []string) {
 	seed := fs.Int64("seed", time.Now().UnixNano(), "RNG seed")
 	formatFlag := fs.String("format", string(SilverAge), "constructed format whose banlist restricts the card pool during search (only \"silver_age\" is supported today)")
 	debug := fs.Bool("debug", false, "print additional debug info to stdout / stderr")
-	finalize := fs.Bool("finalize", false, "high-precision pass — sets -shuffles to 10000 and tightens -min-improvement to 0.01. Use on a deck that's already converged to squeeze out the remaining sub-percent improvements.")
+	finalize := fs.Bool("finalize", false, "high-precision pass — sets -shuffles to 10000. The accept threshold is k·σ/√shuffles, so a bigger budget resolves (and accepts) finer sub-percent gains. Use on a deck that's already converged.")
 	startTemp := fs.Float64("start-temp", 0, "simulated-annealing starting temperature. 0 (default) runs a pure hill climb. Higher values probabilistically accept worse mutations early; acceptance probability is exp((avg - baseline) / T). Good starting range is ~0.05–0.5 given typical Value units.")
-	minImprovement := fs.Float64("min-improvement", 0.1, "noise floor on strict (T==0) acceptance: a mutation's avg must exceed the current avg by more than this margin to be accepted. Guards against infinite-loop acceptance of within-noise wins; raise it for chunkier improvements only, lower it (e.g. 0.01) for fine-grained finalize passes. The probabilistic SA gate at T>0 ignores this margin so annealing can still cross ties.")
 	tempDecay := fs.Float64("temp-decay", 0.95, "multiplicative cooling per acceptance — T ← T × decay, floored at -min-temp. Unused when -start-temp is 0.")
 	minTemp := fs.Float64("min-temp", 0, "minimum temperature. Once T reaches this floor the climb becomes greedy until a local maximum is found. 0 disables annealing in the converged tail.")
 	quietLoad := fs.Bool("quiet-load", false, "skip the baseline card-list dump at startup. Intended for wrapper scripts (e.g. anneal-reanneal.ps1) that re-invoke anneal many times on the same deck — the listing never changes pass-to-pass and floods the log.")
@@ -96,12 +91,11 @@ func runAnnealCmd(args []string) {
 
 	gameengine.OptDebug = *debug
 
-	// -finalize pins a high shuffle budget and tightens the noise floor so sub-0.1 wins land
-	// that the default 0.1 -min-improvement gate would reject. Applied post-parse so it
-	// overrides explicit flags.
+	// -finalize pins a high shuffle budget; since the accept threshold is k·σ/√shuffles, the
+	// larger budget alone resolves the sub-percent wins a shallow pass can't. Applied post-parse
+	// so it overrides an explicit -shuffles.
 	if *finalize {
 		*shuffles = 10000
-		*minImprovement = 0.01
 	}
 
 	name := *deckName
@@ -117,20 +111,19 @@ func runAnnealCmd(args []string) {
 	// Evaluator gets constructed.
 	gameengine.MaxDeckSize = *deckSize
 	cfg := annealConfig{
-		shuffles:       *shuffles,
-		matchup:        sim.Matchup{IncomingPhysicalDamage: *incoming, IncomingArcaneDamage: *arcaneIncoming},
-		deckSize:       *deckSize,
-		maxCopies:      *maxCopies,
-		seed:           *seed,
-		outPath:        outPath,
-		debug:          *debug,
-		startTemp:      *startTemp,
-		tempDecay:      *tempDecay,
-		minTemp:        *minTemp,
-		minImprovement: *minImprovement,
-		quietLoad:      *quietLoad,
-		maxDuration:    *maxDuration,
-		pairMutations:  *pairMutations,
+		shuffles:      *shuffles,
+		matchup:       sim.Matchup{IncomingPhysicalDamage: *incoming, IncomingArcaneDamage: *arcaneIncoming},
+		deckSize:      *deckSize,
+		maxCopies:     *maxCopies,
+		seed:          *seed,
+		outPath:       outPath,
+		debug:         *debug,
+		startTemp:     *startTemp,
+		tempDecay:     *tempDecay,
+		minTemp:       *minTemp,
+		quietLoad:     *quietLoad,
+		maxDuration:   *maxDuration,
+		pairMutations: *pairMutations,
 	}
 
 	// Wrap in a function that owns the profile lifecycle so deferred StopCPUProfile / heap
@@ -237,14 +230,13 @@ func runAnneal(cfg annealConfig) annealResult {
 		stopTicker := startRoundTicker(round, len(mutations), roundStart, &progress,
 			cfg.shuffles, temperature, currentAvg, bestEverAvg)
 		// Adaptive round for every temperature: the SPRT screens each candidate against its accept
-		// threshold (min-improvement at T==0, the random Metropolis threshold at T>0) on coupled
-		// per-shuffle deltas, and a coupled confirm at cfg.shuffles verifies a screen pass. currentAvg
-		// is carried from the last accepted deck for the display; the confirm derives its own coupled
-		// incumbent baseline.
+		// threshold (the derived k·σ/√shuffles resolution at T==0, the random Metropolis threshold
+		// at T>0) on coupled per-shuffle deltas, and a coupled confirm at cfg.shuffles verifies a
+		// screen pass. currentAvg is carried from the last accepted deck for the display; the
+		// confirm derives its own coupled incumbent baseline.
 		d, dStats, avg, idx, found := sim.RunMutationRoundAdaptive(ctx, sim.AdaptiveRoundConfig{
 			Mutations:       mutations,
 			Incumbent:       current,
-			Threshold:       cfg.minImprovement,
 			Temperature:     temperature,
 			Matchup:         cfg.matchup,
 			StatsShuffles:   cfg.shuffles,

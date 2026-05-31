@@ -14,7 +14,7 @@ func runSPRT(t *testing.T, mean, sd, threshold float64, seed int64) (sprtVerdict
 	var acc sprtAccumulator
 	for n := 0; n < 1_000_000; n++ {
 		acc.add(mean + sd*rng.NormFloat64())
-		if v := acc.decision(threshold, defaultSPRTConfig); v != sprtContinue {
+		if v := acc.decision(threshold, threshold, defaultSPRTConfig); v != sprtContinue {
 			return v, acc.n
 		}
 	}
@@ -90,7 +90,7 @@ func TestSPRT_NoDecisionBeforeWarmup(t *testing.T) {
 	var acc sprtAccumulator
 	for i := 0; i < defaultSPRTConfig.warmup-1; i++ {
 		acc.add(100.0) // wildly above any threshold
-		if v := acc.decision(0.1, defaultSPRTConfig); v != sprtContinue {
+		if v := acc.decision(0.1, 0.1, defaultSPRTConfig); v != sprtContinue {
 			t.Fatalf("decided %v at sample %d, before warmup=%d", v, acc.n, defaultSPRTConfig.warmup)
 		}
 	}
@@ -117,15 +117,15 @@ func TestSPRT_ZeroVarianceExactDelta(t *testing.T) {
 		if acc.variance() != 0 {
 			t.Fatalf("delta=%.3f: expected zero variance, got %v", c.delta, acc.variance())
 		}
-		if got := acc.decision(threshold, defaultSPRTConfig); got != c.want {
+		if got := acc.decision(threshold, threshold, defaultSPRTConfig); got != c.want {
 			t.Errorf("delta=%.3f: verdict %v, want %v", c.delta, got, c.want)
 		}
 	}
 }
 
-// TestSPRT_TauShiftTestsAgainstTau pins the worker's tau-shift: feeding (delta - tau + threshold)
-// to the H0=0/H1=threshold SPRT decides "is mean(delta) > tau?", including a negative tau (an SA
-// step accepting a downhill move).
+// TestSPRT_TauShiftTestsAgainstTau pins the tau/threshold decision: testing raw deltas against
+// H0=tau−threshold / H1=tau decides "is mean(delta) > tau?", including a negative tau (an SA step
+// accepting a downhill move).
 func TestSPRT_TauShiftTestsAgainstTau(t *testing.T) {
 	const threshold = 0.1
 	cases := []struct {
@@ -142,8 +142,8 @@ func TestSPRT_TauShiftTestsAgainstTau(t *testing.T) {
 		var acc sprtAccumulator
 		got := sprtContinue
 		for n := 0; n < 1_000_000 && got == sprtContinue; n++ {
-			acc.add((c.dv + 0.5*rng.NormFloat64()) - c.tau + threshold)
-			got = acc.decision(threshold, defaultSPRTConfig)
+			acc.add(c.dv + 0.5*rng.NormFloat64())
+			got = acc.decision(c.tau, threshold, defaultSPRTConfig)
 		}
 		if got != c.want {
 			t.Errorf("dv=%.2f tau=%.2f: verdict %v after %d samples, want %v", c.dv, c.tau, got, acc.n, c.want)
