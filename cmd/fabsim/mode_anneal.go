@@ -71,9 +71,9 @@ func runAnnealCmd(args []string) {
 	formatFlag := fs.String("format", string(SilverAge), "constructed format whose banlist restricts the card pool during search (only \"silver_age\" is supported today)")
 	debug := fs.Bool("debug", false, "print additional debug info to stdout / stderr")
 	finalize := fs.Bool("finalize", false, "high-precision pass — sets -shuffles to 10000. The accept threshold is k·σ/√shuffles, so a bigger budget resolves (and accepts) finer sub-percent gains. Use on a deck that's already converged.")
-	startTemp := fs.Float64("start-temp", 0, "simulated-annealing starting temperature. 0 (default) runs a pure hill climb. Higher values probabilistically accept worse mutations early; acceptance probability is exp((avg - baseline) / T). Good starting range is ~0.05–0.5 given typical Value units.")
+	startTemp := fs.Float64("start-temp", 0, "simulated-annealing starting temperature. 0 (default) runs a pure hill climb that stops at the first local maximum. Higher values probabilistically accept worse mutations early; acceptance probability is exp((avg - baseline) / T). An SA run (start-temp > 0) never stops on its own: on reaching a local maximum it reheats to start-temp and keeps exploring from the current deck (the best-so-far is preserved and only the peak is saved) — stop it with Enter or -max-duration. Good starting range is ~0.05–0.5 given typical Value units.")
 	tempDecay := fs.Float64("temp-decay", 0.95, "multiplicative cooling per acceptance — T ← T × decay, floored at -min-temp. Unused when -start-temp is 0.")
-	minTemp := fs.Float64("min-temp", 0, "minimum temperature. Once T reaches this floor the climb becomes greedy until a local maximum is found. 0 disables annealing in the converged tail.")
+	minTemp := fs.Float64("min-temp", 0, "minimum temperature. Once T reaches this floor the climb becomes greedy until a local maximum, at which point an SA run reheats to -start-temp (see that flag) rather than stopping. 0 disables annealing in the converged tail.")
 	quietLoad := fs.Bool("quiet-load", false, "skip the baseline card-list dump at startup. Intended for wrapper scripts (e.g. anneal-reanneal.ps1) that re-invoke anneal many times on the same deck — the listing never changes pass-to-pass and floods the log.")
 	cpuprofile := fs.String("cpuprofile", "", "if set, write a CPU profile to this path covering the entire anneal run. Pair with -max-duration for a time-boxed profile-driven optimization pass.")
 	memprofile := fs.String("memprofile", "", "if set, write a heap profile to this path at exit (after a runtime.GC()).")
@@ -227,6 +227,7 @@ func runAnneal(cfg annealConfig) annealResult {
 
 	round := 0
 	acceptances := 0
+	reheats := 0
 	start := time.Now()
 	for {
 		round++
@@ -263,14 +264,25 @@ func runAnneal(cfg annealConfig) annealResult {
 
 		if ctx.Err() != nil {
 			return finishAnnealRun(cfg, bestEver, bestEverStats, bestEverAvg, startingAvg,
-				fmt.Sprintf("Aborted mid-round after %d rounds / %d acceptances in %s",
-					round, acceptances, time.Since(start).Truncate(time.Second)),
+				fmt.Sprintf("Aborted mid-round after %d rounds / %d acceptances / %d reheats in %s",
+					round, acceptances, reheats, time.Since(start).Truncate(time.Second)),
 				true)
 		}
 		if !found {
-			// Full round with zero acceptances means every mutation (including
-			// probabilistically-accepted worse ones) failed. At any T > 0 with thousands of
-			// candidates this is vanishingly unlikely unless converged, so treat as local max.
+			// Full round with zero acceptances is a local maximum: every mutation (including
+			// probabilistically-accepted worse ones) failed, which at the cooled floor means the
+			// climb is stuck. An SA run reheats to startTemp and keeps exploring from the current
+			// deck — repeated cool/reheat cycles (basin hopping) rather than stopping. current is
+			// left as-is on purpose, even if it has wandered below the loaded deck; bestEver and the
+			// saved JSON stay pinned to the all-time peak until a new one is found. A pure hill climb
+			// (startTemp == 0) has no temperature to reheat to, so it still terminates here.
+			if cfg.startTemp > 0 {
+				reheats++
+				fmt.Fprintf(os.Stderr, "[round %d] local maximum%s — reheating to T=%.3f (best ever %.3f, reheat #%d)\n",
+					round, tempLabel, cfg.startTemp, bestEverAvg, reheats)
+				temperature = cfg.startTemp
+				continue
+			}
 			return finishAnnealRun(cfg, bestEver, bestEverStats, bestEverAvg, startingAvg,
 				fmt.Sprintf("Local maximum reached after %d rounds / %d acceptances in %s",
 					round, acceptances, time.Since(start).Truncate(time.Second)),
