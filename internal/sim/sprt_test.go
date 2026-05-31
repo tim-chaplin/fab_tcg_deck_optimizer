@@ -45,12 +45,12 @@ func TestSPRT_RejectsClearlyWorse(t *testing.T) {
 }
 
 // TestSPRT_ErrorRatesControlled checks the empirical false-accept rate at H0 and false-reject rate
-// at H1 both stay within a loose bound above the 0.05 nominal (tolerating the plug-in variance).
+// at H1 both stay within a loose bound above the 0.20 nominal (tolerating the plug-in variance).
 func TestSPRT_ErrorRatesControlled(t *testing.T) {
 	const (
 		threshold = 0.1
 		trials    = 400
-		maxRate   = 0.15
+		maxRate   = 0.30
 	)
 	falseAccept, falseReject := 0, 0
 	for seed := int64(1); seed <= trials; seed++ {

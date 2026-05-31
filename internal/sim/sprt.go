@@ -16,8 +16,15 @@ type sprtConfig struct {
 	warmup int
 }
 
-// defaultSPRTConfig is the anneal default: a 5% symmetric error rate and an 8-shuffle warmup.
-var defaultSPRTConfig = sprtConfig{alpha: 0.05, warmup: 8}
+// defaultSPRTConfig is the anneal default: a 20% symmetric error rate and an 8-shuffle warmup.
+// alpha is tuned for minimum compute, not minimum error. On a converged round the per-candidate
+// cost is (screen shuffles + P(false-accept)·N confirm), and a higher alpha buys cheaper screens
+// at the price of more — confirm-filtered — false-accepts. That total bottoms out across a broad
+// alpha ≈ 0.2–0.33 basin (≈1.7× cheaper than alpha=0.05, σ- and N-independent); 0.20 sits at the
+// low end, holding the screen's false-reject of a marginal winner to 20% rather than 25–33%. The
+// confirm's k-sigma gate, not alpha, decides which accepts actually win — so a loose screen costs
+// compute, never correctness; at worst it misses a marginal gain that re-screens next round.
+var defaultSPRTConfig = sprtConfig{alpha: 0.20, warmup: 8}
 
 // defaultConfirmSigmas is the accept threshold's width in confirm standard errors: a hill-climb
 // mutation must beat the incumbent by more than k·σ̂/√N — k sigma of the N-shuffle confirm — to be
