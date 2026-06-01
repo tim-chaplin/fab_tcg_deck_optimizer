@@ -36,15 +36,13 @@ func perShuffleSeed(roundSeed int64, n int) int64 {
 	return int64(x ^ (x >> 31))
 }
 
-// singleShuffleEval evaluates one shuffle of a fixed deck at a time, reusing its scratch and
-// id-index across shuffles so a screen that runs many shuffles on one deck doesn't re-derive them
-// each time.
+// singleShuffleEval evaluates one shuffle of a fixed deck at a time, reusing its scratch across
+// shuffles so a screen that runs many shuffles on one deck doesn't re-derive it each time.
 type singleShuffleEval struct {
 	d             *deck.Deck
 	ev            *Evaluator
 	mp            Matchup
 	scratch       *shuffleScratch
-	idIndex       map[ids.CardID]int
 	handsPerCycle int
 	handSize      int
 	ok            bool
@@ -56,13 +54,11 @@ func newSingleShuffleEval(d *deck.Deck, ev *Evaluator, mp Matchup) *singleShuffl
 	if handSize <= 0 || deckSize < handSize {
 		return &singleShuffleEval{ok: false}
 	}
-	uniqueIDs, idIndex := d.UniqueIDs()
 	return &singleShuffleEval{
 		d:             d,
 		ev:            ev,
 		mp:            mp,
-		scratch:       newShuffleScratch(len(d.Weapons), deckSize, handSize, len(uniqueIDs)),
-		idIndex:       idIndex,
+		scratch:       newShuffleScratch(handSize),
 		handsPerCycle: deckSize / handSize,
 		handSize:      handSize,
 		ok:            true,
@@ -76,7 +72,7 @@ func (e *singleShuffleEval) value(rng *rand.Rand, seed int64) float64 {
 	}
 	rng.Seed(seed)
 	var s deck.Stats
-	runOneShuffle(e.d, e.scratch, &s, e.idIndex, e.ev, rng, e.mp, e.handsPerCycle, e.handSize)
+	runOneShuffle(e.d, e.scratch, &s, e.ev, rng, e.mp, e.handsPerCycle, e.handSize)
 	return s.Mean()
 }
 

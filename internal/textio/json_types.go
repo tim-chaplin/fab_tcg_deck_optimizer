@@ -34,30 +34,17 @@ type StatsJSON struct {
 	Matchup *MatchupJSON `json:"matchup,omitempty"`
 	// Avg is TotalValue/Hands, emitted for human readability. Unmarshal ignores it and
 	// rederives via DeckStats.Mean(); the canonical state is (Runs, Hands, TotalValue).
-	Avg             float64                 `json:"avg"`
-	Runs            int                     `json:"runs"`
-	Hands           int                     `json:"hands"`
-	TotalValue      float64                 `json:"total_value"`
-	FirstCycle      deck.CycleStats         `json:"first_cycle"`
-	SecondCycle     deck.CycleStats         `json:"second_cycle"`
-	Best            BestTurnJSON            `json:"best"`
-	PerCardMarginal []CardMarginalStatsJSON `json:"per_card_marginal,omitempty"`
+	Avg         float64         `json:"avg"`
+	Runs        int             `json:"runs"`
+	Hands       int             `json:"hands"`
+	TotalValue  float64         `json:"total_value"`
+	FirstCycle  deck.CycleStats `json:"first_cycle"`
+	SecondCycle deck.CycleStats `json:"second_cycle"`
+	Best        BestTurnJSON    `json:"best"`
 	// Histogram counts hands seen at each Value. encoding/json writes int-keyed maps with
 	// the int formatted as a string ("7": 42), which round-trips fine since the field type
 	// is map[int]int. Omitted when empty.
 	Histogram map[int]int `json:"histogram,omitempty"`
-}
-
-// CardMarginalStatsJSON is the JSON form of deck.CardMarginalStats keyed by card name.
-// Marginal (PresentMean - AbsentMean) is included alongside the raw with/without sums for
-// at-a-glance scanning even though it's derivable.
-type CardMarginalStatsJSON struct {
-	Card         string  `json:"card"`
-	PresentTotal float64 `json:"present_total"`
-	PresentHands int     `json:"present_hands"`
-	AbsentTotal  float64 `json:"absent_total"`
-	AbsentHands  int     `json:"absent_hands"`
-	Marginal     float64 `json:"marginal"`
 }
 
 // BestTurnJSON is the on-disk shape of deck.BestTurn — just the headline Value.

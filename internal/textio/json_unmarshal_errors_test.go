@@ -33,11 +33,6 @@ func TestUnmarshal_RejectsUnknownNamesAndBadJSON(t *testing.T) {
 			input:     `{"hero":"Viserai","weapons":[],"cards":["Made-Up Card"]}`,
 			wantError: `unknown card "Made-Up Card"`,
 		},
-		{
-			name:      "UnknownPerCardMarginal",
-			input:     `{"hero":"Viserai","weapons":[],"cards":[],"stats":{"per_card_marginal":[{"card":"Made-Up Card"}]}}`,
-			wantError: `unknown card "Made-Up Card" in per_card_marginal stats`,
-		},
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {

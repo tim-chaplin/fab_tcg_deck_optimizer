@@ -1,16 +1,14 @@
 package textio
 
 // JSON → runtime Deck decoding. UnmarshalDeck is the public entry point; fromJSON /
-// perCardMarginalFromJSON / bestTurnFromJSON resolve every name through the card / weapon /
-// hero registries. Unknown names fail loudly so a corrupted file doesn't produce silent
-// nil-entry crashes downstream.
+// bestTurnFromJSON resolve every name through the card / weapon / hero registries. Unknown
+// names fail loudly so a corrupted file doesn't produce silent nil-entry crashes downstream.
 
 import (
 	"encoding/json"
 	"fmt"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/ids"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry"
 )
 
@@ -49,10 +47,6 @@ func fromJSON(dj *DeckJSON) (*deck.Deck, deck.Stats, error) {
 	if err != nil {
 		return nil, deck.Stats{}, err
 	}
-	perCardMarginal, err := perCardMarginalFromJSON(dj.Stats.PerCardMarginal)
-	if err != nil {
-		return nil, deck.Stats{}, err
-	}
 	d := deck.New(h, weapons, cs)
 	// Sideboard and Equipment are name-only lists — the registry isn't consulted, so the
 	// user can list equipment pieces or any other items the sim doesn't model.
@@ -63,40 +57,19 @@ func fromJSON(dj *DeckJSON) (*deck.Deck, deck.Stats, error) {
 		d.Equipment = append([]string(nil), dj.Equipment...)
 	}
 	stats := deck.Stats{
-		Runs:            dj.Stats.Runs,
-		Hands:           dj.Stats.Hands,
-		TotalValue:      dj.Stats.TotalValue,
-		FirstCycle:      dj.Stats.FirstCycle,
-		SecondCycle:     dj.Stats.SecondCycle,
-		Best:            best,
-		PerCardMarginal: perCardMarginal,
-		Histogram:       dj.Stats.Histogram,
+		Runs:        dj.Stats.Runs,
+		Hands:       dj.Stats.Hands,
+		TotalValue:  dj.Stats.TotalValue,
+		FirstCycle:  dj.Stats.FirstCycle,
+		SecondCycle: dj.Stats.SecondCycle,
+		Best:        best,
+		Histogram:   dj.Stats.Histogram,
 	}
 	if m := dj.Stats.Matchup; m != nil {
 		stats.IncomingPhysicalDamage = m.IncomingPhysicalDamage
 		stats.IncomingArcaneDamage = m.IncomingArcaneDamage
 	}
 	return d, stats, nil
-}
-
-func perCardMarginalFromJSON(entries []CardMarginalStatsJSON) (map[ids.CardID]deck.CardMarginalStats, error) {
-	if len(entries) == 0 {
-		return nil, nil
-	}
-	out := make(map[ids.CardID]deck.CardMarginalStats, len(entries))
-	for _, e := range entries {
-		id, ok := registry.CardByName(e.Card)
-		if !ok {
-			return nil, fmt.Errorf("deckio: unknown card %q in per_card_marginal stats", e.Card)
-		}
-		out[id] = deck.CardMarginalStats{
-			PresentTotal: e.PresentTotal,
-			PresentHands: e.PresentHands,
-			AbsentTotal:  e.AbsentTotal,
-			AbsentHands:  e.AbsentHands,
-		}
-	}
-	return out, nil
 }
 
 // bestTurnFromJSON restores the headline Value, returning the zero BestTurn when none was

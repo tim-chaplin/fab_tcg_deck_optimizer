@@ -15,7 +15,6 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/gameengine"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/hero"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/ids"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/triggertype"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapon"
 )
@@ -54,15 +53,13 @@ func (ev *Evaluator) evaluateImpl(d *deck.Deck, maxRuns int, mp Matchup, rng *ra
 // deterministic-RNG path tests rely on.
 func (ev *Evaluator) evaluateSequentialImpl(d *deck.Deck, maxRuns int, mp Matchup, rng *rand.Rand, handSize, deckSize int) deck.Stats {
 	handsPerCycle := deckSize / handSize
-	uniqueIDs, idIndex := d.UniqueIDs()
-	scratch := newShuffleScratch(len(d.Weapons), deckSize, handSize, len(uniqueIDs))
+	scratch := newShuffleScratch(handSize)
 
 	var stats deck.Stats
 	for r := 0; r < maxRuns; r++ {
-		runOneShuffle(d, scratch, &stats, idIndex, ev, rng, mp, handsPerCycle, handSize)
+		runOneShuffle(d, scratch, &stats, ev, rng, mp, handsPerCycle, handSize)
 	}
 	stats.Runs += maxRuns
-	mergeMarginalBuf(&stats, uniqueIDs, scratch.marginalBuf)
 	return stats
 }
 
@@ -74,17 +71,11 @@ func (ev *Evaluator) evaluateSequentialImpl(d *deck.Deck, maxRuns int, mp Matchu
 func (ev *Evaluator) evaluateParallelImpl(d *deck.Deck, maxRuns int, mp Matchup, rng *rand.Rand, handSize, deckSize int) deck.Stats {
 	numWorkers := ev.numWorkers
 	handsPerCycle := deckSize / handSize
-	uniqueIDs, idIndex := d.UniqueIDs()
-	aggregateMarginal := make([]deck.CardMarginalStats, len(uniqueIDs))
 
 	chunkPerWorker := parallelChunkPerWorker
 	maxChunk := numWorkers * chunkPerWorker
 
-	type partial struct {
-		stats    deck.Stats
-		marginal []deck.CardMarginalStats
-	}
-	results := make(chan partial, numWorkers)
+	results := make(chan deck.Stats, numWorkers)
 
 	var stats deck.Stats
 	actualRuns := 0
@@ -113,29 +104,22 @@ func (ev *Evaluator) evaluateParallelImpl(d *deck.Deck, maxRuns int, mp Matchup,
 				defer wg.Done()
 				workerEv := &Evaluator{cache: ev.cache, statePool: gameengine.NewPrewarmedPool()}
 				workerRNG := rand.New(rand.NewSource(seed))
-				scratch := newShuffleScratch(len(d.Weapons), deckSize, handSize, len(uniqueIDs))
+				scratch := newShuffleScratch(handSize)
 				var local deck.Stats
 				for r := 0; r < runs; r++ {
-					runOneShuffle(d, scratch, &local, idIndex, workerEv, workerRNG, mp, handsPerCycle, handSize)
+					runOneShuffle(d, scratch, &local, workerEv, workerRNG, mp, handsPerCycle, handSize)
 				}
-				results <- partial{stats: local, marginal: scratch.marginalBuf}
+				results <- local
 			}(mySeed, myRuns)
 		}
 		wg.Wait()
 		for i := 0; i < spawned; i++ {
 			r := <-results
-			mergeStatsInto(&stats, &r.stats)
-			for j := range aggregateMarginal {
-				aggregateMarginal[j].PresentTotal += r.marginal[j].PresentTotal
-				aggregateMarginal[j].PresentHands += r.marginal[j].PresentHands
-				aggregateMarginal[j].AbsentTotal += r.marginal[j].AbsentTotal
-				aggregateMarginal[j].AbsentHands += r.marginal[j].AbsentHands
-			}
+			mergeStatsInto(&stats, &r)
 		}
 		actualRuns += sz
 	}
 	stats.Runs += actualRuns
-	mergeMarginalBuf(&stats, uniqueIDs, aggregateMarginal)
 	return stats
 }
 
@@ -143,19 +127,15 @@ func (ev *Evaluator) evaluateParallelImpl(d *deck.Deck, maxRuns int, mp Matchup,
 // Cross-turn carryover lives on the master *gameengine.GameState; only per-turn buffers
 // sit here.
 type shuffleScratch struct {
-	handBuf     []card.Card
-	presentBuf  []bool
-	marginalBuf []deck.CardMarginalStats
+	handBuf []card.Card
 }
 
-// newShuffleScratch sizes the per-shuffle reusable buffers for a deck of (deckSize, handSize)
-// shape. Called once per worker; the returned scratch is reused across every shuffle that
+// newShuffleScratch sizes the per-shuffle reusable hand buffer for a deck of the given hand
+// size. Called once per worker; the returned scratch is reused across every shuffle that
 // worker runs.
-func newShuffleScratch(_, _, handSize, numUniqueIDs int) *shuffleScratch {
+func newShuffleScratch(handSize int) *shuffleScratch {
 	return &shuffleScratch{
-		handBuf:     make([]card.Card, handSize, handSize+startOfTurnRevealRoom),
-		presentBuf:  make([]bool, numUniqueIDs),
-		marginalBuf: make([]deck.CardMarginalStats, numUniqueIDs),
+		handBuf: make([]card.Card, handSize, handSize+startOfTurnRevealRoom),
 	}
 }
 
@@ -163,10 +143,17 @@ func newShuffleScratch(_, _, handSize, numUniqueIDs int) *shuffleScratch {
 // stats), accumulating into the caller-owned *deck.Stats. masterDeck is copied before
 // shuffling so each trial gets an independent deck and the master's Cards order stays
 // stable across goroutines.
-func runOneShuffle(masterDeck *deck.Deck, scratch *shuffleScratch, stats *deck.Stats, idIndex map[ids.CardID]int, ev *Evaluator, rng *rand.Rand, mp Matchup, handsPerCycle, handSize int) {
+func runOneShuffle(masterDeck *deck.Deck, scratch *shuffleScratch, stats *deck.Stats, ev *Evaluator, rng *rand.Rand, mp Matchup, handsPerCycle, handSize int) {
 	d := masterDeck.Copy()
 	d.Shuffle(rng)
+	playOrderedDeck(d, scratch, stats, ev, mp, handsPerCycle, handSize)
+}
 
+// playOrderedDeck walks the turns of an already-ordered deck d (Copy + Shuffle is the caller's
+// job), folding each turn's outcome into stats. d is drawn down and recycled in place, so callers
+// pass a throwaway copy. Split out of runOneShuffle so the coupled per-card ablation (ablation.go)
+// can play the full deck and each card-removed copy on one shared shuffle order.
+func playOrderedDeck(d *deck.Deck, scratch *shuffleScratch, stats *deck.Stats, ev *Evaluator, mp Matchup, handsPerCycle, handSize int) {
 	// Carry state borrows one pool slot; playOneTurn / Best mutate it in place across
 	// turns. Put back at shuffle end before FreeAll.
 	state := ev.statePool.Get()
@@ -190,7 +177,6 @@ func runOneShuffle(masterDeck *deck.Deck, scratch *shuffleScratch, stats *deck.S
 		if recordTurnStats(stats, summary, handIdx, handsPerCycle) {
 			recordBestTurnFromSnap(stats, summary, ev, snap)
 		}
-		tallyMarginalPresence(scratch.marginalBuf, idIndex, scratch.presentBuf, summary.BestLine, float64(summary.Value))
 
 		state = summary.State
 		d = summary.State.Deck()
@@ -338,8 +324,7 @@ func advanceToNextTurn(state *gameengine.GameState) {
 	state.ResetEphemeralState()
 }
 
-// mergeStatsInto folds src's per-shuffle accumulators into dst. PerCardMarginal merging
-// happens separately via mergeMarginalBuf at the end of the run.
+// mergeStatsInto folds src's per-shuffle accumulators into dst.
 func mergeStatsInto(dst, src *deck.Stats) {
 	dst.Hands += src.Hands
 	dst.TotalValue += src.TotalValue
@@ -468,49 +453,4 @@ func recordBestTurnFromSnap(stats *deck.Stats, summary TurnSummary, ev *Evaluato
 	}
 	snap.value = summary.Value
 	stats.PrintBest = func(w io.Writer) { PrintBestTurn(ev, snap, w) }
-}
-
-// tallyMarginalPresence credits this turn's value to each entry in marginalBuf, bucketed by
-// whether the card was present in the dealt hand or arsenal-in slot when Best ran. bestLine
-// covers both — each hand card has one entry, plus one FromArsenal entry for the arsenal
-// card. presentBuf is a scratch slice indexed parallel to marginalBuf; both are caller-
-// owned across turns to keep this path allocation-free.
-func tallyMarginalPresence(marginalBuf []deck.CardMarginalStats, idIndex map[ids.CardID]int, presentBuf []bool, bestLine []card.CardAssignment, value float64) {
-	if len(marginalBuf) == 0 {
-		return
-	}
-	clear(presentBuf)
-	for _, a := range bestLine {
-		if i, ok := idIndex[a.Card.ID()]; ok {
-			presentBuf[i] = true
-		}
-	}
-	for i := range marginalBuf {
-		if presentBuf[i] {
-			marginalBuf[i].PresentTotal += value
-			marginalBuf[i].PresentHands++
-		} else {
-			marginalBuf[i].AbsentTotal += value
-			marginalBuf[i].AbsentHands++
-		}
-	}
-}
-
-// mergeMarginalBuf folds the per-Evaluate slice accumulator into PerCardMarginal. The map
-// is lazily initialised so unscored decks don't pay for an empty map.
-func mergeMarginalBuf(stats *deck.Stats, uniqueIDs []ids.CardID, marginalBuf []deck.CardMarginalStats) {
-	if len(uniqueIDs) == 0 {
-		return
-	}
-	if stats.PerCardMarginal == nil {
-		stats.PerCardMarginal = make(map[ids.CardID]deck.CardMarginalStats, len(uniqueIDs))
-	}
-	for i, id := range uniqueIDs {
-		m := stats.PerCardMarginal[id]
-		m.PresentTotal += marginalBuf[i].PresentTotal
-		m.PresentHands += marginalBuf[i].PresentHands
-		m.AbsentTotal += marginalBuf[i].AbsentTotal
-		m.AbsentHands += marginalBuf[i].AbsentHands
-		stats.PerCardMarginal[id] = m
-	}
 }

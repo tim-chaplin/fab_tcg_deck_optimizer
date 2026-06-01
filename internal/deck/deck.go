@@ -34,9 +34,8 @@ type Deck struct {
 	mustNotShuffle bool
 }
 
-// UniqueIDs returns the distinct card IDs in first-appearance order plus a position-lookup
-// map keyed by ID. The simulator pre-builds this so per-shuffle hand-presence accounting
-// can index into slice buffers without growing maps in the inner loop.
+// UniqueIDs returns the distinct card IDs in first-appearance order, plus a lookup map giving
+// each ID's index in that slice.
 func (d *Deck) UniqueIDs() ([]ids.CardID, map[ids.CardID]int) {
 	if d == nil {
 		return nil, nil
@@ -52,6 +51,31 @@ func (d *Deck) UniqueIDs() ([]ids.CardID, map[ids.CardID]int) {
 		out = append(out, id)
 	}
 	return out, idx
+}
+
+// Without returns a copy of the deck with every copy of id removed (a smaller deck; Weapons,
+// Sideboard, and Equipment carried over verbatim, surviving cards' order preserved).
+func (d *Deck) Without(id ids.CardID) *Deck {
+	out := d.Copy()
+	kept := out.cards[:0]
+	for _, c := range out.cards {
+		if c.ID() != id {
+			kept = append(kept, c)
+		}
+	}
+	out.cards = kept
+	return out
+}
+
+// Count returns how many copies of id the deck holds.
+func (d *Deck) Count(id ids.CardID) int {
+	n := 0
+	for _, c := range d.cards {
+		if c.ID() == id {
+			n++
+		}
+	}
+	return n
 }
 
 // New constructs a Deck. Panics if the weapon loadout violates the "0–2 weapons; if 2, both

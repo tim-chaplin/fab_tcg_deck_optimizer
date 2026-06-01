@@ -44,8 +44,8 @@ func runCompareCmd(args []string) {
 func runCompare(name1, name2 string, shuffles int, mp sim.Matchup, maxCopies int, seed int64, fmtValue GameplayFormat) {
 	// compare scores both decks at the same fixed -shuffles count so the per-stat comparison
 	// rests on matched conditions.
-	d1, s1 := evaluateAndPersist(resolveDeckPath(name1), shuffles, mp, seed, false)
-	d2, s2 := evaluateAndPersist(resolveDeckPath(name2), shuffles, mp, seed, false)
+	d1, s1, _ := evaluateAndPersist(resolveDeckPath(name1), shuffles, mp, seed, false)
+	d2, s2, _ := evaluateAndPersist(resolveDeckPath(name2), shuffles, mp, seed, false)
 
 	fmt.Printf("compare: -shuffles=%s -incoming=%d -arcane-incoming=%d\n", commaInt(shuffles), mp.IncomingPhysicalDamage, mp.IncomingArcaneDamage)
 	fmt.Println()

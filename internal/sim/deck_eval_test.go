@@ -9,59 +9,9 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card/cards"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/hero/heroes"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/ids"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/testutils"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapon/weapons"
 )
-
-// Tests the marginal-stats invariant: PresentHands + AbsentHands == Stats.Hands per card.
-func TestEvaluate_PerCardMarginalCoversEveryHand(t *testing.T) {
-	read := registry.GetCard(ids.ReadTheRunesRed)
-	snatch := registry.GetCard(ids.SnatchRed)
-	// 4 of each so Snatch isn't pinned to a single hand and the absent bucket gets exercised.
-	deckCards := []deck.Card{read, read, read, read, snatch, snatch, snatch, snatch}
-	d := deck.New(heroes.Viserai, nil, deckCards)
-	stats := NewEvaluator().Evaluate(d, 20, Matchup{}, rand.New(rand.NewSource(1)))
-
-	if stats.PerCardMarginal == nil {
-		t.Fatalf("PerCardMarginal should be initialised after Evaluate")
-	}
-	for _, id := range []ids.CardID{ids.ReadTheRunesRed, ids.SnatchRed} {
-		m, ok := stats.PerCardMarginal[id]
-		if !ok {
-			t.Errorf("PerCardMarginal missing entry for %s", registry.GetCard(id).Name())
-			continue
-		}
-		if got := m.PresentHands + m.AbsentHands; got != stats.Hands {
-			t.Errorf("%s: PresentHands+AbsentHands = %d, want Stats.Hands = %d (every hand must end up in exactly one bucket)",
-				registry.GetCard(id).Name(), got, stats.Hands)
-		}
-		if m.PresentHands == 0 {
-			t.Errorf("%s: PresentHands = 0 — this card should have been in at least one dealt hand across 20 shuffles",
-				registry.GetCard(id).Name())
-		}
-	}
-}
-
-// Tests the singleton-deck case: AbsentHands == 0, Marginal() == 0 (no comparison possible).
-func TestEvaluate_PerCardMarginalAlwaysPresent(t *testing.T) {
-	read := registry.GetCard(ids.ReadTheRunesRed)
-	d := deck.New(heroes.Viserai, nil, []deck.Card{read, read, read, read, read, read, read, read})
-	stats := NewEvaluator().Evaluate(d, 5, Matchup{}, rand.New(rand.NewSource(1)))
-
-	m := stats.PerCardMarginal[ids.ReadTheRunesRed]
-	if m.AbsentHands != 0 {
-		t.Errorf("AbsentHands = %d, want 0 (single-card deck means card is always present)", m.AbsentHands)
-	}
-	if m.PresentHands != stats.Hands {
-		t.Errorf("PresentHands = %d, want %d (every hand contains the only card in the deck)",
-			m.PresentHands, stats.Hands)
-	}
-	if m.Marginal() != 0 {
-		t.Errorf("Marginal() = %v, want 0 (no absent comparison possible)", m.Marginal())
-	}
-}
 
 // Tests that a Held DR carries into the next turn and reduces the next draw count, halting
 // the loop when no further plays are possible.

@@ -4,7 +4,6 @@ import (
 	"io"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/ids"
 )
 
 // Per-deck evaluation result types. Pure data + small derived-stat methods, with no
@@ -22,15 +21,6 @@ type Stats struct {
 	// Best is the single highest-value hand seen across all runs (ties broken by first
 	// occurrence). Zero-valued if no hands have been evaluated.
 	Best BestTurn
-	// PerCardMarginal is a coarse correlational view of each card's hand-value impact:
-	// per unique card ID, the mean turn Value across turns where it was in the dealt hand
-	// or arsenal-in slot vs turns where it wasn't. A smell test for buggy or oversimplified
-	// implementations.
-	//
-	// Caveat: cards whose effect pays off on a LATER turn (auras, drawn-card payoffs) often
-	// won't surface here — the source has rotated out of the hand by the time its value
-	// lands, so the correlation hits whatever else sat in the payoff turn's hand.
-	PerCardMarginal map[ids.CardID]CardMarginalStats
 	// Histogram counts hands seen at each integer Value. Keyed by best-turn Value so
 	// Min / Max can be derived without retaining every hand's value. Nil until the first
 	// hand is evaluated.
@@ -88,45 +78,6 @@ func (s Stats) Max() int {
 type BestTurn struct {
 	Value    int
 	BestLine []card.CardAssignment
-}
-
-// CardMarginalStats accumulates the with/without sums for a card's correlational marginal
-// hand-value contribution. Present* covers turns where at least one copy sat in the dealt
-// hand or arsenal-in slot when Best ran; Absent* covers the rest. PresentHands +
-// AbsentHands equals Stats.Hands.
-type CardMarginalStats struct {
-	PresentTotal float64
-	PresentHands int
-	AbsentTotal  float64
-	AbsentHands  int
-}
-
-// PresentMean returns the mean turn Value across turns where this card was present in
-// the dealt hand or arsenal-in slot. Zero when the card was never present.
-func (m CardMarginalStats) PresentMean() float64 {
-	if m.PresentHands == 0 {
-		return 0
-	}
-	return m.PresentTotal / float64(m.PresentHands)
-}
-
-// AbsentMean returns the mean turn Value across turns where this card was absent. Zero
-// when the card was always present.
-func (m CardMarginalStats) AbsentMean() float64 {
-	if m.AbsentHands == 0 {
-		return 0
-	}
-	return m.AbsentTotal / float64(m.AbsentHands)
-}
-
-// Marginal returns PresentMean - AbsentMean — the correlational hand-value lift associated
-// with this card being in the turn's hand. Confounded by co-occurrence with other strong
-// cards, so use as a smell test. Zero when either bucket is empty.
-func (m CardMarginalStats) Marginal() float64 {
-	if m.PresentHands == 0 || m.AbsentHands == 0 {
-		return 0
-	}
-	return m.PresentMean() - m.AbsentMean()
 }
 
 // CycleStats tracks total value and hand count for a single deck cycle.

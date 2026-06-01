@@ -1,8 +1,8 @@
 package main
 
 // Human-readable renderings shared by the subcommands: the compact deck summary, the full
-// "best deck" report (summary + card list + best turn + per-card stats), and the small
-// formatting helpers every subcommand reaches for (weapon-list join, comma-grouped integers,
+// "best deck" report (summary + card list + best turn + histogram), and the small formatting
+// helpers every subcommand reaches for (weapon-list join, comma-grouped integers,
 // max-name-length column sizing).
 
 import (
@@ -14,7 +14,6 @@ import (
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/hero"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry"
 )
 
 // printCardList writes the deck's "Card list:" block: one grouped-and-sorted count-and-name
@@ -101,9 +100,9 @@ func printSideBySideStats(name1, name2 string, sections []statSection) {
 	}
 }
 
-// printBestDeck dumps the full deck report: summary, card list, best turn played, the
-// hand-value histogram, and the per-card marginal value table. Sections with no backing
-// data are skipped.
+// printBestDeck dumps the full deck report: summary, card list, best turn played, and the
+// hand-value histogram. Sections with no backing data are skipped. The per-card ablation table
+// is eval-only and printed separately by the eval command (see printCardAblation).
 func printBestDeck(d *deck.Deck, s deck.Stats) {
 	printDeckSummary(d, s)
 	fmt.Println()
@@ -111,9 +110,6 @@ func printBestDeck(d *deck.Deck, s deck.Stats) {
 	printBestTurn(s)
 	if len(s.Histogram) > 0 {
 		printHistogram(s.Histogram, histogramTitle(s), naturalHistogramScale(s))
-	}
-	if len(s.PerCardMarginal) > 0 {
-		printCardValues(d, s)
 	}
 }
 
@@ -128,67 +124,6 @@ func printBestTurn(s deck.Stats) {
 		return
 	}
 	s.PrintBest(os.Stdout)
-}
-
-// printCardValues renders one row per unique card with the marginal +/- signal: mean turn
-// value with the card present in the dealt hand or arsenal-in slot, minus mean when
-// absent. Sorted by marginal descending so above-curve cards surface at the top — used as
-// a smell test for buggy or oversimplified implementations.
-func printCardValues(d *deck.Deck, s deck.Stats) {
-	type row struct {
-		name      string
-		margin    float64
-		hasMargin bool
-	}
-	rows := make([]row, 0, len(s.PerCardMarginal))
-	for id, m := range s.PerCardMarginal {
-		r := row{name: registry.GetCard(id).DisplayName()}
-		if m.PresentHands > 0 && m.AbsentHands > 0 {
-			r.margin = m.Marginal()
-			r.hasMargin = true
-		}
-		rows = append(rows, r)
-	}
-	sort.Slice(rows, func(i, j int) bool {
-		if rows[i].margin != rows[j].margin {
-			return rows[i].margin > rows[j].margin
-		}
-		return rows[i].name < rows[j].name
-	})
-
-	fmt.Println()
-	fmt.Println("Card value (marginal = mean turn value with vs without the card in hand or arsenal):")
-	fmt.Println()
-
-	// Column widths take the larger of header label and longest data string so the dividers
-	// line up regardless of deck. Card column also widens for the "Card" header on absurdly
-	// short-named decks.
-	nameW := d.MaxNameLen()
-	if nameW < len("Card") {
-		nameW = len("Card")
-	}
-	marginalW := len("Marginal")
-	for _, r := range rows {
-		if w := len(formatCardMargin(r.margin, r.hasMargin)); w > marginalW {
-			marginalW = w
-		}
-	}
-
-	fmt.Printf("  %-*s | %*s\n", nameW, "Card", marginalW, "Marginal")
-	fmt.Printf("  %s-+-%s\n", strings.Repeat("-", nameW), strings.Repeat("-", marginalW))
-	for _, r := range rows {
-		fmt.Printf("  %-*s | %*s\n", nameW, r.name, marginalW, formatCardMargin(r.margin, r.hasMargin))
-	}
-}
-
-// formatCardMargin renders the signed marginal value with an explicit sign, or "-" when
-// the card was present in every hand (or never present) so no with/without comparison is
-// possible. The caller's printf width handles right-alignment.
-func formatCardMargin(v float64, has bool) string {
-	if !has {
-		return "-"
-	}
-	return fmt.Sprintf("%+.2f", v)
 }
 
 // Histogram chart body: histWidth in compress regime, histHeight rows, histStretchSlot cols
