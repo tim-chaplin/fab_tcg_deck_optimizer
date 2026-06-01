@@ -154,31 +154,25 @@ type AdaptiveRoundConfig struct {
 	Seed            int64             // couples every screen shuffle and the confirm
 	ConfirmSigmas   float64           // k in the k·σ̂/√N accept threshold; 0 → defaultConfirmSigmas
 	Progress        *AdaptiveProgress // optional live counters the ticker reads; nil to skip
-	Recorder        RankRecorder      // optional: records screened head-to-heads into a ranking; nil to skip
+	Recorder        RankRecorder      // optional: promotes a card when it improves the deck; nil to skip
 	Cache           *Cache            // shared hand-eval cache; nil → a fresh one
 }
 
-// RankRecorder receives a screened head-to-head outcome — winner beat loser — so the search can
-// feed its accept/reject results into a persistent card ranking. nil disables recording.
+// RankRecorder is fed the card a value-increasing swap mutated into the deck, so the search can
+// promote it in a persistent recency ranking. nil disables recording.
 type RankRecorder interface {
-	RecordResult(winner, loser ids.CardID)
+	Promote(id ids.CardID)
 }
 
-// recordOutcome feeds a screened single-swap result into recorder. Hill climb (temperature == 0)
-// only: at temperature > 0 an accept can be a deliberate downhill move, so it isn't a clean "added
-// beat removed" signal. won is true when the added (pool) card beat the removed (deck) card.
-func recordOutcome(recorder RankRecorder, temperature float64, mut deck.Mutation, won bool) {
-	if recorder == nil || temperature != 0 {
+// recordImprovement promotes the card a single-swap mutation added to the deck, so a card that just
+// earned a slot rises in the ranking. Weapon / pair mutations have no single added card and are
+// skipped; a nil recorder is a no-op. The caller gates the call on a value-increasing accept.
+func recordImprovement(recorder RankRecorder, mut deck.Mutation) {
+	if recorder == nil {
 		return
 	}
-	added, removed, ok := mut.Swap()
-	if !ok {
-		return
-	}
-	if won {
-		recorder.RecordResult(added, removed)
-	} else {
-		recorder.RecordResult(removed, added)
+	if added, _, ok := mut.Swap(); ok {
+		recorder.Promote(added)
 	}
 }
 
@@ -302,7 +296,6 @@ func runAdaptiveWorker(ctx context.Context, cancel context.CancelFunc, cfg Adapt
 			cfg.Progress.Screened.Add(1)
 		}
 		if verdict != sprtAccept {
-			recordOutcome(cfg.Recorder, cfg.Temperature, cfg.Mutations[i], false) // removed beat added
 			continue
 		}
 		// Screen says accept; confirm ΔV > tau at high precision, coupled to the incumbent baseline.
@@ -317,10 +310,13 @@ func runAdaptiveWorker(ctx context.Context, cancel context.CancelFunc, cfg Adapt
 		}
 		mutAvg := stats.Mean()
 		if mutAvg-incAvg <= tau {
-			recordOutcome(cfg.Recorder, cfg.Temperature, cfg.Mutations[i], false) // false-accept: removed beat added
-			continue                                                              // the confirm clears it, preserving termination
+			continue // screen false-accept — the confirm clears it, preserving termination
 		}
-		recordOutcome(cfg.Recorder, cfg.Temperature, cfg.Mutations[i], true) // confirmed: added beat removed
+		// Confirmed accept. Promote the added card only when it actually raised the deck's value —
+		// an SA step accepted below the incumbent (downhill) is not a vote for the card.
+		if mutAvg > incAvg {
+			recordImprovement(cfg.Recorder, cfg.Mutations[i])
+		}
 		select {
 		case improvementCh <- mutationImprovement{idx: i, avg: mutAvg, candidate: d, stats: stats}:
 		default:

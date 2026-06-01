@@ -2,10 +2,11 @@ package registry
 
 // Persistent card ranking for the anneal search. Ranking holds a total order over the legal card
 // pool, best (index 0) to worst, so the search can try mutations involving promising cards first.
-// RecordResult exchanges a winning card with a higher-ranked loser — the winner takes the loser's
-// slot outright, so a proven card can jump well up the order and good cards rise / chaff sinks the
-// more the search runs. The order persists to disk between runs; a fresh ranking just seeds the
-// pool in registration order and lets the results settle it.
+// Promote moves a card to the front each time it is mutated into a deck on a value-increasing swap,
+// making the order a recency list — "how recently did this card earn a slot in an improving deck" —
+// so cards that keep making decks stay near the top and cards that never make one sink. The order
+// persists to disk between runs; a fresh ranking just seeds the pool in registration order and lets
+// promotions settle it.
 
 import (
 	"encoding/json"
@@ -19,7 +20,7 @@ import (
 const DefaultRankingPath = "internal/registry/card_ranking.json"
 
 // Ranking is a total order over the legal card pool, best (index 0) to worst. Safe for concurrent
-// RecordResult / Rank.
+// Promote / Rank.
 type Ranking struct {
 	mu    sync.Mutex
 	order []CardID       // best → worst
@@ -27,7 +28,7 @@ type Ranking struct {
 }
 
 // NewRanking seeds a ranking from the legal pool in its registration order — the arbitrary initial
-// ranking that RecordResult settles over time.
+// ranking that Promote settles over time.
 func NewRanking() *Ranking {
 	return rankingFromNames(nil)
 }
@@ -74,20 +75,21 @@ func (r *Ranking) Rank(id CardID) int {
 	return len(r.order)
 }
 
-// RecordResult registers that winner beat loser in a head-to-head. If the winner currently ranks
-// below the loser they exchange positions — the winner takes the loser's slot and vice versa, so a
-// proven card can jump well up the order in one result; if the winner already ranks above the loser
-// nothing changes. Unknown cards are ignored.
-func (r *Ranking) RecordResult(winner, loser CardID) {
+// Promote moves id to the front of the order (best), sliding every card above it down one slot, so
+// a card that just earned a slot in an improving deck becomes the first thing tried next. A card
+// already at the front, or one not in the ranking, is a no-op.
+func (r *Ranking) Promote(id CardID) {
 	r.mu.Lock()
 	defer r.mu.Unlock()
-	wi, wok := r.pos[winner]
-	li, lok := r.pos[loser]
-	if !wok || !lok || wi <= li {
+	cur, ok := r.pos[id]
+	if !ok || cur == 0 {
 		return
 	}
-	r.order[wi], r.order[li] = r.order[li], r.order[wi]
-	r.pos[winner], r.pos[loser] = li, wi
+	copy(r.order[1:cur+1], r.order[:cur]) // shift order[0:cur] down into order[1:cur+1] (memmove-safe)
+	r.order[0] = id
+	for i := 0; i <= cur; i++ {
+		r.pos[r.order[i]] = i
+	}
 }
 
 // Save writes the ranking to path as an indented JSON array of DisplayNames, best → worst.

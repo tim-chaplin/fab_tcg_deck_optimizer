@@ -12,16 +12,16 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry"
 )
 
-// fakeRecorder captures RecordResult calls for the recordOutcome test.
-type fakeRecorder struct{ results [][2]ids.CardID }
+// fakeRecorder captures Promote calls for the recordImprovement test.
+type fakeRecorder struct{ promoted []ids.CardID }
 
-func (f *fakeRecorder) RecordResult(winner, loser ids.CardID) {
-	f.results = append(f.results, [2]ids.CardID{winner, loser})
+func (f *fakeRecorder) Promote(id ids.CardID) {
+	f.promoted = append(f.promoted, id)
 }
 
-// TestRecordOutcome pins the ranking-signal mapping: only at T==0, a win records the added card
-// beating the removed one and a loss the reverse, and non-single-swap mutations record nothing.
-func TestRecordOutcome(t *testing.T) {
+// TestRecordImprovement pins the ranking signal: a single-swap mutation promotes the card it added,
+// and a non-single-swap (weapon / pair) mutation promotes nothing.
+func TestRecordImprovement(t *testing.T) {
 	rng := rand.New(rand.NewSource(1))
 	d := deck.Random(heroes.Viserai, 40, 2, rng, registry.Registry{})
 	var swap, weapon deck.Mutation
@@ -32,36 +32,32 @@ func TestRecordOutcome(t *testing.T) {
 			weapon = m
 		}
 	}
-	added, removed, _ := swap.Swap()
+	added, _, _ := swap.Swap()
 
 	cases := []struct {
-		name        string
-		temperature float64
-		mut         deck.Mutation
-		won         bool
-		want        [][2]ids.CardID
+		name string
+		mut  deck.Mutation
+		want []ids.CardID
 	}{
-		{"T>0 records nothing", 0.5, swap, true, nil},
-		{"win → added beats removed", 0, swap, true, [][2]ids.CardID{{added, removed}}},
-		{"loss → removed beats added", 0, swap, false, [][2]ids.CardID{{removed, added}}},
-		{"non-single-swap records nothing", 0, weapon, true, nil},
+		{"single swap promotes the added card", swap, []ids.CardID{added}},
+		{"non-single-swap promotes nothing", weapon, nil},
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
 			f := &fakeRecorder{}
-			recordOutcome(f, c.temperature, c.mut, c.won)
-			if len(f.results) != len(c.want) {
-				t.Fatalf("recorded %v, want %v", f.results, c.want)
+			recordImprovement(f, c.mut)
+			if len(f.promoted) != len(c.want) {
+				t.Fatalf("promoted %v, want %v", f.promoted, c.want)
 			}
 			for i := range c.want {
-				if f.results[i] != c.want[i] {
-					t.Errorf("result %d = %v, want %v", i, f.results[i], c.want[i])
+				if f.promoted[i] != c.want[i] {
+					t.Errorf("promoted[%d] = %v, want %v", i, f.promoted[i], c.want[i])
 				}
 			}
 		})
 	}
 
-	recordOutcome(nil, 0, swap, true) // nil recorder must be a no-op (no panic)
+	recordImprovement(nil, swap) // nil recorder must be a no-op (no panic)
 }
 
 // adaptiveFixture builds a deliberately weak random deck (so plenty of mutations improve it) plus
