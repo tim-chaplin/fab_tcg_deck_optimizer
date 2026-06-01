@@ -37,6 +37,7 @@ cmd/
   fabsim/          Main CLI: anneal / eval / compare / import
   parsecarddb/     Helper: parse and filter the upstream card database
   crosscheck/      Diagnostic: diff our legal pool against the official cardvault API
+  cardaudit/       Diagnostic: cross-check implemented card stats vs card.csv + the official API
 internal/
   card/            Card interface, CardState, TypeSet, engine-facing contracts
     cards/         Every implemented card (yaml + _gen.go + .go triples)
@@ -52,6 +53,7 @@ internal/
   weapon/          Weapon interface; concrete weapons in weapons/
   ids/             Stable integer ID allocation for cards / heroes / weapons
   fabtype/         FaB class / talent / non-deck type NAME lists for the CSV + typebox tools
+  cardcsv/         Loader for the upstream the-fab-cube card.csv (shared by the card tools)
   format/          Constructed gameplay formats (Silver Age banlist + legality predicate)
   registry/        Master roster of every card / weapon / hero
   sim/             Hand-and-deck evaluator and attack-turn search
@@ -144,6 +146,13 @@ mydecks/           Local working deck files (untracked by git)
 - **cmd/crosscheck** — A diagnostic that pulls the official cardvault.fabtcg.com card list and
   diffs it against `registry.LegalCardsFor(SilverAge, Viserai)`, flagging cards the official
   site lists that we're missing (and any in our pool it no longer lists). Needs network.
+- **cmd/cardaudit** — A report-only diagnostic that cross-checks every implemented card's yaml
+  stats (cost / power / defense) against both `card.csv` and the official cardvault API,
+  bucketing discrepancies by confidence and suppressing an allowlist of intentional modeling
+  deviations. Needs network.
+- **internal/cardcsv** — The shared loader for the upstream the-fab-cube `card.csv` (a tab-
+  separated export); used by `cmd/parsecarddb` and `cmd/cardaudit` so the column mapping lives
+  in one place.
 
 ### Testing
 
