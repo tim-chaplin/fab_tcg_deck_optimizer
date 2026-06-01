@@ -12,11 +12,10 @@ the raw CSV.
 
 `card.csv` is a tab-separated export. `loadCards` reads it with a header-name-to-field
 mapping (`cardCSVColumns`), so an upstream column reorder doesn't break parsing — a new
-column just needs a mapping entry. `cardMatchesFilter` then narrows the rows: optional
-user substring filters on Name and Types, the Silver Age legality gate (a blank legality
-column is treated as legal), the class gate (Runeblade and Generic only — the optimizer's
-current hero pool), and an exclusion list for types the optimizer doesn't model
-(specialized elemental talents, tokens, equipment).
+column just needs a mapping entry. `poolFilter.matches` then narrows the rows. The class /
+talent filters express a hero's legal pool the way `registry.heroCanPlay` does: Generic and
+classless cards are always class-legal, and a card's talents must be a subset of the hero's.
+Class / talent / non-deck words are classified via `internal/fabtype`.
 
 ## How to use
 
@@ -29,16 +28,37 @@ Flags:
 - `-in` — path to `card.csv` (default `data_sources/card.csv`).
 - `-name` — only print cards whose name contains this substring (case-insensitive).
 - `-type` — only print cards whose Types field contains this substring (case-insensitive).
+- `-classes` — comma-separated hero classes; a card must be Generic, classless, or one of
+  these. Empty (default) = any class.
+- `-talents` — comma-separated allowed talents; a card's talents must be a subset, so
+  `Lightning` admits no-talent and Lightning cards. Empty (default) = no-talent cards only.
+- `-any-talent` — ignore `-talents` and admit cards carrying any talent.
+- `-require-talents` — comma-separated talents; admit only cards carrying at least one (e.g.
+  to list just the Lightning cards in a pool).
+- `-deck-only` — exclude non-deck card types (weapons, equipment, heroes, tokens, landmarks).
+- `-silver-age` — require Silver Age legality (default true).
+- `-exclude-banned` — drop cards on our `internal/format` Silver Age banlist.
 - `-format` — `pretty` (default) or `json`.
 - `-names_only` — print only the distinct card names, one per line.
+
+### Examples
+
+```
+# Viserai's pool (Runeblade + Generic, no talent):
+go run ./cmd/parsecarddb -classes Runeblade -deck-only -names_only
+
+# Aurora's Lightning cards worth implementing (drops banned):
+go run ./cmd/parsecarddb -classes Runeblade -talents Lightning -require-talents Lightning \
+  -deck-only -exclude-banned -names_only
+```
 
 ## Important files
 
 - `main.go` — the entire tool: the `Card` struct mirroring the CSV columns, the loader, the
-  filter, and the output formatting.
+  `poolFilter`, and the output formatting.
 
 ## Gotchas
 
-- The class and type filters are deliberately narrow to the optimizer's current scope; a
-  card outside Runeblade / Generic, or carrying an excluded type, will not appear even with
-  a matching `-name`.
+- `-talents` is subset semantics, so the default (empty) admits **only** no-talent cards. Pass
+  the hero's talents (or `-any-talent`) to widen it — a Lightning card won't appear under the
+  default filter even with a matching `-name`.
