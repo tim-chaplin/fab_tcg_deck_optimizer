@@ -146,6 +146,46 @@ func TestApplyDefaults_SideboardClampsAgainstMainDeck(t *testing.T) {
 	}
 }
 
+// Tests that a card present in the main deck is trimmed out of an existing sideboard, so the two
+// sections never hold a combined count over the cap (the both-sections duplication bug).
+func TestApplyDefaults_SideboardTrimsCopiesNowInMain(t *testing.T) {
+	red := fakeCard{id: 3, display: "Read the Runes [R]"}
+	d := New(nil, nil, []Card{red, red}) // main holds the cap
+	d.Sideboard = []string{"Read the Runes [R]", "Read the Runes [R]", "Side Card"}
+	d.ApplyDefaults(testDefaults)
+
+	got := map[string]int{}
+	for _, name := range d.Sideboard {
+		got[name]++
+	}
+	if got["Read the Runes [R]"] != 0 {
+		t.Errorf("Read the Runes [R] left in sideboard %dx while the main holds the cap (%d); want 0",
+			got["Read the Runes [R]"], SideboardCopyCap)
+	}
+	if got["Side Card"] != 1 {
+		t.Errorf("Side Card = %dx, want 1 (a non-main sideboard card is untouched)", got["Side Card"])
+	}
+}
+
+// Tests the partial trim: with one copy in the main deck, the sideboard keeps only (cap - 1).
+func TestApplyDefaults_SideboardTrimsToRemainingRoom(t *testing.T) {
+	red := fakeCard{id: 3, display: "Read the Runes [R]"}
+	d := New(nil, nil, []Card{red}) // main holds one copy
+	d.Sideboard = []string{"Read the Runes [R]", "Read the Runes [R]"}
+	d.ApplyDefaults(testDefaults)
+
+	n := 0
+	for _, name := range d.Sideboard {
+		if name == "Read the Runes [R]" {
+			n++
+		}
+	}
+	if want := SideboardCopyCap - 1; n != want {
+		t.Errorf("Read the Runes [R] in sideboard %dx, want %d (cap %d - 1 in main)",
+			n, want, SideboardCopyCap)
+	}
+}
+
 // Tests that Random builds a deck with the requested size, picks weapons from the
 // legal pool, and never exceeds maxCopies for any single printing.
 func TestRandom_BuildsLegalDeckWithinCopyBudget(t *testing.T) {

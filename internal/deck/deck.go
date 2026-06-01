@@ -339,10 +339,10 @@ type Defaults struct {
 // normal deck-construction max.
 const SideboardCopyCap = 2
 
-// ApplyDefaults tops d.Equipment and d.Sideboard up toward the supplied defaults. Idempotent:
-// each entry is only added when the current count is below target. Equipment targets 1 copy
-// per entry; sideboard targets each entry's Count, clamped by SideboardCopyCap against
-// main-deck + sideboard copies so the merge never breaches the deck-construction limit.
+// ApplyDefaults reconciles d.Equipment and d.Sideboard with the supplied defaults. Equipment is
+// topped up to one copy per entry. The sideboard is first trimmed so main-deck + sideboard copies
+// of any card stay within SideboardCopyCap, then topped up toward each default entry's Count within
+// the same cap. Idempotent.
 func (d *Deck) ApplyDefaults(defaults Defaults) {
 	equipCounts := map[string]int{}
 	for _, name := range d.Equipment {
@@ -359,10 +359,20 @@ func (d *Deck) ApplyDefaults(defaults Defaults) {
 	for _, c := range d.cards {
 		mainCounts[c.DisplayName()]++
 	}
+
+	// Trim the existing sideboard so main-deck + sideboard copies of any card never exceed the cap
+	// (a card now in the main shouldn't also sit in the sideboard past the cap); keeps the first
+	// (cap - main) copies of each, preserving order.
 	sideCounts := map[string]int{}
+	kept := make([]string, 0, len(d.Sideboard))
 	for _, name := range d.Sideboard {
-		sideCounts[name]++
+		if mainCounts[name]+sideCounts[name] < SideboardCopyCap {
+			kept = append(kept, name)
+			sideCounts[name]++
+		}
 	}
+	d.Sideboard = kept
+
 	for _, entry := range defaults.Sideboard {
 		room := SideboardCopyCap - mainCounts[entry.Name] - sideCounts[entry.Name]
 		if room <= 0 {
