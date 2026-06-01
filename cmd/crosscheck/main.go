@@ -26,6 +26,7 @@ import (
 	"time"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/fabtype"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/format"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/hero/heroes"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry"
@@ -36,34 +37,10 @@ const apiBase = "https://api.cardvault.fabtcg.com/carddb/api/v1/advanced-search/
 // classes queried — Viserai's legal class line is Runeblade or Generic.
 var classes = []string{"Runeblade", "Generic"}
 
-// The three sets below form a word blacklist applied to the printed typebox: a card is out of
-// Viserai's pool if any of its words is one of these. A blacklist (rather than parsing the
-// "<supertypes> <CardType> - <subtypes>" grammar) keeps multi-word card types like "Defense
-// Reaction" from tripping a positional parse — order doesn't matter, only presence.
-//
-// talentWords disqualify a card: Viserai has no talent, so any talented card is illegal for
-// him. Royal is deliberately absent — it's a supertype, not a talent, and Royal Generics
-// (e.g. Imperial Seal of Command) are legal.
-var talentWords = map[string]bool{
-	"Chaos": true, "Draconic": true, "Earth": true, "Elemental": true,
-	"Ice": true, "Light": true, "Lightning": true, "Shadow": true,
-}
-
-// otherClassWords are classes other than Runeblade / Generic. A card carrying one (a multiclass
-// print) is off-class for Viserai.
-var otherClassWords = map[string]bool{
-	"Adjudicator": true, "Assassin": true, "Bard": true, "Brute": true, "Guardian": true,
-	"Illusionist": true, "Mechanologist": true, "Merchant": true, "Monarch": true,
-	"Necromancer": true, "Ninja": true, "Pirate": true, "Ranger": true, "Shapeshifter": true,
-	"Warrior": true, "Wizard": true,
-}
-
-// nonDeckTypes are printed card-types that never enter the 40-card deck pool, so we drop them
-// to match LegalCardsFor (which only returns main-deck cards).
-var nonDeckTypes = map[string]bool{
-	"Weapon": true, "Equipment": true, "Hero": true, "Demi-Hero": true,
-	"Token": true, "Landmark": true, "Mentor": true, "Ally": true, "Macro": true,
-}
+// viseraiClasses is Viserai's own hero class. Generic is legal for every hero, so it's handled
+// by fabtype.ClassMatches rather than listed here; the talent / non-deck vocabulary also comes
+// from fabtype.
+var viseraiClasses = map[string]bool{"Runeblade": true}
 
 type apiResponse struct {
 	Next    string `json:"next"`
@@ -119,10 +96,13 @@ var typeboxSplit = strings.NewReplacer(" - ", " ", "||", " ", "//", " ")
 
 // inScope reports whether a printed typebox is a no-talent Runeblade/Generic main-deck card —
 // the cards Viserai can legally run. A card is out of scope if any of its words (across both
-// faces) is a talent, an off-class, or a non-deck card-type.
+// faces) is a talent, a non-deck card-type, or a class other than Runeblade / Generic.
 func inScope(typebox string) bool {
 	for _, tok := range strings.Fields(typeboxSplit.Replace(typebox)) {
-		if talentWords[tok] || otherClassWords[tok] || nonDeckTypes[tok] {
+		if fabtype.TalentNames[tok] || fabtype.NonDeckTypes[tok] {
+			return false
+		}
+		if !fabtype.ClassMatches(tok, viseraiClasses) {
 			return false
 		}
 	}

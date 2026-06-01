@@ -195,10 +195,12 @@ The summary below groups the flags by subcommand.
 
 **`import`**: no flags; see the usage line above.
 
-Helper tool for exploring the upstream card database:
+Helper tool for exploring the upstream card database and enumerating a hero's legal pool (see
+`cmd/parsecarddb/README.md` for the full flag list):
 
 ```
-go run ./cmd/parsecarddb --names_only
+go run ./cmd/parsecarddb -names_only                          # every Silver-Age no-talent card
+go run ./cmd/parsecarddb -classes Runeblade -talents Lightning -modeled   # Aurora's pool
 ```
 
 ## Tests

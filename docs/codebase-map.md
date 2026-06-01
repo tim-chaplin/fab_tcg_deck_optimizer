@@ -51,6 +51,7 @@ internal/
   hero/            Hero interface; concrete heroes in heroes/
   weapon/          Weapon interface; concrete weapons in weapons/
   ids/             Stable integer ID allocation for cards / heroes / weapons
+  fabtype/         FaB class / talent / non-deck type NAME lists for the CSV + typebox tools
   format/          Constructed gameplay formats (Silver Age banlist + legality predicate)
   registry/        Master roster of every card / weapon / hero
   sim/             Hand-and-deck evaluator and attack-turn search
@@ -82,6 +83,10 @@ mydecks/           Local working deck files (untracked by git)
 - **internal/ids** — The central allocation of stable integer identifiers (`CardID`,
   `HeroID`) anchored into contiguous non-overlapping ranges so per-entity caches can be
   slice-indexed. Weapons are cards, so they take `CardID`s in the shared range.
+- **internal/fabtype** — The text-side FaB vocabulary: the sets of class, talent, and non-deck
+  card-type NAMES as they appear in printed type lines / the upstream `card.csv` Types column.
+  Used by the CSV / typebox tools (`cmd/parsecarddb`, `cmd/crosscheck`) to classify a type word;
+  the in-engine legality check uses `registry`'s `classMask` / `talentMask` instead.
 - **internal/format** — The constructed gameplay formats (Silver Age today): a `Format`
   interface whose `IsCardLegal` predicate filters the card pool, backed by the hardcoded
   banlist in `banlist.go`. Hero-agnostic — class/talent legality is the registry's job.
@@ -134,7 +139,8 @@ mydecks/           Local working deck files (untracked by git)
 - **cmd/fabsim** — The user-facing CLI that searches (`anneal`), evaluates, compares, and
   imports decks, with one `mode_*.go` file per subcommand.
 - **cmd/parsecarddb** — A helper tool that parses and filters the upstream the-fab-cube
-  `card.csv`; the preferred way to look up card data and printed text.
+  `card.csv`; the preferred way to look up card data and printed text. Its class / talent flags
+  enumerate a hero's legal pool (e.g. Aurora's Lightning cards) using `internal/fabtype`.
 - **cmd/crosscheck** — A diagnostic that pulls the official cardvault.fabtcg.com card list and
   diffs it against `registry.LegalCardsFor(SilverAge, Viserai)`, flagging cards the official
   site lists that we're missing (and any in our pool it no longer lists). Needs network.

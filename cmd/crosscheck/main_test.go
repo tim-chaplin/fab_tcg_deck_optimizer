@@ -32,8 +32,12 @@ func TestInScope(t *testing.T) {
 		{"Generic Equipment - Arms", false},
 		{"Runeblade Hero - Young", false},
 		{"Generic Token Action - Attack", false},
-		// Royal is a supertype, not a talent — Royal Generics stay legal.
+		// A plain Generic multi-word card type stays in scope.
 		{"Generic Action - Attack Reaction", true},
+		// Talents beyond the elementals — Royal / Revered / Mystic — are out of scope too.
+		{"Royal Generic Action - Attack", false},
+		{"Revered Generic Action", false},
+		{"Mystic Runeblade Action", false},
 	}
 	for _, c := range cases {
 		if got := inScope(c.typebox); got != c.want {

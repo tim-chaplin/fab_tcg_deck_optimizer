@@ -2,7 +2,9 @@ package format
 
 // silverAgeBanlist is the set of card names banned in the Silver Age format — the single
 // source of truth for Silver Age legality. Update it manually when the official banlist
-// changes (it changes infrequently).
+// changes (it changes infrequently). The authoritative list is the official card-legality
+// policy page; the official cardvault API (legal_formats=Silver Age) reflects the same bans
+// and can validate this set — a banned name should be absent from that query's results.
 //
 // Names must match card.Card.Name() exactly: the base printed name, no pitch suffix, and a
 // straight ASCII apostrophe (') to match this repo's card-naming convention — a mismatch
@@ -14,12 +16,10 @@ package format
 var silverAgeBanlist = map[string]struct{}{
 	"Aether Flare":               {},
 	"Aether Ironweave":           {},
-	"Aether Spindle":             {},
 	"Ball Lightning":             {},
 	"Belittle":                   {},
 	"Bonds of Ancestry":          {},
 	"Bracers of Belief":          {},
-	"Burn Up // Shock":           {},
 	"Cash In":                    {},
 	"Count Your Blessings":       {},
 	"Deadwood Dirge":             {},
@@ -31,7 +31,6 @@ var silverAgeBanlist = map[string]struct{}{
 	"Goliath Gauntlet":           {},
 	"Heartened Cross Strap":      {},
 	"Honing Hood":                {},
-	"Lightning Press":            {},
 	"Mask of Three Tails":        {},
 	"Nimby":                      {},
 	"Old Knocker":                {},
