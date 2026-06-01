@@ -3,7 +3,7 @@ types:
     - Generic
     - Action
     - Attack
-cost: 1
+cost: 2
 variants:
     - id: DestructiveDeliberationRed
       pitch: 1

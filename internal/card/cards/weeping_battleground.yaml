@@ -14,8 +14,8 @@ variants:
     - id: WeepingBattlegroundYellow
       pitch: 2
       attack: 0
-      defense: 3
+      defense: 2
     - id: WeepingBattlegroundBlue
       pitch: 3
       attack: 0
-      defense: 3
+      defense: 1

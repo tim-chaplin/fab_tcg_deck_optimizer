@@ -29,7 +29,7 @@ func (WeepingBattlegroundYellow) DisplayName() string                { return "W
 func (WeepingBattlegroundYellow) Cost() int                          { return 0 }
 func (WeepingBattlegroundYellow) Pitch() int                         { return 2 }
 func (WeepingBattlegroundYellow) Attack() int                        { return 0 }
-func (WeepingBattlegroundYellow) Defense() int                       { return 3 }
+func (WeepingBattlegroundYellow) Defense() int                       { return 2 }
 func (WeepingBattlegroundYellow) Types(card.GameEngine) card.TypeSet { return weepingBattlegroundTypes }
 func (WeepingBattlegroundYellow) GoAgain(card.GameEngine) bool       { return false }
 
@@ -41,6 +41,6 @@ func (WeepingBattlegroundBlue) DisplayName() string                { return "Wee
 func (WeepingBattlegroundBlue) Cost() int                          { return 0 }
 func (WeepingBattlegroundBlue) Pitch() int                         { return 3 }
 func (WeepingBattlegroundBlue) Attack() int                        { return 0 }
-func (WeepingBattlegroundBlue) Defense() int                       { return 3 }
+func (WeepingBattlegroundBlue) Defense() int                       { return 1 }
 func (WeepingBattlegroundBlue) Types(card.GameEngine) card.TypeSet { return weepingBattlegroundTypes }
 func (WeepingBattlegroundBlue) GoAgain(card.GameEngine) bool       { return false }
