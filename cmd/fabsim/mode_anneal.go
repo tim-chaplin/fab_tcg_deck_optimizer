@@ -50,6 +50,9 @@ type annealConfig struct {
 	// pairMutations gates the pair-swap layer in AllMutations. See the -pair-mutations flag
 	// help for when to enable it.
 	pairMutations bool
+	// rankingPath is where the persistent card ranking is loaded from and saved to. Defaults to
+	// registry.DefaultRankingPath; override to keep a separate ranking per experiment.
+	rankingPath string
 }
 
 // defaultDeckNameFor keys the default deck filename on (hero, format, incoming) so different
@@ -79,6 +82,7 @@ func runAnnealCmd(args []string) {
 	memprofile := fs.String("memprofile", "", "if set, write a heap profile to this path at exit (after a runtime.GC()).")
 	maxDuration := fs.Duration("max-duration", 0, "cap wall-clock duration; the run aborts cleanly at the deadline like a stdin Enter. Zero (default) runs until the user hits Enter.")
 	pairMutations := fs.Bool("pair-mutations", false, "include the synergy-pair (-1/-1, +1/+1) swap layer in each round's mutation pool. Off by default because the layer multiplies per-round candidates substantially for little acceptance yield. Flip on when introducing a new synergy pair to give it a chance to land.")
+	rankingPath := fs.String("ranking-path", registry.DefaultRankingPath, "path for the persistent card ranking (the recency order that drives which mutations are tried first). Override to keep a separate ranking per experiment — e.g. so a throwaway run doesn't perturb your main one.")
 	_ = parseFlagsAnywhere(fs, args)
 	if fs.NArg() > 0 {
 		die("anneal: unexpected positional argument(s): %v (did you mean -deck %s?)", fs.Args(), fs.Args()[0])
@@ -125,6 +129,7 @@ func runAnnealCmd(args []string) {
 		quietLoad:     *quietLoad,
 		maxDuration:   *maxDuration,
 		pairMutations: *pairMutations,
+		rankingPath:   *rankingPath,
 	}
 
 	// Wrap in a function that owns the profile lifecycle so deferred StopCPUProfile / heap
@@ -180,14 +185,15 @@ type annealResult struct {
 func runAnneal(cfg annealConfig) annealResult {
 	rng := rand.New(rand.NewSource(cfg.seed))
 
-	// Persistent card ranking: orders each round's mutations (promising cards first) and records
-	// every screened head-to-head so good cards rise and chaff sinks over time. Saved on return.
-	ranking, err := registry.LoadRanking(registry.DefaultRankingPath)
+	// Persistent card ranking: orders each round's mutations (promising cards first) and promotes a
+	// card each time it's mutated into the deck on an improvement, so recently-useful cards rise and
+	// untried chaff sinks. Saved on return.
+	ranking, err := registry.LoadRanking(cfg.rankingPath)
 	if err != nil {
 		die("load card ranking: %v", err)
 	}
 	defer func() {
-		if err := ranking.Save(registry.DefaultRankingPath); err != nil {
+		if err := ranking.Save(cfg.rankingPath); err != nil {
 			fmt.Fprintf(os.Stderr, "warning: could not save card ranking: %v\n", err)
 		}
 	}()
@@ -231,7 +237,7 @@ func runAnneal(cfg annealConfig) annealResult {
 	start := time.Now()
 	for {
 		round++
-		mutations := buildRoundMutations(cfg, current, ranking)
+		mutations := buildRoundMutations(cfg, current, ranking, temperature, rng)
 		tempLabel := formatTempLabel(temperature)
 		if verbose {
 			fmt.Fprintf(os.Stderr, "\n[round %d] evaluating %d mutations of avg %.3f%s (best ever %.3f)\n",
@@ -301,12 +307,24 @@ func runAnneal(cfg annealConfig) annealResult {
 }
 
 // buildRoundMutations enumerates every single-card / weapon mutation and orders it by the ranking
-// so the round tries the most promising swaps first (and hits an improvement, if any, sooner).
-func buildRoundMutations(cfg annealConfig, current *deck.Deck, ranking *registry.Ranking) []deck.Mutation {
+// so the round tries the most promising swaps first, then randomizes the top temperature-fraction
+// of that order so a warm search explores instead of marching straight down the ranking.
+func buildRoundMutations(cfg annealConfig, current *deck.Deck, ranking *registry.Ranking, temperature float64, rng *rand.Rand) []deck.Mutation {
 	mutations := deck.AllMutations(current, cfg.maxCopies, cfg.pairMutations, registry.Registry{})
 	sort.SliceStable(mutations, func(i, j int) bool {
 		return mutationRank(mutations[i], ranking) < mutationRank(mutations[j], ranking)
 	})
+	// Temperature sets how much of the ranked order is randomized: T=0 trusts the ranking (try the
+	// top cards first); T>=1 ignores it entirely (full shuffle) so a hot search doesn't just swap in
+	// the recent deck's cards every round; in between, shuffle the top T fraction. Without this the
+	// recency ranking would trap even a from-scratch run in the last deck's basin.
+	frac := temperature
+	if frac > 1 {
+		frac = 1
+	}
+	if width := int(frac * float64(len(mutations))); width > 1 {
+		rng.Shuffle(width, func(i, j int) { mutations[i], mutations[j] = mutations[j], mutations[i] })
+	}
 	return mutations
 }
 

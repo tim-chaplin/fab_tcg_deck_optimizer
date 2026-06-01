@@ -67,7 +67,7 @@ func BenchmarkAnnealFromScratch(b *testing.B) {
 		b.StartTimer()
 
 		for round := 0; round < rounds; round++ {
-			mutations := buildRoundMutations(cfg, current, ranking)
+			mutations := buildRoundMutations(cfg, current, ranking, temperature, rng)
 			d, _, avg, _, found := sim.RunMutationRound(
 				context.Background(), mutations, currentAvg, temperature, minImprovement,
 				cfg.shuffles, cfg.matchup, 0, 0,

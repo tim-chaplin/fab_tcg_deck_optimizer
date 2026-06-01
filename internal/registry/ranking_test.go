@@ -28,31 +28,43 @@ func TestRanking_SeedsWholePool(t *testing.T) {
 	}
 }
 
-func TestRanking_RecordResultPromotesWinner(t *testing.T) {
+func TestRanking_PromoteMovesToTop(t *testing.T) {
 	r := NewRanking()
-	best, challenger := r.order[0], r.order[5]
-	r.RecordResult(challenger, best) // lower-ranked card wins → they swap slots
-	if got := r.Rank(challenger); got != 0 {
-		t.Errorf("winner rank = %d, want 0 (took the loser's slot)", got)
+	promoted := r.order[5]
+	above := append([]CardID(nil), r.order[:5]...) // cards currently ranked above it
+	r.Promote(promoted)
+	if got := r.Rank(promoted); got != 0 {
+		t.Errorf("promoted card rank = %d, want 0", got)
 	}
-	if got := r.Rank(best); got != 5 {
-		t.Errorf("loser rank = %d, want 5 (took the winner's slot)", got)
+	for i, id := range above { // everything above it slides down exactly one slot
+		if got := r.Rank(id); got != i+1 {
+			t.Errorf("card formerly at %d now at %d, want %d", i, got, i+1)
+		}
 	}
 }
 
-func TestRanking_RecordResultNoopWhenWinnerAlreadyAbove(t *testing.T) {
+func TestRanking_PromoteTopAndUnknownAreNoops(t *testing.T) {
 	r := NewRanking()
-	top, low := r.order[0], r.order[5]
-	r.RecordResult(top, low) // winner already ranked above loser
-	if r.Rank(top) != 0 || r.Rank(low) != 5 {
-		t.Errorf("ranks changed on a no-op result: top=%d low=%d", r.Rank(top), r.Rank(low))
+	before := append([]CardID(nil), r.order...)
+	absent := CardID(0)
+	for _, id := range r.order {
+		if id > absent {
+			absent = id
+		}
+	}
+	absent++              // one past the largest pool ID — not in the ranking
+	r.Promote(r.order[0]) // already best
+	r.Promote(absent)     // not in the ranking
+	for i, id := range before {
+		if r.Rank(id) != i {
+			t.Errorf("no-op Promote moved card %d to %d", i, r.Rank(id))
+		}
 	}
 }
 
-// TestRanking_RecordResultConcurrent hammers RecordResult / Rank from many goroutines (run with
-// -race), asserting order stays a valid permutation with pos consistent — the safety the mutex
-// provides.
-func TestRanking_RecordResultConcurrent(t *testing.T) {
+// TestRanking_PromoteConcurrent checks concurrent Promote / Rank keeps order a valid permutation
+// with pos consistent (run with -race).
+func TestRanking_PromoteConcurrent(t *testing.T) {
 	r := NewRanking()
 	n := len(r.order)
 	ids := append([]CardID(nil), r.order...) // snapshot the pool IDs
@@ -64,7 +76,7 @@ func TestRanking_RecordResultConcurrent(t *testing.T) {
 			defer wg.Done()
 			rng := rand.New(rand.NewSource(seed))
 			for i := 0; i < 2000; i++ {
-				r.RecordResult(ids[rng.Intn(n)], ids[rng.Intn(n)])
+				r.Promote(ids[rng.Intn(n)])
 				_ = r.Rank(ids[rng.Intn(n)])
 			}
 		}(int64(g + 1))
@@ -91,7 +103,7 @@ func TestRanking_RecordResultConcurrent(t *testing.T) {
 
 func TestRanking_SaveLoadRoundTrip(t *testing.T) {
 	r := NewRanking()
-	r.RecordResult(r.order[10], r.order[2]) // perturb the order
+	r.Promote(r.order[10]) // perturb the order
 	path := filepath.Join(t.TempDir(), "ranking.json")
 	if err := r.Save(path); err != nil {
 		t.Fatalf("Save: %v", err)
