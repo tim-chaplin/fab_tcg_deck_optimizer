@@ -4,9 +4,12 @@
 //
 // It pulls every Silver-Age-legal Runeblade and Generic print from the official advanced-
 // search API, keeps the no-talent main-deck cards (the ones Viserai can legally run), and
-// diffs that set against registry.LegalCardsFor(SilverAge, Viserai). Each difference is
-// annotated with why it differs (unimplemented, NotImplemented / Unplayable marker, banned by
-// our banlist, or absent from the official query — likely a banlist change or name mismatch).
+// diffs that set against registry.LegalCardsFor(SilverAge, Viserai). It reports:
+//
+//   - [A] official-legal cards absent from our pool (annotated: unimplemented vs quarantined);
+//   - [B] cards in our pool the official query doesn't list;
+//   - [C] entries on our internal/format banlist the official API now lists as legal — stale
+//     bans to remove (catches banlist drift automatically).
 //
 // Network: hits the public cardvault API; run from a machine with outbound HTTPS.
 package main
@@ -21,6 +24,7 @@ import (
 	"net/url"
 	"os"
 	"path/filepath"
+	"regexp"
 	"sort"
 	"strings"
 	"time"
@@ -33,9 +37,6 @@ import (
 )
 
 const apiBase = "https://api.cardvault.fabtcg.com/carddb/api/v1/advanced-search/"
-
-// classes queried — Viserai's legal class line is Runeblade or Generic.
-var classes = []string{"Runeblade", "Generic"}
 
 // viseraiClasses is Viserai's own hero class. Generic is legal for every hero, so it's handled
 // by fabtype.ClassMatches rather than listed here; the talent / non-deck vocabulary also comes
@@ -52,11 +53,9 @@ type apiResponse struct {
 
 type print struct{ name, typebox string }
 
-// fetchClass returns every Silver-Age-legal print for one class, following pagination.
-func fetchClass(client *http.Client, class string) ([]print, error) {
-	q := url.Values{}
-	q.Set("classes", class)
-	q.Set("legal_formats", "Silver Age")
+// fetchPrints paginates the advanced-search API for query q (adding page size / ordering),
+// following next links.
+func fetchPrints(client *http.Client, q url.Values) ([]print, error) {
 	q.Set("page_size", "250")
 	q.Set("orderby", "name")
 	next := apiBase + "?" + q.Encode()
@@ -93,6 +92,16 @@ func fetchClass(client *http.Client, class string) ([]print, error) {
 // ("||", "//") separators become spaces so each face's class/talent words are checked — a DFC
 // whose other face is talented (Burn Up // Shock) is then correctly ruled out.
 var typeboxSplit = strings.NewReplacer(" - ", " ", "||", " ", "//", " ")
+
+// dfcSeparator matches the double-faced-card join in either the API's "||" form or our
+// banlist's " // " form, with any surrounding spaces.
+var dfcSeparator = regexp.MustCompile(`\s*(\|\||//)\s*`)
+
+// normalizeName canonicalizes a card name so the API's DFC form ("Burn Up||Shock") matches our
+// banlist's ("Burn Up // Shock").
+func normalizeName(s string) string {
+	return dfcSeparator.ReplaceAllString(s, " // ")
+}
 
 // inScope reports whether a printed typebox is a no-talent Runeblade/Generic main-deck card —
 // the cards Viserai can legally run. A card is out of scope if any of its words (across both
@@ -200,12 +209,17 @@ func main() {
 		os.Exit(1)
 	}
 
-	// Official side: every SA-legal Runeblade/Generic print, split into the in-scope (no-talent
-	// main-deck) names and the full name set (used to explain pool cards the query didn't list).
+	// Viserai diff [A]/[B]: query per class so the API does the class filtering server-side —
+	// far more reliable than filtering the full set, which is littered with Events, placeholder
+	// cards, and empty typeboxes the inScope blacklist can't catch. officialInScope is the
+	// no-talent main-deck subset; officialAllNames explains pool cards it omits.
 	officialInScope := map[string]string{} // name -> a representative in-scope typebox
 	officialAllNames := map[string]bool{}
-	for _, cls := range classes {
-		prints, err := fetchClass(client, cls)
+	for _, cls := range []string{"Runeblade", "Generic"} {
+		q := url.Values{}
+		q.Set("classes", cls)
+		q.Set("legal_formats", "Silver Age")
+		prints, err := fetchPrints(client, q)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "fetch %s: %v\n", cls, err)
 			os.Exit(1)
@@ -216,6 +230,19 @@ func main() {
 				officialInScope[p.name] = p.typebox
 			}
 		}
+	}
+
+	// Banlist check [C] needs every SA-legal name across all classes (the banlist spans them).
+	q := url.Values{}
+	q.Set("legal_formats", "Silver Age")
+	allPrints, err := fetchPrints(client, q)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "fetch all: %v\n", err)
+		os.Exit(1)
+	}
+	legalNames := map[string]bool{} // normalized SA-legal names
+	for _, p := range allPrints {
+		legalNames[normalizeName(p.name)] = true
 	}
 
 	// Our side: the Viserai pool, plus the status of every registered card (by base name) so we
@@ -280,5 +307,22 @@ func main() {
 			why = "official returned it, but its typebox fell out of scope (talent / non-deck type)"
 		}
 		fmt.Printf("  %-34s — %s\n", name, why)
+	}
+
+	// [C] Our banlist entries the official API now lists as legal — stale bans to remove from
+	// internal/format/banlist.go. (The reverse drift — a card we don't ban that's officially
+	// banned — surfaces in [B] for cards that are in our pool.)
+	var stale []string
+	for _, name := range format.SilverAge.BannedNames() {
+		if legalNames[normalizeName(name)] {
+			stale = append(stale, name)
+		}
+	}
+	fmt.Printf("\n=== [C] On our banlist but official API now lists as LEGAL — stale bans (%d) ===\n", len(stale))
+	for _, name := range stale {
+		fmt.Printf("  %s\n", name)
+	}
+	if len(stale) == 0 {
+		fmt.Println("  (none — our Silver Age banlist matches the official API)")
 	}
 }
