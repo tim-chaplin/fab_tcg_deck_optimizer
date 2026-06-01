@@ -32,7 +32,7 @@ func TestRanking_PromoteMovesToTop(t *testing.T) {
 	r := NewRanking()
 	promoted := r.order[5]
 	above := append([]CardID(nil), r.order[:5]...) // cards currently ranked above it
-	r.Promote(promoted)
+	r.PromoteAll([]CardID{promoted})
 	if got := r.Rank(promoted); got != 0 {
 		t.Errorf("promoted card rank = %d, want 0", got)
 	}
@@ -40,6 +40,23 @@ func TestRanking_PromoteMovesToTop(t *testing.T) {
 		if got := r.Rank(id); got != i+1 {
 			t.Errorf("card formerly at %d now at %d, want %d", i, got, i+1)
 		}
+	}
+}
+
+// TestRanking_PromoteAllPartitions: a set of scattered cards leads the order in their current
+// relative order, the rest follow in theirs (a stable partition).
+func TestRanking_PromoteAllPartitions(t *testing.T) {
+	r := NewRanking()
+	a, b, c := r.order[7], r.order[2], r.order[9] // old ranks 7, 2, 9
+	formerTop := r.order[0]                       // not promoted
+	r.PromoteAll([]CardID{a, b, c})
+	// Promoted cards lead, kept in their old relative order: b(2) < a(7) < c(9).
+	if r.Rank(b) != 0 || r.Rank(a) != 1 || r.Rank(c) != 2 {
+		t.Errorf("promoted set not in relative order: b=%d a=%d c=%d, want 0,1,2", r.Rank(b), r.Rank(a), r.Rank(c))
+	}
+	// The card formerly at rank 0 is now the first of the rest — just behind the 3 promoted.
+	if got := r.Rank(formerTop); got != 3 {
+		t.Errorf("former top now at %d, want 3 (just behind the promoted set)", got)
 	}
 }
 
@@ -52,17 +69,18 @@ func TestRanking_PromoteTopAndUnknownAreNoops(t *testing.T) {
 			absent = id
 		}
 	}
-	absent++              // one past the largest pool ID — not in the ranking
-	r.Promote(r.order[0]) // already best
-	r.Promote(absent)     // not in the ranking
+	absent++                           // one past the largest pool ID — not in the ranking
+	r.PromoteAll([]CardID{r.order[0]}) // already best
+	r.PromoteAll([]CardID{absent})     // not in the ranking
+	r.PromoteAll(nil)                  // empty list
 	for i, id := range before {
 		if r.Rank(id) != i {
-			t.Errorf("no-op Promote moved card %d to %d", i, r.Rank(id))
+			t.Errorf("no-op PromoteAll moved card %d to %d", i, r.Rank(id))
 		}
 	}
 }
 
-// TestRanking_PromoteConcurrent checks concurrent Promote / Rank keeps order a valid permutation
+// TestRanking_PromoteConcurrent checks concurrent PromoteAll / Rank keeps order a valid permutation
 // with pos consistent (run with -race).
 func TestRanking_PromoteConcurrent(t *testing.T) {
 	r := NewRanking()
@@ -76,7 +94,7 @@ func TestRanking_PromoteConcurrent(t *testing.T) {
 			defer wg.Done()
 			rng := rand.New(rand.NewSource(seed))
 			for i := 0; i < 2000; i++ {
-				r.Promote(ids[rng.Intn(n)])
+				r.PromoteAll([]CardID{ids[rng.Intn(n)], ids[rng.Intn(n)]})
 				_ = r.Rank(ids[rng.Intn(n)])
 			}
 		}(int64(g + 1))
@@ -103,7 +121,7 @@ func TestRanking_PromoteConcurrent(t *testing.T) {
 
 func TestRanking_SaveLoadRoundTrip(t *testing.T) {
 	r := NewRanking()
-	r.Promote(r.order[10]) // perturb the order
+	r.PromoteAll([]CardID{r.order[10]}) // perturb the order
 	path := filepath.Join(t.TempDir(), "ranking.json")
 	if err := r.Save(path); err != nil {
 		t.Fatalf("Save: %v", err)

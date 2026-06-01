@@ -158,22 +158,21 @@ type AdaptiveRoundConfig struct {
 	Cache           *Cache            // shared hand-eval cache; nil → a fresh one
 }
 
-// RankRecorder is fed the card a value-increasing swap mutated into the deck, so the search can
-// promote it in a persistent recency ranking. nil disables recording.
+// RankRecorder is fed the cards of a deck a swap just improved, so the search can promote the whole
+// deck in a persistent recency ranking. nil disables recording.
 type RankRecorder interface {
-	Promote(id ids.CardID)
+	PromoteAll(cardIDs []ids.CardID)
 }
 
-// recordImprovement promotes the card a single-swap mutation added to the deck, so a card that just
-// earned a slot rises in the ranking. Weapon / pair mutations have no single added card and are
-// skipped; a nil recorder is a no-op. The caller gates the call on a value-increasing accept.
-func recordImprovement(recorder RankRecorder, mut deck.Mutation) {
+// recordImprovement promotes every card of the improved deck, so the deck — staples included — leads
+// the ranking and a later run inherits it. A nil recorder is a no-op. The caller gates the call on a
+// value-increasing accept.
+func recordImprovement(recorder RankRecorder, improved *deck.Deck) {
 	if recorder == nil {
 		return
 	}
-	if added, _, ok := mut.Swap(); ok {
-		recorder.Promote(added)
-	}
+	deckIDs, _ := improved.UniqueIDs()
+	recorder.PromoteAll(deckIDs)
 }
 
 // RunMutationRoundAdaptive runs one mutation round with SPRT screening + coupled confirm.
@@ -312,10 +311,10 @@ func runAdaptiveWorker(ctx context.Context, cancel context.CancelFunc, cfg Adapt
 		if mutAvg-incAvg <= tau {
 			continue // screen false-accept — the confirm clears it, preserving termination
 		}
-		// Confirmed accept. Promote the added card only when it actually raised the deck's value —
-		// an SA step accepted below the incumbent (downhill) is not a vote for the card.
+		// Confirmed accept. Promote the whole deck only when the swap actually raised its value — an
+		// SA step accepted below the incumbent (downhill) is not a vote for these cards.
 		if mutAvg > incAvg {
-			recordImprovement(cfg.Recorder, cfg.Mutations[i])
+			recordImprovement(cfg.Recorder, d)
 		}
 		select {
 		case improvementCh <- mutationImprovement{idx: i, avg: mutAvg, candidate: d, stats: stats}:
