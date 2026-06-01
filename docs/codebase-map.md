@@ -85,7 +85,8 @@ mydecks/           Local working deck files (untracked by git)
   interface whose `IsCardLegal` predicate filters the card pool, backed by the hardcoded
   banlist in `banlist.go`. Hero-agnostic — class/talent legality is the registry's job.
 - **internal/registry** — The master roster of every implemented card, weapon, and hero,
-  providing ID/name lookups and the marker- and format-filtered deck-construction pools.
+  providing ID/name lookups and the deck-construction pools filtered by marker, format
+  banlist, and the hero's class / talents (`LegalCardsFor` / `LegalWeaponsFor`).
 
 ### Simulation engine
 
@@ -110,9 +111,10 @@ mydecks/           Local working deck files (untracked by git)
 
 ### Deck, heroes, weapons
 
-- **internal/deck** — A candidate deck (hero, weapons, card list, sideboard) plus the
+- **internal/deck** — A candidate deck (hero, format, weapons, card list, sideboard) plus the
   single-slot and synergy-pair mutation enumeration the anneal search drives over, and the
-  per-deck `Stats` result types.
+  per-deck `Stats` result types. Hero and format are durable attributes that scope the legal
+  pool the mutation enumeration draws from.
 - **internal/hero** — The `Hero` interface a hero card satisfies and the narrow engine
   surfaces its abilities consume; concrete heroes (currently Viserai) live in `heroes/`.
 - **internal/weapon** — The platonic weapon `Card` plus the mutable engine-side `Weapon`

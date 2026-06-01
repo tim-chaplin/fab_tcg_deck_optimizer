@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/format"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/gameengine"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/hero/heroes"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry"
@@ -102,7 +103,7 @@ func BenchmarkEvalRandomDeck(b *testing.B) {
 	)
 	gameengine.MaxDeckSize = deckSize
 	rng := rand.New(rand.NewSource(seed))
-	loaded := deck.Random(heroes.Viserai, deckSize, maxCopies, rng, registry.Registry{})
+	loaded := deck.Random(heroes.Viserai, format.SilverAge, deckSize, maxCopies, rng, registry.Registry{})
 	ev := sim.NewEvaluator()
 
 	b.ReportAllocs()

@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/format"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/hero/heroes"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
@@ -21,7 +22,7 @@ func TestEvalCacheEquivalence_Seed3307073355315735355(t *testing.T) {
 		shuffles  = 16
 	)
 	setupRNG := rand.New(rand.NewSource(3307073355315735355))
-	baseline := deck.Random(heroes.Viserai, deckSize, maxCopies, setupRNG, registry.Registry{})
+	baseline := deck.Random(heroes.Viserai, format.SilverAge, deckSize, maxCopies, setupRNG, registry.Registry{})
 	cached := sim.NewEvaluator().Evaluate(baseline.Copy(), shuffles, sim.Matchup{IncomingPhysicalDamage: incoming}, rand.New(rand.NewSource(99)))
 	uncached := sim.NewEvaluatorWithoutCache().Evaluate(baseline.Copy(), shuffles, sim.Matchup{IncomingPhysicalDamage: incoming}, rand.New(rand.NewSource(99)))
 	if cached.Hands != uncached.Hands || cached.TotalValue != uncached.TotalValue {
@@ -41,7 +42,7 @@ func TestRunDefense_DRGraveyardCarriesBetweenDRs_Seed6556227072949927836(t *test
 		shuffles  = 20
 	)
 	setupRNG := rand.New(rand.NewSource(6556227072949927836))
-	baseline := deck.Random(heroes.Viserai, deckSize, maxCopies, setupRNG, registry.Registry{})
+	baseline := deck.Random(heroes.Viserai, format.SilverAge, deckSize, maxCopies, setupRNG, registry.Registry{})
 	sim.NewEvaluator().Evaluate(baseline.Copy(), shuffles, sim.Matchup{IncomingPhysicalDamage: incoming}, rand.New(rand.NewSource(99)))
 	sim.NewEvaluatorWithoutCache().Evaluate(baseline.Copy(), shuffles, sim.Matchup{IncomingPhysicalDamage: incoming}, rand.New(rand.NewSource(99)))
 }

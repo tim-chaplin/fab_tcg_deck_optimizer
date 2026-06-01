@@ -13,6 +13,7 @@ import (
 	"strings"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/format"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry"
 )
 
@@ -85,6 +86,9 @@ func UnmarshalFabrary(text string) (*deck.Deck, map[string]int, error) {
 		return nil, nil, fmt.Errorf("fabrary: unknown hero %q", heroName)
 	}
 	d := deck.New(h, weapons, cardList)
+	// The fabrary Format header carries a display label ("Silver Age"), not the stable name.
+	// Silver Age is the only format, so imports adopt it; revisit when a second format lands.
+	d.Format = format.SilverAge
 	d.Sideboard = sideboard
 	d.Equipment = equipment
 	return d, skipped, nil

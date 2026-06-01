@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/format"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/hero/heroes"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry"
 )
@@ -13,7 +14,7 @@ import (
 // mutation order follows the ranking (non-decreasing rank), and at T>=1 it's fully shuffled.
 func TestBuildRoundMutations_TemperatureWidensShuffle(t *testing.T) {
 	rng := rand.New(rand.NewSource(1))
-	d := deck.Random(heroes.Viserai, 40, 2, rng, registry.Registry{})
+	d := deck.Random(heroes.Viserai, format.SilverAge, 40, 2, rng, registry.Registry{})
 	cfg := annealConfig{maxCopies: 2}
 	ranking := registry.NewRanking()
 

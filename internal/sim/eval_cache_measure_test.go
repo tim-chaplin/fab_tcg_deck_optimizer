@@ -17,6 +17,7 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card/cards"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/format"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/gameengine"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/hero/heroes"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry"
@@ -98,7 +99,7 @@ func TestEvalCache_ParallelEquivalentToSequential(t *testing.T) {
 		numWorkers = 4
 	)
 	setupRNG := rand.New(rand.NewSource(123))
-	baseline := deck.Random(heroes.Viserai, deckSize, maxCopies, setupRNG, registry.Registry{})
+	baseline := deck.Random(heroes.Viserai, format.SilverAge, deckSize, maxCopies, setupRNG, registry.Registry{})
 
 	// Parallel pulls a per-worker seed from rng.Int63(); pre-extract the same int64s so the
 	// per-worker RNGs are byte-identical and the sequential aggregate matches one parallel
@@ -205,7 +206,7 @@ func TestEvalCache_EquivalenceWithUncached(t *testing.T) {
 		shuffles  = 100
 	)
 	setupRNG := rand.New(rand.NewSource(123))
-	baseline := deck.Random(heroes.Viserai, deckSize, maxCopies, setupRNG, registry.Registry{})
+	baseline := deck.Random(heroes.Viserai, format.SilverAge, deckSize, maxCopies, setupRNG, registry.Registry{})
 
 	cached := baseline.Copy()
 	cachedStats := NewEvaluator().Evaluate(cached, shuffles, Matchup{IncomingPhysicalDamage: incoming}, rand.New(rand.NewSource(99)))

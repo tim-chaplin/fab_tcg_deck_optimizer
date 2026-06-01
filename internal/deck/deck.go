@@ -9,6 +9,7 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/format"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/ids"
 )
 
@@ -24,7 +25,13 @@ import (
 // The field is unexported; composition inspection goes through UniqueIDs / NameCounts /
 // DisplayNames / PitchCounts.
 type Deck struct {
-	Hero      Hero
+	Hero Hero
+	// Format is the constructed format the deck is built and optimized for. Together with
+	// Hero it scopes the legal card pool (Registry.LegalCardsFor); both are durable deck
+	// attributes that persist with the deck. New defaults it to format.SilverAge; Random and
+	// the textio loaders set it explicitly. Empty-wrapper constructors (NewShallowSafe, the
+	// nil-receiver Copy) leave it nil until rebound from a source deck.
+	Format    format.Format
 	Weapons   []Weapon
 	cards     []Card
 	Sideboard []string
@@ -79,11 +86,13 @@ func (d *Deck) Count(id ids.CardID) int {
 }
 
 // New constructs a Deck. Panics if the weapon loadout violates the "0–2 weapons; if 2, both
-// 1H" equipment rule. Sideboard and Equipment start empty; callers assign them directly when
-// carrying them over.
+// 1H" equipment rule. Format defaults to format.SilverAge (the only format today) so a
+// New-built deck always has a non-nil format for the mutation pool; callers building for a
+// specific format set Format afterwards (Random and the textio loaders do). Sideboard and
+// Equipment start empty; callers assign them directly when carrying them over.
 func New(h Hero, weapons []Weapon, cards []Card) *Deck {
 	validateWeapons(weapons)
-	return &Deck{Hero: h, Weapons: weapons, cards: cards}
+	return &Deck{Hero: h, Format: format.SilverAge, Weapons: weapons, cards: cards}
 }
 
 // NewShallowSafe returns an empty *Deck wrapper marked mustNotShuffle, ready to be
@@ -136,7 +145,7 @@ func (d *Deck) Copy() *Deck {
 	if d == nil {
 		return &Deck{}
 	}
-	out := &Deck{Hero: d.Hero}
+	out := &Deck{Hero: d.Hero, Format: d.Format}
 	if len(d.Weapons) > 0 {
 		out.Weapons = append(make([]Weapon, 0, len(d.Weapons)), d.Weapons...)
 	}
@@ -160,7 +169,7 @@ func (d *Deck) ShallowCopy() *Deck {
 	if d == nil {
 		return &Deck{}
 	}
-	out := &Deck{Hero: d.Hero, mustNotShuffle: true}
+	out := &Deck{Hero: d.Hero, Format: d.Format, mustNotShuffle: true}
 	if len(d.cards) > 0 {
 		out.cards = d.cards[:len(d.cards):len(d.cards)]
 	}
@@ -178,6 +187,7 @@ func (d *Deck) ShallowCopy() *Deck {
 func (d *Deck) ShallowCopyFrom(src *Deck) {
 	if src == nil {
 		d.Hero = nil
+		d.Format = nil
 		d.cards = nil
 		d.Weapons = nil
 		d.Sideboard = nil
@@ -185,6 +195,7 @@ func (d *Deck) ShallowCopyFrom(src *Deck) {
 		return
 	}
 	d.Hero = src.Hero
+	d.Format = src.Format
 	if len(src.cards) > 0 {
 		d.cards = src.cards[:len(src.cards):len(src.cards)]
 	} else {
@@ -200,20 +211,23 @@ func (d *Deck) ShallowCopyFrom(src *Deck) {
 }
 
 // CopyFrom provides a memory-efficient way to copy a Deck by reusing an already-allocated
-// Deck (the receiver) that's no longer needed: d's cards / Weapons / Hero are overwritten
-// from src, reusing d's existing slice backing arrays when they have enough capacity.
-// Sideboard and Equipment are skipped. Callers that need a full deep copy should use Copy.
+// Deck (the receiver) that's no longer needed: d's cards / Weapons / Hero / Format are
+// overwritten from src, reusing d's existing slice backing arrays when they have enough
+// capacity. Sideboard and Equipment are skipped. Callers that need a full deep copy should
+// use Copy.
 //
 // d must be a non-nil receiver. A nil src is treated as an empty deck — d's slice lengths
-// drop to 0 (backings retained) and Hero zeroes.
+// drop to 0 (backings retained) and Hero / Format zero.
 func (d *Deck) CopyFrom(src *Deck) {
 	if src == nil {
 		d.Hero = nil
+		d.Format = nil
 		d.cards = d.cards[:0]
 		d.Weapons = d.Weapons[:0]
 		return
 	}
 	d.Hero = src.Hero
+	d.Format = src.Format
 	if cap(d.cards) >= len(src.cards) {
 		d.cards = append(d.cards[:0], src.cards...)
 	} else {
@@ -392,21 +406,21 @@ func (d *Deck) ApplyDefaults(defaults Defaults) {
 	}
 }
 
-// Random generates a random legal deck for h: a random weapon loadout from
-// reg.LegalWeapons (one 2H or two 1H; dual-wielding the same weapon allowed) and size
-// cards drawn uniformly from reg.LegalCards one at a time, skipping any roll that would
-// exceed maxCopies for the picked card's ID.
-func Random(h Hero, size, maxCopies int, rng *rand.Rand, reg Registry) *Deck {
+// Random generates a random legal deck for hero h in format f: a random weapon loadout from
+// reg.LegalWeaponsFor (one 2H or two 1H; dual-wielding the same weapon allowed) and size
+// cards drawn uniformly from reg.LegalCardsFor one at a time, skipping any roll that would
+// exceed maxCopies for the picked card's ID. The deck's Format is set to f.
+func Random(h Hero, f format.Format, size, maxCopies int, rng *rand.Rand, reg Registry) *Deck {
 	if maxCopies < 1 {
 		panic(fmt.Sprintf("deck: Random requires maxCopies >= 1 (got %d)", maxCopies))
 	}
-	loadouts := weaponLoadouts(reg.LegalWeapons())
+	loadouts := weaponLoadouts(reg.LegalWeaponsFor(f, h))
 	if len(loadouts) == 0 {
 		panic("deck: Random has no legal weapon loadouts — registry rejected every weapon")
 	}
 	weapons := loadouts[rng.Intn(len(loadouts))]
 
-	pool := reg.LegalCards()
+	pool := reg.LegalCardsFor(f, h)
 	if len(pool) == 0 {
 		panic("deck: Random has no legal cards — cannot build a deck")
 	}
@@ -420,7 +434,9 @@ func Random(h Hero, size, maxCopies int, rng *rand.Rand, reg Registry) *Deck {
 		counts[c.ID()]++
 		picks = append(picks, c)
 	}
-	return New(h, weapons, picks)
+	d := New(h, weapons, picks)
+	d.Format = f
+	return d
 }
 
 // effectiveMaxCopies returns 1 for Legendary cards and maxCopies otherwise.

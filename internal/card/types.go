@@ -21,6 +21,7 @@ const (
 	TypeHero                                 // "Hero"
 	TypeInstant                              // "Instant"
 	TypeItem                                 // "Item"
+	TypeLightning                            // "Lightning" — a talent (Aurora et al.)
 	TypeOneHand                              // "1H"
 	TypeResource                             // "Resource"
 	TypeRevered                              // "Revered" — hero-only; Rosetta crowd-cheer keyword

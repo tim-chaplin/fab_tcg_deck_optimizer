@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/format"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/gameengine"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/hero/heroes"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry"
@@ -21,7 +22,7 @@ func TestPrepareBaseline_AlwaysRescoresLoadedDeck(t *testing.T) {
 	path := filepath.Join(t.TempDir(), "deck.json")
 
 	rng := rand.New(rand.NewSource(1))
-	d := deck.Random(heroes.Viserai, 40, 2, rng, registry.Registry{})
+	d := deck.Random(heroes.Viserai, format.SilverAge, 40, 2, rng, registry.Registry{})
 	staleStats := deck.Stats{Runs: 50000, Hands: 100, TotalValue: 999} // saved avg 9.99
 	if err := writeDeck(d, staleStats, path); err != nil {
 		t.Fatalf("seed writeDeck: %v", err)

@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/format"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/hero/heroes"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry"
 )
@@ -17,7 +18,7 @@ func BenchmarkEvaluate_BestSequence(b *testing.B) {
 		shuffles  = 200
 	)
 	setupRNG := rand.New(rand.NewSource(123))
-	baseline := deck.Random(heroes.Viserai, deckSize, maxCopies, setupRNG, registry.Registry{})
+	baseline := deck.Random(heroes.Viserai, format.SilverAge, deckSize, maxCopies, setupRNG, registry.Registry{})
 
 	b.ReportAllocs()
 	b.ResetTimer()

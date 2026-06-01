@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/format"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/gameengine"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/hero/heroes"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry"
@@ -58,7 +59,7 @@ func BenchmarkAnnealFromScratch(b *testing.B) {
 	for n := 0; n < b.N; n++ {
 		b.StopTimer()
 		rng := rand.New(rand.NewSource(42))
-		current := deck.Random(heroes.Viserai, deckSize, maxCopies, rng, registry.Registry{})
+		current := deck.Random(heroes.Viserai, format.SilverAge, deckSize, maxCopies, rng, registry.Registry{})
 		currentAvg := sim.NewEvaluatorParallel(sim.DefaultWorkers()).
 			Evaluate(current, shuffles, cfg.matchup, rng).Mean()
 		cache := sim.NewCacheBounded(annealCacheCapacity)

@@ -7,6 +7,7 @@ import (
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/format"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/gameengine"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/hero/heroes"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry"
@@ -24,7 +25,7 @@ func TestBestSequence_PermutationOrderInvariance(t *testing.T) {
 	gen := rand.New(rand.NewSource(time.Now().UnixNano()))
 	for h := 0; h < hands; h++ {
 		setupSeed := gen.Int63()
-		baseline := deck.Random(heroes.Viserai, deckSize, maxCopies, rand.New(rand.NewSource(setupSeed)), registry.Registry{})
+		baseline := deck.Random(heroes.Viserai, format.SilverAge, deckSize, maxCopies, rand.New(rand.NewSource(setupSeed)), registry.Registry{})
 		d := baseline.Copy()
 		d.Shuffle(rand.New(rand.NewSource(setupSeed ^ 0xdeadbeef)))
 
