@@ -14,8 +14,8 @@ package fabtype
 var ClassNames = map[string]bool{
 	"Adjudicator": true, "Assassin": true, "Bard": true, "Brute": true, "Generic": true,
 	"Guardian": true, "Illusionist": true, "Mechanologist": true, "Merchant": true,
-	"Monarch": true, "Necromancer": true, "Ninja": true, "Pirate": true, "Ranger": true,
-	"Runeblade": true, "Shapeshifter": true, "Warrior": true, "Wizard": true,
+	"Necromancer": true, "Ninja": true, "Pirate": true, "Ranger": true, "Runeblade": true,
+	"Shapeshifter": true, "Thief": true, "Warrior": true, "Wizard": true,
 }
 
 // ClassMatches reports whether a type-line word is class-legal for a hero whose classes are
@@ -31,11 +31,11 @@ func ClassMatches(word string, heroClasses map[string]bool) bool {
 }
 
 // TalentNames is every talent word. A card carrying one is illegal for a hero who lacks that
-// talent. Royal is intentionally absent — it's a supertype, not a talent (Royal Generics like
-// Imperial Seal of Command stay broadly legal).
+// talent.
 var TalentNames = map[string]bool{
 	"Chaos": true, "Draconic": true, "Earth": true, "Elemental": true,
-	"Ice": true, "Light": true, "Lightning": true, "Shadow": true,
+	"Ice": true, "Light": true, "Lightning": true, "Mystic": true,
+	"Revered": true, "Reviled": true, "Royal": true, "Shadow": true,
 }
 
 // NonDeckTypes is every printed card type that never enters the 40-card deck — equipment slots,
@@ -47,8 +47,17 @@ var NonDeckTypes = map[string]bool{
 
 // UnmodeledTypes is NonDeckTypes minus Weapon: the printed card types the optimizer doesn't
 // simulate. Weapons are excluded because the deck model *does* carry a weapon slot
-// (registry.LegalWeaponsFor) — a Lightning weapon is implementable, a Lightning equipment isn't.
-var UnmodeledTypes = map[string]bool{
-	"Equipment": true, "Hero": true, "Demi-Hero": true,
-	"Token": true, "Landmark": true, "Mentor": true, "Ally": true, "Macro": true,
+// (registry.LegalWeaponsFor) — a Lightning weapon is implementable, a Lightning equipment
+// isn't. Derived from NonDeckTypes so the two can't drift.
+var UnmodeledTypes = without(NonDeckTypes, "Weapon")
+
+// without returns a copy of set with the named key removed.
+func without(set map[string]bool, key string) map[string]bool {
+	out := make(map[string]bool, len(set))
+	for k := range set {
+		if k != key {
+			out[k] = true
+		}
+	}
+	return out
 }

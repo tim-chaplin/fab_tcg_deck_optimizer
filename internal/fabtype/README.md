@@ -7,10 +7,14 @@ column.
 ## Key values
 
 - `ClassNames` — every hero class word (Runeblade, Wizard, …; Generic included).
-- `TalentNames` — every talent word (Lightning, Shadow, Earth, …). Royal is intentionally
-  absent — it's a supertype, not a talent.
+- `TalentNames` — every talent word (Lightning, Shadow, Mystic, Royal, Revered, Reviled, …).
+- `ClassMatches(word, heroClasses)` — class-legality for a single type word: Generic and
+  non-class words always pass; a real class passes only for a hero that plays it. Generic is
+  built in, so callers pass only the hero's own class(es).
 - `NonDeckTypes` — printed card types that never enter the deck (Weapon, Equipment, Hero,
   Token, Landmark, …).
+- `UnmodeledTypes` — `NonDeckTypes` minus `Weapon`: the types the optimizer doesn't model
+  (it does model the weapon slot).
 
 ## Why it's separate from the engine
 
