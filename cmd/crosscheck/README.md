@@ -14,6 +14,11 @@ against `registry.LegalCardsFor(SilverAge, Viserai)`. Each difference is annotat
 - **[B] In our pool but not official-legal** — cards we'd let Viserai run that the official
   query doesn't return (a recent banlist change, a non-deck/talented typebox, or a name
   mismatch). Empty is the healthy state.
+- **[C] Stale bans** — entries on our `internal/format` banlist the official API now lists as
+  legal. These should be removed from `banlist.go`. Catches banlist drift automatically so we
+  don't discover it via a third-party site. (This is the only check that needs the full
+  all-classes SA-legal set; [A]/[B] query per class so the API filters server-side.) Empty is
+  healthy.
 
 ## Run
 

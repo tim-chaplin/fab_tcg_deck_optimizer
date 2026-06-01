@@ -32,6 +32,34 @@ func TestSilverAgeIsCardLegal_Legal(t *testing.T) {
 	}
 }
 
+// TestBannedNames checks the banlist accessor returns sorted names including a known ban and
+// excluding a legal card.
+func TestBannedNames(t *testing.T) {
+	names := SilverAge.BannedNames()
+	if len(names) == 0 {
+		t.Fatal("BannedNames returned empty")
+	}
+	for i := 1; i < len(names); i++ {
+		if names[i-1] > names[i] {
+			t.Errorf("BannedNames not sorted: %q before %q", names[i-1], names[i])
+		}
+	}
+	has := func(n string) bool {
+		for _, x := range names {
+			if x == n {
+				return true
+			}
+		}
+		return false
+	}
+	if !has("Ball Lightning") {
+		t.Error("BannedNames missing a known banned card (Ball Lightning)")
+	}
+	if has("Aether Slash") {
+		t.Error("BannedNames includes a legal card (Aether Slash)")
+	}
+}
+
 // TestParse covers the known format and the self-describing error on an unknown one.
 func TestParse(t *testing.T) {
 	f, err := Parse("silver_age")

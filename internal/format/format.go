@@ -8,7 +8,10 @@
 // not its behaviour, so it stays decoupled from internal/card.
 package format
 
-import "fmt"
+import (
+	"fmt"
+	"sort"
+)
 
 // Card is the minimal view a Format needs of a card to judge legality: just its printed
 // name, which is what a banlist keys on. Declared locally so format stays decoupled from
@@ -32,6 +35,8 @@ type Format interface {
 	// IsCardLegal reports whether c is legal in this format — today, that its name is not on
 	// the format's banlist.
 	IsCardLegal(c Card) bool
+	// BannedNames returns the card names this format bans, sorted.
+	BannedNames() []string
 }
 
 // SilverAge is the current live format. Its banlist is silverAgeBanlist in banlist.go.
@@ -47,6 +52,16 @@ func (silverAge) DisplayName() string { return "Silver Age" }
 func (silverAge) IsCardLegal(c Card) bool {
 	_, banned := silverAgeBanlist[c.Name()]
 	return !banned
+}
+
+// BannedNames returns the Silver Age banned card names, sorted.
+func (silverAge) BannedNames() []string {
+	out := make([]string, 0, len(silverAgeBanlist))
+	for name := range silverAgeBanlist {
+		out = append(out, name)
+	}
+	sort.Strings(out)
+	return out
 }
 
 // Parse converts a CLI flag value to a Format. Unknown values return an error listing the
