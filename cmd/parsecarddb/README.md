@@ -35,7 +35,8 @@ Flags:
 - `-any-talent` — ignore `-talents` and admit cards carrying any talent.
 - `-require-talents` — comma-separated talents; admit only cards carrying at least one (e.g.
   to list just the Lightning cards in a pool).
-- `-deck-only` — exclude non-deck card types (weapons, equipment, heroes, tokens, landmarks).
+- `-modeled` — keep only card types the optimizer models — deck cards **and weapons** —
+  dropping equipment, heroes, tokens, and landmarks.
 - `-silver-age` — require Silver Age legality (default true).
 - `-exclude-banned` — drop cards on our `internal/format` Silver Age banlist.
 - `-format` — `pretty` (default) or `json`.
@@ -44,12 +45,12 @@ Flags:
 ### Examples
 
 ```
-# Viserai's pool (Runeblade + Generic, no talent):
-go run ./cmd/parsecarddb -classes Runeblade -deck-only -names_only
+# Viserai's pool (Runeblade + Generic, no talent, incl. weapons):
+go run ./cmd/parsecarddb -classes Runeblade -modeled -names_only
 
-# Aurora's Lightning cards worth implementing (drops banned):
+# Aurora's Lightning cards worth implementing (incl. weapons, drops banned):
 go run ./cmd/parsecarddb -classes Runeblade -talents Lightning -require-talents Lightning \
-  -deck-only -exclude-banned -names_only
+  -modeled -exclude-banned -names_only
 ```
 
 ## Important files

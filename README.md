@@ -200,7 +200,7 @@ Helper tool for exploring the upstream card database and enumerating a hero's le
 
 ```
 go run ./cmd/parsecarddb -names_only                          # every Silver-Age no-talent card
-go run ./cmd/parsecarddb -classes Runeblade -talents Lightning -deck-only   # Aurora's pool
+go run ./cmd/parsecarddb -classes Runeblade -talents Lightning -modeled   # Aurora's pool
 ```
 
 ## Tests

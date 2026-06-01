@@ -32,3 +32,11 @@ var NonDeckTypes = map[string]bool{
 	"Weapon": true, "Equipment": true, "Hero": true, "Demi-Hero": true,
 	"Token": true, "Landmark": true, "Mentor": true, "Ally": true, "Macro": true,
 }
+
+// UnmodeledTypes is NonDeckTypes minus Weapon: the printed card types the optimizer doesn't
+// simulate. Weapons are excluded because the deck model *does* carry a weapon slot
+// (registry.LegalWeaponsFor) — a Lightning weapon is implementable, a Lightning equipment isn't.
+var UnmodeledTypes = map[string]bool{
+	"Equipment": true, "Hero": true, "Demi-Hero": true,
+	"Token": true, "Landmark": true, "Mentor": true, "Ally": true, "Macro": true,
+}

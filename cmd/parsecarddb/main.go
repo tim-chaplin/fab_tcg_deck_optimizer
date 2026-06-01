@@ -173,7 +173,7 @@ type poolFilter struct {
 	talents       map[string]bool // allowed talents (card talents must be a subset)
 	anyTalent     bool            // ignore the talent subset check entirely
 	require       map[string]bool // card must carry at least one of these talents (empty = none)
-	deckOnly      bool            // exclude non-deck card types (weapons, equipment, tokens, …)
+	modeled       bool            // keep only card types the optimizer models (deck cards + weapons)
 	silverAge     bool            // require Silver Age legality (the card.csv column)
 	excludeBanned bool            // drop cards on our internal/format Silver Age banlist
 }
@@ -208,7 +208,8 @@ func (f poolFilter) matches(c Card) bool {
 	words := typeWords(c.Types)
 	gotTalent := false
 	for _, w := range words {
-		if f.deckOnly && fabtype.NonDeckTypes[w] {
+		// The optimizer models deck cards and weapons but not equipment / tokens / etc.
+		if f.modeled && fabtype.UnmodeledTypes[w] {
 			return false
 		}
 		// Class: every class word other than Generic must be one the hero plays.
@@ -250,7 +251,7 @@ func main() {
 	talents := flag.String("talents", "", "comma-separated allowed talents; a card's talents must be a subset, so 'Lightning' admits no-talent and Lightning cards. Empty = no-talent cards only.")
 	anyTalent := flag.Bool("any-talent", false, "ignore -talents and admit cards carrying any talent")
 	requireTalents := flag.String("require-talents", "", "comma-separated talents; admit only cards carrying at least one (e.g. 'Lightning' to list just the Lightning cards in a pool)")
-	deckOnly := flag.Bool("deck-only", false, "exclude non-deck card types (weapons, equipment, heroes, tokens, landmarks)")
+	modeled := flag.Bool("modeled", false, "keep only card types the optimizer models — deck cards and weapons — dropping equipment, heroes, tokens, and landmarks")
 	silverAge := flag.Bool("silver-age", true, "require Silver Age legality (the card.csv 'Silver Age Legal' column)")
 	excludeBanned := flag.Bool("exclude-banned", false, "drop cards on our internal/format Silver Age banlist (the cards not worth implementing)")
 	outFormat := flag.String("format", "pretty", "output format: pretty | json")
@@ -270,7 +271,7 @@ func main() {
 		talents:       toSet(*talents),
 		anyTalent:     *anyTalent,
 		require:       toSet(*requireTalents),
-		deckOnly:      *deckOnly,
+		modeled:       *modeled,
 		silverAge:     *silverAge,
 		excludeBanned: *excludeBanned,
 	}

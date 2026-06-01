@@ -37,8 +37,9 @@ func TestPoolFilterMatches(t *testing.T) {
 		{"require lightning: no-talent excluded", poolFilter{classes: set("Runeblade"), talents: set("Lightning"), require: set("Lightning")}, card("Runeblade, Action"), false},
 		// any-talent ignores the subset check.
 		{"any-talent admits shadow", poolFilter{anyTalent: true}, card("Shadow, Runeblade, Aura"), true},
-		// deck-only drops non-deck types.
-		{"deck-only drops weapon", poolFilter{deckOnly: true}, card("Runeblade, Weapon, Sword"), false},
+		// modeled keeps weapons (the optimizer models them) but drops unmodeled types.
+		{"modeled keeps weapon", poolFilter{modeled: true}, card("Runeblade, Weapon, Sword"), true},
+		{"modeled drops equipment", poolFilter{modeled: true}, card("Generic, Equipment, Arms"), false},
 		// silver-age gate.
 		{"silver-age drops illegal", poolFilter{silverAge: true}, Card{Name: "X", Types: "Generic, Action", SilverAgeLegal: "No"}, false},
 		{"empty classes = any class", poolFilter{}, card("Warrior, Action"), true},
