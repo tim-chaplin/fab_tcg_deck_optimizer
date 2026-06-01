@@ -23,6 +23,9 @@ this package.
 - Fabrary plain text (fabrary.net import / export): `MarshalFabrary(d)` writes the text,
   `UnmarshalFabrary(text)` parses it. Stats are not part of the fabrary format — they
   round-trip through the JSON encoding only.
+- Upstream card database (read-only): `LoadCardCSV(path)` parses the the-fab-cube `card.csv`
+  into `CardCSV` rows (`cardcsv.go`). Unlike the deck encodings it doesn't touch the registry;
+  it's the shared reader for the card-data tools (`cmd/parsecarddb`, `cmd/cardaudit`).
 - Path resolution: `MydecksPath(name)` returns `mydecks/<name>.json` (a trailing `.json`
   on the name is stripped); `ValidateMydecksName` rejects path-traversal and
   Windows-reserved characters. `MydecksDir` is the relative directory constant.
@@ -36,6 +39,7 @@ this package.
 - `fabrary_marshal.go` / `fabrary_unmarshal.go` / `fabrary_names.go` — the fabrary text
   encoding and its pitch-suffix name canonicalisation.
 - `mydecks.go` — `mydecks/` path resolution and name validation.
+- `cardcsv.go` — `CardCSV` row type + `LoadCardCSV` for the upstream the-fab-cube `card.csv`.
 
 ## Gotchas
 

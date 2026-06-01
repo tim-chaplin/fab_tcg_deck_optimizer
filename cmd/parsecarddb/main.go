@@ -5,7 +5,6 @@
 package main
 
 import (
-	"encoding/csv"
 	"encoding/json"
 	"flag"
 	"fmt"
@@ -15,6 +14,7 @@ import (
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/fabtype"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/format"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/textio"
 )
 
 // named adapts a card name to the format.Card interface (just Name()) so the banlist check can
@@ -22,144 +22,6 @@ import (
 type named string
 
 func (n named) Name() string { return string(n) }
-
-// Card mirrors the columns of card.csv (csvs/english/card.csv in the-fab-cube source repo).
-// One CSV row = one Card.
-type Card struct {
-	UniqueID                 string
-	Name                     string
-	Color                    string
-	Pitch                    string
-	Cost                     string
-	Power                    string
-	Defense                  string
-	Health                   string
-	Intelligence             string
-	Arcane                   string
-	Types                    string
-	Traits                   string
-	CardKeywords             string
-	AbilitiesAndEffects      string
-	AbilityAndEffectKeywords string
-	GrantedKeywords          string
-	RemovedKeywords          string
-	InteractsWithKeywords    string
-	FunctionalText           string
-	TypeText                 string
-	CardPlayedHorizontally   string
-	BlitzLegal               string
-	CCLegal                  string
-	SilverAgeLegal           string
-	CommonerLegal            string
-	LLLegal                  string
-}
-
-// String pretty-prints a Card, omitting blank fields. Implements fmt.Stringer.
-func (c Card) String() string {
-	var b strings.Builder
-	add := func(label, value string) {
-		if value == "" {
-			return
-		}
-		fmt.Fprintf(&b, "  %-12s %s\n", label+":", value)
-	}
-	fmt.Fprintf(&b, "%s", c.Name)
-	if c.Color != "" {
-		fmt.Fprintf(&b, " (%s)", c.Color)
-	}
-	b.WriteByte('\n')
-	add("Types", c.Types)
-	add("Traits", c.Traits)
-	add("Pitch", c.Pitch)
-	add("Cost", c.Cost)
-	add("Power", c.Power)
-	add("Defense", c.Defense)
-	add("Health", c.Health)
-	add("Intelligence", c.Intelligence)
-	add("Arcane", c.Arcane)
-	add("Keywords", c.CardKeywords)
-	add("Text", c.FunctionalText)
-	add("Type Text", c.TypeText)
-	return b.String()
-}
-
-// cardCSVColumns maps CSV header names to the Card field they populate. When a new column
-// appears upstream, add the mapping here.
-var cardCSVColumns = []struct {
-	Header string
-	Assign func(*Card, string)
-}{
-	{"Unique ID", func(c *Card, v string) { c.UniqueID = v }},
-	{"Name", func(c *Card, v string) { c.Name = v }},
-	{"Color", func(c *Card, v string) { c.Color = v }},
-	{"Pitch", func(c *Card, v string) { c.Pitch = v }},
-	{"Cost", func(c *Card, v string) { c.Cost = v }},
-	{"Power", func(c *Card, v string) { c.Power = v }},
-	{"Defense", func(c *Card, v string) { c.Defense = v }},
-	{"Health", func(c *Card, v string) { c.Health = v }},
-	{"Intelligence", func(c *Card, v string) { c.Intelligence = v }},
-	{"Arcane", func(c *Card, v string) { c.Arcane = v }},
-	{"Types", func(c *Card, v string) { c.Types = v }},
-	{"Traits", func(c *Card, v string) { c.Traits = v }},
-	{"Card Keywords", func(c *Card, v string) { c.CardKeywords = v }},
-	{"Abilities and Effects", func(c *Card, v string) { c.AbilitiesAndEffects = v }},
-	{"Ability and Effect Keywords", func(c *Card, v string) { c.AbilityAndEffectKeywords = v }},
-	{"Granted Keywords", func(c *Card, v string) { c.GrantedKeywords = v }},
-	{"Removed Keywords", func(c *Card, v string) { c.RemovedKeywords = v }},
-	{"Interacts with Keywords", func(c *Card, v string) { c.InteractsWithKeywords = v }},
-	{"Functional Text", func(c *Card, v string) { c.FunctionalText = v }},
-	{"Type Text", func(c *Card, v string) { c.TypeText = v }},
-	{"Card Played Horizontally", func(c *Card, v string) { c.CardPlayedHorizontally = v }},
-	{"Blitz Legal", func(c *Card, v string) { c.BlitzLegal = v }},
-	{"CC Legal", func(c *Card, v string) { c.CCLegal = v }},
-	{"Silver Age Legal", func(c *Card, v string) { c.SilverAgeLegal = v }},
-	{"Commoner Legal", func(c *Card, v string) { c.CommonerLegal = v }},
-	{"LL Legal", func(c *Card, v string) { c.LLLegal = v }},
-}
-
-func loadCards(path string) ([]Card, error) {
-	f, err := os.Open(path)
-	if err != nil {
-		return nil, err
-	}
-	defer f.Close()
-
-	r := csv.NewReader(f)
-	r.Comma = '\t'
-	r.LazyQuotes = true
-	r.FieldsPerRecord = -1
-
-	header, err := r.Read()
-	if err != nil {
-		return nil, err
-	}
-	colIdx := map[string]int{}
-	for i, h := range header {
-		colIdx[h] = i
-	}
-	for _, col := range cardCSVColumns {
-		if _, ok := colIdx[col.Header]; !ok {
-			return nil, fmt.Errorf("csv missing column %q", col.Header)
-		}
-	}
-
-	var cards []Card
-	for {
-		rec, err := r.Read()
-		if err != nil {
-			break
-		}
-		var c Card
-		for _, col := range cardCSVColumns {
-			i := colIdx[col.Header]
-			if i < len(rec) {
-				col.Assign(&c, rec[i])
-			}
-		}
-		cards = append(cards, c)
-	}
-	return cards, nil
-}
 
 // poolFilter is the set of predicates a card must satisfy to appear in the output. The class /
 // talent fields express a hero's legal pool the way registry.heroCanPlay does (Generic and
@@ -190,7 +52,7 @@ func typeWords(types string) []string {
 }
 
 // matches reports whether c passes every predicate in f.
-func (f poolFilter) matches(c Card) bool {
+func (f poolFilter) matches(c textio.CardCSV) bool {
 	if f.nameNeedle != "" && !strings.Contains(strings.ToLower(c.Name), f.nameNeedle) {
 		return false
 	}
@@ -277,12 +139,12 @@ func main() {
 		excludeBanned: *excludeBanned,
 	}
 
-	cards, err := loadCards(*in)
+	cards, err := textio.LoadCardCSV(*in)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	var matched []Card
+	var matched []textio.CardCSV
 	for _, c := range cards {
 		if filter.matches(c) {
 			matched = append(matched, c)

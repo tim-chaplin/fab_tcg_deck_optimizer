@@ -37,6 +37,7 @@ cmd/
   fabsim/          Main CLI: anneal / eval / compare / import
   parsecarddb/     Helper: parse and filter the upstream card database
   crosscheck/      Diagnostic: diff our legal pool against the official cardvault API
+  cardaudit/       Diagnostic: cross-check implemented card stats vs card.csv + the official API
 internal/
   card/            Card interface, CardState, TypeSet, engine-facing contracts
     cards/         Every implemented card (yaml + _gen.go + .go triples)
@@ -132,7 +133,8 @@ mydecks/           Local working deck files (untracked by git)
 
 - **internal/textio** — Durable on-disk text encodings: the canonical `mydecks/*.json`
   deck-plus-stats format and the fabrary.net plain-text import/export format, plus `mydecks/`
-  path resolution.
+  path resolution and a read-only loader for the upstream `card.csv` (`LoadCardCSV`, shared by
+  the card-data tools).
 
 ### CLI and tooling
 
@@ -144,6 +146,10 @@ mydecks/           Local working deck files (untracked by git)
 - **cmd/crosscheck** — A diagnostic that pulls the official cardvault.fabtcg.com card list and
   diffs it against `registry.LegalCardsFor(SilverAge, Viserai)`, flagging cards the official
   site lists that we're missing (and any in our pool it no longer lists). Needs network.
+- **cmd/cardaudit** — A report-only diagnostic that cross-checks every implemented card's yaml
+  stats (cost / power / defense) against both `card.csv` and the official cardvault API,
+  bucketing discrepancies by confidence and suppressing an allowlist of intentional modeling
+  deviations. Needs network.
 
 ### Testing
 
