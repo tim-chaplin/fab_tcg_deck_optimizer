@@ -36,6 +36,7 @@ cmd/
   cardgen/         Generator CLI: regenerates per-card _gen.go from yaml
   fabsim/          Main CLI: anneal / eval / compare / import
   parsecarddb/     Helper: parse and filter the upstream card database
+  crosscheck/      Diagnostic: diff our legal pool against the official cardvault API
 internal/
   card/            Card interface, CardState, TypeSet, engine-facing contracts
     cards/         Every implemented card (yaml + _gen.go + .go triples)
@@ -134,6 +135,9 @@ mydecks/           Local working deck files (untracked by git)
   imports decks, with one `mode_*.go` file per subcommand.
 - **cmd/parsecarddb** — A helper tool that parses and filters the upstream the-fab-cube
   `card.csv`; the preferred way to look up card data and printed text.
+- **cmd/crosscheck** — A diagnostic that pulls the official cardvault.fabtcg.com card list and
+  diffs it against `registry.LegalCardsFor(SilverAge, Viserai)`, flagging cards the official
+  site lists that we're missing (and any in our pool it no longer lists). Needs network.
 
 ### Testing
 
