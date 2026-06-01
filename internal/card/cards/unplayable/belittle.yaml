@@ -6,7 +6,6 @@ types:
 cost: 1
 goAgain: true
 markers:
-    - NotSilverAgeLegal
     - Unplayable
 text: |-
     As an additional cost to play Belittle, you may reveal an attack action card with 3 or

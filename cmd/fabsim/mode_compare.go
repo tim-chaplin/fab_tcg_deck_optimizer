@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/format"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 )
 
@@ -24,14 +25,14 @@ func runCompareCmd(args []string) {
 	incoming := fs.Int("incoming", 0, "opponent damage per turn (required — both decks are re-scored against this value)")
 	arcaneIncoming := fs.Int("arcane-incoming", 0, "opponent arcane damage per turn (defaults to 0 — the non-arcane matchup; raise it to score cards that gate on incoming arcane)")
 	seed := fs.Int64("seed", time.Now().UnixNano(), "RNG seed (each deck builds an independent RNG from this seed)")
-	formatFlag := fs.String("format", string(SilverAge), "constructed format predicate applied to replacement picks when a loaded deck contains NotImplemented cards")
+	formatFlag := fs.String("format", format.SilverAge.Name(), "constructed format predicate applied to replacement picks when a loaded deck contains NotImplemented cards")
 	maxCopies := fs.Int("max-copies", defaultMaxCopies, "maximum copies of any single card printing per deck, applied when replacing NotImplemented cards in a loaded deck")
 	_ = parseFlagsAnywhere(fs, args)
 	if fs.NArg() != 2 {
 		die("compare: need exactly 2 positional deck names (got %d); try `fabsim compare <deck1> <deck2>`", fs.NArg())
 	}
 	requireFlag(fs, "compare", "incoming")
-	fmtValue, err := parseGameplayFormat(*formatFlag)
+	fmtValue, err := format.Parse(*formatFlag)
 	if err != nil {
 		die("%v", err)
 	}
@@ -41,7 +42,7 @@ func runCompareCmd(args []string) {
 // runCompare re-evaluates both decks under identical (shuffles, incoming) settings and
 // prints a side-by-side comparison: pitch counts, mean hand value, per-cycle means, hand-
 // value histograms, and per-card count delta. The header records the matched settings.
-func runCompare(name1, name2 string, shuffles int, mp sim.Matchup, maxCopies int, seed int64, fmtValue GameplayFormat) {
+func runCompare(name1, name2 string, shuffles int, mp sim.Matchup, maxCopies int, seed int64, fmtValue format.Format) {
 	// compare scores both decks at the same fixed -shuffles count so the per-stat comparison
 	// rests on matched conditions.
 	d1, s1, _ := evaluateAndPersist(resolveDeckPath(name1), shuffles, mp, seed, false)

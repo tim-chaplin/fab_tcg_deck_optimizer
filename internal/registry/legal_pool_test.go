@@ -52,6 +52,25 @@ func TestLegalCards_ExcludesTaggedUnplayableByID(t *testing.T) {
 	}
 }
 
+// Tests that the implemented Silver Age banned cards stay out of the pool. These four are the
+// cards whose only pool-exclusion is the format banlist (no NotImplemented / Unplayable
+// marker), so they're the regression guard for legality now flowing through internal/format
+// rather than a per-card NotSilverAgeLegal marker. Exercises the real card Name() against the
+// banlist, so a banlist apostrophe / spelling drift (e.g. Fiddler's Green) fails here.
+func TestLegalCards_ExcludesFormatBanned(t *testing.T) {
+	banned := map[string]bool{
+		"Sirens of Safe Harbor": true,
+		"Plunder Run":           true,
+		"Fiddler's Green":       true,
+		"Fate Foreseen":         true,
+	}
+	for _, c := range (Registry{}).LegalCards() {
+		if banned[c.Name()] {
+			t.Errorf("LegalCards included Silver Age banned card %s", c.DisplayName())
+		}
+	}
+}
+
 // Tests that weapons never leak into LegalCards. Weapons are now full card.Cards sharing
 // the CardID pool with deck cards, but they're equipment, not deck cards — they must not be
 // reachable by the deck builder / mutations as main-deck entries. Weapon-slot mutations use

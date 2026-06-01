@@ -7,24 +7,26 @@ lookups, and the filtered deck-construction pools.
 ## Key types
 
 - `Registry` — the deck-construction view. Zero-sized; `LegalCards` / `LegalWeapons` return
-  the pools with `NotImplemented` / `Unplayable` / `NotSilverAgeLegal` entries filtered out.
+  the pools with `NotImplemented` / `Unplayable` entries and format-banned cards filtered out.
   Satisfies `internal/deck.Registry`; callers pass `Registry{}` to `deck.Random`.
 - `Card` / `Hero` / `Weapon` (`registry.go`) — minimal local interfaces (identity + display
   name, and `Hands` for weapons). The package declares its own narrow interfaces so its
   surface stays decoupled from the sim's richer contracts.
-- `NotImplemented` / `Unplayable` / `NotSilverAgeLegal` (`registry.go`) — marker interfaces.
-  `isExcludedFromPool` matches them structurally to gate cards and weapons out of the
-  construction pools. A `NotImplemented` card is still valid in a pre-built hand (it evaluates
-  on its static stats); the markers only stop the optimizer from introducing the card.
+- `NotImplemented` / `Unplayable` (`registry.go`) — marker interfaces. `isExcludedFromPool`
+  matches them structurally to gate cards and weapons out of the construction pools. A
+  `NotImplemented` card is still valid in a pre-built hand (it evaluates on its static stats);
+  the markers only stop the optimizer from introducing the card. Format legality is *not* a
+  marker — `LegalCards` / `LegalWeapons` apply `format.SilverAge.IsCardLegal` (the
+  `internal/format` banlist) alongside the marker check.
 
 ## Registry / sim split
 
 `internal/registry` declares minimal `Card` / `Hero` / `Weapon` interfaces (identity + display
 name) so its surface stays decoupled from the sim's richer contracts. Concrete card / weapon /
 hero types satisfy both, and callers needing behaviour assert to `card.Card` / `sim.Weapon` /
-`sim.Hero` at the read site. The marker interfaces (`NotImplemented`, `Unplayable`,
-`NotSilverAgeLegal`) are declared locally in both the registry and the sim and matched
-structurally — neither package imports the other.
+`sim.Hero` at the read site. The marker interfaces (`NotImplemented`, `Unplayable`) are
+declared in the registry and matched structurally on the production card / weapon types, so
+the registry stays decoupled from the sim — neither package imports the other.
 
 Callers that need cards / weapons / heroes import `internal/registry` directly and assert to
 `card.Card` / `sim.Weapon` / `sim.Hero` at the read site. `gameengine.AttackStepText`
@@ -65,6 +67,8 @@ card kind, so no caller needs to pre-warm the cache.
   null-check.
 - Name indexes are keyed on `DisplayName`, not bare `Name`, so the three printings of a card
   resolve to distinct IDs.
-- The `NotSilverAgeLegal` set must stay in sync with `data_sources/silver_age_banlist.txt`.
+- The Silver Age banlist lives in `internal/format/banlist.go`; banned names must match a
+  card's `Name()` exactly (straight apostrophe, no pitch suffix) or the card leaks into the
+  pool. `TestLegalCards_ExcludesFormatBanned` guards the implemented banned cards.
 - The registry and the sim never import each other; cross-package contracts are matched
   structurally.

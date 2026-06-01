@@ -20,7 +20,6 @@ func (CountYourBlessingsRed) Attack() int                        { return 0 }
 func (CountYourBlessingsRed) Defense() int                       { return 0 }
 func (CountYourBlessingsRed) Types(card.GameEngine) card.TypeSet { return countYourBlessingsTypes }
 func (CountYourBlessingsRed) GoAgain(card.GameEngine) bool       { return false }
-func (CountYourBlessingsRed) NotSilverAgeLegal()                 {}
 func (CountYourBlessingsRed) Unplayable()                        {}
 
 type CountYourBlessingsYellow struct{}
@@ -34,7 +33,6 @@ func (CountYourBlessingsYellow) Attack() int                        { return 0 }
 func (CountYourBlessingsYellow) Defense() int                       { return 0 }
 func (CountYourBlessingsYellow) Types(card.GameEngine) card.TypeSet { return countYourBlessingsTypes }
 func (CountYourBlessingsYellow) GoAgain(card.GameEngine) bool       { return false }
-func (CountYourBlessingsYellow) NotSilverAgeLegal()                 {}
 func (CountYourBlessingsYellow) Unplayable()                        {}
 
 type CountYourBlessingsBlue struct{}
@@ -48,5 +46,4 @@ func (CountYourBlessingsBlue) Attack() int                        { return 0 }
 func (CountYourBlessingsBlue) Defense() int                       { return 0 }
 func (CountYourBlessingsBlue) Types(card.GameEngine) card.TypeSet { return countYourBlessingsTypes }
 func (CountYourBlessingsBlue) GoAgain(card.GameEngine) bool       { return false }
-func (CountYourBlessingsBlue) NotSilverAgeLegal()                 {}
 func (CountYourBlessingsBlue) Unplayable()                        {}

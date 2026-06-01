@@ -4,8 +4,6 @@ types:
     - Action
 cost: 0
 goAgain: true
-markers:
-    - NotSilverAgeLegal
 text: |-
     The next time an attack action card you control hits this turn, draw a card. If
     Plunder Run is played from arsenal, the next attack action card you play this turn gains

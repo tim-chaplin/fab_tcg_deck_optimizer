@@ -4,7 +4,6 @@ types:
     - Instant
 cost: 0
 markers:
-    - NotSilverAgeLegal
     - Unplayable
 text: Gain 3{h}
 variants:

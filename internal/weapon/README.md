@@ -88,8 +88,7 @@ method.
   +3 power); the model for new weapon files.
 - `weapons/talishar.go` — a self-triggering weapon: its `Play` registers an `EndOfTurn`
   self-destruct via `ge.CreateWeapon`; the model for weapons that subscribe a trigger.
-- `weapons/rosetta_thorn.go` — a `NotImplemented` / `NotSilverAgeLegal`-marked weapon, the
-  marker model.
+- `weapons/rosetta_thorn.go` — a `NotImplemented`-marked weapon, the marker model.
 
 ## Gotchas
 

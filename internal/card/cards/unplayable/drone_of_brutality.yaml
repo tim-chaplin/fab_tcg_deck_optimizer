@@ -5,7 +5,6 @@ types:
     - Attack
 cost: 2
 markers:
-    - NotSilverAgeLegal
     - Unplayable
 text: |-
     If Drone of Brutality would be put into your graveyard from anywhere, instead put it on

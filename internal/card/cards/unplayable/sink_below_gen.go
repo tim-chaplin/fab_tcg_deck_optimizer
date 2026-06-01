@@ -20,7 +20,6 @@ func (SinkBelowRed) Attack() int                        { return 0 }
 func (SinkBelowRed) Defense() int                       { return 4 }
 func (SinkBelowRed) Types(card.GameEngine) card.TypeSet { return sinkBelowTypes }
 func (SinkBelowRed) GoAgain(card.GameEngine) bool       { return false }
-func (SinkBelowRed) NotSilverAgeLegal()                 {}
 func (SinkBelowRed) Unplayable()                        {}
 
 type SinkBelowYellow struct{}
@@ -34,7 +33,6 @@ func (SinkBelowYellow) Attack() int                        { return 0 }
 func (SinkBelowYellow) Defense() int                       { return 3 }
 func (SinkBelowYellow) Types(card.GameEngine) card.TypeSet { return sinkBelowTypes }
 func (SinkBelowYellow) GoAgain(card.GameEngine) bool       { return false }
-func (SinkBelowYellow) NotSilverAgeLegal()                 {}
 func (SinkBelowYellow) Unplayable()                        {}
 
 type SinkBelowBlue struct{}
@@ -48,5 +46,4 @@ func (SinkBelowBlue) Attack() int                        { return 0 }
 func (SinkBelowBlue) Defense() int                       { return 2 }
 func (SinkBelowBlue) Types(card.GameEngine) card.TypeSet { return sinkBelowTypes }
 func (SinkBelowBlue) GoAgain(card.GameEngine) bool       { return false }
-func (SinkBelowBlue) NotSilverAgeLegal()                 {}
 func (SinkBelowBlue) Unplayable()                        {}

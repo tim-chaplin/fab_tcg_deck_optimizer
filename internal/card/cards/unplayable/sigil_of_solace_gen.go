@@ -20,7 +20,6 @@ func (SigilOfSolaceRed) Attack() int                        { return 0 }
 func (SigilOfSolaceRed) Defense() int                       { return 0 }
 func (SigilOfSolaceRed) Types(card.GameEngine) card.TypeSet { return sigilOfSolaceTypes }
 func (SigilOfSolaceRed) GoAgain(card.GameEngine) bool       { return false }
-func (SigilOfSolaceRed) NotSilverAgeLegal()                 {}
 func (SigilOfSolaceRed) Unplayable()                        {}
 
 type SigilOfSolaceYellow struct{}
@@ -34,7 +33,6 @@ func (SigilOfSolaceYellow) Attack() int                        { return 0 }
 func (SigilOfSolaceYellow) Defense() int                       { return 0 }
 func (SigilOfSolaceYellow) Types(card.GameEngine) card.TypeSet { return sigilOfSolaceTypes }
 func (SigilOfSolaceYellow) GoAgain(card.GameEngine) bool       { return false }
-func (SigilOfSolaceYellow) NotSilverAgeLegal()                 {}
 func (SigilOfSolaceYellow) Unplayable()                        {}
 
 type SigilOfSolaceBlue struct{}
@@ -48,5 +46,4 @@ func (SigilOfSolaceBlue) Attack() int                        { return 0 }
 func (SigilOfSolaceBlue) Defense() int                       { return 0 }
 func (SigilOfSolaceBlue) Types(card.GameEngine) card.TypeSet { return sigilOfSolaceTypes }
 func (SigilOfSolaceBlue) GoAgain(card.GameEngine) bool       { return false }
-func (SigilOfSolaceBlue) NotSilverAgeLegal()                 {}
 func (SigilOfSolaceBlue) Unplayable()                        {}

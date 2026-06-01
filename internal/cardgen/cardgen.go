@@ -13,7 +13,7 @@
 //	types: [Runeblade, Action, Attack]
 //	cost: 1                 # int constant; omit (or "variable") for VariableCost cards
 //	goAgain: false          # default false
-//	markers: [Dominator]    # NotImplemented, Unplayable, Dominator, NotSilverAgeLegal
+//	markers: [Dominator]    # NotImplemented, Unplayable, Dominator
 //	text: |
 //	  Printed rules text...
 //	variants:
