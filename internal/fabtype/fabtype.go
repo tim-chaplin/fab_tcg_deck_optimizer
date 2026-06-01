@@ -18,6 +18,18 @@ var ClassNames = map[string]bool{
 	"Runeblade": true, "Shapeshifter": true, "Warrior": true, "Wizard": true,
 }
 
+// ClassMatches reports whether a type-line word is class-legal for a hero whose classes are
+// heroClasses. Generic is legal for every hero, and a word that isn't a class at all (a talent,
+// card type, or subtype) imposes no class constraint — both return true. A class word is legal
+// only when it's one the hero plays. Callers pass just the hero's own class(es); Generic is
+// built in here, so it never needs listing per hero.
+func ClassMatches(word string, heroClasses map[string]bool) bool {
+	if word == "Generic" || !ClassNames[word] {
+		return true
+	}
+	return heroClasses[word]
+}
+
 // TalentNames is every talent word. A card carrying one is illegal for a hero who lacks that
 // talent. Royal is intentionally absent — it's a supertype, not a talent (Royal Generics like
 // Imperial Seal of Command stay broadly legal).

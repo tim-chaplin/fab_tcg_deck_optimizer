@@ -212,8 +212,9 @@ func (f poolFilter) matches(c Card) bool {
 		if f.modeled && fabtype.UnmodeledTypes[w] {
 			return false
 		}
-		// Class: every class word other than Generic must be one the hero plays.
-		if len(f.classes) > 0 && fabtype.ClassNames[w] && w != "Generic" && !f.classes[w] {
+		// Class: a class word must be one the hero plays (Generic is always legal — built into
+		// fabtype.ClassMatches, so -classes lists only the hero's own class).
+		if len(f.classes) > 0 && !fabtype.ClassMatches(w, f.classes) {
 			return false
 		}
 		// Talent: every talent word must be one the hero shares (unless -any-talent).

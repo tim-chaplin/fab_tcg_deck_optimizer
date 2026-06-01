@@ -37,9 +37,10 @@ const apiBase = "https://api.cardvault.fabtcg.com/carddb/api/v1/advanced-search/
 // classes queried — Viserai's legal class line is Runeblade or Generic.
 var classes = []string{"Runeblade", "Generic"}
 
-// viseraiClasses are the only classes Viserai may play. A typebox word that is a class outside
-// this set is off-class for him; the talent / non-deck vocabulary comes from fabtype.
-var viseraiClasses = map[string]bool{"Runeblade": true, "Generic": true}
+// viseraiClasses is Viserai's own hero class. Generic is legal for every hero, so it's handled
+// by fabtype.ClassMatches rather than listed here; the talent / non-deck vocabulary also comes
+// from fabtype.
+var viseraiClasses = map[string]bool{"Runeblade": true}
 
 type apiResponse struct {
 	Next    string `json:"next"`
@@ -101,7 +102,7 @@ func inScope(typebox string) bool {
 		if fabtype.TalentNames[tok] || fabtype.NonDeckTypes[tok] {
 			return false
 		}
-		if fabtype.ClassNames[tok] && !viseraiClasses[tok] {
+		if !fabtype.ClassMatches(tok, viseraiClasses) {
 			return false
 		}
 	}
