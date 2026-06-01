@@ -10,11 +10,9 @@ import (
 	"strings"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/format"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/hero"
 )
-
-// defaultFormat is emitted in the Format: header. Update when a new format comes online.
-const defaultFormat = "Silver Age"
 
 // Marshal returns fabrary-style deck text for d, suitable for pasting into fabrary.net's
 // "Import deck" tab. The output sections are:
@@ -29,9 +27,13 @@ const defaultFormat = "Silver Age"
 func MarshalFabrary(d *deck.Deck) string {
 	var b strings.Builder
 	name := d.Hero.(hero.Hero).Name()
+	f := d.Format
+	if f == nil {
+		f = format.SilverAge
+	}
 	fmt.Fprintf(&b, "Name: %s\n", name)
 	fmt.Fprintf(&b, "Hero: %s\n", name)
-	fmt.Fprintf(&b, "Format: %s\n\n", defaultFormat)
+	fmt.Fprintf(&b, "Format: %s\n\n", f.DisplayName())
 
 	b.WriteString("Arena cards\n")
 	arena := weaponCounts(d.Weapons)

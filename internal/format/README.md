@@ -32,7 +32,8 @@ implemented banned cards.
 
 ## How it's consumed
 
-- `internal/registry` — `LegalCards` / `LegalWeapons` apply `format.SilverAge.IsCardLegal`
-  (ANDed with the marker filter, and — in a later change — the hero-pool class/talent check).
-- `cmd/fabsim` — the `-format` flag parses via `Parse`; the format scopes a run and names its
-  output decks (`<hero>_<format>_<incoming>`).
+- `internal/registry` — `LegalCardsFor` / `LegalWeaponsFor` apply `IsCardLegal` (ANDed with
+  the marker filter and the registry's own hero-pool class/talent check).
+- `cmd/fabsim` — the `-format` flag parses via `Parse`; the format is a durable deck attribute
+  (persisted by `internal/textio`) that scopes a run and names its output decks
+  (`<hero>_<format>_<incoming>`).

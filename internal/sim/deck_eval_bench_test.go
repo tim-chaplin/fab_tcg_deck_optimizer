@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/format"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/hero/heroes"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry"
 )
@@ -20,7 +21,7 @@ func BenchmarkEvaluate(b *testing.B) {
 		incoming  = 0
 	)
 	setupRNG := rand.New(rand.NewSource(42))
-	d := deck.Random(heroes.Viserai, deckSize, maxCopies, setupRNG, registry.Registry{})
+	d := deck.Random(heroes.Viserai, format.SilverAge, deckSize, maxCopies, setupRNG, registry.Registry{})
 	ev := NewEvaluator()
 	evalRNG := rand.New(rand.NewSource(42))
 

@@ -10,7 +10,10 @@ import "github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
 // user-managed name lists the simulator never reads; they round-trip but don't participate
 // in scoring. Both omit when empty so files without them stay diff-clean.
 type DeckJSON struct {
-	Hero      string          `json:"hero"`
+	Hero string `json:"hero"`
+	// Format is the constructed format's stable name (e.g. "silver_age"). Omitted on decks
+	// with no format; unmarshal then defaults to Silver Age so pre-format deck files still load.
+	Format    string          `json:"format,omitempty"`
 	Weapons   []string        `json:"weapons"`
 	Cards     []string        `json:"cards"`
 	Sideboard []string        `json:"sideboard,omitempty"`

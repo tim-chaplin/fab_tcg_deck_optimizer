@@ -14,6 +14,7 @@ import (
 	"time"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/format"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/hero/heroes"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
@@ -57,7 +58,7 @@ func TestEvalCache_EquivalenceWithUncached_FuzzAutomatic(t *testing.T) {
 			setupSeed = seedGen.Int63()
 		}
 		setupRNG := rand.New(rand.NewSource(setupSeed))
-		baseline := deck.Random(heroes.Viserai, deckSize, maxCopies, setupRNG, registry.Registry{})
+		baseline := deck.Random(heroes.Viserai, format.SilverAge, deckSize, maxCopies, setupRNG, registry.Registry{})
 
 		cachedStats := sim.NewEvaluator().Evaluate(baseline.Copy(), shuffles, sim.Matchup{IncomingPhysicalDamage: incoming}, rand.New(rand.NewSource(99)))
 		uncachedStats := sim.NewEvaluatorWithoutCache().Evaluate(baseline.Copy(), shuffles, sim.Matchup{IncomingPhysicalDamage: incoming}, rand.New(rand.NewSource(99)))

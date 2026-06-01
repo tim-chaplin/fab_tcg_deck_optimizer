@@ -27,8 +27,9 @@ engine live elsewhere.
 
 - Build a deck with `New(hero, weapons, cards)` — it panics if the weapon loadout breaks
   the "0-2 weapons; if 2, both 1H" rule.
-- `Random(hero, size, maxCopies, rng, registry)` generates a fresh legal deck for search
-  starting points.
+- `Random(hero, format, size, maxCopies, rng, registry)` generates a fresh legal deck for
+  search starting points, scoped to `format` + `hero` (the registry filters its pool to what
+  that pair can legally play) and stamped with `format` on the returned deck.
 - `AllMutations(d, maxCopies, includePairs, registry)` returns every weapon-loadout,
   single-card-swap, and (when `includePairs`) synergy-pair mutation in a deterministic
   ID-sorted order (the anneal driver shuffles it each round to keep exploration unbiased).

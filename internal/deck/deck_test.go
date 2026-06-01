@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/format"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/ids"
 )
 
@@ -47,8 +48,12 @@ type fakeRegistry struct {
 	weapons []Weapon
 }
 
-func (r *fakeRegistry) LegalCards() []Card     { return slices.Clone(r.cards) }
-func (r *fakeRegistry) LegalWeapons() []Weapon { return slices.Clone(r.weapons) }
+func (r *fakeRegistry) LegalCardsFor(format.Format, Hero) []Card {
+	return slices.Clone(r.cards)
+}
+func (r *fakeRegistry) LegalWeaponsFor(format.Format, Hero) []Weapon {
+	return slices.Clone(r.weapons)
+}
 
 func newFakeRegistry() *fakeRegistry {
 	return &fakeRegistry{
@@ -192,7 +197,7 @@ func TestRandom_BuildsLegalDeckWithinCopyBudget(t *testing.T) {
 	reg := newFakeRegistry()
 	rng := rand.New(rand.NewSource(42))
 
-	d := Random(nil, 8, 2, rng, reg)
+	d := Random(nil, format.SilverAge, 8, 2, rng, reg)
 	if len(d.cards) != 8 {
 		t.Errorf("deck size = %d, want 8", len(d.cards))
 	}

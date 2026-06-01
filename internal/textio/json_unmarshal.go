@@ -9,6 +9,7 @@ import (
 	"fmt"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/format"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry"
 )
 
@@ -47,7 +48,16 @@ func fromJSON(dj *DeckJSON) (*deck.Deck, deck.Stats, error) {
 	if err != nil {
 		return nil, deck.Stats{}, err
 	}
+	f := format.SilverAge
+	if dj.Format != "" {
+		parsed, err := format.Parse(dj.Format)
+		if err != nil {
+			return nil, deck.Stats{}, fmt.Errorf("deckio: %w", err)
+		}
+		f = parsed
+	}
 	d := deck.New(h, weapons, cs)
+	d.Format = f
 	// Sideboard and Equipment are name-only lists — the registry isn't consulted, so the
 	// user can list equipment pieces or any other items the sim doesn't model.
 	if len(dj.Sideboard) > 0 {

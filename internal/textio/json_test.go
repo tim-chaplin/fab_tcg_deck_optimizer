@@ -8,6 +8,7 @@ import (
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/format"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/hero"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/hero/heroes"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry"
@@ -16,7 +17,7 @@ import (
 
 func TestDeck_MarshalUnmarshalRoundTrip(t *testing.T) {
 	rng := rand.New(rand.NewSource(1))
-	d := deck.Random(heroes.Viserai, 40, 2, rng, registry.Registry{})
+	d := deck.Random(heroes.Viserai, format.SilverAge, 40, 2, rng, registry.Registry{})
 	stats := sim.NewEvaluator().Evaluate(d, 50, sim.Matchup{IncomingPhysicalDamage: 4}, rng)
 
 	data, err := MarshalDeck(d, stats)
@@ -49,12 +50,48 @@ func TestDeck_MarshalUnmarshalRoundTrip(t *testing.T) {
 	}
 }
 
+// TestRoundTrip_PreservesFormat checks the deck's format is written to the JSON and restored
+// on the way back.
+func TestRoundTrip_PreservesFormat(t *testing.T) {
+	rng := rand.New(rand.NewSource(9))
+	d := deck.Random(heroes.Viserai, format.SilverAge, 40, 2, rng, registry.Registry{})
+	data, err := MarshalDeck(d, deck.Stats{})
+	if err != nil {
+		t.Fatalf("Marshal: %v", err)
+	}
+	if !strings.Contains(string(data), `"format": "silver_age"`) {
+		t.Errorf("marshaled deck missing format field:\n%s", data)
+	}
+	got, _, err := UnmarshalDeck(data)
+	if err != nil {
+		t.Fatalf("Unmarshal: %v", err)
+	}
+	if got.Format != format.SilverAge {
+		t.Errorf("format round trip: got %v, want SilverAge", got.Format)
+	}
+}
+
+// TestUnmarshal_FormatBackCompatAndError covers the format field's back-compat default (a
+// pre-format file with no "format" key loads as Silver Age) and the unknown-format error path.
+func TestUnmarshal_FormatBackCompatAndError(t *testing.T) {
+	got, _, err := UnmarshalDeck([]byte(`{"hero":"Viserai","weapons":[],"cards":[]}`))
+	if err != nil {
+		t.Fatalf("Unmarshal (no format key): %v", err)
+	}
+	if got.Format != format.SilverAge {
+		t.Errorf("missing format defaulted to %v, want SilverAge", got.Format)
+	}
+	if _, _, err := UnmarshalDeck([]byte(`{"hero":"Viserai","format":"bogus","weapons":[],"cards":[]}`)); err == nil {
+		t.Error("UnmarshalDeck accepted unknown format string, want error")
+	}
+}
+
 // TestRoundTrip_PreservesMatchup checks the matchup an eval ran under survives Marshal/Unmarshal,
 // and that an unevaluated deck (Runs == 0) omits the field rather than record a 0/0 matchup it
 // never faced.
 func TestRoundTrip_PreservesMatchup(t *testing.T) {
 	rng := rand.New(rand.NewSource(5))
-	d := deck.Random(heroes.Viserai, 40, 2, rng, registry.Registry{})
+	d := deck.Random(heroes.Viserai, format.SilverAge, 40, 2, rng, registry.Registry{})
 	mp := sim.Matchup{IncomingPhysicalDamage: 7, IncomingArcaneDamage: 2}
 	stats := sim.NewEvaluator().Evaluate(d, 50, mp, rng)
 
@@ -87,7 +124,7 @@ func TestRoundTrip_PreservesMatchup(t *testing.T) {
 // Tests that deck.BestTurn.Value round-trips through Marshal/Unmarshal.
 func TestRoundTrip_PreservesBestTurnValue(t *testing.T) {
 	rng := rand.New(rand.NewSource(7))
-	d := deck.Random(heroes.Viserai, 40, 2, rng, registry.Registry{})
+	d := deck.Random(heroes.Viserai, format.SilverAge, 40, 2, rng, registry.Registry{})
 	stats := deck.Stats{
 		Best: deck.BestTurn{
 			Value:    21,
@@ -113,7 +150,7 @@ func TestRoundTrip_PreservesBestTurnValue(t *testing.T) {
 // multiset of names.
 func TestRoundTrip_PreservesSideboard(t *testing.T) {
 	rng := rand.New(rand.NewSource(42))
-	d := deck.Random(heroes.Viserai, 40, 2, rng, registry.Registry{})
+	d := deck.Random(heroes.Viserai, format.SilverAge, 40, 2, rng, registry.Registry{})
 	d.Sideboard = []string{"Aether Slash [R]", "Aether Slash [R]", "Arcanic Spike [B]"}
 
 	data, err := MarshalDeck(d, deck.Stats{})
@@ -140,7 +177,7 @@ func TestRoundTrip_PreservesSideboard(t *testing.T) {
 // a re-serialize.
 func TestMarshal_OmitsEmptySideboard(t *testing.T) {
 	rng := rand.New(rand.NewSource(1))
-	d := deck.Random(heroes.Viserai, 40, 2, rng, registry.Registry{})
+	d := deck.Random(heroes.Viserai, format.SilverAge, 40, 2, rng, registry.Registry{})
 	data, err := MarshalDeck(d, deck.Stats{})
 	if err != nil {
 		t.Fatalf("Marshal: %v", err)
@@ -176,7 +213,7 @@ func TestUnmarshal_SideboardAcceptsAnyName(t *testing.T) {
 // model equipment pieces).
 func TestRoundTrip_PreservesEquipment(t *testing.T) {
 	rng := rand.New(rand.NewSource(1))
-	d := deck.Random(heroes.Viserai, 40, 2, rng, registry.Registry{})
+	d := deck.Random(heroes.Viserai, format.SilverAge, 40, 2, rng, registry.Registry{})
 	d.Equipment = []string{"Beckoning Haunt", "Nullrune Boots", "Blade Beckoner Helm"}
 
 	data, err := MarshalDeck(d, deck.Stats{})
@@ -198,7 +235,7 @@ func TestRoundTrip_PreservesEquipment(t *testing.T) {
 // the field at all, keeping existing files byte-identical after a re-serialize.
 func TestMarshal_OmitsEmptyEquipment(t *testing.T) {
 	rng := rand.New(rand.NewSource(1))
-	d := deck.Random(heroes.Viserai, 40, 2, rng, registry.Registry{})
+	d := deck.Random(heroes.Viserai, format.SilverAge, 40, 2, rng, registry.Registry{})
 	data, err := MarshalDeck(d, deck.Stats{})
 	if err != nil {
 		t.Fatalf("Marshal: %v", err)

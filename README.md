@@ -155,6 +155,8 @@ The summary below groups the flags by subcommand.
 - `-format` — constructed format whose banlist restricts the card pool during search. Defaults
   to `silver_age`, currently the only supported format. The authoritative Silver Age banlist
   lives in `internal/format/banlist.go`.
+- `-hero` — hero to build for; scopes the legal card pool to the hero's class and talents.
+  Defaults to `Viserai`, the only implemented hero today.
 - `-start-temp` — starting temperature. `0` (default) runs a pure hill climb. Higher values
   probabilistically accept worse mutations early (Metropolis rule).
 - `-temp-decay` — multiplicative cooling per acceptance (default 0.95).

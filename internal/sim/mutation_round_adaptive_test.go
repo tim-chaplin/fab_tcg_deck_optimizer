@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/format"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/hero/heroes"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/ids"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry"
@@ -22,7 +23,7 @@ func (f *fakeRecorder) PromoteAll(cardIDs []ids.CardID) {
 // TestRecordImprovement checks recordImprovement promotes exactly the improved deck's unique cards.
 func TestRecordImprovement(t *testing.T) {
 	rng := rand.New(rand.NewSource(1))
-	d := deck.Random(heroes.Viserai, 40, 2, rng, registry.Registry{})
+	d := deck.Random(heroes.Viserai, format.SilverAge, 40, 2, rng, registry.Registry{})
 
 	f := &fakeRecorder{}
 	recordImprovement(f, d)
@@ -62,7 +63,7 @@ func sameIDSet(a, b []ids.CardID) bool {
 func adaptiveFixture(t *testing.T, seed int64) (*deck.Deck, []deck.Mutation) {
 	t.Helper()
 	rng := rand.New(rand.NewSource(seed))
-	d := deck.Random(heroes.Viserai, 40, 2, rng, registry.Registry{})
+	d := deck.Random(heroes.Viserai, format.SilverAge, 40, 2, rng, registry.Registry{})
 	muts := deck.AllMutations(d, 2, false, registry.Registry{})
 	if len(muts) > 60 {
 		muts = muts[:60] // keep the test quick; 60 candidates is plenty to find an improvement

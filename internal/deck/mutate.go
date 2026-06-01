@@ -106,6 +106,7 @@ func (m Mutation) materialiseSingleSwap() *Deck {
 		newCards[i] = c
 	}
 	nd := New(m.base.Hero, m.base.Weapons, newCards)
+	nd.Format = m.base.Format
 	nd.Sideboard = m.base.Sideboard
 	nd.Equipment = m.base.Equipment
 	return nd
@@ -114,6 +115,7 @@ func (m Mutation) materialiseSingleSwap() *Deck {
 func (m Mutation) materialisePairSwap() *Deck {
 	newCards := pairSwapByIndex(m.base.cards, m.iA, m.iB, m.addA, m.addB)
 	nd := New(m.base.Hero, m.base.Weapons, newCards)
+	nd.Format = m.base.Format
 	nd.Sideboard = m.base.Sideboard
 	nd.Equipment = m.base.Equipment
 	return nd
@@ -122,6 +124,7 @@ func (m Mutation) materialisePairSwap() *Deck {
 func (m Mutation) materialiseWeaponLoadout() *Deck {
 	newCards := append([]Card(nil), m.base.cards...)
 	nd := New(m.base.Hero, m.weapons, newCards)
+	nd.Format = m.base.Format
 	nd.Sideboard = m.base.Sideboard
 	nd.Equipment = m.base.Equipment
 	return nd
@@ -140,7 +143,7 @@ func (m Mutation) materialiseWeaponLoadout() *Deck {
 // is enforced inline by the single-swap and pair generators (a weapon-loadout change leaves
 // card counts untouched, so it's always cap-safe). includePairs gates the pair layer.
 func AllMutations(d *Deck, maxCopies int, includePairs bool, reg Registry) []Mutation {
-	pool := buildLegalByID(reg)
+	pool := buildLegalByID(d, reg)
 	baseCounts := cardCounts(d.cards)
 	out := weaponLoadoutMutations(d, reg)
 	out = append(out, singleSwapMutations(d, pool, baseCounts, maxCopies)...)
@@ -160,10 +163,11 @@ func cardCounts(cs []Card) map[ids.CardID]int {
 	return out
 }
 
-// buildLegalByID materialises the registry's legal pool as an ID→Card map plus IDs in
-// ascending order. The map gives generators O(1) "is this swap-in eligible" checks.
-func buildLegalByID(reg Registry) legalCardPool {
-	cards := reg.LegalCards()
+// buildLegalByID materialises the registry's legal pool (for d's format + hero) as an ID→Card
+// map plus IDs in ascending order. The map gives generators O(1) "is this swap-in eligible"
+// checks.
+func buildLegalByID(d *Deck, reg Registry) legalCardPool {
+	cards := reg.LegalCardsFor(d.Format, d.Hero)
 	pool := legalCardPool{
 		byID: make(map[ids.CardID]Card, len(cards)),
 		ids:  make([]ids.CardID, 0, len(cards)),
@@ -186,7 +190,7 @@ type legalCardPool struct {
 // current one. Loadouts are canonicalised by weaponKey (names sorted) and processed in key
 // order so the output is deterministic regardless of map-iteration randomness.
 func weaponLoadoutMutations(d *Deck, reg Registry) []Mutation {
-	loadouts := weaponLoadouts(reg.LegalWeapons())
+	loadouts := weaponLoadouts(reg.LegalWeaponsFor(d.Format, d.Hero))
 	currentKey := weaponKey(d.Weapons)
 	type keyedLoadout struct {
 		key     string

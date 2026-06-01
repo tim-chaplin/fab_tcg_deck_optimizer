@@ -99,9 +99,9 @@ func TestAllMutations_CountsAndShape(t *testing.T) {
 
 	muts := AllMutations(d, 2, true, reg)
 
-	loadouts := weaponLoadouts(reg.LegalWeapons())
+	loadouts := weaponLoadouts(reg.LegalWeaponsFor(d.Format, d.Hero))
 	wantWeaponMuts := len(loadouts) - 1
-	wantCardMuts := 2 * (len(reg.LegalCards()) - 2)
+	wantCardMuts := 2 * (len(reg.LegalCardsFor(d.Format, d.Hero)) - 2)
 	want := wantWeaponMuts + wantCardMuts
 
 	if len(muts) != want {
@@ -337,7 +337,7 @@ func TestPairSwapMutations_EnumeratesAllVariantCrossProducts(t *testing.T) {
 	d := New(fakeHero{}, []Weapon{reg.weapons[0]},
 		[]Card{a, a, b, b})
 
-	muts := pairSwapMutations(d, fakeMoonSunPair, buildLegalByID(reg), cardCounts(d.cards), 1000)
+	muts := pairSwapMutations(d, fakeMoonSunPair, buildLegalByID(d, reg), cardCounts(d.cards), 1000)
 	const dedupedRemovalCombos = 3 // (a,a), (a,b), (b,b)
 	wantCombos := len(fakeMoonSunPair[0].First) * len(fakeMoonSunPair[0].Second)
 	want := wantCombos * dedupedRemovalCombos
@@ -373,7 +373,7 @@ func TestPairSwapMutations_RemovesBothCopiesOfDuplicate(t *testing.T) {
 	dup := makeFakeCard(fakeC1)
 	d := New(fakeHero{}, []Weapon{reg.weapons[0]}, []Card{dup, dup})
 
-	muts := pairSwapMutations(d, fakeMoonSunPair, buildLegalByID(reg), cardCounts(d.cards), 1000)
+	muts := pairSwapMutations(d, fakeMoonSunPair, buildLegalByID(d, reg), cardCounts(d.cards), 1000)
 	// Exactly one removed-ID combo (c1, c1) × (3 × 3) = 9 variant combos.
 	const want = 9
 	if len(muts) != want {
@@ -409,7 +409,7 @@ func TestPairSwapMutations_FiresWhenOneHalfAlreadyPresent(t *testing.T) {
 	d := New(fakeHero{}, []Weapon{reg.weapons[0]},
 		[]Card{a, a, a, sk1})
 
-	muts := pairSwapMutations(d, fakeMoonSunPair, buildLegalByID(reg), cardCounts(d.cards), 1000)
+	muts := pairSwapMutations(d, fakeMoonSunPair, buildLegalByID(d, reg), cardCounts(d.cards), 1000)
 	if len(muts) == 0 {
 		t.Fatal("expected pair mutations even with one half present")
 	}
@@ -441,7 +441,7 @@ func TestPairSwapMutations_GeneratesCapViolatingCandidates(t *testing.T) {
 	//   (sk1, sk1) and (sk1, a) each emit 9 - 3 = 6 surviving combos.
 	//   (a, a) emits all 9.
 	// Total = 6 + 6 + 9 = 21.
-	muts := pairSwapMutations(d, fakeMoonSunPair, buildLegalByID(reg), cardCounts(d.cards), 1000)
+	muts := pairSwapMutations(d, fakeMoonSunPair, buildLegalByID(d, reg), cardCounts(d.cards), 1000)
 	const want = 21
 	if len(muts) != want {
 		t.Fatalf("got %d pair mutations, want %d (cap-blind enumeration)", len(muts), want)
@@ -487,7 +487,7 @@ func TestPairSwapMutations_HandlesUnbalancedHalfCounts(t *testing.T) {
 	}
 	d := New(fakeHero{}, []Weapon{reg.weapons[0]}, cardsList)
 
-	muts := pairSwapMutations(d, fakeMoonSunPair, buildLegalByID(reg), cardCounts(d.cards), 1000)
+	muts := pairSwapMutations(d, fakeMoonSunPair, buildLegalByID(d, reg), cardCounts(d.cards), 1000)
 	if len(muts) == 0 {
 		t.Fatal("expected pair mutations on unbalanced deck")
 	}
@@ -506,7 +506,7 @@ func TestPairSwapMutations_ResultDifferentFromSource(t *testing.T) {
 	d := New(fakeHero{}, []Weapon{reg.weapons[0]},
 		[]Card{a, a, b, b})
 	srcKey := cardMultisetKey(d.cards)
-	for i, m := range pairSwapMutations(d, fakeMoonSunPair, buildLegalByID(reg), cardCounts(d.cards), 1000) {
+	for i, m := range pairSwapMutations(d, fakeMoonSunPair, buildLegalByID(d, reg), cardCounts(d.cards), 1000) {
 		if cardMultisetKey(m.Deck().cards) == srcKey {
 			t.Errorf("mutation %d (%s) produced a no-op (same multiset as source)", i, m.Description())
 		}
@@ -523,7 +523,7 @@ func TestPairSwapMutations_OverlapSuppressionSkipsRedundantSwaps(t *testing.T) {
 		[]Card{sk1, a, a, a})
 	addStr := "+1 " + sk1.DisplayName()
 	rmStr := "-1 " + sk1.DisplayName()
-	for i, m := range pairSwapMutations(d, fakeMoonSunPair, buildLegalByID(reg), cardCounts(d.cards), 1000) {
+	for i, m := range pairSwapMutations(d, fakeMoonSunPair, buildLegalByID(d, reg), cardCounts(d.cards), 1000) {
 		if strings.Contains(m.Description(), rmStr) && strings.Contains(m.Description(), addStr) {
 			t.Errorf("mutation %d (%s): redundant -1/+1 of %s — overlap suppression failed",
 				i, m.Description(), sk1.DisplayName())
@@ -553,7 +553,7 @@ func TestPairSwapMutations_SkipsPoolMissingHalves(t *testing.T) {
 	d := New(fakeHero{}, []Weapon{reg.weapons[0]},
 		[]Card{a, a, b, b})
 	missingDisplay := makeFakeCard(missing).DisplayName()
-	for i, m := range pairSwapMutations(d, fakeMoonSunPair, buildLegalByID(reg), cardCounts(d.cards), 1000) {
+	for i, m := range pairSwapMutations(d, fakeMoonSunPair, buildLegalByID(d, reg), cardCounts(d.cards), 1000) {
 		if strings.Contains(m.Description(), missingDisplay) {
 			t.Errorf("mutation %d (%s): added pool-missing half %s",
 				i, m.Description(), missingDisplay)
@@ -569,8 +569,8 @@ func TestPairSwapMutations_DeterministicOrdering(t *testing.T) {
 	d := New(fakeHero{}, []Weapon{reg.weapons[0]},
 		[]Card{a, a, b, b})
 
-	first := pairSwapMutations(d, fakeMoonSunPair, buildLegalByID(reg), cardCounts(d.cards), 1000)
-	second := pairSwapMutations(d, fakeMoonSunPair, buildLegalByID(reg), cardCounts(d.cards), 1000)
+	first := pairSwapMutations(d, fakeMoonSunPair, buildLegalByID(d, reg), cardCounts(d.cards), 1000)
+	second := pairSwapMutations(d, fakeMoonSunPair, buildLegalByID(d, reg), cardCounts(d.cards), 1000)
 	if len(first) != len(second) {
 		t.Fatalf("call counts differ: %d vs %d", len(first), len(second))
 	}

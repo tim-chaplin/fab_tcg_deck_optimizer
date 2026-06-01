@@ -9,6 +9,7 @@ import (
 	"sort"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/format"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/hero"
 )
 
@@ -26,8 +27,13 @@ func toJSON(d *deck.Deck, stats deck.Stats) *DeckJSON {
 	cardNames := d.DisplayNames()
 	sort.Strings(cardNames)
 	red, yellow, blue := d.PitchCounts()
+	f := d.Format
+	if f == nil {
+		f = format.SilverAge
+	}
 	return &DeckJSON{
 		Hero:      d.Hero.(hero.Hero).Name(),
+		Format:    f.Name(),
 		Weapons:   weapons,
 		Cards:     cardNames,
 		Sideboard: sortedStrings(d.Sideboard),

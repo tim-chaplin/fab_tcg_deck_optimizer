@@ -6,9 +6,11 @@ lookups, and the filtered deck-construction pools.
 
 ## Key types
 
-- `Registry` — the deck-construction view. Zero-sized; `LegalCards` / `LegalWeapons` return
-  the pools with `NotImplemented` / `Unplayable` entries and format-banned cards filtered out.
-  Satisfies `internal/deck.Registry`; callers pass `Registry{}` to `deck.Random`.
+- `Registry` — the deck-construction view. Zero-sized; `LegalCardsFor(f, h)` /
+  `LegalWeaponsFor(f, h)` return the pools legal for format `f` and hero `h`, with
+  `NotImplemented` / `Unplayable` entries, format-banned cards, and cards illegal for the
+  hero's class / talents filtered out. Satisfies `internal/deck.Registry`; callers pass
+  `Registry{}` to `deck.Random`.
 - `Card` / `Hero` / `Weapon` (`registry.go`) — minimal local interfaces (identity + display
   name, and `Hands` for weapons). The package declares its own narrow interfaces so its
   surface stays decoupled from the sim's richer contracts.
@@ -16,8 +18,13 @@ lookups, and the filtered deck-construction pools.
   matches them structurally to gate cards and weapons out of the construction pools. A
   `NotImplemented` card is still valid in a pre-built hand (it evaluates on its static stats);
   the markers only stop the optimizer from introducing the card. Format legality is *not* a
-  marker — `LegalCards` / `LegalWeapons` apply `format.SilverAge.IsCardLegal` (the
-  `internal/format` banlist) alongside the marker check.
+  marker — the pool methods apply `f.IsCardLegal` (the `internal/format` banlist) alongside
+  the marker check.
+- `classMask` / `talentMask` / `heroCanPlay` (`hero_pool.go`) — the universal class/talent
+  deckbuilding rule the registry owns (format-independent): a hero may include a card only
+  when the card's class is Generic or the hero's class, and every talent on the card is one
+  the hero shares. `classMask` / `talentMask` name which `card.CardType` bits are classes /
+  talents; keep them in lockstep with `internal/card/types.go`.
 
 ## Registry / sim split
 
@@ -41,7 +48,8 @@ card kind, so no caller needs to pre-warm the cache.
 - `AllCards()` — every valid card ID in registration order; freshly allocated, safe to mutate.
 - `HeroByName(name)` / `WeaponByName(name)` — `(nil, false)` when not registered.
 - `AllWeapons` — every implemented weapon, for loadout enumeration.
-- `Registry{}.LegalCards()` / `.LegalWeapons()` — the filtered deck-construction pools.
+- `Registry{}.LegalCardsFor(f, h)` / `.LegalWeaponsFor(f, h)` — the deck-construction pools
+  for format `f` and hero `h`.
 
 ## How to add an entry
 
@@ -52,12 +60,15 @@ card kind, so no caller needs to pre-warm the cache.
 
 ## Important files
 
-- `registry.go` — package doc, the `Card` / `Hero` / `Weapon` and marker interfaces.
+- `registry.go` — `Registry`, `LegalCardsFor`, `LegalWeaponsFor`, `legalCardsForFormat`,
+  `isExcludedFromPool`.
+- `hero_pool.go` — `classMask` / `talentMask`, `heroCanPlay`, `asCardHero` (the class/talent
+  legality check).
+- `interfaces.go` — package doc, the `Card` / `Hero` / `Weapon` and marker interfaces.
 - `cards.go` — `CardID` alias, `cardsByName` index, `GetCard` / `CardByName` / `AllCards`.
 - `cards_gen.go` — generated `cardsByID` slice; do not hand-edit.
 - `heroes.go` — `heroesByName`, `HeroByName`.
 - `weapons.go` — `AllWeapons`, `weaponsByName`, `WeaponByName`.
-- `interfaces.go` — `Registry`, `LegalCards`, `LegalWeapons`, `isExcludedFromPool`.
 
 ## Gotchas and invariants
 

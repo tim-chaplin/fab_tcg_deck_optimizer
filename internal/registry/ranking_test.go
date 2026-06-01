@@ -7,11 +7,13 @@ import (
 	"path/filepath"
 	"sync"
 	"testing"
+
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/format"
 )
 
 func TestRanking_SeedsWholePool(t *testing.T) {
 	r := NewRanking()
-	legal := (Registry{}).LegalCards()
+	legal := legalCardsForFormat(format.SilverAge)
 	if len(r.order) != len(legal) {
 		t.Fatalf("ranking has %d cards, pool has %d", len(r.order), len(legal))
 	}
@@ -145,7 +147,7 @@ func TestLoadRanking_MissingFileSeedsPool(t *testing.T) {
 	if err != nil {
 		t.Fatalf("LoadRanking: %v", err)
 	}
-	if len(r.order) != len((Registry{}).LegalCards()) {
+	if len(r.order) != len(legalCardsForFormat(format.SilverAge)) {
 		t.Errorf("missing-file ranking has %d cards, want full pool", len(r.order))
 	}
 }
@@ -167,7 +169,7 @@ func TestLoadRanking_PartialFileTopsListedAppendsRest(t *testing.T) {
 	if r.Rank(full.order[20]) != 0 || r.Rank(full.order[3]) != 1 {
 		t.Errorf("listed cards not at top: %d, %d", r.Rank(full.order[20]), r.Rank(full.order[3]))
 	}
-	if len(r.order) != len((Registry{}).LegalCards()) {
+	if len(r.order) != len(legalCardsForFormat(format.SilverAge)) {
 		t.Errorf("ranking size %d, want full pool (missing cards appended)", len(r.order))
 	}
 }

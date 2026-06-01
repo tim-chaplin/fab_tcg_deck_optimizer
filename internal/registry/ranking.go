@@ -13,6 +13,8 @@ import (
 	"errors"
 	"os"
 	"sync"
+
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/format"
 )
 
 // DefaultRankingPath is where the anneal search persists its card ranking, relative to the working
@@ -47,7 +49,10 @@ func rankingFromNames(names []string) *Ranking {
 		r.order = append(r.order, id)
 		seen[id] = true
 	}
-	for _, c := range (Registry{}).LegalCards() {
+	// Hero-agnostic: the ranking is a global recency order keyed by CardID, so it spans the
+	// whole format-legal pool. Cards illegal for a given run's hero simply never surface as
+	// mutations (buildLegalByID filters per hero), so their presence here is harmless.
+	for _, c := range legalCardsForFormat(format.SilverAge) {
 		if id := c.ID(); !seen[id] {
 			r.order = append(r.order, id)
 			seen[id] = true

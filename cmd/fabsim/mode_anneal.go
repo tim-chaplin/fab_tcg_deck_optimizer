@@ -15,8 +15,6 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/format"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/gameengine"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/hero"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/hero/heroes"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/sim"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/textio"
@@ -31,8 +29,13 @@ const annealCacheCapacity = 2_000_000
 type annealConfig struct {
 	// shuffles is the deck-scoring budget: the hill climb's improvement-confirm eval and each SA
 	// step's per-mutation eval. The hill-climb screen itself is adaptive and ignores it.
-	shuffles  int
-	matchup   sim.Matchup
+	shuffles int
+	matchup  sim.Matchup
+	// hero and format scope the legal card pool a from-scratch random deck draws from, and
+	// stamp the deck so its mutations stay within the same pool. hero is the registry hero
+	// value (opaque to deck; the registry narrows it to read class / talents).
+	hero      deck.Hero
+	format    format.Format
 	deckSize  int
 	maxCopies int
 	seed      int64
@@ -58,7 +61,7 @@ type annealConfig struct {
 
 // defaultDeckNameFor keys the default deck filename on (hero, format, incoming) so different
 // regimes don't hill-climb one another's optimum.
-func defaultDeckNameFor(h hero.Hero, f format.Format, incoming int) string {
+func defaultDeckNameFor(h interface{ Name() string }, f format.Format, incoming int) string {
 	return fmt.Sprintf("%s_%s_%d_incoming", strings.ToLower(h.Name()), f.Name(), incoming)
 }
 
@@ -73,6 +76,7 @@ func runAnnealCmd(args []string) {
 	maxCopies := fs.Int("max-copies", defaultMaxCopies, "maximum copies of any single card printing per deck")
 	seed := fs.Int64("seed", time.Now().UnixNano(), "RNG seed")
 	formatFlag := fs.String("format", format.SilverAge.Name(), "constructed format whose banlist restricts the card pool during search (only \"silver_age\" is supported today)")
+	heroFlag := fs.String("hero", "Viserai", "hero to build the deck for; scopes the legal card pool to the hero's class and talents (only \"Viserai\" is implemented today)")
 	debug := fs.Bool("debug", false, "print additional debug info to stdout / stderr")
 	finalize := fs.Bool("finalize", false, "high-precision pass — sets -shuffles to 10000. The accept threshold is k·σ/√shuffles, so a bigger budget resolves (and accepts) finer sub-percent gains. Use on a deck that's already converged.")
 	startTemp := fs.Float64("start-temp", 0, "simulated-annealing starting temperature. 0 (default) runs a pure hill climb that stops at the first local maximum. Higher values probabilistically accept worse mutations early; acceptance probability is exp((avg - baseline) / T). An SA run (start-temp > 0) never stops on its own: on reaching a local maximum it reheats to start-temp and keeps exploring from the current deck (the best-so-far is preserved and only the peak is saved) — stop it with Enter or -max-duration. Good starting range is ~0.05–0.5 given typical Value units.")
@@ -94,6 +98,10 @@ func runAnnealCmd(args []string) {
 	if err != nil {
 		die("%v", err)
 	}
+	heroValue, ok := registry.HeroByName(*heroFlag)
+	if !ok {
+		die("anneal: unknown hero %q (only \"Viserai\" is implemented today)", *heroFlag)
+	}
 
 	gameengine.OptDebug = *debug
 
@@ -106,7 +114,7 @@ func runAnnealCmd(args []string) {
 
 	name := *deckName
 	if name == "" {
-		name = defaultDeckNameFor(heroes.Viserai, fmtValue, *incoming)
+		name = defaultDeckNameFor(heroValue, fmtValue, *incoming)
 	}
 	outPath, err := textio.MydecksPath(name)
 	if err != nil {
@@ -119,6 +127,8 @@ func runAnnealCmd(args []string) {
 	cfg := annealConfig{
 		shuffles:      *shuffles,
 		matchup:       sim.Matchup{IncomingPhysicalDamage: *incoming, IncomingArcaneDamage: *arcaneIncoming},
+		hero:          heroValue,
+		format:        fmtValue,
 		deckSize:      *deckSize,
 		maxCopies:     *maxCopies,
 		seed:          *seed,
@@ -428,7 +438,7 @@ func prepareBaseline(cfg annealConfig, rng *rand.Rand) (*deck.Deck, deck.Stats, 
 	}
 	if best == nil {
 		fmt.Fprintf(os.Stderr, "no deck at %s; generating a random starting deck\n", cfg.outPath)
-		best = deck.Random(heroes.Viserai, cfg.deckSize, cfg.maxCopies, rng, registry.Registry{})
+		best = deck.Random(cfg.hero, cfg.format, cfg.deckSize, cfg.maxCopies, rng, registry.Registry{})
 		bestStats = baselineEvaluate(best, cfg, rng)
 		bestAvg := bestStats.Mean()
 		if err := writeDeck(best, bestStats, cfg.outPath); err != nil {
