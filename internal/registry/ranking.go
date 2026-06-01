@@ -2,11 +2,11 @@ package registry
 
 // Persistent card ranking for the anneal search. Ranking holds a total order over the legal card
 // pool, best (index 0) to worst, so the search can try mutations involving promising cards first.
-// Promote moves a card to the front each time it is mutated into a deck on a value-increasing swap,
-// making the order a recency list — "how recently did this card earn a slot in an improving deck" —
-// so cards that keep making decks stay near the top and cards that never make one sink. The order
-// persists to disk between runs; a fresh ranking just seeds the pool in registration order and lets
-// promotions settle it.
+// PromoteAll lifts a whole deck's cards to the front each time a swap improves the deck, making the
+// order a recency list — the cards of recently-good decks lead, untried chaff trails — so loading a
+// tuned deck bootstraps the order from it on the first improvement. The order persists to disk
+// between runs; a fresh ranking just seeds the pool in registration order and lets promotions
+// settle it.
 
 import (
 	"encoding/json"
@@ -20,7 +20,7 @@ import (
 const DefaultRankingPath = "internal/registry/card_ranking.json"
 
 // Ranking is a total order over the legal card pool, best (index 0) to worst. Safe for concurrent
-// Promote / Rank.
+// PromoteAll / Rank.
 type Ranking struct {
 	mu    sync.Mutex
 	order []CardID       // best → worst
@@ -75,21 +75,33 @@ func (r *Ranking) Rank(id CardID) int {
 	return len(r.order)
 }
 
-// Promote moves id to the front of the order (best), sliding every card above it down one slot, so
-// a card that just earned a slot in an improving deck becomes the first thing tried next. A card
-// already at the front, or one not in the ranking, is a no-op.
-func (r *Ranking) Promote(id CardID) {
+// PromoteAll lifts every listed card to the front of the order — a stable partition that keeps the
+// listed cards in their current relative order and the rest in theirs. Used to promote a whole
+// deck's cards when a swap improved it, so the deck (staples included) leads the ranking. Cards not
+// in the ranking are ignored; an empty or all-unknown list is a no-op.
+func (r *Ranking) PromoteAll(ids []CardID) {
 	r.mu.Lock()
 	defer r.mu.Unlock()
-	cur, ok := r.pos[id]
-	if !ok || cur == 0 {
+	promote := make(map[CardID]bool, len(ids))
+	for _, id := range ids {
+		if _, ok := r.pos[id]; ok {
+			promote[id] = true
+		}
+	}
+	if len(promote) == 0 {
 		return
 	}
-	copy(r.order[1:cur+1], r.order[:cur]) // shift order[0:cur] down into order[1:cur+1] (memmove-safe)
-	r.order[0] = id
-	for i := 0; i <= cur; i++ {
-		r.pos[r.order[i]] = i
+	front := make([]CardID, 0, len(promote))
+	back := make([]CardID, 0, len(r.order)-len(promote))
+	for _, id := range r.order { // walking r.order preserves each group's current relative order
+		if promote[id] {
+			front = append(front, id)
+		} else {
+			back = append(back, id)
+		}
 	}
+	r.order = append(front, back...)
+	r.reindex()
 }
 
 // Save writes the ranking to path as an indented JSON array of DisplayNames, best → worst.

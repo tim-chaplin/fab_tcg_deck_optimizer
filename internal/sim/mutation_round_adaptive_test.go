@@ -12,52 +12,49 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry"
 )
 
-// fakeRecorder captures Promote calls for the recordImprovement test.
-type fakeRecorder struct{ promoted []ids.CardID }
+// fakeRecorder captures PromoteAll calls for the recordImprovement test.
+type fakeRecorder struct{ calls [][]ids.CardID }
 
-func (f *fakeRecorder) Promote(id ids.CardID) {
-	f.promoted = append(f.promoted, id)
+func (f *fakeRecorder) PromoteAll(cardIDs []ids.CardID) {
+	f.calls = append(f.calls, append([]ids.CardID(nil), cardIDs...))
 }
 
-// TestRecordImprovement pins the ranking signal: a single-swap mutation promotes the card it added,
-// and a non-single-swap (weapon / pair) mutation promotes nothing.
+// TestRecordImprovement checks recordImprovement promotes exactly the improved deck's unique cards.
 func TestRecordImprovement(t *testing.T) {
 	rng := rand.New(rand.NewSource(1))
 	d := deck.Random(heroes.Viserai, 40, 2, rng, registry.Registry{})
-	var swap, weapon deck.Mutation
-	for _, m := range deck.AllMutations(d, 2, false, registry.Registry{}) {
-		if _, _, ok := m.Swap(); ok {
-			swap = m
-		} else {
-			weapon = m
+
+	f := &fakeRecorder{}
+	recordImprovement(f, d)
+	if len(f.calls) != 1 {
+		t.Fatalf("PromoteAll called %d times, want 1", len(f.calls))
+	}
+	want, _ := d.UniqueIDs()
+	if !sameIDSet(f.calls[0], want) {
+		t.Errorf("promoted %v, want the deck's unique cards %v", f.calls[0], want)
+	}
+
+	recordImprovement(nil, d) // nil recorder must be a no-op (no panic)
+}
+
+// sameIDSet reports whether a and b contain the same CardIDs with the same multiplicity.
+func sameIDSet(a, b []ids.CardID) bool {
+	if len(a) != len(b) {
+		return false
+	}
+	count := make(map[ids.CardID]int, len(a))
+	for _, id := range a {
+		count[id]++
+	}
+	for _, id := range b {
+		count[id]--
+	}
+	for _, n := range count {
+		if n != 0 {
+			return false
 		}
 	}
-	added, _, _ := swap.Swap()
-
-	cases := []struct {
-		name string
-		mut  deck.Mutation
-		want []ids.CardID
-	}{
-		{"single swap promotes the added card", swap, []ids.CardID{added}},
-		{"non-single-swap promotes nothing", weapon, nil},
-	}
-	for _, c := range cases {
-		t.Run(c.name, func(t *testing.T) {
-			f := &fakeRecorder{}
-			recordImprovement(f, c.mut)
-			if len(f.promoted) != len(c.want) {
-				t.Fatalf("promoted %v, want %v", f.promoted, c.want)
-			}
-			for i := range c.want {
-				if f.promoted[i] != c.want[i] {
-					t.Errorf("promoted[%d] = %v, want %v", i, f.promoted[i], c.want[i])
-				}
-			}
-		})
-	}
-
-	recordImprovement(nil, swap) // nil recorder must be a no-op (no panic)
+	return true
 }
 
 // adaptiveFixture builds a deliberately weak random deck (so plenty of mutations improve it) plus
