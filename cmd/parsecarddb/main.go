@@ -252,7 +252,7 @@ func main() {
 	talents := flag.String("talents", "", "comma-separated allowed talents; a card's talents must be a subset, so 'Lightning' admits no-talent and Lightning cards. Empty = no-talent cards only.")
 	anyTalent := flag.Bool("any-talent", false, "ignore -talents and admit cards carrying any talent")
 	requireTalents := flag.String("require-talents", "", "comma-separated talents; admit only cards carrying at least one (e.g. 'Lightning' to list just the Lightning cards in a pool)")
-	modeled := flag.Bool("modeled", false, "keep only card types the optimizer models — deck cards and weapons — dropping equipment, heroes, tokens, and landmarks")
+	modeled := flag.Bool("modeled", false, "keep only card types the optimizer models — deck cards and weapons — dropping equipment, heroes, and tokens")
 	silverAge := flag.Bool("silver-age", true, "require Silver Age legality (the card.csv 'Silver Age Legal' column)")
 	excludeBanned := flag.Bool("exclude-banned", false, "drop cards on our internal/format Silver Age banlist (the cards not worth implementing)")
 	outFormat := flag.String("format", "pretty", "output format: pretty | json")

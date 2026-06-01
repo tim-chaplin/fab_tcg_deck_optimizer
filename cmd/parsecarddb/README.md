@@ -36,7 +36,7 @@ Flags:
 - `-require-talents` — comma-separated talents; admit only cards carrying at least one (e.g.
   to list just the Lightning cards in a pool).
 - `-modeled` — keep only card types the optimizer models — deck cards **and weapons** —
-  dropping equipment, heroes, tokens, and landmarks.
+  dropping equipment, heroes, and tokens.
 - `-silver-age` — require Silver Age legality (default true).
 - `-exclude-banned` — drop cards on our `internal/format` Silver Age banlist.
 - `-format` — `pretty` (default) or `json`.

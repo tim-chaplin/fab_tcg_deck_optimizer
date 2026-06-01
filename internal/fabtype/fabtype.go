@@ -39,10 +39,11 @@ var TalentNames = map[string]bool{
 }
 
 // NonDeckTypes is every printed card type that never enters the 40-card deck — equipment slots,
-// weapons, the hero, tokens, landmarks, and so on.
+// weapons, the hero, and tokens. (Landmarks, Mentors, and Allies are played from the deck and
+// the optimizer models them, so they're deck cards.)
 var NonDeckTypes = map[string]bool{
 	"Weapon": true, "Equipment": true, "Hero": true, "Demi-Hero": true,
-	"Token": true, "Landmark": true, "Mentor": true, "Ally": true, "Macro": true,
+	"Token": true, "Macro": true,
 }
 
 // UnmodeledTypes is NonDeckTypes minus Weapon: the printed card types the optimizer doesn't
