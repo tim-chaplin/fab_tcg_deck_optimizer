@@ -26,7 +26,7 @@ cost: 1                 # int constant; omit or use "variable" for VariableCost 
 goAgain: false          # default false
 dynamicGoAgain: false   # when true, the generator skips GoAgain; the hand file owns it
 universal: false        # when true, Types(g) ORs in the active hero's class
-markers: [Dominator]    # NotImplemented, Unplayable, Dominator, NotSilverAgeLegal
+markers: [Dominator]    # NotImplemented, Unplayable, Dominator
 text: |
   Printed rules text...
 variants:

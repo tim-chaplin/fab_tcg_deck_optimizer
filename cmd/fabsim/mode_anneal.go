@@ -13,6 +13,7 @@ import (
 	"time"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/format"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/gameengine"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/hero"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/hero/heroes"
@@ -57,8 +58,8 @@ type annealConfig struct {
 
 // defaultDeckNameFor keys the default deck filename on (hero, format, incoming) so different
 // regimes don't hill-climb one another's optimum.
-func defaultDeckNameFor(h hero.Hero, f GameplayFormat, incoming int) string {
-	return fmt.Sprintf("%s_%s_%d_incoming", strings.ToLower(h.Name()), f, incoming)
+func defaultDeckNameFor(h hero.Hero, f format.Format, incoming int) string {
+	return fmt.Sprintf("%s_%s_%d_incoming", strings.ToLower(h.Name()), f.Name(), incoming)
 }
 
 // runAnnealCmd parses anneal's flags from args and dispatches to runAnneal.
@@ -71,7 +72,7 @@ func runAnnealCmd(args []string) {
 	deckSize := fs.Int("deck-size", 40, "number of cards per deck")
 	maxCopies := fs.Int("max-copies", defaultMaxCopies, "maximum copies of any single card printing per deck")
 	seed := fs.Int64("seed", time.Now().UnixNano(), "RNG seed")
-	formatFlag := fs.String("format", string(SilverAge), "constructed format whose banlist restricts the card pool during search (only \"silver_age\" is supported today)")
+	formatFlag := fs.String("format", format.SilverAge.Name(), "constructed format whose banlist restricts the card pool during search (only \"silver_age\" is supported today)")
 	debug := fs.Bool("debug", false, "print additional debug info to stdout / stderr")
 	finalize := fs.Bool("finalize", false, "high-precision pass — sets -shuffles to 10000. The accept threshold is k·σ/√shuffles, so a bigger budget resolves (and accepts) finer sub-percent gains. Use on a deck that's already converged.")
 	startTemp := fs.Float64("start-temp", 0, "simulated-annealing starting temperature. 0 (default) runs a pure hill climb that stops at the first local maximum. Higher values probabilistically accept worse mutations early; acceptance probability is exp((avg - baseline) / T). An SA run (start-temp > 0) never stops on its own: on reaching a local maximum it reheats to start-temp and keeps exploring from the current deck (the best-so-far is preserved and only the peak is saved) — stop it with Enter or -max-duration. Good starting range is ~0.05–0.5 given typical Value units.")
@@ -89,7 +90,7 @@ func runAnnealCmd(args []string) {
 	}
 	requireFlag(fs, "anneal", "incoming")
 
-	fmtValue, err := parseGameplayFormat(*formatFlag)
+	fmtValue, err := format.Parse(*formatFlag)
 	if err != nil {
 		die("%v", err)
 	}

@@ -4,8 +4,6 @@ types:
     - Action
     - Attack
 cost: 2
-markers:
-    - NotSilverAgeLegal
 text: When this is put into your graveyard from anywhere, gain 1{h}.
 variants:
     - id: SirensOfSafeHarborRed

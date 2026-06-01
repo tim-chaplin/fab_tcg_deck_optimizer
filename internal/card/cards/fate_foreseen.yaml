@@ -3,8 +3,6 @@ types:
     - Generic
     - DefenseReaction
 cost: 0
-markers:
-    - NotSilverAgeLegal
 text: Opt 1
 variants:
     - id: FateForeseenRed

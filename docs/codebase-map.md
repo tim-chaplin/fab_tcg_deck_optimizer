@@ -50,6 +50,7 @@ internal/
   hero/            Hero interface; concrete heroes in heroes/
   weapon/          Weapon interface; concrete weapons in weapons/
   ids/             Stable integer ID allocation for cards / heroes / weapons
+  format/          Constructed gameplay formats (Silver Age banlist + legality predicate)
   registry/        Master roster of every card / weapon / hero
   sim/             Hand-and-deck evaluator and attack-turn search
   textio/          On-disk deck encodings (JSON deck+stats, fabrary text)
@@ -80,8 +81,11 @@ mydecks/           Local working deck files (untracked by git)
 - **internal/ids** — The central allocation of stable integer identifiers (`CardID`,
   `HeroID`) anchored into contiguous non-overlapping ranges so per-entity caches can be
   slice-indexed. Weapons are cards, so they take `CardID`s in the shared range.
+- **internal/format** — The constructed gameplay formats (Silver Age today): a `Format`
+  interface whose `IsCardLegal` predicate filters the card pool, backed by the hardcoded
+  banlist in `banlist.go`. Hero-agnostic — class/talent legality is the registry's job.
 - **internal/registry** — The master roster of every implemented card, weapon, and hero,
-  providing ID/name lookups and the marker-filtered deck-construction pools.
+  providing ID/name lookups and the marker- and format-filtered deck-construction pools.
 
 ### Simulation engine
 

@@ -154,7 +154,7 @@ The summary below groups the flags by subcommand.
 - `-seed` — RNG seed (default: time-based)
 - `-format` — constructed format whose banlist restricts the card pool during search. Defaults
   to `silver_age`, currently the only supported format. The authoritative Silver Age banlist
-  lives at `data_sources/silver_age_banlist.txt`.
+  lives in `internal/format/banlist.go`.
 - `-start-temp` — starting temperature. `0` (default) runs a pure hill climb. Higher values
   probabilistically accept worse mutations early (Metropolis rule).
 - `-temp-decay` — multiplicative cooling per acceptance (default 0.95).

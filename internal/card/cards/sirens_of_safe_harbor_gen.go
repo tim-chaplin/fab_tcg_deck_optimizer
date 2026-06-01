@@ -20,7 +20,6 @@ func (SirensOfSafeHarborRed) Attack() int                        { return 6 }
 func (SirensOfSafeHarborRed) Defense() int                       { return 2 }
 func (SirensOfSafeHarborRed) Types(card.GameEngine) card.TypeSet { return sirensOfSafeHarborTypes }
 func (SirensOfSafeHarborRed) GoAgain(card.GameEngine) bool       { return false }
-func (SirensOfSafeHarborRed) NotSilverAgeLegal()                 {}
 
 type SirensOfSafeHarborYellow struct{}
 
@@ -33,7 +32,6 @@ func (SirensOfSafeHarborYellow) Attack() int                        { return 5 }
 func (SirensOfSafeHarborYellow) Defense() int                       { return 2 }
 func (SirensOfSafeHarborYellow) Types(card.GameEngine) card.TypeSet { return sirensOfSafeHarborTypes }
 func (SirensOfSafeHarborYellow) GoAgain(card.GameEngine) bool       { return false }
-func (SirensOfSafeHarborYellow) NotSilverAgeLegal()                 {}
 
 type SirensOfSafeHarborBlue struct{}
 
@@ -46,4 +44,3 @@ func (SirensOfSafeHarborBlue) Attack() int                        { return 4 }
 func (SirensOfSafeHarborBlue) Defense() int                       { return 2 }
 func (SirensOfSafeHarborBlue) Types(card.GameEngine) card.TypeSet { return sirensOfSafeHarborTypes }
 func (SirensOfSafeHarborBlue) GoAgain(card.GameEngine) bool       { return false }
-func (SirensOfSafeHarborBlue) NotSilverAgeLegal()                 {}

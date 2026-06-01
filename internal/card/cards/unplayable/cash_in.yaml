@@ -5,7 +5,6 @@ types:
 cost: 4
 goAgain: true
 markers:
-    - NotSilverAgeLegal
     - Unplayable
 text: |-
     You may destroy 4 Coppers, 2 Silvers, or 1 Gold you control rather than pay Cash In's {r}

@@ -34,8 +34,7 @@ def transform(src, note):
     pattern = re.compile(
         r"^(?P<indent>[ \t]*)func \((?P<recv>[A-Za-z0-9]+)\) GoAgain\(\) bool[^\n]*\n"
         r"(?P<between>(?:[ \t]*//[^\n]*\n)?"
-        r"(?:[ \t]*func \([A-Za-z0-9 ]+\) NotImplemented\(\)[^\n]*\n)?"
-        r"(?:[ \t]*func \([A-Za-z0-9 ]+\) NotSilverAgeLegal\(\)[^\n]*\n)?)"
+        r"(?:[ \t]*func \([A-Za-z0-9 ]+\) NotImplemented\(\)[^\n]*\n)?)"
         r"(?P<rest>[ \t]*func \([ \t]*[A-Za-z]?[ \t]*[A-Za-z0-9]+\) Play\()",
         re.MULTILINE,
     )
@@ -47,8 +46,8 @@ def transform(src, note):
         between = m.group("between")
         between = re.sub(r"^[ \t]*// not implemented:[^\n]*\n", "", between, flags=re.MULTILINE)
         between = re.sub(r"^[ \t]*func \([A-Za-z0-9 ]+\) NotImplemented\(\)[^\n]*\n", "", between, flags=re.MULTILINE)
-        # Build replacement: GoAgain line + (any preserved markers, e.g. NotSilverAgeLegal) +
-        # not-implemented comment + NotImplemented method + the Play func line we matched.
+        # Build replacement: GoAgain line + any preserved between-lines + not-implemented
+        # comment + NotImplemented method + the Play func line we matched.
         goagain_line = m.group(0)[: m.group(0).find("\n") + 1]
         notimpl = f"{indent}// not implemented: {note}\n{indent}func ({recv}) NotImplemented()             {{}}\n"
         return goagain_line + between + notimpl + m.group("rest")

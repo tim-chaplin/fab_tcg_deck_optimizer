@@ -2,7 +2,6 @@ name: Sink Below
 types: []
 cost: 0
 markers:
-    - NotSilverAgeLegal
     - Unplayable
 text: You may put a card from your hand on the bottom of your deck. If you do, draw a card.
 variants:

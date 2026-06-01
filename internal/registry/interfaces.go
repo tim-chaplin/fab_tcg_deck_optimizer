@@ -29,8 +29,9 @@ type Weapon interface {
 // simulator doesn't model its printed effect (Gold / Silver / Copper token economies,
 // Landmarks, …). A NotImplemented card is still valid in pre-built hands — it evaluates
 // using its static Attack / Pitch / Defense — but the optimizer won't introduce it into
-// a new deck or swap one in via mutation. Orthogonal to NotSilverAgeLegal: a card can be
-// format-legal yet unimplemented, banned yet fully implemented, or both.
+// a new deck or swap one in via mutation. Orthogonal to format legality (the internal/format
+// banlist): a card can be format-legal yet unimplemented, banned yet fully implemented, or
+// both.
 type NotImplemented interface {
 	NotImplemented()
 }
@@ -39,13 +40,9 @@ type NotImplemented interface {
 // is so weak the optimizer would never pick it even if fully modelled. Same filtering
 // semantics as NotImplemented; the distinction is intent (won't-model vs not-worth-
 // modelling). Pre-built hands still play these normally.
+//
+// Format legality (the Silver Age banlist) is not a marker: it lives in internal/format, and
+// LegalCards / LegalWeapons apply it via format.IsCardLegal.
 type Unplayable interface {
 	Unplayable()
-}
-
-// NotSilverAgeLegal flags cards / weapons banned in the Silver Age format. The registry
-// filters them out of the deck-construction pool. Source of truth is
-// data_sources/silver_age_banlist.txt — keep the two in sync.
-type NotSilverAgeLegal interface {
-	NotSilverAgeLegal()
 }

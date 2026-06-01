@@ -20,7 +20,6 @@ func (NimbyRed) Attack() int                        { return 3 }
 func (NimbyRed) Defense() int                       { return 2 }
 func (NimbyRed) Types(card.GameEngine) card.TypeSet { return nimbyTypes }
 func (NimbyRed) GoAgain(card.GameEngine) bool       { return false }
-func (NimbyRed) NotSilverAgeLegal()                 {}
 func (NimbyRed) Unplayable()                        {}
 
 type NimbyYellow struct{}
@@ -34,7 +33,6 @@ func (NimbyYellow) Attack() int                        { return 2 }
 func (NimbyYellow) Defense() int                       { return 2 }
 func (NimbyYellow) Types(card.GameEngine) card.TypeSet { return nimbyTypes }
 func (NimbyYellow) GoAgain(card.GameEngine) bool       { return false }
-func (NimbyYellow) NotSilverAgeLegal()                 {}
 func (NimbyYellow) Unplayable()                        {}
 
 type NimbyBlue struct{}
@@ -48,5 +46,4 @@ func (NimbyBlue) Attack() int                        { return 1 }
 func (NimbyBlue) Defense() int                       { return 2 }
 func (NimbyBlue) Types(card.GameEngine) card.TypeSet { return nimbyTypes }
 func (NimbyBlue) GoAgain(card.GameEngine) bool       { return false }
-func (NimbyBlue) NotSilverAgeLegal()                 {}
 func (NimbyBlue) Unplayable()                        {}
