@@ -27,7 +27,8 @@ func runEvalCmd(args []string) {
 	arcaneIncoming := fs.Int("arcane-incoming", 0, "opponent arcane damage per turn (defaults to 0 — the non-arcane matchup; raise it to score cards that gate on incoming arcane)")
 	seed := fs.Int64("seed", time.Now().UnixNano(), "RNG seed")
 	printOnly := fs.Bool("print-only", false, "load the deck and print the stats from the last run without simulating or rewriting the on-disk .json / .txt")
-	brief := fs.Bool("brief", false, "print only the score summary (no card list, per-card stats, or best turn)")
+	brief := fs.Bool("brief", false, "print only the score summary (no card list, per-card contribution table, or best turn)")
+	skipPerCardEval := fs.Bool("skip_per_card_eval", false, "skip the per-card contribution table. Computing it re-simulates the deck once per unique card (the costly part of a full eval), so skip it when you only want the score. Off by default.")
 	debug := fs.Bool("debug", false, "print additional debug info to stdout / stderr")
 	_ = parseFlagsAnywhere(fs, args)
 	if fs.NArg() != 1 {
@@ -37,18 +38,26 @@ func runEvalCmd(args []string) {
 		requireFlag(fs, "eval", "incoming")
 	}
 	gameengine.OptDebug = *debug
-	runEval(resolveDeckPath(fs.Arg(0)), *shuffles, sim.Matchup{IncomingPhysicalDamage: *incoming, IncomingArcaneDamage: *arcaneIncoming}, *seed, *printOnly, *brief, *debug)
+	runEval(resolveDeckPath(fs.Arg(0)), *shuffles, sim.Matchup{IncomingPhysicalDamage: *incoming, IncomingArcaneDamage: *arcaneIncoming}, *seed, *printOnly, *brief, *skipPerCardEval, *debug)
 }
 
 // runEval loads the deck at outPath and prints its stats. With printOnly=false it first
 // re-simulates against mp and writes the fresh stats back to disk (.json + sibling fabrary
-// .txt). brief=true prints the score summary only; brief=false prints the full
-// printBestDeck dump. debug=true prints cache telemetry to stderr after a fresh sim.
-func runEval(outPath string, shuffles int, mp sim.Matchup, seed int64, printOnly, brief, debug bool) {
+// .txt). brief=true prints the score summary only; brief=false prints the full printBestDeck
+// dump, followed by the per-card contribution table unless skipPerCardEval is set (it needs a
+// fresh sim, so it never runs in printOnly mode). debug=true prints cache telemetry to stderr.
+func runEval(outPath string, shuffles int, mp sim.Matchup, seed int64, printOnly, brief, skipPerCardEval, debug bool) {
 	if !printOnly {
 		// Print from the in-memory stats — the disk round-trip would drop Stats.PrintBest.
-		d, stats := evaluateAndPersist(outPath, shuffles, mp, seed, debug)
+		d, stats, ev := evaluateAndPersist(outPath, shuffles, mp, seed, debug)
 		printLoadedDeck(d, stats, brief)
+		if !brief && !skipPerCardEval {
+			fmt.Fprintln(os.Stderr, "Evaluating relative value of each card (disable with -skip_per_card_eval)...")
+			start := time.Now()
+			rows := perCardAblation(d, ev, shuffles, mp, seed)
+			printCardAblation(rows, shuffles)
+			fmt.Fprintf(os.Stderr, "per-card ablation: %d cards re-simulated in %s\n", len(rows), time.Since(start).Round(time.Millisecond))
+		}
 		return
 	}
 	d, stats := mustLoadDeck(outPath)
@@ -59,7 +68,7 @@ func runEval(outPath string, shuffles int, mp sim.Matchup, seed int64, printOnly
 // to disk (.json + sibling fabrary .txt), and returns the simulated deck + stats. Prints a
 // one-line before/after summary to stderr; debug=true also prints the dedicated Evaluator's
 // cache stats.
-func evaluateAndPersist(outPath string, shuffles int, mp sim.Matchup, seed int64, debug bool) (*deck.Deck, deck.Stats) {
+func evaluateAndPersist(outPath string, shuffles int, mp sim.Matchup, seed int64, debug bool) (*deck.Deck, deck.Stats, *sim.Evaluator) {
 	loaded, loadedStats := mustLoadDeck(outPath)
 	// Size the pool slots' graveyard/banished backings to this deck before any Evaluator
 	// gets constructed.
@@ -83,7 +92,7 @@ func evaluateAndPersist(outPath string, shuffles int, mp sim.Matchup, seed int64
 	if err := writeDeck(d, stats, outPath); err != nil {
 		die("%v", err)
 	}
-	return d, stats
+	return d, stats, ev
 }
 
 // printCacheStats writes the hand-eval cache counters to stderr as a single annotated line.

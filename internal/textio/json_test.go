@@ -84,54 +84,6 @@ func TestRoundTrip_PreservesMatchup(t *testing.T) {
 	}
 }
 
-// Tests that PerCardMarginal (Present/Absent totals and hand counts per CardID) survives
-// Marshal/Unmarshal.
-func TestRoundTrip_PreservesPerCardMarginal(t *testing.T) {
-	rng := rand.New(rand.NewSource(13))
-	d := deck.Random(heroes.Viserai, 40, 2, rng, registry.Registry{})
-	stats := sim.NewEvaluator().Evaluate(d, 50, sim.Matchup{IncomingPhysicalDamage: 4}, rng)
-	if len(stats.PerCardMarginal) == 0 {
-		t.Fatalf("baseline deck produced no PerCardMarginal entries; test can't differentiate good from bad")
-	}
-
-	data, err := MarshalDeck(d, stats)
-	if err != nil {
-		t.Fatalf("Marshal: %v", err)
-	}
-	_, gotStats, err := UnmarshalDeck(data)
-	if err != nil {
-		t.Fatalf("Unmarshal: %v", err)
-	}
-
-	if len(gotStats.PerCardMarginal) != len(stats.PerCardMarginal) {
-		t.Fatalf("PerCardMarginal entry count: got %d want %d",
-			len(gotStats.PerCardMarginal), len(stats.PerCardMarginal))
-	}
-	for id, want := range stats.PerCardMarginal {
-		gotEntry, ok := gotStats.PerCardMarginal[id]
-		if !ok {
-			t.Errorf("PerCardMarginal missing entry for %s after round trip", registry.GetCard(id).Name())
-			continue
-		}
-		if gotEntry.PresentHands != want.PresentHands || gotEntry.AbsentHands != want.AbsentHands {
-			t.Errorf("%s bucket counts: got present=%d absent=%d, want present=%d absent=%d",
-				registry.GetCard(id).Name(),
-				gotEntry.PresentHands, gotEntry.AbsentHands,
-				want.PresentHands, want.AbsentHands)
-		}
-		if gotEntry.PresentTotal != want.PresentTotal || gotEntry.AbsentTotal != want.AbsentTotal {
-			t.Errorf("%s bucket totals: got present=%v absent=%v, want present=%v absent=%v",
-				registry.GetCard(id).Name(),
-				gotEntry.PresentTotal, gotEntry.AbsentTotal,
-				want.PresentTotal, want.AbsentTotal)
-		}
-		if gotEntry.Marginal() != want.Marginal() {
-			t.Errorf("%s Marginal(): got %v want %v", registry.GetCard(id).Name(),
-				gotEntry.Marginal(), want.Marginal())
-		}
-	}
-}
-
 // Tests that deck.BestTurn.Value round-trips through Marshal/Unmarshal.
 func TestRoundTrip_PreservesBestTurnValue(t *testing.T) {
 	rng := rand.New(rand.NewSource(7))

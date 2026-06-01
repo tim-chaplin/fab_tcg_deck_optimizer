@@ -77,7 +77,7 @@ func TestRunEval_DefaultRewritesFile(t *testing.T) {
 	// where the seed had Hands=0. captureEvalOutput drains stdout/stderr so the test isn't
 	// cluttered with eval's prints and runEval doesn't block on a full pipe buffer.
 	_, _ = captureEvalOutput(t, func() {
-		runEval(path, 50, sim.Matchup{}, 1, false, true, false)
+		runEval(path, 50, sim.Matchup{}, 1, false, true, false, false)
 	})
 	afterDefault, err := os.ReadFile(path)
 	if err != nil {
@@ -116,8 +116,8 @@ func TestRunEval_PrintOnlyLeavesFileUnchanged(t *testing.T) {
 		t.Fatalf("read seeded json: %v", err)
 	}
 
-	stdout, stderr := captureEvalOutput(t, func() {
-		runEval(path, 50, sim.Matchup{}, 1, true, false, false)
+	_, stderr := captureEvalOutput(t, func() {
+		runEval(path, 50, sim.Matchup{}, 1, true, false, false, false)
 	})
 	afterRead, err := os.ReadFile(path)
 	if err != nil {
@@ -131,14 +131,6 @@ func TestRunEval_PrintOnlyLeavesFileUnchanged(t *testing.T) {
 	// test only pins the absence of the rewrite-line marker; unrelated stderr is allowed.
 	if strings.Contains(stderr, "rewriting") {
 		t.Errorf("-print-only should not log a rewrite; got stderr:\n%s", stderr)
-	}
-	// -print-only must render the same dump as a fresh sim — including the marginal-value
-	// table, which round-trips through PerCardMarginal in the JSON.
-	if !strings.Contains(stdout, "Card value") {
-		t.Errorf("-print-only output missing the per-card value table; PerCardMarginal isn't round-tripping through deckio:\n%s", stdout)
-	}
-	if !strings.Contains(stdout, "marginal") {
-		t.Errorf("-print-only output missing the marginal column header:\n%s", stdout)
 	}
 }
 
@@ -158,7 +150,7 @@ func TestRunEval_DefaultPrintsFullDump(t *testing.T) {
 	}
 
 	stdout, stderr := captureEvalOutput(t, func() {
-		runEval(path, 100, sim.Matchup{}, 1, false, false, false)
+		runEval(path, 100, sim.Matchup{}, 1, false, false, false, false)
 	})
 	if !strings.Contains(stdout, "Best turn played") {
 		t.Errorf("eval output missing 'Best turn played' header:\n%s", stdout)
@@ -166,11 +158,11 @@ func TestRunEval_DefaultPrintsFullDump(t *testing.T) {
 	if !strings.Contains(stdout, "Card list:") {
 		t.Errorf("default eval output missing the card list:\n%s", stdout)
 	}
-	if !strings.Contains(stdout, "Card value") {
-		t.Errorf("default eval output missing the per-card value table:\n%s", stdout)
+	if !strings.Contains(stdout, "Per-card contribution") {
+		t.Errorf("default eval output missing the per-card contribution table:\n%s", stdout)
 	}
-	if !strings.Contains(stdout, "marginal") {
-		t.Errorf("default eval output missing the marginal-value column:\n%s", stdout)
+	if !strings.Contains(stdout, "Contribution") {
+		t.Errorf("default eval output missing the contribution column:\n%s", stdout)
 	}
 	if !strings.Contains(stderr, "rewriting") {
 		t.Errorf("default eval should announce the rewrite on stderr; got:\n%s", stderr)
@@ -191,7 +183,7 @@ func TestRunEval_BriefSkipsBestTurnAndCardList(t *testing.T) {
 	}
 
 	stdout, _ := captureEvalOutput(t, func() {
-		runEval(path, 100, sim.Matchup{}, 1, false, true, false)
+		runEval(path, 100, sim.Matchup{}, 1, false, true, false, false)
 	})
 	if !strings.Contains(stdout, "Mean value:") {
 		t.Errorf("brief eval output missing the 'Mean value:' stats line:\n%s", stdout)

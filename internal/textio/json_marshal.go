@@ -10,8 +10,6 @@ import (
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/hero"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/ids"
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/registry"
 )
 
 // MarshalDeck returns the indented JSON encoding of d and stats, with card / weapon / hero
@@ -52,16 +50,15 @@ func sortedStrings(ss []string) []string {
 
 func statsToJSON(s deck.Stats) StatsJSON {
 	return StatsJSON{
-		Matchup:         matchupToJSON(s),
-		Runs:            s.Runs,
-		Hands:           s.Hands,
-		TotalValue:      s.TotalValue,
-		Avg:             s.Mean(),
-		FirstCycle:      s.FirstCycle,
-		SecondCycle:     s.SecondCycle,
-		Best:            bestTurnToJSON(s.Best),
-		PerCardMarginal: perCardMarginalToJSON(s.PerCardMarginal),
-		Histogram:       s.Histogram,
+		Matchup:     matchupToJSON(s),
+		Runs:        s.Runs,
+		Hands:       s.Hands,
+		TotalValue:  s.TotalValue,
+		Avg:         s.Mean(),
+		FirstCycle:  s.FirstCycle,
+		SecondCycle: s.SecondCycle,
+		Best:        bestTurnToJSON(s.Best),
+		Histogram:   s.Histogram,
 	}
 }
 
@@ -75,33 +72,6 @@ func matchupToJSON(s deck.Stats) *MatchupJSON {
 		IncomingPhysicalDamage: s.IncomingPhysicalDamage,
 		IncomingArcaneDamage:   s.IncomingArcaneDamage,
 	}
-}
-
-// perCardMarginalToJSON flattens the ids.CardID-keyed marginal-stats map into a slice
-// sorted by Marginal descending, then by card name — matching the on-screen card-value
-// table's order.
-func perCardMarginalToJSON(m map[ids.CardID]deck.CardMarginalStats) []CardMarginalStatsJSON {
-	if len(m) == 0 {
-		return nil
-	}
-	out := make([]CardMarginalStatsJSON, 0, len(m))
-	for id, s := range m {
-		out = append(out, CardMarginalStatsJSON{
-			Card:         registry.GetCard(id).DisplayName(),
-			PresentTotal: s.PresentTotal,
-			PresentHands: s.PresentHands,
-			AbsentTotal:  s.AbsentTotal,
-			AbsentHands:  s.AbsentHands,
-			Marginal:     s.Marginal(),
-		})
-	}
-	sort.Slice(out, func(i, j int) bool {
-		if out[i].Marginal != out[j].Marginal {
-			return out[i].Marginal > out[j].Marginal
-		}
-		return out[i].Card < out[j].Card
-	})
-	return out
 }
 
 // bestTurnToJSON serialises the headline Value, returning the zero value on no recorded

@@ -356,3 +356,43 @@ func TestDeck_ShuffleOnMasterStillWorks(t *testing.T) {
 		t.Errorf("post-Shuffle size = %d, want 3", d.Size())
 	}
 }
+
+// TestDeck_WithoutAndCount checks Count tallies copies and Without drops every copy of an id while
+// preserving order, carrying Sideboard / Equipment, and leaving the original deck untouched.
+func TestDeck_WithoutAndCount(t *testing.T) {
+	d := New(nil, nil, []Card{
+		fakeCard{id: 1, display: "A"},
+		fakeCard{id: 2, display: "B"},
+		fakeCard{id: 1, display: "A"},
+		fakeCard{id: 3, display: "C"},
+	})
+	d.Sideboard = []string{"SB"}
+	d.Equipment = []string{"EQ"}
+
+	if got := d.Count(1); got != 2 {
+		t.Errorf("Count(1) = %d, want 2", got)
+	}
+	if got := d.Count(3); got != 1 {
+		t.Errorf("Count(3) = %d, want 1", got)
+	}
+	if got := d.Count(99); got != 0 {
+		t.Errorf("Count(99) = %d, want 0 (absent card)", got)
+	}
+
+	w := d.Without(1)
+	if w.Size() != 2 {
+		t.Errorf("Without(1).Size() = %d, want 2 (both copies of 1 gone)", w.Size())
+	}
+	if w.Count(1) != 0 {
+		t.Errorf("Without(1) kept %d copies of card 1", w.Count(1))
+	}
+	if order := []ids.CardID{w.cards[0].ID(), w.cards[1].ID()}; !slices.Equal(order, []ids.CardID{2, 3}) {
+		t.Errorf("Without(1) surviving order = %v, want [2 3]", order)
+	}
+	if len(w.Sideboard) != 1 || w.Sideboard[0] != "SB" || len(w.Equipment) != 1 || w.Equipment[0] != "EQ" {
+		t.Errorf("Without dropped sideboard/equipment: %v / %v", w.Sideboard, w.Equipment)
+	}
+	if d.Size() != 4 {
+		t.Errorf("Without mutated the original deck; Size() = %d, want 4", d.Size())
+	}
+}
