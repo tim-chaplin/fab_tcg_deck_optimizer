@@ -16,4 +16,8 @@
 // Both encodings rely on the internal/registry name-keyed lookups for card / weapon / hero
 // resolution; both are pure data formatters with no sim or gameengine dependency, so the
 // package can be imported by any consumer that needs to read or write a deck file.
+//
+// cardcsv.go adds a third, read-only format: LoadCardCSV parses the upstream the-fab-cube
+// card.csv (the raw card database) into CardCSV rows, used by the card-data tools
+// (cmd/parsecarddb, cmd/cardaudit).
 package textio

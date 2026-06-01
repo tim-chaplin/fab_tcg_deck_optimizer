@@ -12,9 +12,9 @@ import (
 	"os"
 	"strings"
 
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/cardcsv"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/fabtype"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/format"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/textio"
 )
 
 // named adapts a card name to the format.Card interface (just Name()) so the banlist check can
@@ -52,7 +52,7 @@ func typeWords(types string) []string {
 }
 
 // matches reports whether c passes every predicate in f.
-func (f poolFilter) matches(c cardcsv.Card) bool {
+func (f poolFilter) matches(c textio.CardCSV) bool {
 	if f.nameNeedle != "" && !strings.Contains(strings.ToLower(c.Name), f.nameNeedle) {
 		return false
 	}
@@ -139,12 +139,12 @@ func main() {
 		excludeBanned: *excludeBanned,
 	}
 
-	cards, err := cardcsv.Load(*in)
+	cards, err := textio.LoadCardCSV(*in)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	var matched []cardcsv.Card
+	var matched []textio.CardCSV
 	for _, c := range cards {
 		if filter.matches(c) {
 			matched = append(matched, c)

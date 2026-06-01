@@ -10,9 +10,9 @@ the raw CSV.
 
 ## How it works
 
-`card.csv` is a tab-separated export, read by `internal/cardcsv` (a header-name-to-field
-mapping, so an upstream column reorder doesn't break parsing). `poolFilter.matches` then narrows
-the rows. The class / talent filters express a hero's legal pool the way `registry.heroCanPlay`
+`card.csv` is a tab-separated export, read by `internal/textio`'s `LoadCardCSV` (a header-name-
+to-field mapping, so an upstream column reorder doesn't break parsing). `poolFilter.matches`
+then narrows the rows. The class / talent filters express a hero's legal pool the way `registry.heroCanPlay`
 does: Generic and classless cards are always class-legal, and a card's talents must be a subset
 of the hero's. Class / talent / non-deck words are classified via `internal/fabtype`.
 

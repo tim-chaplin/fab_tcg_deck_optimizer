@@ -3,7 +3,7 @@ package main
 import (
 	"testing"
 
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/cardcsv"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/textio"
 )
 
 func set(words ...string) map[string]bool {
@@ -16,8 +16,8 @@ func set(words ...string) map[string]bool {
 
 // TestPoolFilterMatches covers the class/talent subset semantics that express a hero's pool.
 func TestPoolFilterMatches(t *testing.T) {
-	card := func(types string) cardcsv.Card {
-		return cardcsv.Card{Name: "X", Types: types, SilverAgeLegal: "Yes"}
+	card := func(types string) textio.CardCSV {
+		return textio.CardCSV{Name: "X", Types: types, SilverAgeLegal: "Yes"}
 	}
 
 	viserai := poolFilter{classes: set("Runeblade"), silverAge: true} // no talent
@@ -26,7 +26,7 @@ func TestPoolFilterMatches(t *testing.T) {
 	cases := []struct {
 		name   string
 		filter poolFilter
-		card   cardcsv.Card
+		card   textio.CardCSV
 		want   bool
 	}{
 		{"viserai: runeblade", viserai, card("Runeblade, Action, Attack"), true},
@@ -47,7 +47,7 @@ func TestPoolFilterMatches(t *testing.T) {
 		{"modeled keeps weapon", poolFilter{modeled: true}, card("Runeblade, Weapon, Sword"), true},
 		{"modeled drops equipment", poolFilter{modeled: true}, card("Generic, Equipment, Arms"), false},
 		// silver-age gate.
-		{"silver-age drops illegal", poolFilter{silverAge: true}, cardcsv.Card{Name: "X", Types: "Generic, Action", SilverAgeLegal: "No"}, false},
+		{"silver-age drops illegal", poolFilter{silverAge: true}, textio.CardCSV{Name: "X", Types: "Generic, Action", SilverAgeLegal: "No"}, false},
 		{"empty classes = any class", poolFilter{}, card("Warrior, Action"), true},
 	}
 	for _, c := range cases {
@@ -60,10 +60,10 @@ func TestPoolFilterMatches(t *testing.T) {
 // TestPoolFilterExcludeBanned checks the cross-reference against our internal/format banlist.
 func TestPoolFilterExcludeBanned(t *testing.T) {
 	f := poolFilter{excludeBanned: true}
-	if f.matches(cardcsv.Card{Name: "Ball Lightning", Types: "Lightning, Action, Attack", SilverAgeLegal: "Yes"}) {
+	if f.matches(textio.CardCSV{Name: "Ball Lightning", Types: "Lightning, Action, Attack", SilverAgeLegal: "Yes"}) {
 		t.Error("Ball Lightning (on our banlist) should be excluded by -exclude-banned")
 	}
-	if !f.matches(cardcsv.Card{Name: "Aether Slash", Types: "Runeblade, Action, Attack", SilverAgeLegal: "Yes"}) {
+	if !f.matches(textio.CardCSV{Name: "Aether Slash", Types: "Runeblade, Action, Attack", SilverAgeLegal: "Yes"}) {
 		t.Error("Aether Slash (not banned) should pass -exclude-banned")
 	}
 }

@@ -26,7 +26,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/tim-chaplin/fab-deck-optimizer/internal/cardcsv"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/textio"
 	"gopkg.in/yaml.v3"
 )
 
@@ -152,7 +152,7 @@ func fetchAPIStats(client *http.Client, classes []string) (map[string]stats, err
 
 // loadCSVStats indexes card.csv stats by normalized "name|pitch".
 func loadCSVStats(path string) (map[string]stats, error) {
-	rows, err := cardcsv.Load(path)
+	rows, err := textio.LoadCardCSV(path)
 	if err != nil {
 		return nil, err
 	}

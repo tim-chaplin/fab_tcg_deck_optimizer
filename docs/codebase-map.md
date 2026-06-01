@@ -53,7 +53,6 @@ internal/
   weapon/          Weapon interface; concrete weapons in weapons/
   ids/             Stable integer ID allocation for cards / heroes / weapons
   fabtype/         FaB class / talent / non-deck type NAME lists for the CSV + typebox tools
-  cardcsv/         Loader for the upstream the-fab-cube card.csv (shared by the card tools)
   format/          Constructed gameplay formats (Silver Age banlist + legality predicate)
   registry/        Master roster of every card / weapon / hero
   sim/             Hand-and-deck evaluator and attack-turn search
@@ -134,7 +133,8 @@ mydecks/           Local working deck files (untracked by git)
 
 - **internal/textio** — Durable on-disk text encodings: the canonical `mydecks/*.json`
   deck-plus-stats format and the fabrary.net plain-text import/export format, plus `mydecks/`
-  path resolution.
+  path resolution and a read-only loader for the upstream `card.csv` (`LoadCardCSV`, shared by
+  the card-data tools).
 
 ### CLI and tooling
 
@@ -150,9 +150,6 @@ mydecks/           Local working deck files (untracked by git)
   stats (cost / power / defense) against both `card.csv` and the official cardvault API,
   bucketing discrepancies by confidence and suppressing an allowlist of intentional modeling
   deviations. Needs network.
-- **internal/cardcsv** — The shared loader for the upstream the-fab-cube `card.csv` (a tab-
-  separated export); used by `cmd/parsecarddb` and `cmd/cardaudit` so the column mapping lives
-  in one place.
 
 ### Testing
 
