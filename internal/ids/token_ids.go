@@ -25,4 +25,5 @@ const (
 // parent so cardMetaCache keys the "parent play" and "item ability" paths separately.
 const (
 	ImperialSealOfCommandRedAbilityID CardID = QuickenTokenID + iota + 1
+	AmuletOfLightningAbilityID
 )

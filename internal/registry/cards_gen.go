@@ -24,6 +24,8 @@ var cardsByID = []Card{
 	ids.AmplifyTheArknightYellow: cards.AmplifyTheArknightYellow{},
 	ids.AmplifyTheArknightBlue:   cards.AmplifyTheArknightBlue{},
 
+	ids.AmuletOfLightningBlue: cards.AmuletOfLightningBlue{},
+
 	ids.ArcaneCussingRed:    cards.ArcaneCussingRed{},
 	ids.ArcaneCussingYellow: cards.ArcaneCussingYellow{},
 	ids.ArcaneCussingBlue:   cards.ArcaneCussingBlue{},

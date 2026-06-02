@@ -11,14 +11,28 @@ import (
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/weapon/weapons"
 )
 
-// Tests that the hero filter is a no-op for Viserai: LegalCardsFor returns exactly the
-// format pool (every implemented card is Runeblade / Generic with no talent).
-func TestLegalCardsFor_Viserai_EqualsFormatPool(t *testing.T) {
-	formatPool := legalCardsForFormat(format.SilverAge)
-	heroPool := (Registry{}).LegalCardsFor(format.SilverAge, heroes.Viserai)
-	if len(heroPool) != len(formatPool) {
-		t.Fatalf("Viserai pool has %d cards, format pool has %d — a card is now filtered by "+
-			"the hero check that wasn't before", len(heroPool), len(formatPool))
+// Tests that LegalCardsFor's hero filter drops from Viserai's pool exactly the cards Viserai
+// can't play — the Lightning-talent cards (Aurora's, like Amulet of Lightning). Every other
+// implemented card is Runeblade / Generic with no talent, so it stays.
+func TestLegalCardsFor_Viserai_ExcludesLightningCards(t *testing.T) {
+	inHeroPool := make(map[ids.CardID]bool)
+	for _, c := range (Registry{}).LegalCardsFor(format.SilverAge, heroes.Viserai) {
+		inHeroPool[c.ID()] = true
+	}
+	excluded := 0
+	for _, c := range legalCardsForFormat(format.SilverAge) {
+		// Viserai is Runeblade with no talent, so a Lightning-talent card is the one thing it
+		// can't play; everything else (Runeblade / Generic, no talent) it can.
+		viseraiCanPlay := !c.Types(nil).Has(card.TypeLightning)
+		if inHeroPool[c.ID()] != viseraiCanPlay {
+			t.Errorf("%s in Viserai pool = %v, want %v", c.DisplayName(), inHeroPool[c.ID()], viseraiCanPlay)
+		}
+		if !viseraiCanPlay {
+			excluded++
+		}
+	}
+	if excluded == 0 {
+		t.Error("no Lightning cards excluded — the test no longer exercises the hero filter")
 	}
 }
 

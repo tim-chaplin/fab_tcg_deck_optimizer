@@ -131,6 +131,10 @@ type ephemeral struct {
 	heroTapped           bool
 	hasCrowdCheered      bool
 	hasCrowdBooed        bool
+	// lightningFused records whether a Lightning card has been fused this turn — the
+	// prerequisite Amulet of Lightning's instant ability gates on. Per-turn (no card sets it
+	// across turns), so it lives here and clears on reset.
+	lightningFused bool
 }
 
 // reset returns e to its start-of-turn baseline: scalars zero except actionPoints=1,
@@ -751,6 +755,9 @@ func (gs *GameState) DamageDealt() int { return gs.damageDealt }
 // damage does not count — same reason it doesn't strip Mark.
 func (gs *GameState) HitThisTurn() bool     { return gs.hitThisTurn }
 func (gs *GameState) SetHitThisTurn(v bool) { gs.hitThisTurn = v }
+
+func (gs *GameState) HasLightningFused() bool  { return gs.lightningFused }
+func (gs *GameState) SetLightningFused(v bool) { gs.lightningFused = v }
 
 // RegisterPhysicalDamage runs the side effects for an n-power physical attack: when the
 // attack clears the likely-to-hit gate it flips HitThisTurn and credits the unblocked

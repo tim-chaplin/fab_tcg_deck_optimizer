@@ -231,6 +231,10 @@ type GameEngine interface {
 	DamageDealt() int
 	// HitThisTurn reports whether at least one attack has landed this turn.
 	HitThisTurn() bool
+	// HasLightningFused reports whether a Lightning card has been fused this turn; a card that
+	// fuses sets it via SetLightningFused. Per-turn — it clears at the turn boundary.
+	HasLightningFused() bool
+	SetLightningFused(v bool)
 	// LastAttackHit reports whether the most recent finalised attack this attack turn
 	// hit. False until the first attack finalises; each subsequent attack overwrites it.
 	LastAttackHit() bool
