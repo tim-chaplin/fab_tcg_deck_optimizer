@@ -127,6 +127,9 @@ const (
 	VexingMaliceRed
 	VexingMaliceYellow
 	VexingMaliceBlue
+	VolatileFluxorRed
+	VolatileFluxorYellow
+	VolatileFluxorBlue
 	WeepingBattlegroundRed
 	WeepingBattlegroundYellow
 	WeepingBattlegroundBlue

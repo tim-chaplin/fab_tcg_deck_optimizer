@@ -1,0 +1,28 @@
+name: Volatile Fluxor
+types:
+    - Lightning
+    - Action
+    - Attack
+cost: 0
+rarity: Common
+goAgain: true
+text: |-
+    If you've played an instant card this chain link, this gets +N{p}. (Red N=3, Yellow N=2,
+    Blue N=1.)
+
+    When this hits, create a Lightning Flow token.
+
+    **Go again**
+variants:
+    - id: VolatileFluxorRed
+      pitch: 1
+      attack: 0
+      defense: 3
+    - id: VolatileFluxorYellow
+      pitch: 2
+      attack: 0
+      defense: 3
+    - id: VolatileFluxorBlue
+      pitch: 3
+      attack: 0
+      defense: 3

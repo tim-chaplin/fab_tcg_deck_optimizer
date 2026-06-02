@@ -141,6 +141,7 @@ type GameEngine interface {
 	CreateGold(int)
 	CreateSilver(int)
 	CreateCopper(int)
+	CreateLightningFlow(int)
 	RunechantCount() int
 	QuickenCount() int
 	GoldCount() int
