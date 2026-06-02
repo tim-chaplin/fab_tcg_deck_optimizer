@@ -38,6 +38,9 @@ type poolFilter struct {
 	modeled       bool            // keep only card types the optimizer models (deck cards + weapons)
 	silverAge     bool            // require Silver Age legality (the card.csv column)
 	excludeBanned bool            // drop cards on our internal/format Silver Age banlist
+	// rarityLegal, when non-nil, keeps only cards with a Basic/Common/Rare printing — the Silver
+	// Age rarity rule, keyed by card Unique ID. nil = no rarity filter.
+	rarityLegal map[string]bool
 }
 
 // typeWords splits a card.csv Types cell ("Runeblade, Action, Attack") into its words.
@@ -64,6 +67,9 @@ func (f poolFilter) matches(c textio.CardCSV) bool {
 		return false
 	}
 	if f.excludeBanned && !format.SilverAge.IsCardLegal(named(c.Name)) {
+		return false
+	}
+	if f.rarityLegal != nil && !f.rarityLegal[c.UniqueID] {
 		return false
 	}
 
@@ -117,6 +123,9 @@ func main() {
 	modeled := flag.Bool("modeled", false, "keep only card types the optimizer models — deck cards and weapons — dropping equipment, heroes, and tokens")
 	silverAge := flag.Bool("silver-age", true, "require Silver Age legality (the card.csv 'Silver Age Legal' column)")
 	excludeBanned := flag.Bool("exclude-banned", false, "drop cards on our internal/format Silver Age banlist (the cards not worth implementing)")
+	rarityLegal := flag.Bool("rarity-legal", false, "keep only cards with a Basic/Common/Rare printing — the Silver Age rarity rule. Needs -printings and -rarity-file.")
+	printings := flag.String("printings", "data_sources/card-printing.csv", "path to card-printing.csv (per-printing rarity), used by -rarity-legal")
+	rarityFile := flag.String("rarity-file", "data_sources/rarity.csv", "path to rarity.csv (shorthand -> name), used by -rarity-legal")
 	outFormat := flag.String("format", "pretty", "output format: pretty | json")
 	namesOnly := flag.Bool("names_only", false, "print only unique card names, one per line")
 	flag.Parse()
@@ -137,6 +146,13 @@ func main() {
 		modeled:       *modeled,
 		silverAge:     *silverAge,
 		excludeBanned: *excludeBanned,
+	}
+	if *rarityLegal {
+		legal, err := textio.LoadRarityLegal(*printings, *rarityFile)
+		if err != nil {
+			log.Fatal(err)
+		}
+		filter.rarityLegal = legal
 	}
 
 	cards, err := textio.LoadCardCSV(*in)

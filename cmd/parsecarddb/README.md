@@ -36,20 +36,25 @@ Flags:
   to list just the Lightning cards in a pool).
 - `-modeled` — keep only card types the optimizer models — deck cards **and weapons** —
   dropping equipment, heroes, and tokens.
-- `-silver-age` — require Silver Age legality (default true).
+- `-silver-age` — require Silver Age legality via the card.csv `Silver Age Legal` column
+  (default true). This column lags new sets — pair it with `-rarity-legal` for an accurate pool.
 - `-exclude-banned` — drop cards on our `internal/format` Silver Age banlist.
+- `-rarity-legal` — keep only cards with a Basic/Common/Rare printing — the Silver Age rarity
+  rule, which is the reliable signal (the `Silver Age Legal` column lags new sets). Reads
+  `-printings` (`card-printing.csv`) and `-rarity-file` (`rarity.csv`), joining by card Unique
+  ID. Run `fetch.sh` first to have those files locally.
 - `-format` — `pretty` (default) or `json`.
 - `-names_only` — print only the distinct card names, one per line.
 
 ### Examples
 
 ```
-# Viserai's pool (Runeblade + Generic, no talent, incl. weapons):
-go run ./cmd/parsecarddb -classes Runeblade -modeled -names_only
+# Viserai's pool (Runeblade + Generic, no talent, incl. weapons, B/C/R only):
+go run ./cmd/parsecarddb -classes Runeblade -modeled -rarity-legal -names_only
 
-# Aurora's Lightning cards worth implementing (incl. weapons, drops banned):
+# Aurora's Lightning cards worth implementing (incl. weapons, drops banned + non-B/C/R):
 go run ./cmd/parsecarddb -classes Runeblade -talents Lightning -require-talents Lightning \
-  -modeled -exclude-banned -names_only
+  -modeled -exclude-banned -rarity-legal -names_only
 ```
 
 ## Important files

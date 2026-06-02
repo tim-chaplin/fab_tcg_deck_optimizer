@@ -26,6 +26,9 @@ this package.
 - Upstream card database (read-only): `LoadCardCSV(path)` parses the the-fab-cube `card.csv`
   into `CardCSV` rows (`cardcsv.go`). Unlike the deck encodings it doesn't touch the registry;
   it's the shared reader for the card-data tools (`cmd/parsecarddb`, `cmd/cardaudit`).
+- Rarity legality (read-only): `LoadRarityLegal(printingPath, rarityPath)` joins
+  `card-printing.csv` (per-printing rarity) with `rarity.csv` into a card-Unique-ID → has-a-
+  Basic/Common/Rare-printing map (`rarity.go`) — the Silver Age rarity rule.
 - Path resolution: `MydecksPath(name)` returns `mydecks/<name>.json` (a trailing `.json`
   on the name is stripped); `ValidateMydecksName` rejects path-traversal and
   Windows-reserved characters. `MydecksDir` is the relative directory constant.
@@ -40,6 +43,7 @@ this package.
   encoding and its pitch-suffix name canonicalisation.
 - `mydecks.go` — `mydecks/` path resolution and name validation.
 - `cardcsv.go` — `CardCSV` row type + `LoadCardCSV` for the upstream the-fab-cube `card.csv`.
+- `rarity.go` — `LoadRarityLegal` (card-printing.csv + rarity.csv → B/C/R-legal-by-Unique-ID).
 
 ## Gotchas
 
