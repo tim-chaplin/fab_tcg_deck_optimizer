@@ -1,0 +1,18 @@
+name: Amulet of Lightning
+types:
+    - Lightning
+    - Action
+    - Item
+cost: 0
+rarity: Common
+goAgain: true
+text: |-
+    **Go again**
+
+    **Instant** - Destroy Amulet of Lightning: Target action card gains **go again**. Activate
+    this ability only if you have Lightning **fused** this turn.
+variants:
+    - id: AmuletOfLightningBlue
+      pitch: 3
+      attack: 0
+      defense: 0

@@ -21,6 +21,7 @@ const (
 	AmplifyTheArknightRed
 	AmplifyTheArknightYellow
 	AmplifyTheArknightBlue
+	AmuletOfLightningBlue
 	ArcaneCussingRed
 	ArcaneCussingYellow
 	ArcaneCussingBlue
