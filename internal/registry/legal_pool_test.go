@@ -3,6 +3,8 @@ package registry
 import (
 	"testing"
 
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/card"
+	"github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/format"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/hero/heroes"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/ids"
@@ -101,6 +103,29 @@ func TestLegalCards_ExcludesWeapons(t *testing.T) {
 		if inPool[wc.ID()] {
 			t.Errorf("legal-card pool included weapon %s (CardID %d); weapons must not enter the main-deck pool", w.Name(), wc.ID())
 		}
+	}
+}
+
+// Tests that IllegalCards flags banlisted and wrong-class cards while passing cards legal for
+// the hero.
+func TestIllegalCards(t *testing.T) {
+	rune := fakeHero{class: card.TypeRuneblade, typeSet: card.NewTypeSet(card.TypeRuneblade)}
+	legal := GetCard(ids.AetherSlashRed)
+	if bad := IllegalCards(format.SilverAge, rune, []deck.Card{legal}); len(bad) != 0 {
+		t.Errorf("Aether Slash flagged illegal for a Runeblade: %v", bad)
+	}
+
+	id, ok := CardByName("Sink Below")
+	if !ok {
+		t.Skip("Sink Below not registered — pick another implemented banned card")
+	}
+	if bad := IllegalCards(format.SilverAge, rune, []deck.Card{GetCard(id)}); len(bad) != 1 {
+		t.Errorf("a banned card was not flagged illegal, got %d illegal", len(bad))
+	}
+
+	thief := fakeHero{class: card.TypeThief, typeSet: card.NewTypeSet(card.TypeThief)}
+	if bad := IllegalCards(format.SilverAge, thief, []deck.Card{legal}); len(bad) != 1 {
+		t.Errorf("a Runeblade card was not flagged illegal for a non-Runeblade hero, got %d", len(bad))
 	}
 }
 

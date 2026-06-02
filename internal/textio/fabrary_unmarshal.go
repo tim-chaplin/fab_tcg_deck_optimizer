@@ -85,6 +85,9 @@ func UnmarshalFabrary(text string) (*deck.Deck, map[string]int, error) {
 	if !ok {
 		return nil, nil, fmt.Errorf("fabrary: unknown hero %q", heroName)
 	}
+	// Unknown cards were already dropped into skipped; the remaining cards are registry-known,
+	// so any illegal one is a real legality mismatch.
+	assertDeckLegal(format.SilverAge, h, heroName, cardList)
 	d := deck.New(h, weapons, cardList)
 	// The fabrary Format header carries a display label ("Silver Age"), not the stable name.
 	// Silver Age is the only format, so imports adopt it; revisit when a second format lands.

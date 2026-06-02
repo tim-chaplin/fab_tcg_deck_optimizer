@@ -7,6 +7,7 @@ package textio
 import (
 	"encoding/json"
 	"fmt"
+	"strings"
 
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/deck"
 	"github.com/tim-chaplin/fab-deck-optimizer/internal/format"
@@ -56,6 +57,7 @@ func fromJSON(dj *DeckJSON) (*deck.Deck, deck.Stats, error) {
 		}
 		f = parsed
 	}
+	assertDeckLegal(f, h, dj.Hero, cs)
 	d := deck.New(h, weapons, cs)
 	d.Format = f
 	// Sideboard and Equipment are name-only lists — the registry isn't consulted, so the
@@ -80,6 +82,22 @@ func fromJSON(dj *DeckJSON) (*deck.Deck, deck.Stats, error) {
 		stats.IncomingArcaneDamage = m.IncomingArcaneDamage
 	}
 	return d, stats, nil
+}
+
+// assertDeckLegal panics if any loaded card is illegal for the deck's format and hero, so an
+// out-of-pool deck is rejected loudly at load rather than carried into evaluation. Sideboard and
+// Equipment are name-only reserve lists and aren't checked. Shared by both deck loaders.
+func assertDeckLegal(f format.Format, h deck.Hero, heroName string, cards []deck.Card) {
+	bad := registry.IllegalCards(f, h, cards)
+	if len(bad) == 0 {
+		return
+	}
+	names := make([]string, len(bad))
+	for i, c := range bad {
+		names[i] = c.DisplayName()
+	}
+	panic(fmt.Sprintf("deckio: loaded %s deck for %q contains cards illegal in that "+
+		"format/hero: %s", f.Name(), heroName, strings.Join(names, ", ")))
 }
 
 // bestTurnFromJSON restores the headline Value, returning the zero BestTurn when none was

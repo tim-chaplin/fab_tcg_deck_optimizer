@@ -86,6 +86,19 @@ func TestUnmarshal_FormatBackCompatAndError(t *testing.T) {
 	}
 }
 
+// Tests that loading a deck holding a banlisted card panics rather than loading silently.
+func TestUnmarshalDeck_PanicsOnIllegalCard(t *testing.T) {
+	if _, ok := registry.CardByName("Sink Below"); !ok {
+		t.Skip("Sink Below not registered — pick another implemented banned card")
+	}
+	defer func() {
+		if recover() == nil {
+			t.Error("UnmarshalDeck did not panic on a deck containing a banned card")
+		}
+	}()
+	UnmarshalDeck([]byte(`{"hero":"Viserai","format":"silver_age","weapons":[],"cards":["Sink Below"]}`))
+}
+
 // TestRoundTrip_PreservesMatchup checks the matchup an eval ran under survives Marshal/Unmarshal,
 // and that an unevaluated deck (Runs == 0) omits the field rather than record a 0/0 matchup it
 // never faced.
