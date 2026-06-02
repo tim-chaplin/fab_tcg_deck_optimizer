@@ -23,6 +23,13 @@ import (
 // when Count is large. Realistic in-play counts are 1-3; 4 leaves headroom.
 const perItemAbilityCap = 4
 
+// permWeaponIdx (the per-attack-slot index threaded through the permutation) carries three
+// cases in one int16: a weapon swing's equipped index (>= 0), nothing (-1), or an item
+// ability's GameState.Items() index, encoded by encodeItemIdx as -(idx+2) so it can't collide
+// with a weapon index or -1. playSequenceWithMeta decodes it onto pc.Weapon / pc.Item. Folding
+// items into the existing weapon index keeps the hot permutation loop a single-array swap.
+func encodeItemIdx(itemIdx int) int { return -(itemIdx + 2) }
+
 // newSequenceContext builds the sequenceContext shared by the search and print-time replay
 // paths. Folds in item-ability instances and refreshes the pooled leafState from master.
 // Does NOT run defense or seed the graveyard buf — callers do that after attaching per-perm
@@ -62,12 +69,19 @@ func newSequenceContext(
 	}
 	abilities := bufs.activatedAbilities[:bufs.weaponAbilityCount]
 	abilityCosts := bufs.activatedAbilityCosts[:bufs.weaponAbilityCount]
-	appendAbilities := func(it gameengine.Item) {
+	abilityItemIdx := bufs.abilityItemIdx[:bufs.weaponAbilityCount]
+	// itemIdx is the ability owner's index into GameState.Items(), or -1 for token items (which
+	// self-destruct via the firing-token path). It rides each ability slot so the slot resolves
+	// to its own per-perm item object — see the encoding into permWeaponIdx in the wmask loop.
+	appendAbilities := func(itemIdx int, it gameengine.Item) {
 		ability := it.Ability()
 		if ability == nil {
 			// Triggered items (Talisman of Recompense) have no activated ability — they fire
 			// through FireTriggers, with nothing to enqueue as a playable.
 			return
+		}
+		if itemIdx >= 0 {
+			ctx.hasItemAbility = true
 		}
 		copies := it.Count()
 		if copies > perItemAbilityCap {
@@ -78,18 +92,21 @@ func newSequenceContext(
 		for i := 0; i < copies; i++ {
 			abilities = append(abilities, ab)
 			abilityCosts = append(abilityCosts, cost)
+			abilityItemIdx = append(abilityItemIdx, itemIdx)
 		}
 	}
-	for _, it := range masterState.Items() {
-		appendAbilities(it)
+	for i, it := range masterState.Items() {
+		appendAbilities(i, it)
 	}
 	masterState.ForEachTokenItem(func(it gameengine.Item) {
-		appendAbilities(it)
+		appendAbilities(-1, it)
 	})
 	bufs.activatedAbilities = abilities
 	bufs.activatedAbilityCosts = abilityCosts
+	bufs.abilityItemIdx = abilityItemIdx
 	ctx.activatedAbilities = abilities
 	ctx.activatedAbilityCosts = abilityCosts
+	ctx.abilityItemIdx = abilityItemIdx
 
 	// leafState borrows a slot from bufs.statePool. ResetEphemeralState rearms per-turn
 	// state before CopyPersistentStateFrom rewrites cross-turn carryover. The defense
@@ -259,10 +276,13 @@ func bestAttackWithWeapons(
 				if wmask&(1<<j) != 0 {
 					allAttackers = append(allAttackers, ab)
 					// For j < weaponAbilityCount, j is the equipped-weapon index in
-					// state.weapons; item abilities (j >= weaponAbilityCount) carry -1.
+					// state.weapons; a card-item ability (abilityItemIdx[j] >= 0) carries its
+					// item index encoded negative; everything else carries -1.
 					wIdx := -1
 					if j < bufs.weaponAbilityCount {
 						wIdx = j
+					} else if itemIdx := ctx.abilityItemIdx[j]; itemIdx >= 0 {
+						wIdx = encodeItemIdx(itemIdx)
 					}
 					allWeaponIdx = append(allWeaponIdx, wIdx)
 				}
@@ -339,8 +359,13 @@ type sequenceContext struct {
 	priorGraveyard           []card.Card
 	activatedAbilities       []card.Card
 	activatedAbilityCosts    []int
-	defenders                []card.Card
-	leafState                *gameengine.GameState
+	// abilityItemIdx parallels activatedAbilities: each ability's GameState.Items() index, -1
+	// for the weapon prefix and token-item abilities. hasItemAbility is true when any in-play
+	// (non-token) item carries an ability, gating the per-permutation pc.Item resolution.
+	abilityItemIdx []int
+	hasItemAbility bool
+	defenders      []card.Card
+	leafState      *gameengine.GameState
 	// startOfTurnValue is masterState.Value() captured at construction and re-seeded into each
 	// per-perm state after ResetEphemeralState — attack-turn accumulators ride on top of the
 	// start-of-action-phase aura tick, so summary.Value includes that baseline.
@@ -848,11 +873,25 @@ func (ctx *sequenceContext) playSequenceWithMeta(n int) (damage int, totalCounte
 	// (preparePermState rebuilt them via copyWeaponsInto, so they differ from the prior call's).
 	// permWeaponIdx rode the permutation swap alongside the slot; the per-perm object it points
 	// at is what a weapon ability's Play mutates. The Ephemeral.Reset above cleared any stale
-	// pointer from the prior call.
+	// pointer from the prior call. permWeaponIdx encodes weapon swings (>= 0) and item abilities
+	// (<= -2, see encodeItemIdx); each resolves against this permutation's own object copies so
+	// an item ability's Play reaches its own per-perm item (e.g. to self-destruct it). items is
+	// only fetched when an in-play item carries an ability, so item-less turns pay nothing.
 	weapons := state.Weapons()
+	var items []gameengine.Item
+	if ctx.hasItemAbility {
+		items = state.Items()
+	}
 	for i := 0; i < n; i++ {
-		if idx := int(ctx.bufs.permWeaponIdx[i]); idx >= 0 && idx < len(weapons) {
-			pcBuf[i].Weapon = weapons[idx].(card.Weapon)
+		switch idx := int(ctx.bufs.permWeaponIdx[i]); {
+		case idx >= 0:
+			if idx < len(weapons) {
+				pcBuf[i].Weapon = weapons[idx].(card.Weapon)
+			}
+		case idx <= -2:
+			if it := -idx - 2; it < len(items) {
+				pcBuf[i].Item = items[it].(card.Item)
+			}
 		}
 	}
 	state.SetIsMyTurn(true)

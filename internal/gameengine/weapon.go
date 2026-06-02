@@ -31,19 +31,30 @@ func EquipFromCards(gs *GameState, cards []weapon.Card) {
 	}
 }
 
-// DestroyWeapon removes the weapon currently being fired from the arena and, when
-// addToGraveyard is true, pushes its source weapon card into the graveyard. The weapon
-// counterpart of DestroyAura / DestroyItem: direct splice with no cacheable flip —
-// destruction is deterministic from the triggering event. Talishar's end-phase
-// self-destruct routes its handler-side Destroy back here.
-func (ge *GameEngine) DestroyWeapon(addToGraveyard bool) {
-	i := ge.currentHookIdx
-	if i < 0 || i >= len(ge.weapons) {
+// DestroyWeaponObject removes the weapon equal to w from the arena, located by object identity
+// and, when addToGraveyard is true, pushes its source weapon card into the graveyard. Talishar's
+// end-phase self-destruct routes its handler-side self.Destroy() back here.
+func (ge *GameEngine) DestroyWeaponObject(w card.Weapon, addToGraveyard bool) {
+	target := any(w)
+	// Fast path: a trigger handler's self.Destroy() (Talishar's end-phase) removes the firing
+	// weapon — check it directly so the hot self-destruct stays index-direct instead of scanning.
+	if i := ge.currentHookIdx; i >= 0 && i < len(ge.weapons) && any(ge.weapons[i]) == target {
+		ge.currentHookDestroyed = true
+		ge.spliceWeaponAt(i, addToGraveyard)
 		return
 	}
+	for i := range ge.weapons {
+		if any(ge.weapons[i]) == target {
+			ge.spliceWeaponAt(i, addToGraveyard)
+			return
+		}
+	}
+}
+
+// spliceWeaponAt removes ge.weapons[i] and graveyards its source weapon card when asked.
+func (ge *GameEngine) spliceWeaponAt(i int, addToGraveyard bool) {
 	src := ge.weapons[i].SourceCard()
 	ge.weapons = append(ge.weapons[:i], ge.weapons[i+1:]...)
-	ge.currentHookDestroyed = true
 	if src != nil && addToGraveyard {
 		ge.AppendGraveyard(src.(card.Card))
 	}

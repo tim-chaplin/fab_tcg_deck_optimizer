@@ -44,6 +44,9 @@ type attackBufs struct {
 	// weaponAbilityCount is len(weapons) at construction — the size of the cached weapon
 	// prefix in activatedAbilities.
 	weaponAbilityCount int
+	// abilityItemIdx parallels activatedAbilities: the GameState.Items() index for each item
+	// ability, -1 for the weapon prefix (materialised at construction) and token-item abilities.
+	abilityItemIdx []int
 	// maxResourceBonus bounds the resource points the turn's cards can add beyond printed
 	// pitch (see resourceBonusUpperBound); the attack-budget prune relaxes by it.
 	maxResourceBonus int
@@ -106,10 +109,12 @@ func newAttackBufs(handSize, weaponCount int, weapons []gameengine.Weapon, state
 	maxAttackers := handSize + weaponCount + 1 + maxDrawnExtensions
 	activatedAbilities := make([]card.Card, len(weapons))
 	activatedAbilityCosts := make([]int, len(weapons))
+	abilityItemIdx := make([]int, len(weapons))
 	for i, w := range weapons {
 		ab := w.Ability()
 		activatedAbilities[i] = ab
 		activatedAbilityCosts[i] = attackerMetaPtrFor(ab).maxCost
+		abilityItemIdx[i] = -1 // weapon prefix carries no in-play-item index
 	}
 	numMasks := 1 << weaponCount
 	weaponNames := make([][]string, numMasks)
@@ -137,6 +142,7 @@ func newAttackBufs(handSize, weaponCount int, weapons []gameengine.Weapon, state
 		weaponNames:           weaponNames,
 		activatedAbilities:    activatedAbilities,
 		activatedAbilityCosts: activatedAbilityCosts,
+		abilityItemIdx:        abilityItemIdx,
 		weaponAbilityCount:    len(weapons),
 		statePool:             statePool,
 		partitionCards:        make([]partitionCard, handSize+1),

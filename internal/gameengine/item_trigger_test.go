@@ -59,6 +59,34 @@ func TestItemTrigger_SelfDestructRemovesItemAndGraveyards(t *testing.T) {
 	}
 }
 
+// Tests that DestroyItemObject removes exactly the item it's handed (not a same-source
+// duplicate) and graveyards that item's source card.
+func TestDestroyItemObject_RemovesTheGivenItem(t *testing.T) {
+	ge := New()
+	src := fakeCard{name: "Amulet"}
+	ge.CreateItemWithAbility(src, fakeCard{name: "Amulet"})
+	ge.CreateItemWithAbility(src, fakeCard{name: "Amulet"})
+	items := ge.Items()
+	if len(items) != 2 {
+		t.Fatalf("Items has %d entries, want 2", len(items))
+	}
+	first, second := items[0], items[1]
+
+	// Destroy the second object; a name-matched destroy would wrongly take the first.
+	ge.DestroyItemObject(second.(card.Item), true)
+
+	remaining := ge.Items()
+	if len(remaining) != 1 {
+		t.Fatalf("Items has %d entries after destroy, want 1", len(remaining))
+	}
+	if remaining[0] != first {
+		t.Error("DestroyItemObject removed the wrong item — the first object should remain")
+	}
+	if g := ge.Graveyard(); len(g) != 1 || g[0] != card.Card(src) {
+		t.Fatalf("Graveyard = %v, want one entry (the destroyed item's source)", g)
+	}
+}
+
 // Tests that a token item carries no trigger, so FireTriggers never fires or destroys it.
 func TestItemTrigger_TokenItemNeverFires(t *testing.T) {
 	ge := New()

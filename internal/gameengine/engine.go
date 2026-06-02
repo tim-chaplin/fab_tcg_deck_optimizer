@@ -728,35 +728,52 @@ func fireTokenItems(ge *GameEngine, ctx card.FireContext, triggeringTypes card.T
 	ge.currentFiringTokenItem = -1
 }
 
-// DestroyAura removes the aura currently being fired from the arena. It then fires the
-// source card's OnLeavesArena hook — the printed "when this leaves the arena" clause, when
-// the card implements card.LeavesArenaAura — and, when addToGraveyard==true, pushes the
-// source card into the graveyard (no-op for token auras with no source). OnLeavesArena runs
-// before the graveyard append so a "banish another aura from your graveyard" leave clause
-// doesn't see the just-left card. Direct splice with no cacheable flip — destruction is
-// deterministic from the triggering event.
-func (ge *GameEngine) DestroyAura(addToGraveyard bool) {
-	// Token-aura path: when a token slot is mid-Fire, zero its count instead of
-	// splicing ge.auras. Tokens have no source card, so the addToGraveyard /
-	// OnLeavesArena dance doesn't apply to them.
-	if ge.currentFiringTokenAura >= 0 {
-		ge.tokenAuras[ge.currentFiringTokenAura].SetCount(0)
-		ge.tokenAurasLiveBits &^= 1 << ge.currentFiringTokenAura
+// DestroyAuraObject removes the aura equal to a from the arena, located by object identity. It
+// then fires the source card's OnLeavesArena hook — the printed "when this leaves the arena"
+// clause, when the card implements card.LeavesArenaAura — and, when addToGraveyard==true, pushes
+// the source card into the graveyard (no-op for token auras with no source). OnLeavesArena runs
+// before the graveyard append so a "banish another aura from your graveyard" leave clause doesn't
+// see the just-left card.
+func (ge *GameEngine) DestroyAuraObject(a card.Aura, addToGraveyard bool) {
+	target := any(a)
+	// Fast path: a start-of-turn / on-hit handler's self.Destroy() removes the firing card aura
+	// — check it directly so the hot self-destruct stays index-direct instead of scanning.
+	if i := ge.currentHookIdx; i >= 0 && i < len(ge.auras) && any(ge.auras[i]) == target {
 		ge.currentHookDestroyed = true
+		ge.spliceAuraAt(i, addToGraveyard)
 		return
 	}
-	i := ge.currentHookIdx
-	if i < 0 || i >= len(ge.auras) {
-		return
+	// Token-aura slot: zero its count instead of splicing ge.auras. Tokens have no source
+	// card, so the addToGraveyard / OnLeavesArena dance doesn't apply to them.
+	for slot := range ge.tokenAuras {
+		if ge.tokenAuras[slot] != nil && any(ge.tokenAuras[slot]) == target {
+			ge.tokenAuras[slot].SetCount(0)
+			ge.tokenAurasLiveBits &^= 1 << slot
+			if slot == ge.currentFiringTokenAura {
+				ge.currentHookDestroyed = true
+			}
+			return
+		}
 	}
+	// Slow path: an activated ability (no firing index) or a handler destroying a non-firing aura.
+	for i := range ge.auras {
+		if any(ge.auras[i]) == target {
+			ge.spliceAuraAt(i, addToGraveyard)
+			return
+		}
+	}
+}
+
+// spliceAuraAt removes ge.auras[i], clearing its pool slot for reuse, then fires the source's
+// OnLeavesArena hook (before the graveyard append, so a "banish another aura" leave clause
+// doesn't see the just-left card) and graveyards the source when asked.
+func (ge *GameEngine) spliceAuraAt(i int, addToGraveyard bool) {
 	dying := ge.auras[i]
 	src := dying.SourceCard()
-	// Clear the underlying pool slot (SourceCard()==nil, Count()==0) so the next
-	// CreateAura's free-slot scan can reuse it. Splicing ge.auras alone leaves the
-	// pool slot occupied with stale fields.
+	// Clear the underlying pool slot (SourceCard()==nil, Count()==0) so the next CreateAura's
+	// free-slot scan can reuse it. Splicing ge.auras alone leaves the pool slot occupied.
 	dying.Clear()
 	ge.auras = append(ge.auras[:i], ge.auras[i+1:]...)
-	ge.currentHookDestroyed = true
 	if la, ok := src.(card.LeavesArenaAura); ok {
 		la.OnLeavesArena(ge, ge.logger)
 	}
@@ -765,25 +782,43 @@ func (ge *GameEngine) DestroyAura(addToGraveyard bool) {
 	}
 }
 
-// DestroyItem removes the item currently being fired from the arena and, when
-// addToGraveyard is true, pushes its source card into the graveyard (no-op for token
-// items with no source). The item counterpart of DestroyAura: direct splice with no
-// cacheable flip — destruction is deterministic from the triggering event.
-func (ge *GameEngine) DestroyItem(addToGraveyard bool) {
-	// Token-item path: see DestroyAura.
-	if ge.currentFiringTokenItem >= 0 {
-		ge.tokenItems[ge.currentFiringTokenItem].SetCount(0)
-		ge.tokenItemsLiveBits &^= 1 << ge.currentFiringTokenItem
+// DestroyItemObject removes the in-play item equal to it from the arena, located by object
+// identity, and (when addToGraveyard) sends its source card to the graveyard. When the removed
+// item is the one currently firing, currentHookDestroyed is set so the fire loop skips its
+// FiredThisTurn mark.
+func (ge *GameEngine) DestroyItemObject(it card.Item, addToGraveyard bool) {
+	target := any(it)
+	// Fast path: a trigger handler's self.Destroy() removes the firing card item — check it
+	// directly so the hot self-destruct stays index-direct instead of scanning the list.
+	if i := ge.currentHookIdx; i >= 0 && i < len(ge.items) && any(ge.items[i]) == target {
 		ge.currentHookDestroyed = true
+		ge.spliceItemAt(i, addToGraveyard)
 		return
 	}
-	i := ge.currentHookIdx
-	if i < 0 || i >= len(ge.items) {
-		return
+	// Token-item slot: tokens live in tokenItems, not the items list — zero the count.
+	for slot := range ge.tokenItems {
+		if ge.tokenItems[slot] != nil && any(ge.tokenItems[slot]) == target {
+			ge.tokenItems[slot].SetCount(0)
+			ge.tokenItemsLiveBits &^= 1 << slot
+			if slot == ge.currentFiringTokenItem {
+				ge.currentHookDestroyed = true
+			}
+			return
+		}
 	}
+	// Slow path: an activated ability (no firing index) or a handler destroying a non-firing item.
+	for i := range ge.items {
+		if any(ge.items[i]) == target {
+			ge.spliceItemAt(i, addToGraveyard)
+			return
+		}
+	}
+}
+
+// spliceItemAt removes ge.items[i] and graveyards its source when asked.
+func (ge *GameEngine) spliceItemAt(i int, addToGraveyard bool) {
 	src := ge.items[i].SourceCard()
 	ge.items = append(ge.items[:i], ge.items[i+1:]...)
-	ge.currentHookDestroyed = true
 	if src != nil && addToGraveyard {
 		ge.AppendGraveyard(src.(card.Card))
 	}
@@ -834,6 +869,14 @@ func (ge *GameEngine) SacrificePayoffAura() bool {
 // entry is appended after Play returns so self-buffs Play applied are reflected in the
 // displayed delta.
 func (ge *GameEngine) ResolveAttackStep(l card.Logger, pc *card.CardState) {
+	// An activated item ability self-destructs through self.Item.Destroy(); bind the resolved
+	// item to this per-permutation engine so that call reaches the right arena. nil for
+	// everything that isn't an item ability, so non-item resolutions pay only a nil check.
+	if pc.Item != nil {
+		if b, ok := pc.Item.(interface{ BindEngine(card.GameEngine) }); ok {
+			b.BindEngine(ge)
+		}
+	}
 	pc.Card.Play(ge, l, pc)
 	// EffectiveTypes routes through ModalTypes for cards whose type-line shifts per mode
 	// (Tip-Off mode 1 reads as Generic Instant, not Generic Action - Attack), so the

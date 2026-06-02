@@ -85,10 +85,10 @@ func (w *Weapon) Fire(engine card.GameEngine, logger card.Logger, ctx card.FireC
 	w.activeEngine = nil
 }
 
-// Destroy ends the weapon currently being fired, routed through activeEngine. Calling it
-// outside a Fire window panics deterministically rather than silently no-oping.
+// Destroy removes this weapon from the arena, by object identity, through its bound engine;
+// panics if no engine is bound (Fire binds it for a trigger handler).
 func (w *Weapon) Destroy(addToGraveyard bool) {
-	w.activeEngine.DestroyWeapon(addToGraveyard)
+	w.activeEngine.DestroyWeaponObject(w, addToGraveyard)
 }
 
 // Copy returns a deep copy boxed as any so the gameengine.Weapon interface can avoid
