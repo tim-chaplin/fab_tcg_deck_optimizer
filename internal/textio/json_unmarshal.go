@@ -57,9 +57,9 @@ func fromJSON(dj *DeckJSON) (*deck.Deck, deck.Stats, error) {
 		}
 		f = parsed
 	}
-	assertDeckLegal(f, h, dj.Hero, cs)
 	d := deck.New(h, weapons, cs)
 	d.Format = f
+	assertDeckLegal(d.Format, d.Hero, dj.Hero, cs)
 	// Sideboard and Equipment are name-only lists — the registry isn't consulted, so the
 	// user can list equipment pieces or any other items the sim doesn't model.
 	if len(dj.Sideboard) > 0 {
