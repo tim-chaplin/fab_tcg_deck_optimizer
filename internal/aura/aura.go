@@ -88,10 +88,10 @@ func (a *Aura) CopyInto(dst any) any {
 // Compile-time check that *Aura satisfies card.Aura.
 var _ card.Aura = (*Aura)(nil)
 
-// Destroy ends the aura currently being fired, routed through activeEngine. Calling it
-// outside a Fire window panics deterministically rather than silently no-oping.
+// Destroy removes this aura from the arena, by object identity, through its bound engine; panics
+// if no engine is bound (Fire binds it for a trigger handler).
 func (a *Aura) Destroy(addToGraveyard bool) {
-	a.activeEngine.DestroyAura(addToGraveyard)
+	a.activeEngine.DestroyAuraObject(a, addToGraveyard)
 }
 
 // SetFromCard rewrites a in place for reuse as a card-sourced aura — the entry the

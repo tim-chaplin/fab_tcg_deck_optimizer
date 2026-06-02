@@ -91,18 +91,12 @@ type GameEngine interface {
 	// invoked them. Handler signatures are inlined to keep this package import-free of the
 	// concrete aura type.
 	CreateAura(source Card, tt triggertype.Type, handler func(GameEngine, Logger, Aura, FireContext), count int, oncePerTurn bool, filter func(TypeSet) bool)
-	// DestroyAura removes the aura currently being fired. addToGraveyard sends the
-	// originating card to the graveyard (token auras skip the append). Reached via the
-	// per-fire ctx's Destroy method; exposed on GameEngine so the ctx can route the call
-	// through its stored engine reference.
-	DestroyAura(addToGraveyard bool)
-	// DestroyItem removes the item currently being fired. The item counterpart of
-	// DestroyAura — reached via the firing item's Destroy method.
-	DestroyItem(addToGraveyard bool)
-	// DestroyWeapon removes the weapon currently being fired from the arena. The weapon
-	// counterpart of DestroyAura / DestroyItem — reached via the firing weapon's Destroy
-	// method.
-	DestroyWeapon(addToGraveyard bool)
+	// DestroyAuraObject / DestroyItemObject / DestroyWeaponObject remove the in-play object equal
+	// to the argument, located by object identity, and (when addToGraveyard) send its source card
+	// to the graveyard (no-op for a token source).
+	DestroyAuraObject(a Aura, addToGraveyard bool)
+	DestroyItemObject(it Item, addToGraveyard bool)
+	DestroyWeaponObject(w Weapon, addToGraveyard bool)
 	// CreateItem puts a card-sourced item into play whose handler fires on every event in
 	// tt's bit set. oncePerTurn caps it to one fire per turn; filter narrows the firing
 	// site (nil = any). The handler receives a FireContext describing the fire.

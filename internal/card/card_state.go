@@ -92,6 +92,9 @@ type Ephemeral struct {
 	// copies of the same weapon each carry their own object. Lives in Ephemeral so Reset clears
 	// the stale per-perm pointer before the slot is reused.
 	Weapon Weapon
+	// Item is the item counterpart of Weapon above — the in-play item this entry's activated
+	// ability belongs to (mutates or destroys it), nil for everything that isn't an item ability.
+	Item Item
 }
 
 // Reset zeroes r, preserving OnHit's backing array so per-Best reuse stays allocation-free.

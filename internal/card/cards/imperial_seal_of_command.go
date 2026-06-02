@@ -10,8 +10,8 @@
 //     ability carries Go again, the Royal gate, and the OnHit-destroy-arsenal trigger.
 //   - The "Defense reaction cards can't be played this turn" rider is dropped — the sim's
 //     defense pass doesn't model an opt-out window.
-//   - The item isn't self-destroyed on activation: DestroyOpponentArsenal is idempotent
-//     per turn, and leaving the item in play keeps card-conservation accounting honest.
+//   - "Destroy this" is the activation cost, so the ability destroys its own in-play item
+//     (source to graveyard) on every activation, Royal or not, via self.Item.Destroy().
 
 package cards
 
@@ -25,8 +25,9 @@ func (c ImperialSealOfCommandRed) Play(ge card.GameEngine, l card.Logger, self *
 	ge.CreateItemWithAbility(c, ImperialSealOfCommandRedAbility{})
 }
 
-// ImperialSealOfCommandRedAbility is Imperial Seal's printed activated ability. The Royal
-// gate in Play registers the OnHit trigger that fires DestroyOpponentArsenal.
+// ImperialSealOfCommandRedAbility is Imperial Seal's printed activated ability. Play pays the
+// "Destroy this" cost by destroying the item, then (when Royal) registers the OnHit trigger that
+// fires DestroyOpponentArsenal.
 type ImperialSealOfCommandRedAbility struct{}
 
 func (ImperialSealOfCommandRedAbility) ID() ids.CardID      { return ids.ImperialSealOfCommandRedAbilityID }
@@ -42,6 +43,7 @@ func (ImperialSealOfCommandRedAbility) Types(card.GameEngine) card.TypeSet {
 func (ImperialSealOfCommandRedAbility) GoAgain(card.GameEngine) bool { return true }
 
 func (ImperialSealOfCommandRedAbility) Play(ge card.GameEngine, l card.Logger, self *card.CardState) {
+	self.Item.Destroy(true) // pay "Destroy this" before the Royal early-return
 	if !ge.HeroHasType(card.TypeRoyal) {
 		return
 	}

@@ -13,8 +13,8 @@ import (
 
 var _ card.Legendary = cards.ImperialSealOfCommandRed{}
 
-// Tests that a Royal hero with Imperial Seal already in play activates the ability and
-// the subsequent attack hit destroys the opponent's arsenal.
+// Tests that a Royal hero activates Imperial Seal — the hit destroys the opponent's arsenal and
+// the "Destroy this" cost leaves no item in play.
 func TestImperialSeal_RoyalAbilityDestroysArsenalOnHit(t *testing.T) {
 	// Power-4 lands the LikelyDamageDealt=1 leak path, firing OnHit.
 	attacker := testutils.FakeRedAttack().
@@ -37,6 +37,11 @@ func TestImperialSeal_RoyalAbilityDestroysArsenalOnHit(t *testing.T) {
 	if got, want := summary.Value, 7; got != want {
 		t.Errorf("Value = %d, want %d\nBestLine: %s",
 			got, want, sim.FormatBestLine(summary.BestLine))
+	}
+	// "Destroy this" is the activation cost: the item must be gone after the ability resolves.
+	if got := len(summary.State.Items()); got != 0 {
+		t.Errorf("Items() = %d after the ability resolved, want 0 — the item should self-destruct\n"+
+			"BestLine: %s", got, sim.FormatBestLine(summary.BestLine))
 	}
 }
 
@@ -100,6 +105,11 @@ func TestImperialSeal_PlayThenAbilityDestroysArsenalNextTurn(t *testing.T) {
 	if !turn2.State.DestroyedOpponentArsenal() {
 		t.Errorf("DestroyedOpponentArsenal still false on turn 2\nBestLine: %s",
 			sim.FormatBestLine(turn2.BestLine))
+	}
+	// The turn-2 activation pays "Destroy this", so the item is gone by end of turn 2.
+	if got := len(turn2.State.Items()); got != 0 {
+		t.Errorf("turn2 Items() = %d after the ability resolved, want 0 — the item should "+
+			"self-destruct\nBestLine: %s", got, sim.FormatBestLine(turn2.BestLine))
 	}
 	// Turn 1 plays Imperial Seal for nothing — item creation credits no immediate value.
 	if got, want := turn1.Value, 0; got != want {

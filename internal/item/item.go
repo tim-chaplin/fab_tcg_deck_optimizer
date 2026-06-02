@@ -76,11 +76,14 @@ func (i *Item) Fire(engine card.GameEngine, logger card.Logger, ctx card.FireCon
 	i.activeEngine = nil
 }
 
-// Destroy ends the item currently being fired, routed through activeEngine. Calling it
-// outside a Fire window panics deterministically rather than silently no-oping.
+// Destroy removes this item from the arena, by object identity, through its bound engine; panics
+// if no engine is bound (Fire binds it for a trigger, BindEngine for an ability).
 func (i *Item) Destroy(addToGraveyard bool) {
-	i.activeEngine.DestroyItem(addToGraveyard)
+	i.activeEngine.DestroyItemObject(i, addToGraveyard)
 }
+
+// BindEngine sets the engine this item's Destroy routes through.
+func (i *Item) BindEngine(ge card.GameEngine) { i.activeEngine = ge }
 
 // Copy returns a deep copy boxed as any so the gameengine.Item interface can avoid
 // referencing the concrete type. activeEngine is cleared on the copy.
