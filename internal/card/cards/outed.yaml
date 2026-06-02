@@ -4,6 +4,7 @@ types:
     - Action
     - Attack
 cost: 0
+rarity: Common
 goAgain: true
 text: |-
     If you are **marked**, you can't play this. If the defending hero is **marked**, this gets

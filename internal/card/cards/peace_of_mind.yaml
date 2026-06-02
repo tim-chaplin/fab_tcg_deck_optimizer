@@ -3,6 +3,7 @@ types:
     - Generic
     - Instant
 cost: 2
+rarity: Common
 variants:
     - id: PeaceOfMindRed
       pitch: 1

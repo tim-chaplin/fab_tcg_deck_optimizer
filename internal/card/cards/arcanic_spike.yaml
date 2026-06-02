@@ -4,6 +4,7 @@ types:
     - Action
     - Attack
 cost: 2
+rarity: Common
 text: If you've dealt arcane damage this turn, this gets +2{p}.
 variants:
     - id: ArcanicSpikeRed

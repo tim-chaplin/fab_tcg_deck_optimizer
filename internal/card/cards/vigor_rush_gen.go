@@ -14,6 +14,7 @@ type VigorRushRed struct{}
 func (VigorRushRed) ID() ids.CardID                     { return ids.VigorRushRed }
 func (VigorRushRed) Name() string                       { return "Vigor Rush" }
 func (VigorRushRed) DisplayName() string                { return "Vigor Rush [R]" }
+func (VigorRushRed) Rarity() string                     { return "Common" }
 func (VigorRushRed) Cost() int                          { return 1 }
 func (VigorRushRed) Pitch() int                         { return 1 }
 func (VigorRushRed) Attack() int                        { return 4 }
@@ -26,6 +27,7 @@ type VigorRushYellow struct{}
 func (VigorRushYellow) ID() ids.CardID                     { return ids.VigorRushYellow }
 func (VigorRushYellow) Name() string                       { return "Vigor Rush" }
 func (VigorRushYellow) DisplayName() string                { return "Vigor Rush [Y]" }
+func (VigorRushYellow) Rarity() string                     { return "Common" }
 func (VigorRushYellow) Cost() int                          { return 1 }
 func (VigorRushYellow) Pitch() int                         { return 2 }
 func (VigorRushYellow) Attack() int                        { return 3 }
@@ -38,6 +40,7 @@ type VigorRushBlue struct{}
 func (VigorRushBlue) ID() ids.CardID                     { return ids.VigorRushBlue }
 func (VigorRushBlue) Name() string                       { return "Vigor Rush" }
 func (VigorRushBlue) DisplayName() string                { return "Vigor Rush [B]" }
+func (VigorRushBlue) Rarity() string                     { return "Common" }
 func (VigorRushBlue) Cost() int                          { return 1 }
 func (VigorRushBlue) Pitch() int                         { return 3 }
 func (VigorRushBlue) Attack() int                        { return 2 }

@@ -4,6 +4,7 @@ types:
     - Action
     - Attack
 cost: 1
+rarity: Common
 text: '**Instant** - Discard this: **Mark** target opposing hero.'
 variants:
     - id: TipOffRed

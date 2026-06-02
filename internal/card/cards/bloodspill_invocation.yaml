@@ -4,6 +4,7 @@ types:
     - Action
     - Aura
 cost: 1
+rarity: Common
 goAgain: true
 text: |-
     Go again. When an attack action card you control hits, destroy Bloodspill Invocation

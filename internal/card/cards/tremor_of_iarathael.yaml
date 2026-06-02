@@ -4,6 +4,7 @@ types:
     - Action
     - Attack
 cost: 1
+rarity: Rare
 text: |-
     If a card has been put into your banished zone this turn, Tremor of íArathael gains
     +2{p}.

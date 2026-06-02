@@ -14,6 +14,7 @@ type PursueToTheEdgeOfOblivionRed struct{}
 func (PursueToTheEdgeOfOblivionRed) ID() ids.CardID      { return ids.PursueToTheEdgeOfOblivionRed }
 func (PursueToTheEdgeOfOblivionRed) Name() string        { return "Pursue to the Edge of Oblivion" }
 func (PursueToTheEdgeOfOblivionRed) DisplayName() string { return "Pursue to the Edge of Oblivion [R]" }
+func (PursueToTheEdgeOfOblivionRed) Rarity() string      { return "Rare" }
 func (PursueToTheEdgeOfOblivionRed) Cost() int           { return 0 }
 func (PursueToTheEdgeOfOblivionRed) Pitch() int          { return 1 }
 func (PursueToTheEdgeOfOblivionRed) Attack() int         { return 4 }

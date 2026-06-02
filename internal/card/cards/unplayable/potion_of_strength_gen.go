@@ -14,6 +14,7 @@ type PotionOfStrengthBlue struct{}
 func (PotionOfStrengthBlue) ID() ids.CardID                     { return ids.PotionOfStrengthBlue }
 func (PotionOfStrengthBlue) Name() string                       { return "Potion of Strength" }
 func (PotionOfStrengthBlue) DisplayName() string                { return "Potion of Strength [B]" }
+func (PotionOfStrengthBlue) Rarity() string                     { return "Rare" }
 func (PotionOfStrengthBlue) Cost() int                          { return 0 }
 func (PotionOfStrengthBlue) Pitch() int                         { return 3 }
 func (PotionOfStrengthBlue) Attack() int                        { return 0 }

@@ -14,6 +14,7 @@ type TalismanOfDousingYellow struct{}
 func (TalismanOfDousingYellow) ID() ids.CardID                     { return ids.TalismanOfDousingYellow }
 func (TalismanOfDousingYellow) Name() string                       { return "Talisman of Dousing" }
 func (TalismanOfDousingYellow) DisplayName() string                { return "Talisman of Dousing [Y]" }
+func (TalismanOfDousingYellow) Rarity() string                     { return "Common" }
 func (TalismanOfDousingYellow) Cost() int                          { return 0 }
 func (TalismanOfDousingYellow) Pitch() int                         { return 2 }
 func (TalismanOfDousingYellow) Attack() int                        { return 0 }

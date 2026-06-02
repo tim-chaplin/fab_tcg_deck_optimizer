@@ -4,6 +4,7 @@ types:
     - Action
     - Attack
 cost: 3
+rarity: Rare
 text: While Out Muscle isn't defended by a card with equal or greater {p}, it has **go again**.
 variants:
     - id: OutMuscleRed

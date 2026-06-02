@@ -14,6 +14,7 @@ type PerformanceBonusRed struct{}
 func (PerformanceBonusRed) ID() ids.CardID                     { return ids.PerformanceBonusRed }
 func (PerformanceBonusRed) Name() string                       { return "Performance Bonus" }
 func (PerformanceBonusRed) DisplayName() string                { return "Performance Bonus [R]" }
+func (PerformanceBonusRed) Rarity() string                     { return "Common" }
 func (PerformanceBonusRed) Cost() int                          { return 0 }
 func (PerformanceBonusRed) Pitch() int                         { return 1 }
 func (PerformanceBonusRed) Attack() int                        { return 3 }
@@ -26,6 +27,7 @@ type PerformanceBonusYellow struct{}
 func (PerformanceBonusYellow) ID() ids.CardID                     { return ids.PerformanceBonusYellow }
 func (PerformanceBonusYellow) Name() string                       { return "Performance Bonus" }
 func (PerformanceBonusYellow) DisplayName() string                { return "Performance Bonus [Y]" }
+func (PerformanceBonusYellow) Rarity() string                     { return "Common" }
 func (PerformanceBonusYellow) Cost() int                          { return 0 }
 func (PerformanceBonusYellow) Pitch() int                         { return 2 }
 func (PerformanceBonusYellow) Attack() int                        { return 2 }
@@ -38,6 +40,7 @@ type PerformanceBonusBlue struct{}
 func (PerformanceBonusBlue) ID() ids.CardID                     { return ids.PerformanceBonusBlue }
 func (PerformanceBonusBlue) Name() string                       { return "Performance Bonus" }
 func (PerformanceBonusBlue) DisplayName() string                { return "Performance Bonus [B]" }
+func (PerformanceBonusBlue) Rarity() string                     { return "Common" }
 func (PerformanceBonusBlue) Cost() int                          { return 0 }
 func (PerformanceBonusBlue) Pitch() int                         { return 3 }
 func (PerformanceBonusBlue) Attack() int                        { return 1 }

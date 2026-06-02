@@ -3,6 +3,7 @@ types:
     - Generic
     - Action
 cost: 0
+rarity: Common
 goAgain: true
 text: Your next attack with 3 or less base {p} this turn gets **go again**. **Go again**
 variants:

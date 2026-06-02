@@ -20,6 +20,7 @@ type NebulaBlade struct{}
 func (NebulaBlade) ID() ids.CardID                     { return ids.NebulaBladeID }
 func (NebulaBlade) Name() string                       { return "Nebula Blade" }
 func (NebulaBlade) DisplayName() string                { return "Nebula Blade" }
+func (NebulaBlade) Rarity() string                     { return "Common" }
 func (NebulaBlade) Cost() int                          { return 0 }
 func (NebulaBlade) Pitch() int                         { return 0 }
 func (NebulaBlade) Attack() int                        { return 0 }

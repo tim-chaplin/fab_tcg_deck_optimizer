@@ -18,8 +18,9 @@ lookups, and the filtered deck-construction pools.
   matches them structurally to gate cards and weapons out of the construction pools. A
   `NotImplemented` card is still valid in a pre-built hand (it evaluates on its static stats);
   the markers only stop the optimizer from introducing the card. Format legality is *not* a
-  marker — the pool methods apply `f.IsCardLegal` (the `internal/format` banlist) alongside
-  the marker check.
+  marker — the pool methods apply `f.IsCardLegal` (the `internal/format` banlist) and the
+  `rarityLegal` gate (the card's generated `Rarity()` fed to `f.IsRarityLegal`) alongside the
+  marker check.
 - `classMask` / `talentMask` / `heroCanPlay` (`hero_pool.go`) — the universal class/talent
   deckbuilding rule the registry owns (format-independent): a hero may include a card only
   when the card's class is Generic or the hero's class, and every talent on the card is one

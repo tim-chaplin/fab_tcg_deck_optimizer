@@ -4,6 +4,7 @@ types:
     - Action
     - Attack
 cost: 1
+rarity: Common
 text: If you've played or created an aura this turn, this gets +2{p}.
 variants:
     - id: HitTheHighNotesRed

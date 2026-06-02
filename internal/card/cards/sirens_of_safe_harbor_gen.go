@@ -14,6 +14,7 @@ type SirensOfSafeHarborRed struct{}
 func (SirensOfSafeHarborRed) ID() ids.CardID                     { return ids.SirensOfSafeHarborRed }
 func (SirensOfSafeHarborRed) Name() string                       { return "Sirens of Safe Harbor" }
 func (SirensOfSafeHarborRed) DisplayName() string                { return "Sirens of Safe Harbor [R]" }
+func (SirensOfSafeHarborRed) Rarity() string                     { return "Common" }
 func (SirensOfSafeHarborRed) Cost() int                          { return 2 }
 func (SirensOfSafeHarborRed) Pitch() int                         { return 1 }
 func (SirensOfSafeHarborRed) Attack() int                        { return 6 }
@@ -26,6 +27,7 @@ type SirensOfSafeHarborYellow struct{}
 func (SirensOfSafeHarborYellow) ID() ids.CardID                     { return ids.SirensOfSafeHarborYellow }
 func (SirensOfSafeHarborYellow) Name() string                       { return "Sirens of Safe Harbor" }
 func (SirensOfSafeHarborYellow) DisplayName() string                { return "Sirens of Safe Harbor [Y]" }
+func (SirensOfSafeHarborYellow) Rarity() string                     { return "Common" }
 func (SirensOfSafeHarborYellow) Cost() int                          { return 2 }
 func (SirensOfSafeHarborYellow) Pitch() int                         { return 2 }
 func (SirensOfSafeHarborYellow) Attack() int                        { return 5 }
@@ -38,6 +40,7 @@ type SirensOfSafeHarborBlue struct{}
 func (SirensOfSafeHarborBlue) ID() ids.CardID                     { return ids.SirensOfSafeHarborBlue }
 func (SirensOfSafeHarborBlue) Name() string                       { return "Sirens of Safe Harbor" }
 func (SirensOfSafeHarborBlue) DisplayName() string                { return "Sirens of Safe Harbor [B]" }
+func (SirensOfSafeHarborBlue) Rarity() string                     { return "Common" }
 func (SirensOfSafeHarborBlue) Cost() int                          { return 2 }
 func (SirensOfSafeHarborBlue) Pitch() int                         { return 3 }
 func (SirensOfSafeHarborBlue) Attack() int                        { return 4 }

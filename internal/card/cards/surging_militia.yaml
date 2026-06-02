@@ -4,6 +4,7 @@ types:
     - Action
     - Attack
 cost: 2
+rarity: Common
 text: Surging Militia has +1{p} for each non-equipment card defending it.
 variants:
     - id: SurgingMilitiaRed

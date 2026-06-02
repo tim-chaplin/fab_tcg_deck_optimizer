@@ -14,6 +14,7 @@ type MoneyWhereYaMouthIsRed struct{}
 func (MoneyWhereYaMouthIsRed) ID() ids.CardID                     { return ids.MoneyWhereYaMouthIsRed }
 func (MoneyWhereYaMouthIsRed) Name() string                       { return "Money Where Ya Mouth Is" }
 func (MoneyWhereYaMouthIsRed) DisplayName() string                { return "Money Where Ya Mouth Is [R]" }
+func (MoneyWhereYaMouthIsRed) Rarity() string                     { return "Common" }
 func (MoneyWhereYaMouthIsRed) Cost() int                          { return 1 }
 func (MoneyWhereYaMouthIsRed) Pitch() int                         { return 1 }
 func (MoneyWhereYaMouthIsRed) Attack() int                        { return 0 }
@@ -26,6 +27,7 @@ type MoneyWhereYaMouthIsYellow struct{}
 func (MoneyWhereYaMouthIsYellow) ID() ids.CardID                     { return ids.MoneyWhereYaMouthIsYellow }
 func (MoneyWhereYaMouthIsYellow) Name() string                       { return "Money Where Ya Mouth Is" }
 func (MoneyWhereYaMouthIsYellow) DisplayName() string                { return "Money Where Ya Mouth Is [Y]" }
+func (MoneyWhereYaMouthIsYellow) Rarity() string                     { return "Common" }
 func (MoneyWhereYaMouthIsYellow) Cost() int                          { return 1 }
 func (MoneyWhereYaMouthIsYellow) Pitch() int                         { return 2 }
 func (MoneyWhereYaMouthIsYellow) Attack() int                        { return 0 }
@@ -38,6 +40,7 @@ type MoneyWhereYaMouthIsBlue struct{}
 func (MoneyWhereYaMouthIsBlue) ID() ids.CardID                     { return ids.MoneyWhereYaMouthIsBlue }
 func (MoneyWhereYaMouthIsBlue) Name() string                       { return "Money Where Ya Mouth Is" }
 func (MoneyWhereYaMouthIsBlue) DisplayName() string                { return "Money Where Ya Mouth Is [B]" }
+func (MoneyWhereYaMouthIsBlue) Rarity() string                     { return "Common" }
 func (MoneyWhereYaMouthIsBlue) Cost() int                          { return 1 }
 func (MoneyWhereYaMouthIsBlue) Pitch() int                         { return 3 }
 func (MoneyWhereYaMouthIsBlue) Attack() int                        { return 0 }

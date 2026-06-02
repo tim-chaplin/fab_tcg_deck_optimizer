@@ -3,6 +3,7 @@ types:
     - Generic
     - Block
 cost: 0
+rarity: Common
 text: When this defends, look at the top card of your deck.
 variants:
     - id: OnTheHorizonRed

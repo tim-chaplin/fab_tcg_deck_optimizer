@@ -14,6 +14,7 @@ type PutInContextBlue struct{}
 func (PutInContextBlue) ID() ids.CardID                     { return ids.PutInContextBlue }
 func (PutInContextBlue) Name() string                       { return "Put in Context" }
 func (PutInContextBlue) DisplayName() string                { return "Put in Context [B]" }
+func (PutInContextBlue) Rarity() string                     { return "Common" }
 func (PutInContextBlue) Cost() int                          { return 0 }
 func (PutInContextBlue) Pitch() int                         { return 3 }
 func (PutInContextBlue) Attack() int                        { return 0 }

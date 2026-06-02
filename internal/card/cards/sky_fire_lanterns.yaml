@@ -3,6 +3,7 @@ types:
     - Runeblade
     - Action
 cost: 0
+rarity: Common
 goAgain: true
 text: |-
     Reveal the top card of your deck. If it's <same color as this variant>, create a

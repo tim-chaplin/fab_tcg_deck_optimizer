@@ -3,6 +3,7 @@ types:
     - Runeblade
     - Action
 cost: 0
+rarity: Common
 text: Create N Runechant tokens." (Red N=3, Yellow N=2, Blue N=1.)
 variants:
     - id: ReadTheRunesRed

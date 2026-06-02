@@ -3,6 +3,7 @@ types:
     - Generic
     - AttackReaction
 cost: 1
+rarity: Common
 text: |-
     Choose 1; Target dagger or sword weapon attack gets +N{p}. Target attack action
     card with cost 1 or less gets +N{p} and 'When this hits, it gets **go again**.'"

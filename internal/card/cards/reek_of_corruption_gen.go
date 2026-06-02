@@ -14,6 +14,7 @@ type ReekOfCorruptionRed struct{}
 func (ReekOfCorruptionRed) ID() ids.CardID                     { return ids.ReekOfCorruptionRed }
 func (ReekOfCorruptionRed) Name() string                       { return "Reek of Corruption" }
 func (ReekOfCorruptionRed) DisplayName() string                { return "Reek of Corruption [R]" }
+func (ReekOfCorruptionRed) Rarity() string                     { return "Common" }
 func (ReekOfCorruptionRed) Cost() int                          { return 2 }
 func (ReekOfCorruptionRed) Pitch() int                         { return 1 }
 func (ReekOfCorruptionRed) Attack() int                        { return 4 }
@@ -26,6 +27,7 @@ type ReekOfCorruptionYellow struct{}
 func (ReekOfCorruptionYellow) ID() ids.CardID                     { return ids.ReekOfCorruptionYellow }
 func (ReekOfCorruptionYellow) Name() string                       { return "Reek of Corruption" }
 func (ReekOfCorruptionYellow) DisplayName() string                { return "Reek of Corruption [Y]" }
+func (ReekOfCorruptionYellow) Rarity() string                     { return "Common" }
 func (ReekOfCorruptionYellow) Cost() int                          { return 2 }
 func (ReekOfCorruptionYellow) Pitch() int                         { return 2 }
 func (ReekOfCorruptionYellow) Attack() int                        { return 3 }
@@ -38,6 +40,7 @@ type ReekOfCorruptionBlue struct{}
 func (ReekOfCorruptionBlue) ID() ids.CardID                     { return ids.ReekOfCorruptionBlue }
 func (ReekOfCorruptionBlue) Name() string                       { return "Reek of Corruption" }
 func (ReekOfCorruptionBlue) DisplayName() string                { return "Reek of Corruption [B]" }
+func (ReekOfCorruptionBlue) Rarity() string                     { return "Common" }
 func (ReekOfCorruptionBlue) Cost() int                          { return 2 }
 func (ReekOfCorruptionBlue) Pitch() int                         { return 3 }
 func (ReekOfCorruptionBlue) Attack() int                        { return 2 }

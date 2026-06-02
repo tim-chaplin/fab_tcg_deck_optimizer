@@ -14,6 +14,7 @@ type ConsumingVolitionRed struct{}
 func (ConsumingVolitionRed) ID() ids.CardID                     { return ids.ConsumingVolitionRed }
 func (ConsumingVolitionRed) Name() string                       { return "Consuming Volition" }
 func (ConsumingVolitionRed) DisplayName() string                { return "Consuming Volition [R]" }
+func (ConsumingVolitionRed) Rarity() string                     { return "Common" }
 func (ConsumingVolitionRed) Cost() int                          { return 1 }
 func (ConsumingVolitionRed) Pitch() int                         { return 1 }
 func (ConsumingVolitionRed) Attack() int                        { return 4 }
@@ -26,6 +27,7 @@ type ConsumingVolitionYellow struct{}
 func (ConsumingVolitionYellow) ID() ids.CardID                     { return ids.ConsumingVolitionYellow }
 func (ConsumingVolitionYellow) Name() string                       { return "Consuming Volition" }
 func (ConsumingVolitionYellow) DisplayName() string                { return "Consuming Volition [Y]" }
+func (ConsumingVolitionYellow) Rarity() string                     { return "Common" }
 func (ConsumingVolitionYellow) Cost() int                          { return 1 }
 func (ConsumingVolitionYellow) Pitch() int                         { return 2 }
 func (ConsumingVolitionYellow) Attack() int                        { return 3 }
@@ -38,6 +40,7 @@ type ConsumingVolitionBlue struct{}
 func (ConsumingVolitionBlue) ID() ids.CardID                     { return ids.ConsumingVolitionBlue }
 func (ConsumingVolitionBlue) Name() string                       { return "Consuming Volition" }
 func (ConsumingVolitionBlue) DisplayName() string                { return "Consuming Volition [B]" }
+func (ConsumingVolitionBlue) Rarity() string                     { return "Common" }
 func (ConsumingVolitionBlue) Cost() int                          { return 1 }
 func (ConsumingVolitionBlue) Pitch() int                         { return 3 }
 func (ConsumingVolitionBlue) Attack() int                        { return 2 }

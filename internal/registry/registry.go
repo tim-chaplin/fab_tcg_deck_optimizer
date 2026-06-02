@@ -36,7 +36,7 @@ func (Registry) LegalWeaponsFor(f format.Format, h deck.Hero) []deck.Weapon {
 	hc := asCardHero(h)
 	out := make([]deck.Weapon, 0, len(AllWeapons))
 	for _, w := range AllWeapons {
-		if isExcludedFromPool(w) || !f.IsCardLegal(w) {
+		if isExcludedFromPool(w) || !f.IsCardLegal(w) || !rarityLegal(f, w) {
 			continue
 		}
 		// Weapons are card.Cards with a type-line, so the hero class / talent check applies.
@@ -54,12 +54,21 @@ func (Registry) LegalWeaponsFor(f format.Format, h deck.Hero) []deck.Weapon {
 func legalCardsForFormat(f format.Format) []deck.Card {
 	out := make([]deck.Card, 0, len(cardsByID))
 	for _, c := range cardsByID {
-		if c == nil || isExcludedFromPool(c) || !f.IsCardLegal(c) {
+		if c == nil || isExcludedFromPool(c) || !f.IsCardLegal(c) || !rarityLegal(f, c) {
 			continue
 		}
 		out = append(out, c.(deck.Card))
 	}
 	return out
+}
+
+// rarityLegal applies the format's rarity rule to x when x carries a printed rarity. Generated
+// cards expose Rarity() (see internal/cardgen); anything that doesn't — a hand-written value with
+// no rarity yet — skips the check rather than being silently excluded, so the rule only ever
+// tightens the pool for cards that declare a rarity.
+func rarityLegal(f format.Format, x any) bool {
+	r, ok := x.(interface{ Rarity() string })
+	return !ok || f.IsRarityLegal(r.Rarity())
 }
 
 // isExcludedFromPool gates a card or weapon out of the deck-construction pool via the

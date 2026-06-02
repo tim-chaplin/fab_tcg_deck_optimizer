@@ -14,6 +14,7 @@ type AdrenalineRushRed struct{}
 func (AdrenalineRushRed) ID() ids.CardID                     { return ids.AdrenalineRushRed }
 func (AdrenalineRushRed) Name() string                       { return "Adrenaline Rush" }
 func (AdrenalineRushRed) DisplayName() string                { return "Adrenaline Rush [R]" }
+func (AdrenalineRushRed) Rarity() string                     { return "Common" }
 func (AdrenalineRushRed) Cost() int                          { return 2 }
 func (AdrenalineRushRed) Pitch() int                         { return 1 }
 func (AdrenalineRushRed) Attack() int                        { return 4 }
@@ -26,6 +27,7 @@ type AdrenalineRushYellow struct{}
 func (AdrenalineRushYellow) ID() ids.CardID                     { return ids.AdrenalineRushYellow }
 func (AdrenalineRushYellow) Name() string                       { return "Adrenaline Rush" }
 func (AdrenalineRushYellow) DisplayName() string                { return "Adrenaline Rush [Y]" }
+func (AdrenalineRushYellow) Rarity() string                     { return "Common" }
 func (AdrenalineRushYellow) Cost() int                          { return 2 }
 func (AdrenalineRushYellow) Pitch() int                         { return 2 }
 func (AdrenalineRushYellow) Attack() int                        { return 3 }
@@ -38,6 +40,7 @@ type AdrenalineRushBlue struct{}
 func (AdrenalineRushBlue) ID() ids.CardID                     { return ids.AdrenalineRushBlue }
 func (AdrenalineRushBlue) Name() string                       { return "Adrenaline Rush" }
 func (AdrenalineRushBlue) DisplayName() string                { return "Adrenaline Rush [B]" }
+func (AdrenalineRushBlue) Rarity() string                     { return "Common" }
 func (AdrenalineRushBlue) Cost() int                          { return 2 }
 func (AdrenalineRushBlue) Pitch() int                         { return 3 }
 func (AdrenalineRushBlue) Attack() int                        { return 2 }

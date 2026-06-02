@@ -4,6 +4,7 @@ types:
     - Action
     - Attack
 cost: 0
+rarity: Common
 text: When this attacks, create a Runechant token.
 variants:
     - id: HocusPocusRed

@@ -14,6 +14,7 @@ type WageGoldRed struct{}
 func (WageGoldRed) ID() ids.CardID      { return ids.WageGoldRed }
 func (WageGoldRed) Name() string        { return "Wage Gold" }
 func (WageGoldRed) DisplayName() string { return "Wage Gold [R]" }
+func (WageGoldRed) Rarity() string      { return "Rare" }
 func (WageGoldRed) Cost() int           { return 3 }
 func (WageGoldRed) Pitch() int          { return 1 }
 func (WageGoldRed) Attack() int         { return 7 }
@@ -32,6 +33,7 @@ type WageGoldYellow struct{}
 func (WageGoldYellow) ID() ids.CardID      { return ids.WageGoldYellow }
 func (WageGoldYellow) Name() string        { return "Wage Gold" }
 func (WageGoldYellow) DisplayName() string { return "Wage Gold [Y]" }
+func (WageGoldYellow) Rarity() string      { return "Rare" }
 func (WageGoldYellow) Cost() int           { return 3 }
 func (WageGoldYellow) Pitch() int          { return 2 }
 func (WageGoldYellow) Attack() int         { return 6 }
@@ -50,6 +52,7 @@ type WageGoldBlue struct{}
 func (WageGoldBlue) ID() ids.CardID      { return ids.WageGoldBlue }
 func (WageGoldBlue) Name() string        { return "Wage Gold" }
 func (WageGoldBlue) DisplayName() string { return "Wage Gold [B]" }
+func (WageGoldBlue) Rarity() string      { return "Rare" }
 func (WageGoldBlue) Cost() int           { return 3 }
 func (WageGoldBlue) Pitch() int          { return 3 }
 func (WageGoldBlue) Attack() int         { return 5 }

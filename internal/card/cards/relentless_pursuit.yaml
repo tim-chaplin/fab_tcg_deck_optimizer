@@ -3,6 +3,7 @@ types:
     - Generic
     - Action
 cost: 0
+rarity: Rare
 goAgain: true
 text: |-
     **Mark** target opposing hero. If you've attacked them this turn, put this on the bottom

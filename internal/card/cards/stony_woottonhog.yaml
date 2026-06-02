@@ -4,6 +4,7 @@ types:
     - Action
     - Attack
 cost: 2
+rarity: Common
 text: While Stony Woottonhog is defended by less than 2 non-equipment cards, it has +1{p}.
 variants:
     - id: StonyWoottonhogRed

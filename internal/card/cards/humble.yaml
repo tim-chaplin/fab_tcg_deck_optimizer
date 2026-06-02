@@ -4,6 +4,7 @@ types:
     - Action
     - Attack
 cost: 2
+rarity: Rare
 text: |-
     When this hits a hero, they lose all hero card abilities until the end of their next
     turn.

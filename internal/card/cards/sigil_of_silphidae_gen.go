@@ -14,6 +14,7 @@ type SigilOfSilphidaeBlue struct{}
 func (SigilOfSilphidaeBlue) ID() ids.CardID                     { return ids.SigilOfSilphidaeBlue }
 func (SigilOfSilphidaeBlue) Name() string                       { return "Sigil of Silphidae" }
 func (SigilOfSilphidaeBlue) DisplayName() string                { return "Sigil of Silphidae [B]" }
+func (SigilOfSilphidaeBlue) Rarity() string                     { return "Rare" }
 func (SigilOfSilphidaeBlue) Cost() int                          { return 0 }
 func (SigilOfSilphidaeBlue) Pitch() int                         { return 3 }
 func (SigilOfSilphidaeBlue) Attack() int                        { return 0 }

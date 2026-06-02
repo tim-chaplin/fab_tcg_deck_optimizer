@@ -4,6 +4,7 @@ types:
     - Action
     - Attack
 cost: 1
+rarity: Rare
 text: |-
     When this hits a hero, turn a card in their arsenal face-up, then banish an attack action
     card from their arsenal.

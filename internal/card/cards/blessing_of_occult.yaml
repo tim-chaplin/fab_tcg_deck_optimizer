@@ -4,6 +4,7 @@ types:
     - Action
     - Aura
 cost: 1
+rarity: Rare
 text: |-
     At the start of your turn, destroy Blessing of Occult then create N Runechant tokens."
     (Red N=3, Yellow N=2, Blue N=1.)

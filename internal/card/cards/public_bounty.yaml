@@ -3,6 +3,7 @@ types:
     - Generic
     - Action
 cost: 1
+rarity: Common
 goAgain: true
 text: |-
     **Mark** target opposing hero. The next time you attack a **marked** hero this turn, the

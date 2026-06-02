@@ -4,6 +4,7 @@ types:
     - Action
     - Attack
 cost: 3
+rarity: Common
 text: When this defends alone, prevent the next 1 damage that would be dealt to you this turn.
 variants:
     - id: BattlefrontBastionRed

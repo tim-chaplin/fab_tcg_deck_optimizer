@@ -14,6 +14,7 @@ type FeistyLocalsRed struct{}
 func (FeistyLocalsRed) ID() ids.CardID                     { return ids.FeistyLocalsRed }
 func (FeistyLocalsRed) Name() string                       { return "Feisty Locals" }
 func (FeistyLocalsRed) DisplayName() string                { return "Feisty Locals [R]" }
+func (FeistyLocalsRed) Rarity() string                     { return "Common" }
 func (FeistyLocalsRed) Cost() int                          { return 0 }
 func (FeistyLocalsRed) Pitch() int                         { return 1 }
 func (FeistyLocalsRed) Attack() int                        { return 3 }
@@ -26,6 +27,7 @@ type FeistyLocalsYellow struct{}
 func (FeistyLocalsYellow) ID() ids.CardID                     { return ids.FeistyLocalsYellow }
 func (FeistyLocalsYellow) Name() string                       { return "Feisty Locals" }
 func (FeistyLocalsYellow) DisplayName() string                { return "Feisty Locals [Y]" }
+func (FeistyLocalsYellow) Rarity() string                     { return "Common" }
 func (FeistyLocalsYellow) Cost() int                          { return 0 }
 func (FeistyLocalsYellow) Pitch() int                         { return 2 }
 func (FeistyLocalsYellow) Attack() int                        { return 2 }
@@ -38,6 +40,7 @@ type FeistyLocalsBlue struct{}
 func (FeistyLocalsBlue) ID() ids.CardID                     { return ids.FeistyLocalsBlue }
 func (FeistyLocalsBlue) Name() string                       { return "Feisty Locals" }
 func (FeistyLocalsBlue) DisplayName() string                { return "Feisty Locals [B]" }
+func (FeistyLocalsBlue) Rarity() string                     { return "Common" }
 func (FeistyLocalsBlue) Cost() int                          { return 0 }
 func (FeistyLocalsBlue) Pitch() int                         { return 3 }
 func (FeistyLocalsBlue) Attack() int                        { return 1 }

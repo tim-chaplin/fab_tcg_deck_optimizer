@@ -3,6 +3,7 @@ types:
     - Generic
     - Action
 cost: 4
+rarity: Rare
 goAgain: true
 markers:
     - Unplayable

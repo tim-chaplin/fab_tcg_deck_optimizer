@@ -4,6 +4,7 @@ types:
     - Action
     - Attack
 cost: 2
+rarity: Common
 text: |-
     If Cadaverous Contraband hits, you may put a 'non-attack' action card from your graveyard
     on top of your deck.

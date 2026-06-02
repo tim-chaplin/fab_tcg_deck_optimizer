@@ -3,6 +3,7 @@ types:
     - Generic
     - Action
 cost: 0
+rarity: Rare
 goAgain: true
 text: |-
     Put up to 4 cards from your hand on the bottom of your deck, then draw that many cards.

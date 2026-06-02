@@ -14,6 +14,7 @@ type TalismanOfBalanceBlue struct{}
 func (TalismanOfBalanceBlue) ID() ids.CardID                     { return ids.TalismanOfBalanceBlue }
 func (TalismanOfBalanceBlue) Name() string                       { return "Talisman of Balance" }
 func (TalismanOfBalanceBlue) DisplayName() string                { return "Talisman of Balance [B]" }
+func (TalismanOfBalanceBlue) Rarity() string                     { return "Rare" }
 func (TalismanOfBalanceBlue) Cost() int                          { return 0 }
 func (TalismanOfBalanceBlue) Pitch() int                         { return 3 }
 func (TalismanOfBalanceBlue) Attack() int                        { return 0 }

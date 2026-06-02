@@ -3,6 +3,7 @@ types:
     - Generic
     - Action
 cost: 0
+rarity: Common
 goAgain: true
 text: |-
     Look at the top card of target hero's deck. The next attack action card you play from

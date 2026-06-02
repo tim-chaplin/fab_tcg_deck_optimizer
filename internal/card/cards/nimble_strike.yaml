@@ -4,6 +4,7 @@ types:
     - Action
     - Attack
 cost: 1
+rarity: Common
 text: |-
     As an additional cost to play Nimble Strike, you may banish a card named Nimblism from
     your graveyard. If you do, Nimble Strike gain +1{p} and **go again**.

@@ -4,6 +4,7 @@ types:
     - Action
     - Attack
 cost: 2
+rarity: Common
 text: When this defends, you may pay {r}. If you do, it gets +2{d}.
 variants:
     - id: BrothersInArmsRed

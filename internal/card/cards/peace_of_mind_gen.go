@@ -14,6 +14,7 @@ type PeaceOfMindRed struct{}
 func (PeaceOfMindRed) ID() ids.CardID                     { return ids.PeaceOfMindRed }
 func (PeaceOfMindRed) Name() string                       { return "Peace of Mind" }
 func (PeaceOfMindRed) DisplayName() string                { return "Peace of Mind [R]" }
+func (PeaceOfMindRed) Rarity() string                     { return "Common" }
 func (PeaceOfMindRed) Cost() int                          { return 2 }
 func (PeaceOfMindRed) Pitch() int                         { return 1 }
 func (PeaceOfMindRed) Attack() int                        { return 0 }
@@ -26,6 +27,7 @@ type PeaceOfMindYellow struct{}
 func (PeaceOfMindYellow) ID() ids.CardID                     { return ids.PeaceOfMindYellow }
 func (PeaceOfMindYellow) Name() string                       { return "Peace of Mind" }
 func (PeaceOfMindYellow) DisplayName() string                { return "Peace of Mind [Y]" }
+func (PeaceOfMindYellow) Rarity() string                     { return "Common" }
 func (PeaceOfMindYellow) Cost() int                          { return 2 }
 func (PeaceOfMindYellow) Pitch() int                         { return 2 }
 func (PeaceOfMindYellow) Attack() int                        { return 0 }
@@ -38,6 +40,7 @@ type PeaceOfMindBlue struct{}
 func (PeaceOfMindBlue) ID() ids.CardID                     { return ids.PeaceOfMindBlue }
 func (PeaceOfMindBlue) Name() string                       { return "Peace of Mind" }
 func (PeaceOfMindBlue) DisplayName() string                { return "Peace of Mind [B]" }
+func (PeaceOfMindBlue) Rarity() string                     { return "Common" }
 func (PeaceOfMindBlue) Cost() int                          { return 2 }
 func (PeaceOfMindBlue) Pitch() int                         { return 3 }
 func (PeaceOfMindBlue) Attack() int                        { return 0 }

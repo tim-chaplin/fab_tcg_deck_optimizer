@@ -3,6 +3,7 @@ types:
     - Generic
     - Resource
 cost: 0
+rarity: Rare
 text: When this is discarded, create a Gold token.
 variants:
     - id: FoolsGoldYellow

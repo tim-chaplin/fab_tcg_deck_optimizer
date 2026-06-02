@@ -4,6 +4,7 @@ types:
     - Action
     - Aura
 cost: 1
+rarity: Common
 text: '**Ward 4** At the beginning of your action phase, destroy Sigil of Protection.'
 variants:
     - id: SigilOfProtectionRed

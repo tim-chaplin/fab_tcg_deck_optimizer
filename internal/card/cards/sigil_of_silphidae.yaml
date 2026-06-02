@@ -4,6 +4,7 @@ types:
     - Action
     - Aura
 cost: 0
+rarity: Rare
 goAgain: true
 text: |-
     When this enters or leaves the arena, you may banish another aura from your graveyard.

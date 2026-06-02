@@ -104,6 +104,40 @@ func TestLegalCards_ExcludesWeapons(t *testing.T) {
 	}
 }
 
+// fakeRarityCard exposes just the Rarity() probe that rarityLegal asserts on.
+type fakeRarityCard struct{ rarity string }
+
+func (c fakeRarityCard) Rarity() string { return c.rarity }
+
+// Tests the format rarity gate: cards carrying Rarity() are filtered by the rule, and values
+// without it defer to the other filters.
+func TestRarityLegal_GatesOnPrintedRarity(t *testing.T) {
+	if rarityLegal(format.SilverAge, fakeRarityCard{"Majestic"}) {
+		t.Error("rarityLegal kept a Majestic card; the Silver Age rarity rule should drop it")
+	}
+	if !rarityLegal(format.SilverAge, fakeRarityCard{"Rare"}) {
+		t.Error("rarityLegal dropped a Rare card; Basic/Common/Rare are legal")
+	}
+	if !rarityLegal(format.SilverAge, struct{}{}) {
+		t.Error("rarityLegal dropped a value with no Rarity() method; it should defer to the other filters")
+	}
+}
+
+// Tests that every card in the pool declares a Basic/Common/Rare rarity — the invariant the
+// format rarity rule enforces.
+func TestLegalCards_AllRarityLegal(t *testing.T) {
+	for _, c := range legalCardsForFormat(format.SilverAge) {
+		r, ok := c.(interface{ Rarity() string })
+		if !ok {
+			t.Errorf("pool card %s exposes no Rarity()", c.DisplayName())
+			continue
+		}
+		if !format.SilverAge.IsRarityLegal(r.Rarity()) {
+			t.Errorf("pool card %s has non-Silver-Age rarity %q", c.DisplayName(), r.Rarity())
+		}
+	}
+}
+
 // Tests that an implemented, format-legal weapon still appears in LegalWeapons, so weapon-
 // slot mutations keep considering it even though weapons are excluded from the card pool.
 func TestLegalWeapons_IncludesImplementedWeapon(t *testing.T) {

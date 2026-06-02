@@ -14,6 +14,7 @@ type HumbleRed struct{}
 func (HumbleRed) ID() ids.CardID                     { return ids.HumbleRed }
 func (HumbleRed) Name() string                       { return "Humble" }
 func (HumbleRed) DisplayName() string                { return "Humble [R]" }
+func (HumbleRed) Rarity() string                     { return "Rare" }
 func (HumbleRed) Cost() int                          { return 2 }
 func (HumbleRed) Pitch() int                         { return 1 }
 func (HumbleRed) Attack() int                        { return 6 }
@@ -26,6 +27,7 @@ type HumbleYellow struct{}
 func (HumbleYellow) ID() ids.CardID                     { return ids.HumbleYellow }
 func (HumbleYellow) Name() string                       { return "Humble" }
 func (HumbleYellow) DisplayName() string                { return "Humble [Y]" }
+func (HumbleYellow) Rarity() string                     { return "Rare" }
 func (HumbleYellow) Cost() int                          { return 2 }
 func (HumbleYellow) Pitch() int                         { return 2 }
 func (HumbleYellow) Attack() int                        { return 5 }
@@ -38,6 +40,7 @@ type HumbleBlue struct{}
 func (HumbleBlue) ID() ids.CardID                     { return ids.HumbleBlue }
 func (HumbleBlue) Name() string                       { return "Humble" }
 func (HumbleBlue) DisplayName() string                { return "Humble [B]" }
+func (HumbleBlue) Rarity() string                     { return "Rare" }
 func (HumbleBlue) Cost() int                          { return 2 }
 func (HumbleBlue) Pitch() int                         { return 3 }
 func (HumbleBlue) Attack() int                        { return 4 }

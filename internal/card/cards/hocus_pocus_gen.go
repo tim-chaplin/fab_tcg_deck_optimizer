@@ -14,6 +14,7 @@ type HocusPocusRed struct{}
 func (HocusPocusRed) ID() ids.CardID                     { return ids.HocusPocusRed }
 func (HocusPocusRed) Name() string                       { return "Hocus Pocus" }
 func (HocusPocusRed) DisplayName() string                { return "Hocus Pocus [R]" }
+func (HocusPocusRed) Rarity() string                     { return "Common" }
 func (HocusPocusRed) Cost() int                          { return 0 }
 func (HocusPocusRed) Pitch() int                         { return 1 }
 func (HocusPocusRed) Attack() int                        { return 3 }
@@ -26,6 +27,7 @@ type HocusPocusYellow struct{}
 func (HocusPocusYellow) ID() ids.CardID                     { return ids.HocusPocusYellow }
 func (HocusPocusYellow) Name() string                       { return "Hocus Pocus" }
 func (HocusPocusYellow) DisplayName() string                { return "Hocus Pocus [Y]" }
+func (HocusPocusYellow) Rarity() string                     { return "Common" }
 func (HocusPocusYellow) Cost() int                          { return 0 }
 func (HocusPocusYellow) Pitch() int                         { return 2 }
 func (HocusPocusYellow) Attack() int                        { return 2 }
@@ -38,6 +40,7 @@ type HocusPocusBlue struct{}
 func (HocusPocusBlue) ID() ids.CardID                     { return ids.HocusPocusBlue }
 func (HocusPocusBlue) Name() string                       { return "Hocus Pocus" }
 func (HocusPocusBlue) DisplayName() string                { return "Hocus Pocus [B]" }
+func (HocusPocusBlue) Rarity() string                     { return "Common" }
 func (HocusPocusBlue) Cost() int                          { return 0 }
 func (HocusPocusBlue) Pitch() int                         { return 3 }
 func (HocusPocusBlue) Attack() int                        { return 1 }

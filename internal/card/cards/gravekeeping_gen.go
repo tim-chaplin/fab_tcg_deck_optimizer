@@ -14,6 +14,7 @@ type GravekeepingRed struct{}
 func (GravekeepingRed) ID() ids.CardID                     { return ids.GravekeepingRed }
 func (GravekeepingRed) Name() string                       { return "Gravekeeping" }
 func (GravekeepingRed) DisplayName() string                { return "Gravekeeping [R]" }
+func (GravekeepingRed) Rarity() string                     { return "Rare" }
 func (GravekeepingRed) Cost() int                          { return 1 }
 func (GravekeepingRed) Pitch() int                         { return 1 }
 func (GravekeepingRed) Attack() int                        { return 5 }
@@ -26,6 +27,7 @@ type GravekeepingYellow struct{}
 func (GravekeepingYellow) ID() ids.CardID                     { return ids.GravekeepingYellow }
 func (GravekeepingYellow) Name() string                       { return "Gravekeeping" }
 func (GravekeepingYellow) DisplayName() string                { return "Gravekeeping [Y]" }
+func (GravekeepingYellow) Rarity() string                     { return "Rare" }
 func (GravekeepingYellow) Cost() int                          { return 1 }
 func (GravekeepingYellow) Pitch() int                         { return 2 }
 func (GravekeepingYellow) Attack() int                        { return 4 }
@@ -38,6 +40,7 @@ type GravekeepingBlue struct{}
 func (GravekeepingBlue) ID() ids.CardID                     { return ids.GravekeepingBlue }
 func (GravekeepingBlue) Name() string                       { return "Gravekeeping" }
 func (GravekeepingBlue) DisplayName() string                { return "Gravekeeping [B]" }
+func (GravekeepingBlue) Rarity() string                     { return "Rare" }
 func (GravekeepingBlue) Cost() int                          { return 1 }
 func (GravekeepingBlue) Pitch() int                         { return 3 }
 func (GravekeepingBlue) Attack() int                        { return 3 }

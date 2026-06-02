@@ -14,6 +14,7 @@ type NimblismRed struct{}
 func (NimblismRed) ID() ids.CardID                     { return ids.NimblismRed }
 func (NimblismRed) Name() string                       { return "Nimblism" }
 func (NimblismRed) DisplayName() string                { return "Nimblism [R]" }
+func (NimblismRed) Rarity() string                     { return "Common" }
 func (NimblismRed) Cost() int                          { return 0 }
 func (NimblismRed) Pitch() int                         { return 1 }
 func (NimblismRed) Attack() int                        { return 0 }
@@ -26,6 +27,7 @@ type NimblismYellow struct{}
 func (NimblismYellow) ID() ids.CardID                     { return ids.NimblismYellow }
 func (NimblismYellow) Name() string                       { return "Nimblism" }
 func (NimblismYellow) DisplayName() string                { return "Nimblism [Y]" }
+func (NimblismYellow) Rarity() string                     { return "Common" }
 func (NimblismYellow) Cost() int                          { return 0 }
 func (NimblismYellow) Pitch() int                         { return 2 }
 func (NimblismYellow) Attack() int                        { return 0 }
@@ -38,6 +40,7 @@ type NimblismBlue struct{}
 func (NimblismBlue) ID() ids.CardID                     { return ids.NimblismBlue }
 func (NimblismBlue) Name() string                       { return "Nimblism" }
 func (NimblismBlue) DisplayName() string                { return "Nimblism [B]" }
+func (NimblismBlue) Rarity() string                     { return "Common" }
 func (NimblismBlue) Cost() int                          { return 0 }
 func (NimblismBlue) Pitch() int                         { return 3 }
 func (NimblismBlue) Attack() int                        { return 0 }

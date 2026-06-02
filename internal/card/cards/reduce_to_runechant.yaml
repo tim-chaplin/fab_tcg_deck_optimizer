@@ -3,6 +3,7 @@ types:
     - Runeblade
     - DefenseReaction
 cost: 1
+rarity: Rare
 text: |-
     Reduce to Runechant costs {r} less to play for each Runechant you control. Create a
     Runechant token.

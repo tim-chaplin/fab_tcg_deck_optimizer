@@ -4,6 +4,7 @@ types:
     - Action
     - Attack
 cost: 1
+rarity: Common
 text: |-
     When Aether Slash attacks, if a 'non-attack' action card was pitched to play it, deal 1
     arcane damage to any target.

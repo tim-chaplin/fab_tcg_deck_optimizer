@@ -3,6 +3,7 @@ types:
     - Generic
     - AttackReaction
 cost: 1
+rarity: Common
 text: Target sword attack gains +3{p}.
 variants:
     - id: ThrustRed

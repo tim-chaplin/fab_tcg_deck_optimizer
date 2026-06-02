@@ -4,6 +4,7 @@ types:
     - Action
     - Attack
 cost: 1
+rarity: Common
 text: |-
     When this hits, create a Runechant token. If you've dealt arcane damage to an opposing
     hero this turn, this gets go again.

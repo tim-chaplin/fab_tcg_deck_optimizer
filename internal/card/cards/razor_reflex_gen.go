@@ -14,6 +14,7 @@ type RazorReflexRed struct{}
 func (RazorReflexRed) ID() ids.CardID                     { return ids.RazorReflexRed }
 func (RazorReflexRed) Name() string                       { return "Razor Reflex" }
 func (RazorReflexRed) DisplayName() string                { return "Razor Reflex [R]" }
+func (RazorReflexRed) Rarity() string                     { return "Common" }
 func (RazorReflexRed) Cost() int                          { return 1 }
 func (RazorReflexRed) Pitch() int                         { return 1 }
 func (RazorReflexRed) Attack() int                        { return 0 }
@@ -26,6 +27,7 @@ type RazorReflexYellow struct{}
 func (RazorReflexYellow) ID() ids.CardID                     { return ids.RazorReflexYellow }
 func (RazorReflexYellow) Name() string                       { return "Razor Reflex" }
 func (RazorReflexYellow) DisplayName() string                { return "Razor Reflex [Y]" }
+func (RazorReflexYellow) Rarity() string                     { return "Common" }
 func (RazorReflexYellow) Cost() int                          { return 1 }
 func (RazorReflexYellow) Pitch() int                         { return 2 }
 func (RazorReflexYellow) Attack() int                        { return 0 }
@@ -38,6 +40,7 @@ type RazorReflexBlue struct{}
 func (RazorReflexBlue) ID() ids.CardID                     { return ids.RazorReflexBlue }
 func (RazorReflexBlue) Name() string                       { return "Razor Reflex" }
 func (RazorReflexBlue) DisplayName() string                { return "Razor Reflex [B]" }
+func (RazorReflexBlue) Rarity() string                     { return "Common" }
 func (RazorReflexBlue) Cost() int                          { return 1 }
 func (RazorReflexBlue) Pitch() int                         { return 3 }
 func (RazorReflexBlue) Attack() int                        { return 0 }

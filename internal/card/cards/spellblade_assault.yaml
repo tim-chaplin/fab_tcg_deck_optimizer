@@ -4,6 +4,7 @@ types:
     - Action
     - Attack
 cost: 2
+rarity: Rare
 text: When you attack with Spellblade Assault, create 2 Runechant tokens.
 variants:
     - id: SpellbladeAssaultRed

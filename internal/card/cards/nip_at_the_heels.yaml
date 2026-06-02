@@ -3,6 +3,7 @@ types:
     - Generic
     - AttackReaction
 cost: 0
+rarity: Common
 text: Target attack with 3 or less base {p} gets +1{p}.
 variants:
     - id: NipAtTheHeelsBlue

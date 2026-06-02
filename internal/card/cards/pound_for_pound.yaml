@@ -4,6 +4,7 @@ types:
     - Action
     - Attack
 cost: 3
+rarity: Common
 text: |-
     When you play Pound for Pound, if you have less {h} than an opposing hero, it gains
     **dominate**.

@@ -4,6 +4,7 @@ types:
     - Action
     - Attack
 cost: 0
+rarity: Common
 text: If this is defended by an action card, this gets +2{p}.
 variants:
     - id: FeistyLocalsRed

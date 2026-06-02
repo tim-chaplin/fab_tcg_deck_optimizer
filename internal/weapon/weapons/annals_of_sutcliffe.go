@@ -24,6 +24,7 @@ type AnnalsOfSutcliffe struct{}
 func (AnnalsOfSutcliffe) ID() ids.CardID                     { return ids.AnnalsOfSutcliffeID }
 func (AnnalsOfSutcliffe) Name() string                       { return "Annals of Sutcliffe" }
 func (AnnalsOfSutcliffe) DisplayName() string                { return "Annals of Sutcliffe" }
+func (AnnalsOfSutcliffe) Rarity() string                     { return "Rare" }
 func (AnnalsOfSutcliffe) Cost() int                          { return 0 }
 func (AnnalsOfSutcliffe) Pitch() int                         { return 0 }
 func (AnnalsOfSutcliffe) Attack() int                        { return 0 }

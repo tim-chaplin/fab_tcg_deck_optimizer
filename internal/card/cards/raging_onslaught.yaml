@@ -4,6 +4,7 @@ types:
     - Action
     - Attack
 cost: 3
+rarity: Common
 variants:
     - id: RagingOnslaughtRed
       pitch: 1

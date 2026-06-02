@@ -4,6 +4,7 @@ types:
     - Action
     - Attack
 cost: 3
+rarity: Rare
 text: |-
     When this attacks a hero, they reveal the top card of their deck. If this has {p} greater
     than the revealed card, this gets +2{p}. When this hits a hero, destroy the top card of their

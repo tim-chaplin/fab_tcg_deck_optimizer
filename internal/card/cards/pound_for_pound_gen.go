@@ -14,6 +14,7 @@ type PoundForPoundRed struct{}
 func (PoundForPoundRed) ID() ids.CardID                     { return ids.PoundForPoundRed }
 func (PoundForPoundRed) Name() string                       { return "Pound for Pound" }
 func (PoundForPoundRed) DisplayName() string                { return "Pound for Pound [R]" }
+func (PoundForPoundRed) Rarity() string                     { return "Common" }
 func (PoundForPoundRed) Cost() int                          { return 3 }
 func (PoundForPoundRed) Pitch() int                         { return 1 }
 func (PoundForPoundRed) Attack() int                        { return 6 }
@@ -26,6 +27,7 @@ type PoundForPoundYellow struct{}
 func (PoundForPoundYellow) ID() ids.CardID                     { return ids.PoundForPoundYellow }
 func (PoundForPoundYellow) Name() string                       { return "Pound for Pound" }
 func (PoundForPoundYellow) DisplayName() string                { return "Pound for Pound [Y]" }
+func (PoundForPoundYellow) Rarity() string                     { return "Common" }
 func (PoundForPoundYellow) Cost() int                          { return 3 }
 func (PoundForPoundYellow) Pitch() int                         { return 2 }
 func (PoundForPoundYellow) Attack() int                        { return 5 }
@@ -38,6 +40,7 @@ type PoundForPoundBlue struct{}
 func (PoundForPoundBlue) ID() ids.CardID                     { return ids.PoundForPoundBlue }
 func (PoundForPoundBlue) Name() string                       { return "Pound for Pound" }
 func (PoundForPoundBlue) DisplayName() string                { return "Pound for Pound [B]" }
+func (PoundForPoundBlue) Rarity() string                     { return "Common" }
 func (PoundForPoundBlue) Cost() int                          { return 3 }
 func (PoundForPoundBlue) Pitch() int                         { return 3 }
 func (PoundForPoundBlue) Attack() int                        { return 4 }

@@ -14,6 +14,7 @@ type PublicBountyRed struct{}
 func (PublicBountyRed) ID() ids.CardID                     { return ids.PublicBountyRed }
 func (PublicBountyRed) Name() string                       { return "Public Bounty" }
 func (PublicBountyRed) DisplayName() string                { return "Public Bounty [R]" }
+func (PublicBountyRed) Rarity() string                     { return "Common" }
 func (PublicBountyRed) Cost() int                          { return 1 }
 func (PublicBountyRed) Pitch() int                         { return 1 }
 func (PublicBountyRed) Attack() int                        { return 0 }
@@ -26,6 +27,7 @@ type PublicBountyYellow struct{}
 func (PublicBountyYellow) ID() ids.CardID                     { return ids.PublicBountyYellow }
 func (PublicBountyYellow) Name() string                       { return "Public Bounty" }
 func (PublicBountyYellow) DisplayName() string                { return "Public Bounty [Y]" }
+func (PublicBountyYellow) Rarity() string                     { return "Common" }
 func (PublicBountyYellow) Cost() int                          { return 1 }
 func (PublicBountyYellow) Pitch() int                         { return 2 }
 func (PublicBountyYellow) Attack() int                        { return 0 }
@@ -38,6 +40,7 @@ type PublicBountyBlue struct{}
 func (PublicBountyBlue) ID() ids.CardID                     { return ids.PublicBountyBlue }
 func (PublicBountyBlue) Name() string                       { return "Public Bounty" }
 func (PublicBountyBlue) DisplayName() string                { return "Public Bounty [B]" }
+func (PublicBountyBlue) Rarity() string                     { return "Common" }
 func (PublicBountyBlue) Cost() int                          { return 1 }
 func (PublicBountyBlue) Pitch() int                         { return 3 }
 func (PublicBountyBlue) Attack() int                        { return 0 }

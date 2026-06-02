@@ -9,8 +9,8 @@ files.
 ## Key types
 
 - `CardGroup` — one card with its pitch variants. Group-level fields (`Name`, `Types`,
-  `Universal`, `Cost`, `GoAgain`, `DynamicGoAgain`, `Markers`, `Text`) hold uniform across
-  every printing of a card.
+  `Universal`, `Cost`, `Rarity`, `GoAgain`, `DynamicGoAgain`, `Markers`, `Text`) hold uniform
+  across every printing of a card.
 - `Variant` — one pitch printing: `ID`, `Pitch`, `Attack`, `Defense`. `Defense` lives here,
   not on the group, because cards print different defense per pitch.
 - `Generate(dirs, registryPath)` — the entry point. Returns a `map[outputPath][]byte` of
@@ -23,6 +23,7 @@ files.
 name: Aether Slash
 types: [Runeblade, Action, Attack]
 cost: 1                 # int constant; omit or use "variable" for VariableCost cards
+rarity: Common          # lowest printed rarity (Basic/Common/Rare/...); the Silver Age signal
 goAgain: false          # default false
 dynamicGoAgain: false   # when true, the generator skips GoAgain; the hand file owns it
 universal: false        # when true, Types(g) ORs in the active hero's class
@@ -39,10 +40,10 @@ variants:
 ## What the generator emits
 
 For each variant: a zero-size struct and its static methods (`ID`, `Name`, `DisplayName`,
-`Cost` when the cost is constant, `Pitch`, `Attack`, `Defense`, `Types`, `GoAgain` unless
-`dynamicGoAgain`), plus one method per entry in `markers`. A package-level types var
-(`<cardName>Types`) is shared across the card's variants. The registry file lists every
-variant of every group indexed by `ids.CardID`.
+`Rarity` when `rarity` is set, `Cost` when the cost is constant, `Pitch`, `Attack`, `Defense`,
+`Types`, `GoAgain` unless `dynamicGoAgain`), plus one method per entry in `markers`. A
+package-level types var (`<cardName>Types`) is shared across the card's variants. The registry
+file lists every variant of every group indexed by `ids.CardID`.
 
 The hand-written `<card>.go` companion supplies `Play` and any per-card riders, the
 `VariableCost` interface (`EffectiveCost` + `MinCost`) for discount-style dynamic costs,

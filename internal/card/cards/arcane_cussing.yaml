@@ -4,6 +4,7 @@ types:
     - Action
     - Aura
 cost: 1
+rarity: Common
 goAgain: true
 text: |-
     Go again. When you deal or are dealt damage, destroy this. When this leaves the arena

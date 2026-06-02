@@ -3,6 +3,7 @@ types:
     - Generic
     - Action
 cost: 0
+rarity: Common
 text: If you control no Gold tokens, create a Gold token.
 variants:
     - id: StartingStakeYellow

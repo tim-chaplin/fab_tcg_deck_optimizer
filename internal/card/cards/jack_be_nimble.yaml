@@ -4,6 +4,7 @@ types:
     - Action
     - Attack
 cost: 0
+rarity: Rare
 text: |-
     When this attacks, you may banish a Nimblism from your graveyard. If you do, this gets
     +1{p} and **go again**. When this hits a hero, steal an item they control until the end of this

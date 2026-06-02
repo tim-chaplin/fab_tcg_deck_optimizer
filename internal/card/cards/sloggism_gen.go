@@ -14,6 +14,7 @@ type SloggismRed struct{}
 func (SloggismRed) ID() ids.CardID                     { return ids.SloggismRed }
 func (SloggismRed) Name() string                       { return "Sloggism" }
 func (SloggismRed) DisplayName() string                { return "Sloggism [R]" }
+func (SloggismRed) Rarity() string                     { return "Common" }
 func (SloggismRed) Cost() int                          { return 3 }
 func (SloggismRed) Pitch() int                         { return 1 }
 func (SloggismRed) Attack() int                        { return 0 }
@@ -26,6 +27,7 @@ type SloggismYellow struct{}
 func (SloggismYellow) ID() ids.CardID                     { return ids.SloggismYellow }
 func (SloggismYellow) Name() string                       { return "Sloggism" }
 func (SloggismYellow) DisplayName() string                { return "Sloggism [Y]" }
+func (SloggismYellow) Rarity() string                     { return "Common" }
 func (SloggismYellow) Cost() int                          { return 3 }
 func (SloggismYellow) Pitch() int                         { return 2 }
 func (SloggismYellow) Attack() int                        { return 0 }
@@ -38,6 +40,7 @@ type SloggismBlue struct{}
 func (SloggismBlue) ID() ids.CardID                     { return ids.SloggismBlue }
 func (SloggismBlue) Name() string                       { return "Sloggism" }
 func (SloggismBlue) DisplayName() string                { return "Sloggism [B]" }
+func (SloggismBlue) Rarity() string                     { return "Common" }
 func (SloggismBlue) Cost() int                          { return 3 }
 func (SloggismBlue) Pitch() int                         { return 3 }
 func (SloggismBlue) Attack() int                        { return 0 }

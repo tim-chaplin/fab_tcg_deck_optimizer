@@ -14,6 +14,7 @@ type TipOffRed struct{}
 func (TipOffRed) ID() ids.CardID                     { return ids.TipOffRed }
 func (TipOffRed) Name() string                       { return "Tip-Off" }
 func (TipOffRed) DisplayName() string                { return "Tip-Off [R]" }
+func (TipOffRed) Rarity() string                     { return "Common" }
 func (TipOffRed) Cost() int                          { return 1 }
 func (TipOffRed) Pitch() int                         { return 1 }
 func (TipOffRed) Attack() int                        { return 5 }
@@ -26,6 +27,7 @@ type TipOffYellow struct{}
 func (TipOffYellow) ID() ids.CardID                     { return ids.TipOffYellow }
 func (TipOffYellow) Name() string                       { return "Tip-Off" }
 func (TipOffYellow) DisplayName() string                { return "Tip-Off [Y]" }
+func (TipOffYellow) Rarity() string                     { return "Common" }
 func (TipOffYellow) Cost() int                          { return 1 }
 func (TipOffYellow) Pitch() int                         { return 2 }
 func (TipOffYellow) Attack() int                        { return 4 }
@@ -38,6 +40,7 @@ type TipOffBlue struct{}
 func (TipOffBlue) ID() ids.CardID                     { return ids.TipOffBlue }
 func (TipOffBlue) Name() string                       { return "Tip-Off" }
 func (TipOffBlue) DisplayName() string                { return "Tip-Off [B]" }
+func (TipOffBlue) Rarity() string                     { return "Common" }
 func (TipOffBlue) Cost() int                          { return 1 }
 func (TipOffBlue) Pitch() int                         { return 3 }
 func (TipOffBlue) Attack() int                        { return 3 }

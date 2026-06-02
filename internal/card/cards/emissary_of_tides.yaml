@@ -4,6 +4,7 @@ types:
     - Action
     - Attack
 cost: 0
+rarity: Rare
 text: |-
     When this attacks, you may put a card from your hand on the bottom of your deck. If you
     do, this gets +2{p}.

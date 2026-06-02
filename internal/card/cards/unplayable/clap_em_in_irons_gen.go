@@ -14,6 +14,7 @@ type ClapEmInIronsBlue struct{}
 func (ClapEmInIronsBlue) ID() ids.CardID                     { return ids.ClapEmInIronsBlue }
 func (ClapEmInIronsBlue) Name() string                       { return "Clap 'Em in Irons" }
 func (ClapEmInIronsBlue) DisplayName() string                { return "Clap 'Em in Irons [B]" }
+func (ClapEmInIronsBlue) Rarity() string                     { return "Rare" }
 func (ClapEmInIronsBlue) Cost() int                          { return 0 }
 func (ClapEmInIronsBlue) Pitch() int                         { return 3 }
 func (ClapEmInIronsBlue) Attack() int                        { return 0 }

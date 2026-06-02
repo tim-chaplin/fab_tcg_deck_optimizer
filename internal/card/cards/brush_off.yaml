@@ -3,6 +3,7 @@ types:
     - Generic
     - Instant
 cost: 0
+rarity: Common
 variants:
     - id: BrushOffRed
       pitch: 1

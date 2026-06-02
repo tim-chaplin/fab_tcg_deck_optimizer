@@ -14,6 +14,7 @@ type OverloadRed struct{}
 func (OverloadRed) ID() ids.CardID                     { return ids.OverloadRed }
 func (OverloadRed) Name() string                       { return "Overload" }
 func (OverloadRed) DisplayName() string                { return "Overload [R]" }
+func (OverloadRed) Rarity() string                     { return "Common" }
 func (OverloadRed) Cost() int                          { return 0 }
 func (OverloadRed) Pitch() int                         { return 1 }
 func (OverloadRed) Attack() int                        { return 3 }
@@ -26,6 +27,7 @@ type OverloadYellow struct{}
 func (OverloadYellow) ID() ids.CardID                     { return ids.OverloadYellow }
 func (OverloadYellow) Name() string                       { return "Overload" }
 func (OverloadYellow) DisplayName() string                { return "Overload [Y]" }
+func (OverloadYellow) Rarity() string                     { return "Common" }
 func (OverloadYellow) Cost() int                          { return 0 }
 func (OverloadYellow) Pitch() int                         { return 2 }
 func (OverloadYellow) Attack() int                        { return 2 }
@@ -38,6 +40,7 @@ type OverloadBlue struct{}
 func (OverloadBlue) ID() ids.CardID                     { return ids.OverloadBlue }
 func (OverloadBlue) Name() string                       { return "Overload" }
 func (OverloadBlue) DisplayName() string                { return "Overload [B]" }
+func (OverloadBlue) Rarity() string                     { return "Common" }
 func (OverloadBlue) Cost() int                          { return 0 }
 func (OverloadBlue) Pitch() int                         { return 3 }
 func (OverloadBlue) Attack() int                        { return 1 }

@@ -4,6 +4,7 @@ types:
     - Action
     - Attack
 cost: 2
+rarity: Common
 text: |-
     While there is a card in your pitch zone with {p} greater than Zealous Belting's base {p},
     Zealous Belting has **go again**.

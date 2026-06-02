@@ -14,6 +14,7 @@ type ReinforceTheLineRed struct{}
 func (ReinforceTheLineRed) ID() ids.CardID                     { return ids.ReinforceTheLineRed }
 func (ReinforceTheLineRed) Name() string                       { return "Reinforce the Line" }
 func (ReinforceTheLineRed) DisplayName() string                { return "Reinforce the Line [R]" }
+func (ReinforceTheLineRed) Rarity() string                     { return "Rare" }
 func (ReinforceTheLineRed) Cost() int                          { return 0 }
 func (ReinforceTheLineRed) Pitch() int                         { return 1 }
 func (ReinforceTheLineRed) Attack() int                        { return 0 }
@@ -26,6 +27,7 @@ type ReinforceTheLineYellow struct{}
 func (ReinforceTheLineYellow) ID() ids.CardID                     { return ids.ReinforceTheLineYellow }
 func (ReinforceTheLineYellow) Name() string                       { return "Reinforce the Line" }
 func (ReinforceTheLineYellow) DisplayName() string                { return "Reinforce the Line [Y]" }
+func (ReinforceTheLineYellow) Rarity() string                     { return "Rare" }
 func (ReinforceTheLineYellow) Cost() int                          { return 0 }
 func (ReinforceTheLineYellow) Pitch() int                         { return 2 }
 func (ReinforceTheLineYellow) Attack() int                        { return 0 }
@@ -38,6 +40,7 @@ type ReinforceTheLineBlue struct{}
 func (ReinforceTheLineBlue) ID() ids.CardID                     { return ids.ReinforceTheLineBlue }
 func (ReinforceTheLineBlue) Name() string                       { return "Reinforce the Line" }
 func (ReinforceTheLineBlue) DisplayName() string                { return "Reinforce the Line [B]" }
+func (ReinforceTheLineBlue) Rarity() string                     { return "Rare" }
 func (ReinforceTheLineBlue) Cost() int                          { return 0 }
 func (ReinforceTheLineBlue) Pitch() int                         { return 3 }
 func (ReinforceTheLineBlue) Attack() int                        { return 0 }

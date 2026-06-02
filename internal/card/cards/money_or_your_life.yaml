@@ -4,6 +4,7 @@ types:
     - Action
     - Attack
 cost: 3
+rarity: Rare
 text: |-
     When this hits a hero, deal 2 damage to them unless they give you a Gold token
     they control. If you are a Thief, repeat this process once.

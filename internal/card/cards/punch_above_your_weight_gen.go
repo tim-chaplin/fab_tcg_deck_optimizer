@@ -14,6 +14,7 @@ type PunchAboveYourWeightRed struct{}
 func (PunchAboveYourWeightRed) ID() ids.CardID                     { return ids.PunchAboveYourWeightRed }
 func (PunchAboveYourWeightRed) Name() string                       { return "Punch Above Your Weight" }
 func (PunchAboveYourWeightRed) DisplayName() string                { return "Punch Above Your Weight [R]" }
+func (PunchAboveYourWeightRed) Rarity() string                     { return "Rare" }
 func (PunchAboveYourWeightRed) Cost() int                          { return 0 }
 func (PunchAboveYourWeightRed) Pitch() int                         { return 1 }
 func (PunchAboveYourWeightRed) Attack() int                        { return 2 }
@@ -26,6 +27,7 @@ type PunchAboveYourWeightYellow struct{}
 func (PunchAboveYourWeightYellow) ID() ids.CardID      { return ids.PunchAboveYourWeightYellow }
 func (PunchAboveYourWeightYellow) Name() string        { return "Punch Above Your Weight" }
 func (PunchAboveYourWeightYellow) DisplayName() string { return "Punch Above Your Weight [Y]" }
+func (PunchAboveYourWeightYellow) Rarity() string      { return "Rare" }
 func (PunchAboveYourWeightYellow) Cost() int           { return 0 }
 func (PunchAboveYourWeightYellow) Pitch() int          { return 2 }
 func (PunchAboveYourWeightYellow) Attack() int         { return 2 }
@@ -40,6 +42,7 @@ type PunchAboveYourWeightBlue struct{}
 func (PunchAboveYourWeightBlue) ID() ids.CardID                     { return ids.PunchAboveYourWeightBlue }
 func (PunchAboveYourWeightBlue) Name() string                       { return "Punch Above Your Weight" }
 func (PunchAboveYourWeightBlue) DisplayName() string                { return "Punch Above Your Weight [B]" }
+func (PunchAboveYourWeightBlue) Rarity() string                     { return "Rare" }
 func (PunchAboveYourWeightBlue) Cost() int                          { return 0 }
 func (PunchAboveYourWeightBlue) Pitch() int                         { return 3 }
 func (PunchAboveYourWeightBlue) Attack() int                        { return 2 }

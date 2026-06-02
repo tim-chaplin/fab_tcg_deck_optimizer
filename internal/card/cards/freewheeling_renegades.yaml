@@ -4,6 +4,7 @@ types:
     - Action
     - Attack
 cost: 1
+rarity: Common
 text: If this is defended by an action card, this has -2{p}.
 variants:
     - id: FreewheelingRenegadesRed

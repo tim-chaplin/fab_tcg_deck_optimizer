@@ -4,6 +4,7 @@ types:
     - Action
     - Item
 cost: 0
+rarity: Rare
 markers:
     - Unplayable
 text: '**Instant** - Destroy Clarity Potion: **Opt 2**'

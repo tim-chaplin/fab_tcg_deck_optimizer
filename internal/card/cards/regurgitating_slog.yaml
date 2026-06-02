@@ -4,6 +4,7 @@ types:
     - Action
     - Attack
 cost: 2
+rarity: Common
 text: |-
     As an additional cost to play Regurgitating Slog, you may banish a card named Sloggism
     from your graveyard. If you do, Regurgitating Slog gains **dominate**.

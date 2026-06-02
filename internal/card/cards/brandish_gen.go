@@ -14,6 +14,7 @@ type BrandishRed struct{}
 func (BrandishRed) ID() ids.CardID                     { return ids.BrandishRed }
 func (BrandishRed) Name() string                       { return "Brandish" }
 func (BrandishRed) DisplayName() string                { return "Brandish [R]" }
+func (BrandishRed) Rarity() string                     { return "Common" }
 func (BrandishRed) Cost() int                          { return 1 }
 func (BrandishRed) Pitch() int                         { return 1 }
 func (BrandishRed) Attack() int                        { return 3 }
@@ -26,6 +27,7 @@ type BrandishYellow struct{}
 func (BrandishYellow) ID() ids.CardID                     { return ids.BrandishYellow }
 func (BrandishYellow) Name() string                       { return "Brandish" }
 func (BrandishYellow) DisplayName() string                { return "Brandish [Y]" }
+func (BrandishYellow) Rarity() string                     { return "Common" }
 func (BrandishYellow) Cost() int                          { return 1 }
 func (BrandishYellow) Pitch() int                         { return 2 }
 func (BrandishYellow) Attack() int                        { return 2 }
@@ -38,6 +40,7 @@ type BrandishBlue struct{}
 func (BrandishBlue) ID() ids.CardID                     { return ids.BrandishBlue }
 func (BrandishBlue) Name() string                       { return "Brandish" }
 func (BrandishBlue) DisplayName() string                { return "Brandish [B]" }
+func (BrandishBlue) Rarity() string                     { return "Common" }
 func (BrandishBlue) Cost() int                          { return 1 }
 func (BrandishBlue) Pitch() int                         { return 3 }
 func (BrandishBlue) Attack() int                        { return 1 }

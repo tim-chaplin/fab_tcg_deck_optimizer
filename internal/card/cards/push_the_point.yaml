@@ -4,6 +4,7 @@ types:
     - Action
     - Attack
 cost: 1
+rarity: Common
 text: If the last attack on this combat chain hit, Push the Point gains +2{p}.
 variants:
     - id: PushThePointRed

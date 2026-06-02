@@ -14,6 +14,7 @@ type DestructiveDeliberationRed struct{}
 func (DestructiveDeliberationRed) ID() ids.CardID      { return ids.DestructiveDeliberationRed }
 func (DestructiveDeliberationRed) Name() string        { return "Destructive Deliberation" }
 func (DestructiveDeliberationRed) DisplayName() string { return "Destructive Deliberation [R]" }
+func (DestructiveDeliberationRed) Rarity() string      { return "Common" }
 func (DestructiveDeliberationRed) Cost() int           { return 2 }
 func (DestructiveDeliberationRed) Pitch() int          { return 1 }
 func (DestructiveDeliberationRed) Attack() int         { return 5 }
@@ -28,6 +29,7 @@ type DestructiveDeliberationYellow struct{}
 func (DestructiveDeliberationYellow) ID() ids.CardID      { return ids.DestructiveDeliberationYellow }
 func (DestructiveDeliberationYellow) Name() string        { return "Destructive Deliberation" }
 func (DestructiveDeliberationYellow) DisplayName() string { return "Destructive Deliberation [Y]" }
+func (DestructiveDeliberationYellow) Rarity() string      { return "Common" }
 func (DestructiveDeliberationYellow) Cost() int           { return 2 }
 func (DestructiveDeliberationYellow) Pitch() int          { return 2 }
 func (DestructiveDeliberationYellow) Attack() int         { return 4 }
@@ -42,6 +44,7 @@ type DestructiveDeliberationBlue struct{}
 func (DestructiveDeliberationBlue) ID() ids.CardID      { return ids.DestructiveDeliberationBlue }
 func (DestructiveDeliberationBlue) Name() string        { return "Destructive Deliberation" }
 func (DestructiveDeliberationBlue) DisplayName() string { return "Destructive Deliberation [B]" }
+func (DestructiveDeliberationBlue) Rarity() string      { return "Common" }
 func (DestructiveDeliberationBlue) Cost() int           { return 2 }
 func (DestructiveDeliberationBlue) Pitch() int          { return 3 }
 func (DestructiveDeliberationBlue) Attack() int         { return 3 }

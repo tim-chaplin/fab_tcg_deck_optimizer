@@ -3,6 +3,7 @@ types:
     - Generic
     - DefenseReaction
 cost: 0
+rarity: Common
 text: If Springboard Somersault is played from arsenal, it gains +2{d}.
 variants:
     - id: SpringboardSomersaultYellow

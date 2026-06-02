@@ -14,6 +14,7 @@ type DodgeBlue struct{}
 func (DodgeBlue) ID() ids.CardID                     { return ids.DodgeBlue }
 func (DodgeBlue) Name() string                       { return "Dodge" }
 func (DodgeBlue) DisplayName() string                { return "Dodge [B]" }
+func (DodgeBlue) Rarity() string                     { return "Common" }
 func (DodgeBlue) Cost() int                          { return 0 }
 func (DodgeBlue) Pitch() int                         { return 3 }
 func (DodgeBlue) Attack() int                        { return 0 }

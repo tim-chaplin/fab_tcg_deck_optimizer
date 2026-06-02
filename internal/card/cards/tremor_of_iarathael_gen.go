@@ -14,6 +14,7 @@ type TremorOfIArathaelRed struct{}
 func (TremorOfIArathaelRed) ID() ids.CardID                     { return ids.TremorOfIArathaelRed }
 func (TremorOfIArathaelRed) Name() string                       { return "Tremor of íArathael" }
 func (TremorOfIArathaelRed) DisplayName() string                { return "Tremor of íArathael [R]" }
+func (TremorOfIArathaelRed) Rarity() string                     { return "Rare" }
 func (TremorOfIArathaelRed) Cost() int                          { return 1 }
 func (TremorOfIArathaelRed) Pitch() int                         { return 1 }
 func (TremorOfIArathaelRed) Attack() int                        { return 4 }
@@ -26,6 +27,7 @@ type TremorOfIArathaelYellow struct{}
 func (TremorOfIArathaelYellow) ID() ids.CardID                     { return ids.TremorOfIArathaelYellow }
 func (TremorOfIArathaelYellow) Name() string                       { return "Tremor of íArathael" }
 func (TremorOfIArathaelYellow) DisplayName() string                { return "Tremor of íArathael [Y]" }
+func (TremorOfIArathaelYellow) Rarity() string                     { return "Rare" }
 func (TremorOfIArathaelYellow) Cost() int                          { return 1 }
 func (TremorOfIArathaelYellow) Pitch() int                         { return 2 }
 func (TremorOfIArathaelYellow) Attack() int                        { return 3 }
@@ -38,6 +40,7 @@ type TremorOfIArathaelBlue struct{}
 func (TremorOfIArathaelBlue) ID() ids.CardID                     { return ids.TremorOfIArathaelBlue }
 func (TremorOfIArathaelBlue) Name() string                       { return "Tremor of íArathael" }
 func (TremorOfIArathaelBlue) DisplayName() string                { return "Tremor of íArathael [B]" }
+func (TremorOfIArathaelBlue) Rarity() string                     { return "Rare" }
 func (TremorOfIArathaelBlue) Cost() int                          { return 1 }
 func (TremorOfIArathaelBlue) Pitch() int                         { return 3 }
 func (TremorOfIArathaelBlue) Attack() int                        { return 2 }

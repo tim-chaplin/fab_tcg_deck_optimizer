@@ -14,6 +14,7 @@ type RuneFlashRed struct{}
 func (RuneFlashRed) ID() ids.CardID                     { return ids.RuneFlashRed }
 func (RuneFlashRed) Name() string                       { return "Rune Flash" }
 func (RuneFlashRed) DisplayName() string                { return "Rune Flash [R]" }
+func (RuneFlashRed) Rarity() string                     { return "Common" }
 func (RuneFlashRed) Cost() int                          { return 3 }
 func (RuneFlashRed) Pitch() int                         { return 1 }
 func (RuneFlashRed) Attack() int                        { return 4 }
@@ -26,6 +27,7 @@ type RuneFlashYellow struct{}
 func (RuneFlashYellow) ID() ids.CardID                     { return ids.RuneFlashYellow }
 func (RuneFlashYellow) Name() string                       { return "Rune Flash" }
 func (RuneFlashYellow) DisplayName() string                { return "Rune Flash [Y]" }
+func (RuneFlashYellow) Rarity() string                     { return "Common" }
 func (RuneFlashYellow) Cost() int                          { return 3 }
 func (RuneFlashYellow) Pitch() int                         { return 2 }
 func (RuneFlashYellow) Attack() int                        { return 3 }
@@ -38,6 +40,7 @@ type RuneFlashBlue struct{}
 func (RuneFlashBlue) ID() ids.CardID                     { return ids.RuneFlashBlue }
 func (RuneFlashBlue) Name() string                       { return "Rune Flash" }
 func (RuneFlashBlue) DisplayName() string                { return "Rune Flash [B]" }
+func (RuneFlashBlue) Rarity() string                     { return "Common" }
 func (RuneFlashBlue) Cost() int                          { return 3 }
 func (RuneFlashBlue) Pitch() int                         { return 3 }
 func (RuneFlashBlue) Attack() int                        { return 2 }

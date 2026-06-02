@@ -3,6 +3,7 @@ types:
     - Generic
     - Action
 cost: 0
+rarity: Rare
 goAgain: true
 text: |-
     Look at target opponent's hand then name a card. Choose a random card from their hand and

@@ -14,6 +14,7 @@ type ScourTheBattlescapeRed struct{}
 func (ScourTheBattlescapeRed) ID() ids.CardID                     { return ids.ScourTheBattlescapeRed }
 func (ScourTheBattlescapeRed) Name() string                       { return "Scour the Battlescape" }
 func (ScourTheBattlescapeRed) DisplayName() string                { return "Scour the Battlescape [R]" }
+func (ScourTheBattlescapeRed) Rarity() string                     { return "Common" }
 func (ScourTheBattlescapeRed) Cost() int                          { return 0 }
 func (ScourTheBattlescapeRed) Pitch() int                         { return 1 }
 func (ScourTheBattlescapeRed) Attack() int                        { return 3 }
@@ -26,6 +27,7 @@ type ScourTheBattlescapeYellow struct{}
 func (ScourTheBattlescapeYellow) ID() ids.CardID                     { return ids.ScourTheBattlescapeYellow }
 func (ScourTheBattlescapeYellow) Name() string                       { return "Scour the Battlescape" }
 func (ScourTheBattlescapeYellow) DisplayName() string                { return "Scour the Battlescape [Y]" }
+func (ScourTheBattlescapeYellow) Rarity() string                     { return "Common" }
 func (ScourTheBattlescapeYellow) Cost() int                          { return 0 }
 func (ScourTheBattlescapeYellow) Pitch() int                         { return 2 }
 func (ScourTheBattlescapeYellow) Attack() int                        { return 2 }
@@ -38,6 +40,7 @@ type ScourTheBattlescapeBlue struct{}
 func (ScourTheBattlescapeBlue) ID() ids.CardID                     { return ids.ScourTheBattlescapeBlue }
 func (ScourTheBattlescapeBlue) Name() string                       { return "Scour the Battlescape" }
 func (ScourTheBattlescapeBlue) DisplayName() string                { return "Scour the Battlescape [B]" }
+func (ScourTheBattlescapeBlue) Rarity() string                     { return "Common" }
 func (ScourTheBattlescapeBlue) Cost() int                          { return 0 }
 func (ScourTheBattlescapeBlue) Pitch() int                         { return 3 }
 func (ScourTheBattlescapeBlue) Attack() int                        { return 1 }

@@ -4,6 +4,7 @@ types:
     - Action
     - Attack
 cost: 2
+rarity: Common
 text: If you have played or created an aura this turn, Drowning Dire gains **dominate**.
 variants:
     - id: DrowningDireRed

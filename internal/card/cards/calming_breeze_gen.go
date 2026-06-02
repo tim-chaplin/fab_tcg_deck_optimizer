@@ -14,6 +14,7 @@ type CalmingBreezeRed struct{}
 func (CalmingBreezeRed) ID() ids.CardID                     { return ids.CalmingBreezeRed }
 func (CalmingBreezeRed) Name() string                       { return "Calming Breeze" }
 func (CalmingBreezeRed) DisplayName() string                { return "Calming Breeze [R]" }
+func (CalmingBreezeRed) Rarity() string                     { return "Rare" }
 func (CalmingBreezeRed) Cost() int                          { return 0 }
 func (CalmingBreezeRed) Pitch() int                         { return 1 }
 func (CalmingBreezeRed) Attack() int                        { return 0 }

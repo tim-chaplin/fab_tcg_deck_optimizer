@@ -3,6 +3,7 @@ types:
     - Runeblade
     - DefenseReaction
 cost: 0
+rarity: Rare
 text: |-
     Deal 1 arcane damage to the attacking hero. If you have dealt arcane damage this turn,
     Sigil of Suffering gains +1{d}.

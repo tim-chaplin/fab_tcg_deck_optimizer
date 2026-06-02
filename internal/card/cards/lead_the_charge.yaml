@@ -3,6 +3,7 @@ types:
     - Generic
     - Action
 cost: 0
+rarity: Common
 goAgain: true
 text: |-
     The next time you play an action card with cost 0 or greater this turn, gain 1 action

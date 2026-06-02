@@ -14,6 +14,7 @@ type TalismanOfTithesBlue struct{}
 func (TalismanOfTithesBlue) ID() ids.CardID                     { return ids.TalismanOfTithesBlue }
 func (TalismanOfTithesBlue) Name() string                       { return "Talisman of Tithes" }
 func (TalismanOfTithesBlue) DisplayName() string                { return "Talisman of Tithes [B]" }
+func (TalismanOfTithesBlue) Rarity() string                     { return "Rare" }
 func (TalismanOfTithesBlue) Cost() int                          { return 0 }
 func (TalismanOfTithesBlue) Pitch() int                         { return 3 }
 func (TalismanOfTithesBlue) Attack() int                        { return 0 }

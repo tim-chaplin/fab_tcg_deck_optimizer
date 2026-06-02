@@ -4,6 +4,7 @@ types:
     - Action
     - Attack
 cost: 0
+rarity: Rare
 text: When this hits a hero, **mark** them.
 variants:
     - id: PursueToTheEdgeOfOblivionRed

@@ -3,6 +3,7 @@ types:
     - Generic
     - AttackReaction
 cost: 2
+rarity: Common
 text: |-
     Choose 1; Target club or hammer weapon attack gains +N{p}. Target attack action
     card with cost 2 or more gets +N{p} and 'When this hits a hero, they discard a card.'"

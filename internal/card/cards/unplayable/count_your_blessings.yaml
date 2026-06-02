@@ -3,6 +3,7 @@ types:
     - Generic
     - Instant
 cost: 2
+rarity: Rare
 markers:
     - Unplayable
 text: Gain X{h}, where X is 3 plus the number of Count Your Blessings in your graveyard.

@@ -14,6 +14,7 @@ type OathOfTheArknightRed struct{}
 func (OathOfTheArknightRed) ID() ids.CardID                     { return ids.OathOfTheArknightRed }
 func (OathOfTheArknightRed) Name() string                       { return "Oath of the Arknight" }
 func (OathOfTheArknightRed) DisplayName() string                { return "Oath of the Arknight [R]" }
+func (OathOfTheArknightRed) Rarity() string                     { return "Common" }
 func (OathOfTheArknightRed) Cost() int                          { return 2 }
 func (OathOfTheArknightRed) Pitch() int                         { return 1 }
 func (OathOfTheArknightRed) Attack() int                        { return 0 }
@@ -26,6 +27,7 @@ type OathOfTheArknightYellow struct{}
 func (OathOfTheArknightYellow) ID() ids.CardID                     { return ids.OathOfTheArknightYellow }
 func (OathOfTheArknightYellow) Name() string                       { return "Oath of the Arknight" }
 func (OathOfTheArknightYellow) DisplayName() string                { return "Oath of the Arknight [Y]" }
+func (OathOfTheArknightYellow) Rarity() string                     { return "Common" }
 func (OathOfTheArknightYellow) Cost() int                          { return 2 }
 func (OathOfTheArknightYellow) Pitch() int                         { return 2 }
 func (OathOfTheArknightYellow) Attack() int                        { return 0 }
@@ -38,6 +40,7 @@ type OathOfTheArknightBlue struct{}
 func (OathOfTheArknightBlue) ID() ids.CardID                     { return ids.OathOfTheArknightBlue }
 func (OathOfTheArknightBlue) Name() string                       { return "Oath of the Arknight" }
 func (OathOfTheArknightBlue) DisplayName() string                { return "Oath of the Arknight [B]" }
+func (OathOfTheArknightBlue) Rarity() string                     { return "Common" }
 func (OathOfTheArknightBlue) Cost() int                          { return 2 }
 func (OathOfTheArknightBlue) Pitch() int                         { return 3 }
 func (OathOfTheArknightBlue) Attack() int                        { return 0 }

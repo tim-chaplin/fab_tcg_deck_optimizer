@@ -4,6 +4,7 @@ types:
     - Action
     - Attack
 cost: 2
+rarity: Common
 variants:
     - id: DestructiveDeliberationRed
       pitch: 1

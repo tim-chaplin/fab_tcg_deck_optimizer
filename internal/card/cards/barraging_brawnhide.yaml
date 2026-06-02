@@ -4,6 +4,7 @@ types:
     - Action
     - Attack
 cost: 3
+rarity: Common
 text: While Barraging Brawnhide is defended by less than 2 non-equipment cards, it has +1{p}.
 variants:
     - id: BarragingBrawnhideRed

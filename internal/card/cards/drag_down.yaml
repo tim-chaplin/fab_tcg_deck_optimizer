@@ -3,6 +3,7 @@ types:
     - Generic
     - DefenseReaction
 cost: 0
+rarity: Common
 text: When this defends an attack, it gets -3{p}.
 variants:
     - id: DragDownRed

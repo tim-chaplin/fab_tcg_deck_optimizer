@@ -14,6 +14,7 @@ type WhisperOfTheOracleRed struct{}
 func (WhisperOfTheOracleRed) ID() ids.CardID                     { return ids.WhisperOfTheOracleRed }
 func (WhisperOfTheOracleRed) Name() string                       { return "Whisper of the Oracle" }
 func (WhisperOfTheOracleRed) DisplayName() string                { return "Whisper of the Oracle [R]" }
+func (WhisperOfTheOracleRed) Rarity() string                     { return "Common" }
 func (WhisperOfTheOracleRed) Cost() int                          { return 0 }
 func (WhisperOfTheOracleRed) Pitch() int                         { return 1 }
 func (WhisperOfTheOracleRed) Attack() int                        { return 0 }
@@ -26,6 +27,7 @@ type WhisperOfTheOracleYellow struct{}
 func (WhisperOfTheOracleYellow) ID() ids.CardID                     { return ids.WhisperOfTheOracleYellow }
 func (WhisperOfTheOracleYellow) Name() string                       { return "Whisper of the Oracle" }
 func (WhisperOfTheOracleYellow) DisplayName() string                { return "Whisper of the Oracle [Y]" }
+func (WhisperOfTheOracleYellow) Rarity() string                     { return "Common" }
 func (WhisperOfTheOracleYellow) Cost() int                          { return 0 }
 func (WhisperOfTheOracleYellow) Pitch() int                         { return 2 }
 func (WhisperOfTheOracleYellow) Attack() int                        { return 0 }
@@ -38,6 +40,7 @@ type WhisperOfTheOracleBlue struct{}
 func (WhisperOfTheOracleBlue) ID() ids.CardID                     { return ids.WhisperOfTheOracleBlue }
 func (WhisperOfTheOracleBlue) Name() string                       { return "Whisper of the Oracle" }
 func (WhisperOfTheOracleBlue) DisplayName() string                { return "Whisper of the Oracle [B]" }
+func (WhisperOfTheOracleBlue) Rarity() string                     { return "Common" }
 func (WhisperOfTheOracleBlue) Cost() int                          { return 0 }
 func (WhisperOfTheOracleBlue) Pitch() int                         { return 3 }
 func (WhisperOfTheOracleBlue) Attack() int                        { return 0 }

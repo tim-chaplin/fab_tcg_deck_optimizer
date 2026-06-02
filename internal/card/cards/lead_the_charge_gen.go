@@ -14,6 +14,7 @@ type LeadTheChargeRed struct{}
 func (LeadTheChargeRed) ID() ids.CardID                     { return ids.LeadTheChargeRed }
 func (LeadTheChargeRed) Name() string                       { return "Lead the Charge" }
 func (LeadTheChargeRed) DisplayName() string                { return "Lead the Charge [R]" }
+func (LeadTheChargeRed) Rarity() string                     { return "Common" }
 func (LeadTheChargeRed) Cost() int                          { return 0 }
 func (LeadTheChargeRed) Pitch() int                         { return 1 }
 func (LeadTheChargeRed) Attack() int                        { return 0 }
@@ -26,6 +27,7 @@ type LeadTheChargeYellow struct{}
 func (LeadTheChargeYellow) ID() ids.CardID                     { return ids.LeadTheChargeYellow }
 func (LeadTheChargeYellow) Name() string                       { return "Lead the Charge" }
 func (LeadTheChargeYellow) DisplayName() string                { return "Lead the Charge [Y]" }
+func (LeadTheChargeYellow) Rarity() string                     { return "Common" }
 func (LeadTheChargeYellow) Cost() int                          { return 0 }
 func (LeadTheChargeYellow) Pitch() int                         { return 2 }
 func (LeadTheChargeYellow) Attack() int                        { return 0 }
@@ -38,6 +40,7 @@ type LeadTheChargeBlue struct{}
 func (LeadTheChargeBlue) ID() ids.CardID                     { return ids.LeadTheChargeBlue }
 func (LeadTheChargeBlue) Name() string                       { return "Lead the Charge" }
 func (LeadTheChargeBlue) DisplayName() string                { return "Lead the Charge [B]" }
+func (LeadTheChargeBlue) Rarity() string                     { return "Common" }
 func (LeadTheChargeBlue) Cost() int                          { return 0 }
 func (LeadTheChargeBlue) Pitch() int                         { return 3 }
 func (LeadTheChargeBlue) Attack() int                        { return 0 }

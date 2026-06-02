@@ -14,6 +14,7 @@ type EmissaryOfWindRed struct{}
 func (EmissaryOfWindRed) ID() ids.CardID                     { return ids.EmissaryOfWindRed }
 func (EmissaryOfWindRed) Name() string                       { return "Emissary of Wind" }
 func (EmissaryOfWindRed) DisplayName() string                { return "Emissary of Wind [R]" }
+func (EmissaryOfWindRed) Rarity() string                     { return "Rare" }
 func (EmissaryOfWindRed) Cost() int                          { return 0 }
 func (EmissaryOfWindRed) Pitch() int                         { return 1 }
 func (EmissaryOfWindRed) Attack() int                        { return 4 }

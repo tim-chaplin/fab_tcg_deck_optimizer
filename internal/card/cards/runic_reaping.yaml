@@ -3,6 +3,7 @@ types:
     - Runeblade
     - Action
 cost: 1
+rarity: Common
 goAgain: true
 text: |-
     The next Runeblade attack action card you play this turn gains 'When this hits, create N

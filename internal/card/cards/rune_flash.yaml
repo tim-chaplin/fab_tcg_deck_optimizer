@@ -4,6 +4,7 @@ types:
     - Action
     - Attack
 cost: 3
+rarity: Common
 goAgain: true
 text: Rune Flash costs {r} less to play for each Runechant you control.
 variants:

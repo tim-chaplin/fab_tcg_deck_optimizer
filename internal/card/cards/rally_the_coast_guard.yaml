@@ -4,6 +4,7 @@ types:
     - Action
     - Attack
 cost: 3
+rarity: Common
 text: |-
     **Once per Turn Instant** - Discard a card: This gets +3{d}. Activate this only while this
     card is defending.

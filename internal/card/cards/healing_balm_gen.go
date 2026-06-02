@@ -14,6 +14,7 @@ type HealingBalmRed struct{}
 func (HealingBalmRed) ID() ids.CardID                     { return ids.HealingBalmRed }
 func (HealingBalmRed) Name() string                       { return "Healing Balm" }
 func (HealingBalmRed) DisplayName() string                { return "Healing Balm [R]" }
+func (HealingBalmRed) Rarity() string                     { return "Common" }
 func (HealingBalmRed) Cost() int                          { return 0 }
 func (HealingBalmRed) Pitch() int                         { return 1 }
 func (HealingBalmRed) Attack() int                        { return 0 }
@@ -26,6 +27,7 @@ type HealingBalmYellow struct{}
 func (HealingBalmYellow) ID() ids.CardID                     { return ids.HealingBalmYellow }
 func (HealingBalmYellow) Name() string                       { return "Healing Balm" }
 func (HealingBalmYellow) DisplayName() string                { return "Healing Balm [Y]" }
+func (HealingBalmYellow) Rarity() string                     { return "Common" }
 func (HealingBalmYellow) Cost() int                          { return 0 }
 func (HealingBalmYellow) Pitch() int                         { return 2 }
 func (HealingBalmYellow) Attack() int                        { return 0 }
@@ -38,6 +40,7 @@ type HealingBalmBlue struct{}
 func (HealingBalmBlue) ID() ids.CardID                     { return ids.HealingBalmBlue }
 func (HealingBalmBlue) Name() string                       { return "Healing Balm" }
 func (HealingBalmBlue) DisplayName() string                { return "Healing Balm [B]" }
+func (HealingBalmBlue) Rarity() string                     { return "Common" }
 func (HealingBalmBlue) Cost() int                          { return 0 }
 func (HealingBalmBlue) Pitch() int                         { return 3 }
 func (HealingBalmBlue) Attack() int                        { return 0 }

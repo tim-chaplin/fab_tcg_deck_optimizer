@@ -14,6 +14,7 @@ type CriticalStrikeRed struct{}
 func (CriticalStrikeRed) ID() ids.CardID                     { return ids.CriticalStrikeRed }
 func (CriticalStrikeRed) Name() string                       { return "Critical Strike" }
 func (CriticalStrikeRed) DisplayName() string                { return "Critical Strike [R]" }
+func (CriticalStrikeRed) Rarity() string                     { return "Common" }
 func (CriticalStrikeRed) Cost() int                          { return 1 }
 func (CriticalStrikeRed) Pitch() int                         { return 1 }
 func (CriticalStrikeRed) Attack() int                        { return 5 }
@@ -26,6 +27,7 @@ type CriticalStrikeYellow struct{}
 func (CriticalStrikeYellow) ID() ids.CardID                     { return ids.CriticalStrikeYellow }
 func (CriticalStrikeYellow) Name() string                       { return "Critical Strike" }
 func (CriticalStrikeYellow) DisplayName() string                { return "Critical Strike [Y]" }
+func (CriticalStrikeYellow) Rarity() string                     { return "Common" }
 func (CriticalStrikeYellow) Cost() int                          { return 1 }
 func (CriticalStrikeYellow) Pitch() int                         { return 2 }
 func (CriticalStrikeYellow) Attack() int                        { return 4 }
@@ -38,6 +40,7 @@ type CriticalStrikeBlue struct{}
 func (CriticalStrikeBlue) ID() ids.CardID                     { return ids.CriticalStrikeBlue }
 func (CriticalStrikeBlue) Name() string                       { return "Critical Strike" }
 func (CriticalStrikeBlue) DisplayName() string                { return "Critical Strike [B]" }
+func (CriticalStrikeBlue) Rarity() string                     { return "Common" }
 func (CriticalStrikeBlue) Cost() int                          { return 1 }
 func (CriticalStrikeBlue) Pitch() int                         { return 3 }
 func (CriticalStrikeBlue) Attack() int                        { return 3 }

@@ -14,6 +14,7 @@ type PrimeTheCrowdRed struct{}
 func (PrimeTheCrowdRed) ID() ids.CardID                     { return ids.PrimeTheCrowdRed }
 func (PrimeTheCrowdRed) Name() string                       { return "Prime the Crowd" }
 func (PrimeTheCrowdRed) DisplayName() string                { return "Prime the Crowd [R]" }
+func (PrimeTheCrowdRed) Rarity() string                     { return "Common" }
 func (PrimeTheCrowdRed) Cost() int                          { return 2 }
 func (PrimeTheCrowdRed) Pitch() int                         { return 1 }
 func (PrimeTheCrowdRed) Attack() int                        { return 0 }
@@ -26,6 +27,7 @@ type PrimeTheCrowdYellow struct{}
 func (PrimeTheCrowdYellow) ID() ids.CardID                     { return ids.PrimeTheCrowdYellow }
 func (PrimeTheCrowdYellow) Name() string                       { return "Prime the Crowd" }
 func (PrimeTheCrowdYellow) DisplayName() string                { return "Prime the Crowd [Y]" }
+func (PrimeTheCrowdYellow) Rarity() string                     { return "Common" }
 func (PrimeTheCrowdYellow) Cost() int                          { return 2 }
 func (PrimeTheCrowdYellow) Pitch() int                         { return 2 }
 func (PrimeTheCrowdYellow) Attack() int                        { return 0 }
@@ -38,6 +40,7 @@ type PrimeTheCrowdBlue struct{}
 func (PrimeTheCrowdBlue) ID() ids.CardID                     { return ids.PrimeTheCrowdBlue }
 func (PrimeTheCrowdBlue) Name() string                       { return "Prime the Crowd" }
 func (PrimeTheCrowdBlue) DisplayName() string                { return "Prime the Crowd [B]" }
+func (PrimeTheCrowdBlue) Rarity() string                     { return "Common" }
 func (PrimeTheCrowdBlue) Cost() int                          { return 2 }
 func (PrimeTheCrowdBlue) Pitch() int                         { return 3 }
 func (PrimeTheCrowdBlue) Attack() int                        { return 0 }
