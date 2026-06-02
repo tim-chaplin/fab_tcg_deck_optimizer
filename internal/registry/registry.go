@@ -62,6 +62,23 @@ func legalCardsForFormat(f format.Format) []deck.Card {
 	return out
 }
 
+// IllegalCards returns the cards that are not legal to include in a deck for format f and hero
+// h — either format-illegal (on the banlist or a rarity the format disallows) or outside h's
+// class/talent pool. It deliberately ignores the NotImplemented/Unplayable markers that
+// LegalCardsFor applies: those keep the optimizer from *introducing* a card, but a card already
+// in a loaded deck is still a legal inclusion, so a marker alone doesn't taint the deck. Returns
+// nil when every card is legal.
+func IllegalCards(f format.Format, h deck.Hero, cards []deck.Card) []deck.Card {
+	hc := asCardHero(h)
+	var bad []deck.Card
+	for _, c := range cards {
+		if !f.IsCardLegal(c) || !rarityLegal(f, c) || !heroCanPlay(hc, c) {
+			bad = append(bad, c)
+		}
+	}
+	return bad
+}
+
 // rarityLegal applies the format's rarity rule to x when x carries a printed rarity. Generated
 // cards expose Rarity() (see internal/cardgen); anything that doesn't — a hand-written value with
 // no rarity yet — skips the check rather than being silently excluded, so the rule only ever

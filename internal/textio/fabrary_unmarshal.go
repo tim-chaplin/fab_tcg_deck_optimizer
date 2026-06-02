@@ -91,6 +91,9 @@ func UnmarshalFabrary(text string) (*deck.Deck, map[string]int, error) {
 	d.Format = format.SilverAge
 	d.Sideboard = sideboard
 	d.Equipment = equipment
+	// Unknown cards were already dropped into skipped; the remaining cards are registry-known, so
+	// any illegal one is a real legality mismatch — checked against the deck's own format and hero.
+	assertDeckLegal(d.Format, d.Hero, heroName, cardList)
 	return d, skipped, nil
 }
 
