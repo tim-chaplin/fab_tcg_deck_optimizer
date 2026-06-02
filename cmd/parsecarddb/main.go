@@ -123,9 +123,7 @@ func main() {
 	modeled := flag.Bool("modeled", false, "keep only card types the optimizer models — deck cards and weapons — dropping equipment, heroes, and tokens")
 	silverAge := flag.Bool("silver-age", true, "require Silver Age legality (the card.csv 'Silver Age Legal' column)")
 	excludeBanned := flag.Bool("exclude-banned", false, "drop cards on our internal/format Silver Age banlist (the cards not worth implementing)")
-	rarityLegal := flag.Bool("rarity-legal", false, "keep only cards with a Basic/Common/Rare printing — the Silver Age rarity rule. Needs -printings and -rarity-file.")
-	printings := flag.String("printings", "data_sources/card-printing.csv", "path to card-printing.csv (per-printing rarity), used by -rarity-legal")
-	rarityFile := flag.String("rarity-file", "data_sources/rarity.csv", "path to rarity.csv (shorthand -> name), used by -rarity-legal")
+	rarityLegal := flag.Bool("rarity-legal", false, "keep only cards with a Basic/Common/Rare printing — the Silver Age rarity rule. Reads data_sources/card-printing.csv + rarity.csv (run fetch.sh first).")
 	outFormat := flag.String("format", "pretty", "output format: pretty | json")
 	namesOnly := flag.Bool("names_only", false, "print only unique card names, one per line")
 	flag.Parse()
@@ -148,7 +146,7 @@ func main() {
 		excludeBanned: *excludeBanned,
 	}
 	if *rarityLegal {
-		legal, err := textio.LoadRarityLegal(*printings, *rarityFile)
+		legal, err := textio.LoadRarityLegal("data_sources/card-printing.csv", "data_sources/rarity.csv")
 		if err != nil {
 			log.Fatal(err)
 		}

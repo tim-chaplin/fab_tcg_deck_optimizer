@@ -41,8 +41,8 @@ Flags:
 - `-exclude-banned` — drop cards on our `internal/format` Silver Age banlist.
 - `-rarity-legal` — keep only cards with a Basic/Common/Rare printing — the Silver Age rarity
   rule, which is the reliable signal (the `Silver Age Legal` column lags new sets). Reads
-  `-printings` (`card-printing.csv`) and `-rarity-file` (`rarity.csv`), joining by card Unique
-  ID. Run `fetch.sh` first to have those files locally.
+  `data_sources/card-printing.csv` + `data_sources/rarity.csv` (joining by card Unique ID); run
+  `fetch.sh` first to have them locally.
 - `-format` — `pretty` (default) or `json`.
 - `-names_only` — print only the distinct card names, one per line.
 
