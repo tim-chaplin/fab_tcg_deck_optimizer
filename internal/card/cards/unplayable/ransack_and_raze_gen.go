@@ -14,6 +14,7 @@ type RansackAndRazeBlue struct{}
 func (RansackAndRazeBlue) ID() ids.CardID                     { return ids.RansackAndRazeBlue }
 func (RansackAndRazeBlue) Name() string                       { return "Ransack and Raze" }
 func (RansackAndRazeBlue) DisplayName() string                { return "Ransack and Raze [B]" }
+func (RansackAndRazeBlue) Rarity() string                     { return "Rare" }
 func (RansackAndRazeBlue) Cost() int                          { return 0 }
 func (RansackAndRazeBlue) Pitch() int                         { return 3 }
 func (RansackAndRazeBlue) Attack() int                        { return 0 }

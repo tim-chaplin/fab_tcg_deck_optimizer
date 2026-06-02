@@ -3,6 +3,7 @@ types:
     - Generic
     - Action
 cost: 0
+rarity: Common
 text: |-
     Gain N{h}. If you have played a card named Moon Wish this turn, draw a card and Sun Kiss
     gains **go again**." (N is the printed variant value above.)

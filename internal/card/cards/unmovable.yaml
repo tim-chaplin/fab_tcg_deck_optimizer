@@ -3,6 +3,7 @@ types:
     - Generic
     - DefenseReaction
 cost: 3
+rarity: Common
 text: If Unmovable is played from arsenal, it gains +1{d}.
 variants:
     - id: UnmovableRed

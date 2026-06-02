@@ -3,6 +3,7 @@ types:
     - Generic
     - Action
 cost: 0
+rarity: Common
 text: Gain N{h}." (N is the printed variant value above.)
 variants:
     - id: HealingBalmRed

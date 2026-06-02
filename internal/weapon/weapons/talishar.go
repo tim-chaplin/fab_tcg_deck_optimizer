@@ -25,6 +25,7 @@ type Talishar struct{}
 func (Talishar) ID() ids.CardID                     { return ids.TalisharID }
 func (Talishar) Name() string                       { return "Talishar, the Lost Prince" }
 func (Talishar) DisplayName() string                { return "Talishar, the Lost Prince" }
+func (Talishar) Rarity() string                     { return "Rare" }
 func (Talishar) Cost() int                          { return 0 }
 func (Talishar) Pitch() int                         { return 0 }
 func (Talishar) Attack() int                        { return 0 }

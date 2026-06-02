@@ -14,6 +14,7 @@ type WoundedBullRed struct{}
 func (WoundedBullRed) ID() ids.CardID                     { return ids.WoundedBullRed }
 func (WoundedBullRed) Name() string                       { return "Wounded Bull" }
 func (WoundedBullRed) DisplayName() string                { return "Wounded Bull [R]" }
+func (WoundedBullRed) Rarity() string                     { return "Common" }
 func (WoundedBullRed) Cost() int                          { return 3 }
 func (WoundedBullRed) Pitch() int                         { return 1 }
 func (WoundedBullRed) Attack() int                        { return 7 }
@@ -26,6 +27,7 @@ type WoundedBullYellow struct{}
 func (WoundedBullYellow) ID() ids.CardID                     { return ids.WoundedBullYellow }
 func (WoundedBullYellow) Name() string                       { return "Wounded Bull" }
 func (WoundedBullYellow) DisplayName() string                { return "Wounded Bull [Y]" }
+func (WoundedBullYellow) Rarity() string                     { return "Common" }
 func (WoundedBullYellow) Cost() int                          { return 3 }
 func (WoundedBullYellow) Pitch() int                         { return 2 }
 func (WoundedBullYellow) Attack() int                        { return 6 }
@@ -38,6 +40,7 @@ type WoundedBullBlue struct{}
 func (WoundedBullBlue) ID() ids.CardID                     { return ids.WoundedBullBlue }
 func (WoundedBullBlue) Name() string                       { return "Wounded Bull" }
 func (WoundedBullBlue) DisplayName() string                { return "Wounded Bull [B]" }
+func (WoundedBullBlue) Rarity() string                     { return "Common" }
 func (WoundedBullBlue) Cost() int                          { return 3 }
 func (WoundedBullBlue) Pitch() int                         { return 3 }
 func (WoundedBullBlue) Attack() int                        { return 5 }

@@ -14,6 +14,7 @@ type AmuletOfAssertivenessYellow struct{}
 func (AmuletOfAssertivenessYellow) ID() ids.CardID      { return ids.AmuletOfAssertivenessYellow }
 func (AmuletOfAssertivenessYellow) Name() string        { return "Amulet of Assertiveness" }
 func (AmuletOfAssertivenessYellow) DisplayName() string { return "Amulet of Assertiveness [Y]" }
+func (AmuletOfAssertivenessYellow) Rarity() string      { return "Rare" }
 func (AmuletOfAssertivenessYellow) Cost() int           { return 0 }
 func (AmuletOfAssertivenessYellow) Pitch() int          { return 2 }
 func (AmuletOfAssertivenessYellow) Attack() int         { return 0 }

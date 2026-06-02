@@ -4,6 +4,7 @@ types:
     - Action
     - Attack
 cost: 3
+rarity: Rare
 text: When this hits a hero, cards they own lose all colors until the end of their next turn.
 variants:
     - id: BlanchRed

@@ -52,6 +52,7 @@ type CardGroup struct {
 	Types          []string  `yaml:"types"`
 	Universal      bool      `yaml:"universal,omitempty"` // OR the current hero's class into Types()
 	Cost           any       `yaml:"cost"`                // int (constant) or "variable" or nil (variable)
+	Rarity         string    `yaml:"rarity"`              // lowest printed rarity (the Silver Age legality signal)
 	GoAgain        bool      `yaml:"goAgain,omitempty"`
 	DynamicGoAgain bool      `yaml:"dynamicGoAgain,omitempty"` // skip GoAgain in gen; hand file owns it
 	Markers        []string  `yaml:"markers,omitempty"`
@@ -146,6 +147,9 @@ func genGroup(pkg, basename string, g CardGroup) ([]byte, error) {
 		fmt.Fprintf(&buf, "func (%s) ID() ids.CardID      { return ids.%s }\n", v.ID, v.ID)
 		fmt.Fprintf(&buf, "func (%s) Name() string        { return %q }\n", v.ID, g.Name)
 		fmt.Fprintf(&buf, "func (%s) DisplayName() string { return %q }\n", v.ID, display)
+		if g.Rarity != "" {
+			fmt.Fprintf(&buf, "func (%s) Rarity() string      { return %q }\n", v.ID, g.Rarity)
+		}
 		if c, ok := g.constCost(); ok {
 			fmt.Fprintf(&buf, "func (%s) Cost() int            { return %d }\n", v.ID, c)
 		}

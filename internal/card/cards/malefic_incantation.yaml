@@ -4,6 +4,7 @@ types:
     - Action
     - Aura
 cost: 0
+rarity: Rare
 goAgain: true
 text: |-
     This enters the arena with N verse counters. When it has none, destroy it. Once per

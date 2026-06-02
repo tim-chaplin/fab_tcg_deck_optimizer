@@ -14,6 +14,7 @@ type PickACardAnyCardRed struct{}
 func (PickACardAnyCardRed) ID() ids.CardID                     { return ids.PickACardAnyCardRed }
 func (PickACardAnyCardRed) Name() string                       { return "Pick a Card, Any Card" }
 func (PickACardAnyCardRed) DisplayName() string                { return "Pick a Card, Any Card [R]" }
+func (PickACardAnyCardRed) Rarity() string                     { return "Rare" }
 func (PickACardAnyCardRed) Cost() int                          { return 0 }
 func (PickACardAnyCardRed) Pitch() int                         { return 1 }
 func (PickACardAnyCardRed) Attack() int                        { return 0 }
@@ -26,6 +27,7 @@ type PickACardAnyCardYellow struct{}
 func (PickACardAnyCardYellow) ID() ids.CardID                     { return ids.PickACardAnyCardYellow }
 func (PickACardAnyCardYellow) Name() string                       { return "Pick a Card, Any Card" }
 func (PickACardAnyCardYellow) DisplayName() string                { return "Pick a Card, Any Card [Y]" }
+func (PickACardAnyCardYellow) Rarity() string                     { return "Rare" }
 func (PickACardAnyCardYellow) Cost() int                          { return 0 }
 func (PickACardAnyCardYellow) Pitch() int                         { return 2 }
 func (PickACardAnyCardYellow) Attack() int                        { return 0 }
@@ -38,6 +40,7 @@ type PickACardAnyCardBlue struct{}
 func (PickACardAnyCardBlue) ID() ids.CardID                     { return ids.PickACardAnyCardBlue }
 func (PickACardAnyCardBlue) Name() string                       { return "Pick a Card, Any Card" }
 func (PickACardAnyCardBlue) DisplayName() string                { return "Pick a Card, Any Card [B]" }
+func (PickACardAnyCardBlue) Rarity() string                     { return "Rare" }
 func (PickACardAnyCardBlue) Cost() int                          { return 0 }
 func (PickACardAnyCardBlue) Pitch() int                         { return 3 }
 func (PickACardAnyCardBlue) Attack() int                        { return 0 }

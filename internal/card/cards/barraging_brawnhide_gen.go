@@ -14,6 +14,7 @@ type BarragingBrawnhideRed struct{}
 func (BarragingBrawnhideRed) ID() ids.CardID                     { return ids.BarragingBrawnhideRed }
 func (BarragingBrawnhideRed) Name() string                       { return "Barraging Brawnhide" }
 func (BarragingBrawnhideRed) DisplayName() string                { return "Barraging Brawnhide [R]" }
+func (BarragingBrawnhideRed) Rarity() string                     { return "Common" }
 func (BarragingBrawnhideRed) Cost() int                          { return 3 }
 func (BarragingBrawnhideRed) Pitch() int                         { return 1 }
 func (BarragingBrawnhideRed) Attack() int                        { return 7 }
@@ -26,6 +27,7 @@ type BarragingBrawnhideYellow struct{}
 func (BarragingBrawnhideYellow) ID() ids.CardID                     { return ids.BarragingBrawnhideYellow }
 func (BarragingBrawnhideYellow) Name() string                       { return "Barraging Brawnhide" }
 func (BarragingBrawnhideYellow) DisplayName() string                { return "Barraging Brawnhide [Y]" }
+func (BarragingBrawnhideYellow) Rarity() string                     { return "Common" }
 func (BarragingBrawnhideYellow) Cost() int                          { return 3 }
 func (BarragingBrawnhideYellow) Pitch() int                         { return 2 }
 func (BarragingBrawnhideYellow) Attack() int                        { return 6 }
@@ -38,6 +40,7 @@ type BarragingBrawnhideBlue struct{}
 func (BarragingBrawnhideBlue) ID() ids.CardID                     { return ids.BarragingBrawnhideBlue }
 func (BarragingBrawnhideBlue) Name() string                       { return "Barraging Brawnhide" }
 func (BarragingBrawnhideBlue) DisplayName() string                { return "Barraging Brawnhide [B]" }
+func (BarragingBrawnhideBlue) Rarity() string                     { return "Common" }
 func (BarragingBrawnhideBlue) Cost() int                          { return 3 }
 func (BarragingBrawnhideBlue) Pitch() int                         { return 3 }
 func (BarragingBrawnhideBlue) Attack() int                        { return 5 }

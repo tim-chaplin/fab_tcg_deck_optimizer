@@ -4,6 +4,7 @@ types:
     - Action
     - Item
 cost: 0
+rarity: Rare
 goAgain: true
 text: |-
     **Go again** When an attack you control gains exactly +1{p} from an effect during the

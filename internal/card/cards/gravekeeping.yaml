@@ -4,6 +4,7 @@ types:
     - Action
     - Attack
 cost: 1
+rarity: Rare
 text: When this attacks a hero, you may banish a card from their graveyard.
 variants:
     - id: GravekeepingRed

@@ -14,6 +14,7 @@ type InfectiousHostRed struct{}
 func (InfectiousHostRed) ID() ids.CardID                     { return ids.InfectiousHostRed }
 func (InfectiousHostRed) Name() string                       { return "Infectious Host" }
 func (InfectiousHostRed) DisplayName() string                { return "Infectious Host [R]" }
+func (InfectiousHostRed) Rarity() string                     { return "Rare" }
 func (InfectiousHostRed) Cost() int                          { return 0 }
 func (InfectiousHostRed) Pitch() int                         { return 1 }
 func (InfectiousHostRed) Attack() int                        { return 4 }
@@ -26,6 +27,7 @@ type InfectiousHostYellow struct{}
 func (InfectiousHostYellow) ID() ids.CardID                     { return ids.InfectiousHostYellow }
 func (InfectiousHostYellow) Name() string                       { return "Infectious Host" }
 func (InfectiousHostYellow) DisplayName() string                { return "Infectious Host [Y]" }
+func (InfectiousHostYellow) Rarity() string                     { return "Rare" }
 func (InfectiousHostYellow) Cost() int                          { return 0 }
 func (InfectiousHostYellow) Pitch() int                         { return 2 }
 func (InfectiousHostYellow) Attack() int                        { return 3 }
@@ -38,6 +40,7 @@ type InfectiousHostBlue struct{}
 func (InfectiousHostBlue) ID() ids.CardID                     { return ids.InfectiousHostBlue }
 func (InfectiousHostBlue) Name() string                       { return "Infectious Host" }
 func (InfectiousHostBlue) DisplayName() string                { return "Infectious Host [B]" }
+func (InfectiousHostBlue) Rarity() string                     { return "Rare" }
 func (InfectiousHostBlue) Cost() int                          { return 0 }
 func (InfectiousHostBlue) Pitch() int                         { return 3 }
 func (InfectiousHostBlue) Attack() int                        { return 2 }

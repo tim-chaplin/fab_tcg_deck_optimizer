@@ -3,6 +3,7 @@ types:
     - Runeblade
     - Action
 cost: 2
+rarity: Common
 goAgain: true
 text: |-
     Your next Runeblade attack this turn gains +N{p}. Create a Runechant token. Go again."

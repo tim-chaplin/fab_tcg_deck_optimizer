@@ -14,6 +14,7 @@ type RestvineElixirRed struct{}
 func (RestvineElixirRed) ID() ids.CardID                     { return ids.RestvineElixirRed }
 func (RestvineElixirRed) Name() string                       { return "Restvine Elixir" }
 func (RestvineElixirRed) DisplayName() string                { return "Restvine Elixir [R]" }
+func (RestvineElixirRed) Rarity() string                     { return "Rare" }
 func (RestvineElixirRed) Cost() int                          { return 1 }
 func (RestvineElixirRed) Pitch() int                         { return 1 }
 func (RestvineElixirRed) Attack() int                        { return 0 }

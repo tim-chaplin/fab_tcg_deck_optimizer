@@ -4,6 +4,7 @@ types:
     - Action
     - Aura
 cost: 1
+rarity: Rare
 goAgain: true
 text: |-
     Go again. Runeblood Incantation enters the arena with N verse counters on it. At the

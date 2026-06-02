@@ -14,6 +14,7 @@ type FlyingHighRed struct{}
 func (FlyingHighRed) ID() ids.CardID                     { return ids.FlyingHighRed }
 func (FlyingHighRed) Name() string                       { return "Flying High" }
 func (FlyingHighRed) DisplayName() string                { return "Flying High [R]" }
+func (FlyingHighRed) Rarity() string                     { return "Rare" }
 func (FlyingHighRed) Cost() int                          { return 0 }
 func (FlyingHighRed) Pitch() int                         { return 1 }
 func (FlyingHighRed) Attack() int                        { return 0 }
@@ -26,6 +27,7 @@ type FlyingHighYellow struct{}
 func (FlyingHighYellow) ID() ids.CardID                     { return ids.FlyingHighYellow }
 func (FlyingHighYellow) Name() string                       { return "Flying High" }
 func (FlyingHighYellow) DisplayName() string                { return "Flying High [Y]" }
+func (FlyingHighYellow) Rarity() string                     { return "Rare" }
 func (FlyingHighYellow) Cost() int                          { return 0 }
 func (FlyingHighYellow) Pitch() int                         { return 2 }
 func (FlyingHighYellow) Attack() int                        { return 0 }
@@ -38,6 +40,7 @@ type FlyingHighBlue struct{}
 func (FlyingHighBlue) ID() ids.CardID                     { return ids.FlyingHighBlue }
 func (FlyingHighBlue) Name() string                       { return "Flying High" }
 func (FlyingHighBlue) DisplayName() string                { return "Flying High [B]" }
+func (FlyingHighBlue) Rarity() string                     { return "Rare" }
 func (FlyingHighBlue) Cost() int                          { return 0 }
 func (FlyingHighBlue) Pitch() int                         { return 3 }
 func (FlyingHighBlue) Attack() int                        { return 0 }

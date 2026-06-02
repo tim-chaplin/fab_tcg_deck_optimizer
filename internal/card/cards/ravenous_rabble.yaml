@@ -4,6 +4,7 @@ types:
     - Action
     - Attack
 cost: 0
+rarity: Common
 goAgain: true
 text: |-
     When this attacks, reveal the top card of your deck. This gets -X{p}, where X is the pitch

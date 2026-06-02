@@ -14,6 +14,7 @@ type RightBehindYouRed struct{}
 func (RightBehindYouRed) ID() ids.CardID                     { return ids.RightBehindYouRed }
 func (RightBehindYouRed) Name() string                       { return "Right Behind You" }
 func (RightBehindYouRed) DisplayName() string                { return "Right Behind You [R]" }
+func (RightBehindYouRed) Rarity() string                     { return "Common" }
 func (RightBehindYouRed) Cost() int                          { return 3 }
 func (RightBehindYouRed) Pitch() int                         { return 1 }
 func (RightBehindYouRed) Attack() int                        { return 7 }
@@ -26,6 +27,7 @@ type RightBehindYouYellow struct{}
 func (RightBehindYouYellow) ID() ids.CardID                     { return ids.RightBehindYouYellow }
 func (RightBehindYouYellow) Name() string                       { return "Right Behind You" }
 func (RightBehindYouYellow) DisplayName() string                { return "Right Behind You [Y]" }
+func (RightBehindYouYellow) Rarity() string                     { return "Common" }
 func (RightBehindYouYellow) Cost() int                          { return 3 }
 func (RightBehindYouYellow) Pitch() int                         { return 2 }
 func (RightBehindYouYellow) Attack() int                        { return 6 }
@@ -38,6 +40,7 @@ type RightBehindYouBlue struct{}
 func (RightBehindYouBlue) ID() ids.CardID                     { return ids.RightBehindYouBlue }
 func (RightBehindYouBlue) Name() string                       { return "Right Behind You" }
 func (RightBehindYouBlue) DisplayName() string                { return "Right Behind You [B]" }
+func (RightBehindYouBlue) Rarity() string                     { return "Common" }
 func (RightBehindYouBlue) Cost() int                          { return 3 }
 func (RightBehindYouBlue) Pitch() int                         { return 3 }
 func (RightBehindYouBlue) Attack() int                        { return 5 }

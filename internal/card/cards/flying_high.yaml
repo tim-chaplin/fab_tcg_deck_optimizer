@@ -3,6 +3,7 @@ types:
     - Generic
     - Action
 cost: 0
+rarity: Rare
 goAgain: true
 text: |-
     Your next attack this turn gets **go again**. If it's <matching color>, it gets +1{p}.

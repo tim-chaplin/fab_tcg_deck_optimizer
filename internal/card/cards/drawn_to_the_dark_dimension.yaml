@@ -4,6 +4,7 @@ types:
     - Action
     - Attack
 cost: 2
+rarity: Common
 text: |-
     Drawn to the Dark Dimension costs {r} less to play for each Runechant you control.
     Draw a card.

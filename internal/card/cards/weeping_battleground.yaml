@@ -3,6 +3,7 @@ types:
     - Runeblade
     - DefenseReaction
 cost: 0
+rarity: Common
 text: |-
     You may banish an aura from your graveyard. If you do, deal 1 arcane damage to target
     hero.

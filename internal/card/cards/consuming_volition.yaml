@@ -4,6 +4,7 @@ types:
     - Action
     - Attack
 cost: 1
+rarity: Common
 text: |-
     If you've dealt arcane damage this turn, this gets 'When this hits a hero, they discard
     a card.'

@@ -4,6 +4,7 @@ types:
     - Action
     - Attack
 cost: 0
+rarity: Common
 text: If you've played or created an aura this turn, this gets go again.
 variants:
     - id: RuneragerSwarmRed

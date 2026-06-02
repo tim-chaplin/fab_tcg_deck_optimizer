@@ -4,6 +4,7 @@ types:
     - Action
     - Aura
 cost: 2
+rarity: Rare
 goAgain: true
 text: |-
     **Go again** If your hero would be dealt damage, instead destroy Enchanting Melody and

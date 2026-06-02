@@ -3,6 +3,7 @@ types:
     - Generic
     - Resource
 cost: 0
+rarity: Basic
 text: |-
     *(A player may add any number of Cracked Baubles to their card-pool in sealed deck or
     booster draft formats.)*

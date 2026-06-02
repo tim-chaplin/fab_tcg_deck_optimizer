@@ -4,6 +4,7 @@ types:
     - Action
     - Attack
 cost: 1
+rarity: Common
 variants:
     - id: CriticalStrikeRed
       pitch: 1

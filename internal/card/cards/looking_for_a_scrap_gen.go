@@ -14,6 +14,7 @@ type LookingForAScrapRed struct{}
 func (LookingForAScrapRed) ID() ids.CardID                     { return ids.LookingForAScrapRed }
 func (LookingForAScrapRed) Name() string                       { return "Looking for a Scrap" }
 func (LookingForAScrapRed) DisplayName() string                { return "Looking for a Scrap [R]" }
+func (LookingForAScrapRed) Rarity() string                     { return "Rare" }
 func (LookingForAScrapRed) Cost() int                          { return 1 }
 func (LookingForAScrapRed) Pitch() int                         { return 1 }
 func (LookingForAScrapRed) Attack() int                        { return 4 }
@@ -26,6 +27,7 @@ type LookingForAScrapYellow struct{}
 func (LookingForAScrapYellow) ID() ids.CardID                     { return ids.LookingForAScrapYellow }
 func (LookingForAScrapYellow) Name() string                       { return "Looking for a Scrap" }
 func (LookingForAScrapYellow) DisplayName() string                { return "Looking for a Scrap [Y]" }
+func (LookingForAScrapYellow) Rarity() string                     { return "Rare" }
 func (LookingForAScrapYellow) Cost() int                          { return 1 }
 func (LookingForAScrapYellow) Pitch() int                         { return 2 }
 func (LookingForAScrapYellow) Attack() int                        { return 3 }
@@ -38,6 +40,7 @@ type LookingForAScrapBlue struct{}
 func (LookingForAScrapBlue) ID() ids.CardID                     { return ids.LookingForAScrapBlue }
 func (LookingForAScrapBlue) Name() string                       { return "Looking for a Scrap" }
 func (LookingForAScrapBlue) DisplayName() string                { return "Looking for a Scrap [B]" }
+func (LookingForAScrapBlue) Rarity() string                     { return "Rare" }
 func (LookingForAScrapBlue) Cost() int                          { return 1 }
 func (LookingForAScrapBlue) Pitch() int                         { return 3 }
 func (LookingForAScrapBlue) Attack() int                        { return 2 }

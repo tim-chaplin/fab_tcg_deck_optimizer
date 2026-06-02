@@ -14,6 +14,7 @@ type MoneyOrYourLifeRed struct{}
 func (MoneyOrYourLifeRed) ID() ids.CardID                     { return ids.MoneyOrYourLifeRed }
 func (MoneyOrYourLifeRed) Name() string                       { return "Money or Your Life?" }
 func (MoneyOrYourLifeRed) DisplayName() string                { return "Money or Your Life? [R]" }
+func (MoneyOrYourLifeRed) Rarity() string                     { return "Rare" }
 func (MoneyOrYourLifeRed) Cost() int                          { return 3 }
 func (MoneyOrYourLifeRed) Pitch() int                         { return 1 }
 func (MoneyOrYourLifeRed) Attack() int                        { return 6 }
@@ -26,6 +27,7 @@ type MoneyOrYourLifeYellow struct{}
 func (MoneyOrYourLifeYellow) ID() ids.CardID                     { return ids.MoneyOrYourLifeYellow }
 func (MoneyOrYourLifeYellow) Name() string                       { return "Money or Your Life?" }
 func (MoneyOrYourLifeYellow) DisplayName() string                { return "Money or Your Life? [Y]" }
+func (MoneyOrYourLifeYellow) Rarity() string                     { return "Rare" }
 func (MoneyOrYourLifeYellow) Cost() int                          { return 3 }
 func (MoneyOrYourLifeYellow) Pitch() int                         { return 2 }
 func (MoneyOrYourLifeYellow) Attack() int                        { return 5 }
@@ -38,6 +40,7 @@ type MoneyOrYourLifeBlue struct{}
 func (MoneyOrYourLifeBlue) ID() ids.CardID                     { return ids.MoneyOrYourLifeBlue }
 func (MoneyOrYourLifeBlue) Name() string                       { return "Money or Your Life?" }
 func (MoneyOrYourLifeBlue) DisplayName() string                { return "Money or Your Life? [B]" }
+func (MoneyOrYourLifeBlue) Rarity() string                     { return "Rare" }
 func (MoneyOrYourLifeBlue) Cost() int                          { return 3 }
 func (MoneyOrYourLifeBlue) Pitch() int                         { return 3 }
 func (MoneyOrYourLifeBlue) Attack() int                        { return 4 }

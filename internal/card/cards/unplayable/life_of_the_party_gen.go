@@ -14,6 +14,7 @@ type LifeOfThePartyRed struct{}
 func (LifeOfThePartyRed) ID() ids.CardID                     { return ids.LifeOfThePartyRed }
 func (LifeOfThePartyRed) Name() string                       { return "Life of the Party" }
 func (LifeOfThePartyRed) DisplayName() string                { return "Life of the Party [R]" }
+func (LifeOfThePartyRed) Rarity() string                     { return "Rare" }
 func (LifeOfThePartyRed) Cost() int                          { return 2 }
 func (LifeOfThePartyRed) Pitch() int                         { return 1 }
 func (LifeOfThePartyRed) Attack() int                        { return 4 }
@@ -27,6 +28,7 @@ type LifeOfThePartyYellow struct{}
 func (LifeOfThePartyYellow) ID() ids.CardID                     { return ids.LifeOfThePartyYellow }
 func (LifeOfThePartyYellow) Name() string                       { return "Life of the Party" }
 func (LifeOfThePartyYellow) DisplayName() string                { return "Life of the Party [Y]" }
+func (LifeOfThePartyYellow) Rarity() string                     { return "Rare" }
 func (LifeOfThePartyYellow) Cost() int                          { return 2 }
 func (LifeOfThePartyYellow) Pitch() int                         { return 2 }
 func (LifeOfThePartyYellow) Attack() int                        { return 3 }
@@ -40,6 +42,7 @@ type LifeOfThePartyBlue struct{}
 func (LifeOfThePartyBlue) ID() ids.CardID                     { return ids.LifeOfThePartyBlue }
 func (LifeOfThePartyBlue) Name() string                       { return "Life of the Party" }
 func (LifeOfThePartyBlue) DisplayName() string                { return "Life of the Party [B]" }
+func (LifeOfThePartyBlue) Rarity() string                     { return "Rare" }
 func (LifeOfThePartyBlue) Cost() int                          { return 2 }
 func (LifeOfThePartyBlue) Pitch() int                         { return 3 }
 func (LifeOfThePartyBlue) Attack() int                        { return 2 }

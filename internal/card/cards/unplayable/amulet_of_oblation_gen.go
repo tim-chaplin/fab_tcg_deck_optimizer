@@ -14,6 +14,7 @@ type AmuletOfOblationBlue struct{}
 func (AmuletOfOblationBlue) ID() ids.CardID                     { return ids.AmuletOfOblationBlue }
 func (AmuletOfOblationBlue) Name() string                       { return "Amulet of Oblation" }
 func (AmuletOfOblationBlue) DisplayName() string                { return "Amulet of Oblation [B]" }
+func (AmuletOfOblationBlue) Rarity() string                     { return "Rare" }
 func (AmuletOfOblationBlue) Cost() int                          { return 0 }
 func (AmuletOfOblationBlue) Pitch() int                         { return 3 }
 func (AmuletOfOblationBlue) Attack() int                        { return 0 }

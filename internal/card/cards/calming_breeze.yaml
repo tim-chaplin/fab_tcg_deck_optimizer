@@ -3,6 +3,7 @@ types:
     - Generic
     - Instant
 cost: 0
+rarity: Rare
 text: |-
     The next 3 times you would be dealt damage this turn, prevent 1 of that damage."
     The 3-event split is dropped — prevention is credited as a flat 3 against the next hit.

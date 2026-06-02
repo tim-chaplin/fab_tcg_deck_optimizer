@@ -14,6 +14,7 @@ type FerventForerunnerRed struct{}
 func (FerventForerunnerRed) ID() ids.CardID                     { return ids.FerventForerunnerRed }
 func (FerventForerunnerRed) Name() string                       { return "Fervent Forerunner" }
 func (FerventForerunnerRed) DisplayName() string                { return "Fervent Forerunner [R]" }
+func (FerventForerunnerRed) Rarity() string                     { return "Common" }
 func (FerventForerunnerRed) Cost() int                          { return 0 }
 func (FerventForerunnerRed) Pitch() int                         { return 1 }
 func (FerventForerunnerRed) Attack() int                        { return 3 }
@@ -26,6 +27,7 @@ type FerventForerunnerYellow struct{}
 func (FerventForerunnerYellow) ID() ids.CardID                     { return ids.FerventForerunnerYellow }
 func (FerventForerunnerYellow) Name() string                       { return "Fervent Forerunner" }
 func (FerventForerunnerYellow) DisplayName() string                { return "Fervent Forerunner [Y]" }
+func (FerventForerunnerYellow) Rarity() string                     { return "Common" }
 func (FerventForerunnerYellow) Cost() int                          { return 0 }
 func (FerventForerunnerYellow) Pitch() int                         { return 2 }
 func (FerventForerunnerYellow) Attack() int                        { return 2 }
@@ -38,6 +40,7 @@ type FerventForerunnerBlue struct{}
 func (FerventForerunnerBlue) ID() ids.CardID                     { return ids.FerventForerunnerBlue }
 func (FerventForerunnerBlue) Name() string                       { return "Fervent Forerunner" }
 func (FerventForerunnerBlue) DisplayName() string                { return "Fervent Forerunner [B]" }
+func (FerventForerunnerBlue) Rarity() string                     { return "Common" }
 func (FerventForerunnerBlue) Cost() int                          { return 0 }
 func (FerventForerunnerBlue) Pitch() int                         { return 3 }
 func (FerventForerunnerBlue) Attack() int                        { return 1 }

@@ -21,6 +21,7 @@ type RosettaThorn struct{}
 func (RosettaThorn) ID() ids.CardID                     { return ids.RosettaThornID }
 func (RosettaThorn) Name() string                       { return "Rosetta Thorn" }
 func (RosettaThorn) DisplayName() string                { return "Rosetta Thorn" }
+func (RosettaThorn) Rarity() string                     { return "Common" }
 func (RosettaThorn) Cost() int                          { return 0 }
 func (RosettaThorn) Pitch() int                         { return 0 }
 func (RosettaThorn) Attack() int                        { return 0 }

@@ -14,6 +14,7 @@ type SigilOfProtectionRed struct{}
 func (SigilOfProtectionRed) ID() ids.CardID                     { return ids.SigilOfProtectionRed }
 func (SigilOfProtectionRed) Name() string                       { return "Sigil of Protection" }
 func (SigilOfProtectionRed) DisplayName() string                { return "Sigil of Protection [R]" }
+func (SigilOfProtectionRed) Rarity() string                     { return "Common" }
 func (SigilOfProtectionRed) Cost() int                          { return 1 }
 func (SigilOfProtectionRed) Pitch() int                         { return 1 }
 func (SigilOfProtectionRed) Attack() int                        { return 0 }
@@ -26,6 +27,7 @@ type SigilOfProtectionYellow struct{}
 func (SigilOfProtectionYellow) ID() ids.CardID                     { return ids.SigilOfProtectionYellow }
 func (SigilOfProtectionYellow) Name() string                       { return "Sigil of Protection" }
 func (SigilOfProtectionYellow) DisplayName() string                { return "Sigil of Protection [Y]" }
+func (SigilOfProtectionYellow) Rarity() string                     { return "Common" }
 func (SigilOfProtectionYellow) Cost() int                          { return 1 }
 func (SigilOfProtectionYellow) Pitch() int                         { return 2 }
 func (SigilOfProtectionYellow) Attack() int                        { return 0 }
@@ -38,6 +40,7 @@ type SigilOfProtectionBlue struct{}
 func (SigilOfProtectionBlue) ID() ids.CardID                     { return ids.SigilOfProtectionBlue }
 func (SigilOfProtectionBlue) Name() string                       { return "Sigil of Protection" }
 func (SigilOfProtectionBlue) DisplayName() string                { return "Sigil of Protection [B]" }
+func (SigilOfProtectionBlue) Rarity() string                     { return "Common" }
 func (SigilOfProtectionBlue) Cost() int                          { return 1 }
 func (SigilOfProtectionBlue) Pitch() int                         { return 3 }
 func (SigilOfProtectionBlue) Attack() int                        { return 0 }

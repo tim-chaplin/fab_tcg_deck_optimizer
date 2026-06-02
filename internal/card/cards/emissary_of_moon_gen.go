@@ -14,6 +14,7 @@ type EmissaryOfMoonRed struct{}
 func (EmissaryOfMoonRed) ID() ids.CardID                     { return ids.EmissaryOfMoonRed }
 func (EmissaryOfMoonRed) Name() string                       { return "Emissary of Moon" }
 func (EmissaryOfMoonRed) DisplayName() string                { return "Emissary of Moon [R]" }
+func (EmissaryOfMoonRed) Rarity() string                     { return "Rare" }
 func (EmissaryOfMoonRed) Cost() int                          { return 0 }
 func (EmissaryOfMoonRed) Pitch() int                         { return 1 }
 func (EmissaryOfMoonRed) Attack() int                        { return 4 }

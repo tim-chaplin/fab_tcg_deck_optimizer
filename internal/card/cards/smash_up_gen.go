@@ -14,6 +14,7 @@ type SmashUpRed struct{}
 func (SmashUpRed) ID() ids.CardID                     { return ids.SmashUpRed }
 func (SmashUpRed) Name() string                       { return "Smash Up" }
 func (SmashUpRed) DisplayName() string                { return "Smash Up [R]" }
+func (SmashUpRed) Rarity() string                     { return "Rare" }
 func (SmashUpRed) Cost() int                          { return 1 }
 func (SmashUpRed) Pitch() int                         { return 1 }
 func (SmashUpRed) Attack() int                        { return 5 }

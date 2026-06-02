@@ -14,6 +14,7 @@ type HitTheHighNotesRed struct{}
 func (HitTheHighNotesRed) ID() ids.CardID                     { return ids.HitTheHighNotesRed }
 func (HitTheHighNotesRed) Name() string                       { return "Hit the High Notes" }
 func (HitTheHighNotesRed) DisplayName() string                { return "Hit the High Notes [R]" }
+func (HitTheHighNotesRed) Rarity() string                     { return "Common" }
 func (HitTheHighNotesRed) Cost() int                          { return 1 }
 func (HitTheHighNotesRed) Pitch() int                         { return 1 }
 func (HitTheHighNotesRed) Attack() int                        { return 4 }
@@ -26,6 +27,7 @@ type HitTheHighNotesYellow struct{}
 func (HitTheHighNotesYellow) ID() ids.CardID                     { return ids.HitTheHighNotesYellow }
 func (HitTheHighNotesYellow) Name() string                       { return "Hit the High Notes" }
 func (HitTheHighNotesYellow) DisplayName() string                { return "Hit the High Notes [Y]" }
+func (HitTheHighNotesYellow) Rarity() string                     { return "Common" }
 func (HitTheHighNotesYellow) Cost() int                          { return 1 }
 func (HitTheHighNotesYellow) Pitch() int                         { return 2 }
 func (HitTheHighNotesYellow) Attack() int                        { return 3 }
@@ -38,6 +40,7 @@ type HitTheHighNotesBlue struct{}
 func (HitTheHighNotesBlue) ID() ids.CardID                     { return ids.HitTheHighNotesBlue }
 func (HitTheHighNotesBlue) Name() string                       { return "Hit the High Notes" }
 func (HitTheHighNotesBlue) DisplayName() string                { return "Hit the High Notes [B]" }
+func (HitTheHighNotesBlue) Rarity() string                     { return "Common" }
 func (HitTheHighNotesBlue) Cost() int                          { return 1 }
 func (HitTheHighNotesBlue) Pitch() int                         { return 3 }
 func (HitTheHighNotesBlue) Attack() int                        { return 2 }

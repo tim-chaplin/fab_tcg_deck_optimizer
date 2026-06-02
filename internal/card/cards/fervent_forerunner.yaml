@@ -4,6 +4,7 @@ types:
     - Action
     - Attack
 cost: 0
+rarity: Common
 text: |-
     If Fervent Forerunner hits, **opt 2**. If Fervent Forerunner is played from arsenal, it
     gains **go again**.

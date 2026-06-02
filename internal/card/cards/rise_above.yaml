@@ -3,6 +3,7 @@ types:
     - Generic
     - DefenseReaction
 cost: 2
+rarity: Rare
 text: |-
     You may put a card from your hand on top of your deck rather than pay Rise Above's {r}
     cost.

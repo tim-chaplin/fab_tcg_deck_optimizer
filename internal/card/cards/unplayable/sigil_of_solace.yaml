@@ -3,6 +3,7 @@ types:
     - Generic
     - Instant
 cost: 0
+rarity: Rare
 markers:
     - Unplayable
 text: Gain 3{h}

@@ -3,6 +3,7 @@ types:
     - Generic
     - Action
 cost: 0
+rarity: Rare
 goAgain: true
 text: |-
     Choose 1; The next attack action card with cost N or less you play this turn gains

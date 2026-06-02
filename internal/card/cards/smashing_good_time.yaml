@@ -3,6 +3,7 @@ types:
     - Generic
     - Action
 cost: 0
+rarity: Rare
 goAgain: true
 text: |-
     The next time an attack action card hits a hero this turn, you may destroy an item they

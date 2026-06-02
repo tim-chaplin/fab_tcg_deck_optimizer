@@ -4,6 +4,7 @@ types:
     - Action
     - Item
 cost: 0
+rarity: Rare
 markers:
     - Unplayable
 text: '**Action** - Destroy this: Gain 2 action points.'

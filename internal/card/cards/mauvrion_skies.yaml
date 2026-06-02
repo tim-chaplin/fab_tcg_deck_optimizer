@@ -3,6 +3,7 @@ types:
     - Runeblade
     - Action
 cost: 0
+rarity: Rare
 goAgain: true
 text: |-
     The next Runeblade attack action card you play this turn gains go again and 'If

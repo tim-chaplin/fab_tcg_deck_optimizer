@@ -3,6 +3,7 @@ types:
     - Generic
     - DefenseReaction
 cost: 0
+rarity: Common
 text: Opt 1
 variants:
     - id: FateForeseenRed

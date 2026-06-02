@@ -3,6 +3,7 @@ types:
     - Generic
     - Action
 cost: 0
+rarity: Common
 goAgain: true
 text: Your next sword attack this turn gains +1{p}. **Go again**
 variants:

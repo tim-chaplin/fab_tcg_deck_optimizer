@@ -4,6 +4,7 @@ types:
     - Action
     - Attack
 cost: 1
+rarity: Rare
 text: Deal 2 arcane damage to target hero.
 variants:
     - id: VexingMaliceRed

@@ -14,6 +14,7 @@ type BackAlleyBreaklineRed struct{}
 func (BackAlleyBreaklineRed) ID() ids.CardID                     { return ids.BackAlleyBreaklineRed }
 func (BackAlleyBreaklineRed) Name() string                       { return "Back Alley Breakline" }
 func (BackAlleyBreaklineRed) DisplayName() string                { return "Back Alley Breakline [R]" }
+func (BackAlleyBreaklineRed) Rarity() string                     { return "Common" }
 func (BackAlleyBreaklineRed) Cost() int                          { return 1 }
 func (BackAlleyBreaklineRed) Pitch() int                         { return 1 }
 func (BackAlleyBreaklineRed) Attack() int                        { return 5 }
@@ -26,6 +27,7 @@ type BackAlleyBreaklineYellow struct{}
 func (BackAlleyBreaklineYellow) ID() ids.CardID                     { return ids.BackAlleyBreaklineYellow }
 func (BackAlleyBreaklineYellow) Name() string                       { return "Back Alley Breakline" }
 func (BackAlleyBreaklineYellow) DisplayName() string                { return "Back Alley Breakline [Y]" }
+func (BackAlleyBreaklineYellow) Rarity() string                     { return "Common" }
 func (BackAlleyBreaklineYellow) Cost() int                          { return 1 }
 func (BackAlleyBreaklineYellow) Pitch() int                         { return 2 }
 func (BackAlleyBreaklineYellow) Attack() int                        { return 4 }
@@ -38,6 +40,7 @@ type BackAlleyBreaklineBlue struct{}
 func (BackAlleyBreaklineBlue) ID() ids.CardID                     { return ids.BackAlleyBreaklineBlue }
 func (BackAlleyBreaklineBlue) Name() string                       { return "Back Alley Breakline" }
 func (BackAlleyBreaklineBlue) DisplayName() string                { return "Back Alley Breakline [B]" }
+func (BackAlleyBreaklineBlue) Rarity() string                     { return "Common" }
 func (BackAlleyBreaklineBlue) Cost() int                          { return 1 }
 func (BackAlleyBreaklineBlue) Pitch() int                         { return 3 }
 func (BackAlleyBreaklineBlue) Attack() int                        { return 3 }

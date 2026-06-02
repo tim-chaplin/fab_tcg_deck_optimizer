@@ -4,6 +4,7 @@ types:
     - Action
     - Attack
 cost: 3
+rarity: Common
 text: Amplify the Arknight costs {r} less to play for each Runechant you control.
 variants:
     - id: AmplifyTheArknightRed

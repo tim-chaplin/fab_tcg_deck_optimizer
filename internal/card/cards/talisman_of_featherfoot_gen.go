@@ -14,6 +14,7 @@ type TalismanOfFeatherfootYellow struct{}
 func (TalismanOfFeatherfootYellow) ID() ids.CardID      { return ids.TalismanOfFeatherfootYellow }
 func (TalismanOfFeatherfootYellow) Name() string        { return "Talisman of Featherfoot" }
 func (TalismanOfFeatherfootYellow) DisplayName() string { return "Talisman of Featherfoot [Y]" }
+func (TalismanOfFeatherfootYellow) Rarity() string      { return "Rare" }
 func (TalismanOfFeatherfootYellow) Cost() int           { return 0 }
 func (TalismanOfFeatherfootYellow) Pitch() int          { return 2 }
 func (TalismanOfFeatherfootYellow) Attack() int         { return 0 }

@@ -4,6 +4,7 @@ types:
     - Action
     - Attack
 cost: 3
+rarity: Common
 text: When this attacks or defends, if you have less {h} than an opposing hero, gain 1{h}.
 variants:
     - id: FyendalsFightingSpiritRed

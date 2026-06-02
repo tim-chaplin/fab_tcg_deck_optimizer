@@ -21,6 +21,7 @@ type ReapingBlade struct{}
 func (ReapingBlade) ID() ids.CardID                     { return ids.ReapingBladeID }
 func (ReapingBlade) Name() string                       { return "Reaping Blade" }
 func (ReapingBlade) DisplayName() string                { return "Reaping Blade" }
+func (ReapingBlade) Rarity() string                     { return "Rare" }
 func (ReapingBlade) Cost() int                          { return 0 }
 func (ReapingBlade) Pitch() int                         { return 0 }
 func (ReapingBlade) Attack() int                        { return 0 }

@@ -4,6 +4,7 @@ types:
     - Action
     - Attack
 cost: 1
+rarity: Common
 goAgain: true
 text: |-
     When this attacks, your next attack this combat chain with 1 or less base {p} gets +1{p}.

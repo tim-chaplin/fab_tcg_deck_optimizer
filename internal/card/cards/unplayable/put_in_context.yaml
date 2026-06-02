@@ -3,6 +3,7 @@ types:
     - Generic
     - DefenseReaction
 cost: 0
+rarity: Common
 markers:
     - Unplayable
 text: This can only defend an attack with 3 or less base {p}.

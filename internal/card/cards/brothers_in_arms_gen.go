@@ -14,6 +14,7 @@ type BrothersInArmsRed struct{}
 func (BrothersInArmsRed) ID() ids.CardID                     { return ids.BrothersInArmsRed }
 func (BrothersInArmsRed) Name() string                       { return "Brothers in Arms" }
 func (BrothersInArmsRed) DisplayName() string                { return "Brothers in Arms [R]" }
+func (BrothersInArmsRed) Rarity() string                     { return "Common" }
 func (BrothersInArmsRed) Cost() int                          { return 2 }
 func (BrothersInArmsRed) Pitch() int                         { return 1 }
 func (BrothersInArmsRed) Attack() int                        { return 6 }
@@ -26,6 +27,7 @@ type BrothersInArmsYellow struct{}
 func (BrothersInArmsYellow) ID() ids.CardID                     { return ids.BrothersInArmsYellow }
 func (BrothersInArmsYellow) Name() string                       { return "Brothers in Arms" }
 func (BrothersInArmsYellow) DisplayName() string                { return "Brothers in Arms [Y]" }
+func (BrothersInArmsYellow) Rarity() string                     { return "Common" }
 func (BrothersInArmsYellow) Cost() int                          { return 2 }
 func (BrothersInArmsYellow) Pitch() int                         { return 2 }
 func (BrothersInArmsYellow) Attack() int                        { return 5 }
@@ -38,6 +40,7 @@ type BrothersInArmsBlue struct{}
 func (BrothersInArmsBlue) ID() ids.CardID                     { return ids.BrothersInArmsBlue }
 func (BrothersInArmsBlue) Name() string                       { return "Brothers in Arms" }
 func (BrothersInArmsBlue) DisplayName() string                { return "Brothers in Arms [B]" }
+func (BrothersInArmsBlue) Rarity() string                     { return "Common" }
 func (BrothersInArmsBlue) Cost() int                          { return 2 }
 func (BrothersInArmsBlue) Pitch() int                         { return 3 }
 func (BrothersInArmsBlue) Attack() int                        { return 4 }

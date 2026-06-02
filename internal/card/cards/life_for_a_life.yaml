@@ -4,6 +4,7 @@ types:
     - Action
     - Attack
 cost: 1
+rarity: Common
 dynamicGoAgain: true
 text: |-
     When this is played, if you have less {h} than an opposing hero, it gets **go again**.

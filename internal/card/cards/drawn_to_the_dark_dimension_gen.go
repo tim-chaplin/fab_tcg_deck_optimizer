@@ -14,6 +14,7 @@ type DrawnToTheDarkDimensionRed struct{}
 func (DrawnToTheDarkDimensionRed) ID() ids.CardID      { return ids.DrawnToTheDarkDimensionRed }
 func (DrawnToTheDarkDimensionRed) Name() string        { return "Drawn to the Dark Dimension" }
 func (DrawnToTheDarkDimensionRed) DisplayName() string { return "Drawn to the Dark Dimension [R]" }
+func (DrawnToTheDarkDimensionRed) Rarity() string      { return "Common" }
 func (DrawnToTheDarkDimensionRed) Cost() int           { return 2 }
 func (DrawnToTheDarkDimensionRed) Pitch() int          { return 1 }
 func (DrawnToTheDarkDimensionRed) Attack() int         { return 3 }
@@ -28,6 +29,7 @@ type DrawnToTheDarkDimensionYellow struct{}
 func (DrawnToTheDarkDimensionYellow) ID() ids.CardID      { return ids.DrawnToTheDarkDimensionYellow }
 func (DrawnToTheDarkDimensionYellow) Name() string        { return "Drawn to the Dark Dimension" }
 func (DrawnToTheDarkDimensionYellow) DisplayName() string { return "Drawn to the Dark Dimension [Y]" }
+func (DrawnToTheDarkDimensionYellow) Rarity() string      { return "Common" }
 func (DrawnToTheDarkDimensionYellow) Cost() int           { return 2 }
 func (DrawnToTheDarkDimensionYellow) Pitch() int          { return 2 }
 func (DrawnToTheDarkDimensionYellow) Attack() int         { return 2 }
@@ -42,6 +44,7 @@ type DrawnToTheDarkDimensionBlue struct{}
 func (DrawnToTheDarkDimensionBlue) ID() ids.CardID      { return ids.DrawnToTheDarkDimensionBlue }
 func (DrawnToTheDarkDimensionBlue) Name() string        { return "Drawn to the Dark Dimension" }
 func (DrawnToTheDarkDimensionBlue) DisplayName() string { return "Drawn to the Dark Dimension [B]" }
+func (DrawnToTheDarkDimensionBlue) Rarity() string      { return "Common" }
 func (DrawnToTheDarkDimensionBlue) Cost() int           { return 2 }
 func (DrawnToTheDarkDimensionBlue) Pitch() int          { return 3 }
 func (DrawnToTheDarkDimensionBlue) Attack() int         { return 1 }

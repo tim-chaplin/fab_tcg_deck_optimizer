@@ -4,8 +4,8 @@
 //
 // A Format is consumed by internal/registry to filter the legal-card pool (ANDed with the
 // hero-pool class/talent check the registry owns) and by cmd/fabsim to scope a run and name
-// its output decks. The package is deliberately narrow: it knows only about a card's name,
-// not its behaviour, so it stays decoupled from internal/card.
+// its output decks. The package is deliberately narrow: it knows only about a card's name and
+// its printed rarity, not its behaviour, so it stays decoupled from internal/card.
 package format
 
 import (
@@ -33,8 +33,15 @@ type Format interface {
 	// DisplayName is the human-facing label used in deck headers (e.g. "Silver Age").
 	DisplayName() string
 	// IsCardLegal reports whether c is legal in this format — today, that its name is not on
-	// the format's banlist.
+	// the format's banlist. This is the name-only check; the rarity rule is IsRarityLegal,
+	// which the registry ANDs in (it has the card's printed rarity, which a banlist doesn't
+	// need). Kept separate so name-only callers — e.g. cmd/parsecarddb's banlist filter — can
+	// ask the banlist question without a rarity in hand.
 	IsCardLegal(c Card) bool
+	// IsRarityLegal reports whether a card printed at the given rarity (its lowest printed
+	// rarity — see internal/cardgen) is allowed in this format. Takes the rarity string rather
+	// than a Card because rarity lives on the generated card, not the minimal Card view.
+	IsRarityLegal(rarity string) bool
 	// BannedNames returns the card names this format bans, sorted.
 	BannedNames() []string
 }
@@ -52,6 +59,15 @@ func (silverAge) DisplayName() string { return "Silver Age" }
 func (silverAge) IsCardLegal(c Card) bool {
 	_, banned := silverAgeBanlist[c.Name()]
 	return !banned
+}
+
+// silverAgeRarities are the printed rarities Silver Age allows: a card is legal only if its
+// lowest printed rarity is one of these (so a card printed at both Majestic and Rare qualifies).
+var silverAgeRarities = map[string]bool{"Basic": true, "Common": true, "Rare": true}
+
+// IsRarityLegal reports whether rarity is Basic, Common or Rare — the Silver Age rarity rule.
+func (silverAge) IsRarityLegal(rarity string) bool {
+	return silverAgeRarities[rarity]
 }
 
 // BannedNames returns the Silver Age banned card names, sorted.

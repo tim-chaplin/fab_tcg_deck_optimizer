@@ -14,6 +14,7 @@ type StonyWoottonhogRed struct{}
 func (StonyWoottonhogRed) ID() ids.CardID                     { return ids.StonyWoottonhogRed }
 func (StonyWoottonhogRed) Name() string                       { return "Stony Woottonhog" }
 func (StonyWoottonhogRed) DisplayName() string                { return "Stony Woottonhog [R]" }
+func (StonyWoottonhogRed) Rarity() string                     { return "Common" }
 func (StonyWoottonhogRed) Cost() int                          { return 2 }
 func (StonyWoottonhogRed) Pitch() int                         { return 1 }
 func (StonyWoottonhogRed) Attack() int                        { return 6 }
@@ -26,6 +27,7 @@ type StonyWoottonhogYellow struct{}
 func (StonyWoottonhogYellow) ID() ids.CardID                     { return ids.StonyWoottonhogYellow }
 func (StonyWoottonhogYellow) Name() string                       { return "Stony Woottonhog" }
 func (StonyWoottonhogYellow) DisplayName() string                { return "Stony Woottonhog [Y]" }
+func (StonyWoottonhogYellow) Rarity() string                     { return "Common" }
 func (StonyWoottonhogYellow) Cost() int                          { return 2 }
 func (StonyWoottonhogYellow) Pitch() int                         { return 2 }
 func (StonyWoottonhogYellow) Attack() int                        { return 5 }
@@ -38,6 +40,7 @@ type StonyWoottonhogBlue struct{}
 func (StonyWoottonhogBlue) ID() ids.CardID                     { return ids.StonyWoottonhogBlue }
 func (StonyWoottonhogBlue) Name() string                       { return "Stony Woottonhog" }
 func (StonyWoottonhogBlue) DisplayName() string                { return "Stony Woottonhog [B]" }
+func (StonyWoottonhogBlue) Rarity() string                     { return "Common" }
 func (StonyWoottonhogBlue) Cost() int                          { return 2 }
 func (StonyWoottonhogBlue) Pitch() int                         { return 3 }
 func (StonyWoottonhogBlue) Attack() int                        { return 4 }

@@ -4,6 +4,7 @@ types:
     - Action
     - Attack
 cost: 2
+rarity: Common
 text: |-
     When this hits a hero, you may look at a face-down card in their arsenal or equipment
     zones.

@@ -14,6 +14,7 @@ type AmuletOfEchoesBlue struct{}
 func (AmuletOfEchoesBlue) ID() ids.CardID                     { return ids.AmuletOfEchoesBlue }
 func (AmuletOfEchoesBlue) Name() string                       { return "Amulet of Echoes" }
 func (AmuletOfEchoesBlue) DisplayName() string                { return "Amulet of Echoes [B]" }
+func (AmuletOfEchoesBlue) Rarity() string                     { return "Rare" }
 func (AmuletOfEchoesBlue) Cost() int                          { return 0 }
 func (AmuletOfEchoesBlue) Pitch() int                         { return 3 }
 func (AmuletOfEchoesBlue) Attack() int                        { return 0 }

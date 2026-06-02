@@ -14,6 +14,7 @@ type EirinasPrayerRed struct{}
 func (EirinasPrayerRed) ID() ids.CardID                     { return ids.EirinasPrayerRed }
 func (EirinasPrayerRed) Name() string                       { return "Eirina's Prayer" }
 func (EirinasPrayerRed) DisplayName() string                { return "Eirina's Prayer [R]" }
+func (EirinasPrayerRed) Rarity() string                     { return "Rare" }
 func (EirinasPrayerRed) Cost() int                          { return 1 }
 func (EirinasPrayerRed) Pitch() int                         { return 1 }
 func (EirinasPrayerRed) Attack() int                        { return 0 }
@@ -26,6 +27,7 @@ type EirinasPrayerYellow struct{}
 func (EirinasPrayerYellow) ID() ids.CardID                     { return ids.EirinasPrayerYellow }
 func (EirinasPrayerYellow) Name() string                       { return "Eirina's Prayer" }
 func (EirinasPrayerYellow) DisplayName() string                { return "Eirina's Prayer [Y]" }
+func (EirinasPrayerYellow) Rarity() string                     { return "Rare" }
 func (EirinasPrayerYellow) Cost() int                          { return 1 }
 func (EirinasPrayerYellow) Pitch() int                         { return 2 }
 func (EirinasPrayerYellow) Attack() int                        { return 0 }
@@ -38,6 +40,7 @@ type EirinasPrayerBlue struct{}
 func (EirinasPrayerBlue) ID() ids.CardID                     { return ids.EirinasPrayerBlue }
 func (EirinasPrayerBlue) Name() string                       { return "Eirina's Prayer" }
 func (EirinasPrayerBlue) DisplayName() string                { return "Eirina's Prayer [B]" }
+func (EirinasPrayerBlue) Rarity() string                     { return "Rare" }
 func (EirinasPrayerBlue) Cost() int                          { return 1 }
 func (EirinasPrayerBlue) Pitch() int                         { return 3 }
 func (EirinasPrayerBlue) Attack() int                        { return 0 }

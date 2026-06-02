@@ -3,6 +3,7 @@ types:
     - Generic
     - DefenseReaction
 cost: 0
+rarity: Common
 variants:
     - id: DodgeBlue
       pitch: 3

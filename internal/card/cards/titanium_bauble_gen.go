@@ -14,6 +14,7 @@ type TitaniumBaubleBlue struct{}
 func (TitaniumBaubleBlue) ID() ids.CardID                     { return ids.TitaniumBaubleBlue }
 func (TitaniumBaubleBlue) Name() string                       { return "Titanium Bauble" }
 func (TitaniumBaubleBlue) DisplayName() string                { return "Titanium Bauble [B]" }
+func (TitaniumBaubleBlue) Rarity() string                     { return "Common" }
 func (TitaniumBaubleBlue) Cost() int                          { return 0 }
 func (TitaniumBaubleBlue) Pitch() int                         { return 3 }
 func (TitaniumBaubleBlue) Attack() int                        { return 0 }

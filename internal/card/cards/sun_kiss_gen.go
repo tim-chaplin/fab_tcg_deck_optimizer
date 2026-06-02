@@ -14,6 +14,7 @@ type SunKissRed struct{}
 func (SunKissRed) ID() ids.CardID                     { return ids.SunKissRed }
 func (SunKissRed) Name() string                       { return "Sun Kiss" }
 func (SunKissRed) DisplayName() string                { return "Sun Kiss [R]" }
+func (SunKissRed) Rarity() string                     { return "Common" }
 func (SunKissRed) Cost() int                          { return 0 }
 func (SunKissRed) Pitch() int                         { return 1 }
 func (SunKissRed) Attack() int                        { return 0 }
@@ -26,6 +27,7 @@ type SunKissYellow struct{}
 func (SunKissYellow) ID() ids.CardID                     { return ids.SunKissYellow }
 func (SunKissYellow) Name() string                       { return "Sun Kiss" }
 func (SunKissYellow) DisplayName() string                { return "Sun Kiss [Y]" }
+func (SunKissYellow) Rarity() string                     { return "Common" }
 func (SunKissYellow) Cost() int                          { return 0 }
 func (SunKissYellow) Pitch() int                         { return 2 }
 func (SunKissYellow) Attack() int                        { return 0 }
@@ -38,6 +40,7 @@ type SunKissBlue struct{}
 func (SunKissBlue) ID() ids.CardID                     { return ids.SunKissBlue }
 func (SunKissBlue) Name() string                       { return "Sun Kiss" }
 func (SunKissBlue) DisplayName() string                { return "Sun Kiss [B]" }
+func (SunKissBlue) Rarity() string                     { return "Common" }
 func (SunKissBlue) Cost() int                          { return 0 }
 func (SunKissBlue) Pitch() int                         { return 3 }
 func (SunKissBlue) Attack() int                        { return 0 }

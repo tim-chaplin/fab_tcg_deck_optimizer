@@ -14,6 +14,7 @@ type MemorialGroundRed struct{}
 func (MemorialGroundRed) ID() ids.CardID                     { return ids.MemorialGroundRed }
 func (MemorialGroundRed) Name() string                       { return "Memorial Ground" }
 func (MemorialGroundRed) DisplayName() string                { return "Memorial Ground [R]" }
+func (MemorialGroundRed) Rarity() string                     { return "Common" }
 func (MemorialGroundRed) Cost() int                          { return 0 }
 func (MemorialGroundRed) Pitch() int                         { return 1 }
 func (MemorialGroundRed) Attack() int                        { return 0 }
@@ -26,6 +27,7 @@ type MemorialGroundYellow struct{}
 func (MemorialGroundYellow) ID() ids.CardID                     { return ids.MemorialGroundYellow }
 func (MemorialGroundYellow) Name() string                       { return "Memorial Ground" }
 func (MemorialGroundYellow) DisplayName() string                { return "Memorial Ground [Y]" }
+func (MemorialGroundYellow) Rarity() string                     { return "Common" }
 func (MemorialGroundYellow) Cost() int                          { return 0 }
 func (MemorialGroundYellow) Pitch() int                         { return 2 }
 func (MemorialGroundYellow) Attack() int                        { return 0 }
@@ -38,6 +40,7 @@ type MemorialGroundBlue struct{}
 func (MemorialGroundBlue) ID() ids.CardID                     { return ids.MemorialGroundBlue }
 func (MemorialGroundBlue) Name() string                       { return "Memorial Ground" }
 func (MemorialGroundBlue) DisplayName() string                { return "Memorial Ground [B]" }
+func (MemorialGroundBlue) Rarity() string                     { return "Common" }
 func (MemorialGroundBlue) Cost() int                          { return 0 }
 func (MemorialGroundBlue) Pitch() int                         { return 3 }
 func (MemorialGroundBlue) Attack() int                        { return 0 }

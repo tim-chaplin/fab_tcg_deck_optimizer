@@ -4,6 +4,7 @@ types:
     - Action
     - Attack
 cost: 3
+rarity: Rare
 text: If you've played or created an aura this turn, this gets **overpower**.
 variants:
     - id: VantagePointRed

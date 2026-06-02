@@ -3,6 +3,7 @@ types:
     - Generic
     - Instant
 cost: 0
+rarity: Common
 text: |-
     Gain 1{h} If you've been dealt arcane damage this turn, instead gain N{h}."
     (Red N=4, Yellow N=3, Blue N=2.)

@@ -4,6 +4,7 @@ types:
     - Action
     - Attack
 cost: 2
+rarity: Common
 text: |-
     As an additional cost to play Demolition Crew, reveal a card in your hand with cost 2 or
     greater. **Dominate**

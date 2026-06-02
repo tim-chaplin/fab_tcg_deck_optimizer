@@ -4,6 +4,7 @@ types:
     - Action
     - Attack
 cost: 1
+rarity: Common
 text: When you attack with Singeing Steelblade, deal 1 arcane damage to target hero.
 variants:
     - id: SingeingSteelbladeRed

@@ -3,6 +3,7 @@ types:
     - Generic
     - Action
 cost: 1
+rarity: Rare
 goAgain: true
 text: |-
     Put an action card with cost 2 or less from a graveyard on the bottom of its owner's deck.

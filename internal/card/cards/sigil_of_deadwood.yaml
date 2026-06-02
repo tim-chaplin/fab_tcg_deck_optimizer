@@ -4,6 +4,7 @@ types:
     - Action
     - Aura
 cost: 0
+rarity: Common
 goAgain: true
 text: |-
     Go again. At the beginning of your action phase, destroy this. When this leaves the

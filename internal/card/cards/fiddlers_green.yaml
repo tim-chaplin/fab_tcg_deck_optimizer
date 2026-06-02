@@ -3,6 +3,7 @@ types:
     - Generic
     - DefenseReaction
 cost: 0
+rarity: Rare
 text: |-
     When this is put into your graveyard from anywhere, gain N{h}." (N is the printed
     variant value above.)

@@ -3,6 +3,7 @@ types:
     - Generic
     - Instant
 cost: 0
+rarity: Rare
 text: Target defending attack action card gains +4{d}.
 variants:
     - id: ReinforceTheLineRed

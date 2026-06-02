@@ -4,6 +4,7 @@ types:
     - Action
     - Attack
 cost: 0
+rarity: Common
 text: '**Dominate** If Overload hits, it gains **go again**.'
 variants:
     - id: OverloadRed

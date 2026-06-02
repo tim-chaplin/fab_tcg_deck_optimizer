@@ -14,6 +14,7 @@ type CashInYellow struct{}
 func (CashInYellow) ID() ids.CardID                     { return ids.CashInYellow }
 func (CashInYellow) Name() string                       { return "Cash In" }
 func (CashInYellow) DisplayName() string                { return "Cash In [Y]" }
+func (CashInYellow) Rarity() string                     { return "Rare" }
 func (CashInYellow) Cost() int                          { return 4 }
 func (CashInYellow) Pitch() int                         { return 2 }
 func (CashInYellow) Attack() int                        { return 0 }

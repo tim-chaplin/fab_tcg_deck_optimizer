@@ -14,6 +14,7 @@ type PursueToThePitsOfDespairRed struct{}
 func (PursueToThePitsOfDespairRed) ID() ids.CardID      { return ids.PursueToThePitsOfDespairRed }
 func (PursueToThePitsOfDespairRed) Name() string        { return "Pursue to the Pits of Despair" }
 func (PursueToThePitsOfDespairRed) DisplayName() string { return "Pursue to the Pits of Despair [R]" }
+func (PursueToThePitsOfDespairRed) Rarity() string      { return "Rare" }
 func (PursueToThePitsOfDespairRed) Cost() int           { return 1 }
 func (PursueToThePitsOfDespairRed) Pitch() int          { return 1 }
 func (PursueToThePitsOfDespairRed) Attack() int         { return 5 }

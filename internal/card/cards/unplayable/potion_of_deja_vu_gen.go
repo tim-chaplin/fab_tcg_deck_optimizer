@@ -14,6 +14,7 @@ type PotionOfDejaVuBlue struct{}
 func (PotionOfDejaVuBlue) ID() ids.CardID                     { return ids.PotionOfDejaVuBlue }
 func (PotionOfDejaVuBlue) Name() string                       { return "Potion of Déjà Vu" }
 func (PotionOfDejaVuBlue) DisplayName() string                { return "Potion of Déjà Vu [B]" }
+func (PotionOfDejaVuBlue) Rarity() string                     { return "Rare" }
 func (PotionOfDejaVuBlue) Cost() int                          { return 0 }
 func (PotionOfDejaVuBlue) Pitch() int                         { return 3 }
 func (PotionOfDejaVuBlue) Attack() int                        { return 0 }

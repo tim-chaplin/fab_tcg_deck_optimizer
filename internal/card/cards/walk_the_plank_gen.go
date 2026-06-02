@@ -14,6 +14,7 @@ type WalkThePlankRed struct{}
 func (WalkThePlankRed) ID() ids.CardID                     { return ids.WalkThePlankRed }
 func (WalkThePlankRed) Name() string                       { return "Walk the Plank" }
 func (WalkThePlankRed) DisplayName() string                { return "Walk the Plank [R]" }
+func (WalkThePlankRed) Rarity() string                     { return "Common" }
 func (WalkThePlankRed) Cost() int                          { return 3 }
 func (WalkThePlankRed) Pitch() int                         { return 1 }
 func (WalkThePlankRed) Attack() int                        { return 7 }
@@ -26,6 +27,7 @@ type WalkThePlankYellow struct{}
 func (WalkThePlankYellow) ID() ids.CardID                     { return ids.WalkThePlankYellow }
 func (WalkThePlankYellow) Name() string                       { return "Walk the Plank" }
 func (WalkThePlankYellow) DisplayName() string                { return "Walk the Plank [Y]" }
+func (WalkThePlankYellow) Rarity() string                     { return "Common" }
 func (WalkThePlankYellow) Cost() int                          { return 3 }
 func (WalkThePlankYellow) Pitch() int                         { return 2 }
 func (WalkThePlankYellow) Attack() int                        { return 6 }
@@ -38,6 +40,7 @@ type WalkThePlankBlue struct{}
 func (WalkThePlankBlue) ID() ids.CardID                     { return ids.WalkThePlankBlue }
 func (WalkThePlankBlue) Name() string                       { return "Walk the Plank" }
 func (WalkThePlankBlue) DisplayName() string                { return "Walk the Plank [B]" }
+func (WalkThePlankBlue) Rarity() string                     { return "Common" }
 func (WalkThePlankBlue) Cost() int                          { return 3 }
 func (WalkThePlankBlue) Pitch() int                         { return 3 }
 func (WalkThePlankBlue) Attack() int                        { return 5 }

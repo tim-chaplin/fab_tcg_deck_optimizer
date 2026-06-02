@@ -3,6 +3,7 @@ types:
     - Generic
     - AttackReaction
 cost: 0
+rarity: Common
 text: Target attack action card gains +1{p}.
 variants:
     - id: LungingPressBlue

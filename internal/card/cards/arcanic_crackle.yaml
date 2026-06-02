@@ -4,6 +4,7 @@ types:
     - Action
     - Attack
 cost: 0
+rarity: Common
 text: Deal 1 arcane damage to target hero.
 variants:
     - id: ArcanicCrackleRed

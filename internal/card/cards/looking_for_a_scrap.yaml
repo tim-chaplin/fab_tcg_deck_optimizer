@@ -4,6 +4,7 @@ types:
     - Action
     - Attack
 cost: 1
+rarity: Rare
 text: |-
     As an additional cost to play Looking for a Scrap, you may banish a card with 1{p} from
     your graveyard. When you do, this gains +1{p} and **go again**.

@@ -14,6 +14,7 @@ type FactFindingMissionRed struct{}
 func (FactFindingMissionRed) ID() ids.CardID                     { return ids.FactFindingMissionRed }
 func (FactFindingMissionRed) Name() string                       { return "Fact-Finding Mission" }
 func (FactFindingMissionRed) DisplayName() string                { return "Fact-Finding Mission [R]" }
+func (FactFindingMissionRed) Rarity() string                     { return "Common" }
 func (FactFindingMissionRed) Cost() int                          { return 2 }
 func (FactFindingMissionRed) Pitch() int                         { return 1 }
 func (FactFindingMissionRed) Attack() int                        { return 6 }
@@ -26,6 +27,7 @@ type FactFindingMissionYellow struct{}
 func (FactFindingMissionYellow) ID() ids.CardID                     { return ids.FactFindingMissionYellow }
 func (FactFindingMissionYellow) Name() string                       { return "Fact-Finding Mission" }
 func (FactFindingMissionYellow) DisplayName() string                { return "Fact-Finding Mission [Y]" }
+func (FactFindingMissionYellow) Rarity() string                     { return "Common" }
 func (FactFindingMissionYellow) Cost() int                          { return 2 }
 func (FactFindingMissionYellow) Pitch() int                         { return 2 }
 func (FactFindingMissionYellow) Attack() int                        { return 5 }
@@ -38,6 +40,7 @@ type FactFindingMissionBlue struct{}
 func (FactFindingMissionBlue) ID() ids.CardID                     { return ids.FactFindingMissionBlue }
 func (FactFindingMissionBlue) Name() string                       { return "Fact-Finding Mission" }
 func (FactFindingMissionBlue) DisplayName() string                { return "Fact-Finding Mission [B]" }
+func (FactFindingMissionBlue) Rarity() string                     { return "Common" }
 func (FactFindingMissionBlue) Cost() int                          { return 2 }
 func (FactFindingMissionBlue) Pitch() int                         { return 3 }
 func (FactFindingMissionBlue) Attack() int                        { return 4 }

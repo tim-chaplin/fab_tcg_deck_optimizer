@@ -4,6 +4,7 @@ types:
     - Action
     - Attack
 cost: 3
+rarity: Common
 text: When this hits a Pirate hero, {t} them or an ally they control.
 variants:
     - id: WalkThePlankRed

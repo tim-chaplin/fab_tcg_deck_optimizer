@@ -4,6 +4,7 @@ types:
     - Action
     - Attack
 cost: 1
+rarity: Common
 goAgain: true
 text: If Brandish hits, your next weapon attack this turn gains +1{p}. **Go again**
 variants:

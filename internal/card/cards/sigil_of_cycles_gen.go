@@ -14,6 +14,7 @@ type SigilOfCyclesBlue struct{}
 func (SigilOfCyclesBlue) ID() ids.CardID                     { return ids.SigilOfCyclesBlue }
 func (SigilOfCyclesBlue) Name() string                       { return "Sigil of Cycles" }
 func (SigilOfCyclesBlue) DisplayName() string                { return "Sigil of Cycles [B]" }
+func (SigilOfCyclesBlue) Rarity() string                     { return "Rare" }
 func (SigilOfCyclesBlue) Cost() int                          { return 0 }
 func (SigilOfCyclesBlue) Pitch() int                         { return 3 }
 func (SigilOfCyclesBlue) Attack() int                        { return 0 }

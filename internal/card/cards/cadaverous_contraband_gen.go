@@ -14,6 +14,7 @@ type CadaverousContrabandRed struct{}
 func (CadaverousContrabandRed) ID() ids.CardID                     { return ids.CadaverousContrabandRed }
 func (CadaverousContrabandRed) Name() string                       { return "Cadaverous Contraband" }
 func (CadaverousContrabandRed) DisplayName() string                { return "Cadaverous Contraband [R]" }
+func (CadaverousContrabandRed) Rarity() string                     { return "Common" }
 func (CadaverousContrabandRed) Cost() int                          { return 2 }
 func (CadaverousContrabandRed) Pitch() int                         { return 1 }
 func (CadaverousContrabandRed) Attack() int                        { return 6 }
@@ -26,6 +27,7 @@ type CadaverousContrabandYellow struct{}
 func (CadaverousContrabandYellow) ID() ids.CardID      { return ids.CadaverousContrabandYellow }
 func (CadaverousContrabandYellow) Name() string        { return "Cadaverous Contraband" }
 func (CadaverousContrabandYellow) DisplayName() string { return "Cadaverous Contraband [Y]" }
+func (CadaverousContrabandYellow) Rarity() string      { return "Common" }
 func (CadaverousContrabandYellow) Cost() int           { return 2 }
 func (CadaverousContrabandYellow) Pitch() int          { return 2 }
 func (CadaverousContrabandYellow) Attack() int         { return 5 }
@@ -40,6 +42,7 @@ type CadaverousContrabandBlue struct{}
 func (CadaverousContrabandBlue) ID() ids.CardID                     { return ids.CadaverousContrabandBlue }
 func (CadaverousContrabandBlue) Name() string                       { return "Cadaverous Contraband" }
 func (CadaverousContrabandBlue) DisplayName() string                { return "Cadaverous Contraband [B]" }
+func (CadaverousContrabandBlue) Rarity() string                     { return "Common" }
 func (CadaverousContrabandBlue) Cost() int                          { return 2 }
 func (CadaverousContrabandBlue) Pitch() int                         { return 3 }
 func (CadaverousContrabandBlue) Attack() int                        { return 4 }

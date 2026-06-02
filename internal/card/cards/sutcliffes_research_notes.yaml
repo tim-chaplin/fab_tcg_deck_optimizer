@@ -3,6 +3,7 @@ types:
     - Runeblade
     - Action
 cost: 1
+rarity: Common
 goAgain: true
 text: |-
     Reveal the top N cards of your deck. Create a Runechant token for each Runeblade attack

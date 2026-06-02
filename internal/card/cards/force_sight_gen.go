@@ -14,6 +14,7 @@ type ForceSightRed struct{}
 func (ForceSightRed) ID() ids.CardID                     { return ids.ForceSightRed }
 func (ForceSightRed) Name() string                       { return "Force Sight" }
 func (ForceSightRed) DisplayName() string                { return "Force Sight [R]" }
+func (ForceSightRed) Rarity() string                     { return "Common" }
 func (ForceSightRed) Cost() int                          { return 1 }
 func (ForceSightRed) Pitch() int                         { return 1 }
 func (ForceSightRed) Attack() int                        { return 0 }
@@ -26,6 +27,7 @@ type ForceSightYellow struct{}
 func (ForceSightYellow) ID() ids.CardID                     { return ids.ForceSightYellow }
 func (ForceSightYellow) Name() string                       { return "Force Sight" }
 func (ForceSightYellow) DisplayName() string                { return "Force Sight [Y]" }
+func (ForceSightYellow) Rarity() string                     { return "Common" }
 func (ForceSightYellow) Cost() int                          { return 1 }
 func (ForceSightYellow) Pitch() int                         { return 2 }
 func (ForceSightYellow) Attack() int                        { return 0 }
@@ -38,6 +40,7 @@ type ForceSightBlue struct{}
 func (ForceSightBlue) ID() ids.CardID                     { return ids.ForceSightBlue }
 func (ForceSightBlue) Name() string                       { return "Force Sight" }
 func (ForceSightBlue) DisplayName() string                { return "Force Sight [B]" }
+func (ForceSightBlue) Rarity() string                     { return "Common" }
 func (ForceSightBlue) Cost() int                          { return 1 }
 func (ForceSightBlue) Pitch() int                         { return 3 }
 func (ForceSightBlue) Attack() int                        { return 0 }

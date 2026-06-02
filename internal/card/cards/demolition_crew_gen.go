@@ -14,6 +14,7 @@ type DemolitionCrewRed struct{}
 func (DemolitionCrewRed) ID() ids.CardID                     { return ids.DemolitionCrewRed }
 func (DemolitionCrewRed) Name() string                       { return "Demolition Crew" }
 func (DemolitionCrewRed) DisplayName() string                { return "Demolition Crew [R]" }
+func (DemolitionCrewRed) Rarity() string                     { return "Common" }
 func (DemolitionCrewRed) Cost() int                          { return 2 }
 func (DemolitionCrewRed) Pitch() int                         { return 1 }
 func (DemolitionCrewRed) Attack() int                        { return 6 }
@@ -26,6 +27,7 @@ type DemolitionCrewYellow struct{}
 func (DemolitionCrewYellow) ID() ids.CardID                     { return ids.DemolitionCrewYellow }
 func (DemolitionCrewYellow) Name() string                       { return "Demolition Crew" }
 func (DemolitionCrewYellow) DisplayName() string                { return "Demolition Crew [Y]" }
+func (DemolitionCrewYellow) Rarity() string                     { return "Common" }
 func (DemolitionCrewYellow) Cost() int                          { return 2 }
 func (DemolitionCrewYellow) Pitch() int                         { return 2 }
 func (DemolitionCrewYellow) Attack() int                        { return 5 }
@@ -38,6 +40,7 @@ type DemolitionCrewBlue struct{}
 func (DemolitionCrewBlue) ID() ids.CardID                     { return ids.DemolitionCrewBlue }
 func (DemolitionCrewBlue) Name() string                       { return "Demolition Crew" }
 func (DemolitionCrewBlue) DisplayName() string                { return "Demolition Crew [B]" }
+func (DemolitionCrewBlue) Rarity() string                     { return "Common" }
 func (DemolitionCrewBlue) Cost() int                          { return 2 }
 func (DemolitionCrewBlue) Pitch() int                         { return 3 }
 func (DemolitionCrewBlue) Attack() int                        { return 4 }

@@ -14,6 +14,7 @@ type TradeInRed struct{}
 func (TradeInRed) ID() ids.CardID                     { return ids.TradeInRed }
 func (TradeInRed) Name() string                       { return "Trade In" }
 func (TradeInRed) DisplayName() string                { return "Trade In [R]" }
+func (TradeInRed) Rarity() string                     { return "Common" }
 func (TradeInRed) Cost() int                          { return 0 }
 func (TradeInRed) Pitch() int                         { return 1 }
 func (TradeInRed) Attack() int                        { return 3 }
@@ -26,6 +27,7 @@ type TradeInYellow struct{}
 func (TradeInYellow) ID() ids.CardID                     { return ids.TradeInYellow }
 func (TradeInYellow) Name() string                       { return "Trade In" }
 func (TradeInYellow) DisplayName() string                { return "Trade In [Y]" }
+func (TradeInYellow) Rarity() string                     { return "Common" }
 func (TradeInYellow) Cost() int                          { return 0 }
 func (TradeInYellow) Pitch() int                         { return 2 }
 func (TradeInYellow) Attack() int                        { return 2 }
@@ -38,6 +40,7 @@ type TradeInBlue struct{}
 func (TradeInBlue) ID() ids.CardID                     { return ids.TradeInBlue }
 func (TradeInBlue) Name() string                       { return "Trade In" }
 func (TradeInBlue) DisplayName() string                { return "Trade In [B]" }
+func (TradeInBlue) Rarity() string                     { return "Common" }
 func (TradeInBlue) Cost() int                          { return 0 }
 func (TradeInBlue) Pitch() int                         { return 3 }
 func (TradeInBlue) Attack() int                        { return 1 }

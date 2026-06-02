@@ -4,6 +4,7 @@ types:
     - Action
     - Attack
 cost: 2
+rarity: Common
 text: When you play this, if you have less {h} than an opposing hero, this gets +3{p}.
 variants:
     - id: AdrenalineRushRed

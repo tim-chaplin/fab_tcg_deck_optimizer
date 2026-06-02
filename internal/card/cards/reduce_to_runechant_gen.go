@@ -14,6 +14,7 @@ type ReduceToRunechantRed struct{}
 func (ReduceToRunechantRed) ID() ids.CardID                     { return ids.ReduceToRunechantRed }
 func (ReduceToRunechantRed) Name() string                       { return "Reduce to Runechant" }
 func (ReduceToRunechantRed) DisplayName() string                { return "Reduce to Runechant [R]" }
+func (ReduceToRunechantRed) Rarity() string                     { return "Rare" }
 func (ReduceToRunechantRed) Cost() int                          { return 1 }
 func (ReduceToRunechantRed) Pitch() int                         { return 1 }
 func (ReduceToRunechantRed) Attack() int                        { return 0 }
@@ -26,6 +27,7 @@ type ReduceToRunechantYellow struct{}
 func (ReduceToRunechantYellow) ID() ids.CardID                     { return ids.ReduceToRunechantYellow }
 func (ReduceToRunechantYellow) Name() string                       { return "Reduce to Runechant" }
 func (ReduceToRunechantYellow) DisplayName() string                { return "Reduce to Runechant [Y]" }
+func (ReduceToRunechantYellow) Rarity() string                     { return "Rare" }
 func (ReduceToRunechantYellow) Cost() int                          { return 1 }
 func (ReduceToRunechantYellow) Pitch() int                         { return 2 }
 func (ReduceToRunechantYellow) Attack() int                        { return 0 }
@@ -38,6 +40,7 @@ type ReduceToRunechantBlue struct{}
 func (ReduceToRunechantBlue) ID() ids.CardID                     { return ids.ReduceToRunechantBlue }
 func (ReduceToRunechantBlue) Name() string                       { return "Reduce to Runechant" }
 func (ReduceToRunechantBlue) DisplayName() string                { return "Reduce to Runechant [B]" }
+func (ReduceToRunechantBlue) Rarity() string                     { return "Rare" }
 func (ReduceToRunechantBlue) Cost() int                          { return 1 }
 func (ReduceToRunechantBlue) Pitch() int                         { return 3 }
 func (ReduceToRunechantBlue) Attack() int                        { return 0 }

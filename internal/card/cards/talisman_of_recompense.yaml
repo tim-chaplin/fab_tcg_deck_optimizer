@@ -4,6 +4,7 @@ types:
     - Action
     - Item
 cost: 0
+rarity: Rare
 goAgain: true
 text: |-
     **Go again** Whenever you pitch a card, if you would gain exactly one {r}, instead destroy

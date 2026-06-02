@@ -14,6 +14,7 @@ type TalismanOfRecompenseYellow struct{}
 func (TalismanOfRecompenseYellow) ID() ids.CardID      { return ids.TalismanOfRecompenseYellow }
 func (TalismanOfRecompenseYellow) Name() string        { return "Talisman of Recompense" }
 func (TalismanOfRecompenseYellow) DisplayName() string { return "Talisman of Recompense [Y]" }
+func (TalismanOfRecompenseYellow) Rarity() string      { return "Rare" }
 func (TalismanOfRecompenseYellow) Cost() int           { return 0 }
 func (TalismanOfRecompenseYellow) Pitch() int          { return 2 }
 func (TalismanOfRecompenseYellow) Attack() int         { return 0 }

@@ -3,6 +3,7 @@ types:
     - Generic
     - Action
 cost: 2
+rarity: Common
 goAgain: true
 text: |-
     The next attack action card you play this turn gets +N{p}. **The crowd cheers** each

@@ -3,6 +3,7 @@ types:
     - Generic
     - Instant
 cost: 1
+rarity: Common
 variants:
     - id: OasisRespiteRed
       pitch: 1

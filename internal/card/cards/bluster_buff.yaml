@@ -4,6 +4,7 @@ types:
     - Action
     - Attack
 cost: 1
+rarity: Rare
 text: When this attacks, it gets -1{p} unless you pay {r}.
 variants:
     - id: BlusterBuffRed

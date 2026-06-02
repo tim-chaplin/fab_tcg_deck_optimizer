@@ -14,6 +14,7 @@ type StrategicPlanningRed struct{}
 func (StrategicPlanningRed) ID() ids.CardID                     { return ids.StrategicPlanningRed }
 func (StrategicPlanningRed) Name() string                       { return "Strategic Planning" }
 func (StrategicPlanningRed) DisplayName() string                { return "Strategic Planning [R]" }
+func (StrategicPlanningRed) Rarity() string                     { return "Rare" }
 func (StrategicPlanningRed) Cost() int                          { return 1 }
 func (StrategicPlanningRed) Pitch() int                         { return 1 }
 func (StrategicPlanningRed) Attack() int                        { return 0 }
@@ -26,6 +27,7 @@ type StrategicPlanningYellow struct{}
 func (StrategicPlanningYellow) ID() ids.CardID                     { return ids.StrategicPlanningYellow }
 func (StrategicPlanningYellow) Name() string                       { return "Strategic Planning" }
 func (StrategicPlanningYellow) DisplayName() string                { return "Strategic Planning [Y]" }
+func (StrategicPlanningYellow) Rarity() string                     { return "Rare" }
 func (StrategicPlanningYellow) Cost() int                          { return 1 }
 func (StrategicPlanningYellow) Pitch() int                         { return 2 }
 func (StrategicPlanningYellow) Attack() int                        { return 0 }
@@ -38,6 +40,7 @@ type StrategicPlanningBlue struct{}
 func (StrategicPlanningBlue) ID() ids.CardID                     { return ids.StrategicPlanningBlue }
 func (StrategicPlanningBlue) Name() string                       { return "Strategic Planning" }
 func (StrategicPlanningBlue) DisplayName() string                { return "Strategic Planning [B]" }
+func (StrategicPlanningBlue) Rarity() string                     { return "Rare" }
 func (StrategicPlanningBlue) Cost() int                          { return 1 }
 func (StrategicPlanningBlue) Pitch() int                         { return 3 }
 func (StrategicPlanningBlue) Attack() int                        { return 0 }

@@ -4,6 +4,7 @@ types:
     - Action
     - Attack
 cost: 1
+rarity: Common
 text: Create a Runechant token.
 variants:
     - id: SpellbladeStrikeRed

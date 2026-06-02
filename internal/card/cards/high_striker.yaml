@@ -3,6 +3,7 @@ types:
     - Generic
     - Action
 cost: 0
+rarity: Rare
 goAgain: true
 text: |-
     The next time an attack you control hits this turn, create N Copper tokens.

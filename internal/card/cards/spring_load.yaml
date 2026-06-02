@@ -4,6 +4,7 @@ types:
     - Action
     - Attack
 cost: 1
+rarity: Common
 text: When this attacks, if you have no cards in hand, it gains +3{p}.
 variants:
     - id: SpringLoadRed

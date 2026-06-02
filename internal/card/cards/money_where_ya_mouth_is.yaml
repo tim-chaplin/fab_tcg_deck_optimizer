@@ -3,6 +3,7 @@ types:
     - Generic
     - Action
 cost: 1
+rarity: Common
 goAgain: true
 text: |-
     Your next attack this turn gets +N{p} and "When this attacks a hero, you may

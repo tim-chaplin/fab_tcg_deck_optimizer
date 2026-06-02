@@ -4,6 +4,7 @@ types:
     - Action
     - Attack
 cost: 0
+rarity: Rare
 text: |-
     When this attacks a hero, if you control a Frailty token, create a Frailty token under
     their control, then repeat for Inertia and Bloodrot Pox.

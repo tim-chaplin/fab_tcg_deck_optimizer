@@ -3,6 +3,7 @@ types:
     - Generic
     - Action
 cost: 1
+rarity: Rare
 goAgain: true
 text: |-
     Your next attack this turn gets +3{p}. You may destroy an Inertia token you control. If

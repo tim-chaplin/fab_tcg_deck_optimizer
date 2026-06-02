@@ -14,6 +14,7 @@ type CutDownToSizeRed struct{}
 func (CutDownToSizeRed) ID() ids.CardID                     { return ids.CutDownToSizeRed }
 func (CutDownToSizeRed) Name() string                       { return "Cut Down to Size" }
 func (CutDownToSizeRed) DisplayName() string                { return "Cut Down to Size [R]" }
+func (CutDownToSizeRed) Rarity() string                     { return "Common" }
 func (CutDownToSizeRed) Cost() int                          { return 2 }
 func (CutDownToSizeRed) Pitch() int                         { return 1 }
 func (CutDownToSizeRed) Attack() int                        { return 6 }
@@ -26,6 +27,7 @@ type CutDownToSizeYellow struct{}
 func (CutDownToSizeYellow) ID() ids.CardID                     { return ids.CutDownToSizeYellow }
 func (CutDownToSizeYellow) Name() string                       { return "Cut Down to Size" }
 func (CutDownToSizeYellow) DisplayName() string                { return "Cut Down to Size [Y]" }
+func (CutDownToSizeYellow) Rarity() string                     { return "Common" }
 func (CutDownToSizeYellow) Cost() int                          { return 2 }
 func (CutDownToSizeYellow) Pitch() int                         { return 2 }
 func (CutDownToSizeYellow) Attack() int                        { return 5 }
@@ -38,6 +40,7 @@ type CutDownToSizeBlue struct{}
 func (CutDownToSizeBlue) ID() ids.CardID                     { return ids.CutDownToSizeBlue }
 func (CutDownToSizeBlue) Name() string                       { return "Cut Down to Size" }
 func (CutDownToSizeBlue) DisplayName() string                { return "Cut Down to Size [B]" }
+func (CutDownToSizeBlue) Rarity() string                     { return "Common" }
 func (CutDownToSizeBlue) Cost() int                          { return 2 }
 func (CutDownToSizeBlue) Pitch() int                         { return 3 }
 func (CutDownToSizeBlue) Attack() int                        { return 4 }

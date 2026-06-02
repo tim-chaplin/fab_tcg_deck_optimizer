@@ -4,6 +4,7 @@ types:
     - Action
     - Attack
 cost: 0
+rarity: Common
 text: |-
     When this attacks, you may discard a card. If you do, draw a card. If this was played from
     arsenal, it gains **go again**.

@@ -3,6 +3,7 @@ types:
     - Generic
     - Instant
 cost: 0
+rarity: Common
 text: |-
     Put target attack action card with cost 2 or less from your graveyard on top of your
     deck.

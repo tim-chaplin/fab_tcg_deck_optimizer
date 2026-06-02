@@ -32,6 +32,21 @@ func TestSilverAgeIsCardLegal_Legal(t *testing.T) {
 	}
 }
 
+// TestSilverAgeIsRarityLegal checks the rarity rule: Basic/Common/Rare are legal, everything
+// rarer (and the empty string) is not.
+func TestSilverAgeIsRarityLegal(t *testing.T) {
+	for _, r := range []string{"Basic", "Common", "Rare"} {
+		if !SilverAge.IsRarityLegal(r) {
+			t.Errorf("IsRarityLegal(%q) = false, want true", r)
+		}
+	}
+	for _, r := range []string{"Super Rare", "Majestic", "Legendary", "Promo", ""} {
+		if SilverAge.IsRarityLegal(r) {
+			t.Errorf("IsRarityLegal(%q) = true, want false", r)
+		}
+	}
+}
+
 // TestBannedNames checks the banlist accessor returns sorted names including a known ban and
 // excluding a legal card.
 func TestBannedNames(t *testing.T) {

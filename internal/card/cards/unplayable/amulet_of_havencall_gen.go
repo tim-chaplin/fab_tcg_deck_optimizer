@@ -14,6 +14,7 @@ type AmuletOfHavencallBlue struct{}
 func (AmuletOfHavencallBlue) ID() ids.CardID                     { return ids.AmuletOfHavencallBlue }
 func (AmuletOfHavencallBlue) Name() string                       { return "Amulet of Havencall" }
 func (AmuletOfHavencallBlue) DisplayName() string                { return "Amulet of Havencall [B]" }
+func (AmuletOfHavencallBlue) Rarity() string                     { return "Rare" }
 func (AmuletOfHavencallBlue) Cost() int                          { return 0 }
 func (AmuletOfHavencallBlue) Pitch() int                         { return 3 }
 func (AmuletOfHavencallBlue) Attack() int                        { return 0 }

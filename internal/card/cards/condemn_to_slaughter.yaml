@@ -3,6 +3,7 @@ types:
     - Runeblade
     - Action
 cost: 1
+rarity: Rare
 goAgain: true
 text: |-
     Your next Runeblade attack this turn gets +N{p}. You may destroy an aura you control. If

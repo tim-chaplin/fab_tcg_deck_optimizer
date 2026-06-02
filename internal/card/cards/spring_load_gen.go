@@ -14,6 +14,7 @@ type SpringLoadRed struct{}
 func (SpringLoadRed) ID() ids.CardID                     { return ids.SpringLoadRed }
 func (SpringLoadRed) Name() string                       { return "Spring Load" }
 func (SpringLoadRed) DisplayName() string                { return "Spring Load [R]" }
+func (SpringLoadRed) Rarity() string                     { return "Common" }
 func (SpringLoadRed) Cost() int                          { return 1 }
 func (SpringLoadRed) Pitch() int                         { return 1 }
 func (SpringLoadRed) Attack() int                        { return 2 }
@@ -26,6 +27,7 @@ type SpringLoadYellow struct{}
 func (SpringLoadYellow) ID() ids.CardID                     { return ids.SpringLoadYellow }
 func (SpringLoadYellow) Name() string                       { return "Spring Load" }
 func (SpringLoadYellow) DisplayName() string                { return "Spring Load [Y]" }
+func (SpringLoadYellow) Rarity() string                     { return "Common" }
 func (SpringLoadYellow) Cost() int                          { return 1 }
 func (SpringLoadYellow) Pitch() int                         { return 2 }
 func (SpringLoadYellow) Attack() int                        { return 2 }
@@ -38,6 +40,7 @@ type SpringLoadBlue struct{}
 func (SpringLoadBlue) ID() ids.CardID                     { return ids.SpringLoadBlue }
 func (SpringLoadBlue) Name() string                       { return "Spring Load" }
 func (SpringLoadBlue) DisplayName() string                { return "Spring Load [B]" }
+func (SpringLoadBlue) Rarity() string                     { return "Common" }
 func (SpringLoadBlue) Cost() int                          { return 1 }
 func (SpringLoadBlue) Pitch() int                         { return 3 }
 func (SpringLoadBlue) Attack() int                        { return 2 }

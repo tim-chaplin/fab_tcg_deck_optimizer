@@ -14,6 +14,7 @@ type MuscleMuttYellow struct{}
 func (MuscleMuttYellow) ID() ids.CardID                     { return ids.MuscleMuttYellow }
 func (MuscleMuttYellow) Name() string                       { return "Muscle Mutt" }
 func (MuscleMuttYellow) DisplayName() string                { return "Muscle Mutt [Y]" }
+func (MuscleMuttYellow) Rarity() string                     { return "Common" }
 func (MuscleMuttYellow) Cost() int                          { return 3 }
 func (MuscleMuttYellow) Pitch() int                         { return 2 }
 func (MuscleMuttYellow) Attack() int                        { return 6 }

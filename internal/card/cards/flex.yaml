@@ -4,6 +4,7 @@ types:
     - Action
     - Attack
 cost: 0
+rarity: Rare
 text: When you attack or defend with Flex, you may pay {r}{r}. If you do, it gains +2{p}.
 variants:
     - id: FlexRed

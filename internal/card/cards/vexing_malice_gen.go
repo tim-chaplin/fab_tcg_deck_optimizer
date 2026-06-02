@@ -14,6 +14,7 @@ type VexingMaliceRed struct{}
 func (VexingMaliceRed) ID() ids.CardID                     { return ids.VexingMaliceRed }
 func (VexingMaliceRed) Name() string                       { return "Vexing Malice" }
 func (VexingMaliceRed) DisplayName() string                { return "Vexing Malice [R]" }
+func (VexingMaliceRed) Rarity() string                     { return "Rare" }
 func (VexingMaliceRed) Cost() int                          { return 1 }
 func (VexingMaliceRed) Pitch() int                         { return 1 }
 func (VexingMaliceRed) Attack() int                        { return 3 }
@@ -26,6 +27,7 @@ type VexingMaliceYellow struct{}
 func (VexingMaliceYellow) ID() ids.CardID                     { return ids.VexingMaliceYellow }
 func (VexingMaliceYellow) Name() string                       { return "Vexing Malice" }
 func (VexingMaliceYellow) DisplayName() string                { return "Vexing Malice [Y]" }
+func (VexingMaliceYellow) Rarity() string                     { return "Rare" }
 func (VexingMaliceYellow) Cost() int                          { return 1 }
 func (VexingMaliceYellow) Pitch() int                         { return 2 }
 func (VexingMaliceYellow) Attack() int                        { return 2 }
@@ -38,6 +40,7 @@ type VexingMaliceBlue struct{}
 func (VexingMaliceBlue) ID() ids.CardID                     { return ids.VexingMaliceBlue }
 func (VexingMaliceBlue) Name() string                       { return "Vexing Malice" }
 func (VexingMaliceBlue) DisplayName() string                { return "Vexing Malice [B]" }
+func (VexingMaliceBlue) Rarity() string                     { return "Rare" }
 func (VexingMaliceBlue) Cost() int                          { return 1 }
 func (VexingMaliceBlue) Pitch() int                         { return 3 }
 func (VexingMaliceBlue) Attack() int                        { return 1 }

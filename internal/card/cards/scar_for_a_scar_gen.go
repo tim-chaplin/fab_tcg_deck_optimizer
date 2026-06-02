@@ -14,6 +14,7 @@ type ScarForAScarRed struct{}
 func (ScarForAScarRed) ID() ids.CardID                     { return ids.ScarForAScarRed }
 func (ScarForAScarRed) Name() string                       { return "Scar for a Scar" }
 func (ScarForAScarRed) DisplayName() string                { return "Scar for a Scar [R]" }
+func (ScarForAScarRed) Rarity() string                     { return "Common" }
 func (ScarForAScarRed) Cost() int                          { return 0 }
 func (ScarForAScarRed) Pitch() int                         { return 1 }
 func (ScarForAScarRed) Attack() int                        { return 4 }
@@ -25,6 +26,7 @@ type ScarForAScarYellow struct{}
 func (ScarForAScarYellow) ID() ids.CardID                     { return ids.ScarForAScarYellow }
 func (ScarForAScarYellow) Name() string                       { return "Scar for a Scar" }
 func (ScarForAScarYellow) DisplayName() string                { return "Scar for a Scar [Y]" }
+func (ScarForAScarYellow) Rarity() string                     { return "Common" }
 func (ScarForAScarYellow) Cost() int                          { return 0 }
 func (ScarForAScarYellow) Pitch() int                         { return 2 }
 func (ScarForAScarYellow) Attack() int                        { return 3 }
@@ -36,6 +38,7 @@ type ScarForAScarBlue struct{}
 func (ScarForAScarBlue) ID() ids.CardID                     { return ids.ScarForAScarBlue }
 func (ScarForAScarBlue) Name() string                       { return "Scar for a Scar" }
 func (ScarForAScarBlue) DisplayName() string                { return "Scar for a Scar [B]" }
+func (ScarForAScarBlue) Rarity() string                     { return "Common" }
 func (ScarForAScarBlue) Cost() int                          { return 0 }
 func (ScarForAScarBlue) Pitch() int                         { return 3 }
 func (ScarForAScarBlue) Attack() int                        { return 2 }

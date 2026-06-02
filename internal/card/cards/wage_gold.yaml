@@ -5,6 +5,7 @@ types:
     - Attack
 universal: true
 cost: 3
+rarity: Rare
 text: '**Universal** When this attacks a hero, you may **wager** a Gold token with them.'
 variants:
     - id: WageGoldRed
