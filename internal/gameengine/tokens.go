@@ -27,6 +27,7 @@ const (
 	tokenItemGold tokenItemKind = iota
 	tokenItemSilver
 	tokenItemCopper
+	tokenItemLightningFlow
 	numTokenItemKinds
 )
 
@@ -40,6 +41,7 @@ func (gs *GameState) initTokenSlots() {
 	gs.tokenItems[tokenItemGold] = token.NewGold(0)
 	gs.tokenItems[tokenItemSilver] = token.NewSilver(0)
 	gs.tokenItems[tokenItemCopper] = token.NewCopper(0)
+	gs.tokenItems[tokenItemLightningFlow] = token.NewLightningFlow(0)
 }
 
 // resetTokenCounts zeroes Count + firedThisTurn on every token slot and clears both

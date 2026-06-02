@@ -1087,6 +1087,12 @@ func (ge *GameEngine) CreateSilver(n int) {
 	}
 	ge.GameState.bumpTokenItem(tokenItemSilver, n)
 }
+func (ge *GameEngine) CreateLightningFlow(n int) {
+	if n <= 0 {
+		return
+	}
+	ge.GameState.bumpTokenItem(tokenItemLightningFlow, n)
+}
 func (ge *GameEngine) CreateCopper(n int) {
 	if n <= 0 {
 		return

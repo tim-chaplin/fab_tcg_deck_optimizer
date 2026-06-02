@@ -1,8 +1,8 @@
-// Package token owns the factories for FaB's five built-in tokens: the item tokens
-// Gold / Silver / Copper, and the aura-flavored tokens Runechant / Ponder. Each factory
-// returns the concrete value the engine stores — *item.Item for item tokens, *aura.Aura
-// for aura tokens — wiring in the name, identifier, and (for auras) the trigger type +
-// fire closure.
+// Package token owns the factories for FaB's built-in tokens: the item tokens Gold /
+// Silver / Copper / Lightning Flow, and the aura-flavored tokens Runechant / Ponder /
+// Quicken. Each factory returns the concrete value the engine stores — *item.Item for item
+// tokens, *aura.Aura for aura tokens — wiring in the name, identifier, and (for auras) the
+// trigger type + fire closure.
 package token
 
 import (
@@ -30,6 +30,13 @@ func NewSilver(n int) *item.Item {
 func NewCopper(n int) *item.Item {
 	c := cards.CopperToken{}
 	return item.NewFromToken(c.Name(), ids.CopperTokenID, c, n)
+}
+
+// NewLightningFlow returns a fresh Lightning Flow token item at count n. Unlike Gold /
+// Silver / Copper it carries no activated ability — it's inert fodder other Lightning cards
+// consume — so its ability is nil.
+func NewLightningFlow(n int) *item.Item {
+	return item.NewFromToken("Lightning Flow", ids.LightningFlowTokenID, nil, n)
 }
 
 // NewRunechant returns a fresh Runechant token aura at count n. Fires when an attack is

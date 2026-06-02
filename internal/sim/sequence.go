@@ -1015,7 +1015,12 @@ func (ctx *sequenceContext) playSequenceWithMeta(n int) (damage int, totalCounte
 			}
 			activeAttack = pc
 		}
-		state.AppendCardsPlayed(pc.Card)
+		// An activated item ability (pc.Item set) is not a played card, so it stays out of the
+		// played-cards record that HasPlayedType / CardsRemaining read — activating an ability
+		// doesn't satisfy a "played a [Lightning instant / X] this turn" condition.
+		if pc.Item == nil {
+			state.AppendCardsPlayed(pc.Card)
+		}
 		if modeTypes.IsNonAttackAction() {
 			state.SetNonAttackActionPlayed(true)
 		}

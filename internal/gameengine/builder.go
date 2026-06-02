@@ -141,6 +141,8 @@ func tokenItemKindForID(id ids.CardID) (tokenItemKind, bool) {
 		return tokenItemSilver, true
 	case ids.CopperTokenID:
 		return tokenItemCopper, true
+	case ids.LightningFlowTokenID:
+		return tokenItemLightningFlow, true
 	}
 	return 0, false
 }
